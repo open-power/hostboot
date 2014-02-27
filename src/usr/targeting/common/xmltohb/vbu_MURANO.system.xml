@@ -288,6 +288,18 @@
         <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
         <default>false</default>
     </attribute>
+    <attribute>
+        <id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
+        <default>true</default>
+    </attribute>
+    <attribute>
+        <id>MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
+        <default>false</default>
+    </attribute>
+    <attribute>
+        <id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
+        <default>required</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

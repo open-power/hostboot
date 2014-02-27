@@ -1,8 +1,14 @@
-#-- $Id: mbs_def.initfile,v 1.40 2013/11/21 19:21:50 yctschan Exp $
+#-- $Id: mbs_def.initfile,v 1.45 2014/02/24 22:12:25 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.45  |tschang | 2/24/14| fixed MBA1 only cfg
+#--   1.44  |tschang | 2/17/14| bit 12 of MBAXCR23Q should be the same as MBAXCR01Q
+#--   1.43  |tschang | 2/07/14| HW246685 - RCE reported even if we also have chip marks or symbol marks in place
+#--   1.42  |tschang |01/30/14| Removed CDIMM TYPE and replace with custom dimm
+#--   1.41  |tschang |01/24/13| SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT changed to ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT
+#--                             SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE changed to ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE
 #--   1.40  |tschang |11/21/13| HW271989 - updated SCOM write to do a full 64 bit write instead of a RMW
 #--   1.39  |tschang |11/12/13| no functional changes - clean up unused variables
 #--   1.38  |tschang |10/30/13| hash mode update for other IBM types
@@ -102,11 +108,11 @@ define def_mba23_nomem        =  ((MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] == 0b
 # MBA0 (mba01)
 define def_mba01_1a_1socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));                              # DDR3/4 are same
 define def_mba01_1a_2socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));# || (def_mba01_1b_cdimm));             # DDR3/4 are same
-#define def_mba01_1a_cdimm         = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0)); # same as  1a_1socket RDIMM
+#define def_mba01_1a_cdimm         = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1)))); # same as  1a_1socket RDIMM
 
 define def_mba01_1b_1socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba01_1b_2socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_1c_cdimm));
-#define def_mba01_1b_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type1A 2 socket RDIMM cfg for DDR3/4
+#define def_mba01_1b_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type1A 2 socket RDIMM cfg for DDR3/4
 
 ## 1C 1 and 2 sockets not supported
 #define def_mba01_1c_1socket   = 0;
@@ -115,7 +121,7 @@ define def_mba01_1b_2socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) 
 #define def_mba01_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba01_1c_1socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 ) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || def_mba01_1d_1socket;
 define def_mba01_1c_2socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 ) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || def_mba01_1d_2socket;
-define def_mba01_1c_cdimm          = (((MBA0.ATTR_EFF_IBM_TYPE[1][0] == 3 ) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 )) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
+define def_mba01_1c_cdimm          = (((MBA0.ATTR_EFF_IBM_TYPE[1][0] == 3 ) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 )) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
 #define def_mba01_1d_1socket       = 0;
@@ -128,50 +134,50 @@ define def_mba01_1d_2socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4 ) && (MB
 ## note the CDIMMs 2A-2C CDIMMs are wired just like the single slot ISDIMMs
 define def_mba01_2a_1socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2a_cdimm));
 define def_mba01_2a_2socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_2c_cdimm) || (def_mba01_3a_cdimm));
-define def_mba01_2a_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket cfg
+define def_mba01_2a_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1)))); # same as type2A 1 socket cfg
 define def_mba01_2a_1socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2a_ddr4_cdimm));
 define def_mba01_2a_2socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_3a_ddr4_cdimm));
-define def_mba01_2a_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket DDR4 cfg
+define def_mba01_2a_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1)))); # same as type2A 1 socket DDR4 cfg
 
 define def_mba01_2b_1socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2b_cdimm));
 define def_mba01_2b_2socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_mba01_2b_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));      # same as type2B 1 socket cfg
+define def_mba01_2b_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));      # same as type2B 1 socket cfg
 define def_mba01_2b_1socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2b_ddr4_cdimm));
 define def_mba01_2b_2socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_3b_ddr4_cdimm));
-define def_mba01_2b_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type2B 1 socket DDR4 cfg
+define def_mba01_2b_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2B 1 socket DDR4 cfg
 
 # centuar spec only has DDR4 for 2C cfg
 define def_mba01_2c_1socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2a_cdimm));
 define def_mba01_2c_2socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_mba01_2c_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));       # same as type2C 1 socket cfg
+define def_mba01_2c_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type2C 1 socket cfg
 define def_mba01_2c_1socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2a_ddr4_cdimm));
 define def_mba01_2c_2socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_3c_ddr4_cdimm));
-define def_mba01_2c_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type2C 1 socket DDR4 cfg
+define def_mba01_2c_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2C 1 socket DDR4 cfg
 
 define def_mba01_3a_1socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba01_3a_2socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_4a_cdimm));
-#define def_mba01_3a_cdimm         = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));     # same as type2A 2 socket cfg
-define def_mba01_3a_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0) && (MBA0.ATTR_EFF_DRAM_GEN == 1));  # same as type2A 2 socket DDR4 cfg
+#define def_mba01_3a_cdimm         = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2A 2 socket cfg
+define def_mba01_3a_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))) && (MBA0.ATTR_EFF_DRAM_GEN == 1));  # same as type2A 2 socket DDR4 cfg
 define def_mba01_3a_1socket_ddr4   = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba01_3a_2socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_4a_ddr4_cdimm));
-define def_mba01_3a_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 0) && (MBA0.ATTR_EFF_DRAM_GEN == 2));  # same as type2A 2 socket DDR4 cfg
+define def_mba01_3a_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))) && (MBA0.ATTR_EFF_DRAM_GEN == 2));  # same as type2A 2 socket DDR4 cfg
 
 define def_mba01_3b_1socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba01_3b_2socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_mba01_3b_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));     # same as type2B 2 socket DDR4 cfg
-define def_mba01_3b_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));     # same as type2B 2 socket DDR4 cfg   ??
+define def_mba01_3b_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2B 2 socket DDR4 cfg
+define def_mba01_3b_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2B 2 socket DDR4 cfg   ??
 
 define def_mba01_3c_1socket_ddr4   = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba01_3c_2socket_ddr4   = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba01_4c_ddr4_cdimm));
-define def_mba01_3c_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type2C 2 socket DDR4 cfg
-define def_mba01_3c_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type2C 2 socket DDR4 cfg
+define def_mba01_3c_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2C 2 socket DDR4 cfg
+define def_mba01_3c_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2C 2 socket DDR4 cfg
 
-define def_mba01_4a_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 11))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));       # same as type3A 2 socket cfg
-define def_mba01_4a_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 11))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));       # same as type3A 2 socket DDR4 cfg
+define def_mba01_4a_cdimm          = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 11))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3A 2 socket cfg
+define def_mba01_4a_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 11))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3A 2 socket DDR4 cfg
 
-define def_mba01_4b_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 12))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));       # same as type3B 2 socket DDR4 cfg
+define def_mba01_4b_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 12))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3B 2 socket DDR4 cfg
 
-define def_mba01_4c_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 13))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));       # same as type3C 2 socket DDR4 cfg
+define def_mba01_4c_ddr4_cdimm     = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 13))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA0.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA0.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3C 2 socket DDR4 cfg
 
 define def_mba01_5b_1socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 15))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_EFF_DIMM_TYPE == 3));
 define def_mba01_5b_2socket        = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 15))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 3));
@@ -200,11 +206,11 @@ define def_mba01_7c_2socket_ddr4   = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 23))) &
 # MBA1 (mba23)
 define def_mba23_1a_1socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));                              # DDR3/4 are same
 define def_mba23_1a_2socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));# || (def_mba23_1b_cdimm));             # DDR3/4 are same
-#define def_mba23_1a_cdimm         = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0)); # same as  1a_1socket RDIMM
+#define def_mba23_1a_cdimm         = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1)))); # same as  1a_1socket RDIMM
 
 define def_mba23_1b_1socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba23_1b_2socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_1c_cdimm));
-#define def_mba23_1b_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type1A 2 socket RDIMM cfg for DDR3/4
+#define def_mba23_1b_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type1A 2 socket RDIMM cfg for DDR3/4
 
 ## 1C 1 and 2 sockets not supported
 #define def_mba23_1c_1socket   = 0;
@@ -213,7 +219,7 @@ define def_mba23_1b_2socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) 
 #define def_mba23_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba23_1c_1socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || def_mba23_1d_1socket;
 define def_mba23_1c_2socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || def_mba23_1d_2socket;
-define def_mba23_1c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
+define def_mba23_1c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
 #define def_mba23_1d_1socket       = 0;
@@ -226,50 +232,50 @@ define def_mba23_1d_2socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 4 ) && (MB
 ## note the CDIMMs 2A-2C CDIMMs are wired just like the single slot ISDIMMs
 define def_mba23_2a_1socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2a_cdimm));
 define def_mba23_2a_2socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_2c_cdimm) || (def_mba23_3a_cdimm));
-define def_mba23_2a_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket cfg
+define def_mba23_2a_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1)))); # same as type2A 1 socket cfg
 define def_mba23_2a_1socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2a_ddr4_cdimm));
 define def_mba23_2a_2socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_3a_ddr4_cdimm));
-define def_mba23_2a_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket DDR4 cfg
+define def_mba23_2a_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1)))); # same as type2A 1 socket DDR4 cfg
 
 define def_mba23_2b_1socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2b_cdimm));
 define def_mba23_2b_2socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_mba23_2b_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));      # same as type2B 1 socket cfg
+define def_mba23_2b_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));      # same as type2B 1 socket cfg
 define def_mba23_2b_1socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2b_ddr4_cdimm));
 define def_mba23_2b_2socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_3b_ddr4_cdimm));
-define def_mba23_2b_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type2B 1 socket DDR4 cfg
+define def_mba23_2b_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2B 1 socket DDR4 cfg
 
 # centuar spec only has DDR4 for 2C cfg
 define def_mba23_2c_1socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2a_cdimm));
 define def_mba23_2c_2socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_mba23_2c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));       # same as type2C 1 socket cfg
+define def_mba23_2c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type2C 1 socket cfg
 define def_mba23_2c_1socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2a_ddr4_cdimm));
 define def_mba23_2c_2socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_3c_ddr4_cdimm));
-define def_mba23_2c_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type2C 1 socket DDR4 cfg
+define def_mba23_2c_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2C 1 socket DDR4 cfg
 
 define def_mba23_3a_1socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba23_3a_2socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_4a_cdimm));
-#define def_mba23_3a_cdimm         = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));     # same as type2A 2 socket cfg
-define def_mba23_3a_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0) && (MBA1.ATTR_EFF_DRAM_GEN == 1));  # same as type2A 2 socket DDR4 cfg
+#define def_mba23_3a_cdimm         = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2A 2 socket cfg
+define def_mba23_3a_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))) && (MBA1.ATTR_EFF_DRAM_GEN == 1));  # same as type2A 2 socket DDR4 cfg
 define def_mba23_3a_1socket_ddr4   = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba23_3a_2socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_4a_ddr4_cdimm));
-define def_mba23_3a_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 0) && (MBA1.ATTR_EFF_DRAM_GEN == 2));  # same as type2A 2 socket DDR4 cfg
+define def_mba23_3a_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))) && (MBA1.ATTR_EFF_DRAM_GEN == 2));  # same as type2A 2 socket DDR4 cfg
 
 define def_mba23_3b_1socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba23_3b_2socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_mba23_3b_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));     # same as type2B 2 socket DDR4 cfg
-define def_mba23_3b_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));     # same as type2B 2 socket DDR4 cfg   ??
+define def_mba23_3b_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2B 2 socket DDR4 cfg
+define def_mba23_3b_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2B 2 socket DDR4 cfg   ??
 
 define def_mba23_3c_1socket_ddr4   = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_mba23_3c_2socket_ddr4   = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_mba23_4c_ddr4_cdimm));
-define def_mba23_3c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type2C 2 socket DDR4 cfg
-define def_mba23_3c_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type2C 2 socket DDR4 cfg
+define def_mba23_3c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2C 2 socket DDR4 cfg
+define def_mba23_3c_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));  # same as type2C 2 socket DDR4 cfg
 
-define def_mba23_4a_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 12))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));       # same as type3A 2 socket cfg
-define def_mba23_4a_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 12))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));       # same as type3A 2 socket DDR4 cfg
+define def_mba23_4a_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 12))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3A 2 socket cfg
+define def_mba23_4a_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 12))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3A 2 socket DDR4 cfg
 
-define def_mba23_4b_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 12))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));       # same as type3B 2 socket DDR4 cfg
+define def_mba23_4b_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 12))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3B 2 socket DDR4 cfg
 
-define def_mba23_4c_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 13))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));       # same as type3C 2 socket DDR4 cfg
+define def_mba23_4c_ddr4_cdimm     = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 13))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((MBA1.ATTR_EFF_DIMM_TYPE == 2 ) && (MBA1.ATTR_EFF_CUSTOM_DIMM == 1))));       # same as type3C 2 socket DDR4 cfg
 
 define def_mba23_5b_1socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 15))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA1.ATTR_EFF_DIMM_TYPE == 3));
 define def_mba23_5b_2socket        = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 15))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 3));
@@ -358,23 +364,23 @@ define def_mba23_mtype_7c = (def_mba23_7c_1socket     ||def_mba23_7c_2socket    
 
 
 
-define def_type1_memory_populated_behind_MBA01 = (def_mba01_mtype_1a            ||def_mba01_mtype_1b            ||def_mba01_mtype_1c);#            ||def_mba01_mtype_1d);
-define def_type2_memory_populated_behind_MBA01 = (def_mba01_mtype_2a            ||def_mba01_mtype_2b            ||def_mba01_mtype_2c            ||def_mba01_mtype_5d);
-define def_type3_memory_populated_behind_MBA01 = (def_mba01_mtype_3a            ||def_mba01_mtype_3b            ||def_mba01_mtype_3c);
-define def_type4_memory_populated_behind_MBA01 = (def_mba01_mtype_4a            ||def_mba01_mtype_4b            ||def_mba01_mtype_4c);
-define def_type5_memory_populated_behind_MBA01 = (def_mba01_mtype_5a            ||def_mba01_mtype_5b            ||def_mba01_mtype_5c);
-define def_type6_memory_populated_behind_MBA01 = (def_mba01_mtype_6a            ||def_mba01_mtype_6b            ||def_mba01_mtype_6c);
-define def_type7_memory_populated_behind_MBA01 = (def_mba01_mtype_7a            ||def_mba01_mtype_7b            ||def_mba01_mtype_7c);
-#define def_type8_memory_populated_behind_MBA01 = (def_mba01_mtype_8a            ||def_mba01_mtype_8b            ||def_mba01_mtype_8c);
+define def_mba01_type1_memory_populated_behind_MBA01 = (def_mba01_mtype_1a            ||def_mba01_mtype_1b            ||def_mba01_mtype_1c);#            ||def_mba01_mtype_1d);
+define def_mba01_type2_memory_populated_behind_MBA01 = (def_mba01_mtype_2a            ||def_mba01_mtype_2b            ||def_mba01_mtype_2c            ||def_mba01_mtype_5d);
+define def_mba01_type3_memory_populated_behind_MBA01 = (def_mba01_mtype_3a            ||def_mba01_mtype_3b            ||def_mba01_mtype_3c);
+define def_mba01_type4_memory_populated_behind_MBA01 = (def_mba01_mtype_4a            ||def_mba01_mtype_4b            ||def_mba01_mtype_4c);
+define def_mba01_type5_memory_populated_behind_MBA01 = (def_mba01_mtype_5a            ||def_mba01_mtype_5b            ||def_mba01_mtype_5c);
+define def_mba01_type6_memory_populated_behind_MBA01 = (def_mba01_mtype_6a            ||def_mba01_mtype_6b            ||def_mba01_mtype_6c);
+define def_mba01_type7_memory_populated_behind_MBA01 = (def_mba01_mtype_7a            ||def_mba01_mtype_7b            ||def_mba01_mtype_7c);
+#define def_mba01_type8_memory_populated_behind_MBA01 = (def_mba01_mtype_8a            ||def_mba01_mtype_8b            ||def_mba01_mtype_8c);
 
-define def_type1_memory_populated_behind_MBA23 = (def_mba23_mtype_1a            ||def_mba23_mtype_1b            ||def_mba23_mtype_1c);#            ||def_mba23_mtype_1d);
-define def_type2_memory_populated_behind_MBA23 = (def_mba23_mtype_2a            ||def_mba23_mtype_2b            ||def_mba23_mtype_2c            ||def_mba23_mtype_5d);
-define def_type3_memory_populated_behind_MBA23 = (def_mba23_mtype_3a            ||def_mba23_mtype_3b            ||def_mba23_mtype_3c);
-define def_type4_memory_populated_behind_MBA23 = (def_mba23_mtype_4a            ||def_mba23_mtype_4b            ||def_mba23_mtype_4c);
-define def_type5_memory_populated_behind_MBA23 = (def_mba23_mtype_5a            ||def_mba23_mtype_5b            ||def_mba23_mtype_5c);
-define def_type6_memory_populated_behind_MBA23 = (def_mba23_mtype_6a            ||def_mba23_mtype_6b            ||def_mba23_mtype_6c);
-define def_type7_memory_populated_behind_MBA23 = (def_mba23_mtype_7a            ||def_mba23_mtype_7b            ||def_mba23_mtype_7c);
-#define def_type8_memory_populated_behind_MBA23 = (def_mba23_mtype_8a            ||def_mba23_mtype_8b            ||def_mba23_mtype_8c);
+define def_mba23_type1_memory_populated_behind_MBA23 = (def_mba23_mtype_1a            ||def_mba23_mtype_1b            ||def_mba23_mtype_1c);#            ||def_mba23_mtype_1d);
+define def_mba23_type2_memory_populated_behind_MBA23 = (def_mba23_mtype_2a            ||def_mba23_mtype_2b            ||def_mba23_mtype_2c            ||def_mba23_mtype_5d);
+define def_mba23_type3_memory_populated_behind_MBA23 = (def_mba23_mtype_3a            ||def_mba23_mtype_3b            ||def_mba23_mtype_3c);
+define def_mba23_type4_memory_populated_behind_MBA23 = (def_mba23_mtype_4a            ||def_mba23_mtype_4b            ||def_mba23_mtype_4c);
+define def_mba23_type5_memory_populated_behind_MBA23 = (def_mba23_mtype_5a            ||def_mba23_mtype_5b            ||def_mba23_mtype_5c);
+define def_mba23_type6_memory_populated_behind_MBA23 = (def_mba23_mtype_6a            ||def_mba23_mtype_6b            ||def_mba23_mtype_6c);
+define def_mba23_type7_memory_populated_behind_MBA23 = (def_mba23_mtype_7a            ||def_mba23_mtype_7b            ||def_mba23_mtype_7c);
+#define def_mba23_type8_memory_populated_behind_MBA23 = (def_mba23_mtype_8a            ||def_mba23_mtype_8b            ||def_mba23_mtype_8c);
 
 define def_mba01_subtype_A = (def_mba01_mtype_1a            || def_mba01_mtype_2a            || def_mba01_mtype_3a            || def_mba01_mtype_4a            || def_mba01_mtype_5a            || def_mba01_mtype_6a            || def_mba01_mtype_7a);#            || def_mba01_mtype_8a);
 define def_mba01_subtype_B = (def_mba01_mtype_1b            || def_mba01_mtype_2b            || def_mba01_mtype_3b            || def_mba01_mtype_4b            || def_mba01_mtype_5b            || def_mba01_mtype_6b            || def_mba01_mtype_7b);#            || def_mba01_mtype_8b);
@@ -388,13 +394,14 @@ define def_mba23_subtype_C = (def_mba23_mtype_1c                                
 
 define def_mba01_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated = (def_mba01_1a_1socket      ||def_mba01_1b_1socket      ||def_mba01_1c_1socket      ||def_mba01_2a_1socket      ||def_mba01_2a_1socket_ddr4 ||def_mba01_2b_1socket      ||def_mba01_2b_1socket_ddr4 ||def_mba01_2c_1socket      ||def_mba01_2c_1socket_ddr4 ||def_mba01_3a_1socket      ||def_mba01_3a_1socket_ddr4 ||def_mba01_3b_1socket      ||def_mba01_3c_1socket_ddr4 ||def_mba01_5b_1socket      ||def_mba01_5c_1socket      ||def_mba01_5d_1socket      ||def_mba01_7a_1socket      ||def_mba01_7b_1socket      ||def_mba01_7c_1socket      ||def_mba01_7a_1socket_ddr4 ||def_mba01_7b_1socket_ddr4 ||def_mba01_7c_1socket_ddr4);
 define def_mba01_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mba01_1a_2socket      ||def_mba01_1b_2socket      ||def_mba01_1c_2socket      ||def_mba01_2a_2socket      ||def_mba01_2a_2socket_ddr4 ||def_mba01_2b_2socket      ||def_mba01_2b_2socket_ddr4 ||def_mba01_2c_2socket      ||def_mba01_2c_2socket_ddr4 ||def_mba01_3a_2socket      ||def_mba01_3a_2socket_ddr4 ||def_mba01_3b_2socket      ||def_mba01_3c_2socket_ddr4 ||def_mba01_5b_2socket      ||def_mba01_5c_2socket      ||def_mba01_5d_2socket      ||def_mba01_7a_2socket      ||def_mba01_7b_2socket      ||def_mba01_7c_2socket      ||def_mba01_7a_2socket_ddr4 ||def_mba01_7b_2socket_ddr4 ||def_mba01_7c_2socket_ddr4 ||def_mba01_1c_cdimm        ||def_mba01_3a_cdimm        ||def_mba01_3b_cdimm        ||def_mba01_3c_cdimm        ||def_mba01_3a_ddr4_cdimm   ||def_mba01_3b_ddr4_cdimm   ||def_mba01_3c_ddr4_cdimm   ||def_mba01_4a_cdimm        ||def_mba01_4a_ddr4_cdimm   ||def_mba01_4b_ddr4_cdimm   ||def_mba01_4c_ddr4_cdimm);
-#define def_mba01_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mba01_1a_2socket      ||def_mba01_1b_2socket      ||def_mba01_1c_2socket      ||def_mba01_2a_2socket      ||def_mba01_2a_2socket_ddr4 ||def_mba01_2b_2socket      ||def_mba01_2b_2socket_ddr4 ||def_mba01_2c_2socket      ||def_mba01_2c_2socket_ddr4 ||def_mba01_3a_2socket      ||def_mba01_3a_2socket_ddr4 ||def_mba01_3b_2socket      ||def_mba01_3c_2socket_ddr4 ||def_mba01_5b_2socket      ||def_mba01_5c_2socket      ||def_mba01_5d_2socket      ||def_mba01_7a_2socket      ||def_mba01_7b_2socket      ||def_mba01_7c_2socket      ||def_mba01_7a_2socket_ddr4 ||def_mba01_7b_2socket_ddr4 ||def_mba01_7c_2socket_ddr4 ||def_mba01_1b_cdimm        ||def_mba01_1c_cdimm        ||def_mba01_3a_cdimm        ||def_mba01_3b_cdimm        ||def_mba01_3c_cdimm        ||def_mba01_3a_ddr4_cdimm   ||def_mba01_3b_ddr4_cdimm   ||def_mba01_3c_ddr4_cdimm   ||def_mba01_4a_cdimm        ||def_mba01_4a_ddr4_cdimm   ||def_mba01_4b_ddr4_cdimm   ||def_mba01_4c_ddr4_cdimm);
+#define def_mba01_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated   = (def_mba01_1a_2socket      ||def_mba01_1b_2socket      ||def_mba01_1c_2socket      ||def_mba01_2a_2socket      ||def_mba01_2a_2socket_ddr4 ||def_mba01_2b_2socket      ||def_mba01_2b_2socket_ddr4 ||def_mba01_2c_2socket      ||def_mba01_2c_2socket_ddr4 ||def_mba01_3a_2socket      ||def_mba01_3a_2socket_ddr4 ||def_mba01_3b_2socket      ||def_mba01_3c_2socket_ddr4 ||def_mba01_5b_2socket      ||def_mba01_5c_2socket      ||def_mba01_5d_2socket      ||def_mba01_7a_2socket      ||def_mba01_7b_2socket      ||def_mba01_7c_2socket      ||def_mba01_7a_2socket_ddr4 ||def_mba01_7b_2socket_ddr4 ||def_mba01_7c_2socket_ddr4 ||def_mba01_1b_cdimm        ||def_mba01_1c_cdimm        ||def_mba01_3a_cdimm        ||def_mba01_3b_cdimm        ||def_mba01_3c_cdimm        ||def_mba01_3a_ddr4_cdimm   ||def_mba01_3b_ddr4_cdimm   ||def_mba01_3c_ddr4_cdimm   ||def_mba01_4a_cdimm        ||def_mba01_4a_ddr4_cdimm   ||def_mba01_4b_ddr4_cdimm   ||def_mba01_4c_ddr4_cdimm);
 
 define def_mba23_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated = (def_mba23_1a_1socket      ||def_mba23_1b_1socket      ||def_mba23_1c_1socket      ||def_mba23_2a_1socket      ||def_mba23_2a_1socket_ddr4 ||def_mba23_2b_1socket      ||def_mba23_2b_1socket_ddr4 ||def_mba23_2c_1socket      ||def_mba23_2c_1socket_ddr4 ||def_mba23_3a_1socket      ||def_mba23_3a_1socket_ddr4 ||def_mba23_3b_1socket      ||def_mba23_3c_1socket_ddr4 ||def_mba23_5b_1socket      ||def_mba23_5c_1socket      ||def_mba23_5d_1socket      ||def_mba23_7a_1socket      ||def_mba23_7b_1socket      ||def_mba23_7c_1socket      ||def_mba23_7a_1socket_ddr4 ||def_mba23_7b_1socket_ddr4 ||def_mba23_7c_1socket_ddr4);
 #define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mba23_1a_2socket      ||def_mba23_1b_2socket      ||def_mba23_1c_2socket      ||def_mba23_2a_2socket      ||def_mba23_2a_2socket_ddr4 ||def_mba23_2b_2socket      ||def_mba23_2b_2socket_ddr4 ||def_mba23_2c_2socket      ||def_mba23_2c_2socket_ddr4 ||def_mba23_3a_2socket      ||def_mba23_3a_2socket_ddr4 ||def_mba23_3b_2socket      ||def_mba23_3c_2socket_ddr4 ||def_mba23_5b_2socket      ||def_mba23_5c_2socket      ||def_mba23_5d_2socket      ||def_mba23_7a_2socket      ||def_mba23_7b_2socket      ||def_mba23_7c_2socket      ||def_mba23_7a_2socket_ddr4 ||def_mba23_7b_2socket_ddr4 ||def_mba23_7c_2socket_ddr4 ||def_mba23_1b_cdimm        ||def_mba23_1c_cdimm        ||def_mba23_3a_cdimm        ||def_mba23_3b_cdimm        ||def_mba23_3c_cdimm        ||def_mba23_3a_ddr4_cdimm   ||def_mba23_3b_ddr4_cdimm   ||def_mba23_3c_ddr4_cdimm   ||def_mba23_4a_cdimm        ||def_mba23_4a_ddr4_cdimm   ||def_mba23_4b_ddr4_cdimm   ||def_mba23_4c_ddr4_cdimm);
 define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mba23_1a_2socket      ||def_mba23_1b_2socket      ||def_mba23_1c_2socket      ||def_mba23_2a_2socket      ||def_mba23_2a_2socket_ddr4 ||def_mba23_2b_2socket      ||def_mba23_2b_2socket_ddr4 ||def_mba23_2c_2socket      ||def_mba23_2c_2socket_ddr4 ||def_mba23_3a_2socket      ||def_mba23_3a_2socket_ddr4 ||def_mba23_3b_2socket      ||def_mba23_3c_2socket_ddr4 ||def_mba23_5b_2socket      ||def_mba23_5c_2socket      ||def_mba23_5d_2socket      ||def_mba23_7a_2socket      ||def_mba23_7b_2socket      ||def_mba23_7c_2socket      ||def_mba23_7a_2socket_ddr4 ||def_mba23_7b_2socket_ddr4 ||def_mba23_7c_2socket_ddr4 ||def_mba23_1c_cdimm        ||def_mba23_3a_cdimm        ||def_mba23_3b_cdimm        ||def_mba23_3c_cdimm        ||def_mba23_3a_ddr4_cdimm   ||def_mba23_3b_ddr4_cdimm   ||def_mba23_3c_ddr4_cdimm   ||def_mba23_4a_cdimm        ||def_mba23_4a_ddr4_cdimm   ||def_mba23_4b_ddr4_cdimm   ||def_mba23_4c_ddr4_cdimm);
 
 ## Temp defines until the code adds these attributes
+
 
 #--******************************************************************************
 #-- MBS FIR MASK Register
@@ -404,6 +411,37 @@ define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mb
 #     8    ,                    0b1              ;              # int_parity_error - HW244827 and HW251643
 #
 # }
+
+#--******************************************************************************
+# HW246685 : Need RCE FIR bit if NCE/SCE/MPE/MCE on 2nd try
+#	- Want to be able to see RCE reported even if we also have chip marks or symbol marks in place.
+#	- To enable maint fix: set MBSTR(60)=1 to see the RCE in conjunction with the other errors
+#	- To enable mainline fix: set MBSECC(16)=1 to see the RCE in conjunction with the other errors
+#--******************************************************************************
+
+# MBS01_MBSTRQ
+ scom 0x02011655              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     60      ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685 == 1);         # cfg_maint_rce_with_ce
+ }
+
+# MBS23_MBSTRQ
+ scom 0x02011755              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     60      ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685 == 1);            # cfg_maint_rce_with_ce
+ }
+
+# MBU.MBS.ECC0.MBSECCQ
+ scom 0x0201144A              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     16      ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685 == 1);            # Report RCE on corrections
+ }
+
+# MBU.MBS.ECC1.MBSECCQ
+ scom 0x0201148A              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     16      ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685 == 1);            # Report RCE on corrections
+ }
 
 
 #--******************************************************************************
@@ -566,18 +604,17 @@ scom 0x0201140D {
 # address interleave mode
 scom 0x0201140A {
     bits,       scom_data   ,	expr;
-#     0:4 ,       0b10001 , 	any;		#-MW to match dials
-     0:4 ,       0b00000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 0) || (MBA0.ATTR_FUNCTIONAL == 0) || (MBA1.ATTR_FUNCTIONAL == 0);                        # no MBA interleave
-     0:4 ,       0b10000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 23) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10001 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 24) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10010 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 25) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10011 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 26) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10100 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 27) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10101 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 28) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10110 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 29) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b10111 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 30) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b11000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 31) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
-     0:4 ,       0b11001 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 32) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b00000 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 0) || (MBA0.ATTR_FUNCTIONAL == 0) || (MBA1.ATTR_FUNCTIONAL == 0);                        # no MBA interleave
+     0:4 ,       0b10000 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 23) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10001 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 24) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10010 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 25) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10011 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 26) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10100 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 27) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10101 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 28) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10110 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 29) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10111 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 30) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b11000 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 31) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b11001 , (ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT == 32) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
      5   ,       0b0       , any      ;                       # Z mode only
 }
 
@@ -614,20 +651,20 @@ define def_mba23_hash0_type1a = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1) || (MBA1.AT
 define def_mba23_hash2_type1b_5b = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 15)) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] != 0) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] != 0);
 define def_mba23_hash1_type1b_5b = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 15)) && ((MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] == 0) || (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] == 0));
 # Type 1D/5C - simplied table to hash mode 2 for all cfgs
-define def_mba23_hash2_type1d_5c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 16));
+define def_mba23_hash2_type1d_5c = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 4) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 16));
 # Type 2A - simplied table to hash mode 1 when both dimm configured  and hash mode 0 when 1 dimm is configured
-define def_mba23_hash1_type2a = (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] != 0) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] != 0);
-define def_mba23_hash0_type2a = (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5) && ((MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] == 0) || (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] == 0));
+define def_mba23_hash1_type2a = (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] != 0) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] != 0);
+define def_mba23_hash0_type2a = (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5) && ((MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] == 0) || (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] == 0));
 # Type 2B - simplied table to hash mode 0 for all cfgs
-define def_mba23_hash0_type2b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6));
+define def_mba23_hash0_type2b = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 6));
 # Type 3A/7A - simplied table to hash mode 1 for all cfgs
-define def_mba23_hash1_type3a_7a = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 21));
+define def_mba23_hash1_type3a_7a = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 8) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 21));
 # Type 3B/7B - simplied table to hash mode 0 for all cfgs
-define def_mba23_hash0_type3b_7b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 22));
+define def_mba23_hash0_type3b_7b = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 9) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 22));
 # Type 2C - simplied table to hash mode 0 for all cfgs
-define def_mba23_hash0_type2c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7));
+define def_mba23_hash0_type2c = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 7));
 # Type 3C/7C - simplied table to hash mode 0 for all cfgs
-define def_mba23_hash0_type3c_7c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 23));
+define def_mba23_hash0_type3c_7c = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 10) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 23));
 
 define def_mba01_hash0_sel = (def_mba01_hash0_type1a)    ||(def_mba01_hash0_type2a)    ||(def_mba01_hash0_type2b)    ||(def_mba01_hash0_type2c)    ||(def_mba01_hash0_type3b_7b) ||(def_mba01_hash0_type3c_7c) ;
 define def_mba01_hash1_sel = (def_mba01_hash1_type1a)    ||(def_mba01_hash1_type1b_5b) ||(def_mba01_hash1_type2a)    ||(def_mba01_hash1_type3a_7a) ;
@@ -649,14 +686,14 @@ define def_mba23_hash2_sel = (def_mba23_hash2_type1b_5b) ||(def_mba23_hash2_type
 scom 0x0201140B     {
     bits    ,   scom_data   , MBA0.ATTR_FUNCTIONAL, expr;
     0:3     ,   0b0000      ,         1           , (def_mba01_nomem == 1);                                     # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0001      ,         1           , (def_type1_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0010      ,         1           , (def_type2_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0011      ,         1           , (def_type3_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0100      ,         1           , (def_type4_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0101      ,         1           , (def_type5_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0110      ,         1           , (def_type6_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0111      ,         1           , (def_type7_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-#    0:3     ,   0b1000      ,         1           , (def_type8_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0001      ,         1           , (def_mba01_type1_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0010      ,         1           , (def_mba01_type2_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0011      ,         1           , (def_mba01_type3_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0100      ,         1           , (def_mba01_type4_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0101      ,         1           , (def_mba01_type5_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0110      ,         1           , (def_mba01_type6_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0111      ,         1           , (def_mba01_type7_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+#    0:3     ,   0b1000      ,         1           , (def_mba01_type8_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
 #    4:5     ,   0b01        ,         1           , any                           ; # temp until ibm type is fully supported             # MBAXCR01Q_MBA01_config_subtype                    D
     4:5     ,   0b00        ,         1           , (def_mba01_subtype_A == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
     4:5     ,   0b01        ,         1           , (def_mba01_subtype_B == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
@@ -666,8 +703,8 @@ scom 0x0201140B     {
     6:7     ,   0b10        ,         1           , (MBA0.ATTR_EFF_DRAM_DENSITY == 8);   # MBAXCR01Q_MBA01_DRAM_size                         D
     8       ,   0b0         ,         1           , (def_mba01_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated == 1);                # MBAXCR01Q_MBA01_Configuration                                          D
     8       ,   0b1         ,         1           , (def_mba01_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    == 1);                # MBAXCR01Q_MBA01_Configuration                                          D
-#    8       ,   0b0         ,         1           , (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_CHIP_UNIT_POS == 0);                # MBAXCR01Q_MBA01_Configuration                                           D
-#    8       ,   0b1         ,         1           , ((((MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) || (ATTR_EFF_DIMM_TYPE == 0)) && (MBA0.ATTR_CHIP_UNIT_POS == 0)) == 1);                # MBAXCR01Q_MBA01_Configuration   D
+#    8       ,   0b0         ,         1           , (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1);                # MBAXCR01Q_MBA01_Configuration                                           D
+#    8       ,   0b1         ,         1           , (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2);                # MBAXCR01Q_MBA01_Configuration   D
     9       ,   0b1         ,         1           , (MBA0.ATTR_EFF_DRAM_WIDTH == 4);     # MBAXCR01Q_MBA01_DRAM_Width                    D
     9       ,   0b0         ,         1           , (MBA0.ATTR_EFF_DRAM_WIDTH == 8);     # MBAXCR01Q_MBA01_DRAM_Width                    D
     10:11   ,   0b00        ,         1           , def_mba01_hash0_sel;  # MBAXCR01Q_MBA01_Hash_Mode
@@ -676,8 +713,8 @@ scom 0x0201140B     {
 #    10:11   ,   0b00        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 0);  # MBAXCR01Q_MBA01_Hash_Mode
 #    10:11   ,   0b01        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA01_Hash_Mode
 #    10:11   ,   0b10        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA01_Hash_Mode
-    12      , 0b0           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0) || ((L4.ATTR_FUNCTIONAL == 0) || (ATTR_MSS_CACHE_ENABLE == 0))); # MBAXCR01Q_MBA01_Interleave_Mode
-    12      , 0b1           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1) && ((L4.ATTR_FUNCTIONAL == 1) && (ATTR_MSS_CACHE_ENABLE != 0))); # MBAXCR01Q_MBA01_Interleave_Mod
+    12      , 0b0           ,         1           , ((ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == 0) || ((L4.ATTR_FUNCTIONAL == 0) || (ATTR_MSS_CACHE_ENABLE == 0))); # MBAXCR01Q_MBA01_Interleave_Mode
+    12      , 0b1           ,         1           , ((ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == 1) && ((L4.ATTR_FUNCTIONAL == 1) && (ATTR_MSS_CACHE_ENABLE != 0))); # MBAXCR01Q_MBA01_Interleave_Mod
 }
 
 
@@ -692,14 +729,14 @@ scom 0x0201140B     {
 scom 0x0201140C     {
     bits    ,   scom_data   , MBA1.ATTR_FUNCTIONAL, expr;
     0:3     ,   0b0000      ,         1           , (def_mba23_nomem == 1);                                     # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0001      ,         1           , (def_type1_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0010      ,         1           , (def_type2_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0011      ,         1           , (def_type3_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0100      ,         1           , (def_type4_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0101      ,         1           , (def_type5_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0110      ,         1           , (def_type6_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0111      ,         1           , (def_type7_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-#    0:3     ,   0b1000      ,         1           , (def_type8_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0001      ,         1           , (def_mba23_type1_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0010      ,         1           , (def_mba23_type2_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0011      ,         1           , (def_mba23_type3_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0100      ,         1           , (def_mba23_type4_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0101      ,         1           , (def_mba23_type5_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0110      ,         1           , (def_mba23_type6_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0111      ,         1           , (def_mba23_type7_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+#    0:3     ,   0b1000      ,         1           , (def_mba23_type8_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
 #    4:5     ,   0b01        ,         1           , any                       ;# temp until ibm type is fully supported               # MBAXCR01Q_MBA23_config_subtype                    D
     4:5     ,   0b00        ,         1           , (def_mba23_subtype_A == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
     4:5     ,   0b01        ,         1           , (def_mba23_subtype_B == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
@@ -709,16 +746,16 @@ scom 0x0201140C     {
     6:7     ,   0b10        ,         1           , (MBA1.ATTR_EFF_DRAM_DENSITY == 8);   # MBAXCR01Q_MBA23_DRAM_size                         D
     8       ,   0b0         ,         1           , (def_mba23_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated == 1);                # MBAXCR01Q_MBA23_Configuration                                          D
     8       ,   0b1         ,         1           , (def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    == 1);                # MBAXCR01Q_MBA23_Configuration                                          D
-#    8       ,   0b0         ,         1           , (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_CHIP_UNIT_POS == 0);                # MBAXCR01Q_MBA23_Configuration                                           D
-#    8       ,   0b1         ,         1           , ((((ATTR_EFF_NUM_DROPS_PER_PORT == 2) || (ATTR_EFF_DIMM_TYPE == 0)) && (MBA0.ATTR_CHIP_UNIT_POS == 0)) == 1);                # MBAXCR01Q_MBA23_Configuration   D
+#    8       ,   0b0         ,         1           , (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1);                # MBAXCR01Q_MBA23_Configuration                                           D
+#    8       ,   0b1         ,         1           , (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2);                # MBAXCR01Q_MBA23_Configuration   D
     9       ,   0b1         ,         1           , (MBA1.ATTR_EFF_DRAM_WIDTH == 4);     # MBAXCR01Q_MBA23_DRAM_Width                    D
     9       ,   0b0         ,         1           , (MBA1.ATTR_EFF_DRAM_WIDTH == 8);     # MBAXCR01Q_MBA23_DRAM_Width                    D
     10:11   ,   0b00        ,         1           , def_mba23_hash0_sel;  # MBAXCR01Q_MBA23_Hash_Mode
     10:11   ,   0b01        ,         1           , def_mba23_hash1_sel;  # MBAXCR01Q_MBA23_Hash_Mode
     10:11   ,   0b10        ,         1           , def_mba23_hash2_sel;  # MBAXCR01Q_MBA23_Hash_Mode
 #    12      ,   0b0         ,         1           , any;							# -MW match dials  # MBAXCR01Q_MBA23_Interleave_Mode
-    12      ,   0b0         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA23_Interleave_Mode
-    12      ,   0b1         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA23_Interleave_Mode
+    12      ,   0b0         ,         1           , ((ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == 0) || ((L4.ATTR_FUNCTIONAL == 0) || (ATTR_MSS_CACHE_ENABLE == 0))); # MBAXCR01Q_MBA23_Interleave_Mode
+    12      ,   0b1         ,         1           , ((ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == 1) && ((L4.ATTR_FUNCTIONAL == 1) && (ATTR_MSS_CACHE_ENABLE != 0))); # MBAXCR01Q_MBA23_Interleave_Mode
 }
 
 

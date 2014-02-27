@@ -13284,6 +13284,68 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id>
+    <description>Value of on or off.  On is 256 bit interleave.  Off, the translation is on 128  bit interleave mode.  See centaur workbook chapter 5.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
+    <description>
+       The MRW for a system should set this to TRUE for systems that must obey plug rules.  Lab environments should default this to off and allow the user to override using normal methods to test.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id>
+    <description>This dial sets the Centaur address bits used to interleave addresses between MBA01 and MBA23.  Valid values are 23 through 32.  See Centaur Spec Chapter 5 for details.   Used in the intifile </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
+    <description>At a system level, this attribute controls if interleaving is required, requested or never.  The MRW.</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MSS_NEST_CAPABLE_FREQUENCIES</id>
     <description>
         The NEST frequencies the memory chip can run at computed by the mss_freq.  The possibilities are ORed together.  The platform uses these value and the MRW to determine what frequency to boot the fabric (nest) if it can. There are two values: 8G and 9.6G
@@ -13297,6 +13359,22 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_NEST_CAPABLE_FREQUENCIES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
+    <description>
+       The MRW for a system should set this to TRUE for systems that do not want to suport MCS groupings larget than 2.  Mirroring  also must be disabled and is unusable. IBM systems, such as Tuleta, should set this attribute to FALSE.  Stradale based systems should set this to TRUE.  This instructs the grouping code to group contiguous memory controllers of the same size together.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

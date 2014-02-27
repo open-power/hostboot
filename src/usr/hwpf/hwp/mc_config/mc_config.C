@@ -65,6 +65,7 @@
 #include    "mss_eff_config/mss_eff_grouping.H"
 #include    "mss_eff_config/opt_memmap.H"
 #include    "mss_attr_cleanup/mss_attr_cleanup.H"
+#include    "mss_eff_mb_interleave/mss_eff_mb_interleave.H"
 
 namespace   MC_CONFIG
 {
@@ -542,6 +543,41 @@ void*    call_mss_eff_config( void *io_pArgs )
             // Ensure istep error created and has same plid as this error
             l_StepError.addErrorDetails( l_err );
             errlCommit( l_err, HWPF_COMP_ID );
+        }
+    }
+
+    // Calling mss_eff_mb_interleave
+    if (l_StepError.isNull())
+    {
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufTargetList.begin();
+                l_membuf_iter != l_membufTargetList.end();
+                ++l_membuf_iter)
+        {
+            const TARGETING::Target* l_membuf_target = *l_membuf_iter;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  Running mss_eff_mb_interleave HWP on HUID %.8X",
+                    TARGETING::get_huid(l_membuf_target));
+            fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
+                        (const_cast<TARGETING::Target*>(l_membuf_target)) );
+            FAPI_INVOKE_HWP(l_err, mss_eff_mb_interleave, l_membuf_fapi_target);
+            if (l_err)
+            {
+               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                         "ERROR 0x%.8X: mss_eff_mb_interleave HWP returns error",
+                         l_err->reasonCode());
+               ErrlUserDetailsTarget(l_membuf_target).addToLog(l_err);
+               l_StepError.addErrorDetails(l_err);
+               errlCommit(l_err, HWPF_COMP_ID);
+            }
+            else
+            {
+               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Successfully ran mss_eff_mb_interleave HWP on HUID %.8X",
+                    TARGETING::get_huid(l_membuf_target));
+            }
         }
     }
 

@@ -139,12 +139,10 @@
     <attribute><id>FREQ_CORE_MAX</id></attribute>
     <attribute><id>CPM_TURBO_BOOST_PERCENT</id></attribute>
     <!-- End pm_plat_attributes.xml -->
-
     <!-- Start pm_hwp_attributes.xml -->
     <attribute><id>PM_SLW_CONTROL_VECTOR_OFFSET</id></attribute>
     <!-- End pm_hwp_attributes.xml -->
-
-    <!--    sbe_config_update attributes    -->
+    <!-- sbe_config_update attributes    -->
     <attribute><id>NEST_FREQ_MHZ</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
     <attribute><id>EX_GARD_BITS</id></attribute>
@@ -231,6 +229,9 @@
     <attribute><id>DISABLE_SCRUB_AFTER_PATTERN_TEST</id></attribute>
     <attribute><id>PM_PCBS_FSM_TRACE_EN</id></attribute>
     <attribute><id>PM_GLOBAL_FIR_TRACE_EN</id></attribute>
+    <attribute><id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id></attribute>
+    <attribute><id>MRW_ENHANCED_GROUPING_NO_MIRRORING</id></attribute>
+    <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
 </targetType>
 
 <targetType>
@@ -1215,6 +1216,9 @@
     <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
     <attribute><id>MSS_INIT_STATE</id></attribute>
     <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
+    <attribute><id>MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
+    <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
+    <attribute><id>MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->
