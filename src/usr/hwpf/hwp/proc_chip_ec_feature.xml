@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.48 2014/02/06 19:50:54 stillgs Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.49 2014/02/27 22:40:14 mjjones Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
@@ -1023,4 +1023,23 @@
       </chip>       
     </chipEcFeature>
   </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_OCC_DISABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Greg Still and lab team decided to disable the
+        OCC on all Murano DD1.x parts
+      Returns if the OCC should be disabled. True if:
+        Murano EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute> 
 </attributes>
