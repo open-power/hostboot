@@ -34,6 +34,7 @@
 #include <kernel/timemgr.H>
 #include <sys/vfs.h>
 #include <kernel/deferred.H>
+#include <kernel/misc.H>
 
 #include <stdlib.h>
 
@@ -65,6 +66,9 @@ int main()
     kernel.cppBootstrap();
     kernel.memBootstrap();
     kernel.cpuBootstrap();
+
+    // Let FSP/BMC know that Hostboot is now running
+    KernelMisc::setHbScratchStatus(KernelMisc::HB_RUNNING);
 
     kernel.inittaskBootstrap();
 

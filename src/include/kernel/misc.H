@@ -50,6 +50,21 @@ namespace KernelMisc
     /** @brief master host boot instance number (node) */
     extern uint64_t g_masterHBInstance;
 
+    /** @brief Indicate whether HB is running or not */
+    enum HbRunning
+    {
+        HB_RUNNING = 0,
+        HB_SHUTDOWN = 1,
+    };
+
+    /** @fn setHbScratchStatus
+     *  @brief Set scratch register indicating HB running status
+     *
+     *  @param i_status Indicates whether to say HB is running or shutdown
+     *  @return void
+     */
+    void setHbScratchStatus(enum HbRunning i_status);
+
     /** @fn in_kernel_mode
      *  @brief Determine if the code is currently in kernel mode or not.
      *

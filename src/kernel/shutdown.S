@@ -142,7 +142,7 @@ kernel_shutdown_ea0_1_mode:
     isync
 2:
     ;// Clear "Hostboot active" scratch register.
-    li r3, (0x40 + 0x38) ;// See sys/mmio.h
+    li r3, (0x40 + 0x18) ;// See sys/mmio.h
     mtspr SPRC, r3
     li r3, 0x0
     mtspr SPRD, r3

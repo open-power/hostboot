@@ -506,11 +506,6 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             break;
         }
 
-        // Set scratch register to indicate Hostboot is [still] active.
-        const char * hostboot_string = "hostboot";
-        mmio_scratch_write(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
-                           *reinterpret_cast<const uint64_t*>(hostboot_string));
-
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
         TARGETING::Target* sys = NULL;

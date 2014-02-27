@@ -220,9 +220,23 @@ namespace KernelMisc
             // First indicate to the FSP that we're done by clearing out the
             // "hostboot_done" register.  We need to do this since this is the
             // power off path.
-            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,0);
+            setHbScratchStatus(HB_SHUTDOWN);
 
             terminateExecuteTI();
+        }
+    }
+
+    void setHbScratchStatus(enum HbRunning i_status)
+    {
+        if(i_status == HB_RUNNING)
+        {
+            const char * hostboot_string = "hostboot";
+            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                        *reinterpret_cast<const uint64_t*>(hostboot_string));
+        }
+        else
+        {
+            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,0);
         }
     }
 
@@ -290,9 +304,7 @@ namespace KernelMisc
                          kernel_hbDescriptor.kernelMemoryState);
 
         // Set scratch register to indicate Hostboot is [still] active.
-        const char * hostboot_string = "hostboot";
-        updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
-                         *reinterpret_cast<const uint64_t*>(hostboot_string));
+        setHbScratchStatus(HB_RUNNING);
 
         // Restore caller of cpu_master_winkle().
         iv_caller->state = TASK_STATE_RUNNING;
@@ -393,9 +405,7 @@ namespace KernelMisc
                          kernel_hbDescriptor.kernelMemoryState);
 
         // Set scratch register to indicate Hostboot is [still] active.
-        const char * hostboot_string = "hostboot";
-        updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
-                         *reinterpret_cast<const uint64_t*>(hostboot_string));
+        setHbScratchStatus(HB_RUNNING);
 
         // Restore caller of cpu_all_winkle().
         iv_caller->state = TASK_STATE_RUNNING;

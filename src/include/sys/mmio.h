@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -86,8 +86,9 @@ enum MMIO_Scratch_Register
     MMIO_SCRATCH_PNOR_MODE = 0x8,
         /** Thread2 Scratch Register - Unused */
     MMIO_SCRATCH_ISTEP_MODE = 0x10,
-        /** Thread3 Scratch Register - Unused */
-    MMIO_SCRATCH_RSVD_T3 = 0x18,
+        /** Thread3 Scratch Register - Identifies if Hostboot is active after
+         *                             host_start_payload. */
+    MMIO_SCRATCH_HOSTBOOT_ACTIVE = 0x18,
         /** Thread4 Scratch Register - Unused */
     MMIO_SCRATCH_RSVD_T4 = 0x20,
         /** Thread5 Scratch Register - Unused (unit tests may modify) */
@@ -95,9 +96,6 @@ enum MMIO_Scratch_Register
         /** Thread6 Scratch Register - Identifies where hostboot currently
                                        resides and how large the space is */
     MMIO_SCRATCH_MEMORY_STATE = 0x30,
-        /** Thread7 Scratch Register - Identifies if Hostboot is active after
-         *                             host_start_payload. */
-    MMIO_SCRATCH_HOSTBOOT_ACTIVE = 0x38,
         /** Thread7 Scratch Register - Set be SBE for reduced-threads support
          *                             for AVPs.  */
     MMIO_SCRATCH_AVP_THREADS = 0x38,
