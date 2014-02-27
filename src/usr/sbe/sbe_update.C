@@ -445,10 +445,10 @@ namespace SBE
                 break;
             }
 
-
             // Get SBE PNOR section info from PNOR RP
             err = PNOR::getSectionInfo( pnorSectionId,
                                         pnorInfo );
+
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Error calling "
@@ -584,11 +584,16 @@ namespace SBE
                 break;
             }
 
-            // The SBE Image for the corresponding EC was found and includes a
-            //  SBE Header, so advance PNOR pointer 4k to move it past header
-            //  page to the start of the non-customized SBE image
-            o_imgPtr = reinterpret_cast<void*>
+            //  The SBE Image for the corresponding EC was found, check if
+            //  it includes a SBE Header
+            if (pnorInfo.sha512perEC)
+            {
+                TRACFCOMP(g_trac_sbe,INFO_MRK"findSBEInPnor: sha512perEC Found in %s", pnorInfo.name);
+                // Advance PNOR pointer 4k to move it past header page to the
+                // start of the non-customized SBE image
+                o_imgPtr = reinterpret_cast<void*>
                                 (reinterpret_cast<char*>(hdr_Ptr)+0x1000);
+            }
 
 
             if(NULL != o_version)

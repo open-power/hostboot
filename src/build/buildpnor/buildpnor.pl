@@ -241,6 +241,7 @@ sub loadPnorLayout
         my $testonly = $sectionEl->{testonly}[0];
         my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
         my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
+        my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
 
         if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
@@ -261,6 +262,7 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
 
     }
 
@@ -364,7 +366,7 @@ sub createPnorImage
             my $chip = 0;
             my $compress = 0;
             my $ecc = 0;
-            my $sha512Version = 0;
+            my $version = 0;
 
             if( ($sectionHash{$key}{ecc} eq "yes") )
             {
@@ -372,7 +374,11 @@ sub createPnorImage
             }
             if( ($sectionHash{$key}{sha512Version} eq "yes") )
             {
-                $sha512Version = 0x80;
+                $version = 0x80;
+            }
+            elsif( ($sectionHash{$key}{sha512perEC} eq "yes") )
+            {
+                $version = 0x40;
             }
 
             #First User Data Word
@@ -382,8 +388,8 @@ sub createPnorImage
               | $ecc;
 
             #Second User Data Word
-            #[1:sha512Version]
-            my $userflags1 = ($sha512Version << 24);
+            #[1:sha512Version/sha512perEC]
+            my $userflags1 = ($version << 24);
 
             trace(1,"userflags0 = $userflags0");
             trace(1,"userflags1 = $userflags1");

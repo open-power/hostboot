@@ -117,6 +117,7 @@ Layout Description
         <eyeCatch>SBEC</eyeCatch>
         <physicalOffset>0x83D000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
+        <sha512perEC/>
         <ecc/>
     </section>
     <section>
@@ -132,6 +133,7 @@ Layout Description
         <eyeCatch>WINK</eyeCatch>
         <physicalOffset>0x915000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
         <ecc/>
     </section>
     <section>

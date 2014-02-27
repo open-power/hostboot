@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -60,32 +60,20 @@ enum SectionId
 };
 
 /**
- * Select a side of flash to access
- */
-enum SideSelect
-{
-    SIDE_A,        /**< A-side of flash */
-    SIDE_B,        /**< B-side of flash */
-    CURRENT_SIDE,  /**< Use the currently selected side */
-};
-
-/**
  * Information about a section of PNOR
  */
     // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
     SectionId id;  /**< Identifier for this section */
-    SideSelect side;  /**< Identifier for the side of flash */
     const char* name;  /**< Name of the section */
 
     uint64_t vaddr;  /**< Virtual address for the start of the section */
     uint64_t size;  /**< Actual size of content in bytes */
     bool eccProtected;  /**< Section is ECC protected */
+    bool sha512Version; /**< Version Checking */
+    bool sha512perEC; /**< Version Checking perEC */
 };
-
-
-
 
 /**
  * @brief  Return the size and address of a given section of PNOR data

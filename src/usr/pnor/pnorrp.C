@@ -339,7 +339,6 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         }
     } while(0);
 
-
     if (PNOR::INVALID_SECTION != id)
     {
         TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, id=%d", i_section, iv_TOC[i_section].id );
@@ -349,8 +348,12 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.name = cv_EYECATCHER[id];
         o_info.vaddr = iv_TOC[id].virtAddr;
         o_info.size = iv_TOC[id].size;
-        o_info.eccProtected = (bool)(iv_TOC[id].integrity &
-                                     FFS_INTEG_ECC_PROTECT);
+        o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
+                                != 0) ? true : false;
+        o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)
+                                 != 0) ? true : false;
+        o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
+                               != 0) ? true : false;
     }
 
     return l_errhdl;
