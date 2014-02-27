@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/mkrules/dist_targets.mk $
+# $Source: src/build/mkrules/dist.targets.mk $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -85,6 +85,9 @@ COPY_RENAME_FILES = \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
     hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
+    hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
+    hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo \
+    hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
 	Hostboot/$(notdir $(file)):$(file):tools,vpo)
 
@@ -149,6 +152,9 @@ simics.tar_CONTENTS = \
     img/hbicore$(UNDERSCORE_TEST).syms \
     img/hbicore$(UNDERSCORE_TEST).list.bz2 \
     img/hbicore$(UNDERSCORE_TEST).bin.modinfo \
+    img/hbirt$(UNDERSCORE_TEST).syms \
+    img/hbirt$(UNDERSCORE_TEST).list.bz2 \
+    img/hbirt$(UNDERSCORE_TEST).bin.modinfo \
     img/errlparser \
     img/isteplist.csv \
     img/hbotStringFile \
