@@ -72,7 +72,7 @@ void devTree::initialize(uint64_t i_addr, size_t i_maxSize, bool i_virtual)
                     mMaxSize));
     }
     memset(mSpace, 0, mMaxSize);
-    mNextPhandle = 1;
+    mNextPhandle = 0x10000000;
 
     TRACFCOMP( g_trac_devtree, "FDT located @ v:%p p:0x%x", mSpace, mPhysAddr);
 
