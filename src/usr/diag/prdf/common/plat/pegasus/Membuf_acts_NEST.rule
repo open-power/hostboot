@@ -1322,7 +1322,7 @@ actionclass analyzeFetchPreUe1 { funccall("AnalyzeFetchPreUe1"); };
 actionclass analyzeFetchUe0
 {
     funccall("AnalyzeFetchUe0");
-    threshold1;
+    threshold( field(33 / 30 min ) );
     SUEGenerationPoint;
 };
 
@@ -1330,7 +1330,7 @@ actionclass analyzeFetchUe0
 actionclass analyzeFetchUe1
 {
     funccall("AnalyzeFetchUe1");
-    threshold1;
+    threshold( field(33 / 30 min ) );
     SUEGenerationPoint;
 };
 
