@@ -98,7 +98,7 @@ cp_hbfiles: .SPECTARG
 	echo -en VERSION\\0 > ${BASE_SHA_IMAGE}
 	sha512sum ${BASE_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${BASE_SHA_IMAGE}
 	dd if=${BASE_SHA_IMAGE} of=secureboot.header ibs=4k conv=sync
-	dd if=/dev/zero of=hbb.footer bs=1 count=128K
+	dd if=/dev/zero of=hbb.footer count=1 bs=128K
 	cat sbe.header secureboot.header ${BASE_IMAGE} hbb.footer > hostboot.stage.bin
 	head -c 524288  hostboot.stage.bin > ${BASE_W_HEADER_IMAGE}
 	currentsb -chain
@@ -124,28 +124,28 @@ cp_hbfiles: .SPECTARG
 	dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
 	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
 	# create data for a test partition in pnor
-	dd if=/dev/urandom of=${TESTDATA} bs=1 count=28K
+	dd if=/dev/urandom of=${TESTDATA} count=1 bs=28K
 	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
 	# Fill the following partitions with FF's and then ECC them
-	dd if=/dev/zero count=128K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${HBEL_ECC_IMAGE} --p8
 	# GUARD partition
-	dd if=/dev/zero count=16K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=16K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${GUARD_ECC_IMAGE} --p8
 	# GLOBAL partition
-	dd if=/dev/zero count=32K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=32K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${GLOBAL_ECC_IMAGE} --p8
 	# DJVPD partition
-	dd if=/dev/zero count=256K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${DJVPD_ECC_IMAGE} --p8
 	# MVPD partition
-	dd if=/dev/zero count=512K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=512K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${MVPD_ECC_IMAGE} --p8
 	# CVPD partition
-	dd if=/dev/zero count=256K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${CVPD_ECC_IMAGE} --p8
 	# PAYLOAD partition
-	dd if=/dev/zero count=20480K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=20480K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${PAYLOAD_ECC_IMAGE} --p8
 	rm ${TEMP_IMAGE}
 

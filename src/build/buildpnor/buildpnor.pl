@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -33,7 +33,18 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 use File::Basename;
-use Digest::SHA1;
+
+# Digest::SHA1 module is now Digest::SHA in newer version of perl.  Need to
+# do the below eval blocks to support both modules.
+BEGIN
+{
+    eval "use Digest::SHA;";
+    if ($@)
+    {
+        eval "use Digest::SHA1;";
+        die $@ if $@;
+    }
+}
 
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
@@ -567,7 +578,7 @@ sub fillPnorImage
 
         #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
         if ($g_ffsCmd eq "") {
-            my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write`;
+            my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000`;
         } else {
             my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --name $eyeCatch  --write $inputFile`;
         }
