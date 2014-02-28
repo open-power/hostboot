@@ -248,7 +248,7 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
         // Start the initial fast scrub.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
                                   iv_mbaTrgt, startAddr.getRank(),
-                                  COND_TARGETED_CMD,
+                                  COND_FAST_SCRUB,
                                   mss_MaintCmdWrapper::END_OF_MEMORY );
         if ( NULL == iv_mssCmd )
         {

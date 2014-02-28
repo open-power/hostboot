@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -190,8 +190,10 @@ int32_t getCenMaintStartAddr( ExtensibleChip * i_mbaChip, CenAddr & o_addr )
         }
 
         // Read from hardware
+        // We have to use ForceRead here. Value of this register is changed by
+        // HW when we resume maintenance command.
         SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister("MBMACA");
-        o_rc = reg->Read();
+        o_rc = reg->ForceRead();
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"Read() failed on MBMACA" );

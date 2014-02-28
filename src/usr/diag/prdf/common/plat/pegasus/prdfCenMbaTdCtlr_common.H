@@ -111,6 +111,10 @@ class CenMbaTdCtlrCommon
             mss_MaintCmd::STOP_ON_UE |
             mss_MaintCmd::STOP_IMMEDIATE |
             mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION,
+
+        COND_FAST_SCRUB =
+            COND_BG_SCRUB |
+            mss_MaintCmd::STOP_ON_END_ADDRESS,
      };
 
   public: // functions
