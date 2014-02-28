@@ -35,6 +35,7 @@ namespace HWAS
         MOD_HOST_DISCOVER_TARGETS = 0x80,
         MOD_HOST_GARD             = 0x81,
         MOD_PLAT_DECONFIG_GARD    = 0x82,
+        MOD_PLAT_READIDEC         = 0x83,
     };
 
     enum HwasPlatReasonCode
@@ -44,6 +45,7 @@ namespace HWAS
         RC_TOP_LEVEL_TARGET_NULL            = HWAS_COMP_ID | 0x80,
         RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
         RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
+        RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
     };
 };
 

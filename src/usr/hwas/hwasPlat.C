@@ -42,6 +42,7 @@
 
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
+#include <fsi/fsiif.H>
 
 namespace HWAS
 {
@@ -93,6 +94,52 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
     {
         errl = DeviceFW::deviceRead(i_target, &id_ec, op_size,
                                     DEVICE_FSI_ADDRESS(0x01028));
+    }
+
+    //Look for a totally dead chip
+    if( (errl == NULL)
+        && ((id_ec & 0xFFFFFFFF00000000) == 0xFFFFFFFF00000000) )
+    {
+        HWAS_ERR("All FFs for chipid read on %.8X",TARGETING::get_huid(i_target));
+        /*@
+         * @errortype
+         * @moduleid     HWAS::MOD_PLAT_READIDEC
+         * @reasoncode   HWAS::RC_BAD_CHIPID
+         * @userdata1    Target HUID
+         * @userdata2    <unused>
+         * @devdesc      platReadIDEC> Invalid chipid from hardware (all FFs)
+         */
+        errl = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       HWAS::MOD_PLAT_READIDEC,
+                                       HWAS::RC_BAD_CHIPID,
+                                       TARGETING::get_huid(i_target),
+                                       0);
+
+        // if things are this broken then chances are there are bigger
+        //  problems, we can just make some guesses on what to call out
+
+        // make code the highest since there are other issues
+        errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                  HWAS::SRCI_PRIORITY_HIGH);
+
+        // callout this chip as Medium and deconfigure it
+        errl->addHwCallout( i_target,
+                            HWAS::SRCI_PRIORITY_LOW,
+                            HWAS::DECONFIG,
+                            HWAS::GARD_NULL );
+
+        // Grab all the FFDC we can think of
+        FSI::getFsiFFDC( FSI::FFDC_OPB_FAIL_SLAVE,
+                         errl,
+                         i_target );
+        FSI::getFsiFFDC( FSI::FFDC_READWRITE_FAIL,
+                         errl,
+                         i_target );
+        FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL,
+                         errl,
+                         i_target );
+
     }
 
     if (errl == NULL)

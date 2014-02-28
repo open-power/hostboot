@@ -202,6 +202,9 @@ my %resident_modules = (
     "libi2c.so"            => '1',
     "libutil.so"           => '1',
     "libibscom.so"         => '1',
+    "libfsiscom.so"        => '1',
+    "libfsi.so"            => '1',
+    "libscan.so"           => '1',
 
 );
 

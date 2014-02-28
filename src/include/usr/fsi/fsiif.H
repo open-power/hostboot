@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -71,6 +71,7 @@ enum fsiFFDCType_t
     FFDC_READWRITE_FAIL  = 1,
     FFDC_PIB_FAIL        = 2,
     FFDC_OPB_FAIL        = 3,
+    FFDC_OPB_FAIL_SLAVE  = 4,
 };
 
 /**
@@ -86,7 +87,16 @@ enum fsiFFDCType_t
  */
 void getFsiFFDC( fsiFFDCType_t       i_ffdc_type,
                  errlHndl_t          &io_log,
-                 TARGETING::Target*  i_target);
+                 TARGETING::Target*  i_target );
+
+/**
+ * @brief Cleanup the FSI PIB2OPB logic on the procs
+ *
+ * @param[in] i_target  Proc Chip Target to reset
+ *
+ * @return errlHndl_t  NULL on success
+ */
+errlHndl_t resetPib2Opb( TARGETING::Target* i_target );
 
 
 /**

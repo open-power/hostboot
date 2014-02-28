@@ -296,6 +296,14 @@ void getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &i_log,
     }
 }
 
+/**
+ * @brief Cleanup the FSI PIB2OPB logic on the procs
+ */
+errlHndl_t resetPib2Opb( TARGETING::Target* i_target )
+{
+    return Singleton<FsiDD>::instance().resetPib2Opb( i_target );
+}
+
 
 }; //end FSI namespace
 
@@ -383,12 +391,6 @@ errlHndl_t FsiDD::write(TARGETING::Target* i_target,
 
     return l_err;
 }
-
-
-
-/********************
- Internal Methods
- ********************/
 
 /**
  * @brief Initialize the FSI hardware
@@ -491,6 +493,10 @@ errlHndl_t FsiDD::initializeHardware()
 
             ++t_itr;
         }
+
+        // Cleanup any initial error states
+        l_err = resetPib2Opb( iv_master );
+        if( l_err ) { break; }
 
         // setup the local master control regs for the MFSI
         l_err = initMasterControl(iv_master,TARGETING::FSI_MASTER_TYPE_MFSI);
@@ -645,26 +651,34 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
     {
         errlHndl_t tmp_err = NULL;
 
+        // Use this call to find the OPB Master to read
+        FsiAddrInfo_t addr_info( i_target, 0x12345678 );
+        tmp_err = genFullFsiAddr( addr_info );
+        if( tmp_err )
+        {
+            delete tmp_err;
+            return;
+        }
+
         // Figure out which control regs to use for FFDC regs
-        FsiChipInfo_t fsi_info = getFsiInfo( i_target );
-        uint64_t ctl_reg = getControlReg(fsi_info.type);
+        uint64_t ctl_reg = getControlReg(addr_info.accessInfo.type);
 
         // Add data to error log where possible
         uint32_t data = 0;
-        ERRORLOG::ErrlUserDetailsLogRegister l_eud_fsiT(i_target);
+        ERRORLOG::ErrlUserDetailsLogRegister l_eud_fsiT(addr_info.opbTarg);
 
         uint64_t dump_regs[] = {
+            ctl_reg|FSI_MATRB0_1D8,
+            ctl_reg|FSI_MDTRB0_1DC,
             ctl_reg|FSI_MESRB0_1D0,
             ctl_reg|FSI_MAESP0_050,
             ctl_reg|FSI_MAEB_070,
             ctl_reg|FSI_MSCSB0_1D4,
-            ctl_reg|FSI_MATRB0_1D8,
-            ctl_reg|FSI_MDTRB0_1DC
         };
 
         for( size_t x=0; x<(sizeof(dump_regs)/sizeof(dump_regs[0])); x++ )
         {
-            tmp_err = read( dump_regs[x], &data );
+            tmp_err = read( addr_info.opbTarg, dump_regs[x], &data );
             if( tmp_err )
             {
                 delete tmp_err;
@@ -681,7 +695,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         for( size_t p = 0; p < 8; p++ )
         {
             uint32_t addr1 = ctl_reg|(FSI_MSTAP0_0D0+p*0x4);
-            tmp_err = read( addr1, &data );
+            tmp_err = read( addr_info.opbTarg, addr1, &data );
             if( tmp_err )
             {
                 delete tmp_err;
@@ -701,6 +715,8 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
     else if( FSI::FFDC_PIB_FAIL == i_ffdc_type )
     {
         errlHndl_t tmp_err = NULL;
+        FsiChipInfo_t fsi_info = getFsiInfo( i_target );
+
         ERRORLOG::ErrlUserDetailsLogRegister regdata(iv_master);
         regdata.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
         regdata.addToLog(io_log);
@@ -718,7 +734,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         uint32_t databuf = 32;
         for( size_t x=0; x<(sizeof(dump_regs)/sizeof(dump_regs[0])); x++ )
         {
-            tmp_err = read( i_target, dump_regs[x], &databuf );
+            tmp_err = read( fsi_info.master, dump_regs[x], &databuf );
             if( tmp_err )
             {
                 delete tmp_err;
@@ -744,6 +760,10 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
     {
         // Read some error regs from scom
         ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
+        // What I thought I wrote last...
+        l_scom_data.addDataBuffer(&iv_lastOpbCmd,
+                                  sizeof(iv_lastOpbCmd),
+                                  DEVICE_XSCOM_ADDRESS(0xFF00000000020000ull));
         // OPB Regs
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020000ull));
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
@@ -756,13 +776,80 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
         // Other suggestions from Markus Cebulla
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0005001Cull));//SBE_VITAL
-        l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0005001Cull));//SBE_VITAL
+        l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00010005ull));//Secure reg
         l_scom_data.addToLog(io_log);
+    }
+    else if( FSI::FFDC_OPB_FAIL_SLAVE == i_ffdc_type )
+    {
+        errlHndl_t tmp_err = NULL;
+        // Find the OPB Master and then collect FFDC_OPB_FAIL
+        FsiAddrInfo_t addr_info( i_target, 0x12345678 );
+        tmp_err = genFullFsiAddr( addr_info );
+        if( tmp_err )
+        {
+            delete tmp_err;
+        }
+        else
+        {
+            getFsiFFDC( FSI::FFDC_OPB_FAIL,
+                        io_log,
+                        addr_info.opbTarg );
+        }
     }
 
     return;
 
 }
+
+/**
+ * @brief Cleanup the FSI PIB2OPB logic on the procs
+ *
+ * @param[in] i_target  Proc Chip Target to reset
+ *
+ * @return errlHndl_t  NULL on success
+ */
+errlHndl_t FsiDD::resetPib2Opb( TARGETING::Target* i_target )
+{
+    errlHndl_t errhdl = NULL;
+    TRACFCOMP(g_trac_fsi, "FsiDD::resetPib2Opb(%.8X)>", TARGETING::get_huid(i_target) );
+
+    do {
+        // Clear out OPB error
+        uint64_t scom_data = 0;
+        size_t scom_size = sizeof(scom_data);
+
+        uint64_t opbaddr = FSI2OPB_OFFSET_0 | OPB_REG_RES;
+        scom_data = 0x8000000000000000; //0=Unit Reset
+        errhdl = deviceOp( DeviceFW::WRITE,
+                           i_target,
+                           &scom_data,
+                           scom_size,
+                           DEVICE_XSCOM_ADDRESS(opbaddr) );
+        if( errhdl ) { break; }
+
+        opbaddr = FSI2OPB_OFFSET_0 | OPB_REG_STAT;
+        errhdl = deviceOp( DeviceFW::WRITE,
+                           i_target,
+                           &scom_data,
+                           scom_size,
+                           DEVICE_XSCOM_ADDRESS(opbaddr) );
+        if( errhdl ) { break; }
+
+        // Check if we have any errors left
+        opbaddr = FSI2OPB_OFFSET_0 | OPB_REG_STAT;
+        scom_data = 0;
+        errhdl = deviceOp( DeviceFW::READ,
+                           i_target,
+                           &scom_data,
+                           scom_size,
+                           DEVICE_XSCOM_ADDRESS(opbaddr) );
+        if( errhdl ) { break; }
+        TRACFCOMP( g_trac_fsi, "PIB2OPB Status (%.8X->%.8X) after cleanup = %.16X", TARGETING::get_huid(i_target), opbaddr, scom_data );
+    } while(0);
+
+    return errhdl;
+}
+
 
 /********************
  Internal Methods
@@ -775,6 +862,7 @@ FsiDD::FsiDD()
 :iv_master(NULL)
 ,iv_ffdcTask(0)
 ,iv_opbErrorMask(OPB_STAT_ERR_ANY)
+,iv_lastOpbCmd(0)
 {
     TRACFCOMP(g_trac_fsi, "FsiDD::FsiDD()>");
 
@@ -852,6 +940,7 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
     errlHndl_t l_err = NULL;
     bool need_unlock = false;
     mutex_t* l_mutex = NULL;
+    *o_buffer = 0xDEADBEEF;
 
     do {
         // setup the OPB command register
@@ -872,11 +961,20 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
             need_unlock = true;
         }
 
+        // make sure there are no other ops running before we start
+        l_err = pollForComplete( i_addrInfo, NULL );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_fsi, "FsiDD::read> FSI Errors before doing read operation : %.8X->%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr );
+            break;
+        }
+
         // always read/write 64 bits to SCOM
         size_t scom_size = sizeof(uint64_t);
 
         // write the OPB command register to trigger the read
-        TRACUCOMP(g_trac_fsi, "FsiDD::read> ScomWRITE : opbaddr=%.16llX, data=%.16llX", opbaddr, fsicmd );
+        iv_lastOpbCmd = fsicmd;
+        TRACUCOMP(g_trac_fsi, "FsiDD::read> ScomWRITE to %.8X: opbaddr=%.16llX, data=%.16llX", TARGETING::get_huid(i_addrInfo.opbTarg), opbaddr, fsicmd );
         l_err = deviceOp( DeviceFW::WRITE,
                           i_addrInfo.opbTarg,
                           &fsicmd,
@@ -892,6 +990,7 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
         l_err = pollForComplete( i_addrInfo, o_buffer );
         if( l_err )
         {
+            TRACFCOMP(g_trac_fsi, "FsiDD::read> FSI Errors after doing read operation : %.8X->%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr );
             break;
         }
 
@@ -903,9 +1002,9 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
         }
 
         // atomic section <<
-
-        TRACRCOMP(g_trac_fsir, "FSI READ  : %.6X = %.8X", i_addrInfo.absAddr, *o_buffer );
     } while(0);
+
+    TRACRCOMP(g_trac_fsir, "FSI READ  : %.8X->%.6X = %.8X", TARGETING::get_huid(i_addrInfo.opbTarg), i_addrInfo.absAddr, *o_buffer );
 
     if( need_unlock )
     {
@@ -928,7 +1027,7 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
     mutex_t* l_mutex = NULL;
 
     do {
-        TRACRCOMP(g_trac_fsir, "FSI WRITE : %.6X = %.8X", i_addrInfo.absAddr, *i_buffer );
+        TRACRCOMP(g_trac_fsir, "FSI WRITE : %.8X->%.6X = %.8X", TARGETING::get_huid(i_addrInfo.opbTarg), i_addrInfo.absAddr, *i_buffer );
 
         // pull out the data to write (length has been verified)
         uint32_t fsidata = *i_buffer;
@@ -943,8 +1042,8 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
         uint64_t opbaddr = genOpbScomAddr(i_addrInfo,OPB_REG_CMD);
 
         // atomic section >>
-        l_mutex
-            = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
+        l_mutex = (i_addrInfo.opbTarg)->
+          getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
         if( (iv_ffdcTask == 0)  // performance hack for typical case
             || (iv_ffdcTask != task_gettid()) )
@@ -953,8 +1052,17 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
             need_unlock = true;
         }
 
+        // make sure there are no other ops running before we start
+        l_err = pollForComplete( i_addrInfo, NULL );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_fsi, "FsiDD::write> FSI Errors before doing write operation : %.8X->%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr );
+            break;
+        }
+
         // write the OPB command register
-        TRACUCOMP(g_trac_fsi, "FsiDD::write> ScomWRITE : opbaddr=%.16llX, data=%.16llX", opbaddr, fsicmd );
+        iv_lastOpbCmd = fsicmd;
+        TRACUCOMP(g_trac_fsi, "FsiDD::write> ScomWRITE to %.8X: opbaddr=%.16llX, data=%.16llX", TARGETING::get_huid(i_addrInfo.opbTarg), opbaddr, fsicmd );
         l_err = deviceOp( DeviceFW::WRITE,
                           i_addrInfo.opbTarg,
                           &fsicmd,
@@ -970,6 +1078,7 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
         l_err = pollForComplete( i_addrInfo, NULL );
         if( l_err )
         {
+            TRACFCOMP(g_trac_fsi, "FsiDD::write> FSI Errors after doing write operation : %.8X->%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr );
             break;
         }
 
@@ -1003,7 +1112,19 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
 {
     errlHndl_t l_err = NULL;
 
-    if( (i_opbStatReg & iv_opbErrorMask)
+    // Do not look at error bits for the Master we're not using
+    uint32_t l_opbErrorMask = iv_opbErrorMask;
+    if( i_addrInfo.accessInfo.type == TARGETING::FSI_MASTER_TYPE_CMFSI )
+    {
+        l_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
+    }
+    else
+    {
+        l_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
+    }
+
+    // Fail if there is a relevant error bit or the op never finished
+    if( (i_opbStatReg & l_opbErrorMask)
         || (i_opbStatReg & OPB_STAT_BUSY) )
     {
         // If we're already in the middle of handling an error and we failed
@@ -1018,14 +1139,15 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
             return l_err; // just leave
         }
 
-        TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access to %.8X : relAddr=0x%X, absAddr=0x%X, OPB Status=0x%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr, i_addrInfo.absAddr, i_opbStatReg );
+        TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access to %.8X : relAddr=0x%X, absAddr=%.8X->%.6X, OPB Status=0x%.8X, l_opbErrorMask=%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr, TARGETING::get_huid(i_addrInfo.opbTarg), i_addrInfo.absAddr, i_opbStatReg, l_opbErrorMask );
         /*@
          * @errortype
          * @moduleid     FSI::MOD_FSIDD_HANDLEOPBERRORS
          * @reasoncode   FSI::RC_OPB_ERROR
-         * @userdata1[0:31]  Relative FSI Address
+         * @userdata1[00:31]  Relative FSI Address
          * @userdata1[32:63]  Absolute FSI Address
-         * @userdata2    OPB Status Register
+         * @userdata2[00:31]  OPB Status Register
+         * @userdata2[32:63]  FSI Master HUID
          * @devdesc      FsiDD::handleOpbErrors> Error during FSI access
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1034,10 +1156,11 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                                         TWO_UINT32_TO_UINT64(
                                             i_addrInfo.relAddr,
                                             i_addrInfo.absAddr),
-                                        TWO_UINT32_TO_UINT64(i_opbStatReg,0));
+                                        TWO_UINT32_TO_UINT64(i_opbStatReg,
+                                   TARGETING::get_huid(i_addrInfo.opbTarg)));
 
         //mask off the bits we're ignoring before looking closer
-        uint32_t l_opb_stat = (i_opbStatReg & iv_opbErrorMask);
+        uint32_t l_opb_stat = (i_opbStatReg & l_opbErrorMask);
 
         /*
          OPB_errAck
@@ -1098,9 +1221,11 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
         if( !root_cause_found )
         {
             // read the Status Bridge0 Register
+            FsiChipInfo_t fsi_info = getFsiInfo( i_addrInfo.fsiTarg );
+            uint64_t ctl_reg = getControlReg(fsi_info.type);
             uint32_t mesrb0_data = 0;
             tmp_err = read( i_addrInfo.accessInfo.master,
-                            FSI_MESRB0_1D0,
+                            ctl_reg|FSI_MESRB0_1D0,
                             &mesrb0_data );
             if( tmp_err )
             {
@@ -1226,9 +1351,20 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                                   uint32_t* o_readData)
 {
     errlHndl_t l_err = NULL;
-    enum { MAX_OPB_TIMEOUT_NS = 15*NS_PER_MSEC }; //=15ms
+    enum { MAX_OPB_TIMEOUT_NS = 10*NS_PER_MSEC }; //=10ms
 
     do {
+        // Do not look at error bits for the Master we're not using
+        uint32_t l_opbErrorMask = iv_opbErrorMask;
+        if( i_addrInfo.accessInfo.type == TARGETING::FSI_MASTER_TYPE_CMFSI )
+        {
+            l_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
+        }
+        else
+        {
+            l_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
+        }
+
         // poll for complete
         uint32_t read_data[2];
         size_t scom_size = sizeof(uint64_t);
@@ -1260,7 +1396,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
             // check for completion or error
             TRACUCOMP(g_trac_fsi, "FsiDD::pollForComplete> ScomREAD : read_data[0]=%.8llX", read_data[0] );
             if( ((read_data[0] & OPB_STAT_BUSY) == 0)  //not busy
-                || (read_data[0] & iv_opbErrorMask) ) //error bits
+                || (read_data[0] & l_opbErrorMask) ) //error bits
             {
                 break;
             }
@@ -1269,6 +1405,14 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
             elapsed_time_ns += 10000;
         } while( elapsed_time_ns <= MAX_OPB_TIMEOUT_NS ); // hardware has 1ms limit
         if( l_err ) { break; }
+
+        // check if we got an error from the OPB
+        //   (will also check for busy/timeout)
+        l_err = handleOpbErrors( i_addrInfo, read_data[0] );
+        if( l_err )
+        {
+            break;
+        }
 
         // we should never timeout because the hardware should set an error
         if( elapsed_time_ns > MAX_OPB_TIMEOUT_NS )
@@ -1316,17 +1460,14 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                         l_err,
                         i_addrInfo.opbTarg );
 
+            //Clear out the error indication so that we can
+            // do subsequent FSI operations
+            errlHndl_t tmp_err = errorCleanup( i_addrInfo, FSI::RC_OPB_ERROR );
+            if(tmp_err) { delete tmp_err; }
+
             l_err->collectTrace(FSI_COMP_NAME);
             l_err->collectTrace(FSIR_TRACE_BUF);
 
-            break;
-        }
-
-        // check if we got an error from the OPB
-        //   (will also check for busy/timeout)
-        l_err = handleOpbErrors( i_addrInfo, read_data[0] );
-        if( l_err )
-        {
             break;
         }
 
@@ -1537,6 +1678,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
             !(iv_master->getAttr<TARGETING::ATTR_MODEL>()
               == TARGETING::MODEL_VENICE) ) //@fixme-RTC:35041
         {
+            //use the local proc to drive the operation instead of
+            // going through the master proc indirectly
             io_addrInfo.opbTarg = io_addrInfo.accessInfo.master;
             // Note: no need to append the MFSI port since it is now local
         }
@@ -1763,40 +1906,16 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         l_err = genFullFsiAddr(addr_info);
         if( l_err ) { break; }
 
+        // Ensure we don't have any errors before we even start
         uint32_t scom_data[2] = {};
         size_t scom_size = sizeof(scom_data);
-
-        uint64_t opbaddr = genOpbScomAddr(addr_info,OPB_REG_RES);
-        scom_data[0] = 0; scom_data[1] = 0;
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_master,
-                          scom_data,
-                          scom_size,
-                          DEVICE_XSCOM_ADDRESS(opbaddr) );
-        if( l_err ) { break; }
-
-        opbaddr = genOpbScomAddr(addr_info,OPB_REG_STAT);
-        scom_data[0] = 0; scom_data[1] = 0;
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_master,
-                          scom_data,
-                          scom_size,
-                          DEVICE_XSCOM_ADDRESS(opbaddr) );
-        if( l_err ) { break; }
-
-        // Ensure we don't have any errors before we even start
-        opbaddr = genOpbScomAddr(addr_info,OPB_REG_STAT);
+        uint64_t opbaddr = genOpbScomAddr(addr_info,OPB_REG_STAT);
         l_err = deviceOp( DeviceFW::READ,
                           iv_master,
                           scom_data,
                           scom_size,
                           DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err ) { break; }
-        // Trace initial state for debug
-        TRACFCOMP(g_trac_fsi,"Scom %0.8X = %0.8X %0.8X",
-                  opbaddr,
-                  scom_data[0],
-                  scom_data[1]);
         l_err = handleOpbErrors( addr_info, scom_data[0] );
         if( l_err )
         {
@@ -1858,7 +1977,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             databuf = 0x50040400;
 
             //Setup timeout so that:
-            //   code(15ms) > masterproc (0.9ms) > remote fsi master (0.8ms)
+            //   code(10ms) > masterproc (0.9ms) > remote fsi master (0.8ms)
             if( i_master == iv_master )
             {
                 // 26:27= Timeout (b01) = 0.9ms
@@ -2211,25 +2330,19 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
     do {
         if( FSI::RC_OPB_ERROR == i_errType )
         {
-            // Clear out OPB error
-            uint64_t scomdata = 0;
-            size_t scom_size = sizeof(uint64_t);
-            l_err = deviceOp( DeviceFW::WRITE,
-                              i_addrInfo.opbTarg,
-                              &scomdata,
-                              scom_size,
-                              DEVICE_XSCOM_ADDRESS(0x00020001ull) );
+            //Clear out the pib2opb logic for the master
+            // that failed
+            l_err = resetPib2Opb( i_addrInfo.opbTarg );
             if(l_err) break;
         }
         else if( FSI::RC_ERROR_IN_MAEB == i_errType )
         {
-            //Reset the port to clear up the residual errors
-            // 1= Port: Error reset
-            uint32_t data = 0x40000000;
-            uint64_t mresp0_reg = getControlReg(i_addrInfo.accessInfo.type)
-              | FSI_MRESP0_0D0
-              | (i_addrInfo.accessInfo.port*4);
-            l_err = write( mresp0_reg, &data );
+            //Reset the bridge to clear up the residual errors
+            // 0=Bridge: General reset
+            uint32_t data = 0x80000000;
+            uint64_t mesrb0_reg = getControlReg(i_addrInfo.accessInfo.type)
+              | FSI_MESRB0_1D0;
+            l_err = write( i_addrInfo.opbTarg, mesrb0_reg, &data );
             if(l_err) break;
         }
 
@@ -2260,9 +2373,9 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
 {
     errlHndl_t l_err = NULL;
 
-    if( i_addrInfo.fsiTarg == iv_master )
+    if( i_addrInfo.fsiTarg == i_addrInfo.opbTarg )
     {
-        //nothing to check here in operations directed at master proc
+        //nothing to check here in operations directed at FSI Master
         return NULL;
     }
 
@@ -2278,7 +2391,7 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
         l_err = read( i_addrInfo.accessInfo.master, maeb_reg, &maeb_data );
         if( !l_err && (maeb_data != 0) )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::read> Error after read of %.8X, MAEB=%lX", TARGETING::get_huid(i_addrInfo.fsiTarg), maeb_data );
+            TRACFCOMP( g_trac_fsi, "FsiDD::checkForErrors> After op to %.8X, MAEB=%lX (Master=%.8X)", TARGETING::get_huid(i_addrInfo.fsiTarg), maeb_data, TARGETING::get_huid(i_addrInfo.opbTarg) );
             /*@
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_CHECKFORERRORS
@@ -2312,6 +2425,8 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
             //Reset the port to clean up residual errors
             errorCleanup(i_addrInfo,FSI::RC_ERROR_IN_MAEB);
         }
+
+        iv_ffdcTask = 0;
     }
 
     return l_err;

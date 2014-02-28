@@ -87,7 +87,7 @@ class FsiDD
      * @param[in] i_type  FSI Master Type (MFSI or cMFSI)
      * @param[in] i_port  Slave port number
      * @param[out] o_detected  Bitstring of detected slaves
-     * 
+     *
      * @return bool  true if port sensed as active during FSI initialization
      */
     bool isSlavePresent( TARGETING::Target* i_fsiMaster,
@@ -100,7 +100,7 @@ class FsiDD
      *
      * @param[in] i_target
      * @param[out] o_detected  Bitstring of detected slaves
-     * 
+     *
      * @return bool  true if port sensed as active during FSI initialization
      */
     bool isSlavePresent( TARGETING::Target* i_target,
@@ -120,6 +120,15 @@ class FsiDD
     void getFsiFFDC( FSI::fsiFFDCType_t  i_ffdc_type,
                      errlHndl_t          &io_log,
                      TARGETING::Target*  i_target );
+
+    /**
+     * @brief Cleanup the FSI PIB2OPB logic on the procs
+     *
+     * @param[in] i_target  Proc Chip Target to reset
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t resetPib2Opb( TARGETING::Target* i_target );
 
   protected:
     /**
@@ -391,7 +400,7 @@ class FsiDD
         OPB_STAT_BUSY       = 0x00010000, /**< Bit 15 is the Busy bit */
         OPB_STAT_READ_VALID = 0x00020000, /**< Bit 14 is the Valid Read bit */
         OPB_STAT_ERRACK     = 0x00100000, /**< 11 is OPB errAck */
-        OPB_STAT_ERR_OPB    = 0x09F00000, /**< 4,7-11 are OPB errors */
+        OPB_STAT_ERR_OPB    = 0xFFFC0000, /**< 0-14 are OPB errors */
         OPB_STAT_ERR_CMFSI  = 0x0000FC00, /**< 16-21 are cMFSI errors */
         OPB_STAT_ERR_MFSI   = 0x000000FC, /**< 24-29 are MFSI errors */
         OPB_STAT_ERR_ANY    = (OPB_STAT_ERR_OPB |
@@ -529,7 +538,7 @@ class FsiDD
      * Active slaves, 1 bit per port, 1=active,
      *   one entry per MFSI port, plus local MFSI and local cMFSI
      */
-    uint8_t iv_slaves[MAX_SLAVE_PORTS+2];    
+    uint8_t iv_slaves[MAX_SLAVE_PORTS+2];
 
     /**
      * Master processor target
@@ -545,6 +554,11 @@ class FsiDD
      * OPB Error Bits
      */
     uint32_t iv_opbErrorMask;
+
+    /**
+     * Last OPB Command
+     */
+    uint64_t iv_lastOpbCmd;
 
   private:
 

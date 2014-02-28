@@ -67,18 +67,48 @@ void pib_error_handler( TARGETING::Target* i_target,
     //Add this target to the FFDC
     ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").addToLog(i_errlog);
 
-    //Add the callouts for the specific PCB/PIB error
-    uint32_t pib_error = i_status >> 12;
-    PIB::addFruCallouts( i_target,
-                         pib_error,
-                         i_errlog );
-
-    //Grab the PIB2OPB Status reg for a Resource Occupied error
-    if( pib_error == PIB::PIB_RESOURCE_OCCUPIED ) //piberr=001
+    //Look for a totally dead chip
+    if( i_status == 0xFFFFFFFF )
     {
+        // if things are this broken then chances are there are bigger
+        //  problems, we can just make some guesses on what to call out
+
+        // make code the highest since there are other issues
+        i_errlog->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+
+        // callout this chip as Medium and deconfigure it
+        i_errlog->addHwCallout( i_target,
+                                HWAS::SRCI_PRIORITY_LOW,
+                                HWAS::DECONFIG,
+                                HWAS::GARD_NULL );
+
+        // grab all the FFDC we can think of
+        FSI::getFsiFFDC( FSI::FFDC_OPB_FAIL_SLAVE,
+                         i_errlog,
+                         i_target );
+        FSI::getFsiFFDC( FSI::FFDC_READWRITE_FAIL,
+                         i_errlog,
+                         i_target );
         FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL,
                          i_errlog,
                          i_target );
+    }
+    else
+    {
+        //Add the callouts for the specific PCB/PIB error
+        uint32_t pib_error = i_status >> 12;
+        PIB::addFruCallouts( i_target,
+                             pib_error,
+                             i_errlog );
+
+        //Grab the PIB2OPB Status reg for a Resource Occupied error
+        if( pib_error == PIB::PIB_RESOURCE_OCCUPIED ) //piberr=001
+        {
+            FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL,
+                             i_errlog,
+                             i_target );
+        }
     }
 
     //Recovery sequence from Markus
