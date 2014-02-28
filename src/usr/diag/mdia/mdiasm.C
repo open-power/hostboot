@@ -93,6 +93,9 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
         IPOLL_STATUS,
         PBUS_GP1,
         PBUS_GP2,
+        GLOBAL_CS_FIR,
+        GLOBAL_RE_FIR,
+        GLOBAL_SPA,
     };
 
     // get the parent membuf
@@ -142,6 +145,7 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
         {
             continue;
         }
+
         for(const uint64_t * regIt = tableIt->begin;
                 regIt != tableIt->end;
                 ++regIt)
@@ -275,14 +279,27 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // Pending maint cmd complete, reset timer
                 if(mbaspa & ~mbaspamask)
                 {
-                    MDIA_FAST("sm: work item %d reset timed out on: %x",
-                        *((*wit)->workItem),
-                        get_huid(target));
-                    // register a new timeout monitor
-                    uint64_t monitorId = getMonitor().addMonitor(MBA_TIMEOUT);
-                    (*wit)->timer = monitorId;
+                    if((*wit)->timeoutCnt >= MBA_TIMEOUTCNT_MAX)
+                    {
+                        MDIA_FAST("sm: work item %d timed out on: %x, "
+                                  "timeoutCnt: %d", *((*wit)->workItem),
+                                  get_huid(target), (*wit)->timeoutCnt);
+                    }
+                    else
+                    {
+                        MDIA_FAST("sm: work item %d reset timed out on: %x, "
+                                  "timeoutCnt: %d", *((*wit)->workItem),
+                                  get_huid(target), (*wit)->timeoutCnt);
+                        // register a new timeout monitor
+                        uint64_t monitorId =
+                                 getMonitor().addMonitor(MBA_TIMEOUT);
+                        (*wit)->timer = monitorId;
 
-                    break;
+                        // advance timeout counter
+                        (*wit)->timeoutCnt++;
+
+                        break;
+                    }
                 }
 
                 // If maint cmd complete bit is not on, time out
@@ -435,6 +452,7 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->timer = 0;
         p->restartCommand = false;
         p->memSize = 0;
+        p->timeoutCnt = 0;
 
         // get the memsize attached to this mba
 

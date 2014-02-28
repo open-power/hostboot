@@ -41,6 +41,9 @@ namespace MDIA
 //MBA timeout value - 30 secs
 static const uint64_t MBA_TIMEOUT = 30000000000;
 
+//MBA timeout count max before timing out (~1 min)
+static const uint64_t MBA_TIMEOUTCNT_MAX = 2;
+
 /**
  * @brief work flow phases
  */

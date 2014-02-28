@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -102,6 +102,9 @@ enum
     IPOLL_STATUS = 0x01020014,
     PBUS_GP1 = 0x02000001,
     PBUS_GP2 = 0x02000002,
+    GLOBAL_CS_FIR = 0x570F001C,
+    GLOBAL_RE_FIR = 0x570F001B,
+    GLOBAL_SPA = 0x570F001A,
 };
 
 /**
