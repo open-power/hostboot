@@ -625,7 +625,7 @@ namespace SBE
         fapi::ReturnCode rc_fapi = fapi::FAPI_RC_SUCCESS;
         uint32_t coreMask = 0x0000FFFF;
         size_t maxCores = P8_MAX_EX_PER_PROC;
-        uint32_t coreCount = 0;
+        int coreCount = 0;
         uint32_t procIOMask = 0;
         uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
         bool procedure_success = false;
@@ -652,7 +652,6 @@ namespace SBE
             // remove the number of cores passed into p8_xip_customize() until
             // an image can be created successfully.
 
-
             // Maximize Core mask for this target
             err = selectBestCores(i_target,
                                   maxCores,
@@ -672,7 +671,7 @@ namespace SBE
             coreCount = __builtin_popcount(coreMask);
             procIOMask = coreMask;
 
-            while( coreCount > 0 )
+            while( coreCount >= 0 )
             {
 
                 FAPI_EXEC_HWP( rc_fapi,
@@ -829,12 +828,20 @@ namespace SBE
 
         errlHndl_t err = NULL;
         uint32_t manGuardExs = 0x00000000;
+        uint32_t remainingExs = 0x00000000;
         uint32_t exCount = 0;
         uint32_t deconfigByEid = 0;
 
         o_exMask = 0x00000000;
 
         do{
+
+            // Special case: if i_maxExs == 0 don't loop through EXs
+            if (unlikely(i_maxExs == 0 ))
+            {
+                break;
+            }
+
             // find all EX chiplets of the proc
             TARGETING::TargetHandleList l_exTargetList;
             TARGETING::getChildChiplets( l_exTargetList,
@@ -850,7 +857,6 @@ namespace SBE
             {
                 //  make a local copy of the EX target
                 const TARGETING::Target*  l_ex_target = *l_iterEX;
-
 
                 if( !(l_ex_target->
                       getAttr<TARGETING::ATTR_HWAS_STATE>().present) )
@@ -894,6 +900,13 @@ namespace SBE
                     {
                         manGuardExs |= (0x00008000 >> chipUnit);
                     }
+                    // Add it to the 'remaining' list in case
+                    // more are needed
+                    else
+                    {
+                        remainingExs |= (0x00008000 >> chipUnit);
+                    }
+
                 }
             }   // end ex target loop
 
@@ -902,13 +915,47 @@ namespace SBE
                 //We've found enough, break out of function
                 break;
             }
+            else
+            {
+                TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: non-functional "
+                           "cores needed for bit mask: exCount=%d, i_maxExs=%d,"
+                           " o_exMask=0x%.8X, manGuardExs=0x%.8X, "
+                           "remainingExs=0x%.8X",
+                           exCount, i_maxExs, o_exMask, manGuardExs,
+                           remainingExs );
+            }
 
-            //Look for more 'good' exs.
+            // Add more 'good' exs.
             manGuardExs = trimBitMask(manGuardExs,
                         i_maxExs-exCount);
             o_exMask |= manGuardExs;
-            TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask manGuardExs=0x%.8X",
-                       manGuardExs);
+            exCount = __builtin_popcount(o_exMask);
+            TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask "
+                       "manGuardExs=0x%.8X", manGuardExs);
+
+            if(exCount >= i_maxExs)
+            {
+                //We've found enough, break out of function
+                break;
+            }
+
+            // If we still need more, add 'remaining' exs
+            // Get Target Service
+            // System target check done earlier, so no assert check necessary
+            TargetService& tS = targetService();
+            TARGETING::Target* sys = NULL;
+            (void) tS.getTopLevelTarget( sys );
+
+            uint32_t min_exs = sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_EXS>();
+            if ( exCount < min_exs )
+            {
+                remainingExs = trimBitMask(remainingExs,
+                                           min_exs-exCount);
+                o_exMask |= remainingExs;
+                TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask "
+                           "remainingExs=0x%.8X, min_exs=%d",
+                           remainingExs, min_exs);
+            }
 
         }while(0);
 
