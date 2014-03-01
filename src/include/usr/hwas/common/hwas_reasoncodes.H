@@ -41,6 +41,7 @@ namespace HWAS
         //  System Availability Service codes
         //  The first is a blanket error that will be returned to the caller,
         //      further errors will be committed in the routine.
+        //termination_rc
         RC_SYSAVAIL_INSUFFICIENT_HW         = HWAS_COMP_ID | 0x04,
         RC_SYSAVAIL_NO_CORES_FUNC           = HWAS_COMP_ID | 0x05,
         RC_SYSAVAIL_NO_MEMORY_FUNC          = HWAS_COMP_ID | 0x06,

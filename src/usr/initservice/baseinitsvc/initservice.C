@@ -43,6 +43,8 @@
 #include    <sys/mm.h>
 #include    <vmmconst.h>
 #include    <sys/time.h>
+#include    <hwas/common/hwas_reasoncodes.H>
+
 
 #include    <errl/errludstring.H>
 
@@ -531,8 +533,20 @@ void InitService::init( void *io_ptr )
                 "InitService: Committing errorlog %p",
                 l_errl );
 
-        // Set the shutdown status to be the plid to force a TI
-        l_shutdownStatus = l_errl->plid();
+        // Catch this particular error type so it can be returned
+        //   as a reasoncode the FSP can catch instead of a plid
+        if (l_errl->reasonCode() == HWAS::RC_SYSAVAIL_INSUFFICIENT_HW)
+        {
+            TRACFCOMP( g_trac_initsvc,
+                "InitService: Returning reasoncode 0x%08x to the FSP",
+                HWAS::RC_SYSAVAIL_INSUFFICIENT_HW);
+            l_shutdownStatus = HWAS::RC_SYSAVAIL_INSUFFICIENT_HW;
+        }
+        else 
+        {
+            // Set the shutdown status to be the plid to force a TI
+            l_shutdownStatus = l_errl->plid();
+        }
 
         errlCommit( l_errl, INITSVC_COMP_ID );
 
