@@ -40,9 +40,13 @@
 #include <hwpisteperror.H>
 
 #include <targeting/attrsync.H>
+#include <targeting/namedtarget.H>
 #include <diag/prdf/prdfMain.H>
 #include <intr/interrupt.H>
 #include <ibscom/ibscomif.H>
+
+#include <sbe/sbeif.H>
+#include <sbe_update.H>
 
 //  fapi support
 #include  <fapi.H>
@@ -188,6 +192,36 @@ void* host_gard( void *io_pArgs )
         // Write back to attribute
         l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
     }
+
+    // Send message to FSP sending HUID of EX chip associated with master core
+    msg_t * core_msg = msg_allocate();
+    core_msg->type = SBE::MSG_IPL_MASTER_CORE;
+    const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
+    HWAS_ASSERT(l_masterCore, "HWAS host_gard: no masterCore found");
+    // Get the EX chip associated with the master core as that is the chip that 
+    //   has the IS_MASTER_EX attribute associated with it
+    TARGETING::TargetHandleList targetList;
+    getParentAffinityTargets(targetList,
+                             l_masterCore,
+                             TARGETING::CLASS_UNIT,
+                             TARGETING::TYPE_EX);
+    HWAS_ASSERT(targetList.size() == 1, 
+             "HWAS host_gard: Incorrect EX chip(s) associated with masterCore");
+    core_msg->data[0] = 0;
+    core_msg->data[1] = TARGETING::get_huid( targetList[0] );
+    core_msg->extra_data = NULL;
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+              "Sending MSG_MASTER_CORE message with HUID %08x",
+              core_msg->data[1]);
+    errl = MBOX::send(MBOX::IPL_SERVICE_QUEUE,core_msg);
+    if (errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                      ERR_MRK"MBOX::send failed sending Master Core message");
+        msg_free(core_msg);
+
+    }
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
     return errl;

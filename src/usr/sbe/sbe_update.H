@@ -93,7 +93,7 @@ namespace SBE
 
     // For mbox messages to FSP
     const uint32_t MSG_IPL_DUE_TO_SBE_UPDATE = 0x40000012;
-
+    const uint32_t MSG_IPL_MASTER_CORE       = 0x40000005;
 
     /******************************************/
     /*  Enums                                 */
