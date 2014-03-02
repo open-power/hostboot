@@ -410,7 +410,6 @@ actionclass calloutProcLevel2MedThr1
     calloutSelfLow;
     callout2ndLvlMed;
     threshold1;
-    dumpSH;
 };
 
 /** callout Proc with low priority ,Sec level Med priority, Thr1

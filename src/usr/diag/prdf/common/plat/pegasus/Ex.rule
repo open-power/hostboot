@@ -2006,18 +2006,18 @@ actionclass SelfAndLevel2MedThr5PerHr
 };
 
 /** callouts Proc on first instance. Calls for second level support as well*/
-actionclass calloutProcLow2ndLvlMedThr1
+actionclass calloutProcLow2ndLvlMedThr1dumpSh
 {
     calloutParentProcLow;
-    callout2ndLvlMed;
-    threshold1;
+    callout2ndLvlMedThr1dumpSh;
 };
 
 /** callouts Proc on first instance. Calls for second level support as well.
  *  Set SUE flag */
 actionclass calloutProcLow2ndLvlMedThr1SUE
 {
-    calloutProcLow2ndLvlMedThr1;
+    calloutParentProcLow;
+    callout2ndLvlMedThr1;
     flag(SUE);
 };
 
@@ -2060,10 +2060,3 @@ actionclass calloutExLowSecLvlThr1MedDumpSh
     dumpSH;
 };
 
-/** callouts Proc on first instance. Calls for second level support as well
- *  Initiate an SH dump */
-actionclass calloutProcLow2ndLvlMedThr1dumpSh
-{
-    calloutProcLow2ndLvlMedThr1;
-    dumpSH;
-};

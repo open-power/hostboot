@@ -703,12 +703,12 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[29]
      *  LD_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(29)) ? callout2ndLvlMedThr1;
+    (NxCxaFir, bit(29)) ? callout2ndLvlMedThr1dumpSh;
 
     /** NXCXAFIR[30]
      *  ST_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(30)) ? callout2ndLvlMedThr1;
+    (NxCxaFir, bit(30)) ? callout2ndLvlMedThr1dumpSh;
 
     /** NXCXAFIR[31]
      *  PHB_LINK_DOWN
@@ -1360,7 +1360,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[8]
      *  INVALID_TTYPE
      */
-    (PsiHbFir, bit(8)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(8)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[9]
      *  INVALID_CRESP
@@ -1375,7 +1375,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[11]
      *  PB_PARITY_ERROR
      */
-    (PsiHbFir, bit(11)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(11)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PSIHBFIR[12]
      *  FSP_ACCESS_TRUSTED_SPACE
@@ -2369,32 +2369,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_0, bit(18)) ? callout2ndLvlMedThr1;
+    (PciNestFir_0, bit(18)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PCINESTFIR_1[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_1, bit(18)) ? callout2ndLvlMedThr1;
+    (PciNestFir_1, bit(18)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PCINESTFIR_2[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_2, bit(18)) ? callout2ndLvlMedThr1;
+    (PciNestFir_2, bit(18)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PCINESTFIR_0[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_0, bit(19)) ? callout2ndLvlMedThr1;
+    (PciNestFir_0, bit(19)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PCINESTFIR_1[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_1, bit(19)) ? callout2ndLvlMedThr1;
+    (PciNestFir_1, bit(19)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PCINESTFIR_2[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_2, bit(19)) ? callout2ndLvlMedThr1;
+    (PciNestFir_2, bit(19)) ? callout2ndLvlMedThr1dumpSh;
 
     /** PCINESTFIR_0[20]
      *  INVALIDCRESP

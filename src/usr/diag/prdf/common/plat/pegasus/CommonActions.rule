@@ -243,6 +243,12 @@ actionclass callout2ndLvlMedThr1UE
     SUEGenerationPoint;
 };
 
+/** Callout 2nd Level Medium, initiate SH dump */
+actionclass callout2ndLvlMedThr1dumpSh
+{
+    callout2ndLvlMedThr1;
+    dumpSH;
+};
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################
