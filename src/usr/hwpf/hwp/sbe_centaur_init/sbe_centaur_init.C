@@ -228,51 +228,10 @@ void*    call_sbe_centaur_init( void *io_pArgs )
                 l_errl->collectTrace("ISTEPS_TRACE", 512);
             }
        
-            // Log informational error if we retried the Repair Loader
-            errlHndl_t  l_tempErrl = NULL;
-            ecmdDataBufferBase l_dataBuffer(64);
-            fapi::ReturnCode  l_rc = fapiGetScom(l_fapiTarget, 0x0104000A,
-                                                 l_dataBuffer);
-            if (!l_rc.ok())
-            {
-                FAPI_ERR("ERROR in call_sbe_centaur_init - target %.8X "
-                   "Scom error reading Repair Loader retry counter 0x0104000A",
-                   TARGETING::get_huid(l_membuf_target));
-                l_tempErrl = fapi::fapiRcToErrl(l_rc);
-                l_tempErrl->setSev(ERRL_SEV_INFORMATIONAL);
-                errlCommit( l_tempErrl, HWPF_COMP_ID );
-            }
-            else
-            {
-                // If the counter !=0, log an informational error
-                uint64_t l_counter = l_dataBuffer.getDoubleWord(0);
-                FAPI_INF("Target 0x%.8X - RepairLoader Reg_0x0104000A %.16llX",
-                   TARGETING::get_huid(l_membuf_target), l_counter);
+            // Remove 0x0104000A reading, per Joe, the IPL procedures are no
+            // longer writing information related to the repair loader into
+            // this register
 
-                if (l_counter & REPAIR_LOADER_RETRY_CTR_MASK)
-                {
-                    FAPI_ERR("ERROR in call_sbe_centaur_init - target %.8X "
-                    "Repair Loader retry occured, "
-                    "RepairLoader Reg_0x0104000A %.16llX",
-                    TARGETING::get_huid(l_membuf_target), l_counter);
-
-                    /*@
-                     * @errortype
-                     * @moduleid     ISTEP_SBE_CENTAUR_INIT
-                     * @reasoncode   ISTEP_REPAIR_LOADER_RETRY_OCCURED
-                     * @userdata1    Register 0x0104000A
-                     * @userdata2    Membuf target
-                     * @devdesc      Repair Loader error, retry was performed
-                     */
-                    l_tempErrl = new ERRORLOG::ErrlEntry(
-                                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          ISTEP_SBE_CENTAUR_INIT,
-                                          ISTEP_REPAIR_LOADER_RETRY_OCCURED,
-                                          l_counter,
-                                          TARGETING::get_huid(l_membuf_target));
-                    errlCommit( l_tempErrl, HWPF_COMP_ID );
-                }
-            }
         }
 
         // Freeing memory
