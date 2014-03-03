@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwas/proc_enable_reconfig/proc_enable_reconfig_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/proc_hwreconfig/proc_enable_reconfig/proc_enable_reconfig_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,12 +20,19 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_enable_reconfig_errors.xml,v 1.1 2013/11/08 16:27:51 bellows Exp $ -->
+<!-- $Id: proc_enable_reconfig_errors.xml,v 1.2 2014/02/19 13:45:27 bellows Exp $ -->
 <!-- Error definitions for proc_enable_reconfig procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_ENABLE_RECONFIG_UNSUPPORTED</rc>
     <description>Processor Hardware does not support reconfiguration loops.  For Venice and Murano, DD2.0 and greater hardware support this function</description>
+    <callout>
+      <target>PROC</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PROC</target>
+    </deconfigure>
   </hwpError>
 </hwpErrors>

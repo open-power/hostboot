@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/host_prd_hwreconfig/proc_enable_reconfig/proc_enable_reconfig.C $ */
+/* $Source: src/usr/hwpf/hwp/proc_hwreconfig/proc_enable_reconfig/proc_enable_reconfig.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_enable_reconfig.C,v 1.4 2013/11/13 17:21:51 bellows Exp $
+// $Id: proc_enable_reconfig.C,v 1.5 2014/02/19 13:45:23 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_enable_reconfig.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.5   | bellows  |17-FEB-14| Deconfig a proc if error found - SW246059
 //   1.4   | bellows  |13-NOV-13| Fixed up rc_ecmd problems from review
 //   1.3   | bellows  |11-NOV-13| Firmware review updates
 //   1.2   | bellows  |08-NOV-13| Simpified + added attributes
@@ -117,6 +118,7 @@ extern "C" {
       }
       else {
         FAPI_ERR("This processor cannot go through a reconfig loop. Please upgrade to > DD1\n");
+        const fapi::Target & PROC =  l_target_pu;
         FAPI_SET_HWP_ERROR(rc, RC_PROC_ENABLE_RECONFIG_UNSUPPORTED);
         return rc;
       }
@@ -254,6 +256,7 @@ extern "C" {
       }
       else {
         FAPI_ERR("This processor cannot go through a reconfig loop. Please upgrade to > DD1\n");
+        const fapi::Target & PROC =  l_target_pu;
         FAPI_SET_HWP_ERROR(rc, RC_PROC_ENABLE_RECONFIG_UNSUPPORTED);
         return rc;
       }
