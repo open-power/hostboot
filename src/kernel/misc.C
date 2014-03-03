@@ -298,6 +298,8 @@ namespace KernelMisc
         iv_caller->state = TASK_STATE_RUNNING;
         TaskManager::setCurrentTask(iv_caller);
 
+        //Issue sbe master workaround
+        InterruptMsgHdlr::issueSbeMboxWA();
     }
 
     void WinkleCore::nonactiveMainWork()

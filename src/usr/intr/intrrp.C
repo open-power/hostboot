@@ -656,6 +656,35 @@ void IntrRp::msgHandler()
                 }
                 break;
 
+            case MSG_INTR_ISSUE_SBE_MBOX_WA:
+                {
+                    //The SBE IPI injection on master winkle wakeup
+                    //can clobber a pending mailbox interrupt in the ICP
+                    //To workaround need to issue EOI on mailbox.  If
+                    //mbx intr is not hot this does nothing, if it is
+                    //then the EOI will cause intr to be represented
+
+                    //This is safe on FSPless since the PSI intr are
+                    //always setup on master chip
+                    uint64_t baseAddr = iv_baseAddr +
+                                        cpuOffsetAddr(iv_masterCpu);
+                    uint32_t * xirrAddress =
+                      reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
+
+                    //Generate the mailbox IRSN for this node
+                    uint32_t l_irsn = makeXISR(iv_masterCpu, ISN_FSI);
+                    l_irsn |= CPPR_MASK;  //set all CPPR bits - allow any INTR
+
+                    TRACFCOMP(g_trac_intr,
+                              "MBX SBE WA Issue EOI to %x",l_irsn);
+                    *xirrAddress = l_irsn;  //Issue EOI
+
+                    // Acknowlege msg
+                    msg->data[1] = 0;
+                    msg_respond(iv_msgQ, msg);
+                }
+                break;
+
             case MSG_INTR_SHUTDOWN:
                 {
                     TRACFCOMP(g_trac_intr,"Shutdown event received");

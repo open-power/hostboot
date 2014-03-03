@@ -208,3 +208,15 @@ MessageHandler::HandleResult InterruptMsgHdlr::handleResponse
     return UNHANDLED_RC;
 }
 
+
+void InterruptMsgHdlr::issueSbeMboxWA()
+{
+    if(cv_instance)
+    {
+        cv_instance->iv_lock.lock();
+        cv_instance->sendMessage(MSG_INTR_ISSUE_SBE_MBOX_WA,
+                     reinterpret_cast<void*>(MSG_INTR_ISSUE_SBE_MBOX_WA),
+                     NULL,NULL);
+        cv_instance->iv_lock.unlock();
+    }
+}

@@ -149,6 +149,12 @@ class InterruptMsgHdlr : public MessageHandler
          */
         static void sendIPI(uint64_t i_pir, uint8_t i_favor = 0x1);
 
+        /**
+         * Issue the sbe/mailbox workaround (issue a mbox EOI to mailbox)
+         *
+         */
+        static void issueSbeMboxWA();
+
     private:
 
         static InterruptMsgHdlr * cv_instance;

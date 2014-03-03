@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -61,6 +61,8 @@ enum msg_sys_types_t
 
     MSG_INTR_EXTERN,    //!< Msg sent from kernel to user space on ext intr
     MSG_INTR_ADD_CPU,   //!< Add cpu core, data[0] = cpuid (PIR)
+    MSG_INTR_ISSUE_SBE_MBOX_WA,   //!< Issue EOI to mailbox
+
 };
 
 // System-defined root queue types
