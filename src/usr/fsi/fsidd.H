@@ -198,6 +198,12 @@ class FsiDD
             uint16_t flags; ///< Special flags
         }; 
         FsiLinkId_t linkid; ///< Id for traces and error logs
+
+        FsiChipInfo_t() :
+          slave(NULL), master(NULL),
+        type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
+        port(0xFF), cascade(0), flags(0)
+        {};
     };
 
     /**

@@ -301,7 +301,13 @@ void getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &i_log,
  */
 errlHndl_t resetPib2Opb( TARGETING::Target* i_target )
 {
-    return Singleton<FsiDD>::instance().resetPib2Opb( i_target );
+    TRACFCOMP(g_trac_fsi, "FSI::resetPib2Opb(%.8X)>", TARGETING::get_huid(i_target) );
+    mutex_t* l_mutex = i_target
+      ->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
+    mutex_lock(l_mutex);
+    errlHndl_t errhdl = Singleton<FsiDD>::instance().resetPib2Opb( i_target );
+    mutex_unlock(l_mutex);
+    return errhdl;
 }
 
 
@@ -329,6 +335,7 @@ errlHndl_t FsiDD::read(TARGETING::Target* i_target,
         l_err = verifyPresent( i_target );
         if(l_err)
         {
+            TRACFCOMP(g_trac_fsi,"FsiDD::read> verifyPresent failed on i_target=%.8X,i_address=0x%llX", TARGETING::get_huid(i_target), i_address);
             // stick the address in here for debug
             FSI::UdOperation( i_target, i_address, true ).addToLog(l_err);
             break;
@@ -368,6 +375,7 @@ errlHndl_t FsiDD::write(TARGETING::Target* i_target,
         l_err = verifyPresent( i_target );
         if(l_err)
         {
+            TRACFCOMP(g_trac_fsi,"FsiDD::write> verifyPresent failed on i_target=%.8X,i_address=0x%llX", TARGETING::get_huid(i_target), i_address);
             // stick the address in here for debug
             FSI::UdOperation( i_target, i_address, false ).addToLog(l_err);
             break;
@@ -811,7 +819,6 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
 errlHndl_t FsiDD::resetPib2Opb( TARGETING::Target* i_target )
 {
     errlHndl_t errhdl = NULL;
-    TRACFCOMP(g_trac_fsi, "FsiDD::resetPib2Opb(%.8X)>", TARGETING::get_huid(i_target) );
 
     do {
         // Clear out OPB error
@@ -951,12 +958,12 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
         uint64_t opbaddr = genOpbScomAddr(i_addrInfo,OPB_REG_CMD);
 
         // atomic section >>
-        l_mutex
-          = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
         if( (iv_ffdcTask == 0)  // performance hack for typical case
             || (iv_ffdcTask != task_gettid()) )
         {
+            l_mutex = (i_addrInfo.opbTarg)
+              ->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
             mutex_lock(l_mutex);
             need_unlock = true;
         }
@@ -1042,12 +1049,12 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
         uint64_t opbaddr = genOpbScomAddr(i_addrInfo,OPB_REG_CMD);
 
         // atomic section >>
-        l_mutex = (i_addrInfo.opbTarg)->
-          getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
         if( (iv_ffdcTask == 0)  // performance hack for typical case
             || (iv_ffdcTask != task_gettid()) )
         {
+            l_mutex = (i_addrInfo.opbTarg)
+              ->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
             mutex_lock(l_mutex);
             need_unlock = true;
         }
@@ -1118,8 +1125,13 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
     {
         l_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
     }
-    else
+    else if( i_addrInfo.accessInfo.type == TARGETING::FSI_MASTER_TYPE_MFSI )
     {
+        l_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
+    }
+    else //NO_MASTER, meaning that we only care about OPB stuff
+    {
+        l_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
         l_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
     }
 
@@ -1224,7 +1236,15 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
             FsiChipInfo_t fsi_info = getFsiInfo( i_addrInfo.fsiTarg );
             uint64_t ctl_reg = getControlReg(fsi_info.type);
             uint32_t mesrb0_data = 0;
-            tmp_err = read( i_addrInfo.accessInfo.master,
+
+            // check if this operation is already targeted at the master
+            TARGETING::Target* mesrb0_targ = i_addrInfo.accessInfo.master;
+            if( mesrb0_targ == NULL )
+            {
+                mesrb0_targ = iv_master;
+            }
+            TRACFCOMP( g_trac_fsi, "Reading MESRB0 from %.8X", TARGETING::get_huid(mesrb0_targ) );
+            tmp_err = read( mesrb0_targ,
                             ctl_reg|FSI_MESRB0_1D0,
                             &mesrb0_data );
             if( tmp_err )
@@ -1331,7 +1351,8 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
 
 
         //Reset the port to clear up the residual errors
-        errorCleanup( i_addrInfo, FSI::RC_ERROR_IN_MAEB );
+        tmp_err = errorCleanup( i_addrInfo, FSI::RC_ERROR_IN_MAEB );
+        if(tmp_err) { delete tmp_err; }
 
         //MAGIC_INSTRUCTION(MAGIC_BREAK);
 
@@ -1354,21 +1375,26 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
     enum { MAX_OPB_TIMEOUT_NS = 10*NS_PER_MSEC }; //=10ms
 
     do {
+        // poll for complete
+        uint32_t read_data[2];
+        size_t scom_size = sizeof(uint64_t);
+        uint64_t opbaddr = genOpbScomAddr(i_addrInfo,OPB_REG_STAT);
+
         // Do not look at error bits for the Master we're not using
         uint32_t l_opbErrorMask = iv_opbErrorMask;
         if( i_addrInfo.accessInfo.type == TARGETING::FSI_MASTER_TYPE_CMFSI )
         {
             l_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
         }
-        else
+        else if( i_addrInfo.accessInfo.type == TARGETING::FSI_MASTER_TYPE_MFSI )
         {
             l_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
         }
-
-        // poll for complete
-        uint32_t read_data[2];
-        size_t scom_size = sizeof(uint64_t);
-        uint64_t opbaddr = genOpbScomAddr(i_addrInfo,OPB_REG_STAT);
+        else //NO_MASTER, meaning that we only care about OPB stuff
+        {
+            l_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
+            l_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
+        }
 
         uint64_t elapsed_time_ns = 0;
         do
@@ -1671,7 +1697,9 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
         }
 
         //powerbus is alive
-        if( (io_addrInfo.accessInfo.master)->
+        if( false //@fixme - RTC:98898 -always use proc0
+            &&
+            (io_addrInfo.accessInfo.master)->
             getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom
             &&
             // do not use direct mastering on Brazos for now
@@ -2391,7 +2419,7 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
         l_err = read( i_addrInfo.accessInfo.master, maeb_reg, &maeb_data );
         if( !l_err && (maeb_data != 0) )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::checkForErrors> After op to %.8X, MAEB=%lX (Master=%.8X)", TARGETING::get_huid(i_addrInfo.fsiTarg), maeb_data, TARGETING::get_huid(i_addrInfo.opbTarg) );
+            TRACFCOMP( g_trac_fsi, "FsiDD::checkForErrors> After op to %.8X, MAEB=%.8X (Master=%.8X)", TARGETING::get_huid(i_addrInfo.fsiTarg), maeb_data, TARGETING::get_huid(i_addrInfo.opbTarg) );
             /*@
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_CHECKFORERRORS
@@ -2467,22 +2495,27 @@ errlHndl_t FsiDD::verifyPresent( TARGETING::Target* i_target )
                                         TARGETING::get_huid(i_target),
                                         TARGETING::get_huid(chipinfo.master)));
         l_err->collectTrace(FSI_COMP_NAME);
+
         // log the current MLEVP which contains the detected slave
-        uint32_t mlevp_data = 0;
-        errlHndl_t tmp_err = read( chipinfo.master,
-                                   FSI_MLEVP0_018,
-                                   &mlevp_data );
-        if( tmp_err )
+        //  only if we aren't in the middle of FFDC collection
+        uint32_t mlevp_data = 0x12345678;
+        if( iv_ffdcTask == 0 )
         {
-            delete tmp_err;
+            errlHndl_t tmp_err = read( chipinfo.master,
+                                       FSI_MLEVP0_018,
+                                       &mlevp_data );
+            if( tmp_err )
+            {
+                delete tmp_err;
+                mlevp_data = 0x12345678;
+            }
         }
-        else
-        {
-            ERRORLOG::ErrlUserDetailsLogRegister ffdc(chipinfo.master);
-            ffdc.addDataBuffer( &mlevp_data, sizeof(mlevp_data),
-                                DEVICE_FSI_ADDRESS(FSI_MLEVP0_018));
-            ffdc.addToLog(l_err);
-        }
+
+        ERRORLOG::ErrlUserDetailsLogRegister ffdc(chipinfo.master);
+        ffdc.addDataBuffer( &mlevp_data, sizeof(mlevp_data),
+                            DEVICE_FSI_ADDRESS(FSI_MLEVP0_018));
+        ffdc.addToLog(l_err);
+
         FSI::UdPresence( i_target ).addToLog(l_err);
     }
 
