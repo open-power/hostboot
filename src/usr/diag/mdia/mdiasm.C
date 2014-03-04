@@ -772,7 +772,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             break;
         }
 
-        if( TARGETING::MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE
+        if( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
             & iv_globals.mfgPolicy )
         {
             // For MNFG mode, check CE also
@@ -1043,11 +1043,11 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         if(( INITSERVICE::isShutdownRequested() ) &&
            (( COMMAND_COMPLETE == eventType ) ||
             ( COMMAND_STOPPED  == eventType )) &&
-           ! (( MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+           ! (( MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
                 & iv_globals.mfgPolicy) ||
-              ( MNFG_FLAG_BIT_MNFG_ENABLE_STANDARD_PATTERN_TEST
+              ( MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST
                 & iv_globals.mfgPolicy) ||
-              ( MNFG_FLAG_BIT_MNFG_ENABLE_MINIMUM_PATTERN_TEST
+              ( MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST
                 & iv_globals.mfgPolicy)))
         {
             MDIA_FAST("sm: shutdown requested, overrding event "

@@ -52,9 +52,6 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
-  <!-- TODO: RTC 89378 remove MNFG_IPL_MEMORY_CE_CHECKINGE once
-             the attributes_types update is included in the fsp build
-             to keep the defintions in sync -->
   <attribute>
     <id>ATTR_MNFG_FLAGS</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -69,7 +66,6 @@
         MNFG_AVP_ENABLE                     = 0x0000000000000002,
         MNFG_HDAT_AVP_ENABLE                = 0x0000000000000004,
         MNFG_SRC_TERM                       = 0x0000000000000008,
-        MNFG_IPL_MEMORY_CE_CHECKINGE        = 0x0000000000000010,
         MNFG_IPL_MEMORY_CE_CHECKING         = 0x0000000000000010,
         MNFG_FAST_BACKGROUND_SCRUB          = 0x0000000000000020,
         MNFG_TEST_DRAM_REPAIRS              = 0x0000000000000040,
