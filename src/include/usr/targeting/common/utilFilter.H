@@ -130,6 +130,24 @@ void getChildChiplets(TARGETING::TargetHandleList & o_vector,
 
 /**
  * @brief Populate the o_vector with target object pointers which are
+ *        affinity children of the input target and filters based on a
+ *        functional state
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_target, the target for retrieving affinity-parent targets
+ * @parm[in]  i_class, the class of the target to be obtained
+ * @parm[in]  i_type, the type of the target to be obtained
+ * @parm[in]  i_functional, set to true to return only functional targets
+ * @parm[in]  i_state, Selection filter based on ResourceState enum
+ *
+ * @return N/A
+ */
+void getChildAffinityTargetsByState ( TARGETING::TargetHandleList& o_vector,
+           const Target * i_target, CLASS i_class, TYPE i_type,
+           ResourceState i_state );
+
+/**
+ * @brief Populate the o_vector with target object pointers which are
  *        affinity children of the input target
  *
  * @parm[out] o_vector, reference of vector of target pointers.
@@ -140,9 +158,33 @@ void getChildChiplets(TARGETING::TargetHandleList & o_vector,
  *
  * @return N/A
  */
+inline
 void getChildAffinityTargets ( TARGETING::TargetHandleList& o_vector,
-           const Target * i_target, CLASS i_class, TYPE i_type, 
-           bool i_functional = true );
+           const Target * i_target, CLASS i_class, TYPE i_type,
+           bool i_functional = true )
+{
+    getChildAffinityTargetsByState(o_vector, i_target, i_class, i_type,
+                                   i_functional ? UTIL_FILTER_FUNCTIONAL :
+                                                  UTIL_FILTER_ALL);
+}
+
+/**
+ * @brief Populate the o_vector with target object pointers which are
+ *        affinity parents of the input target and filters based on a
+ *        functional state
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_target, the target for retrieving affinity-parent targets
+ * @parm[in]  i_class, the class of the target to be obtained
+ * @parm[in]  i_type, the type of the target to be obtained
+ * @parm[in]  i_functional, set to true to return only functional targets
+ * @parm[in]  i_state, Selection filter based on ResourceState enum
+ *
+ * @return N/A
+ */
+void getParentAffinityTargetsByState ( TARGETING::TargetHandleList& o_vector,
+           const Target * i_target, CLASS i_class, TYPE i_type,
+           ResourceState i_state );
 
 /**
  * @brief Populate the o_vector with target object pointers which are
@@ -156,9 +198,15 @@ void getChildAffinityTargets ( TARGETING::TargetHandleList& o_vector,
  *
  * @return N/A
  */
+inline
 void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
-           const Target * i_target, CLASS i_class, TYPE i_type, 
-           bool i_functional = true );
+           const Target * i_target, CLASS i_class, TYPE i_type,
+           bool i_functional = true )
+{
+    getParentAffinityTargetsByState(o_vector, i_target, i_class, i_type,
+                                    i_functional ? UTIL_FILTER_FUNCTIONAL :
+                                                   UTIL_FILTER_ALL);
+}
 
 /**
  * @brief return the parent chip target of the specified input chiplet
@@ -210,7 +258,7 @@ void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
 
 /**
  * @brief Returns the list of targets which is an immediate peer of the source
- * target provided by the user. 
+ * target provided by the user.
  *
  * @par Detailed Description:
  *
@@ -245,7 +293,7 @@ void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
  *            has PEER Target Attribute, as provided by user.
  *            i_pPeerFilter Pointer to a predicate to be evaluated against each
  *            candidate target (as determined by the source target, type, and
- *            recursion level parameters). 
+ *            recursion level parameters).
  * @param[in] i_pResultFilter to be applied on self and the Parent chain of
  *            Peer Targets of the source target & target leaf provided by user
  *            or evaluated on the basis of the i_pPeerFilter given by user.

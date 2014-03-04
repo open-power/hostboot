@@ -277,16 +277,16 @@ void* host_prd_hwreconfig( void *io_pArgs )
             break;
         }
 
-        // Lists for functional MCS/Centaurs
-        TARGETING::TargetHandleList l_fncMcsList;
-        TARGETING::TargetHandleList l_fncCentaurList;
+        // Lists for present MCS/Centaurs
+        TARGETING::TargetHandleList l_presMcsList;
+        TARGETING::TargetHandleList l_presCentaurList;
 
-        // find all functional MCS chiplets of all procs
-        getChipletResources(l_fncMcsList, TYPE_MCS, UTIL_FILTER_FUNCTIONAL);
+        // find all present MCS chiplets of all procs
+        getChipletResources(l_presMcsList, TYPE_MCS, UTIL_FILTER_PRESENT);
 
         for (TargetHandleList::const_iterator
-             l_mcs_iter = l_fncMcsList.begin();
-             l_mcs_iter != l_fncMcsList.end();
+             l_mcs_iter = l_presMcsList.begin();
+             l_mcs_iter != l_presMcsList.end();
              ++l_mcs_iter)
         {
             // make a local copy of the MCS target
@@ -295,22 +295,22 @@ void* host_prd_hwreconfig( void *io_pArgs )
             TARGETING::ATTR_HUID_type l_currMcsHuid =
                 TARGETING::get_huid(l_pMcs);
 
-            // Find all the functional Centaurs that are associated with this MCS
-            getChildAffinityTargets(l_fncCentaurList, l_pMcs,
-                           CLASS_CHIP, TYPE_MEMBUF);
+            // Find all the present Centaurs that are associated with this MCS
+            getChildAffinityTargetsByState(l_presCentaurList, l_pMcs,
+                           CLASS_CHIP, TYPE_MEMBUF, UTIL_FILTER_PRESENT);
 
             // There will always be 1 Centaur associated with a MCS.
-            if(1 != l_fncCentaurList.size())
+            if(1 != l_presCentaurList.size())
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "No functional Centaurs found for "
+                        "No present Centaurs found for "
                         "MCS target HUID %.8X , skipping this MCS",
                         l_currMcsHuid);
                 continue;
             }
 
             // Make a local copy
-            const TARGETING::Target * l_pCentaur = l_fncCentaurList[0];
+            const TARGETING::Target * l_pCentaur = l_presCentaurList[0];
             // Retrieve HUID of current Centaur
             TARGETING::ATTR_HUID_type l_currCentaurHuid =
                 TARGETING::get_huid(l_pCentaur);

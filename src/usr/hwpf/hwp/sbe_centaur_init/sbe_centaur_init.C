@@ -104,9 +104,28 @@ void*    call_sbe_centaur_init( void *io_pArgs )
          l_membuf_iter != l_membufTargetList.end();
          ++l_membuf_iter)
     {
-        //find SBE image in PNOR
-        TARGETING::Target* l_membuf_target = *l_membuf_iter;
 
+        TARGETING::Target* l_membuf_target = *l_membuf_iter;
+        HwasState l_hwasState = l_membuf_target->getAttr<ATTR_HWAS_STATE>();
+
+        TARGETING::ATTR_MSS_INIT_STATE_type  l_attr_mss_init_state=
+                l_membuf_target->getAttr<TARGETING::ATTR_MSS_INIT_STATE>();
+
+        //run SBE init on functional OR previously functional centaurs
+        if ( l_hwasState.functional ||
+            (l_hwasState.present &&
+            (l_attr_mss_init_state != ENUM_ATTR_MSS_INIT_STATE_COLD)) )
+        {
+            l_membuf_target->setAttr<TARGETING::ATTR_MSS_INIT_STATE>(
+                                 ENUM_ATTR_MSS_INIT_STATE_COLD);
+        }
+        else
+        {
+            //go to the next membuf in the list because this present  membuf is
+            //not functional or has not gone through an IPL once
+            continue;
+        }
+        //find SBE image in PNOR
         uint8_t cur_ec = (*l_membuf_iter)->getAttr<TARGETING::ATTR_EC>();
 
 

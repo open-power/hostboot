@@ -262,8 +262,11 @@ extern "C" {
       }
     }
 
-    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_COLD; // who knows where we might end on another pass through
+    /*
+    // who knows where we might end on another pass through
+    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_COLD;
     rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target_cen, l_attr_mss_init_state);
+    */
     return rc;
   }
 

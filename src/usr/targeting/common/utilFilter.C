@@ -309,63 +309,95 @@ void getChildChiplets( TARGETING::TargetHandleList& o_vector,
     }
 }
 
-void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
-                 const Target * i_target, CLASS i_class, TYPE i_type,
-                 TARGETING::TargetService::ASSOCIATION_TYPE i_association,
-                  bool i_functional )
+void getAffinityTargets (TargetHandleList& o_vector, const Target * i_target,
+                         CLASS i_class, TYPE i_type,
+                         ResourceState i_state,
+                         TargetService::ASSOCIATION_TYPE i_association)
 {
+    #define TARG_FN "getAffinityTargets(...)"
+
     //  find all the targets that are affinity-associated with i_target
     TARGETING::PredicateCTM l_targetFilter(i_class, i_type);
 
     o_vector.clear();
-    if (i_functional)
+    switch(i_state)
     {
-        //  Use PredicateIsFunctional to filter only functional chips
-        TARGETING::PredicateIsFunctional l_functional;
-        TARGETING::PredicatePostfixExpr l_functionalTargets;
-        l_functionalTargets.push(&l_targetFilter).push(&l_functional).And();
-        TARGETING::targetService().getAssociated(
-                o_vector,
-                i_target,
-                i_association,
-                TARGETING::TargetService::ALL,
-                &l_functionalTargets );
-    }
-    else
-    {
-        TARGETING::targetService().getAssociated(
+        case UTIL_FILTER_ALL:
+        {
+            TARGETING::targetService().getAssociated(
                 o_vector,
                 i_target,
                 i_association,
                 TARGETING::TargetService::ALL,
                 &l_targetFilter );
+
+            break;
+        }
+        case UTIL_FILTER_PRESENT:
+        {
+            // Get all present chips or chiplets
+            // Present predicate
+            PredicateHwas l_predPres;
+            l_predPres.present(true);
+            // Type predicate
+            // Set up compound predicate
+            TARGETING::PredicatePostfixExpr l_presentTargets;
+            l_presentTargets.push(&l_targetFilter).push(&l_predPres).And();
+            // Apply the filter through all targets
+            TARGETING::targetService().getAssociated(
+                o_vector,
+                i_target,
+                i_association,
+                TARGETING::TargetService::ALL,
+                &l_presentTargets );
+
+            break;
+        }
+        case UTIL_FILTER_FUNCTIONAL:
+        {
+            //  Use PredicateIsFunctional to filter only functional chips
+            TARGETING::PredicateIsFunctional l_functional;
+            TARGETING::PredicatePostfixExpr l_functionalTargets;
+            l_functionalTargets.push(&l_targetFilter).push(&l_functional).And();
+            TARGETING::targetService().getAssociated(
+                    o_vector,
+                    i_target,
+                    i_association,
+                    TARGETING::TargetService::ALL,
+                    &l_functionalTargets );
+            break;
+        }
+        default:
+            TARG_ASSERT(0, TARG_LOC "Invalid functional state used");
+            break;
     }
+    #undef TARG_FN
 }
 
-void getChildAffinityTargets(
+void getChildAffinityTargetsByState(
           TARGETING::TargetHandleList& o_vector,
     const Target*                      i_target,
           CLASS                        i_class,
           TYPE                         i_type,
-          bool                         i_functional)
+          ResourceState                i_state )
+
 {
-    getAffinityTargets (o_vector, i_target, i_class, i_type,
-        TARGETING::TargetService::CHILD_BY_AFFINITY,
-        i_functional);
+
+    getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
+                       TargetService::CHILD_BY_AFFINITY);
 }
 
 
-void getParentAffinityTargets(
+void getParentAffinityTargetsByState(
           TARGETING::TargetHandleList& o_vector,
     const Target*                      i_target,
           CLASS                        i_class,
           TYPE                         i_type,
-          bool                         i_functional )
+          ResourceState                i_state )
 {
 
-    getAffinityTargets (o_vector, i_target, i_class, i_type,
-        TARGETING::TargetService::PARENT_BY_AFFINITY,
-        i_functional);
+    getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
+                       TargetService::PARENT_BY_AFFINITY);
 }
 
 const Target * getParentChip( const Target * i_pChiplet )
