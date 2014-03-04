@@ -480,7 +480,6 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                     // call it out and set it in VPD.
 
                     MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
-                    memmru.setDramSpared();
                     io_sc.service_data->SetCallout( memmru );
 
                     io_sc.service_data->SetServiceCall();
@@ -592,7 +591,6 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Callout spare DRAM.
         MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
-        memmru.setDramSpared();
         io_sc.service_data->SetCallout( memmru );
 
         // The spare DRAM is bad, so set it in VPD. At this point, the chip mark

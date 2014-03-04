@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -57,14 +57,6 @@ class CenMark
     CenMark( const CenSymbol & i_symbolMark, const CenSymbol & i_chipMark ) :
         iv_symbolMark(i_symbolMark), iv_chipMark(i_chipMark)
     {}
-
-    /** @brief Constructor from components */
-    CenMark( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-             uint8_t i_symbolMark, uint8_t i_chipMark )
-    {
-        iv_symbolMark = CenSymbol::fromSymbol( i_mba, i_rank, i_symbolMark );
-        iv_chipMark   = CenSymbol::fromSymbol( i_mba, i_rank, i_chipMark   );
-    }
 
   public: // functions
 

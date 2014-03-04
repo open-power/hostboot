@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -99,8 +99,9 @@ union MemMruMeld
         uint32_t dramSpared : 1; ///< True if symbol is on spared DRAM
         uint32_t symbol     : 7; ///< Symbol or SpecialCallout
 
+        uint32_t eccSpared  : 1; ///< True if symbol is on ECC DRAM
         // TODO: RTC 67376 Check if width for wiring type is enough
-        uint32_t wiringType : 4; ///< Wiring type
+        uint32_t wiringType : 3; ///< Wiring type
         uint32_t srankValid : 1; ///< TRUE if slave rank is valid
         uint32_t srank      : 3; ///< Slave rank (0-7)
 #else
@@ -108,7 +109,8 @@ union MemMruMeld
         // simulator.
         uint32_t srank      : 3;
         uint32_t srankValid : 1;
-        uint32_t wiringType : 4;
+        uint32_t wiringType : 3;
+        uint32_t eccSpared  : 1;
         uint32_t symbol     : 7;
         uint32_t dramSpared : 1;
         uint32_t mrank      : 3;

@@ -89,6 +89,15 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 
         bool isX4 = isDramWidthX4(mbaTrgt);
 
+        // Get the current spares on this rank.
+        CenSymbol sp0, sp1, ecc;
+        o_rc = mssGetSteerMux( mbaTrgt, i_rank, sp0, sp1, ecc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed." );
+            break;
+        }
+
         // Use this map to keep track of the total counts per DRAM.
         typedef std::map<uint32_t, uint32_t> DramCount;
         DramCount dramCounts;
@@ -137,6 +146,21 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                     }
                     else
                     {
+                        // Check if this symbol is on any of the spares.
+                        if ( ( sp0.isValid() &&
+                               (sp0.getDram() == symData.symbol.getDram()) ) ||
+                             ( sp1.isValid() &&
+                               (sp1.getDram() == symData.symbol.getDram()) ) )
+                        {
+                            symData.symbol.setDramSpared();
+                        }
+                        if ( ecc.isValid() &&
+                             (ecc.getDram() == symData.symbol.getDram()) )
+                        {
+                            symData.symbol.setEccSpared();
+                        }
+
+                        // Add the symbol to the list.
                         symData.count = count;
                         o_maintStats.push_back( symData );
                     }
@@ -162,6 +186,17 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 
         uint8_t sym = CenSymbol::dram2Symbol( highestEntry->first, isX4 );
         o_highestDram = CenSymbol::fromSymbol( mbaTrgt, i_rank, sym );
+
+        // Check if this symbol is on any of the spares.
+        if ( ( sp0.isValid() && (sp0.getDram() == o_highestDram.getDram()) ) ||
+             ( sp1.isValid() && (sp1.getDram() == o_highestDram.getDram()) ) )
+        {
+            o_highestDram.setDramSpared();
+        }
+        if ( ecc.isValid() && (ecc.getDram() == o_highestDram.getDram()) )
+        {
+            o_highestDram.setEccSpared();
+        }
 
     } while(0);
 

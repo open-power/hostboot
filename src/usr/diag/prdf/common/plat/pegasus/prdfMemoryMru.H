@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2013              */
+/* COPYRIGHT International Business Machines Corp. 2008,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -70,9 +70,6 @@ class MemoryMru
      */
     MemoryMru( TARGETING::TargetHandle_t i_mbaTarget, const CenRank & i_rank,
                MemoryMruData::Callout i_specialCallout );
-
-    /** @brief Indicates that the symbol actually resides on the DRAM spare. */
-    void setDramSpared() { iv_memMruMeld.s.dramSpared = 1; }
 
   public: // functions
 

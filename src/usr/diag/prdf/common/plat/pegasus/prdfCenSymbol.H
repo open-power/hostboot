@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -73,7 +73,8 @@ class CenSymbol
      */
     CenSymbol() :
         iv_mbaTarget(NULL), iv_rank(), iv_wiringType(WIRING_INVALID),
-        iv_symbol(SYMBOLS_PER_RANK), iv_pins(NO_SYMBOL_DQS)
+        iv_symbol(SYMBOLS_PER_RANK), iv_pins(NO_SYMBOL_DQS), iv_x4Dram(false),
+        iv_isDramSpared(false), iv_isEccSpared(false)
     {}
 
   private: // constructor
@@ -85,7 +86,8 @@ class CenSymbol
                WiringType i_wiringType, uint8_t i_symbol, uint8_t i_pins,
                bool i_x4Dram ) :
         iv_mbaTarget(i_mba), iv_rank(i_rank), iv_wiringType(i_wiringType),
-        iv_symbol(i_symbol), iv_pins(i_pins), iv_x4Dram(i_x4Dram)
+        iv_symbol(i_symbol), iv_pins(i_pins), iv_x4Dram(i_x4Dram),
+        iv_isDramSpared(false), iv_isEccSpared(false)
     {}
 
   public: // functions
@@ -191,6 +193,18 @@ class CenSymbol
     /** @return TRUE this symbol is on a x4 DRAM, FALSE otherwise. */
     bool isX4Dram() const { return iv_x4Dram; }
 
+    /** @return Marks this symbol as steered to a DRAM spare. */
+    void setDramSpared() { iv_isDramSpared = true; }
+
+    /** @return Marks this symbol as steered to the ECC spare. */
+    void setEccSpared() { iv_isEccSpared = true; }
+
+    /** @return TRUE this symbol is on a DRAM spare, FALSE otherwise. */
+    bool isDramSpared() const { return iv_isDramSpared; }
+
+    /** @return TRUE this symbol is on the ECC spare, FALSE otherwise. */
+    bool isEccSpared() const { return iv_isEccSpared; }
+
     /** @return The symbol of the given Centaur DQ and port select. */
     static uint8_t cenDq2Symbol( uint8_t i_CenDq, uint8_t i_ps );
 
@@ -256,6 +270,8 @@ class CenSymbol
     uint8_t iv_symbol;                      ///< This symbol's numerical value.
     uint8_t iv_pins;                        ///< See enum DqMask.
     bool iv_x4Dram;                         ///< TRUE x4 DRAM, FALSE x8 DRAM.
+    bool iv_isDramSpared; ///< TRUE if symbol resides on DRAM spare.
+    bool iv_isEccSpared;  ///< TRUE if symbol resides on ECC spare.
 };
 
 } // end namespace PRDF

@@ -556,6 +556,25 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                 break;
             }
 
+            // Check if this symbol is on any of the spares.
+            CenSymbol sp0, sp1, ecc;
+            l_rc = mssGetSteerMux( mbaTrgt, rank, sp0, sp1, ecc );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed. HUID: 0x%08x "
+                        "rank: %d", getHuid(mbaTrgt), rank.getMaster() );
+                break;
+            }
+            if ( (sp0.isValid() && (sp0.getDram() == symbol.getDram())) ||
+                 (sp1.isValid() && (sp1.getDram() == symbol.getDram())) )
+            {
+                symbol.setDramSpared();
+            }
+            if ( ecc.isValid() && (ecc.getDram() == symbol.getDram()) )
+            {
+                symbol.setEccSpared();
+            }
+
             // Add the DIMM to the callout list
             MemoryMru memmru ( mbaTrgt, rank, symbol );
             i_sc.service_data->SetCallout( memmru );

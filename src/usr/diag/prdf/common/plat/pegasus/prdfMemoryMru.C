@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2013              */
+/* COPYRIGHT International Business Machines Corp. 2008,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -133,10 +133,13 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                 break;
             }
 
+            if ( iv_memMruMeld.s.dramSpared ) iv_symbol.setDramSpared();
+            if ( iv_memMruMeld.s.eccSpared  ) iv_symbol.setEccSpared();
+
             // Validation checks
             CenSymbol::WiringType type = iv_symbol.getWiringType();
 
-            if ( type != CenSymbol::WiringType (iv_memMruMeld.s.wiringType))
+            if ( type != CenSymbol::WiringType(iv_memMruMeld.s.wiringType) )
             {
                 PRDF_ERR( PRDF_FUNC"Wiring Type does not match type:%u "
                                     "iv_memMruMeld.s.wiringType :%u",
@@ -201,7 +204,8 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         iv_memMruMeld.s.srankValid = iv_rank.isSlaveValid();
         iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
         iv_memMruMeld.s.pins       = iv_symbol.getPins();
-        iv_memMruMeld.s.dramSpared = 0; // manually set by setDramSpared()
+        iv_memMruMeld.s.dramSpared = iv_symbol.isDramSpared() ? 1 : 0;
+        iv_memMruMeld.s.eccSpared  = iv_symbol.isEccSpared()  ? 1 : 0;
         iv_memMruMeld.s.wiringType = iv_symbol.getWiringType();
 
         // If the code gets to this point the MemoryMru is valid.
@@ -306,6 +310,7 @@ TargetHandleList MemoryMru::getCalloutList() const
         {
             // Add DIMM represented by symbol
             uint8_t ps = iv_symbol.getPortSlct();
+            if ( iv_memMruMeld.s.eccSpared ) ps = 1; // Adjust for ECC spare
             o_list = CalloutUtil::getConnectedDimms( iv_mbaTarget,
                                                      iv_rank, ps );
         }

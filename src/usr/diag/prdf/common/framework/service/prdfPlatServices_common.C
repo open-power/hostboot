@@ -413,23 +413,55 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
     int32_t o_rc = SUCCESS;
 
-    errlHndl_t errl = NULL;
-
-    uint8_t symbolMark, chipMark;
-    PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mba),
-                      i_rank.getMaster(), symbolMark, chipMark );
-
-    if ( NULL != errl )
+    do
     {
-        PRDF_ERR( PRDF_FUNC"mss_get_mark_store() failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_mba), i_rank.getMaster() );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-    else
-    {
-        o_mark = CenMark( i_mba, i_rank, symbolMark, chipMark );
-    }
+        errlHndl_t errl = NULL;
+        uint8_t symbolMark, chipMark;
+        PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mba),
+                          i_rank.getMaster(), symbolMark, chipMark );
+
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC"mss_get_mark_store() failed. HUID: 0x%08x "
+                      "rank: %d", getHuid(i_mba), i_rank.getMaster() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+        CenSymbol sm = CenSymbol::fromSymbol( i_mba, i_rank, symbolMark );
+        CenSymbol cm = CenSymbol::fromSymbol( i_mba, i_rank, chipMark   );
+
+        // Check if the chip or symbol mark are on any of the spares.
+        CenSymbol sp0, sp1, ecc;
+        o_rc = mssGetSteerMux( i_mba, i_rank, sp0, sp1, ecc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed. HUID: 0x%08x "
+                      "rank: %d", getHuid(i_mba), i_rank.getMaster() );
+            break;
+        }
+
+        if ( sp0.isValid() )
+        {
+            if ( sp0.getDram() == sm.getDram() ) sm.setDramSpared();
+            if ( sp0.getDram() == cm.getDram() ) cm.setDramSpared();
+        }
+
+        if ( sp1.isValid() )
+        {
+            if ( sp1.getDram() == sm.getDram() ) sm.setDramSpared();
+            if ( sp1.getDram() == cm.getDram() ) cm.setDramSpared();
+        }
+
+        if ( ecc.isValid() )
+        {
+            if ( ecc.getDram() == sm.getDram() ) sm.setEccSpared();
+            if ( ecc.getDram() == cm.getDram() ) cm.setEccSpared();
+        }
+
+        o_mark = CenMark( sm, cm );
+
+    } while (0);
 
     return o_rc;
 
@@ -519,6 +551,10 @@ int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
         o_port0Spare = CenSymbol::fromSymbol( i_mba, i_rank, port0Spare );
         o_port1Spare = CenSymbol::fromSymbol( i_mba, i_rank, port1Spare );
         o_eccSpare   = CenSymbol::fromSymbol( i_mba, i_rank, eccSpare   );
+
+        if ( o_port0Spare.isValid() ) o_port0Spare.setDramSpared();
+        if ( o_port1Spare.isValid() ) o_port1Spare.setDramSpared();
+        if ( o_eccSpare.isValid()   ) o_eccSpare.setEccSpared();
     }
 
     return o_rc;

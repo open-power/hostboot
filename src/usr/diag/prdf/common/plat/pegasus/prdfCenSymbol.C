@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -293,7 +293,7 @@ int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
                               uint8_t i_dimmDq, uint8_t i_portSlct,
                               uint8_t & o_symbol )
 {
-    #define PRDF_FUNC "[CenSymbol::fromDq] "
+    #define PRDF_FUNC "[CenSymbol::getSymbol] "
 
     int32_t o_rc = SUCCESS;
 
