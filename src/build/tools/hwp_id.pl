@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -48,7 +48,8 @@ use constant SHOW_ONLYMISS   => 0x40;
 
 # directories that we'll check for files:
 my @dirList = (
-    "src/usr/hwpf/hwp",             # hostboot
+    "src/usr/hwpf",                 # hostboot
+    "src/include/usr/hwpf",         # hostboot
     "src/usr/pore/poreve/model",    # hostboot
     "src/hwsv/server/hwpf/hwp",     # fsp, should be full tree
     "src/base.pgm/HostServices/hwpf/hwp",       # hostservices
@@ -406,7 +407,7 @@ sub findIdVersion
 ################################################################################
 #
 # checkDirs - find hwp files that should contain $Id:
-#  filetypes .C .c .H .h .xml .define .initfile .attributes
+#  filetypes .C .c .H .h .xml .define .initfile .attributes .pl
 # and prints out their filename and version from the $Id: string.
 # This recursively searches the input directory passed in for all files.
 #
@@ -438,7 +439,8 @@ sub checkDirs
             ($l_entry =~ /\.xml$/) ||
             ($l_entry =~ /\.define$/) ||
             ($l_entry =~ /\.attributes$/) ||
-            ($l_entry =~ /\.initfile$/))
+            ($l_entry =~ /\.initfile$/) ||
+            ($l_entry =~ /\.pl$/))
         {
             findIdVersion($full_path);
         }
