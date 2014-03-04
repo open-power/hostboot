@@ -500,10 +500,10 @@ errlHndl_t PnorRP::readTOC()
             ffs_hb_user_t* ffsUserData = NULL;
 
             //Walk through all the entries in the table and parse the data.
-            ffs_entry* cur_entry = (l_ffs_hdr->entries);
-
             for(uint32_t i=0; i<l_ffs_hdr->entry_count; i++)
             {
+                ffs_entry* cur_entry = (&l_ffs_hdr->entries[i]);
+
                 TRACUCOMP(g_trac_pnor, "PnorRP::readTOC:  Entry %d, name=%s, pointer=0x%X", i, cur_entry->name, (uint64_t)cur_entry);
 
                 uint32_t secId = PNOR::INVALID_SECTION;
@@ -603,7 +603,6 @@ errlHndl_t PnorRP::readTOC()
                         INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
                     }
                 }
-                cur_entry++;
             }
 
             //keep these traces here until PNOR is rock-solid
