@@ -105,10 +105,6 @@ void devTree::initialize(uint64_t i_addr, size_t i_maxSize, bool i_virtual)
     dtOffset_t rootNode = findNode("/");
     addPropertyCell32(rootNode, "#address-cells", 2);
     addPropertyCell32(rootNode, "#size-cells", 2);
-    addPropertyString(rootNode, "compatible", "ibm,powernv");
-
-    //TODO RTC:88056 - store model type in attributes?
-    addPropertyString(rootNode, "model", "rhesus");
 
     //"Get" the phandle -- this will add one to root node as
     //it doesn't already have one

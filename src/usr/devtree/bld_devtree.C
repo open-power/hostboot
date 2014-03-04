@@ -588,6 +588,25 @@ void load_hbrt_image(uint64_t& io_address)
     }
 }
 
+errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
+{
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
+    errlHndl_t errhdl = NULL;
+
+    dtOffset_t rootNode = i_dt->findNode("/");
+
+    /* Add compatibility node */
+    i_dt->addPropertyString(rootNode, "compatible", "ibm,powernv");
+
+    /* Add system model node */
+    //TODO RTC:88056 - store model type in attributes?
+    i_dt->addPropertyString(rootNode, "model", "rhesus");
+
+    return errhdl;
+}
+
 
 errlHndl_t bld_fdt_cpu(devTree * i_dt,
                        std::vector<uint64_t>& o_homerRegions,
@@ -900,6 +919,11 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
 
         TRACFCOMP( g_trac_devtree, "---devtree init---" );
         dt->initialize(i_dtAddr, i_dtSize, devTreeVirtual);
+        errhdl = bld_fdt_system(dt, i_smallTree);
+        if (errhdl)
+        {
+            break;
+        }
 
         std::vector<uint64_t> l_homerRegions;
 
