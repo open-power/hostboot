@@ -311,15 +311,23 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         }
                         else
                         {
-                            // The IStep returned an error, This is the generic
-                            // 'IStep failed' from the IStepError class, real
-                            // errors detailing the failure have already been
-                            // committed. Record the PLID and delete it. This
-                            // will be replaced by the checkMinimumHardware
-                            // error with the same plid that matches the real
-                            // errors
+                            // The IStep returned an error and this is likely
+                            // the generic 'IStep failed' from the
+                            // IStepError class; real errors detailing the
+                            // failure have already been committed. Record the
+                            // PLID and delete it if 'Istep failed' or
+                            // commit it otherwised. This will be replaced by
+                            // the checkMinimumHardware error with the same
+                            // plid that matches the real errors
                             const uint32_t l_plid = err->plid();
-                            delete err;
+                            if (ISTEP::ISTEP_FAILURE == err->reasonCode())
+                            {
+                                delete err;
+                            }
+                            else
+                            {
+                                errlCommit(err, INITSVC_COMP_ID);
+                            }
                             err = l_errl;
                             l_errl = NULL;
                             err->plid(l_plid);
