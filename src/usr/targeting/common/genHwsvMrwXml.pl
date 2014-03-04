@@ -1991,7 +1991,7 @@ sub generate_proc
         <default>physical:sys</default><!-- no alt path -->
     </attribute>
     <attribute>
-        <id>FSI_MASTER_PORT</id>
+        <id>ALTFSI_MASTER_PORT</id>
         <default>0xFF</default><!-- no alt path -->
     </attribute>";
 
