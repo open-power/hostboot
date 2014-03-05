@@ -101,8 +101,6 @@ Pib2Cfam::operation(Transaction& io_transaction)
                 me = ME_SUCCESS;
             } else {
                 me = ME_FAILURE;
-                //@todo CQ:SW248690 - need a better way to catch these
-                fapiLogError( rc, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
             }
             break;
         default:
@@ -133,8 +131,6 @@ Pib2Cfam::operation(Transaction& io_transaction)
                 me = ME_SUCCESS;
             } else {
                 me = ME_FAILURE;
-                //@todo CQ:SW248690 - need a better way to catch these
-                fapiLogError( rc, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
             }
             break;
 

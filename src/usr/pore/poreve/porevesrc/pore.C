@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -66,6 +66,16 @@ Pore::pibMaster(PibTransaction& io_transaction)
         me = io_transaction.iv_modelError;
     }
     if (me != 0) {
+    
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        if (!iv_fapiReturnCode.ok())
+        {
+            FAPI_ERR("Pore::pibMaster() operation returns FAPI rc 0x%.8X",
+                     static_cast<uint32_t>(iv_fapiReturnCode));
+            fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
+        }
+    
         FAPI_ERR("\nPore::pibMaster() received ModelError %d\n"
                  "Transaction is a %s of address 0x%08x\n"
                  "Transaction data is 0x%016llx",
@@ -94,6 +104,16 @@ Pore::ociMaster(OciTransaction& io_transaction)
         me = io_transaction.iv_modelError;
     }
     if (me != 0) {
+
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        if (!iv_fapiReturnCode.ok())
+        {
+            FAPI_ERR("Pore::ociMaster() operation returns FAPI rc 0x%.8X",
+                     static_cast<uint32_t>(iv_fapiReturnCode));
+            fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
+        }
+    
         FAPI_ERR("\nPore::ociMaster() received ModelError %d\n"
                  "Transaction is a %s of address 0x%08x\n"
                  "Transaction data is 0x%016llx",
@@ -122,10 +142,15 @@ Pore::wait(const uint32_t i_count)
     nsDelay += 1;               // Always round up the real delay.
     iv_fapiReturnCode = fapiDelay(nsDelay, simCycles);
 
-    if (iv_fapiReturnCode == 0) {
+    if (iv_fapiReturnCode.ok()) {
         me = ME_SUCCESS;
     } else {
         me = ME_WAIT_FAILURE;
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        FAPI_ERR("Pore::wait() operation returns FAPI rc 0x%.8X",
+                 static_cast<uint32_t>(iv_fapiReturnCode));
+        fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
     }
     if (me != 0) {
         modelError(me);
@@ -147,6 +172,11 @@ Pore::hookInstruction(const PoreAddress& i_address,
         me = ME_SUCCESS;
     } else {
         me = ME_HOOK_INSTRUCTION_ERROR;
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        FAPI_ERR("Pore::hookInstruction() operation returns FAPI rc 0x%.8X",
+                 static_cast<uint32_t>(iv_fapiReturnCode));
+        fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
     }
     if (me != 0) {
         modelError(me);
@@ -165,6 +195,11 @@ Pore::hookRead(const PoreAddress& i_address)
         me = ME_SUCCESS;
     } else {
         me = ME_HOOK_READ_ERROR;
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        FAPI_ERR("Pore::hookRead() operation returns FAPI rc 0x%.8X",
+                 static_cast<uint32_t>(iv_fapiReturnCode));
+        fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
     }
     if (me != 0) {
         modelError(me);
@@ -183,6 +218,11 @@ Pore::hookWrite(const PoreAddress& i_address)
         me = ME_SUCCESS;
     } else {
         me = ME_HOOK_WRITE_ERROR;
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        FAPI_ERR("Pore::hookWrite() operation returns FAPI rc 0x%.8X",
+                 static_cast<uint32_t>(iv_fapiReturnCode));
+        fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
     }
     if (me != 0) {
         modelError(me);
@@ -201,6 +241,11 @@ Pore::hookFetch(const PoreAddress& i_address)
         me = ME_SUCCESS;
     } else {
         me = ME_HOOK_FETCH_ERROR;
+        // If FAPI error, likely from platform, log it here.
+        // Current interface doesn't return FAPI rc up to fapiPoreVe level.
+        FAPI_ERR("Pore::hookFetch() operation returns FAPI rc 0x%.8X",
+                 static_cast<uint32_t>(iv_fapiReturnCode));
+        fapiLogError( iv_fapiReturnCode, fapi::FAPI_ERRL_SEV_UNRECOVERABLE );
     }
     if (me != 0) {
         modelError(me);
