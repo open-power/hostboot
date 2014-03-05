@@ -887,6 +887,21 @@ void ErrlEntry::processCallout()
 // for use by ErrlManager
 void ErrlEntry::deferredDeconfigure()
 {
+    // NOTE:
+    // This function is called in the calling process of errl->commit.  Since
+    // processes that are not allowed to touch swappable memory may call
+    // errl->commit, we need to be very careful about what we do in this
+    // function.
+    //
+    // The getHwasProcessCalloutFn is only enabled when the HWAS module is
+    // loaded, but this does not ensure that the HWAS code pages are
+    // physically present in memory.  Processes like the PnorRP cannot call
+    // into the HWAS module, but can make callouts (using MASTER_..SENTINEL).
+    //
+    // Currently we're using the fact that non-swappable tasks do not make
+    // deferred deconfig requests as the indicator that it is safe to call
+    // the HWAS functionality.
+
     TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure");
 
     // see if HWAS has been loaded and has set the processCallout function
@@ -900,10 +915,17 @@ void ErrlEntry::deferredDeconfigure()
                 it != iv_SectionVector.end();
                 it++ )
         {
-            // if this is a CALLOUT
+            // if this is a CALLOUT and DELAYED_DECONFIG.
             if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
                 (1                == (*it)->iv_header.iv_ver) &&
-                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
+                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst) &&
+                (HWAS::HW_CALLOUT ==
+                    reinterpret_cast<HWAS::callout_ud_t*>(
+                        (*it)->iv_pData)->type) &&
+                (HWAS::DELAYED_DECONFIG ==
+                    reinterpret_cast<HWAS::callout_ud_t*>(
+                        (*it)->iv_pData)->deconfigState)
+               )
             {
                 // call HWAS function to register this action,
                 //  put it on a queue and will be processed separately,
