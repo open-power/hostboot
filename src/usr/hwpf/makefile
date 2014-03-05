@@ -169,6 +169,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/erepair_thresholds.xml \
                      hwp/dram_training/mem_pll_setup/memb_pll_ring_attributes.xml \
                      hwp/proc_chip_ec_feature.xml \
+                     hwp/proc_abus_dmi_xbus_scominit_attributes.xml \
                      hwp/runtime_attributes/memory_occ_attributes.xml
 
 #------------------------------------------------------------------------------

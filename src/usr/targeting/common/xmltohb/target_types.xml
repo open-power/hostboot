@@ -172,6 +172,14 @@
     <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
     <!-- End proc_fab_smp_fabric_attributes.xml -->
 
+    <!-- Start proc_abus_dmi_xbus_scominit.xml -->
+    <attribute><id>MNFG_DMI_MIN_EYE_WIDTH</id></attribute>
+    <attribute><id>MNFG_DMI_MIN_EYE_HEIGHT</id></attribute>
+    <attribute><id>MNFG_ABUS_MIN_EYE_WIDTH</id></attribute>
+    <attribute><id>MNFG_ABUS_MIN_EYE_HEIGHT</id></attribute>
+    <attribute><id>MNFG_XBUS_MIN_EYE_WIDTH</id></attribute>
+    <!-- End proc_abus_dmi_xbus_scominit.xml -->
+
     <attribute><id>ENABLED_THREADS</id></attribute>
     <attribute><id>MSS_ZSERIES</id></attribute>
 

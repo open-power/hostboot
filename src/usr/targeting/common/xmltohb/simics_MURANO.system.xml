@@ -235,6 +235,26 @@
         <id>MEM_MIRROR_PLACEMENT_POLICY</id>
         <default>0</default><!-- NORMAL -->
     </attribute>
+    <attribute>
+        <id>MNFG_DMI_MIN_EYE_WIDTH</id>
+        <default>0x0a</default>
+    </attribute>
+    <attribute>
+        <id>MNFG_DMI_MIN_EYE_HEIGHT</id>
+        <default>0x0f</default>
+    </attribute>
+    <attribute>
+        <id>MNFG_ABUS_MIN_EYE_WIDTH</id>
+        <default>0x0a</default>
+    </attribute>
+    <attribute>
+        <id>MNFG_ABUS_MIN_EYE_HEIGHT</id>
+        <default>0x0f</default>
+    </attribute>
+    <attribute>
+        <id>MNFG_XBUS_MIN_EYE_WIDTH</id>
+        <default>0x14</default>
+    </attribute>
     <!-- End System Attributes from MRW -->
     <attribute>
         <id>ISTEP_MODE</id>

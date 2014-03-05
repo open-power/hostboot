@@ -13285,7 +13285,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-
 <enumerationType>
     <id>TOD_ROLE</id>
     <description>
@@ -13317,6 +13316,111 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_DMI_MIN_EYE_WIDTH</id>
+    <description>
+      System attribute.
+      6 bit rx_min_eye_width value for DMI bus interfaces during system
+      manufacturing; used for both centaur and p8
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MNFG_DMI_MIN_EYE_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MNFG_DMI_MIN_EYE_HEIGHT</id>
+    <description>
+      System attribute.
+      8 bit rx_min_eye_height value for DMI bus interfaces during system
+      manufacturing; used for both centaur and p8
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MNFG_DMI_MIN_EYE_HEIGHT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MNFG_ABUS_MIN_EYE_WIDTH</id>
+    <description>
+      System attribute
+      6 bit rx_min_eye_width value for A bus interfaces during system
+      manufacturing
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MNFG_ABUS_MIN_EYE_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MNFG_ABUS_MIN_EYE_HEIGHT</id>
+    <description>
+      System attribute
+      8 bit rx_min_eye_height value for A bus interfaces during system
+      manufacturing
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MNFG_ABUS_MIN_EYE_HEIGHT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MNFG_XBUS_MIN_EYE_WIDTH</id>
+    <description>
+      System attribute
+      6 bit rx_min_eye_width value for X bus interfaces during system
+      manufacturing
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MNFG_XBUS_MIN_EYE_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 </attributes>

@@ -195,6 +195,11 @@ push @systemAttr,
     "MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", $reqPol->{'mba_cacheline_interleave_mode_control'},
     "MRW_ENHANCED_GROUPING_NO_MIRRORING", $reqPol->{'mcs_enhanced_grouping_no_mirroring'},
     "MRW_STRICT_MBA_PLUG_RULE_CHECKING", $reqPol->{'strict_mba_plug_rule_checking'},
+    "MNFG_DMI_MIN_EYE_WIDTH", $reqPol->{'mnfg-dmi-min-eye-width'},
+    "MNFG_DMI_MIN_EYE_HEIGHT", $reqPol->{'mnfg-dmi-min-eye-height'},
+    "MNFG_ABUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-abus-min-eye-width'},
+    "MNFG_ABUS_MIN_EYE_HEIGHT", $reqPol->{'mnfg-abus-min-eye-height'},
+    "MNFG_XBUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-xbus-min-eye-width'},
 ];
 
 #------------------------------------------------------------------------------
@@ -3132,12 +3137,19 @@ sub addSysAttrs
         my $sysAttrArraySize=$#{$systemAttr[$i]};
         while ($j<$sysAttrArraySize)
         {
+            # systemAttr is an array of pairs
+            #  even index is the attribute id
+            #  odd index has its default value
+            my $l_default = $systemAttr[$i][$j+1];
+            if (substr($l_default,0,2) eq "0b") #convert bin to hex
+            {
+                $l_default = sprintf('0x%X', oct($l_default));
+            }
             print "    <attribute>\n";
             print "        <id>$systemAttr[$i][$j]</id>\n";
-            $j++;
-            print "        <default>$systemAttr[$i][$j]</default>\n";
+            print "        <default>$l_default</default>\n";
             print "    </attribute>\n";
-            $j++;
+            $j+=2; # next attribute id and default pair
         }
     }
 }

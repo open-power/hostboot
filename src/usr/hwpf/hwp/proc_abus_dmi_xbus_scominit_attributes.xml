@@ -1,0 +1,81 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_abus_dmi_xbus_scominit_attributes.xml$  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_abus_dmi_xbus_scominit_attributes.xml,v 1.1 2014/02/17 21:50:50 garyp Exp $ -->
+<!-- proc_abus_dmi_xbus_scominit_attributes.xml -->
+<attributes>
+  <attribute>
+    <id>ATTR_MNFG_DMI_MIN_EYE_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>6 bit rx_min_eye_width value for DMI bus interfaces during system manufacturing; used for both centaur and p8
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MNFG_DMI_MIN_EYE_HEIGHT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>8 bit rx_min_eye_height value for DMI bus interfaces during system manufacturing; used for both centaur and p8
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MNFG_ABUS_MIN_EYE_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>6 bit rx_min_eye_width value for A bus interfaces during system manufacturing
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MNFG_ABUS_MIN_EYE_HEIGHT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>8 bit rx_min_eye_height value for A bus interfaces during system manufacturing
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MNFG_XBUS_MIN_EYE_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>6 bit rx_min_eye_width value for X bus interfaces during system manufacturing
+      creator: platform
+      firmware notes: Attribute value is in the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

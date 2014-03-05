@@ -90,7 +90,8 @@ FAPI_ATTR_SOURCES =          \
     proc_winkle_scan_override_attributes.xml \
     erepair_thresholds.xml \
     dram_training/mem_pll_setup/memb_pll_ring_attributes.xml \
-    runtime_attributes/memory_occ_attributes.xml
+    runtime_attributes/memory_occ_attributes.xml \
+    proc_abus_dmi_xbus_scominit_attributes.xml
 
 XMLTOHB_GENERIC_XML     = generic.xml
 XMLTOHB_FAPI_XML        = fapiattrs.xml
