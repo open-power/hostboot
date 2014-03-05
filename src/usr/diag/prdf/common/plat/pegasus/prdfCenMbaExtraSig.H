@@ -48,9 +48,11 @@ PRDR_ERROR_SIGNATURE(MaintNCE_CTE,   0xffff0016, "", "Maint SOFT/INTER CTE");
 PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
 PRDR_ERROR_SIGNATURE(VcmBadSpare,     0xffff0022, "", "VCM: bad DRAM spare");
-PRDR_ERROR_SIGNATURE(VcmMarksUnavail, 0xffff0023, "",
-                     "VCM: No more marks available");
-PRDR_ERROR_SIGNATURE(VcmFalseAlarmExceeded, 0xffff0024, "",
+PRDR_ERROR_SIGNATURE(VcmCmAndSpare,   0xffff0023, "",
+                     "VCM: Both spare and chip mark used");
+PRDR_ERROR_SIGNATURE(VcmCmAndSm,      0xffff0024, "",
+                     "VCM: Both symbol and chip mark used");
+PRDR_ERROR_SIGNATURE(VcmFalseAlarmExceeded, 0xffff0025, "",
                      "VCM: false alarm threshold exceeded");
 
 PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xffff0030, "", "DSD: DRAM spared");
@@ -79,5 +81,7 @@ PRDR_ERROR_SIGNATURE(TpsSymbolMark, 0xffff0063, "", "TPS: symbol mark placed");
 PRDR_ERROR_SIGNATURE(TpsChipMark,   0xffff0064, "", "TPS: chip mark placed");
 PRDR_ERROR_SIGNATURE(TpsMarksUnavail, 0xffff0065, "",
                      "TPS: No more marks available");
+PRDR_ERROR_SIGNATURE(TpsCmAndSpare, 0xffff0066, "",
+                     "TPS: Both spare and chip mark used");
 
 #endif // __prdfCenMbaExtraSig_H

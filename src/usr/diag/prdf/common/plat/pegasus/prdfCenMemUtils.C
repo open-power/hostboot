@@ -55,13 +55,25 @@ static const char *mbsCeStatReg[][ CE_REGS_PER_MBA ] = {
 
 //------------------------------------------------------------------------------
 
+// Helper structs for collectCeStats()
+struct DramCount_t
+{
+    uint8_t totalCount; uint8_t symbolCount;
+    DramCount_t() : totalCount(0), symbolCount(0) {}
+};
+typedef std::map<uint32_t, DramCount_t> DramCountMap;
+
+//------------------------------------------------------------------------------
+
 int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
-                        MaintSymbols & o_maintStats, CenSymbol & o_highestDram,
+                        MaintSymbols & o_maintStats, CenSymbol & o_chipMark,
                         uint8_t i_thr )
 {
     #define PRDF_FUNC "[MemUtils::collectCeStats] "
 
     int32_t o_rc = SUCCESS;
+
+    o_chipMark = CenSymbol(); // Initially invalid.
 
     do
     {
@@ -87,7 +99,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
             o_rc = FAIL; break;
         }
 
-        bool isX4 = isDramWidthX4(mbaTrgt);
+        const bool isX4 = isDramWidthX4(mbaTrgt);
 
         // Get the current spares on this rank.
         CenSymbol sp0, sp1, ecc;
@@ -99,8 +111,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         }
 
         // Use this map to keep track of the total counts per DRAM.
-        typedef std::map<uint32_t, uint32_t> DramCount;
-        DramCount dramCounts;
+        DramCountMap dramCounts;
 
         const char * reg_str = NULL;
         SCAN_COMM_REGISTER_CLASS * reg = NULL;
@@ -129,11 +140,15 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                 uint8_t dram = CenSymbol::symbol2Dram( sym, isX4 );
 
                 // Keep track of the total DRAM counts.
-                dramCounts[dram] += count;
+                dramCounts[dram].totalCount += count;
 
                 // Add any symbols that have exceeded threshold to the list.
                 if ( i_thr <= count )
                 {
+                    // Keep track of the total number of symbols per DRAM that
+                    // have exceeded threshold.
+                    dramCounts[dram].symbolCount++;
+
                     SymbolData symData;
                     symData.symbol = CenSymbol::fromSymbol( mbaTrgt, i_rank,
                                             sym, CenSymbol::BOTH_SYMBOL_DQS );
@@ -176,26 +191,35 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         std::sort( o_maintStats.begin(), o_maintStats.end(), sortSymDataCount );
 
         // Get the DRAM with the highest count.
-        DramCount::iterator highestEntry = dramCounts.begin();
-        DramCount::iterator it = highestEntry; ++it; // sets it to next entry
-        for ( ; it != dramCounts.end(); ++it )
+        uint32_t highestDram  = 0;
+        uint32_t highestCount = 0;
+        const uint32_t symbolTH = isX4 ? 1 : 2;
+        for ( DramCountMap::iterator it = dramCounts.begin();
+              it != dramCounts.end(); ++it )
         {
-            if ( highestEntry->second < it->second )
-                highestEntry = it;
+            if ( (symbolTH     <= it->second.symbolCount) &&
+                 (highestCount <  it->second.totalCount ) )
+            {
+                highestDram  = it->first;
+                highestCount = it->second.totalCount;
+            }
         }
 
-        uint8_t sym = CenSymbol::dram2Symbol( highestEntry->first, isX4 );
-        o_highestDram = CenSymbol::fromSymbol( mbaTrgt, i_rank, sym );
+        if ( 0 != highestCount )
+        {
+            uint8_t sym = CenSymbol::dram2Symbol( highestDram, isX4 );
+            o_chipMark  = CenSymbol::fromSymbol( mbaTrgt, i_rank, sym );
 
-        // Check if this symbol is on any of the spares.
-        if ( ( sp0.isValid() && (sp0.getDram() == o_highestDram.getDram()) ) ||
-             ( sp1.isValid() && (sp1.getDram() == o_highestDram.getDram()) ) )
-        {
-            o_highestDram.setDramSpared();
-        }
-        if ( ecc.isValid() && (ecc.getDram() == o_highestDram.getDram()) )
-        {
-            o_highestDram.setEccSpared();
+            // Check if this symbol is on any of the spares.
+            if ( ( sp0.isValid() && (sp0.getDram() == o_chipMark.getDram()) ) ||
+                 ( sp1.isValid() && (sp1.getDram() == o_chipMark.getDram()) ) )
+            {
+                o_chipMark.setDramSpared();
+            }
+            if ( ecc.isValid() && (ecc.getDram() == o_chipMark.getDram()) )
+            {
+                o_chipMark.setEccSpared();
+            }
         }
 
     } while(0);

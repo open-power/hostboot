@@ -517,14 +517,14 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 else
                 {
                     // Chip mark and DRAM spare are both used.
-                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
+                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmCmAndSpare );
                     io_sc.service_data->SetServiceCall();
                 }
             }
             else
             {
                 // Chip mark is in place and sparing is not possible.
-                setTdSignature( io_sc, PRDFSIG_VcmMarksUnavail );
+                setTdSignature( io_sc, PRDFSIG_VcmCmAndSpare );
                 io_sc.service_data->SetServiceCall();
             }
         }
@@ -535,7 +535,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             // predictive.
             if ( iv_mark.getSM().isValid() )
             {
-                setTdSignature( io_sc, PRDFSIG_VcmMarksUnavail );
+                setTdSignature( io_sc, PRDFSIG_VcmCmAndSm );
                 io_sc.service_data->SetServiceCall();
             }
         }

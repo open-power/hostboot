@@ -116,10 +116,18 @@ class MatchSymDataSymbol
  * @param  i_mbaChip     Target MBA chip.
  * @param  i_rank        Target rank.
  * @param  o_maintStats  Returns the list of symbols and counts.
- * @param  o_highestDram Returns a symbol representing the DRAM with the highest
- *                       total count. This includes counts from DRAM that are
- *                       under the given threshold. This value is undefined if
- *                       o_maintStats is empty.
+ * @param  o_chipMark    This represents the DRAM in which a chip mark should be
+ *                       placed, if necessary, based on the following:
+ *                         - In x4 mode, this represents the DRAM with the
+ *                           highest total per symbol count with at least 1
+ *                           symbol that has exceeded threshold.
+ *                         - In x8 mode, this represents the DRAM with the
+ *                           highest total per symbol count with at least 2
+ *                           symbols that have exceeded threshold.
+ *                       It is possible that there will be symbols returned in
+ *                       o_maintStats that do not meet the criteria stated
+ *                       above. Therefore, the user must check if o_chipMark is
+ *                       valid before using it.
  * @param  i_thr         The count threshold. Each symbol count must be greater
  *                       than or equal to this value to be added to the list.
  *                       The default is 1, which means all non-zero counts will
@@ -128,7 +136,7 @@ class MatchSymDataSymbol
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
-                        MaintSymbols & o_maintStats, CenSymbol & o_highestDram,
+                        MaintSymbols & o_maintStats, CenSymbol & o_chipMark,
                         uint8_t i_thr = 1 );
 
 /**
