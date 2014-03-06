@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -87,6 +87,13 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     printkd( "\n Begin CxxTest...\n");
 
     __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
+
+    // Before we launch, ensure there aren't any residual error logs from
+    // the IPL.
+    if (ERRORLOG::ErrlManager::errlCommittedThisBoot())
+    {
+        TS_FAIL("Error logs committed previously during IPL.");
+    }
 
     for(std::vector<const char *>::const_iterator i = module_list.begin();
         i != module_list.end(); ++i)

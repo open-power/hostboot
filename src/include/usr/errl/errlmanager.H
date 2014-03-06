@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -169,6 +169,14 @@ public:
       {
           return iv_hwasProcessCalloutFn;
       }
+
+    /**
+     * @brief Determines if any non-informational logs have been committed
+     *        during this boot.
+     *
+     * @return true - A non-informational log has been committed.
+     */
+     static bool errlCommittedThisBoot();
 
 protected:
     /**
@@ -422,6 +430,8 @@ private:
     bool iv_isSpBaseServices;           // do we need to send to FSP
     bool iv_isMboxEnabled;              // are we able to send to FSP
     std::list<msg_t *> iv_errlToSend;   // msgs still to be sent to FSP
+
+    bool iv_nonInfoCommitted;   //< Keeps track of any non-informational logs.
 };
 
 } // End namespace

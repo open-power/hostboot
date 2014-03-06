@@ -105,7 +105,8 @@ ErrlManager::ErrlManager() :
     iv_maxErrlInPnor(0),
     iv_pnorOpenSlot(0),
     iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldnt
-    iv_isMboxEnabled(false)     // but mbox isn't ready yet..
+    iv_isMboxEnabled(false),    // but mbox isn't ready yet..
+    iv_nonInfoCommitted(false)
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
@@ -584,6 +585,12 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
         TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X",
                     i_committerComp, io_err->eid(), io_err->reasonCode() );
 
+        if (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        {
+            iv_nonInfoCommitted = true;
+            lwsync();
+        }
+
         //Ask ErrlEntry to check for any special deferred deconfigure callouts
         io_err->deferredDeconfigure();
 
@@ -720,6 +727,14 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
     }
     return;
 }
+
+bool ErrlManager::errlCommittedThisBoot()
+{
+    isync();
+    return theErrlManager::instance().iv_nonInfoCommitted;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendErrlogToMessageQueue()
 ///////////////////////////////////////////////////////////////////////////////
