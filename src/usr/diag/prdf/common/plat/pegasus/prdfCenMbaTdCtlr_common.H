@@ -126,8 +126,10 @@ class CenMbaTdCtlrCommon
      * @param i_mbaChip An MBA chip.
      */
     explicit CenMbaTdCtlrCommon( ExtensibleChip * i_mbaChip ) :
-        iv_mbaChip(i_mbaChip), iv_initialized(false), iv_tdState(NO_OP),
-        iv_rank(), iv_mark(), iv_mssCmd(NULL), iv_isEccSteer(false)
+        iv_mbaChip(i_mbaChip), iv_membChip(NULL), iv_mbaTrgt(NULL),
+        iv_mbaPos(MAX_MBA_PER_MEMBUF), iv_x4Dimm(false), iv_initialized(false),
+        iv_tdState(NO_OP), iv_rank(), iv_mark(), iv_mssCmd(NULL),
+        iv_isEccSteer(false)
     {}
 
     /** @brief Destructor */
