@@ -837,16 +837,8 @@ void IStepDispatcher::msgHndlr()
             case SHUTDOWN:
                 // Shutdown requested from Fsp
                 TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: SHUTDOWN");
-                // If not in IStep mode, further process the shutdown message
-                // otherwise, ignore it
-                if (!iv_istepMode)
-                {
-                    handleShutdownMsg(pMsg);
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring shutdown msg in IStep mode!");
-                }
+                // Further process the shutdown message
+                handleShutdownMsg(pMsg);
                 break;
             default:
                 TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring unknown message 0x%08x",
@@ -1086,6 +1078,13 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
         // Send the message back as a response
         msg_respond(iv_msgQ, io_pMsg);
         io_pMsg = NULL;
+    }
+
+    if (iv_istepMode)
+    {
+        TRACFCOMP(g_trac_initsvc, INFO_MRK"ShutdownMsg received in istepMode,"
+                                  " call shutdownDuringIPL() directly");
+        shutdownDuringIpl();
     }
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleShutdownMsg");
