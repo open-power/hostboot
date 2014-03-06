@@ -41,6 +41,8 @@
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/interface.h>
 #include <targeting/common/targetservice.H>
+#include <runtime/rt_targeting.H>
+#include <hwpf/hwpf_reasoncodes.H>
 #endif
 
 //******************************************************************************
@@ -261,24 +263,48 @@ fapi::ReturnCode fapiSpecialWakeup(const fapi::Target & i_target,
 #ifdef __HOSTBOOT_RUNTIME
     if(g_hostInterfaces && g_hostInterfaces->wakeup)
     {
-        // TODO Support wakeup RTC = 98665
-        // We need to merge all rt - sapphire tareting id stuff into a
-        // common runtime targeting util - right now some is in xscom and some
-        // is in RT_OCC.
+        TARGETING::Target* target =
+            reinterpret_cast<TARGETING::Target*>(i_target.get());
 
-        //TARGETING::Target* target =
-        //    reinterpret_cast<TARGETING::Target*>(i_target.get());
+        RT_TARG::rtChipId_t core_id = 0;
+        errlHndl_t err = RT_TARG::getRtTarget(target, core_id);
+        if(err)
+        {
+            fapi_rc.setPlatError(reinterpret_cast<void *>(err));
+        }
+        else
+        {
+            uint32_t mode = 0;   //Force awake
+            if(!i_enable)
+            {
+                mode = 1;       // clear force
+            }
+            int rc = g_hostInterfaces->wakeup(core_id, mode);
 
-        //uint64_t core_id = 0;
-        //int rc = g_hostInterfaces->wakeup(core_id,0);
-        //if(rc)
-        //{
-        //    FAPI_ERR("CPU core wakeup call to hypervisor returned rc = %d",
-        //             rc);
+            if(rc)
+            {
+                FAPI_ERR("CPU core wakeup call to hypervisor returned rc = %d",
+                         rc);
+                /*@
+                 * @errortype
+                 * @moduleid     fapi::MOD_PLAT_SPECIAL_WAKEUP
+                 * @reasoncode   fapi::RC_RT_WAKEUP_FAILED
+                 * @userdata1    Hypervisor return code
+                 * @userdata2    Chiplet HUID
+                 * @devdesc      Error code from hypervisor wakeup call
+                 */
+                const bool hbSwError = true;
+                err = new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              fapi::MOD_PLAT_SPECIAL_WAKEUP,
+                                              fapi::RC_RT_WAKEUP_FAILED,
+                                              rc,
+                                              TARGETING::get_huid(target),
+                                              hbSwError);
 
-            // Make error log
-
-        //}
+                fapi_rc.setPlatError(reinterpret_cast<void*>(err));
+            }
+        }
     }
 #endif
     // On Hostboot, processor cores cannot sleep so return success to the

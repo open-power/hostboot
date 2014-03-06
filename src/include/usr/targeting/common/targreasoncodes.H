@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,6 +39,8 @@ enum TargetingModuleId
     TARG_MOD_TEST           = 0x01,
     TARG_MOD_ATTRRP         = 0x02,
     TARG_MOD_ATTR_SYNC      = 0x03,
+    TARG_RT_GET_RT_TARGET   = 0x04,
+    TARG_RT_GET_HB_TARGET   = 0x05,
 };
 
 enum TargetingReasonCode
@@ -52,6 +54,9 @@ enum TargetingReasonCode
     TARG_RC_ATTR_SYNC_TO_FSP_FAIL        = TARG_COMP_ID | 0x07,
     TARG_RC_ATTR_SYNC_REQUEST_TO_HB_FAIL = TARG_COMP_ID | 0x08,
     TARG_RC_ATTR_SYNC_TO_HB_FAIL         = TARG_COMP_ID | 0x09,
+    TARG_RT_UNIT_TARGET_NOT_FOUND        = TARG_COMP_ID | 0x0a,
+    TARG_RT_NO_PROC_TARGET               = TARG_COMP_ID | 0x0b,
+    TARG_RT_TARGET_TYPE_NOT_SUPPORTED    = TARG_COMP_ID | 0x0c,
 };
 
 }; // End TARGETING namespace

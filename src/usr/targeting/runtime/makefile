@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -30,7 +30,8 @@ TARGETING_REL_PATH = ..
 include ${TARGETING_REL_PATH}/hostboot_common.mk
 vpath %.C ${TARGETING_REL_PATH}
 
-HOSTBOOT_RUNTIME_SPECIFIC_OBJS = attrrp_rt.o start_rt.o targplatutil.o
+HOSTBOOT_RUNTIME_SPECIFIC_OBJS = attrrp_rt.o start_rt.o targplatutil.o \
+                                 rt_targeting.o
 
 OBJS = ${COMMON_TARGETING_OBJS} ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
 

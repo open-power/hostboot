@@ -32,6 +32,7 @@
 #include <errl/errludlogregister.H>
 #include <runtime/interface.h>
 #include <errl/errludtarget.H>
+#include <runtime/rt_targeting.H>
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
@@ -39,14 +40,6 @@ TRAC_INIT(&g_trac_xscom, "XSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
 namespace XSCOM
 {
-
-enum
-{
-    CHIPID_NODE_SHIFT = 3,  // CHIPID is 'NNNCCC'b, shift 3
-    MEMBUF_ID_SHIFT = 4,    // CHIPID for MEMBUF is 'NNNCCCMMMM'b
-    MEMBUF_ID_FLAG  = 0x80000000, // MEMBUF chip id has MSbit on
-};
-
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::XSCOM,
@@ -68,15 +61,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::IBSCOM,
                       TARGETING::TYPE_MEMBUF,
                       xscomPerformOp);
-/**
- * @brief Convert target into chipId that the hypervisor uses
- * @param[in]   i_target   The HB TARGETING target
- * @param[out]  o_chipId    Chipid
- * @return      errlHndl_t  Error handle if there was an error
- */
-errlHndl_t get_rt_target(TARGETING::Target* i_target,
-                         uint64_t & o_chipId);
-
 /**
  * @brief Internal routine that verifies the validity of input parameters
  * for an XSCOM access.
@@ -160,127 +144,6 @@ errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
     return l_err;
 }
 
-
-errlHndl_t get_rt_target(TARGETING::Target* i_target,
-                         uint64_t &o_chipId)
-{
-    errlHndl_t l_err = NULL;
-
-    do
-    {
-        if(i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-        {
-            TARGETING::Target* masterProcChip = NULL;
-            TARGETING::targetService().
-                masterProcChipTargetHandle(masterProcChip);
-
-            i_target = masterProcChip;
-        }
-
-        uint32_t target_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
-
-        if(target_type == TARGETING::TYPE_MEMBUF)
-        {
-            TARGETING::TargetHandleList targetList;
-
-            // need to get assoicated MC for this MEMBUF
-            getParentAffinityTargets(targetList,
-                                     i_target,
-                                     TARGETING::CLASS_UNIT,
-                                     TARGETING::TYPE_MCS);
-            if( targetList.empty() )
-            {
-                uint32_t huid = get_huid(i_target);
-                TRACFCOMP(g_trac_xscom,ERR_MRK
-                          "No MSC target found for MEMBUF. MEMBUF huid: %08x",
-                          huid);
-                /*@
-                 * @errortype
-                 * @moduleid     XSCOM_RT_GET_TARGET
-                 * @reasoncode   XSCOM_RT_NO_MCS_TARGET
-                 * @userdata1    HUID of MEMBUF target
-                 * @devdesc      No memory controller target found for the
-                 *               given Memory data controller
-                 */
-                l_err =
-                    new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            XSCOM_RT_GET_TARGET,
-                                            XSCOM_RT_NO_MCS_TARGET,
-                                            huid,
-                                            0);
-
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
-
-                ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").
-                    addToLog(l_err);
-
-                break;
-            }
-
-            TARGETING::Target * mcs_target = targetList[0];
-            uint32_t mcpos = mcs_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-            // Get associated proc chip
-            targetList.clear();
-            getParentAffinityTargets(targetList,
-                                     mcs_target,
-                                     TARGETING::CLASS_CHIP,
-                                     TARGETING::TYPE_PROC);
-
-            if(targetList.empty())
-            {
-                uint32_t huid = get_huid(mcs_target);
-                TRACFCOMP(g_trac_xscom,ERR_MRK
-                          "No proc target found for MSC. MSC huid: %08x",
-                          huid);
-                /*@
-                 * @errortype
-                 * @moduleid     XSCOM_RT_GET_TARGET
-                 * @reasoncode   XSCOM_RT_NO_PROC_TARGET
-                 * @userdata1    HUID of the MSC target
-                 * @devdesc      No processor target found for the Memory
-                 *               controller.
-                 */
-                l_err =
-                    new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            XSCOM_RT_GET_TARGET,
-                                            XSCOM_RT_NO_PROC_TARGET,
-                                            huid,
-                                            0);
-
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
-
-                ERRORLOG::ErrlUserDetailsTarget(mcs_target,"SCOM Target").
-                    addToLog(l_err);
-
-                break;
-            }
-
-            TARGETING::Target * proc_target = targetList[0];
-            uint32_t fabId =
-                proc_target->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
-            uint32_t procPos =
-                proc_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-
-            o_chipId = (fabId << CHIPID_NODE_SHIFT) + procPos;
-            o_chipId = (o_chipId << MEMBUF_ID_SHIFT) | MEMBUF_ID_FLAG;
-            o_chipId += mcpos;
-        }
-        else // must be proc
-        {
-            uint32_t fabId = i_target->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
-            uint32_t procPos = i_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-
-            o_chipId = (fabId << CHIPID_NODE_SHIFT) + procPos;
-        }
-    } while(0);
-
-    return l_err;
-}
-
-
 /**
  * @brief Do the scom operation
  */
@@ -291,11 +154,11 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
 {
     errlHndl_t l_err = NULL;
     int rc = 0;
-    uint64_t proc_id = 0;
+    RT_TARG::rtChipId_t proc_id = 0;
 
     // Convert target to something  Sapphire understands
-    l_err = get_rt_target(i_target,
-                          proc_id);
+    l_err = RT_TARG::getRtTarget(i_target,
+                                 proc_id);
 
     if(l_err)
     {

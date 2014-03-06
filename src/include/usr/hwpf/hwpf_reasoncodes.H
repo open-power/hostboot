@@ -66,6 +66,8 @@ namespace fapi
         MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA           = 0x1B,
         MOD_HOST_COALESCE_HOST                     = 0x1C,
         MOD_ATTR_OVERRIDE                          = 0x1D,
+        MOD_PLAT_SPECIAL_WAKEUP                    = 0x1E,
+
     };
 
     /**
@@ -114,6 +116,7 @@ namespace fapi
         RC_HOST_TIMER_EXPIRED         = HWPF_COMP_ID | 0x2A,
         RC_HOST_TIMER_THREAD_FAIL     = HWPF_COMP_ID | 0x2B,
         RC_NULL_POINTER               = HWPF_COMP_ID | 0x2C,
+        RC_RT_WAKEUP_FAILED           = HWPF_COMP_ID | 0x2D,
     };
 
     /**

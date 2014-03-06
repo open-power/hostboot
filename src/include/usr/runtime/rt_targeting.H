@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/xscom/xscomreasoncodes.H $                    */
+/* $Source: src/include/usr/runtime/rt_targeting.H $                      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* COPYRIGHT International Business Machines Corp. 2014                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,37 +20,51 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __XSCOM_REASONCODES_H
-#define __XSCOM_REASONCODES_H
+#ifndef __RT_TARGETING_H
+#define __RT_TARGETING_H
 
-#include <hbotcompid.H>
+#include <errl/errlentry.H>
 
-namespace XSCOM
+namespace TARGETING
 {
-    enum xscomModuleId
+    class Target;
+}
+
+namespace RT_TARG
+{
+    typedef uint64_t rtChipId_t;
+
+    enum
     {
-        XSCOM_PERFORM_OP            = 0x00,
-        XSCOM_SANITY_CHECK          = 0x01,
-        XSCOM_TEST_XSCOM1           = 0x02,
-        XSCOM_GET_TARGET_VIRT_ADDR  = 0x03,
-        XSCOM_TEST_XSCOM2           = 0x04,
-        XSCOM_COLLECT_FFDC          = 0x05,
-        XSCOM_RESET                 = 0x06,
-        XSCOM_DO_OP                 = 0x07,
-        XSCOM_RT_DO_OP              = 0x08,
-        XSCOM_RT_SANITY_CHECK       = 0x09,
+        CHIPID_NODE_SHIFT = 3,  //!< CHIPID NODE is 'NNNCCC'b
+        MEMBUF_ID_SHIFT = 4,    //!< CHIPID for MEMBUF is 'NNNCCCMMMM'b
+        UNIT_ID_SHIFT   = 4,    //!< CHIPID for CORE is 'NNNCCCPPPP'b
+        UNIT_ID_MASK    = 0x000003ff, //!< Valid id bits w/o ID_FLAG
+        PROC_ID_TYPE    = 0x00000000, //!< PROC chip id type
+        MEMBUF_ID_TYPE  = 0x80000000, //!< MEMBUF chip id type
+        CORE_ID_TYPE    = 0x40000000, //!< CORE/EX chip id type
+        CHIPID_ID_MASK  = 0xFF000000, //!< TYPE field
     };
 
-    enum xscomReasonCode
-    {
-        XSCOM_STATUS_ERR           = XSCOM_COMP_ID | 0x01,
-        XSCOM_INVALID_DATA_BUFFER  = XSCOM_COMP_ID | 0x02,
-        XSCOM_INVALID_OP_TYPE      = XSCOM_COMP_ID | 0x03,
-        XSCOM_DATA_UNMATCHED       = XSCOM_COMP_ID | 0x04,
-        XSCOM_MMIO_UNMAP_ERR       = XSCOM_COMP_ID | 0x05,
-        XSCOM_RUNTIME_ERR          = XSCOM_COMP_ID | 0x06,
-        XSCOM_RUNTIME_INTERFACE_ERR = XSCOM_COMP_ID | 0x07,
-    };
+
+    /**
+     * @brief Convert a TARGETING::Target to an unit ID that can be used
+     * in calls to Sapphire
+     * @param[in] The HB TARGETING::Target
+     * @param[out] Sapphire target id
+     * @return an error handle on error
+     */
+    errlHndl_t getRtTarget(const TARGETING::Target* i_target,
+                           rtChipId_t &o_targetId);
+
+    /**
+     * @brier Convert a runtime chip_id (target) into a TARGETING::Target
+     * @param[in] The rt chipId
+     * @param[out] The TARGETING::Target pointer
+     * @return error log handle on error else NULL
+     */
+    errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
+                           TARGETING::Target *& o_target);
 };
 
 #endif

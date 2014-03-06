@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,6 +22,11 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <cxxtest/TestSuite.H>
 #include <targeting/common/commontargeting.H>
+#include <runtime/rt_targeting.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <targeting/common/trace.H>
+#include <targeting/common/utilFilter.H>
 
 class TargetingTestSuite : public CxxTest::TestSuite
 {
@@ -41,5 +46,70 @@ class TargetingTestSuite : public CxxTest::TestSuite
             }
 
             (void)l_pTarget->getAttr<ATTR_PHYS_PATH>().dump();
+        }
+
+        void testHBRT_targets()
+        {
+            using namespace TARGETING;
+            errlHndl_t err = NULL;
+            RT_TARG::rtChipId_t rt_chipid;
+
+            TARGETING::TargetHandleList allTargets;
+            TARGETING::TargetHandleList targetList;
+
+            getAllChips(targetList, TYPE_PROC);
+
+            allTargets.insert(allTargets.end(),
+                              targetList.begin(),
+                              targetList.end());
+
+            targetList.clear();
+            getAllChips(targetList,TYPE_MEMBUF);
+
+            allTargets.insert(allTargets.end(),
+                              targetList.begin(),
+                              targetList.end());
+
+            targetList.clear();
+            getAllChiplets(targetList, TYPE_EX);
+
+            allTargets.insert(allTargets.end(),
+                              targetList.begin(),
+                              targetList.end());
+
+
+            for(TargetHandleList::iterator pTarg = allTargets.begin();
+                pTarg != allTargets.end(); ++pTarg)
+            {
+                err = RT_TARG::getRtTarget(*pTarg, rt_chipid);
+                if( err )
+                {
+                    TS_FAIL("getRtTarget returned error log");
+                    errlCommit( err, TARG_COMP_ID);
+                    err = NULL;
+                    break;
+                }
+                TRACDCOMP(g_trac_targeting,"chipId = %x",rt_chipid);
+
+                TARGETING::Target * target = NULL;
+
+                err = RT_TARG::getHbTarget(rt_chipid, target);
+                if(err)
+                {
+                    TS_FAIL("getRtTarget_returned error log");
+                    errlCommit( err, TARG_COMP_ID);
+                    err = NULL;
+                    break;
+                }
+
+                if(*pTarg != target)
+                {
+                    TS_FAIL("testHBRT_targets failed for rt_chipID %x"
+                            "target_in %p, target_out %p",
+                            rt_chipid,
+                            *pTarg,
+                            target);
+                }
+            }
         }
 };
