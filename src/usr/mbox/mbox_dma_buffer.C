@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,7 +39,8 @@ extern trace_desc_t * g_trac_mbox;
 
 DmaBuffer::DmaBuffer() :
     iv_head(NULL),
-    iv_dir(makeMask(VmmManager::MBOX_DMA_PAGES))
+    iv_dir(makeMask(VmmManager::MBOX_DMA_PAGES)),
+    iv_dma_req_sent(false)
 {
     iv_head = reinterpret_cast<void*>(VmmManager::MBOX_DMA_ADDR);
     initPhysicalArea(iv_head, iv_phys_head);

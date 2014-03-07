@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -136,6 +136,26 @@ namespace MBOX
                                     base + (i_address-iv_phys_head));
             }
 
+            /**
+             * Set the state of shutdown dma request sent
+             * @param[in] The state to set [true|false]
+             */
+            ALWAYS_INLINE
+            void setShutdownDmaRequestSent(bool i_state)
+            {
+                iv_dma_req_sent = i_state;
+            }
+
+            /**
+             * Query if the shutdown DMA request has been sent
+             * @return state [true|false]
+             */
+            ALWAYS_INLINE
+            bool shutdownDmaRequestSent()
+            {
+                return iv_dma_req_sent;
+            }
+
         private:
 
             /**
@@ -160,6 +180,7 @@ namespace MBOX
             void * iv_head;            //!< Start of DMA memory
             uint64_t iv_phys_head;     //!< Physical translation of iv_head
             uint64_t iv_dir;           //!< 1 bit per 1k buffer, 1 = available
+            bool iv_dma_req_sent;      //!< Reqest sent to retrieve all buffers
 
     };
 }; // namespace

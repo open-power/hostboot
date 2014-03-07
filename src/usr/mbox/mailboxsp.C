@@ -241,13 +241,31 @@ void MailboxSp::msgHandler()
                     {
                         errlCommit(err,MBOX_COMP_ID);
 
-                        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOXSP HALTED on critical error!");
+                        TRACFCOMP(g_trac_mbox, ERR_MRK
+                                  "MBOXSP HALTED on critical error!");
                         crit_assert(0);
                     }
 
                     if(iv_shutdown_msg && quiesced())
                     {
-                        handleShutdown();
+                        // If all DMA buffers still not owned
+                        // try once to get them all back.
+                        if(!iv_dmaBuffer.ownsAllBlocks() &&
+                           !iv_dmaBuffer.shutdownDmaRequestSent())
+                        {
+                            iv_dmaBuffer.setShutdownDmaRequestSent(true);
+                            mbox_msg_t  dma_request_msg;
+                            dma_request_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+                            dma_request_msg.msg_payload.type =
+                                MSG_REQUEST_DMA_BUFFERS;
+                            dma_request_msg.msg_payload.__reserved__async = 1;
+
+                            send_msg(&dma_request_msg);
+                        }
+                        else
+                        {
+                            handleShutdown();
+                        }
                     }
 
                     if(iv_suspended && quiesced())
@@ -295,8 +313,33 @@ void MailboxSp::msgHandler()
                         resume();
                     }
 
+                    // Deal with messages never claimed by any HB component
                     handleUnclaimed();
-                    if(quiesced())
+
+                    // State:  MBOX is quiesced() and owns all the DMA buffers
+                    // Action: handleShutdown() now
+                    //
+                    // State:  MBOX is quiesced(), but does not own all the DMA
+                    //         buffers
+                    // Action: Must send message to retrieve the buffers.
+                    //
+                    // State:  MBOX is still busy
+                    // Action: Send message to retrieve the DMA buffers if one
+                    //         is not pending, but may not get them all back
+                    //         at this time.
+                    //
+                    if(!iv_dmaBuffer.ownsAllBlocks() && !iv_dma_pend)
+                    {
+                        mbox_msg_t  dma_request_msg;
+                        dma_request_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+                        dma_request_msg.msg_payload.type =
+                            MSG_REQUEST_DMA_BUFFERS;
+                        dma_request_msg.msg_payload.__reserved__async = 1;
+
+                        send_msg(&dma_request_msg);
+                    }
+
+                    if(quiesced()) //already in shutdown state
                     {
                         handleShutdown();       // done - shutdown now.
                     }
@@ -587,7 +630,6 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                 iv_msg_to_send.msg_payload.data[1] = 0;
                 iv_msg_to_send.msg_payload.extra_data = NULL;
                 iv_msg_to_send.msg_payload.__reserved__async = 1;
-                iv_dma_pend = true;
             }
             else
             {
@@ -641,6 +683,12 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
     {
         size_t mbox_msg_len = sizeof(mbox_msg_t);
         iv_rts = false;
+
+        if(iv_msg_to_send.msg_queue_id == FSP_MAILBOX_MSGQ &&
+           iv_msg_to_send.msg_payload.type == MSG_REQUEST_DMA_BUFFERS)
+        {
+            iv_dma_pend = true;
+        }
 
         trace_msg("SEND",iv_msg_to_send);
 
@@ -1039,39 +1087,13 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
 
 void MailboxSp::handle_hbmbox_resp(mbox_msg_t & i_mbox_msg)
 {
-
     //Response for more DMA buffers
-    if(i_mbox_msg.msg_payload.data[0] != 0)
-    {
-        iv_dmaBuffer.addBuffers
-            (i_mbox_msg.msg_payload.data[0]);
-        iv_dma_pend = false;
-        send_msg(); // send next message on queue
-    }
-    else // This is not really a response from the FSP
-        // This is an echo back from echo server of a req the HB MBOX sent.
-    {
-        // This message should never come from the real FSP, so it must be
-        // from the echo server. Responding to the echo server will
-        // make the message echo back again as if it were a response from the
-        // FSP. Since it's not possible to know which buffers the FSP owns, for
-        // testing purposes play the role of the FSP and assume the FSP owns
-        // all DMA buffers and will return them all.
-        // TODO This should probably be removed when/if the echo server
-        // is no longer used.
-        TRACFCOMP(g_trac_mbox,"FAKEFSP returning all DMA buffers");
+    iv_dmaBuffer.addBuffers
+        (i_mbox_msg.msg_payload.data[0]);
 
-        i_mbox_msg.msg_payload.data[0] = 0xFFFFFFFFFFFFFFFF;
+    iv_dma_pend = false;
 
-        // Since the HB is waiting for DMA buffers and holding up all other
-        // messages, just sneek this one on the front of the queue, disable
-        // the dma_pending flag to just long enough to send this message.
-        // All other values in the msg should be left as is.
-        iv_dma_pend = false;
-        iv_sendq.push_front(i_mbox_msg);
-        send_msg(); // respond
-        iv_dma_pend = true;
-    }
+    send_msg(); // send next message, if there is one
 }
 
 /**

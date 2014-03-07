@@ -131,7 +131,10 @@ namespace MBOX
                 /**
                  * Default constructor
                  */
-                mbox_msg_t() : msg_id(0), msg_queue_id(0), msg_payload() {}
+                mbox_msg_t() : msg_id(0), msg_queue_id(0), msg_payload()
+                {
+                    memset(&msg_payload,'\0',sizeof(msg_t));
+                }
             };
 
             // Private functions
