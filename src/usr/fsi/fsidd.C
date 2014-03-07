@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <targeting/common/commontargeting.H>
 #include "errlud_fsi.H"
+#include <util/misc.H>
 
 // FSI : General driver traces
 trace_desc_t* g_trac_fsi = NULL;
@@ -2406,6 +2407,18 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
         //nothing to check here in operations directed at FSI Master
         return NULL;
     }
+
+    //@fixme-RTC:87909 - temporary simics workaround
+    //Skip MAEB check on Brazos for now
+    if( Util::isSimicsRunning() )
+    {
+        if( iv_master->getAttr<TARGETING::ATTR_MODEL>()
+            == TARGETING::MODEL_VENICE )
+        {
+            return NULL;
+        }
+    }
+
 
     uint32_t maeb_reg = getControlReg(i_addrInfo.accessInfo.type)|FSI_MAEB_070;
 
