@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.C,v 1.16 2013/05/17 15:53:47 jklazyns Exp $
+// $Id: proc_tod_setup.C,v 1.18 2014/03/06 15:52:15 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -140,6 +140,7 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
 {
     fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
+    ecmdDataBufferBase data2(64);
     uint32_t rc_ecmd = 0;
     fapi::Target* target = i_tod_node->i_target;
 
@@ -161,8 +162,15 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         {
             if (is_mdmt)
             {
-                rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL); // For primary master, use master path 0 (path_0_sel=OFF)
                 rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_PRI_M_S_TOD_SEL);
+                if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
+                {
+                   rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
+                }
+                else // i_osc_sel == TOD_OSC_1
+                {
+                   rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
+                }
             }
             else // Slave nodes (Drawer master is still a slave)
             {
@@ -177,8 +185,15 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         {
             if (is_mdmt)
             {
-                rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);  // For secondary master, use master path 1 (path_1_sel=ON)
                 rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_S_TOD_SEL);
+                if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
+                {
+                   rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
+                }
+                else // i_osc_sel == TOD_OSC_1
+                {
+                   rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
+                }
             }
             else // Slave nodes (Drawer master is still a slave)
             {
@@ -260,16 +275,23 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
 
         // TOD_PRI_PORT_0_CTRL_REG_00040001 is only used for Primary configurations
         // TOD_SEC_PORT_1_CTRL_REG_00040004 is only used for Secondary configurations
+        // In order to check primary and secondary networks are working simultaneously...
+        //  - The result of TOD_PRI_PORT_0_CTRL_REG_00040001 are also inserted into TOD_SEC_PORT_0_CTRL_REG_00040003
+        //    (preserving i_path_delay which can be different between 40001 and 40003)
+        //  - The result of TOD_SEC_PORT_1_CTRL_REG_00040004 are also inserted into TOD_PRI_PORT_1_CTRL_REG_00040002
         uint32_t port_ctrl_reg = 0;
+        uint32_t port_ctrl_check_reg = 0;
         if (i_tod_sel==TOD_PRIMARY)
         {
             FAPI_DBG("configure_tod_node: TOD_PRI_PORT_0_CTRL_REG_00040001 will be configured for primary topology");
             port_ctrl_reg = TOD_PRI_PORT_0_CTRL_REG_00040001;
+            port_ctrl_check_reg = TOD_SEC_PORT_0_CTRL_REG_00040003;
         }
         else // (i_tod_sel==TOD_SECONDARY)
         {
             FAPI_DBG("configure_tod_node: TOD_SEC_PORT_1_CTRL_REG_00040004 will be configured for secondary topology");
             port_ctrl_reg = TOD_SEC_PORT_1_CTRL_REG_00040004;
+            port_ctrl_check_reg = TOD_PRI_PORT_1_CTRL_REG_00040002;
         }
 
         // Read port_ctrl_reg in order to perserve any prior configuration
@@ -277,6 +299,14 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         if (!rc.ok())
         {
             FAPI_ERR("configure_tod_node: Error from fapiGetScom when retrieving port_ctrl_reg!");
+            break;
+        }
+
+        // Read port_ctrl_check_reg in order to perserve any prior configuration
+        rc = fapiGetScom(*target,port_ctrl_check_reg,data2);
+        if (!rc.ok())
+        {
+            FAPI_ERR("configure_tod_node: Error from fapiGetScom when retrieving port_ctrl_check_reg!");
             break;
         }
 
@@ -296,16 +326,19 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         rc_ecmd |= data.insertFromRight(port_rx_select_val,
                                         TOD_PORT_CTRL_REG_RX,
                                         TOD_PORT_CTRL_REG_RX_LEN);
+        rc_ecmd |= data2.insertFromRight(port_rx_select_val,
+                                        TOD_PORT_CTRL_REG_RX,
+                                        TOD_PORT_CTRL_REG_RX_LEN);
 
         //Determine which tx path should be selected for all children
         uint32_t path_sel = 0;
         if (is_mdmt)
         {
-            if (i_tod_sel==TOD_PRIMARY)
+            if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
             {
                 path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
             }
-            else // (i_tod_sel==TOD_SECONDARY)
+            else // i_osc_sel == TOD_OSC_1
             {
                 path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
             }
@@ -348,6 +381,8 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             }
             rc_ecmd |= data.insertFromRight(path_sel, bus_sel, TOD_PORT_CTRL_REG_TX_LEN);
             rc_ecmd |= data.setBit(bus_sel_en);
+            rc_ecmd |= data2.insertFromRight(path_sel, bus_sel, TOD_PORT_CTRL_REG_TX_LEN);
+            rc_ecmd |= data2.setBit(bus_sel_en);
         }
         if (!rc.ok())
         {
@@ -355,16 +390,22 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         }
         if (rc_ecmd)
         {
-            FAPI_ERR("configure_tod_node: Error 0x%08X in ecmdDataBuffer setup for port_ctrl_reg SCOM.",  rc_ecmd);
+            FAPI_ERR("configure_tod_node: Error 0x%08X in ecmdDataBuffer setup for port_ctrl_reg/port_ctrl_check_reg SCOM.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
 
-        // All children have been configured; save register!
+        // All children have been configured; save both port configurations!
         rc = fapiPutScom(*target,port_ctrl_reg,data);
         if (!rc.ok())
         {
             FAPI_ERR("configure_tod_node: fapiPutScom error for port_ctrl_reg SCOM.");
+            break;
+        }
+        rc = fapiPutScom(*target,port_ctrl_check_reg,data2);
+        if (!rc.ok())
+        {
+            FAPI_ERR("configure_tod_node: fapiPutScom error for port_ctrl_check_reg SCOM.");
             break;
         }
 
@@ -768,8 +809,7 @@ fapi::ReturnCode calculate_node_link_delay(tod_topology_node* i_tod_node,
         }
         else // slave node
         {
-            // JK fixed compile issue
-            uint32_t bus_mode_addr  = 0;
+            uint32_t bus_mode_addr = 0;
             uint32_t bus_mode_sel = 0;
             uint32_t bus_freq = 0;
             uint8_t  bus_delay = 0;
