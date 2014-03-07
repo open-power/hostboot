@@ -122,7 +122,7 @@ chip Proc
         capture     group never;
     };
 
-    register NEW_FAILED_LANES_0TO63
+    register ALL_FAILED_LANES_0TO63
     {
         name        "Bit map 0-63 of failed lanes from io_read_erepair";
         scomaddr    0xFFFF0003;
@@ -130,7 +130,7 @@ chip Proc
         capture     group never;
     };
 
-    register NEW_FAILED_LANES_64TO127
+    register ALL_FAILED_LANES_64TO127
     {
         name        "Bit map 64-127 of failed lanes from io_read_erepair";
         scomaddr    0xFFFF0004;

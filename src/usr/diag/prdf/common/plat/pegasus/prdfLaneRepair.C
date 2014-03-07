@@ -123,11 +123,11 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
         // Add failed lane capture data to errorlog
         i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                ( Util::hashString("NEW_FAILED_LANES_0TO63") ^
+                                ( Util::hashString("ALL_FAILED_LANES_0TO63") ^
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap0to63);
         i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                ( Util::hashString("NEW_FAILED_LANES_64TO127") ^
+                                ( Util::hashString("ALL_FAILED_LANES_64TO127") ^
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap64to127);
 
