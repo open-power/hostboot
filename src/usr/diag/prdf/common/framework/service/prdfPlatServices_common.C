@@ -714,7 +714,7 @@ int32_t mss_MaintCmdWrapper::cleanupCmd()
 // Helper function for the other createMssCmd() functions.
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TargetHandle_t i_mba, uint32_t i_stopCond,
-                                    bool i_isFastSpeed,
+                                    mss_MaintCmd::TimeBaseSpeed i_cmdSpeed,
                                     ecmdDataBufferBase i_startAddr,
                                     ecmdDataBufferBase i_endAddr )
 {
@@ -722,23 +722,19 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 
     mss_MaintCmdWrapper * o_cmd = NULL;
 
-    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::BG_SCRUB;
-    if ( i_isFastSpeed )
-        cmdSpeed = mss_MaintCmd::FAST_MAX_BW_IMPACT;
-
     mss_MaintCmd * cmd = NULL;
 
     switch ( i_cmdType )
     {
         case mss_MaintCmdWrapper::TIMEBASE_SCRUB:
             cmd = new mss_TimeBaseScrub( getFapiTarget(i_mba), i_startAddr,
-                                         i_endAddr, cmdSpeed, i_stopCond,
+                                         i_endAddr, i_cmdSpeed, i_stopCond,
                                          false );
             break;
         case mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP:
             cmd = new mss_TimeBaseSteerCleanup( getFapiTarget(i_mba),
                                                 i_startAddr, i_endAddr,
-                                                cmdSpeed, i_stopCond, false );
+                                                i_cmdSpeed, i_stopCond, false );
             break;
         case mss_MaintCmdWrapper::SUPERFAST_READ:
             cmd = new mss_SuperFastRead( getFapiTarget(i_mba), i_startAddr,
@@ -761,6 +757,7 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TargetHandle_t i_mba,
                                     const CenRank & i_rank, uint32_t i_stopCond,
+                                    mss_MaintCmd::TimeBaseSpeed i_cmdSpeed,
                                     uint32_t i_flags,
                                     const CenAddr * i_sAddrOverride )
 {
@@ -768,7 +765,6 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 
     bool slaveOnly = ( 0 != (i_flags & mss_MaintCmdWrapper::SLAVE_RANK_ONLY) );
     bool allMemory = ( 0 != (i_flags & mss_MaintCmdWrapper::END_OF_MEMORY  ) );
-    bool fastScrub = ( 0 == (i_flags & mss_MaintCmdWrapper::BG_SCRUB       ) );
 
     do
     {
@@ -796,7 +792,7 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
         }
 
         // Create the command
-        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, fastScrub,
+        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, i_cmdSpeed,
                               sAddr, eAddr );
 
     } while (0);

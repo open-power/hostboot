@@ -64,7 +64,6 @@ CenMbaTdCtlr::FUNCS CenMbaTdCtlr::cv_cmdCompleteFuncs[] =
     &CenMbaTdCtlr::analyzeDsdPhase2,        // DSD_PHASE_2
     &CenMbaTdCtlr::analyzeTpsPhase1,        // TPS_PHASE_1
     &CenMbaTdCtlr::analyzeTpsPhase2,        // TPS_PHASE_2
-    NULL,                                   // RANK_SCRUB
 };
 
 //------------------------------------------------------------------------------
@@ -245,10 +244,14 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
             break;
         }
 
+        mss_MaintCmd::TimeBaseSpeed cmdSpeed = enableFastBgScrub()
+                                            ? mss_MaintCmd::FAST_MED_BW_IMPACT
+                                            : mss_MaintCmd::FAST_MIN_BW_IMPACT;
+
         // Start the initial fast scrub.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
                                   iv_mbaTrgt, startAddr.getRank(),
-                                  COND_FAST_SCRUB,
+                                  COND_FAST_SCRUB, cmdSpeed,
                                   mss_MaintCmdWrapper::END_OF_MEMORY );
         if ( NULL == iv_mssCmd )
         {
@@ -1026,6 +1029,7 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         // Start phase 1.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
                                   iv_mbaTrgt, iv_rank, COND_TARGETED_CMD,
+                                  mss_MaintCmd::FAST_MAX_BW_IMPACT,
                                   mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( NULL == iv_mssCmd )
         {
@@ -1079,6 +1083,7 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         // Start phase 2.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
                                   iv_mbaTrgt, iv_rank, COND_TARGETED_CMD,
+                                  mss_MaintCmd::FAST_MAX_BW_IMPACT,
                                   mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( NULL == iv_mssCmd )
         {

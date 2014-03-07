@@ -367,10 +367,6 @@ class mss_MaintCmdWrapper
          *  to the end of memory. Default is to run to the end of the rank. */
         END_OF_MEMORY   = 0x01,
 
-        /** When set, the command will run once every 12/24 hours. Default is to
-         *  run as fast as possible. */
-        BG_SCRUB        = 0x02,
-
         /** When set, the command will run on the slave rank only. Default is to
          *  run on the entire master rank. */
         SLAVE_RANK_ONLY = 0x04,
@@ -426,6 +422,7 @@ class mss_MaintCmdWrapper
  * @param  i_rank          The first rank to start with (see enum CtrlFlags for
  *                         more details).
  * @param  i_stopCond      Bit mask for conditions in which to stop command.
+ * @param  i_cmdSpeed      See enum mss_MaintCmd::TimeBaseSpeed for details.
  * @param  i_flags         See enum CtrlFlags for details.
  * @param  i_sAddrOverride A non-NULL value indicates to use this start address
  *                         and not the start address of i_rank.
@@ -439,9 +436,10 @@ class mss_MaintCmdWrapper
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                             TARGETING::TargetHandle_t i_mba,
                             const CenRank & i_rank, uint32_t i_stopCond,
+                            mss_MaintCmd::TimeBaseSpeed i_cmdSpeed
+                                            = mss_MaintCmd::FAST_MAX_BW_IMPACT,
                             uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS,
                             const CenAddr * i_sAddrOverride = NULL );
-
 
 //##############################################################################
 //##                        util functions
@@ -454,8 +452,6 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
  */
 void captureFsiStatusReg( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
-
-
 
 } // end namespace PlatServices
 

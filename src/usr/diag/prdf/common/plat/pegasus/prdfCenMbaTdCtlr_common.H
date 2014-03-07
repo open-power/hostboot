@@ -79,7 +79,6 @@ class CenMbaTdCtlrCommon
         DSD_PHASE_2,     ///< DRAM Spare Deploy phase 2.
         TPS_PHASE_1,     ///< Two-Phase Scrub phase 1.
         TPS_PHASE_2,     ///< Two-Phase Scrub phase 2.
-        RANK_SCRUB,      ///< Targetted fast scrub on a rank.
         MAX_TD_STATE     ///< The maximum number of TD states.
     };
 

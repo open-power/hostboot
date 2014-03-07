@@ -36,7 +36,6 @@ PRDR_ERROR_SIGNATURE(StartDsdPhase2,  0xffff0003, "", "Starting DSD phase 2");
 PRDR_ERROR_SIGNATURE(StartTpsPhase1,  0xffff0004, "", "Starting TPS phase 1");
 PRDR_ERROR_SIGNATURE(StartTpsPhase2,  0xffff0005, "", "Starting TPS phase 2");
 PRDR_ERROR_SIGNATURE(EndTpsPhase2,    0xffff0006, "", "TPS Phase 2 completed");
-PRDR_ERROR_SIGNATURE(StartRankScrub,  0xffff0007, "", "Starting rank scrub");
 
 PRDR_ERROR_SIGNATURE(MaintUE,        0xffff0010, "", "Maintenance UE");
 PRDR_ERROR_SIGNATURE(MaintMPE,       0xffff0011, "", "Maintenance MPE");
