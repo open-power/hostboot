@@ -48,6 +48,7 @@
 #include <targeting/targplatutil.H>
 #include <targeting/targplatreasoncodes.H>
 #include <attributetraits.H>
+#include <targeting/common/utilFilter.H>
 
 #undef EXTRA_SANITY_CHECKING
 
@@ -70,6 +71,7 @@ namespace TARGETING
 #else
 #define MAX_ENABLED_NODE_ID 2
 #endif
+
 
 //******************************************************************************
 // targetService
@@ -136,6 +138,7 @@ TargetService::~TargetService()
 
     #undef TARG_FN
 }
+
 
 //******************************************************************************
 // TargetService::init
@@ -927,6 +930,12 @@ void TargetService::getAssociated(
     (void)_getAssociationsViaDfs(
         o_list,i_pTarget,i_type,i_recursionLevel,i_pPredicate);
     } while (0);
+
+    // If target vector contains more than one element, sorty by HUID
+    if (o_list.size() > 1)
+    {
+        std::sort(o_list.begin(),o_list.end(),compareTargetHuid);
+    }
 
     #undef TARG_FN
 }

@@ -487,6 +487,14 @@ void*    call_mss_power_cleanup( void    *io_pArgs )
             continue;
         }
 
+        // Dump current run on target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_power_cleanup HWP on "
+                "Centaur HUID %.8X, MBA0 HUID %.8X, "
+                "MBA1 HUID %.8X, ", l_currCentaurHuid,
+                        TARGETING::get_huid(l_presMbas[0]),
+                        TARGETING::get_huid(l_presMbas[1]));
+
         // Create FAPI Targets.
         const fapi::Target l_fapiCentaurTarget(TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_pCentaur)));

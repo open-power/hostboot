@@ -307,12 +307,6 @@ void getChildChiplets( TARGETING::TargetHandleList& o_vector,
                 TARGETING::TargetService::ALL,
                 &l_chipletFilter );
     }
-
-    // If chiplet vector contains more than one element, sorty by HUID
-    if (o_vector.size() > 1)
-    {
-        std::sort(o_vector.begin(),o_vector.end(),compareTargetHuid);
-    }
 }
 
 void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
@@ -346,7 +340,6 @@ void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
                 TARGETING::TargetService::ALL,
                 &l_targetFilter );
     }
-
 }
 
 void getChildAffinityTargets(
@@ -545,7 +538,12 @@ void getPeerTargets(
             }
         }
     } while(0);
-
+    // If target vector contains more than one element, sorty by HUID
+    if (o_peerTargetList.size() > 1)
+    {
+        std::sort(o_peerTargetList.begin(),o_peerTargetList.end(),
+                    compareTargetHuid);
+    }
     TARG_EXIT();
     #undef TARG_FN
 }

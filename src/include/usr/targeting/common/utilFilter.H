@@ -52,6 +52,16 @@ namespace TARGETING
 
 
 /**
+ * @brief Predicate function to sort by HUID
+ *
+ * @parm[in]  t1, Target 1 for HUID comparison against target 2
+ * @parm[in]  t2, Target 2 for HUID comparison against target 1
+ *
+ * @return bool, true if t1 HUID < t2 HUID, false otherwise
+ */
+bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2);
+
+/**
  * @brief Populate the o_vector with target chip pointers based on the
  *        requested type, and functional state.
  *
