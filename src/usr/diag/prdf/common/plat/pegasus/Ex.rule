@@ -1155,7 +1155,7 @@ group gCoreFir filter singlebit
     /** COREFIR[26]
      *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
      */
-    (CoreFir, bit(26)) ? callout2ndLvlDumpSh;
+    (CoreFir, bit(26)) ? callout2ndLvlDumpShNoGard;
 
     /** COREFIR[27]
      *  DU_LOG_REC_ERR: logic recoverable error
@@ -1240,7 +1240,7 @@ group gCoreFir filter singlebit
     /** COREFIR[43]
      *  THREAD_HANG_REC_ERR: thread hang recoverable error
      */
-    (CoreFir, bit(43)) ? SelfAndLevel2MedThr5PerHr;
+    (CoreFir, bit(43)) ? SelfAndLevel2MedThr5PerHrNoGard;
 
     /** COREFIR[44]
      *  FIR_LOG_RECOV_ERR: logic recoverable error
@@ -1295,13 +1295,13 @@ group gCoreFir filter singlebit
     /** COREFIR[54]
      *  AMBI_HANG_DETECT: Hang detected unknown source
      */
-    (CoreFir, bit(54)) ? calloutExAndSecLvlThr1;
+    (CoreFir, bit(54)) ? calloutExAndSecLvlThr1NoGard;
 
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
      */
     # FIXME: RTC 85697: Make sure this is SUE-CS bit
-    (CoreFir, bit(55)) ? calloutProcLow2ndLvlMedThr1SUE;
+    (CoreFir, bit(55)) ? calloutProcLow2ndLvlMedThr1SUE_NoGard;
 
     /** COREFIR[56|57|58]
      *  RESERVED
@@ -1409,12 +1409,12 @@ group gL2Fir filter singlebit
     /** L2FIR[12]
      *  RC_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(12)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(12)) ? callout2ndLvlMedThr1NoGard;
 
     /** L2FIR[13]
      *  NCU_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(13)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(13)) ? callout2ndLvlMedThr1NoGard;
 
     /** L2FIR[14]
      *  HW_CONTROL_ERROR
@@ -1479,27 +1479,27 @@ group gL2Fir filter singlebit
     /** L2FIR[26]
      *  HA_LOG_STOP_SW_ERR
      */
-    (L2Fir, bit(26)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(26)) ? defaultMaskedError;
 
     /** L2FIR[27]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
      */
-    (L2Fir, bit(27)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(27)) ? defaultMaskedError;
 
     /** L2FIR[28]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
      */
-    (L2Fir, bit(28)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(28)) ? defaultMaskedError;
 
     /** L2FIR[29]
      *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
      */
-    (L2Fir, bit(29)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(29)) ? defaultMaskedError;
 
     /** L2FIR[30]
      *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
      */
-    (L2Fir, bit(30)) ? callout2ndLvlMedThr1;
+    (L2Fir, bit(30)) ? defaultMaskedError;
 
     /** L2FIR[31]
      *  ILLEGAL_MPALOG_TPID_SW_ERR
@@ -1652,22 +1652,22 @@ group gL3Fir filter singlebit
     /** L3FIR[19]
      *  Reserved field (Access type is l3_flink_0_load_ack_dead)
      */
-    (L3Fir, bit(19)) ? callout2ndLvlMedThr1;
+    (L3Fir, bit(19)) ? callout2ndLvlMedThr1NoGard;
 
     /** L3FIR[20]
      *  Reserved field (Access type is l3_flink_0_store_ack_dead)
      */
-    (L3Fir, bit(20)) ? callout2ndLvlMedThr1;
+    (L3Fir, bit(20)) ? callout2ndLvlMedThr1NoGard;
 
     /** L3FIR[21]
      *  Reserved field (Access type is l3_flink_1_load_ack_dead)
      */
-    (L3Fir, bit(21)) ? callout2ndLvlMedThr1;
+    (L3Fir, bit(21)) ? callout2ndLvlMedThr1NoGard;
 
     /** L3FIR[22]
      *  Reserved field (Access type is l3_flink_1_store_ack_dead)
      */
-    (L3Fir, bit(22)) ? callout2ndLvlMedThr1;
+    (L3Fir, bit(22)) ? callout2ndLvlMedThr1NoGard;
 
     /** L3FIR[23]
      *  L3 Machine Hang
@@ -1732,7 +1732,7 @@ group gL3Fir filter singlebit
     /** L3FIR[35]
      *  L3 HA Log Overflow
      */
-    (L3Fir, bit(35)) ? callout2ndLvlDumpSW;
+    (L3Fir, bit(35)) ? defaultMaskedError;
 
     /** L3FIR[36]
      *  SCOM_ERR: scom error
@@ -1997,27 +1997,30 @@ actionclass calloutParentProcLow
     callout(connected(TYPE_PROC),MRU_LOW);
 };
 
-/** calls out Ex if threshold exceeds. Calls for second level support as well*/
-actionclass SelfAndLevel2MedThr5PerHr
+/** calls out Ex if threshold exceeds. Calls for second level support as well,
+ *  garding not required */
+actionclass SelfAndLevel2MedThr5PerHrNoGard
 {
     calloutSelfMed;
     callout2ndLvlMed;
     threshold5phour;
+    gard(NoGard);
 };
 
-/** callouts Proc on first instance. Calls for second level support as well*/
-actionclass calloutProcLow2ndLvlMedThr1dumpSh
+/** callouts Proc on first instance. Calls for second level support as well,
+ *  garding not done */
+actionclass calloutProcLow2ndLvlMedThr1
 {
     calloutParentProcLow;
-    callout2ndLvlMedThr1dumpSh;
+    callout2ndLvlMedThr1NoGard;
 };
 
 /** callouts Proc on first instance. Calls for second level support as well.
- *  Set SUE flag */
-actionclass calloutProcLow2ndLvlMedThr1SUE
+ *  Set SUE flag, garding not done */
+actionclass calloutProcLow2ndLvlMedThr1SUE_NoGard
 {
     calloutParentProcLow;
-    callout2ndLvlMedThr1;
+    callout2ndLvlMedThr1NoGard;
     flag(SUE);
 };
 
@@ -2047,11 +2050,12 @@ actionclass calloutExThr32pDay
 };
 
 /** callout Ex,Sec Level on first instance ,initiate software
- *  and Hardware dump */
-actionclass calloutExAndSecLvlThr1
+ *  and Hardware dump, garding not done */
+actionclass calloutExAndSecLvlThr1NoGard
 {
     calloutSelfAndLevel2MedThr1;
     dumpSH;
+    gard(NoGard);
 };
 
 actionclass calloutExLowSecLvlThr1MedDumpSh
@@ -2060,3 +2064,10 @@ actionclass calloutExLowSecLvlThr1MedDumpSh
     dumpSH;
 };
 
+/** callouts Proc on first instance. Calls for second level support as well
+ *  Initiate an SH dump, no gard */
+actionclass calloutProcLow2ndLvlMedThr1dumpSh
+{
+    calloutProcLow2ndLvlMedThr1;
+    dumpSH;
+};

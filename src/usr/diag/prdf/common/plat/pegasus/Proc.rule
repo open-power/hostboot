@@ -424,21 +424,23 @@ actionclass calloutProcLevel2MedThr1
 };
 
 /** callout Proc with low priority ,Sec level Med priority, Thr1
- *  and dump type SH */
-actionclass calloutProcLevel2MedThr1dumpSh
+ *  and dump type SH, garding not done */
+actionclass calloutProcLevel2MedThr1dumpShNoGard
 {
     calloutProcLevel2MedThr1;
     dumpSH;
+    gard(NoGard);
 };
 
 /** callout Proc with low priority ,Sec level Med priority, Thr 32per day
- *  and dump type SH */
-actionclass calloutProcLevel2MedThr32dumpSh
+ *  and dump type SH , garding not done */
+actionclass calloutProcLevel2MedThr32dumpShNoGard
 {
     calloutSelfLow;
     callout2ndLvlMed;
     threshold32pday;
     dumpSH;
+    gard(NoGard);
 };
 
 actionclass calloutProcHighThr1SUE

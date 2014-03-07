@@ -477,7 +477,7 @@ group gNxCqFir filter singlebit
     /** NXCQFIR[6]
      *  PowerBus data hang error
      */
-    (NxCqFir, bit(6)) ? callout2ndLvlMedThr1;
+    (NxCqFir, bit(6)) ? callout2ndLvlMedThr1NoGard;
 
     /** NXCQFIR[7]
      *  PowerBus command hang error
@@ -497,7 +497,7 @@ group gNxCqFir filter singlebit
     /** NXCQFIR[10]
      *  PowerBus miscellaneous error
      */
-    (NxCqFir, bit(10)) ? callout2ndLvlMedThr1;
+    (NxCqFir, bit(10)) ? callout2ndLvlMedThr1NoGard;
 
     /** NXCQFIR[11]
      *  MMIO BAR parity error
@@ -598,7 +598,7 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[8]
      *  SNOOP_ARRAY_CE
      */
-    (NxCxaFir, bit(8)) ? callout2ndLvlMedThr32perDay;
+    (NxCxaFir, bit(8)) ? callout2ndLvlMedThr32NoGard;
 
     /** NXCXAFIR[9]
      *  SNOOP_ARRAY_UE
@@ -703,12 +703,12 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[29]
      *  LD_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(29)) ? callout2ndLvlMedThr1dumpSh;
+    (NxCxaFir, bit(29)) ? callout2ndLvlMedThr1NoGard;
 
     /** NXCXAFIR[30]
      *  ST_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(30)) ? callout2ndLvlMedThr1dumpSh;
+    (NxCxaFir, bit(30)) ? callout2ndLvlMedThr1NoGard;
 
     /** NXCXAFIR[31]
      *  PHB_LINK_DOWN
@@ -728,7 +728,7 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[34]
      *  XPT_POWERBUS_CE
      */
-    (NxCxaFir, bit(34)) ? callout2ndLvlMedThr32perDay;
+    (NxCxaFir, bit(34)) ? callout2ndLvlMedThr32NoGard;
 
     /** NXCXAFIR[35]
      *  XPT_POWERBUS_UE
@@ -1330,7 +1330,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[2]
      *  PB_ECC_ERR_SUE
      */
-    (PsiHbFir, bit(2)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(2)) ? callout2ndLvlMedThr1NoGard;
 
     /** PSIHBFIR[3]
      *  INTERRUPT_FROM_ERROR
@@ -1360,32 +1360,32 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[8]
      *  INVALID_TTYPE
      */
-    (PsiHbFir, bit(8)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(8)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[9]
      *  INVALID_CRESP
      */
-    (PsiHbFir, bit(9)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(9)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[10]
      *  PB_DATA_TIME_OUT
      */
-    (PsiHbFir, bit(10)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(10)) ? callout2ndLvlMedThr1NoGard;
 
     /** PSIHBFIR[11]
      *  PB_PARITY_ERROR
      */
-    (PsiHbFir, bit(11)) ? callout2ndLvlMedThr1dumpSh;
+    (PsiHbFir, bit(11)) ? callout2ndLvlMedThr1NoGard;
 
     /** PSIHBFIR[12]
      *  FSP_ACCESS_TRUSTED_SPACE
      */
-    (PsiHbFir, bit(12)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(12)) ? callout2ndLvlMedThr1NoGard;
 
     /** PSIHBFIR[13]
      *  UNEXPECTED_PB
      */
-    (PsiHbFir, bit(13)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(13)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[14]
      *  INTERRUPT_REG_CHANGE_WHILE_ACTIVE
@@ -1395,32 +1395,32 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[15]
      *  INTERRUPT0_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(15)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(15)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[16]
      *  INTERRUPT1_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(16)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(16)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[17]
      *  INTERRUPT2_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(17)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(17)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[18]
      *  INTERRUPT3_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(18)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(18)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[19]
      *  INTERRUPT4_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(19)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(19)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[20]
      *  INTERRUPT5_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(20)) ? calloutProcLevel2MedThr1dumpSh;
+    (PsiHbFir, bit(20)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PSIHBFIR[21]
      *  TCBR_TP_PSI_GLB_ERR_0
@@ -1436,7 +1436,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[23]
      *  UPSTREAM_FIR
      */
-    (PsiHbFir, bit(23)) ? calloutProcLevel2MedThr32dumpSh;
+    (PsiHbFir, bit(23)) ? calloutProcLevel2MedThr32dumpShNoGard;
 
     /** PSIHBFIR[24|25|26]
      *  SPARE_FIR
@@ -1673,12 +1673,12 @@ group gPbaFir filter singlebit
     /** PBAFIR[1]
      *  PBAFIR_PB_RDADRERR_FW
      */
-    (PbaFir, bit(1)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(1)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[2]
      *  PBAFIR_PB_RDDATATO_FW
      */
-    (PbaFir, bit(2)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(2)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[3]
      *  PBAFIR_PB_SUE_FW
@@ -1693,17 +1693,17 @@ group gPbaFir filter singlebit
     /** PBAFIR[5]
      *  PBAFIR_PB_CE_FW
      */
-    (PbaFir, bit(5)) ? callout2ndLvlMedThr32perDay;
+    (PbaFir, bit(5)) ? callout2ndLvlMedThr32NoGard;
 
     /** PBAFIR[6]
      *  PBAFIR_OCI_SLAVE_INIT
      */
-    (PbaFir, bit(6)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(6)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[7]
      *  PBAFIR_OCI_WRPAR_ERR
      */
-    (PbaFir, bit(7)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(7)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[8]
      *  PBAFIR_OCI_REREQTO
@@ -1713,37 +1713,37 @@ group gPbaFir filter singlebit
     /** PBAFIR[9]
      *  PBAFIR_PB_UNEXPCRESP
      */
-    (PbaFir, bit(9)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(9)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[10]
      *  PBAFIR_PB_UNEXPDATA
      */
-    (PbaFir, bit(10)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(10)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[11]
      *  PBAFIR_PB_PARITY_ERR
      */
-    (PbaFir, bit(11)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(11)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[12]
      *  PBAFIR_PB_WRADRERR_FW
      */
-    (PbaFir, bit(12)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(12)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[13]
      *  PBAFIR_PB_BADCRESP
      */
-    (PbaFir, bit(13)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(13)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[14]
      *  PBAFIR_PB_ACKDEAD_FW
      */
-    (PbaFir, bit(14)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(14)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[15]
      *  PBAFIR_PB_CRESPTO
      */
-    (PbaFir, bit(15)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(15)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[16:19]
      *  PBAFIR_BCUE
@@ -1763,12 +1763,12 @@ group gPbaFir filter singlebit
     /** PBAFIR[29]
      *  PBAFIR_ILLEGAL_CACHE_OP
      */
-    (PbaFir, bit(29)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(29)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[30]
      *  PBAFIR_OCI_BAD_REG_ADDR
      */
-    (PbaFir, bit(30)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(30)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[31:39]
      *  PBAFIR_AX
@@ -1778,7 +1778,7 @@ group gPbaFir filter singlebit
     /** PBAFIR[40]
      *  PBAFIR_PB_ACKDEAD_FW_WR
      */
-    (PbaFir, bit(40)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(40)) ? callout2ndLvlMedThr1NoGard;
 
     /** PBAFIR[41:43]
      *  RESERVED
@@ -2369,32 +2369,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_0, bit(18)) ? callout2ndLvlMedThr1dumpSh;
+    (PciNestFir_0, bit(18)) ? callout2ndLvlMedThr1NoGard;
 
     /** PCINESTFIR_1[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_1, bit(18)) ? callout2ndLvlMedThr1dumpSh;
+    (PciNestFir_1, bit(18)) ? callout2ndLvlMedThr1NoGard;
 
     /** PCINESTFIR_2[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_2, bit(18)) ? callout2ndLvlMedThr1dumpSh;
+    (PciNestFir_2, bit(18)) ? callout2ndLvlMedThr1NoGard;
 
     /** PCINESTFIR_0[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_0, bit(19)) ? callout2ndLvlMedThr1dumpSh;
+    (PciNestFir_0, bit(19)) ? callout2ndLvlMedThr1NoGard;
 
     /** PCINESTFIR_1[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_1, bit(19)) ? callout2ndLvlMedThr1dumpSh;
+    (PciNestFir_1, bit(19)) ? callout2ndLvlMedThr1NoGard;
 
     /** PCINESTFIR_2[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_2, bit(19)) ? callout2ndLvlMedThr1dumpSh;
+    (PciNestFir_2, bit(19)) ? callout2ndLvlMedThr1NoGard;
 
     /** PCINESTFIR_0[20]
      *  INVALIDCRESP
@@ -3117,13 +3117,6 @@ actionclass thresholdAndMask_dmiBus6 { calloutDmiBus6; thresholdAndMask; };
 /** Callout DMI bus 7 with "Threshold and Mask" policy. */
 actionclass thresholdAndMask_dmiBus7 { calloutDmiBus7; thresholdAndMask; };
 
-/** Callout 2nd level support of first instance */
-actionclass callout2ndLvlMedThr1
-{
-    callout2ndLvlMed;
-    threshold1;
-};
-
 /** callout NX associated with Proc with a threshold of 32 per day*/
 actionclass calloutNxThr32
 {
@@ -3152,7 +3145,8 @@ actionclass calloutNxThr5pHr
 
 actionclass combinedResponseError
 {
-    callout2ndLvlMedThr1;
+    callout2ndLvlMed;
+    threshold1;
     funccall("combinedResponseCallout");
     funccall("analyzeMpIPL");
 };

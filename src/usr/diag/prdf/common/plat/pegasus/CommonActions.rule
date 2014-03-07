@@ -222,31 +222,33 @@ actionclass calloutSelfAndLevel2MedThr1
 };
 
 
-/** Callout 2nd level support of afer 32 events per day */
-actionclass callout2ndLvlMedThr32perDay
+/** Callout 2nd level support of afer 32 events per day, no gard */
+actionclass callout2ndLvlMedThr32NoGard
 {
     callout2ndLvlMed;
     threshold32pday;
+    gard(NoGard);
 };
 
-/** Callout 2nd Level support on first occurrence */
-actionclass callout2ndLvlMedThr1
+/** Callout 2nd Level support on first occurrence, no gard */
+actionclass callout2ndLvlMedThr1NoGard
 {
     callout2ndLvlMed;
     threshold1;
+    gard(NoGard);
 };
 
-/** Callout 2nd Level Medium,  set SUE generation point */
-actionclass callout2ndLvlMedThr1UE
+/** Callout 2nd Level Medium,  set SUE generation point, no gard */
+actionclass callout2ndLvlMedThr1UE_NoGard
 {
-    callout2ndLvlMedThr1;
+    callout2ndLvlMedThr1NoGard;
     SUEGenerationPoint;
 };
 
 /** Callout 2nd Level Medium, initiate SH dump */
 actionclass callout2ndLvlMedThr1dumpSh
 {
-    callout2ndLvlMedThr1;
+    callout2ndLvlMedThr1NoGard;
     dumpSH;
 };
 ################################################################################
@@ -277,16 +279,16 @@ actionclass dumpHwMembuf
 ################################################################################
 
 /** callout second lvl on first instance, initiaite SH dump */
-actionclass callout2ndLvlDumpSh
+actionclass callout2ndLvlDumpShNoGard
 {
-    callout2ndLvlMedThr1;
+    callout2ndLvlMedThr1NoGard;
     dumpSH;
 };
 
-/** Callout 2nd Level and dump SW */
-actionclass callout2ndLvlDumpSW
+/** Callout 2nd Level and dump SW , no garding*/
+actionclass callout2ndLvlDumpSwNoGard
 {
-    callout2ndLvlMedThr1;
+    callout2ndLvlMedThr1NoGard;
     dumpSW;
 };
 ################################################################################

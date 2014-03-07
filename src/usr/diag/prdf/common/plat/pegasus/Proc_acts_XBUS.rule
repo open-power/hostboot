@@ -254,7 +254,7 @@ group gPbenFir filter singlebit
     /** PBENFIR[15]
      *  X_LINK_CR_OVERFLOW: x link command/response/data buffer overflow
      */
-    (PbenFir, bit(15)) ? calloutProcLevel2MedThr1dumpSh;
+    (PbenFir, bit(15)) ? calloutProcLevel2MedThr1dumpShNoGard;
 
     /** PBENFIR[16]
      *  X0_LINK_FMR_ERR: x0 link framer error

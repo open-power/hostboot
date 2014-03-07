@@ -81,7 +81,7 @@ group gAbusLFir filter singlebit
     /** ABUS_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (AbusLFir, bit(3)) ? callout2ndLvlMedThr32perDay;
+    (AbusLFir, bit(3)) ? callout2ndLvlMedThr32NoGard;
 
     /** ABUS_LFIR[4]
      *  Local errors from PSC (PCB error)

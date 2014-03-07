@@ -332,7 +332,7 @@ group gTpLFir filter singlebit
     /** TP_LFIR[36]
      *  Deadman Timer
      */
-    (TpLFir, bit(36)) ? calloutMasterCoreThr1;
+    (TpLFir, bit(36)) ? calloutMasterCoreThr1NoGard;
 
     /** TP_LFIR[37|38|39]
      *  Unused error
@@ -408,7 +408,7 @@ group gOccFir filter singlebit
     /** OCCFIR[9]
      *  OCC_SCOM_OCCFIR_SRT_UE
      */
-    (OccFir, bit(9)) ? SelfMedThr1;
+    (OccFir, bit(9)) ? defaultMaskedError;
 
     /** OCCFIR[10]
      *  OCC_SCOM_OCCFIR_SRT_CE
@@ -418,32 +418,32 @@ group gOccFir filter singlebit
     /** OCCFIR[11]
      *  OCC_SCOM_OCCFIR_SRT_READ_ERROR
      */
-    (OccFir, bit(11)) ? SelfMedThr1;
+    (OccFir, bit(11)) ? defaultMaskedError;
 
     /** OCCFIR[12]
      *  OCC_SCOM_OCCFIR_SRT_WRITE_ERROR
      */
-    (OccFir, bit(12)) ? SelfMedThr1;
+    (OccFir, bit(12)) ? defaultMaskedError;
 
     /** OCCFIR[13]
      *  OCC_SCOM_OCCFIR_SRT_DATAOUT_PERR
      */
-    (OccFir, bit(13)) ? SelfMedThr1;
+    (OccFir, bit(13)) ? defaultMaskedError;
 
     /** OCCFIR[14]
      *  OCC_SCOM_OCCFIR_SRT_OCI_WRITE_DATA_PARITY
      */
-    (OccFir, bit(14)) ? SelfMedThr1;
+    (OccFir, bit(14)) ? defaultMaskedError;
 
     /** OCCFIR[15]
      *  OCC_SCOM_OCCFIR_SRT_OCI_BE_PARITY_ER
      */
-    (OccFir, bit(15)) ? SelfMedThr1;
+    (OccFir, bit(15)) ? defaultMaskedError;
 
     /** OCCFIR[16]
      *  OCC_SCOM_OCCFIR_SRT_OCI_ADDR_PARITY_ERR
      */
-    (OccFir, bit(16)) ? SelfMedThr1;
+    (OccFir, bit(16)) ? defaultMaskedError;
 
     /** OCCFIR[17]
      *  OCC_SCOM_OCCFIR_PORE_SW_ERROR_ERR
@@ -493,52 +493,52 @@ group gOccFir filter singlebit
     /** OCCFIR[26]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_TIMEOUT
      */
-    (OccFir, bit(26)) ? SelfMedThr1;
+    (OccFir, bit(26)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[27]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_READ_DATA_PARITY
      */
-    (OccFir, bit(27)) ? SelfMedThr1;
+    (OccFir, bit(27)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[28]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_SLAVE_ERROR
      */
-    (OccFir, bit(28)) ? SelfMedThr1;
+    (OccFir, bit(28)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[29]
      *  OCC_SCOM_OCCFIR_OCB_PIB_ADDR_PARITY_ERR
      */
-    (OccFir, bit(29)) ? SelfMedThr1;
+    (OccFir, bit(29)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[30]
      *  OCC_SCOM_OCCFIR_OCB_DB_PIB_DATA_PARITY_ERR
      */
-    (OccFir, bit(30)) ? SelfMedThr1;
+    (OccFir, bit(30)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[31]
      *  OCC_SCOM_OCCFIR_OCB_IDC0_ERROR
      */
-    (OccFir, bit(31)) ? SelfMedThr1;
+    (OccFir, bit(31)) ? defaultMaskedError;
 
     /** OCCFIR[32]
      *  OCC_SCOM_OCCFIR_OCB_IDC1_ERROR
      */
-    (OccFir, bit(32)) ? SelfMedThr1;
+    (OccFir, bit(32)) ? defaultMaskedError;
 
     /** OCCFIR[33]
      *  OCC_SCOM_OCCFIR_OCB_IDC2_ERROR
      */
-    (OccFir, bit(33)) ? SelfMedThr1;
+    (OccFir, bit(33)) ? defaultMaskedError;
 
     /** OCCFIR[34]
      *  OCC_SCOM_OCCFIR_OCB_IDC3_ERROR
      */
-    (OccFir, bit(34)) ? SelfMedThr1;
+    (OccFir, bit(34)) ? defaultMaskedError;
 
     /** OCCFIR[35]
      *  OCC_SCOM_OCCFIR_SRT_FSM_ERR
      */
-    (OccFir, bit(35)) ? SelfMedThr1;
+    (OccFir, bit(35)) ? defaultMaskedError;
 
     /** OCCFIR[36]
      *  OCC_SCOM_OCCFIR_JTAGACC_ERR
@@ -553,7 +553,7 @@ group gOccFir filter singlebit
     /** OCCFIR[38]
      *  OCC_SCOM_OCCFIR_C405_ECC_UE
      */
-    (OccFir, bit(38)) ? SelfMedThr1;
+    (OccFir, bit(38)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[39]
      *  OCC_SCOM_OCCFIR_C405_ECC_CE
@@ -588,27 +588,27 @@ group gOccFir filter singlebit
     /** OCCFIR[45]
      *  OCC_SCOM_OCCFIR_SLW_OCISLV_ERR
      */
-    (OccFir, bit(45)) ? SelfMedThr1;
+    (OccFir, bit(45)) ? SelfMedThr1NoGard;
 
     /** OCCFIR[46]
      *  OCC_SCOM_OCCFIR_GPE_OCISLV_ERR
      */
-    (OccFir, bit(46)) ? SelfMedThr1;
+    (OccFir, bit(46)) ? defaultMaskedError;
 
     /** OCCFIR[47]
      *  OCC_SCOM_OCCFIR_OCB_OCISLV_ERR
      */
-    (OccFir, bit(47)) ? SelfMedThr1;
+    (OccFir, bit(47)) ? defaultMaskedError;
 
     /** OCCFIR[48]
      *  OCC_SCOM_OCCFIR_C405ICU_M_TIMEOUT
      */
-    (OccFir, bit(48)) ? callout2ndLvlMedThr1;
+    (OccFir, bit(48)) ? defaultMaskedError;
 
     /** OCCFIR[49]
      *  OCC_SCOM_OCCFIR_C405DCU_M_TIMEOUT
      */
-    (OccFir, bit(49)) ? callout2ndLvlMedThr1;
+    (OccFir, bit(49)) ? defaultMaskedError;
 
     /** OCCFIR[50]
      *  OCC initiated attention
@@ -787,7 +787,7 @@ group gPmcFir filter singlebit
      */
     (PmcFir, bit(26|27|28|29|30|31|32)) ? defaultMaskedError;
 
-    /** PMCFIR[33:24]
+    /** PMCFIR[33:34]
      *  LFIR_O2P
      */
     (PmcFir, bit(33|34)) ? defaultMaskedError;
@@ -1241,13 +1241,14 @@ actionclass maskTodError
     funccall("todNewTopologyIfBackupMDMT");
 };
 
-/** callout the master core of the Proc */
-actionclass calloutMasterCoreThr1
+/** callout the master core of the Proc, no gard */
+actionclass calloutMasterCoreThr1NoGard
 {
     funccall("calloutMasterCore");
     callout2ndLvlMed;
     threshold1;
     dumpSH;
+    gard(NoGard);
 };
 
 /**
