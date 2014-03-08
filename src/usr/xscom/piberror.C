@@ -59,7 +59,7 @@ void addFruCallouts(TARGETING::Target* i_target,
                                     HWAS::SRCI_PRIORITY_HIGH);
        io_errl->addHwCallout( i_target,
                               HWAS::SRCI_PRIORITY_LOW,
-                              HWAS::DECONFIG,
+                              HWAS::DELAYED_DECONFIG,
                               HWAS::GARD_NULL );
        break;
      case  PIB::PIB_PARTIAL_GOOD:

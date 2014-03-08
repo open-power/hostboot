@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -82,7 +82,8 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         FSI::MOD_FSIPRES_PROCPRESENCEDETECT,
                                         FSI::RC_INVALID_LENGTH,
-                                        TO_UINT64(io_buflen));
+                                        TO_UINT64(io_buflen),
+                                        true /*SW error*/);
         io_buflen = 0;
         return l_errl;
     }
@@ -264,7 +265,8 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         FSI::MOD_FSIPRES_MEMBPRESENCEDETECT,
                                         FSI::RC_INVALID_LENGTH,
-                                        TO_UINT64(io_buflen));
+                                        TO_UINT64(io_buflen),
+                                        true /*SW error*/);
         io_buflen = 0;
         return l_errl;
     }

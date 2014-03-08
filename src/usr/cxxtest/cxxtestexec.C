@@ -123,7 +123,8 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         tasks.push_back(tidrc);
     }
 
-    TRACFCOMP( g_trac_cxxtest,  "Waiting for all tasks to finish....");
+    TRACFCOMP( g_trac_cxxtest,  "Waiting for all (%d) tasks to finish....",
+               CxxTest::g_ModulesStarted );
 
     //  wait for all the launched tasks to finish
     for (std::vector<tid_t>::iterator t = tasks.begin();

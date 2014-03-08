@@ -273,7 +273,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 //Best guess is the chip
                 l_err->addHwCallout( i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_Predictive );
 
                 //Add this target to the FFDC
@@ -389,7 +389,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 //Best guess is the chip
                 l_err->addHwCallout( i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_Predictive );
 
                 //Add this target to the FFDC

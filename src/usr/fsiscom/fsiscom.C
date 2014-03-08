@@ -80,7 +80,7 @@ void pib_error_handler( TARGETING::Target* i_target,
         // callout this chip as Medium and deconfigure it
         i_errlog->addHwCallout( i_target,
                                 HWAS::SRCI_PRIORITY_LOW,
-                                HWAS::DECONFIG,
+                                HWAS::DELAYED_DECONFIG,
                                 HWAS::GARD_NULL );
 
         // grab all the FFDC we can think of
@@ -418,7 +418,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
         }
         else
         {
-            TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Read: PCB/PIB error received: l_status=0x%.8X)", l_status);
+            TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Unsupported Operation Type: i_opType=%d)", i_opType);
 
             /*@
              * @errortype
@@ -434,13 +434,11 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                             FSISCOM::RC_INVALID_OPTYPE,
                                             TWO_UINT32_TO_UINT64(i_opType,
                                                                  l_scomAddr),
-                                            TARGETING::get_huid(i_target));
+                                            TARGETING::get_huid(i_target),
+                                            true /*SW error*/);
             //Add this target to the FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").
               addToLog(l_err);
-
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
 
             break;
 

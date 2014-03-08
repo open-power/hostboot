@@ -110,7 +110,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
                                             FSI::MOD_FSIDD_DDOP,
                                             FSI::RC_INVALID_LENGTH,
                                             i_addr,
-                                            TO_UINT64(io_buflen));
+                                            TO_UINT64(io_buflen),
+                                            true /*SW error*/);
             l_err->collectTrace(FSI_COMP_NAME);
             break;
         }
@@ -134,7 +135,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
                                             FSI::MOD_FSIDD_DDOP,
                                             FSI::RC_NULL_TARGET,
                                             i_addr,
-                                            TO_UINT64(i_opType));
+                                            TO_UINT64(i_opType),
+                                            true /*SW error*/);
             l_err->collectTrace(FSI_COMP_NAME);
             break;
         }
@@ -154,7 +156,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
                                             FSI::MOD_FSIDD_DDOP,
                                             FSI::RC_MASTER_TARGET,
                                             i_addr,
-                                            TO_UINT64(i_opType));
+                                            TO_UINT64(i_opType),
+                                            true /*SW error*/);
             l_err->collectTrace(FSI_COMP_NAME);
             break;
         }
@@ -198,7 +201,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
                                             FSI::MOD_FSIDD_DDOP,
                                             FSI::RC_INVALID_OPERATION,
                                             i_addr,
-                                            TO_UINT64(i_opType));
+                                            TO_UINT64(i_opType),
+                                            true /*SW error*/);
             l_err->collectTrace(FSI_COMP_NAME);
             break;
         }
@@ -1261,7 +1265,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                     TRACFCOMP( g_trac_fsi, "Parity Error in MESRB0 = %.8X", mesrb0_data );
                     l_err->addHwCallout( i_addrInfo.accessInfo.master,
                                          HWAS::SRCI_PRIORITY_HIGH,
-                                         HWAS::DECONFIG,
+                                         HWAS::DELAYED_DECONFIG,
                                          HWAS::GARD_Predictive );
                 }
                 // bit 16 is a Register Access Error
@@ -1282,7 +1286,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                             // error is inside the OPB logic
                             l_err->addHwCallout( i_addrInfo.opbTarg,
                                                  HWAS::SRCI_PRIORITY_HIGH,
-                                                 HWAS::DECONFIG,
+                                                 HWAS::DELAYED_DECONFIG,
                                                  HWAS::GARD_NULL );
                             root_cause_found = true;
                             break;
@@ -1294,7 +1298,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                             // could also be something weird in the chip
                             l_err->addHwCallout( i_addrInfo.fsiTarg,
                                                  HWAS::SRCI_PRIORITY_LOW,
-                                                 HWAS::DECONFIG,
+                                                 HWAS::DELAYED_DECONFIG,
                                                  HWAS::GARD_NULL );
                             root_cause_found = true;
                             break;
@@ -1308,7 +1312,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                             // problem is on the slave side of the bus
                             l_err->addHwCallout( i_addrInfo.fsiTarg,
                                                  HWAS::SRCI_PRIORITY_HIGH,
-                                                 HWAS::DECONFIG,
+                                                 HWAS::DELAYED_DECONFIG,
                                                  HWAS::GARD_Predictive );
                             root_cause_found = true;
                             break;
@@ -1323,7 +1327,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                             // callout the slave side explicitly to deconfig
                             l_err->addHwCallout( i_addrInfo.fsiTarg,
                                                  HWAS::SRCI_PRIORITY_LOW,
-                                                 HWAS::DECONFIG,
+                                                 HWAS::DELAYED_DECONFIG,
                                                  HWAS::GARD_Predictive );
                             root_cause_found = true;
                             break;
@@ -1346,7 +1350,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                                         HWAS::SRCI_PRIORITY_HIGH );
             l_err->addHwCallout( i_addrInfo.fsiTarg,
                                  HWAS::SRCI_PRIORITY_LOW,
-                                 HWAS::DECONFIG,
+                                 HWAS::DELAYED_DECONFIG,
                                  HWAS::GARD_NULL );
         }
 
@@ -1467,7 +1471,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
             //most likely this is an issue with the slave chip
             l_err->addHwCallout( i_addrInfo.fsiTarg,
                                  HWAS::SRCI_PRIORITY_HIGH,
-                                 HWAS::DECONFIG,
+                                 HWAS::DELAYED_DECONFIG,
                                  HWAS::GARD_NULL );
 
             //also could be a problem with the OPB logic
@@ -1526,7 +1530,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                 //most likely this is an issue with the slave chip
                 l_err->addHwCallout( i_addrInfo.fsiTarg,
                                      HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL );
 
                 //also could be a problem with the master
@@ -2506,7 +2510,8 @@ errlHndl_t FsiDD::verifyPresent( TARGETING::Target* i_target )
                                         slaves),
                                      TWO_UINT32_TO_UINT64(
                                         TARGETING::get_huid(i_target),
-                                        TARGETING::get_huid(chipinfo.master)));
+                                        TARGETING::get_huid(chipinfo.master)),
+                                     true /*SW error*/);
         l_err->collectTrace(FSI_COMP_NAME);
 
         // log the current MLEVP which contains the detected slave
