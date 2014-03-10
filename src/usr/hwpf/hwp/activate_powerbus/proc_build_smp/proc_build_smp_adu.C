@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.8 2013/09/26 18:00:08 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.9 2014/02/23 21:41:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,8 +40,60 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_build_smp_adu.H"
-#include "proc_adu_utils.H"
+#include <proc_build_smp_adu.H>
+#include <proc_adu_utils.H>
+
+//------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+
+const uint32_t PROC_BUILD_SMP_MAX_STATUS_POLLS = 5;
+
+const uint32_t PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS = 1;
+const bool PROC_BUILD_SMP_PHASE1_ADU_PICK_LOCK = false;
+const uint32_t PROC_BUILD_SMP_PHASE1_POST_QUIESCE_DELAY = 128;
+const uint32_t PROC_BUILD_SMP_PHASE1_PRE_INIT_DELAY = 128;
+
+const uint32_t PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS = 5;
+const bool PROC_BUILD_SMP_PHASE2_ADU_PICK_LOCK = true;
+const uint32_t PROC_BUILD_SMP_PHASE2_POST_QUIESCE_DELAY = 4096;
+const uint32_t PROC_BUILD_SMP_PHASE2_PRE_INIT_DELAY = 512;
+
+// ADU pMISC Mode register field/bit definitions
+const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT = 30;
+const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT = 31;
+
+// FFDC logging on ADU switch fails
+const uint8_t PROC_BUILD_SMP_FFDC_NUM_REGS = 11;
+const uint32_t PROC_BUILD_SMP_FFDC_REGS[PROC_BUILD_SMP_FFDC_NUM_REGS] =
+{
+    PB_MODE_CENT_0x02010C4A,
+    PB_HP_MODE_NEXT_CENT_0x02010C4B,
+    PB_HP_MODE_CURR_CENT_0x02010C4C,
+    PB_HPX_MODE_NEXT_CENT_0x02010C4D,
+    PB_HPX_MODE_CURR_CENT_0x02010C4E,
+    X_GP0_0x04000000,
+    PB_X_MODE_0x04010C0A,
+    A_GP0_0x08000000,
+    ADU_IOS_LINK_EN_0x02020019,
+    PB_A_MODE_0x0801080A,
+    ADU_PMISC_MODE_0x0202000B
+};
+enum proc_build_smp_ffdc_reg_index
+{
+    PB_MODE_CENT_DATA_INDEX = 0,
+    PB_HP_MODE_NEXT_CENT_DATA_INDEX = 1,
+    PB_HP_MODE_CURR_CENT_DATA_INDEX = 2,
+    PB_HPX_MODE_NEXT_CENT_DATA_INDEX = 3,
+    PB_HPX_MODE_CURR_CENT_DATA_INDEX = 4,
+    X_GP0_DATA_INDEX = 5,
+    PB_X_MODE_DATA_INDEX = 6,
+    A_GP0_DATA_INDEX = 7,
+    ADU_IOS_LINK_EN_DATA_INDEX = 8,
+    PB_A_MODE_DATA_INDEX = 9,
+    ADU_PMISC_MODE_DATA_INDEX = 10
+};
+
 
 extern "C"
 {
@@ -85,12 +137,12 @@ fapi::ReturnCode proc_build_smp_adu_set_switch_action(
             i_switch_cd);
         rc_ecmd |= pmisc_mask.setBit(
             ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT);
-        rc.setEcmdError(rc_ecmd);
 
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_build_smp_adu_set_switch_action: Error 0x%x setting up ADU pMisc Mode register data buffer",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
         // write ADU pMisc Mode register content
@@ -100,7 +152,7 @@ fapi::ReturnCode proc_build_smp_adu_set_switch_action(
                                   pmisc_mask);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_adu_set_switch_action: fapiPutUnderMask error (ADU_PMISC_MODE_0x0202000B)");
+            FAPI_ERR("proc_build_smp_adu_set_switch_action: fapiPutScomUnderMask error (ADU_PMISC_MODE_0x0202000B)");
             break;
         }
     } while(0);
@@ -120,10 +172,10 @@ fapi::ReturnCode proc_build_smp_adu_set_switch_action(
 // returns: FAPI_RC_SUCCESS if lock is successfully acquired,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid number of lock attempts
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
 //              is specified,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_adu_acquire_lock(
@@ -223,10 +275,10 @@ fapi::ReturnCode proc_build_smp_adu_reset(
 // returns: FAPI_RC_SUCCESS if lock is successfully released,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid number of unlock attempts
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
 //              is specified,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_adu_release_lock(
@@ -270,44 +322,35 @@ fapi::ReturnCode proc_build_smp_adu_release_lock(
 //------------------------------------------------------------------------------
 // function: check ADU status matches expected state/value
 //           NOTE: intended to be run while holding ADU lock
-// parameters: i_target         => P8 chip target
-//             i_read_not_write => desired operation (read=true, write=false)
+// parameters: i_target           => P8 chip target
+//             i_smp              => structure encapsulating SMP topology
+//             i_dump_all_targets => dump FFDC for all targets in SMP?
+//                                   true=yes, false=no, only for i_target
 // returns: FAPI_RC_SUCCESS if status matches expected value,
 //          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if status mismatches,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_adu_check_status(
-    const fapi::Target& i_target)
+    const fapi::Target& i_target,
+    proc_build_smp_system& i_smp,
+    const bool i_dump_all_targets)
 {
     fapi::ReturnCode rc;
-    proc_adu_utils_adu_status status_exp, status_act;
+    uint32_t rc_ecmd = 0;
+    proc_adu_utils_adu_status status;
     bool match = false;
     uint8_t num_polls = 0;
 
     FAPI_DBG("proc_build_smp_adu_check_status: Start");
     do
     {
-        // build expected status structure
-        status_exp.busy             = ADU_STATUS_BIT_CLEAR;
-        status_exp.wait_cmd_arbit   = ADU_STATUS_BIT_CLEAR;
-        status_exp.addr_done        = ADU_STATUS_BIT_SET;
-        status_exp.data_done        = ADU_STATUS_BIT_CLEAR;
-        status_exp.wait_resp        = ADU_STATUS_BIT_CLEAR;
-        status_exp.overrun_err      = ADU_STATUS_BIT_CLEAR;
-        status_exp.autoinc_err      = ADU_STATUS_BIT_CLEAR;
-        status_exp.command_err      = ADU_STATUS_BIT_CLEAR;
-        status_exp.address_err      = ADU_STATUS_BIT_CLEAR;
-        status_exp.command_hang_err = ADU_STATUS_BIT_CLEAR;
-        status_exp.data_hang_err    = ADU_STATUS_BIT_CLEAR;
-        status_exp.pbinit_missing   = ADU_STATUS_BIT_DONT_CARE;
-
         // retreive actual status value
         while (num_polls < PROC_BUILD_SMP_MAX_STATUS_POLLS)
         {
             FAPI_DBG("proc_build_smp_adu_check_status: Calling library to read ADU status (poll %d)",
                      num_polls+1);
             rc = proc_adu_utils_get_adu_status(i_target,
-                                               status_act);
+                                               status);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_build_smp_adu_check_status: Error from proc_adu_utils_get_adu_status");
@@ -315,7 +358,7 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
             }
 
             // status reported as busy, poll again
-            if (status_act.busy)
+            if (status.busy)
             {
                 num_polls++;
             }
@@ -332,62 +375,139 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
 
         // check status bits versus expected pattern
         match =
-            (((status_exp.busy == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.busy == status_act.busy)) &&
-             ((status_exp.wait_cmd_arbit == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.wait_cmd_arbit == status_act.wait_cmd_arbit)) &&
-             ((status_exp.addr_done == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.addr_done == status_act.addr_done)) &&
-             ((status_exp.data_done == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.data_done == status_act.data_done)) &&
-             ((status_exp.wait_resp == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.wait_resp == status_act.wait_resp)) &&
-             ((status_exp.overrun_err == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.overrun_err == status_act.overrun_err)) &&
-             ((status_exp.autoinc_err == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.autoinc_err == status_act.autoinc_err)) &&
-             ((status_exp.command_err == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.command_err == status_act.command_err)) &&
-             ((status_exp.address_err == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.address_err == status_act.address_err)) &&
-             ((status_exp.command_hang_err == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.command_hang_err == status_act.command_hang_err)) &&
-             ((status_exp.data_hang_err == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.data_hang_err == status_act.data_hang_err)) &&
-             ((status_exp.pbinit_missing == ADU_STATUS_BIT_DONT_CARE) ||
-              (status_exp.pbinit_missing == status_act.pbinit_missing)));
+            ((status.busy == ADU_STATUS_BIT_CLEAR) &&
+             (status.wait_cmd_arbit == ADU_STATUS_BIT_CLEAR) &&
+             (status.addr_done == ADU_STATUS_BIT_SET) &&
+             (status.data_done == ADU_STATUS_BIT_CLEAR) &&
+             (status.wait_resp == ADU_STATUS_BIT_CLEAR) &&
+             (status.overrun_err == ADU_STATUS_BIT_CLEAR) &&
+             (status.autoinc_err == ADU_STATUS_BIT_CLEAR) &&
+             (status.command_err == ADU_STATUS_BIT_CLEAR) &&
+             (status.address_err == ADU_STATUS_BIT_CLEAR) &&
+             (status.command_hang_err == ADU_STATUS_BIT_CLEAR) &&
+             (status.data_hang_err == ADU_STATUS_BIT_CLEAR));
         if (!match)
         {
             FAPI_ERR("proc_adu_utils_check_adu_status: Status mismatch detected");
             FAPI_ERR("proc_adu_utils_check_adu_status: ADU Status bits:");
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_BUSY           = %d",
-                     (status_act.busy == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.busy == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_WAIT_CMD_ARBIT = %d",
-                     (status_act.wait_cmd_arbit == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.wait_cmd_arbit == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_ADDR_DONE      = %d",
-                     (status_act.addr_done == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.addr_done == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_DATA_DONE      = %d",
-                     (status_act.data_done == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.data_done == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_WAIT_RESP      = %d",
-                     (status_act.wait_resp == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.wait_resp == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status: ADU Error bits:");
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_OVERRUN_ERROR        = %d",
-                     (status_act.overrun_err == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.overrun_err == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_AUTOINC_ERROR        = %d",
-                     (status_act.autoinc_err == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.autoinc_err == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_COMMAND_ERROR        = %d",
-                     (status_act.command_err == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.command_err == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_ADDRESS_ERROR        = %d",
-                     (status_act.address_err == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.address_err == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_COMMAND_HANG_ERROR   = %d",
-                     (status_act.command_hang_err == ADU_STATUS_BIT_SET)?(1)
+                     (status.command_hang_err == ADU_STATUS_BIT_SET)?(1)
                                                                         :(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_DATA_HANG_ERROR      = %d",
-                     (status_act.data_hang_err == ADU_STATUS_BIT_SET)?(1):(0));
+                     (status.data_hang_err == ADU_STATUS_BIT_SET)?(1):(0));
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_PBINIT_MISSING_ERROR = %d",
-                     (status_act.pbinit_missing == ADU_STATUS_BIT_SET)?(1):(0));
-            const proc_adu_utils_adu_status & STATUS_DATA = status_act;
-            const uint8_t & NUM_POLLS = num_polls;
+                     (status.pbinit_missing == ADU_STATUS_BIT_SET)?(1):(0));
+
+            // dump FFDC
+            // there is no clean way to represent the collection in XML (given an arbitrary number of chips),
+            // so collect manually and store into data buffers which can be post-processed from the error log
+            std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
+            std::map<proc_fab_smp_chip_id, proc_build_smp_chip>::iterator p_iter;
+            std::vector<fapi::Target*> targets_to_collect;
+            ecmdDataBufferBase scom_data(64);
+            ecmdDataBufferBase chip_ids;
+            ecmdDataBufferBase ffdc_reg_data[PROC_BUILD_SMP_FFDC_NUM_REGS];
+            bool ffdc_scom_error = false;
+
+            // determine set of chips to collect
+            for (n_iter = i_smp.nodes.begin();
+                 n_iter != i_smp.nodes.end();
+                 n_iter++)
+            {
+                for (p_iter = n_iter->second.chips.begin();
+                     p_iter != n_iter->second.chips.end();
+                     p_iter++)
+                {
+                    if (i_dump_all_targets ||
+                        (p_iter->second.chip->this_chip == i_target))
+                    {
+                        targets_to_collect.push_back(&(p_iter->second.chip->this_chip));
+                    }
+                }
+            }
+
+            // size FFDC buffers
+            rc_ecmd |= chip_ids.setByteLength(targets_to_collect.size());
+            for (uint8_t i = 0; i < PROC_BUILD_SMP_FFDC_NUM_REGS; i++)
+            {
+                rc_ecmd |= ffdc_reg_data[i].setDoubleWordLength(targets_to_collect.size());
+            }
+
+            // extract FFDC data
+            for (std::vector<fapi::Target*>::iterator t = targets_to_collect.begin();
+                 t != targets_to_collect.end();
+                 t++)
+            {
+                // log node/chip ID
+                for (n_iter = i_smp.nodes.begin();
+                     n_iter != i_smp.nodes.end();
+                     n_iter++)
+                {
+                    for (p_iter = n_iter->second.chips.begin();
+                         p_iter != n_iter->second.chips.end();
+                         p_iter++)
+                    {
+                        if ((&(p_iter->second.chip->this_chip)) == *t)
+                        {
+                            uint8_t id = ((n_iter->first & 0x3) << 4) |
+                                (p_iter->first & 0x3);
+
+                            rc_ecmd |= chip_ids.setByte(t - targets_to_collect.begin(), id);
+                        }
+                    }
+                }
+
+                // collect SCOM data
+                for (uint8_t i = 0; i < PROC_BUILD_SMP_FFDC_NUM_REGS; i++)
+                {
+                    rc = fapiGetScom(*(*t), PROC_BUILD_SMP_FFDC_REGS[i], scom_data);
+                    if (!rc.ok())
+                    {
+                        ffdc_scom_error = true;
+                    }
+                    rc_ecmd |= scom_data.extractPreserve(
+                        ffdc_reg_data[i],
+                        0, 64,
+                        64*(t - targets_to_collect.begin()));
+                }
+            }
+
+            const fapi::Target& TARGET = i_target;
+            const proc_adu_utils_adu_status& ADU_STATUS_DATA = status;
+            const uint8_t& ADU_NUM_POLLS = num_polls;
+            const uint8_t& NUM_CHIPS = targets_to_collect.size();
+            const uint8_t& FFDC_VALID = !rc_ecmd && !ffdc_scom_error;
+            const ecmdDataBufferBase& CHIP_IDS = chip_ids;
+            const ecmdDataBufferBase& PB_MODE_CENT_DATA = ffdc_reg_data[0];
+            const ecmdDataBufferBase& PB_HP_MODE_NEXT_CENT_DATA = ffdc_reg_data[1];
+            const ecmdDataBufferBase& PB_HP_MODE_CURR_CENT_DATA = ffdc_reg_data[2];
+            const ecmdDataBufferBase& PB_HPX_MODE_NEXT_CENT_DATA = ffdc_reg_data[3];
+            const ecmdDataBufferBase& PB_HPX_MODE_CURR_CENT_DATA = ffdc_reg_data[4];
+            const ecmdDataBufferBase& X_GP0_DATA = ffdc_reg_data[5];
+            const ecmdDataBufferBase& PB_X_MODE_DATA = ffdc_reg_data[6];
+            const ecmdDataBufferBase& A_GP0_DATA = ffdc_reg_data[7];
+            const ecmdDataBufferBase& ADU_IOS_LINK_EN_DATA = ffdc_reg_data[8];
+            const ecmdDataBufferBase& PB_A_MODE_DATA = ffdc_reg_data[9];
+            const ecmdDataBufferBase& ADU_PMISC_MODE_DATA = ffdc_reg_data[10];
             FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH);
             break;
         }
@@ -400,7 +520,8 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
 
 // NOTE: see comments above function prototype in header
 fapi::ReturnCode proc_build_smp_switch_cd(
-    proc_build_smp_chip& i_smp_chip)
+    proc_build_smp_chip& i_smp_chip,
+    proc_build_smp_system& i_smp)
 {
     fapi::ReturnCode rc;
     // ADU status/control information
@@ -483,7 +604,7 @@ fapi::ReturnCode proc_build_smp_switch_cd(
         }
 
         // check status
-        rc = proc_build_smp_adu_check_status(i_smp_chip.chip->this_chip);
+        rc = proc_build_smp_adu_check_status(i_smp_chip.chip->this_chip, i_smp, false);
         if (!rc.ok())
         {
             FAPI_ERR("proc_build_smp_switch_cd: Error from proc_build_smp_adu_check_status");
@@ -636,7 +757,10 @@ fapi::ReturnCode proc_build_smp_quiesce_pb(
                     }
 
                     // check status
-                    rc = proc_build_smp_adu_check_status(p_iter->second.chip->this_chip);
+                    rc = proc_build_smp_adu_check_status(
+                        p_iter->second.chip->this_chip,
+                        i_smp,
+                        (i_op == SMP_ACTIVATE_PHASE2));
                     if (!rc.ok())
                     {
                         FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_check_status");
@@ -820,7 +944,10 @@ fapi::ReturnCode proc_build_smp_switch_ab(
         }
 
         // check status
-        rc = proc_build_smp_adu_check_status(i_smp.nodes[i_smp.master_chip_curr_node_id].chips[i_smp.master_chip_curr_chip_id].chip->this_chip);
+        rc = proc_build_smp_adu_check_status(
+            i_smp.nodes[i_smp.master_chip_curr_node_id].chips[i_smp.master_chip_curr_chip_id].chip->this_chip,
+            i_smp,
+            true);
         if (!rc.ok())
         {
             FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_check_status");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.13 2013/11/13 01:44:13 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.15 2014/02/26 18:13:01 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,12 +39,13 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_build_smp.H"
-#include "proc_build_smp_epsilon.H"
-#include "proc_build_smp_fbc_nohp.H"
-#include "proc_build_smp_fbc_ab.H"
-#include "proc_build_smp_fbc_cd.H"
-#include "proc_build_smp_adu.H"
+#include <proc_build_smp.H>
+#include <proc_build_smp_epsilon.H>
+#include <proc_build_smp_fbc_nohp.H>
+#include <proc_build_smp_fbc_ab.H>
+#include <proc_build_smp_fbc_cd.H>
+#include <proc_build_smp_adu.H>
+
 
 extern "C"
 {
@@ -72,8 +73,10 @@ extern "C"
 //              invalid,
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR if cache/nest frequency
 //              ratio is unsupported,
+//          RC_PROC_BUILD_SMP_CORE_FREQ_RANGE_ERR if invalid relationship exists
+//              between ceiling/nominal/floor core frequency attributes,
 //          RC_PROC_FAB_SMP_ASYNC_SAFE_MODE_ATTR_ERR if attribute value is
-//             invalid,
+//              invalid,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_process_system(
@@ -89,8 +92,6 @@ fapi::ReturnCode proc_build_smp_process_system(
 
     do
     {
-
-	// ToDO: link to attribute if PB AVP mode support is needed
         io_smp.avp_mode = false;
 
         // get PB frequency attribute
@@ -162,9 +163,9 @@ fapi::ReturnCode proc_build_smp_process_system(
         if (!((io_smp.freq_core_ceiling >= io_smp.freq_core_nom) &&
               (io_smp.freq_core_nom     >= io_smp.freq_core_floor)))
         {
-            const uint32_t& CEILING = io_smp.freq_core_ceiling;
-            const uint32_t& NOM = io_smp.freq_core_nom;
-            const uint32_t& FLOOR = io_smp.freq_core_floor;
+            const uint32_t& FREQ_CORE_CEILING = io_smp.freq_core_ceiling;
+            const uint32_t& FREQ_CORE_NOM = io_smp.freq_core_nom;
+            const uint32_t& FREQ_CORE_FLOOR = io_smp.freq_core_floor;
             FAPI_SET_HWP_ERROR(rc,
                 RC_PROC_BUILD_SMP_CORE_FREQ_RANGE_ERR);
             break;
@@ -232,11 +233,11 @@ fapi::ReturnCode proc_build_smp_process_system(
         {
             case 1:
                 io_smp.pump_mode = PROC_FAB_SMP_PUMP_MODE1;
-                FAPI_DBG("proc_build_smp_process_system: ATTR_FABRIC_PROC_PUMP_MODE = NODAL_IS_CHIP_GROUP_IS_GROUP");
+                FAPI_DBG("proc_build_smp_process_system: ATTR_PROC_FABRIC_PUMP_MODE = NODAL_IS_CHIP_GROUP_IS_GROUP");
                 break;
             case 2:
                 io_smp.pump_mode = PROC_FAB_SMP_PUMP_MODE2;
-                FAPI_DBG("proc_build_smp_process_system: ATTR_FABRIC_PROC_PUMP_MODE = NODAL_AND_GROUP_IS_GROUP");
+                FAPI_DBG("proc_build_smp_process_system: ATTR_PROC_FABRIC_PUMP_MODE = NODAL_AND_GROUP_IS_GROUP");
                 break;
             default:
                 FAPI_ERR("proc_build_smp_process_system: Invalid fabric pump mode attribute value 0x%02X",
@@ -424,11 +425,11 @@ fapi::ReturnCode proc_build_smp_process_system(
         {
             case 0:
                 io_smp.async_safe_mode = false;
-                FAPI_DBG("proc_build_smp_process_system: ATTR_FABRIC_PROC_ASYNC_SAFE_MODE = false");
+                FAPI_DBG("proc_build_smp_process_system: ATTR_PROC_FABRIC_ASYNC_SAFE_MODE = false");
                 break;
             case 1:
                 io_smp.async_safe_mode = true;
-                FAPI_DBG("proc_build_smp_process_system: ATTR_FABRIC_PROC_ASYNC_SAFE_MODE = true");
+                FAPI_DBG("proc_build_smp_process_system: ATTR_PROC_FABRIC_ASYNC_SAFE_MODE = true");
                 break;
             default:
                 FAPI_ERR("proc_build_smp_process_system: Invalid fabric async safe mode attribute value 0x%02X",
@@ -708,7 +709,7 @@ fapi::ReturnCode proc_build_smp_process_chip(
                            nx_enabled);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_NX_ENABLE");
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_PROC_NX_ENABLE");
             break;
         }
 
@@ -718,7 +719,7 @@ fapi::ReturnCode proc_build_smp_process_chip(
                            x_enabled);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_X_ENABLE");
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_PROC_X_ENABLE");
             break;
         }
 
@@ -728,7 +729,7 @@ fapi::ReturnCode proc_build_smp_process_chip(
                            a_enabled);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_A_ENABLE");
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_PROC_A_ENABLE");
             break;
         }
 
@@ -738,7 +739,7 @@ fapi::ReturnCode proc_build_smp_process_chip(
                            pcie_enabled);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_PCIE_ENABLE");
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_PROC_PCIE_ENABLE");
             break;
         }
 
@@ -773,7 +774,7 @@ fapi::ReturnCode proc_build_smp_process_chip(
 //              are valid,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
 //              error is detected based on chip state and input paramters,
-//          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
+//          RC_PROC_BUILD_SMP_INVALID_OPERATION_ERR if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
 //              equivalent,
@@ -887,6 +888,7 @@ fapi::ReturnCode proc_build_smp_set_master_config(
     if (rc.ok() && error)
     {
        FAPI_ERR("proc_build_smp_set_master_config: Node/system master designation error");
+       const fapi::Target& TARGET = io_smp_chip.chip->this_chip;
        const uint8_t& OP = i_op;
        const bool& MASTER_CHIP_SYS_CURR = io_smp_chip.master_chip_sys_curr;
        const bool& MASTER_CHIP_NODE_CURR = io_smp_chip.master_chip_node_curr;
@@ -918,7 +920,7 @@ fapi::ReturnCode proc_build_smp_set_master_config(
 //              fabric node/chip IDs are detected,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
 //              is detected based on chip state and input paramters,
-//          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
+//          RC_PROC_BUILD_SMP_INVALID_OPERATION_ERR if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
 //              equivalent,
@@ -966,6 +968,8 @@ fapi::ReturnCode proc_build_smp_insert_chip(
             if (!ret.second)
             {
                 FAPI_ERR("proc_build_smp_insert_chip: Error encountered adding node to SMP");
+                const fapi::Target & TARGET = io_smp_chip.chip->this_chip;
+                const proc_fab_smp_node_id & NODE_ID = node_id;
                 FAPI_SET_HWP_ERROR(rc,
                     RC_PROC_BUILD_SMP_NODE_ADD_INTERNAL_ERR);
                 break;
@@ -983,8 +987,10 @@ fapi::ReturnCode proc_build_smp_insert_chip(
         if (p_iter != io_smp.nodes[node_id].chips.end())
         {
             FAPI_ERR("proc_build_smp_insert_chip: Duplicate fabric node ID / chip ID found");
-            const uint8_t& NODE_ID = node_id;
-            const uint8_t& CHIP_ID = chip_id;
+            const fapi::Target & TARGET1 = io_smp_chip.chip->this_chip;
+            const fapi::Target & TARGET2 = p_iter->second.chip->this_chip;
+            const proc_fab_smp_node_id & NODE_ID = node_id;
+            const proc_fab_smp_chip_id & CHIP_ID = chip_id;
             FAPI_SET_HWP_ERROR(rc,
                 RC_PROC_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR);
             break;
@@ -998,7 +1004,7 @@ fapi::ReturnCode proc_build_smp_insert_chip(
                                               io_smp);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_insert_chip: Error from proc_fab_smp_set_master_config");
+            FAPI_ERR("proc_build_smp_insert_chip: Error from proc_build_smp_set_master_config");
             break;
         }
 
@@ -1034,10 +1040,18 @@ fapi::ReturnCode proc_build_smp_insert_chip(
 //              do not specify a new fabric system master,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
 //              error is detected based on chip state and input paramters,
-//          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
+//          RC_PROC_BUILD_SMP_INVALID_OPERATION_ERR if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
 //              equivalent,
+//          RC_PROC_BUILD_SMP_AX_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_PCIE_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_LINK_TARGET_TYPE_ERR if link target type is
+//              unsupported,
+//          RC_PROC_BUILD_SMP_INVALID_TOPOLOGY if specified fabric topology
+//              is illegal,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_process_chips(
@@ -1047,6 +1061,7 @@ fapi::ReturnCode proc_build_smp_process_chips(
 {
     // return code
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_process_chips: Start");
@@ -1088,6 +1103,7 @@ fapi::ReturnCode proc_build_smp_process_chips(
             break;
         }
 
+        // ensure that new master was designated
         if (!io_smp.master_chip_curr_set)
         {
             FAPI_ERR("proc_build_smp_process_chips: No system master specified!");
@@ -1098,12 +1114,15 @@ fapi::ReturnCode proc_build_smp_process_chips(
             break;
         }
 
+        // based on master designation, and operation phase,
+        // determine whether each chip will be quiesced as a result
+        // of switch activity
         for (n_iter = io_smp.nodes.begin();
-             (n_iter != io_smp.nodes.end()) && (rc.ok());
+             n_iter != io_smp.nodes.end();
              n_iter++)
         {
             for (p_iter = n_iter->second.chips.begin();
-                 (p_iter != n_iter->second.chips.end()) && (rc.ok());
+                 p_iter != n_iter->second.chips.end();
                  p_iter++)
             {
                 if (((i_op == SMP_ACTIVATE_PHASE1) &&
@@ -1119,10 +1138,210 @@ fapi::ReturnCode proc_build_smp_process_chips(
                 }
             }
         }
+
+        // check that fabric topology is logically valid
+        // 1) in a given node, all chips are connected to every other
+        //    chip in the node, by an X bus
+        // 2) each chip is connected to its partner chip (with same chip id)
+        //    in every other node, by an A bus
+
+        // build set of all valid node ids in system
+        FAPI_DBG("proc_build_smp_process_chips: Checking fabric topology");
+        ecmdDataBufferBase node_ids_in_system(PROC_FAB_SMP_NUM_NODE_IDS); 
+        for (n_iter = io_smp.nodes.begin();
+             n_iter != io_smp.nodes.end();
+             n_iter++)
+        {
+            FAPI_DBG("proc_build_smp_process_chips: Adding n%d", n_iter->first);
+            rc_ecmd |= node_ids_in_system.setBit(n_iter->first);
+        }
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_process_chips: Error 0x%x forming system node ID set data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        // iterate over all nodes
+        for (n_iter = io_smp.nodes.begin();
+             n_iter != io_smp.nodes.end();
+             n_iter++)
+        {
+            // build set of all valid chip ids in node
+            ecmdDataBufferBase chip_ids_in_node(PROC_FAB_SMP_NUM_CHIP_IDS);
+            for (p_iter = n_iter->second.chips.begin();
+                 p_iter != n_iter->second.chips.end();
+                 p_iter++)
+            {
+                FAPI_DBG("proc_build_smp_process_chips: Adding n%d:p%d",
+                         n_iter->first, p_iter->first);
+                rc_ecmd |= chip_ids_in_node.setBit(p_iter->first);
+            }
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_build_smp_process_chips: Error 0x%x forming node %d chip ID set data buffer",
+                         rc_ecmd, n_iter->first);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            // iterate over all chips in current node
+            for (p_iter = n_iter->second.chips.begin();
+                 p_iter != n_iter->second.chips.end();
+                 p_iter++)
+            {
+                FAPI_DBG("proc_build_smp_process_chips: Processing links for n%d:p%d",
+                         n_iter->first, p_iter->first);
+                std::vector<fapi::Target *> x_link_targets;
+                x_link_targets.push_back(&(p_iter->second.chip->x0_chip));
+                x_link_targets.push_back(&(p_iter->second.chip->x1_chip));
+                x_link_targets.push_back(&(p_iter->second.chip->x2_chip));
+                x_link_targets.push_back(&(p_iter->second.chip->x3_chip));
+
+                std::vector<fapi::Target *> a_link_targets;
+                a_link_targets.push_back(&(p_iter->second.chip->a0_chip));
+                a_link_targets.push_back(&(p_iter->second.chip->a1_chip));
+                a_link_targets.push_back(&(p_iter->second.chip->a2_chip));
+
+                // process X-connected chips
+                ecmdDataBufferBase x_connected_chip_ids(PROC_FAB_SMP_NUM_CHIP_IDS);
+                for (std::vector<fapi::Target*>::iterator l = x_link_targets.begin();
+                     l != x_link_targets.end();
+                     l++)
+                {
+                    bool link_is_enabled;
+                    proc_fab_smp_node_id dest_node_id;
+                    proc_fab_smp_chip_id dest_chip_id;
+                    rc = proc_build_smp_query_link_state(p_iter->second,
+                                                         (l - x_link_targets.begin()),
+                                                         *l,
+                                                         link_is_enabled,
+                                                         dest_node_id,
+                                                         dest_chip_id);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_process_chips: Error from proc_build_smp_query_link_state (X)");
+                        break;
+                    }
+
+                    if (link_is_enabled)
+                    {
+                        rc_ecmd |= x_connected_chip_ids.writeBit(
+                            (uint8_t) dest_chip_id, 
+                            ((((uint8_t) dest_node_id) == n_iter->first)?(1):(0)));
+                        if (rc_ecmd)
+                        {
+                            FAPI_ERR("proc_build_smp_process_chips: Error 0x%x writing n%d:p%d X connected chip ID set data buffer",
+                                     rc_ecmd, n_iter->first, p_iter->first);
+                            rc.setEcmdError(rc_ecmd);
+                            break;
+                        }
+
+                        FAPI_DBG("proc_build_smp_process_chips: n%d:p%d X%d -> n%d:p%d",
+                                 n_iter->first, p_iter->first, (l - x_link_targets.begin()),
+                                 dest_node_id, dest_chip_id);
+                    }
+                }
+                if (!rc.ok())
+                {
+                    break;
+                }
+
+                // process A-connected chips
+                ecmdDataBufferBase a_connected_node_ids(PROC_FAB_SMP_NUM_NODE_IDS);
+                for (std::vector<fapi::Target*>::iterator l = a_link_targets.begin();
+                     l != a_link_targets.end();
+                     l++)
+                {
+                    bool link_is_enabled;
+                    proc_fab_smp_node_id dest_node_id;
+                    proc_fab_smp_chip_id dest_chip_id;
+                    rc = proc_build_smp_query_link_state(p_iter->second,
+                                                         (l - a_link_targets.begin()),
+                                                         *l,
+                                                         link_is_enabled,
+                                                         dest_node_id,
+                                                         dest_chip_id);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_process_chips: Error from proc_build_smp_query_link_state (A)");
+                        break;
+                    }
+
+                    if (link_is_enabled)
+                    {
+                        rc_ecmd |= a_connected_node_ids.writeBit(
+                            (uint8_t) dest_node_id,
+                            ((((uint8_t) dest_chip_id) == p_iter->first)?(1):(0)));
+                        if (rc_ecmd)
+                        {
+                            FAPI_ERR("proc_build_smp_process_chips: Error 0x%x writing n%d:p%d A connected node ID set data buffer",
+                                     rc_ecmd, n_iter->first, p_iter->first);
+                            rc.setEcmdError(rc_ecmd);
+                            break;
+                        }
+
+                        FAPI_DBG("proc_build_smp_process_chips: n%d:p%d A%d -> n%d:p%d",
+                                 n_iter->first, p_iter->first, (l - a_link_targets.begin()),
+                                 dest_node_id, dest_chip_id);
+                    }
+                }
+                if (!rc.ok())
+                {
+                    break;
+                }
+
+                // add IDs associated with current chip, to make direct set comparison easy
+                FAPI_DBG("proc_build_smp_process_chips: Checking connectivity for n%d:p%d",
+                         n_iter->first, p_iter->first);
+                rc_ecmd |= a_connected_node_ids.setBit(n_iter->first);
+                rc_ecmd |= x_connected_chip_ids.setBit(p_iter->first);
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_build_smp_process_chips: Error 0x%x writing n%d:p%d connected ID set data buffer (self)",
+                             rc_ecmd, n_iter->first, p_iter->first);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+
+                // compare ID sets, exit if they don't match
+                bool internode_set_match = (node_ids_in_system == a_connected_node_ids);
+                bool intranode_set_match = (chip_ids_in_node == x_connected_chip_ids);
+                if (!internode_set_match ||
+                    !intranode_set_match)
+                {
+                    FAPI_ERR("proc_build_smp_process_chips: Invalid fabric topology detected!");
+                    if (!intranode_set_match)
+                    {
+                        FAPI_ERR("proc_build_smp_process_chips: Target %s is not fully connected (X) to all other chips in its node",
+                                 p_iter->second.chip->this_chip.toEcmdString());
+                    }
+                    if (!internode_set_match)
+                    {
+                        FAPI_ERR("proc_build_smp_process_chips: Target %s is not fully connected (A) to all other nodes",
+                                 p_iter->second.chip->this_chip.toEcmdString());
+                    }
+
+                    const fapi::Target& TARGET = p_iter->second.chip->this_chip;
+                    const bool& A_CONNECTIONS_OK = internode_set_match;
+                    const ecmdDataBufferBase& A_CONNECTED_NODE_IDS = a_connected_node_ids;
+                    const bool& X_CONNECTIONS_OK = intranode_set_match;
+                    const ecmdDataBufferBase& X_CONNECTED_NODE_IDS = x_connected_chip_ids;
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_INVALID_TOPOLOGY);
+                    break;
+                }
+            }
+            if (!rc.ok())
+            {
+                break;
+            }
+        }
         if (!rc.ok())
         {
             break;
-        }
+        }        
+
     } while(0);
 
     // mark function exit

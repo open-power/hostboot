@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.H,v 1.4 2013/09/26 18:00:09 jmcgill Exp $
+// $Id: proc_build_smp_adu.H,v 1.5 2014/02/23 21:41:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -43,27 +43,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi.H>
-#include "proc_build_smp.H"
-
-//------------------------------------------------------------------------------
-// Constants
-//------------------------------------------------------------------------------
-
-const uint32_t PROC_BUILD_SMP_MAX_STATUS_POLLS = 5;
-
-const uint32_t PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS = 1;
-const bool PROC_BUILD_SMP_PHASE1_ADU_PICK_LOCK = false;
-const uint32_t PROC_BUILD_SMP_PHASE1_POST_QUIESCE_DELAY = 128;
-const uint32_t PROC_BUILD_SMP_PHASE1_PRE_INIT_DELAY = 128;
-
-const uint32_t PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS = 5;
-const bool PROC_BUILD_SMP_PHASE2_ADU_PICK_LOCK = true;
-const uint32_t PROC_BUILD_SMP_PHASE2_POST_QUIESCE_DELAY = 4096;
-const uint32_t PROC_BUILD_SMP_PHASE2_PRE_INIT_DELAY = 512;
-
-// ADU pMISC Mode register field/bit definitions
-const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT = 30;
-const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT = 31;
+#include <proc_build_smp.H>
 
 extern "C" {
 
@@ -74,19 +54,21 @@ extern "C" {
 //------------------------------------------------------------------------------
 // function: perform fabric C/D configuration switch on a single chip
 // parameters: i_smp_chip => structure encapsulating chip
+//             i_smp      => structure encapsulating SMP
 // returns: FAPI_RC_SUCCESS if fabric reconfiguration is successful,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid parameters are detected
-//              by ADU library code,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs in ADU library code,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
+//              is specified,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
 //          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if ADU status mismatches
 //              for switch operation,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_switch_cd(
-    proc_build_smp_chip& i_smp_chip);
+    proc_build_smp_chip& i_smp_chip,
+    proc_build_smp_system& i_smp);
 
 
 //------------------------------------------------------------------------------
@@ -101,10 +83,10 @@ fapi::ReturnCode proc_build_smp_switch_cd(
 // returns: FAPI_RC_SUCCESS if fabric reconfiguration is successful,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid parameters are detected
-//              by ADU library code,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs in ADU library code,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
+//              is specified,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
 //          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if ADU status mismatches
 //              for switch operation,
 //          else error
@@ -126,10 +108,10 @@ fapi::ReturnCode proc_build_smp_quiesce_pb(
 // returns: FAPI_RC_SUCCESS if fabric reconfiguration is successful,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid parameters are detected
-//              by ADU library code,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs in ADU library code,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
+//              is specified,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
 //          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if ADU status mismatches
 //              for switch operation,
 //          else error

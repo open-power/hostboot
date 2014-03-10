@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_fab_smp_errors.xml,v 1.6 2014/01/27 05:23:01 jmcgill Exp $ -->
+<!-- $Id: proc_fab_smp_errors.xml,v 1.7 2014/02/23 21:40:08 jmcgill Exp $ -->
 <!-- Error definitions for proc_fab_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -34,6 +34,7 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR</rc>
     <description>Invalid definition for fabric node ID attribute value.</description>
@@ -44,6 +45,7 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR</rc>
     <description>Invalid definition for fabric chip ID attribute value.</description>
@@ -54,34 +56,65 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_EPSILON_TABLE_TYPE_ATTR_ERR</rc>
     <description>Invalid definition for epsilon table type attribute value.</description>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_EPSILON_GB_DIRECTION_ATTR_ERR</rc>
     <description>Invalid definition for epsilon guardband direction attribute value.</description>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_ASYNC_SAFE_MODE_ATTR_ERR</rc>
     <description>Invalid definition for fabric async safe mode attribute value.</description>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_PUMP_MODE_ATTR_ERR</rc>
     <description>Invalid definition for fabric pump mode attribute value.</description>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_X_BUS_WIDTH_ATTR_ERR</rc>
     <description>Invalid definition for X bus width attribute value.</description>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_MCS_INTERLEAVED_ATTR_ERR</rc>
     <description>Invalid definition for MCS interleaving attribute value.</description>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

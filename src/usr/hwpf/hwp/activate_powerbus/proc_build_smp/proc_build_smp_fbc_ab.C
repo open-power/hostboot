@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_ab.C,v 1.9 2013/10/24 19:59:08 jmcgill Exp $
+// $Id: proc_build_smp_fbc_ab.C,v 1.11 2014/02/26 18:12:57 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_ab.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,17 +39,125 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_build_smp_fbc_ab.H"
-#include "proc_build_smp_epsilon.H"
-#include "proc_build_smp_adu.H"
+#include <proc_build_smp_fbc_ab.H>
+#include <proc_build_smp_epsilon.H>
+#include <proc_build_smp_adu.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+// PB Hotplug Mode register field/bit definitions
+const uint32_t PB_HP_MODE_LINK_A_EN_BIT[PROC_FAB_SMP_NUM_A_LINKS]       = {  1,  2,  3 };
+const uint32_t PB_HP_MODE_LINK_A_ADDR_DIS_BIT[PROC_FAB_SMP_NUM_A_LINKS] = {  4,  5,  6 };
+const uint32_t PB_HP_MODE_LINK_A_ID_START_BIT[PROC_FAB_SMP_NUM_A_LINKS] = {  7, 10, 13 };
+const uint32_t PB_HP_MODE_LINK_A_ID_END_BIT[PROC_FAB_SMP_NUM_A_LINKS]   = {  9, 12, 15 };
+
+const uint32_t PB_HP_MODE_PCIE_NOT_DSMP_BIT[PROC_FAB_SMP_NUM_F_LINKS]   = { 38, 39 };
+const uint32_t PB_HP_MODE_LINK_F_MASTER_BIT[PROC_FAB_SMP_NUM_F_LINKS]   = { 42, 43 };
+const uint32_t PB_HP_MODE_LINK_F_EN_BIT[PROC_FAB_SMP_NUM_F_LINKS]       = { 44, 45 };
+const uint32_t PB_HP_MODE_LINK_F_ADDR_DIS_BIT[PROC_FAB_SMP_NUM_F_LINKS] = { 46, 47 };
+const uint32_t PB_HP_MODE_LINK_F_ID_START_BIT[PROC_FAB_SMP_NUM_F_LINKS] = { 48, 51 };
+const uint32_t PB_HP_MODE_LINK_F_ID_END_BIT[PROC_FAB_SMP_NUM_F_LINKS]   = { 50, 53 };
+
+const uint32_t PB_HP_MODE_A_AGGREGATE_BIT = 16;
+const uint32_t PB_HP_MODE_TM_MASTER_BIT = 17;
+const uint32_t PB_HP_MODE_CHG_RATE_SP_MASTER_BIT = 19;
+const uint32_t PB_HP_MODE_PUMP_MODE_BIT = 20;
+const uint32_t PB_HP_MODE_SINGLE_MC_BIT = 21;
+const uint32_t PB_HP_MODE_DCACHE_CAPP_MODE_BIT = 22;
+const uint32_t PB_HP_MODE_A_CMD_RATE_START_BIT = 24;
+const uint32_t PB_HP_MODE_A_CMD_RATE_END_BIT = 31;
+const uint32_t PB_HP_MODE_A_CMD_RATE_MIN_VALUE = 1;
+const uint32_t PB_HP_MODE_A_CMD_RATE_MAX_VALUE = 0x7F;
+const uint32_t PB_HP_MODE_A_GATHER_ENABLE_BIT = 32;
+const uint32_t PB_HP_MODE_A_GATHER_DLY_CNT_START_BIT = 33;
+const uint32_t PB_HP_MODE_A_GATHER_DLY_CNT_END_BIT = 37;
+const uint32_t PB_HP_MODE_GATHER_ENABLE_BIT = 40;
+const uint32_t PB_HP_MODE_F_AGGREGATE_BIT = 55;
+const uint32_t PB_HP_MODE_F_CMD_RATE_START_BIT = 56;
+const uint32_t PB_HP_MODE_F_CMD_RATE_END_BIT = 63;
+const uint32_t PB_HP_MODE_F_CMD_RATE_MIN_VALUE = 1;
+const uint32_t PB_HP_MODE_F_CMD_RATE_MAX_VALUE = 0x7F;
+
+const bool PB_HP_MODE_DCACHE_CAPP_EN = false;
+const bool PB_HP_MODE_A_GATHER_ENABLE = true;
+const uint8_t PB_HP_MODE_A_GATHER_DLY_CNT = 0x04;
+const bool PB_HP_MODE_GATHER_ENABLE = true;
+
+const uint32_t PB_HP_MODE_NEXT_SHADOWS[PROC_BUILD_SMP_NUM_SHADOWS] =
+{
+    PB_HP_MODE_NEXT_WEST_0x02010C0B,
+    PB_HP_MODE_NEXT_CENT_0x02010C4B,
+    PB_HP_MODE_NEXT_EAST_0x02010C8B
+};
+const uint32_t PB_HP_MODE_CURR_SHADOWS[PROC_BUILD_SMP_NUM_SHADOWS] =
+{
+    PB_HP_MODE_CURR_WEST_0x02010C0C,
+    PB_HP_MODE_CURR_CENT_0x02010C4C,
+    PB_HP_MODE_CURR_EAST_0x02010C8C
+};
+
+// PB Hotplug Extension Mode register field/bit definitions
+const uint32_t PB_HPX_MODE_LINK_X_EN_BIT[PROC_FAB_SMP_NUM_X_LINKS]           = {  0,  1,  2,  3 };
+const uint32_t PB_HPX_MODE_LINK_X_ADDR_DIS_BIT[PROC_FAB_SMP_NUM_X_LINKS]     = {  5,  6,  7,  8 };
+const uint32_t PB_HPX_MODE_LINK_X_CHIPID_START_BIT[PROC_FAB_SMP_NUM_X_LINKS] = { 10, 13, 16, 19 };
+const uint32_t PB_HPX_MODE_LINK_X_CHIPID_END_BIT[PROC_FAB_SMP_NUM_X_LINKS]   = { 12, 15, 18, 21 };
+
+const uint32_t PB_HPX_MODE_X_AGGREGATE_BIT = 25;
+const uint32_t PB_HPX_MODE_X_INDIRECT_EN_BIT = 26;
+const uint32_t PB_HPX_MODE_X_GATHER_ENABLE_BIT = 32;
+const uint32_t PB_HPX_MODE_X_GATHER_DLY_CNT_START_BIT = 33;
+const uint32_t PB_HPX_MODE_X_GATHER_DLY_CNT_END_BIT = 37;
+const uint32_t PB_HPX_MODE_X_ONNODE_12QUEUES_BIT = 38;
+const uint32_t PB_HPX_MODE_X_CMD_RATE_START_BIT = 56;
+const uint32_t PB_HPX_MODE_X_CMD_RATE_END_BIT = 63;
+const uint32_t PB_HPX_MODE_X_CMD_RATE_MIN_VALUE = 1;
+const uint32_t PB_HPX_MODE_X_CMD_RATE_MAX_VALUE = 0x7F;
+
+const bool PB_HPX_MODE_X_INDIRECT_EN = true;
+const bool PB_HPX_MODE_X_GATHER_ENABLE = true;
+const uint8_t PB_HPX_MODE_X_GATHER_DLY_CNT = 0x04;
+const bool PB_HPX_MODE_X_ONNODE_12QUEUES = true;
+
+const uint32_t PB_HPX_MODE_NEXT_SHADOWS[PROC_BUILD_SMP_NUM_SHADOWS] =
+{
+    PB_HPX_MODE_NEXT_WEST_0x02010C0D,
+    PB_HPX_MODE_NEXT_CENT_0x02010C4D,
+    PB_HPX_MODE_NEXT_EAST_0x02010C8D
+};
+const uint32_t PB_HPX_MODE_CURR_SHADOWS[PROC_BUILD_SMP_NUM_SHADOWS] =
+{
+    PB_HPX_MODE_CURR_WEST_0x02010C0E,
+    PB_HPX_MODE_CURR_CENT_0x02010C4E,
+    PB_HPX_MODE_CURR_EAST_0x02010C8E
+};
+
+// PB X Link Mode register field/bit definitions
+const uint32_t PB_X_MODE_LINK_DELAY_START_BIT[PROC_FAB_SMP_NUM_X_LINKS] = { 24, 32, 40, 48 };
+const uint32_t PB_X_MODE_LINK_DELAY_END_BIT[PROC_FAB_SMP_NUM_X_LINKS]   = { 31, 39, 47, 55 };
+
+// PB A Link Mode register field/bit definitions
+const uint32_t PB_A_MODE_LINK_DELAY_START_BIT[PROC_FAB_SMP_NUM_A_LINKS] = { 40, 48, 56 };
+const uint32_t PB_A_MODE_LINK_DELAY_END_BIT[PROC_FAB_SMP_NUM_A_LINKS]   = { 47, 55, 63 };
+
+// PB A Link Framer Configuration register field/bit definitions
+const uint32_t PB_A_FMR_CFG_OW_PACK_BIT = 24;
+const uint32_t PB_A_FMR_CFG_OW_PACK_PRIORITY_BIT = 25;
+
+// PB IOF Link Mode register field/bit definitions
+const uint32_t PB_IOF_MODE_LINK_DELAY_START_BIT[PROC_FAB_SMP_NUM_F_LINKS] = { 32, 48 };
+const uint32_t PB_IOF_MODE_LINK_DELAY_END_BIT[PROC_FAB_SMP_NUM_F_LINKS]   = { 47, 63 };
+
+// PB F Link Framer Configuration register field/bit definitions
+const uint32_t PB_F_FMR_CFG_OW_PACK_BIT = 20;
+const uint32_t PB_F_FMR_CFG_OW_PACK_PRIORITY_BIT = 21;
 
 extern "C" {
-
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // function: read PB A Link Framer Configuration register and determine
@@ -152,7 +260,7 @@ fapi::ReturnCode proc_build_smp_get_f_owpack_config(
 //             i_link_en             => per-link enable values
 //             i_link_target         => link endpoint targets
 //             o_link_delay_local    => array of link round trip delay values
-//                                       (measured by local chip)
+//                                      (measured by local chip)
 //             o_link_delay_remote   => array of link round trip delay values
 //                                      (measured by remote chips)
 //             o_link_number_remote  => array of link numbers
@@ -289,7 +397,128 @@ fapi::ReturnCode proc_build_smp_get_link_delays(
     } while(0);
 
     // mark function exit
-    FAPI_DBG("proc_build_smp_get_link_delays: Start");
+    FAPI_DBG("proc_build_smp_get_link_delays: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: determine paramters of link/destination chip
+// parameters: i_smp_chip            => structure encapsulating SMP chip
+//             i_source_link_id      => link identifier for FFDC
+//             i_dest_target         => pointer to destination link endpoint target
+//             o_link_is_enabled     => true=link enabled, false=link disabled
+//             o_dest_target_node_id => node ID of destination chip
+//             o_dest_target_chip_id => chip ID of destination chip
+// returns: FAPI_RC_SUCCESS if output values are valid,
+//          RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR if attribute value is
+//              invalid,
+//          RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR if attribute value is
+//              invalid,
+//          RC_PROC_BUILD_SMP_AX_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_LINK_TARGET_TYPE_ERR if link target type is
+//              unsupported,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_query_link_state(
+    const proc_build_smp_chip& i_smp_chip,
+    const uint8_t i_source_link_id,
+    fapi::Target* i_dest_target,
+    bool& o_link_is_enabled,
+    proc_fab_smp_node_id& o_dest_target_node_id,
+    proc_fab_smp_chip_id& o_dest_target_chip_id)
+{
+    fapi::ReturnCode rc;
+    fapi::TargetType dest_target_type = i_dest_target->getType();
+    bool src_link_region_pg = false;
+    uint8_t src_link_chiplet_id = 0xFF;
+
+    FAPI_DBG("proc_build_smp_query_link_state: Start");
+
+    do
+    {
+        switch (dest_target_type)
+        {
+            case (fapi::TARGET_TYPE_NONE):
+                o_link_is_enabled = false;
+                o_dest_target_node_id = FBC_NODE_ID_0;
+                o_dest_target_chip_id = FBC_CHIP_ID_0;
+                break;
+            case (fapi::TARGET_TYPE_ABUS_ENDPOINT):
+            case (fapi::TARGET_TYPE_XBUS_ENDPOINT):
+                // destination target is valid, so mark link as enabled
+                o_link_is_enabled = true;
+        
+                // extract chip/node ID from destination chip
+                rc = proc_fab_smp_get_node_id_attr(i_dest_target, o_dest_target_node_id);
+                if (rc)
+                {
+                    FAPI_ERR("proc_build_smp_query_link_state: Error from proc_fab_smp_get_node_id_attr");
+                    break;
+                }
+        
+                rc = proc_fab_smp_get_chip_id_attr(i_dest_target, o_dest_target_chip_id);
+                if (rc)
+                {
+                    FAPI_ERR("proc_build_smp_query_link_state: Error from proc_fab_smp_get_chip_id_attr");
+                    break;
+                }
+        
+                // perform partial good attribute checking
+                // ABUS
+                if (dest_target_type == fapi::TARGET_TYPE_ABUS_ENDPOINT)
+                {
+                    src_link_region_pg = i_smp_chip.a_enabled;
+                    src_link_chiplet_id = 0x8;
+                }
+                // XBUS
+                else
+                {
+                    src_link_region_pg = i_smp_chip.x_enabled;
+                    src_link_chiplet_id = 0x4;
+                }
+
+                // destination target is valid, but region on source chip containing
+                // connected link logic is not enabled, given state of partial good
+                // attributes
+                if (!src_link_region_pg)
+                {
+                    // obtain VPD partial good attribute for FFDC
+                    uint64_t src_link_region_pg_attr[32];
+                    rc = FAPI_ATTR_GET(ATTR_CHIP_REGIONS_TO_ENABLE,
+                                       &(i_smp_chip.chip->this_chip),
+                                       src_link_region_pg_attr);
+                
+                    FAPI_ERR("proc_build_smp_query_link_state: Partial good attribute error (chiplet ID = 0x%02X)",
+                             src_link_chiplet_id);
+                    const fapi::Target& SOURCE_CHIP_TARGET = i_smp_chip.chip->this_chip;
+                    const uint8_t& CHIPLET_ID = src_link_chiplet_id;
+                    const uint8_t& SOURCE_LINK_ID = i_source_link_id;
+                    const bool& REGION_ENABLED = src_link_region_pg;
+                    const uint64_t& REGIONS_TO_ENABLE = src_link_region_pg_attr[src_link_chiplet_id];
+                    const bool& REGIONS_TO_ENABLE_VALID = rc.ok();
+                    const fapi::Target& DEST_LINK_TARGET = *(i_dest_target);
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_AX_PARTIAL_GOOD_ERR);
+                    break;
+                }
+                break;
+            default:
+                FAPI_ERR("proc_build_smp_query_link_state: Unsupported destination link target type!");
+                const fapi::Target& SOURCE_CHIP_TARGET = i_smp_chip.chip->this_chip;
+                const uint8_t& SOURCE_LINK_ID = i_source_link_id;
+                const fapi::Target& DEST_LINK_TARGET = *(i_dest_target);
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_LINK_TARGET_TYPE_ERR);
+                break;
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+
+    } while(0);
+
+    FAPI_DBG("proc_build_smp_query_link_state: End");
     return rc;
 }
 
@@ -373,7 +602,21 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
                 // currently procedure does not support aggregate F links
                 if (!i_allow_aggregate || o_link_aggregate)
                 {
+                    uint8_t first_id = 0;
+                    for (first_id = 0; first_id < id; first_id++)
+                    {
+                        if (id_active_count[first_id] > 1)
+                        {
+                            break;
+                        }
+                    }
+
                     FAPI_ERR("proc_build_smp_calc_link_setup: Invalid aggregate link configuration");
+                    const fapi::Target& TARGET = i_smp_chip.chip->this_chip;
+                    const bool& X_NOT_A = i_x_not_a;
+                    const bool& ALLOW_AGGREGATE = i_allow_aggregate;
+                    const uint8_t& AGGREGATE_DEST_ID1 = first_id;
+                    const uint8_t& AGGREGATE_DEST_ID2 = id;
                     FAPI_SET_HWP_ERROR(
                         rc,
                         RC_PROC_BUILD_SMP_INVALID_AGGREGATE_CONFIG_ERR);
@@ -550,7 +793,15 @@ fapi::ReturnCode proc_build_smp_calc_x_cmd_rate(
             (cmd_rate > PB_HPX_MODE_X_CMD_RATE_MAX_VALUE))
         {
             FAPI_ERR("proc_build_smp_calc_x_cmd_rate: X link command rate is out of range");
-            const uint32_t & CMD_RATE = cmd_rate;
+            const uint32_t& FREQ_PB = i_freq_pb;
+            const uint32_t& FREQ_X = i_freq_x;
+            const bool& X_IS_8B = i_x_is_8B;
+            const bool& X_AGGREGATE = i_x_aggregate;
+            const uint32_t& N = n;
+            const uint32_t& D = d;
+            const uint32_t& CMD_RATE = cmd_rate;
+            const uint32_t& MIN_CMD_RATE = PB_HPX_MODE_X_CMD_RATE_MIN_VALUE;
+            const uint32_t& MAX_CMD_RATE = PB_HPX_MODE_X_CMD_RATE_MAX_VALUE;
             FAPI_SET_HWP_ERROR(rc,
                                RC_PROC_BUILD_SMP_X_CMD_RATE_ERR);
             break;
@@ -615,7 +866,16 @@ fapi::ReturnCode proc_build_smp_calc_a_cmd_rate(
             (cmd_rate > PB_HP_MODE_A_CMD_RATE_MAX_VALUE))
         {
             FAPI_ERR("proc_build_smp_calc_a_cmd_rate: A link command rate is out of range");
-            const uint32_t & CMD_RATE = cmd_rate;
+            const uint32_t& FREQ_PB = i_freq_pb;
+            const uint32_t& FREQ_A = i_freq_a;
+            const bool& A_OW_PACK = i_a_ow_pack;
+            const bool& A_OW_PACK_PRIORITY = i_a_ow_pack_priority;
+            const bool& A_AGGREGATE = i_a_aggregate;
+            const uint32_t& N = n;
+            const uint32_t& D = d;
+            const uint32_t& CMD_RATE = cmd_rate;
+            const uint32_t& MIN_CMD_RATE = PB_HP_MODE_A_CMD_RATE_MIN_VALUE;
+            const uint32_t& MAX_CMD_RATE = PB_HP_MODE_A_CMD_RATE_MAX_VALUE;
             FAPI_SET_HWP_ERROR(rc,
                                RC_PROC_BUILD_SMP_A_CMD_RATE_ERR);
             break;
@@ -625,7 +885,7 @@ fapi::ReturnCode proc_build_smp_calc_a_cmd_rate(
     o_a_cmd_rate = (uint8_t) cmd_rate;
 
     // mark function exit
-    FAPI_DBG("proc_build_smp_calc_a_cmd_rate: Start");
+    FAPI_DBG("proc_build_smp_calc_a_cmd_rate: End");
     return rc;
 }
 
@@ -655,7 +915,7 @@ fapi::ReturnCode proc_build_smp_calc_f_cmd_rate(
     uint32_t n_ow_pack = 0;
     uint32_t cmd_rate;
 
-    // mark function exit
+    // mark function entry
     FAPI_DBG("proc_build_smp_calc_f_cmd_rate: Start");
 
     do
@@ -683,7 +943,16 @@ fapi::ReturnCode proc_build_smp_calc_f_cmd_rate(
             (cmd_rate > PB_HP_MODE_F_CMD_RATE_MAX_VALUE))
         {
             FAPI_ERR("proc_build_smp_calc_f_cmd_rate: F link command rate is out of range");
-            const uint32_t & CMD_RATE = cmd_rate;
+            const uint32_t& FREQ_PB = i_freq_pb;
+            const uint32_t& FREQ_F = i_freq_f;
+            const bool& F_OW_PACK = i_f_ow_pack;
+            const bool& F_OW_PACK_PRIORITY = i_f_ow_pack_priority;
+            const bool& F_AGGREGATE = i_f_aggregate;
+            const uint32_t& N = n;
+            const uint32_t& D = d;
+            const uint32_t& CMD_RATE = cmd_rate;
+            const uint32_t& MIN_CMD_RATE = PB_HP_MODE_F_CMD_RATE_MIN_VALUE;
+            const uint32_t& MAX_CMD_RATE = PB_HP_MODE_F_CMD_RATE_MAX_VALUE;
             FAPI_SET_HWP_ERROR(rc,
                                RC_PROC_BUILD_SMP_F_CMD_RATE_ERR);
             break;
@@ -774,6 +1043,7 @@ fapi::ReturnCode proc_build_smp_get_hotplug_curr_reg(
     ecmdDataBufferBase& o_data)
 {
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
     ecmdDataBufferBase data(64);
 
     // mark function entry
@@ -817,7 +1087,14 @@ fapi::ReturnCode proc_build_smp_get_hotplug_curr_reg(
         }
 
         // set output (will be used to compare with next HW read)
-        data.copy(o_data);
+        rc_ecmd |= data.copy(o_data);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_get_hotplug_curr_reg: Error 0x%x copying register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
     }
 
     // mark function exit
@@ -827,49 +1104,52 @@ fapi::ReturnCode proc_build_smp_get_hotplug_curr_reg(
 
 
 //------------------------------------------------------------------------------
-// function: reset (copy CURR->NEXT) PB Hotplug Mode register
-// parameters: i_smp_chip => structure encapsulating SMP chip
+// function: reset (copy CURR->NEXT) PB Hotplug Mode/Mode Extension register
+// parameters: i_smp_chip   => structure encapsulating SMP chip
+//             i_hp_not_hpx => choose HP/HPX register set (true=HP,
+//                             false=HPX)
 // returns: FAPI_RC_SUCCESS if register programming is successful,
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
 //              equivalent,
 //          else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_build_smp_reset_pb_hp_mode(
-    const proc_build_smp_chip& i_smp_chip)
+fapi::ReturnCode proc_build_smp_reset_hotplug_next_reg(
+    const proc_build_smp_chip& i_smp_chip,
+    const bool i_hp_not_hpx)
 {
     fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
 
     // mark function entry
-    FAPI_DBG("proc_build_smp_reset_pb_hp_mode: Start");
+    FAPI_DBG("proc_build_smp_reset_hotplug_next_reg: Start");
 
     do
     {
         // read CURR state
         rc = proc_build_smp_get_hotplug_curr_reg(i_smp_chip,
-                                                 true,
+                                                 i_hp_not_hpx,
                                                  data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_reset_pb_hp_mode: proc_build_smp_get_hotplug_curr_reg");
+            FAPI_ERR("proc_build_smp_reset_hotplug_next_reg: proc_build_smp_get_hotplug_curr_reg");
             break;
         }
 
         // write NEXT state
         rc = proc_build_smp_set_hotplug_reg(i_smp_chip,
                                             false,
-                                            true,
+                                            i_hp_not_hpx,
                                             data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_reset_pb_hp_mode: proc_build_smp_set_hotplug_reg");
+            FAPI_ERR("proc_build_smp_reset_hotplug_next_reg: proc_build_smp_set_hotplug_reg");
             break;
         }
 
     } while(0);
 
     // mark function exit
-    FAPI_DBG("proc_build_smp_reset_pb_hp_mode: End");
+    FAPI_DBG("proc_build_smp_reset_hotplug_next_reg: End");
     return rc;
 }
 
@@ -889,6 +1169,12 @@ fapi::ReturnCode proc_build_smp_reset_pb_hp_mode(
 //              is invalid,
 //          RC_PROC_BUILD_SMP_F_CMD_RATE_ERR if calculated F link command rate
 //              is invalid,
+//          RC_PROC_BUILD_SMP_AX_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_PCIE_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_LINK_TARGET_TYPE_ERR if link target type is
+//              unsupported,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
@@ -935,25 +1221,19 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
         a_target[2] = &(i_smp_chip.chip->a2_chip);
         for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_A_LINKS; l++)
         {
-            // determine link enable
-            a_en[l] = (a_target[l]->getType() != fapi::TARGET_TYPE_NONE);
-            if (a_en[l] && !i_smp_chip.a_enabled)
+            // determine link enable/ID
+            proc_fab_smp_node_id dest_node_id;
+            proc_fab_smp_chip_id dest_chip_id;
+            rc = proc_build_smp_query_link_state(i_smp_chip,
+                                                 l,
+                                                 a_target[l],
+                                                 a_en[l],
+                                                 dest_node_id,
+                                                 dest_chip_id);
+            if (!rc.ok())
             {
-                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Partial good attribute error (A)");
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_A_PARTIAL_GOOD_ERR);
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_query_link_state");
                 break;
-            }
-
-            // determine link ID
-            proc_fab_smp_node_id dest_node_id = FBC_NODE_ID_0;
-            if (a_en[l])
-            {
-                rc = proc_fab_smp_get_node_id_attr(a_target[l], dest_node_id);
-                if (rc)
-                {
-                    FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_fab_smp_get_node_id_attr");
-                    break;
-                }
             }
             a_id[l] = (uint8_t) dest_node_id;
         }
@@ -975,7 +1255,21 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
         {
             if (f_en[l] && !i_smp_chip.pcie_enabled)
             {
+                // obtain partial good attribute for FFDC
+                uint8_t src_link_chiplet_id = 0x9;
+                uint64_t src_link_region_pg_attr[32];
+                rc = FAPI_ATTR_GET(ATTR_CHIP_REGIONS_TO_ENABLE,
+                                   &(i_smp_chip.chip->this_chip),
+                                   src_link_region_pg_attr);
+
                 FAPI_ERR("proc_build_smp_set_pb_hp_mode: Partial good attribute error (PCIE)");
+                const fapi::Target& SOURCE_CHIP_TARGET = i_smp_chip.chip->this_chip;
+                const uint8_t& CHIPLET_ID = src_link_chiplet_id;
+                const uint8_t& SOURCE_LINK_ID = l;
+                const bool& REGION_ENABLED = i_smp_chip.pcie_enabled;
+                const uint64_t& REGIONS_TO_ENABLE = src_link_region_pg_attr[src_link_chiplet_id];
+                const bool& REGIONS_TO_ENABLE_VALID = rc.ok();
+                const uint8_t& DEST_NODE_ID = f_id[l];
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_PCIE_PARTIAL_GOOD_ERR);
                 break;
             }
@@ -1229,53 +1523,6 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
 
 
 //------------------------------------------------------------------------------
-// function: reset (copy CURR->NEXT) PB Hotplug Extension Mode register
-// parameters: i_smp_chip => structure encapsulating SMP chip
-// returns: FAPI_RC_SUCCESS if register programming is successful,
-//          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
-//              equivalent,
-//          else error
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_build_smp_reset_pb_hpx_mode(
-    const proc_build_smp_chip& i_smp_chip)
-{
-    fapi::ReturnCode rc;
-    ecmdDataBufferBase data(64);
-
-    // mark function entry
-    FAPI_DBG("proc_build_smp_reset_pb_hpx_mode: Start");
-
-    do
-    {
-        // read CURR state
-        rc = proc_build_smp_get_hotplug_curr_reg(i_smp_chip,
-                                                 false,
-                                                 data);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_reset_pb_hpx_mode: proc_build_smp_get_hotplug_curr_reg");
-            break;
-        }
-
-        // write NEXT state
-        rc = proc_build_smp_set_hotplug_reg(i_smp_chip,
-                                            false,
-                                            false,
-                                            data);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_reset_pb_hpx_mode: proc_build_smp_set_hotplug_reg");
-            break;
-        }
-    } while(0);
-
-    // mark function exit
-    FAPI_DBG("proc_build_smp_reset_pb_hpx_mode: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
 // function: program PB Hotplug Extension Mode register
 // parameters: i_smp_chip => structure encapsulating SMP chip
 //             i_smp      => structure encapsulating SMP topology
@@ -1288,6 +1535,10 @@ fapi::ReturnCode proc_build_smp_reset_pb_hpx_mode(
 //              specifies invalid aggregate link setup,
 //          RC_PROC_BUILD_SMP_X_CMD_RATE_ERR if calculated X link command rate
 //              is invalid,
+//          RC_PROC_BUILD_SMP_AX_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_LINK_TARGET_TYPE_ERR if link target type is
+//              unsupported,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
@@ -1324,25 +1575,19 @@ fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
         x_target[3] = &(i_smp_chip.chip->x3_chip);
         for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_X_LINKS; l++)
         {
-            // determine link enable
-            x_en[l] = (x_target[l]->getType() != fapi::TARGET_TYPE_NONE);
-            if (x_en[l] && !i_smp_chip.x_enabled)
+            // determine link enable/ID
+            proc_fab_smp_node_id dest_node_id;
+            proc_fab_smp_chip_id dest_chip_id;
+            rc = proc_build_smp_query_link_state(i_smp_chip,
+                                                 l,
+                                                 x_target[l],
+                                                 x_en[l],
+                                                 dest_node_id,
+                                                 dest_chip_id);
+            if (!rc.ok())
             {
-                FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Partial good attribute error (X)");
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_X_PARTIAL_GOOD_ERR);
+                FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Error from proc_build_smp_query_link_state");
                 break;
-            }
-
-            // determine link ID
-            proc_fab_smp_chip_id dest_chip_id = FBC_CHIP_ID_0;
-            if (x_en[l])
-            {
-                rc = proc_fab_smp_get_chip_id_attr(x_target[l], dest_chip_id);
-                if (rc)
-                {
-                    FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Error from proc_fab_smp_get_chip_id_attr");
-                    break;
-                }
             }
             x_id[l] = (uint8_t) dest_chip_id;
         }
@@ -1558,14 +1803,14 @@ fapi::ReturnCode proc_build_smp_set_fbc_ab(
                  (p_iter != n_iter->second.chips.end()) && (rc.ok());
                  p_iter++)
             {
-                rc = proc_build_smp_reset_pb_hp_mode(p_iter->second);
+                rc = proc_build_smp_reset_hotplug_next_reg(p_iter->second, true);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_build_smp_set_fbc_ab: Error from proc_build_smp_reset_pb_hp_mode");
                     break;
                 }
 
-                rc = proc_build_smp_reset_pb_hpx_mode(p_iter->second);
+                rc = proc_build_smp_reset_hotplug_next_reg(p_iter->second, false);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_build_smp_set_fbc_ab: Error from proc_build_smp_reset_pb_hpx_mode");

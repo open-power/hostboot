@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.13 2013/11/13 01:41:53 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.14 2014/02/23 21:41:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,8 +57,6 @@
 // *!               (switch A/B)
 // *!
 //------------------------------------------------------------------------------
-// *! TODO:: support for manufacturing AVP mode configurations
-//------------------------------------------------------------------------------
 
 #ifndef _PROC_BUILD_SMP_H_
 #define _PROC_BUILD_SMP_H_
@@ -69,8 +67,8 @@
 #include <vector>
 #include <map>
 #include <fapi.H>
-#include "proc_fab_smp.H"
-#include "p8_scom_addresses.H"
+#include <proc_fab_smp.H>
+#include <p8_scom_addresses.H>
 
 
 //------------------------------------------------------------------------------
@@ -120,6 +118,7 @@ struct proc_build_smp_proc_chip
     proc_fab_smp_node_id f1_node_id;
 };
 
+
 // structure to represent fabric connectivty & properites for a single chip
 // in the SMP topology
 struct proc_build_smp_chip
@@ -158,37 +157,6 @@ struct proc_build_smp_node
     proc_fab_smp_node_id node_id;
 };
 
-// core/nest frequency ratio cutpoints (epsilon)
-enum proc_build_smp_core_ratio
-{
-    PROC_BUILD_SMP_CORE_RATIO_8_8 = 0,
-    PROC_BUILD_SMP_CORE_RATIO_7_8 = 1,
-    PROC_BUILD_SMP_CORE_RATIO_6_8 = 2,
-    PROC_BUILD_SMP_CORE_RATIO_5_8 = 3,
-    PROC_BUILD_SMP_CORE_RATIO_4_8 = 4,
-    PROC_BUILD_SMP_CORE_RATIO_2_8 = 5
-};
-
-// core floor/nest frequency ratio cutpoints (CPU delay)
-const uint8_t PROC_BUILD_SMP_CPU_DELAY_NUM_SETPOINTS = 13;
-
-enum proc_build_smp_cpu_delay
-{
-    PROC_BUILD_SMP_CPU_DELAY_4800_2400 = 0,
-    PROC_BUILD_SMP_CPU_DELAY_4431_2400 = 1,
-    PROC_BUILD_SMP_CPU_DELAY_4114_2400 = 2,
-    PROC_BUILD_SMP_CPU_DELAY_3840_2400 = 3,
-    PROC_BUILD_SMP_CPU_DELAY_3600_2400 = 4,
-    PROC_BUILD_SMP_CPU_DELAY_3338_2400 = 5,
-    PROC_BUILD_SMP_CPU_DELAY_3200_2400 = 6,
-    PROC_BUILD_SMP_CPU_DELAY_3032_2400 = 7,
-    PROC_BUILD_SMP_CPU_DELAY_2880_2400 = 8,
-    PROC_BUILD_SMP_CPU_DELAY_2743_2400 = 9,
-    PROC_BUILD_SMP_CPU_DELAY_2618_2400 = 10,
-    PROC_BUILD_SMP_CPU_DELAY_2504_2400 = 11,
-    PROC_BUILD_SMP_CPU_DELAY_2400_2400 = 12
-};
-
 // structure to encapsulate system epsilon configuration
 struct proc_build_smp_eps_cfg
 {
@@ -204,6 +172,35 @@ struct proc_build_smp_eps_cfg
     uint32_t w_t2;    // write, tier2 (sp)
     uint32_t w_f;     // write, foreign (f)
     uint32_t p;       // pre
+};
+
+// core/nest frequency ratio cutpoints (epsilon)
+enum proc_build_smp_core_ratio
+{
+    PROC_BUILD_SMP_CORE_RATIO_8_8 = 0,
+    PROC_BUILD_SMP_CORE_RATIO_7_8 = 1,
+    PROC_BUILD_SMP_CORE_RATIO_6_8 = 2,
+    PROC_BUILD_SMP_CORE_RATIO_5_8 = 3,
+    PROC_BUILD_SMP_CORE_RATIO_4_8 = 4,
+    PROC_BUILD_SMP_CORE_RATIO_2_8 = 5
+};
+
+// core floor/nest frequency ratio cutpoints (CPU delay)
+enum proc_build_smp_cpu_delay
+{
+    PROC_BUILD_SMP_CPU_DELAY_4800_2400 = 0,
+    PROC_BUILD_SMP_CPU_DELAY_4431_2400 = 1,
+    PROC_BUILD_SMP_CPU_DELAY_4114_2400 = 2,
+    PROC_BUILD_SMP_CPU_DELAY_3840_2400 = 3,
+    PROC_BUILD_SMP_CPU_DELAY_3600_2400 = 4,
+    PROC_BUILD_SMP_CPU_DELAY_3338_2400 = 5,
+    PROC_BUILD_SMP_CPU_DELAY_3200_2400 = 6,
+    PROC_BUILD_SMP_CPU_DELAY_3032_2400 = 7,
+    PROC_BUILD_SMP_CPU_DELAY_2880_2400 = 8,
+    PROC_BUILD_SMP_CPU_DELAY_2743_2400 = 9,
+    PROC_BUILD_SMP_CPU_DELAY_2618_2400 = 10,
+    PROC_BUILD_SMP_CPU_DELAY_2504_2400 = 11,
+    PROC_BUILD_SMP_CPU_DELAY_2400_2400 = 12
 };
 
 // structure to represent collection of nodes in SMP topology
@@ -259,6 +256,9 @@ typedef fapi::ReturnCode
 // PB shadow register constant definition
 const uint8_t PROC_BUILD_SMP_NUM_SHADOWS = 3;
 
+// core floor/nest frequency ratio cutpoints (CPU delay)
+const uint8_t PROC_BUILD_SMP_CPU_DELAY_NUM_SETPOINTS = 13;
+
 
 extern "C"
 {
@@ -276,9 +276,19 @@ extern "C"
 //                      (SMP_ACTIVATE_PHASE1 = HBI,
 //                       SMP_ACTIVATE_PHASE2 = FSP)
 // returns: FAPI_RC_SUCCESS if SMP build operation is successful,
+//          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
+//              ADU atomic lock,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
+//              is specified,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
+//          RC_PROC_ADU_UTILS_INVALID_FBC_OP if invalid fabric operation
+//              parameters are specified,
+//          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if ADU status mismatches
+//              for switch operation,
 //          RC_PROC_FAB_SMP_X_BUS_WIDTH_ATTR_ERR if attribute value is
 //              invalid,
-//          RC_PROC_FAB_SMP_PUMP_TYPE_ATTR_ERR if attribute value is
+//          RC_PROC_FAB_SMP_PUMP_MODE_ATTR_ERR if attribute value is
 //              invalid,
 //          RC_PROC_FAB_SMP_MCS_INTERLEAVED_ATTR_ERR if attribute value is
 //              invalid,
@@ -288,6 +298,8 @@ extern "C"
 //              invalid,
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR if cache/nest frequency
 //              ratio is unsupported,
+//          RC_PROC_BUILD_SMP_CORE_FREQ_RANGE_ERR if invalid relationship exists
+//              between ceiling/nominal/floor core frequency attributes,
 //          RC_PROC_BUILD_SMP_CORE_CEILING_FREQ_RATIO_ERR if cache/nest frequency
 //              ratio is unsupported,
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_RATIO_ERR if cache/nest frequency
@@ -309,7 +321,7 @@ extern "C"
 //              do not specify a new fabric system master,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
 //              error is detected based on chip state and input paramters,
-//          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
+//          RC_PROC_BUILD_SMP_INVALID_OPERATION_ERR if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if HP shadow registers are not
 //              equivalent,
@@ -329,6 +341,14 @@ extern "C"
 //              is invalid,
 //          RC_PROC_BUILD_SMP_X_CMD_RATE_ERR if calculated X link command rate
 //              is invalid,
+//          RC_PROC_BUILD_SMP_AX_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_PCIE_PARTIAL_GOOD_ERR if partial good attribute
+//              state does not allow for action on target,
+//          RC_PROC_BUILD_SMP_LINK_TARGET_TYPE_ERR if link target type is
+//              unsupported,
+//          RC_PROC_BUILD_SMP_INVALID_TOPOLOGY if specified fabric topology
+//              is illegal,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp(

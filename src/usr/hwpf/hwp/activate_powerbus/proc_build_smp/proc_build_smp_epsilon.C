@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.9 2013/11/13 01:46:55 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.10 2014/02/23 21:41:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,9 +39,152 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_build_smp_epsilon.H"
+#include <proc_build_smp_epsilon.H>
 
 extern "C" {
+
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+//
+// table of base epsilon values
+//
+
+const uint32_t PROC_BUILD_SMP_EPSILON_MIN_VALUE = 0x1;
+const uint32_t PROC_BUILD_SMP_EPSILON_MAX_VALUE = 0xFFFFFFFF;
+
+// HE epsilon (4 chips per-group)
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_HE[] = {    6,    6,    7,    8,    9,   15 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T1_HE[] = {   56,   58,   60,   62,   65,   84 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_HE[] = {  102,  104,  105,  108,  111,  130 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_F_HE[]  = {   66,   67,   69,   71,   75,   93 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_HE[]    = {   46,   47,   47,   48,   50,   55 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_F_HE[]  = {   37,   38,   39,   40,   40,   46 };
+
+// LE epsilon (2 chips per-group)
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_LE[] = {    6,    6,    7,    8,    9,   15 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T1_LE[] = {   47,   49,   50,   53,   56,   75 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_LE[] = {   93,   95,   96,   99,  102,  120 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_F_LE[]  = {   66,   67,   69,   71,   75,   93 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_LE[]    = {   46,   47,   47,   48,   50,   55 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_F_LE[]  = {   37,   38,   39,   40,   40,   46 };
+
+// Stradale epsilon (1 chip per-group)
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_1S[] = {    6,    6,    7,    8,    9,   15 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T1_1S[] = {    6,    6,    7,    8,    9,   15 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_1S[] = {   63,   64,   65,   68,   72,   90 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_F_1S[]  = {   66,   67,   69,   71,   75,   93 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_1S[]    = {   14,   14,   15,   15,   16,   23 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_F_1S[]  = {   37,   38,   39,   40,   40,   46 };
+
+
+//
+// unit specific epsilon range constants
+//
+
+enum proc_build_smp_epsilon_unit
+{
+    PROC_BUILD_SMP_EPSILON_UNIT_L2_R_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_L2_W_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_L2_R_T0,
+    PROC_BUILD_SMP_EPSILON_UNIT_L2_R_T1,
+    PROC_BUILD_SMP_EPSILON_UNIT_L3_R_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_L3_W_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_L3_R_T0,
+    PROC_BUILD_SMP_EPSILON_UNIT_L3_R_T1,
+    PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T0,
+    PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T1,
+    PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_F,
+    PROC_BUILD_SMP_EPSILON_UNIT_NX_W_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_HCA_W_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_CAPP_W_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T0,
+    PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T1,
+    PROC_BUILD_SMP_EPSILON_UNIT_MCD_P
+};
+
+// L2
+const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T0 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T1 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T2 = 2048;
+const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_W_T2 = 128;
+
+// L3
+const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T0 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T1 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T2 = 2048;
+const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_W_T2 = 128;
+
+// MCS
+const uint32_t PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T0 = 1016;
+const uint32_t PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T1 = 1016;
+const uint32_t PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T2 = 1016;
+const uint32_t PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_F  = 1016;
+
+const uint8_t  PROC_BUILD_SMP_EPSILON_MCS_JITTER = 0x1;
+
+// NX
+const uint32_t PROC_BUILD_SMP_EPSILON_NX_MAX_VALUE_W_T2 = 448;
+
+// HCA
+const uint32_t PROC_BUILD_SMP_EPSILON_HCA_MAX_VALUE_W_T2 = 512;
+
+// CAPP
+const uint32_t PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T0 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T1 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T2 = 512;
+const uint32_t PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_W_T2 = 128;
+
+const uint32_t PROC_BUILD_SMP_EPSILON_CAPP_FORCE_T2 = 0x1;
+
+// MCD
+const uint32_t PROC_BUILD_SMP_EPSILON_MCD_MAX_VALUE_P = 65520;
+
+
+//
+// unit specific register field/bit definition constants
+//
+
+// MCS MCEPS register field/bit definitions
+const uint32_t MCEPS_JITTER_EPSILON_START_BIT = 0;
+const uint32_t MCEPS_JITTER_EPSILON_END_BIT = 7;
+const uint32_t MCEPS_NODAL_EPSILON_START_BIT = 8;
+const uint32_t MCEPS_NODAL_EPSILON_END_BIT = 15;
+const uint32_t MCEPS_GROUP_EPSILON_START_BIT = 16;
+const uint32_t MCEPS_GROUP_EPSILON_END_BIT = 23;
+const uint32_t MCEPS_SYSTEM_EPSILON_START_BIT = 24;
+const uint32_t MCEPS_SYSTEM_EPSILON_END_BIT = 31;
+const uint32_t MCEPS_FOREIGN_EPSILON_START_BIT = 32;
+const uint32_t MCEPS_FOREIGN_EPSILON_END_BIT = 39;
+
+// NX CQ Epsilon Scale register field/bit definitions
+const uint32_t NX_CQ_EPSILON_SCALE_EPSILON_START_BIT = 0;
+const uint32_t NX_CQ_EPSILON_SCALE_EPSILON_END_BIT = 5;
+
+// HCA Mode register field/bit definitions
+const uint32_t HCA_MODE_EPSILON_START_BIT = 21;
+const uint32_t HCA_MODE_EPSILON_END_BIT = 29;
+
+// CAPP CXA Snoop Control register field/bit definitions
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_TIER0_START_BIT = 3;
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_TIER0_END_BIT = 11;
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_TIER1_START_BIT = 15;
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_TIER1_END_BIT = 23;
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_TIER2_START_BIT = 25;
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_TIER2_END_BIT = 35;
+const uint32_t CAPP_CXA_SNP_READ_EPSILON_MODE_BIT = 0;
+
+// CAPP APC Master PB Control register field/bit definitions
+const uint32_t CAPP_APC_MASTER_CONTROL_EPSILON_START_BIT = 39;
+const uint32_t CAPP_APC_MASTER_CONTROL_EPSILON_END_BIT = 45;
+
+// MCD Recovery Pre Epsilon Configuration register field/bit definitions
+const uint32_t MCD_RECOVERY_PRE_EPS_CONFIG_EPSILON_START_BIT = 52;
+const uint32_t MCD_RECOVERY_PRE_EPS_CONFIG_EPSILON_END_BIT = 63;
 
 
 //------------------------------------------------------------------------------
@@ -127,6 +270,7 @@ void proc_build_smp_guardband_epsilon(
 //                               underlying register storage
 //             i_must_fit     => raise error if true and target value
 //                               cannot be represented in underlying storage
+//             i_unit         => unit enum for FFDC
 //             o_does_fit     => boolean indicating comparison result
 // returns: FAPI_RC_SUCCESS if value can be represented in HW storage (or
 //              i_must_fit is false)
@@ -137,6 +281,7 @@ fapi::ReturnCode proc_build_smp_check_epsilon(
     const uint32_t i_target_value,
     const uint32_t i_max_hw_value,
     const bool i_must_fit,
+    const proc_build_smp_epsilon_unit i_unit,
     bool& o_does_fit)
 {
     fapi::ReturnCode rc;
@@ -154,6 +299,7 @@ fapi::ReturnCode proc_build_smp_check_epsilon(
                      i_target_value, i_max_hw_value);
             const uint32_t& VALUE = i_target_value;
             const uint32_t& MAX_HW_VALUE = i_max_hw_value;
+            const proc_build_smp_epsilon_unit& UNIT = i_unit;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_EPSILON_RANGE_ERR);
             break;
         }
@@ -213,6 +359,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
             i_eps_cfg.r_t2,
             PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_L2_R_T2,
             r_t2_fits);
 
         if (!rc.ok())
@@ -225,6 +372,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
             i_eps_cfg.w_t2,
             PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_W_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_L2_W_T2,
             w_t2_fits);
 
         if (!rc.ok())
@@ -240,11 +388,13 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
             i_eps_cfg.r_t0,
             PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T0,
             false,
+            PROC_BUILD_SMP_EPSILON_UNIT_L2_R_T0,
             r_t0_fits);
         (void) proc_build_smp_check_epsilon(
             i_eps_cfg.r_t1,
             PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T1,
             false,
+            PROC_BUILD_SMP_EPSILON_UNIT_L2_R_T1,
             r_t1_fits);
 
         // set attributes based on unit implementation
@@ -387,6 +537,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
             i_eps_cfg.r_t2,
             PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_L3_R_T2,
             r_t2_fits);
 
         if (!rc.ok())
@@ -399,6 +550,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
             i_eps_cfg.w_t2,
             PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_W_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_L3_W_T2,
             w_t2_fits);
 
         if (!rc.ok())
@@ -414,11 +566,13 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
             i_eps_cfg.r_t0,
             PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T0,
             false,
+            PROC_BUILD_SMP_EPSILON_UNIT_L3_R_T0,
             r_t0_fits);
         (void) proc_build_smp_check_epsilon(
             i_eps_cfg.r_t1,
             PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T1,
             false,
+            PROC_BUILD_SMP_EPSILON_UNIT_L3_R_T1,
             r_t1_fits);
 
         // set attributes based on unit implementation
@@ -552,6 +706,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_mcs(
             i_eps_cfg.r_t0,
             PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T0,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T0,
             r_t0_fits);
 
         if (!rc.ok())
@@ -564,6 +719,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_mcs(
             i_eps_cfg.r_t1,
             PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T1,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T1,
             r_t1_fits);
 
         if (!rc.ok())
@@ -576,6 +732,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_mcs(
             i_eps_cfg.r_t2,
             PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T2,
             r_t2_fits);
 
         if (!rc.ok())
@@ -588,6 +745,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_mcs(
             i_eps_cfg.r_f,
             PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_F,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_F,
             r_f_fits);
 
         if (!rc.ok())
@@ -705,6 +863,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_nx(
             i_eps_cfg.w_t2,
             PROC_BUILD_SMP_EPSILON_NX_MAX_VALUE_W_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_NX_W_T2,
             w_t2_fits);
 
         if (!rc.ok())
@@ -791,6 +950,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_hca(
             i_eps_cfg.w_t2,
             PROC_BUILD_SMP_EPSILON_HCA_MAX_VALUE_W_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_HCA_W_T2,
             w_t2_fits);
 
         if (!rc.ok())
@@ -881,6 +1041,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_capp(
             i_eps_cfg.r_t2,
             PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T2,
             r_t2_fits);
 
         if (!rc.ok())
@@ -893,6 +1054,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_capp(
             i_eps_cfg.w_t2,
             PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_W_T2,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_CAPP_W_T2,
             w_t2_fits);
 
         if (!rc.ok())
@@ -908,11 +1070,13 @@ fapi::ReturnCode proc_build_smp_set_epsilons_capp(
             i_eps_cfg.r_t0,
             PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T0,
             false,
+            PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T0,
             r_t0_fits);
         (void) proc_build_smp_check_epsilon(
             i_eps_cfg.r_t1,
             PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T1,
             false,
+            PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T1,
             r_t1_fits);
 
         // program write epsilon register based on unit implementation
@@ -950,7 +1114,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_capp(
 
         // program read epsilon register based on unit implementation
         rc_ecmd = data.flushTo0();
-        rc_ecmd = mask.flushTo0();
+        rc_ecmd |= mask.flushTo0();
 
         rc_ecmd |= data.insertFromRight(
             ((i_eps_cfg.r_t2 == PROC_BUILD_SMP_EPSILON_CAPP_MAX_VALUE_R_T2)?
@@ -1060,6 +1224,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_mcd(
             i_eps_cfg.p,
             PROC_BUILD_SMP_EPSILON_MCD_MAX_VALUE_P,
             true,
+            PROC_BUILD_SMP_EPSILON_UNIT_MCD_P,
             p_fits);
 
         if (!rc.ok())
@@ -1184,6 +1349,7 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
                 break;
             default:
                 FAPI_ERR("proc_build_smp_calc_epsilons: Invalid epsilon table type");
+                const proc_fab_smp_eps_table_type& TABLE_TYPE = io_smp.eps_cfg.table_type;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_EPSILON_INVALID_TABLE_ERR);
                 break;
         }
@@ -1289,6 +1455,7 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
             ((io_smp.eps_cfg.w_f  > io_smp.eps_cfg.w_t2) && (io_smp.eps_cfg.table_type != PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S)))
         {
             FAPI_ERR("proc_build_smp_calc_epsilons: Invalid relationship between base epsilon values");
+            const proc_fab_smp_eps_table_type& TABLE_TYPE = io_smp.eps_cfg.table_type;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_EPSILON_INVALID_TABLE_ERR);
             break;
         }
