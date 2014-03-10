@@ -849,7 +849,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
                 if (centaurHandle)
                 {
-                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle, o_errl);
+                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle,
+                                                         o_errl,
+                                                         false);
                     if ( SUCCESS != l_rc )
                     {
                         PRDF_ERR( PRDF_FUNC"runtime deconfig failed 0x%08x",
@@ -860,7 +862,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             }
             else
             {
-                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt, o_errl );
+                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt, o_errl,
+                                                      true);
                 if ( SUCCESS == l_rc )
                 {
                     // Call Dump for Proc Core CS

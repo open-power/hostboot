@@ -74,7 +74,7 @@
  */
 // FIXME:RTC: 65609 will address this issue.
 // need to implement in Hostboot
-#define PRDF_RUNTIME_DECONFIG( i_pTarget, i_errl ) \
+#define PRDF_RUNTIME_DECONFIG( i_pTarget, i_errl, i_dmp ) \
   SUCCESS
 
 /**
