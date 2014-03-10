@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_lrdimm_funcs.C,v 1.6 2014/01/07 21:50:11 bellows Exp $
+// $Id: mss_lrdimm_funcs.C,v 1.8 2014/02/13 18:04:08 kcook Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -40,6 +40,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.8    | kcook    |13-FEB-14| More FW updates.
+//  1.7    | kcook    |12-FEB-14| Updated HWP_ERROR per RAS review to be used with memory_mss_lrdimm_funcs.xml
 //  1.6    | bellows  |02-JAN-14| VPD attribute removal
 //  1.5    | kcook    |12/03/13 | Updated VPD attributes. 
 //  1.4    | bellows  |09/16/13 | Hostboot compile update
@@ -67,7 +69,7 @@ const uint32_t MSS_EFF_VALID = 255;
 
 using namespace fapi;
 
-fapi::ReturnCode mss_lrdimm_rcd_load( Target& i_target, uint32_t port_number, uint32_t& ccs_inst_cnt)
+fapi::ReturnCode mss_lrdimm_rcd_load( fapi::Target& i_target, uint32_t port_number, uint32_t& ccs_inst_cnt)
 {
     ReturnCode rc;
     uint8_t num_drops_per_port;
@@ -262,6 +264,8 @@ fapi::ReturnCode mss_lrdimm_rcd_load( Target& i_target, uint32_t port_number, ui
           data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_7, 28,4);
 
           func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
+        
+          //check for rc but not seeing where rc is set in this loop/if statment
           if(rc) return rc;
        }
     }
@@ -338,6 +342,7 @@ fapi::ReturnCode mss_lrdimm_rcd_load( Target& i_target, uint32_t port_number, ui
           data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_9, 36,4);
 
           func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
+          //why check rc here and not at the FAPI_ATTR_GET line
           if(rc) return rc;
        }
     }
@@ -371,6 +376,7 @@ fapi::ReturnCode mss_lrdimm_rcd_load( Target& i_target, uint32_t port_number, ui
              data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_11,44,4);
 
              func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
+             //not sure why the rc check is here since there are no rc calls
              if(rc) return rc;
           }
        }
@@ -469,6 +475,8 @@ fapi::ReturnCode mss_lrdimm_rcd_load( Target& i_target, uint32_t port_number, ui
              data_buff_rcd_word.insert(ext_funcs[dimm_number][i][1], 60,4);        // msb data
 
              func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
+            
+            //not sure where the rc call is made
              if(rc) return rc;
            } // end if  has ranks
        } // end dimm loop
@@ -525,7 +533,7 @@ fapi::ReturnCode mss_lrdimm_rcd_load( Target& i_target, uint32_t port_number, ui
 
 }
 
-fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,uint32_t dimm_number, uint32_t& io_ccs_inst_cnt)
+fapi::ReturnCode mss_lrdimm_mrs_load( fapi::Target& i_target , uint32_t i_port_number,uint32_t dimm_number, uint32_t& io_ccs_inst_cnt)
 {
      // For LRDIMM  Set Rtt_nom, rtt_wr, driver impedance for R0 and R1
      // turn off  MRS broadcast
@@ -679,6 +687,8 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
               data_buff_rcd_word.clearBit(0,64);
               data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_14, 56,4);
               func_rcd_control_word[dimm_num] = data_buff_rcd_word.getDoubleWord(0);
+            
+              //not sure need this rc check
               if(rc) return rc;
            }
         }
@@ -747,6 +757,7 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
            data_buff_rcd_word.insert(ext_func[1], 60,4);    // msb data
 
            func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
+           //not sure need this rc check
            if(rc) return rc;
         } // end if  has ranks
 
@@ -964,6 +975,8 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
               data_buff_rcd_word.clearBit(0,64);
               data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_14, 56,4);
               func_rcd_control_word[dimm_num] = data_buff_rcd_word.getDoubleWord(0);
+
+              //not sure if need the rc check
               if(rc) return rc;
            }
         }
@@ -1081,7 +1094,7 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
     return rc;
 }
 
-fapi::ReturnCode  mss_execute_lrdimm_mb_dram_training(Target &i_target)
+fapi::ReturnCode  mss_execute_lrdimm_mb_dram_training(fapi::Target &i_target)
 {
    ReturnCode rc;
    uint8_t l_rcd_cntl_word_7;
@@ -1231,7 +1244,7 @@ fapi::ReturnCode  mss_execute_lrdimm_mb_dram_training(Target &i_target)
    return rc;
 }
 
-fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba, 
+fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba, 
                                  uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE],
                                  uint32_t mss_freq, uint8_t eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE])
 {
@@ -1256,7 +1269,6 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
       if(rc)
       {
           FAPI_ERR("Error retrieving assodiated dimms");
-          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
           break;
       }
    
@@ -1267,7 +1279,6 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
          if(rc)
          {
              FAPI_ERR("Error retrieving ATTR_MBA_PORT");
-             FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
              break;
          }
    //------------------------------------------------------------------------
@@ -1275,7 +1286,6 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
          if(rc)
          {
              FAPI_ERR("Error retrieving ATTR_MBA_DIMM");
-             FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
              break;
          }
    
@@ -1357,7 +1367,6 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
       if(rc)
       {
           FAPI_ERR("Error reading spd data from caller");
-          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
           break;
       }
    
@@ -1472,7 +1481,11 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
                   //p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                   eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
-                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                  uint8_t IBM_TYPE = eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm];
+                  const fapi::Target& TARGET = i_target_mba;
+                  fapi::Target& DIMM = l_target_dimm_array[l_cur_mba_dimm];
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_UNSUPPORTED_TYPE);
+                  return rc;
                }
             } // end valid dimm
          } // end dimm loop
@@ -1492,7 +1505,6 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
       if(rc)
       {
          FAPI_ERR("Error setting attributes");
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
          break;
       }
    } while(0);
@@ -1500,7 +1512,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const Target &i_target_mba,
    return rc;
 }
 
-fapi::ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba, uint32_t * p_b_var_array, uint32_t *var_array_p_array[5])
+fapi::ReturnCode mss_lrdimm_rewrite_odt(const fapi::Target& i_target_mba, uint32_t * p_b_var_array, uint32_t *var_array_p_array[5])
 {
    ReturnCode rc;
    uint8_t l_num_ranks_per_dimm_u8array[PORT_SIZE][DIMM_SIZE];
@@ -1547,7 +1559,7 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba, uint32_t * 
    return rc;
 }
 
-fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
+fapi::ReturnCode mss_lrdimm_term_atts(const fapi::Target& i_target_mba)
 {
    ReturnCode rc;
 
@@ -1629,6 +1641,7 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
          FAPI_INF("rcd control word 8-9 %X", l_rcd_cntl_word_8_9 );
 
 
+        const fapi::Target& TARGET = i_target_mba;
          // RC10 LRDIMM operating speed
          if ( l_mss_freq <= 933 ) {         // 800Mbps
             l_rcd_cntl_word_10 = 0;
@@ -1642,7 +1655,8 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
             l_rcd_cntl_word_10 = 4;
          } else {
             FAPI_ERR("Invalid LRDIMM ATTR_MSS_FREQ = %d on %s!", l_mss_freq, i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            uint32_t& L_MSS_FREQ = l_mss_freq;
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_MSS_FREQ); return rc;
          }
          FAPI_INF("rcd control word 10 %X", l_rcd_cntl_word_10 );
 
@@ -1655,7 +1669,8 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
             l_rcd_cntl_word_11 = 6;
          } else {
             FAPI_ERR("Invalid LRDIMM ATTR_MSS_VOLT = %d on %s!", l_mss_volt, i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            uint32_t& L_MSS_VOLT = l_mss_volt;
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_MSS_VOLT); return rc;
          }
          FAPI_INF("rcd control word 11 %X", l_rcd_cntl_word_11 );
 
@@ -1685,6 +1700,8 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
          }
          data_buffer_8.extractToRight( &l_rcd_cntl_word_14, 0, 4);
          FAPI_INF("rcd control word 14 %X", l_rcd_cntl_word_14 );
+         uint8_t& L_LRDIMM_RANK_MULT_MODE=l_lrdimm_rank_mult_mode;
+         uint8_t& L_DRAM_DENSITY=l_dram_density;
 
          // RC15 Rank multiplication
          if ( l_lrdimm_rank_mult_mode == 4 ) {
@@ -1696,7 +1713,7 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
                l_rcd_cntl_word_15 = 7;    // A[17:16]; 4x multiplication, 4 Gbit DDR3 SDRAM
             } else {
                FAPI_ERR("Invalid LRDIMM Rank mult mode =%d, ATTR_EFF_DRAM_DENSITY = %d on %s!", l_lrdimm_rank_mult_mode, l_dram_density, i_target_mba.toEcmdString());
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_RANK_MULT_MODE); return rc;
             }
          } else if ( l_lrdimm_rank_mult_mode == 2 ) {
             if ( l_dram_density == 1 ) {
@@ -1707,7 +1724,7 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
                l_rcd_cntl_word_15 = 3;    // A[16]; 2x multiplication, 4 Gbit DDR3 SDRAM
             } else {
                FAPI_ERR("Invalid LRDIMM Rank Mult mode = %d,  ATTR_EFF_DRAM_DENSITY = %d on %s!", l_lrdimm_rank_mult_mode, l_dram_density, i_target_mba.toEcmdString());
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_DRAM_DENSITY_MULT_2); return rc;
             }
          } else {
             l_rcd_cntl_word_15 = 0;
@@ -1741,8 +1758,9 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
          } else if ( l_dram_ron[l_port][l_dimm] == 1 ) {
             l_dram_ron[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RON_OHM34;
          } else {
+            uint8_t& L_DRAM_RON = l_dram_ron[l_port][l_dimm];
             FAPI_ERR("Invalid SPD LR MR1,2 DRAM drv imp on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_SPD_DRV_IMP); return rc;
          }
 
          attr_eff_dram_ron[l_port][l_dimm] = l_dram_ron[l_port][l_dimm];
@@ -1762,8 +1780,9 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
             case 5 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM30;
                 break;
             default: FAPI_ERR("Invalid SPD LR MR1,2 DRAM RTT_NOM on %s!", i_target_mba.toEcmdString());
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
-                break;
+                uint8_t& L_DRAM_RTT_NOM = l_dram_rtt_nom[l_port][l_dimm];
+                FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_SPD_RTT_NOM);
+                return rc;
          }
 
          switch (l_dram_rtt_wr[l_port][l_dimm]) {
@@ -1774,8 +1793,9 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
             case 2 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_OHM120;
                 break;
             default: FAPI_ERR("Invalid SPD LR MR1,2 DRAM RTT_WR on %s!", i_target_mba.toEcmdString());
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
-                break;
+                uint8_t& L_DRAM_RTT_WR = l_dram_rtt_wr[l_port][l_dimm];
+                FAPI_SET_HWP_ERROR(rc, RC_MSS_LRDIMM_INVALID_SPD_RTT_WR);
+                return rc;
          }
 
          uint8_t l_rank;
@@ -1825,7 +1845,7 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
    return rc;
 }
 
-fapi::ReturnCode mss_spec_rcd_load( Target& i_target,  uint32_t i_port_number, uint8_t  *p_i_rcd_num_arr, uint8_t i_rcd_num_arr_length, uint64_t  i_rcd_word[], uint32_t& io_ccs_inst_cnt,uint8_t i_keep_cke_high)
+fapi::ReturnCode mss_spec_rcd_load( fapi::Target& i_target,  uint32_t i_port_number, uint8_t  *p_i_rcd_num_arr, uint8_t i_rcd_num_arr_length, uint64_t  i_rcd_word[], uint32_t& io_ccs_inst_cnt,uint8_t i_keep_cke_high)
 {
     const uint8_t MAX_NUM_PORTS=2;
     const uint8_t MAX_NUM_DIMMS=2;

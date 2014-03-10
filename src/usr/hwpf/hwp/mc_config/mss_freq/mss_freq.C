@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.23 2014/02/06 00:08:38 jdsloat Exp $
+// $Id: mss_freq.C,v 1.24 2014/02/18 19:53:48 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -63,6 +63,7 @@
 //  1.21   | jdsloat  | 02/12/13 | Added Debug messages
 //  1.22   | jdsloat  | 06/27/13 | Fixed overridng RC error that results in coredump on no centaur SPD info.
 //  1.23   | jdsloat  | 02/05/14 | Added support for DMI capable frequecies via ATTR_MSS_NEST_CAPABLE_FREQUENCIES
+//  1.24   | jdsloat  | 02/18/14 | Added support for DDR4
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -84,6 +85,15 @@ enum {
    MSS_FREQ_DUAL_DROP = 2,
    MSS_FREQ_VALID = 255,
 };
+
+//----------------------------------------------------------------------
+//  Constants
+//----------------------------------------------------------------------
+const uint8_t DDR4_MTB_DIVIDEND = 1;
+const uint8_t DDR4_MTB_DIVISOR = 8;
+const uint8_t DDR4_FTB_DIVIDEND = 1;
+const uint8_t DDR4_FTB_DIVISOR = 1;
+
 
 
 using namespace fapi;
@@ -130,6 +140,10 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   uint32_t  l_freq_override = 0;
   uint8_t l_override_path = 0;
   uint8_t l_nest_capable_frequencies = 0; 
+  uint8_t l_spd_dram_dev_type;
+  uint8_t l_spd_tb_mtb_ddr4=0;
+  uint8_t l_spd_tb_ftb_ddr4=0;
+  uint8_t l_spd_tckmax_ddr4=0;
 
   // Get associated MBA's on this centaur                                                                                      
   l_rc=fapiGetChildChiplets(i_target_memb, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
@@ -151,58 +165,135 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
       for (uint32_t j=0; j < l_dimm_targets.size(); j++)
 	{
 	  
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVIDEND, &l_dimm_targets[j], l_spd_mtb_dividend);
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE, &l_dimm_targets[j], l_spd_dram_dev_type);
 	  if (l_rc)
-	    {
-	      FAPI_ERR("Unable to read SPD Medium Timebase Dividend.");
+	  {
+	      FAPI_ERR("Unable to read SPD Dram Device Type.");
 	      break;
-	    }
+	  }
+	  if (l_spd_dram_dev_type == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4)
+	  {		
+        	  // DDR4 ONLY
+		  FAPI_DBG("DDR4 detected");
 
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVISOR, &l_dimm_targets[j], l_spd_mtb_divisor);
-	  if (l_rc)
-	    {
-	      FAPI_ERR("Unable to read SPD Medium Timebase Divisor.");
-	      break;
-	    }
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_TIMEBASE_MTB_DDR4, &l_dimm_targets[j], l_spd_tb_mtb_ddr4);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read SPD DDR4 Medium Timebase");
+		      break;
+		  }
 
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_TIMEBASE_FTB_DDR4, &l_dimm_targets[j], l_spd_tb_ftb_ddr4);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read SPD DDR4 Fine Timebase");
+		      break;
+		  }
+
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_TCKMAX_DDR4, &l_dimm_targets[j], l_spd_tckmax_ddr4);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read SPD DDR4 TCK Max");
+		      break;
+		  }
+
+		  if ( (l_spd_tb_mtb_ddr4 == 0)&&(l_spd_tb_ftb_ddr4 == 0))
+		  {
+		      // These are now considered constant within DDR4 
+		      // If DDR4 spec changes to include other values, these const's need to be updated
+		      l_spd_mtb_dividend = DDR4_MTB_DIVIDEND;
+		      l_spd_mtb_divisor = DDR4_MTB_DIVISOR;	
+		      l_spd_ftb_dividend = DDR4_FTB_DIVIDEND;
+		      l_spd_ftb_divisor = DDR4_FTB_DIVISOR;
+		  }
+		  else
+		  {
+          	      //Invalid due to the fact that JEDEC dictates that these should be zero.
+          	      FAPI_ERR("Invalid data received from SPD DDR4 MTB/FTB Timebase");
+          	      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_SPD_DATA);
+          	      break;
+      		  }
+
+	  }
+	  else
+	  {		
+		  // DDR3 ONLY
+		  FAPI_DBG("DDR3 detected");
+
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVIDEND, &l_dimm_targets[j], l_spd_mtb_dividend);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read SPD Medium Timebase Dividend.");
+		      break;
+		  }
+
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVISOR, &l_dimm_targets[j], l_spd_mtb_divisor);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read SPD Medium Timebase Divisor.");
+		      break;
+		  }
+
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND,  &l_dimm_targets[j], l_spd_ftb_dividend);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read the SPD FTB dividend");
+		      break;
+		  }
+		  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR,  &l_dimm_targets[j], l_spd_ftb_divisor);
+		  if (l_rc)
+		  {
+		      FAPI_ERR("Unable to read the SPD FTB divisor");
+		      break;
+		  }
+		  if ( (l_spd_mtb_dividend == 0)||(l_spd_mtb_divisor == 0)||(l_spd_ftb_dividend == 0)||(l_spd_ftb_divisor == 0))
+		  {
+		      //Invalid due to the fact that JEDEC dictates that these should be non-zero.
+		      FAPI_ERR("Invalid data received from SPD within MTB/FTB Dividend, MTB/FTB Divisor");
+		      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_SPD_DATA);
+		      break;
+		  }
+	  }
+	  // common to both DDR3 & DDR4
 	  l_rc = FAPI_ATTR_GET(ATTR_SPD_TCKMIN, &l_dimm_targets[j], l_spd_min_tck_MTB);
 	  if (l_rc)
-	    {
+	  {
 	      FAPI_ERR("Unable to read SPD Minimum TCK (Min Clock Cycle).");
 	      break;
-	    }
+	  }
 
 	  l_rc = FAPI_ATTR_GET(ATTR_SPD_TAAMIN, &l_dimm_targets[j], l_spd_min_taa_MTB);
 	  if (l_rc)
-	    {
+	  {
 	      FAPI_ERR("Unable to read SPD Minimum TAA (Min CAS Latency Time).");
 	      break;
-	    }
+	  }
 	  l_rc = FAPI_ATTR_GET(ATTR_SPD_CAS_LATENCIES_SUPPORTED, &l_dimm_targets[j], l_spd_cas_lat_supported);
 	  if (l_rc)
-	    {
+	  {
 	      FAPI_ERR("Unable to read SPD Supported CAS Latencies.");
 	      break;
-	    }
+	  }
 
 	  l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT,  &l_dimm_targets[j], cur_mba_port);
 	  if (l_rc)
-	    {
+	  {
 	      FAPI_ERR("Unable to read the Port Info in order to determine configuration.");
 	      break;
-	    }
+	  }
 	  l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM,  &l_dimm_targets[j], cur_mba_dimm);
 	  if (l_rc)
-	    {
+	  {
 	      FAPI_ERR("Unable to read the DIMM Info in order to determine configuration.");
 	      break;
-	    }
+	  }
 	  l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE,  &l_dimm_targets[j], module_type);
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD module type.");
 	      break;
 	  }
+	  // from dimm_spd_attributes.xml, R1 = 0x00, R2 = 0x01, R3 = 0x02, R4 = 0x03
 	  l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,  &l_dimm_targets[j], num_ranks);
 	  if (l_rc)
 	  {
@@ -221,25 +312,13 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      FAPI_ERR("Unable to read the SPD TCK offset (FTB)");
 	      break;
 	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND,  &l_dimm_targets[j], l_spd_ftb_dividend);
-	  if (l_rc)
-	  {
-	      FAPI_ERR("Unable to read the SPD FTB dividend");
-	      break;
-	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR,  &l_dimm_targets[j], l_spd_ftb_divisor);
-	  if (l_rc)
-	  {
-	      FAPI_ERR("Unable to read the SPD FTB divisor");
-	      break;
-	  }
 
 	  cur_dimm_spd_valid_u8array[cur_mba_port][cur_mba_dimm] = MSS_FREQ_VALID;
 
-	  if ((l_spd_min_tck_MTB == 0)||(l_spd_mtb_dividend == 0)||(l_spd_mtb_divisor == 0)||(l_spd_min_taa_MTB == 0)||(l_spd_ftb_dividend == 0)||(l_spd_ftb_divisor == 0))
+	  if ((l_spd_min_tck_MTB == 0)||(l_spd_min_taa_MTB == 0))
 	  {
 	      //Invalid due to the fact that JEDEC dictates that these should be non-zero.
-	      FAPI_ERR("Invalid data recieved from SPD within MTB Dividend, MTB Divisor, TCK Min, or TAA Min");
+	      FAPI_ERR("Invalid data received from SPD within TCK Min, or TAA Min");
 	      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_SPD_DATA);
 	      break;
 	  }
@@ -249,6 +328,8 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	  l_spd_min_tck =  ( 1000 * l_spd_min_tck_MTB * l_spd_mtb_dividend ) / l_spd_mtb_divisor;
 	  l_spd_min_taa =  ( 1000 * l_spd_min_taa_MTB * l_spd_mtb_dividend ) / l_spd_mtb_divisor;
 
+	  FAPI_INF("min tck = %i, taa = %i", l_spd_min_tck, l_spd_min_taa);
+	  FAPI_INF("FTB tck 0x%x, taa 0x%x",l_spd_tck_offset_FTB,l_spd_taa_offset_FTB);
 	  // Adjusting by tck offset -- tck offset represented in 2's compliment as it could be positive or negative adjustment
 	  // No multiplication of 1000 as it is already in picoseconds.
 	  if (l_spd_tck_offset_FTB & 0x80)
@@ -256,11 +337,13 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      l_spd_tck_offset_FTB = ~( l_spd_tck_offset_FTB ) + 1;
 	      l_spd_tck_offset = (l_spd_tck_offset_FTB  * l_spd_ftb_dividend )  / l_spd_ftb_divisor;
 	      l_spd_min_tck =  l_spd_min_tck - l_spd_tck_offset;
+	      FAPI_INF("FTB minus offset %i, min tck %i",l_spd_tck_offset,l_spd_min_tck);
 	  }
 	  else
 	  {
 	      l_spd_tck_offset = (l_spd_tck_offset_FTB  * l_spd_ftb_dividend )  / l_spd_ftb_divisor;
 	      l_spd_min_tck =  l_spd_min_tck + l_spd_tck_offset;
+              FAPI_INF("FTB plus offset %i, min tck %i",l_spd_tck_offset,l_spd_min_tck);
 	  }
 
 	  // Adjusting by taa offset -- taa offset represented in 2's compliment as it could be positive or negative adjustment
@@ -279,7 +362,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	  if ((l_spd_min_tck == 0)||(l_spd_min_taa == 0))
 	  {
 	      //Invalid due to the fact that JEDEC dictates that these should be non-zero.
-	      FAPI_ERR("Invalid data recieved from SPD causing TCK Min or TAA Min to be 0");
+	      FAPI_ERR("Invalid data received from SPD causing TCK Min or TAA Min to be 0");
 	      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_SPD_DATA);
 	      break;
 	  }
@@ -289,22 +372,22 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 
 	  //is this the slowest dimm?
 	  if (l_dimm_freq_calc < l_dimm_freq_min)
-	    {
+	  {
 	      l_dimm_freq_min = l_dimm_freq_calc;
-	    }
+	  }
 
 	  if (l_spd_min_tck > l_spd_min_tck_max)
-	    {
+	  {
 	      l_spd_min_tck_max = l_spd_min_tck;
-	    }
+	  }
 
 	  if (l_spd_min_taa > l_spd_min_taa_max)
-	    {
+	  {
 	      l_spd_min_taa_max = l_spd_min_taa;
-	    }
+	  }
 
 	  l_spd_cas_lat_supported_all = l_spd_cas_lat_supported_all & l_spd_cas_lat_supported;
-	  num_ranks_total = num_ranks_total + num_ranks;
+	  num_ranks_total = num_ranks_total + num_ranks + 1;
 	  if (module_type_all == 0)
 	  {
 	      module_type_all = module_type;
@@ -315,12 +398,12 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MODULE_TYPE_MIX);
 	  }
 
-      }
+      } // end dimm target loop
       if (l_rc)
       {
 	  break;
       }
-  }
+  } // end mba target loop
 
   FAPI_INF( "Highest Supported Frequency amongst DIMMs: %d", l_dimm_freq_min);
   FAPI_INF( "Minimum TAA(ps) amongst DIMMs: %d Minimum TCK(ps) amongst DIMMs: %d", l_spd_min_taa_max, l_spd_min_tck_max);
@@ -340,7 +423,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   }
 
 
-  FAPI_INF( "PLUG CONFIG(from SPD): %d Type of Dimm(from SPD): 0x%02X Num Ranks(from SPD): %d",  plug_config, module_type, num_ranks);
+  FAPI_INF( "PLUG CONFIG(from SPD): %d, Type of Dimm(from SPD): 0x%02X, Num Ranks(from SPD): %d",  plug_config, module_type, num_ranks);
 
   // Impose configuration limitations
   // Single Drop RDIMMs Cnfgs cannot run faster than 1333 unless it only has 1 rank
@@ -519,40 +602,40 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   if (!l_rc) 
   {
       if (l_dimm_freq_min < 1013)
-	{
+      {
           FAPI_ERR("Unsupported frequency:  DIMM Freq calculated < 1013 MHz");
 	  FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_FREQ_CALCULATED);
-	}
+      }
       else if (l_dimm_freq_min < 1266)
-	{
+      {
 	  // 1066 
 	  l_selected_dimm_freq=1066;
-	}
+      }
       else if (l_dimm_freq_min < 1520)
-	{
+      {
 	  // 1333
 	  l_selected_dimm_freq=1333;
-	}
+      }
       else if (l_dimm_freq_min < 1773)
-	{
+      {
 	  // 1600
 	  l_selected_dimm_freq=1600;
-	}
+      }
       else if (l_dimm_freq_min < 2026)
-	{
+      {
 	  // 1866
 	  l_selected_dimm_freq=1866;
-	}
+      }
       else if (l_dimm_freq_min < 2280)
-	{
+      {
 	  // 2133
 	  l_selected_dimm_freq=2133;
-	}
+      }
       else
-	{
+      {
 	  FAPI_ERR("Unsupported frequency:  DIMM Freq calculated > 2133 MHz: %d", l_dimm_freq_min);
 	  FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_FREQ_CALCULATED);
-	}
+      }
   }
 
   if (!l_rc)
@@ -594,3 +677,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   //all done.
   return l_rc;
 }
+
+
+
+

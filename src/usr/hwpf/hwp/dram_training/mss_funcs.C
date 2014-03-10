@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.33 2013/08/27 22:22:46 kcook Exp $
+// $Id: mss_funcs.C,v 1.35 2014/02/21 21:58:42 jdsloat Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.35   | jdsloat  | 02/21/14| Fixed an inf loop with edit 1.34 and 128GB DIMMs.
+//  1.34   | jdsloat  | 02/20/14| Edited set_end_bit to add a NOP to the end of every CCS execution per CCS defect
 //  1.33   | kcook    | 08/27/13| Removed LRDIMM functions to mss_lrdimm_funcs.C. Use with mss_funcs.H v1.16.
 //  1.32   | kcook    | 08/16/13| Added LRDIMM support. Use with mss_funcs.H v1.15.
 //  1.31   | jdsloat  | 05/20/13| Added ddr_gen determination in address mirror mode function
@@ -98,21 +100,72 @@ ReturnCode mss_ccs_set_end_bit(
             uint32_t i_instruction_number
               )
 {
-    uint32_t reg_address = 0;
     uint32_t rc_num = 0;
     ReturnCode rc;
     ecmdDataBufferBase data_buffer(64);
 
-    reg_address = i_instruction_number + CCS_INST_ARRY1_AB_REG0_0x03010635;
+    ecmdDataBufferBase address_16(16);
+    ecmdDataBufferBase bank_3(3);
+    ecmdDataBufferBase activate_1(1);
+    ecmdDataBufferBase rasn_1(1);
+    ecmdDataBufferBase casn_1(1);
+    ecmdDataBufferBase wen_1(1);
+    ecmdDataBufferBase cke_4(4);
+    ecmdDataBufferBase csn_8(8);
+    ecmdDataBufferBase odt_4(4);
+    ecmdDataBufferBase ddr_cal_type_4(4);
+    ecmdDataBufferBase num_idles_16(16);
+    ecmdDataBufferBase num_repeat_16(16);
+    ecmdDataBufferBase data_20(20);
+    ecmdDataBufferBase read_compare_1(1);
+    ecmdDataBufferBase rank_cal_4(4);
+    ecmdDataBufferBase ddr_cal_enable_1(1);
+    ecmdDataBufferBase ccs_end_1(1);
 
-    FAPI_INF( "Setting End Bit.");
+    uint32_t l_port_number = 0xFFFFFFFF;
 
-    rc = fapiGetScom(i_target, reg_address, data_buffer);
+    i_instruction_number = i_instruction_number + 1;
+
+    FAPI_INF( "Setting End Bit on instruction (NOP): %d.", i_instruction_number);
+ 
+    // Single NOP with CKE raised high and the end bit set high
+    rc_num = rc_num | csn_8.setBit(0,8);
+    rc_num = rc_num | address_16.clearBit(0, 16);
+    rc_num = rc_num | num_idles_16.clearBit(0, 16);
+    rc_num = rc_num | odt_4.setBit(0,4);
+    rc_num = rc_num | csn_8.setBit(0,8);
+    rc_num = rc_num | cke_4.setBit(0,4);
+    rc_num = rc_num | wen_1.clearBit(0);
+    rc_num = rc_num | casn_1.clearBit(0);
+    rc_num = rc_num | rasn_1.clearBit(0);
+    rc_num = rc_num | ccs_end_1.setBit(0);
+
+    rc.setEcmdError(rc_num);
     if(rc) return rc;
-    rc_num = data_buffer.setBit(58);
-    rc.setEcmdError( rc_num);
+
+    rc = mss_ccs_inst_arry_0( i_target,
+                              i_instruction_number,
+                              address_16,
+                              bank_3,
+                              activate_1,
+                              rasn_1,
+                              casn_1,
+                              wen_1,
+                              cke_4,
+                              csn_8,
+                              odt_4,
+                              ddr_cal_type_4,
+                              l_port_number);	
     if(rc) return rc;
-    rc = fapiPutScom(i_target, reg_address, data_buffer);
+    rc = mss_ccs_inst_arry_1( i_target,
+                              i_instruction_number,
+                              num_idles_16,
+                              num_repeat_16,
+                              data_20,
+                              read_compare_1,
+                              rank_cal_4,
+                              ddr_cal_enable_1,
+                              ccs_end_1);
     if(rc) return rc;
 
     return rc;
@@ -239,15 +292,20 @@ ReturnCode mss_ccs_inst_arry_0(
     uint32_t reg_address = 0;
     ecmdDataBufferBase data_buffer(64);
 
-    if (io_instruction_number >= 31)
+    if ((io_instruction_number >= 30)&&(i_port != 0xFFFFFFFF))
     {
         uint32_t num_retry = 10;
         uint32_t timer = 10;
-        rc = mss_ccs_set_end_bit( i_target, 30);
+        rc = mss_ccs_set_end_bit( i_target, 29);
         if(rc) return rc;
         rc = mss_execute_ccs_inst_array( i_target, num_retry, timer);
         if(rc) return rc;
         io_instruction_number = 0;
+    }
+
+    if (i_port == 0xFFFFFFFF)
+    {
+	i_port = 0;
     }
 
     reg_address = io_instruction_number + CCS_INST_ARRY0_AB_REG0_0x03010615;
@@ -312,11 +370,11 @@ ReturnCode mss_ccs_inst_arry_1(
     uint32_t reg_address = 0;
     ecmdDataBufferBase goto_inst(5);
 
-    if (io_instruction_number >= 31)
+    if ((io_instruction_number >= 30)&&(i_ccs_end.isBitClear(0)))
     {
         uint32_t num_retry = 10;
         uint32_t timer = 10;
-        rc = mss_ccs_set_end_bit( i_target, 30);
+        rc = mss_ccs_set_end_bit( i_target, 29);
         if(rc) return rc;
         rc = mss_execute_ccs_inst_array( i_target, num_retry, timer);
         if(rc) return rc;
