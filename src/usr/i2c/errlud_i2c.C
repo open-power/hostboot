@@ -145,7 +145,7 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp16, sizeof(tmp16));
     l_pBuf += sizeof(tmp16);
 
-    tmp64 = i_args.timeout_interval;
+    tmp64 = i_args.polling_interval_ns;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 

@@ -38,6 +38,7 @@
 #include <i2c/i2cif.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/attributes.H>
+#include "../i2c.H"
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -650,6 +651,156 @@ class I2CTest: public CxxTest::TestSuite
                        "testI2CSetupMasters - End: %d/%d fails",
                        fails, NUM_CMDS );
         }
+
+
+
+        /**
+         * @brief Call I2C Set Bus Variables and related functions
+         *
+         *      Test that i2cSetBusVariables() and the functions it uses
+         *      are returning expected values.
+         */
+        void testI2cSetBusVariables ( void )
+        {
+            errlHndl_t err = NULL;
+            int fails = 0;
+            int cmds = 0;
+            I2C::misc_args_t io_args;
+
+            TRACFCOMP( g_trac_i2c,
+                       "testI2cSetBusVariables - Start" );
+
+            // Get top level system target
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target * sysTarget = NULL;
+            tS.getTopLevelTarget( sysTarget );
+            assert( sysTarget != NULL );
+
+            // Get the Proc Target
+            TARGETING::Target* procTarget = NULL;
+            tS.masterProcChipTargetHandle( procTarget );
+
+            /****************************************************/
+            /* Test i2cSetBusVariables() with different i_modes */
+            /****************************************************/
+            struct
+            {
+                I2C::i2c_bus_setting_mode_t i_mode;
+                uint64_t o_bus_speed;
+            } testData[] =
+            {
+                // 1MHz
+                { I2C::SET_I2C_BUS_1MHZ, 1000 },
+
+                // 400KHz
+                { I2C::SET_I2C_BUS_400KHZ, 400 },
+
+                // READ_I2C_BUS_ATTRIBUTES should default to 1MHz
+                { I2C::READ_I2C_BUS_ATTRIBUTES, 1000 },
+            };
+
+            uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
+
+            for ( uint32_t i = 0; i < NUM_CMDS; i++ )
+            {
+                cmds++;
+
+                err = I2C::i2cSetBusVariables(procTarget,
+                                              testData[i].i_mode,
+                                              io_args);
+
+                if( err )
+                {
+                    TS_FAIL( "testI2cSetBusVariables - Error returned from "
+                             "i2cSetBusVariables: i_mode=0x%d, i=%d",
+                             testData[i].i_mode, i);
+                    fails++;
+                    delete err;
+                }
+                else if ( io_args.bus_speed != testData[i].o_bus_speed )
+                {
+                    TS_FAIL( "testI2cSetBusVariables - i2cSetBusVariables "
+                             "returned bad data: i_mode=0x%d, i=%d "
+                             "o_bus_speed=%d, io_args.bus_speed=%d",
+                             testData[i].i_mode, i,
+                             testData[i].o_bus_speed, io_args.bus_speed);
+                    fails++;
+                }
+            }
+
+            /****************************************************/
+            /* Test functions that set other variables          */
+            /****************************************************/
+            struct
+            {
+                uint64_t i_nest_freq_mhz;
+                uint64_t i_bus_speed;
+                uint16_t o_bit_rate_divisor;
+                uint64_t o_polling_interval_ns;
+                uint64_t o_timeout_count;
+            } testData_2[] =
+            {
+                // Most likely settings
+
+                // NEST_FREQ_MHz=2000, bus_speed=1MHz
+                { 2000, 1000,
+                  31, 800, 6250 },
+
+                // NEST_FREQ_MHz=2000, bus_speed=400KHz
+                { 2000, 400,
+                  77, 2000, 2500 },
+
+                // NEST_FREQ_MHz=2400, bus_speed=1MHz
+                { 2400, 1000,
+                  37, 800, 6250 },
+
+                // NEST_FREQ_MHz=2400, bus_speed=400KHz
+                { 2400, 400,
+                  93, 2000, 2500 },
+            };
+
+            NUM_CMDS = sizeof(testData_2)/sizeof(testData_2[0]);
+
+            uint16_t l_brd = 0;
+            uint64_t l_pi =0;
+            uint64_t l_tc=0;
+
+            for ( uint32_t i = 0; i < NUM_CMDS; i++ )
+            {
+                I2C::g_I2C_NEST_FREQ_MHZ = testData_2[i].i_nest_freq_mhz;
+
+                cmds++;
+                l_brd = I2C::i2cGetBitRateDivisor(testData_2[i].i_bus_speed);
+                l_pi = I2C::i2cGetPollingInterval(testData_2[i].i_bus_speed);
+                l_tc = I2C_TIMEOUT_COUNT(l_pi);
+
+                if ((l_brd != testData_2[i].o_bit_rate_divisor ) ||
+                    (l_pi != testData_2[i].o_polling_interval_ns ) ||
+                    (l_tc != testData_2[i].o_timeout_count )
+                   )
+                {
+                    TS_FAIL( "testI2cSetBusVariables - Bad Calculations i=%d "
+                             "nest_freq_mhz=%d, bus_speed=%d, "
+                             "l_brd=%d, testData_2[i].o_bit_rate_divisor=%d, "
+                             "l_pi=%d, testData_2[i].o_polling_interval_ns=%d, "
+                             "l_tc=%d, testData_2[i].o_timeout_count=%d",
+                             i, testData_2[i].i_nest_freq_mhz,
+                             testData_2[i].i_bus_speed,
+                             l_brd, testData_2[i].o_bit_rate_divisor,
+                             l_pi, testData_2[i].o_polling_interval_ns,
+                             l_tc, testData_2[i].o_timeout_count );
+                    fails++;
+                }
+            }
+
+            // reset global variable
+            I2C::g_I2C_NEST_FREQ_MHZ = I2C::i2cGetNestFreq();
+
+            TRACFCOMP( g_trac_i2c,
+                       "testI2CSetBusVariables - End: %d/%d fails",
+                       fails, cmds );
+        }
+
 
 
         /**

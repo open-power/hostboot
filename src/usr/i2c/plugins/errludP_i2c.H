@@ -91,7 +91,7 @@ public:
         // 1 byte   : Flag: read_not_write;
         // 8 bytes  : Bus Speed (kbits/sec)
         // 2 bytes  : Bit Rate Divisor
-        // 8 bytes  : Timeout Interval
+        // 8 bytes  : Polling Interval in ns
         // 8 bytes  : Timeout Count;
 
         uint8_t op = TO_UINT8(l_databuf);
@@ -137,7 +137,8 @@ public:
         l_databuf += sizeof(uint64_t);
         i_parser.PrintNumber("Bit Rate Divisor","%.4lX",TO_UINT16(l_databuf));
         l_databuf += sizeof(uint16_t);
-        i_parser.PrintNumber("Timeout Interval","%.16lX",TO_UINT64(l_databuf));
+        i_parser.PrintNumber("Polling Interval (ns)","%.16lX",
+                              TO_UINT64(l_databuf));
         l_databuf += sizeof(uint64_t);
         i_parser.PrintNumber("Timeout Count","%.16lX",TO_UINT64(l_databuf));
         l_databuf += sizeof(uint64_t);

@@ -34,6 +34,7 @@
 // Includes
 // ----------------------------------------------
 #include <errl/errlentry.H>
+#include <sys/time.h>
 
 namespace I2C
 {
@@ -50,34 +51,81 @@ namespace I2C
  */
 #define I2C_MAX_FIFO_CAPACITY 8
 
+
 /**
- * @brief I2C Clock setting values
- *
- * The clock divisors are found by using a 500Mhz local bus, using the
- * equation that was given in the I2C Master Spec.
- *
+ * @brief Inline function used to set global g_I2C_NEST_FREQ_MHZ
  */
-#define I2C_MAX_BUS_SPEED           1024    // 1MHZ
-#define I2C_CLOCK_DIVISOR_100KHZ    312     // 0x138
-#define I2C_CLOCK_DIVISOR_400KHZ    78      // 0x4E
-#define I2C_CLOCK_DIVISOR_1MHZ      31      // 0x1F
+ALWAYS_INLINE inline uint64_t i2cGetNestFreq()
+{
+  TARGETING::TargetService& tS = TARGETING::targetService();
+  TARGETING::Target * sysTarget = NULL;
+  tS.getTopLevelTarget( sysTarget );
+
+  return sysTarget->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+};
+static uint64_t g_I2C_NEST_FREQ_MHZ = i2cGetNestFreq();
+
 /**
- * @brief I2C Clock delay polling values
+ * @brief Inline function used to calculate Bit Rate Divisor setting
+ *        based on I2C Bus Speed and Nest Frequency
  *
- * The first macro returns an interval to sleep, based on the clock speed.
- * The macro and values were determined by examples provided from the prism
- * hardware team.
+ * @param [in] i_bus_speed_khz Bus Speed in KHz
  *
- * Poll interval = clock divisor / 37
- *      @100KHz = 40uS
- *      @400KHz = 10uS
- *
- * Poll count = 5000 / Poll interval
- *      @100KHz = 125
- *      @400KHz = 500
+ * @return Bit Rate Divisor value
  */
-#define I2C_TIMEOUT_INTERVAL( i_clockSpeed ) ( (i_clockSpeed / 37) +1 )
-#define I2C_TIMEOUT_COUNT( i_interval ) ( 5000 / i_interval )
+ALWAYS_INLINE inline uint16_t i2cGetBitRateDivisor(uint64_t i_bus_speed_khz)
+{
+  // BRD = ( ( ( NEST_FREQ_MHZ / 16 ) / i_bus_speed_khz ) - 1 ) / 4
+
+  // Use tmp variable to convert everything to KHZ safely
+  uint64_t tmp = ( g_I2C_NEST_FREQ_MHZ / 16 ) * 1000;
+
+  return ( ( ( tmp / i_bus_speed_khz ) - 1 ) / 4 );
+}
+
+/**
+ * @brief I2C Polling Interval based on bus speed; set to 1/10th of expected
+ *        duration
+ *
+ * NOTE: I2C Bus Speed in KBits/sec, so multiple by 8
+ *       since Device Driver works on a byte-level
+ *
+ * @param [in] i_bus_speed_khz Bus Speed in KHz
+ *
+ * @return Polling Interval in nanoseconds
+ */
+ALWAYS_INLINE inline uint64_t i2cGetPollingInterval(uint64_t i_bus_speed_khz )
+{
+  // Polling Interval = 8 * (1/bus+speed) * (1/10) -> converted to ns
+  return ( ( 8 * NS_PER_SEC ) / ( 10 * i_bus_speed_khz * 1000 ) );
+
+};
+
+/**
+ * @brief Determine I2C Timeout Count based on I2C_MAX_WAIT_TIME_NS and
+ *         I2C Polling Interval (in ns)
+ */
+#define I2C_MAX_WAIT_TIME_NS 5 * NS_PER_MSEC
+#define I2C_TIMEOUT_COUNT(i_interval_ns) (I2C_MAX_WAIT_TIME_NS / i_interval_ns)
+
+
+/**
+ * @brief Different ways of setting the I2C Bus Speed
+ */
+enum i2c_bus_setting_mode_t
+{
+    READ_I2C_BUS_ATTRIBUTES,
+    SET_I2C_BUS_400KHZ,
+    SET_I2C_BUS_1MHZ,
+    LAST_BUS_SETTING_MODE_TYPE,
+};
+
+/**
+ * @brief Only hard-coded bus speed defines (in KBits/sec)
+ */
+#define I2C_BUS_SPEED_400KHZ 400
+#define I2C_BUS_SPEED_1MHZ   1000
+
 
 /**
  * @brief I2C Master Base Addresses
@@ -129,21 +177,20 @@ struct misc_args_t
     bool     read_not_write;
     uint64_t bus_speed;          // in kbits/sec (ie 400KHz)
     uint16_t bit_rate_divisor;   // uint16_t to match size in mode register
-    uint64_t timeout_interval;
+    uint64_t polling_interval_ns;  // in nanoseconds
     uint64_t timeout_count;
-};
 
-/**
- * @brief Different ways of setting the I2C Bus Speed
- */
-enum i2c_bus_setting_mode_t
-{
-    READ_I2C_BUS_ATTRIBUTES,
-    SET_I2C_BUS_400KHZ,
-    SET_I2C_BUS_1MHZ,
-    LAST_BUS_SETTING_MODE_TYPE
+    misc_args_t():port(0xFF),
+                  engine(0xFF),
+                  devAddr(0xFFFFFFFF),
+                  skip_mode_setup(false),
+                  with_stop(true),
+                  read_not_write(true),
+                  bus_speed(0),
+                  bit_rate_divisor(0),
+                  polling_interval_ns(0),
+                  timeout_count(0){}
 };
-
 
 
 // -----------------------------------------------------------------------

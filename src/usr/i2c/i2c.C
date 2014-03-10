@@ -64,6 +64,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
+
 // ----------------------------------------------
 // Defines
 // ----------------------------------------------
@@ -465,7 +466,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 
 
     // Use Local Variables (timeoutCount gets derecmented)
-    uint64_t interval     = i_args.timeout_interval;
+    uint64_t interval_ns  = i_args.polling_interval_ns;
     uint64_t timeoutCount = i_args.timeout_count;
 
     // Define the regs we'll be using
@@ -516,7 +517,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
             while( (0 == status.fifo_entry_count) &&
                    (0 == status.data_request)        )
             {
-                nanosleep( 0, (interval * 1000) );
+                nanosleep( 0, interval_ns );
 
                 status.value = 0x0ull;
                 err = i2cReadStatusReg( i_target,
@@ -604,7 +605,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
             *((uint8_t*)o_buffer + bytesRead) = fifo.byte_0;
 
             // Everytime FIFO is read, reset timeout count
-            timeoutCount = I2C_TIMEOUT_COUNT( interval );
+            timeoutCount = I2C_TIMEOUT_COUNT( interval_ns );
 
             TRACUCOMP( g_trac_i2cr,
                        "I2C READ  DATA  : engine %.2X : port %.2x : "
@@ -851,18 +852,19 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
     status_reg_t status;
 
     // Use Local Variables (timeoutCount gets derecmented)
-    uint64_t interval     = i_args.timeout_interval;
+    uint64_t interval_ns  = i_args.polling_interval_ns;
     uint64_t timeoutCount = i_args.timeout_count;
 
-    TRACUCOMP(g_trac_i2c, "i2cWaitForCmdComp(): timeoutCount=%d, interval=%d",
-              timeoutCount, interval);
+    TRACUCOMP(g_trac_i2c, "i2cWaitForCmdComp(): timeoutCount=%d, "
+              "interval_ns=%d", timeoutCount, interval_ns);
 
     do
     {
         // Check the Command Complete bit
         do
         {
-            nanosleep( 0, (interval * 1000) );
+            nanosleep( 0, interval_ns );
+
             status.value = 0x0ull;
             err = i2cReadStatusReg( i_target,
                                     i_args,
@@ -1168,7 +1170,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
 
     // Use Local Variables (timeoutCount gets derecmented)
-    uint64_t interval     = i_args.timeout_interval;
+    uint64_t interval_ns  = i_args.polling_interval_ns;
     uint64_t timeoutCount = i_args.timeout_count;
 
     // Define regs we'll be using
@@ -1195,7 +1197,6 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                    status.value, I2C_MAX_FIFO_CAPACITY,
                    status.fifo_entry_count);
 
-
         // 2 Conditions to wait on:
         // 1) FIFO is full
         // 2) Data Request bit is not set
@@ -1203,7 +1204,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                (0 == status.data_request)                             )
         {
             // FIFO is full, wait before writing any data
-            nanosleep( 0, (interval * 1000) );
+            nanosleep( 0, interval_ns );
 
             status.value = 0x0ull;
             err = i2cReadStatusReg( i_target,
@@ -1656,7 +1657,8 @@ errlHndl_t i2cSetupMasters ( void )
     return err;
 }
 
-
+#define I2C_CALCULATE_BRD( i_clockSpeed ) ( i_clockSpeed / 37 )
+// #define BRD_1024 = ( ( nest_freq / ( 16 * 1024 * KILOBYTE ) ) - 1 ) / 4;
 
 // ------------------------------------------------------------------
 //  i2cSetBusVariables
@@ -1668,7 +1670,8 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
 
     TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cSetBusVariables()" );
+               ENTER_MRK"i2cSetBusVariables(): nest_freq=%d, i_mode=%d",
+               g_I2C_NEST_FREQ_MHZ, i_mode );
 
     do
     {
@@ -1681,23 +1684,12 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 
         if ( i_mode == SET_I2C_BUS_400KHZ )
         {
-
-            io_args.bus_speed = 400;
-            io_args.bit_rate_divisor = I2C_CLOCK_DIVISOR_400KHZ;
-            io_args.timeout_interval = I2C_TIMEOUT_INTERVAL(
-                                           I2C_CLOCK_DIVISOR_400KHZ);
-            io_args.timeout_count = I2C_TIMEOUT_COUNT(
-                                        io_args.timeout_interval);
+            io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
         }
 
         else if ( i_mode == SET_I2C_BUS_1MHZ )
         {
-            io_args.bus_speed = 1024;
-            io_args.bit_rate_divisor = I2C_CLOCK_DIVISOR_1MHZ;
-            io_args.timeout_interval = I2C_TIMEOUT_INTERVAL(
-                                           I2C_CLOCK_DIVISOR_1MHZ);
-            io_args.timeout_count = I2C_TIMEOUT_COUNT(
-                                        io_args.timeout_interval);
+            io_args.bus_speed = I2C_BUS_SPEED_1MHZ;
         }
 
         /* @todo RTC:80614 - sync up reading attributes with MRW
@@ -1735,14 +1727,19 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 
         }
 
+        // Set other variables based off of io_args.bus_speed
+        io_args.bit_rate_divisor = i2cGetBitRateDivisor(io_args.bus_speed);
+        io_args.polling_interval_ns = i2cGetPollingInterval(io_args.bus_speed);
+        io_args.timeout_count = I2C_TIMEOUT_COUNT(io_args.polling_interval_ns);
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_i2c,"i2cSetBusVariables(): e/p/dA=%d/%d/0x%x: "
-              "mode=%d: b_sp=%d, b_r_d=0x%x, to_i=%d, to_c = %d",
+
+    TRACUCOMP(g_trac_i2c,"i2cSetBusVariables(): e/p/dA=%d/%d/0x%X: "
+              "mode=%d: b_sp=%d, b_r_d=0x%x, p_i=%d, to_c = %d",
               io_args.engine, io_args.port, io_args.devAddr,
               i_mode, io_args.bus_speed, io_args.bit_rate_divisor,
-              io_args.timeout_interval, io_args.timeout_count);
+              io_args.polling_interval_ns, io_args.timeout_count);
 
     TRACDCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetBusVariables()" );
