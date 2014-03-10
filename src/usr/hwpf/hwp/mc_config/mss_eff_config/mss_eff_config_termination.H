@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_termination.H,v 1.1 2012/04/26 00:08:52 asaetow Exp $
+// $Id: mss_eff_config_termination.H,v 1.3 2014/03/05 21:16:57 dcadiga Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,7 +42,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.2   |          |         |
+//   1.4   | dcadiga  |05-MAR-14|Added term vpd
+//   1.3   |          |         |
+//   1.2   | asaetow  |22-JAN-14| Fixed target "const fapi::Target" to "const fapi::Target&" for mss_eff_config.C v1.38 and mss_eff_config_termination.C v1.42
 //   1.1   | asaetow  |25-APR-12| First Draft.
 
 
@@ -60,14 +62,15 @@
 #include <fapi.H>
 
 
-typedef fapi::ReturnCode (*mss_eff_config_termination_FP_t)(const fapi::Target i_target_mba);
+typedef fapi::ReturnCode (*mss_eff_config_termination_FP_t)(const fapi::Target& i_target_mba);
 
 extern "C" {
 
 //******************************************************************************
 //* name=mss_eff_config_termination, param=i_target_mba, return=ReturnCode
 //******************************************************************************
-fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba);
+fapi::ReturnCode mss_eff_config_termination(const fapi::Target& i_target_mba);
+fapi::ReturnCode mss_eff_config_termination_vpd(const fapi::Target& i_target_mba);
 
 } // extern "C"
 

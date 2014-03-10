@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.37 2014/01/17 16:26:34 bellows Exp $
+// $Id: mss_eff_config.C,v 1.38 2014/01/22 16:49:01 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,6 +44,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.38  | asaetow  |17-JAN-14| Removed mss_eff_config_cke_map, now empty, data from vpd.
+//         |          |         | Removed mss_eff_config_termination from normal/FW code flow.
+//         |          |         | Added mss_eff_config_termination to lab only code flow.
+//         |          |         | Removed CDIMM as a valid EFF_DIMM_TYPE, use EFF_CUSTOM_DIMM instead.
+//         |          |         | Added ATTR_MSS_CAL_STEP_ENABLE attribute set to "always run all cal steps".
+//         |          |         | NOTE: Needs mss_eff_config_termination.C v1.42 and mss_eff_config_termination.H v1.2
 //   1.37  | bellows  |17-JAN-14| Fixed VPD version when only single drop
 //   1.36  | bellows  |13-JAN-14| Make VPD version available at mba level
 //   1.35  | asaetow  |13-JAN-14| Fixed ATTR_EFF_DRAM_DLL_PPD from SLOWEXIT to FASTEXIT.
@@ -151,13 +157,11 @@
 // My Includes
 //------------------------------------------------------------------------------
 #include <mss_eff_config.H>
-#include <mss_eff_config_rank_group.H>
-#include <mss_eff_config_cke_map.H>
 #include <mss_eff_pre_config.H>
+#include <mss_eff_config_rank_group.H>
 #include <mss_eff_config_shmoo.H>
 
 #include <mss_lrdimm_funcs.H>
-
 #include <mss_eff_config_termination.H>
 
 
@@ -176,8 +180,9 @@ const uint8_t PORT_SIZE = 2;
 const uint8_t DIMM_SIZE = 2;
 const uint8_t RANK_SIZE = 4;
 
-#ifndef FAPI_LRDIMM
 using namespace fapi;
+
+#ifndef FAPI_LRDIMM
 fapi::ReturnCode mss_lrdimm_eff_config( const Target& i_target_mba,
                                   uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE],
                                   uint32_t mss_freq, 
@@ -191,6 +196,20 @@ fapi::ReturnCode mss_lrdimm_eff_config( const Target& i_target_mba,
 
 }
 #endif
+
+
+#ifndef FAPI_MSSLABONLY
+fapi::ReturnCode mss_eff_config_termination( const Target& i_target_mba)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of MSSLABONLY function on %s!", i_target_mba.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+#endif
+
 
 //------------------------------------------------------------------------------
 // Structure
@@ -372,6 +391,7 @@ struct mss_eff_config_atts
     uint8_t eff_stack_type[PORT_SIZE][DIMM_SIZE];
     uint32_t eff_zqcal_interval;
     uint8_t dimm_functional_vector;
+    uint8_t mss_cal_step_enable; // Always run all cal steps
     uint32_t eff_vpd_version;
 
 };
@@ -1114,6 +1134,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT; // Always use fast exit.
     p_o_atts->eff_dram_dll_reset = fapi::ENUM_ATTR_EFF_DRAM_DLL_RESET_YES; // Always reset DLL at start of IPL.
     p_o_atts->eff_dram_srt = fapi::ENUM_ATTR_EFF_DRAM_SRT_EXTEND; // Always use extended operating temp range.
+    p_o_atts->mss_cal_step_enable = 0xFF; // Always run all cal steps
     // array init
     for(int i = 0; i < PORT_SIZE; i++)
     {
@@ -1149,20 +1170,22 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
 //------------------------------------------------------------------------------
     switch(p_i_data->module_type[0][0])
     {
-        case fapi::ENUM_ATTR_SPD_MODULE_TYPE_CDIMM:
-            p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
-            FAPI_INF("WARNING: ATTR_SPD_MODULE_TYPE_CDIMM is obsolete.  Check your VPD for correct definition on %s!", i_target_mba.toEcmdString());
-            break;
+        // Removed CDIMM as a valid EFF_DIMM_TYPE.
+        //case fapi::ENUM_ATTR_SPD_MODULE_TYPE_CDIMM:
+        //    p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
+        //    FAPI_INF("WARNING: ATTR_SPD_MODULE_TYPE_CDIMM is obsolete.  Check your VPD for correct definition on %s!", i_target_mba.toEcmdString());
+        //    break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_RDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM;
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_UDIMM:
-            if(p_i_data->custom[0][0]) {
-              p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
-            }
-            else {
+            // Removed CDIMM as a valid EFF_DIMM_TYPE.
+            //if(p_i_data->custom[0][0]) {
+            //  p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
+            //}
+            //else {
               p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
-            }
+            //}
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM;
@@ -1682,7 +1705,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
                }
-            } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM ) {
+            } else if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM ) && ( p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )) {
                if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1A;
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
@@ -2033,6 +2056,11 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, &i_target_mba,
                 p_i_atts->dimm_functional_vector);
         if(rc) break;
+
+        rc = FAPI_ATTR_SET(ATTR_MSS_CAL_STEP_ENABLE, &i_target_mba,
+                p_i_atts->mss_cal_step_enable);
+        if(rc) break;
+
         // Make the final VPD version be a number and not ascii
         p_i_atts->eff_vpd_version=((p_i_atts->eff_vpd_version & 0x0f00)>> 4)|
           ((p_i_atts->eff_vpd_version & 0x000f)>> 0);
@@ -2170,6 +2198,10 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
             break;
         }
 
+
+
+        // Calls to sub-procedures
+
         // LRDIMM attributes
         if ( p_l_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
         {
@@ -2181,16 +2213,29 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                break;
            }
-
         }
  
-        // Calls to sub-procedures
         rc = mss_eff_config_rank_group(i_target_mba); if(rc) break;
-        rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
-        rc = mss_eff_config_termination(i_target_mba); if(rc) break;
+
+        // Removed call to mss_eff_config_cke_map(), 
+        //rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
+
+        // If MSS Lab/Development override, for now everything except DDR3 CDIMMs
+        if ((p_l_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO) || (p_l_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)) {
+           rc = mss_eff_config_termination(i_target_mba); if(rc) break;
+           if(rc)
+           {
+               FAPI_ERR("Error from mss_eff_config_termination()");
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+               break;
+           }
+        }
+
         // Removed call to mss_eff_config_thermal(), it is now called externally.
         //rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
+
         rc = mss_eff_config_shmoo(i_target_mba); if(rc) break;
+
 
 
         FAPI_INF("%s on %s COMPLETE\n", PROCEDURE_NAME,
