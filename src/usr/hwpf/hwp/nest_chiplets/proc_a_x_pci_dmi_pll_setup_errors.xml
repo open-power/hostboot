@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_a_x_pci_dmi_pll_setup_errors.xml,v 1.5 2014/01/07 14:17:46 mfred Exp $ -->
+<!-- $Id: proc_a_x_pci_dmi_pll_setup_errors.xml,v 1.7 2014/02/04 18:55:02 mfred Exp $ -->
 <!-- Halt codes for proc_a_x_pci_dmi_pll_setup --> 
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -28,29 +28,100 @@
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_ABUS_PLL_NO_LOCK</rc>
     <ffdc>LOCK_STATUS</ffdc>
     <description>A_Bus PLL failed to lock.</description>
+    <collectRegisterFfdc>
+        <id>REG_FFDC_ABUS_PLL_NO_LOCK_REGISTERS</id>
+        <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
     <callout>
-        <procedure>CODE </procedure>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>CHIP_IN_ERROR</refTarget>
+        </hw>
         <priority>HIGH</priority>
     </callout>
+    <callout>
+        <target>CHIP_IN_ERROR</target>  
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE </procedure>
+        <priority>LOW</priority>
+    </callout>
+    <!-- Deconfigure CHIP_IN_ERROR -->
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <!-- Create GARD record for CHIP_IN_ERROR -->
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_DMI_PLL_NO_LOCK</rc>
     <ffdc>LOCK_STATUS</ffdc>
     <description>DMI PLL failed to lock.</description>
+    <collectRegisterFfdc>
+        <id>REG_FFDC_DMI_PLL_NO_LOCK_REGISTERS</id>
+        <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
     <callout>
-        <procedure>CODE </procedure>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>CHIP_IN_ERROR</refTarget>
+        </hw>
         <priority>HIGH</priority>
     </callout>
+    <callout>
+        <target>CHIP_IN_ERROR</target>  
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE </procedure>
+        <priority>LOW</priority>
+    </callout>
+    <!-- Deconfigure CHIP_IN_ERROR -->
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <!-- Create GARD record for CHIP_IN_ERROR -->
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_PCIE_PLL_NO_LOCK</rc>
     <ffdc>LOCK_STATUS</ffdc>
     <description>PCIE PLL failed to lock.</description>
+    <collectRegisterFfdc>
+        <id>REG_FFDC_PCIE_PLL_NO_LOCK_REGISTERS</id>
+        <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
     <callout>
-        <procedure>CODE </procedure>
+        <hw>
+            <hwid>PCI_REF_CLOCK</hwid>
+            <refTarget>CHIP_IN_ERROR</refTarget>
+        </hw>
         <priority>HIGH</priority>
     </callout>
+    <callout>
+        <target>CHIP_IN_ERROR</target>  
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE </procedure>
+        <priority>LOW</priority>
+    </callout>
+    <!-- Deconfigure CHIP_IN_ERROR -->
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <!-- Create GARD record for CHIP_IN_ERROR -->
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
 </hwpErrors>

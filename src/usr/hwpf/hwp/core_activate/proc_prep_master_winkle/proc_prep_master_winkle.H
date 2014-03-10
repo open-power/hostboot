@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_prep_master_winkle.H,v 1.8 2013/11/08 22:47:42 jeshua Exp $
+// $Id: proc_prep_master_winkle.H,v 1.9 2014/02/10 04:51:32 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -31,7 +31,7 @@
 // *! TITLE       : proc_prep_master_winkle.H
 // *! DESCRIPTION : Prepares for the master core to winkle
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Greg Still              Email: stillgs@us.ibm.com
 // *!
 //------------------------------------------------------------------------------
 

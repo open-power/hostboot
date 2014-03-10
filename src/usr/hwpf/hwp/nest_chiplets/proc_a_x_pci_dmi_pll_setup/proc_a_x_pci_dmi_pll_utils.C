@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.6 2014/01/07 14:43:36 mfred Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.7 2014/02/03 16:29:10 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -531,6 +531,7 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_release_pll(
             {
                 FAPI_ERR("Timed out polling for PLL lock");
                 const uint8_t LOCK_STATUS = data.getByte(0);
+                const fapi::Target & CHIP_IN_ERROR = i_target;
                 if (i_chiplet_base_scom_addr == NEST_CHIPLET_0x02000000)
                 {
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_A_X_PCI_DMI_PLL_SETUP_DMI_PLL_NO_LOCK);

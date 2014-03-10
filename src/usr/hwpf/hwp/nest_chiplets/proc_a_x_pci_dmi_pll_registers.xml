@@ -1,0 +1,56 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_registers.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_a_x_pci_dmi_pll_registers.xml,v 1.1 2014/02/04 18:55:00 mfred Exp $ -->
+<!-- Definition of PLL registers to collect on some errors -->
+
+<hwpErrors>
+  <registerFfdc>
+    <id>REG_FFDC_DMI_PLL_NO_LOCK_REGISTERS</id>
+    <scomRegister>NEST_GP3_0x020F0012</scomRegister>
+    <scomRegister>PB_PLLLOCKREG_0x020F0019</scomRegister>
+    <cfamRegister>CFAM_FSI_GP3_0x00002812</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00002813</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00002815</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00002816</cfamRegister>
+  </registerFfdc>
+
+  <registerFfdc>
+    <id>REG_FFDC_ABUS_PLL_NO_LOCK_REGISTERS</id>
+    <scomRegister>A_GP3_0x080F0012</scomRegister>
+    <scomRegister>A_PLLLOCKREG_0x080F0019</scomRegister>
+    <cfamRegister>CFAM_FSI_GP3_0x00002812</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00002813</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00002815</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00002816</cfamRegister>
+  </registerFfdc>
+
+  <registerFfdc>
+    <id>REG_FFDC_PCIE_PLL_NO_LOCK_REGISTERS</id>
+    <scomRegister>PCIE_GP3_0x090F0012</scomRegister>
+    <scomRegister>PCIE_PLLLOCKREG_0x090F0019</scomRegister>
+    <cfamRegister>CFAM_FSI_GP3_0x00002812</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00002813</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00002815</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00002816</cfamRegister>
+  </registerFfdc>
+</hwpErrors>

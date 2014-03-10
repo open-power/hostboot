@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.H,v 1.4 2013/09/20 15:26:50 jeshua Exp $
+// $Id: proc_extract_sbe_rc.H,v 1.5 2014/02/10 02:57:57 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,7 +32,7 @@
 // *! DESCRIPTION : Create a return code for an SBE error. Will NEVER return
 // *!               with SUCCESS.
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Johannes Koesters       Email: koesters@de.ibm.com
 // *!
 //------------------------------------------------------------------------------
 

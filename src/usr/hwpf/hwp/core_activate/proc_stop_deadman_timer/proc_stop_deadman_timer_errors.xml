@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.5 2013/07/29 21:26:25 jeshua Exp $ -->
+<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.6 2014/02/10 04:37:29 stillgs Exp $ -->
 <!-- Error definitions for proc_stop_deadman_timer procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -33,9 +33,25 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>CHIP_IN_ERROR</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>
     <ffdc>SBE_VITAL</ffdc>
+     <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -47,8 +63,24 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>CHIP_IN_ERROR</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>
     <ffdc>SBE_VITAL</ffdc>
+     <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

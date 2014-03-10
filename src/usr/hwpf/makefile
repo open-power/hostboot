@@ -136,7 +136,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_initialization/proc_throttle_sync/proc_throttle_sync_errors.xml \
     hwp/dram_initialization/mss_power_cleanup/memory_mss_power_cleanup.xml \
     hwp/runtime_errors/p8_pstate_registers.xml \
-    hwp/mc_config/mss_eff_mb_interleave/memory_mss_eff_mb_interleave.xml
+    hwp/mc_config/mss_eff_mb_interleave/memory_mss_eff_mb_interleave.xml \
+    hwp/nest_chiplets/proc_a_x_pci_dmi_pll_registers.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

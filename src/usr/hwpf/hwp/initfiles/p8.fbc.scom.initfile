@@ -1,4 +1,4 @@
-#-- $Id: p8.fbc.scom.initfile,v 1.13 2013/08/28 22:03:30 jmcgill Exp $
+#-- $Id: p8.fbc.scom.initfile,v 1.14 2014/02/03 18:44:14 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -107,7 +107,7 @@ scom 0x02013406 {
 scom 0x02013407 {
     bits,                      scom_data,        expr;
     0:3,                       0xC,              any;
-    4,                         0b1,              (!mcd_hang_poll_bug);
+    4,                         0b0,              (!mcd_hang_poll_bug);
     4,                         0b0,              (mcd_hang_poll_bug);
     5:7,                       0b000,            any;
     8:63,                      0x00000000000000, any;

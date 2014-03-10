@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_check_slave_sbe_seeprom_complete_errors.xml,v 1.5 2013/04/25 22:03:52 jeshua Exp $ -->
+<!-- $Id: proc_check_slave_sbe_seeprom_complete_errors.xml,v 1.6 2014/02/10 02:22:27 stillgs Exp $ -->
 <!-- Error definitions for proc_check_slave_sbe_seeprom_complete procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -35,6 +35,10 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -48,6 +52,9 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -63,6 +70,9 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -78,5 +88,8 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
 </hwpErrors>

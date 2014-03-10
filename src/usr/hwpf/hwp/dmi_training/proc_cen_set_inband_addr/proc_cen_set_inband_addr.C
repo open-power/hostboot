@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,8 +21,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_cen_set_inband_addr.C,v 1.7 2012/11/30 15:33:50 mfred Exp $
-// $Source: /afs/awd.austin.ibm.com/proj/p9/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_set_inband_addr.C,v $
+// $Id: proc_cen_set_inband_addr.C,v 1.8 2014/02/05 17:34:30 mfred Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_set_inband_addr.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -42,9 +42,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_scom_addresses.H"
-#include "proc_cen_set_inband_addr.H"
-#include <fapi.H>
+#include <p8_scom_addresses.H>
+#include <proc_cen_set_inband_addr.H>
 
 
 using namespace fapi;
@@ -152,6 +151,9 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_cen_set_inband_addr.C,v $
+Revision 1.8  2014/02/05 17:34:30  mfred
+Changed include statements to use <> instead of double-quotes.
+
 Revision 1.7  2012/11/30 15:33:50  mfred
 Several updates suggested by gerrit code review.  Get rid of unused attribute reference.  Change name of inband bar attribute.
 

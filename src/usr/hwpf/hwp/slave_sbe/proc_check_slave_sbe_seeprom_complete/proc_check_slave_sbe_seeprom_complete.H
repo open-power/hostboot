@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slave_sbe_seeprom_complete.H,v 1.3 2013/09/20 15:25:12 jeshua Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.H,v 1.4 2014/02/10 02:32:02 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -31,7 +31,7 @@
 // *! TITLE       : proc_check_slave_sbe_seeprom_complete.H
 // *! DESCRIPTION : Check if a slave has completed the seeprom code
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
 // *!
 //------------------------------------------------------------------------------
 

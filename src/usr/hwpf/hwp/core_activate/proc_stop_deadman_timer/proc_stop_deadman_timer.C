@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_stop_deadman_timer.C,v 1.9 2013/11/08 22:10:44 jeshua Exp $
+// $Id: proc_stop_deadman_timer.C,v 1.10 2014/02/10 04:40:32 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_stop_deadman_timer.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,7 +32,7 @@
 // *! TITLE       : proc_stop_deadman_timer.C
 // *! DESCRIPTION : Stops deadman timer and SBE
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Greg Still              Email: stillgs@us.ibm.com
 // *!
 // *! Overview:
 // *!    Notify SBE that HB is alive again

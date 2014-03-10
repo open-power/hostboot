@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_exit_cache_contained.C,v 1.2 2013/11/05 22:12:13 jeshua Exp $
+// $Id: proc_exit_cache_contained.C,v 1.3 2014/02/10 04:49:54 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_exit_cache_contained.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -31,7 +31,7 @@
 // *! TITLE       : proc_exit_cache_contained.C
 // *! DESCRIPTION : 
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
 // *!
 //------------------------------------------------------------------------------
 
