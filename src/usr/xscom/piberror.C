@@ -100,6 +100,10 @@ void addFruCallouts(TARGETING::Target* i_target,
        break;
 
      default:
+       // should never commit a log that gets here so that is a
+       //   code bug
+       io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_HIGH);
        break;
 
    }

@@ -512,11 +512,11 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
              * @errortype
              * @moduleid     XSCOM_DO_OP
              * @reasoncode   XSCOM_STATUS_ERR
-             * @userdata1    HMER value
+             * @userdata1    HMER value (piberr in bits 21:23)
              * @userdata2    XSCom address
              * @devdesc      XSCom access error
              */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             XSCOM_DO_OP,
                                             XSCOM_STATUS_ERR,
                                             io_hmer,
