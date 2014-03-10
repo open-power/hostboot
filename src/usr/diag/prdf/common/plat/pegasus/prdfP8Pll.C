@@ -484,8 +484,12 @@ PRDF_PLUGIN_DEFINE( Proc, PllPostAnalysis );
 int32_t capturePllFfdc( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[capturePllFfdc] "
+    #define PRDF_FUNC "[Proc::capturePllFfdc] "
 
+    // Add FSI status reg
+    captureFsiStatusReg( i_chip, io_sc );
+
+    // Add EX scom data
     TargetHandleList exList = getConnected(
                         i_chip->GetChipHandle(), TYPE_EX);
     ExtensibleChip * exChip;
@@ -502,7 +506,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     return SUCCESS;
 
-#undef PRDF_FUNC
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Proc, capturePllFfdc );
 

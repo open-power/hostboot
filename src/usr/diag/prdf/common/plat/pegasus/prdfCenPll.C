@@ -32,6 +32,8 @@
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 namespace Membuf
 {
 
@@ -130,6 +132,26 @@ int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 
 }
 PRDF_PLUGIN_DEFINE( Membuf, MaskPll );
+
+/**
+ * @brief   capture additional PLL FFDC
+ * @param   i_chip   Membuf chip
+ * @param   i_sc     service data collector
+ * @returns Success
+ */
+int32_t capturePllFfdc( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[Membuf::capturePllFfdc] "
+
+    // Add FSI status reg
+    captureFsiStatusReg( i_chip, io_sc );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Membuf, capturePllFfdc );
 
 
 } // end namespace Membuf

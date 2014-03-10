@@ -37,7 +37,6 @@
  */
 
 #include <prdfTargetServices.H> // must include all common targeting code
-
 #include <prdfCenConst.H>
 #include <prdfTimer.H>
 
@@ -60,6 +59,8 @@ class CenDqBitmap;
 class CenMark;
 class CenRank;
 class CenSymbol;
+class ExtensibleChip;
+struct STEP_CODE_DATA_STRUCT;
 
 namespace PlatServices
 {
@@ -440,6 +441,21 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                             const CenRank & i_rank, uint32_t i_stopCond,
                             uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS,
                             const CenAddr * i_sAddrOverride = NULL );
+
+
+//##############################################################################
+//##                        util functions
+//##############################################################################
+
+/**
+ * @brief   capture FSI Status Reg for FFDC
+ * @param   i_chip   Extensible chip
+ * @param   i_sc     service data collector
+ */
+void captureFsiStatusReg( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc );
+
+
 
 } // end namespace PlatServices
 

@@ -38,12 +38,15 @@
 
 #include <prdfCenAddress.H>
 #include <prdfCenDqBitmap.H>
+#include <iipServiceDataCollector.h>
+#include <UtilHash.H>
 
 #include <diag/mdia/mdia.H>
 #include <diag/mdia/mdiamevent.H>
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>
+#include <targeting/common/targetservice.H>
 
 using namespace TARGETING;
 
@@ -230,7 +233,66 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
+//##############################################################################
+//##                        util functions
+//##############################################################################
+
+void captureFsiStatusReg( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[PlatServices::captureFsiStatusReg] "
+
+    do
+    {
+        // HB doesn't allow cfam access on master proc
+        TargetHandle_t l_procTgt = i_chip->GetChipHandle();
+
+        if( TYPE_PROC == getTargetType(l_procTgt) )
+        {
+            TargetHandle_t l_pMasterProcChip = NULL;
+            targetService().
+                masterProcChipTargetHandle( l_pMasterProcChip );
+
+            if( l_pMasterProcChip == l_procTgt )
+            {
+                PRDF_DTRAC( PRDF_FUNC"can't access CFAM from master "
+                            "proc: 0x%.8X", i_chip->GetId() );
+                break;
+            }
+        }
+
+        errlHndl_t errH = NULL;
+        ecmdDataBufferBase cfamData(32);
+        uint32_t u32Data = 0;
+
+        PRD_FAPI_TO_ERRL(errH,
+                         fapiGetCfamRegister,
+                         PlatServices::getFapiTarget(i_chip->GetChipHandle()),
+                         0x00001007,
+                         cfamData);
+
+        if(errH)
+        {
+            PRDF_ERR( PRDF_FUNC"chip: 0x%.8X, failed to get "
+                      "CFAM_FSI_STATUS: 0x%X",
+                      i_chip->GetId(), cfamData.getWord( 0 ) );
+            PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
+            break;
+        }
+
+        u32Data = cfamData.getWord(0);
+        BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &u32Data);
+
+        io_sc.service_data->GetCaptureData().Add(
+                            i_chip->GetChipHandle(),
+                            ( Util::hashString("CFAM_FSI_STATUS") ^
+                              i_chip->getSignatureOffset() ),
+                            bs);
+    } while(0);
+
+    #undef PRDF_FUNC
+}
+
 
 } // end namespace PlatServices
 
