@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <map>
+#include <algorithm>
 
 // This component
 #include <targeting/common/targetservice.H>
