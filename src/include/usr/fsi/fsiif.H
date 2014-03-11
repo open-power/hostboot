@@ -70,8 +70,9 @@ enum fsiFFDCType_t
     FFDC_PRESENCE_FAIL   = 0,
     FFDC_READWRITE_FAIL  = 1,
     FFDC_PIB_FAIL        = 2,
-    FFDC_OPB_FAIL        = 3,
-    FFDC_OPB_FAIL_SLAVE  = 4,
+    FFDC_OPB0_FAIL       = 3,
+    FFDC_OPB1_FAIL       = 4,
+    FFDC_OPB_FAIL_SLAVE  = 5,
 };
 
 /**

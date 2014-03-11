@@ -32,6 +32,7 @@
 #include <sys/task.h>
 #include <usr/fsi/fsiif.H>
 #include <usr/fsi/fsi_reasoncodes.H>
+#include <map>
 namespace FSI { class UdPresence; }
 
 /** @file fsidd.H
@@ -203,7 +204,7 @@ class FsiDD
           slave(NULL), master(NULL),
         type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
         port(UINT8_MAX), cascade(0), flags(0)
-        {};
+        { linkid.id = 0; };
     };
 
     /**
@@ -280,13 +281,14 @@ class FsiDD
      * @brief Analyze error bits and recover hardware as needed
      *
      * @param[in] i_addrInfo  FSI addressing information
-     * @param[in] i_opbStatReg  OPB Status bits (OPB_REG_STAT[0:31])
-     * @param[in] i_relFsiAddr  Relative FSI Address that was being accessed
+     * @param[in] i_opbStatAddr  OPB Status Register Address
+     * @param[in] i_opbStatData  OPB Status bits (OPB_REG_STAT[0:31])
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
-                               uint32_t i_opbStatReg);
+                               uint32_t i_opbStatAddr,
+                               uint32_t i_opbStatData);
 
     /**
      * @brief  Poll for completion of a FSI operation, return data on read
@@ -314,9 +316,10 @@ class FsiDD
 
     /**
      * @brief Generate a valid SCOM address to access the OPB, this will
-     *    choose the correct master
+     *    choose the correct PIB2OPB port.
      *
-     * @param[in] i_addrInfo  FSI  data
+     * @param[in] i_addrInfo  FSI connection data for the target of the FSI
+     *      operation
      * @param[in] i_address  Address of OPB register relative to OPB space,
      *      e.g. OPB_REG_CMD
      *
@@ -539,6 +542,16 @@ class FsiDD
      */
     errlHndl_t verifyPresent( TARGETING::Target* i_target );
 
+    /**
+     * @brief Retrieve the connection information needed to access FSI
+     *        registers within the given chip target from attributes
+     *
+     * @param[in] i_target  Target of FSI Slave to access
+     *
+     * @return FsiChipInfo_t  FSI Chip Information
+     */
+    FsiChipInfo_t getFsiInfoFromAttr( TARGETING::Target* i_target );
+
 
     /********************************************
      * VARIABLES
@@ -556,6 +569,11 @@ class FsiDD
     TARGETING::Target* iv_master;
 
     /**
+     * Using alternate master
+     */
+    uint8_t iv_useAlt;
+
+    /**
      * Non-zero if a Task is currently collecting FFDC
      */
     tid_t iv_ffdcTask;
@@ -569,6 +587,12 @@ class FsiDD
      * Last OPB Command
      */
     uint64_t iv_lastOpbCmd;
+
+    /**
+     * Cache of FSI connection information gleaned from attributes
+     *   Indexed by Target*, returns FsiChipInfo_t
+     */
+    std::map<TARGETING::Target*,FsiChipInfo_t> iv_fsiInfoMap;
 
   private:
 
