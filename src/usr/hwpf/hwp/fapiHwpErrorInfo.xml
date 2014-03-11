@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: fapiHwpErrorInfo.xml,v 1.14 2013/10/31 19:49:04 dedahle Exp $ -->
+<!-- $Id: fapiHwpErrorInfo.xml,v 1.15 2014/03/12 00:49:03 whs Exp $ -->
 <!-- XML file specifying Test HW Procedure generated errors. -->
 
 <hwpErrors>
@@ -343,6 +343,16 @@
     <ffdc>FFDC_SCOM_LEN</ffdc>
     <ffdc>FFDC_COLUMN</ffdc>
     <ffdc>FFDC_ROW</ffdc>
+  </hwpError>
+  <!-- ************************************************************ -->
+  <hwpError>
+    <rc>RC_TEST_COLLECT_TRACE</rc>
+    <description>Test adding firmware traces</description>
+    <ffdc>FFDC_VALUE</ffdc>
+    <collectTrace>FSI</collectTrace>
+    <collectTrace>SCOM</collectTrace>
+    <collectTrace>SCAN</collectTrace>
+    <collectTrace>MBOX</collectTrace>
   </hwpError>
   <!-- ************************************************************ -->
 </hwpErrors>

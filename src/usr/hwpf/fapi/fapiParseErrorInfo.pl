@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -21,7 +21,7 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseErrorInfo.pl,v 1.25 2013/10/31 21:34:01 dedahle Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.26 2014/03/12 00:48:41 whs Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -63,6 +63,7 @@
 #                                      DIMM(s) related to MBA
 #                  dedahle   10/15/13  Support register FFDC collection based on
 #                                      present children
+#                  whs       03/11/14  Add FW traces to error logs
 #
 # End Change Log *****************************************************
 #
@@ -356,7 +357,7 @@ foreach my $argnum (1 .. $#ARGV)
     my $errors = $xml->XMLin($infile, ForceArray =>
         ['hwpError', 'collectFfdc', 'ffdc', 'callout', 'deconfigure', 'gard',
          'registerFfdc', 'collectRegisterFfdc', 'cfamRegister', 'scomRegister',
-         'id']);
+         'id','collectTrace']);
 
     # Uncomment to get debug output of all errors
     #print "\nFile: ", $infile, "\n", Dumper($errors), "\n";
@@ -504,6 +505,15 @@ foreach my $argnum (1 .. $#ARGV)
         my $eiEntryCount = 0;
         my %cdgTargetHash; # Records the callout/deconfigure/gards for Targets
         my %cdgChildHash;  # Records the callout/deconfigure/gards for Children
+
+        # collect firmware trace
+        foreach my $collectTrace (@{$err->{collectTrace}})
+        {
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_COLLECT_TRACE; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].collect_trace.iv_eieTraceId =  fapi::CollectTraces::$collectTrace; \\\n";
+            $eiEntryCount++;
+        }
 
         # Local FFDC
         foreach my $ffdc (@{$err->{ffdc}})

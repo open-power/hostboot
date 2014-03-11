@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCode.C,v 1.18 2013/11/11 19:33:34 mjjones Exp $
+// $Id: fapiReturnCode.C,v 1.19 2014/03/12 00:48:21 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.C,v $
 
 /**
@@ -56,6 +56,7 @@
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/24/2013  Support Children CDGs
  *                          mjjones     08/26/2013  Support HW Callouts
+ *                          whs         03/11/2014  Add FW traces to error logs
  */
 
 #include <fapiReturnCode.H>
@@ -385,6 +386,13 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
             addEIChildrenCdg(*l_pParent, l_childType, l_callout, l_deconf,
                              l_gard, l_pri, l_childPort, l_childNumber );
         }
+        else if (l_type == EI_TYPE_COLLECT_TRACE)
+        {
+            CollectTraces::CollectTrace l_traceId =
+               static_cast<CollectTraces::CollectTrace>
+                   (i_pEntries[i].collect_trace.iv_eieTraceId);
+            addEICollectTrace(l_traceId);
+        }
         else
         {
             FAPI_ERR("addErrorInfo: Unrecognized EI type: %d", l_type);
@@ -554,6 +562,18 @@ void ReturnCode::addEIChildrenCdg(
         i_childPort, i_childNum);
     getCreateReturnCodeDataRef().getCreateErrorInfo().
         iv_childrenCDGs.push_back(l_pCdg);
+}
+
+//******************************************************************************
+// addEICollectTrace function
+//******************************************************************************
+void ReturnCode::addEICollectTrace(
+    const CollectTraces::CollectTrace i_traceId)
+{
+    // Create an ErrorInfoCollectTrace object and add it to Error Information
+    ErrorInfoCollectTrace * l_pCT = new ErrorInfoCollectTrace(i_traceId);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_traces.push_back(l_pCT);
 }
 
 }

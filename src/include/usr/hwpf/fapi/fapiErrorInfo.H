@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.H,v 1.12 2014/02/26 14:50:39 mjjones Exp $
+// $Id: fapiErrorInfo.H,v 1.13 2014/03/12 00:47:58 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.H,v $
 
 /**
@@ -48,6 +48,7 @@
  *                          rjknight    09/19/2013  Allow callout/deconfigure
  *                                                  /gard of DIMM(s) related
  *                                                  to MBA
+ *                          whs         03/11/2014  Add FW traces to error logs
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -120,6 +121,23 @@ enum CalloutPriority
     LOW    = 0,
     MEDIUM = 1,
     HIGH   = 2,
+};
+}
+
+/**
+ * @enum Enumeration of firmware traces
+ *
+ * This enumeration defines the possible firmware traces to collect
+ */
+namespace CollectTraces
+{
+const uint32_t TRACE_SIZE = 256; // limit collected trace size
+enum CollectTrace
+{
+    FSI              = 1,
+    SCOM             = 2,
+    SCAN             = 3,
+    MBOX             = 4,
 };
 }
 
@@ -473,6 +491,42 @@ struct ErrorInfoChildrenCDG
 };
 
 /**
+ * @struct ErrorInfoCollectTrace
+ *
+ * This struct contains trace ID to add to the error log
+ */
+struct ErrorInfoCollectTrace
+{
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] i_trace
+     */
+    ErrorInfoCollectTrace(CollectTraces::CollectTrace i_traceId);
+
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+     */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
+
+    // trace
+    CollectTraces::CollectTrace iv_eiTraceId;
+};
+
+/**
  * @struct ErrorInfo
  *
  * This struct defines the error information associated with a fapi::ReturnCode
@@ -540,6 +594,13 @@ struct ErrorInfo
         ErrorInfoChildrenCDGItr_t;
     typedef std::vector<ErrorInfoChildrenCDG *>::const_iterator
         ErrorInfoChildrenCDGCItr_t;
+
+    // Vector of traces to collect
+    std::vector<ErrorInfoCollectTrace *> iv_traces;
+    typedef std::vector<ErrorInfoCollectTrace *>::iterator
+         ErrorInfoCollectTraceItr_t;
+    typedef std::vector<ErrorInfoCollectTrace *>::const_iterator
+         ErrorInfoCollectTraceCItr_t;
 };
 
 }

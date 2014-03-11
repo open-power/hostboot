@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCode.H,v 1.19 2013/11/11 19:33:31 mjjones Exp $
+// $Id: fapiReturnCode.H,v 1.20 2014/03/12 00:48:25 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.H,v $
 
 /**
@@ -57,6 +57,7 @@
  *                          rjknight    09/10/2013  Support DIMM callout from
  *                                                  MBA port and dimm number
  *                          mjjones     11/08/2013  Do not define struct in union
+ *                          whs         03/11/2014  Add FW traces to error logs
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -280,6 +281,7 @@ public:
         EI_TYPE_BUS_CALLOUT       = 4,
         EI_TYPE_CDG               = 5, // Target Callout/Deconfig/GARD
         EI_TYPE_CHILDREN_CDG      = 6, // Children Callout/Deconfig/GARD
+        EI_TYPE_COLLECT_TRACE     = 7,
     };
 
     /**
@@ -336,6 +338,11 @@ public:
         uint8_t  iv_calloutPriority;
     };
 
+    struct ErrorInfoEntryCollectTrace
+    {
+        uint32_t  iv_eieTraceId;
+    };
+
     struct ErrorInfoEntry
     {
         uint8_t iv_type; // Value from ErrorInfoType
@@ -347,6 +354,7 @@ public:
             ErrorInfoEntryBusCallout bus_callout;
             ErrorInfoEntryTargetCDG target_cdg;
             ErrorInfoEntryChildrenCDG children_cdg;
+            ErrorInfoEntryCollectTrace collect_trace;
         };
     };
 
@@ -509,6 +517,14 @@ private:
           const bool i_gard,
           const CalloutPriorities::CalloutPriority i_priority,
           const uint8_t i_childPort, const uint8_t i_childNum);
+
+     /**
+      * @brief Add traces to collect to the ErrorInfo
+      *
+      * @param[in] i_trace
+      */
+      void addEICollectTrace(
+          const CollectTraces::CollectTrace i_traceId);
 
     // The rcValue
     uint32_t iv_rcValue;

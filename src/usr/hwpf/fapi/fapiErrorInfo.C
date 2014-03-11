@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.C,v 1.11 2013/11/11 19:33:45 mjjones Exp $
+// $Id: fapiErrorInfo.C,v 1.12 2014/03/12 00:48:05 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.C,v $
 
 /**
@@ -47,6 +47,7 @@
  *                          mjjones     08/26/2013  Support HW Callouts
  *                          rjknight    09/24/2013  Support dimm callouts
  *                                                  based on mba parent target
+ *                          whs         03/11/2014  Add FW traces to error logs
  */
 
 #include <fapiErrorInfo.H>
@@ -259,6 +260,15 @@ ErrorInfoChildrenCDG::ErrorInfoChildrenCDG(
   iv_gard(i_gard), iv_childPort(i_childPort), iv_childNumber(i_childNum)
 {
 
+}
+
+//******************************************************************************
+// ErrorInfoCollectTrace Constructor
+//******************************************************************************
+ErrorInfoCollectTrace::ErrorInfoCollectTrace(
+    const CollectTraces::CollectTrace i_traceId)
+: iv_eiTraceId(i_traceId)
+{
 }
 
 //******************************************************************************

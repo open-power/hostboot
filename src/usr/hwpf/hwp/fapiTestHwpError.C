@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,7 @@
  *                          mjjones     10/17/2011  Moved AnalyzeError to new file
  *                          rjknight    09/28/2013  Added callout test for MBA
  *                                                  dimm callout support
+ *                          whs         03/11/2014  Add FW traces to error logs
  *
  *
  *  HWP_IGNORE_VERSION_CHECK
@@ -57,6 +58,13 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_procTarget,
     FAPI_INF("hwpTestError: Start HWP");
 
     fapi::ReturnCode l_rc;
+
+    // Test ability for FAPI to request FW traces added to error log
+    FAPI_ERR("hwpTestError: Generating RC_TEST_COLLECT_TRACE");
+    uint32_t  FFDC_VALUE = 0xBEF2;
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_COLLECT_TRACE);
+    // Log the error
+    fapiLogError(l_rc, fapi::FAPI_ERRL_SEV_PREDICTIVE, true);
 
     // Local data that needs to be captured as FFDC
     uint32_t l_ffdc = 0x12345678;
