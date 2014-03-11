@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -59,14 +59,14 @@ void task_end2(void* retval)
 
 tid_t task_gettid()
 {
-    register task_t* task;
+    register task_t* task = NULL;
     asm volatile("mr %0, 13" : "=r"(task));
     return task->tid;
 }
 
 cpuid_t task_getcpuid()
 {
-    register task_t* task;
+    register task_t* task = NULL;
     asm volatile("mr %0, 13" : "=r"(task));
     return task->cpu->cpu;
 }
@@ -121,7 +121,7 @@ tid_t task_exec(const char* file, void* ptr)
 void task_affinity_pin()
 {
     // Get task structure.
-    register task_t* task;
+    register task_t* task = NULL;
     asm volatile("mr %0, 13" : "=r"(task));
 
     // Increment pin count.
@@ -131,7 +131,7 @@ void task_affinity_pin()
 void task_affinity_unpin()
 {
     // Get task structure.
-    register task_t* task;
+    register task_t* task = NULL;
     asm volatile("mr %0, 13" : "=r"(task));
 
     // Decrement pin count.
@@ -146,7 +146,7 @@ void task_affinity_migrate_to_master()
 void task_detach()
 {
     // Get task structure.
-    register task_t* task;
+    register task_t* task = NULL;
     asm volatile("mr %0, 13" : "=r"(task));
 
     task->detached = true;

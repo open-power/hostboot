@@ -904,12 +904,14 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 invalidMsgResponder(i_mbox_msg);
                 free(msg->extra_data); // toss this if it exists
                 msg->extra_data = NULL;
+                i_mbox_msg.msg_payload.extra_data = NULL;
             }
             msg_free(msg);
         }
         else // This is a bounce-back msg from the echo server - Ignore
         {
             free(msg->extra_data);
+            msg->extra_data = NULL;
             msg_free(msg);
         }
     }
@@ -1155,6 +1157,8 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id,
              0,                                      //
              true //Add HB Software Callout
             );
+
+        msg_free(msg);
     }
 
     return err;

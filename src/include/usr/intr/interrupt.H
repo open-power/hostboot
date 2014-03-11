@@ -55,6 +55,7 @@ namespace INTR
 
         PIR_t(uint32_t i_nodeId, uint32_t i_chipId,
               uint32_t i_coreId, uint32_t i_thread = 0) :
+            reserved(0),
             nodeId(i_nodeId), chipId(i_chipId),
             coreId(i_coreId), threadId(i_thread) {}
 

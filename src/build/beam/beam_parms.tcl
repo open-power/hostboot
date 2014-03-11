@@ -28,6 +28,10 @@ source beam_min_parms.tcl
 
 set beam::max_time_per_kloc_in_sec "60"
 
+# Allow empty functions to be considered 'stubs' and not report 'no effect'
+# errors.
+set beam::stub_function_contents "return_constant"
+
 set allocateAnchored {allocator (anchored,
                       return_index=return) }
 

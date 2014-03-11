@@ -297,7 +297,7 @@ class PnorRpTest : public CxxTest::TestSuite
      * @brief PNOR RP test - Read/Write Page
      *        Use message interface to read and write individual pages
      */
-    void test_messageReadWrite(void)
+    void _test_messageReadWrite(void)
     {
         return; //this fails with the new message ids
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> Start" );
@@ -429,7 +429,7 @@ class PnorRpTest : public CxxTest::TestSuite
      * @brief PNOR RP test - Read/Write Addresses
      *        do read/modify/write/read to different virtual addresses
      */
-    void test_AddrReadWrite(void)
+    void _test_AddrReadWrite(void)
     {
         // Leaving disabled because a regular boot tests all of this anyway,
         //  but want to leave this here for possible future unit testing.

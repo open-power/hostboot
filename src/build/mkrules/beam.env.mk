@@ -25,8 +25,9 @@
 # Description:
 #     Configuration of the BEAM settings.
 
+AFSCELL := austin
 BEAMVER = beam-3.6.1
-BEAMPATH = /afs/rch/projects/esw/beam/$(BEAMVER)
+BEAMPATH = /afs/${AFSCELL}/projects/esw/beam/$(BEAMVER)
 BEAMCMD = $(HOST_PREFIX)jail $(BEAMPATH)/bin/beam_compile
 
 ifdef MODULE
@@ -44,7 +45,8 @@ BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_c_config.tcl
 BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_cpp_config.tcl
 
 ##  point to a directory that BEAM can use for its' working files.
-BEAMFLAGS += --beam::data=$(BEAMDIR)
+BEAMFLAGS += --beam::data=$(BEAMDIR)/..
+BEAMFLAGS += --beam::build_root=$(ROOTPATH)
 
 ##  point BEAM to the potential innocent directory for a module.
 BEAM_INNOCENT = $(ROOTPATH)/src/build/beam/$(BEAMMODULE)
