@@ -240,6 +240,7 @@
     <attribute><id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id></attribute>
     <attribute><id>MRW_ENHANCED_GROUPING_NO_MIRRORING</id></attribute>
     <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
+    <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
 </targetType>
 
 <targetType>

@@ -13427,6 +13427,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>HB_RSV_MEM_SIZE_MB</id>
+    <description>
+        The amount of mainstore that PHYP needs to preserve per node
+        during MPIPL.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>256</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
 
 
