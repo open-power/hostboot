@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.32 2014/02/20 20:52:12 bellows Exp $
+// $Id: mss_maint_cmds.C,v 1.33 2014/03/08 04:04:21 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -86,6 +86,15 @@
 //   1.30  | 02/07/14 |adityamd | Added support to mss_restore_DRAM_repairs to be accessed at Standby
 //   1.31  |12-FEB-14 | bellows | Workaround for ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
 //   1.32  |20-FEB-14 | bellows | RAS review updates
+//   1.33  |07-MAR-14 | gollub  | Code review updates for: 
+//         |          |         |     mss_restore_DRAM_repairs
+//         |          |         |     mss_restore_DRAM_repairs_asm
+//         |          |         |     mss_get_dummy_mark_store
+//         |          |         |     mss_put_dummy_mark_store
+//         |          |         |     mss_get_dummy_steer_mux
+//         |          |         |     mss_put_dummy_steer_mux
+//         |          |         | SW249600: Adding 1ms delay to allow cmd to stop properly in mss_stopCmd()
+
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -695,20 +704,20 @@ static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
 // Function Porottypes - These are not externally called, so per RAS review, they
 // go in here
 //------------------------------------------------------------------------------
-    fapi::ReturnCode mss_get_dummy_mark_store( const fapi::Target & i_target,
+    void mss_get_dummy_mark_store( const fapi::Target & i_target,
                                                uint8_t i_rank,
                                                uint8_t & o_symbolMark,
                                                uint8_t & o_chipMark,
                                                uint8_t mark_store[8][2]);
 
 
-    fapi::ReturnCode mss_put_dummy_mark_store( const fapi::Target & i_target,
+    void mss_put_dummy_mark_store( const fapi::Target & i_target,
                                                uint8_t i_rank,
                                                uint8_t i_symbolMark,
                                                uint8_t i_chipMark,
                                                uint8_t mark_store[8][2]);
 
-    fapi::ReturnCode mss_get_dummy_steer_mux( const fapi::Target & i_target,
+    void mss_get_dummy_steer_mux( const fapi::Target & i_target,
                                               uint8_t i_rank,
                                               mss_SteerMux::muxType i_muxType,
                                               uint8_t & o_dramSparePort0Symbol,
@@ -716,14 +725,14 @@ static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
                                               uint8_t & o_eccSpareSymbol,
                                               uint8_t steer[8][3]);
 
-    fapi::ReturnCode mss_put_dummy_steer_mux( const fapi::Target & i_target,
+    void mss_put_dummy_steer_mux( const fapi::Target & i_target,
                                               uint8_t i_rank,
                                               mss_SteerMux::muxType i_muxType,
                                               uint8_t i_steerType,
                                               uint8_t i_symbol,
                                               uint8_t steer[8][3]);
 
-    fapi::ReturnCode mss_check_dummy_steering(const fapi::Target & i_target,
+    void mss_check_dummy_steering(const fapi::Target & i_target,
                                               uint8_t i_rank,
                                               uint8_t & o_dramSparePort0Symbol,
                                               uint8_t & o_dramSparePort1Symbol,
@@ -756,136 +765,162 @@ static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
 //---------------------------------------------------------
 // mss_stopCmd
 //---------------------------------------------------------
-    fapi::ReturnCode mss_MaintCmd::stopCmd()
+fapi::ReturnCode mss_MaintCmd::stopCmd()
+{
+    fapi::ReturnCode l_rc;
+    uint32_t l_ecmd_rc = 0;    
+    ecmdDataBufferBase l_mbmsrq(64);
+    ecmdDataBufferBase l_mbmccq(64);
+    ecmdDataBufferBase l_mbmacaq(64);    
+    ecmdDataBufferBase l_mbspa_mask(64);
+    ecmdDataBufferBase l_mbspa_mask_original(64);
+    ecmdDataBufferBase l_mbspa_and(64);    
+
+
+    // 1 ms delay for HW mode
+    const uint64_t  HW_MODE_DELAY = 100000000;
+
+    // 200000 sim cycle delay for SIM mode
+    const uint64_t  SIM_MODE_DELAY = 200000;
+
+    uint32_t l_count = 0;
+    
+    uint32_t l_loop_limit = 10;
+       
+    FAPI_INF("ENTER mss_MaintCmd::stopCmd()");
+       
+    // Read MBSPA MASK
+    l_rc = fapiGetScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
+    if(l_rc) return l_rc;
+    
+    // Save original mask value so we can restore it when done
+    l_ecmd_rc |= l_mbspa_mask_original.insert(l_mbspa_mask, 0, 64, 0);    
+
+    // Mask bits 0 and 8, to hide the special attentions when the cmd completes
+    l_ecmd_rc |= l_mbspa_mask.setBit(0);        
+    l_ecmd_rc |= l_mbspa_mask.setBit(8);
+    if(l_ecmd_rc)
     {
-      fapi::ReturnCode l_rc;
-      uint32_t l_ecmd_rc = 0;
-      ecmdDataBufferBase l_mbmsrq(64);
-      ecmdDataBufferBase l_mbmccq(64);
-      ecmdDataBufferBase l_mbmacaq(64);
-      ecmdDataBufferBase l_mbspa_mask(64);
-      ecmdDataBufferBase l_mbspa_mask_original(64);
-      ecmdDataBufferBase l_mbspa_and(64);
-
-      FAPI_INF("ENTER mss_MaintCmd::stopCmd()");
-
-// Read MBSPA MASK
-      l_rc = fapiGetScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
-      if(l_rc) return l_rc;
-
-// Save original mask value so we can restore it when done
-      l_ecmd_rc |= l_mbspa_mask_original.insert(l_mbspa_mask, 0, 64, 0);
-
-// Mask bits 0 and 8, to hide the special attentions when the cmd completes
-      l_ecmd_rc |= l_mbspa_mask.setBit(0);
-      l_ecmd_rc |= l_mbspa_mask.setBit(8);
-      if(l_ecmd_rc)
-      {
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
-      }
+    }
 
-// Write MBSPA MASK
-      l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
-      if(l_rc) return l_rc;
-
-
-// Read MBMSRQ
-      l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
-      if(l_rc) return l_rc;
-
-
-// If MBMSRQ[0], maint_cmd_in_progress, stop the cmd
-      if (l_mbmsrq.isBitSet(0))
-      {
-// Read MBMCCQ
+    // Write MBSPA MASK
+    l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
+    if(l_rc) return l_rc;
+    
+    
+    // Read MBMSRQ
+    l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
+    if(l_rc) return l_rc;
+    
+    
+    // If MBMSRQ[0], maint_cmd_in_progress, stop the cmd
+    if (l_mbmsrq.isBitSet(0))
+    {
+        // Read MBMCCQ
         l_rc = fapiGetScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
         if(l_rc) return l_rc;
 
-// Set bit 1 to force the cmd to stop
+        // Set bit 1 to force the cmd to stop
         l_ecmd_rc |= l_mbmccq.setBit(1);
         if(l_ecmd_rc)
         {
-          l_rc.setEcmdError(l_ecmd_rc);
-          return l_rc;
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
         }
-
-// Write MBMCCQ
+        
+        // Write MBMCCQ
         l_rc = fapiPutScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
         if(l_rc) return l_rc;
 
-// Clear bit 1 again, just in case cmd was already stopped
-// in which case, bit 1 doesn't self-clear after we set it.
-        l_ecmd_rc |= l_mbmccq.clearBit(1);
-        if(l_ecmd_rc)
-        {
-          l_rc.setEcmdError(l_ecmd_rc);
-          return l_rc;
+        // Loop to check for cmd in progress bit to turn off
+        do
+        {                
+            // Wait 1ms
+            fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY);
+                    
+            // Read MBMSRQ
+            l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
+            if(l_rc) return l_rc;
+            
+            l_count++;
         }
-
- // Write MBMCCQ
-        l_rc = fapiPutScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
-        if(l_rc) return l_rc;
-
-
- // Read MBMSRQ
-        l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
-        if(l_rc) return l_rc;
-
- // If cmd didn't stop as expected
+        while (l_mbmsrq.isBitSet(0) && (l_count < l_loop_limit));
+                
+        // If cmd didn't stop as expected
         if (l_mbmsrq.isBitSet(0))
         {
-          FAPI_ERR("MBMSRQ[0] = 1, unsuccessful forced maint cmd stop on %s.",iv_target.toEcmdString());
-
-// Calling out MBA target high, deconfig, gard
-          const fapi::Target & MBA = iv_target;
-// FFDC: Capture register we used to stop cmd
-          ecmdDataBufferBase & MBMCC = l_mbmccq;
-// FFDC: Capture register we are checking
-          ecmdDataBufferBase & MBMSR = l_mbmsrq;
-// FFDC: Capture command type we are trying to run
-          const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
-
-// Create new log
-          FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_UNSUCCESSFUL_FORCED_MAINT_CMD_STOP);
-          return l_rc;
+            FAPI_ERR("MBMSRQ[0] = 1, unsuccessful forced maint cmd stop on %s.",iv_target.toEcmdString());
+             
+            // Calling out MBA target high, deconfig, gard
+            const fapi::Target & MBA = iv_target;
+            // FFDC: Capture register we used to stop cmd
+            ecmdDataBufferBase & MBMCC = l_mbmccq;
+            // FFDC: Capture register we are checking
+            ecmdDataBufferBase & MBMSR = l_mbmsrq;
+            // FFDC: Capture command type we are trying to run
+            const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+            
+            // Create new log
+            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_UNSUCCESSFUL_FORCED_MAINT_CMD_STOP);
+            return l_rc;                        
         }
-      }
+        
+        // Else cmd is stopped
+        else
+        {
+            // Clear MCMCC bit 1, just in case cmd was already stopped
+            // before we set it, in which case, bit 1 would not have self cleared.
+            l_ecmd_rc |= l_mbmccq.clearBit(1);
+            if(l_ecmd_rc)
+            {
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
+            }
 
-// Store the address we stopped at in iv_startAddr
-      l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, iv_startAddr);
-      if(l_rc) return l_rc;
-
-// Only 0-36 are valid address bits so clear the rest, 37-63
-      l_ecmd_rc |= iv_startAddr.clearBit(37,27);
-      if(l_ecmd_rc)
-      {
-        l_rc.setEcmdError(l_ecmd_rc);
-        return l_rc;
-      }
-
-
-// Clear bits 0 and 8 in MBSPA AND register
-      l_ecmd_rc |= l_mbspa_and.flushTo1();
-      l_ecmd_rc |= l_mbspa_and.clearBit(0);
-      l_ecmd_rc |= l_mbspa_and.clearBit(8);
-      if(l_ecmd_rc)
-      {
-        l_rc.setEcmdError(l_ecmd_rc);
-        return l_rc;
-      }
-
-// Write MPSPA AND register
-      l_rc = fapiPutScom(iv_target, MBA01_MBSPAQ_AND_0x03010612, l_mbspa_and);
-      if(l_rc) return l_rc;
-
-// Restore MBSPA MASK
-      l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask_original);
-      if(l_rc) return l_rc;
-
-      FAPI_INF("EXIT mss_MaintCmd::stopCmd()");
-      return l_rc;
+            // Write MBMCCQ
+            l_rc = fapiPutScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
+            if(l_rc) return l_rc;
+        }
+        
+        
     }
+    
+    // Store the address we stopped at in iv_startAddr
+    l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, iv_startAddr);
+    if(l_rc) return l_rc;
+
+    // Only 0-36 are valid address bits so clear the rest, 37-63
+    l_ecmd_rc |= iv_startAddr.clearBit(37,27);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+    
+
+    // Clear bits 0 and 8 in MBSPA AND register
+    l_ecmd_rc |= l_mbspa_and.flushTo1();
+    l_ecmd_rc |= l_mbspa_and.clearBit(0);
+    l_ecmd_rc |= l_mbspa_and.clearBit(8);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    // Write MPSPA AND register
+    l_rc = fapiPutScom(iv_target, MBA01_MBSPAQ_AND_0x03010612, l_mbspa_and);
+    if(l_rc) return l_rc;
+    
+    // Restore MBSPA MASK 
+    l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask_original);
+    if(l_rc) return l_rc;    
+    
+    FAPI_INF("EXIT mss_MaintCmd::stopCmd()");
+    return l_rc;
+}
 
 
 //---------------------------------------------------------
@@ -1966,7 +2001,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         l_burst_interval = 0;       // Don't care since burst mode disabled
       }
 
-
 // burst_window_sel
 // MBMCTQ[6]
       l_ecmd_rc |= l_data.insert( l_burst_window_sel, 6, 1, 8-1 );
@@ -2317,24 +2351,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       l_rc = fapiPutScom(iv_target, MBA01_MBA_RRQ0Q_0x0301040E, l_data);
       if(l_rc) return l_rc;
 
-
-
-
-// DEBUG. Set hard CE threshold to 1: MBSTRQ
-/*
-            FAPI_INF("\nDEBUG. Set hard CE threshold to 1: MBSTRQ");
-//ecmdDataBufferBase l_data(64);
-            uint32_t l_hardCEThreshold = 1;
-            l_rc = fapiGetScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
-            if(l_rc) return l_rc;
-            l_data.insert( l_hardCEThreshold, 28, 12, 32-12 ); // 28:39 hard ce threshold
-              l_data.setBit(2);   // Enable hard ce ETE special attention
-                l_data.setBit(55);  // Enable per-symbol counters to count soft ces
-                  l_data.setBit(56);  // Enable per-symbol counters to count int ces
-                    l_data.setBit(57);  // Enable per-symbol counters to count hard ces
-                      l_rc = fapiPutScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
-                    if(l_rc) return l_rc;
-  */
 
 // Start the command: MBMCCQ
       l_rc = startMaintCmd(); if(l_rc) return l_rc;
@@ -2858,20 +2874,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 // Load stop conditions: MBASCTLQ
       l_rc = loadStopCondMask(); if(l_rc) return l_rc;
 
-/*
-// DEBUG. Set hard CE threshold to 1: MBSTRQ
-                 FAPI_INF("\nDEBUG. Set hard CE threshold to 1: MBSTRQ");
-                 ecmdDataBufferBase l_data(64);
-                 uint32_t l_hardCEThreshold = 1;
-                 l_rc = fapiGetScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
-                 if(l_rc) return l_rc;
-                 l_data.insert( l_hardCEThreshold, 28, 12, 32-12 ); // 28:39 hard ce threshold
-                   l_data.setBit(2);   // Enable hard ce ETE special attention
-                     l_data.setBit(57);  // Enable per-symbol counters to count hard ces
-                       l_rc = fapiPutScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
-                     if(l_rc) return l_rc;
-  */
-
 // Start the command: MBMCCQ
       l_rc = startMaintCmd(); if(l_rc) return l_rc;
 
@@ -3379,28 +3381,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
 // NOTE: If this rank is not valid, we should see MBAFIR[1]: invalid
 // maint address, when cmd started
-
-// DEBUG - run on last few address of the rank
-/*
-// Set end address to end of rank
-         l_ecmd_rc |= o_endAddr.flushTo0();
-         l_ecmd_rc |= o_endAddr.insert( i_rank, 0, 4, 8-4 );
-         l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_bank, 7, 4, 32-4 );
-         l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_row, 11, 17, 32-17 );
-         l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_col, 28, 12, 32-12 );
-
-
-// Set start address so we do all banks/cols in last row of the rank
-             uint32_t l_bank_zero = 0;
-         uint32_t l_col_zero = 0;
-         l_ecmd_rc |= o_startAddr.flushTo0();
-         l_ecmd_rc |= o_startAddr.insert( i_rank, 0, 4, 8-4 );
-         l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_bank_zero, 7, 4, 32-4 );
-         l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_row, 11, 17, 32-17 );
-         l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_col_zero, 28, 12, 32-12 );
-  */
-// DEBUG - run on last few address of the rank
-
 
 // Start address is just i_rank with row/col/bank all 0's
           l_ecmd_rc |= o_startAddr.flushTo0();
@@ -4615,9 +4595,9 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
     {
       fapi::ReturnCode l_rc;
-      bool l_flag_standby = 0;
-      struct repair_count Count;
-      l_rc = mss_restore_DRAM_repairs_asm(i_target,o_repairs_applied,o_repairs_exceeded,l_flag_standby,Count);
+      bool l_flag_standby = false;
+      struct repair_count l_count;
+      l_rc = mss_restore_DRAM_repairs_asm(i_target,o_repairs_applied,o_repairs_exceeded,l_flag_standby,l_count);
       return l_rc;
 
     }
@@ -4641,7 +4621,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
     fapi::ReturnCode mss_restore_DRAM_repairs_asm( const fapi::Target & i_target,
                                                       uint8_t & o_repairs_applied,
                                                       uint8_t & o_repairs_exceeded,
-                                                      uint8_t i_standby_flag,
+                                                      bool i_standby_flag,
                                                       struct repair_count &o_repair_count)
 
     {
@@ -4685,8 +4665,8 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       uint8_t l_spare_dram[2][2][4]; // Array defining if spare dram exit
       //New structures Updated to use for ASMI menu
 
-      uint8_t steer[8][3];
-      uint8_t mark_store[8][2];
+      uint8_t l_steer[8][3];
+      uint8_t l_mark_store[8][2];
 
 
 
@@ -4764,26 +4744,9 @@ static const uint32_t maintBuffer65thRegs[4][2]={
               o_repair_count.steer_count[l_rank] = 0;
             }
 
-            //Initializing steer and mark_store arrays
-            // from review, using memset to set up the steer memory location
-            //             for(l_rank =0;l_rank < 8;l_rank++)
-            //             {
-            //               for(l_index =0;l_index<3;l_index++)
-            //               {
-            //                 steer[l_rank][l_index] = MSS_INVALID_SYMBOL;
-            //               }
-            //             }
-            memset(steer,MSS_INVALID_SYMBOL,l_rank*l_index);
+            memset(l_steer,MSS_INVALID_SYMBOL,8*3);
 
-            //             for(l_rank =0;l_rank < 8;l_rank++)
-            //             {
-            //               for(l_index =0;l_index<2;l_index++)
-            //               {
-            //                 mark_store[l_rank][l_index] = MSS_INVALID_SYMBOL;
-            //               }
-            //             }
-            memset(mark_store,MSS_INVALID_SYMBOL,l_rank*l_index);
-
+            memset(l_mark_store,MSS_INVALID_SYMBOL,8*3);
 
             // For each port in the given MBA:0,1
             for(l_port=0; l_port<DIMM_DQ_MAX_MBA_PORTS; l_port++ )
@@ -4822,18 +4785,14 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                       l_byte_being_steered = MSS_INVALID_SYMBOL;
 
 
-                      if(i_standby_flag == 1)
+                      if(i_standby_flag)
                       {
-                        l_rc = mss_get_dummy_mark_store(
-                                                        i_target,               // MBA
-                                                        4*l_dimm + l_rank,      // Master rank: 0-7
-                                                        l_symbol_mark,          // MSS_INVALID_SYMBOL if no symbol mark
-                                                        l_chip_mark,
-                                                        mark_store);          // MSS_INVALID_SYMBOL if no chip mark
-
-
-
-
+                        mss_get_dummy_mark_store(
+                                                  i_target,               // MBA
+                                                  4*l_dimm + l_rank,      // Master rank: 0-7
+                                                  l_symbol_mark,          // MSS_INVALID_SYMBOL if no symbol mark
+                                                  l_chip_mark,            // MSS_INVALID_SYMBOL if no chip mark
+                                                  l_mark_store);          
                       }
                       else
                       {
@@ -4918,18 +4877,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                           {
                             l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_put_dummy_steer_mux(
+                              mss_put_dummy_steer_mux(
 
-                                                             i_target,               // MBA
-                                                             4*l_dimm + l_rank,      // Master rank: 0-7
-                                                             mss_SteerMux::READ_MUX, // read mux
-                                                             l_port,                 // l_port: 0,1
-                                                             l_bad_symbol,
-                                                             steer);          // First symbol index of byte to steer
-
-
+                                                       i_target,               // MBA
+                                                       4*l_dimm + l_rank,      // Master rank: 0-7
+                                                       mss_SteerMux::READ_MUX, // read mux
+                                                       l_port,                 // l_port: 0,1
+                                                       l_bad_symbol,           // First symbol index of byte to steer
+                                                       l_steer);          
                             }
                             else
                             {
@@ -4954,7 +4911,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
 
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
                                //do nothing
                             }
@@ -5008,15 +4965,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                             // only update chip mark, and don't overwrite
                             // symbol mark.
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_get_dummy_mark_store(
+                              mss_get_dummy_mark_store(
 
-                                                              i_target,               // MBA
-                                                              4*l_dimm + l_rank,      // Master rank: 0-7
-                                                              l_symbol_mark,          // Reading this just to write it back
-                                                              l_chip_mark,
-                                                              mark_store);          // Expecting MSS_INVALID_SYMBOL since no chip mark
+                                                        i_target,               // MBA
+                                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                                        l_symbol_mark,          // Reading this just to write it back
+                                                        l_chip_mark,            // Expecting MSS_INVALID_SYMBOL since no chip mark
+                                                        l_mark_store);          
                             }
 
                             else
@@ -5052,16 +5009,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                               l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
                             }
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
 
-                              l_rc = mss_put_dummy_mark_store(
+                              mss_put_dummy_mark_store(
 
-                                                              i_target,               // MBA
-                                                              4*l_dimm + l_rank,      // Master rank: 0-7
-                                                              l_symbol_mark,          // Writting back exactly what we read
-                                                              l_chip_mark,
-                                                              mark_store);          // First symbol index of byte getting chip mark
+                                                        i_target,               // MBA
+                                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                                        l_symbol_mark,          // Writting back exactly what we read
+                                                        l_chip_mark,            // First symbol index of byte getting chip mark
+                                                        l_mark_store);          
 
                             }
                             else
@@ -5139,15 +5096,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                             // chip mark.
 
                             // Read mark store
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_get_dummy_mark_store(
+                              mss_get_dummy_mark_store(
 
-                                                              i_target,               // MBA
-                                                              4*l_dimm + l_rank,      // Master rank: 0-7
-                                                              l_symbol_mark,          // Reading this just to write it back
-                                                              l_chip_mark,
-                                                              mark_store);          // Expecting MSS_INVALID_SYMBOL since no chip mark
+                                                        i_target,               // MBA
+                                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                                        l_symbol_mark,          // Expecting MSS_INVALID_SYMBOL since no symbol mark
+                                                        l_chip_mark,            // Reading this just to write it back
+                                                        l_mark_store);          
                             }
                             else
                             {
@@ -5181,22 +5138,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
                             // Update mark store
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_put_dummy_mark_store(
+                              mss_put_dummy_mark_store(
 
-                                                              i_target,               // MBA
-                                                              4*l_dimm + l_rank,      // Master rank: 0-7
-                                                              l_symbol_mark,          // Writting back exactly what we read
-                                                              l_chip_mark,
-                                                              mark_store);          // First symbol index of byte getting chip mark
+                                                        i_target,               // MBA
+                                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                                        l_symbol_mark,          // Single bad symbol found on this byte
+                                                        l_chip_mark,            // Writting back exactly what we read
+                                                        l_mark_store);          
 
                             }
                             else
                             {
-
-
-
                               l_rc = mss_put_mark_store(
 
                                                         i_target,               // MBA
@@ -5238,16 +5192,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
                             // Update read mux
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_put_dummy_steer_mux(
+                              mss_put_dummy_steer_mux(
 
-                                                             i_target,               // MBA
-                                                             4*l_dimm + l_rank,      // Master rank: 0-7
-                                                             mss_SteerMux::READ_MUX, // read mux
-                                                             l_port,                 // l_port: 0,1
-                                                             l_bad_symbol,
-                                                             steer);          // First symbol index of byte to steer
+                                                       i_target,               // MBA
+                                                       4*l_dimm + l_rank,      // Master rank: 0-7
+                                                       mss_SteerMux::READ_MUX, // read mux
+                                                       l_port,                 // l_port: 0,1
+                                                       l_bad_symbol,           // First symbol index of byte to steer
+                                                       l_steer);          
 
                             }
                             else
@@ -5269,7 +5223,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                             }
 
                             // Update write mux
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
                               //do nothing
                             }
@@ -5327,15 +5281,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
                             // Read mark store
 
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_get_dummy_mark_store(
+                              mss_get_dummy_mark_store(
 
-                                                              i_target,               // MBA
-                                                              4*l_dimm + l_rank,      // Master rank: 0-7
-                                                              l_symbol_mark,          // Reading this just to write it back
-                                                              l_chip_mark,
-                                                              mark_store);          // Expecting MSS_INVALID_SYMBOL since no chip mark
+                                                        i_target,               // MBA
+                                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                                        l_symbol_mark,          // Reading this just to write it back
+                                                        l_chip_mark,            // Expecting MSS_INVALID_SYMBOL since no chip mark
+                                                        l_mark_store);          
                             }
                             else
                             {
@@ -5369,17 +5323,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                             }
 
                             // Update mark store
-                            if(i_standby_flag == 1)
+                            if(i_standby_flag)
                             {
-                              l_rc = mss_put_dummy_mark_store(
+                              mss_put_dummy_mark_store(
 
-                                                              i_target,               // MBA
-                                                              4*l_dimm + l_rank,      // Master rank: 0-7
-                                                              l_symbol_mark,          // Writting back exactly what we read
-                                                              l_chip_mark,
-                                                              mark_store);          // First symbol index of byte getting chip mark
-
-
+                                                        i_target,               // MBA
+                                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                                        l_symbol_mark,          // Writting back exactly what we read
+                                                        l_chip_mark,            // First symbol index of byte getting chip mark
+                                                        l_mark_store);          
                             }
                             else
                             {
@@ -5461,15 +5413,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
                       // Read mark store
 
-                      if(i_standby_flag == 1)
+                      if(i_standby_flag)
                       {
-                        l_rc = mss_get_dummy_mark_store(
+                        mss_get_dummy_mark_store(
 
-                                                        i_target,               // MBA
-                                                        4*l_dimm + l_rank,      // Master rank: 0-7
-                                                        l_symbol_mark,          // Reading this just to write it back
-                                                        l_chip_mark,
-                                                        mark_store);          // Expecting MSS_INVALID_SYMBOL since no chip mark
+                                                  i_target,               // MBA
+                                                  4*l_dimm + l_rank,      // Master rank: 0-7
+                                                  l_symbol_mark,          // MSS_INVALID_SYMBOL, since no symbol mark in x4 mode
+                                                  l_chip_mark,            // MSS_INVALID_SYMBOL if no chip mark
+                                                  l_mark_store);          
                       }
                       else
                       {
@@ -5493,17 +5445,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
 
                       // READ steer mux
-                      if(i_standby_flag == 1)
+                      if(i_standby_flag)
                       {
 
-                        l_rc = mss_check_dummy_steering(
-                                                        i_target,
-                                                        4*l_dimm + l_rank,
-                                                        l_dramSparePort0Symbol,
-                                                        l_dramSparePort1Symbol,
-                                                        l_eccSpareSymbol,
-                                                        steer);
-
+                        mss_check_dummy_steering(
+                                                  i_target,
+                                                  4*l_dimm + l_rank,
+                                                  l_dramSparePort0Symbol,
+                                                  l_dramSparePort1Symbol,
+                                                  l_eccSpareSymbol,
+                                                  l_steer);
                       }
                       else
                       {
@@ -5552,8 +5503,9 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                             else if (((l_byte==9) && (l_nibble == 0) && !l_x4_DRAM_spare_low_exists) ||
                                      ((l_byte==9) && (l_nibble == 1) && !l_x4_DRAM_spare_high_exists))
                             {
-                              FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
-                              FAPI_ERR("WARNING: This nibble has no spare x4 DRAM connected on %s", i_target.toEcmdString());
+                              // Do nothing
+                              //FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                              //FAPI_ERR("WARNING: This nibble has no spare x4 DRAM connected on %s", i_target.toEcmdString());
                             }
 
                             // Else if spare x4 DRAM exists and not used yet (and not ECC spare)
@@ -5565,16 +5517,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
                               // Update read mux
 
-                              if(i_standby_flag == 1)
+                              if(i_standby_flag)
                               {
-                                l_rc = mss_put_dummy_steer_mux(
+                                mss_put_dummy_steer_mux(
 
-                                                               i_target,               // MBA
-                                                               4*l_dimm + l_rank,      // Master rank: 0-7
-                                                               mss_SteerMux::READ_MUX, // read mux
-                                                               l_port,                 // l_port: 0,1
-                                                               l_bad_symbol,
-                                                               steer);          // First symbol index of byte to steer
+                                                         i_target,               // MBA
+                                                         4*l_dimm + l_rank,      // Master rank: 0-7
+                                                         mss_SteerMux::READ_MUX, // read mux
+                                                         l_port,                 // l_port: 0,1
+                                                         l_bad_symbol,           // First symbol index of byte to steer
+                                                         l_steer);          
                               }
                               else
                               {
@@ -5596,7 +5548,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                               }
 
                               // Update write mux
-                              if(i_standby_flag == 1)
+                              if(i_standby_flag)
                               {
                                 //do nothing
                               }
@@ -5646,16 +5598,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                               l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte + 4*l_nibble, l_port) - 1;
 
                               // Update read mux
-                              if(i_standby_flag == 1)
+                              if(i_standby_flag)
                               {
-                                l_rc = mss_put_dummy_steer_mux(
+                                mss_put_dummy_steer_mux(
 
-                                                               i_target,               // MBA
-                                                               4*l_dimm + l_rank,      // Master rank: 0-7
-                                                               mss_SteerMux::READ_MUX, // read mux
-                                                               mss_SteerMux::ECC_SPARE,// Use ECC spare
-                                                               l_bad_symbol,
-                                                               steer);          // First symbol index of byte to steer
+                                                         i_target,               // MBA
+                                                         4*l_dimm + l_rank,      // Master rank: 0-7
+                                                         mss_SteerMux::READ_MUX, // read mux
+                                                         mss_SteerMux::ECC_SPARE,// Use ECC spare
+                                                         l_bad_symbol,           // First symbol index of byte to steer
+                                                         l_steer);          
                               }
                               else
                               {
@@ -5676,7 +5628,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                               }
 
                               // Update write mux
-                              if(i_standby_flag == 1)
+                              if(i_standby_flag)
                               {
                                 //do nothing
                               }
@@ -5725,20 +5677,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                               {
                                 // Find first symbol index of the nibble being steered with the ECC spare
 
-                                if(i_standby_flag == 1)
+                                if(i_standby_flag)
                                 {
-
-
-
-                                  l_rc = mss_check_dummy_steering(
-                                                                  i_target,
-                                                                  4*l_dimm + l_rank,
-                                                                  l_dramSparePort0Symbol,
-                                                                  l_dramSparePort1Symbol,
-                                                                  l_eccSpareSymbol,
-                                                                  steer);
-
-
+                                  mss_check_dummy_steering(
+                                                            i_target,
+                                                            4*l_dimm + l_rank,
+                                                            l_dramSparePort0Symbol,
+                                                            l_dramSparePort1Symbol,
+                                                            l_eccSpareSymbol,
+                                                            l_steer);
                                 }
                                 else
                                 {
@@ -5762,34 +5709,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                                 FAPI_ERR("WARNING: bad deployed ECC spare, so chip mark goes on the nibble being steered, symbols %d-%d on %s",
                                          l_chip_mark, l_chip_mark+1, i_target.toEcmdString());
 
-
-                                //*******************************************************************************
-                                // DEBUG trace to show which port/byte/nibble we actually fixing with chip mark
-                                /*
-                                   uint8_t l_port_index;
-                                   uint8_t l_byte_index;
-                                   uint8_t l_nibble_index;
-                                   // For each port 0,1
-                                   for (l_port_index=0; l_port_index<2; l_port_index++ )
-                                   {
-                                     // For each byte 0-9, where 9 is the spare
-                                     for(l_byte_index=0; l_byte_index<DIMM_DQ_RANK_BITMAP_SIZE; l_byte_index++ )
-                                     {
-                                       // For each nibble 0,1
-                                       for(l_nibble_index=0; l_nibble_index<2; l_nibble_index++ )
-                                       {
-                                         if (l_eccSpareSymbol == mss_centaurDQ_to_symbol(8*l_byte + 4*l_nibble, l_port) - 1)
-                                         {
-                                           FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x",
-                                                    l_port_index, l_dimm, l_rank, l_byte_index, l_dqBitmap[l_byte_index]);
-                                           FAPI_ERR("WARNING: bad deployed ECC spare, so chip mark goes on the nibble being steered");
-                                         }
-                                       }
-                                     }
-                                   }
-                           */
-                          // DEBUG
-                          //*******************************************************************************
                               }
 
 
@@ -5798,21 +5717,18 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                                        ((l_byte==9) && (l_nibble == 1) && l_x4_DRAM_spare_high_exists && l_x4_DRAM_spare_used))
                               {
                                 // Find first symbol index of the nibble being steered with the DRAM spare
-                                if(i_standby_flag == 1)
+                                if(i_standby_flag)
                                 {
-                                  l_rc = mss_check_dummy_steering(
-                                                                  i_target,
-                                                                  4*l_dimm + l_rank,
-                                                                  l_dramSparePort0Symbol,
-                                                                  l_dramSparePort1Symbol,
-                                                                  l_eccSpareSymbol,
-                                                                  steer);
+                                  mss_check_dummy_steering(
+                                                            i_target,
+                                                            4*l_dimm + l_rank,
+                                                            l_dramSparePort0Symbol,
+                                                            l_dramSparePort1Symbol,
+                                                            l_eccSpareSymbol,
+                                                            l_steer);
                                 }
                                 else
                                 {
-
-
-
                                   l_rc = mss_check_steering(
 
                                                             i_target,               // MBA
@@ -5840,15 +5756,15 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
                               // Update mark store
 
-                              if(i_standby_flag == 1)
+                              if(i_standby_flag)
                               {
-                                l_rc = mss_put_dummy_mark_store(
+                                mss_put_dummy_mark_store(
 
-                                                                i_target,               // MBA
-                                                                4*l_dimm + l_rank,      // Master rank: 0-7
-                                                                l_symbol_mark,          // Writting back exactly what we read
-                                                                l_chip_mark,
-                                                                mark_store);          // First symbol index of byte getting chip mark
+                                                          i_target,               // MBA
+                                                          4*l_dimm + l_rank,      // Master rank: 0-7
+                                                          l_symbol_mark,          // MSS_INVALID_SYMBOL, since no symbol mark in x4 mode
+                                                          l_chip_mark,            // First symbol index of byte getting chip mark
+                                                          l_mark_store);          
                               }
                               else
                               {
@@ -5923,7 +5839,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
             //Updating steer and mark_store arrays
 
-            if(i_standby_flag == 1)
+            if(i_standby_flag)
             {
               for(l_rank =0;l_rank < 8;l_rank++)
               {
@@ -5931,14 +5847,14 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                 {
                   if( l_index == 0)
                   {
-                    if(steer[l_rank][l_index] != MSS_INVALID_SYMBOL)
+                    if(l_steer[l_rank][l_index] != MSS_INVALID_SYMBOL)
                     {
                       o_repair_count.steer_count[l_rank] = o_repair_count.steer_count[l_rank] + 1;
                     }
                   }
                   if( l_index == 1)
                   {
-                    if(steer[l_rank][l_index] != MSS_INVALID_SYMBOL)
+                    if(l_steer[l_rank][l_index] != MSS_INVALID_SYMBOL)
                     {
                       o_repair_count.steer_count[l_rank] = o_repair_count.steer_count[l_rank] + 1;
                     }
@@ -5946,7 +5862,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                   }
                   if( l_index == 2)
                   {
-                    if(steer[l_rank][l_index] != MSS_INVALID_SYMBOL)
+                    if(l_steer[l_rank][l_index] != MSS_INVALID_SYMBOL)
                     {
                       o_repair_count.chipmark_count[l_rank] = o_repair_count.chipmark_count[l_rank] + 1;
                     }
@@ -5960,14 +5876,14 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                 {
                   if(l_index == 0)
                   {
-                    if(mark_store[l_rank][l_index] != MSS_INVALID_SYMBOL)
+                    if(l_mark_store[l_rank][l_index] != MSS_INVALID_SYMBOL)
                     {
                       o_repair_count.symbolmark_count[l_rank] = o_repair_count.symbolmark_count[l_rank] + 1;
                     }
                   }
                   if(l_index == 1)
                   {
-                    if(mark_store[l_rank][l_index] != MSS_INVALID_SYMBOL)
+                    if(l_mark_store[l_rank][l_index] != MSS_INVALID_SYMBOL)
                     {
                       o_repair_count.chipmark_count[l_rank] = o_repair_count.chipmark_count[l_rank] + 1;
                     }
@@ -6480,236 +6396,51 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
 
     }
-    //STANDBY FUNCTIONS
 
-    fapi::ReturnCode mss_get_dummy_mark_store( const fapi::Target & i_target,
+    //------------------------------------------------------------------------------
+    // mss_get_dummy_mark_store
+    //------------------------------------------------------------------------------
+    void mss_get_dummy_mark_store( const fapi::Target & i_target,
                                                uint8_t i_rank,
                                                uint8_t & o_symbolMark,
                                                uint8_t & o_chipMark,
                                                uint8_t mark_store[8][2])
     {
 
-      fapi::ReturnCode l_rc;
-      //uint32_t l_ecmd_rc = 0;
-      ecmdDataBufferBase l_markstore(64);
-      ecmdDataBufferBase l_mbeccfir(64);
-      ecmdDataBufferBase l_data(64);
-      uint8_t l_dramWidth = 0;
-      uint8_t l_symbolMarkGalois = 0;
-      // uint8_t l_chipMarkGalois = 0;
-      //uint8_t l_symbolsPerChip = 4;
-
-      uint8_t l_mbaPosition = 0;
-
-      o_symbolMark = MSS_INVALID_SYMBOL;
-      o_chipMark = MSS_INVALID_SYMBOL;
-
-      l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting MBA position on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-      // Get l_dramWidth
-      l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting DRAM width on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-
-      if (i_rank>=8)
-      {
-        FAPI_ERR("i_rank input to mss_dummy_get_mark_store out of range on %s.",i_target.toEcmdString());
-
-        return l_rc;
-      }
-
-
-      l_symbolMarkGalois = mark_store[i_rank][0];
-
-      if (l_symbolMarkGalois == MSS_INVALID_SYMBOL) // No symbol mark
-      {
-        o_symbolMark = MSS_INVALID_SYMBOL;
-      }
-      else if (l_dramWidth == mss_MemConfig::X4)
-      {
-        FAPI_ERR("l_symbolMarkGalois invalid: symbol mark not allowed in x4 mode on %s.",i_target.toEcmdString());
-
-        return l_rc;
-      }
-      else // Converted from galois field to symbol index
-      {
-
-        o_symbolMark = mark_store[i_rank][0];
-
-        if (( MSS_SYMBOLS_PER_RANK <= o_symbolMark )&&(o_symbolMark !=MSS_INVALID_SYMBOL))
-        {
-          FAPI_ERR("Invalid galois field in markstore on %s.",i_target.toEcmdString());
-
-          return l_rc;
-        }
-      }
-
-
-
-
-      if (mark_store[i_rank][1] == MSS_INVALID_SYMBOL) // No chip mark
-      {
-        o_chipMark = MSS_INVALID_SYMBOL;
-      }
-      else // Converted from galois field to chip index
-      {
-        o_chipMark = mark_store[i_rank][1];
-        // TODO: create error if x4 mode and symbol 0,1?
-
-        if ( (MSS_SYMBOLS_PER_RANK <= o_chipMark)&&(o_chipMark != MSS_INVALID_SYMBOL) )
-        {
-          FAPI_ERR("Invalid galois field in markstore on %s.",i_target.toEcmdString());
-
-
-          return l_rc;
-        }
-      }
-
-      FAPI_INF("mss_get_dummy_mark_store(): rank%d, chip mark = %d, symbol mark = %d",
-               i_rank, o_chipMark, o_symbolMark );
-
-      return l_rc;
+      FAPI_INF("ENTER mss_get_dummy_mark_store(), i_rank = %d", i_rank);
+      
+      o_symbolMark = mark_store[i_rank][0];
+      o_chipMark = mark_store[i_rank][1]; 
+      
+      FAPI_INF("EXIT mss_get_dummy_mark_store(): o_symbolMark = %d, o_chipMark = %d",
+               o_symbolMark, o_chipMark);
     }
 
 
     //------------------------------------------------------------------------------
     // mss_put_dummy_mark_store
     //------------------------------------------------------------------------------
-    fapi::ReturnCode mss_put_dummy_mark_store( const fapi::Target & i_target,
+    void mss_put_dummy_mark_store( const fapi::Target & i_target,
                                                uint8_t i_rank,
                                                uint8_t i_symbolMark,
                                                uint8_t i_chipMark,
                                                uint8_t mark_store[8][2])
     {
+      FAPI_INF("ENTER mss_put_dummy_mark_store(): i_rank = %d, i_symbolMark = %d, i_chipMark = %d",
+               i_rank, i_symbolMark, i_chipMark );
 
-      FAPI_INF("ENTER mss_put_dummy_mark_store()");
-
-
-      fapi::ReturnCode l_rc;
-      //uint32_t l_ecmd_rc = 0;
-      ecmdDataBufferBase l_markstore(64);
-      ecmdDataBufferBase l_mbeccfir(64);
-      ecmdDataBufferBase l_data(64);
-      uint8_t l_dramWidth = 0;
-      // uint8_t l_symbolMarkGalois = 0;
-      // uint8_t l_chipMarkGalois = 0;
-      fapi::Target l_targetCentaur;
-      uint8_t l_mbaPosition = 0;
-
-
-      l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting MBA position on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-
-      // Get l_dramWidth
-      l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting DRAM width on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-      // Check for i_rank out of range
-      if (i_rank>=8)
-      {
-        FAPI_ERR("i_rank input to mss_put_dummy_mark_store out of range on %s.",i_target.toEcmdString());
-
-        return l_rc;
-      }
-
-      // Get l_symbolMarkGalois
-      if (i_symbolMark == MSS_INVALID_SYMBOL) // No symbol mark
-      {
-        // FAPI_ERR("Invalid galois field in markstore on %s.",i_target.toEcmdString());
-        mark_store[i_rank][0] = MSS_INVALID_SYMBOL;
-        //return l_rc;
-      }
-      else if ( l_dramWidth == mss_MemConfig::X4 )
-      {
-        FAPI_ERR("i_symbolMark invalid: symbol mark not allowed in x4 mode on %s.",i_target.toEcmdString());
-
-
-        return l_rc;
-      }
-      else if ( (MSS_SYMBOLS_PER_RANK <= i_symbolMark))
-      {
-        FAPI_ERR("Invalid galois field in markstore on %s.",i_target.toEcmdString());
-
-
-
-        return l_rc;
-      }
-
-      else // Convert from symbol index to galois field
-      {
-        mark_store[i_rank][0] = i_symbolMark;
-      }
-
-      // Get l_chipMarkGalois
-      if (i_chipMark == MSS_INVALID_SYMBOL) // No chip mark
-      {
-        mark_store[i_rank][1] = i_chipMark;
-        //FAPI_ERR("i_chipMark invalid: not first symbol index of a x4 chip on %s.",i_target.toEcmdString());
-        //return l_rc;
-      }
-      else if ( (MSS_SYMBOLS_PER_RANK <= i_chipMark)&&(i_chipMark !=MSS_INVALID_SYMBOL) )
-      {
-        FAPI_ERR("i_chipMark invalid: symbol index out of range on %s.",i_target.toEcmdString());
-
-
-        return l_rc;
-      }
-      else if ((l_dramWidth == mss_MemConfig::X8) && (i_chipMark % 4) )
-      {
-        FAPI_ERR("i_chipMark invalid: not first symbol index of a x8 chip on %s.",i_target.toEcmdString());
-
-
-        return l_rc;
-
-      }
-      else if ((l_dramWidth == mss_MemConfig::X4) && (i_chipMark % 2) )
-      {
-        FAPI_ERR("i_chipMark invalid: not first symbol index of a x4 chip on %s.",i_target.toEcmdString());
-
-
-        return l_rc;
-      }
-      // TODO: create error if x4 mode and symbol 0,1?
-      else // Convert from symbol index to galois field
-      {
-
-        mark_store[i_rank][1] = i_chipMark;
-      }
-
+      mark_store[i_rank][0] = i_symbolMark;
+      mark_store[i_rank][1] = i_chipMark;
 
       FAPI_INF("EXIT mss_put_dummy_mark_store()");
-      return l_rc;
     }
-
-
-/*
- steer[8][3]
-  */
 
 
 
     //------------------------------------------------------------------------------
     // mss_get_dummy_steer_mux
     //------------------------------------------------------------------------------
-    fapi::ReturnCode mss_get_dummy_steer_mux( const fapi::Target & i_target,
+    void mss_get_dummy_steer_mux( const fapi::Target & i_target,
                                               uint8_t i_rank,
                                               mss_SteerMux::muxType i_muxType,
                                               uint8_t & o_dramSparePort0Symbol,
@@ -6718,353 +6449,51 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                                               uint8_t steer[8][3])
     {
 
-      fapi::ReturnCode l_rc;
-      //uint32_t l_ecmd_rc = 0;
-      ecmdDataBufferBase l_steerMux(64);
-      ecmdDataBufferBase l_data(64);
-      uint8_t l_dramWidth = 0;
-      uint8_t l_dramSparePort0Index = 0;
-      uint8_t l_dramSparePort1Index = 0;
-      uint8_t l_eccSpareIndex = 0;
-      fapi::Target l_targetCentaur;
-      uint8_t l_mbaPosition = 0;
+      FAPI_INF("ENTER mss_get_dummy_steer_mux(): i_rank = %d", i_rank );
+      
+      o_dramSparePort0Symbol = steer[i_rank][0];    
+      o_dramSparePort1Symbol = steer[i_rank][1];
+      o_eccSpareSymbol = steer[i_rank][2];
 
-      o_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
-      o_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
-      o_eccSpareSymbol = MSS_INVALID_SYMBOL;
-
-
-      l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting MBA position on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-      // Get l_dramWidth
-      l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting DRAM width on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-
-      // Check for i_rank or i_muxType out of range
-      if ((i_rank>=8) ||
-          !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)))
-      {
-        FAPI_ERR("i_rank or i_muxType input to mss_get_dummy_steer_mux out of range on %s.",i_target.toEcmdString());
-
-        return l_rc;
-      }
-
-
-      // Read steer mux register for the given rank and mux type (read or write).
-
-
-      l_dramSparePort0Index = steer[i_rank][0];
-      l_dramSparePort1Index = steer[i_rank][1];
-      l_eccSpareIndex = steer[i_rank][2];
-
-      o_dramSparePort0Symbol = l_dramSparePort0Index ;
-      o_dramSparePort1Symbol = l_dramSparePort1Index ;
-      o_eccSpareSymbol = l_eccSpareIndex ;
-
-
-       //***************************************
-
-     // Get l_dramSparePort0Index
-/*l_ecmd_rc |= l_steerMux.extractPreserve(&l_dramSparePort0Index, 0, 5, 8-5);
-     if(l_ecmd_rc)
-     {
-       l_rc.setEcmdError(l_ecmd_rc);
-       return l_rc;
-     }*/
-
-      // Get o_dramSparePort0Symbol if index in valid range
-/*if ((l_dramWidth == mss_MemConfig::X8) && (l_dramSparePort0Index < MSS_X8_STEER_OPTIONS_PER_PORT) &&(l_dramSparePort0Index != MSS_INVALID_SYMBOL) )
-      {
-      //o_dramSparePort0Symbol = mss_x8dramSparePort0Index_to_symbol[l_dramSparePort0Index];
-      }
-      else if ((l_dramWidth == mss_MemConfig::X4) && (l_dramSparePort0Index < MSS_X4_STEER_OPTIONS_PER_PORT0) &&(l_dramSparePort0Index != MSS_INVALID_SYMBOL))
-      {
-      // o_dramSparePort0Symbol = mss_x4dramSparePort0Index_to_symbol[l_dramSparePort0Index];
-      }
-      else
-      {
-        FAPI_ERR("Steer mux l_dramSparePort0Index out of range on %s.",i_target.toEcmdString());
-
-
-        return l_rc;
-      }*/
-
-
-
-        // Get o_dramSparePort1Symbol if index in valid range
-/* if ((l_dramWidth == mss_MemConfig::X8) && (l_dramSparePort1Index < MSS_X8_STEER_OPTIONS_PER_PORT) &&(l_dramSparePort1Index != MSS_INVALID_SYMBOL))
-        {
-          o_dramSparePort1Symbol = mss_x8dramSparePort1Index_to_symbol[l_dramSparePort1Index];
-        }
-        else if ((l_dramWidth == mss_MemConfig::X4) && (l_dramSparePort1Index < MSS_X4_STEER_OPTIONS_PER_PORT1) &&(l_dramSparePort1Index != MSS_INVALID_SYMBOL) )
-        {
-          o_dramSparePort1Symbol = mss_x4dramSparePort1Index_to_symbol[l_dramSparePort1Index];
-        }
-        else
-        {
-          FAPI_ERR("Steer mux l_dramSparePort1Index out of range on %s.",i_target.toEcmdString());
-
-
-          return l_rc;
-        }*/
-
-
-          // Get o_eccSpareSymbol if index in valid range
-/* if (l_eccSpareIndex < MSS_X4_ECC_STEER_OPTIONS)
-          {
-            o_eccSpareSymbol = mss_eccSpareIndex_to_symbol[l_eccSpareIndex];
-          }
-          else
-          {
-            FAPI_ERR("o_eccSpareSymbol out of range on %s.",i_target.toEcmdString());
-
-
-            return l_rc;
-          }*/
-
-      FAPI_INF("mss_get_dummy_steer_mux(): rank%d, port0 steer = %d, port1 steer = %d, ecc steer = %d",
-               i_rank, o_dramSparePort0Symbol, o_dramSparePort1Symbol, o_eccSpareSymbol );
-
-      return l_rc;
-
+      FAPI_INF("EXIT mss_get_dummy_steer_mux(): port0 steer = %d, port1 steer = %d, ecc steer = %d",
+               o_dramSparePort0Symbol, o_dramSparePort1Symbol, o_eccSpareSymbol );
     }
-
-
 
 
     //------------------------------------------------------------------------------
     // mss_put_dummy_steer_mux
     //------------------------------------------------------------------------------
-
-    fapi::ReturnCode mss_put_dummy_steer_mux( const fapi::Target & i_target,
+    void mss_put_dummy_steer_mux( const fapi::Target & i_target,
                                               uint8_t i_rank,
                                               mss_SteerMux::muxType i_muxType,
                                               uint8_t i_steerType,
                                               uint8_t i_symbol,
                                               uint8_t steer[8][3])
     {
-      FAPI_INF("ENTER mss_put_dummy_steer_mux()");
+      FAPI_INF("ENTER mss_put_dummy_steer_mux(): i_rank = %d, i_steerType = %d, i_symbol = %d",
+               i_rank, i_steerType, i_symbol );
 
-
-      fapi::ReturnCode l_rc;
-      //    uint32_t l_ecmd_rc = 0;
-      ecmdDataBufferBase l_steerMux(64);
-      ecmdDataBufferBase l_data(64);
-      uint8_t l_dramWidth = 0;
-      uint8_t l_dramSparePort0Index = 0;
-      uint8_t l_dramSparePort1Index = 0;
-      uint8_t l_eccSpareIndex = 0;
-      fapi::Target l_targetCentaur;
-      uint8_t l_mbaPosition = 0;
-
-
-
-      // Get MBA position: 0 = mba01, 1 = mba23
-      l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting MBA position on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-      // Get l_dramWidth
-      l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
-      if(l_rc)
-      {
-        FAPI_ERR("Error getting DRAM width on %s.",i_target.toEcmdString());
-        return l_rc;
-      }
-
-
-      // Check for i_rank or i_muxType or i_steerType or i_symbol out of range
-      if ((i_rank>=8) ||
-          !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)) ||
-          !((i_steerType == mss_SteerMux::DRAM_SPARE_PORT0) || (i_steerType == mss_SteerMux::DRAM_SPARE_PORT1) || (i_steerType == mss_SteerMux::ECC_SPARE)) ||
-          (i_symbol >= 72))
-      {
-        FAPI_ERR("i_rank or i_muxType or i_steerType or i_symbol input to mss_get_dummy_steer_mux out of range on %s.",i_target.toEcmdString());
-
-        return l_rc;
-      }
-      // TODO: add error if ecc_spare and symbol is 0 or 1?
-
-
-
-      // Convert from i_symbol to l_dramSparePort0Index
-      if (i_steerType == mss_SteerMux::DRAM_SPARE_PORT0)
-      {
-/*if (l_dramWidth == mss_MemConfig::X8)
-      {
-        l_dramSparePort0Index = MSS_X8_STEER_OPTIONS_PER_PORT;
-        for ( uint32_t i = 0; i < MSS_X8_STEER_OPTIONS_PER_PORT; i++ )
-        {
-          if ( i_symbol == mss_x8dramSparePort0Index_to_symbol[i] )
-          {
-            l_dramSparePort0Index = i;
-            break;
-          }
-        }
-
-        if ( MSS_X8_STEER_OPTIONS_PER_PORT <= l_dramSparePort0Index )
-        {
-          FAPI_ERR("No match for i_symbol = %d in mss_x8dramSparePort0Index_to_symbol[] on %s.", i_symbol, i_target.toEcmdString());
-
-
-          return l_rc;
-        }
-      }
-
-      else if (l_dramWidth == mss_MemConfig::X4)
-      {
-        l_dramSparePort0Index = MSS_X4_STEER_OPTIONS_PER_PORT0;
-        for ( uint32_t i = 0; i < MSS_X4_STEER_OPTIONS_PER_PORT0; i++ )
-        {
-          if ( i_symbol == mss_x4dramSparePort0Index_to_symbol[i] )
-          {
-            l_dramSparePort0Index = i;
-            break;
-          }
-        }
-
-        if ( MSS_X4_STEER_OPTIONS_PER_PORT0 <= l_dramSparePort0Index )
-        {
-          FAPI_ERR("No match for i_symbol in mss_x4dramSparePort0Index_to_symbol[] on %s.",i_target.toEcmdString());
-
-
-          return l_rc;
-        }
-      }*/
-        steer[i_rank][0] =l_dramSparePort0Index;
-
-
-      }
-
-
-      // Convert from i_symbol to l_dramSparePort1Index
-      if (i_steerType == mss_SteerMux::DRAM_SPARE_PORT1)
-      {
-/*if (l_dramWidth == mss_MemConfig::X8)
-      {
-        l_dramSparePort1Index = MSS_X8_STEER_OPTIONS_PER_PORT;
-        for ( uint32_t i = 0; i < MSS_X8_STEER_OPTIONS_PER_PORT; i++ )
-        {
-          if ( i_symbol == mss_x8dramSparePort1Index_to_symbol[i] )
-          {
-            l_dramSparePort1Index = i;
-            break;
-          }
-        }
-
-        if ( MSS_X8_STEER_OPTIONS_PER_PORT <= l_dramSparePort1Index )
-        {
-          FAPI_ERR("No match for i_symbol in mss_x8dramSparePort1Index_to_symbol[] on %s.",i_target.toEcmdString());
-
-
-          return l_rc;
-        }
-      }
-
-      else if (l_dramWidth == mss_MemConfig::X4)
-      {
-        l_dramSparePort1Index = MSS_X4_STEER_OPTIONS_PER_PORT1;
-        for ( uint32_t i = 0; i < MSS_X4_STEER_OPTIONS_PER_PORT1; i++ )
-        {
-          if ( i_symbol == mss_x4dramSparePort1Index_to_symbol[i] )
-          {
-            l_dramSparePort1Index = i;
-            break;
-          }
-        }
-
-        if ( MSS_X4_STEER_OPTIONS_PER_PORT1 <= l_dramSparePort1Index )
-        {
-          FAPI_ERR("No match for i_symbol in mss_x4dramSparePort1Index_to_symbol[] on %s.",i_target.toEcmdString());
-
-
-          return l_rc;
-        }
-      }*/
-
-        // l_ecmd_rc |= l_steerMux.insert( l_dramSparePort1Index, 5, 5, 8-5 );
-        steer[i_rank][1] =l_dramSparePort1Index;
-
-
-      }
-
-
-
-      // Convert from i_symbol to l_eccSpareIndex
-      if (i_steerType == mss_SteerMux::ECC_SPARE)
-      {
-/*if (l_dramWidth == mss_MemConfig::X4)
-      {
-        l_eccSpareIndex = MSS_X4_ECC_STEER_OPTIONS;
-        for ( uint32_t i = 0; i < MSS_X4_ECC_STEER_OPTIONS; i++ )
-        {
-          if ( i_symbol == mss_eccSpareIndex_to_symbol[i] )
-          {
-            l_eccSpareIndex = i;
-            break;
-          }
-        }
-
-        if ( MSS_X4_ECC_STEER_OPTIONS <= l_eccSpareIndex )
-        {
-          FAPI_ERR("No match for i_symbol in mss_eccSpareIndex_to_symbol[] on %s.",i_target.toEcmdString());
-
-
-          return l_rc;
-        }
-      }
-      else if (l_dramWidth == mss_MemConfig::X8)
-      {
-        FAPI_ERR("ECC_SPARE not valid with x8 mode on %s.",i_target.toEcmdString());
-
-
-        return l_rc;
-      }*/
-
-
-        steer[i_rank][2] =l_eccSpareIndex;
-        //l_ecmd_rc |= l_steerMux.insert( l_eccSpareIndex, 10, 6, 8-6 );
-      }
-
-
+      steer[i_rank][i_steerType] = i_symbol;
 
 
       FAPI_INF("EXIT mss_put_dummy_steer_mux()");
-
-      return l_rc;
-
     }
-    fapi::ReturnCode mss_check_dummy_steering(const fapi::Target & i_target,
+
+
+    //------------------------------------------------------------------------------
+    // mss_check_dummy_steering
+    //------------------------------------------------------------------------------
+    void mss_check_dummy_steering(const fapi::Target & i_target,
                                               uint8_t i_rank,
                                               uint8_t & o_dramSparePort0Symbol,
                                               uint8_t & o_dramSparePort1Symbol,
                                               uint8_t & o_eccSpareSymbol,
                                               uint8_t steer[8][3])
 
-
-
     {
-
-
-
-
-
       // Get the read steer mux, with the assuption
       // that the write mux will be the same.
-      return mss_get_dummy_steer_mux( i_target,
+      mss_get_dummy_steer_mux( i_target,
                                       i_rank,
                                       mss_SteerMux::READ_MUX,
                                       o_dramSparePort0Symbol,
@@ -7075,4 +6504,3 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
     }
 
-    //StandBY FUNCTIONS

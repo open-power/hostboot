@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.20 2014/02/20 20:52:15 bellows Exp $
+// $Id: mss_maint_cmds.H,v 1.21 2014/03/08 04:03:27 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -58,7 +58,7 @@
 //         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
 //   1.19  | 02/07/14 |adityamd | Added support to mss_restore_DRAM_repairs to be accessed at Standby
 //   1.20  | 02/20/14 |bellows  | RAS update from repairs at standby
-
+//   1.21  | 03/07/14 | gollub  | mss_restore_DRAM_repairs_asm: changed i_standby_flag to bool
 
 #ifndef _MSS_MAINT_CMDS_H
 #define _MSS_MAINT_CMDS_H
@@ -1094,7 +1094,7 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
     fapi::ReturnCode mss_restore_DRAM_repairs_asm( const fapi::Target & i_target,
                                                       uint8_t & o_repairs_applied,
                                                       uint8_t & o_repairs_exceeded,
-                                                      uint8_t i_standby_flag,
+                                                      bool i_standby_flag,
                                                       struct repair_count &o_repair_count);
 
 
