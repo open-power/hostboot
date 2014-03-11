@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -459,7 +459,6 @@ sub get_istep_list()
 sub print_istep_list( )
 {
     my  $hdrflag    =   1;
-    my  $col        =   0;
 
     ## ::userDisplay   " IStep Name\n";
     ##::userDisplay   "---------------------------------------------------\n";
@@ -478,22 +477,10 @@ sub print_istep_list( )
                 }
                 ## will truncate after 40 chars, hopefully this will not be an issue
                 my $ss  =   sprintf( "%-40s", $inList[$i][$j] );
-                ::userDisplay   "$ss" ;
-                $col ++ ;
-                if ( $col > 1 )
-                {
-                    ::userDisplay   "\n";
-                    $col = 0;
-
-                }
+                ::userDisplay   "$i.$j: $ss\n" ;
             }
         }   ## end for $j
 
-        if ( $col > 0 )
-        {
-            ::userDisplay "\n";
-            $col = 0;
-        }
         $hdrflag=1;
     }   ##  end for $i
 }
@@ -850,12 +837,52 @@ sub process_command( $ )
             }
         }
 
-
-        for( my $x=$istepM; $x<$istepN+1; $x++ )
+        for(my $x=$istepM; $x<=$istepN; $x++)
         {
-            for( my $y=$substepM; $y<$substepN+1; $y++ )
+            if ($istepM == $istepN)
             {
-                runIStep( $x, $y );
+                # First and Last Steps are the same.
+                # Run all requested substeps between the same step
+                for(my $y=$substepM; $y<=$substepN; $y++)
+                {
+                    if (defined($inList[$x][$y]))
+                    {
+                        runIStep($x, $y);
+                    }
+                }
+            }
+            elsif ($x == $istepM)
+            {
+                # First requested Step, run from requested substep
+                for(my $y=$substepM; $y<MAX_SUBSTEPS; $y++)
+                {
+                    if (defined($inList[$x][$y]))
+                    {
+                        runIStep($x, $y);
+                    } 
+                }
+            }
+            elsif ($x == $istepN)
+            {
+                # Last requested Step, run up to requested substep
+                for(my $y=0; $y<=$substepN; $y++)
+                {
+                    if (defined($inList[$x][$y]))
+                    {
+                        runIStep($x, $y);
+                    }
+                }
+            }
+            else
+            {
+                # Middle istep, run all substeps
+                for(my $y=0; $y<MAX_SUBSTEPS; $y++)
+                {
+                    if (defined($inList[$x][$y]))
+                    {
+                        runIStep($x, $y);
+                    }
+                }
             }
         }
 

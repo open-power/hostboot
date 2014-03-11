@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -124,9 +124,9 @@ Examples: \n
     hb-istep    clear-trace \n
     hb-istep    resume \n
     hb-istep    s4 \n
-    hb-istep    s4..N
+    hb-istep    s4..N \n
     hb-istep    poweron \n
-    hb-istep    poweron..clock_frequency_set /n
+    hb-istep    poweron..clock_frequency_set \n
     """)
 
 #------------------------------------------------
