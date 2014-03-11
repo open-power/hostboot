@@ -39,8 +39,7 @@ endif
 
 ##	Set BEAM source files.
 ##  see the beamgen:  target to generate these config files.
-BEAMFLAGS += --beam::parms=$(BEAMPATH)/tcl/beam_default_parms.tcl   \
-    $(ROOTPATH)/src/build/beam/beam_parms.tcl
+BEAMFLAGS += --beam::parms=$(ROOTPATH)/src/build/beam/beam_parms.tcl
 BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_c_config.tcl
 BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_cpp_config.tcl
 

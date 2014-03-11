@@ -684,6 +684,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
                 mutex_unlock(&iv_mutex);
 
+                break;
+
             case ANALYZE_IPL_MNFG_CE_STATS:
             {
                 MDIA_FAST("Executing analyzeIplCEStats");

@@ -144,7 +144,7 @@ bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type )
     assert(sys != NULL);
 
     // get the current payload kind
-    ATTR_PAYLOAD_KIND_type payload_kind = sys->getAttr<ATTR_PAYLOAD_KIND>();
+    TARGETING::PAYLOAD_KIND payload_kind = sys->getAttr<ATTR_PAYLOAD_KIND>();
 
     if( o_type )
     {

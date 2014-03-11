@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -123,12 +123,10 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
     TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendToHypervisor" );
     do
     {
+        uint32_t l_msgSize = io_err->flattenedSize();
 
-         uint32_t l_msgSize = io_err->flattenedSize();
-
-
-         void * temp_buff = malloc( l_msgSize );
-         io_err->flatten ( temp_buff, l_msgSize );
+        uint8_t * temp_buff = new uint8_t [l_msgSize ];
+        io_err->flatten ( temp_buff, l_msgSize );
 
         TRACDCOMP(g_trac_errl,
                   INFO_MRK"Send msg to FSP for errlogId [0x%08x]",
@@ -158,7 +156,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                       );
         }
 
-        delete (uint8_t *)temp_buff;
+        delete [] temp_buff;
 
     } while (0);
 

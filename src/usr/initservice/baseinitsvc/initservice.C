@@ -549,7 +549,6 @@ void InitService::init( void *io_ptr )
     //  Tell kernel to perform shutdown sequence
     INITSERVICE::doShutdown( l_shutdownStatus );
 
-    printk( "InitService exit.\n" );
     // return to _start() to exit the task.
 }
 

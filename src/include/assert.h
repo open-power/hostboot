@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -197,7 +197,7 @@ void __assert(AssertBehavior i_assertb, int i_line);
  *       typedef char CHECKSIZEVAR[(EXPECTED_SIZE == sizeof(DATA)) -1]
  *
  */
-#define CPPASSERT(exp) typedef char compile_time_assert_failed[2*((exp)!=0)-1]
+#define CPPASSERT(exp) typedef char compile_time_assert_failed[2*((exp)?1:0)-1]
 
 
 #ifdef __cplusplus
