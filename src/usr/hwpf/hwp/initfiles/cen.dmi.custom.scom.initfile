@@ -1,8 +1,9 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.20 2014/02/14 15:57:01 jgrell Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.21 2014/02/20 15:19:02 garyp Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.21|garyp   |02/19/14|Added rx_min_eye_width and rx_min_eye_height for manufacturing and lab thresholding
 #--     1.20|jgrell  |02/14/14|Corrected FIR_ACTION1 and FIR_MASK settings for SW245013
 #--     1.19|jgrell  |02/12/14|Added FIR_ACTION1 setting and changed FIR_MASK setting for SW245013
 #--                           |Added rx_wt_lane_disabled=1 on lane 17 for SW244284
@@ -63,6 +64,18 @@ define def_IS_HW  = (SYS.ATTR_IS_SIMULATION == 0);
 define def_IS_VBU = (SYS.ATTR_IS_SIMULATION == 1);
 
 define def_all_lanes=11111;
+
+#--*****************
+#-- set rx_min_eye_width and rx_min_eye_height if in manufacturing mode
+#--*****************
+scom 0x800.0b(rx_result_chk_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+        bits,                         	scom_data, 	expr;
+    rx_min_eye_width, SYS.ATTR_MNFG_DMI_MIN_EYE_WIDTH,              ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+    rx_min_eye_height, SYS.ATTR_MNFG_DMI_MIN_EYE_HEIGHT,            ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+}
+
+
+
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------

@@ -1,8 +1,9 @@
-#-- $Id: p8.xbus.custom.scom.initfile,v 1.7 2013/12/04 17:25:29 jgrell Exp $
+#-- $Id: p8.xbus.custom.scom.initfile,v 1.8 2014/02/20 15:29:11 garyp Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.8 |garyp   |02/19/14|Added rx_min_eye_width for manufacturing and lab thresholding
 #--     1.7 |jgrell  |12/03/13|Set rx_sls_extend_sel to 001 for DD2
 #--     1.5 |jgrell  |09/17/13|Added DD2 specific inits
 #--     1.3 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
@@ -54,6 +55,27 @@ define def_all_lanes=11111;
 #-- Overrides
 #-------------------------------------------------------------------------------------
 #--***********************************************************************************
+
+#--*****************
+#-- set rx_min_eye_width if in manufacturing mode
+#--*****************
+scom 0x800.0b(rx_result_chk_pg)(rx_grp0)(lane_na).0x(xbus0_gcr_addr) {
+    bits,                         	scom_data, 	expr;
+    rx_min_eye_width, SYS.ATTR_MNFG_XBUS_MIN_EYE_WIDTH,               ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+}
+scom 0x800.0b(rx_result_chk_pg)(rx_grp1)(lane_na).0x(xbus0_gcr_addr) {
+        bits,                         	scom_data, 	expr;
+    rx_min_eye_width, SYS.ATTR_MNFG_XBUS_MIN_EYE_WIDTH,               ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+}
+scom 0x800.0b(rx_result_chk_pg)(rx_grp2)(lane_na).0x(xbus0_gcr_addr) {
+        bits,                         	scom_data, 	expr;
+    rx_min_eye_width, SYS.ATTR_MNFG_XBUS_MIN_EYE_WIDTH,               ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+}
+scom 0x800.0b(rx_result_chk_pg)(rx_grp3)(lane_na).0x(xbus0_gcr_addr) {
+        bits,                         	scom_data, 	expr;
+    rx_min_eye_width, SYS.ATTR_MNFG_XBUS_MIN_EYE_WIDTH,               ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+}
+
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------

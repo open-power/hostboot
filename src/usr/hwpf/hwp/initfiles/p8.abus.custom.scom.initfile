@@ -1,8 +1,9 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.13 2014/02/12 20:04:14 jgrell Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.14 2014/02/20 15:28:36 garyp Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.14|garyp   |02/19/14| Added rx_min_eye_width and rx_min_eye_height for manufacturing and lab thresholding
 #--     1.13|jgrell  |02/12/14| Added rx_wt_lane_disabled=1 on lane 17 (SW244284)
 #--     1.12|jgrell  |12/03/13| Set rx_eo_ddc_timeout_sel to 110 for DD2
 #--     1.11|jgrell  |10/29/13| Changed rx_ds_timeout_sel setting to 111
@@ -45,6 +46,16 @@ include edi.io.define
 #--******************************************************************************
 
 define def_all_lanes=11111;
+
+#--*****************
+#-- set rx_min_eye_width and rx_min_eye_height if in manufacturing mode
+#--*****************
+scom 0x800.0b(rx_result_chk_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
+    bits,                         	scom_data, 	expr;
+    rx_min_eye_width, SYS.ATTR_MNFG_ABUS_MIN_EYE_WIDTH,             ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+    rx_min_eye_height, SYS.ATTR_MNFG_ABUS_MIN_EYE_HEIGHT,           ((SYS.ATTR_MNFG_FLAGS & ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) > 0);
+}
+
 
 
 #--******************************************************************************
