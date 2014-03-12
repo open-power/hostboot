@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,7 +21,8 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_errors.xml,v 1.42 2013/08/22 19:44:10 mjjones Exp $ -->
+<!-- $Id: memory_errors.xml,v 1.00 2013/08/22 19:44:10 mjjones Exp $ -->
+<!-- Mike Jones - modified version from 1.42 to 1.00 because it is a sandbox version -->
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 <!-- *********************************************************************** -->
 
@@ -233,7 +234,10 @@
 <hwpError>
     <rc>RC_MSS_UNABLE_TO_GROUP_MCS</rc>
     <description>MCS COULD NOT BE GROUPED.  EITHER SWITCH DIMMS SO GROUPING IS POSSIBLE OR CHANGE SYSTEM POLICY.</description>
-    <gard><target>TARGET_MCS</target></gard>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>MEDIUM</priority>
+    </callout>
     <deconfigure><target>TARGET_MCS</target></deconfigure>
 </hwpError>
 
