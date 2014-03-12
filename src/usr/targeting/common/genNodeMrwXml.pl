@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -32,7 +32,11 @@
 #              Specify which system MRW XML to be generated. 
 #              The file name will be set as uppercase 
 #        --mrwdir=pathname
-#              Specify the complete dir pathname of the MRW.
+#              Specify the complete dir pathname of the MRW. Colon-delimited
+#              list accepted to specify multiple directories to search.
+#        --outfileDir=pathname
+#              Specify the complete dir pathname to where output files should
+#              be created
 #        --build=hb/fsp
 #              Specify if HostBoot build (hb) or FSP build (fsp)
 #        --nodeCount
@@ -64,17 +68,19 @@ my $mrwdir = "";
 my $sysname = "";
 my $usage = 0;
 my $nodeCount = 0;
+my $outFileDir = "";
 my $build = "fsp";
 use Getopt::Long;
 
 GetOptions( "mrwdir:s"  => \$mrwdir,
             "system:s"  => \$sysname,
             "nodeCount:i" => \$nodeCount,
+            "outfileDir:s" => \$outFileDir,
             "build:s"   => \$build,
             "help"      => \$usage, );
 
 
-if ($usage || ($mrwdir eq "") || ($sysname eq ""))
+if ($usage || ($mrwdir eq "") || ($sysname eq "") || ($outFileDir eq ""))
 {
     display_help();
     exit 0;
@@ -85,7 +91,6 @@ if ($nodeCount ==0)
     #no nodes so don't need to create node xml files
     exit 0;
 }
-
 
 my $SYSNAME = uc($sysname);
 
@@ -110,16 +115,13 @@ else
 
 
 #create files
-open (FH, "<$mrwdir/${SYSNAME}_${fileSuffix}.mrw.xml") ||
-        die "ERROR: unable to open $mrwdir/${SYSNAME}_${fileSuffix}.mrw.xml\n";
-close (FH);
-
-$sysInfo = XMLin("$mrwdir/${SYSNAME}_${fileSuffix}.mrw.xml",
+my $mrw_file = open_mrw_file($mrwdir, "${SYSNAME}_${fileSuffix}.mrw.xml");
+$sysInfo = XMLin($mrw_file,
                 ForceArray=>1);
 #print Dumper($sysInfo);
 for my $j(0..($nodeCount))
 {
-    $outFile = "$mrwdir/${SYSNAME}_node_$j"."_${fileSuffix}.mrw.xml";
+    $outFile = "$outFileDir/${SYSNAME}_node_$j"."_${fileSuffix}.mrw.xml";
     push @nodeOutFiles, [$outFile];
 }
 
@@ -186,6 +188,42 @@ exit 0;
 ################################################################################
 #subroutines below
 
+sub open_mrw_file
+{
+    my ($paths, $filename) = @_;
+
+    #Need to get list of paths to search
+    my @paths_to_search = split /:/, $paths;
+    my $file_found = "";
+
+    #Check for file at each directory in list
+    foreach my $path (@paths_to_search)
+    {
+        if ( open (FH, "<$path/$filename") )
+        {
+            $file_found = "$path/$filename";
+            close(FH);
+            last; #break out of loop
+        }
+    }
+
+    if ($file_found eq "")
+    {
+        #If the file was not found, build up error message and exit
+        my $err_msg = "Could not find $filename in following paths:\n";
+        foreach my $path (@paths_to_search)
+        {
+            $err_msg = $err_msg."  $path\n";
+        }
+        die $err_msg;
+    }
+    else
+    {
+        #Return the full path to the file found
+        return $file_found;
+    }
+}
+
 sub display_help
 {
     use File::Basename;
@@ -203,7 +241,11 @@ Usage:
               Specify which system MRW XML to be generated
                The system name will be set as uppercase
         --mrwdir=pathname
-              Specify the complete dir pathname of the MRW.
+              Specify the complete dir pathname of the MRW. Colon-delimited
+              list accepted to specify multiple directories to search.
+        --outfileDir=pathname
+              Specify the complete dir pathname to where output files should
+              be created
         --build=hb/fsp
               Specify if HostBoot build (hb) or FSP build (fsp)
         --nodeCount

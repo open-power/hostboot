@@ -30,7 +30,8 @@
 #        --system=systemname
 #              Specify which system MRW XML to be generated
 #        --mrwdir=pathname
-#              Specify the complete dir pathname of the MRW.
+#              Specify the complete dir pathname of the MRW. Colon-delimited
+#              list accepted to specify multiple directories to search.
 #        --build=hb
 #              Specify HostBoot build (hb)
 #        --outfile=XmlFilename
@@ -103,17 +104,13 @@ if ($sysname =~ /brazos/)
     $MAXNODE = 4;
 }
 
-open (FH, "<$mrwdir/${sysname}-mru-ids.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-mru-ids.xml\n";
-close (FH);
-my $mruAttr = XMLin("$mrwdir/${sysname}-mru-ids.xml");
+my $mru_ids_file = open_mrw_file($mrwdir, "${sysname}-mru-ids.xml");
+my $mruAttr = XMLin($mru_ids_file);
 #------------------------------------------------------------------------------
 # Process the system-policy MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
-close (FH);
-my $sysPolicy = XMLin("$mrwdir/${sysname}-system-policy.xml");
+my $system_policy_file = open_mrw_file($mrwdir, "${sysname}-system-policy.xml");
+my $sysPolicy = XMLin($system_policy_file);
 my $reqPol = $sysPolicy->{"required-policy-settings"};
 
 my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
@@ -219,10 +216,8 @@ else
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-pm-settings.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-pm-settings.xml\n";
-close (FH);
-my $pmSettings = XMLin("$mrwdir/${sysname}-pm-settings.xml");
+my $pm_settings_file = open_mrw_file($mrwdir, "${sysname}-pm-settings.xml");
+my $pmSettings = XMLin($pm_settings_file);
 
 my @pmChipAttr; # Repeated [NODE, POS, ATTR, VAL, ATTR, VAL, ATTR, VAL...]
 
@@ -258,16 +253,16 @@ if ((scalar @SortedPmChipAttr) == 0)
     # Orlena: Platform dropped so there will never be a populated
     #         orlena-pm-settings file
     # Brazos: SW231069 raised to get brazos-pm-settings populated
-    print STDOUT "WARNING: No data in $mrwdir/${sysname}-pm-settings.xml. Defaulting values\n";
+    print STDOUT "WARNING: No data in mrw dir(s): $mrwdir with ".
+                  "filename:${sysname}-pm-settings.xml. Defaulting values\n";
 }
 
 #------------------------------------------------------------------------------
 # Process the proc-pcie-settings MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-proc-pcie-settings.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-proc-pcie-settings.xml\n";
-close (FH);
-my $ProcPcie = XMLin("$mrwdir/${sysname}-proc-pcie-settings.xml");
+my $proc_pcie_settings_file = open_mrw_file($mrwdir,
+                                           "${sysname}-proc-pcie-settings.xml");
+my $ProcPcie = XMLin($proc_pcie_settings_file);
 
 # Repeated [NODE, POS, ATTR, IOP0-VAL, IOP1-VAL, ATTR, IOP0-VAL, IOP1-VAL]
 my @procPcie;
@@ -323,10 +318,8 @@ my @SortedPcie = sort byNodePos @procPcie;
 #------------------------------------------------------------------------------
 # Process the chip-ids MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-chip-ids.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-chip-ids.xml\n";
-close (FH);
-my $chipIds = XMLin("$mrwdir/${sysname}-chip-ids.xml");
+my $chip_ids_file = open_mrw_file($mrwdir, "${sysname}-chip-ids.xml");
+my $chipIds = XMLin($chip_ids_file);
 
 use constant CHIP_ID_NODE => 0;
 use constant CHIP_ID_POS  => 1;
@@ -343,10 +336,8 @@ foreach my $i (@{$chipIds->{'chip-id'}})
 #------------------------------------------------------------------------------
 # Process the power-busses MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-power-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-power-busses.xml\n";
-close (FH);
-my $powerbus = XMLin("$mrwdir/${sysname}-power-busses.xml");
+my $power_busses_file = open_mrw_file($mrwdir, "${sysname}-power-busses.xml");
+my $powerbus = XMLin($power_busses_file);
 
 my @pbus;
 use constant PBUS_FIRST_END_POINT_INDEX => 0;
@@ -412,10 +403,8 @@ foreach my $i (@{$powerbus->{'power-bus'}})
 #------------------------------------------------------------------------------
 # Process the dmi-busses MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-dmi-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-dmi-busses.xml\n";
-close (FH);
-my $dmibus = XMLin("$mrwdir/${sysname}-dmi-busses.xml");
+my $dmi_busses_file = open_mrw_file($mrwdir, "${sysname}-dmi-busses.xml");
+my $dmibus = XMLin($dmi_busses_file);
 
 my @dbus_mcs;
 use constant DBUS_MCS_NODE_INDEX => 0;
@@ -464,10 +453,8 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
 #------------------------------------------------------------------------------
 # Process the cent-vrds MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-cent-vrds.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-cent-vrds.xml\n";
-close (FH);
-my $vmemCentaur = XMLin("$mrwdir/${sysname}-cent-vrds.xml");
+my $cent_vrds_file = open_mrw_file($mrwdir, "${sysname}-cent-vrds.xml");
+my $vmemCentaur = XMLin($cent_vrds_file);
 
 # Capture all pnor attributes into the @unsortedPnorTargets array
 use constant VMEM_DEV_PATH_FIELD => 0;
@@ -525,16 +512,12 @@ my @SortedVmem = sort byVmemNodePos @unsortedVmem;
 #------------------------------------------------------------------------------
 # Process the cec-chips and pcie-busses MRW files
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-cec-chips.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-cec-chips.xml\n";
-close (FH);
-my $devpath = XMLin("$mrwdir/${sysname}-cec-chips.xml",
+my $cec_chips_file = open_mrw_file($mrwdir, "${sysname}-cec-chips.xml");
+my $devpath = XMLin($cec_chips_file,
                         KeyAttr=>'instance-path');
 
-open (FH, "<$mrwdir/${sysname}-pcie-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-pcie-busses.xml\n";
-close (FH);
-my $pcie_buses = XMLin("$mrwdir/${sysname}-pcie-busses.xml");
+my $pcie_busses_file = open_mrw_file($mrwdir, "${sysname}-pcie-busses.xml");
+my $pcie_buses = XMLin($pcie_busses_file);
 
 our %pcie_list;
 
@@ -659,10 +642,8 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 #------------------------------------------------------------------------------
 # Process the targets MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-targets.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-targets.xml\n";
-close (FH);
-my $eTargets = XMLin("$mrwdir/${sysname}-targets.xml");
+my $targets_file = open_mrw_file($mrwdir, "${sysname}-targets.xml");
+my $eTargets = XMLin($targets_file);
 
 # Capture all targets into the @Targets array
 use constant NAME_FIELD => 0;
@@ -701,10 +682,8 @@ foreach my $i (@{$eTargets->{target}})
 #------------------------------------------------------------------------------
 # Process the fsi-busses MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-fsi-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-fsi-busses.xml\n";
-close (FH);
-my $fsiBus = XMLin("$mrwdir/${sysname}-fsi-busses.xml");
+my $fsi_busses_file = open_mrw_file($mrwdir, "${sysname}-fsi-busses.xml");
+my $fsiBus = XMLin($fsi_busses_file);
 
 # Capture all FSI connections into the @Fsis array
 # Save the FSP node id
@@ -751,10 +730,8 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
 #------------------------------------------------------------------------------
 # Process the psi-busses MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-psi-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-psi-busses.xml\n";
-close (FH);
-our $psiBus = XMLin("$mrwdir/${sysname}-psi-busses.xml",
+my $psi_busses_file = open_mrw_file($mrwdir, "${sysname}-psi-busses.xml");
+our $psiBus = XMLin($psi_busses_file,
                       forcearray=>['psi-bus']);
 
 # Capture all PSI connections into the @hbPSIs array
@@ -777,10 +754,8 @@ foreach my $i (@{$psiBus->{'psi-bus'}})
 #------------------------------------------------------------------------------
 # Process the memory-busses MRW file
 #------------------------------------------------------------------------------
-open (FH, "<$mrwdir/${sysname}-memory-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-memory-busses.xml\n";
-close (FH);
-my $memBus = XMLin("$mrwdir/${sysname}-memory-busses.xml");
+my $memory_busses_file = open_mrw_file($mrwdir, "${sysname}-memory-busses.xml");
+my $memBus = XMLin($memory_busses_file);
 
 # Capture all memory buses info into the @Membuses array
 use constant MCS_TARGET_FIELD     => 0;
@@ -961,7 +936,7 @@ for my $i ( 0 .. $#SortedTargets )
 }
 
 # Finally, generate the xml file.
-print "<!-- Source path = $mrwdir -->\n";
+print "<!-- Source path(s) = $mrwdir -->\n";
 
 print "<attributes>\n";
 
@@ -1790,11 +1765,9 @@ my $computeNodeInit = 0;
 my %computeNodeList = ();
 sub generate_compute_node_ipath
 {
-    open (FH, "<$::mrwdir/${sysname}-location-codes.xml") ||
-        die "ERROR: unable to open $::mrwdir/${sysname}-location-codes.xml\n";
-    close (FH);
-
-    my $nodeTargets = XMLin("$::mrwdir/${sysname}-location-codes.xml");
+    my $location_codes_file = open_mrw_file($::mrwdir,
+                                            "${sysname}-location-codes.xml");
+    my $nodeTargets = XMLin($location_codes_file);
 
     #get the node (compute) ipath details
     foreach my $Target (@{$nodeTargets->{'location-code-entry'}})
@@ -2393,11 +2366,8 @@ my $phbInit = 0;
 my %phbList = ();
 sub generate_phb
 {
-    open (FH, "<$::mrwdir/${sysname}-targets.xml") ||
-        die "ERROR: unable to open $::mrwdir/${sysname}-targets.xml\n";
-    close (FH);
-
-    my $phbTargets = XMLin("$::mrwdir/${sysname}-targets.xml");
+    my $targets_file = open_mrw_file($::mrwdir, "${sysname}-targets.xml");
+    my $phbTargets = XMLin($targets_file);
 
     #get the PHB details
     foreach my $Target (@{$phbTargets->{target}})
@@ -2814,11 +2784,9 @@ my $logicalDimmInit = 0;
 my %logicalDimmList = ();
 sub generate_logicalDimms
 {
-    open (FH, "<$::mrwdir/${sysname}-memory-busses.xml") ||
-        die "ERROR: unable to open $::mrwdir/${sysname}-memory-busses.xml\n";
-    close (FH);
-
-    my $dramTargets = XMLin("$::mrwdir/${sysname}-memory-busses.xml");
+    my $memory_busses_file = open_mrw_file($::mrwdir,
+                                           "${sysname}-memory-busses.xml");
+    my $dramTargets = XMLin($memory_busses_file);
 
     #get the DRAM details
     foreach my $Target (@{$dramTargets->{drams}->{dram}})
@@ -3342,6 +3310,42 @@ sub get_mruid
     return $mruData;
 }
 
+sub open_mrw_file
+{
+    my ($paths, $filename) = @_;
+
+    #Need to get list of paths to search
+    my @paths_to_search = split /:/, $paths;
+    my $file_found = "";
+
+    #Check for file at each directory in list
+    foreach my $path (@paths_to_search)
+    {
+        if ( open (FH, "<$path/$filename") )
+        {
+            $file_found = "$path/$filename";
+            close(FH);
+            last; #break out of loop
+        }
+    }
+
+    if ($file_found eq "")
+    {
+        #If the file was not found, build up error message and exit
+        my $err_msg = "Could not find $filename in following paths:\n";
+        foreach my $path (@paths_to_search)
+        {
+            $err_msg = $err_msg."  $path\n";
+        }
+        die $err_msg;
+    }
+    else
+    {
+        #Return the full path to the file found
+        return $file_found;
+    }
+}
+
 sub display_help
 {
     use File::Basename;
@@ -3355,7 +3359,8 @@ Usage:
         --system=systemname
               Specify which system MRW XML to be generated
         --mrwdir=pathname
-              Specify the complete dir pathname of the MRW.
+              Specify the complete dir pathname of the MRW. Colon-delimited
+              list accepted to specify multiple directories to search.
         --build=hb
               Specify HostBoot build (hb)
         --outfile=XmlFilename
