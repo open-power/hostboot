@@ -120,11 +120,9 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK,
-           "call_sbe_centaur_init() - Error getting image from PNOR. ec=0x%.2X",
-                       cur_ec );
-
-            TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_sbe_centaur_init - l_sbePnorAddr",l_sbePnorAddr,400);
+           "call_sbe_centaur_init() - Error getting image from PNOR. "
+           "Target 0x%.8X, EC=0x%.2X",
+           TARGETING::get_huid(l_membuf_target), cur_ec );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_membuf_target).addToLog( l_errl );
