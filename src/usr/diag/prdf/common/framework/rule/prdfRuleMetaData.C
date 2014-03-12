@@ -682,11 +682,11 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
                 l_arg[3] = createVirtualRegister(i_vReg->cv_value[3].p, i_data);
             }
 
-            // passing NULL objects in l_arg[x]
-            l_rc = &i_data.cv_scanFactory.GetAttnTypeRegister(*l_arg[0],
-                                                              *l_arg[1],
-                                                              *l_arg[2],
-                                                              *l_arg[3]);
+            // passing NULL objects in *l_arg[x]
+            l_rc = &i_data.cv_scanFactory.GetAttnTypeRegister(l_arg[0],
+                                                              l_arg[1],
+                                                              l_arg[2],
+                                                              l_arg[3]);
             break;
 
         case Prdr::BIT_STR:

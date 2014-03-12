@@ -63,7 +63,7 @@ bool CenMbaRceTable::addEntry( const CenRank & i_rank ,
     {
         // Insert all entries even if threshold is crossed
         // for better FFDC.
-        o_doTps |= it->second.addAddress( 0, i_sc );
+        o_doTps = o_doTps || it->second.addAddress( 0, i_sc );
     }
 
     return o_doTps;

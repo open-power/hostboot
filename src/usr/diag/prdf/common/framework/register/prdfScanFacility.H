@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -162,14 +162,14 @@ public:
 
   /**
    * @brief  Get a AttnTypeRegister
-   * @params 3 scr Registers
+   * @params 4 pointers to scr Registers
    * @post only one instance of the register with these SCR's will exist
    */
   SCAN_COMM_REGISTER_CLASS & GetAttnTypeRegister(
-                                    SCAN_COMM_REGISTER_CLASS & i_check,
-                                    SCAN_COMM_REGISTER_CLASS & i_recov,
-                                    SCAN_COMM_REGISTER_CLASS & i_special,
-                                    SCAN_COMM_REGISTER_CLASS & i_proccs);
+                                    SCAN_COMM_REGISTER_CLASS * i_check,
+                                    SCAN_COMM_REGISTER_CLASS * i_recov,
+                                    SCAN_COMM_REGISTER_CLASS * i_special,
+                                    SCAN_COMM_REGISTER_CLASS * i_proccs);
 
   /**
    * @brief Get a PrdfConstantRegister

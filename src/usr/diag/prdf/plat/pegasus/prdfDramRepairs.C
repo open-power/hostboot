@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -255,8 +255,6 @@ bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
     bool o_calloutMade  = false;
     bool analysisErrors = false;
 
-    errlHndl_t errl = NULL; // Initially NULL, will create if needed.
-
     for ( std::vector<CenRank>::const_iterator rank = i_ranks.begin();
           rank != i_ranks.end(); rank++ )
     {
@@ -274,9 +272,6 @@ bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
             continue; // skip this rank
         }
     }
-
-    // Commit the error log, if needed.
-    commitErrl( errl, i_mba );
 
     // Commit an additional error log indicating something failed in the
     // analysis, if needed.

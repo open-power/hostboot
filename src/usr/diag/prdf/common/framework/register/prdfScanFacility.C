@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -161,12 +161,12 @@ SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetOrRegister(
 //-----------------------------------------------------------------------------
 
 SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetAttnTypeRegister(
-                                            SCAN_COMM_REGISTER_CLASS & i_check,
-                                            SCAN_COMM_REGISTER_CLASS & i_recov,
-                                            SCAN_COMM_REGISTER_CLASS & i_special,
-                                            SCAN_COMM_REGISTER_CLASS & i_proccs )
+                                           SCAN_COMM_REGISTER_CLASS * i_check,
+                                           SCAN_COMM_REGISTER_CLASS * i_recov,
+                                           SCAN_COMM_REGISTER_CLASS * i_special,
+                                           SCAN_COMM_REGISTER_CLASS * i_proccs )
 {
-  AttnTypeRegister r(i_check,i_recov,i_special,i_proccs);
+  AttnTypeRegister r(*i_check, *i_recov, *i_special, *i_proccs);
   return iv_attnRegFw.get(r);
 }
 
