@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.5 2013/10/31 20:41:25 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.6 2014/03/11 03:07:42 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -37,6 +37,7 @@
 //   1.4   | 10/22/13 | gollub  | Keep maint ECC errors masked, since PRD intends
 //         |          |         | to use cmd complete attention instead.
 //   1.5   | 10/31/13 | gollub  | For DD1 use MBSPA[8], for DD2 using MBSPA[0].
+//   1.6   | 10/03/14 | gollub  | Unmkask MBS_FIR_REG[15]: dir_ce for DD2 only
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -61,7 +62,7 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
                                            
 {
 
-    FAPI_INF("ENTER mss_unmask_inband_errors()"); 
+    FAPI_INF("ENTER mss_unmask_inband_errors()");
     
     fapi::ReturnCode l_rc;
     uint32_t l_ecmd_rc = 0;            
@@ -180,7 +181,8 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbs_fir_action1.setBit(14);
     l_ecmd_rc |= l_mbs_fir_mask_or.setBit(14);
 
-    // 15    dir_ce                 recoverable         mask (until unmask_fetch_errors)
+    // 15    dir_ce                 recoverable    DD1: mask (forever)
+    // 15    dir_ce                 recoverable    DD2: mask (until unmask_fetch_errors)
     l_ecmd_rc |= l_mbs_fir_action0.clearBit(15);            
     l_ecmd_rc |= l_mbs_fir_action1.setBit(15);
     l_ecmd_rc |= l_mbs_fir_mask_or.setBit(15);
@@ -2402,6 +2404,17 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     ecmdDataBufferBase l_mbs_fir_mask(64);
     ecmdDataBufferBase l_mbs_fir_mask_and(64);
     
+    uint8_t l_dd2_fir_bit_defn_changes = 0;
+
+    l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES, &i_target, l_dd2_fir_bit_defn_changes);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES");
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);                
+        return l_rc;
+    }    
+    
     // Read mask 
     l_rc = fapiGetScom_w_retry(i_target, MBS_FIR_MASK_REG_0x02011403, l_mbs_fir_mask); 
     if(l_rc)
@@ -2438,9 +2451,16 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     // 13    cache_co_ue            recoverable         unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(13);
 
-    // 15    dir_ce                 recoverable         unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(15);
-
+    // 15    dir_ce          
+    if (l_dd2_fir_bit_defn_changes)
+    {
+        // NOTE: SW248520: Known DD1 problem - higher temp causes
+        // L4 Dir CEs. Want to ignore. Unmask for DD2 only
+        
+        //                          recoverable         unmask        
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(15);
+    }
+    
     // 16    dir_ue                 channel checkstop   unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(16);
 
