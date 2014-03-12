@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.21 2013/12/10 21:25:35 baysah Exp $
+/// $Id: proc_cen_framelock.C,v 1.22 2014/03/05 22:26:38 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -37,8 +37,11 @@
 
 // Change Log
 // Version | who      |Date     | Comment
+//   1.22  | baysah   |05-MAR-14| Fix for Defect SW248451 is to change replay buffer
+//                                overrun to checkstop in MCI
 //   1.20  | bellows  |25-NOV-13| Changed include to use <> instead of "" for hostboot
 //   1.19  | bellows  |08-NOV-13| Added ATTR_MSS_INIT_STATE to track IPL states
+
 
 //------------------------------------------------------------------------------
 // Includes
@@ -1910,7 +1913,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
     //l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
     l_ecmdRc |= mci_data.setBit(20);    //Scom Register parity error
     l_ecmdRc |= mci_data.setBit(22);    //mcicfgq parity error
-    l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
+   // l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
     l_ecmdRc |= mci_data.setBit(24);    //MCIFIRQ_MCS_RECOVERABLE_ERROR
     l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PowerBus
     l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
