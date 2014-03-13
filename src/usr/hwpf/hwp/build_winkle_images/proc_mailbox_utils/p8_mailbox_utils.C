@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: p8_mailbox_utils.C,v 1.1 2013/09/18 17:28:20 dcrowell Exp $
+// $Id: p8_mailbox_utils.C,v 1.3 2014/02/26 04:58:11 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -403,28 +403,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint3
         }
 
         uint32_t l_dpll_divider = 4;
-        /*
-        // Future todo -- Look to have these as attribute
-        unit8_t l_dpll_init_divide;
-        l_fapirc =  FAPI_ATTR_GET(  ATTR_PROC_DPLL_DIV124, i_target, l_dpll_init_divide );
-        if  (l_fapirc )
-        {
-            FAPI_ERR("fapiGetAttribute of ATTR_PROC_DPLL_DIV124 failed");
-            break;
-        }
-
-        unit8_t l_dpll_out_divide;
-        l_fapirc =  FAPI_ATTR_GET(  ATTR_PROC_DPLL_OUT124, i_target, l_dpll_out_divide );
-        if  (l_fapirc )
-        {
-            FAPI_ERR("fapiGetAttribute of ATTR_PROC_DPLL_OUT124 failed");
-            break;
-        }
-
-        l_dpll_divider = (uint32_t)(l_dpll_init_divide * l_dpll_out_divide);
-        */
-
-        FAPI_DBG("DPLL divider HARDCODED to %01x", l_dpll_divider);
+        FAPI_DBG("Setting DPLL divider to %01x", l_dpll_divider);
         l_fapirc = FAPI_ATTR_SET(ATTR_PROC_DPLL_DIVIDER, &i_target, l_dpll_divider );
         if  (l_fapirc )
         {
@@ -700,27 +679,25 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox3( const fapi::Target &i_target, uint3
 //          note: VPD is in 5mV increments
 //  -current recommended default    =   0x4a
 //  24:27 -> Unused                 =   0x00
-//  28     -> Device ID mode selection (0=node ID, 1=chip ID)
-//                                  =   0b1
-//  29:31 -> Fabric node ID         =   Node
-//
+//  28    -> Fabric wrap test       =   MNFG wrap test attribute
+//  29:31 -> Fabric node ID         =   Node ID attribute
 //
 // parameters: i_target           Reference to the chip target
 //             o_set_data         The 32-bit mailbox value
-//             i_includeNode      True if the value should include node information
+//             i_write_fbc_data   True if the mailbox value should include fabric wrap
+//                                test/node ID information
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint32_t & o_set_data,
-                                               bool i_includeNode )
+                                             bool i_write_fbc_data)
 {
     fapi::ReturnCode l_fapirc;
 
     const uint32_t  BOOT_VOLTAGE_INFO_BIT_POSITION   =   0;
     const uint32_t  BOOT_VOLTAGE_INFO_BIT_LENGTH     =   32;
-    const uint32_t  DEVICE_ID_CONTENT_BIT  = 28;
+    const uint32_t  WRAP_TEST_BIT  = 28;
     const uint32_t  NODE_ID_BIT_POSITION   = 29;
     const uint32_t  NODE_ID_BIT_LENGTH     = 3;
-
 
     do
     {
@@ -776,15 +753,28 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
         FAPI_INF("Boot Voltage:      VDD = %1.2f mV, VCS = %1.2f mV",
                    (float)l_vdd_mv / 100, (float)l_vcs_mv / 100);
 
-        if (!i_includeNode)
+        if (i_write_fbc_data)
         {
-            //Make sure we DON'T set NODE ID
-            o_set_data &= ~( 1 << (sizeof(o_set_data)*8 - DEVICE_ID_CONTENT_BIT - 1));
-        }
-        else
-        {
+            // set wrap test flag (FSP boot)
+            fapi::ATTR_MNFG_FLAGS_Type l_mnfg_flags = 0;
+            l_fapirc =  FAPI_ATTR_GET(  ATTR_MNFG_FLAGS,
+                                        NULL,
+                                        l_mnfg_flags );
+            if  (l_fapirc )
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_MNFG_FLAGS failed");
+                break;
+            }
+            FAPI_INF(   "ATTR_MNFG_FLAGS => %016llX", l_mnfg_flags);
 
-            //Also set node ID (to save Brazos)
+            if ((l_mnfg_flags & fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ==
+                fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG)
+            {
+                FAPI_INF("ATTR_MNFG_FLAGS => %016llX", l_mnfg_flags);
+                o_set_data |= 1 << (sizeof(o_set_data)*8 - WRAP_TEST_BIT - 1);
+            }
+
+            // set node ID (FSP boot)
             fapi::ATTR_FABRIC_NODE_ID_Type l_node_id =   0 ;
             l_fapirc =  FAPI_ATTR_GET(  ATTR_FABRIC_NODE_ID,
                                         &i_target,
@@ -796,8 +786,6 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
             }
             FAPI_INF(   "ATTR_FABRIC_NODE_ID => %d", l_node_id);
 
-
-            o_set_data |= 1 << (sizeof(o_set_data)*8 - DEVICE_ID_CONTENT_BIT - 1);
             o_set_data |= l_node_id << (sizeof(o_set_data)*8 -
                                         NODE_ID_BIT_POSITION -
                                         NODE_ID_BIT_LENGTH    );

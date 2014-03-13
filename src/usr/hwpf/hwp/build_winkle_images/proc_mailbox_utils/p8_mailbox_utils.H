@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: p8_mailbox_utils.H,v 1.1 2013/09/18 17:28:30 dcrowell Exp $
+// $Id: p8_mailbox_utils.H,v 1.2 2014/02/26 04:58:11 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -113,6 +113,8 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint3
 //  - The MPI flag will be evaluated by proc_sbe_ipl_seeprom to distinguish
 //    between a normal and a memory preserving IPL
 //  - attribute ATTR_IS_MPIPL will indicate MPIPL or not.
+//  Bit 1 in this register indicates standalone/FSPless mode
+//  - 0b0 = FSP present, 0b1 = standalone/FSPless mode
 //  FSP provides a MPI (Memory Preserving IPL) flag and settings for the I2C
 //  master bus speed calculation
 //  Bits    | 0     |   1 2 3   |   4..7    8..11   12..15                    |
@@ -161,18 +163,17 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox3( const fapi::Target &i_target, uint3
 //          note: VPD is in 5mV increments
 //  -current recommended default    =   0x4a
 //  24:27 -> Unused                 =   0x00
-//  28     -> Device ID mode selection (0=node ID, 1=chip ID)
-//                                  =   0b1
-//  29:31 -> Fabric node ID         =   Node
-//
+//  28    -> Fabric wrap test       =   MNFG wrap test attribute
+//  29:31 -> Fabric node ID         =   Node ID attribute
 //
 // parameters: i_target           Reference to the chip target
 //             o_set_data         The 32-bit mailbox value
-//             i_includeNode      True if the value should include node information
+//             i_write_fbc_data   True if the mailbox value should include fabric wrap
+//                                test/node ID information                             
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint32_t & o_set_data,
-                                               bool i_includeNode );
+                                             bool i_write_fbc_data);
 
 } // extern "C"
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.66 2013/12/03 05:20:34 cmolsen Exp $
+// $Id: p8_xip_customize.C,v 1.67 2014/02/26 04:58:11 jmcgill Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -906,7 +906,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     }
 
     //MBOX 3 (Note: utils functions number them 1-4, not 0-3)
-    //Don't want to include the node info in the SBE image, because that would cause Stradale problems
+    //Don't want to include the fabric configuration info in the SBE image,
+    //because that would cause Stradale problems
     rc = p8_mailbox_utils_get_mbox4(i_target, mboxValue, false);
     if( rc ) {
       FAPI_ERR("Getting the MBOX 3 value failed, so returning the error");

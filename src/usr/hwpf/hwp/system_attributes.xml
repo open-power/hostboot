@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: system_attributes.xml,v 1.14 2013/09/06 20:04:16 dcrowell Exp $ -->
+<!-- $Id: system_attributes.xml,v 1.18 2014/02/26 21:29:06 mjjones Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with the system.
@@ -66,7 +66,7 @@
         MNFG_AVP_ENABLE                     = 0x0000000000000002,
         MNFG_HDAT_AVP_ENABLE                = 0x0000000000000004,
         MNFG_SRC_TERM                       = 0x0000000000000008,
-        MNFG_IPL_MEMORY_CE_CHECKING         = 0x0000000000000010,
+        MNFG_IPL_MEMORY_CE_CHECKINGE        = 0x0000000000000010,
         MNFG_FAST_BACKGROUND_SCRUB          = 0x0000000000000020,
         MNFG_TEST_DRAM_REPAIRS              = 0x0000000000000040,
         MNFG_DISABLE_DRAM_REPAIRS           = 0x0000000000000080,
@@ -250,7 +250,7 @@
     <valueType>uint32</valueType>
     <enum>
         RL0 = 0x000,
-        RL100 = 0x100
+        RL100 = 0x100  
     </enum>
     <platInit/>
   </attribute>
@@ -290,6 +290,31 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MULTI_SCOM_BUFFER_MAX_SIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Defines maximum size of data buffer to allocate for optimal
+      performance with platform implementation of fapiMultiScom API.
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        MULTI_SCOM_BUFFER_SIZE_1KB   = 0x0000000000000400,
+        MULTI_SCOM_BUFFER_SIZE_2KB   = 0x0000000000000800,
+        MULTI_SCOM_BUFFER_SIZE_4KB   = 0x0000000000001000,
+        MULTI_SCOM_BUFFER_SIZE_8KB   = 0x0000000000002000,
+        MULTI_SCOM_BUFFER_SIZE_16KB  = 0x0000000000004000,
+        MULTI_SCOM_BUFFER_SIZE_32KB  = 0x0000000000008000,
+        MULTI_SCOM_BUFFER_SIZE_64KB  = 0x0000000000010000,
+        MULTI_SCOM_BUFFER_SIZE_128KB = 0x0000000000020000,
+        MULTI_SCOM_BUFFER_SIZE_256KB = 0x0000000000040000,
+        MULTI_SCOM_BUFFER_SIZE_512KB = 0x0000000000080000,
+        MULTI_SCOM_BUFFER_SIZE_1MB   = 0x0000000000100000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_RECONFIGURE_LOOP</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -300,7 +325,6 @@
         DECONFIGURE      = 0x1,
         BAD_DQ_BIT_SET   = 0x2
     </enum>
-    <platInit/>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->

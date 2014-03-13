@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_mailbox_utils_errors.xml,v 1.1 2013/09/18 19:54:48 dcrowell Exp $ -->
+<!-- $Id: p8_mailbox_utils_errors.xml,v 1.2 2014/02/28 15:27:47 jmcgill Exp $ -->
 <!-- Error definitions for proc_mailbox_utils procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -31,6 +31,10 @@
       The ATTR_FREQ_PROC_REFCLOCK specified a zero for proc refclk, which is invalid
     </description>
     <ffdc>REF_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -44,5 +48,9 @@
     <ffdc>DPLL_DIV</ffdc>
     <ffdc>FREQ_MULT</ffdc>
     <ffdc>MAX_BITS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>
