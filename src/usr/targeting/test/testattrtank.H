@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -69,7 +69,8 @@ public:
             l_tank.clearNonConstAttribute(ATTR_SCRATCH_UINT64_1,
                                           TYPE_SYS,
                                           AttributeTank::ATTR_POS_NA,
-                                          AttributeTank::ATTR_UNIT_POS_NA);
+                                          AttributeTank::ATTR_UNIT_POS_NA,
+                                          AttributeTank::ATTR_NODE_NA);
 
             // Try to get an attribute from empty tank
             uint64_t l_val = 0;
@@ -77,6 +78,7 @@ public:
                                     TYPE_SYS,
                                     AttributeTank::ATTR_POS_NA,
                                     AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
                                     &l_val))
             {
                 TS_FAIL("tankTest1: Error. Got attr from empty tank (3)");
@@ -115,6 +117,7 @@ public:
                                 TYPE_SYS,
                                 AttributeTank::ATTR_POS_NA,
                                 AttributeTank::ATTR_UNIT_POS_NA,
+                                AttributeTank::ATTR_NODE_NA,
                                 0, sizeof(l_val), &l_val);
 
             // Check that attributes exist in the tank
@@ -142,6 +145,7 @@ public:
                                     TYPE_SYS,
                                     AttributeTank::ATTR_POS_NA,
                                     AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
                                     &l_val))
             {
                 TS_FAIL("tankTest2: Error. Got wrong attr from tank (4)");
@@ -154,6 +158,7 @@ public:
                                     TYPE_PROC,
                                     AttributeTank::ATTR_POS_NA,
                                     AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
                                     &l_val))
             {
                 TS_FAIL("tankTest2: Error. Got wrong attr from tank (5)");
@@ -166,6 +171,7 @@ public:
                                       TYPE_SYS,
                                       AttributeTank::ATTR_POS_NA,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
                 TS_FAIL("tankTest2: Error. Did not get attr from tank (6)");
@@ -174,9 +180,8 @@ public:
 
             if (l_val != 4)
             {
-                TS_FAIL(
-                    "tankTest2: Error. Got bad value (0x%llx) from tank (7)",
-                    l_val);
+                TS_FAIL("tankTest2: Error. Got bad value (0x%llx) from tank (7)",
+                        l_val);
                 break;
             }
 
@@ -187,6 +192,7 @@ public:
                                       TYPE_SYS,
                                       1,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
                 TS_FAIL("tankTest2: Error. Did not get attr from tank (8)");
@@ -208,6 +214,7 @@ public:
                                       TYPE_SYS,
                                       AttributeTank::ATTR_POS_NA,
                                       2,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
                 TS_FAIL("tankTest2: Error. Did not get attr from tank (10)");
@@ -221,6 +228,28 @@ public:
                 break;
             }
 
+            // Get the attribute from the tank using a real node-number
+            // This should succeed because attribute in tank matches all node
+            // numbers
+            l_val = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                      TYPE_SYS,
+                                      AttributeTank::ATTR_POS_NA,
+                                      AttributeTank::ATTR_UNIT_POS_NA,
+                                      1,
+                                      &l_val)))
+            {
+                TS_FAIL("tankTest2: Error. Did not get attr from tank (12)");
+                break;
+            }
+
+            if (l_val != 4)
+            {
+                TS_FAIL("tankTest2: Error. Got bad value (0x%llx) from tank (13)",
+                        l_val);
+                break;
+            }
+
             // Serialize all attributes from the tank
             std::vector<AttributeTank::AttributeSerializedChunk> l_attributes;
             l_tank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
@@ -228,18 +257,16 @@ public:
 
             if (l_attributes.size() != 1)
             {
-                TS_FAIL(
-                    "tankTest2: Error. Got wrong number of chunks (%d) from tank (12)",
-                    l_attributes.size());
+                TS_FAIL("tankTest2: Error. Got wrong number of chunks (%d) from tank (14)",
+                        l_attributes.size());
                 break;
             }
 
             if (l_attributes[0].iv_size !=
                 (sizeof(AttributeTank::AttributeHeader) + sizeof(l_val)))
             {
-                TS_FAIL(
-                    "tankTest2: Error. Got wrong size (%d) of attrs from tank (13)",
-                    l_attributes[0].iv_size);
+                TS_FAIL("tankTest2: Error. Got wrong size (%d) of attrs from tank (15)",
+                        l_attributes[0].iv_size);
                 break;
             }
 
@@ -249,9 +276,8 @@ public:
 
             if (*l_pVal != 4)
             {
-                TS_FAIL(
-                    "tankTest2: Error. Got bad value (0x%016llx) from tank (14)",
-                    *l_pVal);
+                TS_FAIL("tankTest2: Error. Got bad value (0x%016llx) from tank (16)",
+                        *l_pVal);
                 break;
             }
 
@@ -263,9 +289,10 @@ public:
                                     TYPE_SYS,
                                     AttributeTank::ATTR_POS_NA,
                                     AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
                                     &l_val))
             {
-                TS_FAIL("tankTest2: Error. Got value from empty tank (15)");
+                TS_FAIL("tankTest2: Error. Got value from empty tank (17)");
                 break;
             }
 
@@ -278,17 +305,17 @@ public:
                                       TYPE_SYS,
                                       AttributeTank::ATTR_POS_NA,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
-                TS_FAIL("tankTest2: Error. Did not get attr from tank (16)");
+                TS_FAIL("tankTest2: Error. Did not get attr from tank (18)");
                 break;
             }
 
             if (l_val != 4)
             {
-                TS_FAIL(
-                    "tankTest2: Error. Got bad value (0x%llx) from tank (17)",
-                    l_val);
+                TS_FAIL("tankTest2: Error. Got bad value (0x%llx) from tank (19)",
+                        l_val);
                 break;
             }
 
@@ -317,6 +344,7 @@ public:
                                 TYPE_PROC,
                                 1,
                                 AttributeTank::ATTR_UNIT_POS_NA,
+                                AttributeTank::ATTR_NODE_NA,
                                 0, sizeof(l_val), &l_val);
 
             // Add ATTR_SCRATCH_UINT32_1 as an MBA attribute to the tank
@@ -325,6 +353,7 @@ public:
                                 TYPE_MBA,
                                 1,
                                 2,
+                                3,
                                 0, sizeof(l_val2), &l_val2);
 
             // Get the first attribute from the tank
@@ -333,6 +362,7 @@ public:
                                       TYPE_PROC,
                                       1,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
                 TS_FAIL("tankTest3: Error. Did not get attr from tank (1)");
@@ -341,9 +371,8 @@ public:
 
             if (l_val != 4)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%016llx) from tank (2)",
-                    l_val);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%016llx) from tank (2)",
+                        l_val);
                 break;
             }
 
@@ -353,6 +382,7 @@ public:
                                     TYPE_PROC,
                                     2,
                                     AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
                                     &l_val))
             {
                 TS_FAIL("tankTest3: Error. Got wrong attr from tank (3)");
@@ -365,6 +395,7 @@ public:
                                       TYPE_MBA,
                                       1,
                                       2,
+                                      3,
                                       &l_val2)))
             {
                 TS_FAIL("tankTest3: Error. Did not get attr from tank (4)");
@@ -373,9 +404,8 @@ public:
 
             if (l_val2 != 5)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%llx) from tank (5)",
-                    l_val);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%llx) from tank (5)",
+                        l_val);
                 break;
             }
 
@@ -386,9 +416,24 @@ public:
                                     TYPE_MBA,
                                     1,
                                     3,
+                                    3,
                                     &l_val2))
             {
                 TS_FAIL("tankTest3: Error. Got wrong attr from tank (6)");
+                break;
+            }
+
+            // Try to get the second attribute from the tank with the wrong
+            // node number
+            l_val2 = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                    TYPE_MBA,
+                                    1,
+                                    2,
+                                    4,
+                                    &l_val2))
+            {
+                TS_FAIL("tankTest3: Error. Got wrong attr from tank (7)");
                 break;
             }
 
@@ -399,9 +444,8 @@ public:
 
             if (l_attributes.size() != 1)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got wrong number of chunks (%d) from tank (7)",
-                    l_attributes.size());
+                TS_FAIL("tankTest3: Error. Got wrong number of chunks (%d) from tank (8)",
+                        l_attributes.size());
                 break;
             }
 
@@ -409,9 +453,8 @@ public:
                 (sizeof(AttributeTank::AttributeHeader) + sizeof(l_val) +
                  sizeof(AttributeTank::AttributeHeader) + sizeof(l_val2)) )
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got wrong size (%d) of attrs from tank (8)",
-                    l_attributes[0].iv_size);
+                TS_FAIL("tankTest3: Error. Got wrong size (%d) of attrs from tank (9)",
+                        l_attributes[0].iv_size);
                 break;
             }
 
@@ -421,9 +464,8 @@ public:
 
             if (*l_pVal != 4)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%016llx) from tank (9)",
-                    *l_pVal);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%016llx) from tank (10)",
+                        *l_pVal);
                 break;
             }
 
@@ -434,9 +476,8 @@ public:
 
             if (*l_pVal2 != 5)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%08x) from tank (10)",
-                    *l_pVal2);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%08x) from tank (11)",
+                        *l_pVal2);
                 break;
             }
 
@@ -452,17 +493,17 @@ public:
                                       TYPE_PROC,
                                       1,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
-                TS_FAIL("tankTest3: Error. Did not get attr from tank (11)");
+                TS_FAIL("tankTest3: Error. Did not get attr from tank (12)");
                 break;
             }
 
             if (l_val != 4)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%016llx) from tank (12)",
-                    l_val);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%016llx) from tank (13)",
+                        l_val);
                 break;
             }
 
@@ -472,17 +513,17 @@ public:
                                       TYPE_MBA,
                                       1,
                                       2,
+                                      3,
                                       &l_val2)))
             {
-                TS_FAIL("tankTest3: Error. Did not get attr from tank (13)");
+                TS_FAIL("tankTest3: Error. Did not get attr from tank (14)");
                 break;
             }
 
             if (l_val2 != 5)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%llx) from tank (14)",
-                    l_val);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%llx) from tank (15)",
+                        l_val);
                 break;
             }
 
@@ -499,18 +540,16 @@ public:
 
             if (l_attributes.size() != 2)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got wrong number of chunks (%d) from tank (15)",
-                    l_attributes.size());
+                TS_FAIL("tankTest3: Error. Got wrong number of chunks (%d) from tank (16)",
+                        l_attributes.size());
                 break;
             }
 
             if (l_attributes[0].iv_size !=
                 (sizeof(AttributeTank::AttributeHeader) + sizeof(l_val)))
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got wrong size (%d) of attrs from tank (16)",
-                    l_attributes[0].iv_size);
+                TS_FAIL("tankTest3: Error. Got wrong size (%d) of attrs from tank (17)",
+                        l_attributes[0].iv_size);
                 break;
             }
 
@@ -520,18 +559,16 @@ public:
 
             if (*l_pVal != 4)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%016llx) from tank (17)",
-                    *l_pVal);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%016llx) from tank (18)",
+                        *l_pVal);
                 break;
             }
 
             if (l_attributes[1].iv_size !=
                 (sizeof(AttributeTank::AttributeHeader) + sizeof(l_val2)))
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got wrong size (%d) of attrs from tank (18)",
-                    l_attributes[1].iv_size);
+                TS_FAIL("tankTest3: Error. Got wrong size (%d) of attrs from tank (19)",
+                        l_attributes[1].iv_size);
                 break;
             }
 
@@ -541,9 +578,8 @@ public:
 
             if (*l_pVal2 != 5)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%016llx) from tank (19)",
-                    *l_pVal);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%016llx) from tank (20)",
+                        *l_pVal);
                 break;
             }
 
@@ -560,17 +596,17 @@ public:
                                       TYPE_PROC,
                                       1,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
                                       &l_val)))
             {
-                TS_FAIL("tankTest3: Error. Did not get attr from tank (20)");
+                TS_FAIL("tankTest3: Error. Did not get attr from tank (21)");
                 break;
             }
 
             if (l_val != 4)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%016llx) from tank (21)",
-                    l_val);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%016llx) from tank (22)",
+                        l_val);
                 break;
             }
 
@@ -580,17 +616,17 @@ public:
                                       TYPE_MBA,
                                       1,
                                       2,
+                                      3,
                                       &l_val2)))
             {
-                TS_FAIL("tankTest3: Error. Did not get attr from tank (22)");
+                TS_FAIL("tankTest3: Error. Did not get attr from tank (23)");
                 break;
             }
 
             if (l_val2 != 5)
             {
-                TS_FAIL(
-                    "tankTest3: Error. Got bad value (0x%llx) from tank (23)",
-                    l_val);
+                TS_FAIL("tankTest3: Error. Got bad value (0x%llx) from tank (24)",
+                        l_val);
                 break;
             }
 
@@ -621,6 +657,7 @@ public:
                                 TYPE_SYS,
                                 AttributeTank::ATTR_POS_NA,
                                 AttributeTank::ATTR_UNIT_POS_NA,
+                                AttributeTank::ATTR_NODE_NA,
                                 AttributeTank::ATTR_FLAG_CONST,
                                 sizeof(l_val), &l_val);
 
@@ -628,7 +665,8 @@ public:
             l_tank.clearNonConstAttribute(ATTR_SCRATCH_UINT8_1,
                                           TYPE_SYS,
                                           AttributeTank::ATTR_POS_NA,
-                                          AttributeTank::ATTR_UNIT_POS_NA);
+                                          AttributeTank::ATTR_UNIT_POS_NA,
+                                          AttributeTank::ATTR_NODE_NA);
 
             // Check that tank is not-empty
             if (!l_tank.attributesExist())
@@ -669,6 +707,7 @@ public:
                                 TYPE_SYS,
                                 AttributeTank::ATTR_POS_NA,
                                 AttributeTank::ATTR_UNIT_POS_NA,
+                                1,
                                 0, sizeof(l_val), &l_val);
 
             l_val = 5;
@@ -676,6 +715,7 @@ public:
                                 TYPE_SYS,
                                 AttributeTank::ATTR_POS_NA,
                                 AttributeTank::ATTR_UNIT_POS_NA,
+                                1,
                                 0, sizeof(l_val), &l_val);
 
             // Get the attribute from the tank
@@ -684,6 +724,7 @@ public:
                                       TYPE_SYS,
                                       AttributeTank::ATTR_POS_NA,
                                       AttributeTank::ATTR_UNIT_POS_NA,
+                                      1,
                                       &l_val)))
             {
                 TS_FAIL("tankTest5: Error. Did not get attr from tank (1)");
@@ -692,9 +733,8 @@ public:
 
             if (l_val != 5)
             {
-                TS_FAIL(
-                    "tankTest5: Error. Got bad value (0x%llx) from tank (2)",
-                    l_val);
+                TS_FAIL("tankTest5: Error. Got bad value (0x%llx) from tank (2)",
+                        l_val);
                 break;
             }
 
@@ -705,18 +745,16 @@ public:
 
             if (l_attributes.size() != 1)
             {
-                TS_FAIL(
-                    "tankTest5: Error. Got wrong number of chunks (%d) from tank (3)",
-                    l_attributes.size());
+                TS_FAIL("tankTest5: Error. Got wrong number of chunks (%d) from tank (3)",
+                        l_attributes.size());
                 break;
             }
 
             if (l_attributes[0].iv_size !=
                 (sizeof(AttributeTank::AttributeHeader) + sizeof(l_val)))
             {
-                TS_FAIL(
-                    "tankTest5: Error. Got wrong size (%d) of attrs from tank (4)",
-                    l_attributes[0].iv_size);
+                TS_FAIL("tankTest5: Error. Got wrong size (%d) of attrs from tank (4)",
+                        l_attributes[0].iv_size);
                 break;
             }
 
@@ -726,9 +764,8 @@ public:
 
             if (*l_pVal != 5)
             {
-                TS_FAIL(
-                    "tankTest5: Error. Got bad value (0x%016llx) from tank (5)",
-                    *l_pVal);
+                TS_FAIL("tankTest5: Error. Got bad value (0x%016llx) from tank (5)",
+                        *l_pVal);
                 break;
             }
             delete [] l_attributes[0].iv_pAttributes;
@@ -739,6 +776,372 @@ public:
         TS_TRACE("tankTest5 complete" );
     }
 
+    //**************************************************************************
+    // tankTest6. Test AttributeTank clearAllAttributes with node filter
+    //**************************************************************************
+    void test6(void)
+    {
+        do
+        {
+            // Create a local AttributeTank
+            AttributeTank l_tank;
+
+            // Add an attribute for NODE_NA to the tank
+            uint64_t l_val = 4;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT64_1,
+                                TYPE_PROC,
+                                1,
+                                AttributeTank::ATTR_UNIT_POS_NA,
+                                AttributeTank::ATTR_NODE_NA,
+                                0, sizeof(l_val), &l_val);
+
+            // Add an attribute for node 3 to the tank
+            uint32_t l_val2 = 5;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT32_1,
+                                TYPE_MBA,
+                                1,
+                                2,
+                                3,
+                                0, sizeof(l_val2), &l_val2);
+
+            // Clear NOT_ALL_NODES attributes
+            l_tank.clearAllAttributes(AttributeTank::NODE_FILTER_NOT_ALL_NODES);
+
+            // Get the NODE_NA attribute from the tank
+            l_val = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                      TYPE_PROC,
+                                      1,
+                                      AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
+                                      &l_val)))
+            {
+                TS_FAIL("tankTest6: Error. Did not get attr from tank (1)");
+                break;
+            }
+
+            if (l_val != 4)
+            {
+                TS_FAIL("tankTest6: Error. Got bad value (0x%llx) from tank (2)",
+                        l_val);
+                break;
+            }
+
+            // Try to get the node 3 attribute from the tank (should be cleared)
+            l_val2 = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                    TYPE_MBA,
+                                    1,
+                                    2,
+                                    3,
+                                    &l_val2))
+            {
+                TS_FAIL("tankTest6: Error. Got cleared attr from tank (3)");
+                break;
+            }
+
+            // Add the node 3 attribute back to the tank
+            l_val2 = 5;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT32_1,
+                                TYPE_MBA,
+                                1,
+                                2,
+                                3,
+                                0, sizeof(l_val2), &l_val2);
+
+            // Clear SPECIFIC_NODE_AND_ALL attributes for node 6
+            l_tank.clearAllAttributes(
+                AttributeTank::NODE_FILTER_SPECIFIC_NODE_AND_ALL, 6);
+
+            // Try to get the NODE_NA attribute from the tank (should be
+            // cleared)
+            l_val = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                    TYPE_PROC,
+                                    1,
+                                    AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
+                                    &l_val))
+            {
+                TS_FAIL("tankTest6: Error. Got cleared attr from tank (4)");
+                break;
+            }
+
+            // Get the node 3 attribute from the tank
+            l_val2 = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                      TYPE_MBA,
+                                      1,
+                                      2,
+                                      3,
+                                      &l_val2)))
+            {
+                TS_FAIL("tankTest6: Error. Did not get attr from tank (5)");
+                break;
+            }
+
+            if (l_val2 != 5)
+            {
+                TS_FAIL("tankTest6: Error. Got bad value (0x%llx) from tank (6)",
+                        l_val2);
+                break;
+            }
+
+            // Add the NODE_NA attribute back to the tank
+            l_val = 4;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT64_1,
+                                TYPE_PROC,
+                                1,
+                                AttributeTank::ATTR_UNIT_POS_NA,
+                                AttributeTank::ATTR_NODE_NA,
+                                0, sizeof(l_val), &l_val);
+
+            // Clear SPECIFIC_NODE_AND_ALL attributes for node 3
+            l_tank.clearAllAttributes(
+                AttributeTank::NODE_FILTER_SPECIFIC_NODE_AND_ALL, 3);
+
+            // Try to get the NODE_NA attribute from the tank (should be
+            // cleared)
+            l_val = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                    TYPE_PROC,
+                                    1,
+                                    AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
+                                    &l_val))
+            {
+                TS_FAIL("tankTest6: Error. Got cleared attr from tank (7)");
+                break;
+            }
+
+            // Try to get the node 3 attribute from the tank (should be cleared)
+            l_val2 = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                    TYPE_MBA,
+                                    1,
+                                    2,
+                                    3,
+                                    &l_val2))
+            {
+                TS_FAIL("tankTest6: Error. Got cleared attr from tank (8)");
+                break;
+            }
+
+            // Add the NODE_NA attribute back to the tank
+            l_val = 4;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT64_1,
+                                TYPE_PROC,
+                                1,
+                                AttributeTank::ATTR_UNIT_POS_NA,
+                                AttributeTank::ATTR_NODE_NA,
+                                0, sizeof(l_val), &l_val);
+
+            // Add the node 3 attribute back to the tank
+            l_val2 = 5;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT32_1,
+                                TYPE_MBA,
+                                1,
+                                2,
+                                3,
+                                0, sizeof(l_val2), &l_val2);
+
+            // Clear SPECIFIC_NODE attributes for node 6
+            l_tank.clearAllAttributes(
+                AttributeTank::NODE_FILTER_SPECIFIC_NODE, 6);
+
+            // Get the NODE_NA attribute from the tank
+            l_val = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                      TYPE_PROC,
+                                      1,
+                                      AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
+                                      &l_val)))
+            {
+                TS_FAIL("tankTest6: Error. Did not get attr from tank (9)");
+                break;
+            }
+
+            if (l_val != 4)
+            {
+                TS_FAIL("tankTest6: Error. Got bad value (0x%llx) from tank (10)",
+                        l_val);
+                break;
+            }
+
+            // Get the node 3 attribute from the tank
+            l_val2 = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                      TYPE_MBA,
+                                      1,
+                                      2,
+                                      3,
+                                      &l_val2)))
+            {
+                TS_FAIL("tankTest6: Error. Did not get attr from tank (11)");
+                break;
+            }
+
+            if (l_val2 != 5)
+            {
+                TS_FAIL("tankTest6: Error. Got bad value (0x%llx) from tank (12)",
+                        l_val2);
+                break;
+            }
+
+            // Clear SPECIFIC_NODE attributes for node 3
+            l_tank.clearAllAttributes(
+                AttributeTank::NODE_FILTER_SPECIFIC_NODE, 3);
+
+            // Get the NODE_NA attribute from the tank
+            l_val = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                      TYPE_PROC,
+                                      1,
+                                      AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
+                                      &l_val)))
+            {
+                TS_FAIL("tankTest6: Error. Did not get attr from tank (13)");
+                break;
+            }
+
+            if (l_val != 4)
+            {
+                TS_FAIL("tankTest6: Error. Got bad value (0x%llx) from tank (14)",
+                        l_val);
+                break;
+            }
+
+            // Try to get the node 3 attribute from the tank (should be cleared)
+            l_val2 = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                    TYPE_MBA,
+                                    1,
+                                    2,
+                                    3,
+                                    &l_val2))
+            {
+                TS_FAIL("tankTest6: Error. Got cleared attr from tank (15)");
+                break;
+            }
+
+        } while (0);
+
+        TS_TRACE("tankTest6 complete" );
+    }
+
+    //**************************************************************************
+    // tankTest7. Test AttributeTank clearNonConstAttribute
+    //**************************************************************************
+    void test7(void)
+    {
+        do
+        {
+            // Create a local AttributeTank
+            AttributeTank l_tank;
+
+            // Add a const attribute for node 3 to the tank
+            uint32_t l_val2 = 5;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT32_1,
+                                TYPE_MBA,
+                                1,
+                                2,
+                                3,
+                                AttributeTank::ATTR_FLAG_CONST,
+                                sizeof(l_val2), &l_val2);
+
+            // Try to clear the attribute, it should not be cleared
+            l_tank.clearNonConstAttribute(ATTR_SCRATCH_UINT32_1,
+                                          TYPE_MBA,
+                                          1,
+                                          2,
+                                          3);
+
+            // Get the node 3 attribute from the tank
+            l_val2 = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                      TYPE_MBA,
+                                      1,
+                                      2,
+                                      3,
+                                      &l_val2)))
+            {
+                TS_FAIL("tankTest7: Error. Did not get attr from tank (1)");
+                break;
+            }
+
+            if (l_val2 != 5)
+            {
+                TS_FAIL("tankTest7: Error. Got bad value (0x%llx) from tank (2)",
+                        l_val2);
+                break;
+            }
+
+            // Clear all attributes from the tank
+            l_tank.clearAllAttributes();
+
+            // Add a non-const attribute for node 3 to the tank
+            l_val2 = 5;
+            l_tank.setAttribute(ATTR_SCRATCH_UINT32_1,
+                                TYPE_MBA,
+                                1,
+                                2,
+                                3,
+                                0,
+                                sizeof(l_val2), &l_val2);
+
+            // Try to clear the attribute with node 1, it should not be cleared
+            l_tank.clearNonConstAttribute(ATTR_SCRATCH_UINT32_1,
+                                          TYPE_MBA,
+                                          1,
+                                          2,
+                                          1);
+
+            // Get the node 3 attribute from the tank
+            l_val2 = 0;
+            if (!(l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                      TYPE_MBA,
+                                      1,
+                                      2,
+                                      3,
+                                      &l_val2)))
+            {
+                TS_FAIL("tankTest7: Error. Did not get attr from tank (3)");
+                break;
+            }
+
+            if (l_val2 != 5)
+            {
+                TS_FAIL("tankTest7: Error. Got bad value (0x%llx) from tank (4)",
+                        l_val2);
+                break;
+            }
+
+            // Clear the attribute
+            l_tank.clearNonConstAttribute(ATTR_SCRATCH_UINT32_1,
+                                          TYPE_MBA,
+                                          1,
+                                          2,
+                                          3);
+
+            // Try to get the node 3 attribute from the tank (should be cleared)
+            l_val2 = 0;
+            if (l_tank.getAttribute(ATTR_SCRATCH_UINT32_1,
+                                    TYPE_MBA,
+                                    1,
+                                    2,
+                                    3,
+                                    &l_val2))
+            {
+                TS_FAIL("tankTest7: Error. Got cleared attr from tank (5)");
+                break;
+            }
+
+        } while (0);
+
+        TS_TRACE("tankTest7 complete" );
+    }
 };
 
 #endif

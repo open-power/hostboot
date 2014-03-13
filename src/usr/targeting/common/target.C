@@ -84,27 +84,26 @@ bool Target::_tryGetAttr(
         // Check if there are any overrides for this attr ID
         if (cv_overrideTank.attributeExists(i_attr))
         {
-            // The following attributes can be used to determine the position
-            // of a target (for a unit, the position is the parent's position)
-            // Do not check for overrides for these because an infinite loop
-            // will result from recursively checking for overrides
-            if ((i_attr != ATTR_PHYS_PATH) &&
-                (i_attr != ATTR_AFFINITY_PATH) &&
-                (i_attr != ATTR_POWER_PATH))
+            // Find if there is an attribute override for this target
+            uint32_t l_type = getAttrTankTargetType();
+            uint16_t l_pos = 0;
+            uint8_t l_unitPos = 0;
+            uint8_t l_node = 0;
+            getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
+
+            TRACFCOMP(g_trac_targeting, "Checking for override for ID: 0x%08x, "
+                      "TargType: 0x%08x, Pos/Upos/Node: 0x%08x",
+                      i_attr, l_type,
+                      (static_cast<uint32_t>(l_pos) << 16) +
+                      (static_cast<uint32_t>(l_unitPos) << 8) + l_node);
+
+            l_found = cv_overrideTank.getAttribute(i_attr, l_type,
+                l_pos, l_unitPos, l_node, io_pAttrData);
+
+            if (l_found)
             {
-                // Find if there is an attribute override
-                uint32_t l_type = getAttrTankTargetType();
-                uint16_t l_pos = getAttrTankTargetPos();
-                uint8_t l_unitPos = getAttrTankTargetUnitPos();
-
-                l_found = cv_overrideTank.getAttribute(i_attr, l_type,
-                    l_pos, l_unitPos, io_pAttrData);
-
-                if (l_found)
-                {
-                    TRACFCOMP(g_trac_targeting, "Returning Override for 0x%08x",
-                              i_attr);
-                }
+                TRACFCOMP(g_trac_targeting, "Returning Override for ID: 0x%08x",
+                          i_attr);
             }
         }
     }
@@ -158,22 +157,24 @@ bool Target::_trySetAttr(
     if (unlikely(l_clearAnyNonConstOverride || l_syncAttribute))
     {
         uint32_t l_type = getAttrTankTargetType();
-        uint16_t l_pos = getAttrTankTargetPos();
-        uint8_t l_unitPos = getAttrTankTargetUnitPos();
+        uint16_t l_pos = 0;
+        uint8_t l_unitPos = 0;
+        uint8_t l_node = 0;
+        getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
 
         if (l_clearAnyNonConstOverride)
         {
             // Clear any non const override for this attribute because the
             // attribute is being written
             cv_overrideTank.clearNonConstAttribute(i_attr, l_type, l_pos,
-                l_unitPos);
+                l_unitPos, l_node);
         }
 
         if (l_syncAttribute)
         {
             // Write the attribute to the SyncAttributeTank to sync to Cronus
-            cv_syncTank.setAttribute(i_attr, l_type, l_pos, l_unitPos, 0,
-                i_size, i_pAttrData);
+            cv_syncTank.setAttribute(i_attr, l_type, l_pos, l_unitPos, l_node,
+                0, i_size, i_pAttrData);
         }
     }
 
@@ -434,85 +435,122 @@ Target* Target::getTargetFromHuid(
 //******************************************************************************
 uint32_t Target::getAttrTankTargetType() const
 {
-    // In a Targeting Attribute Tank, the Target Type is the TARGETING::TYPE
-    TARGETING::TYPE l_targetType = TYPE_NA;
-    void * l_pAttrData = NULL;
-    _getAttrPtr(ATTR_TYPE, l_pAttrData);
-    if (l_pAttrData)
+    // In a Targeting Attribute Tank, the Target Type is ATTR_TYPE
+    AttributeTraits<ATTR_TYPE>::Type l_type = TYPE_NA;
+    void * l_pAttr = NULL;
+    _getAttrPtr(ATTR_TYPE, l_pAttr);
+    if (l_pAttr)
     {
-        l_targetType = *(reinterpret_cast<TARGETING::TYPE *>(l_pAttrData));
+        l_type = *(reinterpret_cast<AttributeTraits<ATTR_TYPE>::Type *>(
+            l_pAttr));
     }
-
-    return l_targetType;
+    return l_type;
 }
 
 //******************************************************************************
-// Target::getAttrTankTargetPos()
+// Target::getAttrTankTargetPosData()
 //******************************************************************************
-uint16_t Target::getAttrTankTargetPos() const
+void Target::getAttrTankTargetPosData(uint16_t & o_pos,
+                                      uint8_t & o_unitPos,
+                                      uint8_t & o_node) const
 {
-    // In a Targeting Attribute Tank, the Position for units is the
-    // ATTR_POSITION of the parent chip, else if the target has an ATTR_POSITION
-    // then it is that else it is ATTR_POS_NA
-    AttributeTraits<ATTR_POSITION>::Type l_targetPos =
-        AttributeTank::ATTR_POS_NA;
+    o_pos = AttributeTank::ATTR_POS_NA;
+    o_unitPos = AttributeTank::ATTR_UNIT_POS_NA;
+    o_node = AttributeTank::ATTR_NODE_NA;
 
-    TARGETING::CLASS l_targetClass = CLASS_NA;
-    void * l_pAttrData = NULL;
-    _getAttrPtr(ATTR_CLASS, l_pAttrData);
-    if (l_pAttrData)
+    // Pos, UnitPos and Node are figured out from the PHYS_PATH
+    void * l_pAttr = NULL;
+    _getAttrPtr(ATTR_PHYS_PATH, l_pAttr);
+    if (l_pAttr)
     {
-        l_targetClass = *(reinterpret_cast<TARGETING::CLASS *>(l_pAttrData));
-    }
+        AttributeTraits<ATTR_PHYS_PATH>::Type & l_physPath =
+            *(reinterpret_cast<AttributeTraits<ATTR_PHYS_PATH>::Type *>(
+                l_pAttr));
 
-    if (l_targetClass == CLASS_UNIT)
-    {
-        // The position is the parent chip's position
-        const Target * l_pParent = getParentChip(this);
-
-        if (l_pParent)
+        for (uint32_t i = 0; i < l_physPath.size(); i++)
         {
-            l_pParent->_getAttrPtr(ATTR_POSITION, l_pAttrData);
-            if (l_pAttrData)
+            const EntityPath::PathElement & l_element = l_physPath[i];
+
+            if (l_element.type == TYPE_NODE)
             {
-                l_targetPos = *(reinterpret_cast
-                    <AttributeTraits<ATTR_POSITION>::Type *>(l_pAttrData));
+                o_node = l_element.instance;
             }
+            else if ((l_element.type == TYPE_PROC) ||
+                     (l_element.type == TYPE_MEMBUF) ||
+                     (l_element.type == TYPE_DIMM))
+            {
+                o_pos = l_element.instance;
+            }
+            else if ((l_element.type == TYPE_EX) ||
+                     (l_element.type == TYPE_L4) ||
+                     (l_element.type == TYPE_MCS) ||
+                     (l_element.type == TYPE_MBA) ||
+                     (l_element.type == TYPE_XBUS) ||
+                     (l_element.type == TYPE_ABUS))
+            {
+                o_unitPos = l_element.instance;
+            }
+        }
+
+        // Check that the correct values are returned
+        _getAttrPtr(ATTR_CLASS, l_pAttr);
+        if (l_pAttr)
+        {
+            AttributeTraits<ATTR_CLASS>::Type & l_class =
+                *(reinterpret_cast<AttributeTraits<ATTR_CLASS>::Type *>(
+                    l_pAttr));
+            if (l_class == TARGETING::CLASS_SYS)
+            {
+                if ((o_pos != AttributeTank::ATTR_POS_NA) ||
+                    (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                    (o_node != AttributeTank::ATTR_NODE_NA))
+                {
+                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                }
+            }
+            else if ((l_class == TARGETING::CLASS_CHIP) ||
+                     (l_class == TARGETING::CLASS_CARD) ||
+                     (l_class == TARGETING::CLASS_LOGICAL_CARD))
+            {
+                if ((o_pos == AttributeTank::ATTR_POS_NA) ||
+                    (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                    (o_node == AttributeTank::ATTR_NODE_NA))
+                {
+                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                }
+            }
+            else if (l_class == TARGETING::CLASS_UNIT)
+            {
+                if ((o_pos == AttributeTank::ATTR_POS_NA) ||
+                    (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
+                    (o_node == AttributeTank::ATTR_NODE_NA))
+                {
+                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                }
+            }
+            else if (l_class == TARGETING::CLASS_ENC)
+            {
+                if ((o_pos != AttributeTank::ATTR_POS_NA) ||
+                    (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                    (o_node == AttributeTank::ATTR_NODE_NA))
+                {
+                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                }
+            }
+            else
+            {
+                targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+            }
+        }
+        else
+        {
+            targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_CLASS);
         }
     }
     else
     {
-        // The position is this object's position
-        _getAttrPtr(ATTR_POSITION, l_pAttrData);
-        if (l_pAttrData)
-        {
-            l_targetPos = *(reinterpret_cast
-                    <AttributeTraits<ATTR_POSITION>::Type *>(l_pAttrData));
-        }
+        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_PHYS_PATH);
     }
-
-    return l_targetPos;
-}
-
-//******************************************************************************
-// Target::getAttrTankTargetUnitPos()
-//******************************************************************************
-uint8_t Target::getAttrTankTargetUnitPos() const
-{
-    // In a Targeting Attribute Tank, the Unit Position for units is
-    // ATTR_CHIP_UNIT, else it is ATTR_UNIT_POS_NA
-    AttributeTraits<ATTR_CHIP_UNIT>::Type l_targetUnitPos =
-        AttributeTank::ATTR_UNIT_POS_NA;
-
-    void * l_pAttrData = NULL;
-    _getAttrPtr(ATTR_CHIP_UNIT, l_pAttrData);
-    if (l_pAttrData)
-    {
-        l_targetUnitPos = *(reinterpret_cast
-            <AttributeTraits<ATTR_CHIP_UNIT>::Type *>(l_pAttrData));
-    }
-
-    return l_targetUnitPos;
 }
 
 //******************************************************************************
@@ -542,6 +580,16 @@ void Target::targAssert(TargAssertReason i_reason,
         TARG_ASSERT(false,
             "TARGETING::Target::_getHbMutexAttr<0x%7x>: _getAttrPtr returned NULL",
             i_ffdc);
+        break;
+    case GET_ATTR_TANK_TARGET_POS_DATA:
+        TARG_ASSERT(false,
+            "TARGETING::Target::getAttrTankTargetPosData: "
+            "Error decoding class 0x%x", i_ffdc);
+        break;
+    case GET_ATTR_TANK_TARGET_POS_DATA_ATTR:
+        TARG_ASSERT(false,
+            "TARGETING::Target::getAttrTankTargetPosData: "
+            "Error getting attr<0x%7x>)", i_ffdc);
         break;
     default:
         TARG_ASSERT(false,

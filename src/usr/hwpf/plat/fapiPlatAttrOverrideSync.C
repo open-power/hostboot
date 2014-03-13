@@ -68,16 +68,21 @@ void directOverride()
     // Apply the attribute override
     if (g_attrOverrideFapiTank)
     {
-        FAPI_IMP(
-            "directOverride: Applying direct attr override to FAPI tank (0x%08x:0x%08x:0x%04x:0x%02x)",
+        FAPI_IMP("directOverride: Applying override to FAPI tank "
+            "Id: 0x%08x, TargType: 0x%08x, Pos: 0x%04x, UPos: 0x%02x",
             g_attrOverrideHeader.iv_attrId, g_attrOverrideHeader.iv_targetType,
             g_attrOverrideHeader.iv_pos, g_attrOverrideHeader.iv_unitPos);
+        FAPI_IMP("directOverride: Applying override to FAPI tank "
+            "Node: 0x%02x, Flags: 0x%02x, Size: 0x%08x",
+            g_attrOverrideHeader.iv_node, g_attrOverrideHeader.iv_flags,
+            g_attrOverrideHeader.iv_valSize);
 
         theAttrOverrideSync().iv_overrideTank.setAttribute(
             g_attrOverrideHeader.iv_attrId,
             g_attrOverrideHeader.iv_targetType,
             g_attrOverrideHeader.iv_pos,
             g_attrOverrideHeader.iv_unitPos,
+            g_attrOverrideHeader.iv_node,
             g_attrOverrideHeader.iv_flags,
             g_attrOverrideHeader.iv_valSize,
             &g_attrOverride);
@@ -118,16 +123,21 @@ void directOverride()
                 break;
         }
 
-        FAPI_IMP(
-            "directOverride: Applying direct attr override to TARG tank (0x%08x:0x%08x:0x%04x:0x%02x)",
+        FAPI_IMP("directOverride: Applying override to TARG tank "
+            "Id: 0x%08x, TargType: 0x%08x, Pos: 0x%04x, UPos: 0x%02x",
             g_attrOverrideHeader.iv_attrId, l_targetType,
             g_attrOverrideHeader.iv_pos, g_attrOverrideHeader.iv_unitPos);
+        FAPI_IMP("directOverride: Applying override to TARG tank "
+            "Node: 0x%02x, Flags: 0x%02x, Size: 0x%08x",
+            g_attrOverrideHeader.iv_node, g_attrOverrideHeader.iv_flags,
+            g_attrOverrideHeader.iv_valSize);
 
         TARGETING::Target::theTargOverrideAttrTank().setAttribute(
             g_attrOverrideHeader.iv_attrId,
             l_targetType,
             g_attrOverrideHeader.iv_pos,
             g_attrOverrideHeader.iv_unitPos,
+            g_attrOverrideHeader.iv_node,
             g_attrOverrideHeader.iv_flags,
             g_attrOverrideHeader.iv_valSize,
             &g_attrOverride);
@@ -327,7 +337,11 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
     {
         errlHndl_t l_pErr = NULL;
 
-        // Clear all current FSP Attribute Overrides
+        // Non-const overrides may have been cleared by being written to.
+        // Therefore, clear the FSP Attribute Overrides for this node and
+        // send the current set of overrides to the FSP for this node
+
+        // Clear all current FSP Attribute Overrides for this node
         msg_t * l_pMsg = msg_allocate();
         l_pMsg->type = MSG_CLEAR_ALL_OVERRIDES;
         l_pMsg->data[0] = 0;
@@ -356,18 +370,24 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
                 std::vector<TARGETING::AttributeTank::AttributeSerializedChunk>
                     l_attributes;
 
+                // Note that NODE_FILTER_NOT_ALL_NODES retrieves all overrides
+                // that are not for all nodes - i.e. overrides for this node.
+                // The FSP already has all overrides for all nodes.
                 if (i == TARGETING::AttributeTank::TANK_LAYER_FAPI)
                 {
                     iv_overrideTank.serializeAttributes(
                         TARGETING::AttributeTank::ALLOC_TYPE_MALLOC,
-                        MAILBOX_CHUNK_SIZE, l_attributes);
+                        MAILBOX_CHUNK_SIZE, l_attributes,
+                        TARGETING::AttributeTank::NODE_FILTER_NOT_ALL_NODES);
                 }
                 else
                 {
                     TARGETING::Target::theTargOverrideAttrTank().
                         serializeAttributes(
                             TARGETING::AttributeTank::ALLOC_TYPE_MALLOC,
-                            MAILBOX_CHUNK_SIZE, l_attributes);
+                            MAILBOX_CHUNK_SIZE, l_attributes,
+                            TARGETING::AttributeTank::
+                                NODE_FILTER_NOT_ALL_NODES);
                 }
 
                 if (l_attributes.size())
@@ -489,20 +509,33 @@ bool AttrOverrideSync::getAttrOverride(const fapi::AttributeId i_attrId,
         return false;
     }
 
-    // Do the work of figuring out the target's type/position and find out
+    // Do the work of figuring out the target's type/position/node and find out
     // if there is an override for this target
     uint32_t l_targetType = getTargetType(i_pTarget);
-    uint16_t l_pos = getTargetPos(i_pTarget);
-    uint8_t l_unitPos = getTargetUnitPos(i_pTarget);
+
+    // Get the Target pointer
+    TARGETING::Target * l_pTarget =
+        reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
+    uint16_t l_pos = 0;
+    uint8_t l_unitPos = 0;
+    uint8_t l_node = 0;
+    l_pTarget->getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
+
+    FAPI_INF("getAttrOverride: Checking for override for ID: 0x%08x, "
+             "TargType: 0x%08x, Pos/Upos/Node: 0x%08x",
+             i_attrId, l_targetType,
+             (static_cast<uint32_t>(l_pos) << 16) +
+             (static_cast<uint32_t>(l_unitPos) << 8) + l_node);
 
     bool l_override = iv_overrideTank.getAttribute(i_attrId, l_targetType,
-        l_pos, l_unitPos, o_pVal);
+        l_pos, l_unitPos, l_node, o_pVal);
 
     if (l_override)
     {
-        FAPI_INF("getAttrOverride: Returning Override for 0x%08x", i_attrId);
+        FAPI_INF("getAttrOverride: Returning Override for ID: 0x%08x",
+                 i_attrId);
     }
-    
+
     return l_override;
 }
 
@@ -543,22 +576,28 @@ void AttrOverrideSync::setAttrActions(const fapi::AttributeId i_attrId,
     if (l_clearAnyNonConstOverride || l_syncAttribute)
     {
         uint32_t l_targetType = getTargetType(i_pTarget);
-        uint16_t l_pos = getTargetPos(i_pTarget);
-        uint8_t l_unitPos = getTargetUnitPos(i_pTarget);
+
+        // Get the Target pointer
+        TARGETING::Target * l_pTarget =
+            reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
+        uint16_t l_pos = 0;
+        uint8_t l_unitPos = 0;
+        uint8_t l_node = 0;
+        l_pTarget->getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
 
         if (l_clearAnyNonConstOverride)
         {
             // Clear any non const override for this attribute because the
             // attribute is being written
             iv_overrideTank.clearNonConstAttribute(i_attrId, l_targetType,
-                l_pos, l_unitPos);
+                l_pos, l_unitPos, l_node);
         }
 
         if (l_syncAttribute)
         {
             // Write the attribute to the SyncAttributeTank to sync to Cronus
             iv_syncTank.setAttribute(i_attrId, l_targetType, l_pos, l_unitPos,
-                0, i_size, i_pVal);
+                l_node, 0, i_size, i_pVal);
         }
     }
 }
@@ -585,65 +624,6 @@ uint32_t AttrOverrideSync::getTargetType(const fapi::Target * const i_pTarget)
     }
 
     return l_targetType;
-}
-
-//******************************************************************************
-uint16_t AttrOverrideSync::getTargetPos(const fapi::Target * const i_pTarget)
-{
-    // Note that an error querying a parent chip is ignored and the function
-    // returns ATTR_POS_NA
-    uint16_t l_pos = TARGETING::AttributeTank::ATTR_POS_NA;
-
-    if (i_pTarget != NULL)
-    {
-        // Get the Target pointer
-        TARGETING::Target * l_pTarget =
-            reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
-
-        if (l_pTarget->getAttr<TARGETING::ATTR_CLASS>() ==
-            TARGETING::CLASS_UNIT)
-        {
-            // Target is a chiplet. The position is the parent chip position
-            const TARGETING::Target * l_pChip = getParentChip(l_pTarget);
-
-            if (l_pChip == NULL)
-            {
-                FAPI_ERR("getParentChip failed to return parent");
-            }
-            else
-            {
-                l_pos = l_pChip->getAttr<TARGETING::ATTR_POSITION>();
-            }
-        }
-        else
-        {
-            // Target is not a chiplet
-            l_pos = l_pTarget->getAttr<TARGETING::ATTR_POSITION>();
-        }
-    }
-
-    return l_pos;
-}
-
-//******************************************************************************
-uint8_t AttrOverrideSync::getTargetUnitPos(const fapi::Target * const i_pTarget)
-{
-    uint8_t l_unitPos = TARGETING::AttributeTank::ATTR_UNIT_POS_NA;
-
-    if (i_pTarget != NULL)
-    {
-        // Get the Target pointer
-        TARGETING::Target * l_pTarget =
-            reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
-
-        if (l_pTarget->getAttr<TARGETING::ATTR_CLASS>() ==
-            TARGETING::CLASS_UNIT)
-        {
-            l_unitPos = l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        }
-    }
-
-    return l_unitPos;
 }
 
 } // End fapi namespace

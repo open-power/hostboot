@@ -1295,6 +1295,10 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
         errlCommit(err, INITSVC_COMP_ID);
     }
 
+    // Send the potentially modified set of Attribute overrides and any
+    // Attributes to sync (to Cronus) to the FSP
+    fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+
     // Transfer ownership of the message pointer back from iv_pIstepMsg
     mutex_lock(&iv_mutex);
     io_pMsg = iv_pIstepMsg;

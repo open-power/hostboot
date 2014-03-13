@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -26,17 +26,6 @@
  *  @brief Defines the AttributeTank and its associated classes. These are used
  *         to store attributes for Attribute Overriding and Synchronization
  */
-
-/*
- * Change Log ******************************************************************
- * Flag     Defect/Feature  User        Date        Description
- * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     06/07/2012  Created
- *                          mjjones     10/15/2012  Moved to general AttributeTank.
- *                          mjjones     02/13/2013  Moved to Targeting and major
- *                                                  design changes
- */
-
 #ifndef __TARGETING_COMMON_ATTRTANK_H
 #define __TARGETING_COMMON_ATTRTANK_H
 
@@ -94,9 +83,23 @@ public:
         TANK_LAYER_TARG,
     };
 
+    /**
+     * @brief Enumeration of node filter values
+     *
+     * This is passed to serializeAttributes and clearAllAttributes
+     */
+    enum NodeFilter
+    {
+        NODE_FILTER_NONE,
+        NODE_FILTER_NOT_ALL_NODES,
+        NODE_FILTER_SPECIFIC_NODE_AND_ALL,
+        NODE_FILTER_SPECIFIC_NODE,
+    };
+
     // Constants for various fields in AttributeHeader
     static const uint16_t ATTR_POS_NA = 0xffff;      // iv_pos N/A
     static const uint8_t  ATTR_UNIT_POS_NA = 0xff;   // iv_unitPos N/A
+    static const uint8_t  ATTR_NODE_NA = 0xf;        // iv_node N/A
 
     /**
      * @struct AttributeHeader
@@ -120,7 +123,8 @@ public:
         uint16_t iv_pos;        // For chips/dimms the position
                                 // For chiplets the parent chip position
         uint8_t  iv_unitPos;    // For chiplets the position
-        uint8_t  iv_flags;      // AttributeFlags enum value(s)
+        uint8_t  iv_node  : 4;  // Target Node number
+        uint8_t  iv_flags : 4;  // AttributeFlags enum value(s)
         uint32_t iv_valSize;    // Size of the attribute value in bytes
     };
 
@@ -171,8 +175,23 @@ public:
 
     /**
      * @brief Clear all attributes
+     *
+     * @param[in] i_nodeFilter NODE_FILTER_NONE:
+     *                           Clear all attributes
+     *                         NODE_FILTER_NOT_ALL_NODES:
+     *                           Clear only those attributes that are not for
+     *                           all nodes
+     *                         NODE_FILTER_SPECIFIC_NODE_AND_ALL:
+     *                           Clear only those attributes that are for a
+     *                           specific node (i_node) or all nodes
+     *                         NODE_FILTER_SPECIFIC_NODE
+     *                           Clear only those attributes that are for a
+     *                           specific node (i_node)
+     * @param[in]  i_node      See i_nodeFilter
      */
-    virtual void clearAllAttributes();
+    virtual void clearAllAttributes(
+        const NodeFilter i_nodeFilter = NODE_FILTER_NONE,
+        const uint8_t i_node = ATTR_NODE_NA);
 
     /**
      * @brief Clear any non-const attribute for a specified ID and Target
@@ -184,11 +203,27 @@ public:
      * @param[in] i_targetType Target Type attribute is for
      * @param[in] i_pos        Target Position
      * @param[in] i_unitPos    Target Unit Position
+     * @param[in] i_node       Target Node
      */
     virtual void clearNonConstAttribute(const uint32_t i_attrId,
                                         const uint32_t i_targetType,
                                         const uint16_t i_pos,
-                                        const uint8_t i_unitPos);
+                                        const uint8_t i_unitPos,
+                                        const uint8_t i_node);
+
+    /**
+     * @brief DEPRECATED
+     *
+     * Will be removed with RTC99917 when FSP code has been changed to call
+     * the new interface with the i_node parameter
+     */
+    virtual void clearNonConstAttribute(const uint32_t i_attrId,
+                                        const uint32_t i_targetType,
+                                        const uint16_t i_pos,
+                                        const uint8_t i_unitPos)
+    {
+        clearNonConstAttribute(i_attrId, i_targetType, i_pos, i_unitPos, 0);
+    }
 
     /**
      * @brief Set an Attribute
@@ -205,6 +240,7 @@ public:
      * @param[in] i_targetType Target Type attribute is for
      * @param[in] i_pos        Target Position
      * @param[in] i_unitPos    Target Unit Position
+     * @param[in] i_node       Target Node
      * @param[in] i_flags      Flags (ORed set of AttributeFlags)
      * @param[in] i_valSize    Size of attribute value in bytes
      * @param[in] i_pVal       Pointer to attribute value
@@ -213,9 +249,28 @@ public:
                               const uint32_t i_targetType,
                               const uint16_t i_pos,
                               const uint8_t i_unitPos,
+                              const uint8_t i_node,
                               const uint8_t i_flags,
                               const uint32_t i_valSize,
                               const void * i_pVal);
+
+    /**
+     * @brief DEPRECATED
+     *
+     * Will be removed with RTC99917 when FSP code has been changed to call
+     * the new interface with the i_node parameter
+     */
+    virtual void setAttribute(const uint32_t i_attrId,
+                              const uint32_t i_targetType,
+                              const uint16_t i_pos,
+                              const uint8_t i_unitPos,
+                              const uint8_t i_flags,
+                              const uint32_t i_valSize,
+                              const void * i_pVal)
+    {
+        setAttribute(i_attrId, i_targetType, i_pos, i_unitPos, 0, i_flags,
+                     i_valSize, i_pVal);
+    }
 
     /**
      * @brief Get a copy of an Attribute
@@ -227,6 +282,7 @@ public:
      * @param[in]  i_targetType Target Type attribute is for
      * @param[in]  i_pos        Target Position
      * @param[in]  i_unitPos    Target Unit Position
+     * @param[in]  i_node       Target Node
      * @param[out] o_pVal       Pointer to attribute value
      *
      * return true if attribute exists and a copy was written to o_pVal
@@ -235,7 +291,24 @@ public:
                               const uint32_t i_targetType,
                               const uint16_t i_pos,
                               const uint8_t i_unitPos,
+                              const uint8_t i_node,
                               void * o_pVal) const;
+
+    /**
+     * @brief DEPRECATED
+     *
+     * Will be removed with RTC99917 when FSP code has been changed to call
+     * the new interface with the i_node parameter
+     */
+    virtual bool getAttribute(const uint32_t i_attrId,
+                              const uint32_t i_targetType,
+                              const uint16_t i_pos,
+                              const uint8_t i_unitPos,
+                              void * o_pVal) const
+    {
+        return getAttribute(i_attrId, i_targetType, i_pos, i_unitPos, 0,
+                            o_pVal);
+    }
 
     /**
      * @brief Serialize all Attributes into newly allocated memory chunks
@@ -252,11 +325,25 @@ public:
      *                          structs are added to.
      *                          The caller must free (if MALLOC)
      *                          or delete[] (if NEW) each chunk's memory
+     * @param[in]  i_nodeFilter NODE_FILTER_NONE:
+     *                            Get all attributes
+     *                          NODE_FILTER_NOT_ALL_NODES:
+     *                            Get only those attributes that are not for all
+     *                            nodes
+     *                          NODE_FILTER_SPECIFIC_NODE_AND_ALL:
+     *                            Get only those attributes that are for a
+     *                            specific node (i_node) or all nodes
+     *                          NODE_FILTER_SPECIFIC_NODE
+     *                            Get only those attributes that are for a
+     *                            specific node (i_node)
+     * @param[in]  i_node       See i_nodeFilter
      */
     virtual void serializeAttributes(
         const AllocType i_allocType,
         const uint32_t i_chunkSize,
-        std::vector<AttributeSerializedChunk> & o_attributes) const;
+        std::vector<AttributeSerializedChunk> & o_attributes,
+        const NodeFilter i_nodeFilter = NODE_FILTER_NONE,
+        const uint8_t i_node = ATTR_NODE_NA) const;
 
     /**
      * @brief Deserialize a chunk of Attributes into the tank

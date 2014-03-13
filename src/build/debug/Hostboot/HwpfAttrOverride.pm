@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -55,6 +55,7 @@ use constant TARGET_TYPE_ABUS_ENDPOINT => 0x00000100;
 # From attributeTank.H
 use constant ATTR_POS_NA => 0xffff;
 use constant ATTR_UNIT_POS_NA => 0xff;
+use constant ATTR_NODE_NA => 0xf;
 use constant ATTR_FLAG_CONST => 1;
 
 # From fapiPlatAttrOverrideSync.C
@@ -277,7 +278,7 @@ sub main
         {
             chomp($line);
 
-            if ($line =~ /^target = /)
+            if ($line =~ /^target/)
             {
                 if ($attrString eq "")
                 {
@@ -536,15 +537,26 @@ sub main
             } # end of processing all lines making up a single attr override
 
             #------------------------------------------------------------------
-            # Figure out the Target type/pos/unitpos
+            # Figure out the Target node/type/pos/unitpos
             #------------------------------------------------------------------
             my $targType = TARGET_TYPE_SYSTEM;
             my $targPos = ATTR_POS_NA;
             my $targUnitPos = ATTR_UNIT_POS_NA;
-
-            # Figure out the target type
+            my $targNode = ATTR_NODE_NA;
             my $targ = $targLine;
 
+            # Figure out the node number
+            if ($targ =~ /target = k0:n0:s0:?\s*$/)
+            {
+                # String representing system target
+                $targNode = ATTR_NODE_NA;
+            }
+            elsif ($targ =~ /target = k0:n(\d+)/)
+            {
+                $targNode = $1;
+            }
+
+            # Figure out the target type
             if ($targ =~ /p8.ex/)
             {
                 $targType = TARGET_TYPE_EX_CHIPLET;
@@ -609,9 +621,17 @@ sub main
             # Debug output
             if ($debug)
             {
-                ::userDisplay "OVERRIDE. ID: $attrIdVal. ";
-                ::userDisplay "Targ: $targType.$targPos.$targUnitPos. ";
-                ::userDisplay "Flags: $flags\n";
+                if ($fapiTank)
+                {
+                    ::userDisplay "FAPI OVERRIDE.";
+                }
+                else
+                {
+                    ::userDisplay "TARG OVERRIDE.";
+                }
+                ::userDisplay "ID: $attrIdVal, Node: $targNode,";
+                ::userDisplay "TargType: $targType, Pos: $targPos,";
+                ::userDisplay "UPos: $targUnitPos, Flags: $flags\n";
             }
 
             #------------------------------------------------------------------
@@ -625,7 +645,8 @@ sub main
             #     uint16_t iv_pos;        // For chips/dimms the position
             #                             // For chiplets the parent chip position
             #     uint8_t  iv_unitPos;    // For chiplets the position
-            #     uint8_t  iv_flags;      // AttributeFlags enum value(s)
+            #     uint8_t  iv_node  : 4;  // Target Node number
+            #     uint8_t  iv_flags : 4;  // AttributeFlags enum value(s)
             #     uint32_t iv_valSize;    // Size of the attribute value in bytes
             # };
             my $addr = $overrideHeaderAddr;
@@ -637,7 +658,7 @@ sub main
             $addr += 2;
             ::write8($addr, $targUnitPos);
             $addr += 1;
-            ::write8($addr, $flags);
+            ::write8($addr, (($targNode << 4) + $flags));
             $addr += 1;
             ::write32($addr, $valSize);
 

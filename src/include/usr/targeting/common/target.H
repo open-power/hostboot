@@ -335,6 +335,22 @@ class Target
          */
         static bool uninstallWriteAttributeCallback();
 
+        /**
+         *  @brief Returns the target's position data as used in an attribute
+         *         tank.
+         *
+         *  This target positions are associated with an attribute in an
+         *  attribute tank and help identify which target(s) the attribute
+         *  belongs to.
+         *
+         *  @param[out] o_pos     Chip/Dimm Position (ATTR_POS_NA if not found)
+         *  @param[out] o_unitPos Unit Position (ATTR_UNIT_POS_NA if not found)
+         *  @param[out] o_node    Node Number (ATTR_NODE_NA if not found)
+         */
+        void getAttrTankTargetPosData(uint16_t & o_pos,
+                                      uint8_t & o_unitPos,
+                                      uint8_t & o_node) const;
+
     private: // Private helper interfaces
 
         /**
@@ -461,7 +477,8 @@ class Target
                   mutex_t*&    o_pMutex) const;
 
         /**
-         *  @brief Returns the target's type as used in an attribute tank.
+         *  @brief Returns the target's type as used in a Targeting attribute
+         *         tank.
          *
          *  This target type is associated with an attribute in an attribute
          *  tank and helps identify which target(s) the attribute belongs to
@@ -469,29 +486,6 @@ class Target
          *  @return uint32_t The target type
          */
         uint32_t getAttrTankTargetType() const;
-
-        /**
-         *  @brief Returns the target's position as used in an attribute tank.
-         *
-         *  This target position is associated with an attribute in an attribute
-         *  tank and helps identify which target(s) the attribute belongs to.
-         *  For a unit, this is the parent chip's position
-         *
-         *  @return uint16_t The target position
-         */
-        uint16_t getAttrTankTargetPos() const;
-
-        /**
-         *  @brief Returns the target's unit position as used in an attribute
-         *         tank.
-         *
-         *  This target unit position is associated with an attribute in an
-         *  attribute tank and helps identify which target(s) the attribute
-         *  belongs to. This is only a valid value for units
-         *
-         *  @return uint8_t The target unit position
-         */
-        uint8_t getAttrTankTargetUnitPos() const;
 
         /**
          *  @brief enumeration of assert reasons
@@ -502,6 +496,8 @@ class Target
             GET_ATTR,
             GET_ATTR_AS_STRING,
             GET_HB_MUTEX_ATTR,
+            GET_ATTR_TANK_TARGET_POS_DATA,
+            GET_ATTR_TANK_TARGET_POS_DATA_ATTR,
         };
 
         /**

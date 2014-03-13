@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -25,15 +25,6 @@
  *
  *  @brief Implements the AttributeTank and associated classes.
  */
-
-/*
- * Change Log ******************************************************************
- * Flag     Defect/Feature  User        Date        Description
- * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     06/07/2012  Created
- *                          mjjones     02/13/2013  Moved to Targeting and major
- *                                                  design changes
- */
 #include <stdlib.h>
 #include <string.h>
 #include <targeting/common/attributeTank.H>
@@ -44,8 +35,8 @@ namespace TARGETING
 
 //******************************************************************************
 AttributeTank::AttributeHeader::AttributeHeader() :
-    iv_attrId(0), iv_targetType(0), iv_pos(0), iv_unitPos(0), iv_flags(0),
-    iv_valSize(0)
+    iv_attrId(0), iv_targetType(0), iv_pos(0), iv_unitPos(0), iv_node(0),
+    iv_flags(0), iv_valSize(0)
 {
 
 }
@@ -87,19 +78,54 @@ bool AttributeTank::syncEnabled()
 }
 
 //******************************************************************************
-void AttributeTank::clearAllAttributes()
+void AttributeTank::clearAllAttributes(
+    const NodeFilter i_nodeFilter,
+    const uint8_t i_node)
 {
     TARG_MUTEX_LOCK(iv_mutex);
 
-    for (AttributesItr_t l_itr = iv_attributes.begin();
-         l_itr != iv_attributes.end(); ++l_itr)
+    AttributesItr_t l_itr = iv_attributes.begin();
+
+    while (l_itr != iv_attributes.end())
     {
+        if (i_nodeFilter == NODE_FILTER_NOT_ALL_NODES)
+        {
+            // Only clear attributes that are not for all nodes
+            if ((*l_itr)->iv_hdr.iv_node == ATTR_NODE_NA)
+            {
+                l_itr++;
+                continue;
+            }
+        }
+        else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE_AND_ALL)
+        {
+            // Only clear attributes associated with i_node or all
+            if ( ((*l_itr)->iv_hdr.iv_node != ATTR_NODE_NA) &&
+                 ((*l_itr)->iv_hdr.iv_node != i_node) )
+            {
+                l_itr++;
+                continue;
+            }
+        }
+        else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE)
+        {
+            // Only clear attributes associated with i_node
+            if ((*l_itr)->iv_hdr.iv_node != i_node)
+            {
+                l_itr++;
+                continue;
+            }
+        }
+
         delete (*l_itr);
         (*l_itr) = NULL;
+        l_itr = iv_attributes.erase(l_itr);
     }
 
-    iv_attributesExist = false;
-    iv_attributes.clear();
+    if (iv_attributes.empty())
+    {
+        iv_attributesExist = false;
+    }
 
     TARG_MUTEX_UNLOCK(iv_mutex);
 }
@@ -108,7 +134,8 @@ void AttributeTank::clearAllAttributes()
 void AttributeTank::clearNonConstAttribute(const uint32_t i_attrId,
                                            const uint32_t i_targetType,
                                            const uint16_t i_pos,
-                                           const uint8_t i_unitPos)
+                                           const uint8_t i_unitPos,
+                                           const uint8_t i_node)
 {
     TARG_MUTEX_LOCK(iv_mutex);
 
@@ -118,7 +145,8 @@ void AttributeTank::clearNonConstAttribute(const uint32_t i_attrId,
         if ( ((*l_itr)->iv_hdr.iv_attrId == i_attrId) &&
              ((*l_itr)->iv_hdr.iv_targetType == i_targetType) &&
              ((*l_itr)->iv_hdr.iv_pos == i_pos) &&
-             ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos) )
+             ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos) &&
+             ((*l_itr)->iv_hdr.iv_node == i_node) )
         {
             if (!((*l_itr)->iv_hdr.iv_flags & ATTR_FLAG_CONST))
             {
@@ -144,6 +172,7 @@ void AttributeTank::setAttribute(const uint32_t i_attrId,
                                  const uint32_t i_targetType,
                                  const uint16_t i_pos,
                                  const uint8_t i_unitPos,
+                                 const uint8_t i_node,
                                  const uint8_t i_flags,
                                  const uint32_t i_valSize,
                                  const void * i_pVal)
@@ -160,6 +189,7 @@ void AttributeTank::setAttribute(const uint32_t i_attrId,
              ((*l_itr)->iv_hdr.iv_targetType == i_targetType) &&
              ((*l_itr)->iv_hdr.iv_pos == i_pos) &&
              ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos) &&
+             ((*l_itr)->iv_hdr.iv_node == i_node) &&
              ((*l_itr)->iv_hdr.iv_valSize == i_valSize) )
         {
             // Found existing attribute, update it unless the existing attribute
@@ -184,6 +214,7 @@ void AttributeTank::setAttribute(const uint32_t i_attrId,
         l_pAttr->iv_hdr.iv_targetType = i_targetType;
         l_pAttr->iv_hdr.iv_pos = i_pos;
         l_pAttr->iv_hdr.iv_unitPos = i_unitPos;
+        l_pAttr->iv_hdr.iv_node = i_node;
         l_pAttr->iv_hdr.iv_flags = i_flags;
         l_pAttr->iv_hdr.iv_valSize = i_valSize;
         l_pAttr->iv_pVal = new uint8_t[i_valSize];
@@ -201,6 +232,7 @@ bool AttributeTank::getAttribute(const uint32_t i_attrId,
                                  const uint32_t i_targetType,
                                  const uint16_t i_pos,
                                  const uint8_t i_unitPos,
+                                 const uint8_t i_node,
                                  void * o_pVal) const
 {
     TARG_MUTEX_LOCK(iv_mutex);
@@ -216,7 +248,9 @@ bool AttributeTank::getAttribute(const uint32_t i_attrId,
              (((*l_itr)->iv_hdr.iv_pos == ATTR_POS_NA) ||
               ((*l_itr)->iv_hdr.iv_pos == i_pos)) &&
              (((*l_itr)->iv_hdr.iv_unitPos == ATTR_UNIT_POS_NA) ||
-              ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos)) )
+              ((*l_itr)->iv_hdr.iv_unitPos == i_unitPos)) &&
+             (((*l_itr)->iv_hdr.iv_node == ATTR_NODE_NA) ||
+              ((*l_itr)->iv_hdr.iv_node == i_node)) )
         {
             l_found = true;
             memcpy(o_pVal, (*l_itr)->iv_pVal, (*l_itr)->iv_hdr.iv_valSize);
@@ -232,7 +266,9 @@ bool AttributeTank::getAttribute(const uint32_t i_attrId,
 void AttributeTank::serializeAttributes(
     const AllocType i_allocType,
     const uint32_t i_chunkSize,
-    std::vector<AttributeSerializedChunk> & o_attributes) const
+    std::vector<AttributeSerializedChunk> & o_attributes,
+    const NodeFilter i_nodeFilter,
+    const uint8_t i_node) const
 {
     TARG_MUTEX_LOCK(iv_mutex);
 
@@ -247,8 +283,37 @@ void AttributeTank::serializeAttributes(
         // Fill up the buffer with as many attributes as possible
         while (l_itr != iv_attributes.end())
         {
+            if (i_nodeFilter == NODE_FILTER_NOT_ALL_NODES)
+            {
+                // Only want attributes that are not for all nodes
+                if ((*l_itr)->iv_hdr.iv_node == ATTR_NODE_NA)
+                {
+                    l_itr++;
+                    continue;
+                }
+            }
+            else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE_AND_ALL)
+            {
+                // Only want attributes associated with i_node or all
+                if ( ((*l_itr)->iv_hdr.iv_node != ATTR_NODE_NA) &&
+                     ((*l_itr)->iv_hdr.iv_node != i_node) )
+                {
+                    l_itr++;
+                    continue;
+                }
+            }
+            else if (i_nodeFilter == NODE_FILTER_SPECIFIC_NODE)
+            {
+                // Only want attributes associated with i_node
+                if ((*l_itr)->iv_hdr.iv_node != i_node)
+                {
+                    l_itr++;
+                    continue;
+                }
+            }
+
             if ((l_index + sizeof(AttributeHeader) +
-                (*l_itr)->iv_hdr.iv_valSize) > i_chunkSize)
+                     (*l_itr)->iv_hdr.iv_valSize) > i_chunkSize)
             {
                 // Attribute will not fit into the buffer
                 if (l_index == 0)

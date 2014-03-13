@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -225,26 +225,6 @@ private:
      * @return Target Type
      */
     static uint32_t getTargetType(const fapi::Target * const i_pTarget);
-
-    /**
-     * @brief Utility function that gets the target position of a FAPI Target
-     *        as used in an attribute tank
-     *
-     * @param[in] i_pTarget Pointer to FAPI Target (NULL = system)
-     *
-     * @return Target Position
-     */
-    static uint16_t getTargetPos(const fapi::Target * const i_pTarget);
-
-    /**
-     * @brief Utility function that gets the target unit position of a FAPI
-     *        Target as used in an attribute tank
-     *
-     * @param[in] i_pTarget Pointer to FAPI Target (NULL = system)
-     *
-     * @return Target Unit Position
-     */
-    static uint8_t getTargetUnitPos(const fapi::Target * const i_pTarget);
 
     // The FAPI Attribute Tanks
     TARGETING::AttributeTank iv_overrideTank;
