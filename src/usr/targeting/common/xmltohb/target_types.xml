@@ -1228,7 +1228,6 @@
     <attribute><id>MSS_INIT_STATE</id></attribute>
     <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
     <attribute><id>MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
-    <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
     <attribute><id>MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
 </targetType>
 
