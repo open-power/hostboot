@@ -20,17 +20,19 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_mpipl_chip_cleanup_errors.xml,v 1.4 2014/02/19 23:36:03 belldi Exp $ -->
+<!-- $Id: proc_mpipl_chip_cleanup_errors.xml,v 1.5 2014/03/02 23:18:31 belldi Exp $ -->
 <!-- Error codes for proc_mpipl_chip_cleanup -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_MCD_RECOVERY_NOT_DISABLED_RC</rc>
-    <description>MCD recovery is not disabled as expected</description>
+    <rc>RC_MPIPL_MCD_RECOVERY_NOT_DISABLED_RC</rc>
+    <description>MCD recovery is not disabled as expected during MPIPL</description>
     <!-- Add target chip -->
     <ffdc>CHIP_TARGET</ffdc>
-    <!-- Add data buffer -->
-    <ffdc>DATA_BUFFER</ffdc>
+    <!-- Add register address -->
+    <ffdc>MCD_RECOV_CTRL_REG_ADDR</ffdc>
+    <!-- Add register data -->
+    <ffdc>MCD_RECOV_CTRL_REG_DATA</ffdc>
     <!-- Add procedure callout -->
     <callout>
       <procedure>CODE</procedure>

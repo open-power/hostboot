@@ -330,6 +330,10 @@
         <default>false</default>
     </attribute>
     <attribute>
+        <id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
+        <default>true</default>
+    </attribute>
+    <attribute>
         <id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
         <default>true</default>
     </attribute>

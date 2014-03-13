@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_prep_master_winkle_errors.xml,v 1.7 2014/02/10 04:13:33 stillgs Exp $ -->
+<!-- $Id: proc_prep_master_winkle_errors.xml,v 1.8 2014/02/28 16:58:58 stillgs Exp $ -->
 <!-- Error definitions for proc_prep_master_winkle procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -43,7 +43,10 @@
     <callout>
       <target>CHIP_IN_ERROR</target>     
       <priority>LOW</priority>
-    </callout>    
+    </callout>   
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>     
+    </deconfigure>  
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_pre_config.H,v 1.1 2013/08/06 23:30:39 asaetow Exp $
+// $Id: mss_eff_pre_config.H,v 1.2 2014/02/20 20:52:11 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_pre_config.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -64,10 +64,10 @@ typedef fapi::ReturnCode (*mss_eff_pre_config_FP_t)(const fapi::Target i_target_
 
 extern "C" {
 
-//******************************************************************************
-//* name=mss_eff_pre_config, param=i_target_mba, return=ReturnCode
-//******************************************************************************
-fapi::ReturnCode mss_eff_pre_config(const fapi::Target i_target_mba);
+  //******************************************************************************
+    //* name=mss_eff_pre_config, param=i_target_mba, return=ReturnCode
+      //******************************************************************************
+        fapi::ReturnCode mss_eff_pre_config(const fapi::Target i_target_mba);
 
 } // extern "C"
 

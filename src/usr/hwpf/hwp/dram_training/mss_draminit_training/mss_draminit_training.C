@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.72 2014/02/15 00:25:56 mwuu Exp $
+// $Id: mss_draminit_training.C,v 1.73 2014/02/25 22:23:13 mwuu Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.73   | mwuu     |25-FEB-14| Fixed ISDIMM spare case for bad bitmap
 //  1.72   | mwuu     |14-FEB-14| Fixed x4 spare case when mss_c4_phy returns bad
 //         |          |         | data with workaround
 //  1.71   | mwuu     |13-FEB-14| Updated get/setC4dq2reg, mss_set/get_bbm_regs FNs
@@ -3772,7 +3773,7 @@ ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
 				switch (dimm_spare[i_port][i_dimm][i_rank])
     			{
 			        case ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE:
-			            spare_bitmap = 0;
+			            continue;							// ignore bbm data for nonexistent spare
 		            break;
 			        case ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE:
 			            spare_bitmap = 0x0F;

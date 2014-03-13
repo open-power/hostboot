@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_chip_cleanup.H,v 1.2 2012/11/27 21:37:11 belldi Exp $
+// $Id: proc_mpipl_chip_cleanup.H,v 1.3 2014/03/02 23:16:17 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -56,7 +56,7 @@ extern "C"
   /**
   * @brief To enable MCD recovery
   *
-  * @param[in] (1) 'i_target' Reference to chip target
+  * @param[in] (1) 'i_target' Reference to processor chip target
   *
   * @return ReturnCode
   *

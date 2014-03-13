@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.14 2014/02/13 15:44:05 pardeik Exp $
+// $Id: mss_thermal_init.C,v 1.15 2014/02/26 21:19:10 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.15  | pardeik  |24-FEB-14| added support for ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE
 //   1.14  | pardeik  |12-FEB-14| changed CONFIG_INTERVAL_TIMER from 5 to 15 to 
 //   1.13  | pardeik  |30-JAN-14| workaround for SW243504 (enable sensors on master
 //                              |   i2c bus if ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE=ON)
@@ -172,6 +173,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       uint8_t l_i2c_bus_encode;
       uint8_t l_sensor_map_mask;
       uint8_t l_master_i2c_temp_sensor_enable;
+      uint8_t l_spare_i2c_temp_sensor_enable;
 
 //********************************************
 // Centaur internal temperature polling setup 
@@ -256,6 +258,8 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 	  l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY, &i_target, l_cdimm_sensor_map_secondary);
 	  if (l_rc) return l_rc;
 	  l_rc = FAPI_ATTR_GET(ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE, NULL, l_master_i2c_temp_sensor_enable);
+	  if (l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE, NULL, l_spare_i2c_temp_sensor_enable);
 	  if (l_rc) return l_rc;
       }
 
@@ -420,13 +424,22 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 		  }
 		  if ((l_cdimm_sensor_map & l_sensor_map_mask) != 0)
 		  {
-		      // Only enable the sensor for custom dimms based on the attribute
-		      // Put in for i2c multimaster issue SW243504
-		      if ( (k==0)
+		      // Only enable the sensor for custom dimms based on the attributes
+		      if (
+			  (
+			   (k==0)
 			   &&
 			   (l_master_i2c_temp_sensor_enable ==
 			    ENUM_ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE_OFF)
 			   )
+			  ||
+			  (
+			   (k==1)
+			   &&
+			   (l_spare_i2c_temp_sensor_enable ==
+			    ENUM_ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE_OFF)
+			   )
+			  )
 		      {
 			  // do nothing here - do not enable the sensor
 		      }

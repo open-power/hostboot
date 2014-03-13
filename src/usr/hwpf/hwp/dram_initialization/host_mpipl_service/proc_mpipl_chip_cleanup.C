@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_chip_cleanup.C,v 1.7 2014/02/20 23:18:01 belldi Exp $
+// $Id: proc_mpipl_chip_cleanup.C,v 1.8 2014/03/02 23:14:49 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -103,8 +103,8 @@ extern "C"
     fapi::ReturnCode rc; //fapi return code value
     uint32_t rc_ecmd = 0;    //ecmd return code value
     const uint32_t data_size = 64; //Size of data buffer
-    ecmdDataBufferBase fsi_data(data_size);
     const int MAX_MCD_DIRS = 2; //Max of 2 MCD Directories (even and odd)
+    ecmdDataBufferBase fsi_data[MAX_MCD_DIRS];
     const uint64_t ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[MAX_MCD_DIRS] = {
       0x0000000002013410, //MCD even recovery control register address
       0x0000000002013411  //MCD odd recovery control register address
@@ -120,74 +120,89 @@ extern "C"
       0x02012400,
       0x02012800
     };     
-
-    //Verify MCD recovery was previously disabled for even and odd slices
-    //If not, this is an error condition
-    for (int counter = 0; counter < MAX_MCD_DIRS; counter++) {
-      FAPI_DBG("Verifying MCD %s Recovery is disabled", ARY_MCD_DIR_STRS[counter]);
-      
-      //Get data from MCD Even or Odd Recovery Ctrl reg
-      rc = fapiGetScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data);
-      if (rc) {
-        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
-        return rc;
-      }
-
-      //Check whether bit 0 is 0, meaning MCD recovery is disabled as expected
-      if( fsi_data.getBit(MCD_RECOVERY_CTRL_REG_BIT_POS0) ) {
-        FAPI_ERR("%s: MCD %s Recovery not disabled as expected", procedureName, ARY_MCD_DIR_STRS[counter]);
-        const fapi::Target & CHIP_TARGET = i_target;
-        ecmdDataBufferBase & DATA_BUFFER = fsi_data;
-        FAPI_SET_HWP_ERROR(rc, RC_MCD_RECOVERY_NOT_DISABLED_RC);
-        return rc;
-      }
-    }
-
-    //Assert bit 0 of MCD Recovery Ctrl regs to enable MCD recovery
-    for (int counter = 0; counter < MAX_MCD_DIRS; counter++) {
-      FAPI_DBG("Enabling MCD %s Recovery", ARY_MCD_DIR_STRS[counter]);
-      
-      //Get data from MCD Even or Odd Recovery Control reg
-      rc = fapiGetScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data);
-      if (rc) {
-        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
-        return rc;
-      }
-      
-      //Assert bit 0 of MCD Even or Odd Recovery Control reg to enable recovery
-      rc_ecmd = fsi_data.setBit(MCD_RECOVERY_CTRL_REG_BIT_POS0 );
+    
+    do {
+      //Set bit length for 64-bit buffers
+      rc_ecmd = fsi_data[0].setBitLength(data_size);
+      rc_ecmd |= fsi_data[1].setBitLength(data_size);
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u) asserting bit pos %u in ecmdDataBufferBase that stores value of MCD %s Recovery Control reg (addr: 0x%08llX)", procedureName, rc_ecmd, MCD_RECOVERY_CTRL_REG_BIT_POS0, ARY_MCD_DIR_STRS[counter], ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
         rc.setEcmdError(rc_ecmd);
-        return rc;
+        break;
+      }
+  
+      //Verify MCD recovery was previously disabled for even and odd slices
+      //If not, this is an error condition
+      for (int counter = 0; counter < MAX_MCD_DIRS; counter++) {
+        FAPI_DBG("Verifying MCD %s Recovery is disabled, target=%s", ARY_MCD_DIR_STRS[counter], i_target.toEcmdString());
+        
+        //Get data from MCD Even or Odd Recovery Ctrl reg
+        rc = fapiGetScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]);
+        if (!rc.ok()) {
+          FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX), target=%s", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], i_target.toEcmdString());
+          break;
+        }
+        
+  
+        //Check whether bit 0 is 0, meaning MCD recovery is disabled as expected
+        if( fsi_data[counter].getBit(MCD_RECOVERY_CTRL_REG_BIT_POS0) ) {
+          FAPI_ERR("%s: MCD %s Recovery not disabled as expected, target=%s", procedureName, ARY_MCD_DIR_STRS[counter], i_target.toEcmdString());
+          const fapi::Target & CHIP_TARGET = i_target;
+  	  const uint64_t & MCD_RECOV_CTRL_REG_ADDR = ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter];
+          ecmdDataBufferBase & MCD_RECOV_CTRL_REG_DATA = fsi_data[counter];
+          FAPI_SET_HWP_ERROR(rc, RC_MPIPL_MCD_RECOVERY_NOT_DISABLED_RC);
+          break;
+        }
+      }
+      if(!rc.ok()) {
+        break;
+      }
+  
+      //Assert bit 0 of MCD Recovery Ctrl regs to enable MCD recovery
+      for (int counter = 0; counter < MAX_MCD_DIRS; counter++) {
+        FAPI_DBG("Enabling MCD %s Recovery, target=%s", ARY_MCD_DIR_STRS[counter], i_target.toEcmdString());
+        
+        //Assert bit 0 of MCD Even or Odd Recovery Control reg to enable recovery
+        rc_ecmd = fsi_data[counter].setBit(MCD_RECOVERY_CTRL_REG_BIT_POS0 );
+        if(rc_ecmd) {
+          FAPI_ERR("%s: Error (%u) asserting bit pos %u in ecmdDataBufferBase that stores value of MCD %s Recovery Control reg (addr: 0x%08llX), target=%s", procedureName, rc_ecmd, MCD_RECOVERY_CTRL_REG_BIT_POS0, ARY_MCD_DIR_STRS[counter], ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], i_target.toEcmdString());
+          rc.setEcmdError(rc_ecmd);
+          break;
+        }
+        
+        //Write data to MCD Even or Odd Recovery Control reg
+        rc = fapiPutScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]);
+        if (!rc.ok()) {
+          FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], i_target.toEcmdString());
+          break;
+        }
+      }
+      if(!rc.ok()) {
+        break;
+      }
+  
+      // SW227429: clear PCI Nest FIR registers
+      // hostboot is blindly sending EOIs in order to ensure no interrupts are pending when  PHYP starts up again
+      // with ETU held in reset, these get trapped in PCI and force a freeze to occur (PCI Nest FIR(14))
+      // clearing the FIR should remove the freeze condition
+      rc_ecmd = fsi_data[0].flushTo0();
+      if (rc_ecmd) {
+        FAPI_ERR("%s: Error (%u) forming PCI Nest FIR clear data buffer, target=%s", procedureName, rc_ecmd, i_target.toEcmdString());
+        rc.setEcmdError(rc_ecmd);
+        break;
       }
       
-      //Write data to MCD Even or Odd Recovery Control reg
-      rc = fapiPutScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data);
-      if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
-        return rc;
+      for (int counter = 0; counter < MAX_PHBS; counter++) {
+        FAPI_DBG("Clearing PCI%d Nest FIR, target=%s", counter, i_target.toEcmdString());
+        rc = fapiPutScom(i_target, PCI_NEST_FIR_REG_ADDRS[counter], fsi_data[0]);
+        if (!rc.ok()) {
+          FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, PCI_NEST_FIR_REG_ADDRS[counter], i_target.toEcmdString());
+          break;
+        }
       }
-    }
+    } while(0);
 
-    // SW227429: clear PCI Nest FIR registers
-    // hostboot is blindly sending EOIs in order to ensure no interrupts are pending when  PHYP starts up again
-    // with ETU held in reset, these get trapped in PCI and force a freeze to occur (PCI Nest FIR(14))
-    // clearing the FIR should remove the freeze condition
-    rc_ecmd = fsi_data.flushTo0();
-    if (rc_ecmd) {
-      FAPI_ERR("%s: Error (%u) forming PCI Nest FIR clear data buffer", procedureName, rc_ecmd);
-      rc.setEcmdError(rc_ecmd);
-      return rc;
-    }
-    for (int counter = 0; counter < MAX_PHBS; counter++) {
-      FAPI_DBG("Clearing PCI%d Nest FIR", counter);
-      rc = fapiPutScom(i_target, PCI_NEST_FIR_REG_ADDRS[counter], fsi_data);
-      if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, PCI_NEST_FIR_REG_ADDRS[counter]);
-        return rc;
-      }
-    }
+    FAPI_IMP("Exiting %s", procedureName);
+
     return rc;
   }
 

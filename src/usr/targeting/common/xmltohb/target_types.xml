@@ -232,7 +232,6 @@
     <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id></attribute>
     <attribute><id>PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR</id></attribute>
     <attribute><id>PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id></attribute>
-    <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>MULTI_SCOM_BUFFER_MAX_SIZE</id></attribute>
     <attribute><id>DISABLE_SCRUB_AFTER_PATTERN_TEST</id></attribute>
     <attribute><id>PM_PCBS_FSM_TRACE_EN</id></attribute>
@@ -240,6 +239,8 @@
     <attribute><id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id></attribute>
     <attribute><id>MRW_ENHANCED_GROUPING_NO_MIRRORING</id></attribute>
     <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
+    <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
+    <attribute><id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
 </targetType>
 

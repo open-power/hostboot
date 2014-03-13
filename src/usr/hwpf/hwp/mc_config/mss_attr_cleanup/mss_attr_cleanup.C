@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_attr_cleanup.C,v 1.2 2013/11/14 16:52:25 bellows Exp $
+// $Id: mss_attr_cleanup.C,v 1.3 2014/02/19 13:41:22 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_attr_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -48,6 +48,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.3   | bellows  |17-FEB-14| RAS Review Comments
 //   1.2   | bellows  |11-NOV-13| Gerrit Review Comments
 //   1.1   | bellows  |28-NOV-12| First Draft. Functions implemented
 //------------------------------------------------------------------------------
@@ -56,9 +57,9 @@
 //------------------------------------------------------------------------------
 // My Includes
 //------------------------------------------------------------------------------
-#include "mss_attr_cleanup.H"
-#include "cen_scom_addresses.H"
-#include "mss_eff_config.H"
+#include <mss_attr_cleanup.H>
+#include <cen_scom_addresses.H>
+#include <mss_eff_config.H>
 
 //------------------------------------------------------------------------------
 // Includes
@@ -78,7 +79,7 @@ const uint8_t DIMM_SIZE = 2;
 //------------------------------------------------------------------------------
 extern "C"
 {
-  fapi::ReturnCode mss_attr_cleanup_mba_attributes(const fapi::Target & i_target_mba);
+
 //------------------------------------------------------------------------------
 // @brief mss_attr_cleanup(): This function will disable a centaur - fencing it and powering it down
 //
@@ -94,8 +95,8 @@ extern "C"
 
     FAPI_INF("Running mss_attr_cleanup on %s\n", i_target_centaur.toEcmdString());
 
-    do {
-
+    do
+    {
 
       rc = mss_attr_cleanup_mba_attributes(i_target_mba0);
       if(rc) break;
@@ -108,7 +109,9 @@ extern "C"
     return rc;
   } // end mss_attr_cleanup()
 
-  fapi::ReturnCode mss_attr_cleanup_mba_attributes(const fapi::Target & i_target_mba) {
+
+  fapi::ReturnCode mss_attr_cleanup_mba_attributes(const fapi::Target & i_target_mba) 
+  {
   // turn off functional vector
     fapi::ReturnCode rc;
     uint8_t dimm_functional_vector=0x00; // ready to set all DIMMs to non functional
@@ -118,8 +121,8 @@ extern "C"
     uint8_t dimm_ranks[PORT_SIZE][DIMM_SIZE]; // Number of ranks for each configured DIMM in each MBA
     uint8_t dimm_type;
     uint8_t spd_dimm_ranks[PORT_SIZE][DIMM_SIZE];
-    uint8_t module_type;
-    uint8_t custom;
+    uint8_t module_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
+    uint8_t custom = fapi::ENUM_ATTR_SPD_CUSTOM_YES;
     uint8_t mba_port;
     uint8_t mba_dimm;
 
@@ -128,7 +131,8 @@ extern "C"
       rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_mba, mba_functional);
       if(rc) break;
 
-      if(! mba_functional ) {
+      if(! mba_functional ) 
+      {
 
 // read in some SPD attributes that are used in thermal (non functional DIMM/MBA, yet uses power)
 // we do this because we are cleaning up a DIMM that may not be functional any more due to whatever reason
@@ -144,15 +148,17 @@ extern "C"
           rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &target_dimm_array[dimm_index], mba_dimm);
           if(rc) break;
 
-          if(mba_port == 0 && mba_dimm == 0) {
+          if(mba_port == 0 && mba_dimm == 0) 
+          {
             rc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM, &target_dimm_array[dimm_index], custom);
             if (rc) break;
 
             rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE, &target_dimm_array[dimm_index], module_type);
             if(rc) break;
           }
+          //should there be an else check that leads to HWP error?
 
-          rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS, &target_dimm_array[dimm_index], spd_dimm_ranks[mba_port][mba_dimm]);
+              rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS, &target_dimm_array[dimm_index], spd_dimm_ranks[mba_port][mba_dimm]);
           if(rc) break;
         }
 
@@ -162,9 +168,12 @@ extern "C"
         if (rc) break;
 
         for(i=0;i<PORT_SIZE;i++)
-          for(j=0;j<DIMM_SIZE;j++) {
+        {
+          for(j=0;j<DIMM_SIZE;j++)
+          {
             eff_dimm_size[i][j]=0;
-            switch (spd_dimm_ranks[i][j]) {
+            switch (spd_dimm_ranks[i][j])
+            {
                 case fapi::ENUM_ATTR_SPD_NUM_RANKS_R4:
                     dimm_ranks[i][j]=4;
                     break;
@@ -180,30 +189,22 @@ extern "C"
             }
             switch(module_type)
             {
-                case fapi::ENUM_ATTR_SPD_MODULE_TYPE_CDIMM:
-                    dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
-                    break;
                 case fapi::ENUM_ATTR_SPD_MODULE_TYPE_RDIMM:
                     dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM;
                     break;
                 case fapi::ENUM_ATTR_SPD_MODULE_TYPE_UDIMM:
-                    if(custom) {
-                      dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
-                    }
-                    else {
-                      dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
-                    }
+                    dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
                     break;
                 case fapi::ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM:
                     dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM;
                     break;
                 default:
-                    FAPI_INF("DIMM type set to 0 on %s", i_target_mba.toEcmdString());
-                    dimm_type = 0;
+                    FAPI_INF("DIMM type set to %d on %s", fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM, i_target_mba.toEcmdString());
+                    dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
                     break;
             }
           }
-
+        }
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_SIZE, &i_target_mba, eff_dimm_size);
         if (rc) break;
 
@@ -214,7 +215,8 @@ extern "C"
         if (rc) break;
 
       }
-      else { // reenable  -reverse everything
+      else 
+        { // reenable  -reverse everything
 
       }
     } while(0);
@@ -222,5 +224,6 @@ extern "C"
     if(rc) { FAPI_ERR("ERROR: Bad RC in mss_attr_cleanup_mba_attributes"); }
     return rc;
   } // end of mss_attr_cleanup_mba_attributes
+
 } // extern "C"
 

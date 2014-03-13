@@ -13107,25 +13107,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
-    <description>
-    Used for Custom DIMMs to not enable the reading of the dimm temperature 
-    sensor on the master i2c bus.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_EFF_VPD_VERSION</id>
     <description>
         The lowest VPD Version of the DIMMs attached to the MBA. Comes directly (in ASCII) of the VINI VZ keyword
@@ -13426,7 +13407,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
-
+      
 <attribute>
     <id>HB_RSV_MEM_SIZE_MB</id>
     <description>
@@ -13442,6 +13423,32 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+    <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
+    <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the master i2c bus</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
+    <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the spare i2c bus</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
-
-

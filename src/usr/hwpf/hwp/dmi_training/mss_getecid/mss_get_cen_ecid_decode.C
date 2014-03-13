@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid_decode.C,v 1.8 2013/10/14 16:22:30 bellows Exp $
+// $Id: mss_get_cen_ecid_decode.C,v 1.9 2014/02/19 13:41:29 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.9   | bellows  |17-FEB-14| RAS Review Comments
 //   1.8   | bellows  |14-OCT-13| One more sprintf update to make this hostboot/cronus agnostic
 //   1.7   | bellows  |08-OCT-13| Made update so it compiles with cronus + hostboot
 //   1.6   | thi      |05-OCT-13| Fix compiler error
@@ -58,9 +59,6 @@
 using namespace fapi;
 
 extern "C" {
-
-  fapi::ReturnCode get_ecid_char(uint8_t c, char *creturn); // print helping function
-  void get_ecid_checksum(char ECID[13]);
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -102,11 +100,13 @@ extern "C" {
     rc_num |= temp.insert(&t,32,32,0);
     t = data[0] >> 32;
     rc_num |= temp.insert(&t,0,32,0);
-    for(uint8_t i=0;i<10;i++) {
+    for(uint8_t i=0;i<10;i++)
+    {
       rc_num |= temp.extract(&c,4+i*6,6);
       c = c >> 2;
       rc = get_ecid_char( c, &ecid_char);
-      if(rc) {
+      if(rc)
+      {
         FAPI_ERR("get_ecid_char returned with an error");
         return rc;
       }
@@ -124,7 +124,8 @@ extern "C" {
 
     chip_version=i_user_info.io_ec/0x10;
 
-    if(i_user_info.io_ec < 0x20) {
+    if(i_user_info.io_ec < 0x20)
+    {
 
       if(!i_user_info.o_nwell_misplacement) chip_version = 1.01;
       if(!i_user_info.o_bluewaterfall_broken) chip_version=1.10;
@@ -132,7 +133,8 @@ extern "C" {
     }
 
 
-    if(!(i_user_info.i_user_defined & CSV)) {
+    if(!(i_user_info.i_user_defined & CSV))
+    {
       sprintf(temp_string, "ECID(1:64)   0x%016llx\n", static_cast<unsigned long long int>(i_user_info.io_ecid[0]));
       strcat(o_display_string, temp_string);
       sprintf(temp_string, "ECID(65:128) 0x%016llx\n", static_cast<unsigned long long int>(i_user_info.io_ecid[1]));
@@ -144,27 +146,47 @@ extern "C" {
       sprintf(temp_string, "  Chip version: DD%.02f\n",chip_version);
       strcat(o_display_string, temp_string);
 
-      if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)   sprintf(temp_string, "  All eDRAMs Halves are good\n"); // Note A is Even, B is Odd	
-      else if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A) sprintf(temp_string, "  eDRAM Half A is good.  eDRAM Half B is bad\n");
-      else if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B)   sprintf(temp_string, "  eDRAM Half A is bad.  eDRAM Half B is good\n");
-      else if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF) sprintf(temp_string, "  All eDRAMs Halves are bad\n");
-      else if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_ON) sprintf(temp_string, "  All eDRAMs Halves are full unk good\n"); 
-      else if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_A) sprintf(temp_string, "  All eDRAMs A or Even unk good\n");
-      else if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_B) sprintf(temp_string, "  All eDRAMs B or odd  unk good\n");
-      else sprintf(temp_string, "  All eDRAMs Halves are full unk bad\n");
+      switch(i_cache_enable)
+      {
+          case  fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON:
+              sprintf(temp_string, "  All eDRAMs Halves are good\n"); // Note A is Even, B is Odd
+              break;
+          case fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A:
+              sprintf(temp_string, "  eDRAM Half A is good.  eDRAM Half B is bad\n");
+              break;
+          case ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B:
+              sprintf(temp_string, "  eDRAM Half A is bad.  eDRAM Half B is good\n");
+              break;
+          case ENUM_ATTR_MSS_CACHE_ENABLE_OFF:
+              sprintf(temp_string, "  All eDRAMs Halves are bad\n");
+              break;
+          case ENUM_ATTR_MSS_CACHE_ENABLE_UNK_ON:
+              sprintf(temp_string, "  All eDRAMs Halves are full unk good\n");
+              break;
+          case ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_A:
+              sprintf(temp_string, "  All eDRAMs A or Even unk good\n");
+              break;
+          case ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_B:
+              sprintf(temp_string, "  All eDRAMs B or odd  unk good\n");
+              break;
+          default:
+              sprintf(temp_string, "  All eDRAMs Halves are full unk bad\n");
+              break;
+      }
       strcat(o_display_string, temp_string);
 
       if(i_ddr_port_status == 0)   sprintf(temp_string, "  All DDR Ports are good\n"); 	
       else if(i_ddr_port_status == 1) sprintf(temp_string, "  DDR Port 0/1 is good.  DDR Port 2/3 is bad\n");
       else if(i_ddr_port_status == 2)   sprintf(temp_string, "  DDR Port 0/1 is bad.  DDR Port 2/3 is good\n");
-      else sprintf(temp_string, "  All DDR Ports are bad\n");
+      else sprintf(temp_string, "  All DDR Ports are bad\n"); // this is informational, so no callouts are made
       strcat(o_display_string, temp_string);
 
       sprintf(temp_string, "  PSRO: 0x%02x %f ps\n",i_user_info.o_psro, i_user_info.o_psro*0.025+7.5);
       strcat(o_display_string, temp_string);
     }
     //prints out a CSV
-    else {
+    else 
+    {
       uint8_t repair,bad_edram_a,bad_edram_b;
       uint8_t bad_ddr_port01,bad_ddr_port23;
       if(i_cache_enable == fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)  {repair=1;bad_edram_a=0;bad_edram_b=0; } 
@@ -183,7 +205,8 @@ extern "C" {
       sprintf(o_display_string, "%s,%d,%d,%0.2f,%d,%d,%d,%d,%d,%f ps\n",ECID,x,y,chip_version,repair,bad_edram_a,bad_edram_b,bad_ddr_port01,bad_ddr_port23,((float)i_user_info.o_psro*0.025+7.5));
     }
 
-    if(rc_num) {
+    if(rc_num)
+    {
       FAPI_ERR("Error occured during databuffer manipulations");
       rc.setEcmdError(rc);
     }
@@ -192,7 +215,8 @@ extern "C" {
   }
 
 //gets the character for the ECID
-  fapi::ReturnCode get_ecid_char(uint8_t c, char *creturn) {
+  fapi::ReturnCode get_ecid_char(uint8_t c, char *creturn)
+  {
    //c is a number, so use the offset for a number
     if(c < 10) {*creturn = (char)(c+48);}
     else {*creturn = (char)(c+55);}
@@ -200,7 +224,8 @@ extern "C" {
   }
 
 //gets the checksum, the last two characters, in the ecid string
-  void get_ecid_checksum(char ECID[13]) {
+  void get_ecid_checksum(char ECID[13])
+  {
     char rtn[13];
     for(uint32_t i = 0; i < 10; i++) rtn[i] = ECID[i];
     rtn[10]='A';
@@ -211,13 +236,17 @@ extern "C" {
     {
       sum = ((sum * 8) + (rtn[i] - 32)) % 59;
     }
-    if (sum != 0) {
+    if (sum != 0)
+    {
       int adjust = 59 - sum;
       rtn[11] += adjust & 7;
       adjust >>= 3;
       rtn[10] += adjust & 7;
     }
-    for (uint32_t i = 0; i < 13; i++) ECID[i] = rtn[i];
+    for (uint32_t i = 0; i < 13; i++)
+    {
+      ECID[i] = rtn[i];
+    }
   }
 
 

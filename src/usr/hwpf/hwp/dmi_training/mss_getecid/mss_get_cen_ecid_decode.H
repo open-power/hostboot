@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid_decode.H,v 1.3 2013/10/03 08:07:37 bellows Exp $
+// $Id: mss_get_cen_ecid_decode.H,v 1.4 2014/02/19 13:41:32 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.4   | bellows  |19-FEB-14| RAS Review Updates
 //   1.3   | bellows  |02-OCT-13| Minor Review Comments addressed
 //   1.2   | bellows  |24-SEP-13| Fixed typo
 //   1.1   | bellows  |17-SEP-13| Original Program
@@ -98,6 +99,8 @@ extern "C"
                                     char * o_display_string
 
                                     );
+  fapi::ReturnCode get_ecid_char(uint8_t c, char *creturn); // print helping function
+  void get_ecid_checksum(char ECID[13]);
 
 } // extern "C"
 

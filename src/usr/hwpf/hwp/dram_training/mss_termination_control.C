@@ -20,8 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: mss_termination_control.C,v 1.26 2014/01/31 13:41:28 sasethur Exp $
+// $Id: mss_termination_control.C,v 1.27 2014/02/25 21:08:15 mwuu Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -44,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.27   | mwuu     |25-Feb-14| Fixed setting opposite port slew values in 
+//         |          |         | config_slew_rate
 //  1.26   | mjjones  |31-Jan-14| RAS Reviewed 
 //  1.25   | mjjones  |22-Jan-14| Removed firmware header
 //  1.24   | abhijsau |21-Jan-14| mike and menlo fixed ras review comments
@@ -512,6 +513,8 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 		FAPI_DBG("port%u type=%u imp_idx=%u slew_idx=%u cal_slew=%u",
 			i_port, i_slew_type, imp_idx, slew_idx, slew_cal_value);
 
+		if (i_port == 0)	 // port 0 dq/dqs slew
+		{
 			rc = fapiGetScom(i_target_mba,
 				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_0_0x800000750301143F,
 				data_buffer); if(rc) return rc;
@@ -523,22 +526,25 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 				rc.setEcmdError(rc_num);
 				return rc;
 			}
-	// switch this later to use broadcast address, 0x80003C750301143F P0_[0:4]
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_0_0x800000750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_1_0x800004750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_2_0x800008750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_3_0x80000C750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_4_0x800010750301143F,
-				data_buffer); if(rc) return rc;
+		// switch this later to use broadcast address, 0x80003C750301143F P0_[0:4]
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_0_0x800000750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_1_0x800004750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_2_0x800008750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_3_0x80000C750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_4_0x800010750301143F,
+					data_buffer); if(rc) return rc;
+		}
+		else	 // port 1 dq/dqs slew
+		{
 			rc = fapiGetScom(i_target_mba,
 				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_0_0x800100750301143F,
 				data_buffer); if(rc) return rc;
@@ -547,25 +553,26 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			if (rc_num)
 			{
 			FAPI_ERR("Error in setting up DATA slew buffer");
-			rc.setEcmdError(rc_num);
-			return rc;
+				rc.setEcmdError(rc_num);
+				return rc;
 			}
-	// switch this later to use broadcast address, 0x80013C750301143F P1_[0:4]
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_0_0x800100750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_1_0x800104750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_2_0x800108750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_3_0x80010C750301143F,
-				data_buffer); if(rc) return rc;
-			rc = fapiPutScom(i_target_mba,
-				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_4_0x800110750301143F,
-				data_buffer); if(rc) return rc;
+		// switch this later to use broadcast address, 0x80013C750301143F P1_[0:4]
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_0_0x800100750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_1_0x800104750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_2_0x800108750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_3_0x80010C750301143F,
+					data_buffer); if(rc) return rc;
+				rc = fapiPutScom(i_target_mba,
+					DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_4_0x800110750301143F,
+					data_buffer); if(rc) return rc;
+		}
 	} // end DATA
     else	// Slew type = ADR
     {
@@ -642,6 +649,8 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 		FAPI_DBG("port%u type=%u slew_idx=%u imp_idx=%u cal_slew=%u",
 			i_port, i_slew_type, slew_idx, imp_idx, slew_cal_value);
 
+		if (i_port == 0)	 // port 0 adr slew
+		{
 			rc = fapiGetScom(i_target_mba,
 				DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR0_0x8000401A0301143F,
 				data_buffer); if(rc) return rc;
@@ -666,10 +675,12 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			rc = fapiPutScom(i_target_mba,
 			DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR3_0x80004C1A0301143F,
 			data_buffer); if(rc) return rc;
+		}
+		else				 // port 1 adr slew
+		{
 			rc = fapiGetScom(i_target_mba,
-			DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR0_0x8001401A0301143F,
-			data_buffer); if(rc) return rc;
-
+				DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR0_0x8001401A0301143F,
+				data_buffer); if(rc) return rc;
 			rc_num |= data_buffer.insertFromRight(slew_cal_value, adr_pos, 4);
 			if (rc_num)
 			{
@@ -690,6 +701,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			rc = fapiPutScom(i_target_mba,
 			DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR3_0x80014C1A0301143F,
 			data_buffer); if(rc) return rc;
+		}
     } // end ADR
     return rc;
 }

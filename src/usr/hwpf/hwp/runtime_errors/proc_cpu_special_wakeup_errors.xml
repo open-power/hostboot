@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_cpu_special_wakeup_errors.xml,v 1.5 2013/06/20 13:28:18 stillgs Exp $ -->
+<!-- $Id: proc_cpu_special_wakeup_errors.xml,v 1.9 2014/03/10 21:36:58 stillgs Exp $ -->
 <!-- Error definitions for proc_cpu_special_wakeup procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -34,29 +34,83 @@
     <ffdc>PMGP0</ffdc>
     <ffdc>SP_WKUP_REG_ADDRESS</ffdc>
     <ffdc>SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>HISTORY_ADDRESS</ffdc>
+    <ffdc>HISTORY_VALUE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <target>EX_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>EX_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_SPCWKUP_CODE_BAD_ENTITY</rc>
     <description>An invalid entity (eg besides FSP, OCC, or PHYP ENUM) was passed to proc_cpu_special_wakeup</description>
      <ffdc>I_ENTITY</ffdc>
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_SPCWKUP_CODE_BAD_OP</rc>
     <description>An invalid operation (eg besides Set or Clear ENUM) was passed to proc_cpu_special_wakeup</description>
    <ffdc>I_OPERATION</ffdc>
+   <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_CHKSTOP</rc>
-    <description>system is checkstopped before proc_cpu_special_wakeup</description>
+    <description>Special_wakeup requested with the system checkstopped and ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG not set</description>
+    <ffdc>PCBSINTRTYPE</ffdc>
+    <ffdc>ATTRIGNOREXSTOP</ffdc>
+    <ffdc>EX_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_SPCWKUP_PUTGETSCOM_FAILED</rc>
-    <description>Register read/write failed in proc_cpu_special_wakeup</description>
-    <ffdc>ERRORS</ffdc>    
+    <rc>RC_PROCPM_SPCWKUP_SLW_IN_CHKSTOP</rc>
+    <description>Special_wakeup requested to an EX chiplet in either Sleep or Winkle with the system checkstopped
+    Calling firmware will have to check for this return code to influence dump flow.  Note:  this is NOT a loggable error.
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_SPCWKUP_NOT_SET</rc>
+    <description>Special wake-up done is not set but a platform COUNT greater than 0 exists.  Hardware and code are out of sync.</description>
+    <ffdc>PMGP0</ffdc>
+    <ffdc>ENTITY_COUNT</ffdc>
+    <ffdc>I_ENTITY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -68,6 +122,20 @@
     <ffdc>PHYP_SPCWKUP_COUNT</ffdc>
     <ffdc>FSP_SPCWKUP_COUNT</ffdc>
     <ffdc>OCC_SPCWKUP_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_SPCWKUP_INVALID_PMHISTORY</rc>
+    <description>Invalid PM History detected in proc_cpu_special_wakeup</description>
+    <ffdc>PMHIST</ffdc>
+    <callout>
+      <target>EX_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
