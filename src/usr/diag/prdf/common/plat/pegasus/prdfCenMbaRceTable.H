@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -49,6 +49,14 @@ class CenMbaRceTable
   public: // functions
 
     /**
+     * @brief Constructor
+     * @param i_mbaTrgt An MBA target.
+     */
+    explicit CenMbaRceTable( TARGETING::TargetHandle_t i_mbaTrgt ) :
+        iv_mbaTrgt( i_mbaTrgt )
+    {}
+
+    /**
      * @brief  Will attempt to add a new entry to the table.
      *
      * If an entry already exists, the entry's count is incremented. Otherwise,
@@ -71,10 +79,9 @@ class CenMbaRceTable
 
     /**
      * @brief Gathers all table data to be stored in capture data.
-     * @param i_mbaTrgt  An MBA target.
      * @param io_cd      Capture data struct.
      */
-    void addCapData( TARGETING::TargetHandle_t i_mbaTrgt, CaptureData & io_cd );
+    void addCapData( CaptureData & io_cd );
 
     /** Default Constructor */
     CenMbaRceTable():iv_table(){}
@@ -84,6 +91,9 @@ class CenMbaRceTable
     typedef std::map<CenRank, LineDelete::PrdfCacheCETable> RceTable;
 
   private: // instance variables
+
+    /** MBA associated with this table. */
+    TARGETING::TargetHandle_t iv_mbaTrgt;
 
     /** A storage container for memory RCE errors. */
     RceTable iv_table;

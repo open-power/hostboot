@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -54,6 +54,9 @@ enum
 
     SYMBOLS_PER_X8DRAM = 4,
     SYMBOLS_PER_X4DRAM = 2,
+
+    DQS_PER_X8DRAM = DQS_PER_SYMBOL * SYMBOLS_PER_X8DRAM,
+    DQS_PER_X4DRAM = DQS_PER_SYMBOL * SYMBOLS_PER_X4DRAM,
 
     X8DRAMS_PER_RANK = SYMBOLS_PER_RANK / SYMBOLS_PER_X8DRAM,
     X4DRAMS_PER_RANK = SYMBOLS_PER_RANK / SYMBOLS_PER_X4DRAM,

@@ -66,6 +66,14 @@ class CenMbaCeTable
   public: // functions
 
     /**
+     * @brief Constructor
+     * @param i_mbaTrgt An MBA target.
+     */
+    explicit CenMbaCeTable( TARGETING::TargetHandle_t i_mbaTrgt ) :
+        iv_mbaTrgt( i_mbaTrgt )
+    {}
+
+    /**
      * @brief  Will attempt to add a new entry to the table.
      *
      * If an entry already exists, the entry's count is incremented. Otherwise,
@@ -110,29 +118,31 @@ class CenMbaCeTable
 
     /**
      * @brief Gathers all table data to be stored in capture data.
-     * @param i_mbaTrgt  An MBA target.
      * @param io_cd      Capture data struct.
      */
-    void addCapData( TARGETING::TargetHandle_t i_mbaTrgt, CaptureData & io_cd );
+    void addCapData( CaptureData & io_cd );
 
   private: // structs, typedefs
 
     /** @brief Individual entries of iv_table. */
     struct TableData
     {
-        bool    active;             ///< TRUE if this entry is active
-        uint8_t count;              ///< Number of times this entry is detected
-        CenAddr addr;               ///< Physical address of this entry
-        uint8_t dram;               ///< The DRAM in which the CE was detected
-        uint8_t dramPins;           ///< The failing pins of the DRAM
-        uint8_t portSlct;           ///< The port select of the DRAM
+        bool    active;              ///< TRUE if this entry is active
+        uint8_t count;               ///< Number of times this entry is detected
+        CenAddr addr;                ///< Physical address of this entry
+        uint8_t dram;                ///< The DRAM in which the CE was detected
+        uint8_t dramPins;            ///< The failing pins of the DRAM
+        uint8_t portSlct;            ///< The port select of the DRAM
         CEN_SYMBOL::WiringType type; ///< The wiring type
-        bool    isHard;             ///< TRUE if a hard CE was detected
+        bool    isHard;              ///< TRUE if a hard CE was detected
+        bool    isDramSpared;        ///< TRUE if on spare DRAM
+        bool    isEccSpared;         ///< TRUE if on ECC spare
 
         /** @brief Default constructor. */
         TableData() :
             active(false), count(0), addr(), dram(0), dramPins(0), portSlct(0),
-            type(CEN_SYMBOL::WIRING_INVALID), isHard(false)
+            type(CEN_SYMBOL::WIRING_INVALID), isHard(false),
+            isDramSpared(false), isEccSpared(false)
         {}
 
         /**
@@ -144,10 +154,11 @@ class CenMbaCeTable
          */
         TableData( const CenAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
                    uint8_t i_portSlct, CEN_SYMBOL::WiringType i_type,
-                   bool i_isHard ) :
+                   bool i_isHard, bool i_isDramSpared, bool i_isEccSpared ) :
             active(true), count(1), addr(i_addr), dram(i_dram),
             dramPins(i_dramPins), portSlct(i_portSlct), type(i_type),
-            isHard(i_isHard)
+            isHard(i_isHard), isDramSpared(i_isDramSpared),
+            isEccSpared(i_isEccSpared)
         {}
 
         /** An entry is equivalent if the address and DRAM match. */
@@ -160,6 +171,9 @@ class CenMbaCeTable
     typedef std::list<TableData> CeTable;
 
   private: // instance variables
+
+    /** MBA associated with this table. */
+    TARGETING::TargetHandle_t iv_mbaTrgt;
 
     /** A storage container for memory fetch CE errors. */
     CeTable iv_table;

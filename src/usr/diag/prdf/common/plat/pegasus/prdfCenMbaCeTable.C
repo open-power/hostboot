@@ -27,6 +27,7 @@
 
 // Framwork includes
 #include <iipServiceDataCollector.h>
+#include <prdfPlatServices.H>
 #include <UtilHash.H>
 
 // Pegasus includes
@@ -37,6 +38,7 @@ using namespace TARGETING;
 namespace PRDF
 {
 
+using namespace PlatServices;
 using namespace CE_TABLE;
 
 //------------------------------------------------------------------------------
@@ -48,7 +50,8 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
 
     TableData data ( i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
                      i_symbol.getPortSlct(), i_symbol.getWiringType(),
-                     i_isHard );
+                     i_isHard, i_symbol.isDramSpared(),
+                     i_symbol.isEccSpared() );
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
@@ -180,7 +183,7 @@ void CenMbaCeTable::getMnfgCounts( const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-void CenMbaCeTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
+void CenMbaCeTable::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -192,6 +195,8 @@ void CenMbaCeTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
     memset( data, 0x00, sz_maxData );
 
     size_t sz_actData = 0;
+
+    uint32_t mbaPos = getTargetPosition( iv_mbaTrgt );
 
     for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
@@ -211,9 +216,13 @@ void CenMbaCeTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
 
         uint8_t active = it->active ? 1 : 0;
         uint8_t isHard = it->isHard ? 1 : 0;
+        uint8_t isSp   = it->isDramSpared ? 1 : 0;
+        uint8_t isEcc  = it->isEccSpared  ? 1 : 0;
 
         data[sz_actData  ] = it->count;
-        data[sz_actData+1] = it->type << 4;                     // 4 spare bits
+        data[sz_actData+1] = (it->type << 5) |
+                             (mbaPos << 4) | (it->portSlct << 3) |
+                             (isSp << 2) | (isEcc << 1);  // 1 spare bit
         data[sz_actData+2] = (isHard << 7) | (active << 6) | (it->dram & 0x3f);
         data[sz_actData+3] = it->dramPins;
         data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | (svld << 1) | row0;
@@ -234,7 +243,7 @@ void CenMbaCeTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
 
         // Add data to capture data.
         BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( i_mbaTrgt, Util::hashString("MEM_CE_TABLE"), bs );
+        io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_CE_TABLE"), bs );
     }
 }
 

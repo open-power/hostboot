@@ -79,7 +79,7 @@ void CenMbaRceTable::flushEntry( const CenRank & i_rank )
 }
 //------------------------------------------------------------------------------
 
-void CenMbaRceTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
+void CenMbaRceTable::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
     static const size_t sz_entryCnt = sizeof( uint8_t ); // entry count
@@ -122,7 +122,7 @@ void CenMbaRceTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
 
         // Add data to capture data.
         BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( i_mbaTrgt, Util::hashString("MEM_RCE_TABLE"), bs );
+        io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_RCE_TABLE"), bs );
     }
 }
 

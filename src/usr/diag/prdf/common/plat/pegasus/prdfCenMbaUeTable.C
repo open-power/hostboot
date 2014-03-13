@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -67,8 +67,7 @@ void CenMbaUeTable::addEntry( UE_TABLE::Type i_type, const CenAddr & i_addr )
 
 //------------------------------------------------------------------------------
 
-void CenMbaUeTable::addCapData( TargetHandle_t i_mbaTrgt,
-                                CaptureData & io_cd )
+void CenMbaUeTable::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
 
@@ -117,7 +116,7 @@ void CenMbaUeTable::addCapData( TargetHandle_t i_mbaTrgt,
 
         // Add data to capture data.
         BIT_STRING_ADDRESS_CLASS bs ( 0, sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( i_mbaTrgt, Util::hashString("MEM_UE_TABLE"), bs );
+        io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_UE_TABLE"), bs );
     }
 }
 

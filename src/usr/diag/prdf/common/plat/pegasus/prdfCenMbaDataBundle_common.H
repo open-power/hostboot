@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,7 +56,9 @@ class CenMbaDataBundleCommon : public DataBundle
      */
     explicit CenMbaDataBundleCommon( ExtensibleChip * i_mbaChip ) :
         iv_mbaChip(i_mbaChip), iv_membChip(NULL), iv_tdCtlr(i_mbaChip),
-        iv_ueTable()
+        iv_ueTable( i_mbaChip->GetChipHandle()),
+        iv_ceTable( i_mbaChip->GetChipHandle()),
+        iv_rceTable(i_mbaChip->GetChipHandle())
     {}
 
     /**
@@ -97,9 +99,9 @@ class CenMbaDataBundleCommon : public DataBundle
 
   public: // instance variables
 
-    CenMbaTdCtlr  iv_tdCtlr;       ///< Targeted Diagnostics Controller
-    CenMbaUeTable iv_ueTable;      ///< UE table for FFDC
-    CenMbaCeTable iv_ceTable;      ///< CE table for FFDC
+    CenMbaTdCtlr   iv_tdCtlr;      ///< Targeted Diagnostics Controller
+    CenMbaUeTable  iv_ueTable;     ///< UE table for FFDC
+    CenMbaCeTable  iv_ceTable;     ///< CE table for FFDC
     CenMbaRceTable iv_rceTable;    ///< RCE table for FFDC
 
 };

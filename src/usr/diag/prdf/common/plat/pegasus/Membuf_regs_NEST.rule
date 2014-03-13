@@ -869,14 +869,14 @@
     {
         name        "MBU.MBS.ARB.RXLT.MBAXCR01Q";
         scomaddr    0x0201140B;
-        capture     group never;
+        capture     group default;
     };
 
     register MBA1_MBAXCR
     {
         name        "MBU.MBS.ARB.RXLT.MBAXCR23Q";
         scomaddr    0x0201140C;
-        capture     group never;
+        capture     group default;
     };
 
     ############################################################################

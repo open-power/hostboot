@@ -49,7 +49,11 @@ using namespace PARSER;
 using namespace MemoryMruData;
 using namespace CEN_SYMBOL;
 
-static const char * dramSiteCardAPortARank02[ ] =
+//##############################################################################
+// DRAM site tables for RAW CARD A
+//##############################################################################
+
+static const char * dramSiteCardAPortARank02[] =
 
 {
     "DA01.d3", "DA01.d0", "DA01.d2", "DA01.d7",
@@ -83,16 +87,15 @@ static const char * dramSiteCardAPortARank02[ ] =
     "DA0SP.d3", "DA0SP.d4", "DA0SP.d5", "DA0SP.d1"
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortARank02[ ] =
+static const char * dramCardAPortARank02[] =
 {
     "DA01", "DA04", "DA07", "DA06", "DA02", "DA05", "DA03", "DA08",
     "DA09", "DA0SP"
 };
-//---------------------------------------------------------
 
-static const char * dramSiteCardAPortARank46[ ] =
+//------------------------------------------------------------------------------
+
+static const char * dramSiteCardAPortARank46[] =
 {
     "DA11.d2", "DA11.d1", "DA11.d3", "DA11.d4",
     "DA11.d0", "DA11.d5", "DA11.d6", "DA11.d7",
@@ -123,16 +126,15 @@ static const char * dramSiteCardAPortARank46[ ] =
 
     "DA1SP.d3", "DA1SP.d5", "DA1SP.d1", "DA1SP.d4",
     "DA1SP.d2", "DA1SP.d7", "DA1SP.d6", "DA1SP.d0"
-} ;//rank4_6
+};
 
-//---------------------------------------------------------
 
-static const char * dramCardAPortARank46[ ] =
+static const char * dramCardAPortARank46[] =
 {
     "DA11", "DA14","DA17","DA16", "DA12", "DA15", "DA13", "DA18", "DA19","DA1SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardAPortBRank02[] =
 {
@@ -165,18 +167,15 @@ static const char * dramSiteCardAPortBRank02[] =
 
     "DB0SP.d1", "DB0SP.d5", "DB0SP.d7", "DB0SP.d0",
     "DB0SP.d4", "DB0SP.d6", "DB0SP.d2", "DB0SP.d3",
-
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortBRank02[ ] =
+static const char * dramCardAPortBRank02[] =
 {
     "DB07", "DB01", "DB03", "DB02", "DB06", "DB05", "DB08", "DB04",
     "DB09", "DB0SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardAPortBRank46[] =
 {
@@ -209,17 +208,14 @@ static const char * dramSiteCardAPortBRank46[] =
 
     "DB1SP.d0", "DB1SP.d6", "DB1SP.d4", "DB1SP.d1",
     "DB1SP.d7", "DB1SP.d5", "DB1SP.d3", "DB1SP.d2",
-
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortBRank46[ ] =
+static const char * dramCardAPortBRank46[] =
 {
     "DB17", "DB11","DB13","DB12", "DB16", "DB15", "DB18", "DB14", "DB19","DB1SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardAPortCRank02[] =
 {
@@ -252,18 +248,15 @@ static const char * dramSiteCardAPortCRank02[] =
 
     "DC0SP.d2", "DC0SP.d0", "DC0SP.d6", "DC0SP.d1",
     "DC0SP.d4", "DC0SP.d7", "DC0SP.d5", "DC0SP.d3",
-
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortCRank02[ ] =
+static const char * dramCardAPortCRank02[] =
 {
     "DC02", "DC03", "DC05", "DC08", "DC01", "DC06", "DC04", "DC09",
     "DC07", "DC0SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardAPortCRank46[] =
 {
@@ -296,18 +289,15 @@ static const char * dramSiteCardAPortCRank46[] =
 
     "DC1SP.d3", "DC1SP.d1", "DC1SP.d5", "DC1SP.d0",
     "DC1SP.d7", "DC1SP.d4", "DC1SP.d6", "DC1SP.d2",
-
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortCRank46[ ] =
+static const char * dramCardAPortCRank46[] =
 {
     "DC12", "DC13", "DC15", "DC18", "DC11", "DC16", "DC14", "DC19",
     "DC17", "DC1SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardAPortDRank02[] =
 {
@@ -340,18 +330,15 @@ static const char * dramSiteCardAPortDRank02[] =
 
     "DD0SP.d7", "DD0SP.d1", "DD0SP.d2", "DD0SP.d0",
     "DD0SP.d6", "DD0SP.d5", "DD0SP.d4", "DD0SP.d3",
-
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortDRank02[ ] =
+static const char * dramCardAPortDRank02[] =
 {
     "DD05",  "DD04", "DD02", "DD08", "DD01", "DD09", "DD03", "DD07",
     "DD06",  "DD0SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardAPortDRank46[] =
 {
@@ -386,17 +373,85 @@ static const char * dramSiteCardAPortDRank46[] =
     "DD1SP.d5", "DD1SP.d6", "DD1SP.d7", "DD1SP.d2",
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardAPortDRank46[ ] =
+static const char * dramCardAPortDRank46[] =
 {
     "DD15", "DD14", "DD12", "DD18", "DD11", "DD19", "DD13", "DD17",
     "DD16", "DD1SP"
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortARank02[ ] =
+static const char ** dqSiteMap_rcA
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+{
+    { // MBA 0
+        { // Port 0
+            dramSiteCardAPortARank02, NULL, // Ranks 0-1
+            dramSiteCardAPortARank02, NULL, // Ranks 2-3
+            dramSiteCardAPortARank46, NULL, // Ranks 4-5
+            dramSiteCardAPortARank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardAPortBRank02, NULL, // Ranks 0-1
+            dramSiteCardAPortBRank02, NULL, // Ranks 2-3
+            dramSiteCardAPortBRank46, NULL, // Ranks 4-5
+            dramSiteCardAPortBRank46, NULL, // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramSiteCardAPortCRank02, NULL, // Ranks 0-1
+            dramSiteCardAPortCRank02, NULL, // Ranks 2-3
+            dramSiteCardAPortCRank46, NULL, // Ranks 4-5
+            dramSiteCardAPortCRank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardAPortDRank02, NULL, // Ranks 0-1
+            dramSiteCardAPortDRank02, NULL, // Ranks 2-3
+            dramSiteCardAPortDRank46, NULL, // Ranks 4-5
+            dramSiteCardAPortDRank46, NULL, // Ranks 6-7
+        },
+    },
+};
+
+static const char ** dramSiteMap_rcA
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+{
+    { // MBA 0
+        { // Port 0
+            dramCardAPortARank02, NULL, // Ranks 0-1
+            dramCardAPortARank02, NULL, // Ranks 2-3
+            dramCardAPortARank46, NULL, // Ranks 4-5
+            dramCardAPortARank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramCardAPortBRank02, NULL, // Ranks 0-1
+            dramCardAPortBRank02, NULL, // Ranks 2-3
+            dramCardAPortBRank46, NULL, // Ranks 4-5
+            dramCardAPortBRank46, NULL, // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramCardAPortCRank02, NULL, // Ranks 0-1
+            dramCardAPortCRank02, NULL, // Ranks 2-3
+            dramCardAPortCRank46, NULL, // Ranks 4-5
+            dramCardAPortCRank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramCardAPortDRank02, NULL, // Ranks 0-1
+            dramCardAPortDRank02, NULL, // Ranks 2-3
+            dramCardAPortDRank46, NULL, // Ranks 4-5
+            dramCardAPortDRank46, NULL, // Ranks 6-7
+        },
+    },
+};
+
+//##############################################################################
+// DRAM site tables for RAW CARD B
+//##############################################################################
+
+static const char * dramSiteCardBPortARank02[] =
 
 {
     "DA07.d3", "DA07.d0", "DA07.d2", "DA07.d1",
@@ -427,20 +482,19 @@ static const char * dramSiteCardBPortARank02[ ] =
     "DA17.d0", "DA17.d2", "DA17.d1", "DA17.d3",
 
     "DA1SP.d3", "DA1SP.d1", "DA1SP.d2", "DA1SP.d0",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
 };
 
-//---------------------------------------------------------
-
-static const char * dramCardBPortARank02[ ] =
+static const char * dramCardBPortARank02[] =
 {
     "DA07", "DA02", "DA03", "DA04", "DA12", "DA06", "DA11", "DA05",
     "DA14", "DA18", "DA13", "DA19", "DA09", "DA16", "DA08", "DA15",
-    "DA01", "DA17", "DA1SP",NULL
+    "DA01", "DA17", "DA1SP","",
 };
-//---------------------------------------------------------
 
-static const char * dramSiteCardBPortARank46[ ] =
+//------------------------------------------------------------------------------
+
+static const char * dramSiteCardBPortARank46[] =
 {
     "DA27.d2", "DA27.d1", "DA27.d3", "DA27.d0",
     "DA22.d3", "DA22.d1", "DA22.d2", "DA22.d0",
@@ -470,20 +524,17 @@ static const char * dramSiteCardBPortARank46[ ] =
     "DA37.d1", "DA37.d3", "DA37.d0", "DA37.d2",
 
     "DA3SP.d2", "DA3SP.d0", "DA3SP.d3", "DA3SP.d1",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-} ;//rank4_6
-
-//---------------------------------------------------------
-
-static const char * dramCardBPortARank46[ ] =
+static const char * dramCardBPortARank46[] =
 {
     "DA27", "DA22", "DA23", "DA24", "DA32", "DA26", "DA31", "DA25",
     "DA34", "DA38", "DA33", "DA39", "DA29", "DA36", "DA28", "DA35",
-    "DA21", "DA37", "DA3SP",NULL
+    "DA21", "DA37", "DA3SP","",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardBPortBRank02[] =
 {
@@ -515,20 +566,17 @@ static const char * dramSiteCardBPortBRank02[] =
     "DB12.d0", "DB12.d2", "DB12.d1", "DB12.d3",
 
     "DB1SP.d2", "DB1SP.d1", "DB1SP.d3", "DB1SP.d0",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-}; //rank0_2
-
-//---------------------------------------------------------
-
-static const char * dramCardBPortBRank02[ ] =
+static const char * dramCardBPortBRank02[] =
 {
     "DB13", "DB16", "DB14", "DB17", "DB01", "DB15", "DB11", "DB19",
     "DB04", "DB03", "DB05", "DB07", "DB06", "DB09", "DB08", "DB18",
-    "DB02", "DB12", "DB1SP", NULL
+    "DB02", "DB12", "DB1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardBPortBRank46[] =
 {
@@ -560,20 +608,17 @@ static const char * dramSiteCardBPortBRank46[] =
     "DB32.d1", "DB32.d3","DB32.d0",  "DB32.d2",
 
     "DB3SP.d3", "DB3SP.d0", "DB3SP.d2", "DB3SP.d1",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-}; //rank_4_6
-
-//---------------------------------------------------------
-
-static const char * dramCardBPortBRank46[ ] =
+static const char * dramCardBPortBRank46[] =
 {
     "DB33", "DB36", "DB34", "DB37", "DB21", "DB35", "DB31", "DB39",
     "DB24", "DB23", "DB25", "DB27", "DB26", "DB29", "DB28", "DB38",
-    "DB22", "DB32", "DB3SP", NULL
+    "DB22", "DB32", "DB3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardBPortCRank02[] =
 {
@@ -605,20 +650,17 @@ static const char * dramSiteCardBPortCRank02[] =
     "DC06.d0", "DC06.d1", "DC06.d3", "DC06.d2",
 
     "DC1SP.d3", "DC1SP.d1", "DC1SP.d0", "DC1SP.d2",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-};//rank_0_2
-
-//---------------------------------------------------------
-
-static const char * dramCardBPortCRank02[ ] =
+static const char * dramCardBPortCRank02[] =
 {
     "DC18", "DC09", "DC08", "DC07", "DC16", "DC17", "DC19", "DC01",
     "DC12", "DC02", "DC13", "DC14", "DC11", "DC03", "DC04", "DC15",
-    "DC05", "DC06", "DC1SP", NULL,
+    "DC05", "DC06", "DC1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardBPortCRank46[] =
 {
@@ -650,19 +692,17 @@ static const char * dramSiteCardBPortCRank46[] =
     "DC26.d1", "DC26.d0", "DC26.d2", "DC26.d3",
 
     "DC3SP.d2", "DC3SP.d0", "DC3SP.d1", "DC3SP.d3",
-    NULL,       NULL,       NULL,       NULL,
-}; //rank_4_6
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardBPortCRank46[ ] =
+static const char * dramCardBPortCRank46[] =
 {
     "DC38", "DC29", "DC28", "DC27", "DC36", "DC37", "DC39", "DC21",
     "DC32", "DC22", "DC33", "DC34", "DC31", "DC23", "DC24", "DC35",
-    "DC25", "DC26", "DC3SP", NULL
+    "DC25", "DC26", "DC3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardBPortDRank02[] =
 {
@@ -693,20 +733,18 @@ static const char * dramSiteCardBPortDRank02[] =
     "DD09.d2", "DD09.d0", "DD09.d3", "DD09.d1",
     "DD17.d0", "DD17.d3", "DD17.d1", "DD17.d2",
 
-    "DD1SP.d2", "DD1SP.d0", "DD1SP.d3",  "DD1SP.d1",
-    NULL,       NULL,       NULL,        NULL,
-};//rank_0_2
+    "DD1SP.d2", "DD1SP.d0", "DD1SP.d3", "DD1SP.d1",
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardBPortDRank02[ ] =
+static const char * dramCardBPortDRank02[] =
 {
     "DD13", "DD16", "DD19", "DD15", "DD14", "DD12", "DD11", "DD18",
     "DD08", "DD03", "DD04", "DD01", "DD05", "DD02", "DD06", "DD07",
-    "DD09", "DD17", "DD1SP", NULL
+    "DD09", "DD17", "DD1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardBPortDRank46[] =
 {
@@ -738,22 +776,89 @@ static const char * dramSiteCardBPortDRank46[] =
     "DD37.d1", "DD37.d2", "DD37.d0", "DD37.d3",
 
     "DD3SP.d3", "DD3SP.d1", "DD3SP.d2", "DD3SP.d0",
-    NULL,       NULL,       NULL,       NULL,
-}; //rank_4_6
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardBPortDRank46[ ] =
+static const char * dramCardBPortDRank46[] =
 {
     "DD33", "DD36", "DD39", "DD35", "DD34", "DD32", "DD31", "DD38",
     "DD28", "DD23", "DD24", "DD21", "DD25", "DD22", "DD26", "DD27",
-    "DD29", "DD37", "DD3SP", NULL
+    "DD29", "DD37", "DD3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static const char * dramSiteCardDPortARank01[ ] =
+static const char ** dqSiteMap_rcB
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+{
+    { // MBA 0
+        { // Port 0
+            dramSiteCardBPortARank02, NULL, // Ranks 0-1
+            dramSiteCardBPortARank02, NULL, // Ranks 2-3
+            dramSiteCardBPortARank46, NULL, // Ranks 4-5
+            dramSiteCardBPortARank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardBPortBRank02, NULL, // Ranks 0-1
+            dramSiteCardBPortBRank02, NULL, // Ranks 2-3
+            dramSiteCardBPortBRank46, NULL, // Ranks 4-5
+            dramSiteCardBPortBRank46, NULL, // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramSiteCardBPortCRank02, NULL, // Ranks 0-1
+            dramSiteCardBPortCRank02, NULL, // Ranks 2-3
+            dramSiteCardBPortCRank46, NULL, // Ranks 4-5
+            dramSiteCardBPortCRank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardBPortDRank02, NULL, // Ranks 0-1
+            dramSiteCardBPortDRank02, NULL, // Ranks 2-3
+            dramSiteCardBPortDRank46, NULL, // Ranks 4-5
+            dramSiteCardBPortDRank46, NULL, // Ranks 6-7
+        },
+    },
+};
 
+static const char ** dramSiteMap_rcB
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+{
+    { // MBA 0
+        { // Port 0
+            dramCardBPortARank02, NULL, // Ranks 0-1
+            dramCardBPortARank02, NULL, // Ranks 2-3
+            dramCardBPortARank46, NULL, // Ranks 4-5
+            dramCardBPortARank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramCardBPortBRank02, NULL, // Ranks 0-1
+            dramCardBPortBRank02, NULL, // Ranks 2-3
+            dramCardBPortBRank46, NULL, // Ranks 4-5
+            dramCardBPortBRank46, NULL, // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramCardBPortCRank02, NULL, // Ranks 0-1
+            dramCardBPortCRank02, NULL, // Ranks 2-3
+            dramCardBPortCRank46, NULL, // Ranks 4-5
+            dramCardBPortCRank46, NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramCardBPortDRank02, NULL, // Ranks 0-1
+            dramCardBPortDRank02, NULL, // Ranks 2-3
+            dramCardBPortDRank46, NULL, // Ranks 4-5
+            dramCardBPortDRank46, NULL, // Ranks 6-7
+        },
+    },
+};
+
+//##############################################################################
+// DRAM site tables for RAW CARD D
+//##############################################################################
+
+static const char * dramSiteCardDPortARank01[] =
 {
     "DA07.d3", "DA07.d0", "DA07.d2", "DA07.d1",
     "DA02.d2", "DA02.d0", "DA02.d3", "DA02.d1",
@@ -783,21 +888,19 @@ static const char * dramSiteCardDPortARank01[ ] =
     "DA06.d3", "DA06.d1", "DA06.d0", "DA06.d2",
 
     "DA1SP.d3", "DA1SP.d2", "DA1SP.d1", "DA1SP.d0",
-    NULL,       NULL,       NULL,       NULL,
-}; //rank 0_1
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardDPortARank01[ ] =
+static const char * dramCardDPortARank01[] =
 {
     "DA07", "DA02", "DA03", "DA04", "DA11", "DA12", "DA17", "DA05",
     "DA01", "DA18", "DA16", "DA19", "DA09", "DA14", "DA08", "DA15",
-    "DA13", "DA06", "DA1SP", NULL
+    "DA13", "DA06", "DA1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static const char * dramSiteCardDPortARank45[ ] =
+static const char * dramSiteCardDPortARank45[] =
 {
     "DA27.d2", "DA27.d1", "DA27.d3", "DA27.d0",
     "DA22.d3", "DA22.d1", "DA22.d2", "DA22.d0",
@@ -826,21 +929,18 @@ static const char * dramSiteCardDPortARank45[ ] =
     "DA33.d3", "DA33.d0", "DA33.d2", "DA33.d1",
     "DA26.d2", "DA26.d0", "DA26.d1", "DA26.d3",
 
-    "DA3SP.d2",  "DA3SP.d3", "DA3SP.d0", "DA3SP.d1",
-    NULL,        NULL,       NULL,       NULL,
+    "DA3SP.d2", "DA3SP.d3", "DA3SP.d0", "DA3SP.d1",
+    "",         "",         "",         "",
+};
 
-} ;//rank4_5
-
-//---------------------------------------------------------
-
-static const char * dramCardDPortARank45[ ] =
+static const char * dramCardDPortARank45[] =
 {
     "DA27", "DA22", "DA23", "DA24", "DA31", "DA32", "DA37", "DA25",
     "DA21", "DA38", "DA36", "DA39", "DA29", "DA34", "DA28", "DA35",
-    "DA33", "DA26", "DA3SP", NULL
+    "DA33", "DA26", "DA3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardDPortBRank01[] =
 {
@@ -872,20 +972,17 @@ static const char * dramSiteCardDPortBRank01[] =
     "DB12.d0", "DB12.d2", "DB12.d1", "DB12.d3",
 
     "DB1SP.d2", "DB1SP.d1", "DB1SP.d3", "DB1SP.d0",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-}; //rank0_1
-
-//---------------------------------------------------------
-
-static const char * dramCardDPortBRank01[ ] =
+static const char * dramCardDPortBRank01[] =
 {
     "DB13", "DB16", "DB14", "DB17", "DB01", "DB15", "DB11", "DB19",
     "DB04", "DB03", "DB05", "DB07", "DB06", "DB09", "DB08", "DB18",
-    "DB02", "DB12", "DB1SP", NULL
+    "DB02", "DB12", "DB1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardDPortBRank45[] =
 {
@@ -917,20 +1014,17 @@ static const char * dramSiteCardDPortBRank45[] =
     "DB32.d1", "DB32.d3", "DB32.d0", "DB32.d2",
 
     "DB3SP.d3", "DB3SP.d0", "DB3SP.d2", "DB3SP.d1",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-}; //rank_4_5
-
-//---------------------------------------------------------
-
-static const char * dramCardDPortBRank45[ ] =
+static const char * dramCardDPortBRank45[] =
 {
     "DB33", "DB36", "DB34", "DB37", "DB21", "DB35", "DB31", "DB39",
     "DB24", "DB23", "DB25", "DB27", "DB26", "DB29", "DB28", "DB38",
-    "DB22", "DB32", "DB3SP", NULL
+    "DB22", "DB32", "DB3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardDPortCRank01[] =
 {
@@ -962,20 +1056,17 @@ static const char * dramSiteCardDPortCRank01[] =
     "DC06.d0", "DC06.d1", "DC06.d3", "DC06.d2",
 
     "DC1SP.d3", "DC1SP.d1", "DC1SP.d0", "DC1SP.d2",
-    NULL,       NULL,       NULL,       NULL,
+    "",         "",         "",         "",
+};
 
-};//rank_0_1
-
-//---------------------------------------------------------
-
-static const char * dramCardDPortCRank01[ ] =
+static const char * dramCardDPortCRank01[] =
 {
     "DC18", "DC09", "DC08", "DC07", "DC16", "DC17", "DC19", "DC01",
     "DC12", "DC02", "DC13", "DC14", "DC11", "DC03", "DC04", "DC15",
-    "DC05", "DC06", "DC1SP", NULL
+    "DC05", "DC06", "DC1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardDPortCRank45[] =
 {
@@ -1007,19 +1098,17 @@ static const char * dramSiteCardDPortCRank45[] =
     "DC26.d1", "DC26.d0", "DC26.d2", "DC26.d3",
 
     "DC3SP.d2", "DC3SP.d0", "DC3SP.d1", "DC3SP.d3",
-    NULL,       NULL,       NULL,       NULL,
-}; //rank_4_5
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardDPortCRank45[ ] =
+static const char * dramCardDPortCRank45[] =
 {
     "DC38", "DC29", "DC28", "DC27", "DC36", "DC37", "DC39", "DC21",
     "DC32", "DC22", "DC33", "DC34", "DC31", "DC23", "DC24", "DC35",
-    "DC25", "DC26", "DC3SP", NULL
+    "DC25", "DC26", "DC3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardDPortDRank01[] =
 {
@@ -1051,19 +1140,17 @@ static const char * dramSiteCardDPortDRank01[] =
     "DD17.d0", "DD17.d3", "DD17.d1", "DD17.d2",
 
     "DD1SP.d2", "DD1SP.d0", "DD1SP.d3", "DD1SP.d1",
-    NULL,       NULL,       NULL,       NULL,
-};//rank_0_1
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardDPortDRank01[ ] =
+static const char * dramCardDPortDRank01[] =
 {
     "DD13", "DD16", "DD19", "DD15", "DD14", "DD12", "DD11", "DD18",
     "DD08", "DD03", "DD05", "DD01", "DD04", "DD02", "DD06", "DD07",
-    "DD09", "DD17", "DD1SP", NULL
+    "DD09", "DD17", "DD1SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static const char * dramSiteCardDPortDRank45[] =
 {
@@ -1095,107 +1182,243 @@ static const char * dramSiteCardDPortDRank45[] =
     "DD37.d1", "DD37.d2", "DD37.d0", "DD37.d3",
 
     "DD3SP.d3", "DD3SP.d1", "DD3SP.d2", "DD3SP.d0",
-    NULL,       NULL,       NULL,       NULL,
-}; //rank_4_5
+    "",         "",         "",         "",
+};
 
-//---------------------------------------------------------
-
-static const char * dramCardDPortDRank45[ ] =
+static const char * dramCardDPortDRank45[] =
 {
     "DD33", "DD36", "DD39", "DD35", "DD34", "DD32", "DD31", "DD38",
     "DD28", "DD23", "DD25", "DD21", "DD24", "DD22", "DD26", "DD27",
-    "DD29", "DD37", "DD3SP", NULL
-}; //rank_4_5
-
-//---------------------------------------------------------
-
-static const char ** dramSiteLocMap[] =
-{
-    dramSiteCardAPortARank02,
-    dramSiteCardAPortARank46,
-    dramSiteCardAPortBRank02,
-    dramSiteCardAPortBRank46,
-    dramSiteCardAPortCRank02,
-    dramSiteCardAPortCRank46,
-    dramSiteCardAPortDRank02,
-    dramSiteCardAPortDRank46,
-
-    dramSiteCardBPortARank02,
-    dramSiteCardBPortARank46,
-    dramSiteCardBPortBRank02,
-    dramSiteCardBPortBRank46,
-    dramSiteCardBPortCRank02,
-    dramSiteCardBPortCRank46,
-    dramSiteCardBPortDRank02,
-    dramSiteCardBPortDRank46,
-
-    dramSiteCardDPortARank01,
-    dramSiteCardDPortARank45,
-    dramSiteCardDPortBRank01,
-    dramSiteCardDPortBRank45,
-    dramSiteCardDPortCRank01,
-    dramSiteCardDPortCRank45,
-    dramSiteCardDPortDRank01,
-    dramSiteCardDPortDRank45,
-
+    "DD29", "DD37", "DD3SP", "",
 };
 
-//---------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static const char ** dramLocMap[] =
+static const char ** dqSiteMap_rcD
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
 {
-    dramCardAPortARank02,
-    dramCardAPortARank46,
-    dramCardAPortBRank02,
-    dramCardAPortBRank46,
-    dramCardAPortCRank02,
-    dramCardAPortCRank46,
-    dramCardAPortDRank02,
-    dramCardAPortDRank46,
-
-    dramCardBPortARank02,
-    dramCardBPortARank46,
-    dramCardBPortBRank02,
-    dramCardBPortBRank46,
-    dramCardBPortCRank02,
-    dramCardBPortCRank46,
-    dramCardBPortDRank02,
-    dramCardBPortDRank46,
-
-    dramCardDPortARank01,
-    dramCardDPortARank45,
-    dramCardDPortBRank01,
-    dramCardDPortBRank45,
-    dramCardDPortCRank01,
-    dramCardDPortCRank45,
-    dramCardDPortDRank01,
-    dramCardDPortDRank45,
-
+    { // MBA 0
+        { // Port 0
+            dramSiteCardDPortARank01, dramSiteCardDPortARank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardDPortARank45, dramSiteCardDPortARank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardDPortBRank01, dramSiteCardDPortBRank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardDPortBRank45, dramSiteCardDPortBRank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramSiteCardDPortCRank01, dramSiteCardDPortCRank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardDPortCRank45, dramSiteCardDPortCRank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardDPortDRank01, dramSiteCardDPortDRank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardDPortDRank45, dramSiteCardDPortDRank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
+        },
+    },
 };
 
-//---------------------------------------------------------
-
-// This table summarizes two things
-// 1. all the valid ranks for various  Centaur card types.
-// 2. There is an index of dramSiteLocMap/dramLocMap from which a dram Site
-//    location table for a given Card Type and given Port begin. Let us call
-//    this BASE LOCATION. A lookup in to cardRankMap using rank info, gives us
-//    an offset to BASE LOCATION at which 'exact dram site table' is located.
-//    qualification of 'exact dram site table' is :
-//    dram site table for a given card type, given port type and given rank
-//    number.
-
-static int32_t cardRankMap[3][8] =
+static const char ** dramSiteMap_rcD
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
 {
-    //valid rank are 0-2 and 4-6
-    { 0, -1,  0, -1, 1, -1,  1, -1 },   // Raw Card A
-
-    //valid rank are 0-2 and 4-6
-    { 0, -1,  0, -1, 1, -1,  1, -1 },   // Raw Card B
-
-    //valid rank are 0-1 and 4-5
-    { 0,  0, -1, -1, 1,  1, -1, -1 },   // Raw Card D
+    { // MBA 0
+        { // Port 0
+            dramCardDPortARank01, dramCardDPortARank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardDPortARank45, dramCardDPortARank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
+        },
+        { // Port 1
+            dramCardDPortBRank01, dramCardDPortBRank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardDPortBRank45, dramCardDPortBRank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramCardDPortCRank01, dramCardDPortCRank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardDPortCRank45, dramCardDPortCRank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
+        },
+        { // Port 1
+            dramCardDPortDRank01, dramCardDPortDRank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardDPortDRank45, dramCardDPortDRank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
+        },
+    },
 };
+
+//##############################################################################
+// Support functions for looking up DRAM site locations
+//##############################################################################
+
+// NOTE: o_cardName will always return a non-NULL string of exactly 12
+//       characters, regardless if this function gave a bad return code.
+int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
+                         uint8_t i_ps, uint8_t i_mrank,
+                         bool & o_x4Dram, const char * & o_cardName,
+                         const char ** & o_dqMap, const char ** & o_dramMap )
+{
+    int32_t o_rc = SUCCESS;
+
+    o_x4Dram   = false;
+    o_cardName = "            ";
+    o_dqMap    = NULL;
+    o_dramMap  = NULL;
+
+    do
+    {
+        if ( (MAX_MBA_PER_MEMBUF   <= i_mbaPos) ||
+             (PORT_SLCT_PER_MBA    <= i_ps    ) ||
+             (MASTER_RANKS_PER_MBA <= i_mrank ) )
+        {
+            o_rc = FAIL; break;
+        }
+
+        switch ( i_cardType )
+        {
+            case CEN_TYPE_A:
+                o_x4Dram   = false;
+                o_cardName = "RAW_CARD_A  ";
+                o_dqMap    = dqSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
+                o_dramMap  = dramSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
+                break;
+
+            case CEN_TYPE_B:
+                o_x4Dram   = true;
+                o_cardName = "RAW_CARD_B  ";
+                o_dqMap    = dqSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
+                o_dramMap  = dramSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
+                break;
+
+            case CEN_TYPE_D:
+                o_x4Dram   = true;
+                o_cardName = "RAW_CARD_D  ";
+                o_dqMap    = dqSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
+                o_dramMap  = dramSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
+                break;
+
+            default:
+                o_rc = FAIL;
+        }
+        if ( SUCCESS != o_rc ) break;
+
+        if ( (NULL == o_dqMap) || (NULL == o_dramMap) )
+        {
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+}
+
+//##############################################################################
+// Support functions for translating between symbol, DQ, and DRAM index.
+// TODO: RTC 99972 - These functions are copies of functions in the CenSymbol
+//       class. Need to create common util functions that are available for both
+//       the functional code and the error log plugin code.
+//##############################################################################
+
+uint8_t symbol2CenDq( uint8_t i_symbol )
+{
+    uint8_t cenDq = DQS_PER_DIMM;
+
+    if ( SYMBOLS_PER_RANK > i_symbol )
+    {
+        if ( 8 > i_symbol )
+            cenDq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
+        else
+            cenDq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
+    }
+
+    return cenDq;
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t symbol2PortSlct( uint8_t i_symbol )
+{
+    uint8_t portSlct = PORT_SLCT_PER_MBA;
+
+    if ( SYMBOLS_PER_RANK > i_symbol )
+    {
+        portSlct = ( ((i_symbol <= 3) || ((8 <= i_symbol) && (i_symbol <= 39)))
+                     ? 1 : 0 );
+    }
+
+    return portSlct;
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
+{
+    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
+                                              : X8DRAMS_PER_RANK;
+
+    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
+                                              : SYMBOLS_PER_X8DRAM;
+
+    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
+                                   : SYMBOLS_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+// Returns the symbol 0-71, or 0-1 if ECC spared.
+uint8_t transEccSpare( uint8_t i_symbol, bool i_isEccSpared )
+{
+    uint8_t sym = i_symbol;
+
+    if ( i_isEccSpared )
+    {
+        // The ECC spare is on symbols 0 and 1, so adjust this symbol to match.
+        sym %= SYMBOLS_PER_X4DRAM;
+    }
+
+    return sym;
+}
+
+//------------------------------------------------------------------------------
+
+// Returns the DQ site index 0-71, or 72-79 if spared to DRAM
+uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
+{
+    uint8_t dqIdx = i_dq;
+
+    if ( i_isDramSpared )
+    {
+        // The DRAM spare indexes are 72-79, so adjust this DQ to match.
+        dqIdx = DQS_PER_DIMM + (i_dq % DQS_PER_BYTE);
+    }
+
+    return dqIdx;
+}
+
+//------------------------------------------------------------------------------
+
+// The DRAM site index is different than the DRAM number used in symbol2Dram()
+// or dram2Symbol(). This index is solely used for accessing the DRAM site
+// tables above.
+uint8_t dqSiteIdx2DramSiteIdx( uint8_t i_dqSiteIdx, bool i_isX4Dram )
+{
+    const uint8_t dqsPerDram = i_isX4Dram ? DQS_PER_X4DRAM
+                                          : DQS_PER_X8DRAM;
+    return i_dqSiteIdx / dqsPerDram;
+}
 
 //------------------------------------------------------------------------------
 // Helper functions
@@ -1241,172 +1464,68 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
 // Function definitions
 //------------------------------------------------------------------------------
 
-uint8_t getCenDqFromSymbol( uint8_t i_symbol )
+// Helper function for parseMemMruData()
+int32_t getMemMruDramSite( MemoryMruData::MemMruMeld i_memMruData,
+                           char * o_data )
 {
-    uint8_t cenDq = DQS_PER_DIMM;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        if ( 8 > i_symbol )
-            cenDq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
-        else
-            cenDq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
-    }
-
-    return cenDq;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t getPortFromSymbol( uint8_t i_symbol )
-{
-    uint8_t portSlct = PORT_SLCT_PER_MBA;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        portSlct = ( ((i_symbol <= 3) || ((8 <= i_symbol) && (i_symbol <= 39)))
-                     ? 1 : 0 );
-    }
-
-    return portSlct;
-}
-
-//------------------------------------------------------------------------------
-
-int32_t resolveCenCard( MemoryMruData::MemMruMeld i_memMruData,
-                     uint32_t & o_dramSiteTble, uint32_t & io_dimmDq,
-                     uint32_t & o_dramIndex )
-{
-    int32_t rankOffset = 0;
-    uint8_t bitsPerDram = 4; // since both Card B and D are x4
     int32_t o_rc = SUCCESS;
-    o_dramSiteTble = 0;
-    o_dramIndex = 0;
 
     do
     {
-        switch( i_memMruData.s.wiringType )
-        {
-            case CEN_TYPE_A:    bitsPerDram = 8; break;
-            case CEN_TYPE_B:    //both Card B and Card D are x4 DIMM
-            case CEN_TYPE_D:    break;
-            default:            o_rc = FAIL; break;
-        }
+        // Get the symbol and adjust for ECC spare, if needed.
+        uint8_t symbol = transEccSpare( i_memMruData.s.symbol,
+                                        i_memMruData.s.eccSpared );
 
-        if( o_rc )
-            break;
-        //pick the valid rank offset from table
-        rankOffset =
-            cardRankMap[ i_memMruData.s.wiringType ][ i_memMruData.s.mrank ];
+        uint8_t type   = i_memMruData.s.wiringType;
+        uint8_t mbaPos = i_memMruData.s.mbaPos;
+        uint8_t ps     = symbol2PortSlct( symbol );
+        uint8_t mrank  = i_memMruData.s.mrank;
 
-        if ( 0 > rankOffset )
-        {
-            // it is a case of unspported rank
-            o_rc = FAIL;
-            break;
-        }
+        // Get the DRAM site location information.
+        bool x4Dram;
+        const char * cardName;
+        const char ** dqMap;
+        const char ** dramMap;
+        o_rc = getDramSiteInfo( type, mbaPos, ps, mrank, x4Dram,
+                                cardName, dqMap, dramMap );
+        if ( SUCCESS != o_rc ) break;
 
-        // There are 4 step in looking up the DRAM Site location
-        //  1. Find out the card associated with the symbol.
-        //  2. Find out MBA associated with Symbol.
-        //  3. Once MBA is known, find the MBA Port associated with symbol.
-        //  4. Find the rank associated with the symbol.
+        // Get the DQ and DRAM indexes for site location tables.
+        uint8_t dqIdx = transDramSpare( symbol2CenDq(symbol),
+                                        i_memMruData.s.dramSpared );
 
-        //  To reach the right table this is what we need to do :
-        //  Relevant dramSite Table =
-        //  dramSiteLocMap[Card Index + MBA Index + Port Index + Rank Index ]
-        //  dram site location = Relevant dramSite Table[ DQ ]
+        uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
 
-        o_dramSiteTble = 8 * i_memMruData.s.wiringType;
-        o_dramSiteTble += 4 * i_memMruData.s.mbaPos;
-        o_dramSiteTble += 2 * getPortFromSymbol( i_memMruData.s.symbol );
-        o_dramSiteTble += rankOffset;
+        // Add the DRAM site data based on the pin info.
+        strcpy( o_data, "" );
 
-        if( i_memMruData.s.dramSpared )
-        {
-            // mapping DQ to spare DRAM area.
-            io_dimmDq = SYMBOLS_PER_RANK +  ( io_dimmDq % 8 ) ;
-        }
-
-        // getting DRAM info
-        o_dramIndex = io_dimmDq / bitsPerDram;
-
-    }while(0);
-
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
-int32_t getDramSite( MemoryMruData::MemMruMeld  i_memMruData, char *o_data )
-{
-    int32_t o_rc = SUCCESS;
-    uint32_t tableOffset = 0;
-    uint32_t dramIndex = 0;
-    uint32_t dimmDq = 0;
-
-    do
-    {
-
-        if( i_memMruData.s.eccSpared  )
-        {
-            // Symbol adjustment for ECC spare.
-            // ECC spare is on symbol 0 and 1. So in case of ECC spare, we need
-            // to find out which of the two ECC symbol was used to replace the
-            // failing symbol. Since, we have just two symbols meant for ECC
-            // spare, if failing symbol is even, symbol 0 is used else symbol 1
-            // is used. This change of symbol in MemoryMruData is purely to
-            // simplify lookup of correct dramSite location in case of ECC
-            // spare.
-            i_memMruData.s.symbol = i_memMruData.s.symbol % 2;
-        }
-
-        dimmDq = getCenDqFromSymbol( i_memMruData.s.symbol );
-        o_rc = resolveCenCard( i_memMruData, tableOffset, dimmDq, dramIndex );
-
-        if( SUCCESS != o_rc )   // an invalid card or unknown card
-            break;
-
-        if( ( NULL == (dramSiteLocMap[tableOffset])[dimmDq] )||
-            ( NULL == (dramSiteLocMap[tableOffset])[dimmDq + 1] ) )
-
-        {
-            // Lookup shall fail. No point in moving further.
-            o_rc = FAIL;
-            break;
-        }
-
-        strcpy( o_data, "DRAM Site: " );
-
-        switch( i_memMruData.s.pins )
+        switch ( i_memMruData.s.pins )
         {
             case EVEN_SYMBOL_DQ:
-                strcat( o_data, (dramSiteLocMap[tableOffset])[dimmDq] );
+                strcat( o_data, dqMap[dqIdx] );
                 break;
 
             case ODD_SYMBOL_DQ:
-                strcat( o_data, (dramSiteLocMap[tableOffset])[dimmDq+1] );
+                strcat( o_data, dqMap[dqIdx+1] );
                 break;
 
             case BOTH_SYMBOL_DQS:
-                strcat( o_data, (dramSiteLocMap[tableOffset])[dimmDq] );
+                strcat( o_data, dqMap[dqIdx] );
                 strcat( o_data, ", " );
-                strcat( o_data, (dramSiteLocMap[tableOffset])[dimmDq+1] );
+                strcat( o_data, dqMap[dqIdx+1] );
                 break;
 
             case NO_SYMBOL_DQS:
                 // blaming relevant dram since we aren't sure of DQ
-                strcat( o_data, (dramLocMap[tableOffset])[dramIndex] );
+                strcat( o_data, dramMap[dramIdx] );
                 break;
 
             default:
-                o_rc = FAIL; break;
+                o_rc = FAIL; // invalid pin info
         }
+        if ( SUCCESS != o_rc ) break;
 
-        if( SUCCESS != o_rc )   // an invalid failed pin info
-            break;          // just in case we add something after this later
-
-    }while(0);
+    } while(0);
 
     return o_rc;
 }
@@ -1446,14 +1565,17 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
             break;
         default:
 
-            if( SYMBOLS_PER_RANK >  mm.s.symbol )
+            if ( SYMBOLS_PER_RANK > mm.s.symbol )
             {
-                if( SUCCESS != getDramSite( mm, data ) )
-                {
-                    snprintf( data, DATA_SIZE, "Symbol: %d Pins: %d Spared: %s",
-                              mm.s.symbol, mm.s.pins,
-                              (1 == mm.s.dramSpared) ? "true" : "false" );
-                }
+                char dramSite_str[DATA_SIZE] = { '\0' };
+                getMemMruDramSite( mm, dramSite_str );
+
+                snprintf( data, DATA_SIZE,
+                          "Symbol:%d Pins:%d S:%c E:%c Site:%s",
+                          mm.s.symbol, mm.s.pins,
+                          (1 == mm.s.dramSpared) ? 'Y' : 'N',
+                          (1 == mm.s.eccSpared)  ? 'Y' : 'N',
+                          dramSite_str );
             }
     }
 
@@ -1550,7 +1672,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 {
     using namespace CE_TABLE;
 
-    bool rc = true;
+    bool o_rc = true;
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
@@ -1559,18 +1681,23 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
 
     const char * hh = "  A H Count Type";
-    const char * hd = "Rank Bank Row     Column DRAM Pins";
+    const char * hd = "Rank P Bank Row     Column DRAM Pins S E Site";
     i_parser.PrintString( hh, hd );
-    hh = "  - - ----- -------------";
-    hd = "---- ---- ------- ------ ---- ----";
+    hh = "  - - ----- ------------";
+    hd = "---- - ---- ------- ------ ---- ---- - - ------";
     i_parser.PrintString( hh, hd );
 
     for ( uint32_t i = 0; i < entries; i++ )
     {
         uint32_t idx = i * ENTRY_SIZE;
 
-        uint32_t count = i_buffer[idx  ];                           //  8-bit
-        uint32_t type  = i_buffer[idx+1] >> 4;                      //  4-bit
+        uint32_t count = i_buffer[idx];                             //  8-bit
+
+        uint32_t type   = (i_buffer[idx+1] >> 5) & 0x7;             //  3-bit
+        uint32_t mbaPos = (i_buffer[idx+1] >> 4) & 0x1;             //  1-bit
+        uint32_t ps     = (i_buffer[idx+1] >> 3) & 0x1;             //  1-bit
+        uint32_t isSp   = (i_buffer[idx+1] >> 2) & 0x1;             //  1-bit
+        uint32_t isEcc  = (i_buffer[idx+1] >> 1) & 0x1;             //  1-bit
 
         uint8_t  isHard = (i_buffer[idx+2] >> 7) & 0x1;             //  1-bit
         uint8_t  active = (i_buffer[idx+2] >> 6) & 0x1;             //  1-bit
@@ -1595,17 +1722,33 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
         char active_char = ( 1 == active ) ? 'Y':'N';
         char isHard_char = ( 1 == isHard ) ? 'Y':'N';
+        char isSp_char   = ( 1 == isSp   ) ? 'Y':'N';
+        char isEcc_char  = ( 1 == isEcc  ) ? 'Y':'N';
 
-        const char * type_str = "UNKNOWN      "; // 13 characters
-        switch ( type )
+        // Get the DRAM site location information.
+        bool x4Dram;
+        const char * cardName;
+        const char ** dqMap;
+        const char ** dramMap;
+        int32_t l_rc = getDramSiteInfo( type, mbaPos, ps, mrnk, x4Dram,
+                                        cardName, dqMap, dramMap );
+
+        // Get the DRAM site string.
+        const char * dramSite_str = "";
+        if ( (SUCCESS == l_rc) &&
+             (dram < (x4Dram ? X4DRAMS_PER_RANK : X8DRAMS_PER_RANK)) )
         {
-            case CEN_TYPE_A: type_str = "RAW_CARD_A  "; break;
-            case CEN_TYPE_B: type_str = "RAW_CARD_B  "; break;
-            case CEN_TYPE_D: type_str = "RAW_CARD_D  "; break;
+            // Get the DRAM index for site location table.
+            uint8_t symbol  = transEccSpare( dram2Symbol(dram, x4Dram),
+                                             (1 == isEcc) );
+            uint8_t dqIdx   = transDramSpare( symbol2CenDq(symbol),
+                                              (1 == isSp) );
+            uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
 
-            default: ;
+            dramSite_str = dramMap[dramIdx];
         }
 
+        // Get the rank string.
         char rank_str[DATA_SIZE]; // 4 characters
         if ( 1 == svld )
         {
@@ -1616,18 +1759,23 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
             snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
         }
 
+        // Build the header string.
         char header[HEADER_SIZE] = { '\0' };
         snprintf( header, HEADER_SIZE, "  %c %c  0x%02x %s", active_char,
-                  isHard_char, count, type_str );
+                  isHard_char, count, cardName );
 
-        char data[DATA_SIZE]     = { '\0' };
-        snprintf( data, DATA_SIZE, "%s  0x%01x 0x%05x  0x%03x   %2d 0x%02x",
-                  rank_str, bnk, row, col, dram, dramPins );
+        // Build the data string.
+        char data[DATA_SIZE] = { '\0' };
+        snprintf( data, DATA_SIZE,
+                  "%s %1d  0x%1x 0x%05x  0x%03x   %2d 0x%02x %c %c %s",
+                  rank_str, ps, bnk, row, col, dram, dramPins,
+                  isSp_char, isEcc_char, dramSite_str );
 
+        // Print the line.
         i_parser.PrintString( header, data );
     }
 
-    return rc;
+    return o_rc;
 }
 
 //------------------------------------------------------------------------------

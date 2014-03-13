@@ -38,6 +38,7 @@
 
 #include <iipconst.h>
 #include <targeting/common/target.H>
+#include <prdfParserEnums.H>
 
 //------------------------------------------------------------------------------
 
@@ -45,32 +46,6 @@ namespace PRDF
 {
 
 class CenRank;
-
-enum PositionBounds
-{
-    MAX_NODE_PER_SYS    = 8,
-
-    MAX_PROC_PER_NODE   = 8,
-
-    MAX_EX_PER_PROC     = 16,
-    MAX_CORE_PER_PROC   = MAX_EX_PER_PROC,
-    MAX_L2_PER_PROC     = MAX_EX_PER_PROC,
-    MAX_L3_PER_PROC     = MAX_EX_PER_PROC,
-
-    MAX_XBUS_PER_PROC   = 4,
-    MAX_ABUS_PER_PROC   = 3,
-    MAX_PHB_PER_PROC    = 3,
-
-    MAX_MCS_PER_PROC    = 8,
-    MAX_MEMBUF_PER_PROC = MAX_MCS_PER_PROC,
-
-    MAX_MBA_PER_MEMBUF  = 2,
-    MAX_PORT_PER_MBA    = 2,
-    MAX_DIMM_PER_PORT   = 2,
-    MAX_L4_PER_MEMBUF   = 1,
-
-    INVALID_POSITION_BOUND = 0xffffffff,
-};
 
 namespace PlatServices
 {
