@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.21 2014/03/08 04:03:27 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.22 2014/03/11 19:04:46 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -59,6 +59,8 @@
 //   1.19  | 02/07/14 |adityamd | Added support to mss_restore_DRAM_repairs to be accessed at Standby
 //   1.20  | 02/20/14 |bellows  | RAS update from repairs at standby
 //   1.21  | 03/07/14 | gollub  | mss_restore_DRAM_repairs_asm: changed i_standby_flag to bool
+//   1.22  | 03/11/14 | gollub  | SW250519: More options for enum TimeBaseSpeed
+
 
 #ifndef _MSS_MAINT_CMDS_H
 #define _MSS_MAINT_CMDS_H
@@ -296,9 +298,21 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
   * @brief speed options for time base commands.
   */
       enum TimeBaseSpeed
-      {
-        FAST_AS_POSSIBLE =                     0,
-        SLOW_12H =                             1,
+      {      
+        /** Background scrubbing (field). */
+        BG_SCRUB,
+
+        /** Runtime DRAM repairs procedures (field) and the initial fast scrub
+        * of memory (field). */
+        FAST_MIN_BW_IMPACT,
+
+        /** Background scrubbing (mnfg) and the initial fast scrub of memory
+        * (mnfg). */
+        FAST_MED_BW_IMPACT,
+
+        /** IPL time DRAM repairs procedures (field/mnfg) and runtime DRAM
+        * repairs procedures (mnfg). */
+        FAST_MAX_BW_IMPACT,      
       };
 
 
@@ -460,7 +474,7 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
 
 /**
   * @brief  Loads timebase speed into hw.
-  * @param  i_speed  FAST_AS_POSSIBLE or SLOW_12H
+  * @param  i_speed  See enum TimeBaseSpeed
   * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
   */
       virtual fapi::ReturnCode loadSpeed(TimeBaseSpeed i_speed);
@@ -775,7 +789,7 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
       mss_TimeBaseScrub( const fapi::Target & i_target,           // MBA target
                          const ecmdDataBufferBase & i_startAddr,  // Address cmd will start at
                          const ecmdDataBufferBase & i_endAddr,    // Address cmd will stop at
-                         TimeBaseSpeed i_speed,                   // Fast as possible, or slow (all memory on the MBA in 12h)
+                         TimeBaseSpeed i_speed,                   // See enum TimeBaseSpeed
                          uint32_t i_stopCondition,                // Mask of error conditions cmd should stop on
                          bool i_poll );                           // Set to true if you wait for command to complete
 
@@ -813,7 +827,7 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
 // here for now
       uint32_t iv_savedData;
 
-// Fast as possible, or slow (all memory on the MBA in 12h)
+// See enum TimeBaseSpeed
       TimeBaseSpeed iv_speed;
     };
 
@@ -828,7 +842,7 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
       mss_TimeBaseSteerCleanup( const fapi::Target & i_target,    // MBA target
                                 const ecmdDataBufferBase & i_startAddr,  // Address cmd will start at
                                 const ecmdDataBufferBase & i_endAddr,    // Address cmd will stop at
-                                TimeBaseSpeed i_speed,                   // TODO: fast for runtime, faster for ipl?
+                                TimeBaseSpeed i_speed,                   // See enum TimeBaseSpeed
                                 uint32_t i_stopCondition,                // Mask of error conditions cmd should stop on
                                 bool i_poll );                           // Set to true if you wait for command to complete
 
@@ -866,8 +880,7 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
 // here for now
       uint32_t iv_savedData;
 
-// TODO: Want as fast as possible, but IPL may be able to go faster than
-// runtime since no fetch traffic to worry about.
+// See enum TimeBaseSpeed
       TimeBaseSpeed iv_speed;
     };
 

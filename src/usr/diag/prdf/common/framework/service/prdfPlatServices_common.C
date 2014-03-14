@@ -722,9 +722,9 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 
     mss_MaintCmdWrapper * o_cmd = NULL;
 
-    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::SLOW_12H;
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::BG_SCRUB;
     if ( i_isFastSpeed )
-        cmdSpeed = mss_MaintCmd::FAST_AS_POSSIBLE;
+        cmdSpeed = mss_MaintCmd::FAST_MAX_BW_IMPACT;
 
     mss_MaintCmd * cmd = NULL;
 

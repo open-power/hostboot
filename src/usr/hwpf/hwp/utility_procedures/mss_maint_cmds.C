@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.33 2014/03/08 04:04:21 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.34 2014/03/11 19:04:19 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -94,7 +94,7 @@
 //         |          |         |     mss_get_dummy_steer_mux
 //         |          |         |     mss_put_dummy_steer_mux
 //         |          |         | SW249600: Adding 1ms delay to allow cmd to stop properly in mss_stopCmd()
-
+//   1.34  |11-MAR-14 | gollub  | SW250519: More options for enum TimeBaseSpeed
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -1878,20 +1878,20 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(l_rc) return l_rc;
 
 
-// FAST_AS_POSSIBLE
-      if (i_speed == FAST_AS_POSSIBLE)
+
+      if ( (FAST_MIN_BW_IMPACT == i_speed) ||
+           (FAST_MED_BW_IMPACT == i_speed) ||
+           (FAST_MAX_BW_IMPACT == i_speed) )           
       {
-// TODO: Need to figure out what fastest possible setting is.
         l_burst_window_sel = 0;
         l_timebase_sel = 0;
         l_timebase_burst_sel = 0;
         l_timebase_interval = 512;
-//l_timebase_interval = 32; // DEBUG: speeds up testing
         l_burst_window = 0;
         l_burst_interval = 0;
       }
-// SLOW_12H
-      else
+
+      else // BG_SCRUB
       {
 // Get l_ddr_freq from ATTR_MSS_FREQ
 // Possible frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz
