@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.177 2014/03/05 00:13:59 belldi Exp $
+// $Id: p8_scom_addresses.H,v 1.178 2014/03/12 18:55:47 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -997,6 +997,8 @@ CONST_UINT64_T( MCS_MCICFG_0x0201184A                 , ULL(0x0201184A) );
 CONST_UINT64_T( MCS_MCISTAT_0x0201184B                , ULL(0x0201184B) );
 CONST_UINT64_T( MCS_MCICRCSYN_0x0201184C              , ULL(0x0201184C) );
 
+CONST_UINT64_T( IOMC_SCOM_MODE_PB_0x02011A20          , ULL(0x02011A20) );
+
 CONST_UINT64_T( MC1_BUSCNTL_FIR_0x02011E00            , ULL(0x02011E00) );
 CONST_UINT64_T( MC1_BUSCNTL_FIR_AND_0x02011E01        , ULL(0x02011E01) );
 
@@ -1267,6 +1269,8 @@ CONST_UINT64_T( X_PERV_LFIR_ACT1_0x04040011           , ULL(0x04040011) );
 CONST_UINT64_T( X_XBUS1_BUSCNTL_FIR_0x04011400        , ULL(0x04011400) );
 CONST_UINT64_T( X_XBUS1_BUSCNTL_FIR_AND_0x04011401    , ULL(0x04011401) );
 
+CONST_UINT64_T( X_XBUS_SCOM_MODE_PB_0x04011020        , ULL(0x04011020) );
+
 //------------------------------------------------------------------------------
 //      X-BUS THERMAL
 //------------------------------------------------------------------------------
@@ -1358,6 +1362,8 @@ CONST_UINT64_T( A_PERV_LFIR_ACT1_0x08040011           , ULL(0x08040011) );
 
 CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_0x08010C00         , ULL(0x08010C00) );
 CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_AND_0x08010C01     , ULL(0x08010C01) );
+
+CONST_UINT64_T( A_ABUS_SCOM_MODE_PB_0x08010C20        , ULL(0x08010C20) );
 
 //------------------------------------------------------------------------------
 //      PLL LOCK
@@ -2077,6 +2083,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.178  2014/03/12 18:55:47  jmcgill
+add IO SCOM_MODE_PB register constant definitions (DMI/XBUS/ABUS)
+
 Revision 1.177  2014/03/05 00:13:59  belldi
 
 Added following CAPP Error Reporting and Handling regs. FFDC is collected from them in proc_suspend_io.

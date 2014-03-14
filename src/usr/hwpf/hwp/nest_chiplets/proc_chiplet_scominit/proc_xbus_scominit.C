@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_xbus_scominit.C,v 1.5 2013/11/09 18:37:40 jmcgill Exp $
+// $Id: proc_xbus_scominit.C,v 1.6 2014/03/12 18:56:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_xbus_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 //  Version     Date        Owner       Description
 //------------------------------------------------------------------------------
+//    1.6       03/10/14    jmcgill     Add endpoint power up
 //    1.5       11/08/13    jmcgill     Updates for RAS review
 //    1.4       02/06/13    thomsen     Changed order of targets expected by
 //                                      initfile
@@ -62,6 +63,7 @@
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
 #include <proc_xbus_scominit.H>
+#include <p8_scom_addresses.H>
 
 extern "C" {
 
@@ -74,10 +76,14 @@ fapi::ReturnCode proc_xbus_scominit(const fapi::Target & i_xbus_target,
                                     const fapi::Target & i_connected_xbus_target)
 {
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+
     std::vector<fapi::Target> targets;
     fapi::Target this_pu_target;
     fapi::Target connected_pu_target;
     uint8_t xbus_enable_attr;
+
+    ecmdDataBufferBase data(64);
 
     // mark HWP entry
     FAPI_INF("proc_xbus_scominit: Start");
@@ -130,6 +136,35 @@ fapi::ReturnCode proc_xbus_scominit(const fapi::Target & i_xbus_target,
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_XBUS_SCOMINIT_PARTIAL_GOOD_ERR);
                 break;
             }
+
+            // assert IO reset to power-up bus endpoint logic
+            // read-modify-write, set single reset bit (HW auto-clears)
+            // on writeback
+            rc = fapiGetScom(i_xbus_target, X_XBUS_SCOM_MODE_PB_0x04011020, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_xbus_scominit: Error from fapiGetScom (X_XBUS_SCOM_MODE_PB_0x04011020) on %s",
+                         i_xbus_target.toEcmdString());
+                break;
+            }
+
+            rc_ecmd |= data.setBit(2,5);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_xbus_scominit: Error 0x%x forming XBUS SCOM Mode PB register data buffer on %s",
+                         rc_ecmd, i_xbus_target.toEcmdString());
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutScom(i_xbus_target, X_XBUS_SCOM_MODE_PB_0x04011020, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_xbus_scominit: Error from fapiPutScom (X_XBUS_SCOM_MODE_PB_0x04011020) on %s",
+                         i_xbus_target.toEcmdString());
+                break;
+            }
+
 
             // Call BASE XBUS SCOMINIT
             FAPI_INF("proc_xbus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",

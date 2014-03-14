@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit/proc_dmi_scominit.C $ */
+/* $Source: src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit/proc_dmi_scominit.C $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_dmi_scominit.C,v 1.8 2013/11/09 18:37:40 jmcgill Exp $
+// $Id: proc_dmi_scominit.C,v 1.9 2014/03/12 18:56:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_dmi_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 //  Version     Date        Owner       Description
 //------------------------------------------------------------------------------
+//    1.9       03/10/14    jmcgill     Add endpoint power up
 //    1.8       10/08/13    jmcgill     Updates for RAS review
 //    1.7       05/14/13    jmcgill     Address review comments
 //    1.6       05/01/13    jgrell      Added proc chip target
@@ -68,6 +69,17 @@
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
 #include <proc_dmi_scominit.H>
+#include <p8_scom_addresses.H>
+
+
+//------------------------------------------------------------------------------
+//  Constant definitions
+//------------------------------------------------------------------------------
+
+// map MCS chiplet ID -> associated bus IORESET bit in IOMC SCOM_MODE_PB
+// register
+const uint8_t IOMC_SCOM_MODE_PB_IORESET_BIT[8] = { 5,4,2,3,5,4,2,3 };
+
 
 extern "C" {
 
@@ -78,10 +90,14 @@ extern "C" {
 // HWP entry point, comments in header
 fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
 {
-
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+
     fapi::Target this_pu_target;
     std::vector<fapi::Target> targets;
+
+    uint8_t mcs_pos;
+    ecmdDataBufferBase data(64);
 
     // mark HWP entry
     FAPI_INF("proc_dmi_scominit: Start");
@@ -92,6 +108,42 @@ fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
         // to execute
         if (i_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
         {
+            // assert IO reset to power-up bus endpoint logic
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, mcs_pos);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_dmi_scominit: Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+
+            // read-modify-write, set single reset bit (HW auto-clears)
+            // on writeback
+            rc = fapiGetScom(i_target, IOMC_SCOM_MODE_PB_0x02011A20, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_dmi_scominit: Error from fapiGetScom (IOMC_SCOM_MODE_PB_0x02011A20) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+
+            rc_ecmd |= data.setBit(IOMC_SCOM_MODE_PB_IORESET_BIT[mcs_pos]);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_dmi_scominit: Error 0x%x forming IOMC SCOM Mode PB register data buffer on %s",
+                         rc_ecmd, i_target.toEcmdString());
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutScom(i_target, IOMC_SCOM_MODE_PB_0x02011A20, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_dmi_scominit: Error from fapiPutScom (IOMC_SCOM_MODE_PB_0x02011A20) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+
             // get parent chip target
             rc = fapiGetParentChip(i_target, this_pu_target);
             if (!rc.ok())
