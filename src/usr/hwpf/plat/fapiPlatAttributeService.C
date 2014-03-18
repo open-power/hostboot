@@ -933,14 +933,40 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
             l_pProcTarget->tryGetAttr<TARGETING::ATTR_PHB_BASE_ADDRS>(
                 l_phbRegs);
 
-            //  BAR # 0 are the PCIE mem 64
-            //  BAR # 1 are the PCIE mem 32
+            //  BAR # 0 are the PCIE mem 64, 64GB window
+            //  BAR # 1 are the PCIE mem 32, 2GB window
             //  BAR # 2 are the PHB REGS
+
+            //If we are in sapphire mode we need to shift the PCI
+            //Mem addresses down below the 48 bit limit for an NVIDA
+            //adapter.  This is a workaround for GA1 so the adapter
+            //can be supported.  Largest (theoretically dimm) is 1TB,
+            //so max mem is ~32TB for non brazos system.
+
+            //Place mem64 @ 59TB-63TB (0x00003B0000000000)
+            //Place mem32 @ 63.875TB-64TB (0x00030FE000000000)
+
+            //TODO RTC 100773 -- Fix this the correct way by
+            //having base addresses per payload type
+
+            //We will change the base addr down 4 bits, but need to keep
+            //the proc/node offsets the same
             for ( uint8_t u=0; u < 3; u++ )
             {
-               o_pcieBarBase[u][0]  =  l_pciMem64[u];
-               o_pcieBarBase[u][1]  =  l_pciMem32[u];
-               o_pcieBarBase[u][2]  =  l_phbRegs[u];
+               if(TARGETING::is_sapphire_load())
+               {
+                   o_pcieBarBase[u][0] = SAPPHIRE_PCIE_BAR0_BASE |
+                                     (l_pciMem64[u] & PCIE_BAR0_OFFSET_MASK);
+                   o_pcieBarBase[u][1] = SAPPHIRE_PCIE_BAR1_BASE |
+                                     (l_pciMem32[u] & PCIE_BAR1_OFFSET_MASK);
+               }
+               else
+               {
+                   o_pcieBarBase[u][0] = l_pciMem64[u];
+                   o_pcieBarBase[u][1] = l_pciMem32[u];
+               }
+
+               o_pcieBarBase[u][2] = l_phbRegs[u];
 
                FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Unit %d : %p %p %p",
                          u,

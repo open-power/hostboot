@@ -58,6 +58,14 @@ const uint64_t  PCIE_BAR0_SIZE      =   0x0000001000000000ULL;
 const uint64_t  PCIE_BAR1_SIZE      =   0x0000000080000000ULL;
 const uint64_t  PCIE_BAR2_SIZE      =   0x0000000000001000ULL;
 
+// 4 PHB per chip, 4chips per node, max 4 nodes
+const uint64_t  PCIE_BAR0_OFFSET_MASK =  ((PCIE_BAR0_SIZE*4*4*4)-1);
+const uint64_t  PCIE_BAR1_OFFSET_MASK =  ((PCIE_BAR1_SIZE*4*4*4)-1);
+const uint64_t  SAPPHIRE_PCIE_BAR0_BASE = 0x00003B0000000000;
+const uint64_t  SAPPHIRE_PCIE_BAR1_BASE = 0x00003FE000000000;
+
+
+
 //  PHB Register Address Space  -   line 90 Overall Map
 //  size is 1_MB
 const uint64_t  PHB_REGS_SIZE       =   0x0000000000100000ULL;
