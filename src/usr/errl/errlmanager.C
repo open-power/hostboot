@@ -83,6 +83,7 @@ char* g_ErrlStorage;
 
 const uint32_t PNOR_ERROR_LENGTH = 4096;
 const uint32_t EMPTY_ERRLOG_IN_PNOR = 0xFFFFFFFF;
+const uint32_t FIRST_BYTE_ERRLOG = 0xF0000000;
 
 class AtLoadFunctions
 {
@@ -882,10 +883,15 @@ void ErrlManager::setupPnorInfo()
         {
             if (!isSlotEmpty(i))
             {
-                uint32_t l_eid = readEidFromFlattened(i);
-                if (l_eid > l_maxId )
+                uint32_t l_id = readEidFromFlattened(i);
+                // If id is not from HB (0x9XXXXXXX) grab plid instead
+                if ( (l_id & FIRST_BYTE_ERRLOG) != ERRLOG_PLID_BASE )
                 {
-                    l_maxId = l_eid;
+                    l_id = readPlidFromFlattened(i);
+                }
+                if (l_id > l_maxId )
+                {
+                    l_maxId = l_id;
 
                     // set this - start at this 'max' slot so that our first
                     // save will increment correctly
@@ -897,7 +903,7 @@ void ErrlManager::setupPnorInfo()
                 if (!isSlotACKed(i))
                 {
                     TRACFCOMP( g_trac_errl, INFO_MRK"setupPnorInfo slot %d eid %.8X was not ACKed.",
-                        i, l_eid);
+                        i, l_id);
                     setACKInFlattened(i);
                 } // not ACKed
             } // not empty
@@ -1090,6 +1096,18 @@ uint32_t ErrlManager::readEidFromFlattened(uint32_t i_position)
     TRACDCOMP(g_trac_errl, "readEid(%d): eid %.8x", i_position, pPH->eid);
 
     return pPH->eid;
+}
+
+// readPlidFromFlattened()
+// i_position MUST be valid errlog (not EMPTY_ERRLOG_IN_PNOR)
+uint32_t ErrlManager::readPlidFromFlattened(uint32_t i_position)
+{
+    const char * l_pnorAddr = iv_pnorAddr + (PNOR_ERROR_LENGTH * i_position);
+    const pelPrivateHeaderSection_t *pPH =
+            reinterpret_cast<const pelPrivateHeaderSection_t *>(l_pnorAddr);
+    TRACDCOMP(g_trac_errl, "readEid(%d): plid %.8x", i_position, pPH->plid);
+
+    return pPH->plid;
 }
 
 // isSlotACKed()

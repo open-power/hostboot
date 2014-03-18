@@ -410,6 +410,16 @@ private:
     uint32_t readEidFromFlattened(uint32_t i_position);
 
     /**
+     * @brief read the Plid from the flattened error log in PNOR;
+     *      MUST point to a non-empty slot
+     *
+     * @param[in]   i_position - index into PNOR to check
+     * @return      plid for that error log
+     *
+     */
+    uint32_t readPlidFromFlattened(uint32_t i_position);
+
+    /**
      * @brief set the ACK bit in the flattened error log in PNOR;
      *      MUST point to a non-empty slot
      *
