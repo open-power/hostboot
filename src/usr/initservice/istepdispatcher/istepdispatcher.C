@@ -178,6 +178,10 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
             if(err)
             {
+                if (err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+                {
+                    err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
                 TRACFCOMP(g_trac_initsvc,
                           "ERROR: Failed to register mailbox, terminating");
                 break;
@@ -915,7 +919,12 @@ errlHndl_t IStepDispatcher::sendSyncPoint()
 
         if (err)
         {
-            TRACFCOMP( g_trac_initsvc, ERR_MRK"sendSyncPoint: Error sending message");
+            if (err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+            {
+                err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            }
+            TRACFCOMP( g_trac_initsvc, ERR_MRK"sendSyncPoint:"
+                                      " Error sending message");
         }
     }
 
@@ -1147,7 +1156,12 @@ void IStepDispatcher::iStepBreakPoint(uint32_t i_info)
 
         if(err)
         {
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleBreakpointMsg: Error sending message");
+            if (err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+            {
+                err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            }
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleBreakpointMsg:"
+                                         " Error sending message");
             errlCommit(err, INITSVC_COMP_ID);
             msg_free(pMsg);
             pMsg = NULL;
@@ -1433,6 +1447,10 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             err = MBOX::resume();
             if (err)
             {
+                if (err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+                {
+                    err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
                 TRACFCOMP( g_trac_initsvc, "ERROR : MBOX::resume");
                 errlCommit(err, INITSVC_COMP_ID);
             }
@@ -1474,6 +1492,10 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     myMsg->data[1] = iv_curSubStep;
     myMsg->extra_data = NULL;
     err = MBOX::send(HWSVRQ, myMsg);
+    if (err && err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+    {
+        err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+    }
     clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
     TRACFCOMP( g_trac_initsvc,INFO_MRK"Progress Code %d.%d Sent",
                myMsg->data[0],myMsg->data[1]);
