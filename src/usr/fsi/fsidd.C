@@ -826,11 +826,24 @@ errlHndl_t FsiDD::resetPib2Opb( TARGETING::Target* i_target )
     errlHndl_t errhdl = NULL;
 
     do {
+        //@fixme -- RTC:35041
+        //hack for Brazos when FSP-B is not installed
+        uint64_t opb_offset = FSI2OPB_OFFSET_0;
+        if( iv_master->getAttr<TARGETING::ATTR_MODEL>()
+            == TARGETING::MODEL_VENICE )
+        {
+            // always use the B-port engine on proc1
+            if( i_target->getAttr<TARGETING::ATTR_POSITION>() == 1 )
+            {
+                opb_offset = FSI2OPB_OFFSET_1;
+            }
+        }
+
         // Clear out OPB error
         uint64_t scom_data = 0;
         size_t scom_size = sizeof(scom_data);
 
-        uint64_t opbaddr = FSI2OPB_OFFSET_0 | OPB_REG_RES;
+        uint64_t opbaddr = opb_offset | OPB_REG_RES;
         scom_data = 0x8000000000000000; //0=Unit Reset
         errhdl = deviceOp( DeviceFW::WRITE,
                            i_target,
@@ -839,7 +852,7 @@ errlHndl_t FsiDD::resetPib2Opb( TARGETING::Target* i_target )
                            DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( errhdl ) { break; }
 
-        opbaddr = FSI2OPB_OFFSET_0 | OPB_REG_STAT;
+        opbaddr = opb_offset | OPB_REG_STAT;
         errhdl = deviceOp( DeviceFW::WRITE,
                            i_target,
                            &scom_data,
@@ -848,7 +861,7 @@ errlHndl_t FsiDD::resetPib2Opb( TARGETING::Target* i_target )
         if( errhdl ) { break; }
 
         // Check if we have any errors left
-        opbaddr = FSI2OPB_OFFSET_0 | OPB_REG_STAT;
+        opbaddr = opb_offset | OPB_REG_STAT;
         scom_data = 0;
         errhdl = deviceOp( DeviceFW::READ,
                            i_target,
