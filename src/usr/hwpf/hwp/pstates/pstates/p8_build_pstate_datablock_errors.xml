@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,73 +20,167 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.9 2013/10/30 17:28:36 jimyac Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.11 2014/02/24 15:32:29 jimyac Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_NO_CORES_PRESENT_ERROR</rc>
     <description>There are no cores present</description>
+    <ffdc>PRESENT_CHIPLETS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError> 
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR</rc>
     <description>#V Buffer returned is wrong size</description>
+    <ffdc>BUFFER_SIZE</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError> 
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PDM_BUFFER_SIZE_ERROR</rc>
     <description>#M Buffer returned is wrong size</description>
+    <ffdc>BUFFER_SIZE</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>   
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
     <description>MVPD Bucket Frequency was not equal per chiplet</description>
-  </hwpError>    
+    <ffdc>ATTR_MVPD_DATA_0</ffdc>
+    <ffdc>ATTR_MVPD_DATA_1</ffdc>
+    <ffdc>ATTR_MVPD_DATA_2</ffdc>
+    <ffdc>ATTR_MVPD_DATA_3</ffdc>
+    <ffdc>ATTR_MVPD_DATA_4</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>     
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_ATTR_DPLL_DIV_ERROR</rc>
     <description> Attribute ATTR_PROC_DPLL_DIVIDER = 0</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>   
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_FREQ_BIAS_ERROR</rc>
     <description>Cannot have both up and down bias set</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>   
  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_PSTATE_DATABLOCK_EXT_VOLTAGE_BIAS_ERROR</rc>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_EXT_VDD_VOLTAGE_BIAS_ERROR</rc>
     <description>Cannot have both up and down bias set</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>     
  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_PSTATE_DATABLOCK_INT_VOLTAGE_BIAS_ERROR</rc>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_EXT_VCS_VOLTAGE_BIAS_ERROR</rc>
     <description>Cannot have both up and down bias set</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>  
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_INT_VDD_VOLTAGE_BIAS_ERROR</rc>
+    <description>Cannot have both up and down bias set</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>         
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_INT_VCS_VOLTAGE_BIAS_ERROR</rc>
+    <description>Cannot have both up and down bias set</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>         
   <!-- *********************************************************************** -->  
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_OBJECT_ERROR</rc>
     <description>chip_characterization_create was passed null pointer to characterization or characterization->parameters</description>
-    <ffdc>CHAR_RETURN_CODE</ffdc>    
+    <ffdc>CHAR_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>  
   </hwpError>  
   <!-- *********************************************************************** -->  
   <hwpError>
     <rc> RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ARGUMENT_ERROR</rc>
     <description>chip_characterization_create was passed null pointer to characterization->vpd or no points</description>
     <ffdc>CHAR_RETURN_CODE</ffdc>    
-    <ffdc>POINTS</ffdc>    
+    <ffdc>POINTS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>    
   <!-- *********************************************************************** -->  
   <hwpError>
     <rc> RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ERROR</rc>
     <description>chip_characterization_create returned an error</description>
-    <ffdc>CHAR_RETURN_CODE</ffdc>    
+    <ffdc>CHAR_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>  
   </hwpError>      
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_OBJECT_ERROR</rc>
     <description>gpst_create was passed null pointer to gpst, characterization, or characterization->ops or characterization->points = 0</description>
     <ffdc>GPST_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>     
   <!-- *********************************************************************** -->
   <hwpError>
@@ -95,41 +189,83 @@
     <ffdc>GPST_RETURN_CODE</ffdc>
     <ffdc>OPS_PMIN</ffdc>
     <ffdc>OPS_PMAX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>     
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ENTRY_ERROR</rc>
     <description>gpst_entry_create was passed a voltage that was out of limits of vrm11 vid code or ivid vide code</description>
     <ffdc>GPST_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>        
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ERROR</rc>
     <description>gpst_create returned an error</description>
     <ffdc>GPST_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>  
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_OBJECT_ERROR</rc>
     <description>lpst_create was passed null pointer to gpst or lpsa</description>
     <ffdc>LPST_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>      
   <!-- *********************************************************************** -->
    <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_IVID_ERROR</rc>
     <description>lpst_create attempted to convert an invalid voltage value to ivid format (GT 1.39375V or LT 0.6V)</description>
     <ffdc>LPST_RETURN_CODE</ffdc>
-  </hwpError>      
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError> 
+  <!-- *********************************************************************** -->
+   <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_VID_INCR_CLIP_INREG_ERROR</rc>
+    <description>lpst_create encountered a vid increment GT 7 in regulation</description>
+    <ffdc>LPST_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>   
   <!-- *********************************************************************** -->  
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR</rc>
     <description>lpst_create returned an error</description>
     <ffdc>LPST_RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>    
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_RESCLK_BAND_ERROR</rc>
     <description>Resonant clocking band attribute values are not in ascending order from low to high</description>
+    <ffdc>PM_RES_CLOCK_LOW_BAND_LOWER_FREQ</ffdc>
+    <ffdc>PM_RES_CLOCK_LOW_BAND_UPPER_FREQ</ffdc>
+    <ffdc>PM_RES_CLOCK_HIGH_BAND_LOWER_FREQ</ffdc>
+    <ffdc>PM_RES_CLOCK_HIGH_BAND_UPPER_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>    
    <!-- *********************************************************************** -->
   <hwpError>
@@ -138,6 +274,13 @@
     <ffdc>OP_POINT</ffdc>
     <ffdc>CHIPLET_NUM</ffdc>
     <ffdc>BUCKET_ID</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>    
    <!-- *********************************************************************** -->
   <hwpError>
@@ -146,14 +289,37 @@
     <ffdc>OP_POINT</ffdc>
     <ffdc>CHIPLET_NUM</ffdc>
     <ffdc>BUCKET_ID</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>     
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_MINMAX_BOUNDS_ERROR</rc>
+    <description>freq2pState or pstate_minmax_chk returned error - computed pstate for freq is out of bounds of MAX/MIN possible</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>      
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_FREQ2PSTATE_PSTATE_MINMAX_BOUNDS_ERROR</rc>
     <description>freq2pState returned error - computed pstate for freq is out of bounds of MAX/MIN possible</description>
     <ffdc>RETURN_CODE</ffdc>
     <ffdc>PSTATE</ffdc>
     <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>      
   <!-- *********************************************************************** -->
   <hwpError>
@@ -162,11 +328,29 @@
     <ffdc>RETURN_CODE</ffdc>
     <ffdc>PSTATE</ffdc>
     <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>        
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_ERROR</rc>
     <description>Bad Return code</description>
     <ffdc>RETURN_CODE</ffdc>
-  </hwpError>      
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_FREQ2PSTATE_ERROR</rc>
+    <description>Bad Return code</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>         
 </hwpErrors>

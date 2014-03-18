@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,7 @@
 #ifndef __PSTATE_TABLES_H__
 #define __PSTATE_TABLES_H__
 
-// $Id: pstate_tables.h,v 1.7 2013/08/13 17:13:03 jimyac Exp $
+// $Id: pstate_tables.h,v 1.8 2014/02/18 16:07:34 jimyac Exp $
 
 /// \file pstate_tables.h 
 /// \brief Code used to generate Pstate tables from real or imagined chip
@@ -151,7 +151,8 @@ lpst_create(const GlobalPstateTable *gpst,
             LocalPstateArray *lpsa, 
             const uint8_t dead_zone_5mv,
             double volt_int_vdd_bias, 
-            double volt_int_vcs_bias);            
+            double volt_int_vcs_bias,            
+            uint8_t *vid_incr_gt7_nonreg);            
 
 typedef struct IVRM_PARM_DATA {
     uint32_t vin_min;                   // Minimum input voltage

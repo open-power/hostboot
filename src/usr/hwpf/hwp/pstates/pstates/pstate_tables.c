@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.14 2014/01/15 17:37:18 jimyac Exp $
+// $Id: pstate_tables.c,v 1.16 2014/02/20 16:28:06 jimyac Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -149,7 +149,8 @@ chip_characterization_create(ChipCharacterization *characterization,
                  OperatingPointParameters *parameters,
                  int points)
 {
-    int rc, i;
+    int rc;
+    uint8_t i;
     uint32_t pstate0_code;
     uint8_t  gpst_points           = 0;   // jwy
     uint32_t curr_pstate_code      = 0;   // jwy
@@ -277,8 +278,8 @@ gpst_stepping_setup(GlobalPstateTable* gpst,
                     int pstate_stepsize,
                     int vrm_delay_ns)
 {
-    uint32_t cycles;
-    int rc, sigbits, stepdelay_range, stepdelay_value;
+    uint32_t cycles, sigbits, stepdelay_range, stepdelay_value;
+    int rc;
 
     do {
         rc = 0;
@@ -301,7 +302,6 @@ gpst_stepping_setup(GlobalPstateTable* gpst,
         // Normalize the exponential encoding
 
         sigbits = 32 - cntlz32(cycles);
-// jwy        stepdelay_range = MAX(0, sigbits - VRM_STEPDELAY_RANGE_BITS);
        
        stepdelay_range = (sigbits - VRM_STEPDELAY_RANGE_BITS);
 
@@ -352,8 +352,7 @@ gpst_entry_create(gpst_entry_t *entry, OperatingPoint *op)
 {
     int rc;
     uint8_t vid;
-// jwy    int32_t vcs_offset;
-// jwy    uint32_t vdd_uv;
+
     gpst_entry_t gpe;
 
     do {
@@ -443,9 +442,10 @@ gpst_create(GlobalPstateTable *gpst,
             int evrm_delay_ns)
 {
     OperatingPoint *ops, interp;
-    int rc, points, i, entry, pstate;
-    int32_t pmin, pmax;
-    uint8_t fNom;
+    int rc, points;
+    int32_t entry;
+    int32_t pmin, pmax, pstate;
+    uint8_t fNom, i;
 
     do {
         rc = 0;
@@ -515,9 +515,6 @@ gpst_create(GlobalPstateTable *gpst,
         gpst->entries = pmax - pmin + 1;
  
         // Set the Pmin Pstate
-
-       for (i = 0; i < points; i++) 
-
         entry = 0;
         if (gpst_entry_create(&(gpst->pstate[entry]), &(ops[0]))) {
             rc = -GPST_INVALID_ENTRY;
@@ -610,10 +607,12 @@ lpst_create(const GlobalPstateTable *gpst,
             LocalPstateArray *lpsa, 
             const uint8_t dead_zone_5mv, 
             double volt_int_vdd_bias, 
-            double volt_int_vcs_bias)
+            double volt_int_vcs_bias,
+            uint8_t *vid_incr_gt7_nonreg)
 {            
   int          rc  = 0;
-  int          i,j;
+  int8_t        i;
+  uint8_t       j;
   gpst_entry_t  entry;
   uint32_t      turbo_uv;              
   uint32_t      gpst_uv;              
@@ -621,7 +620,7 @@ lpst_create(const GlobalPstateTable *gpst,
   uint32_t      vdd_uv;                
   uint8_t       v_ivid;
   uint8_t       gpst_ivid;
-  int          lpst_max_found = 0;                
+  uint8_t       lpst_max_found = 0;                
   uint32_t      lpst_max_uv;           
   uint8_t       lpst_entries;          
   uint8_t       lpst_entries_div4;          
@@ -677,8 +676,6 @@ lpst_create(const GlobalPstateTable *gpst,
     
     lpst_entries = gpst->entries;
     lpst_pmin    = gpst->pmin;
-    
-// jwy    printf("turbo_uv = %d lpst_max_uv = %d entries = %d lpst_pmin = %d lpst_max_pstate = %d i = %d\n", turbo_uv, lpst_max_uv, lpst_entries, lpst_pmin, lpst_max_pstate, i);
     
     // ----------------------------------------------------------------------------
     // now loop over gpst from 0 to lpst_entries and fill in lpst from data in gpst
@@ -740,8 +737,7 @@ lpst_create(const GlobalPstateTable *gpst,
          
           // if not in regulation, return a warning
           if (lpst_pstate > lpst_max_pstate) { 
-//            rc = 2;         
-//            break;
+            *vid_incr_gt7_nonreg = 1;
           }  
         }  
                   
@@ -796,7 +792,6 @@ lpst_create(const GlobalPstateTable *gpst,
       
       for (j = 1; j <= steps_above_curr; j++) {
         inc_step = j - 1;
-// jwy        printf("%d %d %d\n", lpst_pstate,j, steps_above_curr);
         entry.value = revle64(gpst->pstate[lpst_pstate - gpst_pmin(gpst) + j].value);       
         rc         = ivid2vuv(entry.fields.evid_vdd_eff, &gpst_uv);      if (rc) break;
         gpst_uv     = (uint32_t) (gpst_uv * volt_int_vdd_bias);
@@ -812,16 +807,13 @@ lpst_create(const GlobalPstateTable *gpst,
       if (inc_step > 7) 
         inc_step = 7;
       
-      
       lpsa->pstate[i].fields.inc_step = inc_step;
-// jwy       lpsa->pstate[i].fields.inc_step = 0;               // FIXME - temporary patch!
 
       // start looking below in gpst to find dec_step
       dec_step = 0; // default
       
       for (j = 1; j <= steps_below_curr; j++) {
         dec_step = j - 1;
-// jwy        printf("%d %d %d\n", lpst_pstate,j, steps_below_curr);
         entry.value = revle64(gpst->pstate[lpst_pstate - gpst_pmin(gpst) - j].value);       
         rc         = ivid2vuv(entry.fields.evid_vdd_eff, &gpst_uv);         if (rc) break;
         gpst_uv     = (uint32_t) (gpst_uv * volt_int_vdd_bias);
@@ -838,9 +830,6 @@ lpst_create(const GlobalPstateTable *gpst,
         dec_step = 7;      
       
       lpsa->pstate[i].fields.dec_step = dec_step;
-// jwy        lpsa->pstate[i].fields.dec_step = 0;             // FIXME - temporary patch!
-
-// jwy      printf (" %d %X %X %f %d %d %d %d\n", i, (uint32_t)lpsa->pstate[i].fields.ivid_vdd, (uint32_t)lpsa->pstate[i].fields.ivid_vcs, pwrratio_f, pwrratio, vid_incr[0], vid_incr[1], vid_incr[2]);
 
       // Byte reverse the entry into the image.
       lpsa->pstate[i].value = revle64(lpsa->pstate[i].value);
@@ -887,7 +876,6 @@ build_vds_region_table( ivrm_parm_data_t*       i_ivrm_parms,
     {
         pss->lpsa.vdsvin[i].fields.ivid0 = beg_offset;
         pss->lpsa.vdsvin[i].fields.ivid1 = end_offset;
-// jwy        printf("  Vds_region[%x]: begin - %02llX, end - %02llX\n", i, beg_offset, end_offset);
         
         // Calculate offsets for next entry
         beg_offset = end_offset + 1;
@@ -913,8 +901,7 @@ fill_vin_table( ivrm_parm_data_t*       i_ivrm_parms,
 {  
     uint8_t     s;
     uint8_t     i;
-    int         idx;
-//    uint8_t     pfetstr = 17;
+    uint32_t    idx;
     
     i = i_ivrm_parms->vin_table_setsperrow;
     for (i = 0; i < i_ivrm_parms->vds_region_entries; i++)
@@ -930,17 +917,6 @@ fill_vin_table( ivrm_parm_data_t*       i_ivrm_parms,
             pss->lpsa.vdsvin[idx].fields.pfet6 = i_ivrm_parms->forced_pfetstr_value;
             pss->lpsa.vdsvin[idx].fields.pfet7 = i_ivrm_parms->forced_pfetstr_value;
 
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet0 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet1 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17; 
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet2 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17; 
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet3 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet4 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet5 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet6 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
-// jwy            pss->lpsa.vdsvin[idx].fields.pfet7 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
-
-// jwy            printf("  Vin[%d]{%d,%d}: %016llX\n", idx, i, s, pss->lpsa.vdsvin[idx].value);
-            
             // Byte reverse the entry into the image.
             pss->lpsa.vdsvin[idx].value = revle64(pss->lpsa.vdsvin[idx].value);                                    
          } 
@@ -973,10 +949,10 @@ void simeq(int n, double A[], double Y[], double X[])
 
     double *B;           /* [n][n+1]  WORKING MATRIX */
     int *ROW;            /* ROW INTERCHANGE INDICES */
-    int HOLD , I_PIVOT;  /* PIVOT INDICES */
+    uint32_t HOLD , I_PIVOT;  /* PIVOT INDICES */
     double PIVOT;        /* PIVOT ELEMENT VALUE */
     double ABS_PIVOT;
-    int i,j,k,m;
+    uint8_t i,j,k,m;
 
     B = (double *)calloc((n+1)*(n+1), sizeof(double));
     ROW = (int *)calloc(n, sizeof(int));
@@ -1019,7 +995,6 @@ void simeq(int n, double A[], double Y[], double X[])
         for(j=k+1; j<n+1; j++){
           B[ROW[k]*m+j] = 0.0;
         }
-// jwy        printf("redundant row (singular) %d \n", ROW[k]);
       } /* singular, delete row */
       else{
 
@@ -1052,11 +1027,10 @@ void simeq(int n, double A[], double Y[], double X[])
 
 void fit_file(int n, uint8_t version, double C[], ivrm_cal_data_t* cal_data)
 {
-  int i, j, k;
+  uint8_t i, j, k;
   int points;                            
   double y;
   double Vd, Vs;
-// jwy  double Vg;
   double x[30];        /* at least 2n */
   double A[2500];                             
   double Y[50];                          
@@ -1099,29 +1073,22 @@ void fit_file(int n, uint8_t version, double C[], ivrm_cal_data_t* cal_data)
     if (version == 0) {   
       Vd = Vd_v1[k]; 
       Vs = Vs_v1[k]; 
-// jwy      Vg = (double)cal_data->point[k].gate_voltage/1000;         // uV
       y  = ((double)cal_data->point[k].drain_current)/1000;      // uA 
     } 
     else if (version == 1 || version == 2 || version == 3) {
       Vd = (double)cal_data->point[k].drain_voltage;             // mV
       Vs = (double)cal_data->point[k].source_voltage;            // mV
-// jwy      Vg = (double)cal_data->point[k].gate_voltage/1000;         // uV
       y  = ((double)cal_data->point[k].drain_current)/1000;      // uA   
     }
     else {                                                       //simulation data
       Vd = (double)cal_data->point[k].drain_voltage;             // mV
       Vs = (double)cal_data->point[k].source_voltage;            // mV
-// jwy      Vg = (double)cal_data->point[k].gate_voltage;              // mV
       y  = ((double)cal_data->point[k].drain_current)/1000;      // uA       
     }
-   
-// jwy    printf (" %f %f %f %f\n", Vd, Vs, Vg, y );
 
     x[1]=Vs/1.11;      // x[1] = target Vin = Vgs / 1.11
     x[2]=Vs/1.11-Vd;   // x[2] = target Vds = Vin/1.11 - Vout = Vs/1.11 - Vd
     x[3]=x[1]*x[2];    // x[3] = Vin*Vds
-    
-// jwy    if (Vg>20) { printf("ERROR:   gate voltage > 20mV:   current=%lf, Vd=%lf, Vs=%lf, Vg=%lf\n", y, Vd, Vs, Vg); }
     
     for(i=0; i<n; i++) {
       for(j=0; j<n; j++) {
@@ -1133,45 +1100,26 @@ void fit_file(int n, uint8_t version, double C[], ivrm_cal_data_t* cal_data)
   
   simeq(n, A, Y, C);
   
-// jwy  for(i=0; i<n; i++) printf("C[%d]=%g \n", i, C[i]);
 } /* end fit_file */
-
-// jwy void dec2bin(int h, int n) {
-// jwy    int i;
-// jwy    char b[12];
-// jwy    if (n>12) { n = 12; }
-// jwy     for( i = n-1; i >= 0; i--) {
-// jwy         if( (1 << i) & h) {
-// jwy            b[n - i] = '1';
-// jwy            printf("%c",b[n-i]);
-// jwy         } else {
-// jwy            b[n - i] = '0';
-// jwy            printf("%c",b[n-i]);
-// jwy         }
-// jwy    }
-// jwy 
-// jwy    b[n] = 0; // ascii terminating character
-// jwy }
-
 
 void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
                       double C[],
                       PstateSuperStructure* pss)
 {
-  int i, j;
+  uint8_t i, j;
   double VIN_MIN;
   double VDS_MIN;
   double Vin[40]; /* at least 2n */
   double Vds[40];
-  int    NUM_VIN;
-  int    NUM_VDS;
+  uint32_t    NUM_VIN;
+  uint32_t    NUM_VDS;
   double LSB_CURRENT;
   double TEMP_UPLIFT;
   double Ical[40][40];
   double Iratio[40][40];
   double Iratio_clip;
   uint8_t Iratio_int[40][40];  
-  int temp;
+  uint32_t temp;
   uint8_t ratio_val;
   uint8_t idx;
   
@@ -1190,13 +1138,7 @@ void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
      Vds[i] = temp*6.25 ;
   }
 
-// jwy  printf("\t");
-// jwy  for(i=0; i<NUM_VDS; i++) { printf("%lf\t", Vds[i]); }
-// jwy  printf("\n");
-
   for(i=0; i<NUM_VIN; i++) {
-// jwy     printf("%lf\t", Vin[i]);
-     
      for (j=0; j<NUM_VDS; j++) {
         if(Vin[i]-Vds[j]>=700) {
            Ical[i][j]   = C[0] + C[1]*Vin[i] + C[2]*Vds[j] + C[3]*Vin[i]*Vds[j]; // compute cal current
@@ -1206,39 +1148,19 @@ void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
            Iratio_clip = (Iratio[i][j]+1/16>3.875 ? 3.875 : Iratio[i][j]+1/16); 
 // bug           temp = (int) (Iratio[i][j]+1/16>3.875 ? 3.875 : Iratio[i][j]+1/16); 
            temp = (int) Iratio_clip; 
-//           printf("%2.2f %2.2f %u ", Ical[i][j], Iratio_clip, temp);
-//           dec2bin(temp, 2);
            ratio_val = 0;
            ratio_val = (temp << 3) & 0x018;          // jwy shift temp left 3 and clear out lower 3 bits - this gets bits 0:1 of value
-//           printf(".");
-           
            temp = (int) ( (Iratio_clip - temp)*8 + 0.5);
            temp = temp > 7 ? 7 : temp;  // bug fix - clip to 7 if overflow
-           
-//           dec2bin(temp, 3);
            ratio_val = (temp & 0x07)| ratio_val;     // jwy OR lower 3 bits of temp with upper 2 bits already in 0:1 - this merges bits 2:4 with 0:1 for final value
            Iratio_int[i][j] = ratio_val; 
-// jwy           printf(" %u",ratio_val);
-// jwy           printf("\t");
         } else {
            Iratio[i][j]     = 0;
            Iratio_int[i][j] = 0;
-// jwy           printf("0*\t");
         }
-// jwy        printf("%lf\t", Iratio[i][j]);
      }
-// jwy     printf("\n");
   }
-
-// jwy   for (i=0; i<NUM_VDS; i++) { 
-// jwy 
-// jwy     for(j=0; j<NUM_VIN; j++) {
-// jwy       printf("%u ",Iratio_int[i][j]);
-// jwy     }
-// jwy     printf("\n"); 
-// jwy   }
-
-  
+ 
   // fill in Vin table with Iratio data
   for (i=0; i<NUM_VDS; i++) {          // 16 rows
   
@@ -1252,13 +1174,6 @@ void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
       pss->lpsa.vdsvin[idx].fields.pfet5 = Iratio_int[(j*8)+5][i];
       pss->lpsa.vdsvin[idx].fields.pfet6 = Iratio_int[(j*8)+6][i];
       pss->lpsa.vdsvin[idx].fields.pfet7 = Iratio_int[(j*8)+7][i]; 
-      
-// jwy        for (k=0; k<8; k++) {
-// jwy        printf("%u ", Iratio_int[(j*8)+k][i]);
-// jwy        }
-// jwy        printf("\n");
-// jwy        printf("  Vin[%d]{%d,%d}: %016llX\n", idx, i, j, pss->lpsa.vdsvin[idx].value);
-
       
       // Byte reverse the entry into the image.
       pss->lpsa.vdsvin[idx].value = revle64(pss->lpsa.vdsvin[idx].value);      

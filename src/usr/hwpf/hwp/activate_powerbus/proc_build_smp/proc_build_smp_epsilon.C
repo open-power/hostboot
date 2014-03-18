@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.10 2014/02/23 21:41:06 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.11 2014/03/06 17:42:24 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1433,7 +1433,7 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
         io_smp.eps_cfg.p = PROC_BUILD_SMP_EPSILON_MCD_MAX_VALUE_P-1;
 
         // dump scaled epsilon values
-        FAPI_DBG("proc_build_smp_calc_epsilons: Scaled epsilon values based on %s%d%% guardband:",
+        FAPI_DBG("proc_build_smp_calc_epsilons: Scaled epsilon values based on %s%d percent guardband:",
                  (io_smp.eps_cfg.gb_positive)?("+"):("-"),
                  io_smp.eps_cfg.gb_percentage);
         FAPI_DBG("proc_build_smp_calc_epsilons:  R_T0 = %d", io_smp.eps_cfg.r_t0);

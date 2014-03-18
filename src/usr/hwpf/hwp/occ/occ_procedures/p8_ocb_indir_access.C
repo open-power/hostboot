@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_ocb_indir_access.C,v 1.2 2012/12/08 14:01:47 stillgs Exp $
+// $Id: p8_ocb_indir_access.C,v 1.3 2014/03/07 14:55:01 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_ocb_indir_access.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,7 @@
 ///     Venice DD1.
 /// \endverbatim
 ///
+/// buildfapiprcd -e "../../xml/error_info/proc_ocb_indir_access_errors.xml" p8_ocb_indir_access.C
 //------------------------------------------------------------------------------
 
 
