@@ -44,6 +44,8 @@
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
+
 
 // Hostboot Image ID string
 extern char hbi_ImageId;
@@ -458,8 +460,66 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         TRACFCOMP(g_trac_errl, ENTER_MRK"addHwCallout(0x%.8x 0x%x 0x%x 0x%x)",
                 get_huid(i_target), i_priority,
                 i_deconfigState, i_gardErrorType);
-        TARGETING::EntityPath ep =
-                i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+        TARGETING::EntityPath ep;
+        TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+        if (l_type == TARGETING::TYPE_CORE)
+        {
+            //IF the type being garded is a Core the associated EX Chiplet
+            //  needs to be found and garded instead because the core is
+            //  not gardable
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                "addHwCallout - Callout on Core type, use EX Chiplet instead"
+                " because Core is not gardable");
+            TARGETING::TargetHandleList targetList;
+            getParentAffinityTargets(targetList,
+                                     i_target,
+                                     TARGETING::CLASS_UNIT,
+                                     TARGETING::TYPE_EX);
+            if ( targetList.size() != 1 )
+            {
+                TRACFCOMP(g_trac_errl, ERR_MRK
+                    "addHwCallout - Found No EX Chiplet for this Core");
+
+                //Just use the the Core itself in the gard operation
+                ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+                /*@     errorlog tag
+                *  @errortype      ERRL_SEV_UNRECOVERABLE
+                *  @moduleid       ERRL_ADD_HW_CALLOUT_ID
+                *  @reasoncode     ERRL_CORE_EX_TARGET_NULL
+                *  @userdata1      Core HUID that has bad EX association
+                *  @userdata2      Number of EX chips associatd with core
+                *
+                *  @devdesc        Hardware callout could not Gard target
+                $                  because it could not find EX chip
+                *                  associated with the Core to be called out
+                *
+                */
+                errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRORLOG::ERRL_ADD_HW_CALLOUT_ID,
+                                    ERRORLOG::ERRL_CORE_EX_TARGET_NULL,
+                                    get_huid(i_target), targetList.size(),
+                                    true);
+
+                if (l_errl)
+                {
+                    errlCommit(l_errl, ERRL_COMP_ID);
+                }
+
+            }
+            else
+            {
+                //Use the EX target found in below logic to gard
+                ep = targetList[0]->getAttr<TARGETING::ATTR_PHYS_PATH>();
+            }
+        }
+        else
+        {
+            ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        }
+
         // size is total EntityPath size minus unused path elements
         uint32_t size1 = sizeof(ep) -
                     (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *

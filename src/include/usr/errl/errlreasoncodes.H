@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,6 +41,7 @@ namespace ERRORLOG
         ERRL_USERDATA_TEST_MOD_ID   = 0x01,
         ERRL_TEST_MOD_ID            = 0x02,
         ERRL_RT_TEST_MOD_ID         = 0x03,
+        ERRL_ADD_HW_CALLOUT_ID      = 0x04,
         //........
         ERRL_LAST_MODULE_ID         = 0xFF
     };
@@ -54,6 +55,7 @@ namespace ERRORLOG
         ERRL_TEST_ATTRIBUTE_UD    = ERRL_COMP_ID | 0x04,
         ERRL_TEST_LOGREGISTER_UD  = ERRL_COMP_ID | 0x05,
         ERRL_TEST_CALLOUT_UD      = ERRL_COMP_ID | 0x06,
+        ERRL_CORE_EX_TARGET_NULL  = ERRL_COMP_ID | 0x07,
         //........
         ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
     };
