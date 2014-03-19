@@ -315,6 +315,20 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
 TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt );
 
 /**
+ * @brief   Get spare DRAM information on a DIMM.
+ * @param   i_mba MBA target.
+ * @param   i_rank Rank.
+ * @param   i_ps MBA port select.
+ * @param   o_spareConfig Spare DRAM config information.
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @note    On a DIMM its possible that spare is not present. Also on X4 DRAM
+ *          spare can be on High nibble or low nibble. This function will
+ *          populate spare config information in o_spareConfig.
+ */
+int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
+                            uint8_t i_ps, uint8_t & o_spareConfig );
+
+/**
  * @brief   Returns the memory buffer raw card type (i.e. R/C A).
  * @param   i_memTarget A memory buffer, MBA, or DIMM.
  * @return

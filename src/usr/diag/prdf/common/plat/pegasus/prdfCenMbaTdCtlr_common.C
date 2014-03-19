@@ -431,7 +431,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         uint8_t ps = iv_mark.getCM().getPortSlct();
-        uint8_t spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+        uint8_t spareConfig = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
         o_rc = getDimmSpareConfig( iv_mbaTrgt, iv_rank, ps,
                                    spareConfig );
         if ( SUCCESS != o_rc )
@@ -442,7 +442,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Check if DRAM spare is present. Also, ECC spares are available on all
         // x4 DIMMS.
-        if ( ( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE != spareConfig ) || iv_x4Dimm )
+        if ( ( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE != spareConfig ) || iv_x4Dimm )
         {
             // It is possible that a Centaur DIMM does not have spare DRAMs.
             // Check the VPD for available spares. Note that a x4 DIMM has

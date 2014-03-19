@@ -187,7 +187,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
             PRDF_ERR( PRDF_FUNC"Master Rank list size is 0");
             break;;
         }
-        uint8_t spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+        uint8_t spareConfig = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
         // check for spare DRAM. Port does not matter.
         // Also this configuration is same for all ranks on MBA.
         rc = getDimmSpareConfig( i_mbaTrgt, masterRanks[0], 0, spareConfig );
@@ -197,7 +197,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
             break;
         }
 
-        if( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE != spareConfig )
+        if( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE != spareConfig )
             mbaData.header.isSpareDram = true;
 
         // Iterate all ranks to get DRAM repair data
