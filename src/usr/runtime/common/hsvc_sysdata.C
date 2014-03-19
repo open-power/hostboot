@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Thu Mar 13 10:52:38 CDT 2014 by cswenson from
+// Generated on Wed Mar 19 10:52:20 CDT 2014 by cswenson from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
@@ -116,14 +116,17 @@ HSVC_LOAD_ATTR( ATTR_IS_MPIPL );
 HSVC_LOAD_ATTR( ATTR_IS_SIMULATION );
 HSVC_LOAD_ATTR( ATTR_MEM_FILTER_PLL_SOURCE );
 HSVC_LOAD_ATTR( ATTR_MNFG_FLAGS );
+HSVC_LOAD_ATTR( ATTR_MULTI_SCOM_BUFFER_MAX_SIZE );
 HSVC_LOAD_ATTR( ATTR_NEST_FREQ_MHZ );
 HSVC_LOAD_ATTR( ATTR_PCI_REFCLOCK_RCVR_TERM );
 HSVC_LOAD_ATTR( ATTR_PIB_I2C_NEST_PLL );
 HSVC_LOAD_ATTR( ATTR_PIB_I2C_REFCLOCK );
+HSVC_LOAD_ATTR( ATTR_PM_HWP_ATTR_VERSION );
 HSVC_LOAD_ATTR( ATTR_PROC_EPS_TABLE_TYPE );
 HSVC_LOAD_ATTR( ATTR_PROC_FABRIC_PUMP_MODE );
 HSVC_LOAD_ATTR( ATTR_PROC_REFCLOCK_RCVR_TERM );
 HSVC_LOAD_ATTR( ATTR_PROC_X_BUS_WIDTH );
+HSVC_LOAD_ATTR( ATTR_RECONFIGURE_LOOP );
 HSVC_LOAD_ATTR( ATTR_RISK_LEVEL );
 HSVC_LOAD_ATTR( ATTR_SBE_IMAGE_OFFSET );
 // -- Input: ../../xml/attribute_info/unit_attributes.xml --

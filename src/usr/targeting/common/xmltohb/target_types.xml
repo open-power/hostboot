@@ -242,6 +242,7 @@
     <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
+    <attribute><id>PM_HWP_ATTR_VERSION</id></attribute>
 </targetType>
 
 <targetType>
