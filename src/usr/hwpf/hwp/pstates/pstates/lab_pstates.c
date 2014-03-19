@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: lab_pstates.c,v 1.8 2013/08/13 17:12:54 jimyac Exp $
+// $Id: lab_pstates.c,v 1.9 2014/02/21 03:02:20 jmcgill Exp $
 
 /// \file lab_pstates.c
 /// \brief Lab-only (as opposed to product-procedure) support for Pstates.
@@ -538,7 +538,7 @@ cpmrange_print(FILE* stream, CpmPstateModeRanges* cpmrange)
     fprintf(stream, "Valid Number of CPM Pstate Ranges : %u\n", 
             cpmrange->validRanges);
             
-    for (i == 0; i < 8; i++) {        
+    for (i = 0; i < 8; i++) {        
       fprintf(stream, "  CPM Range %d Pstate : %d\n", 
               i, cpmrange->inflectionPoint[i]);
     }

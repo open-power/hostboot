@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
 
-// $Id: proc_cen_ref_clk_enable.C,v 1.2 2013/08/14 20:44:47 jmcgill Exp $
+// $Id: proc_cen_ref_clk_enable.C,v 1.3 2014/02/28 17:52:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_ref_clk_enable.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -133,7 +133,8 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
                 {
                     // bit offset exceeds field range
                     FAPI_ERR("proc_cen_ref_clk_enable: Translated Centaur refclock enable bit position is out of range!");
-                    const uint8_t& POSITION = mcs_unit_id;
+                    const fapi::Target& PROC_TARGET = i_target;
+                    const uint8_t& CENTAUR_POSITION = mcs_unit_id;
                     const uint8_t& REFCLOCK_BIT = refclock_bit;
                     FAPI_SET_HWP_ERROR(rc,
                                        RC_PROC_CEN_REF_CLK_ENABLE_SWIZZLE_ERR);
@@ -158,8 +159,9 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
         if (configured_centaurs != i_attached_centaurs)
         {
             FAPI_ERR("proc_cen_ref_clk_enable: Not all Centaurs marked as attached were configured");
-            const uint8_t& CONFIGURED = configured_centaurs;
-            const uint8_t& ATTACHED = i_attached_centaurs;
+            const fapi::Target& PROC_TARGET = i_target;
+            const uint8_t& CONFIGURED_CENTAUR_POSITIONS = configured_centaurs;
+            const uint8_t& ATTACHED_CENTAUR_POSITIONS = i_attached_centaurs;
             FAPI_SET_HWP_ERROR(rc,
                                RC_PROC_CEN_REF_CLK_ENABLE_CONFIG_ERR);
             break;

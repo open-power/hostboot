@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,20 +20,30 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_cen_ref_clk_enable_errors.xml,v 1.1 2013/08/14 20:45:46 jmcgill Exp $ -->
+<!-- $Id: proc_cen_ref_clk_enable_errors.xml,v 1.2 2014/02/28 17:53:41 jmcgill Exp $ -->
 <!-- Error definitions for proc_cen_ref_clk_enable -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CEN_REF_CLK_ENABLE_SWIZZLE_ERR</rc>
     <description>Translated Centaur refclock enable bit position is out of range.</description>
-    <ffdc>POSITION</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>CENTAUR_POSITION</ffdc>
     <ffdc>REFCLOCK_BIT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_CEN_REF_CLK_ENABLE_CONFIG_ERR</rc>
     <description>Not all Centaurs marked as attached were configured.</description>
-    <ffdc>CONFIGURED</ffdc>
-    <ffdc>ATTACHED</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>CONFIGURED_CENTAUR_POSITIONS</ffdc>
+    <ffdc>ATTACHED_CENTAUR_POSITIONS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

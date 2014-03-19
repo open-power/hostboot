@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstates.c,v 1.6 2013/09/17 16:36:39 jimyac Exp $
+// $Id: pstates.c,v 1.7 2014/02/18 16:07:35 jimyac Exp $
 
 /// \file pstates.c
 /// \brief Pstate routines required by OCC product firmware
@@ -237,10 +237,6 @@ gpst_entry(const GlobalPstateTable *gpst,
     int rc, index;
     Pstate biased_pstate;
 
-// jwy    if (SSX_ERROR_CHECK_API) {
-// jwy      SSX_ERROR_IF(gpst == 0, GPST_INVALID_OBJECT);
-// jwy    }
-
     if (gpst == 0) {
         return -GPST_INVALID_OBJECT;
     }
@@ -327,11 +323,7 @@ gpst_vdd2pstate(const GlobalPstateTable* gpst,
     size_t i;
     int rc;
     gpst_entry_t         entry_rev;       // jwy
-    
-    
-// jwy     if (SSX_ERROR_CHECK_API) {
-// jwy     SSX_ERROR_IF(gpst == 0, GPST_INVALID_OBJECT);
-// jwy     }
+  
 
     if (gpst == 0) {
          return -GPST_INVALID_OBJECT;
@@ -347,7 +339,6 @@ gpst_vdd2pstate(const GlobalPstateTable* gpst,
         for (i = 0; i < gpst->entries; i++) {
             entry_rev.value = revle64(gpst->pstate[i].value);       // jwy
 
-// jwy            if (gpst->pstate[i].fields.evid_vdd <= vdd) {
             if (entry_rev.fields.evid_vdd <= vdd) {                 // jwy
                 break;
             }
@@ -359,7 +350,6 @@ gpst_vdd2pstate(const GlobalPstateTable* gpst,
             *entry = gpst->pstate[i - 1];
             rc = -GPST_PSTATE_CLIPPED_HIGH;
 
-// jwy        } else if ((i == 0) && (gpst->pstate[i].fields.evid_vdd < vdd)) {
         } else if ((i == 0) && (entry_rev.fields.evid_vdd < vdd)) {
 
             *pstate = gpst_pmin(gpst);
