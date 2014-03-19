@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.30 2013/12/10 14:39:02 mfred Exp $
+// $Id: io_dccal.C,v 1.31 2014/02/17 07:07:39 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.31  |jaswamin|02/17/14| Fixed the order of scoms for the pll workaround
 //   1.22  |jaswamin|09/19/13| Removed unused variables 
 //   1.19  |thomsen |04/12/12| Added delay after starting zcal and offset cancellation to work around a GCR parity error bug (HW242564)
 //   1.18  |jaswamin|01/26/12| Commented out offset cal for X and A bus
@@ -111,7 +112,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
     uint32_t rc_ecmd=0;
     uint16_t bits = 0;
     ecmdDataBufferBase data_buffer;
-	ecmdDataBufferBase rx_wt_timeout_sel_buf(16),rx_pdwn_lite_value_buf(16),rx_eo_latch_offset_done_buf(16),rx_wt_cu_pll_pgooddly_buf(16);
+	ecmdDataBufferBase rx_wt_timeout_sel_buf(16),rx_pdwn_lite_value_buf(16),rx_eo_latch_offset_done_buf(16),rx_wt_cu_pll_pgooddly_buf(16),rx_wt_cu_pll_pgooddly_buf_copy(16);
     ecmdDataBufferBase set_bits(16);
     ecmdDataBufferBase clear_bits(16);
     //char printStr[200];
@@ -206,13 +207,13 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         rc=GCR_write(*target_ptr,chip_interface,rx_training_start_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
 		
 		//write rx_wt_cu_pll_reset to '1'
-		//write rx_wt_cu_pll_pgood to '1'
-		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf,0,16);
-		set_bits.setBit(0);
+		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf_copy);if (rc) {return(rc);}
+		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf_copy,0,16);
+		//set_bits.setBit(0);
 		set_bits.setBit(1);
-		set_bits.setBit(2);
-		set_bits.setBit(3);
-		set_bits.setBit(4);
+		//set_bits.setBit(2);
+		//set_bits.setBit(3);
+		//set_bits.setBit(4);
 		bits=rx_wt_cu_pll_pgooddly_clear;
 		rc_ecmd|=clear_bits.flushTo0();
 		if(rc_ecmd)
@@ -221,6 +222,24 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
             return(rc);
 		}
 		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		
+		//write rx_wt_cu_pll_pgood to '1'
+		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf_copy);if (rc) {return(rc);}
+		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf_copy,0,16);
+		set_bits.setBit(0);
+		//set_bits.setBit(1);
+		//set_bits.setBit(2);
+		//set_bits.setBit(3);
+		//set_bits.setBit(4);
+		bits=rx_wt_cu_pll_pgooddly_clear;
+		rc_ecmd|=clear_bits.flushTo0();
+		if(rc_ecmd)
+		{
+			rc.setEcmdError(rc_ecmd);
+            return(rc);
+		}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		
 	    fapiDelay(100000000,10000000); //Wait 100ms for zcal to complete before polling the status register
       
 	    //write rx_wt_timeout_sel to '000'
