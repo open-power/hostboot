@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -365,8 +365,8 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
 
-    if [ "$loopcount" -gt 60 ];   then
-        echo    "ERROR: timed out after 5 minutes"
+    if [ "$loopcount" -gt 120 ];   then
+        echo    "ERROR: timed out after 10 minutes"
         autosim $NOWIN --simcmd   "hb-Ps"
         timeout=$(($modsstarted - $modscompleted))
         break
