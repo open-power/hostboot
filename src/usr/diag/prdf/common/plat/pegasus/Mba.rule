@@ -40,7 +40,7 @@ chip Mba
     name        "Centaur MBA Chiplet";
     targettype  TYPE_MBA;
     sigoff      0x8000;
-    dump        DUMP_CONTENT_HWSUPERNOVA;
+    dump        DUMP_CONTENT_HW;
     scomlen     64;
 
 .include "prdfCenMbaExtraSig.H";

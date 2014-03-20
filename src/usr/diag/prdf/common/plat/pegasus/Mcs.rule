@@ -468,7 +468,6 @@ actionclass calloutConnCenTh1
 {
     callout(connected(TYPE_MEMBUF), MRU_MED);
     threshold1;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus (MEDA) */
@@ -477,7 +476,6 @@ actionclass calloutDmiBus
     calloutSelfMedA;
     callout(connected(TYPE_MEMBUF), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Clear MBS SecondaryBits and calloutDmiBusTh1 */
@@ -513,4 +511,3 @@ actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), CalloutDmiBusAndThr2pd );
 };
-

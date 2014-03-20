@@ -42,7 +42,7 @@ chip Membuf
     name        "Centaur Chip";
     targettype  TYPE_MEMBUF;
     sigoff      0x8000;
-    dump        DUMP_CONTENT_HWSUPERNOVA;
+    dump        DUMP_CONTENT_HW;
     scomlen     64;
 
 # Include Extra signatures

@@ -2938,7 +2938,6 @@ actionclass calloutDmiBus0
     callout(connected(TYPE_MCS,    0), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 0), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 
 };
 
@@ -2948,7 +2947,6 @@ actionclass calloutDmiBus1
     callout(connected(TYPE_MCS,    1), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 1), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 2 */
@@ -2957,7 +2955,6 @@ actionclass calloutDmiBus2
     callout(connected(TYPE_MCS,    2), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 2), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 3 */
@@ -2966,7 +2963,6 @@ actionclass calloutDmiBus3
     callout(connected(TYPE_MCS,    3), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 3), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 4 */
@@ -2975,7 +2971,6 @@ actionclass calloutDmiBus4
     callout(connected(TYPE_MCS,    4), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 4), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 5 */
@@ -2984,7 +2979,6 @@ actionclass calloutDmiBus5
     callout(connected(TYPE_MCS,    5), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 5), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 6 */
@@ -2993,7 +2987,6 @@ actionclass calloutDmiBus6
     callout(connected(TYPE_MCS,    6), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 6), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 7 */
@@ -3002,7 +2995,6 @@ actionclass calloutDmiBus7
     callout(connected(TYPE_MCS,    7), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 7), MRU_MEDA);
     calloutDmiBusSymFru;
-    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 0, threshold 1 */

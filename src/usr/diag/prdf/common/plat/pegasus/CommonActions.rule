@@ -267,13 +267,6 @@ actionclass dumpSW
     dump(DUMP_CONTENT_SW);
 };
 
-
-/** Dump hardware content for memory buffer */
-actionclass dumpHwMembuf
-{
-    dump( DUMP_CONTENT_HWSUPERNOVA );
-};
-
 ################################################################################
 #                              Callout sec lvl support with dump               #
 ################################################################################
