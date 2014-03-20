@@ -10445,23 +10445,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-    <description>Length of ex_func_l3 ring in bits
-      creator: platform
-      firmware notes:
-    </description>
-   <simpleType>
-      <uint32_t></uint32_t>
-   </simpleType>
-   <persistency>non-volatile</persistency>
-   <readable/>
-   <hwpfToHbAttrMap>
-      <id>ATTR_PROC_EX_FUNC_L3_LENGTH</id>
-      <macro>DIRECT</macro>
-   </hwpfToHbAttrMap>
-</attribute>
-
 <enumerationType>
     <id>PROC_PBIEX_ASYNC_SEL</id>
     <description>Enumeration indicating which _PBIEX_ASYNC_SEL should be use</description>

@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -21,8 +21,7 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-
-# $Id: fapiCreateL3DeltaVals.pl,v 1.2 2013/12/13 14:42:47 mjjones Exp $
+# $Id: fapiCreateL3DeltaVals.pl,v 1.3 2014/03/20 16:25:04 whs Exp $
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiL3DeltaDataAttr.H
@@ -91,9 +90,11 @@ print OUTFILE "#define DELTA_DATA_SIZE 64\n";
 
 # Create array structure for L3_DELTA_DATA attribute
 print OUTFILE "struct L3_DELTA_DATA_ATTR {\n";
+print OUTFILE "    uint8_t  l_ATTR_SELECT;\n";
 print OUTFILE "    uint8_t  l_ATTR_CHIPTYPE;\n";
 print OUTFILE "    uint8_t  l_ATTR_EC;\n";
-print OUTFILE "    uint32_t l_ATTR_L3_DELTA_DATA [3][DELTA_DATA_SIZE];\n";
+print OUTFILE "    uint32_t l_ATTR_BIT_LENGTH;\n";
+print OUTFILE "    uint32_t l_ATTR_L3_DELTA_DATA[DELTA_DATA_SIZE];\n";
 print OUTFILE "};\n";
 print OUTFILE "\n";
 print OUTFILE "\n" . "const L3_DELTA_DATA_ATTR L3_DELTA_DATA_array [] = {\n";
@@ -111,6 +112,8 @@ foreach $ringAttrFile (@fileList)
     my $count = 0;
     my $dataCount = 0;
     my $dataArrayString = "";
+    my $selectVal = 0;
+    my $lengthVal = 0;
 
 # open the winkle ring attribute file
     open (FILE, "$ringAttrFile") or die "Couldn't open $ringAttrFile for input.\n";
@@ -139,7 +142,6 @@ foreach $ringAttrFile (@fileList)
     print OUTFILE " \@ec $ec\n";
     print OUTFILE " \@version $revision\n";
     print OUTFILE "*/\n";
-    print OUTFILE "{\n";
 
     while (<FILE>)
     {   
@@ -155,7 +157,12 @@ foreach $ringAttrFile (@fileList)
             # Store select value in array
             if ($_ =~ m"^#SELECT=(\d)")
             {
-                my $selectVal = $1;
+                $selectVal = $1;
+            }
+            if ($_ =~ m"^ATTR_PROC_EX_FUNC_L3_LENGTH u32\s+(\d+)\s+")
+            {
+                $lengthVal = $1;
+
                 if ($selectVal != ($count-1))
                 {
                     die "$ProgName ERROR: Select value in file $ringAttrFile does not appear to be sequential.  There may be a script problem or a corrupted ring attribute file.\n";
@@ -175,14 +182,12 @@ foreach $ringAttrFile (@fileList)
                 {
                     die "$ProgName ERROR: Chip type $chip not supported by this script.  Either the ring attribute file is in error or support for the new chip type needs to be added.\n";
                 }
-                # If first set of data values
-                if ($selectVal == 0)
-                {
-                    print OUTFILE "   $chipEnum, \t// CHIP TYPE  \n";
-                    print OUTFILE "   0x$ec, \t// EC LEVEL \n";
-                    print OUTFILE "   {\n";
-                }
-                print OUTFILE "     {  \t// ATTR_PROC_PBIEX_ASYNC_SEL = $1\n";
+                print OUTFILE "{\n";
+                print OUTFILE "   $selectVal, \t// ATTR_PROC_PBIEX_ASYNC_SEL \n";
+                print OUTFILE "   $chipEnum, \t// CHIP TYPE  \n";
+                print OUTFILE "   0x$ec, \t// EC LEVEL \n";
+                print OUTFILE "   $lengthVal, \t// RING LENGTH \n";
+                print OUTFILE "   {\n";
             }
 
             # Store values in array
@@ -197,18 +202,16 @@ foreach $ringAttrFile (@fileList)
                 # If this is the last entry in the array (delta data size = 64
                 if ($dataCount eq 64)
                 { 
-                    print OUTFILE "        $dataArrayString }, // ATTR_PROC_EX_FUNC_L3_DELTA_DATA \n";
+                    print OUTFILE "        $dataArrayString\n";
+                    print OUTFILE "   }, // ATTR_PROC_EX_FUNC_L3_DELTA_DATA\n";
+                    print OUTFILE "},\n";
                     $dataArrayString = "";
                 }
             }
         }
     }
 
-    # Close array
-    print OUTFILE "   }, \n\n";
-
     close (FILE);
-    print OUTFILE "},\n";
 
 }
 print OUTFILE "}; \n\n";

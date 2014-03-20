@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getL3DeltaDataAttr.H,v 1.1 2013/12/10 02:11:07 mjjones Exp $
+// $Id: getL3DeltaDataAttr.H,v 1.2 2014/03/20 16:24:43 whs Exp $
 /**
  *  @file getL3DeltaDataAttr.H
  *
@@ -36,7 +36,7 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*getL3DeltaDataAttr_FP_t)
-     (const fapi::Target &, uint32_t (&)[DELTA_DATA_SIZE]);
+     (const fapi::Target &, uint32_t (&)[DELTA_DATA_SIZE], uint32_t &);
 
 
 extern "C"
@@ -46,12 +46,14 @@ extern "C"
  *
  * @param i_fapiTarget      -   cpu target
  * @param o_data            -   out:    L3 delta data data.
+ * @param o_ringLength      -   out:    Length of decompressed data
  *
  * @return fapi::ReturnCode -   FAPI_RC_SUCCESS if success,
  *                              relevant error code for failure.
  */
 fapi::ReturnCode getL3DeltaDataAttr( const fapi::Target  &i_fapiTarget,
-                                     uint32_t (&o_data)[DELTA_DATA_SIZE]);
+                                     uint32_t (&o_data)[DELTA_DATA_SIZE],
+                                     uint32_t (&o_ringLength));
 
 }
 

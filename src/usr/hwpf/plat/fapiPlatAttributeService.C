@@ -1454,7 +1454,18 @@ fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
                                      uint32_t (&o_data)[DELTA_DATA_SIZE])
 {
     fapi::ReturnCode l_rc;
-    FAPI_EXEC_HWP(l_rc, getL3DeltaDataAttr, *i_pProcTarget, o_data);
+    uint32_t l_ringLength=0;
+    FAPI_EXEC_HWP(l_rc, getL3DeltaDataAttr,*i_pProcTarget,o_data,l_ringLength);
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetL3Length(const fapi::Target * i_pProcTarget,
+                                     uint32_t (&o_ringLength))
+{
+    fapi::ReturnCode l_rc;
+    uint32_t l_data [DELTA_DATA_SIZE] = {};
+    FAPI_EXEC_HWP(l_rc, getL3DeltaDataAttr,*i_pProcTarget,l_data,o_ringLength);
     return l_rc;
 }
 

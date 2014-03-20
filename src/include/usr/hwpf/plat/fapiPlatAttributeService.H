@@ -669,6 +669,16 @@ fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
                                      uint32_t (&o_data)[DELTA_DATA_SIZE]);
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_PROC_EX_FUNC_L3_LENGTH attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[out] o_ringLength  length of decompressed ring
+ */
+fapi::ReturnCode fapiPlatGetL3Length(const fapi::Target * i_pProcTarget,
+                                    uint32_t (&o_ringLength));
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
  *        ATTR_PCI_OSCSWITCH_CONFIG attribute. It should not be called
  *        directly.
  *
@@ -1735,11 +1745,14 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
         (PTARGET, VAL, fapi::SET_L4_BANK_DELETE_MODE)
 
 //------------------------------------------------------------------------------
-//  MACRO to support L3 DELTA DATA Ring Attribute
+//  MACROS to support L3 DELTA DATA Ring Attributes
 //------------------------------------------------------------------------------
 #define ATTR_PROC_EX_FUNC_L3_DELTA_DATA_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetL3DDAttr(PTARGET, VAL)
+#define ATTR_PROC_EX_FUNC_L3_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetL3Length(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
 //  MACRO to support pci osc switch config

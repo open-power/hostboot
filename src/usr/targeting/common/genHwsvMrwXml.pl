@@ -1882,14 +1882,6 @@ sub generate_proc
         }
     }
 
-    #default to murano (s1_) values and change later if for venice (p8_)
-    my $ex_func_l3      = 48826;
-
-    if($CHIPNAME eq "venice")
-    {
-        $ex_func_l3      = 49020;
-    }
-
     #MURANO=DCM installed, VENICE=SCM
     my $dcm_installed = 0;
     if($CHIPNAME eq "murano")
@@ -1943,12 +1935,6 @@ sub generate_proc
         <default>$fruid</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$vpdnum</default></attribute>
-
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>$ex_func_l3</default>
-    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>$dcm_installed</default>
     </attribute>";

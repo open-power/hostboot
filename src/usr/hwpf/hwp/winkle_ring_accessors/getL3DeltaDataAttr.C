@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getL3DeltaDataAttr.C,v 1.4 2013/12/13 14:46:30 mjjones Exp $
+// $Id: getL3DeltaDataAttr.C,v 1.5 2014/03/20 16:24:48 whs Exp $
 /**
  *  @file getL3DeltaDataAttr.C
  *
@@ -51,12 +51,14 @@ extern "C"
 {
 
 fapi::ReturnCode getL3DeltaDataAttr( const fapi::Target  &i_fapiTarget,
-                                     uint32_t (&o_data)[DELTA_DATA_SIZE])
+                                     uint32_t (&o_data)[DELTA_DATA_SIZE],
+                                     uint32_t (&o_ringLength))
 {
      FAPI_INF("getL3DeltaDataAttr: entry" );
 
      // Initialize return values to 0x00
      memset(o_data, 0x00, sizeof(o_data));
+     o_ringLength = 0;
 
      // Define and initialize variables
 
@@ -150,7 +152,8 @@ fapi::ReturnCode getL3DeltaDataAttr( const fapi::Target  &i_fapiTarget,
          for (i = 0; ((i < (sizeof(L3_DELTA_DATA_array) / 
                             sizeof(L3_DELTA_DATA_ATTR))) &&
              ((L3_DELTA_DATA_array[i].l_ATTR_CHIPTYPE != l_chipType) ||
-               (L3_DELTA_DATA_array[i].l_ATTR_EC       != l_attrDdLevel))); i++)
+              (L3_DELTA_DATA_array[i].l_ATTR_EC       != l_attrDdLevel) ||
+              (L3_DELTA_DATA_array[i].l_ATTR_SELECT   != l_selection))); i++)
          { }
          // No match found
          if (i == (sizeof(L3_DELTA_DATA_array)/sizeof(L3_DELTA_DATA_ATTR)))
@@ -166,8 +169,9 @@ fapi::ReturnCode getL3DeltaDataAttr( const fapi::Target  &i_fapiTarget,
          }
 
          // Set return delta data attr value
-         memcpy(o_data, L3_DELTA_DATA_array[i].l_ATTR_L3_DELTA_DATA[l_selection],
+         memcpy(o_data,L3_DELTA_DATA_array[i].l_ATTR_L3_DELTA_DATA,
                 sizeof(o_data));
+         o_ringLength = L3_DELTA_DATA_array[i].l_ATTR_BIT_LENGTH;
 
      } while (0);
 
