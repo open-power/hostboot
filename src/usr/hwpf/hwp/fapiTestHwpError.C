@@ -73,7 +73,8 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_procTarget,
     l_buf.setBit(64);
 
     FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_A");
-    const fapi::Target & UNIT_TEST_FFDC_MASTER_CHIP_TARGET = i_procTarget;
+    const fapi::Target & UNIT_TEST_CHIP_TARGET = i_procTarget;
+    const fapi::Target & UNIT_TEST_MBA_TARGET = i_mbaTarget;
     uint32_t & UNIT_TEST_FFDC_DATA_INTEGER = l_ffdc;
     ecmdDataBufferBase & UNIT_TEST_FFDC_DATA_BUF = l_buf;
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
@@ -84,21 +85,16 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_procTarget,
     // Check that the return code is set to success
     if (!l_rc.ok())
     {
-        FAPI_ERR("Performing HWP: hwpTestError: rc is 0x%x, " \
+        FAPI_ERR("Performing HWP: hwpTestError: rc is 0x%x, "
                  "expected success", static_cast<uint32_t>(l_rc));
     }
-
 
     FAPI_INF("Test calling out all DIMMs based on mba port 0");
 
     // all dimms on a specific port
     FAPI_ERR("Generating RC_TEST_DIMM_CALLOUT_MBA_A");
-
-    const fapi::Target & UNIT_TEST_MBA_TARGET = i_mbaTarget;
     uint8_t UNIT_TEST_MBA_PORT_NUMBER = 0x0;
-
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_CALLOUT_MBA_A);
-
     fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
 
     // specific dimm on a specific port
@@ -108,28 +104,22 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_procTarget,
     uint8_t UNIT_TEST_DIMM_NUMBER = 0x01;
 
     FAPI_ERR("Generating RC_TEST_DIMM_CALLOUT_MBA_B");
-
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_CALLOUT_MBA_B);
-
     fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
-
 
     FAPI_INF("Test calling out all dimms of an mba");
     // all dimms on an mba target
     FAPI_ERR("Generating RC_TEST_DIMM_CALLOUT_MBA_C");
-
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_CALLOUT_MBA_C);
-
     fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
 
     // commented out due to ci test failing on deconfigured parts
     FAPI_INF("Test deconfigure all dimms of mba with port 0 specified");
     UNIT_TEST_MBA_PORT_NUMBER = 0x0;
+
     // deconfigure all dimms on port 0
     FAPI_ERR("Generating RC_TEST_DIMM_DECONFIGURE_MBA_A ");
-
     FAPI_SET_HWP_ERROR(l_rc,RC_TEST_DIMM_DECONFIGURE_MBA_A);
-
     fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
 
     FAPI_INF("Test gard of DIMM2");
@@ -138,9 +128,7 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_procTarget,
     UNIT_TEST_MBA_PORT_NUMBER = 0x01;
 
     FAPI_ERR("Generating RC_TEST_DIMM_GARD_MBA_B ");
-
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_GARD_MBA_B);
-
     fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
 
     // Generate the same error again need to return an error

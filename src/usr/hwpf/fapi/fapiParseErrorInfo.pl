@@ -21,7 +21,7 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseErrorInfo.pl,v 1.26 2014/03/12 00:48:41 whs Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.27 2014/03/20 20:05:08 mjjones Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -64,6 +64,8 @@
 #                  dedahle   10/15/13  Support register FFDC collection based on
 #                                      present children
 #                  whs       03/11/14  Add FW traces to error logs
+#                  mjjones   03/20/14  Fix register FFDC collection bug when
+#                                      collecting chiplet registers
 #
 # End Change Log *****************************************************
 #
@@ -1044,12 +1046,15 @@ print CRFILE "        l_pData = l_pBuf;\n";
 print CRFILE "        l_targets.push_back(i_target);\n";
 print CRFILE "    }\n\n";
 #---------------------------------------------------------------------------------------------------------
-# Obtain target position and instert as the first word in the buffer
+# Obtain target position and insert as the first word in the buffer
 #---------------------------------------------------------------------------------------------------------
+print CRFILE "    bool l_targIsChiplet = i_target.isChiplet();\n\n";
 print CRFILE "    for (std::vector<fapi::Target>::const_iterator targetIter = l_targets.begin();\n";
 print CRFILE "        targetIter != l_targets.end(); ++targetIter)\n";
 print CRFILE "    {\n";
-print CRFILE "        if ((fapi::TARGET_TYPE_NONE != i_child) || (fapi::TARGET_TYPE_NONE != i_presChild))\n";
+print CRFILE "        if ((fapi::TARGET_TYPE_NONE != i_child) ||\n";
+print CRFILE "            (fapi::TARGET_TYPE_NONE != i_presChild) ||\n";
+print CRFILE "            (true == l_targIsChiplet))\n";
 print CRFILE "        {\n";
 print CRFILE "            uint8_t l_chipletPos = 0;\n";
 print CRFILE "            l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*targetIter), l_chipletPos);\n";
