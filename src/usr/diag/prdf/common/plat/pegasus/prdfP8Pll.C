@@ -59,6 +59,9 @@ enum
     PLL_ERROR_BIT   = 25,
     PB_DMI_RIGHT_PLL_ERROR = 25, // Venice only
     PB_DMI_LEFT_PLL_ERROR  = 26, // Venice and Murano
+    // PCB Slave internal parity error
+    PARITY_ERROR_MASK  = 8,
+    PARITY_ERROR_BIT   = 4,
 };
 
 /**
@@ -363,78 +366,85 @@ PRDF_PLUGIN_DEFINE( Proc, ClearPll );
 /**
   * @brief Mask the PLL error for P8 Plugin
   * @param  i_chip P8 chip
-  * @param Output Unused.
+  * @param  i_sc   The step code data struct
   * @returns Failure or Success of query.
   * @note
   */
-int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
+int32_t MaskPll( ExtensibleChip * i_chip,
+                 STEP_CODE_DATA_STRUCT & i_sc )
 {
     #define PRDF_FUNC "[Proc::MaskPll] "
 
     int32_t rc = SUCCESS;
-    MODEL procModel = getProcModel( i_chip->GetChipHandle() );
-    // fence off proc osc error reg bits
-    P8DataBundle * procdb = getDataBundle( i_chip );
-    P8DataBundle::ProcPllErrRegList & procPllErrRegList =
-                             procdb->getProcPllErrRegList();
-    if( procPllErrRegList.empty() )
-    {
-        GetProcPllErrRegList( i_chip, procPllErrRegList );
-    }
 
-    P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
-    for( ; itr != procPllErrRegList.end(); ++itr)
+    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
     {
-        // Error is already fenced
-        if( (*itr).configReg->IsBitSet(PLL_ERROR_MASK) )
+        MODEL procModel = getProcModel( i_chip->GetChipHandle() );
+        // fence off proc osc error reg bits
+        P8DataBundle * procdb = getDataBundle( i_chip );
+        P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+            procdb->getProcPllErrRegList();
+        if( procPllErrRegList.empty() )
         {
-            continue;
+            GetProcPllErrRegList( i_chip, procPllErrRegList );
         }
 
-        bool needMask = false;
-        if( P8DataBundle::PB == (*itr).type )
+        P8DataBundle::ProcPllErrRegListIter itr =
+                                   procPllErrRegList.begin();
+        for( ; itr != procPllErrRegList.end(); ++itr)
         {
-            if( ((*itr).errReg->IsBitSet(PB_DMI_LEFT_PLL_ERROR)) ||
-                (( MODEL_VENICE == procModel) &&
-                 ( (*itr).errReg->IsBitSet(PB_DMI_RIGHT_PLL_ERROR))) )
+            // Error is already fenced
+            if( (*itr).configReg->IsBitSet(PLL_ERROR_MASK) )
+            {
+                continue;
+            }
+
+            bool needMask = false;
+            if( P8DataBundle::PB == (*itr).type )
+            {
+                if( ((*itr).errReg->IsBitSet(PB_DMI_LEFT_PLL_ERROR)) ||
+                    (( MODEL_VENICE == procModel) &&
+                     ( (*itr).errReg->IsBitSet(PB_DMI_RIGHT_PLL_ERROR))) )
+                {
+                    (*itr).configReg->SetBit(PLL_ERROR_MASK);
+                    needMask = true;
+                }
+            }
+            else if( (*itr).errReg->IsBitSet(PLL_ERROR_BIT) )
             {
                 (*itr).configReg->SetBit(PLL_ERROR_MASK);
                 needMask = true;
             }
+
+            if( needMask )
+            {
+                rc |= (*itr).configReg->Write();
+            }
         }
-        else if( (*itr).errReg->IsBitSet(PLL_ERROR_BIT) )
+
+        // fence off pci osc error reg bit
+        SCAN_COMM_REGISTER_CLASS * pciErrReg =
+            i_chip->getRegister("PCI_ERROR_REG");
+        SCAN_COMM_REGISTER_CLASS * pciConfigReg =
+            i_chip->getRegister("PCI_CONFIG_REG");
+
+        if(pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
+           !pciConfigReg->IsBitSet(PLL_ERROR_MASK))
         {
-            (*itr).configReg->SetBit(PLL_ERROR_MASK);
-            needMask = true;
+            pciConfigReg->SetBit(PLL_ERROR_MASK);
+            rc |= pciConfigReg->Write();
         }
 
-        if( needMask )
-        {
-            rc |= (*itr).configReg->Write();
-        }
-    }
+        // Need to clear the PLL Err Reg list so it can
+        // be populated with fresh data on the next analysis
+        // can do this in error case to save some space
+        procPllErrRegList.clear();
 
-    // fence off pci osc error reg bit
-    SCAN_COMM_REGISTER_CLASS * pciErrReg =
-                i_chip->getRegister("PCI_ERROR_REG");
-    SCAN_COMM_REGISTER_CLASS * pciConfigReg =
-                i_chip->getRegister("PCI_CONFIG_REG");
+        // Since TP_LFIR bit is the collection of all of the
+        // pll error reg bits, we can't mask it or we will not
+        // see any PLL errors reported from the error regs
 
-    if(pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
-       !pciConfigReg->IsBitSet(PLL_ERROR_MASK))
-    {
-        pciConfigReg->SetBit(PLL_ERROR_MASK);
-        rc |= pciConfigReg->Write();
-    }
-
-    // Need to clear the PLL Err Reg list so it can
-    // be populated with fresh data on the next analysis
-    // can do this in error case to save some space
-    procPllErrRegList.clear();
-
-    // Since TP_LFIR bit is the collection of all of the
-    // pll error reg bits, we can't mask it or we will not
-    // see any PLL errors reported from the error regs
+    }  // if not checkstop
 
     if( rc != SUCCESS )
     {
@@ -509,6 +519,282 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Proc, capturePllFfdc );
+
+/**
+  * @brief   Check PCB Slave internal parity errors
+  * @param   i_chip P8 chip
+  * @param   o_parityErr true for parity error, false otherwise
+  * @param   io_sc  service data collector
+  * @returns FAIL or SUCCESS
+  */
+int32_t CheckParityErr( ExtensibleChip * i_chip,
+                        bool & o_parityErr,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[Proc::CheckParityErr] "
+
+    int32_t rc = SUCCESS;
+    o_parityErr = false;
+    P8DataBundle * procdb = getDataBundle( i_chip );
+    P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+        procdb->getProcPllErrRegList();
+
+    do
+    {
+        // First check PCI chiplet
+        SCAN_COMM_REGISTER_CLASS * pciErrReg =
+            i_chip->getRegister("PCI_ERROR_REG");
+        SCAN_COMM_REGISTER_CLASS * pciConfigReg =
+            i_chip->getRegister("PCI_CONFIG_REG");
+
+        rc = pciErrReg->Read();
+        if (rc != SUCCESS) break;
+
+        rc = pciConfigReg->Read();
+        if (rc != SUCCESS) break;
+
+        if(pciErrReg->IsBitSet(PARITY_ERROR_BIT) &&
+           !pciConfigReg->IsBitSet(PARITY_ERROR_MASK))
+        {
+            o_parityErr = true;
+            break;
+        }
+
+        // Next check other chiplets
+
+        // Always get a list here since this is the entry point
+        GetProcPllErrRegList( i_chip, procPllErrRegList );
+
+        P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
+        for( ; itr != procPllErrRegList.end(); ++itr)
+        {
+            rc = (*itr).errReg->Read();
+            if (rc != SUCCESS) break;
+
+            rc = (*itr).configReg->Read();
+            if (rc != SUCCESS) break;
+
+            if((*itr).errReg->IsBitSet(PARITY_ERROR_BIT) &&
+               !(*itr).configReg->IsBitSet(PARITY_ERROR_MASK))
+            {
+                o_parityErr = true;
+                break;
+            }
+        }
+
+    } while(0);
+
+    if( ! o_parityErr )
+    {
+        PRDF_ERR(PRDF_FUNC"no parity error found for proc: 0x%.8X",
+                 i_chip->GetId());
+    }
+
+    if( rc != SUCCESS )
+    {
+        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X", i_chip->GetId());
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+
+/**
+  * @brief Mask the PCB Slave internal parity error
+  * @param  i_chip P8 chip
+  * @param  i_sc   The step code data struct
+  * @returns Failure or Success
+  */
+int32_t MaskParityErr( ExtensibleChip * i_chip,
+                       STEP_CODE_DATA_STRUCT & i_sc)
+{
+    #define PRDF_FUNC "[Proc::MaskParityErr] "
+
+    int32_t rc = SUCCESS;
+
+    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    {
+        // fence off proc osc error reg bits
+        P8DataBundle * procdb = getDataBundle( i_chip );
+        P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+            procdb->getProcPllErrRegList();
+
+        if( procPllErrRegList.empty() )
+        {
+            GetProcPllErrRegList( i_chip, procPllErrRegList );
+        }
+
+        P8DataBundle::ProcPllErrRegListIter itr =
+                                 procPllErrRegList.begin();
+        for( ; itr != procPllErrRegList.end(); ++itr)
+        {
+            // Error is already fenced
+            if( (*itr).configReg->IsBitSet(PARITY_ERROR_MASK) )
+            {
+                continue;
+            }
+
+            if( (*itr).errReg->IsBitSet(PARITY_ERROR_BIT) )
+            {
+                (*itr).configReg->SetBit(PARITY_ERROR_MASK);
+                rc |= (*itr).configReg->Write();
+            }
+        }
+
+        // fence off pci parity error
+        SCAN_COMM_REGISTER_CLASS * pciErrReg =
+            i_chip->getRegister("PCI_ERROR_REG");
+        SCAN_COMM_REGISTER_CLASS * pciConfigReg =
+            i_chip->getRegister("PCI_CONFIG_REG");
+
+        if(pciErrReg->IsBitSet(PARITY_ERROR_BIT) &&
+           !pciConfigReg->IsBitSet(PARITY_ERROR_MASK))
+        {
+            pciConfigReg->SetBit(PARITY_ERROR_MASK);
+            rc |= pciConfigReg->Write();
+        }
+
+        // Since TP_LFIR bit is the collection of all of the
+        // pll error reg bits, we can't mask it or we will not
+        // see any PLL errors reported from the error regs
+
+    } // if not checkstop
+
+    if( rc != SUCCESS )
+    {
+        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+                 i_chip->GetId());
+    }
+
+    return rc;
+
+#undef PRDF_FUNC
+}
+
+/**
+ * @brief  Clear the Parity errors
+ * @param  i_chip P8 chip
+ * @param  i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t ClearParityErr( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & i_sc)
+{
+    #define PRDF_FUNC "[Proc::ClearParityErr] "
+
+    int32_t rc = SUCCESS;
+
+    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    {
+        // Clear proc osc error reg bits
+        P8DataBundle * procdb = getDataBundle( i_chip );
+        P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+                           procdb->getProcPllErrRegList();
+        if( procPllErrRegList.empty() )
+        {
+            GetProcPllErrRegList( i_chip, procPllErrRegList );
+        }
+
+        P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
+        for( ; itr != procPllErrRegList.end(); ++itr)
+        {
+            (*itr).errReg->ClearBit(PARITY_ERROR_BIT);
+            rc |= (*itr).errReg->Write();
+        }
+
+        // Clear pci parity error
+        SCAN_COMM_REGISTER_CLASS * pciErrReg =
+                i_chip->getRegister("PCI_ERROR_REG");
+        pciErrReg->ClearBit(PARITY_ERROR_BIT);
+        rc |= pciErrReg->Write();
+
+        // Clear TP_LFIR
+        SCAN_COMM_REGISTER_CLASS * TP_LFIR =
+                   i_chip->getRegister("TP_LFIR_AND");
+        TP_LFIR->setAllBits();
+        // Parity error also feeds into this LFIR
+        TP_LFIR->ClearBit(PLL_DETECT_P8);
+        rc |= TP_LFIR->Write();
+    }
+
+    if( rc != SUCCESS )
+    {
+        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+                 i_chip->GetId());
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+
+/**
+  * @brief   analyze PCB Slave internal parity errors
+  * @param   i_chip P8 chip
+  * @param   io_sc  service data collector
+  * @returns Failure or Success
+  */
+int32_t AnalyzeParityErr( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[Proc::AnalyzeParityErr] "
+
+    int32_t rc = SUCCESS;
+    bool found = false;
+
+    do
+    {
+        rc = CheckParityErr(i_chip, found, io_sc);
+        if (rc != SUCCESS) break;
+
+        if(found)
+        {
+            if(io_sc.service_data->IsAtThreshold())
+            {
+                MaskParityErr( i_chip, io_sc );
+            }
+
+            ClearParityErr( i_chip, io_sc );
+        }
+
+    } while(0);
+
+    // clear the PLL Err Reg list
+    P8DataBundle * procdb = getDataBundle( i_chip );
+    P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+                        procdb->getProcPllErrRegList();
+    procPllErrRegList.clear();
+
+    if( rc != SUCCESS )
+    {
+        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X", i_chip->GetId());
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Proc, AnalyzeParityErr );
+
+/**
+ * @brief  There are some FIR bits that will be cleared manually and must not be
+ *         cleared by the framework code. The plugin forces the rule code to
+ *         analyze a special copy of the FIR which will not automatically clear
+ *         the FIR bits at attention.
+ * @param  i_chip P8 chip.
+ * @param  i_sc   The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS always.
+ */
+int32_t NoClearFirBits( ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return PRD_NO_CLEAR_FIR_BITS;
+}
+PRDF_PLUGIN_DEFINE( Proc, NoClearFirBits );
+
 
 } // end namespace Proc
 

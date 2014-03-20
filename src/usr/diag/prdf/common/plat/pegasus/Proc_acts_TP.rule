@@ -262,12 +262,12 @@ group gTpLFir filter singlebit
     (TpLFir, bit(18)) ? TodReportByPHYP;
 
     /** TP_LFIR[19]
-     *  Processor PLL error
+     *  PCB Slave Internal Parity Error
      *
-     *  These should never trigger directly themselves.
-     *  Should be handled by global PRD PLL code.
+     *  This bit is also shared with the PLL Lock error.
+     *  PLL error should already be handled by global PRD PLL code.
      */
-    (TpLFir, bit(19)) ? PllError;
+    (TpLFir, bit(19)) ? PcbSlaveInternalParity;
 
     /** TP_LFIR[20]
      *  Sbe indicated error_event0to4 enabled by mask bit 5 to 9
@@ -1158,12 +1158,17 @@ actionclass analyzeMcs31
     analyze(connected(TYPE_MCS, 7));
 };
 
-/** PLL error action */
-actionclass PllError
+# still need to capture PLL FIRs for debugging
+/** PCB Slave Internal parity error action */
+actionclass PcbSlaveInternalParity
 {
     capture(PllFIRs);
+    calloutSelfHigh;
+    threshold5pday;
+    funccall("AnalyzeParityErr");
     funccall("capturePllFfdc");
-    threshold32pday;
+    funccall("NoClearFirBits"); # Must be called last so return
+                                # code can be passed on to rule code.
 };
 
 # TOD Actions:
