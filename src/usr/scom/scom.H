@@ -73,7 +73,7 @@ enum ScomErrorMask
  *                              Output: Read: size of output data
  *                                      Write: size of data written
  * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
- *                              (usrif.H)
+ *                              @see usr/devicefw/(userif.H)
  * @param[in]   i_args          This is an argument list for DD framework.
  *                              In this function, there's only one argument,
  *                              which is the SCom address value.
@@ -86,6 +86,35 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                          size_t& io_buflen,
                          int64_t i_accessType,
                          va_list i_args);
+
+/**
+ * @brief Performs a SCom operation on a target TYPE_MEMBUF
+ * This function performs a SCOM operation by calling
+ * checkIndirectScomOP.  It handles whether the address
+ * a regular or an indirect SCOM address
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        SCom target
+ * @param[in/out] io_buffer     Read: pointer to output data storage
+ *                              Write: pointer to data to be written
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output: Read: size of output data
+ *                                      Write: size of data written
+ * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
+ *                              @see usr/devicefw/(userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there's only one argument,
+ *                              which is the SCom address value.
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
+                               TARGETING::Target* i_target,
+                               void* io_buffer,
+                               size_t& io_buflen,
+                               int64_t i_accessType,
+                               va_list i_args);
 
 
 /**
@@ -103,7 +132,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
  *                              Output: Read: size of output data
  *                                      Write: size of data written
  * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
- *                              (usrif.H)
+ *                              @see usr/devicefw/userif.H
  * @param[in]   i_addr         scom Address Value
  *
  * @return  errlHndl_t
@@ -130,7 +159,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
  *                              Output: Read: size of output data
  *                                      Write: size of data written
  * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
- *                              (usrif.H)
+ *                              @see usr/devicefw/userif.H
  * @param[in]   i_addr          Scom Address Value.
  *
  * @return  errlHndl_t

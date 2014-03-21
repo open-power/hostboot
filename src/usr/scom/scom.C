@@ -41,7 +41,6 @@
 #include <xscom/piberror.H>
 #include <errl/errludtarget.H>
 
-
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
 TRAC_INIT(&g_trac_scom, SCOM_COMP_NAME, KILOBYTE, TRACE::BUFFER_SLOW); //1K
@@ -59,7 +58,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
                       TARGETING::TYPE_MEMBUF,
-                      scomPerformOp);
+                      scomMemBufPerformOp);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,6 +87,63 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
     return l_err;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
+                               TARGETING::Target* i_target,
+                               void* io_buffer,
+                               size_t& io_buflen,
+                               int64_t i_accessType,
+                               va_list i_args)
+{
+    errlHndl_t l_err = NULL;
+
+
+    uint64_t l_scomAddr = va_arg(i_args,uint64_t);
+
+
+
+    l_err = checkIndirectAndDoScom(i_opType,
+                                   i_target,
+                                   io_buffer,
+                                   io_buflen,
+                                   i_accessType,
+                                   l_scomAddr);
+
+    // Check for ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
+    // if ATTR set and MBSECCQ being read then set bit 16
+    // See RTC 97286
+    //
+    if(!l_err && (i_opType == DeviceFW::READ))
+    {
+        const uint64_t MBS_ECC0_MBSECCQ_0x0201144A = 0x000000000201144Aull;
+        const uint64_t MBS_ECC1_MBSECCQ_0x0201148A = 0x000000000201148Aull;
+
+        uint64_t addr = l_scomAddr & 0x000000007FFFFFFFull;
+        if(addr == MBS_ECC0_MBSECCQ_0x0201144A ||
+           addr == MBS_ECC1_MBSECCQ_0x0201148A)
+        {
+            uint8_t enabled = 0;
+            //FAPI_ATTR_GET      @todo RTC 101877 - access FAPI attributes
+            //    (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685,
+            //     i_target,
+            //     enabled);
+            //   For now use:   if ec >= 0x20
+            if(i_target->getAttr<TARGETING::ATTR_EC>() >= 0x20)
+            {
+                enabled = true;
+            }
+
+            if(enabled)
+            {
+                uint64_t * data = reinterpret_cast<uint64_t *>(io_buffer);
+                *data |= 0x0000800000000000ull; // Force on bit 16
+            }
+        }
+    }
+
+    return l_err;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

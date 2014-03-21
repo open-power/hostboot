@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <devicefw/userif.H>
 #include <fsi/fsiif.H>
 #include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
 
 #include <devicefw/driverif.H>
 
@@ -1811,6 +1812,59 @@ public:
 
       TRACFCOMP( g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> %d/%d fails", fails, total );
 
+  }
+
+  /**
+   * Test MBSECCQ bit 16 fix
+   * Bit 16 should be on if ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS set
+   */
+  void test_MBSECCQ(void)
+  {
+      errlHndl_t l_err =  NULL;
+
+      // get an existing membuf
+      TARGETING::TargetHandleList targetList;
+      getAllChips(targetList,TARGETING::TYPE_MEMBUF);
+      if(targetList.size())
+      {
+          TARGETING::Target * mbuf = targetList[0];
+          uint8_t enabled = 0;
+
+          // @todo RTC 101877
+          //FAPI_ATTR_GET
+          //    (ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685,
+          //     mbuf,
+          //     enabled);
+          // Fow now use this:
+          if(mbuf->getAttr<TARGETING::ATTR_EC>() >= 0x20)
+          {
+              enabled = true;
+          }
+
+          if(enabled)
+          {
+              TRACFCOMP(g_trac_scom,"MBSECCQ test run");
+              uint64_t data = 0;
+              size_t op_size = sizeof(uint64_t);
+
+              l_err = deviceOp(DeviceFW::READ,
+                               mbuf,
+                               &data,
+                               op_size,
+                               DEVICE_SCOM_ADDRESS(0x0201144a));
+
+              if(l_err)
+              {
+                  TS_FAIL("test_MBSECCQ: unexpected error log");
+                  errlCommit(l_err,SCOM_COMP_ID);
+              }
+
+              if( (data & 0x0000800000000000ull) == 0 )
+              {
+                  TS_FAIL("test_MBSECCQ: Bit 16 is not set");
+              }
+          }
+      }
   }
 
 };
