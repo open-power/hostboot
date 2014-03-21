@@ -403,15 +403,18 @@ class FsiDD
         FSI2OPB_OFFSET_1 = 0x00030000, /**< cMFSI 1 */
 
         // Bit masks
-        OPB_STAT_BUSY       = 0x00010000, /**< Bit 15 is the Busy bit */
-        OPB_STAT_READ_VALID = 0x00020000, /**< Bit 14 is the Valid Read bit */
+        OPB_STAT_BUSY       = 0x00010000, /**< 15 is the Busy bit */
+        OPB_STAT_READ_VALID = 0x00020000, /**< 14 is the Valid Read bit */
         OPB_STAT_ERRACK     = 0x00100000, /**< 11 is OPB errAck */
-        OPB_STAT_ERR_OPB    = 0xFFFC0000, /**< 0-14 are OPB errors */
-        OPB_STAT_ERR_CMFSI  = 0x0000FC00, /**< 16-21 are cMFSI errors */
-        OPB_STAT_ERR_MFSI   = 0x000000FC, /**< 24-29 are MFSI errors */
+        OPB_STAT_ANYERR     = 0x80000000, /**< 0 is Any error */
+        OPB_STAT_ERR_OPB    = 0x7FEC0000, /**< 1:10,12:13 are OPB errors */
+        OPB_STAT_ERR_CMFSI  = 0x0000FC00, /**< 16:21 are cMFSI errors */
+        OPB_STAT_ERR_MFSI   = 0x000000FC, /**< 24:29 are MFSI errors */
         OPB_STAT_ERR_ANY    = (OPB_STAT_ERR_OPB |
                                OPB_STAT_ERR_CMFSI |
-                               OPB_STAT_ERR_MFSI),
+                               OPB_STAT_ERR_MFSI |
+                               OPB_STAT_ERRACK |
+                               OPB_STAT_ANYERR ),
     };
 
     /**
@@ -428,6 +431,7 @@ class FsiDD
         FSI_MSIEP0_030  = 0x030,
         FSI_MAESP0_050  = 0x050,
         FSI_MAEB_070    = 0x070, //MREFP0
+        FSI_MBSYP0_078  = 0x078,
         FSI_MRESP0_0D0  = 0x0D0,
         FSI_MSTAP0_0D0  = 0x0D0,
         FSI_MRESP0_0D1  = 0x0D1,

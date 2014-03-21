@@ -678,7 +678,8 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
 
         // Add data to error log where possible
         uint32_t data = 0;
-        ERRORLOG::ErrlUserDetailsLogRegister l_eud_fsiT(addr_info.opbTarg);
+        ERRORLOG::ErrlUserDetailsLogRegister
+          l_eud_fsiT(addr_info.accessInfo.master);
 
         uint64_t dump_regs[] = {
             ctl_reg|FSI_MATRB0_1D8,
@@ -691,7 +692,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
 
         for( size_t x=0; x<(sizeof(dump_regs)/sizeof(dump_regs[0])); x++ )
         {
-            tmp_err = read( addr_info.opbTarg, dump_regs[x], &data );
+            tmp_err = read( addr_info.accessInfo.master, dump_regs[x], &data );
             if( tmp_err )
             {
                 delete tmp_err;
@@ -708,7 +709,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         for( size_t p = 0; p < 8; p++ )
         {
             uint32_t addr1 = ctl_reg|(FSI_MSTAP0_0D0+p*0x4);
-            tmp_err = read( addr_info.opbTarg, addr1, &data );
+            tmp_err = read( addr_info.accessInfo.master, addr1, &data );
             if( tmp_err )
             {
                 delete tmp_err;
@@ -1023,6 +1024,7 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
         l_err = checkForErrors( i_addrInfo );
         if( l_err )
         {
+            TRACFCOMP(g_trac_fsi, "FsiDD::read> FSI Errors after doing read operation : %.8X->%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr );
             break;
         }
 
@@ -1111,6 +1113,7 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
         l_err = checkForErrors( i_addrInfo );
         if( l_err )
         {
+            TRACFCOMP(g_trac_fsi, "FsiDD::write> FSI Errors after doing write operation : %.8X->%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr );
             break;
         }
 
@@ -1326,7 +1329,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                             l_err->addHwCallout( i_addrInfo.fsiTarg,
                                                  HWAS::SRCI_PRIORITY_HIGH,
                                                  HWAS::DELAYED_DECONFIG,
-                                                 HWAS::GARD_Predictive );
+                                                 HWAS::GARD_NULL );
                             root_cause_found = true;
                             break;
 
@@ -1962,13 +1965,19 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                           scom_size,
                           DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err ) { break; }
+
+        // Temporarily ignore the master-specific errors
+        uint32_t old_mask = iv_opbErrorMask;
+        iv_opbErrorMask &= ~OPB_STAT_ERR_MFSI;
+        iv_opbErrorMask &= ~OPB_STAT_ERR_CMFSI;
         l_err = handleOpbErrors( addr_info, scom_data[0] );
         if( l_err )
         {
             TRACFCOMP(g_trac_fsi,"Unclearable FSI Errors present at the beginning, no choice but to fail");
+            iv_opbErrorMask = old_mask;
             break;
         }
-
+        iv_opbErrorMask = old_mask;
 
         // Initialize the FSI Master regs if they aren't already setup
         if( hb_doing_init )
@@ -2383,12 +2392,64 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
         }
         else if( FSI::RC_ERROR_IN_MAEB == i_errType )
         {
+            uint32_t data = 0;
+
             //Reset the bridge to clear up the residual errors
             // 0=Bridge: General reset
-            uint32_t data = 0x80000000;
+            data = 0x80000000;
             uint64_t mesrb0_reg = getControlReg(i_addrInfo.accessInfo.type)
               | FSI_MESRB0_1D0;
-            l_err = write( i_addrInfo.opbTarg, mesrb0_reg, &data );
+            l_err = write( i_addrInfo.accessInfo.master, mesrb0_reg, &data );
+            if(l_err) break;
+
+            //perform error reset on Centaur fsi slave:
+            //  write 0x4000000 to addr=834.
+            data = 0x4000000;
+            l_err = write( i_addrInfo.fsiTarg, FSI::SLRES_34, &data );
+            if(l_err) break;
+
+            //further step is to issue a PIB reset to the FSI2PIB engine
+            //in busy state, i.e. write arbitrary data to 101c
+            //(putcfam 1007) register of the previously failed FSI2PIB
+            //engine on Centaur.
+            data = 0xFFFFFFFF;
+            l_err = write( i_addrInfo.fsiTarg,FSI:: FSI2PIB_STATUS, &data );
+            if(l_err) break;
+
+            //then, write arbitrary data to 1018  (putcfam 1006) to
+            //reset any pending FSI2PIB errors.
+            data = 0xFFFFFFFF;
+            l_err = write( i_addrInfo.fsiTarg, FSI::FSI2PIB_RESET, &data );
+            if(l_err) break;
+
+            //Reset the master's bridge to clear up the residual errors
+            // unless the FSI master has no master above it
+            if( i_addrInfo.accessInfo.master != iv_master )
+            {
+                // 0=Bridge: General reset
+                data = 0x80000000;
+                mesrb0_reg = MFSI_CONTROL_REG | FSI_MESRB0_1D0;
+                l_err = write( iv_master, mesrb0_reg, &data );
+                if(l_err) break;
+            }
+
+            //Trace some values for FFDC in case this cleanup
+            // didn't really work
+            uint32_t grabregs[] = {
+                MFSI_CONTROL_REG|FSI_MSIEP0_030,
+                CMFSI_CONTROL_REG|FSI_MSIEP0_030,
+                MFSI_CONTROL_REG|FSI_MAEB_070,
+                CMFSI_CONTROL_REG|FSI_MAEB_070
+            };
+            for( size_t r = 0;
+                 r < (sizeof(grabregs)/sizeof(grabregs[0]));
+                 r++ )
+            {
+                l_err = read( i_addrInfo.accessInfo.master,
+                          MFSI_CONTROL_REG|FSI_MSIEP0_030, &data );
+                if(l_err) break;
+                TRACFCOMP( g_trac_fsi, "errorCleanup> %.8X->%.6X = %.8X", TARGETING::get_huid(i_addrInfo.accessInfo.master), grabregs[r], data );
+            }
             if(l_err) break;
         }
 
@@ -2449,7 +2510,7 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
         l_err = read( i_addrInfo.accessInfo.master, maeb_reg, &maeb_data );
         if( !l_err && (maeb_data != 0) )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::checkForErrors> After op to %.8X, MAEB=%.8X (Master=%.8X)", TARGETING::get_huid(i_addrInfo.fsiTarg), maeb_data, TARGETING::get_huid(i_addrInfo.opbTarg) );
+            TRACFCOMP( g_trac_fsi, "FsiDD::checkForErrors> After op to %.8X, MAEB(%.4X)=%.8X (Master=%.8X)", TARGETING::get_huid(i_addrInfo.fsiTarg), maeb_reg, maeb_data, TARGETING::get_huid(i_addrInfo.accessInfo.master) );
             /*@
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_CHECKFORERRORS

@@ -112,11 +112,18 @@ enum SlaveRegistersP8
     SLAVE_REGS       = 0x000800, /**< FSI Slave Register */
     SMODE_00         = SLAVE_REGS|0x00,
     SLBUS_30         = SLAVE_REGS|0x30,
+    SLRES_34         = SLAVE_REGS|0x34,
 
     FSI_SHIFT_ENGINE = 0x000C00, /**< FSI Shift Engine (SCAN) */
+
     FSI2PIB_ENGINE   = 0x001000, /**< FSI2PIB Engine (SCOM) */
+    FSI2PIB_RESET    = FSI2PIB_ENGINE|0x18, /**< see 1006 */
+    FSI2PIB_STATUS   = FSI2PIB_ENGINE|0x1C, /**< see 1007 */
+
     FSI_SCRATCHPAD   = 0x001400, /**< FSI Scratchpad */
+
     FSI_I2C_MASTER   = 0x001800, /**< FSI I2C-Master */
+
     FSI_GEMINI_MBOX  = 0x002800, /**< FSI Gemini Mailbox with FSI GPx Registers */
 };
 
