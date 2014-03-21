@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/io_power_down_lanes/io_power_down_lanes.H $  */
+/* $Source: src/usr/hwpf/hwp/bus_training/io_power_down_lanes.H $         */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,12 +20,12 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_power_down_lanes.H,v 1.4 2013/02/12 07:32:04 varkeykv Exp $
+// $Id: io_power_down_lanes.H,v 1.5 2014/03/06 11:12:24 varkeykv Exp $
 #ifndef IO_POWER_DOWN_LANES_H_
 #define IO_POWER_DOWN_LANES_H_
 
 
-#include <fapi.H>
+#include <fapi.H> 
 
 /**
  * @brief IO Power down lanes

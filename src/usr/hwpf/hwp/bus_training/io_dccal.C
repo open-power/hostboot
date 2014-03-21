@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.31 2014/02/17 07:07:39 jaswamin Exp $
+// $Id: io_dccal.C,v 1.35 2014/03/20 08:37:35 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -115,26 +115,64 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
 	ecmdDataBufferBase rx_wt_timeout_sel_buf(16),rx_pdwn_lite_value_buf(16),rx_eo_latch_offset_done_buf(16),rx_wt_cu_pll_pgooddly_buf(16),rx_wt_cu_pll_pgooddly_buf_copy(16);
     ecmdDataBufferBase set_bits(16);
     ecmdDataBufferBase clear_bits(16);
+       const fapi::Target &TARGET=target;
     //char printStr[200];
     FAPI_DBG("In the Dccal procedure");
+    uint8_t ddlevel;
+    
+     rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG, &target,ddlevel);
+     if(rc)
+     {
+      FAPI_ERR("IO_DCCAL :Error Reading DDLEVEL using MCD_HANG_RECOVERY attribute");
+      return rc;
+     }
+     
+     
+     
+     FAPI_DBG("DDLevel FLAG is read as %d",ddlevel);
+     
     io_interface_t chip_interface=master_interface;//first we run on master chip
     uint32_t group=master_group;
     const Target *target_ptr=&target; // Assuming I am allowed to do this . 
-		rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+		rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);
+		if (rc) 
+		{
+			// have to add support for field parsing
+			FAPI_ERR("IO_DCCAL : GCR_read error for rx_training_status_pg");
+			return rc;
+		}
         FAPI_DBG("IO_DCCAL : Starting Offset Calibration on interface %d group %d",chip_interface,group);
         // read and save rx_pdwn_lite_disable
         //int read_bit=rx_pdwn_lite_disable;
         rc= GCR_read(*target_ptr,master_interface,rx_mode_pg ,group,0,rx_pdwn_lite_value_buf);if (rc) {return(rc);}
         //int rx_pdwn_lite_value=rx_wt_timeout_sel_buf.getHalfWord(0) & read_bit;
-        
+        	if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : GCR_read error for rx_mode_pg");
+			return rc;
+		}
         // read and save rx_wt_timeout_sel
         //read_bit=rx_wt_timeout_sel_tap7; //find the 3 bit value of the field. need it to be all 1's to do an &
-        rc= GCR_read(*target_ptr,master_interface,rx_timeout_sel_pg ,group,0,rx_wt_timeout_sel_buf);if (rc) {return(rc);}
+	// -- REVIEW , think this read is safe 
+        rc= GCR_read(*target_ptr,master_interface,rx_timeout_sel_pg ,group,0,rx_wt_timeout_sel_buf);
+			if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : GCR_read error for rx_timeout_sel_pg");
+			return rc;
+		}
+	
         //int rx_wt_timeout_value=rx_wt_timeout_sel_buf.getHalfWord(0) & read_bit;
         
 		//read and save rx_wt_cu_pll_pgooddly
 		//read_bit=rx_wt_cu_pll_pgooddly_disable; // selects 111 for the 3 bit field.need it to be all 1's to do an &
-		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf);if (rc) {return(rc);}
+		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf);
+				if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : GCR_read error for rx_wiretest_pll_cntl_pgrx_wiretest_pll_cntl_pg");
+			return rc;
+		}
+
+
 		//int rx_wt_cu_pll_pgooddly_value=rx_wt_cu_pll_pgooddly_buf.getHalfWord(0) & read_bit;
 		
 		//read and save rx_wt_cu_pll_reset
@@ -148,26 +186,31 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         // set power down lite disable, rx_pdwn_lite_disable
         bits=rx_pdwn_lite_disable;
 		//bits=1;
-		set_bits.insert(rx_pdwn_lite_value_buf,0,16);
+		rc_ecmd|=set_bits.insert(rx_pdwn_lite_value_buf,0,16);
 		//rc_ecmd|=set_bits.insert(bits,0,16);
         //rc_ecmd|=set_bits.insert(bits,2,1);
 		//rc_ecmd|=set_bits.setOr(bits,0,16);
-		set_bits.setBit(2);
+		rc_ecmd|=set_bits.setBit(2);
         bits=rx_pdwn_lite_disable_clear;
         //rc_ecmd|=clear_bits.insert(bits,0,16);
 		rc_ecmd|=clear_bits.flushTo0();
         if(rc_ecmd)
         {
+	  FAPI_ERR("IO_DCCAL : error power down lite disable");
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
-        rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
-		
+        rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,set_bits ,clear_bits);
+	  if (rc)
+	  {
+		  FAPI_ERR("IO_DCCAL : GCR_write error for rx_mode_pg");
+		  return rc;
+	  }
 		//write rx_wt_cu_pll_pgooddly to  '111'
 		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf,0,16);
-		set_bits.setBit(2);
-		set_bits.setBit(3);
-		set_bits.setBit(4);
+		rc_ecmd|=set_bits.setBit(2);
+		rc_ecmd|=set_bits.setBit(3);
+		rc_ecmd|=set_bits.setBit(4);
 		bits=rx_wt_cu_pll_pgooddly_clear;
 		rc_ecmd|=clear_bits.flushTo0();
 		if(rc_ecmd)
@@ -175,24 +218,43 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
 			rc.setEcmdError(rc_ecmd);
             return(rc);
 		}
-		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);
+				if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : GCR_write error for rx_wiretest_pll_cntl_pg");
+			return rc;
+		}
         
 		// write rx_wt_timeout_sel to '111'
 		bits=rx_wt_timeout_sel_tap7;
-		set_bits.insert(rx_wt_timeout_sel_buf,0,16);
-		set_bits.setBit(9);
-		set_bits.setBit(10);
-		set_bits.setBit(11);
+		rc_ecmd|=set_bits.insert(rx_wt_timeout_sel_buf,0,16);
+		//Update for DDLEVEL - as per Garys find 
+		if(ddlevel==1){
+		rc_ecmd|=  set_bits.setBit(9);
+		rc_ecmd|=  set_bits.setBit(10);
+		rc_ecmd|=  set_bits.setBit(11);
+		}else{
+		rc_ecmd|=    set_bits.setBit(10);
+		rc_ecmd|=  set_bits.setBit(11);
+		rc_ecmd|=  set_bits.setBit(12);
+		}
         bits=rx_wt_timeout_sel_clear;
         //rc_ecmd|=clear_bits.insert(bits,0,16);
 		rc_ecmd|=clear_bits.flushTo0();
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
+	    FAPI_ERR("IO_DCCAL : error clearing bits for GCR_write rx_timeout_sel_pgrx_timeout_sel_pg");
             return(rc);
         }
-        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
-		
+	// -- REVIEW , here bits are not used , only set_bits which are now conditioanlized 
+        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);
+	if (rc)
+	{
+	  FAPI_ERR("IO_DCCAL : GCR_write error for rx_timeout_sel_pg");
+	  return rc;
+	}
+	    
        
 		//writw rx_start_offset_cal to '1'
     	bits=rx_start_offset_cal;
@@ -202,15 +264,21 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
+	    FAPI_ERR("IO_DCCAL : error setting up clear bits for GCR_write rx_training_start_pg");
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_training_start_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
-		
+	
+	if (rc)
+	{
+		FAPI_ERR("IO_DCCAL : GCR_write error for rx_training_start_pg");
+		return rc;
+	}	
 		//write rx_wt_cu_pll_reset to '1'
 		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf_copy);if (rc) {return(rc);}
 		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf_copy,0,16);
 		//set_bits.setBit(0);
-		set_bits.setBit(1);
+		rc_ecmd|=set_bits.setBit(1);
 		//set_bits.setBit(2);
 		//set_bits.setBit(3);
 		//set_bits.setBit(4);
@@ -218,15 +286,26 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
 		rc_ecmd|=clear_bits.flushTo0();
 		if(rc_ecmd)
 		{
+		  FAPI_ERR("IO_DCCAL : error setting up set_bits and clear_bits for GCR_write rx_wiretest_pll_cntl_pg");
 			rc.setEcmdError(rc_ecmd);
             return(rc);
 		}
-		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);
+		if(rc)
+				{
+			FAPI_ERR("IO_DCCAL : GCR_write error for rx_wiretest_pll_cntl_pg");
+			return rc;
+		}
 		
 		//write rx_wt_cu_pll_pgood to '1'
-		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf_copy);if (rc) {return(rc);}
+		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf_copy);
+		if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : GCR_read error for rx_wiretest_pll_cntl_pg");
+			return rc;
+		}
 		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf_copy,0,16);
-		set_bits.setBit(0);
+		rc_ecmd|=set_bits.setBit(0);
 		//set_bits.setBit(1);
 		//set_bits.setBit(2);
 		//set_bits.setBit(3);
@@ -235,41 +314,74 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
 		rc_ecmd|=clear_bits.flushTo0();
 		if(rc_ecmd)
 		{
+		  FAPI_ERR("IO_DCCAL : error setting up set_bits and clear_bits for GCR_write rx_wiretest_pll_cntl_pg");
 			rc.setEcmdError(rc_ecmd);
             return(rc);
 		}
-		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);
+		if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : GCR_write error for rx_wiretest_pll_cntl_pg");
+			return rc;
+		}
 		
 	    fapiDelay(100000000,10000000); //Wait 100ms for zcal to complete before polling the status register
       
 	    //write rx_wt_timeout_sel to '000'
-        set_bits.insert(rx_wt_timeout_sel_buf,0,16);
-		set_bits.clearBit(9);
-		set_bits.clearBit(10);
-		set_bits.clearBit(11);
+      rc_ecmd|=  set_bits.insert(rx_wt_timeout_sel_buf,0,16);
+		if(ddlevel==1){
+		rc_ecmd|=  set_bits.clearBit(9);
+		rc_ecmd|=  set_bits.clearBit(10);
+		rc_ecmd|=  set_bits.clearBit(11);
+		}else{
+		rc_ecmd|=    set_bits.clearBit(10);
+		rc_ecmd|=  set_bits.clearBit(11);
+		rc_ecmd|=  set_bits.clearBit(12);
+		}
         bits=rx_wt_timeout_sel_clear;
         //rc_ecmd|=clear_bits.insert(bits,0,16);
 		rc_ecmd|=clear_bits.flushTo0();
         if(rc_ecmd)
         {
+	  FAPI_ERR("IO_DCCAL : error setting up set_bits and clear_bits for GCR_write rx_timeout_sel_pg");
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
-        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+	//-- REVIEW here also bits var is not used but above dlevel conditions take care
+        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);
+			if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : error GCR_write rx_timeout_sel_pg");
+			return rc;
+		}
         // Poll for the done bit
-        rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+	
+        rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);
+		if (rc)
+		{
+			FAPI_ERR("IO_DCCAL : error GCR_read rx_training_status_pg");
+			return rc;
+		}
         
         int done_bit=rx_offset_cal_done;
         int fail_bit=rx_offset_cal_failed;
         bool fail= data_buffer.getHalfWord(0) & fail_bit;
         bool done = data_buffer.getHalfWord(0)& done_bit;
         int timeoutCnt = 0;
-        while ( ( !done ) && ( timeoutCnt < 5000 ) && !fail )
+	//Updating timeout as per Gary/Joe's defect SW251251 to be ~1s than the 50s earlier count
+	// This needs to be regressed in lab 
+        while ( ( !done ) && ( timeoutCnt < 100 ) && !fail )
         {
                 // wait for 80000 time units
                 // Time units may be something for simulation, and something else (or nothing) for hardware
                 // At any rate, this is intended to be approximately 100 us.
-                rc=GCR_read(*target_ptr,chip_interface,rx_training_status_pg,group,0,data_buffer); if (rc) {return(rc);}// have to add support for field parsing
+                rc=GCR_read(*target_ptr,chip_interface,rx_training_status_pg,group,0,data_buffer);
+					if (rc)
+			{
+				// have to add support for field parsing
+				FAPI_ERR("IO_DCCAL : error GCR_read rx_training_status_pg in polling for done bit loop");
+				return rc;
+			}
                 fail= data_buffer.getHalfWord(0) & fail_bit;
                 done = data_buffer.getHalfWord(0)& done_bit;
                 fapiDelay(10000000,10000000);
@@ -280,29 +392,42 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         {
                 FAPI_ERR("IO Offset cal error on interface %d",chip_interface);
                 //Set HWP error
+		io_interface_t& CHIP_INTERFACE = chip_interface;
+		ecmdDataBufferBase& DATA_BUFFER = data_buffer;
+		int& FAIL_BIT = fail_bit;
+		const Target &TARGET = target;
+
                 FAPI_SET_HWP_ERROR(rc,IO_DCCAL_OFFCAL_ERROR_RC);
                 return rc;
         }
         // Check for errors
-        else if ( timeoutCnt >= 5000 && !done && !fail )
+        else if ( timeoutCnt >=100 && !done && !fail )
         {
                 FAPI_ERR("Timed out waiting for Done bit to be set");
                 //Set HWP error
+				int &TIMEOUTCNT=timeoutCnt;
                 FAPI_SET_HWP_ERROR(rc,IO_DCCAL_OFFCAL_TIMEOUT_RC);
                 return rc;
         }
         else
         {
-             FAPI_DBG("IO Offset cal Completed on interface %d",chip_interface);
+             FAPI_DBG("IO Offset cal Completed on interface %d with timeoutcount %d",chip_interface,timeoutCnt);
         }
         
         // clear eye opt offset cal done bit, rx_eo_latch_offset_done
-		rc=GCR_read(*target_ptr,chip_interface,rx_eo_step_stat_pg,group,0,set_bits); if (rc) {return(rc);}// have to add support for field parsing
+		rc=GCR_read(*target_ptr,chip_interface,rx_eo_step_stat_pg,group,0,set_bits);
+				if (rc)
+		{
+			// have to add support for field parsing
+			FAPI_ERR("IO_DCCAL : error GCR_read rx_eo_step_stat_pg");
+			return rc;
+		}
         rc_ecmd|=set_bits.clearBit(0);
         bits=rx_eo_latch_offset_done_clear;
         rc_ecmd|=clear_bits.insert(bits,0,16);
         if(rc_ecmd)
         {
+	  FAPI_ERR("IO_DCCAL : error in set and clear bits for GCR_write rx_eo_step_stat_pg");
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
@@ -328,15 +453,15 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         
         //bits=rx_wt_timeout_value;
 		bits=rx_wt_timeout_sel_tap3;
-        set_bits.insert(rx_wt_timeout_sel_buf,0,16);
+        rc_ecmd|=set_bits.insert(rx_wt_timeout_sel_buf,0,16);
 		//rc_ecmd |= set_bits.setAnd(bits,9,3);
 		// if(target.getType() !=  fapi::TARGET_TYPE_MEMBUF_CHIP){
 			// rc_ecmd|=set_bits.insert(bits,9,3);
 		// }
 		// else
 		//rc_ecmd |= set_bits.clearBit(9);
-        bits=rx_wt_timeout_sel_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        // --  bits=rx_wt_timeout_sel_clear;
+        rc_ecmd|=clear_bits.flushTo0();
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
@@ -370,7 +495,7 @@ ReturnCode run_zcal_debug(const Target& target,io_interface_t interface,uint32_t
     ecmdDataBufferBase data_buffer(16);
     rc=GCR_read(target,interface,tx_impcal_nval_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
     rc=GCR_read(target,interface,tx_impcal_pval_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
-    rc=GCR_read(target,interface,tx_impcal_p_4x_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing 
+    rc=GCR_read(target,interface,tx_impcal_p_4x_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
     return rc;
 }
 
@@ -385,8 +510,11 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
     ecmdDataBufferBase set_bits(16);
     ecmdDataBufferBase clear_bits(16);
     ecmdDataBufferBase data_buffer(16);
-    rc_ecmd|=set_bits.flushTo0();
+    rc_ecmd=set_bits.flushTo0();
     rc_ecmd|=clear_bits.flushTo1(); // I dont want to clear anything by default
+    const fapi::Target &TARGET=target;
+    const uint32_t& K2 = k2;
+    const uint32_t& M = m;
     if(rc_ecmd)
     {
         rc.setEcmdError(rc_ecmd);
@@ -394,14 +522,6 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
     }
     io_interface_t chip_interface=master_interface;//first we run on master chip
     uint32_t group=master_group;
-    // Get all the input attributes from PLAT
-    /*
-    Need to check if these attributes are required or not 
-    rc = FAPI_ATTR_GET(ATTR_IOD_MARGIN_RATIO, &target, m); // Fetch the attribute for the chip we are working on 
-    rc = FAPI_ATTR_GET(ATTR_IOD_POST_CURSOR_DRIVER_RATIO, &target, k2);
-    // Find if we are in SW_OVERRIDE mode
-    rc = FAPI_ATTR_GET(ATTR_IOD_ZCAL_SW_OVERRIDE, &target, swOverride);
-    */
     
         const uint32_t min        = (10<<3);   // impcntl min -  - p8 - 10<<3
         const uint32_t max        = (40<<3);   // impcntl max -  - p8 - 40<<3
@@ -427,12 +547,7 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
                     FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_M_EXCEEDED_RC);
                     return rc;
         }
-    
-        //if ( m < 0x40 ) {
-        //            FAPI_DBG("MARGIN RATIO m is less than 50 percent");
-        //            FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_M_LOW_RC);
-        //            return rc;
-        //}
+
           if ( ( ! zcal_override ) && ( ! swOverride ) )
         {
 
@@ -475,6 +590,8 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
                                     FAPI_DBG("IO Impedance cal error on interface %d ",chip_interface);
                                      run_zcal_debug(*target_ptr,chip_interface,group);
                                     //set HWP error
+				    ecmdDataBufferBase& DATA_BUFFER=data_buffer;
+				    bool &FAIL=fail;
                                     FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_ERROR_RC);
                                     return(rc);
                                     
@@ -484,6 +601,7 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
                                 {
                                             FAPI_DBG("Timed out waiting for Done bit to be set");
                                             //set HWP error
+					    int &TIMEOUTCNT=timeoutCnt;
                                             FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_TIMEOUT_RC);
                                             return rc;
                                 }
@@ -511,12 +629,19 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
         if ( ( (uint32_t)zcal_n < min )|| ( (uint32_t)zcal_n > max ) )
         {
                     FAPI_ERR("zcal_n value is out of impcntl range");
+		    uint32_t &ZCAL_N=zcal_n;
+		    const uint32_t &MIN=min;
+		    const uint32_t &MAX=max;
+		    
                     FAPI_SET_HWP_ERROR(rc, IO_DCCAL_ZCALN_VALUE_OUT_OF_RANGE_RC);
                     return rc;
         }
         if (   ( (uint32_t)zcal_p < min )|| ( (uint32_t)zcal_p > max ) )
         {
                     FAPI_ERR("zcal_p value is out of impcntl range");
+		    uint32_t &ZCAL_P=zcal_p;
+		    const uint32_t &MIN=min;
+		    const uint32_t &MAX=max;
                     FAPI_SET_HWP_ERROR(rc, IO_DCCAL_ZCALP_VALUE_OUT_OF_RANGE_RC); 
                     return rc;
         }
@@ -643,7 +768,7 @@ ReturnCode io_dccal(const Target& target){
     fapi::Target parent_target;
 	uint32_t ring_length=0;
 	uint32_t rc_ecmd=0;
-
+const fapi::Target& TARGET = target;
     FAPI_DBG("Running IO DCCAL PROCEDURE");
 
     // This is a DMI/MC bus

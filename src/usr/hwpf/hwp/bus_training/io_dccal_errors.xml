@@ -1,0 +1,226 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/bus_training/io_dccal_errors.xml $           -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: io_dccal_errors.xml,v 1.5 2014/03/18 14:58:40 jgrell Exp $ -->
+
+<!-- Error definitions for io_dccal HWPS  -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_OFFCAL_ERROR_RC</rc>
+    <ffdc>CHIP_INTERFACE</ffdc>
+    <ffdc>DATA_BUFFER</ffdc>
+    <ffdc>FAIL_BIT</ffdc>
+    <ffdc>TARGET</ffdc>
+    <description>io offset cal errored out</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_OFFCAL_TIMEOUT_RC</rc>
+    <ffdc>TIMEOUTCNT</ffdc>
+    <description>io offset cal timedout</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_K2_EXCEEDED_RC</rc>
+    <ffdc>K2</ffdc>
+    <description>Post cursor drive ratio has exceeded 0.25</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_M_EXCEEDED_RC</rc>
+    <ffdc>M</ffdc>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+    <description>Margin Ratio has exceeded 100 percentage</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_ERROR_RC</rc>
+    <ffdc>FAIL</ffdc>
+    <ffdc>DATA_BUFFER</ffdc>
+    <description>io impedance cal errored out</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_TIMEOUT_RC</rc>
+    <ffdc>TIMEOUTCNT</ffdc>
+    <description>io impedance cal timed out</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCALN_VALUE_OUT_OF_RANGE_RC</rc>
+    <ffdc>ZCAL_N</ffdc>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <description>Impedance calibration zcal_n value out of range</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCALP_VALUE_OUT_OF_RANGE_RC</rc>
+    <ffdc>ZCAL_P</ffdc>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <description>Impedance calibration zcal_p value out of range</description>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_INVALID_INVOCATION_RC</rc>
+    <ffdc>TARGET</ffdc>
+    <description>io dc cal invoked with wrong pair of targets</description>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+	<callout>
+        <target>TARGET</target>
+        <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+ 
+</hwpErrors>
+
+

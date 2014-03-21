@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.H,v 1.16 2013/11/25 07:10:39 varkeykv Exp $
+// $Id: io_funcs.H,v 1.17 2014/02/20 13:27:29 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -133,6 +133,42 @@ public:
     // First Fail Data Capture Routines
     // Wire Test First Fail Data Capture
     ReturnCode dump_ffdc_wiretest(const Target&  master_chip_target,
+                                  io_interface_t  master_chip_interface ,
+				  uint32_t master_group,
+                                  const Target& slave_chip_target ,
+                                  io_interface_t slave_chip_interface,
+				  uint32_t slave_group
+                                  );
+    
+      // First Fail Data Capture Routines
+    // Deskew First Fail Data Capture
+    ReturnCode dump_ffdc_deskew(const Target&  master_chip_target,
+                                  io_interface_t  master_chip_interface ,
+				  uint32_t master_group,
+                                  const Target& slave_chip_target ,
+                                  io_interface_t slave_chip_interface,
+				  uint32_t slave_group
+                                  );
+    
+    // Eye opt First Fail Data Capture
+    ReturnCode dump_ffdc_eyeopt(const Target&  master_chip_target,
+                                  io_interface_t  master_chip_interface ,
+				  uint32_t master_group,
+                                  const Target& slave_chip_target ,
+                                  io_interface_t slave_chip_interface,
+				  uint32_t slave_group
+                                  );
+    
+        // Repair First Fail Data Capture
+    ReturnCode dump_ffdc_repair(const Target&  master_chip_target,
+                                  io_interface_t  master_chip_interface ,
+				  uint32_t master_group,
+                                  const Target& slave_chip_target ,
+                                  io_interface_t slave_chip_interface,
+				  uint32_t slave_group
+                                  );
+     // FUnc mode First Fail Data Capture
+    ReturnCode dump_ffdc_func(const Target&  master_chip_target,
                                   io_interface_t  master_chip_interface ,
 				  uint32_t master_group,
                                   const Target& slave_chip_target ,

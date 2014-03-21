@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_restore_erepair.C,v 1.16 2013/11/14 08:50:21 varkeykv Exp $
+// $Id: io_restore_erepair.C,v 1.17 2014/03/05 12:01:03 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -41,6 +41,7 @@
 // --------|--------|--------|--------------------------------------------------
 //   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK 
 //------------------------------------------------------------------------------
+
 
 #include <fapi.H>
 #include "io_restore_erepair.H"
@@ -107,7 +108,8 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
   }
   else{
       FAPI_ERR("Invalid io_restore_erepair HWP invocation");
-      FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_INVALID_INVOCATION_RC);
+      const fapi::Target &TARGET = target;
+      FAPI_SET_HWP_ERROR(rc, IO_RESTORE_EREPAIR_INVALID_INVOCATION_RC);
       return(rc);
   }
   // Use the accessor to fetch VPD data for this particular target instance
@@ -177,10 +179,20 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
               lane_valid=true;
             }
           if (lane < 16 && lane_valid) {
-             data_one.setBit(lane);
+             rc_ecmd = data_one.setBit(lane);
+             if(rc_ecmd)
+             {
+                 rc.setEcmdError(rc_ecmd);
+                 return(rc);
+             }
           }
           else if(lane>=16 && lane_valid) {
-             data_two.setBit(lane-16);
+             rc_ecmd = data_two.setBit(lane-16);
+             if(rc_ecmd)
+             {
+                 rc.setEcmdError(rc_ecmd);
+                 return(rc);
+             }
           }
       }
        FAPI_DBG("#2 Corrected RX lane is  %d\n",lane);

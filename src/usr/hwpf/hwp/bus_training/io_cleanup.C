@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,19 +20,19 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_cleanup.C,v 1.3 2013/12/12 08:41:30 varkeykv Exp $
+// $Id: io_cleanup.C,v 1.5 2014/03/13 16:01:03 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
 // *!                   *** IBM Confidential ***
 // *!***************************************************************************
 // *! FILENAME             : io_cleanup.C
-// *! TITLE                : 
-// *! DESCRIPTION          : Cleanup procedure for re-init loop 
-// *! CONTEXT              : 
+// *! TITLE                :
+// *! DESCRIPTION          : Cleanup procedure for re-init loop
+// *! CONTEXT              :
 // *!
 // *! OWNER  NAME          : Varghese, Varkey         Email: varkey.kv@in.ibm.com
-// *! BACKUP NAME          : Janani Swaminathan      Email:  jaswamin@in.ibm.com     
+// *! BACKUP NAME          : Janani Swaminathan      Email:  jaswamin@in.ibm.com
 // *!
 // *!***************************************************************************
 // CHANGE HISTORY:
@@ -50,7 +50,7 @@
 extern "C" {
      using namespace fapi;
 // For clearing the FIR mask , used by io run training
-// As per Irving , it should be ok to clear all FIRs here since we will scom init , also we dont touch mask values 
+// As per Irving , it should be ok to clear all FIRs here since we will scom init , also we dont touch mask values
 ReturnCode clear_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
     ReturnCode rc;
     ecmdDataBufferBase data(64);
@@ -68,7 +68,7 @@ ReturnCode clear_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interf
 
 /*
  from Megan's ipl1.sh
- 
+
  istep -s0..11
 ## forcing channel fail
 getscom pu  02011C4A -pall -call -vs1
@@ -111,11 +111,6 @@ istep dmi_io_dccal
         putscom cen 0201080A 8000000000000000 -pall -call
         getscom pu  02011C4A -pall -call -vs1
         getscom cen 0201080A -pall -call -vs1
-
-
- 
- 
- 
 */
 
 ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interface,uint32_t master_group,const Target &slave_target,io_interface_t slave_interface,uint32_t slave_group)
@@ -123,12 +118,11 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
      ReturnCode rc;
      uint32_t rc_ecmd = 0;
      uint8_t chip_unit = 0;
- //    uint8_t link_fir_unmask_data = 0x8F;
      ecmdDataBufferBase data(64);
      ecmdDataBufferBase reg_data(16),set_bits(16),clear_bits(16),temp_bits(16);
-     
+
      //iotk put rx_fence=1 -t=p8:bmcs
-     // No other field in this reg , so no need for RMW 
+     // No other field in this reg , so no need for RMW
      rc_ecmd = temp_bits.setBit(0);
      if(rc_ecmd)
      {
@@ -137,11 +131,11 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
      }
      rc=GCR_write(master_target, master_interface,  rx_fence_pg, master_group,0,   temp_bits, temp_bits,1,1);
      if(rc) return rc;
-     
+
      //iotk put rx_fence=1 -t=cn
      rc=GCR_write(slave_target, slave_interface, rx_fence_pg, slave_group,0,   temp_bits, temp_bits,1,1);
      if(rc) return rc;
-     
+
      rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
                     &master_target,
                     chip_unit);
@@ -150,20 +144,20 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
      FAPI_ERR("Error retreiving MCS chiplet number!");
      return rc;
      }
-     
+
      // swizzle to DMI number
      if (master_interface == CP_IOMC0_P0)
      {
           chip_unit = 3-(chip_unit % 4);
-             // swap 0 and 1 due to Clock group swap in layout
+          // swap 0 and 1 due to Clock group swap in layout
           if(chip_unit==1){
                chip_unit=0;
           }
           else if(chip_unit==0){
                chip_unit=1;
           }
-      
-          
+
+
           FAPI_DBG("CHIP UNIT IS %d",chip_unit);
 
      }
@@ -174,7 +168,7 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
                   scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0]);
           return rc;
      }
-     
+
      rc_ecmd = data.setBit(2+chip_unit,1);  // Scom_mode_pb ,ioreset starts at bit 2
      if(rc_ecmd)
      {
@@ -190,14 +184,14 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
                   scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0]);
           return rc;
      }
-     
+
      rc_ecmd = data.flushTo0();
      if(rc_ecmd)
      {
         rc.setEcmdError(rc_ecmd);
         return(rc);
      }
-     // Centaur is always bus0 in reset register 
+     // Centaur is always bus0 in reset register
      if(slave_interface == CEN_DMI){
           chip_unit=0;
      }
@@ -222,10 +216,10 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
                    scom_mode_pb_reg_addr[FIR_CEN_DMI]);
           return rc;
      }
-    
-    
+
+
     // NOW We clear FIRS.. need to see if we need to do this or some other procedure will do this . Bellows/Irving to respond
-    
+
     rc = clear_fir_reg(slave_target,FIR_CEN_DMI);
      if(rc)
      {
@@ -276,12 +270,10 @@ ReturnCode io_cleanup(const Target &master_target,const Target &slave_target){
      io_interface_t master_interface,slave_interface;
      uint32_t master_group=0;
      uint32_t slave_group=0;
-  //   const uint32_t max_group=4; // Num of X bus groups in one bus
-
      bool is_master=false;
 
-     
-     // This is a DMI/MC bus 
+
+     // This is a DMI/MC bus
      if( (master_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )&& (slave_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)){
           FAPI_DBG("This is a DMI bus using base DMI scom address");
           master_interface=CP_IOMC0_P0; // base scom for MC bus
@@ -305,23 +297,17 @@ ReturnCode io_cleanup(const Target &master_target,const Target &slave_target){
      }
      //This is an A Bus
      else if( (master_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT )&& (slave_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT)){
-          FAPI_DBG("This is an A Bus training invocation");
-          master_interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
-          slave_interface=CP_FABRIC_A0; //base scom for A bus
-          master_group=0; // Design requires us to do this as per scom map and layout
-          slave_group=0;
-          rc=isChipMaster(master_target,master_interface,master_group,is_master);
-          if(rc.ok()){
-                    // Now only for DMI 
-          }
+        // This procedure only supports DMI for now
      }
      else{
+          const Target &MASTER_TARGET = master_target;
+          const Target &SLAVE_TARGET = slave_target;
           FAPI_ERR("Invalid io_cleanup HWP invocation . Pair of targets dont belong to DMI or A bus instances");
-          FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_INVALID_INVOCATION_RC);
+          FAPI_SET_HWP_ERROR(rc, IO_CLEANUP_INVALID_INVOCATION_RC);
      }
      return rc;
 }
 
 
 
-} // extern 
+} // extern

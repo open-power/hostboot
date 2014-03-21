@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_clear_firs.C,v 1.14 2013/06/20 13:29:37 jmcgill Exp $
+// $Id: io_clear_firs.C,v 1.16 2014/03/20 16:15:49 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 2012, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -151,6 +151,7 @@ ReturnCode io_clear_firs(const fapi::Target &i_target){
     io_interface_t gcr_interface; // requires different base address for gcr scoms
     uint32_t group=0;
     uint32_t max_group=1;
+    const fapi::Target &ENDPOINT=i_target;
     
     //on dmi
     if( (i_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )){

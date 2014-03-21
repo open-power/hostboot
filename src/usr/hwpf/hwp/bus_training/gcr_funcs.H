@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: gcr_funcs.H,v 1.19 2013/06/06 20:40:52 cswenson Exp $
+// $Id: gcr_funcs.H,v 1.22 2014/03/07 13:13:29 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -35,7 +35,7 @@
 // *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com
 // *!
 // *!***************************************************************************
-// CHANGE HISTORY:
+// CHANGE HISTORY: 
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
@@ -99,6 +99,9 @@ typedef enum { tx_per_lane,  tx_per_group,  tx_per_pack, tx_per_bus,  rx_per_lan
 
 typedef enum { gcr_op_read,  gcr_op_write }  gcr_op;
 
+     const uint32_t num_rxlanes_per_group[NUM_INTERFACES] ={1,20,24,24,24,20,24,18 };
+const uint32_t num_txlanes_per_group[NUM_INTERFACES] ={1,20,24,17,17,20,24,24 };
+const uint32_t num_groups_per_bus[NUM_INTERFACES] = { 1,4,1,1,1,4,1,1};
 
 // Lane Bit Defintions
 // 0x00  (lane 0),   0x01  (lane 1) , etc

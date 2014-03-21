@@ -1,0 +1,105 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/bus_training/io_run_training_errors.xml $    -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: io_run_training_errors.xml,v 1.8 2014/03/17 18:54:00 dedahle Exp $ -->
+<!-- Error definitions for IO_RUN_TRAINING  -->
+<hwpErrors>
+  <hwpError>
+    <rc>IO_RUN_TRAINING_SET_PLL_INVALID_INVOCATION_RC</rc>
+    <description>io_training_set_pll_post_wiretest invoked with incorrect target type</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_POST_TRAINING_INVALID_INVOCATION_RC</rc>
+    <description>io_training_set_pll_post_wiretest invoked with incorrect target type</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_CHECK_DLL_VAL_OUT_OF_BOUND_RC</rc>
+    <description>DLL Workaround encountered unexpected start value</description>
+    <ffdc>DLL_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_CHECK_DLL_WORKAROUND_FAIL</rc>
+    <description>DLL Workaround failed to arrive at a solution</description>
+    <ffdc>DLL_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
+  </hwpError>
+      <!-- *********************************************************************** -->
+    <hwpError>
+     <rc>IO_RUN_TRAINING_FIR_MAX_SPARES_EXCEEDED_RC</rc>
+     <description>maximum spares possible to deploy exceeded</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>SPARE_ERROR_REG</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_TARGET</target>
+    </gard>
+  </hwpError>
+      <!-- *********************************************************************** -->
+   <hwpError>
+    <rc>IO_RUN_TRAINING_INVALID_TARGET_PAIR_RC</rc>
+    <description>io_run_training invoked with wrong pair of targets</description>
+    <ffdc>MASTER_TARGET</ffdc>
+    <ffdc>SLAVE_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>

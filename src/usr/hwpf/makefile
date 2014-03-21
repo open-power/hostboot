@@ -32,7 +32,6 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 #------------------------------------------------------------------------------
 HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml \
-    hwp/bus_training/io_errors.xml \
     hwp/dimm_errors.xml \
     hwp/chip_accessors/chip_errors.xml \
     hwp/dram_training/memory_errors.xml \
@@ -138,7 +137,16 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/runtime_errors/p8_pstate_registers.xml \
     hwp/mc_config/mss_eff_mb_interleave/memory_mss_eff_mb_interleave.xml \
     hwp/nest_chiplets/proc_a_x_pci_dmi_pll_registers.xml \
-    hwp/dram_training/mss_lrdimm_funcs/memory_mss_lrdimm_funcs.xml
+    hwp/dram_training/mss_lrdimm_funcs/memory_mss_lrdimm_funcs.xml \
+    hwp/bus_training/gcr_funcs_errors.xml \
+    hwp/bus_training/io_run_training_errors.xml \
+    hwp/bus_training/io_funcs_errors.xml \
+    hwp/bus_training/io_dccal_errors.xml \
+    hwp/bus_training/io_power_down_lanes_errors.xml \
+    hwp/bus_training/io_read_erepair_errors.xml \
+    hwp/bus_training/io_fir_isolation_errors.xml \
+    hwp/bus_training/io_restore_erepair_errors.xml \
+    hwp/bus_training/io_cleanup_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
