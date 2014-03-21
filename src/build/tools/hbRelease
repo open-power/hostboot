@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -33,10 +33,12 @@ use File::Temp qw/tempfile/;
 
 my $debug = 0;
 my $help = 0;
-GetOptions("debug!" => \$debug,
-           "help" => \$help);
 
-my %globals = ();
+my %globals = ( "branch" => "master" );
+
+GetOptions("debug!" => \$debug,
+           "help" => \$help,
+           "branch:s" => \$globals{"branch"});
 
 my %commands = ( "define" => \&execute_define,
                  "undef" => \&execute_undef,
@@ -125,7 +127,8 @@ sub execute_gerrit_query
         $project = config_project();
     }
 
-    my $items = gerrit_query("status:open project:$project");
+    my $items = gerrit_query("status:open project:$project ".
+                             "branch:".$globals{"branch"});
 
     foreach my $item (@$items)
     {
@@ -141,19 +144,17 @@ sub execute_gerrit_query
 sub execute_git_query
 {
     my $level = "";
-    my $branch = "gerrit/master";
 
     GetOptions("name:s" => \$level,
-               "level:s" => \$level,
-               "branch:s" => \$branch);
+               "level:s" => \$level);
 
     die "Missing level name" if ($level eq "");
 
-    $branch = git_resolve_ref($branch);
+    $globals{"branch"} = git_resolve_ref($globals{"branch"});
 
     my $level = config_get_level($level);
 
-    my $commits = git_commit_history($branch, $level->{base});
+    my $commits = git_commit_history($globals{"branch"}, $level->{base});
 
     foreach my $commit (@{$commits})
     {
@@ -178,6 +179,11 @@ sub execute_level_query
     print "        ".git_name_rev($level_info->{base})."\n";
     print "    Released:\n";
     print "        ".git_name_rev($level_info->{released})."\n";
+    if ($globals{"branch"} ne "master")
+    {
+        print "    Branch:\n";
+        print "        ".$globals{"branch"}."\n";
+    }
     print "    Patches:\n";
     foreach my $patch (sort @{$level_info->{patches}})
     {
@@ -366,7 +372,7 @@ sub execute_publish_cq
 
 sub execute_build_name
 {
-    my $release = "810";
+    my $release = "820";
     my $build_letter = "a";
 
     GetOptions("release:s" => \$release,
@@ -440,7 +446,7 @@ q(
 
     Options:
         --level=<name>          Name for the level to query [required].
-        --branch=<commit>       Branch to query against [default=gerrit/master].
+        --branch=<commit>       Branch to query against [default=master].
 ),
             "query-level" =>
 q(
@@ -848,6 +854,7 @@ sub git_create_tag
     print COMMAND "Release: $level\n\n";
     print COMMAND "Base: ".$level_info->{base}."\n";
     print COMMAND "Previous-Release: ".$level_info->{released}."\n";
+    print COMMAND "Branch: ".$globals{"branch"}."\n";
     print COMMAND "\n";
     foreach my $patch (@{$level_info->{patches}})
     {
@@ -1055,6 +1062,13 @@ sub config_add_level
     system("git config --file ".config_filename().
            " --add level.".$level_def->{name}.".released ".
            $level_def->{released});
+
+    if ($globals{"branch"} ne "master")
+    {
+        system("git config --file ".config_filename().
+               " --add level.".$level_def->{name}.".branch ".
+               $globals{"branch"});
+    }
 }
 
 # sub config_del_level
@@ -1172,6 +1186,16 @@ sub config_get_level
     close COMMAND;
 
     $level_data{released} = $released;
+
+    open COMMAND, "git config --file ".config_filename().
+                  " --get level.$level.branch |";
+    my $branch = <COMMAND>; chomp($branch);
+    close COMMAND;
+
+    if ($branch ne "")
+    {
+        $globals{"branch"} = $branch;
+    }
 
     my @patches = ();
     open COMMAND, "git config --file ".config_filename().
@@ -1328,7 +1352,7 @@ sub gerrit_query_commit
 {
     my $commit = shift;
     
-    my $query_result = gerrit_query($commit);
+    my $query_result = gerrit_query("$commit branch:".$globals{"branch"});
     foreach my $result (@{$query_result})
     {
         if ($result->{id} eq $commit)
