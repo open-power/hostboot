@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_control.C,v 1.12 2014/02/06 21:58:40 stillgs Exp $
+// $Id: p8_pfet_control.C,v 1.14 2014/03/13 20:48:21 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_control.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -34,25 +34,6 @@
 ///
 /// High-level procedure flow:
 /// \verbatim
-///
-/**
-        Check for valid parms
-        Check if PMGP0(0) has the PM function enabled.  If not, enable it.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  */
 ///
 ///  Procedure Prereq:
 ///     - System clocks are running
@@ -86,9 +67,9 @@
 ///       46:49 - not relevant
 ///       50:53 - eco_vcs_pfet_state (50: Idle; 51: Increment; 52: Decrement; 53: Wait)
 ///       54:57 - not relevant
-
-
-
+///
+///  buildfapiprcd -e "../../xml/error_info/p8_pfet_errors.xml" -C p8_pm_utils.C p8_pfet_control.C
+///
 //------------------------------------------------------------------------------
 
 
@@ -154,6 +135,7 @@ fapi::ReturnCode p8_pfet_off_override( const fapi::Target& i_target,
                              pfet_dom_t          i_domain);
 
 fapi::ReturnCode p8_pfet_poll(const fapi::Target& i_target,
+                            uint8_t              i_ex_number,
                             uint64_t             i_address,
                             pfet_dom_t           i_domain);
 
@@ -174,7 +156,7 @@ fapi::ReturnCode p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 /// \param[in] i_target     Chip target
 /// \param[in] i_ex_number  EX number
 /// \param[in] i_domain     Domain: BOTH, ECO, CORE
-/// \param[in] i_op         Operation: VON, VOFF, NONE
+/// \param[in] i_op         Operation: VON, VOFF, VOFF_OVERRIDE
 ///
 /// \retval FAPI_RC_SUCCESS if something good happens,
 /// \retval BAD_RETURN_CODE otherwise
@@ -190,7 +172,7 @@ p8_pfet_control(  const fapi::Target&   i_target,
     ecmdDataBufferBase          data(64);
     ecmdDataBufferBase          pmgp0(64);
     ecmdDataBufferBase          gp3(64);
-    uint64_t                    address;
+    uint64_t                    address = 0;
     bool                        restore_pmgp0 = false;
     bool                        restore_gp3 = false;
 
@@ -204,27 +186,27 @@ p8_pfet_control(  const fapi::Target&   i_target,
 
     do
     {
-    
+
         uint8_t ipl_mode = 0;
         l_rc = FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, ipl_mode);
         if (!l_rc.ok())
         {
             FAPI_ERR("fapiGetAttribute of ATTR_IS_MPIPL rc = 0x%x", (uint32_t)l_rc);
             break;
-        }    
-        FAPI_INF("IPL mode = %s", ipl_mode ? "MPIPL" : "NORMAL");    
-        
-        l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+        }
+        FAPI_INF("IPL mode = %s", ipl_mode ? "MPIPL" : "NORMAL");
+
+        l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number,
                                 "start of p8_pfet_control");
         if (!l_rc.ok()) { break; }
-        
+
         // Check for valid operation parameter
-        if ((i_op != VON) && (i_op != VOFF) && (i_op != VOFF_OVERRIDE) && (i_op != NONE))
+        if ((i_op != VON) && (i_op != VOFF) && (i_op != VOFF_OVERRIDE))
         {
             FAPI_ERR("\tInvalid operation parm 0x%x", i_op);
-            const uint64_t& EX = i_ex_number;
-            const uint64_t& DOMAIN = i_domain;
-            const uint64_t& OPERATION = i_op;
+            const uint8_t & EX = i_ex_number;
+            const pfet_dom_t & DOMAIN = i_domain;
+            const pfet_force_t & OPERATION = i_op;
             FAPI_SET_HWP_ERROR(l_rc, RC_PMPROC_PFETLIB_BAD_OP);
             break;
         }
@@ -233,8 +215,8 @@ p8_pfet_control(  const fapi::Target&   i_target,
         if ((i_domain != CORE) && (i_domain != ECO) && (i_domain != BOTH))
         {
             FAPI_ERR("\tInvalid domain parm 0x%x", i_domain);
-            const uint64_t& EX = i_ex_number;
-            const uint64_t& DOMAIN = i_domain;
+            const uint8_t & EX = i_ex_number;
+            const pfet_dom_t & DOMAIN = i_domain;
             FAPI_SET_HWP_ERROR(l_rc, RC_PMPROC_PFETLIB_BAD_DOMAIN);
             break;
         }
@@ -275,7 +257,7 @@ p8_pfet_control(  const fapi::Target&   i_target,
                 break;
             }
 
-            l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+            l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number,
                                 "after of PM enablement");
             if (!l_rc.ok()) { break; }
 
@@ -417,25 +399,6 @@ p8_pfet_control(  const fapi::Target&   i_target,
                     break;
                 }
 
-                // --- Align f and f/2 (done only to mimic proc_sbe_chiplet_init.S)
-//                address = EX_GP0_AND_0x10000004 + (0x01000000 * i_ex_number);
-//                e_rc |= data.flushTo1();
-//                e_rc |= data.clearBit(62);   // Edge delayed
-//
-//                if (e_rc)
-//                {
-//                    FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
-//                    l_rc.setEcmdError(e_rc);
-//                    break;
-//                }
-//
-//                l_rc=fapiPutScom( i_target, address, data );
-//                if(!l_rc.ok())
-//                {
-//                    FAPI_ERR("PutScom error 0x%08llX", address);
-//                    break;
-//                }
-
                 FAPI_DBG("\tSetting DPLL, PERV THOLD and Perv ECO Fence in PMGP0");
                 address = EX_PMGP0_OR_0x100F0102 + (0x01000000 * i_ex_number);
                 e_rc |= data.flushTo0();
@@ -495,8 +458,8 @@ p8_pfet_control(  const fapi::Target&   i_target,
                     FAPI_ERR("PutScom error 0x%08llX", address);
                     break;
                 }
-                
-                l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+
+                l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number,
                                 "after of GP3(0) handling");
                 if (!l_rc.ok()) { break; }
             }
@@ -518,8 +481,8 @@ p8_pfet_control(  const fapi::Target&   i_target,
             FAPI_ERR("GetScom error 0x%08llX", address);
             break;
         }
-        
-        l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+
+        l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number,
                                 "before transition choice");
         if (!l_rc.ok()) { break; }
 
@@ -540,7 +503,7 @@ p8_pfet_control(  const fapi::Target&   i_target,
             if(!l_rc.ok())
             {
                 FAPI_ERR("\tPFET turn off of %s domains failed",
-                            pfet_dom_names[i_domain]);              
+                            pfet_dom_names[i_domain]);
                 break;
             }
         }
@@ -554,23 +517,12 @@ p8_pfet_control(  const fapi::Target&   i_target,
                             pfet_dom_names[i_domain]);
                 break;
             }
-            
-            l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+
+            l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number,
                                 "after VON handling");
             if (!l_rc.ok()) { break; }
-            
-        }
-        // Error
-        else
-        {
-            FAPI_ERR("\tUnreachable core op point 0x%x", i_op);
-            const uint64_t& EX = i_ex_number;
-            const uint64_t& DOMAIN = i_domain;
-            const uint64_t& OPERATION = i_op;
-            FAPI_SET_HWP_ERROR(l_rc, RC_PMPROC_PFETLIB_CODE_FAULT);
-            break;
-        }
 
+        }
 
         // Restore GP3 except for reinit_endp as this will force power on
         if (restore_gp3)
@@ -648,7 +600,7 @@ p8_pfet_on( const fapi::Target& i_target,
             b_eco = true;
         }
 
-        uint8_t  chipHasPFETPoweroffBug = 0; 
+        uint8_t  chipHasPFETPoweroffBug = 0;
         l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_PFET_POWEROFF_BUG,
                              &i_target,
                              chipHasPFETPoweroffBug);
@@ -692,7 +644,7 @@ p8_pfet_on( const fapi::Target& i_target,
             FAPI_DBG("\tEnabling turn on of Core VDD");
             e_rc |= data.clearBit(CORE_OVERRIDE_STATE, CORE_OVERRIDE_LENGTH);
             e_rc |= data.clearBit(CORE_FORCE_STATE, CORE_FORCE_LENGTH);
-            e_rc |= data.insert((uint32_t)VON, CORE_FORCE_STATE, CORE_FORCE_LENGTH, 30);          
+            e_rc |= data.insert((uint32_t)VON, CORE_FORCE_STATE, CORE_FORCE_LENGTH, 30);
         }
 
         if (b_eco)
@@ -723,11 +675,10 @@ p8_pfet_on( const fapi::Target& i_target,
         }
 
         // Poll for completion
-        l_rc=p8_pfet_poll(i_target, address, i_domain);
+        l_rc=p8_pfet_poll(i_target, i_ex_number, address, i_domain);
         if(!l_rc.ok())
         {
             FAPI_ERR("PFET poll timeout turning on VCS");
-            // l_rc is set timeout xml based code in p8_pfet_poll
             break;
         }
 
@@ -798,11 +749,10 @@ p8_pfet_on( const fapi::Target& i_target,
         }
 
         // Poll for completion
-        l_rc=p8_pfet_poll(i_target, address, i_domain);
+        l_rc=p8_pfet_poll(i_target, i_ex_number, address, i_domain);
         if(!l_rc.ok())
         {
             FAPI_ERR("PFET poll timeout turning on VDD");
-            // l_rc is set timeout xml based code in p8_pfet_poll
             break;
         }
 
@@ -848,7 +798,7 @@ p8_pfet_off( const fapi::Target& i_target,
     uint64_t                    address;
     bool                        b_core = false;
     bool                        b_eco = false;
-    
+
     uint8_t                     core_vret_voff_value;
     uint8_t                     eco_vret_voff_value;
 
@@ -862,8 +812,8 @@ p8_pfet_off( const fapi::Target& i_target,
         {
             b_eco = true;
         }
-        
-        uint8_t  chipHasPFETPoweroffBug = 0; 
+
+        uint8_t  chipHasPFETPoweroffBug = 0;
         l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_PFET_POWEROFF_BUG,
                              &i_target,
                              chipHasPFETPoweroffBug);
@@ -926,11 +876,11 @@ p8_pfet_off( const fapi::Target& i_target,
                                 data.getDoubleWord(0));
 
 
-        // As we need to turn the PFETs off, ensure the stage pointers to the 
+        // As we need to turn the PFETs off, ensure the stage pointers to the
         // OFF value are in place (and not assumed).
         core_vret_voff_value = 0xBB;
         eco_vret_voff_value = 0xBB;
-        
+
         // -------------------------------------------------------------
         FAPI_DBG("\tSetting Core Voff Settings");
         e_rc |= data.insertFromRight(core_vret_voff_value, 0, 8);
@@ -967,11 +917,41 @@ p8_pfet_off( const fapi::Target& i_target,
             break;
         }
 
+        // Ensure that the chiplet is electrically fenced before shutting down
+        // the power
+        FAPI_INF("Force EX electrical fence ON before turning off power");
+        e_rc |= data.flushTo0();
+        e_rc |= data.setBit(27);
+        if (e_rc)
+        {
+            FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+            l_rc.setEcmdError(e_rc);
+            break;
+        }
+
+        address = EX_GP3_OR_0x100F0014 + (0x01000000 * i_ex_number);
+        l_rc=fapiPutScom( i_target, address, data);
+        if(!l_rc.ok())
+        {
+            FAPI_ERR("PutScom error 0x%08llX", address);
+            break;
+        }
+        
+        address = EX_GP3_0x100F0012 + (0x01000000 * i_ex_number);
+        l_rc=fapiGetScom( i_target, address, data);
+        if(!l_rc.ok())
+        {
+            FAPI_ERR("GetScom error 0x%08llX", address);
+            break;
+        }
+        FAPI_DBG("\tEX_GP3_0x%08llX with electrical fence set 0x%16llX",
+                                address,
+                                data.getDoubleWord(0));
 
         // VDD ---------------------
 
         FAPI_INF("Turning off VDD");
-        
+
         address = EX_PFET_CTL_REG_0x100F0106 + (0x01000000 * i_ex_number);
         l_rc=fapiGetScom( i_target, address, data );
         if(!l_rc.ok())
@@ -1019,18 +999,16 @@ p8_pfet_off( const fapi::Target& i_target,
         }
 
         // Poll for completion
-        l_rc=p8_pfet_poll(i_target, address, i_domain);
+        l_rc=p8_pfet_poll(i_target, i_ex_number, address, i_domain);
         if(!l_rc.ok())
         {
             FAPI_ERR("PFET poll timeout turning off VDD");
-            // l_rc is set timeout xml based code in p8_pfet_poll
             break;
         }
 
         FAPI_DBG("Put the controls back to a Nop state");
         e_rc |= data.clearBit(CORE_FORCE_STATE, CORE_FORCE_LENGTH);
         e_rc |= data.clearBit(ECO_FORCE_STATE, ECO_FORCE_LENGTH);
-//        e_rc |= data.insert((uint32_t)NONE, CORE_FORCE_STATE, CORE_FORCE_LENGTH, 30);
         if (e_rc)
         {
             FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
@@ -1104,18 +1082,16 @@ p8_pfet_off( const fapi::Target& i_target,
         }
 
         // Poll for completion
-        l_rc=p8_pfet_poll(i_target, address, i_domain);
+        l_rc=p8_pfet_poll(i_target, i_ex_number, address, i_domain);
         if(!l_rc.ok())
         {
             FAPI_ERR("PFET poll timeout turning on VCS");
-            // l_rc is set timeout xml based code in p8_pfet_poll
             break;
         }
 
         FAPI_DBG("\tPut the controls back to a Nop state");
         e_rc |= data.clearBit(CORE_FORCE_STATE, CORE_FORCE_LENGTH);
         e_rc |= data.clearBit(ECO_FORCE_STATE, ECO_FORCE_LENGTH);
- //       e_rc |= data.insert((uint32_t)NONE, ECO_FORCE_STATE, ECO_FORCE_LENGTH, 30);
         if (e_rc)
         {
             FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
@@ -1178,7 +1154,7 @@ p8_pfet_off_override( const fapi::Target& i_target,
             b_eco = true;
         }
 
-        uint8_t  chipHasPFETPoweroffBug = 0; 
+        uint8_t  chipHasPFETPoweroffBug = 0;
         l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_PFET_POWEROFF_BUG,
                              &i_target,
                              chipHasPFETPoweroffBug);
@@ -1302,10 +1278,6 @@ p8_pfet_off_override( const fapi::Target& i_target,
         {
             FAPI_DBG("\tClearing Core VDD regulation finger %d", core_regulation_finger);
             e_rc |= data.clearBit(core_regulation_finger);
-
-//            FAPI_DBG("\tSetting the select value to indicate OFF for ECO VDD");
-//            e_rc |= data.setBit(5);
-//            e_rc |= data.insert((uint32_t)0xB, CORE_OVERRIDE_SEL, CORE_OVERRIDE_SEL_LENGTH, 28);
         }
 
         if (e_rc)
@@ -1315,25 +1287,10 @@ p8_pfet_off_override( const fapi::Target& i_target,
             break;
         }
 
-//        FAPI_DBG("\tEX_PFET_CTL_REG_0x%08llX after  0x%16llX",
-//                                    address,
-//                                    data.getDoubleWord(0));
-//
-//        l_rc=fapiPutScom( i_target, address, data );
-//        if(!l_rc.ok())
-//        {
-//            FAPI_ERR("PutScom error 0x%08llX", address);
-//            break;
-//        }
-//
         if (b_eco)
         {
             FAPI_DBG("\tClearing ECO regulation VDD finger %d", eco_regulation_finger);
             e_rc |= data.clearBit(eco_regulation_finger);
-
-//            FAPI_DBG("\tSetting the select value to indicate OFF for ECO VDD");
-//            e_rc |= data.setBit(7);
-//            e_rc |= data.insert((uint32_t)0xB, ECO_OVERRIDE_SEL, ECO_OVERRIDE_SEL_LENGTH, 28);
         }
 
         if (e_rc)
@@ -1407,10 +1364,6 @@ p8_pfet_off_override( const fapi::Target& i_target,
         {
             FAPI_DBG("\tClearing Core VCS regulation finger %d", core_regulation_finger);
             e_rc |= data.clearBit(core_regulation_finger);
-
-//            FAPI_DBG("\tSetting the select value to indicate OFF for ECO VCS");
-//            e_rc |= data.setBit(5);
-//            e_rc |= data.insert((uint32_t)0xB, CORE_OVERRIDE_SEL, CORE_OVERRIDE_SEL_LENGTH, 28);
         }
 
         if (e_rc)
@@ -1420,25 +1373,10 @@ p8_pfet_off_override( const fapi::Target& i_target,
             break;
         }
 
-//        FAPI_DBG("\tEX_PFET_CTL_REG_0x%08llX after  0x%16llX",
-//                                    address,
-//                                    data.getDoubleWord(0));
-//
-//        l_rc=fapiPutScom( i_target, address, data );
-//        if(!l_rc.ok())
-//        {
-//            FAPI_ERR("PutScom error 0x%08llX", address);
-//            break;
-//        }
-
         if (b_eco)
         {
             FAPI_DBG("\tClearing ECO regulation VCS finger %d", eco_regulation_finger);
             e_rc |= data.clearBit(eco_regulation_finger);
-
-//            FAPI_DBG("\tSetting the select value to indicate OFF for ECO VCS");
-//            e_rc |= data.setBit(7);
-//            e_rc |= data.insert((uint32_t)0xB, ECO_OVERRIDE_SEL, ECO_OVERRIDE_SEL_LENGTH, 28);
         }
 
         if (e_rc)
@@ -1486,12 +1424,13 @@ p8_pfet_off_override( const fapi::Target& i_target,
 /// \retval RC_PROCPM_PFET_TIMEOUT otherwise
 fapi::ReturnCode
 p8_pfet_poll(   const fapi::Target& i_target,
+                uint8_t             i_ex_number,
                 uint64_t            i_address,
                 pfet_dom_t          i_domain)
 {
     fapi::ReturnCode            l_rc;
     ecmdDataBufferBase          data(64);
-    uint32_t                    i;
+    uint32_t                    i = 0;
     bool                        b_core_idle = false;
     bool                        b_eco_idle = false;
     char                        core_state_buffer[32];
@@ -1505,15 +1444,6 @@ p8_pfet_poll(   const fapi::Target& i_target,
         FAPI_DBG("\tPoll for FSM to go back to idle");
         for (i=0; i<=PFET_MAX_IDLE_POLLS; i++)
         {
-
-            // Delay between polls
-            l_rc=fapiDelay( PFET_POLL_WAIT, PFET_POLL_WAIT_SIM );
-            if(!l_rc.ok())
-            {
-                FAPI_ERR("fapiDelay error");
-                break;
-            }
-
             l_rc=fapiGetScom(i_target, i_address, data );
             if(!l_rc.ok())
             {
@@ -1538,8 +1468,10 @@ p8_pfet_poll(   const fapi::Target& i_target,
                 }
             }
 
-            // Exit the polling loop if both are idle
-            if (b_core_idle && b_eco_idle)
+            // Exit the polling loop if selected are idle
+            if ( ((i_domain == BOTH) && b_core_idle && b_eco_idle) ||
+                 ((i_domain == CORE) && b_core_idle) ||
+                 ((i_domain == ECO) && b_eco_idle) )
             {
                 FAPI_DBG("\tPoll complete");
 
@@ -1566,31 +1498,42 @@ p8_pfet_poll(   const fapi::Target& i_target,
                 }
 
                 FAPI_DBG("\tCore State: %s; ECO State: %s", core_state_buffer, eco_state_buffer);
-
                 break;
             }
 
-
+            // Delay between polls
+            l_rc=fapiDelay( PFET_POLL_WAIT, PFET_POLL_WAIT_SIM );
+            if(!l_rc.ok())
+            {
+                FAPI_ERR("fapiDelay error");
+                break;
+            }
         }
-        // If both rails are not idle, error out
-        if (!(b_core_idle && b_eco_idle))
+
+        if (l_rc)
         {
+            // Error in for loop
+            break;
+        }
+
+        if (i >= PFET_MAX_IDLE_POLLS)
+        {
+            // Poll timeout
             FAPI_ERR("\tERROR: Polling timeout ");
             const uint64_t& ADDRESS = i_address;
             const uint64_t& PFETCONTROLVALUE = data.getDoubleWord(0);
             const uint64_t& DOMAIN = i_domain;
+            const fapi::Target & PROC_CHIP_IN_ERROR = i_target;
+            const uint8_t & EX_NUMBER_IN_ERROR = i_ex_number;
             FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFETLIB_TIMEOUT);
             break;
         }
-
-
-
     } while(0);
     return l_rc;
 }
 
 //------------------------------------------------------------------------------
-/// pfet_read_state_delay
+/// p8_pfet_read_state
 ///
 /// \param[in]  i_target     Chip target
 /// \param[in]  i_address    Address to poll for PFET State
@@ -1676,6 +1619,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 
     ecmdDataBufferBase          pmgp0(64);
     const uint32_t              PM_DISABLE_BIT = 0;
+    const uint32_t              PFET_WORKAROUND_MARK_PMGP0_BIT = 47;
 
     ecmdDataBufferBase          pcbspm_mode(64);
     const uint32_t              TIMER_MODE_BIT = 7;
@@ -1696,16 +1640,16 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 
     ecmdDataBufferBase          core_voff_vret(64);
     ecmdDataBufferBase          eco_voff_vret(64);
-    
-     
-    
+
+
+
 
     FAPI_INF("Beginning FET work-around for IVRM FSM");
     do
     {
 
-        // ---------------------------------------------------------------------  
-              
+        // ---------------------------------------------------------------------
+
         // Determine if Pstates have been previously enabled.  If so, the
         // work-around was previously run and cannot be run again.
         address = EX_PCBSPM_MODE_REG_0x100F0156 + 0x01000000*i_ex_number;
@@ -1721,8 +1665,55 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
         {
             FAPI_INF("Skipping PFET work-around as Pstate have already been enabled");
             break;
-        }     
-            
+        }
+
+        // Adding another layer of protection.
+        // Set PMGP0(47) [a spare bit in chips that have this bug]
+        // to indicated that this work-around has already been run
+        // to avoid contaminating the PState mechanism in the event
+        // that it was not first disabled.
+
+        address = EX_PMGP0_0x100F0100 + (0x01000000 * i_ex_number);
+        l_rc=fapiGetScom( i_target, address, data );
+        if(!l_rc.ok())
+        {
+            FAPI_ERR("GetScom error 0x%08llX", address);
+            break;
+        }
+        if (data.isBitSet(PFET_WORKAROUND_MARK_PMGP0_BIT))
+        {
+            FAPI_INF("Skipping PFET work-around as iVRM/FFET work-around has previously run on %s EX:%d",
+                            i_target.toEcmdString(),
+                            i_ex_number);
+            break;
+
+        }
+        else
+        {
+            e_rc |= data.flushTo0();
+            e_rc |= data.setBit(PFET_WORKAROUND_MARK_PMGP0_BIT);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+                l_rc.setEcmdError(e_rc);
+                break;
+            }
+
+            address = EX_PMGP0_OR_0x100F0102 + (0x01000000 * i_ex_number);
+            l_rc=fapiPutScom( i_target, address, data );
+            if(!l_rc.ok())
+            {
+                FAPI_ERR("PutScom error 0x%08llX", address);
+                break;
+            }
+
+             FAPI_INF("Setting flag that PFET work-around cannot be run again on %s EX:%d",
+                            i_target.toEcmdString(),
+                            i_ex_number);
+            // This can set the PMGP0 snitch bit (PMErr(12)).  It is cleared,
+            // though, in p8_pfet_init.C (the caller)
+        }
+
         address = EX_GP3_0x100F0012 + 0x01000000*i_ex_number;
 
         // Save the setting for later restoration
@@ -1766,9 +1757,9 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 FAPI_ERR("PutScom error 0x%08llX", address);
                 break;
             }
-            
+
             // ----------------------
-            // Read back for debug            
+            // Read back for debug
             address = EX_GP3_0x100F0012 + 0x01000000*i_ex_number;
             l_rc=fapiGetScom( i_target, address, data );
             if(!l_rc.ok())
@@ -1777,7 +1768,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 break;
             }
             FAPI_DBG("\tGP3 value: 0x%016llX", data.getDoubleWord(0));
-            
+
             // ----------------------
             FAPI_INF("Set Slave Winkle fence");
             e_rc |= data.flushTo0();
@@ -1788,7 +1779,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 l_rc.setEcmdError(e_rc);
                 break;
             }
-            
+
             // Set the bit
             address = EX_PMGP0_OR_0x100F0102 + 0x01000000*i_ex_number;
             l_rc=fapiPutScom( i_target, address, data );
@@ -1799,7 +1790,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
             }
 
             // ----------------------
-            // Read back for debug            
+            // Read back for debug
             address = EX_PMGP0_0x100F0100 + 0x01000000*i_ex_number;
             l_rc=fapiGetScom( i_target, address, data );
             if(!l_rc.ok())
@@ -1808,7 +1799,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 break;
             }
             FAPI_DBG("\tPMGP0 value: 0x%016llX", data.getDoubleWord(0));
-                      
+
             FAPI_INF("Temporarily enable the chiplet");
             e_rc |= data.flushTo0();
             e_rc |= data.setBit(0);
@@ -1827,7 +1818,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 FAPI_ERR("PutScom error 0x%08llX", address);
                 break;
             }
-            
+
             // ----------------------
             // Read back for debug
             address = EX_GP3_OR_0x100F0014 + 0x01000000*i_ex_number;
@@ -1838,7 +1829,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 break;
             }
             FAPI_DBG("\tGP3 value: 0x%016llX", data.getDoubleWord(0));
-            
+
             address = EX_PMGP0_0x100F0100 + 0x01000000*i_ex_number;
             l_rc=fapiGetScom( i_target, address, data );
             if(!l_rc.ok())
@@ -1847,7 +1838,7 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 break;
             }
             FAPI_DBG("\tPMGP0 value: 0x%016llX", data.getDoubleWord(0));
-            // ----------------------                      
+            // ----------------------
         }
 
         // ---------------------------------------------------------------------
@@ -2177,11 +2168,10 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
                 break;
             }
 
-            e_rc |= fapiDelay(10000, 1000);
-            if (e_rc)
+            l_rc = fapiDelay(10000, 1000);
+            if (l_rc)
             {
-                FAPI_ERR("Error (0x%x) from fapiDelay", e_rc);
-                l_rc.setEcmdError(e_rc);
+                FAPI_ERR("Error from fapiDelay");
                 break;
             }
 
@@ -2191,11 +2181,9 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 
         if (i >=  BABYSTEPPER_WINKLE_TIMEOUT)
         {
-            FAPI_DBG("\tBaby Stepper Timeout %d", i_ex_number);
-            //const uint64_t& EX = i_ex_number;
-            //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFETLIB_BABYSTEPPER_TIMEOUT);
-            //break;
-
+            // This is a workaround for early chip EC levels, just trace and do
+            // not return error
+            FAPI_ERR("\tBaby Stepper Timeout %d", i_ex_number);
         }
 
         // ---------------------------------------------------------------------
@@ -2235,14 +2223,15 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 
             i++;
 
+            // No delay needed, hardware reacton should be nearly immediate and
+            // this is a workaround for early chip EC levels
+
         } while (data.isBitSet(GOTO_WAKEUP_BIT) &&  i < BABYSTEPPER_WAKEUP_TIMEOUT);
         if (i >=  BABYSTEPPER_WAKEUP_TIMEOUT)
         {
-            FAPI_DBG("\tBaby Stepper Timeout on Wakeup %d", i_ex_number);
-            //const uint64_t& EX = i_ex_number;
-            //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFETLIB_BABYSTEPPER_WAKEUP_TIMEOUT);
-            //break;
-
+            // This is a workaround for early chip EC levels, just trace and do
+            // not return error
+            FAPI_ERR("\tBaby Stepper Timeout on Wakeup %d", i_ex_number);
         }
 
 
@@ -2379,4 +2368,3 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 }
 
 } //end extern
-

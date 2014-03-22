@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pfet_errors.xml,v 1.4 2013/05/23 18:44:19 stillgs Exp $ -->
+<!-- $Id: p8_pfet_errors.xml,v 1.5 2014/02/25 04:07:23 stillgs Exp $ -->
 <!-- Error definitions for p8_pfet_init and p8_pfet_lib procedures -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -29,6 +29,10 @@
     <description>Invalid domain value passed to p8_pfet_control.</description>
     <ffdc>EX</ffdc>
     <ffdc>DOMAIN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -37,6 +41,10 @@
     <ffdc>EX</ffdc>
     <ffdc>DOMAIN</ffdc>
     <ffdc>OPERATION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -56,30 +64,35 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PMPROC_PFETLIB_CODE_FAULT</rc>
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <ffdc>OPERATION</ffdc>
-    <description>Unreachable code point in p8_pfet_control.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
     <rc>RC_PROCPM_PFETLIB_TIMEOUT</rc>
-    <description>PFET sequencer timed out in p8_pfet_control.</description>
+    <description>
+        PFET sequencer timed out in p8_pfet_control.
+        Bad EX Chiplet
+    </description>
     <ffdc>ADDRESS</ffdc>
     <ffdc>PFETCONTROLVALUE</ffdc>
     <ffdc>DOMAIN</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PFETLIB_BABYSTEPPER_TIMEOUT</rc>
-    <description>IVRM babystepper timed out in p8_pfet_control.</description>
-    <ffdc>EX</ffdc>   
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PFETLIB_BABYSTEPPER_WAKEUP_TIMEOUT</rc>
-    <description>IVRM babystepper timed out waking up in p8_pfet_control.</description>
-    <ffdc>EX</ffdc>   
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
   </hwpError>
 </hwpErrors>

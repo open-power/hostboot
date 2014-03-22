@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.H,v 1.5 2014/02/10 02:57:57 stillgs Exp $
+// $Id: proc_extract_sbe_rc.H,v 1.7 2014/03/18 14:09:28 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -29,8 +29,7 @@
 // *! *** IBM Confidential ***
 // *|
 // *! TITLE       : proc_extract_sbe_rc.H
-// *! DESCRIPTION : Create a return code for an SBE error. Will NEVER return
-// *!               with SUCCESS.
+// *! DESCRIPTION : Create a return code for an SBE/SLW error.
 // *!
 // *! OWNER NAME  : Johannes Koesters       Email: koesters@de.ibm.com
 // *!
@@ -42,16 +41,11 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi.H>
-#include "p8_scom_addresses.H"
+#include <p8_scom_addresses.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// Enum definitions
 //------------------------------------------------------------------------------
 enum por_engine_t {
   SBE = PORE_SBE_0x000E0000,
@@ -72,14 +66,11 @@ extern "C"
 {
 
 /**
- * @brief Create a return code based off the current SBE RC.
+ * @brief Create a return code based off the current SBE/SLW RC.
  *
- * @param[in] i_target         Reference to processor target containing the SBE
- *
+ * @param[in] i_target         Reference to processor target containing the SBE/SLW engine
  * @param[in] i_pSEEPROM       Pointer to a memory-mapped SEEPROM image (or NULL) 
- *
  * @param[in] i_engine         The POR engine type (SBE/SLW)
- *
  * @return ReturnCode          The error code the SBE hit, or the error hit
  *                             while trying to get the error code
  */
