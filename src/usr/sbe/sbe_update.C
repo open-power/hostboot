@@ -713,7 +713,6 @@ namespace SBE
                 else
                 {
                     // Look for a specific return code
-
                     if ( static_cast<uint32_t>(rc_fapi) ==
                          fapi::RC_PROC_XIPC_OVERFLOW_BEFORE_REACHING_MINIMUM_EXS
                        )
@@ -732,9 +731,24 @@ namespace SBE
                               TARGETING::get_huid(i_target),
                               coreMask, procIOMask, coreCount);
 
-                        // Setup for next loop - trim original core mask
-                        procIOMask = trimBitMask(coreMask,
-                                                 --coreCount);
+                        // Setup for next loop - update coreMask
+                        err = selectBestCores(i_target,
+                                              --coreCount,
+                                              procIOMask);
+
+                        if ( err )
+                        {
+                            TRACFCOMP(g_trac_sbe,
+                                      ERR_MRK"procCustomizeSbeImg() - "
+                                      "selectBestCores() failed rc=0x%X. "
+                                      "coreCount=0x%.8X. HUID=0x%X. Aborting "
+                                      "Customization of SBE Image",
+                                      err->reasonCode(), coreCount,
+                                      TARGETING::get_huid(i_target));
+
+                            // break from while loop
+                            break;
+                        }
 
                         TRACFCOMP( g_trac_sbe, "procCustomizeSbeImg(): for "
                                    "next loop: procIOMask=0x%.8X, coreMask="
@@ -879,11 +893,6 @@ namespace SBE
                 {
                     o_exMask |= (0x00008000 >> chipUnit);
                     exCount++;
-
-                    if(exCount >= i_maxExs)
-                    {
-                        break;
-                    }
                 }
                 else
                 {
@@ -915,13 +924,23 @@ namespace SBE
                 }
             }   // end ex target loop
 
-            if(exCount >= i_maxExs)
+            if(exCount == i_maxExs)
             {
-                //We've found enough, break out of function
+                //We've found the exact amount, break out of function
                 break;
             }
+
+            else if(exCount > i_maxExs)
+            {
+                //We have too many, so need to trim
+                o_exMask = trimBitMask(o_exMask,
+                                       i_maxExs);
+                break;
+            }
+
             else
             {
+                // We need to add 'other' cores
                 TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: non-functional "
                            "cores needed for bit mask: exCount=%d, i_maxExs=%d,"
                            " o_exMask=0x%.8X, manGuardExs=0x%.8X, "
