@@ -92,7 +92,7 @@ ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${PAYLOAD_ECC_IMAGE}
 
 cp_hbfiles: .SPECTARG
-	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
+	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
 	echo "00000000001800000000000008000000000000000007EF80" | xxd -r -ps - sbe.header
 	# add version header w/ HBB sha hash
 	echo -en VERSION\\0 > ${BASE_SHA_IMAGE}
