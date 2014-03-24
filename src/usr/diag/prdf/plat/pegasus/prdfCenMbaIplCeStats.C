@@ -116,7 +116,11 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
 
             // Check if analysis is banned.
             HalfRankKey banKey = { i_stopRank, portSlct };
-            if ( iv_bannedAnalysis[banKey] )
+
+            // Check if the rank has already been banned. Note that [] will
+            // create an entry if one does not exist, so used find() instead to
+            // check for existence in the map.
+            if ( iv_bannedAnalysis.end() != iv_bannedAnalysis.find(banKey) )
                 continue;
 
             // Update iv_ceSymbols with the new symbol data.
@@ -125,17 +129,17 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
 
             // Increment the soft CEs per DRAM.
             DramKey dramKey = { i_stopRank, dram, portSlct };
-            iv_dramMap[dramKey]++;
+            iv_dramMap[dramKey] += symData[i].count;
 
             // Increment the soft CEs per half rank.
             HalfRankKey rankKey = { i_stopRank, portSlct };
-            iv_rankMap[rankKey]++;
+            iv_rankMap[rankKey] += symData[i].count;
 
             // In case of dimm select, rank select does not matter
             CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_MBA );
             // Increment the soft CEs per half dimm select.
             HalfRankKey dsKey = { dimmRank, portSlct };
-            iv_dsMap[dsKey]++;
+            iv_dsMap[dsKey] += symData[i].count;
         }
 
     } while (0);

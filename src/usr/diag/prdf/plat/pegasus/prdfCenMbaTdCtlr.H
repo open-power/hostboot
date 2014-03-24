@@ -112,6 +112,13 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t handleMPE( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
+     * @brief  Handle CE ETE during MNFG CE analysis.
+     * @param  io_sc Service data collector.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    int32_t handleMnfgCeEte( STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
      * @brief  Sends a message to MDIA that a maintenance command has completed.
      * @note   If for some reason PRD needed to do some targeted diagnotics and
      *         on a rank that was not the last rank behind the MBA, this

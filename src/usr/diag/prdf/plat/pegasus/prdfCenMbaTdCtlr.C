@@ -377,12 +377,10 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // During MNFG IPL CE, we will get this condition.
             // During SF read, all CE are reported as Hard CE.
             // So we will only check for Hard CE threshold.
-
-            // Start TPS Phase 1
-            o_rc = startTpsPhase1( io_sc );
+            o_rc = handleMnfgCeEte( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"startTpsPhase1() failed" );
+                PRDF_ERR( PRDF_FUNC"handleMnfgCeEte() failed" );
                 break;
             }
         }
@@ -1247,6 +1245,55 @@ int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"startVcmPhase1() failed" );
+            break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t CenMbaTdCtlr::handleMnfgCeEte( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::handleMnfgCeEte] "
+
+    using namespace CalloutUtil;
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        MemUtils::MaintSymbols symData; CenSymbol junk;
+        o_rc = MemUtils::collectCeStats( iv_mbaChip, iv_rank, symData, junk);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MemUtils::collectCeStats() failed. MBA:0x%08x",
+                      iv_mbaChip->GetId() );
+            break;
+        }
+
+        // As HW threshold is set as 1 in mdia, we should only get one symbol
+        // here. If there is no symbol, that is an HW error.
+        if( 0 == symData.size() )
+        {
+            PRDF_ERR( PRDF_FUNC" symData size is 0. MBA:0x%08x",
+                      iv_mbaChip->GetId() );
+            o_rc = FAIL; break;
+        }
+
+        // Callout the symbol.
+        MemoryMru memmru ( iv_mbaTrgt, iv_rank, symData[0].symbol );
+        io_sc.service_data->SetCallout( memmru );
+
+        // Start TPS Phase 1
+        o_rc = startTpsPhase1( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"startTpsPhase1() failed" );
             break;
         }
 
