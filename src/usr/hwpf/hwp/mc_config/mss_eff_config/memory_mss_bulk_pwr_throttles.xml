@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.3 2014/01/24 21:56:55 pardeik Exp $ -->
+<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.4 2014/03/07 00:25:55 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_bulk_pwr_throttles.C -->
 <!-- // *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com -->
 <!-- // *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com -->
@@ -29,17 +29,26 @@
 <!-- Original Source for RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER</rc>
-    <description>Unable to find throttle setting that has DIMM power underneath the limit.  Callout Firmware.</description>
+    <description>Unable to find throttle setting that has DIMM power underneath the limit.</description>
   <ffdc>PAIR_POWER</ffdc>
   <ffdc>PAIR_WATT_TARGET</ffdc>
   <callout>
-    <target>MEMBUF_CHIP</target>
+    <childTargets>
+      <parent>MEM_MBA</parent>
+      <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
     <priority>MEDIUM</priority>
   </callout>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
+  <deconfigure>
+    <childTargets>
+      <parent>MEM_MBA</parent>
+      <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+  </deconfigure>
 </hwpError>
 
 </hwpErrors>

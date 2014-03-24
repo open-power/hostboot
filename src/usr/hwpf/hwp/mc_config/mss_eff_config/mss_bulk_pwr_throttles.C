@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.19 2014/01/24 21:57:28 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.21 2014/03/10 16:31:45 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -71,6 +71,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.21  | jdsloat  |10-MAR-14| Edited comments
+//   1.20  | pardeik  |06-MAR-14| RAS update for HWP error
+//         |          |         |   (changed the callout from centaur to mba)
 //   1.19  | pardeik  |24-JAN-14| RAS update for HWP error
 //   1.18  | pardeik  |23-JAN-14| gerrit review updates to break out of for loop
 //   1.17  | pardeik  |21-JAN-14| updates to prevent a negative power limit
@@ -434,7 +437,7 @@ extern "C" {
 	    FAPI_ERR("Not enough available memory power [Channel Pair Power %4.2f/%d cW]", channel_pair_power, channel_pair_watt_target);
 	    const float & PAIR_POWER = channel_pair_power;
 	    const uint32_t & PAIR_WATT_TARGET = channel_pair_watt_target;
-	    const fapi::Target & MEMBUF_CHIP = target_chip;
+	    const fapi::Target & MEM_MBA = i_target_mba;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER);
 	    return rc;
 	}
