@@ -1596,8 +1596,17 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
     const uint16_t OUTER_START = (OUTER_START_STEP << 8) | OUTER_START_SUBSTEP;
     const uint16_t OUTER_STOP = (OUTER_STOP_STEP << 8) | OUTER_STOP_SUBSTEP;
 
+    // TODO RTC 101925. PRD enables FIRs in Istep 11. If Istep 12 deconfigures
+    // HW that is asserting FIRs and performs the Inner Reconfig Loop then PRD
+    // ends up logging errors when it sees FIR bits for the deconfigured HW.
+    // The fix is to dispense with the Inner Reconfig Loop, if the code loops
+    // back to Istep 10 then everything is cleaned up. This issue will be
+    // resolved with RTC 101925
+    const bool INNER_LOOP_ENABLED = false;
+
     // If current step is within major step 12
-    if ((current >= INNER_START) && (current <= INNER_STOP))
+    if ( INNER_LOOP_ENABLED &&
+         ((current >= INNER_START) && (current <= INNER_STOP)) )
     {
         doReconfigure = true;
         // Loop back to 12.1
