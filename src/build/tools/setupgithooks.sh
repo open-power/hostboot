@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -22,37 +22,44 @@
 #
 # IBM_PROLOG_END_TAG
 
-#   each developer runs this from the git_repo base dir.  
-#   will copy the scripts into .git/hooks/ dir and make them runnable
+# Each developer runs this from the git_repo base dir, where it will copy the
+# needed scripts into .git/hooks/ directory and make them executable.
 
-ROOTDIR=.
-TOOLSDIR=$ROOTDIR/src/build/tools
-preCommitScript=pre-commit-prologs
-addCopyrightScript=addCopyright.pl
+# Setup some global variables
+HOOKSDIR=$HOSTBOOTROOT/.git/hooks
+TOOLSDIR=$HOSTBOOTROOT/src/build/tools
+HB_SRV=hostboot.gerrit
 
-if [ -f "$TOOLSDIR/$preCommitScript" ]
+if [ -d $HOOKSDIR ]
 then
-    if [ -d ".git/hooks" ]
+
+    # Get hooks from Gerrit, if needed.
+    if [ ! -f $HOOKSDIR/commit-msg ]
     then
-        echo "copy files into .git/hooks dir..."
-        cp -v $ROOTDIR/src/build/tools/pre-commit          $ROOTDIR/.git/hooks/.
-        cp -v $ROOTDIR/src/build/tools/pre-commit          $ROOTDIR/.git/hooks/pre-applypatch
-        cp -v $ROOTDIR/src/build/tools/post-commit         $ROOTDIR/.git/hooks/.
-        cp -v $ROOTDIR/src/build/tools/$preCommitScript    $ROOTDIR/.git/hooks/.
-        cp -v $ROOTDIR/src/build/tools/$addCopyrightScript $ROOTDIR/.git/hooks/.
-        
-        chmod u+x $ROOTDIR/.git/hooks/pre-commit
-        chmod u+x $ROOTDIR/.git/hooks/pre-applypatch
-        chmod u+x $ROOTDIR/.git/hooks/post-commit
-        chmod u+x $ROOTDIR/.git/hooks/$preCommitScript
-        chmod u+x $ROOTDIR/.git/hooks/addCopyright.pl
-        
+        echo "Copying Gerrit hooks..."
+        scp -p -q $HB_SRV:hooks/commit-msg $HOOKSDIR
+    fi
+
+    # Copy custom pre/post commit hooks from tools directory.
+    if [ -f "$TOOLSDIR/pre-commit" -a -f "$TOOLSDIR/post-commit" ]
+    then
+        echo "Copying pre/post commit hooks..."
+
+        cp $TOOLSDIR/pre-commit  $HOOKSDIR/
+        cp $TOOLSDIR/pre-commit  $HOOKSDIR/pre-applypatch
+        cp $TOOLSDIR/post-commit $HOOKSDIR/
+
+        chmod u+x $HOOKSDIR/pre-commit
+        chmod u+x $HOOKSDIR/pre-applypatch
+        chmod u+x $HOOKSDIR/post-commit
+
     else
-        echo "Does not appear that the current working directory is the root of a git repository\n"
+        echo "Cannot find or access pre or post commit scripts"
         exit 1
     fi
+
 else
-    echo "Cannot find or access $preCommitScript\n"
+    echo "Cannot find or access .git/hooks directory"
     exit 1
 fi
 
