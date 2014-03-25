@@ -194,7 +194,6 @@ push @systemAttr,
         $reqPol->{'cdimm_spare_i2c_temp_sensor_enable'},
     "PM_SYSTEM_IVRMS_ENABLED", $reqPol->{'pm_system_ivrms_enabled'},
     "PM_SYSTEM_IVRM_VPD_MIN_LEVEL", $reqPol->{'pm_system_ivrm_vpd_min_level'},
-    "MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", $reqPol->{'mba_cacheline_interleave_mode_control'},
     "MRW_ENHANCED_GROUPING_NO_MIRRORING", $reqPol->{'mcs_enhanced_grouping_no_mirroring'},
     "MRW_STRICT_MBA_PLUG_RULE_CHECKING", $reqPol->{'strict_mba_plug_rule_checking'},
     "MNFG_DMI_MIN_EYE_WIDTH", $reqPol->{'mnfg-dmi-min-eye-width'},
@@ -203,6 +202,19 @@ push @systemAttr,
     "MNFG_ABUS_MIN_EYE_HEIGHT", $reqPol->{'mnfg-abus-min-eye-height'},
     "MNFG_XBUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-xbus-min-eye-width'},
 ];
+
+if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')
+{
+   push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 1];
+}
+elsif ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'requested')
+{
+   push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 2];
+}
+else
+{
+   push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 0];
+}
 
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
