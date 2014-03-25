@@ -80,6 +80,14 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
         <default>0x1900</default>
     </attribute>
     <attribute>
+        <id>MIN_FREQ_MHZ</id>
+        <default>0x7EC</default>
+    </attribute>
+    <attribute>
+        <id>NOMINAL_FREQ_MHZ</id>
+        <default>0x00000F74</default>
+    </attribute>
+    <attribute>
         <id>FREQ_PB</id>
         <default>0x960</default>
     </attribute>
@@ -289,6 +297,10 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PAYLOAD_KIND</id>
         <default>NONE</default>
+    </attribute>
+    <attribute>
+        <id>MAX_PROC_CHIPS_PER_NODE</id>
+        <default>8</default>
     </attribute>
     <attribute><id>FREQ_CORE_MAX</id>
         <default>4000</default>
@@ -17276,92 +17288,6 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
 </targetInstance>
 
 <!-- Centaur n0p63 : end -->
-
-<!-- Target used for FSI wrap-back testing -->
-<targetInstance>
-    <id>sys0node0proc0wrap</id>
-    <type>chip-processor-venice</type>
-    <attribute><id>HUID</id><default>0x00070099</default></attribute>
-    <attribute><id>SCOM_SWITCHES</id>
-        <default>
-            <field><id>useFsiScom</id><value>1</value></field>
-            <field><id>useXscom</id><value>0</value></field>
-            <field><id>useInbandScom</id><value>0</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-9</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-9</default>
-    </attribute>
-
-    <!--  FSI is connected via wrapback to itself over MFSI-0 -->
-    <attribute>
-        <id>FSI_MASTER_CHIP</id>
-        <default>physical:sys-0/node-0/proc-0</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_TYPE</id>
-        <default>MFSI</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_PORT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FSI_SLAVE_CASCADE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FSI_OPTION_FLAGS</id>
-        <default>
-            <field><id>flipPort</id><value>0</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-
-    <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0003FFE000000000</default>
-    </attribute>
-    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80000000</default>
-    </attribute>
-    <attribute><id>INTP_BASE_ADDR</id>
-        <default>0x0003FFFF80000000</default>
-    </attribute>
-    <attribute><id>PHB_BASE_ADDRS</id>
-        <default>
-            0x0003FFFE40000000,0x0003FFFE40100000,
-            0x0003FFFE40200000,0x0003FFFE40300000
-        </default>
-    </attribute>
-    <attribute><id>PCI_BASE_ADDRS_64</id>
-        <default>
-            0x0003D00000000000,0x0003D01000000000,
-            0x0003D02000000000,0x0003D03000000000
-        </default>
-    </attribute>
-    <attribute><id>PCI_BASE_ADDRS_32</id>
-        <default>
-            0x0003FF8000000000,0x0003FF8080000000,
-            0x0003FF8100000000,0x0003FF8180000000
-        </default>
-    </attribute>
-    <attribute><id>RNG_BASE_ADDR</id>
-        <default>0x0003FFFF40000000</default>
-    </attribute>
-    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
-        <default>0x0003E00000000000</default>
-    </attribute>
-    <attribute><id>PROC_DCM_INSTALLED</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
 
 <!-- DIMMS
      id/physical is sys-0/node-0/dimm-[d]
