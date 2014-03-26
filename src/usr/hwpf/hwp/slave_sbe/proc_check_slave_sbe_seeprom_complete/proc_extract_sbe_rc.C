@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_extract_sbe_rc.C,v 1.16 2014/03/18 14:09:27 jmcgill Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.17 2014/03/24 20:34:44 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -792,20 +792,30 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
         // return soft error with lowest priority
         if ((i_engine == SBE) && (soft_err != eNO_ERROR))
         {
-            if ((soft_err == eSOFT_ERR_PNOR) || (soft_err == eSOFT_ERR_BOTH))
-            {
-                FAPI_ERR("Recoverable ECC Error on PNOR Access");
-            }
-            if ((soft_err == eSOFT_ERR_I2CM) || (soft_err == eSOFT_ERR_BOTH))
+            const fapi::Target & CHIP_IN_ERROR = i_target;
+            if (soft_err == eSOFT_ERR_I2CM)
             {
                 FAPI_ERR("Recoverable ECC Error on I2C Access");
+                const ecmdDataBufferBase & I2C_ECCB_STATUS = i2cm_eccb_status;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_I2C_SBE);
+                break;
             }
-            const fapi::Target & CHIP_IN_ERROR = i_target;
-            const soft_error_t & SOFT_ERR_STATUS = soft_err;
-            const ecmdDataBufferBase & PNOR_ECCB_STATUS = pnor_eccb_status;
-            const ecmdDataBufferBase & I2C_ECCB_STATUS = i2cm_eccb_status;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_SBE);
-            break;
+            else if (soft_err == eSOFT_ERR_PNOR)
+            {
+                FAPI_ERR("Recoverable ECC Error on PNOR Access");
+                const ecmdDataBufferBase & PNOR_ECCB_STATUS = pnor_eccb_status;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_PNOR_SBE);
+                break;
+            }
+            else // (soft_err == eSOFT_ERR_BOTH)
+            {
+                FAPI_ERR("Recoverable ECC Error on PNOR Access");
+                FAPI_ERR("Recoverable ECC Error on I2C Access");
+                const ecmdDataBufferBase & PNOR_ECCB_STATUS = pnor_eccb_status;
+                const ecmdDataBufferBase & I2C_ECCB_STATUS = i2cm_eccb_status;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_I2C_AND_PNOR_SBE);
+                break;
+            }
         }
 
     } while(0);

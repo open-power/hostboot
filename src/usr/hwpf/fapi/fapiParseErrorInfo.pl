@@ -21,7 +21,7 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseErrorInfo.pl,v 1.27 2014/03/20 20:05:08 mjjones Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.28 2014/03/26 21:31:21 mjjones Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -66,6 +66,7 @@
 #                  whs       03/11/14  Add FW traces to error logs
 #                  mjjones   03/20/14  Fix register FFDC collection bug when
 #                                      collecting chiplet registers
+#                  mjjones   03/26/14  Generate HWP error on unknown SBE error
 #
 # End Change Log *****************************************************
 #
@@ -1198,8 +1199,7 @@ print EIFILE "\n\n#endif\n";
 # Print end of file information to fapiSetSbeError.H
 #------------------------------------------------------------------------------
 print SBFILE "    default:\\\n";
-print SBFILE "        RC.setFapiError(fapi::FAPI_RC_UNRECOGNIZED_SBE_ERROR);\\\n";
-print SBFILE "        RC.addEIFfdc(0, &ERRVAL, sizeof(ERRVAL));\\\n";
+print SBFILE "        FAPI_SET_HWP_ERROR(RC, RC_SBE_UNKNOWN_ERROR);\\\n";
 print SBFILE "        break;\\\n";
 print SBFILE "}\n\n";
 print SBFILE "#endif\n";

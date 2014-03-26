@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.12 2014/03/18 14:11:37 jmcgill Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.14 2014/03/24 20:34:12 jmcgill Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -318,12 +318,6 @@
       <target>CHIP_IN_ERROR</target>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -347,12 +341,6 @@
       <target>CHIP_IN_ERROR</target>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -788,14 +776,55 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_I2C_SBE</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      ECCB indicates correctable ECC error threshold from I2C/PNOR was exceeded during SBE execution
+      ECCB indicates correctable ECC error threshold from I2C was exceeded during SBE execution
+      Reload/update of SEEPROM required
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <ffdc>I2C_ECCB_STATUS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_PNOR_SBE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      ECCB indicates correctable ECC error threshold from PNOR was exceeded during SBE execution
+      Reload/update of PNOR required
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <ffdc>PNOR_ECCB_STATUS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_I2C_AND_PNOR_SBE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      ECCB indicates correctable ECC error threshold from both I2C and PNOR was exceeded during SBE execution
       Reload/update of SEEPROM/PNOR required
     </description>
     <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
     <ffdc>I2C_ECCB_STATUS</ffdc>
     <ffdc>PNOR_ECCB_STATUS</ffdc>
     <collectRegisterFfdc>
@@ -831,6 +860,30 @@
     <deconfigure>
       <target>CHIP_IN_ERROR</target>
     </deconfigure>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_UNKNOWN_ERROR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      FAPI_SET_SBE_ERROR did not resolve SBE/SLW PC to known RC.
+      May be caused by platform attempting to resolve engine state with mismatched binary image.
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>
