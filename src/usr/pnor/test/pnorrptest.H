@@ -508,7 +508,7 @@ class PnorRpTest : public CxxTest::TestSuite
     {
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC Start" );
 
-        bool fatal_error = false;
+        uint64_t fatal_error = 0;
         uint64_t offset = 0;
         uint8_t* tocHeader = new uint8_t[PAGESIZE];
         uint8_t* tocEntry = new uint8_t[PAGESIZE];

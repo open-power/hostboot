@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -178,8 +178,8 @@ class PnorRP
      * @param[in] i_chip  Which PNOR chip
      * @param[in] i_ecc  true=apply ECC after reading
      * @param[out] o_dest  Buffer to copy data into
-     * @param[out] o_fatalError  true=fatal error encountered, but no
-     *                    log could be created
+     * @param[out] o_fatalError  non-zero=fatal error encountered, but no
+     *                    log could be created.  Value is the internal RC.
      *
      * @return Error from device
      */
@@ -187,7 +187,7 @@ class PnorRP
                                uint64_t i_chip,
                                bool i_ecc,
                                void* o_dest,
-                               bool& o_fatalError );
+                               uint64_t& o_fatalError );
 
     /**
      * @brief  Write 1 logical page of data to the PNOR device

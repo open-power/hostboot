@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,6 +56,7 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
         m->type = i_type;
         m->data[0] = reinterpret_cast<uint64_t>(i_key);
         m->data[1] = reinterpret_cast<uint64_t>(i_data);
+        m->extra_data = NULL;
         m->__reserved__async = 1;
 
         // Create pending response object.
@@ -191,7 +192,7 @@ int MessageHandler::recvMessage(msg_t* i_msg)
 
     while(task_t* end_task = endTaskList.remove())
     {
-        TaskManager::endTask(end_task, NULL, TASK_STATUS_CRASHED);
+        TaskManager::endTask(end_task, i_msg->extra_data, TASK_STATUS_CRASHED);
     }
 
     // Release memory for message (created from sendMsg).

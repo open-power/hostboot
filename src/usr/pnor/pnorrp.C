@@ -368,7 +368,7 @@ errlHndl_t PnorRP::readTOC()
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
     errlHndl_t l_errhdl = NULL;
     uint8_t* tocBuffer = NULL;
-    bool fatal_error = false;
+    uint64_t fatal_error = 0;
     bool TOC_0_failed = false;
 
     do{
@@ -644,7 +644,7 @@ void PnorRP::waitForMessage()
     bool needs_ecc = false;
     int rc = 0;
     uint64_t status_rc = 0;
-    bool fatal_error = false;
+    uint64_t fatal_error = 0;
 
     while(1)
     {
@@ -675,7 +675,7 @@ void PnorRP::waitForMessage()
                                                    needs_ecc,
                                                    user_addr,
                                                    fatal_error );
-                        if( l_errhdl || fatal_error )
+                        if( l_errhdl || ( 0 != fatal_error ) )
                         {
                             status_rc = -EIO; /* I/O error */
                         }
@@ -741,8 +741,10 @@ void PnorRP::waitForMessage()
             /*  Expected Response:
              *      data[0] = virtual address requested
              *      data[1] = rc (0 or negative errno value)
+             *      extra_data = Specific reason code.
              */
             message->data[1] = status_rc;
+            message->extra_data = reinterpret_cast<void*>(fatal_error);
             rc = msg_respond( iv_msgQ, message );
             if( rc )
             {
@@ -764,12 +766,12 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
                                    uint64_t i_chip,
                                    bool i_ecc,
                                    void* o_dest,
-                                   bool& o_fatalError )
+                                   uint64_t& o_fatalError )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readFromDevice> i_offset=0x%X, i_chip=%d", i_offset, i_chip );
     errlHndl_t l_errhdl = NULL;
     uint8_t* ecc_buffer = NULL;
-    o_fatalError = false;
+    o_fatalError = 0;
 
     do
     {
@@ -819,7 +821,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
                 // Also need to spawn a separate task to do the shutdown
                 //  so that the regular PNOR task can service the writes
                 //  that happen during shutdown.
-                o_fatalError = true;
+                o_fatalError = PNOR::RC_ECC_UE;
                 INITSERVICE::doShutdown( PNOR::RC_ECC_UE, true );
             }
             // found an error so we need to fix something

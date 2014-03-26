@@ -261,6 +261,16 @@ errlHndl_t InitService::startTask(
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_TASK_FAILED,
                                     l_tidretrc, l_childsts, hbSwError);
+
+            // If the task crashed, then the l_childerrl is either NULL or
+            // contains an RC indicating that the issue causing the child
+            // to crash has already been reported.  Therefore, reduce the
+            // severity to informational.
+            if ((l_childsts == TASK_STATUS_CRASHED) &&
+                (NULL != l_childerrl))
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
             break;
         } // endif tidretrc
 
@@ -379,6 +389,16 @@ errlHndl_t InitService::executeFn(
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_FN_FAILED,
                                     l_tidretrc, l_childsts, hbSwError);
+
+            // If the task crashed, then the l_childerrl is either NULL or
+            // contains an RC indicating that the issue causing the child
+            // to crash has already been reported.  Therefore, reduce the
+            // severity to informational.
+            if ((l_childsts == TASK_STATUS_CRASHED) &&
+                (NULL != l_childerrl))
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
 
             TRACFCOMP(g_trac_initsvc,
                     "ERROR : task_wait_tid(0x%x). '%s', l_tidretrc=0x%x, l_childsts=0x%x",
@@ -542,7 +562,7 @@ void InitService::init( void *io_ptr )
                 HWAS::RC_SYSAVAIL_INSUFFICIENT_HW);
             l_shutdownStatus = HWAS::RC_SYSAVAIL_INSUFFICIENT_HW;
         }
-        else 
+        else
         {
             // Set the shutdown status to be the plid to force a TI
             l_shutdownStatus = l_errl->plid();
