@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <kernel/terminate.H>
 #include <kernel/hbterminatetypes.H>
 #include <kernel/kernel_reasoncodes.H>
+#include <kernel/cpuid.H>
 
 cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;
@@ -214,7 +215,34 @@ void CpuManager::startCPU(ssize_t i)
             reinterpret_cast<uintptr_t>(cpu->kernel_stack_bottom) +
             kernel_page_offset);
 
-        cpu->xscom_mutex = (mutex_t)MUTEX_INITIALIZER;
+        cpu->xscom_mutex = NULL;
+
+        // xscom workaround for HW822317 : Power8 Errata.
+        //     Need to make the xscom mutex a per-core mutex to prevent
+        //     multi-threaded access to the HMER.
+        if ((CpuID::getCpuType() == CORE_POWER8_MURANO) ||
+            (CpuID::getCpuType() == CORE_POWER8_VENICE))
+        {
+            const size_t num_threads = getThreadCount();
+            size_t cpu_idx = (cpuId / num_threads) * num_threads;
+
+            for(size_t i = 0; i < getThreadCount(); ++i)
+            {
+                if ((NULL != cv_cpus[nodeId][cpu_idx + i]) &&
+                    (NULL != cv_cpus[nodeId][cpu_idx + i]->xscom_mutex))
+                {
+                    cpu->xscom_mutex =
+                        cv_cpus[nodeId][cpu_idx + i]->xscom_mutex;
+                    break;
+                }
+            }
+        }
+
+        if (NULL == cpu->xscom_mutex)
+        {
+            cpu->xscom_mutex = new mutex_t;
+            mutex_init(cpu->xscom_mutex);
+        }
 
         // Create idle task.
         cpu->idle_task = TaskManager::createIdleTask();

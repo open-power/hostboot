@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -89,7 +89,7 @@ struct cpu_t
     task_t* idle_task;
 
     /** XSCOM mutex to serialize access per CPU */
-    mutex_t xscom_mutex;
+    mutex_t* xscom_mutex;
 
     /** counter for executePeriodics */
     size_t periodic_count;

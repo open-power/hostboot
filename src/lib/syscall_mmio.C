@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -94,5 +94,5 @@ mutex_t * mmio_xscom_mutex()
     crit_assert(task->affinity_pinned);
 
     // Return mutex from cpu structure.
-    return &task->cpu->xscom_mutex;
+    return task->cpu->xscom_mutex;
 }

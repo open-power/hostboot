@@ -707,6 +707,14 @@ system_call_fast_path:
         ;// Compare was already done in system call path.
     bne cr0, 2f
     mfspr r3, HMER
+        ;// Do XSCOM workaround for Errata HW822317.
+        ;// If the done bit (10) is on in HMER, it could take another cycle
+        ;// for any error status to show up.  Perform another HMER read.
+    rldicr. r0, r3, 10, 0
+    beq cr0, 1f                 ;// Done bit not set, jump to exit.
+    mfspr r0, HMER              ;// Read HMER again and OR results.
+    or r3, r3, r0
+        ;// --- end workaround HW822317
     b 1f                        ;// Jump to exit point.
         ;// Check if this is HMER write (0x801).
 2:
