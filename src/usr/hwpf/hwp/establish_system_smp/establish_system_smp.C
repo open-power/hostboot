@@ -70,6 +70,7 @@
 //  Uncomment these files as they become available:
 // #include    "host_coalesce_host/host_coalesce_host.H"
 #include    "p8_block_wakeup_intr/p8_block_wakeup_intr.H"
+#include    "p8_cpu_special_wakeup.H"
 
 namespace   ESTABLISH_SYSTEM_SMP
 {
@@ -546,6 +547,36 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "SUCCESS : p8_block_wakeup_intr(SET)" );
                 }
+
+                // disable special wakeup
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running p8_cpu_special_wakeup (DISABLE) on EX target"
+                    " HUID %.8X",
+                    TARGETING::get_huid(l_exTarget));
+
+                FAPI_INVOKE_HWP(l_errl,
+                                p8_cpu_special_wakeup,
+                                l_fapi_ex_target,
+                                SPCWKUP_DISABLE,
+                                HOST);
+
+                if(l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "Disable p8_cpu_special_wakeup ERROR :"
+                               " Returning errorlog, reason=0x%x",
+                               l_errl->reasonCode() );
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_exTarget).addToLog( l_errl );
+
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "SUCCESS: Disable special wakeup");
+                }
             } // for ex
         } // for proc
     }
@@ -558,6 +589,72 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
             "host_sys_fab_iovalid_processing exit data[0]=0x%X",
             io_pMsg->data[0]);
     return NULL;
+}
+
+
+errlHndl_t enableSpecialWakeup()
+{
+    errlHndl_t l_errl = NULL;
+    // loop thru all proc and find all functional ex units
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+    for (TargetHandleList::const_iterator l_procIter =
+         l_procTargetList.begin();
+         l_procIter != l_procTargetList.end();
+         ++l_procIter)
+    {
+        const TARGETING::Target* l_pChipTarget = *l_procIter;
+
+        // Get EX list under this proc
+        TARGETING::TargetHandleList l_exList;
+        getChildChiplets( l_exList, l_pChipTarget, TYPE_EX );
+
+        for (TargetHandleList::const_iterator
+             l_exIter = l_exList.begin();
+             l_exIter != l_exList.end();
+             ++l_exIter)
+        {
+            const TARGETING::Target * l_exTarget = *l_exIter;
+
+            fapi::Target l_fapi_ex_target
+                ( TARGET_TYPE_EX_CHIPLET,
+                  (const_cast<TARGETING::Target*>(l_exTarget)) );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Running p8_cpu_special_wakeup(ENABLE) "
+                      "on EX target HUID %.8X",
+                      TARGETING::get_huid(l_exTarget));
+
+            FAPI_INVOKE_HWP(l_errl,
+                            p8_cpu_special_wakeup,
+                            l_fapi_ex_target,
+                            SPCWKUP_ENABLE,
+                            HOST);
+
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Enable p8_cpu_special_wakeup ERROR :"
+                           " Returning errorlog, reason=0x%x",
+                           l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_exTarget).addToLog( l_errl );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS: Enable special wakeup");
+            }
+        }
+        if(l_errl)
+        {
+            break;
+        }
+    }
+    return l_errl;
 }
 
 };   // end namespace

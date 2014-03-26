@@ -64,7 +64,7 @@
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 #include    "p8_set_pore_bar.H"
-
+#include    "p8_cpu_special_wakeup.H"
 
 #include    "start_payload.H"
 #include    <runtime/runtime.H>
@@ -120,6 +120,15 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance );
  */
 errlHndl_t notifyFsp ( bool i_istepModeFlag,
                        TARGETING::SpFunctions i_spFuncs );
+
+/**
+ * @brief This function disables the special wakeup that allows scom
+ *        operations on napped cores
+ *
+ * @return errlHndl_t error handle
+ */
+errlHndl_t disableSpecialWakeup();
+
 
 /**
  * @brief This function will clear the PORE BARs.  Needs to be done
@@ -446,7 +455,11 @@ void*    call_host_start_payload( void    *io_pArgs )
 
     if( l_errl == NULL )
     {
+        l_errl = disableSpecialWakeup();
+    }
 
+    if( l_errl == NULL )
+    {
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
         //      - this will start the payload (Phyp)
@@ -742,6 +755,74 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
     } while(0);
 
     return err;
+}
+
+
+errlHndl_t disableSpecialWakeup()
+{
+    errlHndl_t l_errl = NULL;
+
+    // loop thru all proc and find all functional ex units
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+    for (TargetHandleList::const_iterator l_procIter =
+         l_procTargetList.begin();
+         l_procIter != l_procTargetList.end();
+         ++l_procIter)
+    {
+        const TARGETING::Target* l_pChipTarget = *l_procIter;
+
+        // Get EX list under this proc
+        TARGETING::TargetHandleList l_exList;
+        getChildChiplets( l_exList, l_pChipTarget, TYPE_EX );
+
+        for (TargetHandleList::const_iterator
+             l_exIter = l_exList.begin();
+             l_exIter != l_exList.end();
+             ++l_exIter)
+        {
+            const TARGETING::Target * l_exTarget = *l_exIter;
+
+            fapi::Target l_fapi_ex_target
+                ( TARGET_TYPE_EX_CHIPLET,
+                  (const_cast<TARGETING::Target*>(l_exTarget)) );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Running p8_cpu_special_wakeup(DISABLE) "
+                      "on EX target HUID %.8X",
+                      TARGETING::get_huid(l_exTarget));
+
+            FAPI_INVOKE_HWP(l_errl,
+                            p8_cpu_special_wakeup,
+                            l_fapi_ex_target,
+                            SPCWKUP_DISABLE,
+                            HOST);
+
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Disable p8_cpu_special_wakeup ERROR :"
+                           " Returning errorlog, reason=0x%x",
+                           l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ERRORLOG::ErrlUserDetailsTarget(l_exTarget).addToLog( l_errl );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS: Disable special wakeup");
+            }
+        }
+        if(l_errl)
+        {
+            break;
+        }
+    }
+
+    return l_errl;
 }
 
 };   // end namespace

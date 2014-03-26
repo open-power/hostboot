@@ -46,7 +46,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
-
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  establish_system_smp.o
@@ -55,7 +55,6 @@ OBJS =  establish_system_smp.o
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp/<HWP_dir>
-
 
 include ${ROOTPATH}/config.mk
 

@@ -74,6 +74,7 @@
 #include    "proc_post_winkle.H"
 #include    "proc_check_slw_done.H"
 #include    "p8_block_wakeup_intr.H"
+#include    "p8_cpu_special_wakeup.H"
 
 // mss_scrub support
 #include    <diag/prdf/prdfMain.H>
@@ -186,6 +187,33 @@ void*    call_host_activate_master( void    *io_pArgs )
                        "p8_block_wakeup_intr SUCCESS"  );
         }
 
+        // Clear special wakeup
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Disable special wakeup on master core");
+
+        FAPI_INVOKE_HWP(l_errl, p8_cpu_special_wakeup,
+                        l_fapi_ex_target,
+                        SPCWKUP_DISABLE,
+                        HOST);
+
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "Disable p8_cpu_special_wakeup ERROR : Returning errorlog,"
+            " reason=0x%x",
+                l_errl->reasonCode() );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Disable special wakeup on master core SUCCESS");
+        }
+
 
         //  put the master into winkle.
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -246,6 +274,32 @@ void*    call_host_activate_master( void    *io_pArgs )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "proc_prep_master_winkle SUCCESS"  );
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Enable special wakeup on master core");
+
+        FAPI_INVOKE_HWP(l_errl, p8_cpu_special_wakeup,
+                        l_fapi_ex_target,
+                        SPCWKUP_ENABLE,
+                        HOST);
+
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "Enable p8_cpu_special_wakeup ERROR : Returning errorlog, "
+            "reason=0x%x",
+                l_errl->reasonCode() );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Enable special wakeup on master core SUCCESS");
         }
 
     }   while ( 0 );
@@ -463,6 +517,38 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "SUCCESS : proc_post_winkle" );
+                }
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Running p8_cpu_special_wakeup (ENABLE)"
+                          " EX target HUID %.8X",
+                          TARGETING::get_huid(l_exTarget));
+
+                // Enable special wakeup on core
+                FAPI_INVOKE_HWP( l_errl,
+                                 p8_cpu_special_wakeup,
+                                 l_fapi_ex_target,
+                                 SPCWKUP_ENABLE,
+                                 HOST);
+
+                if( l_errl )
+                {
+                    ErrlUserDetailsTarget(l_pChipTarget).addToLog( l_errl );
+
+                    // Create IStep error log and cross ref error that occurred
+                    l_stepError.addErrorDetails( l_errl );
+
+                    // Commit Error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                             "ERROR : enable p8_cpu_special_wakeup, PLID=0x%x",
+                             l_errl->plid()  );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "SUCCESS: enable p8_cpu_special_wakeup");
                 }
             }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include    <fapiPlatHwpInvoker.H>
 #include    <hwpf/plat/fapiPlatTrace.H>
 #include    <hwpf/hwpf_reasoncodes.H>
+#include    "p8_cpu_special_wakeup.H"
 
 #include    <pnor/pnorif.H>
 #include    <vpd/mvpdenums.H>
@@ -198,7 +199,7 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
                                                theKeyword ) );
         if( l_errl ) { break; }
 
-        
+
         if(0 == theData[0])
         {
             cacheDeconfig = false;
@@ -276,134 +277,169 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             break;
         }
     }
-    if( l_masterCore == NULL )
+
+    do
     {
-        TRACFCOMP( g_fapiImpTd,
-                   "Could not find a target for core %d",
-                   l_masterCoreID );
-        /*@
-         * @errortype
-         * @moduleid     fapi::MOD_THREAD_ACTIVATE
-         * @reasoncode   fapi::RC_NO_MASTER_CORE_TARGET
-         * @userdata1    Master cpu id (NNNCCCPPPPTTT)
-         * @userdata2    Master processor chip huid
-         * @devdesc      activate_threads> Could not find a target
-         *               for the master core
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         fapi::MOD_THREAD_ACTIVATE,
-                                         fapi::RC_NO_MASTER_CORE_TARGET,
-                                         cpuid,
-                                         TARGETING::get_huid(l_masterProc));
-        l_errl->collectTrace("TARG",256);
-        l_errl->collectTrace(FAPI_TRACE_NAME,256);
-        l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-        io_rtaskRetErrl = l_errl;
-        return;
-    }
-
-    TRACFCOMP( g_fapiTd,
-               "Master CPU : c%d t%d (HUID=%.8X)",
-               l_masterCoreID, l_masterThreadID,
-               TARGETING::get_huid(l_masterCore) );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapiCore( fapi::TARGET_TYPE_EX_CHIPLET,
-               (const_cast<TARGETING::Target*>(l_masterCore)));
-
-    //  AVPs might enable a subset of the available threads
-    uint64_t max_threads = cpu_thread_count();
-    TARGETING::Target* sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(sys);
-    assert( sys != NULL );
-    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
-
-    for( uint64_t thread = 0; thread < max_threads; thread++ )
-    {
-        // Skip the thread that we're running on
-        if( thread == l_masterThreadID )
-        {
-            continue;
-        }
-
-        // Skip threads that we shouldn't be starting
-        if( !(en_threads & (0x8000000000000000>>thread)) )
-        {
-            continue;
-        } 
-
-        // send a magic instruction for PHYP Simics to work...
-        MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-
-        // parameters: i_target   => core target
-        //             i_thread   => thread (0..7)
-        //             i_command  =>
-        //               PTC_CMD_SRESET => initiate sreset thread command
-        //               PTC_CMD_START  => initiate start thread command
-        //               PTC_CMD_STOP   => initiate stop thread command
-        //               PTC_CMD_STEP   => initiate step thread command
-        //               PTC_CMD_QUERY  => query and return thread state
-        //                                 return data in o_ras_status
-        //             i_warncheck => convert pre/post checks errors to warnings
-        //             o_ras_status  => output: complete RAS status register
-        //             o_state       => output: thread state info
-        //                               see proc_thread_control.H
-        //                               for bit enumerations:
-        //                               THREAD_STATE_*
-        ecmdDataBufferBase l_ras_status;
-        uint64_t l_thread_state;
-        FAPI_INVOKE_HWP( l_errl, proc_thread_control,
-                         l_fapiCore,      //i_target
-                         thread,          //i_thread
-                         PTC_CMD_SRESET,  //i_command
-                         false,           //i_warncheck
-                         l_ras_status,    //o_ras_status
-                         l_thread_state); //o_state
-
-        if ( l_errl != NULL )
+        if( l_masterCore == NULL )
         {
             TRACFCOMP( g_fapiImpTd,
-                       "ERROR: 0x%.8X :  proc_thread_control HWP( cpu %d, thread %d, "
-                       "ras status 0x%.16X, thread state 0x%.16X )",
-                       l_errl->reasonCode(),
-                       l_masterCoreID,
-                       thread,
-                       l_ras_status.getDoubleWord(0),
-                       l_thread_state );
+                       "Could not find a target for core %d",
+                       l_masterCoreID );
+            /*@
+             * @errortype
+             * @moduleid     fapi::MOD_THREAD_ACTIVATE
+             * @reasoncode   fapi::RC_NO_MASTER_CORE_TARGET
+             * @userdata1    Master cpu id (NNNCCCPPPPTTT)
+             * @userdata2    Master processor chip huid
+             * @devdesc      activate_threads> Could not find a target
+             *               for the master core
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             fapi::MOD_THREAD_ACTIVATE,
+                                             fapi::RC_NO_MASTER_CORE_TARGET,
+                                             cpuid,
+                                             TARGETING::get_huid(l_masterProc));
+            l_errl->collectTrace("TARG",256);
             l_errl->collectTrace(FAPI_TRACE_NAME,256);
             l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
 
-            // if 1 thread fails it is unlikely that other threads will work
-            //   so we'll just jump out now
             break;
         }
-        else
+
+        TRACFCOMP( g_fapiTd,
+                   "Master CPU : c%d t%d (HUID=%.8X)",
+                   l_masterCoreID, l_masterThreadID,
+                   TARGETING::get_huid(l_masterCore) );
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapiCore
+            ( fapi::TARGET_TYPE_EX_CHIPLET,
+              (const_cast<TARGETING::Target*>(l_masterCore)));
+
+        //  AVPs might enable a subset of the available threads
+        uint64_t max_threads = cpu_thread_count();
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        assert( sys != NULL );
+        uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+
+
+        // --------------------------------------------------------------------
+        //Enbale the special wake-up on master core(EX)
+        FAPI_INF("\tEnable special wake-up on master core");
+
+        FAPI_INVOKE_HWP(l_errl, p8_cpu_special_wakeup,
+                        l_fapiCore,
+                        SPCWKUP_ENABLE,
+                        HOST);
+
+        if(l_errl)
         {
-            TRACFCOMP( g_fapiTd,
-                       "SUCCESS: proc_thread_control HWP( cpu %d, thread %d, "
-                       "ras status 0x%.16X,thread state 0x%.16X )",
-                       l_masterCoreID,
-                       thread,
-                       l_ras_status.getDoubleWord(0),
-                       l_thread_state );
+            TRACFCOMP( g_fapiImpTd,
+                       "ERROR: 0x%.8X : p8_cpu_special_wakeup set HWP(cpu %d)",
+                       l_errl->reasonCode(),
+                       l_masterCoreID);
+
+            l_errl->collectTrace(FAPI_TRACE_NAME,256);
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+            break;
         }
 
-        TRACFCOMP( g_fapiTd,
-                   "SUCCESS: Thread c%d t%d started",
-                   l_masterCoreID,
-                   thread );
+        for( uint64_t thread = 0; thread < max_threads; thread++ )
+        {
+            // Skip the thread that we're running on
+            if( thread == l_masterThreadID )
+            {
+                continue;
+            }
 
-    }
+            // Skip threads that we shouldn't be starting
+            if( !(en_threads & (0x8000000000000000>>thread)) )
+            {
+                continue;
+            }
 
-    // Reclaim remainder of L3 cache if available.
-    if ((!PNOR::usingL3Cache()) &&
-        (!getCacheDeconfig(l_masterCoreID)))
-    {
-        TRACFCOMP( g_fapiTd,
-                   "activate_threads: Extending cache to 8MB" );
-        mm_extend(MM_EXTEND_FULL_CACHE);
-    }
+            // send a magic instruction for PHYP Simics to work...
+            MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
 
+            // parameters: i_target   => core target
+            //             i_thread   => thread (0..7)
+            //             i_command  =>
+            //               PTC_CMD_SRESET => initiate sreset thread command
+            //               PTC_CMD_START  => initiate start thread command
+            //               PTC_CMD_STOP   => initiate stop thread command
+            //               PTC_CMD_STEP   => initiate step thread command
+            //               PTC_CMD_QUERY  => query and return thread state
+            //                                 return data in o_ras_status
+            //             i_warncheck => convert pre/post checks errors to
+            //                            warnings
+            //             o_ras_status  => output: complete RAS status
+            //                                      register
+            //             o_state       => output: thread state info
+            //                               see proc_thread_control.H
+            //                               for bit enumerations:
+            //                               THREAD_STATE_*
+            ecmdDataBufferBase l_ras_status;
+            uint64_t l_thread_state;
+            FAPI_INVOKE_HWP( l_errl, proc_thread_control,
+                             l_fapiCore,      //i_target
+                             thread,          //i_thread
+                             PTC_CMD_SRESET,  //i_command
+                             false,           //i_warncheck
+                             l_ras_status,    //o_ras_status
+                             l_thread_state); //o_state
+
+            if ( l_errl != NULL )
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           "ERROR: 0x%.8X :  proc_thread_control HWP"
+                           "( cpu %d, thread %d, "
+                           "ras status 0x%.16X, thread state 0x%.16X )",
+                           l_errl->reasonCode(),
+                           l_masterCoreID,
+                           thread,
+                           l_ras_status.getDoubleWord(0),
+                           l_thread_state );
+
+                l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+
+                // if 1 thread fails it is unlikely that other threads will work
+                //   so we'll just jump out now
+                break;
+            }
+            else
+            {
+                TRACFCOMP
+                    (g_fapiTd,
+                     "SUCCESS: proc_thread_control HWP( cpu %d, thread %d, "
+                     "ras status 0x%.16X,thread state 0x%.16X )",
+                     l_masterCoreID,
+                     thread,
+                     l_ras_status.getDoubleWord(0),
+                     l_thread_state );
+            }
+
+            TRACFCOMP( g_fapiTd,
+                       "SUCCESS: Thread c%d t%d started",
+                       l_masterCoreID,
+                       thread );
+        }
+        if(l_errl)
+        {
+            break;
+        }
+
+        // Reclaim remainder of L3 cache if available.
+        if ((!PNOR::usingL3Cache()) &&
+            (!getCacheDeconfig(l_masterCoreID)))
+        {
+            TRACFCOMP( g_fapiTd,
+                       "activate_threads: Extending cache to 8MB" );
+            mm_extend(MM_EXTEND_FULL_CACHE);
+        }
+
+    } while(0);
 
     TRACFCOMP( g_fapiTd,
                "activate_threads exit" );

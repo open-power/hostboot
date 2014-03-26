@@ -112,6 +112,14 @@ errlHndl_t call_host_coalesce_host( );
  */
 void* host_sys_fab_iovalid_processing( void* io_pMsg );
 
+/**
+ * @brief  enableSpecialWakeup on all functional cores after
+ *         winkle wakeup.
+ *
+ * @return error log handle
+ */
+errlHndl_t enableSpecialWakeup();
+
 };   // end namespace
 
 #endif

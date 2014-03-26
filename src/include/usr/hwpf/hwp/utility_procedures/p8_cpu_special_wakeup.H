@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/occ/occ_procedures/proc_cpu_special_wakeup.H $ */
+/* $Source: src/include/usr/hwpf/hwp/utility_procedures/p8_cpu_special_wakeup.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_cpu_special_wakeup.H,v 1.8 2012/08/21 11:39:37 pchatnah Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cpu_special_wakeup.H,v $
+// $Id: p8_cpu_special_wakeup.H,v 1.7 2013/12/11 20:39:04 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,21 +47,28 @@
 
 #ifndef _PROC_SPCWKUP_ENTITY
 #define _PROC_SPCWKUP_ENTITY
+
+#define NUM_SPCWKUP_ENTITIES 4
 enum PROC_SPCWKUP_ENTITY 
 {
-    HOST   = 0X1,
-    FSP    = 0x2,
-    OCC    = 0x3,
-    PHYP   = HOST
-
+    HOST,
+    FSP,
+    OCC,
+    PHYP = HOST,
+    SPW_ALL
 };
-        
-        
+
+
+
+#define NUM_SPCWKUP_OPS 3
 enum PROC_SPCWKUP_OPS 
 {
-    SPCWKUP_ENABLE   = 0x1,
-    SPCWKUP_DISABLE  = 0x2
+    SPCWKUP_DISABLE,
+    SPCWKUP_ENABLE,
+    SPCWKUP_INIT,
+    SPCWKUP_FORCE_DEASSERT
 };
+
 
 #endif  // _PROC_SPCWKUP_TGTS
 
@@ -74,22 +81,22 @@ enum PROC_SPCWKUP_OPS
 
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_cpu_special_wakeup_FP_t) (const fapi::Target&, PROC_SPCWKUP_OPS , PROC_SPCWKUP_ENTITY  );
+typedef fapi::ReturnCode (*p8_cpu_special_wakeup_FP_t) (
+                            const fapi::Target&, 
+                            PROC_SPCWKUP_OPS, 
+                            PROC_SPCWKUP_ENTITY         );
 
 extern "C" {
-
-
 
 //------------------------------------------------------------------------------
 // Parameter structure definitions
 //------------------------------------------------------------------------------
 
 
-
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
-/// \param[in] i_target EX target
+/// \param[in] i_ex_target EX target
 /// \param[in] i_entity   Entity bit to use (OCC, PHYP, FSP)
 /// \param[in] i_operation   operation to use (SPCWKUP_ENABLE, SPCWKUP_DISABLE)
 
@@ -97,8 +104,9 @@ extern "C" {
 /// \retval ECMD_SUCCESS if something good happens,
 /// \retval BAD_RETURN_CODE otherwise
 fapi::ReturnCode 
-proc_cpu_special_wakeup(const fapi::Target& i_target, PROC_SPCWKUP_OPS i_operation , PROC_SPCWKUP_ENTITY i_entity );
-
+p8_cpu_special_wakeup(  const fapi::Target& i_ex_target, 
+                        PROC_SPCWKUP_OPS i_operation , 
+                        PROC_SPCWKUP_ENTITY i_entity );
 
 } // extern "C"
 

@@ -51,6 +51,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/switch_rec_attn
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_check_slw_done
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_block_wakeup_intr
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 
 ##  NOTE: add new object files when you add a new HWP
@@ -74,7 +75,6 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/switch_rec_attn
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_post_winkle
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_check_slw_done
-
 
 include ${ROOTPATH}/config.mk
 

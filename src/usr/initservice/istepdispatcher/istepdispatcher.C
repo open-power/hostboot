@@ -1460,6 +1460,15 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                    "Returned from cpu_all_winkle." );
             }
 
+            // Re-enable p8_cpu_special_wakeup
+            err = ESTABLISH_SYSTEM_SMP::enableSpecialWakeup();
+            if (err)
+            {
+                TRACFCOMP( g_trac_initsvc,
+                           "ERROR: ESTABLISH_SYSTEM_SMP::enableSpecialWakeup");
+                errlCommit(err, INITSVC_COMP_ID);
+            }
+
             err = MBOX::resume();
             if (err)
             {

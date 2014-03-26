@@ -24,8 +24,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/utility_procedures
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 EXTRAINCDIR += ${ROOTPATH}/usr/hwpf/hwp/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 
 VPATH += ${HWPPATH}/utility_procedures
 
 OBJS += mss_unmask_errors.o mss_maint_cmds.o
+OBJS += p8_cpu_special_wakeup.o proc_cpu_special_wakeup.o
 

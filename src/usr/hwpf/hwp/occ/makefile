@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 ## pointer to already consumed procedures.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 ##  NOTE: add the base istep dir here. 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/occ
@@ -64,13 +65,11 @@ OBJS =  occ.o \
         p8_pm_occ_firinit.o \
         p8_pm_pba_firinit.o \
         p8_pm_pmc_firinit.o \
-        p8_cpu_special_wakeup.o \
         p8_pm_utils.o
 
 #These procedures are included per Stradale's request so
 #they can implement OCC Reset.
 OBJS+=  p8_pm_prep_for_reset.o \
-        proc_cpu_special_wakeup.o \
         p8_pmc_force_vsafe.o \
         p8_ocb_indir_access.o \
         p8_ocb_indir_setup_linear.o 
