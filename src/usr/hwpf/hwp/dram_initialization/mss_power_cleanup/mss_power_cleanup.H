@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_power_cleanup.H,v 1.2 2013/11/14 16:55:43 bellows Exp $
+// $Id: mss_power_cleanup.H,v 1.3 2014/02/19 13:41:35 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_power_cleanup.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.3   | bellows  |19-FEB-14| RAS Review Updates
 //   1.2   |bellows   |11-Nov-13| Gerrit Review Comments
 //   1.1   |bellows   |07-Nov-13| copied from mss_cnfg_cleanup.H version 1.2
 //------------------------------------------------------------------------------
@@ -84,6 +85,12 @@ fapi::ReturnCode mss_power_cleanup(const fapi::Target & i_target_centaur,
 // @return fapi::ReturnCode
 //------------------------------------------------------------------------------
 fapi::ReturnCode mss_power_cleanup_mba(const fapi::Target & i_target_mba); // clean up an mba
+
+fapi::ReturnCode mss_power_cleanup_centaur(const fapi::Target & i_target_centaur);
+fapi::ReturnCode mss_power_cleanup_mba_part1(const fapi::Target & i_target_centaur, const fapi::Target & i_target_mba);
+fapi::ReturnCode mss_power_cleanup_mba_fence(const fapi::Target & i_target_centaur, const fapi::Target & i_target_mba0, const fapi::Target & i_target_mba1 );
+
+
 
 } // extern "C"
 
