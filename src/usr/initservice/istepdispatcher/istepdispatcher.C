@@ -281,7 +281,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             if (l_doReconfig)
             {
                 // Something occurred that requires a reconfig loop
-                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: Reconfig required after IStep %d:%d",
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
+                          " Reconfig required after IStep %d:%d",
                           istep, substep);
 
                 // Find out if in manufacturing mode
@@ -292,8 +293,18 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
                 if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
                 {
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: In manufacturing mode");
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
+                              " In manufacturing mode");
                     l_manufacturingMode = true;
+                }
+
+                // Find out if in MPIPL mode
+                bool l_MPIPLMode = false;
+                if   (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+                {
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
+                              " In MPIPL mode");
+                    l_MPIPLMode = true;
                 }
 
                 uint8_t newIstep = 0;
@@ -301,7 +312,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
                 if ((checkReconfig(istep, substep, newIstep, newSubstep)) &&
                     (numReconfigs < MAX_NUM_RECONFIG_ATTEMPTS) &&
-                    (!l_manufacturingMode))
+                    (!l_manufacturingMode) &&
+                    (!l_MPIPLMode) )
                 {
                     // Within the Reconfig Loop, going to loop back
                     // first, check to make sure we still have a bootable system
@@ -403,9 +415,9 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 else
                 {
                     // Reconfig loop required, but the istep is either outside
-                    // of the reconfig loop or too many reconfigs have been
-                    // attempted or in manufacturing mode, return an error to
-                    // cause termination
+                    // of the reconfig loop, too many reconfigs have been
+                    // attempted, in manufacturing mode, or in MPIPL.
+                    // Return an error to cause termination
                     if (!err)
                     {
                         err = failedDueToDeconfig(istep, substep,
