@@ -134,6 +134,12 @@ public:
         // are found connected to a non-functional Centaur
         DECONFIGURED_BY_NO_PARENT_MEMBUF,       // BASE | 0x09
 
+        // set by presentByAssoc() when a MEMBUF has no DIMMs
+        DECONFIGURED_BY_NO_CHILD_DIMM,          // BASE | 0x0A
+
+        // set by presentByAssoc() when a MEMBUF has no MCS
+        DECONFIGURED_BY_NO_PARENT_MCS,          // BASE | 0x0B
+
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
     };

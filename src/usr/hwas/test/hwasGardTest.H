@@ -2855,6 +2855,315 @@ public:
             TS_FAIL("testDeconfigureAssocProc8: incorrect configuration returned");
         }
     }
+
+    /**
+     *  @brief Test Deconfig Present Association 1
+     */
+    void testdeconfigPresentByAssoc1()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
+        // This tests the scenario where there is one mcs, membuff, and dimm
+        // This is done to ensure that the algorithm works on each edge case
+
+        TargetInfoVector l_targInfo;
+        TargetInfoVector l_targToDeconfig;
+        TargetInfo l_TargetInfo;
+
+        l_TargetInfo.pThisTarget = NULL;
+        EntityPath l_ep(TARGETING::EntityPath::PATH_AFFINITY);
+        l_TargetInfo.functional = 1;
+
+        // MCS only
+        l_ep.addLast(TYPE_MCS, 0);
+        l_TargetInfo.affinityPath = l_ep;
+        l_TargetInfo.huid = 0;
+        l_TargetInfo.type = TYPE_MCS;
+
+        l_targInfo.push_back(l_TargetInfo);
+
+        presentByAssoc(l_targInfo, l_targToDeconfig);
+
+        // MEMBUF only
+        l_ep.addLast(TYPE_MEMBUF, 0);
+        l_TargetInfo.affinityPath = l_ep;
+        l_TargetInfo.huid = 1;
+        l_TargetInfo.type = TYPE_MEMBUF;
+        l_targInfo.push_back(l_TargetInfo);
+
+        presentByAssoc(l_targInfo, l_targToDeconfig);
+
+        // DIMM only
+        l_ep.addLast(TYPE_DIMM, 0);
+        l_TargetInfo.affinityPath = l_ep;
+        l_TargetInfo.huid = 2;
+        l_TargetInfo.type = TYPE_DIMM;
+        l_targInfo.push_back(l_TargetInfo);
+
+        presentByAssoc(l_targInfo, l_targToDeconfig);
+
+        // Check result
+        if (l_targToDeconfig.size() == 3 &&
+            l_targToDeconfig[0].huid == 0 &&
+            l_targToDeconfig[1].huid == 1 &&
+            l_targToDeconfig[2].huid == 2 )
+        {
+            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc1: Success");
+        }
+        else
+        {
+            TS_FAIL("testdeconfigPresentByAssoc1: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfig Present Association 2
+     */
+    void testdeconfigPresentByAssoc2()
+    {
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Started");
+        // This test the scenario where MCS Group 0 does not have a membuf and
+        // is marked for deconfigure.
+
+        // User-defined number of targets
+        size_t NUM_TARGS = 4;
+
+        // Input target vector
+        TargetInfoVector l_targets;
+        TargetInfo l_TargInfo;
+        EntityPath l_ep(TARGETING::EntityPath::PATH_AFFINITY);
+        l_TargInfo.affinityPath = l_ep;
+        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
+        // Output target vector
+        TargetInfoVector l_targToDeconfig;
+
+        // Add MCS Group 0
+        l_targets[0].pThisTarget = NULL;
+        l_targets[0].functional = 1;
+        l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[0].huid = 0;
+        l_targets[0].type = TYPE_MCS;
+
+        // Add MEMBUF Group 1
+        l_targets[1].pThisTarget = NULL;
+        l_targets[1].functional = 1;
+        l_targets[1].affinityPath.addLast(TYPE_MCS, 1);
+        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[1].huid = 1;
+        l_targets[1].type = TYPE_MEMBUF;
+
+        // Add DIMM Group 1
+        l_targets[2].pThisTarget = NULL;
+        l_targets[2].functional = 1;
+        l_targets[2].affinityPath.addLast(TYPE_MCS, 1);
+        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[2].affinityPath.addLast(TYPE_DIMM, 0);
+        l_targets[2].huid = 2;
+        l_targets[2].type = TYPE_DIMM;
+
+        // Add MCS Group 1
+        l_targets[3].pThisTarget = NULL;
+        l_targets[3].functional = 1;
+        l_targets[3].affinityPath.addLast(TYPE_MCS, 1);
+        l_targets[3].huid = 3;
+        l_targets[3].type = TYPE_MCS;
+
+        presentByAssoc(l_targets, l_targToDeconfig);
+
+        // Check result
+        if (l_targToDeconfig.size() == 1 &&
+            l_targToDeconfig[0].huid == 0 )
+        {
+            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Success");
+        }
+        else
+        {
+            TS_FAIL("testdeconfigPresentByAssoc2: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfig Present Association 3
+     */
+    void testdeconfigPresentByAssoc3()
+    {
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Started");
+        // This test the scenario where MEMBUF Group 1 has no MCS and then
+        // DIMM Group 1 has no MEMBUF because MEMBUF 1 will be marked for
+        // deconfigure
+
+        // User-defined number of targets
+        size_t NUM_TARGS = 5;
+
+        // Input target vector
+        TargetInfoVector l_targets;
+        TargetInfo l_TargInfo;
+        EntityPath l_ep(TARGETING::EntityPath::PATH_AFFINITY);
+        l_TargInfo.affinityPath = l_ep;
+        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
+        // Output target vector
+        TargetInfoVector l_targToDeconfig;
+
+        // Add MCS Group 0
+        l_targets[0].pThisTarget = NULL;
+        l_targets[0].functional = 1;
+        l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[0].huid = 0;
+        l_targets[0].type = TYPE_MCS;
+
+        // Add MEMBUF Group 0
+        l_targets[1].pThisTarget = NULL;
+        l_targets[1].functional = 1;
+        l_targets[1].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[1].huid = 1;
+        l_targets[1].type = TYPE_MEMBUF;
+
+        // Add MEMBUF Group 1
+        l_targets[2].pThisTarget = NULL;
+        l_targets[2].functional = 1;
+        l_targets[2].affinityPath.addLast(TYPE_MCS, 1);
+        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[2].huid = 2;
+        l_targets[2].type = TYPE_MEMBUF;
+
+
+        // Add DIMM Group 0
+        l_targets[3].pThisTarget = NULL;
+        l_targets[3].functional = 1;
+        l_targets[3].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[3].affinityPath.addLast(TYPE_DIMM, 0);
+        l_targets[3].huid = 3;
+        l_targets[3].type = TYPE_DIMM;
+
+        // Add DIMM Group 1
+        l_targets[4].pThisTarget = NULL;
+        l_targets[4].functional = 1;
+        l_targets[4].affinityPath.addLast(TYPE_MCS, 1);
+        l_targets[4].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[4].affinityPath.addLast(TYPE_DIMM, 0);
+        l_targets[4].huid = 4;
+        l_targets[4].type = TYPE_DIMM;
+
+        presentByAssoc(l_targets, l_targToDeconfig);
+
+        // Check result
+        if (l_targToDeconfig.size() == 2 &&
+            l_targToDeconfig[0].huid == 2 &&
+            l_targToDeconfig[1].huid == 4 )
+        {
+            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Success");
+        }
+        else
+        {
+            TS_FAIL("testdeconfigPresentByAssoc3: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfig Present Association 4
+     */
+    void testdeconfigPresentByAssoc4()
+    {
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Started");
+        // This test the scenario where MEMBUF Group 0 has no DIMMs causing
+        // MCS Group 0 to also be deconfigured.
+
+        // User-defined number of targets
+        size_t NUM_TARGS = 2;
+
+        // Input target vector
+        TargetInfoVector l_targets;
+        TargetInfo l_TargInfo;
+        EntityPath l_ep(TARGETING::EntityPath::PATH_AFFINITY);
+        l_TargInfo.affinityPath = l_ep;
+        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
+        // Output target vector
+        TargetInfoVector l_targToDeconfig;
+
+        // Add MCS Group 0
+        l_targets[0].pThisTarget = NULL;
+        l_targets[0].functional = 1;
+        l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[0].huid = 0;
+        l_targets[0].type = TYPE_MCS;
+
+        // Add MEMBUF Group 0
+        l_targets[1].pThisTarget = NULL;
+        l_targets[1].functional = 1;
+        l_targets[1].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[1].huid = 1;
+        l_targets[1].type = TYPE_MEMBUF;
+
+        presentByAssoc(l_targets, l_targToDeconfig);
+
+        // Check result
+        if (l_targToDeconfig.size() == 2 &&
+            l_targToDeconfig[0].huid == 1 &&
+            l_targToDeconfig[1].huid == 0 )
+        {
+            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Success");
+        }
+        else
+        {
+            TS_FAIL("testdeconfigPresentByAssoc4: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfig Present Association 5
+     */
+    void testdeconfigPresentByAssoc5()
+    {
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Started");
+        // This test the scenario where MEMBUF Group 0 and DIMM Group 0 having
+        // no MCS. This tests the MCSINDEX edge case because one never existed
+
+        // User-defined number of targets
+        size_t NUM_TARGS = 2;
+
+        // Input target vector
+        TargetInfoVector l_targets;
+        TargetInfo l_TargInfo;
+        EntityPath l_ep(TARGETING::EntityPath::PATH_AFFINITY);
+        l_TargInfo.affinityPath = l_ep;
+        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
+        // Output target vector
+        TargetInfoVector l_targToDeconfig;
+
+        // Add MEMBUF Group 0
+        l_targets[0].pThisTarget = NULL;
+        l_targets[0].functional = 1;
+        l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[0].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[0].huid = 0;
+        l_targets[0].type = TYPE_MEMBUF;
+
+        // Add DIMM Group 0
+        l_targets[1].pThisTarget = NULL;
+        l_targets[1].functional = 1;
+        l_targets[1].affinityPath.addLast(TYPE_MCS, 0);
+        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
+        l_targets[1].affinityPath.addLast(TYPE_DIMM, 0);
+        l_targets[1].huid = 1;
+        l_targets[1].type = TYPE_DIMM;
+
+        presentByAssoc(l_targets, l_targToDeconfig);
+
+        // Check result
+        if (l_targToDeconfig.size() == 2 &&
+            l_targToDeconfig[0].huid == 0 &&
+            l_targToDeconfig[1].huid == 1 )
+        {
+            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Success");
+        }
+        else
+        {
+            TS_FAIL("testdeconfigPresentByAssoc5: incorrect configuration returned");
+        }
+    }
+
 };
 
 #endif

@@ -46,14 +46,6 @@ namespace TARGETING
 
 #define TARG_CLASS ""
 
-
-// Predicate function for sorting by HUID
-bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
-{
-    return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
-}
-
-
 /**
  * @brief Populate the o_vector with target object pointers based on the
  *        requested class, type, and functional state.

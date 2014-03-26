@@ -34,7 +34,6 @@
 #include <targeting/common/iterators/targetiterator.H>
 #include <targeting/common/iterators/rangefilter.H>
 
-
 namespace TARGETING
 {
 
@@ -59,7 +58,25 @@ namespace TARGETING
  *
  * @return bool, true if t1 HUID < t2 HUID, false otherwise
  */
-bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2);
+inline bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
+{
+  return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
+}
+
+/**
+ * @brief Predicate function to sort by Affinity path (lexicographical order)
+ *
+ * @parm[in]  t1, Target 1 for AffinityPath comparison against target 2
+ * @parm[in]  t2, Target 2 for AffinityPath comparison against target 1
+ *
+ * @return bool, true if t1 AffinityPath < t2 AffinityPath, false otherwise
+ */
+inline bool compareAffinity(TargetHandle_t t1, TargetHandle_t t2)
+{
+    EntityPath t1_Affinity = t1->getAttr<ATTR_AFFINITY_PATH>();
+    EntityPath t2_Affinity = t2->getAttr<ATTR_AFFINITY_PATH>();
+    return t1_Affinity < t2_Affinity;
+}
 
 /**
  * @brief Populate the o_vector with target chip pointers based on the

@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 
 // This component
 #include <attributeenums.H>
@@ -185,6 +186,36 @@ bool EntityPath::operator==(
 
     #undef TARG_FN
 }
+
+//******************************************************************************
+// EntityPath::operator<
+//******************************************************************************
+
+bool EntityPath::operator<(const EntityPath &i_rhs) const
+{
+    #define TARG_FN "operator<(...)"
+
+    if (iv_type != i_rhs.iv_type)
+    {
+        return iv_type < i_rhs.iv_type;
+    }
+
+    size_t size = std::min(iv_size,i_rhs.iv_size)*sizeof(PathElement);
+    int result = memcmp(&iv_pathElement[0], &i_rhs.iv_pathElement[0], size);
+
+    // lhs == rhs
+    if ( result == 0 )
+    {
+        return iv_size < i_rhs.iv_size;
+    }
+    else
+    {
+        return ( result < 0 );
+    }
+
+    #undef TARG_FN
+}
+
 
 //******************************************************************************
 // EntityPath::equals

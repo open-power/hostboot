@@ -45,7 +45,6 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
-#include <hwas/common/deconfigGard.H>
 
 namespace HWAS
 {
@@ -66,10 +65,6 @@ TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
 
 // SORT functions that we'll use for PR keyword processing
-bool compareTargetHUID(TargetHandle_t t1, TargetHandle_t t2)
-{
-    return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
-}
 bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
 {
     if (t1.group == t2.group)
@@ -78,6 +73,11 @@ bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
                     t2.target->getAttr<ATTR_HUID>());
     }
     return (t1.group < t2.group);
+}
+
+bool compareAffinity(const TargetInfo t1, const TargetInfo t2)
+{
+        return t1.affinityPath < t2.affinityPath;
 }
 
 /**
@@ -183,7 +183,8 @@ errlHndl_t discoverTargets()
         // sort the list by ATTR_HUID to ensure that we
         //  start at the same place each time
         std::sort(pCheckPres.begin(), pCheckPres.end(),
-                compareTargetHUID);
+                compareTargetHuid);
+
         for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
                 pTarget_it != pCheckPres.end();
                 ++pTarget_it
@@ -472,143 +473,10 @@ errlHndl_t discoverTargets()
             break;
         }
 
-        HWAS_INF("discoverTargets:Find functional MCSs"
-                 " which should be non-functional ");
-
-        //get the membufs
-        TargetHandleList l_funcMembufTargetList;
-        getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
-
-        //get the mcss
-        TargetHandleList l_funcMCSTargetList;
-        getAllChiplets(l_funcMCSTargetList, TYPE_MCS, true );
-
-        TargetHandleList::iterator pMCSTarget_it = l_funcMCSTargetList.begin();
-        while (pMCSTarget_it != l_funcMCSTargetList.end())
-        {
-            TargetHandle_t l_MCSTarget = *pMCSTarget_it;
-            EntityPath l_MCSAffinityPath =
-                 l_MCSTarget->getAttr<ATTR_AFFINITY_PATH>();
-
-            bool l_functMembufFound = false;
-            HWAS_DBG("discoverTargets:  MCS %.8X is functional",
-                      l_MCSTarget->getAttr<ATTR_HUID>());
-
-            for (TargetHandleList::iterator
-                pMembufTarget_it = l_funcMembufTargetList.begin();
-                pMembufTarget_it != l_funcMembufTargetList.end();
-                ++pMembufTarget_it)
-            {
-                TargetHandle_t l_MembufTarget = *pMembufTarget_it;
-                EntityPath l_MembufAffinityPath =
-                     l_MembufTarget->getAttr<ATTR_AFFINITY_PATH>();
-
-                l_functMembufFound =
-                     l_MCSAffinityPath.equals(l_MembufAffinityPath,
-                          l_MCSAffinityPath.size());
-                if (l_functMembufFound == true)
-                {
-                    //found a functional membuf so don't need to look further
-                    //can also remove the membuf from the list since a membuf
-                    //should not match two MCSs
-                    pMembufTarget_it=
-                        l_funcMembufTargetList.erase(pMembufTarget_it);
-                    HWAS_DBG("discoverTargets: MEMBUF %.8X is "
-                             "functional, assoicated with MCS %.8X",
-                              l_MembufTarget->getAttr<ATTR_HUID>(),
-                              l_MCSTarget->getAttr<ATTR_HUID>());
-                    break;
-                }
-
-            }
-            if (l_functMembufFound)
-            {
-                //remove functional MCS associated with functional membufs from
-                //the list of functional MCS
-                pMCSTarget_it=l_funcMCSTargetList.erase(pMCSTarget_it);
-            }
-            else
-            {
-                ++pMCSTarget_it;
-            }
-        }
-
-        //should now have a list of functional MCS that have no functional
-        //membufs
-        for (TargetHandleList::const_iterator
-                pMCSTarget_it = l_funcMCSTargetList.begin();
-                pMCSTarget_it != l_funcMCSTargetList.end();
-                ++pMCSTarget_it)
-        {
-            TargetHandle_t l_MCSTarget = *pMCSTarget_it;
-            //indicate that the MCS should be disabled because there is a
-            //non functional membuf or no membufs associated with this MCS
-            enableHwasState(l_MCSTarget,true,false,
-                          HWAS::DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF);
-
-
-
-            HWAS_INF("discoverTargets: MCS %.8X mark as present, not functional",
-                      l_MCSTarget->getAttr<ATTR_HUID>() );
-        }
-
-        // Get list of non-functional Centaurs
-        TargetHandleList l_nonFuncCentaurs;
-        getChipResources(l_nonFuncCentaurs, TYPE_MEMBUF,
-                         UTIL_FILTER_NON_FUNCTIONAL);
-
-        // Some common variables used below
-        TargetHandleList pChildList;
-        PredicateIsFunctional isFunctional;
-
-        // Iterate through list of non-functional Centaurs, and
-        // set all children as non-functional
-        for (TargetHandleList::const_iterator
-                pCenTarget_it = l_nonFuncCentaurs.begin();
-                pCenTarget_it != l_nonFuncCentaurs.end();
-                ++pCenTarget_it)
-        {
-            // Cache current target
-            TargetHandle_t l_cenTarget = *pCenTarget_it;
-
-            // find all CHILD matches for this target and deconfigure them
-            targetService().getAssociated(pChildList, l_cenTarget,
-                TargetService::CHILD, TargetService::ALL, &isFunctional);
-            for (TargetHandleList::iterator pChild_it = pChildList.begin();
-                    pChild_it != pChildList.end();
-                    ++pChild_it)
-            {
-                TargetHandle_t l_childTarget = *pChild_it;
-                //non functional membuf or no membufs associated with this MCS
-                enableHwasState(l_childTarget,true,false,
-                         HWAS::DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEMBUF);
-                HWAS_INF("discoverTargets: Target %.8X mark as present"
-                         ", not functional due to non-functional parent"
-                         " Centaur",
-                         l_childTarget->getAttr<ATTR_HUID>() );
-            }
-
-            // find all CHILD_BY_AFFINITY matches for this target and
-            // deconfigure them
-            targetService().getAssociated(pChildList, l_cenTarget,
-                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-                &isFunctional);
-            for (TargetHandleList::iterator pChild_it = pChildList.begin();
-                    pChild_it != pChildList.end();
-                    ++pChild_it)
-            {
-                TargetHandle_t l_affinityTarget = *pChild_it;
-                //non functional membuf or no membufs associated with this MCS
-                enableHwasState(l_affinityTarget,true,false,
-                         HWAS::DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEMBUF);
-                HWAS_INF("discoverTargets: Target %.8X mark as present"
-                         ", not functional due to non-functional parent"
-                         " Centaur",
-                         l_affinityTarget->getAttr<ATTR_HUID>() );
-            }
-        }
-
-
+        // call invokePresentByAssoc() to obtain functional MCS's, MEMBUFs, and
+        // DIMM's, call algorithm function presentByAssoc() to determine
+        // targets that need to be deconfigured
+        invokePresentByAssoc();
 
     } while (0);
 
@@ -688,7 +556,7 @@ errlHndl_t restrictEXunits(
                 // sort the list by ATTR_HUID to ensure that we
                 //  start at the same place each time
                 std::sort(pEXList[i].begin(), pEXList[i].end(),
-                            compareTargetHUID);
+                            compareTargetHuid);
 
                 // keep a pointer into that list
                 pEX_it[i] = pEXList[i].begin();
@@ -1076,6 +944,299 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
             (l_errl == NULL) ? "available" : "NOT available");
     return  l_errl ;
 } // checkMinimumHardware
+
+/**
+ * @brief Checks if both targets have the same paths up to a certain number
+ *        of path elements, determined by the smaller affinity path.
+ *
+ * @param[in] i_t1 TargetInfo containing the first target's affinity path
+ * @param[in] i_t2 TargetInfo containing the second target's affinity path
+ */
+bool isSameSubPath(TargetInfo i_t1, TargetInfo i_t2)
+{
+    size_t l_size = std::min(i_t1.affinityPath.size(),
+                             i_t2.affinityPath.size());
+    return i_t1.affinityPath.equals(i_t2.affinityPath, l_size);
+}
+
+/**
+ * @brief Deconfigures a target based on type
+ *
+ * Called by invokePresentByAssoc() after presentByAssoc() is called
+ *
+ * @param[in] i_targInfo TargetInfo for the target to be deconfigured
+ */
+void deconfigPresentByAssoc(TargetInfo i_targInfo)
+{
+    TargetHandleList pChildList;
+
+    // find all CHILD matches for this target and deconfigure them
+    getChildChiplets(pChildList, i_targInfo.pThisTarget, TYPE_NA);
+
+    for (TargetHandleList::iterator pChild_it = pChildList.begin();
+            pChild_it != pChildList.end();
+            ++pChild_it)
+    {
+        TargetHandle_t l_childTarget = *pChild_it;
+        enableHwasState(l_childTarget, true, false, i_targInfo.reason);
+        HWAS_INF("deconfigPresentByAssoc: Target %.8X mark as present"
+                 ", not functional due to non-functional parent"
+                 " Centaur",
+                 l_childTarget->getAttr<ATTR_HUID>() );
+    }
+
+    // find all CHILD_BY_AFFINITY matches for this target and deconfigure them
+    getChildAffinityTargets(pChildList, i_targInfo.pThisTarget,
+                            CLASS_NA ,TYPE_NA);
+
+    for (TargetHandleList::iterator pChild_it = pChildList.begin();
+            pChild_it != pChildList.end();
+            ++pChild_it)
+    {
+        TargetHandle_t l_affinityTarget = *pChild_it;
+        enableHwasState(l_affinityTarget,true,false, i_targInfo.reason);
+        HWAS_INF("deconfigPresentByAssoc: Target %.8X mark as present"
+                 ", not functional due to non-functional parent"
+                 " Centaur",
+                 l_affinityTarget->getAttr<ATTR_HUID>() );
+    }
+
+    // deconfigure the target itself
+    enableHwasState(i_targInfo.pThisTarget,true,false,i_targInfo.reason);
+    HWAS_INF("deconfigPresentByAssoc: Target %.8X mark as present, not functional",
+              i_targInfo.huid );
+
+}
+
+void invokePresentByAssoc()
+{
+    HWAS_INF("invokePresentByAssoc enter");
+
+    // make one list
+    TargetHandleList l_funcTargetList;
+
+    // get the mcss
+    TargetHandleList l_funcMCSTargetList;
+    getAllChiplets(l_funcMCSTargetList, TYPE_MCS, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                               l_funcMCSTargetList.begin(),
+                               l_funcMCSTargetList.end());
+
+    // get the membufs
+    TargetHandleList l_funcMembufTargetList;
+    getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                               l_funcMembufTargetList.begin(),
+                               l_funcMembufTargetList.end());
+
+    // get the dimms
+    TargetHandleList l_funcDIMMTargetList;
+    getAllLogicalCards(l_funcDIMMTargetList, TYPE_DIMM, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                               l_funcDIMMTargetList.begin(),
+                               l_funcDIMMTargetList.end());
+
+    // Define vectors of TargetInfo structs to be used in presentByAssoc
+    TargetInfoVector l_targInfo;
+    TargetInfoVector l_targToDeconfig;
+    do
+    {
+        // Iterate through targets and populate l_targInfo vector
+        for (TargetHandleList::const_iterator
+             l_targIter = l_funcTargetList.begin();
+             l_targIter != l_funcTargetList.end();
+             ++l_targIter)
+        {
+            TargetInfo l_TargetInfo;
+            l_TargetInfo.pThisTarget =
+                    *l_targIter;
+            l_TargetInfo.affinityPath =
+                    (*l_targIter)->getAttr<ATTR_AFFINITY_PATH>();
+            l_TargetInfo.huid =
+                    (*l_targIter)->getAttr<ATTR_HUID>();
+            l_TargetInfo.type =
+                    (*l_targIter)->getAttr<ATTR_TYPE>();
+            l_TargetInfo.functional = true;
+            l_targInfo.push_back(l_TargetInfo);
+        }
+
+        // Call presentByAssoc to take the functional targets in l_targInfo
+        // and determine which ones need to be deconfigured
+        presentByAssoc(l_targInfo, l_targToDeconfig);
+
+        // Deconfigure targets in l_targToDeconfig
+        for (TargetInfoVector::const_iterator
+             l_targIter = l_targToDeconfig.begin();
+             l_targIter != l_targToDeconfig.end();
+             ++l_targIter)
+        {
+            deconfigPresentByAssoc(*l_targIter);
+        }
+
+    } while(0);
+}
+
+void presentByAssoc(TargetInfoVector& o_funcTargets,
+                    TargetInfoVector& o_targToDeconfig)
+{
+    HWAS_INF("presentByAssoc entry");
+
+    // Sort entire vector by affinity path. This provides the algorithm with
+    // an ordered vector of targets, making it easy to check if a MCS has a
+    // MEMBUF, a MEMBUF has a MCS and DIMM, and a DIMM has a MEMBUF.
+    std::sort(o_funcTargets.begin(), o_funcTargets.end(),
+              compareAffinity);
+
+    // Keep track of the most recently seen MCS and MEMBUF. This allows the
+    // algorithm to quickly check if targets share a MCS or MEMBUF and used
+    // for backtracking after deleting a target from the vector
+    size_t l_MCSIndex = __INT_MAX__;
+    size_t l_MEMBUFIndex = __INT_MAX__;
+    size_t i = 0;
+
+    // Perform presentByAssoc algorithm
+    while ( i < o_funcTargets.size() )
+    {
+        // INIT STEPS:
+        // Reset iterator, check functional state, check if the next taget in
+        // the vector is valid or even needed
+
+        // Get iterator to erase elements from vector when needed
+        std::vector<TargetInfo>::iterator it = o_funcTargets.begin();
+        std::advance(it,i);
+
+        // If target is already marked non-functional, delete from vector and
+        // move on.
+        TargetInfo& l_curTargetInfo = *it;
+        if (!l_curTargetInfo.functional)
+        {
+            o_funcTargets.erase(it);
+            continue;
+        }
+
+        // Check if there is a next target and set it
+        // Don't need to check next target with a DIMM
+        TargetInfo* l_nextTargetInfo = NULL;
+        if ( (i + 1) < o_funcTargets.size() &&
+             l_curTargetInfo.type != TYPE_DIMM )
+        {
+            l_nextTargetInfo = it + 1;
+        }
+
+        // CASE MCS
+        if ( l_curTargetInfo.type == TYPE_MCS )
+        {
+            // No Child MEMBUFs
+            // If next is not a MEMBUF sharing the same MCS, deconfig MCS
+            if ( l_nextTargetInfo == NULL ||
+                 l_nextTargetInfo->type != TYPE_MEMBUF ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MCS - NO_CHILD_MEMBUF
+                l_curTargetInfo.reason =
+                        HWAS::DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF;
+
+                // Add target to Deconfig vector to be deconfigured later
+                o_targToDeconfig.push_back(l_curTargetInfo);
+                // Remove target from funcTargets
+                o_funcTargets.erase(it);
+            }
+            // Update MCS Index
+            else
+            {
+                l_MCSIndex = i;
+                i++;
+            }
+        }
+
+        // CASE MEMBUF
+        else if ( l_curTargetInfo.type == TYPE_MEMBUF )
+        {
+            // No Child DIMMs
+            // If next is not a DIMM sharing the same MEMBUF, deconfig MEMBUF
+            if ( l_nextTargetInfo == NULL ||
+                 l_nextTargetInfo->type != TYPE_DIMM ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MEMBUF - NO_CHILD_DIMM
+                l_curTargetInfo.reason =
+                        HWAS::DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM;
+            }
+            // No Parent MCS
+            // If MEMBUF doesn't share the same MCS as MCSIndex, deconfig MEMBUF
+            else if ( l_MCSIndex == __INT_MAX__ ||
+                    !isSameSubPath(l_curTargetInfo, o_funcTargets[l_MCSIndex]))
+            {
+                // Disable MEMBUF - NO_PARENT_MCS
+                l_curTargetInfo.reason =
+                        HWAS::DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCS;
+            }
+            // Update MEMBUF Index
+            else
+            {
+                l_MEMBUFIndex = i;
+                i++;
+                continue;
+            }
+
+            // Add target to deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            o_funcTargets.erase(it);
+
+            // Backtrack to last MCS
+            if ( l_MCSIndex != __INT_MAX__ )
+            {
+                i = l_MCSIndex;
+            }
+            // Backtrack to beginning if no MCS has been seen yet
+            else
+            {
+                i = 0;
+            }
+        }
+
+        // CASE DIMM
+        else if ( l_curTargetInfo.type == TYPE_DIMM )
+        {
+            // No Parent MEMBUF
+            // If DIMM does not share the same MEMBUF as MEMBUFIndex,
+            // deconfig DIMM
+            if ( l_MEMBUFIndex == __INT_MAX__ ||
+                 !isSameSubPath(l_curTargetInfo, o_funcTargets[l_MEMBUFIndex]))
+            {
+                // Disable DIMM
+                l_curTargetInfo.reason =
+                        HWAS::DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEMBUF;
+
+                // Add target to deconfig vector to be deconfigured later
+                o_targToDeconfig.push_back(l_curTargetInfo);
+                // Remove target from funcTargets
+                o_funcTargets.erase(it);
+
+                // Backtrack to last MEMBUF
+                if ( l_MEMBUFIndex != __INT_MAX__ )
+                {
+                    i = l_MEMBUFIndex;
+                }
+                // Backtrack to last MCS if no MEMBUF has been seen yet
+                else if ( l_MCSIndex != __INT_MAX__)
+                {
+                    i = l_MCSIndex;
+                }
+                // Backtrack to beginning if no MCS has been seen yet
+                else
+                {
+                    i = 0;
+                }
+            }
+            else
+            {
+                i++;
+            }
+        }
+    } // presentByAssoc algorithm
+}
 
 };   // end namespace
 

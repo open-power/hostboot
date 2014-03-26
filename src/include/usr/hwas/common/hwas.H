@@ -40,6 +40,7 @@
 /******************************************************************************/
 #include <stdint.h>
 #include <targeting/common/commontargeting.H>
+#include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwasError.H>
 
 namespace HWAS
@@ -123,6 +124,53 @@ errlHndl_t restrictEXunits(
  */
 errlHndl_t checkMinimumHardware(
     const TARGETING::ConstTargetHandle_t i_node = NULL);
+
+/**
+ * @brief  Struct representing a particular target.  Used by
+ * invokePresentByAssoc to populate a vector of TargetInfo's for subsequent
+ * use by deconfigPresentByAssoc
+ */
+struct TargetInfo
+{
+    TARGETING::ATTR_AFFINITY_PATH_type affinityPath;
+    TARGETING::Target * pThisTarget;
+    TARGETING::ATTR_HUID_type huid;
+    TARGETING::ATTR_TYPE_type type;
+    HWAS::DeconfigGard::DeconfiguredByReason reason;
+    bool functional;
+};
+
+// Structure populated in invokePresentByAssoc() for use in presentByAssoc()
+typedef std::vector<TargetInfo> TargetInfoVector;
+
+/**
+ * @brief Invokes presentByAssoc
+ *
+ * Called by discoverTargets(). This function queries the system and populates
+ * a vector of structs representing functional MCS, MEMBUFS, DIMMS.
+ * This vector is then passed to presentByAssoc() which systematically adds
+ * targets to another vector to be deconfigured based on their related targets
+ * Upon completion of presentByAssoc(), this function iterates
+ * through the returned vector and deconfigures any targets marked
+ * for deconfiguration.
+ */
+void invokePresentByAssoc();
+
+/**
+ * @brief Algorithm to check if a MCS has a MEMBUF, a MEMBUF has a MCS and DIMM,
+ *        and a DIMM has a MEMBUF.
+ *
+ * The vector o_funcTargets is sorted by affinity path to allow a single pass
+ * with some backtracking to check every scenario more efficiently.
+ * These checks are needed because of scenarios where targets are non-present
+ * and their related targets are not marked as deconfigured
+ *
+ * @param[in/out] o_funcTargets    A vector of functional MCS, MEMBUFS, DIMMS
+ * @param[in/out] o_targToDeconfig A vector of targets to deconfigure, done
+ *                                 this way to allow unit tests
+ */
+void presentByAssoc(TargetInfoVector& o_funcTargets,
+                    TargetInfoVector& o_targToDeconfig);
 
 };   // end namespace
 

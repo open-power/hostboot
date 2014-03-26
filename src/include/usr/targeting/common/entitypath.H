@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -253,6 +253,29 @@ class EntityPath
          */
         bool operator==(
             const EntityPath& i_rhs) const;
+
+        /**
+         *  @brief Returns whether an entity path is logically less than
+         *  another entity path (lexicographical order)
+         *
+         *  Returns whether an entity path is logically less than another.
+         *  This determination takes into account the entity path type, the
+         *  number of path elements, and the values of the path elements
+         *  themselves.
+         *
+         *  @param[in] i_rhs Const reference to entity path to compare
+         *
+         *  @pre N/A
+         *
+         *  @post Equality returned to caller
+         *
+         *  @return bool indicating whether an entity path is logically less
+         *  than another entity path
+         *
+         *  @retval true The lhs entity path is logically less than rhs
+         *  @retval false The lhs entity path is logically greater than rhs
+         */
+        bool operator<(const EntityPath& i_rhs) const;
 
         /**
          *  @brief Returns whether two entity paths are logically equal, but

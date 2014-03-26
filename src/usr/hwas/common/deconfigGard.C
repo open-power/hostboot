@@ -344,12 +344,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 } // deconfigureTargetsFromGardRecordsForIpl
 
 //******************************************************************************
-bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
-{
-    return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
-}
-
-//******************************************************************************
 errlHndl_t DeconfigGard::processFieldCoreOverride()
 {
     HWAS_DBG("Process Field Core Override FCO");
