@@ -176,6 +176,8 @@ public:
      */
     bool isFutureShutdownRequested();
 
+    void setAcceptIstepMessages(bool accept);
+
 protected:
 
     /**
@@ -389,6 +391,10 @@ private:
     bool iv_futureShutdown;
     uint8_t iv_istepToCompleteBeforeShutdown;
     uint8_t iv_substepToCompleteBeforeShutdown;
+
+    // Instance variable stating whether this istepdispatcher instance should
+    //   accept istep messages or not
+    bool iv_acceptIstepMessages;
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;

@@ -66,6 +66,17 @@ errlHndl_t sendIstepCompleteMsg ( void );
  */
 bool isShutdownRequested ( void );
 
+/**
+ * @brief This function is to be used by external code to tell
+ *      this instance of istepdispatcher whether it should
+ *      accept istep messages or not
+ *
+ * @param[in] i_accept - true if istep messages are to be accepted, false if not
+ *
+ * @return Nothing
+ */
+void setAcceptIstepMessages ( bool i_accept );
+
 }
 
 #endif

@@ -67,6 +67,7 @@ enum    InitServiceReasonCode
     //termination_rc
     SHUTDOWN_REQUESTED_BY_FSP    =   INITSVC_COMP_ID | 0x0b,
     ISTEP_INVALID_ON_MPIPL       =   INITSVC_COMP_ID | 0x0c,
+    ISTEP_NON_MASTER_NODE_MSG    =   INITSVC_COMP_ID | 0x0d,
 };
 
 enum InitServiceUserDetailDataSubSection

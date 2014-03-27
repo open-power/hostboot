@@ -71,6 +71,7 @@
 // #include    "host_coalesce_host/host_coalesce_host.H"
 #include    "p8_block_wakeup_intr/p8_block_wakeup_intr.H"
 #include    "p8_cpu_special_wakeup.H"
+#include    <initservice/istepdispatcherif.H>
 
 namespace   ESTABLISH_SYSTEM_SMP
 {
@@ -212,12 +213,11 @@ errlHndl_t call_host_coalesce_host( )
         const INTR::PIR_t masterCpu = task_getcpuid();
         uint64_t this_node = masterCpu.nodeId;
 
-
         //loop though all possible drawers whether they exist or not
         // An invalid or non-existant logical node number in that drawer
         // indicates that the drawer does not exist.
-
         TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x0;
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type master_node_mask = 0x0;
 
         for(uint16_t drawer = 0; drawer < NUMBER_OF_POSSIBLE_NODES; ++drawer)
         {
@@ -235,6 +235,12 @@ errlHndl_t call_host_coalesce_host( )
                            mask,hb_existing_image);
                 if( 0 != ((mask >> node) & hb_existing_image ) )
                 {
+                    //The first nonzero bit in hb_existing_image represents the
+                    // master node, set mask for later comparison
+                    if (master_node_mask == 0)
+                    {
+                        master_node_mask = mask;
+                    }
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "send coalese host message to drawer %d",
                                drawer );
@@ -259,6 +265,26 @@ errlHndl_t call_host_coalesce_host( )
         //the other nodes
         if(l_errl == NULL)
         {
+            // reset mask to msb
+            mask = 0x1 << (NUMBER_OF_POSSIBLE_NODES -1);
+            //create mask to apply to hb_existing_image for this particular node
+            mask = mask >> this_node;
+
+            if (master_node_mask & (hb_existing_image & mask))
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "Master Node detected, continue allowing "
+                               "istep messages to this node.");
+                INITSERVICE::setAcceptIstepMessages(true);
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "This node is not the master node, no longer "
+                               "respond to istep messages.");
+                INITSERVICE::setAcceptIstepMessages(false);
+            }
+
             //wait for all hb images to respond
             //want to spawn a timer thread
             tid_t l_progTid = task_create(

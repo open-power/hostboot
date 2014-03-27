@@ -101,7 +101,8 @@ IStepDispatcher::IStepDispatcher() :
     iv_shutdown(false),
     iv_futureShutdown(false),
     iv_istepToCompleteBeforeShutdown(0),
-    iv_substepToCompleteBeforeShutdown(0)
+    iv_substepToCompleteBeforeShutdown(0),
+    iv_acceptIstepMessages(true)
 
 {
     mutex_init(&iv_bkPtMutex);
@@ -826,14 +827,7 @@ void IStepDispatcher::msgHndlr()
                 break;
             case ISTEP_MSG_TYPE:
                 TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: ISTEP_MSG_TYPE");
-                if (iv_istepMode)
-                {
-                    handleIStepRequestMsg(pMsg);
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring IStep msg in non-IStep mode!");
-                }
+                handleIStepRequestMsg(pMsg);
                 break;
             case COALESCE_HOST:
                 TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: COALESCE_HOST");
@@ -1210,8 +1204,6 @@ bool IStepDispatcher::isShutdownRequested()
     return isShutdownRequested;
 }
 
-
-
 // ----------------------------------------------------------------------------
 // IStepDispatcher::isFutureShutdownRequested()
 // ----------------------------------------------------------------------------
@@ -1258,12 +1250,30 @@ bool IStepDispatcher::isFutureShutdownRequested()
 }
 
 // ----------------------------------------------------------------------------
+// IStepDispatcher::acceptIstepMessages()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::setAcceptIstepMessages(bool i_accept)
+{
+    TRACDCOMP(g_trac_initsvc,
+                  ENTER_MRK"IStepDispatcher::setAcceptIstepMessages");
+
+    mutex_lock(&iv_mutex);
+    iv_acceptIstepMessages = i_accept;
+    mutex_unlock(&iv_mutex);
+
+    TRACDCOMP(g_trac_initsvc,
+                  EXIT_MRK"IStepDispatcher::setAcceptIstepMessages");
+    return;
+}
+
+// ----------------------------------------------------------------------------
 // IStepDispatcher::handleIStepRequestMsg()
 // ----------------------------------------------------------------------------
 void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 {
     errlHndl_t err = NULL;
     bool l_doReconfig = false;
+    bool l_acceptMessages = false;
 
     // find the step/substep. The step is in the top 32bits, the substep is in
     // the bottom 32bits and is a byte
@@ -1281,9 +1291,31 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     iv_curSubStep = substep;
     iv_pIstepMsg = io_pMsg;
     io_pMsg = NULL;
+    l_acceptMessages = iv_acceptIstepMessages;
     mutex_unlock(&iv_mutex);
 
-    err = doIstep (istep, substep, l_doReconfig);
+    if (l_acceptMessages)
+    {
+        err = doIstep (istep, substep, l_doReconfig);
+    }
+    else
+    {
+        /*@
+             * @errortype
+             * @reasoncode       ISTEP_NON_MASTER_NODE_MSG
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_INITSVC_MOD_ID
+             * @userdata1        Istep Requested
+             * @userdata2        Substep Requested
+             * @devdesc          Istep messaged received by non-master node.
+        */
+        err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      ISTEP_INITSVC_MOD_ID,
+                                      ISTEP_NON_MASTER_NODE_MSG,
+                                      iv_curIStep,
+                                      iv_curSubStep);
+    }
 
     // If there was no IStep error, but something happened that requires a
     // reconfigure
@@ -1690,6 +1722,10 @@ bool isShutdownRequested()
     return IStepDispatcher::getTheInstance().isShutdownRequested();
 }
 
+void setAcceptIstepMessages(bool i_accept)
+{
+    return IStepDispatcher::getTheInstance().setAcceptIstepMessages(i_accept);
+}
 // ----------------------------------------------------------------------------
 // IStepDispatcher::getIstepInfo()
 // ----------------------------------------------------------------------------
