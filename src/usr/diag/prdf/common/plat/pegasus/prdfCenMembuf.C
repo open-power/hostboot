@@ -141,13 +141,13 @@ int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
             {
                 case CHECK_STOP:
                     l_memcFir = i_membChip->getRegister("MEM_CHIPLET_CS_FIR");
-                    // mba1 CS: bits 6, 8, 10, 13
-                    l_checkBits = 0x02A40000;
+                    // mba1 CS: bits 7, 8, 10, 13
+                    l_checkBits = 0x01A40000;
                     break;
                 case RECOVERABLE:
                     l_memcFir = i_membChip->getRegister("MEM_CHIPLET_RE_FIR");
-                    // mba1 RE: bits 4, 6, 8, 11
-                    l_checkBits = 0x0A900000;
+                    // mba1 RE: bits 5, 6, 8, 11
+                    l_checkBits = 0x06900000;
                     break;
                 case SPECIAL:
                     l_memcFir = i_membChip->getRegister("MEM_CHIPLET_SPA");
