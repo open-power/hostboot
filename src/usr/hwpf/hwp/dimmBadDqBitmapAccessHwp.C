@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: dimmBadDqBitmapAccessHwp.C,v 1.14 2014/02/24 22:17:22 whs Exp $
+// $Id: dimmBadDqBitmapAccessHwp.C,v 1.15 2014/03/27 20:55:12 whs Exp $
 /**
  *  @file dimmBadDqBitmapAccessHwp.C
  *
@@ -50,6 +50,7 @@
  *                                                  Bad DQ set
  *                          whs         02/24/2014  Capture bad DQs as FFDC
  *                                                  in mnfg error logs
+ *                          whs         03/27/2014  fix current FFDC bit map
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
@@ -376,9 +377,13 @@ fapi::ReturnCode dimmBadDqBitmapGet(
                 {
                     if (o_data[i][j] != l_data[i][j])
                     {
-                        o_data[i][j] = l_data[i][j];
                         mfgModeBadBitsPresent = true;
+                        break ;
                     }
+                }
+                if (mfgModeBadBitsPresent)
+                {
+                    break;
                 }
             }
             // Create and log fapi error if discrepancies were found
@@ -418,6 +423,15 @@ fapi::ReturnCode dimmBadDqBitmapGet(
                 FAPI_SET_HWP_ERROR(l_rc,
                     RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_GET);
                 fapiLogError(l_rc);
+
+                // correct the output bit map
+                for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
+                {
+                    for (uint8_t j = 0; j < (DIMM_DQ_RANK_BITMAP_SIZE); j++)
+                    {
+                        o_data[i][j] = l_data[i][j];
+                    }
+                }
             }
         }
     } while(0);
