@@ -28,7 +28,7 @@
 // The following is required because MDIA implements its own version of these
 // hardware procedures:
 // $Id: mss_memdiags.H,v 1.9 2013/12/02 14:58:58 bellows Exp $
-// $Id: mss_memdiags.C,v 1.23 2013/12/02 18:59:22 bellows Exp $
+// $Id: mss_memdiags.C,v 1.24 2014/03/11 19:05:18 gollub Exp $
 
 #include "mdiafwd.H"
 #include "mdiatrace.H"
