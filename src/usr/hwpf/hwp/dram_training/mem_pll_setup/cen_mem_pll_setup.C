@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_setup.C,v 1.25 2013/11/15 16:30:00 mfred Exp $
+// $Id: cen_mem_pll_setup.C,v 1.26 2014/03/19 13:58:05 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -52,6 +52,10 @@ const uint16_t  POLL_COUNT_MAX          = 50;      // Number of times to poll fo
 // CFAM FSI STATUS register bit/field definitions
 const uint8_t FSI_STATUS_MEM_PLL_LOCK_BIT = 25;
 
+// TP LFIR  bit/field definitions
+const uint8_t TP_LFIR_ERRORS_FROM_NEST_PLL_LOCK_BIT = 19;
+const uint8_t TP_LFIR_ERRORS_FROM_MEM_PLL_LOCK_BIT  = 20;
+
 extern "C" {
 
 using namespace fapi;
@@ -61,6 +65,8 @@ fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
     // Target is centaur
     fapi::ReturnCode rc;
     ecmdDataBufferBase cfam_data(32);
+    uint32_t            rc_ecmd = 0;
+    ecmdDataBufferBase  scom_data(64);
 
     uint32_t  poll_count           = 0;
     uint32_t  done_polling         = 0;
@@ -110,6 +116,31 @@ fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
             FAPI_INF("Centaur MEM PLL is now locked.");
         }
 
+
+        FAPI_DBG("Clearing the FIR PLL lock error bits and unmasking TP LFIR PLL lock error bits ...");
+        rc_ecmd |= scom_data.flushTo1();
+        rc_ecmd |= scom_data.clearBit(TP_LFIR_ERRORS_FROM_NEST_PLL_LOCK_BIT);
+        rc_ecmd |= scom_data.clearBit(TP_LFIR_ERRORS_FROM_MEM_PLL_LOCK_BIT);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("Error 0x%x setting up ecmd data buffer to clear TP LFIR PLL Lock bits.", rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+        rc = fapiPutScom(i_target, TP_PERV_LFIR_AND_0x0104000B, scom_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error writing Pervasive LFIR AND Register.");
+            break;
+        }
+        rc = fapiPutScom(i_target, TP_PERV_LFIR_MASK_AND_0x0104000E, scom_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error writing Pervasive LFIR Mask AND Register.");
+            break;
+        }
+
+
     } while(0);
 
     FAPI_INF("********* cen_mem_pll_setup complete *********");
@@ -125,6 +156,9 @@ fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_setup.C,v $
+Revision 1.26  2014/03/19 13:58:05  mfred
+Update to clear and unmask the PLL lock FIR bits after the PLL locks.  SW249390.
+
 Revision 1.25  2013/11/15 16:30:00  mfred
 Changes made by Mike Jones for gerrit review, mostly for improved error handling.
 
