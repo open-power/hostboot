@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/kernel/console.H $                                */
+/* $Source: src/usr/errl/errludprintk.C $                                 */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* COPYRIGHT International Business Machines Corp. 2014                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,40 +20,30 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __KERNEL_CONSOLE_H
-#define __KERNEL_CONSOLE_H
-
-#include <stdint.h>
+#include <errl/errludprintk.H>
+#include <errl/errlreasoncodes.H>
+#include <kernel/console.H>
+#include <algorithm>
 #include <string.h>
-#include <builtins.h>
 
-#include <util/sprintf.H>
-
-#ifdef HOSTBOOT_DEBUG
-    #define printkd(format...) printk(format)
-#else
-    #define printkd(format...)
-#endif
-
-void printk(const char*, ...) FORMAT_PRINTF;
-
-class Console : public Util::ConsoleBufferInterface
+namespace ERRORLOG
 {
-    public:
-	int putc(int);
-        size_t operator()(int c) { return putc(c); };
 
-	enum { BUFFER_SIZE = 1024 * 16 };
+    void ErrlUserDetailsPrintk::_capturePrintk(size_t i_size)
+    {
+        // Determine existing size of printk buffer.
+        size_t printkSize = strnlen(kernel_printk_buffer, Console::BUFFER_SIZE);
+        i_size = std::min(i_size, printkSize);
 
-    protected:
-	Console();
-	~Console() {};
+        // Copy trailing i_size to UD buffer.
+        uint8_t* buffer = reallocUsrBuf(i_size);
+        memcpy(buffer, &kernel_printk_buffer[printkSize - i_size], i_size);
 
-    private:
-	size_t iv_pos;
-	char * iv_buffer;
+        // Set up ErrlUserDetails instance variables.
+        iv_CompId = ERRL_COMP_ID;
+        iv_Version = 1;
+        iv_SubSection = ERRL_UDT_PRINTK;
+
+    }
+
 };
-
-extern char kernel_printk_buffer[Console::BUFFER_SIZE];
-
-#endif

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/kernel/console.H $                                */
+/* $Source: src/include/usr/errl/errludprintk.H $                         */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* COPYRIGHT International Business Machines Corp. 2014                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,40 +20,50 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __KERNEL_CONSOLE_H
-#define __KERNEL_CONSOLE_H
+#ifndef ERRL_UDPRINTK_H
+#define ERRL_UDPRINTK_H
+
+/**
+ *  @file errludprintk.H
+ *
+ *  Defines the ErrlUserDetailsPrintk class that adds a portion of the printk
+ *  buffers as FFDC to an error log as user detail data.
+ */
 
 #include <stdint.h>
-#include <string.h>
-#include <builtins.h>
+#include <errl/errluserdetails.H>
 
-#include <util/sprintf.H>
-
-#ifdef HOSTBOOT_DEBUG
-    #define printkd(format...) printk(format)
-#else
-    #define printkd(format...)
-#endif
-
-void printk(const char*, ...) FORMAT_PRINTF;
-
-class Console : public Util::ConsoleBufferInterface
+namespace ERRORLOG
 {
-    public:
-	int putc(int);
-        size_t operator()(int c) { return putc(c); };
 
-	enum { BUFFER_SIZE = 1024 * 16 };
+    class ErrlUserDetailsPrintk : public ErrlUserDetails
+    {
+        public:
+            enum { DEFAULT_SIZE_BYTES = 256 };
 
-    protected:
-	Console();
-	~Console() {};
+            /** @brief Constructor
+             *
+             *  Captures the printk buffer.
+             *
+             *  @param[in] i_size - Amount (in bytes) of data to capture.
+             */
+            explicit ErrlUserDetailsPrintk(size_t i_size = DEFAULT_SIZE_BYTES)
+            {
+                _capturePrintk(i_size);
+            }
 
-    private:
-	size_t iv_pos;
-	char * iv_buffer;
-};
+            /** @brief Destructor
+             */
+            virtual ~ErrlUserDetailsPrintk() {};
 
-extern char kernel_printk_buffer[Console::BUFFER_SIZE];
+        private:
+            //Disabled.
+            ErrlUserDetailsPrintk(const ErrlUserDetailsPrintk&);
+            ErrlUserDetailsPrintk& operator=(const ErrlUserDetailsPrintk&);
+
+            void _capturePrintk(size_t);
+    };
+
+}
 
 #endif

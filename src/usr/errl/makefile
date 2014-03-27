@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -26,7 +26,7 @@ MODULE = errl
 OBJS = errlentry.o errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
        errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
        errludstring.o errludbacktrace.o errludattribute.o errludlogregister.o \
-       errludcallout.o
+       errludcallout.o errludprintk.o
 
 SUBDIRS = test.d  parser.d runtime.d
 

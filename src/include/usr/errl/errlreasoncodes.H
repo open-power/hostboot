@@ -70,6 +70,7 @@ namespace ERRORLOG
         ERRL_UDT_ATTRIBUTE        = 0x04,
         ERRL_UDT_LOGREGISTER      = 0x05,
         ERRL_UDT_CALLOUT          = 0x06,
+        ERRL_UDT_PRINTK           = 0x07,
     };
 };
 

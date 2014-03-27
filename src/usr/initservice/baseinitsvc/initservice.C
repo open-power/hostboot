@@ -47,6 +47,7 @@
 
 
 #include    <errl/errludstring.H>
+#include    <errl/errludprintk.H>
 
 #include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
 
@@ -262,6 +263,9 @@ errlHndl_t InitService::startTask(
                                     INITSERVICE::WAIT_TASK_FAILED,
                                     l_tidretrc, l_childsts, hbSwError);
 
+            // Add Printk Buffer for FFDC.
+            ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
+
             // If the task crashed, then the l_childerrl is either NULL or
             // contains an RC indicating that the issue causing the child
             // to crash has already been reported.  Therefore, reduce the
@@ -389,6 +393,9 @@ errlHndl_t InitService::executeFn(
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_FN_FAILED,
                                     l_tidretrc, l_childsts, hbSwError);
+
+            // Add Printk Buffer for FFDC.
+            ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
 
             // If the task crashed, then the l_childerrl is either NULL or
             // contains an RC indicating that the issue causing the child
