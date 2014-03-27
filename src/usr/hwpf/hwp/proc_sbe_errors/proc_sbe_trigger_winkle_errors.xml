@@ -1,0 +1,132 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_trigger_winkle_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_sbe_trigger_winkle_errors.xml,v 1.4 2014/01/26 20:06:34 stillgs Exp $ -->
+<!-- Error definitions for proc_sbe_trigger_winkle procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_TRIGGER_WINKLE_EX_DID_NOT_ENTER_WINKLE</rc>
+    <description>
+      Procedure: proc_sbe_trigger_winkle
+      The master EX chiplet did not enter winkle before the deadman timer expired.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_PIBMEM_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>CHIP_IN_ERROR</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_TRIGGER_WINKLE_EX_WAKEUP_DID_NOT_HIT_GOTO</rc>
+    <description>
+      Procedure: proc_sbe_trigger_winkle
+      The master EX chiplet wakeup did not hit GOTO before the deadman timer expired.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_PIBMEM_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>CHIP_IN_ERROR</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_TRIGGER_WINKLE_EX_WAKEUP_DID_NOT_FINISH</rc>
+    <description>
+      Procedure: proc_sbe_trigger_winkle
+      The master EX chiplet wakeup didn't finish before the deadman timer expired.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_PIBMEM_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>CHIP_IN_ERROR</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_TRIGGER_WINKLE_HOSTBOOT_DID_NOT_RESPOND</rc>
+    <description>
+      Procedure: proc_sbe_trigger_winkle
+      The master EX chiplet woke up but hostboot didn't indicate that it was running before the deadman timer expired.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_PIBMEM_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>CHIP_IN_ERROR</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+</hwpErrors>

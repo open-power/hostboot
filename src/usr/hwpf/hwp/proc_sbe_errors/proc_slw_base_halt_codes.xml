@@ -1,0 +1,459 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_slw_base_halt_codes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_slw_base_halt_codes.xml,v 1.9 2013/11/23 00:33:44 cmolsen Exp $ -->
+<!-- Halt codes for proc_slw_*.S -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_UNDEFINED_SV</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that an
+      invalid start vector was detected in the EXE_TRIGGER (ETR) register when 
+      kicking off an idle transition. The start vector is in ETR(8:11).
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_PFET_VDD_TIMEOUT_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_poweronoff and indicates that a timeout
+      occured waiting for the VDD PFET sequencer(s) to complete.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_PFET_VCS_TIMEOUT_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_poweronoff and indicates that a timeout
+      occured waiting for the VCS PFET sequencer(s) to complete.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_PFET_DECODE_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_poweronoff and indicates that an invalid
+      PFET decode was detected.  This is an SLW firmware issue.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_IVRM_BS_SLEEP_ENTRY_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout
+      occured waiting for the internal VRM babystepper to synchronize the idle
+      transition command during sleep entry.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_IVRM_BS_WINKLE_ENTRY_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout
+      occured waiting for the internal VRM babystepper to synchronize the idle
+      transition command during winkle entry.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_IVRM_BS_EXIT_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout
+      occured waiting for the internal VRM babystepper to synchronize the idle
+      transition command during a fast exit.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_IVRM_CAL_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout
+      occured while polling for the iVRM calibration to complete.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_IVRM_CAL_BS_EXIT_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout
+      occured waiting for the internal VRM babystepper to synchronize the idle
+      transition command during a deep exit after iVRM calibration.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_IVRM_FORCESM_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout
+      occured waiting for the internal VRM force safe mode to take effect.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_RAM_THREAD_CHECK_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_ram and indicates that a timeout
+      occured waiting the RAM hardware to accept the instruction given to it..
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_RAM_THREAD_QUIESCE_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_ram and indicates that a timeout
+      occured waiting the RAM hardware to quiesce.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_RAM_CONTROL_EXCEPTION_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_ram and indicates that RAM controller
+      indicates recovery is inprogress or an exception has occured..
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_RAM_STATUS_TIMEOUT_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_ram and indicates that a timeout occured
+      looking for good status from the RAM Controller.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_GOTO_TIMEOUT_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_base and indicates that a timeout occured
+      looking for the proper PCBS-PM state before issuing a PCBS-PM "GOTO" command.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_NEVER_REACH_HALT</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      updated the PMC status reg but never reached the subsequent halt op.  PMC SLW 
+      Timeouts will be indicated without further FIR bits.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_SIMPLE_HALT</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      executed the simple halt error injection.  PMC SLW Timeouts will be indicated
+      without further FIR bits.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_INVALID_INSTR</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      enabled invalid instruction error injection occured.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_INVALID_OCI_ADDRESS</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      enabled invalid OCI address error injection occured.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_INVALID_PIB_ADDRESS</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      enabled invalid PIB address error injection occured.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_PC_UNDERFLOW</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      enabled PC underflow error injection occured.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_PC_OVERRFLOW</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      enabled PC overflow error injection occured.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_ERRINJ_TIMEOUT_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_pro_epi_log and indicates that the image 
+      enabled timeout error injection occured.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_EH_PIB_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_error_handler upon a detected error 0 
+      event (non-masked PIB error code).
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_EH_OCI_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_error_handler upon a detected error 1 
+      event (non-masked OCI error code).
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_EH_INSTRUCTION_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_error_handler upon a detected error 2 
+      event (instruction fetch or decode).
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_EH_INTERNAL_DATA_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_error_handler upon a detected error 3 
+      event (internal data error).
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_EH_ERROR_ON_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_error_handler upon a detected error 4 
+      event (an error was detected upon an error).
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_PMGP1_ENABLE_CONFIG_ERROR</rc>
+    <description>
+      This error is signalled by proc_slw_base code when the multicast read AND 
+      and the multicast read OR of the PMGP1 register for the chiplets 
+      represented in the EXE Trigger register do not match.  This could be caused 
+      by a configuration error with the Deep Sleep power up and/or down bits or 
+      Deep Winkle power up bit.  If these bits match, then a hardware fault is 
+      the next most probable.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>SLW_RC_ILLEGAL_WINKLE_ENTRY_POWER_DOWN</rc>
+    <description>
+      This error is signalled by proc_slw_base code (poweronoff portion) and indicates
+      that the PMGP1 bit for WINKLE_POWER_DOWN when WINKLE_POWER_OFF_SEL is set to 1
+      (eg a Deep Winkle) has been detected.  This is an illegal configuration as it
+      causes the loss of the High Availability Log Write pointer in the L3 before it
+      could be saved for restoration upon Deep Winkle Exit.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>SLW_RC_OHA_SPWUP_TIMEOUT</rc>
+    <description>
+      This error is signalled by proc_slw_base code when the polling for OHA AISS 
+      achieving the special wake-up state after hitting the PCBS GOTO operation to 
+      complete deep sleep exit.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SLW_CPM_SPWKUP_NOT_SET</rc>
+    <description>
+      This error is signalled by proc_slw_occ_cpm code when it is detected that 
+      special wake-up override isnt enabled which it must be prior to calling
+      any of the CPM install or enable routines.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

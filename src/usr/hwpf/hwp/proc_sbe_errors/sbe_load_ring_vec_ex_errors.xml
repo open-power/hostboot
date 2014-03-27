@@ -1,0 +1,93 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/sbe_load_ring_vec_ex_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: sbe_load_ring_vec_ex_errors.xml,v 1.3 2013/06/21 22:50:58 jeshua Exp $ -->
+<!-- Error definitions for sbe_load_ring_vec_ex procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_time_core_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_core_gptr_time_initf
+      Failed to find a chiplet to scan for ex_time_core
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+         and should log something about the target EX -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_time_eco_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_gptr_time_initf
+      Failed to find a chiplet to scan for ex_time_eco
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+         and should log something about the target EX -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_repr_core_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_core_repair_initf
+      Failed to find a chiplet to scan for ex_repr_core</description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+         and should log something about the target EX -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_repr_eco_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_repair_initf
+      Failed to find a chiplet to scan for ex_repr_eco
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+         and should log something about the target EX -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+</hwpErrors>

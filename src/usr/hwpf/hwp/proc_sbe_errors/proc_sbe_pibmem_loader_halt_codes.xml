@@ -1,0 +1,106 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_pibmem_loader_halt_codes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_sbe_pibmem_loader_halt_codes.xml,v 1.2 2013/06/21 18:44:47 jeshua Exp $ -->
+<!-- Halt codes for proc_sbe_pibmem_loader.S -->
+<hwpErrors>
+  <hwpError>
+    <rc>RC_SBE_PIBMEM_PRE_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_pibmem_loader
+      The PIBMEM either shows error status or is not in the idle state prior to
+      the execution of the procedure.  The contents of the PIBMEM Status
+      Register are in D0 at the time of the halt. Resetting the PIBMEM prior
+      to running proc_sbe_pibmem_loader should clear up this error.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PIBMEM_POST_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_pibmem_loader
+      The PIBMEM either shows error status or is not in the idle state after
+      execution of the procedure.  The contents of the PIBMEM Status Register
+      are in D0 at the time of the halt.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PIBMEM_IMAGE_SIZE_ALIGNMENT</rc>
+    <description>
+      Procedure: proc_sbe_pibmem_loader
+      The size of the PIBMEM image to load is not a multiple of 8 bytes, which
+      is a hard requirement due to the PORE architecture. The image size passed
+      to the procedure can be found in SPRG0.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PIBMEM_LOAD_ADDRESS_ALIGNMENT</rc>
+    <description>
+      Procedure: proc_sbe_pibmem_loader
+      The load address of the PIBMEM image is not a multiple of 8 bytes, which
+      is a hard requirement due to the PORE architecture.  The load address
+      passed to the procedure can be found in SPRG0.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PIBMEM_OVERFLOW</rc>
+    <description>
+      Procedure: proc_sbe_pibmem_loader
+      The load address and size of the PIBMEM image would overflow the physical
+      PIBMEM. The image size (in bytes) passed to the procedure is in SPRG0;
+      D1 contains the PIBMEM load address passed to the procedure.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+</hwpErrors>

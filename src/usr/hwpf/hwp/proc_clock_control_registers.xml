@@ -1,0 +1,93 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_clock_control_registers.xml $           -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_clock_control_registers.xml,v 1.1 2013/04/25 19:17:30 jeshua Exp $ -->
+<!-- Definition of Clock control registers to collect on some errors -->
+<hwpErrors>
+  <!-- TP chiplet -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_TP_CLOCK_CONTROLLER</id>
+    <scomRegister>TP_OPCG_CNTL0_0x01030002</scomRegister>
+    <scomRegister>TP_OPCG_CNTL1_0x01030003</scomRegister>
+    <scomRegister>TP_OPCG_CNTL2_0x01030004</scomRegister>
+    <scomRegister>TP_OPCG_CNTL3_0x01030005</scomRegister>
+    <scomRegister>TP_CLK_REGION_0x01030006</scomRegister>
+    <scomRegister>TP_CLK_SCANSEL_0x01030007</scomRegister>
+    <scomRegister>TP_CLK_STATUS_0x01030008</scomRegister>
+  </registerFfdc>
+  <!-- Nest chiplet -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_NEST_CLOCK_CONTROLLER</id>
+    <scomRegister>NEST_OPCG_CNTL0_0x02030002</scomRegister>
+    <scomRegister>NEST_OPCG_CNTL1_0x02030003</scomRegister>
+    <scomRegister>NEST_OPCG_CNTL2_0x02030004</scomRegister>
+    <scomRegister>NEST_OPCG_CNTL3_0x02030005</scomRegister>
+    <scomRegister>NEST_CLK_REGION_0x02030006</scomRegister>
+    <scomRegister>NEST_CLK_SCANSEL_0x02030007</scomRegister>
+    <scomRegister>NEST_CLK_STATUS_0x02030008</scomRegister>
+  </registerFfdc>
+  <!-- X Bus chiplet -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_XBUS_CLOCK_CONTROLLER</id>
+    <scomRegister>X_OPCG_CNTL0_0x04030002</scomRegister>
+    <scomRegister>X_OPCG_CNTL1_0x04030003</scomRegister>
+    <scomRegister>X_OPCG_CNTL2_0x04030004</scomRegister>
+    <scomRegister>X_OPCG_CNTL3_0x04030005</scomRegister>
+    <scomRegister>X_CLK_REGION_0x04030006</scomRegister>
+    <scomRegister>X_CLK_SCANSEL_0x04030007</scomRegister>
+    <scomRegister>X_CLK_STATUS_0x04030008</scomRegister>
+  </registerFfdc>
+  <!-- A Bus chiplet -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_ABUS_CLOCK_CONTROLLER</id>
+    <scomRegister>A_OPCG_CNTL0_0x08030002</scomRegister>
+    <scomRegister>A_OPCG_CNTL1_0x08030003</scomRegister>
+    <scomRegister>A_OPCG_CNTL2_0x08030004</scomRegister>
+    <scomRegister>A_OPCG_CNTL3_0x08030005</scomRegister>
+    <scomRegister>A_CLK_REGION_0x08030006</scomRegister>
+    <scomRegister>A_CLK_SCANSEL_0x08030007</scomRegister>
+    <scomRegister>A_CLK_STATUS_0x08030008</scomRegister>
+  </registerFfdc>
+  <!-- PCIE chiplet -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_PCIE_CLOCK_CONTROLLER</id>
+    <scomRegister>PCIE_OPCG_CNTL0_0x09030002</scomRegister>
+    <scomRegister>PCIE_OPCG_CNTL1_0x09030003</scomRegister>
+    <scomRegister>PCIE_OPCG_CNTL2_0x09030004</scomRegister>
+    <scomRegister>PCIE_OPCG_CNTL3_0x09030005</scomRegister>
+    <scomRegister>PCIE_CLK_REGION_0x09030006</scomRegister>
+    <scomRegister>PCIE_CLK_SCANSEL_0x09030007</scomRegister>
+    <scomRegister>PCIE_CLK_STATUS_0x09030008</scomRegister>
+  </registerFfdc>
+  <!-- EX chiplet -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_EX_CLOCK_CONTROLLER</id>
+    <scomRegister>EX_SYNC_CONFIG_0x10030000</scomRegister>
+    <scomRegister>EX_OPCG_CNTL0_0x10030002</scomRegister>
+    <scomRegister>EX_OPCG_CNTL1_0x10030003</scomRegister>
+    <scomRegister>EX_OPCG_CNTL2_0x10030004</scomRegister>
+    <scomRegister>EX_OPCG_CNTL3_0x10030005</scomRegister>
+    <scomRegister>EX_CLK_REGION_0x10030006</scomRegister>
+    <scomRegister>EX_CLK_SCANSEL_0x10030007</scomRegister>
+    <scomRegister>EX_CLK_STATUS_0x10030008</scomRegister>
+  </registerFfdc>
+</hwpErrors>

@@ -1,0 +1,56 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_select_ex_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_sbe_select_ex_errors.xml,v 1.2 2013/06/21 18:22:23 jeshua Exp $ -->
+<!-- Error definitions for proc_sbe_select_ex procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SELECT_EX_NO_GOOD_BOOT_CORES_FOUND</rc>
+    <description>
+      Procedure: proc_sbe_select_ex
+      None of the valid boot cores are enabled
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <ffdc>EX_PARTIAL_GOOD_0x520F0012</ffdc>
+    <sbeError/>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SELECT_EX_NO_SECOND_GOOD_BOOT_CORE_FOUND</rc>
+    <description>
+      Procedure: proc_sbe_select_ex
+      Skipped the first good boot core and no other good boot core was found
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <ffdc>EX_PARTIAL_GOOD_0x520F0012</ffdc>
+    <sbeError/>
+  </hwpError>
+</hwpErrors>

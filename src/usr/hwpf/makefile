@@ -93,7 +93,6 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/pstates/pstates/proc_get_voltage_errors.xml \
     hwp/proc_cfam_registers.xml \
     hwp/p8_slw_registers.xml \
-    hwp/proc_sbe_select_ex_errors.xml \
     hwp/utility_procedures/memory_mss_maint_cmds.xml \
     hwp/mc_config/mss_volt/memory_mss_volt.xml \
     hwp/mc_config/mss_freq/memory_mss_freq.xml \
@@ -146,7 +145,28 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/bus_training/io_read_erepair_errors.xml \
     hwp/bus_training/io_fir_isolation_errors.xml \
     hwp/bus_training/io_restore_erepair_errors.xml \
-    hwp/bus_training/io_cleanup_errors.xml
+    hwp/bus_training/io_cleanup_errors.xml \
+    hwp/proc_pibmem_registers.xml \
+    hwp/proc_clock_control_registers.xml \
+    hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_chiplet_init_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_decompress_scan_halt_codes.xml \
+    hwp/proc_sbe_errors/proc_sbe_ex_dpll_setup_halt_codes.xml \
+    hwp/proc_sbe_errors/proc_sbe_ex_startclocks_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_fabricinit_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_instruct_start_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_lco_loader_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_npll_setup_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_pb_startclocks.xml \
+    hwp/proc_sbe_errors/proc_sbe_pibmem_loader_halt_codes.xml \
+    hwp/proc_sbe_errors/proc_sbe_scominit_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_select_ex_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_setup_evid_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_tp_switch_gears_errors.xml \
+    hwp/proc_sbe_errors/proc_sbe_trigger_winkle_errors.xml \
+    hwp/proc_sbe_errors/proc_slw_base_halt_codes.xml \
+    hwp/proc_sbe_errors/sbe_common_halt_codes.xml \
+    hwp/proc_sbe_errors/sbe_load_ring_vec_ex_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

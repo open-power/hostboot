@@ -1,0 +1,304 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/sbe_common_halt_codes.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: sbe_common_halt_codes.xml,v 1.5 2013/06/21 22:57:28 jeshua Exp $ -->
+<!-- Halt codes for proc_sbe_* procedures common to P8 and Centaur -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <!-- ** Generic halt codes                                                -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SUCCESS</rc>
+    <description>
+      This halt code does not represent an error; This is the code associated
+      with the normal successful completion of an IPL by an SBE istep
+      procedure.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SUCCESS_SLAVE_CHIP</rc>
+    <description>
+      This halt code does not represent an error; This is the code associated
+      with the normal successful completion of an IPL by an SBE istep
+      procedure on a slave chip.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PAUSE_WITH_SUCCESS</rc>
+    <description>
+      This halt code does not represent an error; This is the code associated
+      with a procedure initiated halt of the SBE code, with the expectation
+      that it will be resumed at a later point in time.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- ** Halt codes from sbe_common.H                                      -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PROC_ENTRY_HALT</rc>
+    <description>
+      This halt code does not represent an error; This is the code associated
+      with a HALT requested by the user prior to the execution of a procedure
+      by setting the PROC_CONTROL_ENTRY_HALT bit in the control word for the
+      procedure.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PROC_EXIT_HALT</rc>
+    <description>
+      This halt code does not represent an error; This is the code associated
+      with a HALT requested by the user after the execution of a procedure
+      by setting the PROC_CONTROL_EXIT_HALT bit in the control word for the
+      procedure.
+    </description>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PROC_CHECKSTOP</rc>
+    <description>
+      This halt code indicates that a checkstop was detected after executing a
+      procedure.  Use the fields of the SBEVITAL register to identify the
+      procedure that failed.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+      and to log the FIR regs? -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PROC_RECOVERABLE</rc>
+    <description>
+      This halt code indicates that a recoverable error was detected after
+      executing a procedure.  Use the fields of the SBEVITAL register to
+      identify the procedure that failed.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+      and to log the FIR regs? -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PROC_SPATTN</rc>
+    <description>
+      This halt code indicates that a Special Attention was detected after
+      executing a procedure.  Use the fields of the SBEVITAL register to
+      identify the procedure that failed.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+      and to log the FIR regs? -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- ** Halt codes from proc_sbe_pore_errors.S                            -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PORE_ERROR0</rc>
+    <description>
+      This halt code indicates that an execution-phase PIB/PCB access
+      returned a non-0 response.  The PORE PIBMS_DBG registers 0 and 1
+      (plus the remainder of the PORE state) contain the information required
+      for an initial debug of the problem.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PORE_ERROR1</rc>
+    <description>
+      This halt code indicates that an execution-phase OCI accesss had an
+      error.  The PORE PIBMS_DBG registers 0 and 1 (plus the remainder of the
+      PORE state) contain the information required for an initial debug of the
+      problem.
+
+      This error should never occur during an SBE IPL since the SBE does not
+      include an OCI interface.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PORE_ERROR2</rc>
+    <description>
+      This halt code indicates an instruction fetch or decode error. The PORE
+      specification lists several causes of this error code.  The most likely
+      causes in a production system are:
+      o An I2C hang when fetching code from SEEPROM;
+      o A bad branch that starts executing garbage or data;
+      o Memory corruption
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PORE_ERROR3</rc>
+    <description>
+      This halt code indicates an internal data error during consistency
+      checking, e.g., a bad scan-data CRC.
+
+      This error should never occur during an SBE IPL since the SBE IPL does
+      not use the PORE SCAND instruction.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_PORE_ERROR4</rc>
+    <description>
+      This halt code indicates that a second error occurred during processing
+      of an initial error.
+
+      It is extremely unlikely that this error would ever occur during an SBE
+      IPL since the PORE error handlers are nothing more than a single HALT
+      statement.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- ** Halt codes from scan0 subroutine                                  -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN0_DONE_POLL_THRESHOLD</rc>
+    <description>
+      This error is signalled by the scan0 subroutine, indicating that the
+      scan0 DONE polling reached the specified threshold value. The scan0
+      subroutine could have been called by various procedures.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+         and should log something about the target chiplet -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- ** Halt codes from arrayinit subroutine                              -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_ARRAYINIT_POLL_THRESHOLD</rc>
+    <description>
+      This error is signalled by the arrayinit subroutine, indicating that the
+      arrayinit DONE polling reached the specified threshold value. The arrayinit
+      subroutine could have been called by various procedures.
+    </description>
+    <!-- JDS TODO - this FFDC should probably only log the target engine
+         and should log something about the target chiplet -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+</hwpErrors>

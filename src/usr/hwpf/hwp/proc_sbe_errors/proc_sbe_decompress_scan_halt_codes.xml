@@ -1,0 +1,136 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_decompress_scan_halt_codes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_sbe_decompress_scan_halt_codes.xml,v 1.3 2013/06/21 22:46:29 jeshua Exp $ -->
+<!-- Halt codes for proc_sbe_decompress_scan.S -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN_MULTICAST_TYPE_ERROR</rc>
+    <description>
+      Subroutine: proc_sbe_decompress_scan
+      The subroutine was given a chiplet Id that is a multicast chiplet,
+      however it is not a multicast WRITE type as required. The bad chiplet Id
+      will be found in P0 at the halt.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN_MAGIC_MISMATCH</rc>
+    <description>
+      Subroutine: proc_sbe_decompress_scan
+      The subroutine was passed a data structure whose magic number was
+      incorrect. The magic number of the data structure can be found in PORE
+      register D0. The most likely cause of this error is a problem with the
+      tool chain used to build the SBE IPL images.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN_HEADER_VERSION_ERROR</rc>
+    <description>
+      Subroutine: proc_sbe_decompress_scan
+      The subroutine was passed a data structure whose header version is
+      different from the one the code was expecting. The header version of the
+      data structure can be found in PORE register D0. The most likely cause of
+      this error is a problem with the tool chain used to build the SBE IPL
+      images.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN_DATA_SIZE_ERROR</rc>
+    <description>
+      Subroutine: proc_sbe_decompress_scan
+      Each scan data structure contains the total expected size of the
+      structure, however in this case the compressed scan string required
+      either more or less data than indicated in the header. The PORE register
+      D0 contains the number (signed) of excess doublewords. The most likely
+      cause of this error is a problem with the tool chain used to build the
+      SBE IPL images.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN_RING_LENGTH_ERROR</rc>
+    <description>
+      Subroutine: proc_sbe_decompress_scan
+      The number of bits scanned does not match the ring length stored in the
+      scan data header. The PORE register D0 contains the number (signed) of
+      excess bits. The most likely cause of this error is a problem with the
+      tool chain used to build the SBE IPL images.
+    </description>
+    <!-- JDS TODO - this FFDC should log the target chiplet
+         REG_FFDC_PROC_*_CLOCK_CONTROLLER registers as well -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SCAN_CHECKWORD_ERROR</rc>
+    <description>
+      Subroutine: proc_sbe_decompress_scan
+      The initial checkword did not rotate back into the scan data register at
+      the completion of the scan. The contents of the PORE D0 register have
+      been loaded with the received checkword, whose value may provide a clue
+      as to what happened. The expected value is 0xa5a55a5a00000000. This error
+      could be caused by broken hardware, or by any tool problem that would
+      misrepresent the length of the actual hardware scan ring.
+    </description>
+    <!-- JDS TODO - this FFDC should log the target chiplet
+         REG_FFDC_PROC_*_CLOCK_CONTROLLER registers as well -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError>
+</hwpErrors>

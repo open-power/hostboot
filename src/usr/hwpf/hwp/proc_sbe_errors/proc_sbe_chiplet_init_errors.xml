@@ -1,0 +1,68 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_chiplet_init_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_sbe_chiplet_init_errors.xml,v 1.2 2013/12/13 15:59:11 stillgs Exp $ -->
+<!-- Halt codes for proc_sbe_chiplet_init.S -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_MPIPL_CLOCK_START_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_chiplet_init.S
+      Check that clocks were started to allow AISS access for PCB Fencing failed
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError> 
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_MPIPL_PBC_FENCE_TIMEOUT_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_chiplet_init.S
+      Check that the PCB Fence was raised fOR MPIPL reset failed
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError> 
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_MPIPL_SECURITY_UNLOCK_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_chiplet_init.S
+      The security function failed to unlock for MPIPL restart
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <sbeError/>
+  </hwpError> 
+</hwpErrors>
