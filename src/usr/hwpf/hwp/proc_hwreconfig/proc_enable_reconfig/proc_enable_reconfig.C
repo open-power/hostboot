@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_enable_reconfig.C,v 1.5 2014/02/19 13:45:23 bellows Exp $
+// $Id: proc_enable_reconfig.C,v 1.7 2014/03/25 21:42:37 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_enable_reconfig.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -32,7 +32,7 @@
 //------------------------------------------------------------------------------
 // *! TITLE       : proc_enable_reconfig
 // *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  :  Mark Bellwos   Email: bellows@us.ibm.com
+// *! OWNER NAME  :  Jacob Sloat   Email: jdsloat@us.ibm.com
 // *! BACKUP NAME :                 Email: ______@us.ibm.com
 
 // *! ADDITIONAL COMMENTS :
@@ -44,6 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.7   | jdsloat  |25-MAR-14| Added return rc to the end of the code
+//   1.6   | jdsloat  |14-MAR-14| Commented out INIT_STATE set at the end of procedure.  SW245901
 //   1.5   | bellows  |17-FEB-14| Deconfig a proc if error found - SW246059
 //   1.4   | bellows  |13-NOV-13| Fixed up rc_ecmd problems from review
 //   1.3   | bellows  |11-NOV-13| Firmware review updates
@@ -263,11 +265,11 @@ extern "C" {
     }
 
     /*
-    // who knows where we might end on another pass through
-    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_COLD;
+    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_COLD; // who knows where we might end on another pass through
     rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target_cen, l_attr_mss_init_state);
     */
     return rc;
+
   }
 
 } // extern C
