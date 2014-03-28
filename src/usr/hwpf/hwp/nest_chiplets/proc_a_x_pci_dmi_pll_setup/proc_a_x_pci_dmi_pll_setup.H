@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.5 2013/04/17 22:38:44 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.6 2014/03/27 17:58:11 bgeukes Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -43,6 +43,21 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
+
+//-----
+// Constant Definitions
+//
+
+CONST_UINT64_T( PERV_PLL_LOCK_ERROR_INDICATION_0x010F001F    , ULL(0x010F001F) );
+CONST_UINT64_T( NEST_PLL_LOCK_ERROR_INDICATION_0x020F001F    , ULL(0x020F001F) );
+CONST_UINT64_T( ABUS_PLL_LOCK_ERROR_INDICATION_0x080F001F    , ULL(0x080F001F) );
+CONST_UINT64_T( PCI_PLL_LOCK_ERROR_INDICATION_0x090F001F    , ULL(0x090F001F) );
+
+CONST_UINT64_T( PERV_PLL_LOCK_MASK_0x010F001E    , ULL(0x010F001E) );
+CONST_UINT64_T( NEST_PLL_LOCK_MASK_0x020F001E    , ULL(0x020F001E) );
+CONST_UINT64_T( ABUS_PLL_LOCK_MASK_0x080F001E    , ULL(0x080F001E) );
+CONST_UINT64_T( PCI_PLL_LOCK_MASK_0x090F001E    , ULL(0x090F001E) );
+
 
 //------------------------------------------------------------------------------
 // Structure definitions
