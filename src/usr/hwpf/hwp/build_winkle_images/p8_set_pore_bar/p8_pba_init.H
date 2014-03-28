@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_init.H,v 1.6 2013/06/01 03:26:29 dcrowell Exp $
+
+// $Id: p8_pba_init.H,v 1.8 2014/03/17 23:16:35 stillgs Exp $
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -103,6 +104,10 @@ const uint64_t PBA_SLVRESETs[4] =
 // Maximum number of Polls for PBA slave reset
 #define MAX_PBA_RESET_POLLS     16
 #define PBA_RESET_POLL_DELAY    1       // in microseconds
+
+// Maximum number of Polls for PBA Block Copy Stopping - 500ms timeout
+#define MAX_PBA_BC_STOP_POLLS     256
+#define PBA_BC_STOP_POLL_DELAY    10    // in microseconds
 
 // bar mask is valid for bits 23 to 43, in a 64bit value this is
 //           1         2         3         4         5         6
@@ -198,7 +203,11 @@ typedef union pbaxcfg_typ{
    } fields;
 } pbaxcfg_t;
 
-
+// BCDE and BCUE Status registers bits
+#define PBA_BC_STAT_RUNNING  0
+#define PBA_BC_STAT_STOPPED 29
+#define PBA_BC_STAT_ERROR   30
+#define PBA_BC_STAT_DONE    31
 
 
 // ----------------------------------------------------------------------
@@ -219,5 +228,4 @@ p8_pba_init (const fapi::Target& i_target,
 
 
 #endif // _P8_PBAINITQ_H_
-
 

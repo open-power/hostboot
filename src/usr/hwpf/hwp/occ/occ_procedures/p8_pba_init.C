@@ -20,8 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_init.C,v 1.16 2014/02/17 02:36:40 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
+
+// $Id: p8_pba_init.C,v 1.18 2014/03/17 23:16:22 stillgs Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -50,14 +51,7 @@
 // *!      FAPI_SET_HWP_ERROR(rc,RC_PMPROC_PBA_INIT_INCORRECT_MODE);
 // *!  }
 // *!
-// *! list of changes
-// *! 2012/10/11 applied changes and error corrections according to Terry Opie and reformatting if-else
-// *! 2012/10/11 applied changes according to Terry Opie
-// *! 2012/07/26 applied the changes as recommended by Greg's second review, pbax attributes included,
-// *! 2012/07/18 applied the changes as recommended by Greg, attribute coding, TODO: correct constants
-// *! 2012/05/09 global variables removed, "mode" used according to common rules.
-// *! 2012/05/17 temporary commented out the accesses assumed wrong address
-// *!
+// *! buildfapiprcd -e "../../xml/error_info/p8_pba_init_errors.xml" p8_pba_init.C
 //------------------------------------------------------------------------------
 
 
@@ -97,6 +91,8 @@ fapi::ReturnCode pba_init_reset ( const Target& i_target );
 fapi::ReturnCode pba_slave_setup_init ( const Target& i_target );
 fapi::ReturnCode pba_slave_setup_reset ( const Target& i_target );
 fapi::ReturnCode pba_slave_reset(const Target& i_target);
+
+fapi::ReturnCode pba_bc_stop(const Target& i_target);
 
 
 // **********************************************************************************************
@@ -179,52 +175,14 @@ pba_init_reset(const Target& i_target)
     FAPI_INF("pba_init_reset start ...");
     do
     {
-        // Stop the  BCDE and BCUE
-        address = PBA_BCDE_CTL_0x00064010;
-
-        l_rc |= data.flushTo0();
-        l_rc |= data.setBit(0);      // Bit 0: BCDE_CTL_STOP
-        if (l_rc)
-        {
-            rc.setEcmdError(l_rc);
-            break;
-        }
-        FAPI_INF("\tStopping BCDE addr=0x%08llX, value=0x%16llX, Target = %s",
-                            address,
-                            data.getDoubleWord(0),
-                            i_target.toEcmdString());
-        rc = fapiPutScom(i_target, address, data);
+        // Stop the  BCDE and BCUE        
+        rc = pba_bc_stop(i_target);
         if (!rc.ok())
         {
-            FAPI_ERR("fapiPutScom(addr=0x%08llX) failed, Target = %s",
-                            address,
-                            i_target.toEcmdString());
+            FAPI_ERR("pba_bc_stop detected an error");
             break;
         }
-
-        address = PBA_BCUE_CTL_0x00064015;
-
-        l_rc |= data.flushTo0();
-        l_rc |= data.setBit(0);      // Bit 0: BCUE_CTL_STOP
-        if (l_rc)
-        {
-            rc.setEcmdError(l_rc);
-            break;
-        }
-        FAPI_INF("\tStopping BCUE addr=0x%08llX, value=0x%16llX, Target = %s",
-                            address,
-                            data.getDoubleWord(0),
-                            i_target.toEcmdString());
-        rc = fapiPutScom(i_target, address, data);
-        if (!rc.ok())
-        {
-            FAPI_ERR("fapiPutScom(addr=0x%08llX) failed, Target = %s",
-                            address,
-                            i_target.toEcmdString());
-            break;
-        }
-
-
+      
         // Reset each slave and wait for completion.
         rc =  pba_slave_reset(i_target);
         if (rc)
@@ -508,7 +466,7 @@ pba_slave_setup_init(const Target& i_target)
                                    ec_allows_pba_prefetch_enable);
         if(rc)
         {
-     	    FAPI_ERR("Error querying Chip EC feature: "
+            FAPI_ERR("Error querying Chip EC feature: "
                      "ATTR_PROC_EC_PBA_PREFETCH_ENABLE");
             break;
         }
@@ -722,9 +680,29 @@ pba_slave_reset(const Target& i_target)
     ecmdDataBufferBase  data(64);
     bool                poll_failure = false;
     uint32_t            p;
+    
+    uint8_t             ec_has_pba_slvrest_bug = 0;
+    uint8_t             attr_mpipl = 0;
 
     do
     {
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET,
+                                   &i_target,
+                                   ec_has_pba_slvrest_bug);
+        if(rc)
+        {
+            FAPI_ERR("Error querying Chip EC feature: "
+                     "ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET");
+            break;
+        }
+        
+        rc = FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, attr_mpipl);
+        if(rc)
+        {
+            FAPI_ERR("Error querying attribute ATTR_IS_MPIPL");
+            break;
+        }
+
         for (int s=0; s<= 3; s++)
         {
 
@@ -749,7 +727,17 @@ pba_slave_reset(const Target& i_target)
                      FAPI_ERR("fapiPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc);
                      break ;
                 }
-
+                
+                // Due to HW228485, skip the check of the in-progress bits for MPIPL 
+                // (after the PBA channels have been used at runtime) as they
+                // are unreliable in Murano 1.x.
+                if (attr_mpipl && ec_has_pba_slvrest_bug)
+                {
+                   FAPI_INF("PBA Reset Polling being skipped due to MPIPL on a chip with PBA reset bug");
+                   poll_failure = false;
+                   continue;
+                }
+                
                 // Read the reset register to check for reset completion
                 rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001 , data);
                 if (rc)
@@ -762,6 +750,7 @@ pba_slave_reset(const Target& i_target)
                 // If slave reset in progress, wait and then poll
                 if (data.isBitClear(4+s))
                 {
+                    FAPI_INF("PBA Reset complete for Slave %d", s);
                     poll_failure = false;
                     break;
                 }
@@ -811,6 +800,158 @@ pba_slave_reset(const Target& i_target)
 
 }  // end pba_slave_setup_reset
 
+// ************************************************************************************************
+// **************************************************** pba_bc_stop *******************************
+// Stop the BCDE and BCUE and then poll for respective completion
+fapi::ReturnCode
+pba_bc_stop(const Target& i_target)
+{
+    fapi::ReturnCode    rc;
+    uint32_t            e_rc = 0;
+    ecmdDataBufferBase  data(64);
+    uint64_t            address = 0;
+    bool                bcde_stop_complete = false;
+    bool                bcue_stop_complete = false;
+    uint32_t            p;
+    
+    
+    do
+    {
+       
+        FAPI_INF("Stop the  BCDE and BCUE");
+        address = PBA_BCDE_CTL_0x00064010;
+
+        e_rc |= data.flushTo0();
+        e_rc |= data.setBit(0);      // Bit 0: BCDE_CTL_STOP
+        if (e_rc)
+        {
+            rc.setEcmdError(e_rc);
+            break;
+        }
+        FAPI_INF("\tStopping BCDE addr=0x%08llX, value=0x%16llX, Target = %s",
+                            address,
+                            data.getDoubleWord(0),
+                            i_target.toEcmdString());
+        rc = fapiPutScom(i_target, address, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("fapiPutScom(addr=0x%08llX) failed, Target = %s",
+                            address,
+                            i_target.toEcmdString());
+            break;
+        }
+
+        address = PBA_BCUE_CTL_0x00064015;
+
+        e_rc |= data.flushTo0();
+        e_rc |= data.setBit(0);      // Bit 0: BCUE_CTL_STOP
+        if (e_rc)
+        {
+            rc.setEcmdError(e_rc);
+             break;
+        }
+        FAPI_INF("\tStopping BCUE addr=0x%08llX, value=0x%16llX, Target = %s",
+                            address,
+                            data.getDoubleWord(0),
+                            i_target.toEcmdString());
+        rc = fapiPutScom(i_target, address, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("fapiPutScom(addr=0x%08llX) failed, Target = %s",
+                            address,
+                            i_target.toEcmdString());
+            break;
+        }
+        
+        // Stopped for the BC engines is defined as the Running bit is clear
+        //
+        // The Stopped, Done and Error bits may also be on if the BCE happened
+        // stop before the requested transfer was complete.  However, done of 
+        // these indicators are relevent as the OCC is being reset anyway.
+                
+        for (p=0; p<MAX_PBA_BC_STOP_POLLS; p++)
+        {
+        
+               
+            // Read the BCDE Status register to check for a stopped condition          
+            rc = fapiGetScom(i_target, PBA_BCDE_STAT_0x00064012 , data);
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetPutScom( PBA_BCDE_STAT_0x00064012 ) failed. With rc = 0x%x", (uint32_t)rc);
+                 break;
+            }
+            FAPI_DBG("BCDE Status poll data = 0x%016llX", data.getDoubleWord(0));
+            
+           
+            if (data.isBitClear(PBA_BC_STAT_RUNNING))
+            {
+                FAPI_INF("BCDE Running Bit is clear to indicate the stop condition");
+                bcde_stop_complete = true;
+            }
+            
+            
+            // Read the BCUE Status register to check for stop condition
+            rc = fapiGetScom(i_target, PBA_BCUE_STAT_0x00064017 , data);
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetPutScom( PBA_BCUE_STAT_0x00064017 ) failed. With rc = 0x%x", (uint32_t)rc);
+                 break;
+            }
+            FAPI_DBG("BCUE Status poll data = 0x%016llX", data.getDoubleWord(0));
+            
+            if (data.isBitClear(PBA_BC_STAT_RUNNING))
+            {
+                FAPI_INF("BCUE Running Bit is clear to indicate the stop condition");
+                bcue_stop_complete = true;
+            }                        
+                                    
+            // If both engines are stopped , exit polling loop 
+            if (bcde_stop_complete && bcue_stop_complete)
+            {                
+                break;         
+            }                   
+            else
+            {                
+                rc = fapiDelay(MAX_PBA_BC_STOP_POLLS*1000, 2000000);   // In microseconds
+                if (rc)
+                {
+                     FAPI_ERR("fapiDelay failed. With rc = 0x%x", (uint32_t)rc);
+                     break;
+                }
+            }
+        } // polling loop
+
+        // Error exit from above loop
+        if (!rc.ok())
+        {
+             break;
+        }
+
+        if (!bcde_stop_complete)
+        {
+             FAPI_ERR("PBA BCDE Stop Timout");
+             const fapi::Target & CHIP = i_target;
+             const uint32_t     & POLLCOUNT = MAX_PBA_BC_STOP_POLLS;
+             const uint32_t     & POLLVALUE = MAX_PBA_BC_STOP_POLLS;
+             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_BCDE_STOP_TIMEOUT);
+             break;
+        }
+        if (!bcue_stop_complete)
+        {
+             FAPI_ERR("PBA BCDE Stop Timout");
+             const fapi::Target & CHIP = i_target;
+             const uint32_t     & POLLCOUNT = MAX_PBA_BC_STOP_POLLS;
+             const uint32_t     & POLLVALUE = MAX_PBA_BC_STOP_POLLS;
+             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_BCUE_STOP_TIMEOUT);
+             break;
+        }
+        
+    } while(0);
+
+    return rc;
+
+}  // end pba_bcde_stop
+
+
 
 } //end extern C
-
