@@ -27,11 +27,13 @@
 
 #include <UtilHash.H>
 #include <iipServiceDataCollector.h>
+#include <prdfParserUtils.H>
 
 namespace PRDF
 {
 
 using namespace PlatServices;
+using namespace PARSERUTILS;
 using namespace fapi; // for spare dram config
 
 bool CenDqBitmap::badDqs() const
@@ -133,8 +135,8 @@ int32_t CenDqBitmap::setSymbol( uint8_t i_symbol, uint8_t i_pins )
 
     do
     {
-        uint8_t evenDq   = CenSymbol::symbol2CenDq(    i_symbol );
-        uint8_t portSlct = CenSymbol::symbol2PortSlct( i_symbol );
+        uint8_t evenDq   = symbol2CenDq(    i_symbol );
+        uint8_t portSlct = symbol2PortSlct( i_symbol );
         if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
         {
             PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );
@@ -165,8 +167,8 @@ int32_t CenDqBitmap::setDram( uint8_t i_symbol, uint8_t i_pins )
 
     do
     {
-        uint8_t evenDq   = CenSymbol::symbol2CenDq(    i_symbol );
-        uint8_t portSlct = CenSymbol::symbol2PortSlct( i_symbol );
+        uint8_t evenDq   = symbol2CenDq(    i_symbol );
+        uint8_t portSlct = symbol2PortSlct( i_symbol );
         if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
         {
             PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );
@@ -206,8 +208,8 @@ int32_t CenDqBitmap::isChipMark( uint8_t i_symbol, bool & o_cm )
 
     do
     {
-        uint8_t evenDq   = CenSymbol::symbol2CenDq(    i_symbol );
-        uint8_t portSlct = CenSymbol::symbol2PortSlct( i_symbol );
+        uint8_t evenDq   = symbol2CenDq(    i_symbol );
+        uint8_t portSlct = symbol2PortSlct( i_symbol );
         if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
         {
             PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );

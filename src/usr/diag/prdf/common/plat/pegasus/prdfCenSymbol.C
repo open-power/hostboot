@@ -26,6 +26,7 @@
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
 #include <prdfCenMemUtils.H>
+#include <prdfParserUtils.H>
 
 using namespace TARGETING;
 
@@ -34,6 +35,7 @@ namespace PRDF
 
 using namespace PlatServices;
 using namespace CEN_SYMBOL;
+using namespace PARSERUTILS;
 
 static const uint8_t symbol2Galois[] =
 {
@@ -242,83 +244,6 @@ uint8_t CenSymbol::getDramPins() const
 
 //------------------------------------------------------------------------------
 
-uint8_t CenSymbol::cenDq2Symbol( uint8_t i_cenDq, uint8_t i_ps )
-{
-    uint8_t sym = SYMBOLS_PER_RANK;
-
-    if ( DQS_PER_DIMM > i_cenDq && PORT_SLCT_PER_MBA > i_ps )
-    {
-        if ( i_cenDq >= 64 )
-            sym = ( (3 - ((i_cenDq - 64) / 2)) + ((0 == i_ps) ? 4 : 0) );
-        else
-            sym = ( ((63 - i_cenDq) / 2) + ((0 == i_ps) ? 32 : 0) + 8 );
-    }
-
-    return sym;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t CenSymbol::symbol2CenDq( uint8_t i_symbol )
-{
-    uint8_t cenDq = DQS_PER_DIMM;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        if ( 8 > i_symbol )
-            cenDq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
-        else
-            cenDq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
-    }
-
-    return cenDq;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t CenSymbol::symbol2PortSlct( uint8_t i_symbol )
-{
-    uint8_t portSlct = PORT_SLCT_PER_MBA;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        portSlct = ( ((i_symbol <= 3) || ((8 <= i_symbol) && (i_symbol <= 39)))
-                     ? 1 : 0 );
-    }
-
-    return portSlct;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t CenSymbol::symbol2Dram( uint8_t i_symbol, bool i_isX4Dram )
-{
-    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
-                                              : X8DRAMS_PER_RANK;
-
-    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
-                                              : SYMBOLS_PER_X8DRAM;
-
-    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / symbolsPerDram)
-                                         : dramsPerRank;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t CenSymbol::dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
-{
-    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
-                                              : X8DRAMS_PER_RANK;
-
-    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
-                                              : SYMBOLS_PER_X8DRAM;
-
-    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
-                                   : SYMBOLS_PER_RANK;
-}
-
-//------------------------------------------------------------------------------
-
 int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
                               uint8_t i_dimmDq, uint8_t i_portSlct,
                               uint8_t & o_symbol )
@@ -385,6 +310,32 @@ int32_t CenSymbol::setPins( uint8_t i_pins )
 
     return o_rc;
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t CenSymbol::getEvenDq() const
+{
+    return symbol2CenDq( iv_symbol );
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t CenSymbol::getPortSlct() const
+{
+    return symbol2PortSlct( iv_symbol );
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t CenSymbol::getDramSymbol() const
+{
+    return dram2Symbol( symbol2Dram(iv_symbol, iv_x4Dram), iv_x4Dram);
+}
+
+uint8_t CenSymbol::getDram() const
+{
+    return symbol2Dram( iv_symbol, iv_x4Dram );
 }
 
 } // end namespace PRDF

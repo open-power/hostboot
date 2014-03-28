@@ -34,6 +34,7 @@
 #include <prdfDramRepairUsrData.H>
 #include <prdfMemoryMruData.H>
 #include <prdfParserEnums.H>
+#include <prdfParserUtils.H>
 
 namespace PRDF
 {
@@ -46,6 +47,7 @@ namespace FSP
 {
 
 using namespace PARSER;
+using namespace PARSERUTILS;
 using namespace MemoryMruData;
 using namespace CEN_SYMBOL;
 
@@ -1323,57 +1325,6 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
     } while (0);
 
     return o_rc;
-}
-
-//##############################################################################
-// Support functions for translating between symbol, DQ, and DRAM index.
-// TODO: RTC 99972 - These functions are copies of functions in the CenSymbol
-//       class. Need to create common util functions that are available for both
-//       the functional code and the error log plugin code.
-//##############################################################################
-
-uint8_t symbol2CenDq( uint8_t i_symbol )
-{
-    uint8_t cenDq = DQS_PER_DIMM;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        if ( 8 > i_symbol )
-            cenDq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
-        else
-            cenDq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
-    }
-
-    return cenDq;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t symbol2PortSlct( uint8_t i_symbol )
-{
-    uint8_t portSlct = PORT_SLCT_PER_MBA;
-
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        portSlct = ( ((i_symbol <= 3) || ((8 <= i_symbol) && (i_symbol <= 39)))
-                     ? 1 : 0 );
-    }
-
-    return portSlct;
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
-{
-    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
-                                              : X8DRAMS_PER_RANK;
-
-    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
-                                              : SYMBOLS_PER_X8DRAM;
-
-    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
-                                   : SYMBOLS_PER_RANK;
 }
 
 //------------------------------------------------------------------------------

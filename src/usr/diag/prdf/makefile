@@ -53,6 +53,7 @@ VPATH =  \
     framework/resolution \
     plat \
     plat/pegasus \
+    common/plugins
 
 #FIXME: we can remove most of these as well if we have them include correctly
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi

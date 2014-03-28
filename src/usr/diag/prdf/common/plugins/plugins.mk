@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2004,2013
+# COPYRIGHT International Business Machines Corp. 2004,2014
 #
 # p1
 #
@@ -33,7 +33,8 @@ LIBRARY_OFILES += \
     prdfLogParse.o \
     prdfLogParse_common.o \
     prdfCenLogParse.o \
-    prdrErrlPluginsSupt.o
+    prdrErrlPluginsSupt.o \
+    prdfParserUtils.o
 
 LIBFLAGS = -Efips/lib
 

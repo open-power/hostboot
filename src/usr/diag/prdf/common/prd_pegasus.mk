@@ -58,4 +58,5 @@ prd_pegasus_specific = \
     prdfLineDelete.o \
     prdfMemoryMru.o \
     prdfPegasusConfigurator.o \
-    prdfRegisterData.o
+    prdfRegisterData.o \
+    prdfParserUtils.o

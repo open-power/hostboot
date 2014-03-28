@@ -146,21 +146,20 @@ class CenSymbol
     uint8_t getPins() const { return iv_pins; }
 
     /** @return The even Centaur DQ of this symbol. */
-    uint8_t getEvenDq() const { return symbol2CenDq( iv_symbol ); }
+    uint8_t getEvenDq() const;
 
     /** @return The port select for this symbol. */
-    uint8_t getPortSlct() const { return symbol2PortSlct( iv_symbol ); }
+    uint8_t getPortSlct() const;
 
     /** @return The DRAM index for this symbol. */
-    uint8_t getDram() const { return symbol2Dram( iv_symbol, iv_x4Dram ); }
+    uint8_t getDram() const;
 
     /**
      * @return The first symbol of the DRAM associated with this symbol.
      * @note   Needed for input into mss_put_mark_store and mss_put_steer_mux
      *         hardware procedures.
      */
-    uint8_t getDramSymbol() const
-    { return dram2Symbol( symbol2Dram(iv_symbol, iv_x4Dram), iv_x4Dram); }
+    uint8_t getDramSymbol() const;
 
     /** @return The bad pins associated with this symbol in relation to the DRAM
      *          (x4 mode is 4-bits, x8 mode is 8-bits,). */
@@ -190,21 +189,6 @@ class CenSymbol
 
     /** @return TRUE this symbol is on the ECC spare, FALSE otherwise. */
     bool isEccSpared() const { return iv_isEccSpared; }
-
-    /** @return The symbol of the given Centaur DQ and port select. */
-    static uint8_t cenDq2Symbol( uint8_t i_CenDq, uint8_t i_ps );
-
-    /** @return The even Centaur DQ of the given symbol. */
-    static uint8_t symbol2CenDq( uint8_t i_symbol );
-
-    /** @return The port select for given symbol. */
-    static uint8_t symbol2PortSlct( uint8_t i_symbol );
-
-    /** @return The DRAM index for the given symbol. */
-    static uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram );
-
-    /** @return The first symbol of the given DRAM index. */
-    static uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram );
 
     /**
      * @brief   Overrides the '<' operator.

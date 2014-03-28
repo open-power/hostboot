@@ -30,6 +30,7 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfCenMembufDataBundle.H>
+#include <prdfParserUtils.H>
 #ifndef __HOSTBOOT_MODULE
 #include <prdfCenMbaDynMemDealloc.H> // For dynamic memory deallocation support
 #endif
@@ -43,6 +44,7 @@ namespace MemUtils
 {
 
 using namespace PlatServices;
+using namespace PARSERUTILS;
 using namespace CEN_SYMBOL;
 
 const uint8_t CE_REGS_PER_MBA = 9;
@@ -141,7 +143,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                 if ( 0 == count ) continue; // nothing to do
 
                 uint8_t sym  = baseSymbol + i;
-                uint8_t dram = CenSymbol::symbol2Dram( sym, isX4 );
+                uint8_t dram = symbol2Dram( sym, isX4 );
 
                 // Keep track of the total DRAM counts.
                 dramCounts[dram].totalCount += count;
@@ -211,7 +213,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 
         if ( 0 != highestCount )
         {
-            uint8_t sym = CenSymbol::dram2Symbol( highestDram, isX4 );
+            uint8_t sym = dram2Symbol( highestDram, isX4 );
             o_chipMark  = CenSymbol::fromSymbol( mbaTrgt, i_rank, sym );
 
             // Check if this symbol is on any of the spares.
