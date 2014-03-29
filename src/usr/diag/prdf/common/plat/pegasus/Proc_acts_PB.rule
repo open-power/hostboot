@@ -683,12 +683,12 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[25]
      *  POWERBUS_MISC_ERROR
      */
-    (NxCxaFir, bit(25)) ? SelfMedThr1;
+    (NxCxaFir, bit(25)) ? SelfHighThr1;
 
     /** NXCXAFIR[26]
      *  POWERBUS_INTERFACE_PE
      */
-    (NxCxaFir, bit(26)) ? SelfMedThr1;
+    (NxCxaFir, bit(26)) ? SelfHighThr1;
 
     /** NXCXAFIR[27]
      *POWERBUS_DATA_HANG_ERROR
@@ -748,17 +748,17 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[38]
      *  TLBI_SEQ_ERR
      */
-    (NxCxaFir, bit(38)) ? SelfMedThr1;
+    (NxCxaFir, bit(38)) ? SelfHighThr1;
 
     /** NXCXAFIR[39]
      *  TLBI_BAD_OP_ERR
      */
-    (NxCxaFir, bit(39)) ? SelfMedThr1;
+    (NxCxaFir, bit(39)) ? SelfHighThr1;
 
     /** NXCXAFIR[40]
      *  TLBI_SEQ_NUM_PARITY_ERR
      */
-    (NxCxaFir, bit(40)) ? SelfMedThr1;
+    (NxCxaFir, bit(40)) ? SelfHighThr1;
 
     /** NXCXAFIR[41]
      *  ST_CLASS_CMD_FOREIGN_LINK_FAIL
@@ -813,7 +813,7 @@ group gMcdFir filter singlebit
     /** MCDFIR[2]
      *  MCD_REG_PARITY_ERR
      */
-    (McdFir, bit(2)) ? SelfHighThr32PerDay;
+    (McdFir, bit(2)) ? defaultMaskedError;
 
     /** MCDFIR[3]
      *  MCD_SM_ERR
@@ -1275,22 +1275,22 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[12]
      *  PB_CENT_F0LINK_ERROR
      */
-    (PbCentFir, bit(12)) ? calloutProcLevel2MedThr1;
+    (PbCentFir, bit(12)) ? defaultMaskedError;
 
     /** PBCENTFIR[13]
      *  PB_CENT_F1LINK_ERROR
      */
-    (PbCentFir, bit(13)) ? calloutProcLevel2MedThr1;
+    (PbCentFir, bit(13)) ? defaultMaskedError;
 
     /** PBCENTFIR[14]
      *  PB_CENT_F0_OVERFLOW
      */
-    (PbCentFir, bit(14)) ? calloutProcLevel2MedThr1;
+    (PbCentFir, bit(14)) ? defaultMaskedError;
 
     /** PBCENTFIR[15]
      *  PB_CENT_F1_OVERFLOW
      */
-    (PbCentFir, bit(15)) ? calloutProcLevel2MedThr1;
+    (PbCentFir, bit(15)) ? defaultMaskedError;
 
     /** PBCENTFIR[16]
      *  FIR_SCOM_CENT_ERR
@@ -1330,7 +1330,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[2]
      *  PB_ECC_ERR_SUE
      */
-    (PsiHbFir, bit(2)) ? callout2ndLvlMedThr1NoGard;
+    (PsiHbFir, bit(2)) ? defaultMaskedError;
 
     /** PSIHBFIR[3]
      *  INTERRUPT_FROM_ERROR
@@ -2090,62 +2090,62 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[0]
      *  BAR_PE
      */
-    (PciNestFir_0, bit(0)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(0)) ? calloutConnPci0Th1NoGard;
 
     /** PCINESTFIR_1[0]
      *  BAR_PE
      */
-    (PciNestFir_1, bit(0)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(0)) ? calloutConnPci1Th1NoGard;
 
     /** PCINESTFIR_2[0]
      *  BAR_PE
      */
-    (PciNestFir_2, bit(0)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(0)) ? calloutConnPci2Th1NoGard;
 
     /** PCINESTFIR_0[1]
      *  NONBAR_PE
      */
-    (PciNestFir_0, bit(1)) ? calloutConnPci0Th32;
+    (PciNestFir_0, bit(1)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[1]
      *  NONBAR_PE
      */
-    (PciNestFir_1, bit(1)) ? calloutConnPci1Th32;
+    (PciNestFir_1, bit(1)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[1]
      *  NONBAR_PE
      */
-    (PciNestFir_2, bit(1)) ? calloutConnPci2Th32;
+    (PciNestFir_2, bit(1)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[2]
      *  PB_TO_PEC_CE
      */
-    (PciNestFir_0, bit(2)) ? calloutConnPci0Th32;
+    (PciNestFir_0, bit(2)) ? calloutConnPci0Th32NoGard;
 
     /** PCINESTFIR_1[2]
      *  PB_TO_PEC_CE
      */
-    (PciNestFir_1, bit(2)) ? calloutConnPci1Th32;
+    (PciNestFir_1, bit(2)) ? calloutConnPci1Th32NoGard;
 
     /** PCINESTFIR_2[2]
      *  PB_TO_PEC_CE
      */
-    (PciNestFir_2, bit(2)) ? calloutConnPci2Th32;
+    (PciNestFir_2, bit(2)) ? calloutConnPci1Th32NoGard;
 
     /** PCINESTFIR_0[3]
      *  PB_TO_PEC_UE
      */
-    (PciNestFir_0, bit(3)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(3)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[3]
      *  PB_TO_PEC_UE
      */
-    (PciNestFir_1, bit(3)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(3)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[3]
      *  PB_TO_PEC_UE
      */
-    (PciNestFir_2, bit(3)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(3)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[4]
      *  PB_TO_PEC_SUE
@@ -2165,32 +2165,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[5]
      *  ARY_ECC_CE
      */
-    (PciNestFir_0, bit(5)) ? calloutConnPci0Th32;
+    (PciNestFir_0, bit(5)) ? calloutConnPci0Th32NoGard;
 
     /** PCINESTFIR_1[5]
      *  ARY_ECC_CE
      */
-    (PciNestFir_1, bit(5)) ? calloutConnPci1Th32;
+    (PciNestFir_1, bit(5)) ? calloutConnPci1Th32NoGard;
 
     /** PCINESTFIR_2[5]
      *  ARY_ECC_CE
      */
-    (PciNestFir_2, bit(5)) ? calloutConnPci2Th32;
+    (PciNestFir_2, bit(5)) ? calloutConnPci2Th32NoGard;
 
     /** PCINESTFIR_0[6]
      *  ARY_ECC_UE
      */
-    (PciNestFir_0, bit(6)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(6)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[6]
      *  ARY_ECC_UE
      */
-    (PciNestFir_1, bit(6)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(6)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[6]
      *  ARY_ECC_UE
      */
-    (PciNestFir_2, bit(6)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(6)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[7]
      *  ARY_ECC_SUE
@@ -2210,32 +2210,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_0, bit(8)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(8)) ? calloutConnPci0Th1NoGard;
 
     /** PCINESTFIR_1[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_1, bit(8)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(8)) ? calloutConnPci1Th1NoGard;
 
     /** PCINESTFIR_2[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_2, bit(8)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(8)) ? calloutConnPci2Th1NoGard;
 
     /** PCINESTFIR_0[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_0, bit(9)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(9)) ? calloutConnPci0Th1NoGard;
 
     /** PCINESTFIR_1[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_1, bit(9)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(9)) ? calloutConnPci1Th1NoGard;
 
     /** PCINESTFIR_2[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_2, bit(9)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(9)) ? calloutConnPci2Th1NoGard;
 
     /** PCINESTFIR_0[10]
      *  PB_DATA_HANG_ERRORS
@@ -2270,47 +2270,47 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[12]
      *  RD_ARE_ERRORS
      */
-    (PciNestFir_0, bit(12)) ? calloutProcLevel2MedThr1;
+    (PciNestFir_0, bit(12)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[12]
      *  RD_ARE_ERRORS
      */
-    (PciNestFir_1, bit(12)) ? calloutProcLevel2MedThr1;
+    (PciNestFir_1, bit(12)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[12]
      *  RD_ARE_ERRORS
      */
-    (PciNestFir_2, bit(12)) ? calloutProcLevel2MedThr1;
+    (PciNestFir_2, bit(12)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[13]
      *  NONRD_ARE_ERRORS
      */
-    (PciNestFir_0, bit(13)) ? calloutProcLevel2MedThr1;
+    (PciNestFir_0, bit(13)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[13]
      *  NONRD_ARE_ERRORS
      */
-    (PciNestFir_1, bit(13)) ? calloutProcLevel2MedThr1;
+    (PciNestFir_1, bit(13)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[13]
      *  NONRD_ARE_ERRORS
      */
-    (PciNestFir_2, bit(13)) ? calloutProcLevel2MedThr1;
+    (PciNestFir_2, bit(13)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_0, bit(14)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(14)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_1, bit(14)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(14)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_2, bit(14)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(14)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[15]
      *  PCI_CLOCK_ERROR
@@ -2339,32 +2339,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[16]
      *  AIB_FENCE
      */
-    (PciNestFir_0, bit(16)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(16)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[16]
      *  AIB_FENCE
      */
-    (PciNestFir_1, bit(16)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(16)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[16]
      *  AIB_FENCE
      */
-    (PciNestFir_2, bit(16)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(16)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[17]
      *  HW_ERRORS
      */
-    (PciNestFir_0, bit(17)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(17)) ? calloutConnPci0Th1NoGard;
 
     /** PCINESTFIR_1[17]
      *  HW_ERRORS
      */
-    (PciNestFir_1, bit(17)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(17)) ? calloutConnPci1Th1NoGard;
 
     /** PCINESTFIR_2[17]
      *  HW_ERRORS
      */
-    (PciNestFir_2, bit(17)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(17)) ? calloutConnPci2Th1NoGard;
 
     /** PCINESTFIR_0[18]
      *  UNSOLICITIEDPBDATA
@@ -2444,32 +2444,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[23]
      *  AIB_PE
      */
-    (PciNestFir_0, bit(23)) ? calloutConnPci0Th32;
+    (PciNestFir_0, bit(23)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[23]
      *  AIB_PE
      */
-    (PciNestFir_1, bit(23)) ? calloutConnPci1Th32;
+    (PciNestFir_1, bit(23)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[23]
      *  AIB_PE
      */
-    (PciNestFir_2, bit(23)) ? calloutConnPci2Th32;
+    (PciNestFir_2, bit(23)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[24]
      *  ASB_ERROR
      */
-    (PciNestFir_0, bit(24)) ? calloutConnPci0Th1;
+    (PciNestFir_0, bit(24)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[24]
      *  ASB_ERROR
      */
-    (PciNestFir_1, bit(24)) ? calloutConnPci1Th1;
+    (PciNestFir_1, bit(24)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[24]
      *  ASB_ERROR
      */
-    (PciNestFir_2, bit(24)) ? calloutConnPci2Th1;
+    (PciNestFir_2, bit(24)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[25]
      *  FOREIGN_LINK_FAIL
@@ -2914,23 +2914,53 @@ actionclass calloutConnPci1 { callout(connected(TYPE_PCI,1), MRU_MED); };
 /** Callout the connected PCI 2 controller. */
 actionclass calloutConnPci2 { callout(connected(TYPE_PCI,2), MRU_MED); };
 
-/** Callout the connected PCI 0 controller, threshold 1 */
-actionclass calloutConnPci0Th1 { calloutConnPci0; threshold1; };
+/** Callout the connected PCI 0 controller, threshold 1 , no garding */
+actionclass calloutConnPci0Th1NoGard
+{
+    calloutConnPci0;
+    threshold1;
+    gard(NoGard);
+};
 
-/** Callout the connected PCI 1 controller, threshold 1 */
-actionclass calloutConnPci1Th1 { calloutConnPci1; threshold1; };
+/** Callout the connected PCI 1 controller, threshold 1, no garding */
+actionclass calloutConnPci1Th1NoGard
+{
+    calloutConnPci1;
+    threshold1;
+    gard(NoGard);
+};
 
-/** Callout the connected PCI 2 controller, threshold 1 */
-actionclass calloutConnPci2Th1 { calloutConnPci2; threshold1; };
+/** Callout the connected PCI 2 controller, threshold 1, no garding */
+actionclass calloutConnPci2Th1NoGard
+{
+    calloutConnPci2;
+    threshold1;
+    gard(NoGard);
+};
 
-/** Callout the connected PCI 0 controller, threshold 32 per day */
-actionclass calloutConnPci0Th32 { calloutConnPci0; threshold32pday; };
+/** Callout the connected PCI 0 controller, threshold 32 per day, no garding */
+actionclass calloutConnPci0Th32NoGard
+{
+    calloutConnPci0;
+    threshold32pday;
+    gard(NoGard);
+};
 
-/** Callout the connected PCI 1 controller, threshold 32 per day */
-actionclass calloutConnPci1Th32 { calloutConnPci1; threshold32pday; };
+/** Callout the connected PCI 1 controller, threshold 32 per day, no garding */
+actionclass calloutConnPci1Th32NoGard
+{
+    calloutConnPci1;
+    threshold32pday;
+    gard(NoGard);
+};
 
-/** Callout the connected PCI 2 controller, threshold 32 per day */
-actionclass calloutConnPci2Th32 { calloutConnPci2; threshold32pday; };
+/** Callout the connected PCI 2 controller, threshold 32 per day , no garding */
+actionclass calloutConnPci2Th32NoGard
+{
+    calloutConnPci2;
+    threshold32pday;
+    gard(NoGard);
+};
 
 /** Callout the DMI bus 0 */
 actionclass calloutDmiBus0
@@ -3137,16 +3167,14 @@ actionclass calloutNxThr5pHr
 
 actionclass combinedResponseError
 {
-    callout2ndLvlMed;
-    threshold1;
-    funccall("combinedResponseCallout");
     funccall("analyzeMpIPL");
+    funccall("combinedResponseCallout");
 };
 
 actionclass forceMpIpl
 {
-    calloutProcLevel2MedThr1;
     funccall("analyzeMpIPL");
+    callout2ndLvlMedThr1NoGard;
 };
 
 /** callout both ends of PSI Link.Threshold is 32 events per day.

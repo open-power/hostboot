@@ -332,7 +332,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
      */
-    (MciFir, bit(27)) ? calloutDmiBusAndLvl2Th1;
+    (MciFir, bit(27)) ? callout2ndLvlMedThr1NoGard;
 
     /** MCIFIR[28]
      *  MCIFIRQ_MULTIPLE_RCMD_OR_CRESP_ACTIVE
@@ -430,7 +430,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[46]
      *  MCIFIRQ_INVALID_CENTAUR_BYPASS
      */
-    (MciFir, bit(46)) ? calloutDmiBusSelfLowConnHigh;
+    (MciFir, bit(46)) ? calloutDmiBusSelfLowConnMed;
 
     /** MCIFIR[47]
      *  MCS WRITE DATAFLOW SUE
@@ -545,7 +545,7 @@ actionclass analyzeSpareBitAndThr
 actionclass mcifirBit48
 {
     threshold32pday;
-    try( funccall("dd1mcifirBit48"), calloutDmiBusSelfLowConnHigh );
+    try( funccall("dd1mcifirBit48"), calloutDmiBusSelfLowConnMed );
 };
 
 /** The plugin checks if the Proc is either Murano DD2 or Venice DD1.
@@ -554,14 +554,14 @@ actionclass mcifirBit48
 actionclass mcifirBit49
 {
     threshold32pday;
-    try( funccall("dd1mcifirBit49"), calloutDmiBusSelfLowConnHigh );
+    try( funccall("dd1mcifirBit49"), calloutDmiBusSelfLowConnMed );
 };
 
 /** Callout MCS Low and Centaur High */
-actionclass calloutDmiBusSelfLowConnHigh
+actionclass calloutDmiBusSelfLowConnMed
 {
     calloutSelfLow;
-    callout(connected(TYPE_MEMBUF), MRU_HIGH);
+    callout(connected(TYPE_MEMBUF), MRU_MED);
     calloutDmiBusSymFru;
     threshold1;
 };

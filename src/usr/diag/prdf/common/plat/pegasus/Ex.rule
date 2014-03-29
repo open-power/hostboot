@@ -1123,9 +1123,9 @@ group gCoreFir filter singlebit
     (CoreFir, bit(19)) ? calloutExThr5pHr;
 
     /** COREFIR[20]
-     *  UNUSED_3
+     *  HV Corruption
      */
-    (CoreFir, bit(20)) ? defaultMaskedError;
+    (CoreFir, bit(20)) ? SelfHighThr1;
 
     /** COREFIR[21]
      *  FX_LOG_CHKSTOP_ERR: logic core check stop
@@ -1155,7 +1155,7 @@ group gCoreFir filter singlebit
     /** COREFIR[26]
      *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
      */
-    (CoreFir, bit(26)) ? callout2ndLvlDumpShNoGard;
+    (CoreFir, bit(26)) ? callout2ndLvlMedThr1NoGard;
 
     /** COREFIR[27]
      *  DU_LOG_REC_ERR: logic recoverable error
@@ -1165,7 +1165,7 @@ group gCoreFir filter singlebit
     /** COREFIR[28]
      *  DU_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(28)) ? defaultMaskedError;
+    (CoreFir, bit(28)) ? SelfHighThr1;
 
     /** COREFIR[29]
      *  LSU_SRAM_PARITY_ERR: SRAM recoverable error (DCACHE parity error, etc.)
@@ -1193,12 +1193,14 @@ group gCoreFir filter singlebit
     (CoreFir, bit(33)) ? defaultMaskedError;
 
     /** COREFIR[34]
-     *  LS_SLB_MULTIHIT_ERR: special recovery error SLBFEE multi hit error occurred
+     *  LS_SLB_MULTIHIT_ERR: special recovery error SLBFEE multi hit
+     *  error occurred
      */
     (CoreFir, bit(34)) ? defaultMaskedError;
 
     /** COREFIR[35]
-     *  LS_DERAT_MULTIHIT_ERR: special recovery error ERAT multi hit error occurred
+     *  LS_DERAT_MULTIHIT_ERR: special recovery error ERAT multi hit error
+     *  occurred
      */
     (CoreFir, bit(35)) ? defaultMaskedError;
 
@@ -1316,7 +1318,7 @@ group gCoreFir filter singlebit
     /** COREFIR[60]
      *  DBG_FIR_CHECKSTOP_ON_TRIGGER: debug Trigger Error inject
      */
-    (CoreFir, bit(60)) ? defaultMaskedError;
+    (CoreFir, bit(60)) ? SelfHighThr1;
 
     /** COREFIR[61]
      *  SP_INJ_REC_ERR: SCOM or Firmware recoverable Error Inject
@@ -1331,7 +1333,7 @@ group gCoreFir filter singlebit
     /** COREFIR[63]
      *  SPRD_PHYP_ERR_INJ: Phyp Xstop via SPRC / SPRD
      */
-    (CoreFir, bit(63)) ? calloutProcLow2ndLvlMedThr1dumpSh;
+    (CoreFir, bit(63)) ? calloutProcLow2ndLvlMedThr1;
 };
 
 ################################################################################
@@ -1652,22 +1654,22 @@ group gL3Fir filter singlebit
     /** L3FIR[19]
      *  Reserved field (Access type is l3_flink_0_load_ack_dead)
      */
-    (L3Fir, bit(19)) ? callout2ndLvlMedThr1NoGard;
+    (L3Fir, bit(19)) ? defaultMaskedError;
 
     /** L3FIR[20]
      *  Reserved field (Access type is l3_flink_0_store_ack_dead)
      */
-    (L3Fir, bit(20)) ? callout2ndLvlMedThr1NoGard;
+    (L3Fir, bit(20)) ? defaultMaskedError;
 
     /** L3FIR[21]
      *  Reserved field (Access type is l3_flink_1_load_ack_dead)
      */
-    (L3Fir, bit(21)) ? callout2ndLvlMedThr1NoGard;
+    (L3Fir, bit(21)) ? defaultMaskedError;
 
     /** L3FIR[22]
      *  Reserved field (Access type is l3_flink_1_store_ack_dead)
      */
-    (L3Fir, bit(22)) ? callout2ndLvlMedThr1NoGard;
+    (L3Fir, bit(22)) ? defaultMaskedError;
 
     /** L3FIR[23]
      *  L3 Machine Hang
@@ -1782,22 +1784,22 @@ group gNcuFir filter singlebit
     /** NCUFIR[4]
      *  ST_FOREIGN0_ACK_DEAD: Store received ack_dead on foreign link0.
      */
-    (NcuFir, bit(4)) ? SelfHighThr32PerDay;
+    (NcuFir, bit(4)) ? defaultMaskedError;
 
     /** NCUFIR[5]
      *  ST_FOREIGN1_ACK_DEAD: Store received ack_dead on foreign link1.
      */
-    (NcuFir, bit(5)) ? SelfHighThr32PerDay;
+    (NcuFir, bit(5)) ? defaultMaskedError;
 
     /** NCUFIR[6]
      *  LD_FOREIGN0_ACK_DEAD: Load received ack_dead on foreign link0.
      */
-    (NcuFir, bit(6)) ? SelfHighThr32PerDay;
+    (NcuFir, bit(6)) ? defaultMaskedError;
 
     /** NCUFIR[7]
      *  LD_FOREIGN1_ACK_DEAD: Load received ack_dead on foreign link1.
      */
-    (NcuFir, bit(7)) ? SelfHighThr32PerDay;
+    (NcuFir, bit(7)) ? defaultMaskedError;
 
     /** NCUFIR[8]
      *  STQ_DATA_PARITY_ERR: Store data parity error from regfile detected.
@@ -1832,12 +1834,12 @@ group gNcuFir filter singlebit
     /** NCUFIR[14]
      *  IMA_FOREIGN0_ACK_DEAD: IMA received ack_dead on foreign link0.
      */
-    (NcuFir, bit(14)) ? calloutExLowSecLvlThr1MedDumpSh;
+    (NcuFir, bit(14)) ? defaultMaskedError;
 
     /** NCUFIR[15]
      *  IMA_FOREIGN1_ACK_DEAD: IMA received ack_dead on foreign link1.
      */
-    (NcuFir, bit(15)) ? calloutExLowSecLvlThr1MedDumpSh;
+    (NcuFir, bit(15)) ? defaultMaskedError;
 
     /** NCUFIR[16]
      *  HTM_GOT_ACK_DEAD: HTM received ack_dead on any foreign link.
@@ -2007,12 +2009,13 @@ actionclass SelfAndLevel2MedThr5PerHrNoGard
     gard(NoGard);
 };
 
-/** callouts Proc on first instance. Calls for second level support as well,
- *  garding not done */
+/** callouts Proc on first instance. Calls for second level support as well */
 actionclass calloutProcLow2ndLvlMedThr1
 {
     calloutParentProcLow;
-    callout2ndLvlMedThr1NoGard;
+    callout2ndLvlMed;
+    threshold1;
+
 };
 
 /** callouts Proc on first instance. Calls for second level support as well.
@@ -2049,25 +2052,16 @@ actionclass calloutExThr32pDay
     SelfMedThr32PerDay;
 };
 
-/** callout Ex,Sec Level on first instance ,initiate software
- *  and Hardware dump, garding not done */
+/** callout Ex,Sec Level on first instance ,initiate core dump,
+ *  garding not done */
 actionclass calloutExAndSecLvlThr1NoGard
 {
     calloutSelfAndLevel2MedThr1;
-    dumpSH;
     gard(NoGard);
 };
 
 actionclass calloutExLowSecLvlThr1MedDumpSh
 {
     SelfLowLevel2MedThr1;
-    dumpSH;
-};
-
-/** callouts Proc on first instance. Calls for second level support as well
- *  Initiate an SH dump, no gard */
-actionclass calloutProcLow2ndLvlMedThr1dumpSh
-{
-    calloutProcLow2ndLvlMedThr1;
     dumpSH;
 };

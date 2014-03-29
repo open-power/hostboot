@@ -157,34 +157,7 @@
     {
         name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_REG";
         scomaddr    0x09010800;
-        reset       (&, 0x09010801);
-        mask        (|, 0x09010805);
         capture     group default;
-    };
-
-    register PBFFIR_MASK
-    {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_MASK_REG";
-        scomaddr    0x09010803;
-        capture     group default;
-    };
-
-    register PBFFIR_ACT0
-    {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_ACTION0_REG";
-        scomaddr    0x09010806;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PBFFIR");
-    };
-
-    register PBFFIR_ACT1
-    {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_ACTION1_REG";
-        scomaddr    0x09010807;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PBFFIR");
     };
 
     register PBFIR_IOF0_ERROR_REPORT
