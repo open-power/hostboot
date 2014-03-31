@@ -789,14 +789,16 @@
 
 <attribute>
     <id>FSI_OPTION_FLAGS</id>
-    <description>Reserved for any special flags we might need to access FSI</description>
+    <description>
+        Reserved for any special flags we might need to access FSI
+    </description>
     <complexType>
         <description>FSI flags</description>
         <field>
             <name>flipPort</name>
             <description>
-                Set on master chips if their slave port is reversed when
-                the system is driven by the primary master chip.
+                Set on FSI master chips (procs) if that chip uses slaveB
+                to attach to the acting master chip.
             </description>
             <type>uint16_t</type>
             <bits>1</bits>

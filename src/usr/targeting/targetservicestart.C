@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -133,6 +133,14 @@ static void initializeAttributes(TargetService& i_targetService)
 
         if(l_pMasterProcChip)
         {
+            // Master uses xscom by default, needs to be set before
+            // doing any other scom accesses
+            ScomSwitches l_switches =
+              l_pMasterProcChip->getAttr<ATTR_SCOM_SWITCHES>();
+            l_switches.useXscom = 1;
+            l_switches.useFsiScom = 0;
+            l_pMasterProcChip->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+
             errlHndl_t l_errl = NULL;
             size_t l_size = sizeof(uint64_t);
             uint64_t l_data;
@@ -159,6 +167,7 @@ static void initializeAttributes(TargetService& i_targetService)
                 }
             }
         }
+
 
         if(l_isMpipl)
         {

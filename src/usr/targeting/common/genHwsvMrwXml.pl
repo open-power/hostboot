@@ -685,15 +685,6 @@ foreach my $i (@{$eTargets->{target}})
 my $fsi_busses_file = open_mrw_file($mrwdir, "${sysname}-fsi-busses.xml");
 my $fsiBus = XMLin($fsi_busses_file);
 
-# Capture all FSI connections into the @Fsis array
-# Save the FSP node id
-use constant FSI_TYPE_FIELD   => 0;
-use constant FSI_LINK_FIELD   => 1;
-use constant FSI_TARGET_FIELD => 2;
-use constant FSI_MASTER_FIELD => 3;
-use constant FSI_TARGET_TYPE  => 4;
-my @Fsis;
-
 # Build all the FSP chip targets / attributes
 my %FSPs = ();
 foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
@@ -718,14 +709,89 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
             'rid'         => $rid,
         };
     }
+}
 
-    push @Fsis, [ $fsiBus->{master}->{type}, $fsiBus->{master}->{link},
+# Build up FSI paths
+# Capture all FSI connections into the @Fsis array
+my @Fsis;
+use constant FSI_TYPE_FIELD   => 0;
+use constant FSI_LINK_FIELD   => 1;
+use constant FSI_TARGET_FIELD => 2;
+use constant FSI_MASTERNODE_FIELD => 3;
+use constant FSI_MASTERPOS_FIELD => 4;
+use constant FSI_TARGET_TYPE_FIELD  => 5;
+use constant FSI_SLAVE_PORT_FIELD => 6;
+#Master procs have FSP as their master
+#<fsi-bus>
+#  <master>
+#    <type>FSP Master</type>
+#    <part-id>BRAZOS_FSP2</part-id>
+#    <unit-id>FSIM_CLK[23]</unit-id>
+#    <target><name>fsp</name><node>4</node><position>1</position></target>
+#    <engine>0</engine>
+#    <link>23</link>
+#  </master>
+#  <slave>
+#    <part-id>VENICE</part-id>
+#    <unit-id>FSI_SLAVE0</unit-id>
+#    <target><name>pu</name><node>3</node><position>1</position></target>
+#    <port>0</port>
+#  </slave>
+#</fsi-bus>
+#Non-master chips have a MURANO/VENICE as their master
+#<fsi-bus>
+#  <master>
+#    <part-id>VENICE</part-id>
+#    <unit-id>FSI_CASCADE3</unit-id>
+#    <target><name>pu</name><node>0</node><position>0</position></target>
+#    <engine>12</engine>
+#    <link>3</link>
+#    <type>Cascaded Master</type>
+#  </master>
+#  <slave>
+#    <part-id>CENTAUR</part-id>
+#    <unit-id>FSI_SLAVE0</unit-id>
+#    <target><name>memb</name><node>0</node><position>0</position></target>
+#    <fsp-device-path-segments>L02C0E12:L3C0</fsp-device-path-segments>
+#    <port>0</port>
+#  </slave>
+#</fsi-bus>
+foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
+{
+    #skip slaves that we don't care about
+    if( !($fsiBus->{'slave'}->{'target'}->{'name'} eq "pu")
+       && !($fsiBus->{'slave'}->{'target'}->{'name'} eq "memb") )
+    {
+        next;
+    }
+
+    push @Fsis, [
+      #TYPE :: 'fsp master','hub master','cascaded master'
+      $fsiBus->{'master'}->{'type'},
+      #LINK :: coming out of master
+      $fsiBus->{'master'}->{'link'},
+      #TARGET :: Slave chip
         "n$fsiBus->{slave}->{target}->{node}:"
         . "p$fsiBus->{slave}->{target}->{position}",
-        "n$fsiBus->{master}->{target}->{node}:"
-         . "p$fsiBus->{master}->{target}->{position}",
-        $fsiBus->{slave}->{target}->{name} ];
+      #MASTERNODE :: Master chip node
+        "$fsiBus->{master}->{target}->{node}",
+      #MASTERPOS :: Master chip position
+        "$fsiBus->{master}->{target}->{position}",
+      #TARGET_TYPE :: Slave chip type 'pu','memb'
+      $fsiBus->{'slave'}->{'target'}->{'name'},
+      #SLAVE_PORT :: mproc->'fsi_slave0',altmproc->'fsi_slave1'
+      $fsiBus->{'slave'}->{'unit-id'}
+        ];
+
+   #print "\nTARGET=$Fsis[$#Fsis][FSI_TARGET_FIELD]\n";
+   #print "TYPE=$Fsis[$#Fsis][FSI_TYPE_FIELD]\n";
+   #print "LINK=$Fsis[$#Fsis][FSI_LINK_FIELD]\n";
+   #print "MASTERNODE=$Fsis[$#Fsis][FSI_MASTERNODE_FIELD]\n";
+   #print "MASTERPOS=$Fsis[$#Fsis][FSI_MASTERPOS_FIELD]\n";
+   #print "TARGET_TYPE=$Fsis[$#Fsis][FSI_TARGET_TYPE_FIELD]\n";
+   #print "SLAVE_PORT=$Fsis[$#Fsis][FSI_SLAVE_PORT_FIELD]\n";
 }
+#print "Fsis = $#Fsis\n";
 
 #------------------------------------------------------------------------------
 # Process the psi-busses MRW file
@@ -762,11 +828,10 @@ use constant MCS_TARGET_FIELD     => 0;
 use constant CENTAUR_TARGET_FIELD => 1;
 use constant DIMM_TARGET_FIELD    => 2;
 use constant DIMM_PATH_FIELD      => 3;
-use constant CFSI_LINK_FIELD      => 4;
-use constant BUS_NODE_FIELD       => 5;
-use constant BUS_POS_FIELD        => 6;
-use constant BUS_ORDINAL_FIELD    => 7;
-use constant DIMM_POS_FIELD       => 8;
+use constant BUS_NODE_FIELD       => 4;
+use constant BUS_POS_FIELD        => 5;
+use constant BUS_ORDINAL_FIELD    => 6;
+use constant DIMM_POS_FIELD       => 7;
 
 use constant CDIMM_RID_NODE_MULTIPLIER => 32;
 
@@ -779,7 +844,7 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          "n$i->{mba}->{target}->{node}:p$i->{mba}->{target}->{position}:mba" .
          $i->{mba}->{target}->{chipUnit},
          "n$i->{dimm}->{target}->{node}:p$i->{dimm}->{target}->{position}",
-         $i->{dimm}->{'instance-path'}, $i->{'fsi-link'},
+         $i->{dimm}->{'instance-path'},
          $i->{mcs}->{target}->{node},
          $i->{mcs}->{target}->{position}, 0,
          $i->{dimm}->{'instance-path'} ];
@@ -945,7 +1010,8 @@ my $sys = 0;
 generate_sys();
 
 my $node = 0;
-my $Mproc = 0;
+my @mprocs;
+my $altMproc = 0;
 my $fru_id = 0;
 my @fru_paths;
 my $hasProc = 0;
@@ -957,7 +1023,6 @@ for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
 
 $node = $curnode;
-$hasProc = 0;
 
 # find master proc of this node
 for my $i ( 0 .. $#Fsis )
@@ -965,13 +1030,11 @@ for my $i ( 0 .. $#Fsis )
     my $nodeId = lc($Fsis[$i][FSI_TARGET_FIELD]);
     $nodeId =~ s/.*n(.*):.*$/$1/;
     if ((lc($Fsis[$i][FSI_TYPE_FIELD]) eq "fsp master") &&
-        (($Fsis[$i][FSI_TARGET_TYPE]) eq "pu") &&
+        (($Fsis[$i][FSI_TARGET_TYPE_FIELD]) eq "pu") &&
         ($nodeId eq $node))
     {
-        $Mproc = $Fsis[$i][FSI_TARGET_FIELD];
-        $Mproc =~ s/.*p(.*)/$1/;
-        $hasProc = 1;
-        last;
+        push @mprocs, $Fsis[$i][FSI_TARGET_FIELD];
+        #print "Mproc = $Fsis[$i][FSI_TARGET_FIELD]\n";
     }
 }
 
@@ -989,7 +1052,8 @@ foreach my $fsp ( keys %FSPs )
     }
 }
 
-if ($hasProc == 0)
+# Node has no master processor, maybe it is just a control node?
+if ($#mprocs < 0)
 {
     next;
 }
@@ -1088,27 +1152,44 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                 push @fru_paths, [ $fru_path, $fru_id ];
             }
         }
-        if ($proc eq $Mproc)
+
+        my @fsi;
+        for (my $j = 0; $j <= $#Fsis; $j++)
         {
-            generate_proc($proc, $ipath, $lognode, $logid,
-                                 $proc_ordinal_id, 1, 0, 0,$fru_id,$hwTopology);
-        }
-        else
-        {
-            my $fsi;
-            for (my $j = 0; $j <= $#Fsis; $j++)
+            if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p$proc") &&
+                ($Fsis[$j][FSI_TARGET_TYPE_FIELD] eq "pu") &&
+                (lc($Fsis[$j][FSI_SLAVE_PORT_FIELD]) eq "fsi_slave0") &&
+                (lc($Fsis[$j][FSI_TYPE_FIELD]) eq "hub master") )
             {
-                if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p$proc") &&
-                    ($Fsis[$j][FSI_TARGET_TYPE] eq "pu") &&
-                    ($Fsis[$j][FSI_MASTER_FIELD] eq "n${node}:p$Mproc"))
-                {
-                    $fsi = $Fsis[$j][FSI_LINK_FIELD];
-                    last;
-                }
+                @fsi = @{@Fsis[$j]};
+                last;
             }
-            generate_proc($proc, $ipath, $lognode, $logid,
-                          $proc_ordinal_id, 0, 1, $fsi,$fru_id,$hwTopology);
         }
+
+        my @altfsi;
+        for (my $j = 0; $j <= $#Fsis; $j++)
+        {
+            if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p$proc") &&
+                ($Fsis[$j][FSI_TARGET_TYPE_FIELD] eq "pu") &&
+                (lc($Fsis[$j][FSI_SLAVE_PORT_FIELD]) eq "fsi_slave1") &&
+                (lc($Fsis[$j][FSI_TYPE_FIELD]) eq "hub master") )
+            {
+                @altfsi = @{@Fsis[$j]};
+                last;
+            }
+        }
+
+        my $is_master = 0;
+        foreach my $m (@mprocs)
+        {
+            if ($m eq "n${node}:p$proc")
+            {
+                $is_master = 1;
+            }
+        }
+
+        generate_proc($proc, $is_master, $ipath, $lognode, $logid,
+                      $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology);
 
         # call to do any fsp per-proc targets (ie, occ, psi)
         do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
@@ -1198,7 +1279,6 @@ for my $i ( 0 .. $#STargets )
             if ($mba eq $centaur)
             {
                 $membMcs = $Membuses[$j][MCS_TARGET_FIELD];
-                $cfsi = $Membuses[$j][CFSI_LINK_FIELD];
                 $found = 1;
                 last;
             }
@@ -1206,6 +1286,32 @@ for my $i ( 0 .. $#STargets )
         if ($found == 0)
         {
             die "ERROR. Can't locate Centaur from memory bus table\n";
+        }
+
+        my @fsi;
+        for (my $j = 0; $j <= $#Fsis; $j++)
+        {
+            if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p${memb}") &&
+                ($Fsis[$j][FSI_TARGET_TYPE_FIELD] eq "memb") &&
+                (lc($Fsis[$j][FSI_SLAVE_PORT_FIELD]) eq "fsi_slave0") &&
+                (lc($Fsis[$j][FSI_TYPE_FIELD]) eq "cascaded master") )
+            {
+                @fsi = @{@Fsis[$j]};
+                last;
+            }
+        }
+
+        my @altfsi;
+        for (my $j = 0; $j <= $#Fsis; $j++)
+        {
+            if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p${memb}") &&
+                ($Fsis[$j][FSI_TARGET_TYPE_FIELD] eq "memb") &&
+                (lc($Fsis[$j][FSI_SLAVE_PORT_FIELD]) eq "fsi_slave1") &&
+                (lc($Fsis[$j][FSI_TYPE_FIELD]) eq "cascaded master") )
+            {
+                @altfsi = @{@Fsis[$j]};
+                last;
+            }
         }
 
         my $relativeCentaurRid = $STargets[$i][PLUG_POS]
@@ -1219,9 +1325,9 @@ for my $i ( 0 .. $#STargets )
         my $vmem_id=$SortedVmem[$vmem_count][VMEM_ID_FIELD];
         $vmem_count++;
 
-        generate_centaur( $memb, $membMcs, $cfsi, $ipath,
-                               $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
-                               $vmem_id, $vmemDevPath, $vmemAddr, $ipath);
+        generate_centaur( $memb, $membMcs, \@fsi, \@altfsi, $ipath,
+                          $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
+                          $vmem_id, $vmemDevPath, $vmemAddr, $ipath);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -1837,8 +1943,11 @@ sub generate_system_node
 
 sub generate_proc
 {
-    my ($proc, $ipath, $lognode, $logid, $ordinalId, $master, $slave, $fsi,
-        $fruid,$hwTopology) = @_;
+    my ($proc, $is_master, $ipath, $lognode, $logid, $ordinalId,
+        $fsiA, $altfsiA,
+        $fruid, $hwTopology) = @_;
+    my @fsi = @{$fsiA};
+    my @altfsi = @{$altfsiA};
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc});
     my $vpdnum = ${proc};
     my $position = ${proc};
@@ -1885,8 +1994,8 @@ sub generate_proc
     <attribute><id>POSITION</id><default>${position}</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
-            <field><id>useFsiScom</id><value>$slave</value></field>
-            <field><id>useXscom</id><value>$master</value></field>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
             <field><id>useInbandScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
@@ -1924,33 +2033,54 @@ sub generate_proc
         <default>$dcm_installed</default>
     </attribute>";
 
-    if ($master)
+    ## Master value ##
+    if( $is_master )
     {
         print "
-    <!-- Master Proc attribute -->
     <attribute>
         <id>PROC_MASTER_TYPE</id>
-        <default>ACTING_MASTER</default>
+        <default>MASTER_CANDIDATE</default>
     </attribute>";
-
     }
-    if ($slave)
+    else
     {
         print "
-    <!-- Slave Proc attribute -->
-    <!-- FSI is connected via node${node}:proc${Mproc}:MFSI-$fsi -->
     <attribute>
-        <id>FSI_MASTER_CHIP</id>
-        <default>physical:sys-$sys/node-$node/proc-$Mproc</default>
-    </attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>NOT_MASTER</default>
+    </attribute>";
+    }
+
+    ## Setup FSI Attributes ##
+    if( ($#fsi <= 0) && ($#altfsi <= 0) )
+    {
+        print "
+    <!-- No FSI connection -->
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default>
+    </attribute>";
+    }
+    else
+    {
+        print "
+    <!-- FSI connections -->
     <attribute>
         <id>FSI_MASTER_TYPE</id>
         <default>MFSI</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_PORT</id>
-        <default>$fsi</default>
-    </attribute>
+    </attribute>";
+    }
+
+    # if a proc is sometimes the master then it
+    #  will have flipped ports
+    my $flipport = 0;
+    if( $is_master )
+    {
+        $flipport = 1;
+    }
+
+    # these values are common for both fsi ports
+    print "
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
         <default>0</default>
@@ -1958,22 +2088,72 @@ sub generate_proc
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>
-        <field><id>flipPort</id><value>0</value></field>
+        <field><id>flipPort</id><value>$flipport</value></field>
         <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>";
-        #TODO RTC:35041 -- Parse out alternate FSI paths
+
+    if( $#fsi <= 0 )
+    {
         print "
+    <!-- FSI-A is not connected -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no A path -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no A path -->
+    </attribute>";
+    }
+    else
+    {
+        my $mNode = $fsi[FSI_MASTERNODE_FIELD];
+        my $mPos = $fsi[FSI_MASTERPOS_FIELD];
+        my $link = $fsi[FSI_LINK_FIELD];
+        print "
+    <!-- FSI-A is connected via node$mNode:proc$mPos:MFSI-$link -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-$sys/node-$mNode/proc-$mPos</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>$link</default>
+    </attribute>";
+    }
+
+    if( $#altfsi <= 0 )
+    {
+        print "
+    <!-- FSI-B is not connected -->
     <attribute>
         <id>ALTFSI_MASTER_CHIP</id>
-        <default>physical:sys</default><!-- no alt path -->
+        <default>physical:sys</default><!-- no B path -->
     </attribute>
     <attribute>
         <id>ALTFSI_MASTER_PORT</id>
-        <default>0xFF</default><!-- no alt path -->
-    </attribute>";
-
+        <default>0xFF</default><!-- no B path -->
+    </attribute>\n";
     }
+    else
+    {
+        my $mNode = $altfsi[FSI_MASTERNODE_FIELD];
+        my $mPos = $altfsi[FSI_MASTERPOS_FIELD];
+        my $link = $altfsi[FSI_LINK_FIELD];
+        print "
+    <!-- FSI-B is connected via node$mNode:proc$mPos:MFSI-$link -->
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys-$sys/node-$mNode/proc-$mPos</default>
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>$link</default>
+    </attribute>\n";
+    }
+    print "    <!-- End FSI connections -->\n";
+    ## End FSI ##
 
     # add EEPROM attributes
     addEeproms($sys, $node, $proc);
@@ -2816,8 +2996,10 @@ sub generate_logicalDimms
 
 sub generate_centaur
 {
-    my ($ctaur, $mcs, $cfsi, $ipath, $ordinalId, $relativeCentaurRid,
+    my ($ctaur, $mcs, $fsiA, $altfsiA, $ipath, $ordinalId, $relativeCentaurRid,
             $vmemId, $vmemDevPath, $vmemAddr, $ipath) = @_;
+    my @fsi = @{$fsiA};
+    my @altfsi = @{$altfsiA};
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -2881,20 +3063,19 @@ sub generate_centaur
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
-    </attribute>
+    </attribute>";
 
-    <!-- FSI is connected via proc$proc:cMFSI-$cfsi -->
-    <attribute>
-        <id>FSI_MASTER_CHIP</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc</default>
-    </attribute>
+    # FSI Connections #
+    if( $#fsi <= 0 )
+    {
+        die "\n*** No valid FSI link found for Centaur $ctaur ***\n";
+    }
+
+    print "\n
+    <!-- FSI connections -->
     <attribute>
         <id>FSI_MASTER_TYPE</id>
         <default>CMFSI</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_PORT</id>
-        <default>$cfsi</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -2906,7 +3087,55 @@ sub generate_centaur
         <field><id>flipPort</id><value>0</value></field>
         <field><id>reserved</id><value>0</value></field>
         </default>
+    </attribute>";
+
+    my $mNode = $fsi[FSI_MASTERNODE_FIELD];
+    my $mPos = $fsi[FSI_MASTERPOS_FIELD];
+    my $link = $fsi[FSI_LINK_FIELD];
+    print "
+    <!-- FSI-A is connected via node$mNode:proc$mPos:CMFSI-$link -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-$sys/node-$mNode/proc-$mPos</default>
     </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>$link</default>
+    </attribute>";
+
+    if( $#altfsi <= 0 )
+    {
+        print "
+    <!-- FSI-B is not connected -->
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no B path -->
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no B path -->
+    </attribute>\n";
+    }
+    else
+    {
+        $mNode = $altfsi[FSI_MASTERNODE_FIELD];
+        $mPos = $altfsi[FSI_MASTERPOS_FIELD];
+        $link = $altfsi[FSI_LINK_FIELD];
+        print "
+    <!-- FSI-B is connected via node$mNode:proc$mPos:CMFSI-$link -->
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys-$sys/node-$mNode/proc-$mPos</default>
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>$link</default>
+    </attribute>\n";
+    }
+    print "    <!-- End FSI connections -->\n";
+    # End FSI #
+
+    print "
     <attribute><id>VPD_REC_NUM</id><default>$ctaur</default></attribute>
     <attribute>
         <id>EI_BUS_TX_LANE_INVERT</id>
