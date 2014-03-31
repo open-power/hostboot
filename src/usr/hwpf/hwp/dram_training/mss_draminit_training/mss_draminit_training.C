@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.73 2014/02/25 22:23:13 mwuu Exp $
+// $Id: mss_draminit_training.C,v 1.77 2014/03/28 19:48:10 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.77   | jdsloat  |28-MAR-14| Added ifdef around #include for mss_lrdimm_ddr4_funcs.H
+//  1.76   | mwuu     |14-MAR-14| Fixed CDIMM full spare case in getC4dq2reg (bbm)
+//  1.75   | kcook    |14-MAR-14| Fixed mss_mxd_training stub function definition
+//  1.74   | kcook    |14-MAR-14| Added calls to DDR4 LRDIMM training functions
 //  1.73   | mwuu     |25-FEB-14| Fixed ISDIMM spare case for bad bitmap
 //  1.72   | mwuu     |14-FEB-14| Fixed x4 spare case when mss_c4_phy returns bad
 //         |          |         | data with workaround
@@ -154,10 +158,40 @@
 #include <mss_lrdimm_funcs.H>
 #include "mss_access_delay_reg.H"
 
+#ifdef FAPI_LRDIMM
+#include <mss_lrdimm_ddr4_funcs.H>
+#endif
 
 #ifndef FAPI_LRDIMM
 using namespace fapi;
 fapi::ReturnCode mss_execute_lrdimm_mb_dram_training(Target& i_target)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+fapi::ReturnCode mss_mrep_training(Target& i_target, uint32_t port)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+fapi::ReturnCode mss_mxd_training(Target& i_target, uint8_t port,  uint8_t i_type)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+fapi::ReturnCode mss_dram_write_leveling(Target& i_target, uint32_t port)
 {
    ReturnCode rc;
 
@@ -430,9 +464,18 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	{
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
+
+            // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
+	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
+                 (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
+            {
+                 rc = mss_mrep_training(i_target, port);
+		 rc = mss_mxd_training(i_target,port,0);
+            }
 	}
 
-        if ( dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+        if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) && 
+				(dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
         {
             FAPI_INF("Performing LRDIMM MB-DRAM training");
 
@@ -659,7 +702,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			       if(rc) return rc;
                             }
 			}
-
+                        // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
+                        else if ( (group == 0) && (cur_cal_step == 1)
+                                  && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                  && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
+                        {
+                           rc = mss_dram_write_leveling(i_target, port);
+                           if(rc) return rc;
+                        }
 
 		        //Set the config register
 			if(port == 0)
@@ -3420,6 +3470,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 							return rc;
 						}
 					}
+		 // does disabling read clocks for unused bytes cause problems?
 					else
 					{
 						uint64_t rdclk_addr =
@@ -3772,7 +3823,7 @@ ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
 
 				switch (dimm_spare[i_port][i_dimm][i_rank])
     			{
-			        case ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE:
+			        case ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE:	// 0xFF
 			            continue;							// ignore bbm data for nonexistent spare
 		            break;
 			        case ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE:
@@ -3782,7 +3833,7 @@ ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
 			            spare_bitmap = 0xF0;
 		            break;
 			        case ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE:
-			            spare_bitmap = 0xFF;
+			            spare_bitmap = 0x00;
 		            break;
 					default:
 						FAPI_ERR("ATTR_VPD_DIMM_SPARE is invalid %u", 

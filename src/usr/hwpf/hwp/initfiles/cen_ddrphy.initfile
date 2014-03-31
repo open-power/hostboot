@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.30 2014/01/23 01:33:13 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.31 2014/03/11 16:13:37 mwuu Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,9 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#	    1.31|mwuu    |03/11/14|Changed DPHY01_DDRPHY_ADR_PLL_VREG_CONFIG_0_P0_ADR32S0
+#			|		 |		  |VCO bits 60:63 to match the DP18 PLL of 700MHz,
+#			|		 |		  |Changed LRDIMM settings GPO, WLO to use attributes
 #		1.30|mwuu    |01/22/14|Changed DIMM_TYPE fix for DDR4 CDIMM
 #		1.29|mwuu    |01/14/14|Added VPD attributes for TSYS_ADR, TSYS_DP18,
 #			|        |        |changed DIMM_TYPE for obsolete CDIMM enum
@@ -432,7 +435,7 @@ scom 0x8000C00D0301143F {
 #	0:47	,	0x000000000000,	any		;	# reserved
 # 	# WLO is normally 0 except for RDIMM (RCD) configurations in which case it's set to 1
 # DD0 = PORT_BUFFER_LATENCY
- 	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
+#	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
  	48:51	,	(ATTR_VPD_WLO[0]),	any								;	# based on attribute now..
 # 	48:51	,	0x1			,	(def_is_rdimm)						;	# RDIMM
 # 	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
@@ -440,6 +443,7 @@ scom 0x8000C00D0301143F {
 # 	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
 # 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
 # 	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM	# !! need to review LR settings !!
+# 	52:55	,	(ATTR_VPD_RLO[0] + 1),	(def_2N_mode)				;	# based on attribute now..
  	52:55	,	(ATTR_VPD_RLO[0]),	any								;	# based on attribute now..
  	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
  	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
@@ -470,12 +474,13 @@ scom 0x8001C00D0301143F {
 #	0:47	,	0x000000000000,	any		;	# reserved
 # 	# WLO is normally 0 except for RDIMM (RCD) configurations in which case it's set to 1
 # DD0 = PORT_BUFFER_LATENCY
- 	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
+#	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
  	48:51	,	(ATTR_VPD_WLO[1]),	any								;	# based on attribute now..
 # 	48:51	,	0x1			,	(def_is_rdimm)						;	# RDIMM
 # 	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
 # 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
- 	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
+#	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
+# 	52:55	,	(ATTR_VPD_RLO[1] + 1),	(def_2N_mode)				;	# based on attribute now..
  	52:55	,	(ATTR_VPD_RLO[1]),	any								;	# based on attribute now..
 # 	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
 # 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
@@ -548,9 +553,11 @@ scom 0x800(0,1)BC300301143F {		# PHY01 Port[0:1] broadcast ADR32S[0:1]
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
  	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
 
-	60:63	,	0x4			,	(def_is_ddr4)					;	# VCO = high for DDR4
-	60:63	,	0x0			,	any								;	# VCO = low for DDR3
-
+#	60:63	,	0x4			,	(def_is_ddr4)					;	# VCO = high for DDR4
+#	60:63	,	0x0			,	any								;	# VCO = low for DDR3
+#  changed from SWyatt review...
+	60:63   ,   0x4         ,   (CEN.ATTR_MSS_FREQ > 1400)      ;   # VCO = high for >= 700MHz or 1400 MT/s
+    60:63   ,   0x0         ,   any                             ;   # VCO = low for < 700MHz
 }
 
 # ---------------------------------------------------------------------------------------
@@ -639,9 +646,10 @@ scom 0x800(0,1)3C760301143F {			# CONFIG0_P[0:1] broadcast [0:4]
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
  	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
 
+#   Changed to 700MHz per Swyatt
 #	60:63	,	0x0			,	(def_is_sim)					;	# for SIM
-	60:63	,	0x4			,	(CEN.ATTR_MSS_FREQ > 1459)		;	# VCO = high for >= 730MHz or 1460 MT/s
-	60:63	,	0x0			,	any								;	# VCO = low for < 730MHz
+	60:63	,	0x4			,	(CEN.ATTR_MSS_FREQ > 1400)		;	# VCO = high for >= 700MHz or 1400 MT/s
+	60:63	,	0x0			,	any								;	# VCO = low for < 700MHz
 }
 
 # ---------------------------------------------------------------------------------------
@@ -3795,7 +3803,7 @@ scom 0x8001C8000301143F {	# _P1
 	#
 	# min GPO = 5 + max(rndUp(System_delay)) - RLO + ADVANCE_RD_VALID + SPAM_EN
 	# max GPO = 11 if in 2:1, 13 if in 4:1
-	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7
+#	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7
 	48:51	,	(ATTR_VPD_GPO[1]),	any			;	# GLOBAL_PHY_OFFSET (GPO), based on attribute now
 #	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
 	52		,	0b0			,	any				;	# ADVANCE_RD_VALID	ask Yuen
@@ -4167,7 +4175,7 @@ scom 0x800(0,1)CC020301143F {	# _P[0:1]
 }
 
 # ---------------------------------------------------------------------------------------
-# Write control logic configuration 3	default=0x01F8
+# Write control logic configuration 3	default=0x01F8		DDR4 PDA register
 #
 # DPHY01_DDRPHY_WC_CONFIG3_P0	0x005	0x8000cc050301143f
 # PHYW.PHYX.SYNTHX.D3SIDEA.WCX.DDRPHY_WC_CONFIG3_L2
