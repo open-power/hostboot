@@ -877,7 +877,15 @@ errlHndl_t ibscomPerformOp(DeviceFW::OperationType i_opType,
 void enableInbandScoms( bool i_disable )
 {
     TARGETING::TargetHandleList membufChips;
-    TARGETING::getAllChips(membufChips, TYPE_MEMBUF, true);
+
+    //In the enable path, only modify function chips, but in the
+    // disable path we want to touch everybody
+    bool func_only = true;
+    if( IBSCOM_DISABLE == i_disable )
+    {
+        func_only = false;
+    }
+    TARGETING::getAllChips(membufChips, TYPE_MEMBUF, func_only);
 
     mutex_t* l_mutex = NULL;
 
