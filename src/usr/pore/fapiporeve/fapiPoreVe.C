@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVe.C,v 1.33 2013/06/25 19:08:33 thi Exp $
+// $Id: fapiPoreVe.C,v 1.35 2014/03/31 15:21:37 thi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -51,8 +51,6 @@
 //   Extract end state
 //   Destroy PoreVe
 //		  
-
-
 
 //----------------------------------------------------------------------
 //  Includes
@@ -91,6 +89,7 @@ fapi::ReturnCode fapiPoreVe(
     bool haveMAINMEM = false;
     bool haveSRAM    = false;
     bool havePIBMEM  = false;
+    const fapi::Target & TARGET = i_target;
 
     //----------------------------------------------------------------------
     // Find the PORE type
@@ -134,6 +133,7 @@ fapi::ReturnCode fapiPoreVe(
     // Parse the arguments
     //----------------------------------------------------------------------
     FapiPoreVeStateArg *stateArg = NULL;
+    bool p_state_allocated = false;
     for( itr = io_sharedObjectArgs.begin();
          (itr != io_sharedObjectArgs.end()) && rc.ok(); itr++ )
     {
@@ -154,6 +154,7 @@ fapi::ReturnCode fapiPoreVe(
                 {
                     p_state = new PoreState();
                     stateArg->iv_data=p_state;
+                    p_state_allocated = true;
                     char* state_rc;
                     int linenum = 0;
 
@@ -728,6 +729,7 @@ fapi::ReturnCode fapiPoreVe(
         if( p_state == NULL )
         {
             p_state = new PoreState();
+            p_state_allocated = true;
         }
         me = poreve->iv_pore.extractState( *p_state );
 
@@ -814,8 +816,14 @@ fapi::ReturnCode fapiPoreVe(
             stateArg->iv_data=p_state;
             fclose( stateArg->iv_fd );
         }
-
 #endif
+
+        if (p_state_allocated)
+        {
+            delete p_state;
+            stateArg->iv_data=NULL;
+        }
+
         if( me != ME_SUCCESS )
         {
             FAPI_ERR( "Model error extracting state. Errno(%i)\n", (int)me);
@@ -845,6 +853,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVe.C,v $
+Revision 1.35  2014/03/31 15:21:37  thi
+Added FFDC and callouts
+
+Revision 1.34  2013/12/02 20:49:04  mklight
+delete PoreState data created by fapiPoreVe
+
 Revision 1.33  2013/06/25 19:08:33  thi
 Fix Hostboot compile error
 
