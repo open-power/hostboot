@@ -183,22 +183,17 @@ void*    call_mem_pll_initf( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err );
 
-            break;
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails(l_err);
+
+            // Commit Error
+            errlCommit(l_err, HWPF_COMP_ID);
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS: cen_mem_pll_initf HWP( )" );
         }
-    }
-
-    if( l_err )
-    {
-        // Create IStep error log and cross reference to error that occurred
-        l_StepError.addErrorDetails( l_err );
-
-        // Commit Error
-        errlCommit( l_err, HWPF_COMP_ID );
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf exit" );
@@ -250,22 +245,17 @@ void*    call_mem_pll_setup( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
-            break;
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails(l_err);
+
+            // Commit Error
+            errlCommit(l_err, HWPF_COMP_ID);
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS: mem_pll_setup HWP( )" );
         }
-    }
-
-    if( l_err )
-    {
-        // Create IStep error log and cross reference to error that occurred
-        l_StepError.addErrorDetails( l_err );
-
-        // Commit Error
-        errlCommit( l_err, HWPF_COMP_ID );
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup exit" );
@@ -440,13 +430,12 @@ void*    call_mss_scominit( void *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
-                // Create IStep error log and cross reference to error that occurred
+                // Create IStep error log and cross reference to error that
+                // occurred
                 l_stepError.addErrorDetails( l_err );
 
                 // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
             }
             else
             {
@@ -454,7 +443,7 @@ void*    call_mss_scominit( void *io_pArgs )
                            "SUCCESS :  mss_scominit HWP( )" );
             }
         }
-        if (l_err)
+        if (l_stepError.getErrorHandle())
         {
             break;
         }
@@ -494,8 +483,6 @@ void*    call_mss_scominit( void *io_pArgs )
 
                 // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
             }
             else
             {
@@ -565,8 +552,6 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
-            break; // break out of mba loop
         }
         else
         {
@@ -635,8 +620,6 @@ void*    call_mss_draminit( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
-            break; // Break out of mba loop
         }
         else
         {
@@ -707,8 +690,6 @@ void*    call_mss_draminit_training( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
-            break; // break out of mba loop
         }
         else
         {
@@ -842,8 +823,6 @@ void*    call_mss_draminit_mc( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
-            break; // break out of memBuf loop
         }
         else
         {
@@ -937,7 +916,5 @@ void*    call_mss_dimm_power_test( void *io_pArgs )
 
     return l_stepError.getErrorHandle();
 }
-
-
 
 };   // end namespace
