@@ -1,0 +1,5 @@
+config ERRL_ENTRY_TRACE
+    default y
+    help
+        This enables traces in errl entry that would
+        otherwise be TRACDCOMP

@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,6 +48,7 @@
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <config.h>
 
 
 // Hostboot Image ID string
@@ -154,7 +158,11 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_termState(TERM_STATE_UNKNOWN),
     iv_sevFinal(false)
 {
+    #ifdef CONFIG_ERRL_ENTRY_TRACE
+    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
+    #else
     TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
+    #endif
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
     // Automatically add a software callout if asked
@@ -448,9 +456,15 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 
     if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
     {
+        #ifdef CONFIG_ERRL_ENTRY_TRACE
         TRACFCOMP(g_trac_errl, ENTER_MRK
                 "addHwCallout(\"MASTER_PROC_SENTINEL\" 0x%x 0x%x 0x%x)",
                 i_target, i_priority, i_deconfigState, i_gardErrorType);
+        #else
+        TRACDCOMP(g_trac_errl, ENTER_MRK
+                "addHwCallout(\"MASTER_PROC_SENTINEL\" 0x%x 0x%x 0x%x)",
+                i_target, i_priority, i_deconfigState, i_gardErrorType);
+        #endif
         ErrlUserDetailsCallout(
                 &HWAS::TARGET_IS_SENTINEL, sizeof(HWAS::TARGET_IS_SENTINEL),
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
@@ -458,10 +472,15 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
     else
     {   // we got a non MASTER_SENTINEL target, therefore the targeting
         // module is loaded, therefore we can make this call.
+        #ifdef CONFIG_ERRL_ENTRY_TRACE
         TRACFCOMP(g_trac_errl, ENTER_MRK"addHwCallout(0x%.8x 0x%x 0x%x 0x%x)",
                 get_huid(i_target), i_priority,
                 i_deconfigState, i_gardErrorType);
-
+        #else
+        TRACDCOMP(g_trac_errl, ENTER_MRK"addHwCallout(0x%.8x 0x%x 0x%x 0x%x)",
+                get_huid(i_target), i_priority,
+                i_deconfigState, i_gardErrorType);
+        #endif
         TARGETING::EntityPath ep;
         TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
         if (l_type == TARGETING::TYPE_CORE)
@@ -545,8 +564,13 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 void ErrlEntry::addProcedureCallout(const HWAS::epubProcedureID i_procedure,
                             const HWAS::callOutPriority i_priority)
 {
+    #ifdef CONFIG_ERRL_ENTRY_TRACE
     TRACFCOMP( g_trac_errl, ENTER_MRK"addProcedureCallout(0x%x, 0x%x)",
                 i_procedure, i_priority);
+    #else
+    TRACDCOMP( g_trac_errl, ENTER_MRK"addProcedureCallout(0x%x, 0x%x)",
+                i_procedure, i_priority);
+    #endif
 
     ErrlUserDetailsCallout(i_procedure, i_priority).addToLog(this);
 
@@ -599,7 +623,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 // Function to set the correct subsystem ID based on callout priorities
 void ErrlEntry::setSubSystemIdBasedOnCallouts()
 {
-    TRACFCOMP(g_trac_errl, INFO_MRK
+    TRACDCOMP(g_trac_errl, INFO_MRK
             "ErrlEntry::getSubSystemIdBasedOnCallouts()");
 
     HWAS::callout_ud_t *    pData = NULL;
@@ -663,7 +687,7 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                 TARGETING::Target *pTarget =
                             TARGETING::targetService().toTarget(ep);
 
-                TRACFCOMP(g_trac_errl, INFO_MRK
+                TRACDCOMP(g_trac_errl, INFO_MRK
                         "mapping highest priority target 0x%x "
                         "callout to determine SSID",
                         pTarget->getAttr<TARGETING::ATTR_TYPE>() );
@@ -681,7 +705,7 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
         else if ( pData->type == HWAS::PROCEDURE_CALLOUT )
         {
             // for procedures, map the procedure to a subsystem
-            TRACFCOMP(g_trac_errl, INFO_MRK
+            TRACDCOMP(g_trac_errl, INFO_MRK
                     "mapping highest priority procedure 0x%x "
                     "callout to determine SSID",  pData->procedure);
             iv_User.setSubSys(getSubSystem( pData->procedure));
@@ -714,7 +738,7 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
     // in both places.
     iv_Src.setSubSys( iv_User.getSubSys() );
 
-    TRACFCOMP(g_trac_errl, INFO_MRK
+    TRACDCOMP(g_trac_errl, INFO_MRK
                 "ErrlEntry::setSubSystemIdBasedOnCallouts() "
                 "ssid selected 0x%X", iv_Src.getSubSys() );
 
@@ -911,7 +935,7 @@ epubSubSystem_t ErrlEntry::getSubSystem( HWAS::clockTypeEnum i_clockType ) const
 // for use by ErrlManager
 void ErrlEntry::processCallout()
 {
-    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout");
+    TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout");
 
     // see if HWAS has been loaded and has set the processCallout function
     HWAS::processCalloutFn pFn =
@@ -937,10 +961,10 @@ void ErrlEntry::processCallout()
     } // if HWAS module loaded
     else
     {
-        TRACFCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
+        TRACDCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
     }
 
-    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout returning");
+    TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout returning");
 }
 
 
@@ -963,7 +987,7 @@ void ErrlEntry::deferredDeconfigure()
     // deferred deconfig requests as the indicator that it is safe to call
     // the HWAS functionality.
 
-    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure");
+    TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure");
 
     // see if HWAS has been loaded and has set the processCallout function
     HWAS::processCalloutFn pFn =
@@ -999,10 +1023,10 @@ void ErrlEntry::deferredDeconfigure()
     } // if HWAS module loaded
     else
     {
-        TRACFCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
+        TRACDCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
     }
 
-    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure returning");
+    TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure returning");
 }
 
 

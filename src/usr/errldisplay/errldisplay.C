@@ -300,7 +300,7 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
 void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
                                 compId_t i_committerComp)
 {
-    TRACFCOMP( g_trac_errldisp, ENTER_MRK "ErrLogDisplay::msgDisplay" );
+    TRACDCOMP( g_trac_errldisp, ENTER_MRK "ErrLogDisplay::msgDisplay" );
 
     const errLogInfo *info = findErrLogInfo ( i_err->moduleId(),
                                               i_err->reasonCode());
@@ -355,7 +355,7 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
                       "================================================\n" );
     CONSOLE::flush();
 
-    TRACFCOMP( g_trac_errldisp, EXIT_MRK "ErrLogDisplay::msgDisplay" );
+    TRACDCOMP( g_trac_errldisp, EXIT_MRK "ErrLogDisplay::msgDisplay" );
 }
 
 

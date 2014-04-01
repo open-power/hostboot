@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2014                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -103,7 +104,7 @@ void processCallout(errlHndl_t &io_errl,
         bool i_DeferredOnly)
 {
     callout_ud_t *pCalloutUD = (callout_ud_t *)i_pData;
-    HWAS_INF("processCallout entry. data %p size %lld type 0x%x",
+    HWAS_DBG("processCallout entry. data %p size %lld type 0x%x",
             i_pData, i_Size, pCalloutUD->type);
 
     if (i_DeferredOnly)
@@ -216,7 +217,7 @@ void processCallout(errlHndl_t &io_errl,
         }
     } // switch
 
-    HWAS_INF("processCallout exit");
+    HWAS_DBG("processCallout exit");
 } // processCallout
 
 }; // end namespace
