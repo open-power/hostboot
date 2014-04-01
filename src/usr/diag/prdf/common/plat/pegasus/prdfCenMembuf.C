@@ -46,6 +46,9 @@
 #include <prdfCenMembufExtraSig.H>
 #include <prdfLaneRepair.H>
 #include <prdfCenMemUtils.H>
+#ifndef __HOSTBOOT_MODULE
+#include <prdfCenMbaDynMemDealloc.H> // For dynamic memory deallocation support
+#endif
 
 using namespace TARGETING;
 
@@ -808,8 +811,20 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
         {
             PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
                       rank.getMaster(), rank.getSlave() );
-            break;
+            // We are not adding break here as we still want to do lmbGard
+            // If you want to add any code after this which depends on result
+            // of handleTdEvent result, add the code judicially.
         }
+
+        #ifndef __HOSTBOOT_MODULE
+        // Send lmb gard message to PHYP.
+        int32_t lmbRc =  DEALLOC::lmbGard( mbaChip, addr );
+        if ( SUCCESS != lmbRc )
+        {
+            PRDF_ERR( PRDF_FUNC"lmbGard() failed" );
+            l_rc = lmbRc; break;
+        }
+        #endif
 
     } while (0);
 

@@ -30,6 +30,9 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfCenMembufDataBundle.H>
+#ifndef __HOSTBOOT_MODULE
+#include <prdfCenMbaDynMemDealloc.H> // For dynamic memory deallocation support
+#endif
 
 using namespace TARGETING;
 
@@ -440,6 +443,14 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                     {
                         PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(0x%08x, SKIP_MBA) "
                                   "failed", getHuid( mba ) );
+                        o_rc |= l_rc;
+                    }
+                    #else
+                    int32_t l_rc = DEALLOC::mbaGard( mbaChip  );
+                    if ( SUCCESS != l_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC"mbaGard failed. HUID: 0x%08x",
+                                  getHuid( mba ) );
                         o_rc |= l_rc;
                     }
                     #endif // __HOSTBOOT_MODULE
