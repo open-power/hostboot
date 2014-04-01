@@ -708,7 +708,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[10]
      *  MBACALFIRQ_MBA_WRD_CE
      */
-    (MbaCalFir, bit(10)) ? thresholdAndMask_self;
+    (MbaCalFir, bit(10)) ? SelfMedThr32PerDay;
 
     /** MBACALFIR[11]
      *  MBACALFIRQ_MBA_MAINT_UE
@@ -728,7 +728,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[14]
      *  MBACALFIRQ_WRQ_DATA_CE
      */
-    (MbaCalFir, bit(14)) ? thresholdAndMask_self;
+    (MbaCalFir, bit(14)) ? SelfMedThr32PerDay;
 
     /** MBACALFIR[15]
      *  MBACALFIRQ_WRQ_DATA_UE

@@ -1270,20 +1270,20 @@ actionclass calloutDmiBusTh2pday { calloutDmiBus; threshold2pday; };
 actionclass calloutDmiBusLvl2Th1 { calloutDmiBusTh1; callout2ndLvlLow; };
 
 /** Callout MCS, centaur, threshold 1 and set SUE genreation point */
-actionclass CalloutMcsMedSelfLowThr1UE
+actionclass CalloutMcsMedSelfMedThr1UE
 {
     callout(connected(TYPE_MCS),MRU_MED);
-    calloutSelfLow;
+    calloutSelfMed;
     threshold1;
     SUEGenerationPoint;
 };
 
 /** If channel Replay Timeout do nothing else
- *  execute CalloutMcsMedSelfLowThr1UE
+ *  execute CalloutMcsMedSelfMedThr1UE
  */
 actionclass chkChnlReplTOCalloutMcsSelfThr1UE
 {
-    try( funccall("checkChnlReplayTimeOut"), CalloutMcsMedSelfLowThr1UE );
+    try( funccall("checkChnlReplayTimeOut"), CalloutMcsMedSelfMedThr1UE );
 };
 
 /** If no channel Replay Timeout, execute SelfMedThr1UE */
@@ -1292,7 +1292,7 @@ actionclass chkChnlReplTOSelfMedThr1UE
     try( funccall("checkChnlReplayTimeOut"), SelfMedThr1UE );
 };
 
-/** If no sparebit is set, execute SelfMedThr1UE */
+/** If no sparebit is set, execute calloutDmiBusTh2pday*/
 actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), calloutDmiBusTh2pday );
