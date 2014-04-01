@@ -393,6 +393,10 @@ private:
         bool iv_XDeconfigured[NUM_X_BUSES];
     };
 
+    // Structure populated in _invokeDeconfigureAssocProc() for use in
+    // _deconfigureAssocProc()
+    typedef std::vector<ProcInfo> ProcInfoVector;
+
     /**
      * @brief Deconfigures Targets by association.
      *
@@ -476,8 +480,7 @@ private:
      *  @return errlHndl_t. Error log handle.
      *
      */
-    static errlHndl_t _deconfigureAssocProc(
-                                std::vector<ProcInfo *> &io_procInfo);
+    static errlHndl_t _deconfigureAssocProc(ProcInfoVector &io_procInfo);
 
     /**
      *  @brief Performs SMP node balancing
@@ -497,7 +500,7 @@ private:
      *  @return errlHndl_t. Error log handle.
      *
      */
-    static errlHndl_t _symmetryValidation(std::vector<ProcInfo *> &io_procInfo);
+    static errlHndl_t _symmetryValidation(ProcInfoVector &io_procInfo);
 
 public:
 

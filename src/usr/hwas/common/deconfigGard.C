@@ -734,7 +734,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
     // Define vector of ProcInfo structs to be used by
     // _deconfigAssocProc algorithm. Declared here so
     // "delete" can be used outside of do {...} while(0)
-    std::vector<ProcInfo *> l_procInfo;
+    ProcInfoVector l_procInfo;
 
     do
     {
@@ -798,37 +798,37 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
              l_procsIter != l_procs.end();
              ++l_procsIter)
         {
-            ProcInfo * l_ProcInfo = new ProcInfo();
+            ProcInfo l_ProcInfo = ProcInfo();
             // Iterate through present procs and populate structs in l_procInfo
             // Target pointer
-            l_ProcInfo->iv_pThisProc =
+            l_ProcInfo.iv_pThisProc =
                 *l_procsIter;
             // HUID
-            l_ProcInfo->procHUID =
+            l_ProcInfo.procHUID =
                 (*l_procsIter)->getAttr<ATTR_HUID>();
             // FABRIC_NODE_ID
-            l_ProcInfo->procFabricNode =
+            l_ProcInfo.procFabricNode =
                 (*l_procsIter)->getAttr<ATTR_FABRIC_NODE_ID>();
             // FABRIC_CHIP_ID
-            l_ProcInfo->procFabricChip =
+            l_ProcInfo.procFabricChip =
                 (*l_procsIter)->getAttr<ATTR_FABRIC_CHIP_ID>();
             // HWAS state
-            l_ProcInfo->iv_deconfigured =
+            l_ProcInfo.iv_deconfigured =
                 !(isFunctional(*l_procsIter));
             // iv_isMaster
             if (*l_procsIter == l_pMasterProcTarget)
             {
-                l_ProcInfo->iv_isMaster = true;
+                l_ProcInfo.iv_isMaster = true;
             }
             else
             {
-                l_ProcInfo->iv_isMaster = false;
+                l_ProcInfo.iv_isMaster = false;
             }
             l_procInfo.push_back(l_ProcInfo);
         }
         // Iterate through l_procInfo and populate child bus endpoint
         // chiplet information
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
              l_procInfoIter = l_procInfo.begin();
              l_procInfoIter != l_procInfo.end();
              ++l_procInfoIter)
@@ -836,7 +836,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
             // Populate vector of bus endpoints associated with this proc
             TargetHandleList l_busChiplets;
             targetService().getAssociated(l_busChiplets,
-                                         (*l_procInfoIter)->iv_pThisProc,
+                                         (*l_procInfoIter).iv_pThisProc,
                                          TargetService::CHILD,
                                          TargetService::IMMEDIATE,
                                          &busses);
@@ -848,7 +848,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
             uint8_t aBusIndex = 0;
 
             // Iterate through bus endpoint chiplets
-            for (TargetHandleList::iterator
+            for (TargetHandleList::const_iterator
                  l_busIter = l_busChiplets.begin();
                  l_busIter != l_busChiplets.end();
                  ++l_busIter)
@@ -874,7 +874,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
                 // Get parent chip from xbus chiplet
                 l_pPeerProcTarget = getParentChip(l_pDstTarget);
                 // Find matching ProcInfo struct
-                for (std::vector<ProcInfo *>::const_iterator
+                for (ProcInfoVector::iterator
                      l_matchProcInfoIter = l_procInfo.begin();
                      l_matchProcInfoIter != l_procInfo.end();
                      ++l_matchProcInfoIter)
@@ -882,27 +882,27 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
                     // If Peer proc target matches this ProcInfo struct's
                     // Identifier target
                     if (l_pPeerProcTarget ==
-                        (*l_matchProcInfoIter)->iv_pThisProc)
+                        (*l_matchProcInfoIter).iv_pThisProc)
                     {
                         // Update struct of current proc to point to this
                         // struct, and also handle iv_A/XDeconfigured[]
                         // and increment appropriate index:
                         if (TYPE_XBUS == (*l_busIter)->getAttr<ATTR_TYPE>())
                         {
-                            (*l_procInfoIter)->iv_pXProcs[xBusIndex] =
-                                *l_matchProcInfoIter;
+                            (*l_procInfoIter).iv_pXProcs[xBusIndex] =
+                                &(*l_matchProcInfoIter);
                             // HWAS state
-                            (*l_procInfoIter)->iv_XDeconfigured[xBusIndex] =
+                            (*l_procInfoIter).iv_XDeconfigured[xBusIndex] =
                                 !(isFunctional(*l_busIter));
                             xBusIndex++;
                         }
                         else if (TYPE_ABUS == (*l_busIter)->
                                                      getAttr<ATTR_TYPE>())
                         {
-                            (*l_procInfoIter)->iv_pAProcs[aBusIndex] =
-                                *l_matchProcInfoIter;
+                            (*l_procInfoIter).iv_pAProcs[aBusIndex] =
+                                &(*l_matchProcInfoIter);
                             // HWAS state
-                            (*l_procInfoIter)->iv_ADeconfigured[aBusIndex] =
+                            (*l_procInfoIter).iv_ADeconfigured[aBusIndex] =
                                !(isFunctional(*l_busIter));
                             aBusIndex++;
                         }
@@ -921,28 +921,26 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
         }
         // Iterate through l_procInfo and deconfigure any procs
         // which _deconfigureAssocProc marked for deconfiguration
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::const_iterator
              l_procInfoIter = l_procInfo.begin();
              l_procInfoIter != l_procInfo.end();
              ++l_procInfoIter)
         {
-            if ((*l_procInfoIter)->iv_deconfigured &&
-                (isFunctional((*l_procInfoIter)->iv_pThisProc)))
+            if ((*l_procInfoIter).iv_deconfigured &&
+                (isFunctional((*l_procInfoIter).iv_pThisProc)))
             {
                 // Deconfigure marked procs
                 HWAS_INF("_invokeDeconfigureAssocProc is "
                                 "deconfiguring proc: %.8X",
-                    get_huid((*l_procInfoIter)->iv_pThisProc));
-                _deconfigureTarget(*(*l_procInfoIter)->
+                    get_huid((*l_procInfoIter).iv_pThisProc));
+                _deconfigureTarget(*(*l_procInfoIter).
                                 iv_pThisProc, DECONFIGURED_BY_BUS_DECONFIG);
-                _deconfigureByAssoc(*(*l_procInfoIter)->
+                _deconfigureByAssoc(*(*l_procInfoIter).
                                 iv_pThisProc, DECONFIGURED_BY_BUS_DECONFIG);
             }
         }
     }while(0);
-    // Free previously allocated memory
-    while(!l_procInfo.empty()) delete l_procInfo.back(),
-                                  l_procInfo.pop_back();
+
     return l_pErr;
 }
 
@@ -1453,8 +1451,7 @@ void DeconfigGard::processDeferredDeconfig()
 } // processDeferredDeconfig
 
 //******************************************************************************
-errlHndl_t DeconfigGard::_deconfigureAssocProc(
-                                    std::vector<ProcInfo *> &io_procInfo)
+errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 {
     // Defined for possible use in future applications
     errlHndl_t l_errlHdl = NULL;
@@ -1468,40 +1465,40 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
 
         // Find master proc
         ProcInfo * l_pMasterProcInfo = NULL;
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
-            if ((*l_procInfoIter)->iv_isMaster)
+            if ((*l_procInfoIter).iv_isMaster)
             {
                 // Save for subsequent use
-                l_pMasterProcInfo = *l_procInfoIter;
+                l_pMasterProcInfo = &(*l_procInfoIter);
                 // Iterate through bus endpoints, and if deconfigured,
                 // mark peer proc to be deconfigured
                 for (uint8_t i = 0; i < NUM_A_BUSES; i++)
                 {
-                    if ((*l_procInfoIter)->iv_ADeconfigured[i])
+                    if ((*l_procInfoIter).iv_ADeconfigured[i])
                     {
                         HWAS_INF("deconfigureAssocProc marked proc: "
                                  "%.8X for deconfiguration "
                                  "due to deconfigured abus endpoint "
                                  "on master proc.",
-                                 (*l_procInfoIter)->iv_pAProcs[i]->procHUID);
-                        (*l_procInfoIter)->iv_pAProcs[i]->
+                                 (*l_procInfoIter).iv_pAProcs[i]->procHUID);
+                        (*l_procInfoIter).iv_pAProcs[i]->
                                         iv_deconfigured = true;
                     }
                 }
                 for (uint8_t i = 0; i < NUM_X_BUSES; i++)
                 {
-                    if ((*l_procInfoIter)->iv_XDeconfigured[i])
+                    if ((*l_procInfoIter).iv_XDeconfigured[i])
                     {
                         HWAS_INF("deconfigureAssocProc marked proc: "
                                  "%.8X for deconfiguration "
                                  "due to deconfigured xbus endpoint "
                                  "on master proc.",
-                                 (*l_procInfoIter)->iv_pXProcs[i]->procHUID);
-                        (*l_procInfoIter)->iv_pXProcs[i]->
+                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                        (*l_procInfoIter).iv_pXProcs[i]->
                                         iv_deconfigured = true;
                     }
                 }
@@ -1517,18 +1514,18 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
         // Iterate through procs, and mark deconfigured any
         // non-master proc which has more than one bus endpoint
         // chiplet deconfigured
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // Don't deconfigure master proc
-            if ((*l_procInfoIter)->iv_isMaster)
+            if ((*l_procInfoIter).iv_isMaster)
             {
                 continue;
             }
             // Don't examine previously marked proc
-            if ((*l_procInfoIter)->iv_deconfigured)
+            if ((*l_procInfoIter).iv_deconfigured)
             {
                 continue;
             }
@@ -1538,12 +1535,12 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
             // which are deconfigured
             for (uint8_t i = 0; i < NUM_A_BUSES; i++)
             {
-                if ((*l_procInfoIter)->iv_ADeconfigured[i])
+                if ((*l_procInfoIter).iv_ADeconfigured[i])
                 {
                     // Only increment deconfigBusCounter if peer proc exists
                     //  and is functional
-                    if((*l_procInfoIter)->iv_pAProcs[i] &&
-                      (!(*l_procInfoIter)->iv_pAProcs[i]->iv_deconfigured))
+                    if((*l_procInfoIter).iv_pAProcs[i] &&
+                      (!(*l_procInfoIter).iv_pAProcs[i]->iv_deconfigured))
                     {
                         deconfigBusCounter++;
                     }
@@ -1551,12 +1548,12 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
             }
             for (uint8_t i = 0; i < NUM_X_BUSES; i++)
             {
-                if ((*l_procInfoIter)->iv_XDeconfigured[i])
+                if ((*l_procInfoIter).iv_XDeconfigured[i])
                 {
                     // Only increment deconfigBusCounter if peer proc exists
                     // and is functional
-                    if((*l_procInfoIter)->iv_pXProcs[i] &&
-                      (!(*l_procInfoIter)->iv_pXProcs[i]->iv_deconfigured))
+                    if((*l_procInfoIter).iv_pXProcs[i] &&
+                      (!(*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured))
                     {
                         deconfigBusCounter++;
                     }
@@ -1570,9 +1567,9 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                                  "%.8X for deconfiguration "
                                  "due to %d deconfigured bus endpoints "
                                  "on this proc.",
-                                 (*l_procInfoIter)->procHUID,
+                                 (*l_procInfoIter).procHUID,
                                   deconfigBusCounter);
-                (*l_procInfoIter)->iv_deconfigured = true;
+                (*l_procInfoIter).iv_deconfigured = true;
             }
         }// STEP 2
 
@@ -1583,44 +1580,44 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
         // mark proc with higher HUID to be deconfigured.
 
         // Iterate through procs and check xbus chiplets
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // Master proc handled in STEP 1
-            if ((*l_procInfoIter)->iv_isMaster)
+            if ((*l_procInfoIter).iv_isMaster)
             {
                 continue;
             }
             // Don't examine previously marked proc
-            if ((*l_procInfoIter)->iv_deconfigured)
+            if ((*l_procInfoIter).iv_deconfigured)
             {
                 continue;
             }
             // If current proc is on master logical node
             if (l_pMasterProcInfo->procFabricNode ==
-                (*l_procInfoIter)->procFabricNode)
+                (*l_procInfoIter).procFabricNode)
             {
                 // Check xbus endpoints
                 for (uint8_t i = 0; i < NUM_X_BUSES; i++)
                 {
                     // If endpoint deconfigured and endpoint peer proc is
                     // not already marked deconfigured
-                    if (((*l_procInfoIter)->iv_XDeconfigured[i]) &&
-                        (!((*l_procInfoIter)->iv_pXProcs[i]->iv_deconfigured)))
+                    if (((*l_procInfoIter).iv_XDeconfigured[i]) &&
+                        (!((*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured)))
                     {
                         // Mark proc with higher HUID to be deconfigured
-                        if ((*l_procInfoIter)->iv_pXProcs[i]->procHUID >
-                            (*l_procInfoIter)->procHUID)
+                        if ((*l_procInfoIter).iv_pXProcs[i]->procHUID >
+                            (*l_procInfoIter).procHUID)
                         {
                             HWAS_INF("deconfigureAssocProc marked remote proc:"
                                  " %.8X for deconfiguration "
                                  "due to higher HUID than peer "
                                  "proc on same master-containing logical "
                                  "node.",
-                                 (*l_procInfoIter)->iv_pXProcs[i]->procHUID);
-                            (*l_procInfoIter)->iv_pXProcs[i]->
+                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                            (*l_procInfoIter).iv_pXProcs[i]->
                                                iv_deconfigured = true;
                         }
                         else
@@ -1630,8 +1627,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                                  "due to higher HUID than peer "
                                  "proc on same master-containing logical "
                                  "node.",
-                                 (*l_procInfoIter)->procHUID);
-                            (*l_procInfoIter)->iv_deconfigured = true;
+                                 (*l_procInfoIter).procHUID);
+                            (*l_procInfoIter).iv_deconfigured = true;
                         }
                     }
                 }
@@ -1649,19 +1646,19 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
 
         // Iterate through procs and, if in non-master
         // logical node, check xbus chiplets
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // Don't examine previously marked proc
-            if ((*l_procInfoIter)->iv_deconfigured)
+            if ((*l_procInfoIter).iv_deconfigured)
             {
                 continue;
             }
             // Don't examine procs on master logical node
             if (l_pMasterProcInfo->procFabricNode ==
-                (*l_procInfoIter)->procFabricNode)
+                (*l_procInfoIter).procFabricNode)
             {
                 continue;
             }
@@ -1671,27 +1668,27 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
             {
                 // If endpoint deconfigured and endpoint peer proc
                 // is not already marked deconfigured
-                if (((*l_procInfoIter)->iv_XDeconfigured[i]) &&
-                    (!((*l_procInfoIter)->iv_pXProcs[i]->iv_deconfigured)))
+                if (((*l_procInfoIter).iv_XDeconfigured[i]) &&
+                    (!((*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured)))
                 {
                     // Variable to indicate If this step results in
                     // finding a proc to mark deconfigured
                     bool l_chipIDmatch = false;
                     // Iterate through procs and examine ones found to
                     // be on the master-containing logical node
-                    for (std::vector<ProcInfo *>::const_iterator
+                    for (ProcInfoVector::const_iterator
                          l_mNodeProcInfoIter = io_procInfo.begin();
                          l_mNodeProcInfoIter != io_procInfo.end();
                          ++l_mNodeProcInfoIter)
                     {
                         if (l_pMasterProcInfo->procFabricNode ==
-                            (*l_mNodeProcInfoIter)->procFabricNode)
+                            (*l_mNodeProcInfoIter).procFabricNode)
                         {
                             // If master logical node proc deconfigured with
                             // same FABRIC_CHIP_ID as current proc
-                            if (((*l_mNodeProcInfoIter)->iv_deconfigured) &&
-                                ((*l_mNodeProcInfoIter)->procFabricChip ==
-                                 (*l_procInfoIter)->procFabricChip))
+                            if (((*l_mNodeProcInfoIter).iv_deconfigured) &&
+                                ((*l_mNodeProcInfoIter).procFabricChip ==
+                                 (*l_procInfoIter).procFabricChip))
                             {
                                 // Mark current proc to be deconfigured
                                 // and set chipIDmatch
@@ -1700,19 +1697,20 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                                  "due to same position deconfigured "
                                  "proc on master-containing logical "
                                  "node.",
-                                 (*l_procInfoIter)->procHUID);
-                                (*l_procInfoIter)->iv_deconfigured =\
+                                 (*l_procInfoIter).procHUID);
+                                (*l_procInfoIter).iv_deconfigured =\
                                                                   true;
                                 l_chipIDmatch = true;
+                                break;
                             }
                             // If master logical node proc deconfigured with
                             // same FABRIC_CHIP_ID as current proc's xbus peer
                             // proc
-                            else if (((*l_mNodeProcInfoIter)->
+                            else if (((*l_mNodeProcInfoIter).
                                         iv_deconfigured) &&
-                                    ((*l_mNodeProcInfoIter)->
+                                    ((*l_mNodeProcInfoIter).
                                         procFabricChip ==
-                                    (*l_procInfoIter)->iv_pXProcs[i]->
+                                    (*l_procInfoIter).iv_pXProcs[i]->
                                         procFabricChip))
                             {
                                 // Mark peer proc to be deconfigured
@@ -1722,10 +1720,11 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                                  "due to same position deconfigured "
                                  "proc on master-containing logical "
                                  "node.",
-                                 (*l_procInfoIter)->iv_pXProcs[i]->procHUID);
-                                (*l_procInfoIter)->iv_pXProcs[i]->
+                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                                (*l_procInfoIter).iv_pXProcs[i]->
                                  iv_deconfigured = true;
                                 l_chipIDmatch = true;
+                                break;
                             }
                         }
                     }
@@ -1733,16 +1732,16 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                     if (!(l_chipIDmatch))
                     {
                         // Deconfigure proc with higher HUID
-                        if ((*l_procInfoIter)->procHUID >
-                            (*l_procInfoIter)->iv_pXProcs[i]->procHUID)
+                        if ((*l_procInfoIter).procHUID >
+                            (*l_procInfoIter).iv_pXProcs[i]->procHUID)
                         {
                              HWAS_INF("deconfigureAssocProc marked proc:"
                              " %.8X for deconfiguration "
                              "due to higher HUID than peer "
                              "proc on same non master-containing logical "
                              "node.",
-                             (*l_procInfoIter)->procHUID);
-                            (*l_procInfoIter)->iv_deconfigured =
+                             (*l_procInfoIter).procHUID);
+                            (*l_procInfoIter).iv_deconfigured =
                                                           true;
                         }
                         else
@@ -1752,8 +1751,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                              "due to higher HUID than peer "
                              "proc on same non master-containing logical "
                              "node.",
-                             (*l_procInfoIter)->iv_pXProcs[i]->procHUID);
-                            (*l_procInfoIter)->iv_pXProcs[i]->
+                             (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                            (*l_procInfoIter).iv_pXProcs[i]->
                             iv_deconfigured = true;
                         }
                     }
@@ -1768,18 +1767,18 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
         // abus peer proc.
 
         // Iterate through procs and check for deconfigured abus endpoints
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // Master proc handled in STEP 1
-            if ((*l_procInfoIter)->iv_isMaster)
+            if ((*l_procInfoIter).iv_isMaster)
             {
                 continue;
             }
             // Don't examine procs which are already marked
-            if ((*l_procInfoIter)->iv_deconfigured)
+            if ((*l_procInfoIter).iv_deconfigured)
             {
                 continue;
             }
@@ -1789,18 +1788,18 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
             {
                 // If endpoint deconfigured and endpoint peer proc
                 // is not already marked deconfigured
-                if (((*l_procInfoIter)->iv_ADeconfigured[i]) &&
-                    (!((*l_procInfoIter)->iv_pAProcs[i]->iv_deconfigured)))
+                if (((*l_procInfoIter).iv_ADeconfigured[i]) &&
+                    (!((*l_procInfoIter).iv_pAProcs[i]->iv_deconfigured)))
                 {
                     // Check XBUS peer
                     bool l_xbusPeerProcDeconfigured = false;
                     for (uint8_t j = 0; j < NUM_X_BUSES; j++)
                     {
                         // If peer proc exists
-                        if ((*l_procInfoIter)->iv_pXProcs[j])
+                        if ((*l_procInfoIter).iv_pXProcs[j])
                         {
                             // If xbus peer proc deconfigured
-                            if ((*l_procInfoIter)->iv_pXProcs[j]->
+                            if ((*l_procInfoIter).iv_pXProcs[j]->
                                                     iv_deconfigured)
                             {
                                 // Set xbusPeerProcDeconfigured and deconfigure
@@ -1808,9 +1807,9 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                                  HWAS_INF("deconfigureAssocProc marked proc:"
                                  " %.8X for deconfiguration "
                                  "due to deconfigured xbus peer proc.",
-                                 (*l_procInfoIter)->procHUID);
+                                 (*l_procInfoIter).procHUID);
                                 l_xbusPeerProcDeconfigured = true;
-                                (*l_procInfoIter)->iv_deconfigured = true;
+                                (*l_procInfoIter).iv_deconfigured = true;
                                 break;
                             }
                         }
@@ -1822,8 +1821,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
                         HWAS_INF("deconfigureAssocProc marked "
                              "remote proc: %.8X for deconfiguration "
                              "due to functional xbus peer proc.",
-                             (*l_procInfoIter)->iv_pAProcs[i]->procHUID);
-                        (*l_procInfoIter)->iv_pAProcs[i]->
+                             (*l_procInfoIter).iv_pAProcs[i]->procHUID);
+                        (*l_procInfoIter).iv_pAProcs[i]->
                                           iv_deconfigured = true;
                     }
                 }
@@ -1841,8 +1840,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
 
 //******************************************************************************
 
-errlHndl_t DeconfigGard::_symmetryValidation(
-                                        std::vector<ProcInfo *> &io_procInfo)
+errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
 {
     // Defined for possible use in future applications
     errlHndl_t l_errlHdl = NULL;
@@ -1858,16 +1856,16 @@ errlHndl_t DeconfigGard::_symmetryValidation(
 
         // Find master proc
         ProcInfo * l_pMasterProcInfo = NULL;
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // If master proc
-            if ((*l_procInfoIter)->iv_isMaster)
+            if ((*l_procInfoIter).iv_isMaster)
             {
                 // Save for subsequent use
-                l_pMasterProcInfo = *l_procInfoIter;
+                l_pMasterProcInfo = &(*l_procInfoIter);
                 break;
             }
         }
@@ -1875,36 +1873,36 @@ errlHndl_t DeconfigGard::_symmetryValidation(
         HWAS_ASSERT(l_pMasterProcInfo, "HWAS _symmetryValidation:"
                                        "Master proc not found");
         // Iterate through procs and check if in master logical node
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::const_iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // Skip master proc
-            if ((*l_procInfoIter)->iv_isMaster)
+            if ((*l_procInfoIter).iv_isMaster)
             {
                 continue;
             }
             // If current proc is on master logical node
             // and marked as deconfigured
             if ((l_pMasterProcInfo->procFabricNode ==
-                (*l_procInfoIter)->procFabricNode) &&
-                ((*l_procInfoIter)->iv_deconfigured))
+                (*l_procInfoIter).procFabricNode) &&
+                ((*l_procInfoIter).iv_deconfigured))
             {
                 // Iterate through procs and mark any same-
                 // position procs as deconfigured
-                for (std::vector<ProcInfo *>::const_iterator
+                for (ProcInfoVector::iterator
                      l_posProcInfoIter = io_procInfo.begin();
                      l_posProcInfoIter != io_procInfo.end();
                      ++l_posProcInfoIter)
                 {
-                    if ((*l_procInfoIter)->procFabricChip ==
-                        (*l_posProcInfoIter)->procFabricChip)
+                    if ((*l_procInfoIter).procFabricChip ==
+                        (*l_posProcInfoIter).procFabricChip)
                     {
                         HWAS_INF("symmetryValidation step 1 marked proc: "
                              "%.8X for deconfiguration.",
-                             (*l_posProcInfoIter)->procHUID);
-                        (*l_posProcInfoIter)->iv_deconfigured = true;
+                             (*l_posProcInfoIter).procHUID);
+                        (*l_posProcInfoIter).iv_deconfigured = true;
                     }
                 }
             }
@@ -1918,17 +1916,17 @@ errlHndl_t DeconfigGard::_symmetryValidation(
 
         // Iterate through procs, if marked deconfigured, compare chip
         // position to functional chip on master node.
-        for (std::vector<ProcInfo *>::const_iterator
+        for (ProcInfoVector::const_iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
             // If proc is marked deconfigured
-            if ((*l_procInfoIter)->iv_deconfigured)
+            if ((*l_procInfoIter).iv_deconfigured)
             {
                 // Iterate through procs, examining those on
                 // the master logical node
-                for (std::vector<ProcInfo *>::const_iterator
+                for (ProcInfoVector::const_iterator
                      l_mNodeProcInfoIter = io_procInfo.begin();
                      l_mNodeProcInfoIter != io_procInfo.end();
                      ++l_mNodeProcInfoIter)
@@ -1937,23 +1935,23 @@ errlHndl_t DeconfigGard::_symmetryValidation(
                     // functional, and matches the position of the deconfigured
                     // proc from the outer loop
                     if ((l_pMasterProcInfo->procFabricNode ==
-                        (*l_mNodeProcInfoIter)->procFabricNode) &&
-                        (!((*l_mNodeProcInfoIter)->iv_deconfigured)) &&
-                        ((*l_mNodeProcInfoIter)->procFabricChip ==
-                                (*l_procInfoIter)->procFabricChip))
+                        (*l_mNodeProcInfoIter).procFabricNode) &&
+                        (!((*l_mNodeProcInfoIter).iv_deconfigured)) &&
+                        ((*l_mNodeProcInfoIter).procFabricChip ==
+                                (*l_procInfoIter).procFabricChip))
                     {
                         // Find xbus peer proc to mark deconfigured
                         for (uint8_t i = 0; i < NUM_X_BUSES; i++)
                         {
                             // If xbus peer proc exists, mark it
-                            if ((*l_procInfoIter)->iv_pXProcs[i])
+                            if ((*l_procInfoIter).iv_pXProcs[i])
                             {
                                 HWAS_INF("symmetryValidation step 2 "
                                     "marked proc: %.8X for "
                                     "deconfiguration.",
-                                    (*l_procInfoIter)->
+                                    (*l_procInfoIter).
                                     iv_pXProcs[i]->procHUID);
-                                (*l_procInfoIter)->iv_pXProcs[i]->
+                                (*l_procInfoIter).iv_pXProcs[i]->
                                     iv_deconfigured = true;
                             }
                         }
