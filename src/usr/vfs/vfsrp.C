@@ -39,6 +39,7 @@
 #include <pnor/pnorif.H>
 #include <util/align.H>
 #include <errl/errludstring.H>
+#include <errl/errlmanager.H>
 
 using namespace VFS;
 
@@ -87,10 +88,35 @@ void* VfsRp::msg_handler(void * unused)
 
 // ----------------------------------------------------------------------------
 
-void* VfsRp::load_unload(void * i_msg)
+void * VfsRp::vfsWatcher(void * unused)
+{
+    Singleton<VfsRp>::instance()._vfsWatcher();
+    return NULL;
+}
+
+// ----------------------------------------------------------------------------
+
+void* VfsRp::loadUnloadMonitored(void * i_msg)
 {
     task_detach();
-    Singleton<VfsRp>::instance()._load_unload((msg_t*)i_msg);
+    Singleton<VfsRp>::instance()._loadUnloadMonitored((msg_t*)i_msg);
+    return NULL;
+}
+
+// ----------------------------------------------------------------------------
+
+void* VfsRp::loadUnload(void * i_msg)
+{
+    Singleton<VfsRp>::instance()._loadUnload((msg_t*)i_msg);
+    return NULL;
+}
+
+// ----------------------------------------------------------------------------
+
+void* VfsRp::execMonitored(void * i_msg)
+{
+    task_detach();
+    Singleton<VfsRp>::instance()._execMonitored((msg_t*)i_msg);
     return NULL;
 }
 
@@ -98,13 +124,9 @@ void* VfsRp::load_unload(void * i_msg)
 
 void* VfsRp::exec(void * i_msg)
 {
-    task_detach();
     Singleton<VfsRp>::instance()._exec((msg_t*)i_msg);
     return NULL;
 }
-
-// ----------------------------------------------------------------------------
-
 /**
  * Initialze the vfs resource provider
  */
@@ -132,10 +154,10 @@ errlHndl_t VfsRp::_init()
         {
             // Note: permissions are set elsewhere
 
-            // Start msg_handler
+            // Start msg_handler task watcher
             //  NOTE: This would be a weak consistancy issues if
             //  task_create were not a system call.
-            task_create(VfsRp::msg_handler, NULL);
+            task_create(VfsRp::vfsWatcher, NULL);
         }
         else
         {
@@ -167,10 +189,80 @@ errlHndl_t VfsRp::_init()
 
 // ----------------------------------------------------------------------------
 
+void VfsRp::_vfsWatcher()
+{
+
+    while(1)
+    {
+        tid_t tid = task_create(VfsRp::msg_handler, NULL);
+        assert( tid > 0 );
+
+        int childsts = 0;
+        void * childRc = NULL;
+
+        // The msg_handler will only return if there is a problem
+        tid_t tidRc = task_wait_tid( tid,
+                                     &childsts,
+                                     &childRc);
+
+        TRACFCOMP(g_trac_vfs, ERR_MRK
+                  "VFS msg_handler crashed. tid:%d status:%d childRc:%p. "
+                  "Restarting VFS...",
+                  tid, childsts, childRc);
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_WATCHER
+         * @reasoncode      VFS_TASK_CRASHED
+         * @userdata1       tidRc
+         * @userdata2       task Rc
+         *
+         * @devdesc         VFS RP Task crashed.
+         *
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM, // severity
+             VFS::VFS_WATCHER,                     // moduleid
+             VFS::VFS_TASK_CRASHED,                // reason
+             (uint64_t)tidRc,                      // tid rc
+             (uint64_t)childRc,                    // child rc
+             true
+            );
+
+        // Message is only saved in iv_msg for messages from the kernel
+        if(iv_msg != NULL)
+        {
+            if(childRc == NULL) // Critical error not yet reported
+            {
+                ERRORLOG::errlCommit(err, VFS_COMP_ID);
+            }
+            else // Crit error already generated
+            {
+                delete err;
+            }
+
+            iv_msg->data[1] = -EIO;  /* I/O error */
+            iv_msg->extra_data = childRc;  /* Critical code from PNOR */
+            msg_respond(iv_msgQ, iv_msg);
+            iv_msg = NULL;
+        }
+        else //nothing to respond to - just commit error and restar task
+        {
+            ERRORLOG::errlCommit(err, VFS_COMP_ID);
+        }
+
+        // Loop and restart the vfs msg_handler task
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 void VfsRp::msgHandler()
 {
     while(1)
     {
+        iv_msg = NULL;
         msg_t* msg = msg_wait(iv_msgQ);
 
         switch(msg->type)
@@ -181,7 +273,7 @@ void VfsRp::msgHandler()
                               (const char *) msg->data[0]);
 
                     // run in own task so page faults can be handled
-                    task_create(load_unload, msg);
+                    task_create(loadUnloadMonitored, msg);
                 }
                 break;
 
@@ -191,7 +283,7 @@ void VfsRp::msgHandler()
                               (const char *) msg->data[0]);
 
                     // run in own task so page faults can be handled
-                    task_create(load_unload, msg);
+                    task_create(loadUnloadMonitored, msg);
 
                 }
                 break;
@@ -202,13 +294,14 @@ void VfsRp::msgHandler()
                            (const char*)((msg_t*)msg->data[0])->data[0]);
 
                     // run in own task so page faults can be handled
-                    task_create(exec, msg);
+                    task_create(execMonitored, msg);
 
                 }
                 break;
 
             case MSG_MM_RP_READ:
                 {
+                    iv_msg = msg; // save message in case task crashes
                     uint64_t vaddr = msg->data[0]; //page aligned
                     uint64_t paddr = msg->data[1]; //page aligned
 
@@ -243,7 +336,59 @@ void VfsRp::msgHandler()
 
 // ----------------------------------------------------------------------------
 
-void VfsRp::_load_unload(msg_t * i_msg)
+void VfsRp::_loadUnloadMonitored(msg_t * i_msg)
+{
+    tid_t tid = task_create(VfsRp::loadUnload, i_msg);
+    assert( tid > 0 );
+
+    int childsts = 0;
+    void * childRc = NULL;
+
+    tid_t tidRc = task_wait_tid( tid,
+                                 &childsts,
+                                 &childRc);
+
+
+    if(childsts == TASK_STATUS_CRASHED)
+    {
+        TRACFCOMP(g_trac_vfs, ERR_MRK
+                  "VFS load/unload crashed. tid:%d status:%d childRc:%p",
+                  tid, childsts, childRc);
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_MODULE_LOAD_MONITOR
+         * @reasoncode      VFS_TASK_CRASHED
+         * @userdata1       tidRc
+         * @userdata2       Task Status
+         *
+         * @devdesc         VFS Task crashed.
+         *
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,     // severity
+             VFS::VFS_MODULE_LOAD_MONITOR,             // moduleid
+             VFS::VFS_TASK_CRASHED,                    // reason Code
+             (uint64_t)tidRc,                          // tid rc
+             (uint64_t)childsts,                       // task status
+             true
+            );
+
+        if(childRc != NULL) // crit elog aleady generated
+        {
+            err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+
+        // tell caller that load/unload failed
+        i_msg->data[0] = reinterpret_cast<uint64_t>(err);
+        msg_respond(iv_msgQ, i_msg);
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+void VfsRp::_loadUnload(msg_t * i_msg)
 {
     errlHndl_t err = NULL;
 
@@ -374,6 +519,57 @@ void VfsRp::_load_unload(msg_t * i_msg)
     }
     i_msg->data[0] = (uint64_t) err;
     msg_respond(iv_msgQ, i_msg);
+}
+
+// ----------------------------------------------------------------------------
+
+void VfsRp::_execMonitored(msg_t * i_msg)
+{
+    tid_t tid = task_create(VfsRp::exec, i_msg);
+    assert( tid > 0 );
+
+    int childsts = 0;
+    void * childRc = NULL;
+
+    tid_t tidRc = task_wait_tid( tid,
+                                 &childsts,
+                                 &childRc);
+
+    if(childsts == TASK_STATUS_CRASHED)
+    {
+        TRACFCOMP(g_trac_vfs, ERR_MRK
+                  "VFS exec crashed. tid:%d status:%d childRc:%p",
+                  tid, childsts, childRc);
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_MODULE_EXEC_MONITOR
+         * @reasoncode      VFS_TASK_CRASHED
+         * @userdata1       tidRc
+         * @userdata2       task Rc
+         *
+         * @devdesc         VFS Task crashed.
+         *
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,     // severity
+             VFS::VFS_MODULE_EXEC_MONITOR,             // moduleid
+             VFS::VFS_TASK_CRASHED,                    // reason Code
+             (uint64_t)tidRc,                          // tid rc
+             (uint64_t)childRc,                        // child rc
+             true
+            );
+
+        if(childRc != NULL) // crit elog aleady generated
+        {
+            err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+
+        // tell caller that exec/startup failed
+        i_msg->data[0] = reinterpret_cast<uint64_t>(err);
+        msg_respond(iv_msgQ, i_msg);
+    }
 }
 
 // ----------------------------------------------------------------------------

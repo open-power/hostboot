@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -32,6 +32,9 @@ namespace VFS
         UNDEFINED_MODULE_ERRL_ID    = 0x00,
         VFS_MODULE_ID               = 0x01,
         VFS_RT_MODULE_ID            = 0x02,
+        VFS_WATCHER                 = 0x03,
+        VFS_MODULE_LOAD_MONITOR     = 0x04,
+        VFS_MODULE_EXEC_MONITOR     = 0x05,
     };
 
     enum VfsReasonCode
@@ -42,6 +45,7 @@ namespace VFS
         VFS_PERMS_VMEM_FAILED =     VFS_COMP_ID | 0x04,
         VFS_MODULE_DOES_NOT_EXIST = VFS_COMP_ID | 0x05,
         VFS_INVALID_DATA_MODULE   = VFS_COMP_ID | 0x06,
+        VFS_TASK_CRASHED          = VFS_COMP_ID | 0x07,
     };
 };
 

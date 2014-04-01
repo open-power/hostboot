@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -88,7 +88,7 @@ namespace VFS
             /**
              * Ctor
              */
-            VfsRp() : iv_msgQ(NULL), iv_pnor_vaddr(0)
+            VfsRp() : iv_msgQ(NULL), iv_msg(NULL), iv_pnor_vaddr(0)
             {
                 mutex_init(&iv_mutex);
             }
@@ -104,18 +104,36 @@ namespace VFS
             static void* msg_handler(void * unused);
 
             /**
+             * Load or Unload a module. Monitor for crash
+             * @param[in] i_msg the message
+             * @note Does not return.
+             */
+            static void* loadUnloadMonitored(void * i_msg);
+
+            /**
              * Load or Unload a module
+             * @param[in] i_msg the message
+             */
+            static void* loadUnload(void * i_msg);
+
+            /**
+             * Call _start on module. Montior for crash
              * @param[in] i_msg the message
              * @note Does not return. 
              */
-            static void* load_unload(void * i_msg);
+            static void* execMonitored(void * i_msg);
 
             /**
              * Call _start on module
              * @param[in] i_msg the message
-             * @note Does not return. 
              */
             static void* exec(void * i_msg);
+
+            /**
+             * Start the VFS resource provider message handler
+             * and watch for crashes.
+             */
+            static void* vfsWatcher(void * unused);
 
         private: // functions
 
@@ -131,10 +149,16 @@ namespace VFS
             void msgHandler();
 
             /**
+             * Load or Unload a module. Monitor for task crash
+             * @parm[in] The message
+             */
+            void _loadUnloadMonitored(msg_t * i_msg);
+
+            /**
              * Load or Unload a module
              * @param[in] i_msg the message
              */
-            void _load_unload(msg_t * i_msg);
+            void _loadUnload(msg_t * i_msg);
 
             /**
              * Call _start on module
@@ -142,9 +166,21 @@ namespace VFS
              */
             void _exec(msg_t * i_msg);
 
+            /**
+             * Call _start on Module. Montor for task crash
+             * @param[in] The message
+             */
+            void _execMonitored(msg_t * i_msg);
+
+            /**
+             * Message Handler task watcher
+             */
+            void _vfsWatcher();
+
         private: // data
 
             msg_q_t iv_msgQ;         //!< message queue
+            msg_t*  iv_msg;          //!< Current message being handled
             uint64_t iv_pnor_vaddr;  //!< virtual address of ext image in PFNOR
 
             typedef std::vector<VfsSystemModule *> ModuleList_t;
