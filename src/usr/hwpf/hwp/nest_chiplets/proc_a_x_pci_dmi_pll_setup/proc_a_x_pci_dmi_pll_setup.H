@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.6 2014/03/27 17:58:11 bgeukes Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.7 2014/04/02 14:02:33 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -43,20 +43,6 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
-
-//-----
-// Constant Definitions
-//
-
-CONST_UINT64_T( PERV_PLL_LOCK_ERROR_INDICATION_0x010F001F    , ULL(0x010F001F) );
-CONST_UINT64_T( NEST_PLL_LOCK_ERROR_INDICATION_0x020F001F    , ULL(0x020F001F) );
-CONST_UINT64_T( ABUS_PLL_LOCK_ERROR_INDICATION_0x080F001F    , ULL(0x080F001F) );
-CONST_UINT64_T( PCI_PLL_LOCK_ERROR_INDICATION_0x090F001F    , ULL(0x090F001F) );
-
-CONST_UINT64_T( PERV_PLL_LOCK_MASK_0x010F001E    , ULL(0x010F001E) );
-CONST_UINT64_T( NEST_PLL_LOCK_MASK_0x020F001E    , ULL(0x020F001E) );
-CONST_UINT64_T( ABUS_PLL_LOCK_MASK_0x080F001E    , ULL(0x080F001E) );
-CONST_UINT64_T( PCI_PLL_LOCK_MASK_0x090F001E    , ULL(0x090F001E) );
 
 
 //------------------------------------------------------------------------------

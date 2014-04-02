@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.14 2014/03/28 15:25:39 bgeukes Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.15 2014/04/02 14:02:33 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -47,12 +47,105 @@
 #include <proc_a_x_pci_dmi_pll_utils.H>
 
 
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+const uint64_t GENERIC_PCB_CONFIG_0x000F001E = 0x000F001EULL;
+
+
 //------------------------------------------------------------------------------
 // Function definition
 //------------------------------------------------------------------------------
 
 extern "C"
 {
+
+//------------------------------------------------------------------------------
+// function:
+//      Clear and unmask chiplet PLL lock indication
+//
+// parameters: i_target                 => chip target
+//             i_chiplet_base_scom_addr => aligned base address of chiplet SCOM
+//                                         address space
+// returns: FAPI_RC_SUCCESS if operation was successful, else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_a_x_pci_dmi_pll_setup_unmask_lock(const fapi::Target & i_target,
+                                                        const uint32_t i_chiplet_base_scom_addr)
+{
+    // return codes
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+
+    // data buffer to hold register values
+    ecmdDataBufferBase data(64);
+
+    do
+    {
+        rc = fapiGetScom(i_target,
+                         i_chiplet_base_scom_addr | GENERIC_PCB_ERR_0x000F001F,
+                         data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error reading PCB Slave PLL Lock Indication");
+            break;
+        }
+        
+        rc_ecmd |= data.setBit(25);  // set bit to clear previous lock errors 
+        rc_ecmd |= data.setBit(26);  // set bit to clear previous lock errors 
+        rc_ecmd |= data.setBit(27);  // set bit to clear previous lock errors
+        rc_ecmd |= data.setBit(28);  // set bit to clear previous lock errors
+        
+        if (rc_ecmd)
+        {
+        	FAPI_ERR("Error (0x%x) setting up PLL Lock Indication ecmdDataBufferBase", rc_ecmd);
+        	rc.setEcmdError(rc_ecmd);
+        	break;		
+        }
+        
+        FAPI_INF("Clearing PCB Slave Lock Indication Bit 25,26,27,28");
+        rc = fapiPutScom(i_target,
+                         i_chiplet_base_scom_addr | GENERIC_PCB_ERR_0x000F001F,
+                         data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error writing PCB Slave PLL Lock Indication");
+            break;
+        }
+        
+        rc = fapiGetScom(i_target,
+                         i_chiplet_base_scom_addr | GENERIC_PCB_CONFIG_0x000F001E,
+                         data);
+        if (!rc.ok())
+        {
+           FAPI_ERR("Error reading PCB Slave PLL Lock Mask");
+           break;
+        }
+        
+        rc_ecmd |= data.clearBit(12);  // set bit to clear PLL Lock Mask 
+        
+        if (rc_ecmd)
+        {
+        	FAPI_ERR("Error (0x%x) setting up PLL Lock Mask ecmdDataBufferBase", rc_ecmd);
+        	rc.setEcmdError(rc_ecmd);
+        	break;		
+        }
+        
+        FAPI_INF("Clearing PCB Slave Lock Mask Bit 12");
+        rc = fapiPutScom(i_target, 
+                         i_chiplet_base_scom_addr | GENERIC_PCB_CONFIG_0x000F001E,
+                         data);
+        if (!rc.ok())
+        {
+           FAPI_ERR("Error writing PCB Slave Lock Mask");
+           break;
+        }
+    } while(0);
+
+    return rc;
+}
+
 
 //------------------------------------------------------------------------------
 // function:
@@ -77,7 +170,6 @@ extern "C"
 	
 
         // return codes
-		uint32_t rc_ecmd = 0;
         fapi::ReturnCode rc;
 		
         // locals
@@ -104,6 +196,15 @@ extern "C"
             {
                 FAPI_INF("This routine does not do X-BUS PLL setup at this time!.");
                 FAPI_INF("It is assumed that the X-BUS PLL is already set up in synchronous mode for use with the NEST logic.");
+
+                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
+                    i_target,
+                    TP_CHIPLET_0x01000000);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
+                    break;
+                }
             }
             // end X-bus PLL setup
 
@@ -144,6 +245,15 @@ extern "C"
                     break;
                 }
 
+                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
+                    i_target,
+                    A_BUS_CHIPLET_0x08000000);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
+                    break;
+                }
+
                 FAPI_INF("Done setting up A-Bus PLL. ");
             }  // end A PLL
 
@@ -165,6 +275,14 @@ extern "C"
                 if (!rc.ok())
                 {
                     FAPI_ERR("Error from proc_a_x_pci_dmi_pll_release_pll");
+                    break;
+                }
+                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
+                    i_target,
+                    NEST_CHIPLET_0x02000000);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
                     break;
                 }
 
@@ -207,243 +325,18 @@ extern "C"
                     break;
                 }
 
+                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
+                    i_target,
+                    PCIE_CHIPLET_0x09000000);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
+                    break;
+                }
+
                 FAPI_INF("Done setting up PCIE PLL. ");
+
             }  // end PCIE PLL
-
-
-
-			/// Perform PLL lock error clean up and Error unmasking
-
-			// Pervasive Chiplet
-        		rc = fapiGetScom(i_target,PERV_PLL_LOCK_ERROR_INDICATION_0x010F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading PCB Slave PLL Lock Indication");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.setBit(25);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(26);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(27);  // set bit to clear previous lock errors
-				rc_ecmd |= scom_data.setBit(28);  // set bit to clear previous lock errors
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				
-				FAPI_INF("Clearing PCB Slave Lock Indication Bit 25,26,27,28");
-        		rc = fapiPutScom(i_target,PERV_PLL_LOCK_ERROR_INDICATION_0x010F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing Perv PCB Slave Lock Inidication Register");
-            	   break;
-        	   	}
-
-			// Nest Chiplet
-        		rc = fapiGetScom(i_target,NEST_PLL_LOCK_ERROR_INDICATION_0x020F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading Nest PCB Slave PLL Lock Indication");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.setBit(25);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(26);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(27);  // set bit to clear previous lock errors
-				rc_ecmd |= scom_data.setBit(28);  // set bit to clear previous lock errors
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing PCB Slave Lock Indication Bit 25,26,27,28");
-        		rc = fapiPutScom(i_target,NEST_PLL_LOCK_ERROR_INDICATION_0x020F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing Perv PCB Slave Lock Inidication Register");
-            	   break;
-        	   	}
-		
-			// ABUS Chiplet
-        		rc = fapiGetScom(i_target,ABUS_PLL_LOCK_ERROR_INDICATION_0x080F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading ABUS PCB Slave PLL Lock Indication");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.setBit(25);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(26);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(27);  // set bit to clear previous lock errors
-				rc_ecmd |= scom_data.setBit(28);  // set bit to clear previous lock errors
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing ABUS PCB Slave Lock Indication Bit 25,26,27,28");
-        		rc = fapiPutScom(i_target,ABUS_PLL_LOCK_ERROR_INDICATION_0x080F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing ABUS PCB Slave Lock Inidication Register");
-            	   break;
-        	   	}
-
-			// PCI Chiplet
-        		rc = fapiGetScom(i_target,PCI_PLL_LOCK_ERROR_INDICATION_0x090F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading PCI PCB Slave PLL Lock Indication");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.setBit(25);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(26);  // set bit to clear previous lock errors 
-				rc_ecmd |= scom_data.setBit(27);  // set bit to clear previous lock errors
-				rc_ecmd |= scom_data.setBit(28);  // set bit to clear previous lock errors
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing PCI PCB Slave Lock Indication Bit 25,26,27,28");
-        		rc = fapiPutScom(i_target,PCI_PLL_LOCK_ERROR_INDICATION_0x090F001F,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing PCI PCB Slave Lock Inidication Register");
-            	   break;
-        	   	}
-
-			//// Unmasking Lock Indication
-			// Pervasive Chiplet
-        		rc = fapiGetScom(i_target,PERV_PLL_LOCK_MASK_0x010F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading PCB Slave PLL Lock Mask");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.clearBit(12);  // set bit to clear PLL Lock Mask 
-			
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing PCB Slave Lock Mask Bit 12");
-        		rc = fapiPutScom(i_target,PERV_PLL_LOCK_MASK_0x010F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing Perv PCB Slave Lock Mask");
-            	   break;
-        	   	}
-
-			// Nest Chiplet
-        		rc = fapiGetScom(i_target,NEST_PLL_LOCK_MASK_0x020F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading PCB Slave PLL Lock Mask");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.clearBit(12);  // set bit to clear PLL Lock Mask 
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing Nest PCB Slave Lock Mask Bit 12");
-        		rc = fapiPutScom(i_target,NEST_PLL_LOCK_MASK_0x020F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing Nest PCB Slave Lock Mask");
-            	   break;
-        	   	}
-				
-			// ABUS Chiplet
-        		rc = fapiGetScom(i_target,ABUS_PLL_LOCK_MASK_0x080F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading ABUS PCB Slave PLL Lock Mask");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.clearBit(12);  // set bit to clear PLL Lock Mask 
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing ABUS PCB Slave Lock Mask Bit 12");
-        		rc = fapiPutScom(i_target,ABUS_PLL_LOCK_MASK_0x080F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing ABUS PCB Slave Lock Mask");
-            	   break;
-        	   	}
-				
-			// PCI Chiplet
-        		rc = fapiGetScom(i_target,PCI_PLL_LOCK_MASK_0x090F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error reading PCB Slave PLL Lock Mask");
-            	   break;
-        	   	}
-				
-				rc_ecmd |= scom_data.clearBit(12);  // set bit to clear PLL Lock Mask 
-
-				if (rc_ecmd)
-				{
-					FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-   					rc.setEcmdError(rc_ecmd);
-					break;		
-				}
-
-				FAPI_INF("Clearing PCI PCB Slave Lock Mask Bit 12");
-        		rc = fapiPutScom(i_target,PCI_PLL_LOCK_MASK_0x090F001E,scom_data);
-        
-				if(rc)
-        		{
-        		   FAPI_ERR("Error writing PCI PCB Slave Lock Mask");
-            	   break;
-        	   	}
-			
 
         } while (0); // end do
 
@@ -459,6 +352,9 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_setup.C,v $
+Revision 1.15  2014/04/02 14:02:33  jmcgill
+respect function input parameters/partial good in unlock error clear/unmask logic (SW252901)
+
 Revision 1.14  2014/03/28 15:25:39  bgeukes
 updates for SW252901 after RAS review
 
