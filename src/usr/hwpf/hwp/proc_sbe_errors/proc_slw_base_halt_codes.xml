@@ -215,7 +215,7 @@
     <rc>RC_SLW_GOTO_TIMEOUT_ERROR</rc>
     <description>
       This error is signalled by proc_slw_base and indicates that a timeout occured
-      looking for the proper PCBS-PM state before issuing a PCBS-PM "GOTO" command.
+      looking for the proper PCBS-PM state before issuing a PCBS-PM GOTO command.
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_SLW_REGISTERS</id>
