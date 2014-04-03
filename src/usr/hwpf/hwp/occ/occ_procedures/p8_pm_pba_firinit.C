@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pba_firinit.C,v 1.17 2014/01/06 18:29:14 stillgs Exp $
+// $Id: p8_pm_pba_firinit.C,v 1.18 2014/03/21 19:11:18 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -33,22 +33,23 @@
 /// \brief Configure the PBA FIR
 ///
 /// \verbatim
-/// 
+///
 ///   if RESET
 ///       masks all bits of the FIR k
-///   
+///
 ///   else
-///       using macros defined in p8_pm.H to establish the respective 
+///       using macros defined in p8_pm.H to establish the respective
 ///       mask/action bits in the relevant ecmdbuffer for one of the following
 ///       settings:
 ///           a) Masked
 ///           b) Recoverable Attention
 ///           c) Checkstop
-/// 
+///
 ///  Procedure Prereq:
 ///    o System clocks are running
-/// 
+///
 /// \endverbatim
+/// buildfapiprcd p8_pm_pba_firinit.C
 //------------------------------------------------------------------------------
 
 
@@ -96,7 +97,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
     ecmdDataBufferBase  mask(64);
     uint32_t            e_rc = 0;
 
-    
+
     FAPI_DBG("Executing p8_pm_pba_firinit  ....");
     do
     {
@@ -141,7 +142,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             SET_RECOV_ATTN  (PBAFIR_PB_CE_FW          ) ; // 5   PBAFIR_PB_CE_FW
             SET_RECOV_ATTN  (PBAFIR_OCI_SLAVE_INIT    ) ; // 6   PBAFIR_OCI_SLAVE_INIT
             SET_RECOV_ATTN  (PBAFIR_OCI_WRPAR_ERR     ) ; // 7   PBAFIR_OCI_WRPAR_ERR
-            SET_RECOV_ATTN  (PBAFIR_OCI_REREQTO       ) ; // 8   PBAFIR_OCI_REREQTO
+            SET_FIR_MASKED  (PBAFIR_OCI_REREQTO       ) ; // 8   PBAFIR_OCI_REREQTO
             SET_FIR_MASKED  (PBAFIR_PB_UNEXPCRESP     ) ; // 9   PBAFIR_PB_UNEXPCRESP
             SET_RECOV_ATTN  (PBAFIR_PB_UNEXPDATA      ) ; // 10  PBAFIR_PB_UNEXPDATA
             SET_RECOV_ATTN  (PBAFIR_PB_PARITY_ERR     ) ; // 11  PBAFIR_PB_PARITY_ERR
@@ -194,8 +195,8 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             {
                 FAPI_ERR("fapiPutScom(PBA_FIR_0x02010840) failed.");
                  break;
-            }            
-            
+            }
+
             FAPI_DBG(" action_0  => 0x%16llx ",  action_0.getDoubleWord(0));
             FAPI_DBG(" action_1  => 0x%16llx ",  action_1.getDoubleWord(0));
             FAPI_DBG(" mask      => 0x%16llx ",  mask.getDoubleWord(0));
