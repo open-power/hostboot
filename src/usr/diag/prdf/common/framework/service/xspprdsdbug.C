@@ -57,9 +57,12 @@
 
 #undef xspprdsdbug_C
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 
+using namespace PlatServices;
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -162,9 +165,31 @@ bool SYSTEM_DEBUG_CLASS::IsAttentionActive( TARGETING::TargetHandle_t i_pChipHan
     return rc;
 }
 
+// --------------------------------------------------------------------
+
 void SYSTEM_DEBUG_CLASS::Clear(void)
 {
     g_AttnDataList.clear();
+}
+
+// --------------------------------------------------------------------
+
+TargetHandle_t SYSTEM_DEBUG_CLASS::getTargetWithAttn
+                        ( TYPE i_tgtType, ATTENTION_VALUE_TYPE i_attnType) const
+{
+    TargetHandle_t o_tgt = NULL;
+
+    for(AttnList::const_iterator i = g_AttnDataList.begin();
+                                  i != g_AttnDataList.end(); ++i)
+    {
+        if(( getTargetType( (*i).targetHndl ) == i_tgtType)
+            && ( (*i).attnType == i_attnType ) )
+        {
+            o_tgt = (*i).targetHndl;
+            break;
+        }
+    }
+    return o_tgt;
 }
 
 // -------------------------------------------------------------------

@@ -126,6 +126,12 @@ fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target );
  */
 bool atRuntime();
 
+/**
+ * @brief Check if SMP is  cohenerent ( Node stitching complete).
+ * @return true if SMP is coherent, false otherwise.
+ */
+bool isSmpCoherent();
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

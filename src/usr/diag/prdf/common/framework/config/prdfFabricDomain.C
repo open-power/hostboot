@@ -46,8 +46,14 @@
 #include <algorithm>
 
 #undef prdfFabricDomain_C
+
+using namespace TARGETING;
+
 namespace PRDF
 {
+
+using namespace PlatServices;
+
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -153,7 +159,26 @@ void FabricDomain::SortForXstop()
     bool l_internalCS[GetSize()];
 
     union { uint64_t * u; CPU_WORD * c; } ptr; // zs01
+    SYSTEM_DEBUG_CLASS sysDebug;
+    TargetHandle_t node = NULL;
 
+    if( false == isSmpCoherent() )
+    {
+        // Before node stitching, any system CS is only limited
+        // to a node. ATTN will only pass us proc chips belonging
+        // to a single node. In this scenario, we should only consider
+        // chips belonging to one node.
+        TargetHandle_t proc = sysDebug.getTargetWithAttn( TYPE_PROC,
+                                                          MACHINE_CHECK);
+        node = getConnectedParent( proc, TYPE_NODE);
+        if( NULL == node )
+        {
+            // We should never reach here. Even if we reach here, as this is
+            // XSTOP, we would like to go ahead with analysis to have as much
+            // data as possible. So just print a trace.
+            PRDF_ERR("[FabricDomain::SortForXstop] Node is Null");
+        }
+    }
     // Get internal setting and external driver list for each chip.
     for(uint32_t i = 0; i < GetSize(); ++i)
     {
@@ -161,6 +186,12 @@ void FabricDomain::SortForXstop()
         l_wofValues[i] = 0;
 
         RuleChip * l_fabChip = LookUp(i);
+
+        // if it is a node check stop, limit the scope of sorting only to the
+        // node which is causing ATTN to invoke PRD.
+        if ( ( NULL != node ) && ( node != getConnectedParent(
+                                    l_fabChip->GetChipHandle(), TYPE_NODE) ))
+            continue;
 
         ptr.u = &l_externalDrivers[i]; // zs01
         BitString l_externalChips(GetSize(), ptr.c); // zs01
