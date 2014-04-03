@@ -492,18 +492,6 @@ namespace INTR
                                   uint32_t& o_irsn, uint32_t& o_num);
 
             /**
-             * Read the PCIE interrupt source numbers out of the HW
-             *
-             * @param i_target  Processor target to read value from
-             * @param o_irsn    List of IRSN for the PCIE units
-             * @param o_num     Number of interrupts behind IRSN
-             * @return an error handle on error
-             */
-            errlHndl_t getPcieIRSNs(TARGETING::Target * i_target,
-                                    std::vector<uint32_t> &o_irsn,
-                                    std::vector<uint32_t> &o_num);
-
-            /**
              * Read the NX interrupt source number out of the HW
              *
              * @param i_target  Processor target to read value from

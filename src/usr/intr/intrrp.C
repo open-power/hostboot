@@ -823,100 +823,6 @@ errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target,
     return err;
 }
 
-
-errlHndl_t IntrRp::getPcieIRSNs(TARGETING::Target * i_target,
-                                std::vector<uint32_t> &o_irsn,
-                                std::vector<uint32_t> &o_num)
-{
-    errlHndl_t err = NULL;
-    o_irsn.clear();
-
-    uint64_t reg = 0;
-    uint64_t mask = 0;
-    uint64_t bar = 0;
-
-    size_t scom_len = sizeof(uint64_t);
-
-    do{
-        // PE
-        for(size_t i = 0;
-            i < sizeof(cv_PE_IRSN_COMP_SCOM_LIST)
-                       /sizeof(cv_PE_IRSN_COMP_SCOM_LIST[0]);
-            ++i)
-        {
-            scom_len = sizeof(uint64_t);
-            err = deviceRead
-              (
-               i_target,
-               &reg,
-               scom_len,
-               DEVICE_SCOM_ADDRESS(cv_PE_IRSN_COMP_SCOM_LIST[i])
-               );
-            if(err)
-            {
-                break;
-            }
-
-
-            scom_len = sizeof(uint64_t);
-            err = deviceRead
-              (
-               i_target,
-               &mask,
-               scom_len,
-               DEVICE_SCOM_ADDRESS(cv_PE_IRSN_MASK_SCOM_LIST[i])
-               );
-            if(err)
-            {
-                break;
-            }
-
-            scom_len = sizeof(uint64_t);
-            err = deviceRead
-              (
-               i_target,
-               &bar,
-               scom_len,
-               DEVICE_SCOM_ADDRESS(cv_PE_BAR_SCOM_LIST[i])
-               );
-            if(err)
-            {
-                break;
-            }
-
-            //only calc IRSN if downstream interrupts are enabled
-            uint32_t l_irsn  = 0;
-            uint32_t l_intNum = 0;
-            if(bar & (1ull << (63-PE_IRSN_DOWNSTREAM)))
-            {
-                uint64_t l_irsn64 = reg & mask;
-                l_irsn64 >>=PE_IRSN_SHIFT;
-                l_irsn =  l_irsn64;
-
-                //To get the number of interrupts, we need to "count" the 0 bits
-                //cheat by extending mask to FFF8 + mask, then invert and add 1
-                mask >>=PE_IRSN_SHIFT;
-                l_intNum = mask;
-                l_intNum = (~((~IRSN_COMP_MASK) | l_intNum)) +1;
-            }
-            TRACFCOMP(g_trac_intr,"PE_ISRN[0x%08x] PE%d intNum: 0x%x  ",
-                      l_irsn, i, l_intNum);
-            if(l_irsn != 0x0)
-            {
-                o_irsn.push_back(l_irsn);
-                o_num.push_back(l_intNum);
-            }
-        }
-        if(err)
-        {
-            break;
-        }
-    }while(0);
-
-    return err;
-}
-
-
 errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
 {
     errlHndl_t err = NULL;
@@ -1791,29 +1697,8 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
             }
         }
 
-
-        //Issue EIOs to PE (PCIE) ISN
-        std::vector<uint32_t> l_peIsn;
-        std::vector<uint32_t> l_peIntNum;
-        err = getPcieIRSNs(i_proc, l_peIsn, l_peIntNum);
-        if(err)
-        {
-            break;
-        }
-
-        for(uint32_t i = 0; i < l_peIsn.size(); i++)
-        {
-            //now need to issue on all SN up to 2048
-            uint32_t l_peBaseIsn = l_peIsn[i] | 0xFF000000;
-            uint32_t l_peMaxIsn = l_peBaseIsn + l_peIntNum[i];
-            TRACFCOMP(g_trac_intr,"Issuing EOI to PCIE range %x - %x",
-                      l_peBaseIsn, l_peMaxIsn);
-
-            for(uint32_t l_isn = l_peBaseIsn; l_isn < l_peMaxIsn; ++l_isn)
-            {
-                *xirrPtr = l_isn;
-            }
-        }
+        //Don't need to issue EOIs to PHBs
+        //since PHB ETU reset cleans them up
 
         //Issue eio to NX logic
         uint32_t l_nxBaseIsn;
