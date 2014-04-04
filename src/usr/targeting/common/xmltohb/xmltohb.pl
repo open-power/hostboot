@@ -4517,6 +4517,28 @@ sub packSingleSimpleTypeAttribute {
         $simpleTypeProperties->{$typeName}{specialPolicies}->($$attributeRef,
             $value);
 
+        if ($value eq 'true')
+        {
+            $value = 1;
+        }
+        elsif ($value eq 'false')
+        {
+            $value = 0;
+        }
+
+        if( ($simpleTypeProperties->{$typeName}{complexTypeSupport}) &&
+            ($value =~ m/[^0-9]/) )
+        {
+            # This is a type that supports complex types - i.e. an integer and
+            # the value is a string. Look for an enumeration named after the
+            # attribute id, if one is not found then one of the function calls
+            # below will exit with error
+            my $enumeration = getEnumerationType($$attributesRef,
+                $$attributeRef->{id});
+
+            $value = enumNameToValue($enumeration, $value);
+        }
+
         if(ref ($simpleTypeProperties->{$typeName}{packfmt}) eq "CODE")
         {
             $$binaryDataRef .= $simpleTypeProperties->{$typeName}{packfmt}->

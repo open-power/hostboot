@@ -2935,7 +2935,7 @@ sub generate_capp
         <id>MRU_ID</id>";
         # TODO RTC: 97477
         print "
-        <default>TO_BE_ADDED</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
