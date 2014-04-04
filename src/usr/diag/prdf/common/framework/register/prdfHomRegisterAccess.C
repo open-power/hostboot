@@ -37,6 +37,7 @@
   #include <ecmdDataBuffer.H>
   #include <hwsvExecutionService.H>
   #include <hwco_service_codes.H>
+  #include <p8_pore_table_gen_api.H>
 #endif
 
 #include <prdfHomRegisterAccess.H>
@@ -50,6 +51,8 @@
 
 #undef prdfHomRegisterAccess_C
 
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -114,10 +117,10 @@ void ScomService::setScomAccessor(ScomAccessor & i_ScomAccessor)
     iv_ScomAccessor = &i_ScomAccessor;
 }
 
-uint32_t ScomService::Access(TARGETING::TargetHandle_t i_target,
-                                 BIT_STRING_CLASS & bs,
-                                 uint64_t registerId,
-                                 MopRegisterAccess::Operation operation) const
+uint32_t ScomService::Access(TargetHandle_t i_target,
+                             BIT_STRING_CLASS & bs,
+                             uint64_t registerId,
+                             MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomService::Access()");
     int32_t rc = SUCCESS;
@@ -180,10 +183,10 @@ uint32_t ScomService::Access(TARGETING::TargetHandle_t i_target,
 }
 
 
-errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
-                                  BIT_STRING_CLASS & bs,
-                                  uint64_t registerId,
-                                  MopRegisterAccess::Operation operation) const
+errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
+                                BIT_STRING_CLASS & bs,
+                                uint64_t registerId,
+                                MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomAccessor::Access()");
 
@@ -205,13 +208,11 @@ errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
         switch (operation)
         {
             case MopRegisterAccess::WRITE:
+            {
                 for(unsigned int i = 0; i < bsize; ++i)
                 {
                     if(bs.IsSet(i)) buffer.setBit(i);
                 }
-
-                // FIXME: If register is in a EX chiplet, need to also update
-                //        PORE image ????
 
                 PRD_FAPI_TO_ERRL(errH,
                                  fapiPutScom,
@@ -219,7 +220,56 @@ errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                                  registerId,
                                  buffer);
 
+                #ifndef __HOSTBOOT_MODULE
+
+                if( NULL != errH ) break;
+
+                // If register is in a EX chiplet, need to update PORE image.
+                // The PORE update is necessary to avoid loosing the FIR MASK
+                // after the Core exits the sleep-winkle state.
+                if( TYPE_EX == PlatServices::getTargetType(i_target) )
+                {
+                    // In SLW image we only have space for 32 registers and
+                    // that space is not exclusive to PRD.
+                    // Though we can write to Mask directly or using AND
+                    // register but when we mask a FIR bit for Predictive
+                    // callout, we always use OR register.
+                    // So we will only consider OR register here as it will
+                    // simplify our logic and  will also help to meet SLW
+                    // image size requirement.
+                    // Using OR register only also enables us to use SCOM_OR
+                    // operation in underlying platform API which further
+                    // helps to reduce size of SLW Image.
+                    uint32_t l_exMaskReg[5] = {
+                                        0x1004000f,   // EX_LOCAL_FIR_MASK_OR
+                                        0x10013105,   // EX_CORE_FIR_MASK_OR
+                                        0x10012805,   // EX_L2CERRS_FIR_MASK_OR
+                                        0x10010805,   // EX_L3CERRS_FIR_MASK_OR
+                                        0x10010c05 }; // EX_NCSCOMS_FIR_MASK_OR
+
+                    for(uint32_t l_count = 0; l_count < 5; l_count++)
+                    {
+                        if( l_exMaskReg[l_count]  == registerId )
+                        {
+                            int32_t l_rc = SUCCESS;
+                            l_rc = PlatServices::updateExScomToSlwImage(
+                                                              i_target,
+                                                              registerId,
+                                                              buffer,
+                                                              P8_PORE_SCOM_OR );
+                            if( SUCCESS != l_rc )
+                            {
+                                PRDF_ERR("[ScomAccessor::Access()] Error in"
+                                         " updateExScomToSlwImage.");
+                            }
+                            break;
+                        }
+                    }
+                }
+                #endif // End of, not __HOSTBOOT_MODULE
+
                 break;
+            }
 
             case MopRegisterAccess::READ:
                 bs.Pattern(0x00000000); // clear all bits
@@ -238,7 +288,8 @@ errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                 break;
 
             default:
-                PRDF_ERR("ScomAccessor::Access() unsuppported scom op: 0x%08X", operation);
+                PRDF_ERR("ScomAccessor::Access() unsuppported scom op: 0x%08X",
+                          operation);
                 break;
 
         } // end switch operation
@@ -266,7 +317,7 @@ errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                          SRCI_MACH_CHECK,
                          SRCI_NO_ATTR,
                          PRDF_HOM_SCOM,              // module id
-                         FSP_DEFAULT_REFCODE,        // refcode What do we use???
+                         FSP_DEFAULT_REFCODE,        // refcode What do we use??
                          PRDF_CODE_FAIL,             // Reason code
                          SCR_ACCESS_FAILED,          // user data word 1
                          PlatServices::getHuid(i_target),   // user data word 2
@@ -301,7 +352,7 @@ uint32_t HomRegisterAccessScom::Access( BIT_STRING_CLASS & bs,
 //------------------------------------------------------------------------------
 
 HomRegisterAccessScan::HomRegisterAccessScan(
-                                    TARGETING::TargetHandle_t i_ptargetHandle,
+                                    TargetHandle_t i_ptargetHandle,
                                     ScanRingField * start, ScanRingField * end )
 : MopRegisterAccess(), iv_punitHandle(i_ptargetHandle)
 {
