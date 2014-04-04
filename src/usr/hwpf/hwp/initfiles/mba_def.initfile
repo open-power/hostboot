@@ -1,9 +1,16 @@
 
-#-- $Id: mba_def.initfile,v 1.62 2014/02/18 17:25:16 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.68 2014/04/04 16:46:15 jdsloat Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.68|jdsloat | 4/04/14| Turned off Power controls for GA1 concerns - Turn back on at a later date
+#--     1.67|tschang | 4/01/14| Adjusted the PUP Avail and SEPD/FEPD time.
+#--     1.66|tschang | 3/28/14| Removed Performance enhancement for rdtag with DMI freq
+#--         |baysah  | 3/31/14| Added def_margin_pup_fast=12 and def_margin_pup_slow=0 for Yuen with values from Randy/Anuwat
+#--     1.65|tschang | 3/18/14| Fixed typos in the dly7 settings from 0001 to 01111
+#--     1.64|baysah  | 3/05/14| Added MBA Power Ctrol Settings and backed out the refresh avoidance settings until spec benchmark results
+#--     1.63|tschang | 3/03/14| Performance enhancement for rdtag with DMI freq, refresh avoidance and CFG_PUP_AVAIL
 #--     1.62|tschang | 2/14/14| Set Safe mode throttle when ATTR_CENTAUR_EC_ENABLE_SAFE_MODE_THROTTLE is 1
 #--     1.61|tschang | 2/14/14| Safe mode throttle using sys attributes ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP, ATTR_MRW_MEM_THROTTLE_DENOMINATOR
 #--     1.60|tschang | 2/03/14| Removed CDIMM TYPE and replace with custom dimm
@@ -222,6 +229,8 @@ define def_equal_test     =  (SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT
 # mba tmr0 register timings are added to the value below
 define def_margin1      = (1);
 define def_margin2      = (0);
+define def_margin_pup_fast   = (7);
+define def_margin_pup_slow   = (0);
 define def_margin_rdtag = (4);
 
 
@@ -1471,6 +1480,16 @@ define  def_mcb_addr_total22_max24  = (((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] - ATT
 define  def_mcb_addr_total22_max25  = (((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] - ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[0][0]) == 8) && (((ATTR_EFF_DRAM_COLS - 3) + (ATTR_EFF_DRAM_BANKS/4) + ATTR_EFF_DRAM_ROWS) == 22 ));
 
 #######################################
+# MBA01_MBA_MBAREFAQ Base Address:  0x03010436
+# MBA23_MBA_MBAREFAQ Base Address:  0x03010c36
+#######################################
+
+scom 0x03010436     {
+    bits    ,   scom_data                                 ,       ATTR_FUNCTIONAL,     expr;
+#   0:63    ,   0xE1FFFFC421020C00                        ,            1            ,     any;          #Enable Dynamic Refresh Avoidance with coef2
+    0:63    ,   0x6591B48421021400                        ,            1            ,     any;          #Old Default settings to turn off Dynamic refresh avoidance
+}
+#######################################
 # MBA01_MBA_RRQ0Q Base Address:  0x0301040E
 # MBA23_MBA_RRQ0Q Base Address:  0x03010C0E
 #######################################
@@ -1781,7 +1800,7 @@ scom 0x0301040B     {
     8:11    ,   0b1000   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133); # RRDM_dly     3                             D
     8:11    ,   0b1001   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 2400); # RRDM_dly     3                                                      D
 # fails will 0 margin 12:15
-    12:15   ,   0b0001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMSR_dly   4
+    12:15   ,   0b0111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMSR_dly   4
     12:15   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMSR_dly   4
     12:15   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMSR_dly   4
     12:15   ,   0b1010   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWSMSR_dly   4
@@ -1790,7 +1809,7 @@ scom 0x0301040B     {
     12:15   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMSR_dly   4
     12:15   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMSR_dly   4
     12:15   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMSR_dly   4
-    16:19   ,   0b0001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMDR_dly   5
+    16:19   ,   0b0111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMDR_dly   5
     16:19   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMDR_dly   5
     16:19   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMDR_dly   5
     16:19   ,   0b1010   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWSMDR_dly   5
@@ -1799,7 +1818,7 @@ scom 0x0301040B     {
     16:19   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMDR_dly   5
     16:19   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMDR_dly   5
     16:19   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMDR_dly   5
-    20:23   ,   0b0001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
+    20:23   ,   0b0111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
     20:23   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWDM_dly	 6
     20:23   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWDM_dly	 6
     20:23   ,   0b1010   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWDM_dly	 6
@@ -1990,17 +2009,28 @@ scom 0x03010432    {
 scom 0x03010434    {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,   expr;
 #    3:5     ,   0b010       ,           1            ,   any; # cfg_min_max_domains       36
-    6:10    ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly4  == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly5  == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly6  == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b00111     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly7  == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b01000     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly8  == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b01101     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly13 == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b10000     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly16 == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b10100     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly20 == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b10111     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly23 == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b11010     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly26 == 1); # MBARPC0Q_cfg_pup_avail     36
-    6:10    ,   0b11101     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly29 == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b00100  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly4  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail   - performance enhancemnt
+    6:10    ,   0b00100  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly4  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail   - performance enhancemnt
+    6:10    ,   0b00101  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly5  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b00101  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly5  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b00110  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly6  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b00110  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly6  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b00111  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly7  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b00111  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly7  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b01000  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly8  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b01000  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly8  == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b01101  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly13 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b01101  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly13 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b10000  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly16 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b10000  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly16 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b10100  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly20 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b10100  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly20 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b10111  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly23 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b10111  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly23 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b11010  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly26 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b11010  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly26 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b11101  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly29 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 0); # MBARPC0Q_cfg_pup_avail     36
+    6:10    ,   0b11101  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly29 == 1) && (ATTR_EFF_DRAM_DLL_PPD == 1); # MBARPC0Q_cfg_pup_avail     36
     11:15   ,   0b00011     ,           1            ,   (def_MBARPC0Q_cfg_pdn_pup_dly3 == 1); # MBARPC0Q_cfg_pup_pup       37
     11:15   ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pdn_pup_dly4 == 1); # MBARPC0Q_cfg_pup_pup       37
     11:15   ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pdn_pup_dly5 == 1); # MBARPC0Q_cfg_pup_pup       37
@@ -2009,7 +2039,9 @@ scom 0x03010434    {
     16:20   ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly4 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly5 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly6 == 1); # MBARPC0Q_cfg_pup_pdn       38
-#    22      ,   0b1         ,           1            ,   any; # cfg_min_domain_reduction_enable set to 1 to enable power controls
+    22      ,   0b0         ,           1            ,   any; # cfg_min_domain_reduction_enable set to 1 to enable power controls
+    23:32   ,   0b0000000011,           1            ,   any; # Set min doman reduction time to 30.7 us (10.245us * 3)
+    43      ,   0b0         ,           1            ,   any; # Use 1 in 8k 2:1 cycle pulses for min domain reduction time interval
 }
 
 # MBAPC1Q    power control settings reg 1

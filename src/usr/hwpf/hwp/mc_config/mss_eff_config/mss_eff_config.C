@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.38 2014/01/22 16:49:01 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.43 2014/04/04 14:44:32 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,6 +44,17 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.44  | jdsloat  |04-APR-14| Fixed DDR4 ifdef flag
+//   1.43  |          |         | 
+//   1.42  | asaetow  |31-MAR-14| Added ifdef for three #include from Thi and Jake FW Code review.
+//         |          |         | Added back in bus_width_extension check from SPD byte8[4:3]. 
+//         |          |         | NOTE: Only 64bit with ECC extension is allowed.
+//         |          |         | Added FFDC error callout from Andrea's FW RAS review.
+//         |          |         | NOTE: Do NOT pickup without memory_mss_eff_config.xml v1.2
+//         |          |         | Added comments for commended out code.
+//   1.41  | jdsloat  |20-MAR-14| FASTEXIT settings in mba_def.initfile are causing fails.  Workaround to use SLOWEXIT. SW249561
+//   1.40  | kcook    |14-MAR-14| Added call to DDR4 function support
+//   1.39  | dcadiga  |04-MAR-14| Added isdimm support pass 1
 //   1.38  | asaetow  |17-JAN-14| Removed mss_eff_config_cke_map, now empty, data from vpd.
 //         |          |         | Removed mss_eff_config_termination from normal/FW code flow.
 //         |          |         | Added mss_eff_config_termination to lab only code flow.
@@ -161,9 +172,17 @@
 #include <mss_eff_config_rank_group.H>
 #include <mss_eff_config_shmoo.H>
 
-#include <mss_lrdimm_funcs.H>
+#ifdef FAPI_MSSLABONLY
 #include <mss_eff_config_termination.H>
+#endif
 
+#ifdef FAPI_LRDIMM
+#include <mss_lrdimm_funcs.H>
+#endif
+
+#ifdef FAPI_DDR4
+#include <mss_eff_config_ddr4.H>
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -191,12 +210,11 @@ fapi::ReturnCode mss_lrdimm_eff_config( const Target& i_target_mba,
    ReturnCode rc;
 
    FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_LRDIMM_INVALID_EXEC);
    return rc;
 
 }
 #endif
-
 
 #ifndef FAPI_MSSLABONLY
 fapi::ReturnCode mss_eff_config_termination( const Target& i_target_mba)
@@ -204,7 +222,19 @@ fapi::ReturnCode mss_eff_config_termination( const Target& i_target_mba)
    ReturnCode rc;
 
    FAPI_ERR("Invalid exec of MSSLABONLY function on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_TERM_EXEC);
+   return rc;
+
+}
+#endif
+
+#ifndef FAPI_DDR4
+fapi::ReturnCode mss_eff_config_ddr4( const Target& i_target_mba)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of DDR4 function on %s!", i_target_mba.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DDR4_INVALID_EXEC);
    return rc;
 
 }
@@ -275,10 +305,12 @@ struct mss_eff_config_spd_data
     uint8_t twtrmin[PORT_SIZE][DIMM_SIZE];
     uint8_t trtpmin[PORT_SIZE][DIMM_SIZE];
     uint32_t tfawmin[PORT_SIZE][DIMM_SIZE];
+
+    // Not needed for GA1 CDIMM, will need to enable check for ISDIMM.
     //uint8_t sdram_optional_features[PORT_SIZE][DIMM_SIZE];
-    //uint8_t sdram_thermal_and_refresh_options[PORT_SIZE]
-    //                                              [DIMM_SIZE];
+    //uint8_t sdram_thermal_and_refresh_options[PORT_SIZE][DIMM_SIZE];
     //uint8_t module_thermal_sensor[PORT_SIZE][DIMM_SIZE];
+
     uint8_t fine_offset_tckmin[PORT_SIZE][DIMM_SIZE];
     uint8_t fine_offset_taamin[PORT_SIZE][DIMM_SIZE];
     uint8_t fine_offset_trcdmin[PORT_SIZE][DIMM_SIZE];
@@ -286,22 +318,20 @@ struct mss_eff_config_spd_data
     uint8_t fine_offset_trcmin[PORT_SIZE][DIMM_SIZE];
 
     //uint8_t module_specific_section[PORT_SIZE][DIMM_SIZE][57];         
-    //uint32_t module_id_module_manufacturers_jedec_id_code
-    //                                              [PORT_SIZE][DIMM_SIZE];
-    //uint8_t module_id_module_manufacturing_location[PORT_SIZE]
-    //                                              [DIMM_SIZE];
-    //uint32_t module_id_module_manufacturing_date[PORT_SIZE]
-    //                                              [DIMM_SIZE];
-    //uint32_t module_id_module_serial_number[PORT_SIZE]
-    //                                              [DIMM_SIZE];
+
+    // See "svpdMFGtool --inventory"
+    //uint32_t module_id_module_manufacturers_jedec_id_code[PORT_SIZE][DIMM_SIZE];
+    //uint8_t module_id_module_manufacturing_location[PORT_SIZE][DIMM_SIZE];
+    //uint32_t module_id_module_manufacturing_date[PORT_SIZE][DIMM_SIZE];
+    //uint32_t module_id_module_serial_number[PORT_SIZE][DIMM_SIZE];
     //uint32_t cyclical_redundancy_code[PORT_SIZE][DIMM_SIZE];
-    // HERE uint8_t module_part_number[PORT_SIZE][DIMM_SIZE][
-    //                                              SPD_ATTR_SIZE_18];
+    //uint8_t module_part_number[PORT_SIZE][DIMM_SIZE][SPD_ATTR_SIZE_18];
     //uint32_t module_revision_code[PORT_SIZE][DIMM_SIZE];
-    //uint32_t dram_manufacturer_jedec_id_code[PORT_SIZE]
-    //                                              [DIMM_SIZE];
-    // HERE uint8_t bad_dq_data[PORT_SIZE][DIMM_SIZE]
-    //                                              [SPD_ATTR_SIZE_80];
+    //uint32_t dram_manufacturer_jedec_id_code[PORT_SIZE][DIMM_SIZE];
+
+    // See VPD parser #A keyword
+    //uint8_t bad_dq_data[PORT_SIZE][DIMM_SIZE][SPD_ATTR_SIZE_80];
+
     uint32_t vpd_version[PORT_SIZE][DIMM_SIZE];
 };
 
@@ -313,7 +343,7 @@ struct mss_eff_config_spd_data
 struct mss_eff_config_atts
 {
     uint8_t eff_dimm_ranks_configed[PORT_SIZE][DIMM_SIZE];
-    // AST HERE: Needs SPD byte68:76
+    // AST HERE: Needs SPD byte68:76, deferred to GA2 for full ISDIMM support
     uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_type;
@@ -322,8 +352,10 @@ struct mss_eff_config_atts
     uint8_t eff_dram_asr;
     uint8_t eff_dram_bl;
     uint8_t eff_dram_banks;
+
     // See mss_freq.C
     //uint8_t eff_dram_cl;
+
     uint8_t eff_dram_cols;
     uint8_t eff_dram_cwl;
     uint8_t eff_dram_density;
@@ -358,12 +390,16 @@ struct mss_eff_config_atts
     uint32_t eff_memcal_interval;
     uint8_t eff_mpr_loc;
     uint8_t eff_mpr_mode;
-    // AST HERE: Needs SPD byte33[6:4], currently hard coded to 0
-    uint8_t eff_num_dies_per_package[PORT_SIZE][DIMM_SIZE];
+
+    // AST HERE: Needs SPD byte33[6:4], currently hard coded to 0, removed for GA1
+    //uint8_t eff_num_dies_per_package[PORT_SIZE][DIMM_SIZE];
+
     uint8_t eff_num_drops_per_port;
     uint8_t eff_num_master_ranks_per_dimm[PORT_SIZE][DIMM_SIZE];
-    // AST HERE: Needs source data, currently hard coded to 0
-    uint8_t eff_num_packages_per_rank[PORT_SIZE][DIMM_SIZE];
+
+    // AST HERE: Needs source data, currently hard coded to 0, removed for GA1
+    //uint8_t eff_num_packages_per_rank[PORT_SIZE][DIMM_SIZE];
+
     uint8_t eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_schmoo_mode;
 
@@ -516,9 +552,12 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         rc = FAPI_ATTR_GET(ATTR_SPD_SDRAM_COLUMNS, &i_target_dimm,
             p_o_spd_data->sdram_columns[i_port][i_dimm]);
         if(rc) break;
+
+        // See mss_volt.C
         //rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_NOMINAL_VOLTAGE, &i_target_dimm,
             //p_o_spd_data->module_nominal_voltage[i_port][i_dimm]);
         //if(rc) break;
+
         rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS, &i_target_dimm,
             p_o_spd_data->num_ranks[i_port][i_dimm]);
         if(rc) break;
@@ -540,6 +579,8 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVISOR, &i_target_dimm,
             p_o_spd_data->mtb_divisor[i_port][i_dimm]);
         if(rc) break;
+
+        // See mss_freq.C
         //rc = FAPI_ATTR_GET(ATTR_SPD_TCKMIN, &i_target_dimm,
             //p_o_spd_data->tckmin[i_port][i_dimm]);
         //if(rc) break;
@@ -549,6 +590,7 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         //rc = FAPI_ATTR_GET(ATTR_SPD_TAAMIN, &i_target_dimm,
             //p_o_spd_data->taamin[i_port][i_dimm]);
         //if(rc) break;
+
         rc = FAPI_ATTR_GET(ATTR_SPD_TWRMIN, &i_target_dimm,
             p_o_spd_data->twrmin[i_port][i_dimm]);
         if(rc) break;
@@ -579,6 +621,8 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         rc = FAPI_ATTR_GET(ATTR_SPD_TFAWMIN, &i_target_dimm,
             p_o_spd_data->tfawmin[i_port][i_dimm]);
         if(rc) break;
+
+        // Not needed for GA1 CDIMM, will need to enable check for ISDIMM.
         //rc = FAPI_ATTR_GET(ATTR_SPD_SDRAM_OPTIONAL_FEATURES, &i_target_dimm,
             //p_o_spd_data->sdram_optional_features[i_port][i_dimm]);
         //if(rc) break;
@@ -589,6 +633,7 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         //rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_THERMAL_SENSOR, &i_target_dimm,
             //p_o_spd_data->module_thermal_sensor[i_port][i_dimm]);
         //if(rc) break;
+
         rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TCKMIN, &i_target_dimm,
             p_o_spd_data->fine_offset_tckmin[i_port][i_dimm]);
         if(rc) break;
@@ -610,6 +655,8 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
             //&i_target_dimm,
             //p_o_spd_data->module_specific_section[i_port][i_dimm]);
         //if(rc) break;
+
+        // See "svpdMFGtool --inventory"
         //rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_ID_MODULE_MANUFACTURERS_
             //JEDEC_ID_CODE,
             //&i_target_dimm,
@@ -634,7 +681,7 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
             //&i_target_dimm,
             //p_o_spd_data->cyclical_redundancy_code[i_port][i_dimm]);
         //if(rc) break;
-        // HERE rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_PART_NUMBER,
+        //rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_PART_NUMBER,
             //&i_target_dimm,
             //p_o_spd_data->module_part_number[i_port][i_dimm]);
         //if(rc) break;
@@ -646,7 +693,9 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
             //&i_target_dimm,
             //p_o_spd_data->dram_manufacturer_jedec_id_code[i_port][i_dimm]);
         //if(rc) break;
-        // HERE rc = FAPI_ATTR_GET(ATTR_SPD_BAD_DQ_DATA, &i_target_dimm,
+
+        // See VPD parser #A keyword
+        //rc = FAPI_ATTR_GET(ATTR_SPD_BAD_DQ_DATA, &i_target_dimm,
             //p_o_spd_data->bad_dq_data[i_port][i_dimm]);
         //if(rc) break;
 
@@ -696,7 +745,6 @@ fapi::ReturnCode mss_eff_config_get_spd_data(
         if(rc)
         {
             FAPI_ERR("Error retrieving assodiated dimms");
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
             break;
         }
 //------------------------------------------------------------------------------
@@ -709,7 +757,6 @@ fapi::ReturnCode mss_eff_config_get_spd_data(
             if(rc)
             {
                 FAPI_ERR("Error retrieving ATTR_MBA_PORT");
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                 break;
             }
 //------------------------------------------------------------------------------
@@ -718,7 +765,6 @@ fapi::ReturnCode mss_eff_config_get_spd_data(
             if(rc)
             {
                 FAPI_ERR("Error retrieving ATTR_MBA_DIMM");
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                 break;
             }
 //------------------------------------------------------------------------------
@@ -730,7 +776,6 @@ fapi::ReturnCode mss_eff_config_get_spd_data(
             if(rc)
             {
                 FAPI_ERR("Error retrieving functional fapi attribute");
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                 break;
             }
 //------------------------------------------------------------------------------
@@ -747,7 +792,6 @@ fapi::ReturnCode mss_eff_config_get_spd_data(
             if(rc)
             {
                 FAPI_ERR("Error reading spd data from caller");
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                 break;
             }
         }
@@ -776,6 +820,15 @@ fapi::ReturnCode mss_eff_config_verify_plug_rules(
                                 mss_eff_config_atts *p_i_atts)
 {
     fapi::ReturnCode rc;
+    const fapi::Target& TARGET_MBA = i_target_mba;
+    uint8_t& CUR_DIMM_SPD_VALID_U8ARRAY_0_0 = 
+             p_i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][0];
+    uint8_t& CUR_DIMM_SPD_VALID_U8ARRAY_0_1 = 
+             p_i_mss_eff_config_data->cur_dimm_spd_valid_u8array[0][1];
+    uint8_t& CUR_DIMM_SPD_VALID_U8ARRAY_1_0 = 
+             p_i_mss_eff_config_data->cur_dimm_spd_valid_u8array[1][0];
+    uint8_t& CUR_DIMM_SPD_VALID_U8ARRAY_1_1 = 
+             p_i_mss_eff_config_data->cur_dimm_spd_valid_u8array[1][1];
 
     // Identify/Verify DIMM plug rule
     if (
@@ -795,7 +848,7 @@ fapi::ReturnCode mss_eff_config_verify_plug_rules(
        )
     {
         FAPI_ERR("Plug rule violation on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MISMATCH_EMPTY);
         return rc;
     }
     if ( (
@@ -811,7 +864,7 @@ fapi::ReturnCode mss_eff_config_verify_plug_rules(
        ) && (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_FALSE) )
     {
         FAPI_ERR("Plug rule violation on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MISMATCH_SIDE);
         return rc;
     }
     if ( (
@@ -824,7 +877,7 @@ fapi::ReturnCode mss_eff_config_verify_plug_rules(
        ) && (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_TRUE) )
     {
         FAPI_ERR("Plug rule violation on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MISMATCH_TOP);
         return rc;
     }
     if ((p_i_mss_eff_config_data->
@@ -871,6 +924,7 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
                                     mss_eff_config_spd_data *p_i_data)
 {
     fapi::ReturnCode rc;
+    const fapi::Target& TARGET_MBA = i_target_mba;
 
     // Start Identify/Verify/Assigning values to attributes
     // Identify/Verify DIMM compatability
@@ -895,7 +949,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
     {
         FAPI_ERR("Incompatable DRAM generation on %s!",
                 i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+        uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+        uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+        uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -918,7 +976,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
         )
     {
         FAPI_ERR("Incompatable DIMM type on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        uint8_t& MODULE_TYPE_0_0 = p_i_data->module_type[0][0];
+        uint8_t& MODULE_TYPE_0_1 = p_i_data->module_type[0][1];
+        uint8_t& MODULE_TYPE_1_0 = p_i_data->module_type[1][0];
+        uint8_t& MODULE_TYPE_1_1 = p_i_data->module_type[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_TYPE);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -941,7 +1003,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
         )
     {
         FAPI_ERR("Incompatable DIMM ranks on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        uint8_t& NUM_RANKS_0_0 = p_i_data->num_ranks[0][0];
+        uint8_t& NUM_RANKS_0_1 = p_i_data->num_ranks[0][1];
+        uint8_t& NUM_RANKS_1_0 = p_i_data->num_ranks[1][0];
+        uint8_t& NUM_RANKS_1_1 = p_i_data->num_ranks[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_RANKS);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -964,7 +1030,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
         )
     {
         FAPI_ERR("Incompatable DIMM banks on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                uint8_t& SDRAM_BANKS_0_0 = p_i_data->sdram_banks[0][0];
+                uint8_t& SDRAM_BANKS_0_1 = p_i_data->sdram_banks[0][1];
+                uint8_t& SDRAM_BANKS_1_0 = p_i_data->sdram_banks[1][0];
+                uint8_t& SDRAM_BANKS_1_1 = p_i_data->sdram_banks[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_BANKS);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -987,7 +1057,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
         )
     {
         FAPI_ERR("Incompatable DIMM rows on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                uint8_t& SDRAM_ROWS_0_0 = p_i_data->sdram_rows[0][0];
+                uint8_t& SDRAM_ROWS_0_1 = p_i_data->sdram_rows[0][1];
+                uint8_t& SDRAM_ROWS_1_0 = p_i_data->sdram_rows[1][0];
+                uint8_t& SDRAM_ROWS_1_1 = p_i_data->sdram_rows[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_ROWS);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -1010,7 +1084,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
         )
     {
         FAPI_ERR("Incompatable DIMM cols on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                uint8_t& SDRAM_COLS_0_0 = p_i_data->sdram_columns[0][0];
+                uint8_t& SDRAM_COLS_0_1 = p_i_data->sdram_columns[0][1];
+                uint8_t& SDRAM_COLS_1_0 = p_i_data->sdram_columns[1][0];
+                uint8_t& SDRAM_COLS_1_1 = p_i_data->sdram_columns[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_COLUMNS);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -1034,51 +1112,24 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
     {
         FAPI_ERR("Incompatable DRAM primary bus width on %s!",
                 i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                uint8_t& BUS_WIDTH_0_0 = p_i_data->module_memory_bus_width[0][0];
+                uint8_t& BUS_WIDTH_0_1 = p_i_data->module_memory_bus_width[0][1];
+                uint8_t& BUS_WIDTH_1_0 = p_i_data->module_memory_bus_width[1][0];
+                uint8_t& BUS_WIDTH_1_1 = p_i_data->module_memory_bus_width[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_BUS_WIDTH);
         return rc;
     }
 //------------------------------------------------------------------------------
-    /* AST HERE: Needs SPD byte8[4:3]
-    if (
-            (p_i_data->spd_module_memory_bus_width_extension_u8array[0][0]
-                != p_i_data->spd_module_memory_bus_width_extension_u8array[1][0])
-            ||
-            (
-                (p_i_atts->eff_num_drops_per_port
-                == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL)
-                &&
-                (
-                    (p_i_data->spd_module_memory_bus_width_extension_u8array[0][1]
-                != p_i_data->spd_module_memory_bus_width_extension_u8array[1][1])
-                )
-                ||
-                (
-                    (p_i_data->spd_module_memory_bus_width_extension_u8array[0][0]
-                != p_i_data->spd_module_memory_bus_width_extension_u8array[0][1])
-                )
-            )
-        )
-    {
-        FAPI_ERR("Incompatable DRAM bus width extension on %s!",
-        i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-        return rc;
-    }
-//------------------------------------------------------------------------------
-    if (
-            (p_i_data->module_memory_bus_width[0][0]
-            != fapi::ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_W64)
-            ||
-            (p_i_data->spd_module_memory_bus_width_extension_u8array[0][0]
-            != fapi::ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_EXTENSION_W8)
-        )
+    // ATTR_SPD_MODULE_MEMORY_BUS_WIDTH, SPD byte8[4:3], only 64bit with ECC extension is allowed
+    if ( p_i_data->module_memory_bus_width[0][0] != 
+         fapi::ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_WE64 )
     {
         FAPI_ERR("Unsupported DRAM bus width on %s!",
             i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+            uint8_t& MODULE_MEMORY_BUS_WIDTH = p_i_data->module_memory_bus_width[0][0];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_UNSUPPORTED_MODULE_MEMORY_BUS_WIDTH);
         return rc;
     }
-    */
 //------------------------------------------------------------------------------
     if (
             (p_i_data->dram_width[0][0]
@@ -1099,7 +1150,11 @@ fapi::ReturnCode mss_eff_config_verify_spd_data(
         )
     {
         FAPI_ERR("Incompatable DRAM width on %s!", i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                uint8_t& DRAM_WIDTH_0_0 = p_i_data->dram_width[0][0];
+                uint8_t& DRAM_WIDTH_0_1 = p_i_data->dram_width[0][1];
+                uint8_t& DRAM_WIDTH_1_0 = p_i_data->dram_width[1][0];
+                uint8_t& DRAM_WIDTH_1_1 = p_i_data->dram_width[1][1];
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_WIDTH);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -1128,10 +1183,11 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                                 mss_eff_config_atts *p_o_atts)
 {
     fapi::ReturnCode rc;
+    const fapi::Target& TARGET_MBA = i_target_mba;
 
     // set select atts members to non-zero
     p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1; // Always use AL = CL - 1. 
-    p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT; // Always use fast exit.
+    p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT; // FASTEXIT settings in mba_def.initfile are causing fails.  Workaround to use SLOWEXIT.
     p_o_atts->eff_dram_dll_reset = fapi::ENUM_ATTR_EFF_DRAM_DLL_RESET_YES; // Always reset DLL at start of IPL.
     p_o_atts->eff_dram_srt = fapi::ENUM_ATTR_EFF_DRAM_SRT_EXTEND; // Always use extended operating temp range.
     p_o_atts->mss_cal_step_enable = 0xFF; // Always run all cal steps
@@ -1163,8 +1219,9 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             p_o_atts->eff_dram_gen = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4;
             break;
         default:
+                        uint8_t& DRAM_DEVICE_TYPE=p_i_data->dram_device_type[0][0];
             FAPI_ERR("Unknown DRAM type on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DRAM_DEVICE_ERROR);
             return rc;
     }
 //------------------------------------------------------------------------------
@@ -1192,7 +1249,8 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             break;
         default:
             FAPI_ERR("Unknown DIMM type on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+            uint8_t& MOD_TYPE = p_i_data->module_type[0][0];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MOD_TYPE_ERROR);
             return rc;
     }
 //------------------------------------------------------------------------------
@@ -1219,7 +1277,8 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             break;
         default:
             FAPI_ERR("Unknown DRAM banks on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                        uint8_t& SDRAM_BANKS= p_i_data->sdram_banks[0][0];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_SDRAM_BANK_ERROR);
             return rc;
     }
 //------------------------------------------------------------------------------
@@ -1242,7 +1301,8 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             break;
         default:
             FAPI_ERR("Unknown DRAM rows on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                        uint8_t& SDRAM_ROWS= p_i_data->sdram_rows[0][0];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_SDRAM_ROWS_ERROR);
             return rc;
     }
 //------------------------------------------------------------------------------
@@ -1262,10 +1322,12 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             break;
         default:
             FAPI_ERR("Unknown DRAM cols on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                        uint8_t& SDRAM_COLS= p_i_data->sdram_columns[0][0];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_SDRAM_COLS_ERROR);
             return rc;
     }
 //------------------------------------------------------------------------------
+         uint8_t& DRAM_WIDTH= p_i_data->dram_width[0][0];
     if (p_i_data->dram_width[0][0]
             == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4)
     {
@@ -1290,7 +1352,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
         p_o_atts->eff_dram_width = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X16;
         FAPI_ERR("Unsupported DRAM width x16 on %s!",
                 i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DRAM_WIDTH_16_ERROR);
         return rc;
     }
     else if (p_i_data->dram_width[0][0]
@@ -1299,14 +1361,14 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
         p_o_atts->eff_dram_width = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X32;
         FAPI_ERR("Unsupported DRAM width x32 on %s!",
                 i_target_mba.toEcmdString());
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DRAM_WIDTH_32_ERROR);
         return rc;
 
     }
     else
     {
          FAPI_ERR("Unknown DRAM width on %s!", i_target_mba.toEcmdString());
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DRAM_WIDTH_ERROR);
          return rc;
     }
 //------------------------------------------------------------------------------
@@ -1348,11 +1410,12 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             }
             else
             {
+                           uint8_t& SDRAM_DENSITY = p_i_data->sdram_density[l_cur_mba_port][l_cur_mba_dimm];
                p_i_mss_eff_config_data->cur_dram_density = 1;
                if (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_FALSE) {
                   FAPI_ERR("Unsupported DRAM density on %s!",
                           i_target_mba.toEcmdString());
-                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DRAM_DENSITY_ERR);
                   return rc;
                }
             }
@@ -1606,8 +1669,9 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     }
     else
     {
+                const uint16_t& CWL_VAL = (TWO_MHZ/p_i_mss_eff_config_data->mss_freq);
         FAPI_ERR("Error calculating CWL");
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_CWL_CALC_ERR);
         return rc;
     }
 //------------------------------------------------------------------------------
@@ -1692,6 +1756,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
             }
 
+                        uint8_t& UNSUPPORTED_VAL = p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm];
             // AST HERE: Needed SPD byte33[7,1:0], for expanded IBM_TYPE
             if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
                if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
@@ -1703,7 +1768,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                } else {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
-                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_RDIMM_UNSUPPORTED_TYPE); return rc;
                }
             } else if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM ) && ( p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )) {
                if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
@@ -1713,7 +1778,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                } else {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
-                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_UDIMM_UNSUPPORTED_TYPE); return rc;
                }
             } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {
                FAPI_INF("Will set LR atts after orig eff_config functions");
@@ -1721,7 +1786,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             } else {
                p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE); return rc;
             }
           } else {
              p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
@@ -1868,10 +1933,12 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_BL, &i_target_mba,
                 p_i_atts->eff_dram_bl);
         if(rc) break;
+
         // See mss_freq.C
         //rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_CL, &i_target_mba,
             //p_i_atts->eff_dram_cl);
         //if(rc) break;
+
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_COLS, &i_target_mba,
                 p_i_atts->eff_dram_cols);
         if(rc) break;
@@ -1965,18 +2032,24 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_EFF_MPR_MODE, &i_target_mba,
                 p_i_atts->eff_mpr_mode);
         if(rc) break;
-        rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DIES_PER_PACKAGE, &i_target_mba,
-                p_i_atts->eff_num_dies_per_package);
-        if(rc) break;
+
+        // AST HERE: Needs SPD byte33[6:4], currently hard coded to 0, removed for GA1
+        //rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DIES_PER_PACKAGE, &i_target_mba,
+        //        p_i_atts->eff_num_dies_per_package);
+        //if(rc) break;
+
         rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba,
                 p_i_atts->eff_num_drops_per_port);
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba,
                 p_i_atts->eff_num_master_ranks_per_dimm);
         if(rc) break;
-        rc = FAPI_ATTR_SET(ATTR_EFF_NUM_PACKAGES_PER_RANK, &i_target_mba,
-                p_i_atts->eff_num_packages_per_rank);
-        if(rc) break;
+
+        // AST HERE: Needs source data, currently hard coded to 0, removed for GA1
+        //rc = FAPI_ATTR_SET(ATTR_EFF_NUM_PACKAGES_PER_RANK, &i_target_mba,
+        //        p_i_atts->eff_num_packages_per_rank);
+        //if(rc) break;
+
         rc = FAPI_ATTR_SET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba,
                 p_i_atts->eff_num_ranks_per_dimm);
         if(rc) break;
@@ -2084,6 +2157,17 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
 //------------------------------------------------------------------------------
 fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 {
+    const fapi::Target& TARGET_MBA = i_target_mba;
+#ifdef FAPI_DDR4
+	fapi::ReturnCode rc;
+	rc = mss_eff_config_ddr4(i_target_mba);
+	if(rc)
+    {
+        FAPI_ERR("Error from mss_eff_config_ddr4()");
+        return rc;
+    }
+#endif
+#ifndef FAPI_DDR4
     /* Initialize Variables */
     const char * const PROCEDURE_NAME = "mss_eff_config";
     fapi::ReturnCode rc;
@@ -2105,11 +2189,25 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
     FAPI_INF("STARTING %s on %s \n", PROCEDURE_NAME,
             i_target_mba.toEcmdString());
 
+    do
+    {
+      FAPI_INF("Setup and VPD attributes if needbe\n");
+
+#ifdef FAPI_MSSLABONLY
+      FAPI_INF("Lab only: Setup and VPD attributes if needbe\n");
+
+      rc = mss_eff_config_termination_vpd(i_target_mba); if(rc) break;
+      if(rc)
+      {
+        FAPI_ERR("Error from mss_eff_config_termination_vpd()");
+        break;
+      }
+#endif
+
     // Added call to mss_eff_pre_config() for Mike Pardeik (power/thermal).
     rc = mss_eff_pre_config(i_target_mba); if(rc) return rc;
 
-    do
-    {
+     
 //------------------------------------------------------------------------------
         // Grab allow single port data
         rc = FAPI_ATTR_GET(ATTR_MSS_ALLOW_SINGLE_PORT, &i_target_mba, p_l_mss_eff_config_data->allow_single_port);
@@ -2131,7 +2229,8 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
             FAPI_ERR("Invalid ATTR_MSS_FREQ = %d on %s!",
                     p_l_mss_eff_config_data->mss_freq,
                     i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                        uint32_t& FREQ_VAL = p_l_mss_eff_config_data->mss_freq;
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MSS_FREQ);
             break;
         }
         FAPI_INF("mss_freq = %d, tCK_in_ps= %d on %s.",
@@ -2149,7 +2248,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         if(rc)
         {
             FAPI_ERR("Error from mss_eff_config_get_spd_data()");
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
             break;
         }
 
@@ -2159,7 +2257,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         if(rc)
         {
             FAPI_ERR("Error from mss_eff_config_verify_plug_rules()");
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
             break;
         }
 
@@ -2173,7 +2270,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
             if(rc)
             {
                 FAPI_ERR("Error from mss_eff_config_verify_spd_data()");
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                 break;
             }
         }
@@ -2184,7 +2280,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         if(rc)
         {
             FAPI_ERR("Error from mss_eff_config_setup_eff_atts()");
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
             break;
         }
 
@@ -2194,7 +2289,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         if(rc)
         {
             FAPI_ERR("Error from mss_eff_config_write_eff_atts()");
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
             break;
         }
 
@@ -2210,7 +2304,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
            if(rc)
            {
                FAPI_ERR("Error from mss_lrdimm_eff_config()");
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                break;
            }
         }
@@ -2226,7 +2319,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
            if(rc)
            {
                FAPI_ERR("Error from mss_eff_config_termination()");
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
                break;
            }
         }
@@ -2246,7 +2338,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
     delete p_l_mss_eff_config_data;
     delete p_l_spd_data;
     delete p_l_atts;
-
+#endif
     return rc;
 } // end mss_eff_config()
 } // extern "C"

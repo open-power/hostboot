@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,18 +20,74 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<hwpErrors>
-<!-- $Id: memory_mss_eff_config_rank_group.xml,v 1.1 2013/06/19 18:27:57 bellows Exp $ -->
+<!-- $Id: memory_mss_eff_config_rank_group.xml,v 1.2 2014/04/01 17:06:22 asaetow Exp $ -->
 <!-- For file ../../ipl/fapi/mss_eff_config_rank_group.C -->
 <!-- // *! OWNER NAME  : Anuwat Saetow     Email: asaetow@us.ibm.com -->
 <!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
 <!-- //         |          |         | Changed BACKUP to Mark Bellows. -->
 
-<!-- Original Source for RC_ERROR_001A memory_errors.xml -->
+<hwpErrors>
+<!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_MSS_EFF_CONFIG_RC_ERROR_001A</rc>
-    <description>Plug rule violation in EFF_CONFIG.</description>
+    <rc>RC_MSS_EFF_CONFIG_RANK_GROUP_NON_MATCH_RANKS</rc>
+    <description>Plug rule violation in mss_eff_config_rank_group 
+		due to num_ranks_per_dimm not matching.</description>
+    <FFDC>TARGET_MBA</FFDC>
+	<callout>	
+		<procedure>MEMORY_PLUGGING_ERROR</procedure>
+		<priority>HIGH</priority>
+	</callout>
+	
+	<callout>
+		<target>TARGET_MBA</target>
+		<priority>MEDIUM</priority>
+	</callout>
+	
+	<deconfigure>
+		<target>TARGET_MBA</target>
+	</deconfigure>
 </hwpError>
 
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MSS_EFF_CONFIG_RANK_GROUP_NUM_RANKS_NEQ1</rc>
+    <description>Plug rule violation in mss_eff_config_rank_group 
+		due to num_ranks_per_dimm not being set correctly.</description>
+    <FFDC>TARGET_MBA</FFDC>
+	<callout>	
+		<procedure>MEMORY_PLUGGING_ERROR</procedure>
+		<priority>HIGH</priority>
+	</callout>
 
+	<callout>
+		<target>TARGET_MBA</target>
+		<priority>MEDIUM</priority>
+	</callout>	
+
+	<deconfigure>
+		<target>TARGET_MBA</target>
+	</deconfigure>
+</hwpError>
+
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MSS_EFF_CONFIG_RANK_GROUP_NO_MATCH</rc>
+    <description>Plug rule violation in mss_eff_config_rank_group 
+		due to no matching case.</description>
+    <FFDC>TARGET_MBA</FFDC>
+	<callout>	
+		<procedure>MEMORY_PLUGGING_ERROR</procedure>
+		<priority>HIGH</priority>
+	</callout>
+
+	<callout>
+		<target>TARGET_MBA</target>
+		<priority>MEDIUM</priority>
+	</callout>	
+
+	<deconfigure>
+		<target>TARGET_MBA</target>
+	</deconfigure>
+</hwpError>
+<!-- *********************************************************************** -->
 </hwpErrors>

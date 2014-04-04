@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_rank_group.C,v 1.11 2013/08/16 13:45:45 kcook Exp $
+// $Id: mss_eff_config_rank_group.C,v 1.12 2014/04/01 17:10:21 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,6 +46,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.13  |          |         | 
+//   1.12  | asaetow  |31-MAR-13| Added FFDC error callout from Andrea's FW RAS review. 
+//         |          |         | NOTE: Do NOT pickup without memory_mss_eff_config_rank_group.xml v1.2 
 //   1.11  | kcook    |16-AUG-13| Added LRDIMM support.
 //   1.10  | asaetow  |17-APR-13| Removed 32G CDIMM 1R dualdrop workaround.
 //         |          |         | NOTE: Needs mss_draminit_training.C v1.57 or newer.
@@ -106,6 +109,7 @@ extern "C" {
 fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
    fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
    const char * const PROCEDURE_NAME = "mss_eff_config_rank_group";
+   const fapi::Target& TARGET_MBA = i_target_mba;
    FAPI_INF("*** Running %s on %s ... ***", PROCEDURE_NAME, i_target_mba.toEcmdString());
 
    const uint8_t PORT_SIZE = 2;
@@ -254,7 +258,7 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
             if (num_ranks_per_dimm_u8array[cur_port][0] != num_ranks_per_dimm_u8array[cur_port][1]) {
                FAPI_ERR("%s: FAILED!", PROCEDURE_NAME);
                FAPI_ERR("Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0], num_ranks_per_dimm_u8array[cur_port][1], i_target_mba.toEcmdString(), cur_port);
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_RANK_GROUP_NON_MATCH_RANKS);
                return rc;
             }
             primary_rank_group0_u8array[cur_port] = 0;
@@ -278,7 +282,7 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
             } else if (num_ranks_per_dimm_u8array[cur_port][0] != 1) {
                FAPI_ERR("%s: FAILED!", PROCEDURE_NAME);
                FAPI_ERR("Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0], num_ranks_per_dimm_u8array[cur_port][1], i_target_mba.toEcmdString(), cur_port);
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_RANK_GROUP_NUM_RANKS_NEQ1);
                return rc;
             }
          } else if ((num_ranks_per_dimm_u8array[cur_port][0] == 0) && (num_ranks_per_dimm_u8array[cur_port][1] == 0)) {
@@ -293,7 +297,7 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
          } else {
             FAPI_ERR("%s: FAILED!", PROCEDURE_NAME);
             FAPI_ERR("Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0], num_ranks_per_dimm_u8array[cur_port][1], i_target_mba.toEcmdString(), cur_port);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_RANK_GROUP_NO_MATCH);
             return rc;
          }
          tertiary_rank_group0_u8array[cur_port] = INVALID;
