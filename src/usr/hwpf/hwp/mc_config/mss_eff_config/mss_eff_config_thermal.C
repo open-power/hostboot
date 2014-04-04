@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.25 2014/01/21 17:39:47 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.26 2014/03/10 16:32:09 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.26  | jdsloat  |10-MAR-14| Edited comments
 //   1.25  | pardeik  |21-JAN-14| fixed default power curve values for CDIMM
 //         |          |         | removed unneeded comments
 //   1.24  | pardeik  |20-DEC-13| only get power curve attributes if custom dimm

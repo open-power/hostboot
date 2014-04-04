@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_throttle_to_power.C,v 1.12 2014/01/06 19:49:21 pardeik Exp $
+// $Id: mss_throttle_to_power.C,v 1.13 2014/03/10 16:31:27 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_throttle_to_power.C,v $
 //------------------------------------------------------------------------------
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.13  | jdsloat  |10-MAR-14| Edited comments
 //   1.12  | pardeik  |06-JAN-14| added dimm power curve uplift from MRW
 //         |          |         | use max utiliation from MRW for MAX_UTIL
 //   1.11  | pardeik  |13-NOV-13| changed MAX_UTIL from 75 to 56.25

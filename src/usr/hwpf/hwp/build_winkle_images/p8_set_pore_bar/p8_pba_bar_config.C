@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_bar_config.C,v 1.3 2012/10/23 16:09:37 stillgs Exp $
+// $Id: p8_pba_bar_config.C,v 1.4 2014/03/03 23:44:49 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_bar_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -137,13 +137,14 @@ p8_pba_bar_config (const Target&  i_target,
 
     uint64_t            work_size;
 
-    FAPI_DBG("Called with index %x, address 0x%16llX, size 0x%llX scope 0x%llX",
+    FAPI_DBG("Called with index %x, address 0x%08llX, size 0x%04llX scope 0x%04llX",
                        i_index, i_pba_bar_addr, i_pba_bar_size, i_pba_cmd_scope);
 
     // check if pba_bar scope in range
     if ( i_pba_cmd_scope > PBA_CMD_SCOPE_FOREIGN1 )
     {
-        FAPI_ERR("ERROR: PB Command Scope out of Range");
+        FAPI_ERR("ERROR: PB Command Scope out of Range: 0x%04llX > 0x%04X", i_pba_cmd_scope, PBA_CMD_SCOPE_FOREIGN1 );
+        const uint64_t exp_PBA_CMD_SCOPE_FOREIGN1 = PBA_CMD_SCOPE_FOREIGN1;
         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_BAR_SCOPE_OUT_OF_RANGE);
         return l_rc;
     }
@@ -152,7 +153,8 @@ p8_pba_bar_config (const Target&  i_target,
     // High order bits checked to ensure a valid real address
     if ( (BAR_ADDR_RANGECHECK_HIGH & i_pba_bar_addr) != 0x0ull )
     {
-        FAPI_ERR("ERROR: Address out of Range");
+        FAPI_ERR("ERROR: Address out of Range : i_pba_bar_addr=0x%08llX", i_pba_bar_addr);
+        const uint64_t exp_BAR_ADDR_RANGECHECK_HIGH = BAR_ADDR_RANGECHECK_HIGH;
         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_ADDR_OUT_OF_RANGE);
         return l_rc;
     }
@@ -160,7 +162,8 @@ p8_pba_bar_config (const Target&  i_target,
     // Low order bits checked for alignment
     if ( (BAR_ADDR_RANGECHECK_LOW & i_pba_bar_addr) != 0x0ull )
     {
-        FAPI_ERR("ERROR: Address must be on a 1MB boundary");
+        FAPI_ERR("ERROR: Address must be on a 1MB boundary : i_pba_bar_addr=0x%08llX",i_pba_bar_addr);
+        const uint64_t exp_BAR_ADDR_RANGECHECK_LOW = BAR_ADDR_RANGECHECK_LOW;
         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_ADDR_ALIGNMENT_ERROR);
         return l_rc;
     }
@@ -169,7 +172,7 @@ p8_pba_bar_config (const Target&  i_target,
     // The combination of both the size and BAR being zero is legal.
     if ( (i_pba_bar_size == 0x0ull) && (i_pba_bar_size != 0x0ull) )
     {
-        FAPI_ERR("ERROR: Size must be 1MB or greater");
+        FAPI_ERR("ERROR: Size must be 1MB or greater : i_pba_bar_size=%08llX", i_pba_bar_size);
         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_BAR_SIZE_INVALID);
         return l_rc;
     }

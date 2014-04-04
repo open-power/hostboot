@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,9 +21,10 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_volt.xml,v 1.1 2013/06/19 18:28:37 bellows Exp $ -->
+
+<!-- $Id: memory_mss_volt.xml,v 1.2 2014/03/06 00:11:14 jdsloat Exp $ -->
 <!-- For file ../../ipl/fapi/mss_volt.C -->
-<!-- // *! OWNER NAME :   Jeff Sabrowski (jsabrow@us.ibm.com) -->
+<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
 <!-- // *! BACKUP NAME : -->
 
 <!-- Original Source for RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE memory_errors.xml -->
@@ -31,27 +32,53 @@
     <rc>RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE</rc>
     <description>Unsupported DIMM type found.  All dimms must be DDR3 or DDR4</description>
     <ffdc>DEVICE_TYPE</ffdc>
-</hwpError>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- Original Source for RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED</rc>
     <description>Mixing of DDR3 and DDR4 not supported.</description>
-</hwpError>
+    <ffdc>DEVICE_TYPE</ffdc>
+    <callout>
+      <target>DIMM_DDR4_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_DDR4_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- Original Source for RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
     <description>One or more DIMMs do not support required voltage for DDR type.</description>
-</hwpError>
+    <ffdc>DIMM_VOLTAGE</ffdc>
+    <callout>
+      <target>DIMM_UV_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_UV_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- Original Source for RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION</rc>
     <description>One or more DIMMs classified non-functional has a tolerated voltage below selected voltage.</description>
- <!-- Deconfigure MASTER_CHIP -->
- <deconfigure><target>MASTER_CHIP</target></deconfigure>
-</hwpError>
-
+    <ffdc>DIMM_VOLTAGE</ffdc>
+ <!-- Deconfigure DIMM or Centaur -->
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 </hwpErrors>
+

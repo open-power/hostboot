@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_ex_cleanup.H,v 1.3 2012/11/27 23:11:35 belldi Exp $
+// $Id: proc_mpipl_ex_cleanup.H,v 1.4 2014/03/03 00:42:49 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_ex_cleanup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,7 +57,7 @@ extern "C"
   /**
   * @brief Undo step that prepared fast-winkled cores for scanning and set up deep winkle mode
   *
-  * @param[in] (1) 'i_target' Reference to chip target
+  * @param[in] (1) 'i_target' Reference to processor chip target
   *
   * @return ReturnCode
   *

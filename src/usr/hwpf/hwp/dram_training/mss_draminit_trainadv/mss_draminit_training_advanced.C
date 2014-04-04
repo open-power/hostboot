@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.42 2014/01/23 17:09:52 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.43 2014/03/10 16:30:18 jdsloat Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -82,11 +82,12 @@
 //  1.40   | abhijsau |17-DEC-13| added creation and deletion of schmoo object  
 //  1.41   | abhijsau |16-JAN-14| removed EFF_DIMM_TYPE attribute
 //  1.42   | mjjones  |17-Jan-14| Fixed layout and error handling for RAS Review
+//  1.43   | jdsloat  |10-MAR-14| Edited comments
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
 // DQ & DQS VREF (rd_vref), RCV_IMP shmoo would call rd_eye for margin calculation
-// Internal Vref controlled by this function & external vref platform to provide function we return value
+// Internal Vref controlled by this function & external vref 
 
 // Not supported
 // DDR4, DIMM Types

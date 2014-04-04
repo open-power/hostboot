@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_power_cleanup.C,v 1.10 2014/03/25 18:06:03 jdsloat Exp $
+// $Id: mss_power_cleanup.C,v 1.7 2014/02/19 13:41:33 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_power_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -29,7 +29,7 @@
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_power_cleanup
 // *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Jacob Sloat      Email: jdsloat@us.ibm.com
+// *! OWNER NAME  : Mark Bellows      Email: bellows@us.ibm.com
 // *! BACKUP NAME : Anuwat Saetow     Email: asaetow@us.ibm.com
 
 // *! ADDITIONAL COMMENTS :
@@ -49,9 +49,6 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.10  | jdsloat  |25-MAR-14| ENUM_ATTR_MSS_INIT_STATE_COLD became fapi::ENUM_ATTR_MSS_INIT_STATE_COLD
-//   1.9   | jdsloat  |25-MAR-14| Fixed 1.8
-//   1.8   | jdsloat  |25-MAR-14| Added a check to break procedure if HW non-functional
 //   1.7   | bellows  |19-FEB-14| RAS Review Updates Pass 2
 //   1.6   |bellows   |17-FEB-14| RAS review updates
 //   1.5   |bellows   |05-FEB-14| Making this procedure work on really non-functional centaurs
@@ -103,7 +100,6 @@ extern "C"
   {
     fapi::ReturnCode rc,rc0,rc1,rcf,rcc;
     uint8_t centaur_functional=1, mba0_functional=1, mba1_functional=1;
-    uint8_t cen_init_state = 0;
 
     FAPI_INF("Running mss_power_cleanupon %s\n", i_target_centaur.toEcmdString());
 
@@ -117,14 +113,6 @@ extern "C"
 
       rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_mba1, mba1_functional);
       if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_FUNCTIONAL"); break; }
-
-      rc = FAPI_ATTR_GET(ATTR_MSS_INIT_STATE, &i_target_centaur, cen_init_state);
-      if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_INIT_STATE"); break; }
-
-      if (cen_init_state == fapi::ENUM_ATTR_MSS_INIT_STATE_COLD)
-      {
-	FAPI_ERR("Centaur clocks not on.  Cannot execute mss_power_cleanup on this target: %s", i_target_centaur.toEcmdString()); break;
-      } 
 
       rc0 = mss_power_cleanup_mba_part1(i_target_centaur, i_target_mba0);
       rc1 = mss_power_cleanup_mba_part1(i_target_centaur, i_target_mba1);

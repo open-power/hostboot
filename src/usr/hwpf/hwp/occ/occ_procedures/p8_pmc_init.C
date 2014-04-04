@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_init.C,v 1.37 2013/11/07 14:00:09 stillgs Exp $
+// $Id: p8_pmc_init.C,v 1.41 2014/04/03 20:29:13 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -28,22 +28,15 @@
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Pradeep CN         Email: pradeepcn@in.ibm.com
+// *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!
-// *! General Description:
-// *!
-// *!   The purpose of this procedure is to ......
-// *!
-// *!   High-level procedure flow:
-// *!     o Do thing 1
-// *!     o Do thing 2
-// *!     o Do thing 3
-// *!     o Check if all went well
-// *!     o   If so celebrate
-// *!     o   Else write logs, set bad return code
-// *!
-// *! Procedure Prereq:
-// *!   o System clocks are running
-// *!
+/// \verbatim
+/// High-level procedure flow:
+///
+///     T
+///
+///  \endverbatim
+///  buildfapiprcd -e "../../xml/error_info/p8_pmc_errors.xml,../../xml/error_info/p8_pstate_registers.xml" p8_pmc_init.C
 //------------------------------------------------------------------------------
 
 
@@ -60,6 +53,9 @@
 #define PSTATE_HALT_POLL_COUNT 256
 #define PORE_REQ_POLL_COUNT 256
 
+#define MASTER_SIDE 0
+#define SLAVE_SIDE  1
+
 extern "C" {
 
 using namespace fapi;
@@ -67,6 +63,28 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------
+
+fapi::ReturnCode
+p8_pmc_poll_pstate_halt(    const fapi::Target &    i_target,
+                            const uint8_t           i_side);
+
+fapi::ReturnCode
+p8_pmc_poll_idle_halt(      const fapi::Target &    i_target,
+                            const uint8_t           i_side);
+
+fapi::ReturnCode
+p8_pmc_poll_interchip_halt( const fapi::Target&  i_target,
+                            const uint8_t        i_side,
+                            bool                 i_is_MasterPMC,
+                            const fapi::Target&  i_dcm_target);
+
+fapi::ReturnCode
+p8_pmc_poll_spivid_halt(    const fapi::Target& i_target,
+                            const uint8_t       i_side);
+
+fapi::ReturnCode
+p8_pmc_poll_o2p_halt(       const fapi::Target& i_target,
+                            const uint8_t       i_side);
 
 // ----------------------------------------------------------------------
 /**
@@ -200,41 +218,39 @@ pmc_config_spivid_settings(const Target& l_pTarget)
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-pmc_reset_function( const fapi::Target& i_target1 , 
-                    const fapi::Target& i_target2, 
+pmc_reset_function( const fapi::Target& i_target1 ,
+                    const fapi::Target& i_target2,
                     uint32_t i_mode)
 {
 
     fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
+    ecmdDataBufferBase pmcstatus(64);
+    ecmdDataBufferBase porr(64);
     ecmdDataBufferBase pmcmode_master(64);
     ecmdDataBufferBase pmcmode_slave(64);
-    //  ecmdDataBufferBase mask(64);
-    uint32_t e_rc = 0;
-    uint32_t count = 0 ;
-    bool is_stopped = false ;
-    bool is_spivid_stopped = false ;
-    bool is_not_ongoing = false ;
 
-    //  bool fw_pstate_mode = false ;
-    bool is_pstate_error_stopped = false ;
-    bool is_intchp_error_stopped= false ;
+    uint32_t e_rc = 0;
+//    uint32_t count = 0 ;
+//    bool is_stopped = false ;
+//    bool is_pstate_error_stopped = false ;
+//    bool is_spivid_stopped = false ;
+//    bool is_intchp_error_stopped= false ;
     bool master_enable_pstate_voltage_changes = false ;
     bool master_is_MasterPMC= false ;
-    bool master_enable_fw_pstate_mode= false ;
+//    bool master_enable_fw_pstate_mode= false ;
     bool master_is_enable_interchip_interface= false ;
 
 
-    bool slave_enable_pstate_voltage_changes = false ;
+//    bool slave_enable_pstate_voltage_changes = false ;
     bool slave_is_MasterPMC= false ;
-    bool slave_enable_fw_pstate_mode= false ;
+//    bool slave_enable_fw_pstate_mode= false ;
     bool slave_is_enable_interchip_interface= false ;
 
 
     fapi::Target master_target;
     fapi::Target slave_target;
     uint8_t attr_pm_spivid_port_enable1 = 0;
-//    uint8_t attr_pm_spivid_port_enable2 = 0;
     uint8_t attr_dcm_installed_1 = 0;
     uint8_t attr_dcm_installed_2 = 0;
     uint64_t any_error = 0;
@@ -263,8 +279,12 @@ pmc_reset_function( const fapi::Target& i_target1 ,
             // if not NULL, exit with config error
             if (i_target2.getType() != TARGET_TYPE_NONE  )
             {
-                FAPI_ERR ("config error : target2 is not null for target1 dcm not installed case");
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
+                FAPI_ERR ("Config error : target2 is not null for target1 SCM case");
+                const fapi::Target& MASTER_TARGET = i_target1;
+                const fapi::Target& SLAVE_TARGET = i_target2;
+                const uint8_t & DCM_INSTALLED_1 =  attr_dcm_installed_1;
+                const uint8_t & DCM_INSTALLED_2 =  attr_dcm_installed_2;
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_SCM_INSTALL_ERROR);
                 break;
             }
         }
@@ -292,7 +312,14 @@ pmc_reset_function( const fapi::Target& i_target1 ,
 
                 if (attr_dcm_installed_2 != 1)
                 {
-                    FAPI_ERR ("config error:  DCM_INSTALLED target2 does not match target1");
+                    FAPI_ERR ("Config error:  DCM_INSTALLED target2 does not match target1\n" \
+                              "   target1: %08x attr:%02x, target2:%08x attr:%02x",
+                              i_target1.getType(), attr_dcm_installed_1,
+                              i_target2.getType(), attr_dcm_installed_2);
+                    const fapi::Target& MASTER_TARGET = i_target1;
+                    const fapi::Target& SLAVE_TARGET = i_target2;
+                    const uint8_t & DCM_INSTALLED_1 =  attr_dcm_installed_1;
+                    const uint8_t & DCM_INSTALLED_2 =  attr_dcm_installed_2;
                     FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
                     break;
                 }
@@ -381,7 +408,7 @@ pmc_reset_function( const fapi::Target& i_target1 ,
 
         if (any_error)
         {
-           FAPI_DBG(" PMC_FIR has error(s) active.  Continuing though  0x%16llX ", data.getDoubleWord(0));
+           FAPI_INF(" PMC_FIR has error(s) active.  Continuing though  0x%16llX ", data.getDoubleWord(0));
         }
 
         e_rc = data.flushTo0();
@@ -535,7 +562,6 @@ pmc_reset_function( const fapi::Target& i_target1 ,
             }
         }
 
-
         ////////////////////////////////////////////////////////////////////////////
         // Issue halt to Pstate Master FSM on master_chiptarget
         // Issue halt to Pstate Master FSM on slave_chiptarget
@@ -576,11 +602,12 @@ pmc_reset_function( const fapi::Target& i_target1 ,
              break;
         }
 
-        master_is_MasterPMC = data.isBitSet(6) & data.isBitSet(7) ;
-        master_enable_pstate_voltage_changes = data.isBitSet(3) ;
-        master_enable_fw_pstate_mode = data.isBitSet(2) ;
-        master_is_enable_interchip_interface = data.isBitSet(6) ;
+        master_is_MasterPMC = pmcmode_master.isBitSet(6) && pmcmode_master.isBitSet(7) ;
+        master_enable_pstate_voltage_changes = pmcmode_master.isBitSet(3) ;
+//        master_enable_fw_pstate_mode = pmcmode_master.isBitSet(2) ;
+        master_is_enable_interchip_interface = pmcmode_master.isBitSet(6) ;
 
+        // Resave the updated PMC Mode reg
         pmcmode_master = data;
 
         // ******************************************************
@@ -590,13 +617,12 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         if (dcm)
         {
             FAPI_INF("Halt Pstates and Idles on Slave");
-            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , pmcmode_master );
             if (rc)
             {
               FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
               break;
             }
-
 
             e_rc |= data.setBit(05);
             e_rc |= data.setBit(14);
@@ -614,51 +640,14 @@ pmc_reset_function( const fapi::Target& i_target1 ,
                  break;
             }
 
-            slave_is_MasterPMC = data.isBitSet(6) & data.isBitSet(7) ;
-            slave_enable_pstate_voltage_changes = data.isBitSet(3) ;
-            slave_enable_fw_pstate_mode = data.isBitSet(2) ;
-            slave_is_enable_interchip_interface = data.isBitSet(6) ;
+            slave_is_MasterPMC = pmcmode_slave.isBitSet(6) && pmcmode_slave.isBitSet(7) ;
+//            slave_enable_pstate_voltage_changes = pmcmode_slave.isBitSet(3) ;
+//            slave_enable_fw_pstate_mode = pmcmode_slave.isBitSet(2) ;
+            slave_is_enable_interchip_interface = pmcmode_slave.isBitSet(6) ;
 
+            // Resave the updated PMC Mode reg
             pmcmode_slave = data;
 
-            // Check with Greg about return
-            // TODO : if ATTR_DCM_INSTALLED = 1 chip level attribute
-            /*
-            if (master_is_MasterPMC == 0)
-            {
-                FAPI_ERR(" MasterPMC bit of Master PMC is not set");
-                const uint64_t& MASTERPMCMODE = pmcmode_master.getDoubleWord(0);
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_MASTER_CONFIG_ERROR);
-                break;
-            }
-
-            if (slave_is_MasterPMC == 1)
-            {
-                FAPI_ERR(" MasterPMC bit of Slave PMC is set");
-                const uint64_t& SLAVEPMCMODE = pmcmode_slave.getDoubleWord(0);
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_SLAVE_CONFIG_ERROR);
-                break;
-            }
-
-
-            if ((master_is_enable_interchip_interface ==1) && (slave_is_enable_interchip_interface == 0))
-            {
-                FAPI_ERR (" Configuration Error : Master is enabled with interchip interface but slave is not ");
-                const uint64_t& MASTERPMCMODE = pmcmode_master.getDoubleWord(0);
-                const uint64_t& SLAVEPMCMODE = pmcmode_slave.getDoubleWord(0);
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_INTERCHIP_CONFIG_ERROR);
-                break;
-            }
-
-            if ( (master_enable_fw_pstate_mode == 1)  &&  (slave_enable_fw_pstate_mode == 0))
-            {
-              FAPI_ERR (" Configuration Error : Master is enabled with FW pstate mode but slave is not ");
-              const uint64_t& MASTERPMCMODE = pmcmode_master.getDoubleWord(0);
-              const uint64_t& SLAVEPMCMODE = pmcmode_slave.getDoubleWord(0);
-              FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_INTERCHIP_CONFIG_ERROR);
-              break;
-            }
-            */
         }
 
 
@@ -698,235 +687,31 @@ pmc_reset_function( const fapi::Target& i_target1 ,
             FAPI_INF("Halt interchip interface on Master");
             if (master_is_enable_interchip_interface == 1)
             {
-
-                rc = fapiGetScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                rc = p8_pmc_poll_interchip_halt(master_target, MASTER_SIDE, master_is_MasterPMC, slave_target );
                 if (rc)
                 {
-                    FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    FAPI_ERR("p8_pmc_poll_interchip_halt detected a failure.");
                     break;
                 }
-
-                e_rc = data.setBit(01);
-                if (e_rc)
-                {
-                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master during reset");
-                    rc.setEcmdError(e_rc);
-                    break;
-                }
-
-
-                rc = fapiPutScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
-                    break;
-                }
-
-                //  Poll for interchip interface to stop
-                for (count = 0 , is_stopped = 0 ; count <= INTERCHIP_HALT_POLL_COUNT && is_stopped == 0;  count++)
-                {
-                    //    Interchip_Wait1: Read PMC_STATUS_REG
-                    //       is_pstate_error_stopped =  pstate_processing_is_suspended ||
-                    //                                  gpsa_bdcst_error ||
-                    //                                  gpsa_vchg_error ||
-                    //                                  gpsa_timeout_error ||
-                    //                                  pstate_interchip_error
-
-                    rc = fapiGetScom(master_target, PMC_STATUS_REG_0x00062009 , data );
-                    if (rc)
-                    {
-                        FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
-                        break;
-                    }
-
-                    is_pstate_error_stopped =   data.isBitSet(0) |
-                                                data.isBitSet(1) |
-                                                data.isBitSet(5) |
-                                                data.isBitSet(6) |
-                                                data.isBitSet(11);
-
-                    //    Interchip_Wait2: Read PMC_INTCHP_STATUS_REG
-                    //       is_intchp_error_stopped =  interchip_ecc_ue_err ||
-                    //                                  interchip_fsm_err ||
-                    //                                  (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC
-                    rc = fapiGetScom(master_target, PMC_INTCHP_STATUS_REG_0x00062013 , data );
-                    if (rc)
-                    {
-                        FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed.");
-                        break;
-                    }
-                    is_intchp_error_stopped =   data.isBitSet(1) |
-                                                data.isBitSet(7) |
-                                                (~( data.isBitClear(16,4) &&  master_is_MasterPMC)) ;
-
-                    //    is_stopped = (interchip_ga_ongoing == 0) ||
-                    //                  is_pstate_error_stopped ||
-                    //                  is_intchp_error_stopped ;
-                    is_stopped = data.isBitClear(0)  || is_pstate_error_stopped || is_intchp_error_stopped;
-                    FAPI_DBG("polling interchip ongoing :  ... ");
-
-                    //       If !is_stopped Then -->Interchip_Wait1  (Wait limit is parm TD_Interchip_HaltWait_max=260)
-
-                } // end_for
-                // Error check
-                if (!rc.ok())
-                {
-                    break;
-                }
-
-                if (count > INTERCHIP_HALT_POLL_COUNT)
-                {
-                    FAPI_ERR("Timed out in polling interchip ongoing : Reset_suspicious    ... ");
-                    //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-                    //       break;
-                }
-
-                //    InterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if
-
-                rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
-                    break;
-                }
-
-                e_rc = data.setBit(15);
-                if (e_rc)
-                {
-                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Master during reset");
-                    rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                rc = fapiPutScom(master_target, PMC_MODE_REG_0x00062000 , data );
-                if (rc) {
-                  FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed."); break;
-                }
-
-            } // end if
+            }
 
             // ******************************************************
             // Slave
             // ******************************************************
             FAPI_INF("Halt interchip interface on Slave");
-
             if (slave_is_enable_interchip_interface ==1)
             {
-
-                rc = fapiGetScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                rc = p8_pmc_poll_interchip_halt(slave_target, SLAVE_SIDE, slave_is_MasterPMC, master_target);
                 if (rc)
                 {
-                    FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    FAPI_ERR("p8_pmc_poll_interchip_halt detected a failure.");
                     break;
                 }
-
-                e_rc = data.setBit(01);
-                if (e_rc)
-                {
-                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Slave during reset");
-                    rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                rc = fapiPutScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
-                    break;
-                }
-
-                 //  Poll for interchip interface to stop
-                for (count = 0 , is_stopped = 0 ; count <= INTERCHIP_HALT_POLL_COUNT && is_stopped == 0;  count++)
-                {
-                    //    Interchip_Wait1: Read PMC_STATUS_REG
-                    //       is_pstate_error_stopped =  pstate_processing_is_suspended ||
-                    //                                  gpsa_bdcst_error ||
-                    //                                  gpsa_vchg_error ||
-                    //                                  gpsa_timeout_error ||
-                    //                                  pstate_interchip_error
-
-                    rc = fapiGetScom(slave_target, PMC_STATUS_REG_0x00062009 , data );
-                    if (rc)
-                    {
-                        FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
-                        break;
-                    }
-
-                    is_pstate_error_stopped =   data.isBitSet(0) |
-                                                data.isBitSet(1) |
-                                                data.isBitSet(5) |
-                                                data.isBitSet(6) |
-                                                data.isBitSet(11) ;
-
-
-                    //    Interchip_Wait2: Read PMC_INTCHP_STATUS_REG
-                    //       is_intchp_error_stopped =  interchip_ecc_ue_err ||
-                    //                                  interchip_fsm_err ||
-                    //                                  (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC
-
-                    rc = fapiGetScom(slave_target, PMC_INTCHP_STATUS_REG_0x00062013 , data );
-                    if (rc)
-                    {
-                        FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed.");
-                        break;
-                    }
-                    is_intchp_error_stopped =   data.isBitSet(1) |
-                                                data.isBitSet(7) |
-                                                (~( data.isBitClear(16,4) &&  slave_is_MasterPMC));
-
-                    //    is_stopped = (interchip_ga_ongoing == 0) ||
-                    //                  is_pstate_error_stopped ||
-                    //                  is_intchp_error_stopped ;
-                    is_stopped =    data.isBitClear(0) ||
-                                    is_pstate_error_stopped ||
-                                    is_intchp_error_stopped;
-                    FAPI_DBG("polling interchip ongoing :     ... ");
-
-                } // end_for
-
-                // Error check
-                if (!rc.ok())
-                {
-                    break;
-                }
-
-                // Timeout check
-                if (count > INTERCHIP_HALT_POLL_COUNT)
-                {
-                    FAPI_ERR("Timed out in polling interchip ongoing : Reset_suspicious    ... ");
-                    //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-                    //       break;
-                }
-
-
-                //    InterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if
-                rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
-                    break;
-                }
-
-                e_rc = data.setBit(15);
-                if (e_rc)
-                {
-                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Slave during reset");
-                    rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
-                    break;
-                }
-
-            } // end if
+            }
         } // end dcm
 
         ////////////////////////////////////////////////////////////////////////////
-        // If voltage changes are enable, issue halt to SPIVID controller on FSM on master_chiptarget
+        // If voltage changes are enabled, issue halt to SPIVID controller on FSM on master_chiptarget
         // Poll for SPIVID FSM to halt on master_chiptarget
         // If poll not complete, flag "reset_suspicious" and save the poll point; continue
         //
@@ -934,70 +719,20 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         //         HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
         //    Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
         //       is_spivid_error = spivid_retry_timeout || spivid_fsm_err
-        //       if spivid_ongoing && !is_spivid_error Then -->Spivid_HaltWait   (Wait limit is parm TD_Spivid_HaltWait_max=100)
+        //       if spivid_ongoing && !is_spivid_error Then -->Spivid_HaltWait
         //       else -->MPS_HaltWait
         ////////////////////////////////////////////////////////////////////////////
 
         if (master_enable_pstate_voltage_changes==1)
         {
             FAPI_INF("Halt SPIVID controller on Master");
-
-            //  HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
-            rc = fapiGetScom(master_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
+            rc = p8_pmc_poll_spivid_halt(master_target, MASTER_SIDE);
             if (rc)
             {
-                FAPI_ERR("fapiGetScom(PMC_SPIV_COMMAND_REG_0x00062047) failed.");
+                FAPI_ERR("p8_pmc_poll_spivid_halt detected a failure.");
                 break;
             }
-
-            e_rc = data.setBit(0);
-            if (e_rc)
-            {
-                FAPI_ERR("ecmdDataBufferBase error setting up PMC_SPIV_COMMAND_REG_0x00062047 on Master during reset");
-                rc.setEcmdError(e_rc);
-                break;
-            }
-
-            rc = fapiPutScom(master_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
-            if (rc)
-            {
-                FAPI_ERR("fapiPutScom(PMC_SPIV_COMMAND_REG_0x00062047) failed.");
-                break;
-            }
-
-            //    Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
-            for (count = 0 , is_spivid_stopped=0; count <= VOLTAGE_CHANGE_POLL_COUNT  && is_spivid_stopped==0  ; count++)
-            {
-                rc = fapiGetScom(master_target, PMC_SPIV_STATUS_REG_0x00062046 , data );
-                if (rc)
-                {
-                  FAPI_ERR("fapiGetScom(PMC_SPIV_STATUS_REG_0x00062046) failed.");
-                  break;
-                }
-                is_spivid_stopped =   data.isBitClear(0) |
-                                      data.isBitSet(1)   |
-                                      data.isBitSet(2)   |
-                                      data.isBitSet(3)   |
-                                      data.isBitSet(4) ;
-                FAPI_DBG("Polling spivid ongoing on Masster ... ");
-            } // end for
-
-            // Error check
-            if (!rc.ok())
-            {
-                break;
-            }
-
-            // Timeout check
-            if (count > VOLTAGE_CHANGE_POLL_COUNT)
-            {
-                FAPI_ERR("Timed out in polling SPIVID ongoing  : Reset_suspicious    ... ");
-                // \todo
-                //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-                //       break;
-            }
-        } // end if
-
+        }
 
         ////////////////////////////////////////////////////////////////////////////
         // Poll for Pstate Master FSM being stopped on master_chiptarget
@@ -1020,46 +755,12 @@ pmc_reset_function( const fapi::Target& i_target1 ,
 
          FAPI_INF("Check for Pstate FSM being stopped on Master");
 
-        // ******************************************************
-        // Master
-        // ******************************************************
-        for (count = 0, is_stopped = 0; count <= PSTATE_HALT_POLL_COUNT && is_stopped == 0 ; count++)
-        {
-            rc = fapiGetScom(master_target, PMC_STATUS_REG_0x00062009 , data );
-            if (rc)
-            {
-              FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
-              break;
-            }
-
-
-            if (master_enable_fw_pstate_mode)
-            {
-              is_not_ongoing = (master_enable_pstate_voltage_changes == 0 ||
-                                data.isBitClear(8)                          ) &&
-                                data.isBitClear(9);
-            }
-            else
-            {
-              is_not_ongoing = (master_enable_pstate_voltage_changes==0 ||
-                                data.isBitClear(7)                        );
-            }
-
-            is_stopped = (  data.isBitSet(11) |
-                            data.isBitSet(12) |
-                            data.isBitSet(1)  |
-                            data.isBitSet(5)  |
-                            data.isBitSet(6)) |
-                            is_not_ongoing ;
-            FAPI_DBG("Polling voltage change ongoing on Master ... ");
-        } // end for
-
-        if (count > PSTATE_HALT_POLL_COUNT )
-        {
-           FAPI_ERR("Timed out in polling voltage change ongoing : Reset_suspicious   ... ");
-           //    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-           //    break;
-        }
+         rc = p8_pmc_poll_pstate_halt(master_target, MASTER_SIDE);
+         if (rc)
+         {
+             FAPI_ERR("p8_pmc_poll_pstate_halt error detected for PMC Master");
+             break;
+         }
 
         // ******************************************************
         // Slave
@@ -1068,50 +769,13 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         {
             FAPI_INF("Check for Pstate FSM being stopped on Slave");
 
-            for (count = 0 , is_stopped = 0 ; count <= PSTATE_HALT_POLL_COUNT && is_stopped == 0 ; count++)
+            rc = p8_pmc_poll_pstate_halt(master_target, SLAVE_SIDE);
+            if (rc)
             {
-
-                rc = fapiGetScom(slave_target, PMC_STATUS_REG_0x00062009 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
-                    break;
-                }
-
-                if (slave_enable_fw_pstate_mode)
-                {
-                    is_not_ongoing = (  slave_enable_pstate_voltage_changes == 0 ||
-                                        data.isBitClear(8)                         ) &&
-                                        data.isBitClear(9);
-                }
-                else
-                {
-                    is_not_ongoing = (  slave_enable_pstate_voltage_changes == 0 ||
-                                        data.isBitClear(7)                         );
-                }
-
-                is_stopped = (  data.isBitSet(11) |
-                                data.isBitSet(12) |
-                                data.isBitSet(1)  |
-                                data.isBitSet(5)  |
-                                data.isBitSet(6)) |
-                                is_not_ongoing ;
-                FAPI_DBG("polling voltage change ongoing on Slave ...");
-            } // end for
-
-            // Error check
-            if (!rc.ok())
-            {
+                FAPI_ERR("p8_pmc_poll_pstate_halt error detected for PMC Slave");
                 break;
             }
 
-            // Timeout check
-            if (count > PSTATE_HALT_POLL_COUNT )
-            {
-                FAPI_ERR("Timed out in polling voltage change ongoing : Reset_suspicious   ... ");
-                //    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-                //    break;
-            }
         } // dcm
 
 
@@ -1146,83 +810,12 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         // ******************************************************
 
         FAPI_INF("Poll for O2P bridge being complete on Master");
-        rc = fapiGetScom(master_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
+
+        rc = p8_pmc_poll_o2p_halt(master_target, MASTER_SIDE);
         if (rc)
         {
-            FAPI_ERR("fapiGetScom(PMC_O2S_COMMAND_REG__0x00062057) failed.");
+            FAPI_ERR("p8_pmc_poll_o2p_halt error detected for PMC Master");
             break;
-        }
-
-        e_rc = data.setBit(00);  if(e_rc){rc.setEcmdError(e_rc); break; }
-
-        rc = fapiPutScom(master_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
-        if (rc)
-        {
-            FAPI_ERR("fapiPutScom(PMC_O2S_COMMAND_REG__0x00062057) failed.");
-            break;
-        }
-
-        // Poll for O2S to be stopped
-        for (count = 0 , is_stopped = 0 ; count <= O2S_POLL_COUNT && is_stopped == 0 ; count++)
-        {
-            rc = fapiGetScom(master_target, PMC_O2S_STATUS_REG_0x00062056 , data );
-            if (rc)
-            {
-                FAPI_ERR("fapiGetScom(PMC_O2S_STATUS_REG__0x00062056) failed.");
-                break;
-            }
-
-            is_stopped = (  data.isBitClear(0) |
-                            data.isBitSet(4)   |
-                            data.isBitSet(5)   |
-                            data.isBitSet(7));
-            FAPI_DBG("Polling O2S ongoing . :   .. ");
-        }
-
-        // Error check
-        if (!rc.ok())
-        {
-            break;
-        }
-
-        // Timeout check
-        if (count > O2S_POLL_COUNT)
-        {
-            FAPI_ERR("Timed out in polling O2S ongoing . : Reset_suspicious  .. ");
-            //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-            //       break;
-        }
-
-        // Poll for O2P to be stopped
-        for (count = 0 , is_stopped = 0 ; count <= O2P_POLL_COUNT && is_stopped == 0 ; count++)
-        {
-            rc = fapiGetScom(master_target, PMC_O2P_CTRL_STATUS_REG_0x00062061 , data );
-            if (rc)
-            {
-                FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
-                break;
-            }
-
-            is_stopped = (  data.isBitClear(0) |
-                            data.isBitSet(4)   |
-                            data.isBitSet(5)   |
-                            data.isBitSet(6)   |
-                            data.isBitSet(7));
-            FAPI_DBG("Polling O2P ongoing . :   .. ");
-        }
-
-        // Error check
-        if (!rc.ok())
-        {
-            break;
-        }
-
-        // Timeout check
-        if (count > O2P_POLL_COUNT)
-        {
-            FAPI_ERR("Timed out in polling O2P ongoing . : Reset_suspicious .. ");
-            //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-            //       break;
         }
 
         // ******************************************************
@@ -1233,45 +826,20 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         {
             FAPI_INF("Poll for O2P bridge being complete on Slave");
 
-            for (count = 0 , is_stopped = 0 ; count <= O2P_POLL_COUNT  && is_stopped == 0 ; count++)
+            rc = p8_pmc_poll_o2p_halt(slave_target, SLAVE_SIDE);
+            if (rc)
             {
-                rc = fapiGetScom(slave_target, PMC_O2P_CTRL_STATUS_REG_0x00062061 , data );
-                if (rc)
-                {
-                     FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
-                     break;
-                }
-
-                is_stopped = (   data.isBitClear(0) |
-                                 data.isBitSet(4)   |
-                                 data.isBitSet(5)   |
-                                 data.isBitSet(6)   |
-                                 data.isBitSet(7));
-                FAPI_DBG("Polling O2P ongoing . :   .. ");
-            }
-
-            // Error check
-            if (!rc.ok())
-            {
+                FAPI_ERR("p8_pmc_poll_o2p_halt error detected for PMC Slave");
                 break;
             }
-
-            // Timeout check
-            if (count > O2P_POLL_COUNT)
-            {
-                FAPI_ERR("Timed out in polling O2P ongoing . : Reset_suspicious .. ");
-                //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-                //       break;
-            }
-        } // dcm
+        }
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //GREG: Check with Greg whether this is needed for both master and slave?
         // 8) Poll for Idle FSM being quiesced (timeout: 500ms to cover the case of having all 4 types of Deep Idle
         // transitions in flight)
         // Note: Previously issued special wake-ups could have triggered PORE activity through the Idle FSM (and
-        // the related pending queues). if poll timeout, mark the error point
+        // the related pending queues). if poll timeout, FAIL THE OCC RESET AS SLW RECOVER IS COMPROMISED
         //
         // Note on Idle/PORE-SLW state (prior to reset)
         // Given that special wake-up occurred before this point, any errors that resulted from that special wake-up
@@ -1282,83 +850,39 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         // ******************************************************
         // Master
         // ******************************************************
-        
+
         FAPI_INF("Poll for Idle FSM being quiesced on Master");
-        for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT  && is_stopped == 0 ; count++)
-        {
-            rc = fapiGetScom(master_target, PMC_PORE_REQ_REG0_0x0006208E , data );
-            if (rc)
-            {
-                FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
-                break;
-            }
 
-            is_stopped = (data.isBitClear(20)) ;
-            FAPI_DBG("Polling pore_busy bit ...");
-        }
-
-        // Error check
-        if (!rc.ok())
+        rc = p8_pmc_poll_idle_halt(master_target, MASTER_SIDE);
+        if (rc)
         {
+            FAPI_ERR("p8_pmc_poll_idle_halt error detected for PMC Master");
             break;
         }
 
-        //  Timeout check
-        if (count > PORE_REQ_POLL_COUNT)
-        {
-            FAPI_ERR("Timed out in polling pore_busy bit  . : Reset_suspicious .. ");
-            //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-            //       break;
-        }
 
         // ******************************************************
         // Slave
         // ******************************************************
-        
+
         if (dcm)
         {
             FAPI_INF("Poll for Idle FSM being quiesced on Slave");
-            for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT  && is_stopped == 0 ; count++)
+            rc = p8_pmc_poll_idle_halt(slave_target, SLAVE_SIDE);
+            if (rc)
             {
-                rc = fapiGetScom(slave_target, PMC_PORE_REQ_REG0_0x0006208E , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
-                    break;
-                }
-
-                is_stopped = (data.isBitClear(20)) ;
-                FAPI_DBG("Polling pore_busy bit ...");
-            }
-
-            // Error check
-            if (!rc.ok())
-            {
+                FAPI_ERR("p8_pmc_poll_idle_halt error detected for PMC Slave");
                 break;
-            }
-
-            //  Timeout check
-            if (count > PORE_REQ_POLL_COUNT)
-            {
-                FAPI_ERR("Timed out in polling pore_busy bit  . : Reset_suspicious .. ");
-                //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-                //       break;
             }
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        // GREG:
         // Issue interchip interface reset (if enabled) on master_chiptarget
         // PMC_INTCHP_COMMAND_REG.reset (0) = 1
         // PMC_INTCHP_COMMAND_REG.reset (0) = 0
         // Issue interchip interface reset (if enabled) on slave_chiptarget
         // PMC_INTCHP_COMMAND_REG.reset (0) = 1
         // PMC_INTCHP_COMMAND_REG.reset (0) = 0
-
-        // SCOTT:
-        // 9. if enable_interchip_interface==1 and parm InterchipResetIf_AfterHalt
-        //     InterchipResetIf_On: PMC_INTCHP_COMMAND_REG.interchip_reset_if<-1
-        //    InterchipResetIf_Off: PMC_INTCHP_COMMAND_REG.interchip_reset_if<-0
         ///////////////////////////////////////////////////////////////////////////////
 
         // ******************************************************
@@ -1475,7 +999,7 @@ pmc_reset_function( const fapi::Target& i_target1 ,
         // Master
         // ******************************************************
         // RESET_ALL_PMC_REGISTERS
-       
+
         if (i_mode == PM_RESET)
         {
             FAPI_INF("Hard reset detected");
@@ -1535,31 +1059,6 @@ pmc_reset_function( const fapi::Target& i_target1 ,
                     FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
                     break;
                 }
-
-                // \todo remove in deference to init path
-                // Restored only for slave
-                // SAFE_MODE_WITHOUT_SPIVID
-                rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
-                    break;
-                }
-
-                e_rc = data.setBit(13);
-                if (e_rc)
-                {
-                    FAPI_ERR("ecmdDataBufferBase error for PMC_MODE_REG_0x00062000 on Slave reset");
-                    rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
-                    break;
-                }
             }
         }
         else
@@ -1577,12 +1076,13 @@ pmc_reset_function( const fapi::Target& i_target1 ,
 /**
  * pmc_init_function
  *
- * @param[in] i_target1 Primary Chip target:   Murano - chip0; Venice - chip
-
+ * @param[in] i_target Primary Chip target:   Murano - chip0; Venice - chip
+ * @param[in] i_dcm     Boolean to run in DCM or SCM mode
+ *
  * @retval ECMD_SUCCESS
  * @retval ERROR defined in xml
  */
-fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
+fapi::ReturnCode pmc_init_function(const fapi::Target& i_target, bool i_dcm )
 {
     fapi::ReturnCode rc;
     uint32_t        e_rc;
@@ -1638,7 +1138,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_FRAME_SIZE,
                         "ATTR_PM_SPIVID_FRAME_SIZE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_frame_size,
                         default_spivid_frame_size );
 
@@ -1646,7 +1146,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_IN_DELAY_FRAME1,
                         "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_in_delay_frame1,
                         default_spivid_in_delay_frame1 );
 
@@ -1654,7 +1154,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_IN_DELAY_FRAME1,
                         "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_in_delay_frame2,
                         default_spivid_in_delay_frame2 );
 
@@ -1662,7 +1162,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_CLOCK_POLARITY,
                         "ATTR_PM_SPIVID_CLOCK_POLARITY",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_clock_polarity,
                         default_spivid_clock_polarity );
 
@@ -1670,7 +1170,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_CLOCK_PHASE,
                         "ATTR_PM_SPIVID_CLOCK_PHASE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_clock_phase,
                         default_spivid_clock_phase );
 
@@ -1678,7 +1178,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_CRC_GEN_ENABLE,
                         "ATTR_PM_SPIVID_CRC_GEN_ENABLE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_crc_gen_enable,
                         default_spivid_crc_gen_enable );
 
@@ -1686,7 +1186,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_CRC_CHECK_ENABLE,
                         "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_crc_check_enable,
                         default_spivid_crc_check_enable );
 
@@ -1694,7 +1194,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE,
                         "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_majority_vote_enable,
                         default_spivid_majority_vote_enable );
 
@@ -1702,7 +1202,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_MAX_RETRIES,
                         "ATTR_PM_SPIVID_MAX_RETRIES",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_max_retries,
                         default_spivid_max_retries );
 
@@ -1710,7 +1210,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES,
                         "ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_crc_polynomial_enables,
                         default_spivid_crc_polynomial_enables );
 
@@ -1718,7 +1218,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR_DEFAULT(rc,
                         ATTR_PM_SPIVID_PORT_ENABLE,
                         "ATTR_PM_SPIVID_PORT_ENABLE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_port_enable,
                         default_spivid_port_enable );
 
@@ -1726,56 +1226,54 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         GETATTR(        rc,
                         ATTR_PM_SPIVID_CLOCK_DIVIDER,
                         "ATTR_PM_SPIVID_CLOCK_DIVIDER",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_clock_divider);
 
             //----------------------------------------------------------
         GETATTR(        rc,
                         ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
                         "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_interframe_delay_write_status_value);
 
             //----------------------------------------------------------
         GETATTR(        rc,
                         ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
                         "ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE",
-                        &i_target1,
+                        &i_target,
                         attr_pm_spivid_inter_retry_delay_value);
 
-        FAPI_INF("PMC initialization...");
+        FAPI_INF("PMC initialization as %s ...", i_dcm ? "DCM" : "SCM");
 
-        uint8_t o2s_frame_size = attr_pm_spivid_frame_size;
-        uint8_t o2s_in_delay1  = attr_pm_spivid_in_delay_frame1;
-        uint8_t o2s_in_delay2  = attr_pm_spivid_in_delay_frame2;
-        uint8_t o2s_clk_pol    = attr_pm_spivid_clock_polarity;
-        uint8_t o2s_clk_pha    = attr_pm_spivid_clock_phase;
-        uint8_t o2s_port_enable = attr_pm_spivid_port_enable;
-        uint32_t o2s_inter_frame_delay = attr_pm_spivid_interframe_delay_write_status_value;
-        uint8_t o2s_crc_gen_en = attr_pm_spivid_crc_gen_enable;
-        uint8_t o2s_crc_check_en = attr_pm_spivid_crc_check_enable;
-        uint8_t o2s_majority_vote_en = attr_pm_spivid_majority_vote_enable;
-        uint8_t o2s_max_retries = attr_pm_spivid_max_retries;
-        uint8_t o2s_crc_polynomial_enables = attr_pm_spivid_crc_polynomial_enables;
-        uint16_t o2s_clk_divider = attr_pm_spivid_clock_divider;
+        uint8_t     o2s_frame_size = attr_pm_spivid_frame_size;
+        uint8_t     o2s_in_delay1  = attr_pm_spivid_in_delay_frame1;
+        uint8_t     o2s_in_delay2  = attr_pm_spivid_in_delay_frame2;
+        uint8_t     o2s_clk_pol    = attr_pm_spivid_clock_polarity;
+        uint8_t     o2s_clk_pha    = attr_pm_spivid_clock_phase;
+        uint8_t     o2s_port_enable = attr_pm_spivid_port_enable;
+        uint32_t    o2s_inter_frame_delay = attr_pm_spivid_interframe_delay_write_status_value;
+        uint8_t     o2s_crc_gen_en = attr_pm_spivid_crc_gen_enable;
+        uint8_t     o2s_crc_check_en = attr_pm_spivid_crc_check_enable;
+        uint8_t     o2s_majority_vote_en = attr_pm_spivid_majority_vote_enable;
+        uint8_t     o2s_max_retries = attr_pm_spivid_max_retries;
+        uint8_t     o2s_crc_polynomial_enables = attr_pm_spivid_crc_polynomial_enables;
+        uint16_t    o2s_clk_divider = attr_pm_spivid_clock_divider;
         //spivid_freq =  attr_pm_spivid_frequency;
-        uint8_t   o2s_in_count2        = o2s_frame_size ;
-        uint8_t   o2s_out_count2          = 0 ;
-        uint8_t   o2s_bridge_enable = 0x1 ;
-        uint8_t   o2s_nr_of_frames        = 2 ;
-        uint8_t   o2s_in_count1        = 0 ;
-        uint8_t   o2s_out_count1        = o2s_frame_size ;
-        uint8_t   hangpulse_predivider = 1;
-        uint8_t   gpsa_timeout_value   = 100;
-        uint8_t   one=1;
-        uint8_t   zero=0;
-        uint8_t   dcm=0;
-        uint8_t   is_master=0;
-        uint8_t   is_slave=1;
+        uint8_t     o2s_in_count2        = o2s_frame_size ;
+        uint8_t     o2s_out_count2          = 0 ;
+        uint8_t     o2s_bridge_enable = 0x1 ;
+        uint8_t     o2s_nr_of_frames        = 2 ;
+        uint8_t     o2s_in_count1        = 0 ;
+        uint8_t     o2s_out_count1        = o2s_frame_size ;
+        uint8_t     hangpulse_predivider = 1;
+        uint8_t     gpsa_timeout_value   = 100;
+        uint8_t     one=1;
+        uint8_t     zero=0;
+        uint8_t     is_master=0;
+        uint8_t     is_slave=1;
 
-        uint8_t   is_simulation = 0;
-        uint8_t   attr_dcm_installed_1 = 0;
-        uint64_t any_error = 0;
+        uint8_t     is_simulation = 0;
+        uint64_t    any_error = 0;
 
         rc = FAPI_ATTR_GET( ATTR_IS_SIMULATION, NULL, is_simulation);
         if (rc)
@@ -1806,7 +1304,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             break;
         }
 
-        rc = fapiGetScom(i_target1, PMC_LFIR_0x01010840 , data );
+        rc = fapiGetScom(i_target, PMC_LFIR_0x01010840 , data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
@@ -1828,7 +1326,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //     - set PMC_o2s_CTRL_REG0A (24b)
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG0A_0x00062050, data );
+        rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG0A_0x00062050, data );
         if (rc)
         {
              FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG0A) failed.");
@@ -1852,14 +1350,14 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    o2s_in_delay1              => %d ",  o2s_in_delay1);
         FAPI_INF("    o2s_in_count1              => %d ",  o2s_in_count1);
 
-        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG0A_0x00062050, data );
+        rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG0A_0x00062050, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG0A_0x00062050) failed.");
             break;
         }
 
-        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG0A_0x00062040, data );
+        rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG0A_0x00062040, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG0A_0x00062040) failed.");
@@ -1870,7 +1368,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //     - set PMC_O2S_CTRL_REG0B (24b)
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG0B_0x00062051, data );
+        rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG0B_0x00062051, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG0B) failed.");
@@ -1892,14 +1390,14 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    o2s_in_delay2              => %d ",  o2s_in_delay2 );
         FAPI_INF("    o2s_in_count2              => %d ",  o2s_in_count2 );
 
-        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG0B_0x00062051, data );
+        rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG0B_0x00062051, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG0B_0x00062051) failed.");
             break;
         }
 
-        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG0B_0x00062041, data );
+        rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG0B_0x00062041, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG0B_0x00062041) failed.");
@@ -1910,7 +1408,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //     - set PMC_O2S_CTRL_REG1
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+        rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG1_0x00062052, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG1) failed.");
@@ -1941,14 +1439,14 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    o2s_port_enable             => %d ",  o2s_port_enable);
 
 
-        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+        rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG1_0x00062052, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG1_0x00062052) failed.");
              break;
         }
 
-        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG1_0x00062042, data );
+        rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG1_0x00062042, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG1_0x00062042) failed.");
@@ -1959,7 +1457,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //     - set PMC_O2S_CTRL_REG2
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG2_0x00062053, data );
+        rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG2_0x00062053, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG2) failed.");
@@ -1978,14 +1476,14 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("  PMC_O2S_CTRL_REG2_ / PMC_SPIV_CTRL_REG2Configuration");
         FAPI_INF("    o2s_inter_frame_delay       => %d ",  o2s_inter_frame_delay );
 
-        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG2_0x00062053, data );
+        rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG2_0x00062053, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG2_0x00062053) failed.");
             break;
         }
 
-        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG2_0x00062043, data );
+        rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG2_0x00062043, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG2_0x00062043) failed.");
@@ -1996,7 +1494,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //     - set PMC_SPIV_CTRL_REG3
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_SPIV_CTRL_REG3_0x00062044, data );
+        rc = fapiGetScom(i_target, PMC_SPIV_CTRL_REG3_0x00062044, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_SPIV_CTRL_REG3) failed.");
@@ -2016,7 +1514,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    spivid_inter_retry_delay_value => %d ",  attr_pm_spivid_inter_retry_delay_value );
         FAPI_INF("    100ns_div_value                => %d ",  var_100ns_div_value);
 
-        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG3_0x00062044, data );
+        rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG3_0x00062044, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG3_0x00062044) failed.");
@@ -2027,7 +1525,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //     - set PMC_O2S_CTRL_REG4
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG4_0x00062055, data );
+        rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG4_0x00062055, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG4) failed.");
@@ -2054,7 +1552,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    o2s_crc_polynomial_enab  => 0x%x ",  o2s_crc_polynomial_enables );
 
 
-        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG4_0x00062055, data );
+        rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG4_0x00062055, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG4_0x00062055) failed.");
@@ -2065,7 +1563,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //   Program crc polynomials
         //  ******************************************************************
 
-        rc = fapiGetScom(i_target1, PMC_SPIV_CTRL_REG4_0x00062045, data );
+        rc = fapiGetScom(i_target, PMC_SPIV_CTRL_REG4_0x00062045, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_SPIV_CTRL_REG4) failed.");
@@ -2091,7 +1589,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    spiv_max_retries          => %d ",  o2s_max_retries         );
         FAPI_INF("    spiv_crc_polynomial_enab  => 0x%x ",  o2s_crc_polynomial_enables );
 
-        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG4_0x00062045, data );
+        rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG4_0x00062045, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG4_0x00062045) failed.");
@@ -2101,7 +1599,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //  ******************************************************************
         //     - write PMC_PARAMETER_REG0
         //  ******************************************************************
-        rc = fapiGetScom(i_target1, PMC_PARAMETER_REG0_0x00062005, data );
+        rc = fapiGetScom(i_target, PMC_PARAMETER_REG0_0x00062005, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_PARAMETER_REG0_0x00062005) failed.");
@@ -2121,7 +1619,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    hangpulse_predivider       => 0x%x ",  hangpulse_predivider);
         FAPI_INF("    gpsa_timeout_value         => 0x%x ",  gpsa_timeout_value  );
 
-        rc = fapiPutScom(i_target1, PMC_PARAMETER_REG0_0x00062005, data );
+        rc = fapiPutScom(i_target, PMC_PARAMETER_REG0_0x00062005, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_PARAMETER_REG0_0x00062005) failed.");
@@ -2134,7 +1632,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //          00 --- which may be a turbo frequency.
         //  ******************************************************************
         //  Added for SW207759
-        rc = fapiGetScom(i_target1, PMC_RAIL_BOUNDS_0x00062003, data );
+        rc = fapiGetScom(i_target, PMC_RAIL_BOUNDS_0x00062003, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_RAIL_BOUNDS_0x00062003) failed.");
@@ -2154,7 +1652,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("    pmin_rail       => 0x%x ",  data.getByte(0));
         FAPI_INF("    pmax_rail       => 0x%x ",  data.getByte(1));
 
-        rc = fapiPutScom(i_target1, PMC_RAIL_BOUNDS_0x00062003, data );
+        rc = fapiPutScom(i_target, PMC_RAIL_BOUNDS_0x00062003, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_RAIL_BOUNDS_0x00062003) failed.");
@@ -2164,7 +1662,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         //  ******************************************************************
         //     - write PMC_MODE_REG
         //  ******************************************************************
-        rc = fapiGetScom(i_target1, PMC_MODE_REG_0x00062000, data );
+        rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000, data );
         if (rc)
         {
             FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
@@ -2185,7 +1683,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         FAPI_INF("  PMC_MODE_REG Configuration");
         FAPI_INF("    SAFE_MODE_WITHOUT_SPIVID       => %d ",  zero);
 
-        rc = fapiPutScom(i_target1, PMC_MODE_REG_0x00062000, data );
+        rc = fapiPutScom(i_target, PMC_MODE_REG_0x00062000, data );
         if (rc)
         {
             FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
@@ -2196,19 +1694,9 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         // REGISTER WRITES FOR DCMS
         // *************************************************************
 
-        rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target1, attr_dcm_installed_1);
-        if (rc)
+        if (i_dcm)
         {
-            FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
-            break;
-        }
-        FAPI_INF (" value read from the attribute ATTR_DCM_INSTALLED in init function = 0x%x", attr_dcm_installed_1 );
-
-        if (attr_dcm_installed_1 == 1)
-        {
-            dcm = 1;
-
-            rc = fapiGetScom(i_target1, DEVICE_ID_REG_0x000F000F, data );
+            rc = fapiGetScom(i_target, DEVICE_ID_REG_0x000F000F, data );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(DEVICE_ID_REG_0x000F000F) failed.");
@@ -2217,14 +1705,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
 
             is_master = data.isBitClear(39) ;
             is_slave = not is_master ;
-        }
-        else
-        {
-            dcm = 0 ;
-        }
 
-        if (dcm == 1)
-        {
             if (is_master)
             {
                 FAPI_INF ("**** Setting up DCM Master ****");
@@ -2236,7 +1717,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             //  ****************************************************************
             //     - write PMC_MODE_REG
             //  ****************************************************************
-            rc = fapiGetScom(i_target1, PMC_MODE_REG_0x00062000, data );
+            rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000, data );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
@@ -2260,7 +1741,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             FAPI_DBG("    ENABLE_INTERCHIP_PSTATE_IN_HAPS        => %d ", is_master );
             FAPI_DBG("    SAFE_MODE_WITHOUT_SPIVID               => %d ", is_slave  );
 
-            rc = fapiPutScom(i_target1, PMC_MODE_REG_0x00062000, data );
+            rc = fapiPutScom(i_target, PMC_MODE_REG_0x00062000, data );
             if (rc)
             {
                 FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
@@ -2272,7 +1753,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             //     - set PMC_O2S_CTRL_REG1
             //  ******************************************************************
 
-            rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+            rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG1_0x00062052, data );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG1) failed.");
@@ -2297,14 +1778,14 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             }
 
             // \todo this should be looked at for removal to avoid future problems
-            rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+            rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG1_0x00062052, data );
             if (rc)
             {
                 FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG1_0x00062052) failed.");
                 break;
             }
 
-            rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG1_0x00062042, data );
+            rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG1_0x00062042, data );
             if (rc)
             {
                 FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG1_0x00062042) failed.");
@@ -2314,7 +1795,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             //  ******************************************************************
             //     - write PMC_INTCHP_CTRL_REG1
             //  ******************************************************************
-            rc = fapiGetScom(i_target1, PMC_INTCHP_CTRL_REG1_0x00062010, data );
+            rc = fapiGetScom(i_target, PMC_INTCHP_CTRL_REG1_0x00062010, data );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(PMC_INTCHP_CTRL_REG1_0x00062010) failed.");
@@ -2336,7 +1817,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             FAPI_DBG("    INTERCHIP_CPHA                 =>   %d ", zero     );
             FAPI_DBG("    INTERCHIP_CLOCK_DIVIDER        => 0x%x ", interchip_clock_divider     );
 
-            rc = fapiPutScom(i_target1, PMC_INTCHP_CTRL_REG1_0x00062010, data );
+            rc = fapiPutScom(i_target, PMC_INTCHP_CTRL_REG1_0x00062010, data );
             if (rc)
             {
                 FAPI_ERR("fapiPutScom(PMC_INTCHP_CTRL_REG1_0x00062010) failed.");
@@ -2347,7 +1828,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             //  ******************************************************************
             //     - write PMC_INTCHP_CTRL_REG4
             //  ******************************************************************
-            rc = fapiGetScom(i_target1, PMC_INTCHP_CTRL_REG4_0x00062012, data );
+            rc = fapiGetScom(i_target, PMC_INTCHP_CTRL_REG4_0x00062012, data );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(PMC_INTCHP_CTRL_REG4_0x00062012) failed.");
@@ -2370,7 +1851,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
             FAPI_DBG("    INTERCHIP_MSG_RCV_OVERFLOW_CHECK_EN        =>   %d ",  one          );
             FAPI_DBG("    INTERCHIP_ECC_UE_BLOCK_EN                  =>   %d ",  one          );
 
-            rc = fapiPutScom(i_target1, PMC_INTCHP_CTRL_REG4_0x00062012, data );
+            rc = fapiPutScom(i_target, PMC_INTCHP_CTRL_REG4_0x00062012, data );
             if (rc)
             {
                 FAPI_ERR("fapiPutScom(PMC_INTCHP_CTRL_REG4_0x00062012) failed.");
@@ -2404,6 +1885,10 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
 {
     fapi::ReturnCode    rc;
 
+    uint8_t         attr_dcm_installed_1 = 0;
+    uint8_t         attr_dcm_installed_2 = 0;
+    bool            dcm = false;
+
     do
     {
 
@@ -2435,8 +1920,71 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
         // ------------------------------------------------
         else if (mode == PM_INIT)
         {
-            FAPI_INF("Executing p8_pmc_init for Target %s ...", i_target1.toEcmdString());
-            rc = pmc_init_function(i_target1);
+
+            // Per SW250226, determine if initialization should be as a real DCM
+            // or as a garded SCM
+            rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target1, attr_dcm_installed_1);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
+            FAPI_INF (" ATTR_DCM_INSTALLED value in init function = 0x%x", attr_dcm_installed_1 );
+
+            // Default is dcm = false
+            if (attr_dcm_installed_1 == 0)
+            {
+
+                // target2 should be NULL
+                // if not NULL, exit with config error
+                if (i_target2.getType() != TARGET_TYPE_NONE  )
+                {
+                    FAPI_ERR ("Config error : target2 is not null for target1 SCM case");
+                    const fapi::Target& MASTER_TARGET = i_target1;
+                    const fapi::Target& SLAVE_TARGET = i_target2;
+                    const uint8_t & DCM_INSTALLED_1 =  attr_dcm_installed_1;
+                    const uint8_t & DCM_INSTALLED_2 =  attr_dcm_installed_2;
+                    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_SCM_INSTALL_ERROR);
+                    break;
+                }
+            }
+            // Target 1 indicates a physical DCM
+            else
+            {
+                // Check if Target 2 indicates a real DCM.  If not, gard defaults to SCM
+                if (i_target2.getType() != TARGET_TYPE_NONE  )
+                {
+                    rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target2, attr_dcm_installed_2);
+                    if (rc)
+                    {
+                        FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
+                        break;
+                    }
+                    FAPI_INF (" ATTR_DCM_INSTALLED value in INIT function = 0x%x", attr_dcm_installed_2 );
+
+                    if (attr_dcm_installed_2 != 1)
+                    {
+                        FAPI_ERR ("Config error:  DCM_INSTALLED target2 does not match target1\n" \
+                                  "   target1: %08x attr:%02x, target2:%08x attr:%02x",
+                                  i_target1.getType(), attr_dcm_installed_1,
+                                  i_target2.getType(), attr_dcm_installed_2);
+                        const fapi::Target& MASTER_TARGET = i_target1;
+                        const fapi::Target& SLAVE_TARGET = i_target2;
+                        const uint8_t & DCM_INSTALLED_1 =  attr_dcm_installed_1;
+                        const uint8_t & DCM_INSTALLED_2 =  attr_dcm_installed_2;
+                        FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_DCM_INSTALL_ERROR);
+                        break;
+                    }
+                    dcm = true;
+                }
+            }
+
+
+            FAPI_INF("Executing p8_pmc_init for as %s for Target %s ...",
+                            dcm ? "DCM" : "SCM",
+                            i_target1.toEcmdString());
+            rc = pmc_init_function(i_target1, dcm);
             if (rc)
             {
                 FAPI_ERR("Error from pmc_init_function for target1");
@@ -2446,7 +1994,7 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
             if ( i_target2.getType() != TARGET_TYPE_NONE )
             {
                 FAPI_INF("Executing p8_pmc_init for Target %s ...", i_target2.toEcmdString());
-                rc = pmc_init_function(i_target2);
+                rc = pmc_init_function(i_target2, dcm);
                 if (rc)
                 {
                   FAPI_ERR("Error from pmc_init_function for target2");
@@ -2460,7 +2008,7 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
         /// -------------------------------
         else if (mode == PM_RESET)
         {
-            FAPI_INF("Hard reset detected.  Calling pmc_reset_function");           
+            FAPI_INF("Hard reset detected.  Calling pmc_reset_function");
             rc = pmc_reset_function(i_target1 , i_target2, mode);
             if (rc)
             {
@@ -2468,7 +2016,7 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
                 break;
             }
         }
-        
+
         // -------------------------------
         /// Reset:  perform soft reset of PMC
         /// -------------------------------
@@ -2500,6 +2048,597 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
 
 } // end p8_pmc_init
 
+
+// ----------------------------------------------------------------------
+/**
+ * p8_pmc_poll_pstate_halt
+ *
+ * @param[in] i_target  Chip target
+ * @param[in] i_side    Master - 0; Slave - 1
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+p8_pmc_poll_pstate_halt(const fapi::Target& i_target, uint8_t const i_side)
+{
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase  pmcstatus(64);
+    ecmdDataBufferBase  porr(64);
+
+    bool is_pstate_error_stopped = false ;
+    bool is_error_stopped = false;
+
+    uint32_t count = 0 ;
+    bool is_stopped = false ;
+
+    do
+    {
+
+        // Confirm that Pstate hardware is quiesced before changing modes
+        rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009 , pmcstatus );
+        if (rc)
+        {
+             FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+             break;
+        }
+
+        //  Poll for local Pstates being stopped
+        for (count = 0 , is_stopped = 0 ; count <= PSTATE_HALT_POLL_COUNT && is_stopped == 0;  count++)
+        {
+
+            //  is_stopped = (GPSA_CHG_ONGOING == 0 ||
+            //                VOLT_CHG_ONGOING == 0 ||
+            //                BRD_CST_ONGOING  == 0) ;
+            is_stopped = pmcstatus.isBitClear(7)  || pmcstatus.isBitClear(8) || pmcstatus.isBitClear(9);
+
+            // Leave if stopped
+            if (is_stopped)
+                continue;
+
+            // wait for 1 millisecond/loop in hardware
+            rc = fapiDelay(1000*1000, 20000000);
+            if (rc)
+            {
+                FAPI_ERR("FAPI delay ends up with error");
+                break;
+            }
+
+            // Re-read
+            rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009 , pmcstatus );
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+                 break;
+            }
+
+        } // end_for
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // check for Pstate errors
+        is_pstate_error_stopped =   pmcstatus.isBitSet(0) ||
+                                    pmcstatus.isBitSet(1) ||
+                                    pmcstatus.isBitSet(5) ||
+                                    pmcstatus.isBitSet(6) ||
+                                    pmcstatus.isBitSet(11);
+
+        if (is_pstate_error_stopped)
+        {
+            FAPI_ERR("Pstate errors exist. Reset may be suspicious but NOT failing as it could be cleared ... ");
+        }
+
+        if (count > PSTATE_HALT_POLL_COUNT)
+        {
+            FAPI_ERR("Timed out in polling for Local Pstates to quiesce. Reset may be suspicious but NOT failing as it could be cleared ... ");
+        }
+
+
+        rc = fapiGetScom(i_target, PMC_PORRR0_REG_0x0006208E , porr );
+        if (rc)
+        {
+             FAPI_ERR("fapiGetScom(PMC_PORRR0_REG_0x0006208E) failed.");
+             break;
+        }
+
+        // Poll for local Idle being stopped.  As specical wake-up was to have
+        // occured prior to this, execution should be quick.  If this times out,
+        // there is a significant problem.
+        for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT && is_stopped == 0;  count++)
+        {
+            //  is_stopped = (PORRR_PORE_BUSY == 0) ;
+            is_stopped = porr.isBitClear(20);
+
+            // Leave if stopped
+            if (is_stopped)
+                continue;
+
+            // wait for 1 millisecond/loop in hardware
+            rc = fapiDelay(1000*1000, 20000000);
+            if (rc)
+            {
+                FAPI_ERR("FAPI delay ends up with error");
+                break;
+            }
+
+            // Re-read
+            rc = fapiGetScom(i_target, PMC_PORRR0_REG_0x0006208E , porr );
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetScom(PMC_PORRR0_REG_0x0006208E) failed.");
+                 break;
+            }
+
+        } // end_for
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // check for Idle errors
+        is_error_stopped =   porr.isBitSet(21) || pmcstatus.isBitSet(12);
+
+        if (is_error_stopped)
+        {
+            FAPI_ERR("PMC Idle halt errors exist.  OCC recovery cannot proceed ... ");
+            const fapi::Target& TARGET = i_target;
+            const uint64_t & PORR = porr.getDoubleWord(0);
+            const uint64_t & PMCSTATUS = pmcstatus.getDoubleWord(0);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_IDLE_ERROR);
+            break;
+        }
+
+        if (count > PORE_REQ_POLL_COUNT)
+        {
+            FAPI_ERR("PMC Timed out in polling for Idle to Halt. OCC recovery cannot proceed ... ");
+            const fapi::Target& TARGET = i_target;
+            const uint64_t & PORR = porr.getDoubleWord(0);
+            const uint64_t & PMCSTATUS = pmcstatus.getDoubleWord(0);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_IDLE_TIMEOUT_ERROR);
+            break;
+        }
+
+    }
+    while (0);
+    return rc;
+}
+
+// ----------------------------------------------------------------------
+/**
+ * p8_pmc_poll_idle_halt
+ *
+ * @param[in] i_target  Chip target
+ * @param[in] i_side    Master - 0; Slave - 1
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+p8_pmc_poll_idle_halt(const fapi::Target& i_target, const uint8_t i_side)
+{
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase  pmcstatus(64);
+    ecmdDataBufferBase  porr(64);
+
+    bool is_error_stopped = false;
+
+    uint32_t count = 0 ;
+    bool is_stopped = false ;
+
+    do
+    {
+
+        // Poll for local Idle being stopped.  As special wake-up was to have
+        // occured prior to this, execution should be quick.  If this times out,
+        // there is a significant problem.
+        for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT && is_stopped == 0;  count++)
+        {
+            //  is_stopped = (PORRR_PORE_BUSY == 0) ;
+            is_stopped = porr.isBitClear(20);
+
+            // Leave if stopped
+            if (is_stopped)
+                continue;
+
+            // wait for 1 millisecond/loop in hardware
+            rc = fapiDelay(1000*1000, 20000000);
+            if (rc)
+            {
+                FAPI_ERR("FAPI delay ends up with error");
+                break;
+            }
+
+            // Re-read
+            rc = fapiGetScom(i_target, PMC_PORRR0_REG_0x0006208E , porr );
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetScom(PMC_PORRR0_REG_0x0006208E) failed.");
+                 break;
+            }
+
+        } // end_for
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // check for Idle errors
+        is_error_stopped =   porr.isBitSet(21) || pmcstatus.isBitSet(12);
+
+        if (is_error_stopped)
+        {
+            FAPI_ERR("PMC Idle halt errors exist.  OCC recovery cannot proceed ... ");
+            const fapi::Target& TARGET = i_target;
+            const uint64_t & PORR = porr.getDoubleWord(0);
+            const uint64_t & PMCSTATUS = pmcstatus.getDoubleWord(0);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_IDLE_ERROR);
+            break;
+        }
+
+        if (count > PORE_REQ_POLL_COUNT)
+        {
+            FAPI_ERR("PMC Timed out in polling for Idle to Halt. OCC recovery cannot proceed ... ");
+            const fapi::Target& TARGET = i_target;
+            const uint64_t & PORR = porr.getDoubleWord(0);
+            const uint64_t & PMCSTATUS = pmcstatus.getDoubleWord(0);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_IDLE_TIMEOUT_ERROR);
+            break;
+        }
+
+    }
+    while (0);
+    return rc;
+}
+
+// ----------------------------------------------------------------------
+/**
+ * p8_pmc_poll_interchip_halt
+ *
+ * @param[in] i_target  Chip target
+ * @param[in] i_side    Master - 0; Slave - 1
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+p8_pmc_poll_interchip_halt( const fapi::Target& i_target,
+                            const uint8_t       i_side,
+                            bool                i_MasterPMC,
+                            const fapi::Target& i_dcm_target)
+{
+    fapi::ReturnCode    rc;
+    uint32_t            e_rc;
+    ecmdDataBufferBase  data(64);
+
+    bool is_stopped = false ;
+    bool is_pstate_error_stopped = false;
+    bool is_intchp_error_stopped = false;
+
+    uint32_t count = 0 ;
+
+
+    do
+    {
+        rc = fapiGetScom(i_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+            break;
+        }
+
+        e_rc = data.setBit(01);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+            break;
+        }
+
+        //  Poll for interchip interface to stop
+        for (count = 0 , is_stopped = 0 ; count <= INTERCHIP_HALT_POLL_COUNT && is_stopped == 0;  count++)
+        {
+
+            rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+                break;
+            }
+
+            //    Interchip_Wait1: Read PMC_STATUS_REG
+            //       is_pstate_error_stopped =  pstate_processing_is_suspended ||
+            //                                  gpsa_bdcst_error ||
+            //                                  gpsa_vchg_error ||
+            //                                  gpsa_timeout_error ||
+            //                                  pstate_interchip_error;
+            is_pstate_error_stopped =   data.isBitSet(0) ||
+                                        data.isBitSet(1) ||
+                                        data.isBitSet(5) ||
+                                        data.isBitSet(6) ||
+                                        data.isBitSet(11);
+
+            //    Interchip_Wait2: Read PMC_INTCHP_STATUS_REG
+            //       is_intchp_error_stopped =  interchip_ecc_ue_err ||
+            //                                  interchip_fsm_err ||
+            //                                  (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC
+            rc = fapiGetScom(i_target, PMC_INTCHP_STATUS_REG_0x00062013 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed.");
+                break;
+            }
+            is_intchp_error_stopped =   data.isBitSet(1) ||
+                                        data.isBitSet(7) ||
+                                        (~( data.isBitClear(16,4) &&  i_MasterPMC)) ;
+
+            //    is_stopped = (interchip_ga_ongoing == 0) ||
+            //                  is_pstate_error_stopped ||
+            //                  is_intchp_error_stopped ;
+            is_stopped = data.isBitClear(0)  || is_pstate_error_stopped || is_intchp_error_stopped;
+
+            if (is_stopped)
+                continue;
+
+            FAPI_DBG("polling interchip ongoing :  ... ");
+
+            //       If !is_stopped Then -->Interchip_Wait1  (Wait limit is parm TD_Interchip_HaltWait_max=260)
+
+            // wait for 1 millisecond/loop in hardware
+            rc = fapiDelay(1000*1000, 20000000);
+            if (rc)
+            {
+                FAPI_ERR("fapi delay ends up with error");
+                break;
+            }
+
+        } // end_for
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        if (count > INTERCHIP_HALT_POLL_COUNT)
+        {
+            FAPI_INF("Timed out in polling interchip ongoing : Reset may be suspicious but NOT failing as it could be cleared ... ");
+            const fapi::Target& THISTARGET = i_target;
+            const fapi::Target& DCMTARGET = i_dcm_target;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_INTCHP_TIMEOUT_ERROR);
+            fapiLogError(rc, fapi::FAPI_ERRL_SEV_RECOVERED);
+        }
+
+        // InterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if
+
+        rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+            break;
+        }
+
+        e_rc = data.setBit(15);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Master during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_target, PMC_MODE_REG_0x00062000 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+            break;
+        }
+
+    }
+    while (0);
+    return rc;
+}
+
+// ----------------------------------------------------------------------
+/**
+ * p8_pmc_poll_spivid_halt
+ *
+ * @param[in] i_target  Chip target
+ * @param[in] i_side    Master - 0; Slave - 1
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+p8_pmc_poll_spivid_halt(const fapi::Target& i_target,
+                        const uint8_t       i_side)
+{
+    fapi::ReturnCode    rc;
+    uint32_t            e_rc;
+    ecmdDataBufferBase  data(64);
+
+    bool is_spivid_stopped = false ;
+
+    uint32_t count = 0 ;
+
+
+    do
+    {
+        //  HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
+        rc = fapiGetScom(i_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_SPIV_COMMAND_REG_0x00062047) failed.");
+            break;
+        }
+
+        e_rc = data.setBit(0);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_SPIV_COMMAND_REG_0x00062047 on Side %d during reset",
+                                    i_side);
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_COMMAND_REG_0x00062047) failed.");
+            break;
+        }
+
+        //    Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
+        for (count = 0 , is_spivid_stopped=0; count <= VOLTAGE_CHANGE_POLL_COUNT  && is_spivid_stopped==0  ; count++)
+        {
+
+            rc = fapiGetScom(i_target, PMC_SPIV_STATUS_REG_0x00062046 , data );
+            if (rc)
+            {
+              FAPI_ERR("fapiGetScom(PMC_SPIV_STATUS_REG_0x00062046) failed.");
+              break;
+            }
+            is_spivid_stopped =   data.isBitClear(0) ||
+                                  data.isBitSet(1)   ||
+                                  data.isBitSet(2)   ||
+                                  data.isBitSet(3)   ||
+                                  data.isBitSet(4) ;
+
+            if (is_spivid_stopped)
+                continue;
+
+            FAPI_DBG("Polling spivid ongoing on Side %d", i_side);
+
+            // wait for 1 millisecond/loop in hardware
+            rc = fapiDelay(1000*1000, 20000000);
+            if (rc)
+            {
+                FAPI_ERR("fapi delay ends up with error");
+                break;
+            }
+
+        } // end for
+
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // Timeout check
+        if (count > VOLTAGE_CHANGE_POLL_COUNT)
+        {
+            FAPI_ERR("Timed out in polling SPIVID ongoing  : Reset_suspicious    ... ");
+            const fapi::Target& TARGET = i_target;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_SPIVID_TIMEOUT_ERROR);
+            fapiLogError(rc, fapi::FAPI_ERRL_SEV_RECOVERED);
+        }
+
+    }
+    while (0);
+    return rc;
+}
+
+// ----------------------------------------------------------------------
+/**
+ * p8_pmc_poll_o2p_halt
+ *
+ * @param[in] i_target  Chip target
+ * @param[in] i_side    Master - 0; Slave - 1
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+p8_pmc_poll_o2p_halt(const fapi::Target& i_target,
+                     const uint8_t       i_side)
+{
+    fapi::ReturnCode    rc;
+    uint32_t            e_rc;
+    ecmdDataBufferBase  data(64);
+
+    bool is_stopped = false ;
+
+    uint32_t count = 0 ;
+
+
+    do
+    {
+        rc = fapiGetScom(i_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_O2S_COMMAND_REG__0x00062057) failed.");
+            break;
+        }
+
+        e_rc = data.setBit(00);
+        if(e_rc)
+        {
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_COMMAND_REG__0x00062057) failed.");
+            break;
+        }
+
+        // Poll for O2S to be stopped
+        for (count = 0 , is_stopped = 0 ; count <= O2S_POLL_COUNT && is_stopped == 0 ; count++)
+        {
+            // wait for 1 millisecond/loop in hardware
+            rc = fapiDelay(1000*1000, 20000000);
+            if (rc)
+            {
+                FAPI_ERR("fapi delay ends up with error");
+                break;
+            }
+            rc = fapiGetScom(i_target, PMC_O2S_STATUS_REG_0x00062056 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_O2S_STATUS_REG__0x00062056) failed.");
+                break;
+            }
+
+            is_stopped = (  data.isBitClear(0) ||
+                            data.isBitSet(4)   ||
+                            data.isBitSet(5)   ||
+                            data.isBitSet(7));
+            FAPI_DBG("Polling O2S ongoing . :   .. ");
+        }
+
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // Timeout check
+        if (count > O2P_POLL_COUNT)
+        {
+            FAPI_ERR("Timed out in polling O2P ongoing . : Reset_suspicious .. ");
+            const fapi::Target& TARGET = i_target;
+            const uint64_t & O2PSTATUS = data.getDoubleWord(0);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_O2P_TIMEOUT_ERROR);
+            fapiLogError(rc, fapi::FAPI_ERRL_SEV_RECOVERED);
+        }
+
+    }
+    while (0);
+    return rc;
+}
+
 } //end extern C
 
 /*
@@ -2508,6 +2647,21 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pmc_init.C,v $
+Revision 1.41  2014/04/03 20:29:13  cmolsen
+Removed three bool variables that were set only but not used.
+
+Revision 1.40  2014/03/12 21:03:15  stillgs
+Per SW251617, updates for HostCompiler tool flagged logical errors (bitwise operators were scalar was intended
+
+Revision 1.39  2014/03/06 16:26:54  stillgs
+SW250226 (deconfigured chip on DCM)
+
+Revision 1.38  2014/03/05 22:13:13  stillgs
+
+- Updates per RAS/callout reviews.  In dealing with these comments, did some
+restructuring of common code into subroutines.  Runs through the Cronus
+OCC reset shift cleanly.
+
 Revision 1.37  2013/11/07 14:00:09  stillgs
 
 Per SW232699, updated SPIVID parameters
