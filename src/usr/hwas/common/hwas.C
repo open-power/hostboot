@@ -1120,7 +1120,7 @@ void presentByAssoc(TargetInfoVector& o_funcTargets,
         if ( (i + 1) < o_funcTargets.size() &&
              l_curTargetInfo.type != TYPE_DIMM )
         {
-            l_nextTargetInfo = it + 1;
+            l_nextTargetInfo = &(*(it + 1));
         }
 
         // CASE MCS
