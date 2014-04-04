@@ -195,6 +195,7 @@ export SANDBOXRC
 export SANDBOXROOT=$SBXHOME
 export SANDBOXNAME=$TEST_SANDBOX
 export SANDBOXBASE=$SANDBOXROOT/$SANDBOXNAME
+export AUTOSIM_WORKDIR=$SANDBOXBASE
 
 if [ ! -d "$SBXHOME/$TEST_SANDBOX" ] ; then
         echo "run mksb to create the sandbox "
