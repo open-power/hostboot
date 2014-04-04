@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -112,14 +112,18 @@
     ############################################################################
 
     # FIR not used. Capture for FFDC only.
+    # This register is on the same clock domain for both MBAs. So if one is
+    # powered down and we try to SCOM to the other, there will be SCOM failures.
+    # Since this register is for FFDC purposes only, we simply will not capture
+    # this register.
 
-    register MEMFBISTFIR
-    {
-        name        "FBIST.FBM.FBM_FIR_REG";
-        scomaddr    0x03010480;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
+#    register MEMFBISTFIR
+#    {
+#        name        "FBIST.FBM.FBM_FIR_REG";
+#        scomaddr    0x03010480;
+#        capture     group FirRegs;
+#        capture     group MemChipletRegs;
+#    };
 
     ############################################################################
     # Error Report Registers
