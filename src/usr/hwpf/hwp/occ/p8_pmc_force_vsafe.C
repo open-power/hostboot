@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_force_vsafe.C,v 1.14 2014/01/24 23:41:37 jdavidso Exp $
+// $Id: p8_pmc_force_vsafe.C,v 1.16 2014/03/21 01:16:09 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_force_vsafe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,18 +44,9 @@
 // *! Procedure Prereq:
 // *!   o System clocks are running
 // *!
-//------------------------------------------------------------------------------
-
+//  buildfapiprcd -e ../../xml/error_info/p8_force_vsafe_errors.xml,../../xml/error_info/p8_pstate_registers.xml p8_pmc_force_vsafe.C
 
 // -----------------------------------------------------------------------------
-// Flowchart Begins
-// -----------------------------------------------------------------------------
-//                     ------------------
-//                    |    Sim starts     |
-//                     ------------------
-//                |
-//                |
-//                V
 //             Write a voltage value into
 //             PVSAFE  - PMC_PARAMETER_REG1
 // Actually, this value will be been written outside this procedure by the OCC pstate installation routine after the p8_build_pstate runs to build
@@ -131,7 +122,8 @@ using namespace fapi;
 // returns: ECMD_SUCCESS if something good happens,
 //          BAD_RETURN_CODE otherwise
 fapi::ReturnCode
-p8_pmc_force_vsafe(const fapi::Target& i_target  )
+p8_pmc_force_vsafe( const fapi::Target& i_target,
+                    const fapi::Target& i_dcm_target)
 {
     fapi::ReturnCode    rc;
     ecmdDataBufferBase  data(64);
@@ -142,18 +134,20 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
     const uint32_t   MAX_POLL_ATTEMPTS    = 0x200;
 
     uint32_t            count = 0;
-    //  size_t i;
     uint16_t            pvsafe = 0;
-    bool l_set;
+    bool                l_set;
     uint16_t            pstate_target = 0;
     uint16_t            pstate_step_target = 0;
     uint16_t            pstate_actual = 0;
     uint8_t             DONE_FLAG = 0;
+    uint8_t             pmc_error = 0;
+    uint8_t             intchp_error = 0;
     uint8_t             any_error = 0;
     uint8_t             any_ongoing = 0;
     uint8_t             dummy = 0;
 
-    FAPI_INF("p8_pmc_force_vsafe start  ....");
+    FAPI_INF("p8_pmc_force_vsafe start to primary target %s",
+                            i_target.toEcmdString());
 
     do
     {
@@ -177,6 +171,7 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
         if ( ( data.isBitClear(3) ))
         {
             FAPI_ERR("PMC is disabled for Voltage changes");
+            const fapi::Target & CHIP = i_target;
             const uint64_t & PMCMODE  = data.getDoubleWord(0);
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_VOLTAGE_CHANGE_MODE_ERR);
             break;
@@ -185,6 +180,7 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
         if ( ( !data.isBitClear(5) ))
         {
             FAPI_ERR("PMC is disabled PMC_MASTER_SEQUENCER");
+            const fapi::Target & CHIP = i_target;
             const uint64_t & PMCMODE  = data.getDoubleWord(0);
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_MST_SEQUENCER_STATE_ERR);
             break;
@@ -238,7 +234,7 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
             break;
         }
         FAPI_DBG("   debug_mode : status_b4_heartbeat_loss      =>  0x%16llx",  data.getDoubleWord(0));
-        
+
         l_set = data.isBitSet(0);
         FAPI_DBG("   pstate_processing_is_susp     => %x ",  l_set ) ;
         l_set = data.isBitSet(1);
@@ -300,36 +296,54 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
         // Loop only if count is less thean poll attempts and DONE_FLAG = 0 and no error
         for(count=0; ((count<=MAX_POLL_ATTEMPTS) && (DONE_FLAG == 0) && (any_error == 0)); count++)
         {
-            rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009, data );
+            rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009, pmcstatusreg );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
                 break;
             }
 
-            FAPI_DBG("   poll_status       => 0x%16llx",  data.getDoubleWord(0));
+            FAPI_DBG("   PMC Status poll  => 0x%16llx",  pmcstatusreg.getDoubleWord(0));
 
-            any_error = !(data.isBitClear(1) && data.isBitClear(5) &&
-                      data.isBitClear(6) && data.isBitClear(10) && data.isBitClear(11) &&
-                      data.isBitClear(12));
+            pmc_error = (   pmcstatusreg.isBitSet(1)  ||    // GPSA_BDCST_ERROR
+                            pmcstatusreg.isBitSet(5)  ||    // GPSA_VCHG_ERROR
+                            pmcstatusreg.isBitSet(6)  ||    // GPSA_TIMEOUT_ERROR
+                            pmcstatusreg.isBitSet(10) ||    // GPS_TABLE_ERROR
+                            pmcstatusreg.isBitSet(12)   );  // ISTATE_PROCESSING_IS_SUSPENDED
 
-            any_ongoing = !(data.isBitClear(8) && data.isBitClear(7)&& data.isBitClear(9));
+            any_ongoing = ( pmcstatusreg.isBitSet(7) ||     // GPSA_CHG_ONGOING
+                            pmcstatusreg.isBitSet(8) ||     // VOLT_CHG_ONGOING
+                            pmcstatusreg.isBitSet(9)   );   // BRD_CST_ONGOING
+
+                       
+            // If there is an interchip error, determine if it is expected or not
+            // Unexpected:  gpsa_timeout or ECC UE error
+            if (pmcstatusreg.isBitSet(11))                  // PSTATE_INTERCHIP_ERROR
+            {
+                rc = fapiGetScom(i_target, PMC_INTCHP_STATUS_REG_0x00062013, data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+                    break;
+                }
+                
+                intchp_error = (data.isBitSet(18) ||        // GPSA_TIMEOUT_ERROR
+                                data.isBitSet(19)   );      // ECC UE ERROR                
+            }
             
-            // Save PMC Status
-            pmcstatusreg = data;
-
+            any_error = (pmc_error || intchp_error);
+            
             // Check for voltage change has any error
-            if (any_error == 1)
+            if (any_error)
             {
                 // An error was detected
-                FAPI_DBG(" PMC_STATUS_REG is Read after the opn ---------->     ");
-
-                if (data.isBitSet(0))
+                FAPI_INF(" PMC_STATUS_REG upon Error");
+                if (pmcstatusreg.isBitSet(0))
                     FAPI_ERR("   pstate_processing_is_susp active");
-                if (data.isBitSet(1))
+                if (pmcstatusreg.isBitSet(1))
                     FAPI_ERR("   gpsa_bdcst_error active");
 
-                e_rc = data.extractToRight( &dummy,2,3);
+                e_rc = pmcstatusreg.extractToRight( &dummy,2,3);
                 if (e_rc)
                 {
                     rc.setEcmdError(e_rc);
@@ -337,28 +351,27 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
                 }
                 if (dummy)
                     FAPI_ERR("   gpsa_bdcst_resp_info is non-zero => %x ",  dummy );
-                    
-                if (data.isBitSet(5))
-                    FAPI_ERR("   gpsa_vchg_error active");
-                if (data.isBitSet(6))
-                    FAPI_ERR("   gpsa_timeout_error active");
-                if (data.isBitSet(7))
-                    FAPI_ERR("   gpsa_chg_ongoing active");
-                if (data.isBitSet(8))
-                    FAPI_ERR("   volt_chg_ongoing active");
-                if (data.isBitSet(9))
-                    FAPI_ERR("   brd_cst_ongoing active");
-                if (data.isBitSet(10))
-                    FAPI_ERR("   gpsa_table_error active");
-                if (data.isBitSet(11))
-                    FAPI_ERR("   pstate_interchip_error active");
-                if (data.isBitSet(12))
-                    FAPI_ERR("   istate_processing_is_susp active");
-               
-                FAPI_ERR("Error detected with PMC on-going deassertion during safe voltage movement ");
-                const uint64_t & PMCSTATUS  = data.getDoubleWord(0);
 
-                const fapi::Target & CHIP = i_target;
+                if (pmcstatusreg.isBitSet(5))
+                    FAPI_ERR("   gpsa_vchg_error active");
+                if (pmcstatusreg.isBitSet(6))
+                    FAPI_ERR("   gpsa_timeout_error active");
+                if (pmcstatusreg.isBitSet(7))
+                    FAPI_ERR("   gpsa_chg_ongoing active");
+                if (pmcstatusreg.isBitSet(8))
+                    FAPI_ERR("   volt_chg_ongoing active");
+                if (pmcstatusreg.isBitSet(9))
+                    FAPI_ERR("   brd_cst_ongoing active");
+                if (pmcstatusreg.isBitSet(10))
+                    FAPI_ERR("   gpsa_table_error active");
+                if (pmcstatusreg.isBitSet(11))
+                    FAPI_ERR("   pstate_interchip_error active");
+                if (pmcstatusreg.isBitSet(12))
+                    FAPI_ERR("   istate_processing_is_susp active");
+
+                FAPI_ERR("Error detected with PMC on-going deassertion during safe voltage movement ");
+                const fapi::Target & THISCHIP = i_target;
+                const fapi::Target & DCMCHIP = i_dcm_target;
                 FAPI_SET_HWP_ERROR(rc, RC_PROCPM_VLT_ERROR);
                 break;
 
@@ -366,44 +379,46 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
             else if (any_ongoing == 0)
             {
                 // Voltage change done (not on-going) and not errors
-
+                FAPI_INF("PMC completed performing safe mode transition");                                
+                l_set = pmcstatusreg.isBitSet(0);
+                if (l_set) FAPI_INF("   pstate_processing_is_susp => %x ",  l_set ) ;
                 
-                FAPI_DBG("   status_after_heartbeat_loss       => 0x%16llx",  data.getDoubleWord(0));
+                l_set = pmcstatusreg.isBitSet(1);
+                if (l_set) FAPI_INF("   gpsa_bdcst_error          => %x ",  l_set );
 
-                l_set = data.isBitSet(0);
-                FAPI_DBG("   pstate_processing_is_susp     => %x ",  l_set ) ;
-                l_set = data.isBitSet(1);
-                FAPI_DBG("   gpsa_bdcst_error              => %x ",  l_set );
-
-                e_rc = data.extractToRight( &dummy,2,3);
+                e_rc = pmcstatusreg.extractToRight( &dummy,2,3);
                 if (e_rc)
                 {
                     rc.setEcmdError(e_rc);
                     break;
                 }
-                FAPI_DBG("   gpsa_bdcst_resp_info          => %x ",  dummy );
-
-                l_set = data.isBitSet(5);
-                FAPI_DBG("   gpsa_vchg_error               => %x ",  l_set );
-                l_set = data.isBitSet(6);
-                FAPI_DBG("   gpsa_timeout_error            => %x ",  l_set );
-                l_set = data.isBitSet(7);
-                FAPI_DBG("   gpsa_chg_ongoing              => %x ",  l_set );
-                l_set = data.isBitSet(8);
-                FAPI_DBG("   volt_chg_ongoing              => %x ",  l_set );
-                l_set = data.isBitSet(9);
-                FAPI_DBG("   brd_cst_ongoing               => %x ",  l_set );
-                l_set = data.isBitSet(10);
-                FAPI_DBG("   gpsa_table_error              => %x ",  l_set );
-                l_set = data.isBitSet(11);
-                FAPI_DBG("   pstate_interchip_error        => %x ",  l_set );
-                l_set = data.isBitSet(12);
-                FAPI_DBG("   istate_processing_is_susp     => %x ",  l_set );
+                if (l_set) FAPI_INF("   gpsa_bdcst_resp_info      => %x ",  dummy );
                 
-                // Save PMC Status
-                pmcstatusreg = data;
+                l_set = pmcstatusreg.isBitSet(5);
+                if (l_set) FAPI_INF("   gpsa_vchg_error           => %x ",  l_set );
+                              
+                l_set = pmcstatusreg.isBitSet(6);
+                if (l_set) FAPI_INF("   gpsa_timeout_error        => %x ",  l_set );
+                
+                l_set = pmcstatusreg.isBitSet(7);
+                if (l_set) FAPI_INF("   gpsa_chg_ongoing          => %x ",  l_set );
+                
+                l_set = pmcstatusreg.isBitSet(8);
+                if (l_set) FAPI_INF("   volt_chg_ongoing          => %x ",  l_set );
+                
+                l_set = pmcstatusreg.isBitSet(9);
+                if (l_set) FAPI_INF("   brd_cst_ongoing           => %x ",  l_set );
+                
+                l_set = pmcstatusreg.isBitSet(10);
+                if (l_set) FAPI_INF("   gpsa_table_error          => %x ",  l_set );
+                
+                l_set = pmcstatusreg.isBitSet(11);
+                if (l_set) FAPI_INF("   pstate_interchip_error    => %x ",  l_set );
+                
+                l_set = pmcstatusreg.isBitSet(12);
+                if (l_set) FAPI_INF("   istate_processing_is_susp => %x ",  l_set );
+                
 
-                FAPI_DBG("Voltage_change done without any error ... ");
                 rc = fapiGetScom(i_target, PMC_PARAMETER_REG1_0x00062006, data );
                 if (rc)
                 {
@@ -445,10 +460,11 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
                 if (pstate_target != pvsafe || pstate_step_target != pvsafe || pstate_actual != pvsafe )
                 {
                     FAPI_ERR("Pstate monitor and control register targets did not match");
+                    const fapi::Target & THISCHIP = i_target;
+                    const fapi::Target & DCMCHIP = i_dcm_target;
                     const uint64_t & PSTATETARGET = (uint64_t)pstate_target;
                     const uint64_t & PSTATESTEPTARGET = (uint64_t)pstate_step_target;
                     const uint64_t & PSTATEACTUAL = (uint64_t)pstate_actual;
-                    const uint64_t & PMCSTATUS = pmcstatusreg.getDoubleWord(0);                    
                     FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PSTATE_MONITOR_ERR);
                     break;
                 }
@@ -456,7 +472,6 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
             }
             else  // voltage change is ongoing so wait and then poll again
             {
-                FAPI_DBG("   status       => 0x%16llx",  data.getDoubleWord(0));
 
                 // wait for 1 millisecond in hardware
                 rc = fapiDelay(1000*1000, 20000000);
@@ -480,15 +495,8 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
             const uint64_t & PSTATETARGET = (uint64_t)pstate_target;
             const uint64_t & PSTATESTEPTARGET = (uint64_t)pstate_step_target;
             const uint64_t & PSTATEACTUAL = (uint64_t)pstate_actual;
-            // get current pmc status value
-            rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009, pmcstatusreg );
-            if (rc)
-            {
-                FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
-                break;
-            }
-            const uint64_t & PMCSTATUS = pmcstatusreg.getDoubleWord(0);     
-            const fapi::Target & CHIP = i_target;
+            const fapi::Target & THISCHIP = i_target;
+            const fapi::Target & DCMCHIP = i_dcm_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_VLT_TIMEOUT);
             break;
         }

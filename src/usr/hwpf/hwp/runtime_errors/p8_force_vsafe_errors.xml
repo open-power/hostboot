@@ -20,65 +20,126 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_force_vsafe_errors.xml,v 1.5 2014/01/24 23:40:22 jdavidso Exp $ -->
-<!-- Error definitions for proc_pmc_force_vsage procedure -->
+<!-- $Id: p8_force_vsafe_errors.xml,v 1.6 2014/03/05 21:04:04 stillgs Exp $ -->
+<!-- Error definitions for proc_pmc_force_vsafe procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_VLT_TIMEOUT</rc>
-    <description>Voltage change timeout for the ongoing operation completion.</description>
-    <callout>
-       <target>CHIP</target> 
-       <priority>HIGH</priority> 
-    </callout>
+    <description>Voltage change timeout for the ongoing operation completion.</description>    
     <ffdc>PSTATETARGET</ffdc>
     <ffdc>PSTATESTEPTARGET</ffdc>
     <ffdc>PSTATEACTUAL</ffdc>
-    <ffdc>PMCSTATUS</ffdc>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PSTATE_REGISTERS</id>
-      <target>CHIP</target>
+      <id>REG_FFDC_PSTATE_REGISTERS</id> 
+      <id>REG_FFDC_SPIVID_REGISTERS</id>
+      <target>THISCHIP</target>
     </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PSTATE_REGISTERS</id> 
+      <id>REG_FFDC_SPIVID_REGISTERS</id>
+      <target>DCMCHIP</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PCBS_PSSTATE_MONITOR_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>THISCHIP</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc> 
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PCBS_PSSTATE_MONITOR_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>DCMCHIP</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>      
+    <callout>
+       <target>THISCHIP</target> 
+       <priority>HIGH</priority> 
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_VLT_ERROR</rc>
-    <description>Voltage change not done because of  errors on the status register.</description>
-    <callout>
-       <target>CHIP</target> 
-       <priority>HIGH</priority> 
-    </callout>
-    <ffdc>PMCSTATUS</ffdc>
+    <description>Voltage change not done because of  errors on the status register.</description>   
     <collectRegisterFfdc>
       <id>REG_FFDC_PSTATE_REGISTERS</id>
-      <target>CHIP</target>
+      <id>REG_FFDC_SPIVID_REGISTERS</id> 
+      <target>THISCHIP</target>
     </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PSTATE_REGISTERS</id>
+      <id>REG_FFDC_SPIVID_REGISTERS</id> 
+      <target>DCMCHIP</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PCBS_PSSTATE_MONITOR_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>THISCHIP</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc> 
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PCBS_PSSTATE_MONITOR_REGISTERS</id>
+      <basedOnPresentChildren>
+          <target>DCMCHIP</target>
+          <childType>TARGET_TYPE_EX_CHIPLET</childType>
+          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+      </basedOnPresentChildren>     
+    </collectRegisterFfdc>   
+     <callout>
+       <target>THISCHIP</target> 
+       <priority>HIGH</priority> 
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_MONITOR_ERR</rc>
     <description>Voltage change done but expected pstate did not match after completion.</description>
+    <ffdc>THISCHIP</ffdc>
     <ffdc>PSTATETARGET</ffdc>
     <ffdc>PSTATESTEPTARGET</ffdc>
     <ffdc>PSTATEACTUAL</ffdc>
-    <ffdc>PMCSTATUS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PSTATE_REGISTERS</id>
+      <id>REG_FFDC_SPIVID_REGISTERS</id>
+      <target>THISCHIP</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PSTATE_REGISTERS</id>
+      <id>REG_FFDC_SPIVID_REGISTERS</id>
+      <target>DCMCHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+       <target>THISCHIP</target> 
+       <priority>HIGH</priority> 
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
  <hwpError>
     <rc>RC_PROCPM_VOLTAGE_CHANGE_MODE_ERR</rc>
     <description>PMC is disabled for Voltage changes.</description>
+    <ffdc>CHIP</ffdc>
     <ffdc>PMCMODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <!-- *********************************************************************** -->
- <hwpError>
-    <rc>RC_PROCPM_INITIAL_AUCTION_MODE_ERR</rc>
-    <description>PMC is not in HARDWARE or FIRMWARE AUCTION MODE.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
+ <!-- *********************************************************************** -->
  <hwpError>
     <rc>RC_PROCPM_MST_SEQUENCER_STATE_ERR</rc>
     <description>PMC is disabled PMC_MASTER_SEQUENCER.</description>
+    <ffdc>CHIP</ffdc>
     <ffdc>PMCMODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>
