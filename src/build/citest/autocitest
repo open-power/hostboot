@@ -273,8 +273,21 @@ waitkb
 
 # Start simics and wait for it to reach standby
 echo "Starting simics"
+
+# If we are running under Jenkins, do "no remote execution" because built in
+# /tmp.
+if [ -z $JOB_NAME -o -z $BUILD_NUMBER ];
+then
+    NRE=""
+else
+    # Trick autosim into thinking we're running on a vexec system.
+    echo "echo \"Running on server $HOSTNAME ---\"" >> \
+            ${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw/startup.simics
+    NRE="-nre"
+fi
+
 #autosim $VERBOSE --startsim --chkpt standby <<< chkpt not working yet
-autosim $NOWIN $VERBOSE --startsim
+autosim $NOWIN $VERBOSE --startsim --sim_parms $NRE
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to start simics $?"
         stopserver      ##  kill the server again.
