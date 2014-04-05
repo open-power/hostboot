@@ -8563,7 +8563,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_ALLOW_SINGLE_PORT</id>
         <macro>DIRECT</macro>
@@ -9352,7 +9351,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_DQS_SWIZZLE_TYPE</id>
         <macro>DIRECT</macro>
@@ -9644,7 +9642,6 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES</id>
         <macro>DIRECT</macro>
@@ -9712,7 +9709,6 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PNOR_I2C_ADDRESS_BYTES</id>
         <macro>DIRECT</macro>
@@ -10440,7 +10436,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_PCIE_REFCLOCK_ENABLE</id>
         <macro>DIRECT</macro>
@@ -12064,60 +12059,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-    <id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
-    <description>runtime memory throttle values adjusted by the dimm power test
-        DIMM power test memory throttles for cfg_nm_n_per_mba</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
-    <description>runtime memory throttle values adjusted by the dimm power test
-        DIMM power test memory throttles for cfg_nm_n_per_chip</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id>
-    <description>runtime memory throttle values adjusted by the dimm power test
-        DIMM power test memory throttles for cfg_nm_m</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <!--
 <attribute>
     <id>MSS_DRAM_ACTIVATE_POWER_PERCENT</id>
@@ -12546,7 +12487,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_CPM_TURBO_BOOST_PERCENT</id>
         <macro>DIRECT</macro>

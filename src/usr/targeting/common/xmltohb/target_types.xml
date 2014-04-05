@@ -1087,9 +1087,6 @@
     <attribute><id>LRDIMM_ADDITIONAL_CNTL_WORDS</id></attribute>
     <attribute><id>LRDIMM_RANK_MULT_MODE</id></attribute>
     <attribute><id>EFF_CRC_WR_LATENCY</id></attribute>
-    <attribute><id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
-    <attribute><id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
-    <attribute><id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id></attribute>
     <attribute><id>MSS_THROTTLE_CONTROL_RAS_WEIGHT</id></attribute>
     <attribute><id>MSS_THROTTLE_CONTROL_CAS_WEIGHT</id></attribute>
     <attribute><id>MCBIST_RANDOM_SEED_VALUE</id></attribute>

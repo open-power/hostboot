@@ -2227,7 +2227,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <valueType>uint8</valueType>
     <enum>FALSE = 0, TRUE = 1</enum>
     <platInit/>
-    <writeable/>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
@@ -2238,7 +2237,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <description>DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses. Type 0 is normal, type 1 is for systems with wiring like glacier 1.  Additional types maybe defined if new boards have even different DQS swizzle features</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <writeable/>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
@@ -2390,42 +2388,6 @@ Will be set at an MBA level with one policy to be used</description>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>runtime memory throttle values adjusted by the dimm power test
-DIMM power test memory throttles for cfg_nm_n_per_mba</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistent/>
-</attribute>
-
-<attribute>
-    <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>runtime memory throttle values adjusted by the dimm power test
-DIMM power test memory throttles for cfg_nm_n_per_chip</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistent/>
-</attribute>
-
-<attribute>
-    <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>runtime memory throttle values adjusted by the dimm power test
-DIMM power test memory throttles for cfg_nm_m</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistent/>
 </attribute>
 
 <attribute>
