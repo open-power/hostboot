@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_build_smp_errors.xml,v 1.9 2014/02/26 18:14:12 jmcgill Exp $ -->
+<!-- $Id: proc_build_smp_errors.xml,v 1.10 2014/03/27 03:36:41 jmcgill Exp $ -->
 <!-- Error definitions for proc_build_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -362,10 +362,11 @@
     <ffdc>A_CONNECTIONS_OK</ffdc>
     <ffdc>A_CONNECTED_NODE_IDS</ffdc>
     <ffdc>X_CONNECTIONS_OK</ffdc>
-    <ffdc>X_CONNECTED_NODE_IDS</ffdc>
+    <ffdc>X_CONNECTED_CHIP_IDS</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

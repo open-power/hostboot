@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.15 2014/02/26 18:13:01 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.16 2014/03/27 03:35:53 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1327,7 +1327,7 @@ fapi::ReturnCode proc_build_smp_process_chips(
                     const bool& A_CONNECTIONS_OK = internode_set_match;
                     const ecmdDataBufferBase& A_CONNECTED_NODE_IDS = a_connected_node_ids;
                     const bool& X_CONNECTIONS_OK = intranode_set_match;
-                    const ecmdDataBufferBase& X_CONNECTED_NODE_IDS = x_connected_chip_ids;
+                    const ecmdDataBufferBase& X_CONNECTED_CHIP_IDS = x_connected_chip_ids;
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_INVALID_TOPOLOGY);
                     break;
                 }
