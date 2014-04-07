@@ -55,17 +55,32 @@ void addFruCallouts(TARGETING::Target* i_target,
      case  PIB::PIB_CHIPLET_OFFLINE:
        //Offline should just be a code bug, but it seems that there are
        //  cases where bad hardware can also cause this problem
-       io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_HIGH);
+       //Since we assume code is good before going out, make the
+       //  hw callout a higher priority
        io_errl->addHwCallout( i_target,
-                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::SRCI_PRIORITY_HIGH,
                               HWAS::DELAYED_DECONFIG,
                               HWAS::GARD_NULL );
+       io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_MED);
        break;
+
      case  PIB::PIB_PARTIAL_GOOD:
-     case  PIB::PIB_INVALID_ADDRESS:
        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
+       break;
+
+     case  PIB::PIB_INVALID_ADDRESS:
+       //Invalid Address should just be a code bug, but it seems that there
+       //  are cases where bad hardware can also cause this problem
+       //Since we assume code is good before going out, make the
+       //  hw callout a higher priority
+       io_errl->addHwCallout( i_target,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::DELAYED_DECONFIG,
+                              HWAS::GARD_NULL );
+       io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_MED);
        break;
 
      case PIB::PIB_PARITY_ERROR:

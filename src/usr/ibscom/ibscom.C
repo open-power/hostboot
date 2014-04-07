@@ -815,6 +815,10 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
 
                 //grab some HW regs via FSISCOM
                 ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_target);
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(0x000F0011));
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(0x000F001E));
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(0x000F001F));
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(0x0104000A));
                 ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBS_FIR));
                 ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBSIBERR0));
                 ffdc.addToLog(l_err);
