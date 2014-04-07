@@ -36,8 +36,9 @@
 #include    <targeting/common/targetservice.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/util.H>
-
 #include    <runtime/rt_targeting.H>
+
+#include <runtime/interface.h>
 
 //  fapi support
 #include    <fapi.H>
@@ -223,7 +224,17 @@ namespace RT_OCC
 
         if ( err )
         {
+            uint64_t status = err->plid();
             errlCommit( err, HWPF_COMP_ID );
+
+            if(g_hostInterfaces &&
+               g_hostInterfaces->report_failure)
+            {
+
+                g_hostInterfaces->report_failure(status,
+                                                 i_proc_chip);
+            }
+
             if(rc == 0)
             {
                 rc = -1;
@@ -447,12 +458,29 @@ namespace RT_OCC
                         err = stop_occ(*itarg, NULL);
                     }
 
-                    // TODO RTC 101156
-                    // error handling still being designed
-                    // Need new interface from Sapphire?
                     if( err )
                     {
+                        uint64_t status = err->plid();
                         errlCommit( err, HWPF_COMP_ID );
+
+                        if(g_hostInterfaces &&
+                           g_hostInterfaces->report_failure)
+                        {
+                            RT_TARG::rtChipId_t proc_chip = 0;
+                            errlHndl_t err2 =
+                                RT_TARG::getRtTarget(*itarg, proc_chip);
+
+                            if(err2) // should never happen
+                            {
+                                TRACFCOMP
+                                    (g_fapiTd, ERR_MRK
+                                     "Error converting target to RT chipID");
+                                errlCommit( err2, HWPF_COMP_ID );
+                            }
+
+                            g_hostInterfaces->report_failure(status,
+                                                             proc_chip);
+                        }
                         err = NULL;
                         rc = -1;
                         // keep going
@@ -491,11 +519,44 @@ namespace RT_OCC
                     err = stop_occ(t0,t1);
                 }
 
-                // TODO RTC 101156 Error handling still being designed
-                // Need new interface from Sapphire?
                 if( err )
                 {
+                    uint64_t status = err->plid();
                     errlCommit( err, HWPF_COMP_ID );
+
+                    if(g_hostInterfaces &&
+                       g_hostInterfaces->report_failure)
+                    {
+                        RT_TARG::rtChipId_t proc_chip = 0;
+                        errlHndl_t err2 =
+                            RT_TARG::getRtTarget(t0, proc_chip);
+
+                        if(err2) // should never happen
+                        {
+                            TRACFCOMP
+                                (g_fapiTd, ERR_MRK
+                                 "Error converting target to RT chipID");
+                            errlCommit( err2, HWPF_COMP_ID );
+                        }
+
+                        g_hostInterfaces->report_failure(status,
+                                                         proc_chip);
+
+                        if(t1)
+                        {
+                            err2 = RT_TARG::getRtTarget(t1, proc_chip);
+                            if(err2) // should never happen
+                            {
+                                TRACFCOMP
+                                    (g_fapiTd, ERR_MRK
+                                     "Error converting target to RT chipID");
+                                errlCommit( err2, HWPF_COMP_ID );
+                            }
+
+                            g_hostInterfaces->report_failure(status,
+                                                             proc_chip);
+                        }
+                    }
                     err = NULL;
                     rc = -1;
                     // keep going

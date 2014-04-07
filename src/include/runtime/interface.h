@@ -133,6 +133,12 @@ typedef struct hostInterfaces
      */
     void (*nanosleep)(uint64_t i_seconds, uint64_t i_nano_seconds);
 
+    /**
+     * @brief Report an error to the host
+     * @param[in] Failing status that identifies the nature of the fail
+     * @param[in] Identifier that specifies the failing part
+     */
+    void (*report_failure)( uint64_t i_status, uint64_t i_partId );
 
     // Reserve some space for future growth.
     void (*reserved[32])(void);
