@@ -202,7 +202,7 @@ class FsiDD
         FsiChipInfo_t() :
           slave(NULL), master(NULL),
         type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
-        port(0xFF), cascade(0), flags(0)
+        port(UINT8_MAX), cascade(0), flags(0)
         {};
     };
 
@@ -221,14 +221,14 @@ class FsiDD
         FsiAddrInfo_t( TARGETING::Target* i_target,
                        uint64_t i_address ) :
           fsiTarg(i_target), opbTarg(NULL),
-        relAddr(i_address), absAddr(0xFFFFFFFF)
+        relAddr(i_address), absAddr(UINT32_MAX)
         {};
 
       private:
         /** Default Constructor is not allowed */
         FsiAddrInfo_t() :
           fsiTarg(NULL), opbTarg(NULL), 
-        relAddr(0xFFFFFFFF),absAddr(0xFFFFFFFF)
+        relAddr(UINT32_MAX),absAddr(UINT32_MAX)
         {};        
     };
 

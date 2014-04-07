@@ -2305,11 +2305,13 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
     }
 
 
-    if( (info.master == NULL) || (info.type == FSI_MASTER_TYPE_NO_MASTER) )
+    if( (info.master == NULL)
+        || (info.type == FSI_MASTER_TYPE_NO_MASTER)
+        || (info.port == UINT8_MAX) )
     {
         info.master = NULL;
         info.type = FSI_MASTER_TYPE_NO_MASTER;
-        info.port = 0;
+        info.port = UINT8_MAX;
         info.cascade = 0;
         info.flags = 0;
         info.linkid.id = 0;

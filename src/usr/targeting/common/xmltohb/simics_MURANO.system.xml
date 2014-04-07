@@ -394,6 +394,43 @@
         <id>FRU_ID</id>
         <default>0</default>
     </attribute>
+    <!-- FSI connections -->
+    <!-- FSI is not connected, but stick some values in there
+         to test alt path code -->
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <!-- FSI-A is connected via node0:proc0:MFSI-1 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0xFF</default>
+    </attribute>
+    <!-- FSI-B is not connected -->
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no B path -->
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no B path -->
+    </attribute>
+    <!-- End FSI connections -->
     <attribute>
         <id>FABRIC_NODE_ID</id>
         <default>0</default>
@@ -1218,18 +1255,10 @@
         <id>FRU_ID</id>
         <default>0</default>
     </attribute>
-    <!-- FSI is connected via proc0:MFSI-0 -->
-    <attribute>
-        <id>FSI_MASTER_CHIP</id>
-        <default>physical:sys-0/node-0/proc-0</default>
-    </attribute>
+    <!-- FSI connections -->
     <attribute>
         <id>FSI_MASTER_TYPE</id>
         <default>MFSI</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_PORT</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -1242,6 +1271,25 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <!-- FSI-A is connected via node0:proc0:MFSI-1 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>1</default>
+    </attribute>
+    <!-- FSI-B is not connected -->
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no B path -->
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no B path -->
+    </attribute>
+    <!-- End FSI connections -->
     <attribute>
         <id>FABRIC_NODE_ID</id>
         <default>0</default>
