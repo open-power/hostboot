@@ -35,7 +35,6 @@
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfMbaDomain.H>
-#include <sys/sync.h>
 
 using namespace TARGETING;
 using namespace HWAS;
@@ -62,10 +61,9 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 {
     #define PRDF_FUNC "PRDF::analyzeIplCEStats"
 
-    static mutex_t lock = MUTEX_INITIALIZER;
-    mutex_lock(&lock);
-
     PRDF_ENTER( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
+
+    PRDF_SYSTEM_SCOPE_MUTEX;
 
     int32_t o_rc = SUCCESS;
     o_calloutMade = false;
@@ -102,8 +100,6 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 
     PRDF_EXIT( PRDF_FUNC"(0x%08x), o_calloutMade:%u",
                getHuid(i_mba), o_calloutMade );
-
-    mutex_unlock(&lock);
 
     return o_rc;
 

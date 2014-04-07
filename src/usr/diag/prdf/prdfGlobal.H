@@ -37,6 +37,7 @@
 /*--------------------------------------------------------------------*/
 #include <prdfGlobal_common.H>
 #include <util/singleton.H>
+#include <sys/sync.h> // for mutex support
 
 /*--------------------------------------------------------------------*/
 /*  Singleton macros common to both FSP and Hostboot                  */
@@ -94,5 +95,113 @@ typedef uint32_t hwTableContent;
  *          CONTENT_HW is a FSP specific enum val originally defined in dump.
  */
 const uint32_t CONTENT_HW = 0x40000000;
+
+/**
+ * @brief   This class provides general purpose mutual
+ *          exclusion (mutex) class for locking static or
+ *          member data to ensure thread safety.
+ */
+class prdfMutex
+{
+public:
+
+    /**
+     * Constructor
+     */
+    prdfMutex();
+
+    /**
+     * Destructor
+     */
+    ~prdfMutex();
+
+    /**
+     * Lock this mutex
+     */
+    void lock();
+
+    /**
+     * Unlock this mutex
+     */
+    void unlock();
+
+private:
+    mutex_t ivMutex;
+
+    // No copies or assignments allowed
+    prdfMutex(prdfMutex& r);
+    prdfMutex& operator=(prdfMutex& r);
+};
+
+inline prdfMutex::prdfMutex()
+{
+    mutex_init(&ivMutex);
+}
+
+inline prdfMutex::~prdfMutex()
+{
+    mutex_destroy(&ivMutex);
+}
+
+inline void prdfMutex::lock()
+{
+    mutex_lock( &ivMutex );
+}
+
+inline void prdfMutex::unlock()
+{
+    mutex_unlock( &ivMutex );
+}
+
+/**
+ * @brief   This class provides interfaces to
+ *          acquire a scope mutex
+ */
+class prdfScopeMutex
+{
+public:
+    /**
+     * Constructor (locks the specified mutex)
+     *
+     * @param i_mutex the mutex to be locked
+     *        for the scope of this function
+     */
+    prdfScopeMutex(prdfMutex& i_mutex);
+
+    /**
+     * Destructor
+     */
+    ~prdfScopeMutex();
+
+private:
+    prdfMutex* ivMutex;
+
+    // No copies or assignments allowed
+    prdfScopeMutex(prdfScopeMutex& r);
+    prdfScopeMutex& operator=(prdfScopeMutex& r);
+};
+
+inline prdfScopeMutex::prdfScopeMutex(prdfMutex& i_mutex)
+: ivMutex(&i_mutex)
+{
+    ivMutex->lock();
+}
+
+inline prdfScopeMutex::~prdfScopeMutex()
+{
+    ivMutex->unlock();
+}
+
+/**
+  * @brief Mutex to prevent concurrent accesses
+  *
+  */
+static prdfMutex g_mutex;
+
+/**
+ * @brief macro to acquire global scope mutex
+ */
+#define PRDF_SYSTEM_SCOPE_MUTEX         \
+    prdfScopeMutex dataLock(g_mutex);
 
 #endif // PRDF_GLOBAL_HB_H

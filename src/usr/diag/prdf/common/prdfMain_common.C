@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -155,6 +155,11 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
                  const AttnList & i_attnList )
 {
     PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_attentionType );
+
+    // TODO RTC 103728: This is only needed for Hostboot code at this time,
+    //      however, this issue is intented to address code changes needed to
+    //      make PRD thread safe, either part or as a whole.
+    PRDF_SYSTEM_SCOPE_MUTEX;
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;

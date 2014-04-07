@@ -39,7 +39,6 @@
 #include "common/plat/pegasus/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"
 #include "plat/pegasus/prdfPlatCalloutUtil.H"
-#include <sys/sync.h>
 
 using namespace HWAS;
 using namespace std;
@@ -329,10 +328,9 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
 {
     #define PRDF_FUNC "PRDF::restoreDramRepairs"
 
-    static mutex_t lock = MUTEX_INITIALIZER;
-    mutex_lock(&lock);
-
     PRDF_ENTER( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
+
+    PRDF_SYSTEM_SCOPE_MUTEX;
 
     bool calloutMade = false;
 
@@ -400,8 +398,6 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
     } while(0);
 
     PRDF_EXIT( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
-
-    mutex_unlock(&lock);
 
     return calloutMade ? FAIL : SUCCESS;
 
