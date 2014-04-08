@@ -36,6 +36,7 @@
 #else
   #include <ecmdDataBuffer.H>
   #include <hwsvExecutionService.H>
+  #include <hwco_service_codes.H>
 #endif
 
 #include <prdfHomRegisterAccess.H>
@@ -138,6 +139,19 @@ uint32_t ScomService::Access(TARGETING::TargetHandle_t i_target,
                                          bs,
                                          registerId,
                                          operation);
+    }
+    #endif
+
+    #ifndef __HOSTBOOT_MODULE
+    if (errlH != NULL && HWCO_SLW_IN_CHECKSTOP == errlH->getRC())
+    {
+        // We can get a flood of errors from a core in sleep/winkle at the
+        // time of a checkstop. An errorlog will already be committed for
+        // for this, so we will ignore these errors here.
+        delete errlH;
+        errlH = NULL;
+        rc = PRD_SCANCOM_FAILURE;
+        bs.Clear();
     }
     #endif
 
