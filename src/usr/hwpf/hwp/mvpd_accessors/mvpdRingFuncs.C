@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mvpdRingFuncs.C,v 1.9 2014/02/12 22:14:51 mjjones Exp $
+// $Id: mvpdRingFuncs.C,v 1.11 2014/04/08 20:52:49 whs Exp $
 /**
  *  @file mvpdRingFuncs.C
  *
