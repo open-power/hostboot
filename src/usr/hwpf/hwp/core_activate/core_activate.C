@@ -369,6 +369,16 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                        "call_host_activate_slave_cores: Waking %x",
                        pir );
 
+            // Get EX FAPI target
+            TARGETING::TargetHandleList targetList;
+            getParentAffinityTargets(targetList,
+                                     (*l_core),
+                                     TARGETING::CLASS_UNIT,
+                                     TARGETING::TYPE_EX);
+            TARGETING::Target* l_ex = targetList[0];
+            const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
+                                 const_cast<TARGETING::Target*>(l_ex) );
+
             int rc = cpu_start_core(pir,en_threads);
 
             // Handle time out error
@@ -379,10 +389,6 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                            "Time out rc from kernel %d on core %x",
                            rc,
                            pir);
-
-                // Get core's FAPI target
-                const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
-                        (const_cast<TARGETING::Target*> (*l_core)) );
 
                 FAPI_INVOKE_HWP( l_errl, proc_check_slw_done,
                                  l_fapi_ex_target);
@@ -443,6 +449,40 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                 else
                 {
                     errlCommit( l_tmperrl, HWPF_COMP_ID );
+                }
+            }
+            else //Core out of winkle sucessfully, issue SPWU for PRD
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Running p8_cpu_special_wakeup (ENABLE)"
+                          " EX target HUID %.8X",
+                          TARGETING::get_huid(l_ex));
+
+                // Enable special wakeup on core
+                FAPI_INVOKE_HWP( l_errl,
+                                 p8_cpu_special_wakeup,
+                                 l_fapi_ex_target,
+                                 SPCWKUP_ENABLE,
+                                 HOST);
+
+                if( l_errl )
+                {
+                    ErrlUserDetailsTarget(l_ex).addToLog( l_errl );
+
+                    // Create IStep error log and cross ref error that occurred
+                    l_stepError.addErrorDetails( l_errl );
+
+                    // Commit Error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                             "ERROR : enable p8_cpu_special_wakeup, PLID=0x%x",
+                             l_errl->plid()  );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "SUCCESS: enable p8_cpu_special_wakeup");
                 }
             }
         }
@@ -517,38 +557,6 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "SUCCESS : proc_post_winkle" );
-                }
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Running p8_cpu_special_wakeup (ENABLE)"
-                          " EX target HUID %.8X",
-                          TARGETING::get_huid(l_exTarget));
-
-                // Enable special wakeup on core
-                FAPI_INVOKE_HWP( l_errl,
-                                 p8_cpu_special_wakeup,
-                                 l_fapi_ex_target,
-                                 SPCWKUP_ENABLE,
-                                 HOST);
-
-                if( l_errl )
-                {
-                    ErrlUserDetailsTarget(l_pChipTarget).addToLog( l_errl );
-
-                    // Create IStep error log and cross ref error that occurred
-                    l_stepError.addErrorDetails( l_errl );
-
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                             "ERROR : enable p8_cpu_special_wakeup, PLID=0x%x",
-                             l_errl->plid()  );
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "SUCCESS: enable p8_cpu_special_wakeup");
                 }
             }
 
