@@ -352,7 +352,9 @@ $(call GENTARGET, ${IF_CMP_FLEX_TARGET}) : \
 	$(C2) "    FLEX       $(notdir $<)"
 	$(C1)flex -o$@ $^
 
-$(GENDIR)/$(IF_CMP_SUBDIR)/%.host.o: ifcompiler/%.C $(IF_COMPILER_H_FILES)
+$(GENDIR)/$(IF_CMP_SUBDIR)/%.host.o: \
+	    ifcompiler/%.C $(IF_COMPILER_H_FILES) \
+	    $(GENDIR)/$(IF_CMP_YACC_H_TARGET)
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
 			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
