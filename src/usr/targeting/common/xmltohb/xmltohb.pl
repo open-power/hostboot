@@ -4517,7 +4517,16 @@ sub packSingleSimpleTypeAttribute {
         $simpleTypeProperties->{$typeName}{specialPolicies}->($$attributeRef,
             $value);
 
-        if ($value eq 'true')
+        if (ref($value) eq "HASH")
+        {
+            # value is a hash ref, XML::Simple represents an empty element with
+            # an empty hash. Map to zero.
+            # TODO RTC 103737. Remove this check. Empty elements should cause
+            # a compile failure. This RTC will resolve a Brazos MFG Targeting
+            # image problem where chip IDs from the MRW are empty elements.
+            $value = 0;
+        }
+        elsif ($value eq 'true')
         {
             $value = 1;
         }
