@@ -477,8 +477,8 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
     #define PRDF_FUNC "[PlatServices::mssSetMarkStore] "
 
     int32_t o_rc = SUCCESS;
-
     errlHndl_t errl = NULL;
+    o_writeBlocked = false;
 
     uint8_t sm = io_mark.getSM().isValid() ? io_mark.getSM().getSymbol()
                                            : MSS_INVALID_SYMBOL;
