@@ -342,10 +342,13 @@ include ${ROOTPATH}/config.mk
 make_ifcompiler_dir:
 	@mkdir -p $(GENDIR)/$(IF_CMP_SUBDIR)
 
-$(call GENTARGET, ${IF_CMP_YACC_C_TARGET} ${IF_CMP_YACC_H_TARGET}) : \
+$(call GENTARGET, ${IF_CMP_YACC_C_TARGET}) : \
         ifcompiler/initCompiler.y
 	$(C2) "    YACC       $(notdir $<)"
 	$(C1)yacc -d -o ${GENDIR}/${IF_CMP_YACC_C_TARGET} $^
+
+$(call GENTARGET, ${IF_CMP_YACC_H_TARGET}) : \
+    $(call GENTARGET, ${IF_CMP_YACC_C_TARGET}) ifcompiler/initCompiler.y
 
 $(call GENTARGET, ${IF_CMP_FLEX_TARGET}) : \
         ifcompiler/initCompiler.lex
