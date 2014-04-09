@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/trace/runtime/makefile $
+# $Source: src/usr/errl/runtime/makefile $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -27,7 +27,7 @@ MODULE = errl_rt
 OBJS = errlentry.o rt_errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
        errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
        errludstring.o errludbacktrace.o errludattribute.o \
-       errludcallout.o rt_vfs.o
+       errludcallout.o rt_vfs.o errludlogregister.o
 
 SUBDIRS = test.d
 

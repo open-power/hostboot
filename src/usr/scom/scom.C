@@ -40,6 +40,8 @@
 #include <sys/time.h>
 #include <xscom/piberror.H>
 #include <errl/errludtarget.H>
+#include <errl/errludlogregister.H>
+
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
@@ -48,6 +50,17 @@ TRAC_INIT(&g_trac_scom, SCOM_COMP_NAME, KILOBYTE, TRACE::BUFFER_SLOW); //1K
 
 namespace SCOM
 {
+/**
+ * @brief Add any additional FFDC for this specific type of scom
+ *
+ * @param[in] i_err  Log to add FFDC to
+ * @param[in] i_target  Target of SCOM operation
+ * @param[in] i_addr  SCOM address
+ */
+void addScomFailFFFDC( errlHndl_t i_err,
+                       TARGETING::Target* i_target,
+                       uint64_t i_addr );
+
 
 // Register Scom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -537,7 +550,53 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                           io_buflen, accessType_flag, i_addr );
     }
 
+    //Add some additional FFDC based on the specific operation
+    if( l_err )
+    {
+        addScomFailFFFDC( l_err, i_target, i_addr );
+    }
+
     return l_err;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void addScomFailFFFDC( errlHndl_t i_err,
+                       TARGETING::Target* i_target,
+                       uint64_t i_addr )
+{
+    // Read some error regs from scom
+    ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
+    bool addit = false;
+
+    //PBA scoms on the processor
+    if( ((i_addr & 0xFFFFF000) == 0x00064000)
+        && (TARGETING::TYPE_PROC
+            == i_target->getAttr<TARGETING::ATTR_TYPE>()) )
+    {
+        addit = true;
+        //look for hung operations on the PBA
+        uint64_t ffdc_regs[] = {
+            //grab the PBA buffers in case something is hung
+            0x02010850, //PBARBUFVAL0
+            0x02010851, //PBARBUFVAL1
+            0x02010852, //PBARBUFVAL2
+            0x02010858, //PBAWBUFVAL0
+            0x02010859, //PBAWBUFVAL1
+
+            0x020F0012, //PB_GP3 (has fence information)
+        };
+        for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
+        {
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs[x]));
+        }
+    }
+
+    if( addit )
+    {
+        l_scom_data.addToLog(i_err);
+    }
 }
 
 
