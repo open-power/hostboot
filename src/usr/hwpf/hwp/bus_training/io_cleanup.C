@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_cleanup.C,v 1.5 2014/03/13 16:01:03 varkeykv Exp $
+// $Id: io_cleanup.C,v 1.8 2014/04/09 16:23:51 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -233,36 +233,6 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
     return rc;
 }
 
-// Determines if target is a master...
-static ReturnCode isChipMaster(const Target&  chip_target, io_interface_t chip_interface,uint32_t current_group, bool   & masterchip_found ) {
-    ReturnCode rc;
-    ecmdDataBufferBase    mode_data(16);
-    masterchip_found=false;
-
-    // Check if rx_master_mode bit is set for chip
-    // Read  rx_master_mode  for chip
-    if(chip_interface==CP_FABRIC_X0)
-    {
-	rc=GCR_read(chip_target ,  chip_interface, ei4_rx_mode_pg,  current_group,0, mode_data);
-    }
-    else
-    {
-	rc=GCR_read(chip_target ,  chip_interface, rx_mode_pg,  current_group,0, mode_data);
-    }
-    if (rc) {
-         FAPI_ERR("io_cleanup: Error reading master mode bit\n");
-    }
-    else
-    {
-        // Check if  chip is master
-        if (mode_data.isBitSet(0)) {
-         FAPI_DBG("This chip is a master\n");
-            masterchip_found  =true;
-        }
-    }
-    return(rc);
-}
-
 
 // Cleans up for Centaur Reconfig or Abus hot plug case
 ReturnCode io_cleanup(const Target &master_target,const Target &slave_target){
@@ -270,7 +240,6 @@ ReturnCode io_cleanup(const Target &master_target,const Target &slave_target){
      io_interface_t master_interface,slave_interface;
      uint32_t master_group=0;
      uint32_t slave_group=0;
-     bool is_master=false;
 
 
      // This is a DMI/MC bus
@@ -280,20 +249,8 @@ ReturnCode io_cleanup(const Target &master_target,const Target &slave_target){
           slave_interface=CEN_DMI; // Centaur scom base
           master_group=3; // Design requires us to do this as per scom map and layout
           slave_group=0;
-          rc=isChipMaster(master_target,master_interface,master_group,is_master);
-          if(rc.ok()){
-               if(!is_master)
-               {
-                    FAPI_DBG("DMI Bus ..target swap performed");
-                    rc=do_cleanup(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
-                    if(rc) return rc;
-               }
-               else
-               {
-                    rc=do_cleanup(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-                    if(rc) return rc;
-               }
-          }
+          rc=do_cleanup(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+          if(rc) return rc;
      }
      //This is an A Bus
      else if( (master_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT )&& (slave_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT)){
