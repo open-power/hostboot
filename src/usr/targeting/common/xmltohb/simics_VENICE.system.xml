@@ -521,7 +521,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -1732,7 +1732,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -2943,7 +2943,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -4154,7 +4154,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -5364,7 +5364,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -6543,7 +6543,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -7720,7 +7720,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
@@ -8897,7 +8897,7 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
     <attribute>
         <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
         <default>
-            0x000,0x000
+            0x00000080, 0x00000080
         </default>
     </attribute>
     <!-- End PROC_PCIE_ attributes -->
