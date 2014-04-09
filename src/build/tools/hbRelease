@@ -1351,8 +1351,11 @@ sub gerrit_query
 sub gerrit_query_commit
 {
     my $commit = shift;
+
+    my $project = config_project();
     
-    my $query_result = gerrit_query("$commit branch:".$globals{"branch"});
+    my $query_result = gerrit_query("$commit project:$project ".
+                                    "branch:".$globals{"branch"});
     foreach my $result (@{$query_result})
     {
         if ($result->{id} eq $commit)
