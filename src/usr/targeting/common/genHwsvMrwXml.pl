@@ -2033,8 +2033,17 @@ sub generate_proc
         <default>$dcm_installed</default>
     </attribute>";
 
+    #fixme-RTC:103921 - should not default anything to ACTING_MASTER
     ## Master value ##
-    if( $is_master )
+    if( $is_master && ($proc == 0) )
+    {
+        print "
+    <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
+    </attribute>";
+    }
+    elsif( $is_master )
     {
         print "
     <attribute>
