@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.C,v 1.19 2014/03/06 19:03:25 stillgs Exp $
+// $Id: p8_pm_pmc_firinit.C,v 1.20 2014/04/07 02:55:10 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -363,11 +363,11 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             e_rc |= pmc_ocb_mask_hi.setBit(PSTATE_INTERCHIP_ERRORFRAME_ERR      ); //  8  pstate_interchip_errorframe_err
             e_rc |= pmc_ocb_mask_hi.setBit(PSTATE_MS_FSM_ERR                    ); //  9  pstate_ms_fsm_err
             e_rc |= pmc_ocb_mask_hi.setBit(MS_COMP_PARITY_ERR                   ); // 10  ms_comp_parity_err
-            e_rc |= pmc_ocb_mask_hi.setBit(IDLE_PORESW_FATAL_ERR                ); // 11  idle_poresw_fatal_err
-            e_rc |= pmc_ocb_mask_hi.setBit(IDLE_PORESW_STATUS_RC_ERR            ); // 12  idle_poresw_status_rc_err
-            e_rc |= pmc_ocb_mask_hi.setBit(IDLE_PORESW_STATUS_VALUE_ERR         ); // 13  idle_poresw_status_value_err
-            e_rc |= pmc_ocb_mask_hi.setBit(IDLE_PORESW_WRITE_WHILE_INACTIVE_ERR ); // 14  idle_poresw_write_while_inactive_err
-            e_rc |= pmc_ocb_mask_hi.setBit(IDLE_PORESW_TIMEOUT_ERR              ); // 15  idle_poresw_timeout_err
+//          Left 0                        (IDLE_PORESW_FATAL_ERR                ); // 11  idle_poresw_fatal_err
+//          Left 0                        (IDLE_PORESW_STATUS_RC_ERR            ); // 12  idle_poresw_status_rc_err
+//          Left 0                        (IDLE_PORESW_STATUS_VALUE_ERR         ); // 13  idle_poresw_status_value_err
+//          Left 0                        (IDLE_PORESW_WRITE_WHILE_INACTIVE_ERR ); // 14  idle_poresw_write_while_inactive_err
+//          Left 0                        (IDLE_PORESW_TIMEOUT_ERR              ); // 15  idle_poresw_timeout_err
 //          Left 0                        (IDLE_OCI_MASTER_WRITE_TIMEOUT_ERR    ); // 16  idle_oci_master_write_timeout_err
             e_rc |= pmc_ocb_mask_hi.setBit(IDLE_INTERNAL_ERR                    ); // 17  idle_internal_err
             e_rc |= pmc_ocb_mask_hi.setBit(INT_COMP_PARITY_ERR                  ); // 18  int_comp_parity_err
