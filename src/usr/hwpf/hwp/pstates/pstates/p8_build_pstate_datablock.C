@@ -20,14 +20,16 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.33 2014/03/12 00:47:01 stillgs Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.34 2014/04/07 02:17:52 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! OWNER NAME: Jim Yacynych         Email: jimyac@us.ibm.com
+// *! OWNER NAME:  Jim Yacynych         Email: jimyac@us.ibm.com
+// *! BACKUP NAME: Greg Still           Email: stillgs@us.ibm.com
+// *! BACKUP NAME: David Du             Email: daviddu@us.ibm.com
 // *!
 
 /// \file p8_build_pstate_datablock.C
@@ -1074,6 +1076,8 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
   uint32_t   pstate_diff;
   gpst_entry_t entry;
   uint8_t    gpsi_max;
+  
+  const uint32_t MAXIMUM_BOOST_PERCENT_SUPPORTED = 20;
 
   do
   {
@@ -1082,6 +1086,17 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
       FAPI_INF("CPM Turbo Boost Attribute = 0 -- no boosting will be done");
       break;
     }
+    
+    // check that percentage is rational.  Note: attribute information is .1 percent units
+    if (attr_boost_percent > MAXIMUM_BOOST_PERCENT_SUPPORTED * 10) { 
+        FAPI_ERR("Boost percentage is greater than maximum supported.  Max: %u; Value: %u",
+                    MAXIMUM_BOOST_PERCENT_SUPPORTED, attr_boost_percent);        
+        const uint32_t& MAXBOOSTPERCENT  = MAXIMUM_BOOST_PERCENT_SUPPORTED;
+        const uint32_t& ATTRBOOSTPERCENT = attr_boost_percent;
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_INVALID_BOOST_PERCENTAGE_ERROR); 
+        break;   
+    }
+    
     // calculate percent to boost
     boosted_pct = 1.0 + (BOOST_PCT_UNIT * (double)attr_boost_percent);
 
@@ -1108,7 +1123,18 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
       FAPI_INF("CPM Turbo Boost Attribute resulted in no increase in pstates - boost_pct = %f turbo_freq_khz = %u boosted_freq_khz = %u",
                boosted_pct,  pstate0_frequency_khz, boosted_freq_khz);
       break;
-    }
+    } 
+    else if (pstate_diff > 255) {
+        FAPI_ERR("Percentage boost calculation overrun produced invalid Pstate Difference: %u", pstate_diff);
+        const uint32_t& PSTATEDIFF = pstate_diff;
+        const uint32_t& BOOSTEDFREQKHZ = boosted_freq_khz;
+        const uint32_t& PSTATE0FREQKHZ = pstate0_frequency_khz;
+        const uint32_t& FREQSTEPKHZ = frequency_step_khz;
+        const uint32_t& ATTRBOOSTPERCENT = attr_boost_percent;
+        const double& BOOSTEDPCT = boosted_pct;
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSTATE_DIFF_ERROR); 
+        break;   
+    } 
     else {
       gpsi_max    = pss->gpst.entries - 1;
       entry.value = revle64(pss->gpst.pstate[gpsi_max].value);

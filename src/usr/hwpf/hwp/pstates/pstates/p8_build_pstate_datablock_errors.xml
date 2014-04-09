@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.11 2014/02/24 15:32:29 jimyac Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.12 2014/04/07 02:11:36 stillgs Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
  <!-- *********************************************************************** -->
@@ -352,5 +352,32 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>         
+  </hwpError>  
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_DIFF_ERROR</rc>
+    <description>Percentage boost calculation overrun produced invalid Pstate Difference</description>
+    <ffdc>PSTATEDIFF</ffdc>
+    <ffdc>BOOSTEDFREQKHZ</ffdc>
+    <ffdc>PSTATE0FREQKHZ</ffdc>
+    <ffdc>FREQSTEPKHZ</ffdc>
+    <ffdc>ATTRBOOSTPERCENT</ffdc>
+    <ffdc>BOOSTEDPCT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError> 
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_INVALID_BOOST_PERCENTAGE_ERROR</rc>
+    <description>Percentage boost request is greater than the maximum supported</description>
+    <ffdc>MAXBOOSTPERCENT</ffdc>
+    <ffdc>ATTRBOOSTPERCENT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError> 
+  <!-- *********************************************************************** -->    
 </hwpErrors>
