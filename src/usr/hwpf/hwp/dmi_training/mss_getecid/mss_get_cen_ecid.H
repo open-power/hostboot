@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.H,v 1.11 2013/10/03 08:07:47 bellows Exp $
+// $Id: mss_get_cen_ecid.H,v 1.12 2014/03/25 21:09:09 uid157495 Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.11  | sglancy  |25-MAR-14| Minor Review Comments addressed
 //   1.10  | bellows  |02-OCT-13| Minor Review Comments addressed
 //   1.9   | bellows  |17-SEP-13| Allow for external wrapper parsing
 //   1.8   | bellows  |26-MAR-13| Reviewer found updates
@@ -51,6 +52,7 @@
 
 #ifndef _MSS_GET_CEN_ECID_H_
 #define _MSS_GET_CEN_ECID_H_
+
 
 //------------------------------------------------------------------------------
 // Includes

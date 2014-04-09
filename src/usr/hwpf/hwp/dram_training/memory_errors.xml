@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_errors.xml,v 1.43 2014/03/09 08:03:24 gpaulraj Exp $ -->
+<!-- $Id: memory_errors.xml,v 1.45 2014/03/26 21:30:50 lapietra Exp $ -->
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 <!-- *********************************************************************** -->
 
@@ -402,6 +402,7 @@
   <scomRegister>CEN_DMIFIR_ACT1_0x02010407</scomRegister>
   <scomRegister>CEN_DMIFIR_WOF_0x02010408</scomRegister>
 </registerFfdc>
+
 
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 </hwpErrors>

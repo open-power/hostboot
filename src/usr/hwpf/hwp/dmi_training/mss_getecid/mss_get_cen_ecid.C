@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.30 2013/11/14 16:55:39 bellows Exp $
+// $Id: mss_get_cen_ecid.C,v 1.31 2014/03/25 21:08:53 uid157495 Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.31  | sglancy  |25-MAR-14| RAS review updates
 //   1.30  | bellows  |11-NOV-13| Gerrit review updates
 //   1.29  | bellows  |08-NOV-13| Added ATTR_MSS_INIT_STATE to track IPL states
 //   1.28  | bellows  |02-OCT-13| Minor Review Comments addressed
@@ -66,6 +67,7 @@
 //   1.7   | sglancy  | 6-DEC-12| Updated to coincide with firmware updates to ECID attribute
 //   1.6   | sglancy  | 5-DEC-12| Updated to coincide with firmware change requests
 //   1.5-1 | sglancy  | 5-DEC-12| Lost due to no update log
+
 
 //------------------------------------------------------------------------------
 // Includes
@@ -117,13 +119,15 @@ using namespace fapi;
       rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target, l_attr_mss_init_state);
       if(rc) return rc;
 
+      // If struct was valid, and the MSS_INIT_STATE set successfully,
+      // procedure is done.
       return rc;
     }
 
     uint8_t l_psro;
 
     // mark HWP entry
-
+    uint32_t rc_ecmd = 0;
     ecmdDataBufferBase scom(64);
     FAPI_IMP("Entering mss_get_cen_ecid....");
     rc = fapiGetScom( i_target, ECID_PART_0_0x00010000, scom );
@@ -132,7 +136,13 @@ using namespace fapi;
       FAPI_ERR("mss_get_cen_ecid: could not read scom address 0x00010000" );
       return rc;
     }
-    scom.reverse();
+    rc_ecmd = scom.reverse();
+    if(rc_ecmd)
+    {
+      FAPI_ERR("mss_get_cen_ecid: error manipulating ecmdDataBufferBase");
+      rc.setEcmdError(rc_ecmd);
+      return rc;
+    }
     ecid_struct.io_ecid[0] = scom.getDoubleWord(0);
 
     //gets the second part of the ecid and sets the attribute
@@ -142,7 +152,13 @@ using namespace fapi;
       FAPI_ERR("mss_get_cen_ecid: could not read scom address 0x00010001" );
       return rc;
     }
-    scom.reverse();
+    rc_ecmd |= scom.reverse();
+    if(rc_ecmd)
+    {
+      FAPI_ERR("mss_get_cen_ecid: error manipulating ecmdDataBufferBase");
+      rc.setEcmdError(rc_ecmd);
+      return rc;
+    }
     ecid_struct.io_ecid[1] = scom.getDoubleWord(0);
 
     uint64_t ecid[2];
@@ -231,7 +247,7 @@ using namespace fapi;
                                    uint8_t & o_nwell_misplacement ){
 //get bit128
     uint8_t bit128=0;
-    uint32_t rc_ecmd;
+    uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
     ecmdDataBufferBase scom(64);
 
@@ -239,9 +255,13 @@ using namespace fapi;
     o_bluewaterfall_broken = 0;
 
 
-    scom.setDoubleWord(0, ecid[1]);
-
-    rc_ecmd = scom.extract(&bit128,63,1);
+    rc_ecmd = scom.setDoubleWord(0, ecid[1]);
+    if(rc_ecmd) {
+      FAPI_ERR("mss_get_cen_ecid: error manipulating ecmdDataBufferBase" );
+      rc.setEcmdError(rc_ecmd);
+      return rc;
+    }
+    rc_ecmd |= scom.extract(&bit128,63,1);
     bit128 = bit128 >> 7;
     if(rc_ecmd) {
       FAPI_ERR("mss_get_cen_ecid: could not extract cache data_valid bit" );
@@ -253,7 +273,7 @@ using namespace fapi;
 
     //gets bits 113 and 114 to determine the state of the cache
       uint8_t bit113_114=0;
-      rc_ecmd = scom.extract(&bit113_114,48,2);
+      rc_ecmd |= scom.extract(&bit113_114,48,2);
       bit113_114 = bit113_114 >> 6;
       uint8_t t;
       if(rc_ecmd) {
@@ -289,7 +309,7 @@ using namespace fapi;
       if (i_checkL4CacheEnableUnknown)
       {
         uint8_t bit127 = 0;
-        rc_ecmd = scom.extract(&bit127,62,1);
+        rc_ecmd |= scom.extract(&bit127,62,1);
         bit127 = bit127 >> 7;
         if(rc_ecmd) {
           FAPI_ERR("mss_get_cen_ecid: could not extract ECBIT bit" );
@@ -319,13 +339,13 @@ using namespace fapi;
     //reads in the ECID info for whether a DDR port side is good or bad
     //This is only defined for DD1.x parts
     if(i_ecidContainsPortLogicBadIndication ) {
-      rc_ecmd = scom.extract(&o_ddr_port_status,50,2);
-      o_ddr_port_status = o_ddr_port_status >> 6;
+      rc_ecmd |= scom.extract(&o_ddr_port_status,50,2);
       if(rc_ecmd) {
         FAPI_ERR("mss_get_cen_ecid: could not extract DDR status data" );
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
+      o_ddr_port_status = o_ddr_port_status >> 6;
     }
     else {
       o_ddr_port_status = 0x0; // logic in both ports are good
@@ -334,7 +354,7 @@ using namespace fapi;
 
      //116..123         average PSRO from 85C wafer test
     uint8_t bit117_124=0;
-    rc_ecmd = scom.extract(&bit117_124,52,8);
+    rc_ecmd |= scom.extract(&bit117_124,52,8);
     if(rc_ecmd) {
       FAPI_ERR("mss_get_cen_ecid: could not extract PSRO" );
       rc.setEcmdError(rc_ecmd);
