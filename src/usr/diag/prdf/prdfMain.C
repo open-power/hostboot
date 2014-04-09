@@ -45,6 +45,12 @@ namespace PRDF
 using namespace PlatServices;
 
 //------------------------------------------------------------------------------
+// Forward references
+//------------------------------------------------------------------------------
+
+extern errlHndl_t noLock_refresh();
+
+//------------------------------------------------------------------------------
 // Platform specific helper function for PRDF::initialize()
 //------------------------------------------------------------------------------
 
@@ -63,7 +69,8 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 
     PRDF_ENTER( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
 
-    PRDF_SYSTEM_SCOPE_MUTEX;
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
 
     int32_t o_rc = SUCCESS;
     o_calloutMade = false;
@@ -111,22 +118,26 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 errlHndl_t startScrub()
 {
     #define PRDF_FUNC "[PRDF::startScrub] "
+    PRDF_ENTER( PRDF_FUNC );
 
     errlHndl_t o_errl = NULL;
 
     int32_t l_rc = SUCCESS;
     HUID nodeId = INVALID_HUID;
 
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
+
     do
     {
         // Since the last refresh is in istep10 host_prd_hwreconfig,
         // it may be good to call it again here at istep16 mss_scrub
         // to remove any non-functional MBAs from PRD system model.
-        o_errl = refresh();
+        o_errl = noLock_refresh();
         // This shouldn't return any error but if it does, break out
         if(NULL != o_errl)
         {
-            PRDF_ERR( PRDF_FUNC"refresh() failed" );
+            PRDF_ERR( PRDF_FUNC"noLock_refresh() failed" );
             break;
         }
 
@@ -173,6 +184,8 @@ errlHndl_t startScrub()
         // Add traces
         o_errl->collectTrace( PRDF_COMP_NAME, 512 );
     }
+
+    PRDF_EXIT( PRDF_FUNC );
 
     return o_errl;
 

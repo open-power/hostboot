@@ -330,7 +330,8 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
 
     PRDF_ENTER( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
 
-    PRDF_SYSTEM_SCOPE_MUTEX;
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
 
     bool calloutMade = false;
 

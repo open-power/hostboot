@@ -79,12 +79,6 @@
   SUCCESS
 
 /**
- * @brief macro to acquire scope lock on system target
- *        This macro is currently not used in hostboot.
- */
-#define PRDF_SYSTEM_SCOPELOCK
-
-/**
  * @brief   defined dump content to get through hostboot compilation.
  *          hwTableContent is a FSP specific enum originally defined in dump.
  */
@@ -201,7 +195,7 @@ static prdfMutex g_mutex;
 /**
  * @brief macro to acquire global scope mutex
  */
-#define PRDF_SYSTEM_SCOPE_MUTEX         \
+#define PRDF_SYSTEM_SCOPELOCK         \
     prdfScopeMutex dataLock(g_mutex);
 
 #endif // PRDF_GLOBAL_HB_H

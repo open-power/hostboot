@@ -84,14 +84,11 @@ void unInitialize()
 
 //------------------------------------------------------------------------------
 
-errlHndl_t initialize()
+errlHndl_t noLock_initialize()
 {
-    PRDF_ENTER( "PRDF::initialize()" );
+    #define PRDF_FUNC "PRDF::noLock_initialize() "
 
-    // will unlock when going out of scope
-    // this lock is recursive so it's ok to lock again
-    // as long as calling from the same thread
-    PRDF_SYSTEM_SCOPELOCK;
+    PRDF_ENTER( PRDF_FUNC );
 
     g_prd_errlHndl = NULL; // This forces any previous errls to be committed
 
@@ -131,7 +128,7 @@ errlHndl_t initialize()
             delete systemPtr;
             systemPtr = NULL;
             g_initialized = false;
-            PRDF_ERR("PRDF::initialize() failed to buid object model");
+            PRDF_ERR(PRDF_FUNC"failed to buid object model");
         }
         //systemPtr is populated in configurator
         else if( systemPtr != NULL )
@@ -144,9 +141,28 @@ errlHndl_t initialize()
         Prdr::LoadChipCache::flushCache();
     }
 
-    PRDF_EXIT( "PRDF::initialize()" );
+    PRDF_EXIT( PRDF_FUNC );
 
     return (g_prd_errlHndl.release());
+
+    #undef PRDF_FUNC
+}
+
+errlHndl_t initialize()
+{
+    PRDF_ENTER( "PRDF::initialize()" );
+
+    errlHndl_t err = NULL;
+
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
+
+    err = noLock_initialize();
+
+    PRDF_EXIT( "PRDF::initialize()" );
+
+    return err;
+
 }
 
 //------------------------------------------------------------------------------
@@ -155,11 +171,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
                  const AttnList & i_attnList )
 {
     PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_attentionType );
-
-    // TODO RTC 103728: This is only needed for Hostboot code at this time,
-    //      however, this issue is intented to address code changes needed to
-    //      make PRD thread safe, either part or as a whole.
-    PRDF_SYSTEM_SCOPE_MUTEX;
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
@@ -172,7 +183,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
     if(( g_initialized == false)&&(NULL ==systemPtr))
     {
-        g_prd_errlHndl = initialize();
+        g_prd_errlHndl = noLock_initialize();
         if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
     }
 
@@ -283,6 +294,28 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
 //------------------------------------------------------------------------------
 
+errlHndl_t noLock_refresh()
+{
+    PRDF_ENTER("PRDF::noLock_refresh()");
+
+    errlHndl_t l_errl = NULL;
+
+    if((false == g_initialized) || (NULL == systemPtr))
+    {
+        l_errl = noLock_initialize();
+    }
+    else
+    {
+        // System was built so just check and
+        // remove any non-functional chips
+        systemPtr->RemoveNonFunctionalChips();
+    }
+
+    PRDF_EXIT("PRDF::noLock_refresh()");
+
+    return l_errl;
+}
+
 errlHndl_t refresh()
 {
     PRDF_ENTER("PRDF::refresh()");
@@ -292,16 +325,7 @@ errlHndl_t refresh()
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
-    if((false == g_initialized) || (NULL == systemPtr))
-    {
-        l_errl = initialize();
-    }
-    else
-    {
-        // System was built so just check and
-        // remove any non-functional chips
-        systemPtr->RemoveNonFunctionalChips();
-    }
+    l_errl = noLock_refresh();
 
     PRDF_EXIT("PRDF::refresh()");
 
