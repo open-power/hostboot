@@ -2857,6 +2857,102 @@ public:
     }
 
     /**
+     *  @brief Test Deconfigure Associated Proc9
+     */
+    void testDeconfigureAssocProc9()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssocProc9: Started");
+
+        // This test populates structs which contain information
+        // regarding a processor and its child chiplet's linkage
+        // and states.  A vector of these structs, effectively
+        // describing the system, is passed to the
+        // _deconfigureAssocProc algorithm which marks procs to
+        // be deconfigured based on existing bus deconfigurations.
+
+        // SCENARIO 1: TULETA 4 System with Proc 3 NP which is indicated by
+        // No Abus endpoints on Proc 1 and 3 and no Xbus endpoint on Proc1
+
+        // Return error for _deconfigureAssocProc
+        errlHndl_t l_pErr = NULL;
+
+        // User-defined number of procs
+        size_t NUM_PROCS = 4;
+
+        // Define and populate vector
+        DeconfigGard::ProcInfoVector l_tuletaProcs;
+        DeconfigGard::ProcInfo l_ProcInfo = DeconfigGard::ProcInfo();
+        l_tuletaProcs.insert(l_tuletaProcs.begin(), NUM_PROCS, l_ProcInfo);
+
+        // Set proc options
+        // Proc0:
+        l_tuletaProcs[0].iv_pThisProc = NULL;          // Target *
+        l_tuletaProcs[0].procHUID = 0;                 // HUID
+        l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_tuletaProcs[0].iv_isMaster = true;           // Master proc
+        l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
+        // ABus links and states
+        l_tuletaProcs[0].iv_pAProcs[0] = &l_tuletaProcs[2];
+        l_tuletaProcs[0].iv_pAProcs[1] = &l_tuletaProcs[2];
+        // XBus links and states
+        l_tuletaProcs[0].iv_pXProcs[0] = &l_tuletaProcs[1];
+
+        // Proc1:
+        l_tuletaProcs[1].iv_pThisProc = NULL;          // Target *
+        l_tuletaProcs[1].procHUID = 1;                 // HUID
+        l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_tuletaProcs[1].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_tuletaProcs[1].iv_pXProcs[0] = &l_tuletaProcs[0];
+
+        // Proc2:
+        l_tuletaProcs[2].iv_pThisProc = NULL;          // Target *
+        l_tuletaProcs[2].procHUID = 2;                 // HUID
+        l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_tuletaProcs[2].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
+        // ABus links and states
+        l_tuletaProcs[2].iv_pAProcs[0] = &l_tuletaProcs[0];
+        l_tuletaProcs[2].iv_pAProcs[1] = &l_tuletaProcs[0];
+        // No xbus because proc3 is "not present"
+
+        // Proc3:
+        l_tuletaProcs[3].iv_pThisProc = NULL;          // Target *
+        l_tuletaProcs[3].procHUID = 3;                 // HUID
+        l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_tuletaProcs[3].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[3].iv_deconfigured = true;      // HWAS state
+        // Xbus links still has xbus to proc 2 because proc 2 is functional
+        l_tuletaProcs[3].iv_pXProcs[0] = &l_tuletaProcs[2];
+
+        // Call _deconfigureAssocProc to determine which procs
+        // should be deconfigured based on state of system passed in
+        l_pErr = DeconfigGard::_deconfigureAssocProc(l_tuletaProcs);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+        }
+
+        // Check result
+        if (l_tuletaProcs[0].iv_deconfigured == false &&
+            l_tuletaProcs[1].iv_deconfigured == false &&
+            l_tuletaProcs[2].iv_deconfigured == true &&
+            l_tuletaProcs[3].iv_deconfigured == true)
+        {
+            TS_TRACE(INFO_MRK "testDeconfigureAssocProc9: Success");
+        }
+        else
+        {
+            TS_FAIL("testDeconfigureAssocProc9: incorrect configuration returned");
+        }
+    }
+
+    /**
      *  @brief Test Deconfig Present Association 1
      */
     void testdeconfigPresentByAssoc1()

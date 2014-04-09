@@ -92,6 +92,19 @@ void getChipResources(TARGETING::TargetHandleList & o_vector,
                       TYPE i_type, ResourceState i_state );
 
 /**
+ * @brief Populate the o_vector with target enc pointers based on the
+ *        requested type, and functional state.
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_type, the type of the chip targets to be obtained
+ * @parm[in]  i_state, Selection filter based on ResourceState enum
+ *
+ * @return N/A
+ */
+void getEncResources(TARGETING::TargetHandleList & o_vector,
+                      TYPE i_type, ResourceState i_state );
+
+/**
  * @brief Populate the o_vector with target chiplet pointers based on the
  *        requested type, and functional state.
  *
@@ -144,6 +157,7 @@ void getAllChiplets(TARGETING::TargetHandleList & o_vector,
  */
 void getChildChiplets(TARGETING::TargetHandleList & o_vector,
                const Target * i_chip, TYPE i_type, bool i_functional = true );
+
 
 /**
  * @brief Populate the o_vector with target object pointers which are

@@ -329,13 +329,31 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             break;
         }
 
-        // Deconfigure procs based on fabric bus deconfigs and perform SMP
-        // node balancing
-        l_pErr = _invokeDeconfigureAssocProc();
-        if (l_pErr)
+        if (iv_XABusEndpointDeconfigured)
         {
-            HWAS_ERR("Error from _invokeDeconfigureAssocProc");
-            break;
+            // Check if Abus decofigures should be considered in algorithm
+            bool l_doAbusDeconfig = pSys->getAttr<ATTR_DO_ABUS_DECONFIG>();
+            // Get all present nodes
+            TargetHandleList l_presNodes;
+            getEncResources(l_presNodes, TYPE_NODE, UTIL_FILTER_PRESENT);
+
+            for (TargetHandleList::const_iterator
+                 l_nodesIter = l_presNodes.begin();
+                 l_nodesIter != l_presNodes.end();
+                 ++l_nodesIter)
+            {
+                l_pErr = _invokeDeconfigureAssocProc(*l_nodesIter,
+                                                      l_doAbusDeconfig);
+                if (l_pErr)
+                {
+                    HWAS_ERR("Error from _invokeDeconfigureAssocProc");
+                    break;
+                }
+                // Set for deconfigure algorithm to run on every node even if
+                // no buses deconfigured (needed for multi-node systems)
+                setXABusEndpointDeconfigured(true);
+            }
+            setXABusEndpointDeconfigured(false);
         }
     }
     while (0);
@@ -703,11 +721,14 @@ errlHndl_t DeconfigGard::deconfigureAssocProc()
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
+errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
+            const TARGETING::ConstTargetHandle_t i_node,
+            bool i_doAbusDeconfig)
 {
     HWAS_INF("Preparing data for _deconfigureAssocProc ");
     // Return error
     errlHndl_t l_pErr = NULL;
+
     // Define vector of ProcInfo structs to be used by
     // _deconfigAssocProc algorithm. Declared here so
     // "delete" can be used outside of do {...} while(0)
@@ -730,15 +751,27 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
         // Clear flag as this function is called multiple times
         iv_XABusEndpointDeconfigured = false;
 
+        // Get top 'starting' level target - use top level target if no
+        // i_node given (hostboot)
+        Target *pTop;
+        if (i_node == NULL)
+        {
+            HWAS_INF("_invokeDeconfigureAssocProc: i_node not specified");
+            targetService().getTopLevelTarget(pTop);
+            HWAS_ASSERT(pTop, "_invokeDeconfigureAssocProc: no TopLevelTarget");
+        }
+        else
+        {
+            HWAS_INF("_invokeDeconfigureAssocProc: i_node 0x%X specified",
+                     i_node->getAttr<ATTR_HUID>());
+            pTop = const_cast<Target *>(i_node);
+        }
+
         // Define and populate vector of procs
         // Define predicate
         PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
         PredicateHwas predPres;
         predPres.present(true);
-
-        // Get top level target
-        Target * l_pSys;
-        targetService().getTopLevelTarget(l_pSys);
 
         // Find master proc
         Target* l_pMasterProcTarget;
@@ -749,7 +782,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
         // Populate vector
         TargetHandleList l_procs;
         targetService().getAssociated(l_procs,
-                                      l_pSys,
+                                      pTop,
                                       TargetService::CHILD,
                                       TargetService::ALL,
                                       &predProc);
@@ -768,8 +801,10 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
         PredicatePostfixExpr busses;
         busses.push(&predAbus).push(&predPres).And().push(&predXbus).Or();
 
-        // Iterate through procs and populate l_procInfo
-        // vector with system information regarding procs
+        // Iterate through procs and populate l_procInfo vector with system
+        // information regarding procs to be used by _deconfigAssocProc
+        // algorithm.
+        ProcInfoVector l_procInfo;
         for (TargetHandleList::const_iterator
              l_procsIter = l_procs.begin();
              l_procsIter != l_procs.end();
@@ -873,8 +908,9 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
                                 !(isFunctional(*l_busIter));
                             xBusIndex++;
                         }
-                        else if (TYPE_ABUS == (*l_busIter)->
-                                                     getAttr<ATTR_TYPE>())
+                        // If subsystem owns abus deconfigs consider them
+                        else if (i_doAbusDeconfig &&
+                                TYPE_ABUS == (*l_busIter)->getAttr<ATTR_TYPE>())
                         {
                             (*l_procInfoIter).iv_pAProcs[aBusIndex] =
                                 &(*l_matchProcInfoIter);
@@ -888,6 +924,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
                 }
             }
         }
+
         // call _deconfigureAssocProc() to run deconfig algorithm
         // based on current state of system obtained above
         l_pErr = _deconfigureAssocProc(l_procInfo);
@@ -896,6 +933,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
             HWAS_ERR("Error from _deconfigureAssocProc ");
             break;
         }
+
         // Iterate through l_procInfo and deconfigure any procs
         // which _deconfigureAssocProc marked for deconfiguration
         for (ProcInfoVector::const_iterator

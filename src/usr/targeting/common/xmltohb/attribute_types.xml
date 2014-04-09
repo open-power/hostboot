@@ -978,9 +978,9 @@
         <value>0x00000006</value>
     </enumerator>
     <enumerator>
-        <name>HOSTSVC_HBEL</name>
-        <value>0x00000008</value>
-    </enumerator>
+       <name>HOSTSVC_HBEL</name>
+       <value>0x00000008</value>
+   </enumerator>
 </enumerationType>
 
 <!-- For POD Testing -->
@@ -13355,7 +13355,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
-      
+
 <attribute>
     <id>HB_RSV_MEM_SIZE_MB</id>
     <description>
@@ -13397,6 +13397,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DO_ABUS_DECONFIG</id>
+    <description>
+        Indicates if system should consider abus logic when deconfiguring in
+        _deconfigureAssocProc(), will be overwritten on multi-node system
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 </attributes>

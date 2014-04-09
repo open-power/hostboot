@@ -352,6 +352,7 @@ public:
     errlHndl_t platGetGardRecords(const TARGETING::Target * const i_pTarget,
                               GardRecords_t & o_records);
 
+
 protected:
 
     /**
@@ -462,10 +463,16 @@ private:
      *  through the returned vector and deconfigures any proc marked
      *  for deconfiguration.
      *
+     *  @param[in] i_node           restrict processing - only apply algorithm
+     *                              to targets that match the predicate
+     *  @param[in] i_doAbusDeconfig indicates if abus logic should be considered
+     *
      *  @return errlHndl_t. Error log handle.
      *
      */
-    errlHndl_t _invokeDeconfigureAssocProc();
+    errlHndl_t _invokeDeconfigureAssocProc(
+                const TARGETING::ConstTargetHandle_t i_node = NULL,
+                bool i_doAbusDeconfig = true);
 
     /**
      *  @brief _deconfigureAssocProc deconfigures procs based on

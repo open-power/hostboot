@@ -213,6 +213,11 @@ else
    push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 0];
 }
 
+if ($MAXNODE > 1 && $sysname !~ m/mfg/)
+{
+    push @systemAttr, ["DO_ABUS_DECONFIG", 0];
+}
+
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
 #------------------------------------------------------------------------------
