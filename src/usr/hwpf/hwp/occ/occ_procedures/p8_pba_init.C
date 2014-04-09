@@ -20,9 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: p8_pba_init.C,v 1.18 2014/03/17 23:16:22 stillgs Exp $
-// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
+// $Id: p8_pba_init.C,v 1.19 2014/04/08 05:45:40 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -466,7 +465,7 @@ pba_slave_setup_init(const Target& i_target)
                                    ec_allows_pba_prefetch_enable);
         if(rc)
         {
-            FAPI_ERR("Error querying Chip EC feature: "
+     	    FAPI_ERR("Error querying Chip EC feature: "
                      "ATTR_PROC_EC_PBA_PREFETCH_ENABLE");
             break;
         }
@@ -691,7 +690,7 @@ pba_slave_reset(const Target& i_target)
                                    ec_has_pba_slvrest_bug);
         if(rc)
         {
-            FAPI_ERR("Error querying Chip EC feature: "
+     	    FAPI_ERR("Error querying Chip EC feature: "
                      "ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET");
             break;
         }
@@ -699,7 +698,7 @@ pba_slave_reset(const Target& i_target)
         rc = FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, attr_mpipl);
         if(rc)
         {
-            FAPI_ERR("Error querying attribute ATTR_IS_MPIPL");
+     	    FAPI_ERR("Error querying attribute ATTR_IS_MPIPL");
             break;
         }
 
@@ -933,7 +932,7 @@ pba_bc_stop(const Target& i_target)
              const fapi::Target & CHIP = i_target;
              const uint32_t     & POLLCOUNT = MAX_PBA_BC_STOP_POLLS;
              const uint32_t     & POLLVALUE = MAX_PBA_BC_STOP_POLLS;
-             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_BCDE_STOP_TIMEOUT);
+	         FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_BCDE_STOP_TIMEOUT);
              break;
         }
         if (!bcue_stop_complete)
@@ -942,10 +941,47 @@ pba_bc_stop(const Target& i_target)
              const fapi::Target & CHIP = i_target;
              const uint32_t     & POLLCOUNT = MAX_PBA_BC_STOP_POLLS;
              const uint32_t     & POLLVALUE = MAX_PBA_BC_STOP_POLLS;
-             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_BCUE_STOP_TIMEOUT);
+	         FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_BCUE_STOP_TIMEOUT);
              break;
         }
         
+        FAPI_INF("Clear the  BCDE and BCUE stop bits via control register clearing");
+        
+        e_rc |= data.flushTo0();
+        if (e_rc)
+        {
+            rc.setEcmdError(e_rc);
+            break;
+        }
+        
+        address = PBA_BCDE_CTL_0x00064010;
+        FAPI_INF("\tClear BCDE stop bit addr=0x%08llX, value=0x%16llX, Target = %s",
+                            address,
+                            data.getDoubleWord(0),
+                            i_target.toEcmdString());
+        rc = fapiPutScom(i_target, address, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("fapiPutScom(addr=0x%08llX) failed, Target = %s",
+                            address,
+                            i_target.toEcmdString());
+            break;
+        }
+
+        address = PBA_BCUE_CTL_0x00064015;        
+        FAPI_INF("\tClear BCUE stop bit addr=0x%08llX, value=0x%16llX, Target = %s",
+                            address,
+                            data.getDoubleWord(0),
+                            i_target.toEcmdString());
+        rc = fapiPutScom(i_target, address, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("fapiPutScom(addr=0x%08llX) failed, Target = %s",
+                            address,
+                            i_target.toEcmdString());
+            break;
+        }
+                
     } while(0);
 
     return rc;
@@ -955,3 +991,4 @@ pba_bc_stop(const Target& i_target)
 
 
 } //end extern C
+
