@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -27,12 +27,10 @@ if [ -e ./customrc ]; then
 fi
 
 export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20130412}
-export CROSS_PREFIX=${CROSS_PREFIX:-powerpc64-unknown-linux-gnu-}
-export HOST_PREFIX=${HOST_PREFIX:-x86_64-pc-linux-gnu-}
-
+export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
+export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
 export PATH=${FAKEROOT}/wrappers:${PATH}
 
-export PATH=${PATH}:`pwd`/src/build/lids
 export PATH=${PATH}:`pwd`/src/build/trace
 export PATH=${PATH}:`pwd`/src/build/tools
 
