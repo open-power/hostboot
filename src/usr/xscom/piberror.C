@@ -39,20 +39,15 @@ namespace PIB
 /**
  * @brief Add callouts to an errorlog based on the type of PIB error could be a
  *             hardware or procedure callout
- *
- * @param[in]  i_target        Operation target
- * @param[in]  i_pibErrStatus  Error Status bits retrieved
- * @param[in/out] io_errl      Originating errorlog that we will add Fru
- *                             Callouts to.
- * @return none
  */
 void addFruCallouts(TARGETING::Target* i_target,
                     uint32_t  i_pibErrStatus,
+                    uint64_t i_scomAddr,
                     errlHndl_t& io_errl)
 {
    switch (i_pibErrStatus)
    {
-     case  PIB::PIB_CHIPLET_OFFLINE:
+     case  PIB::PIB_CHIPLET_OFFLINE: //b010
        //Offline should just be a code bug, but it seems that there are
        //  cases where bad hardware can also cause this problem
        //Since we assume code is good before going out, make the
@@ -65,12 +60,12 @@ void addFruCallouts(TARGETING::Target* i_target,
                                     HWAS::SRCI_PRIORITY_MED);
        break;
 
-     case  PIB::PIB_PARTIAL_GOOD:
+     case  PIB::PIB_PARTIAL_GOOD: //b011
        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
        break;
 
-     case  PIB::PIB_INVALID_ADDRESS:
+     case  PIB::PIB_INVALID_ADDRESS: //b100
        //Invalid Address should just be a code bug, but it seems that there
        //  are cases where bad hardware can also cause this problem
        //Since we assume code is good before going out, make the
@@ -83,28 +78,40 @@ void addFruCallouts(TARGETING::Target* i_target,
                                     HWAS::SRCI_PRIORITY_MED);
        break;
 
-     case PIB::PIB_PARITY_ERROR:
-     case PIB::PIB_TIMEOUT:
+     case PIB::PIB_PARITY_ERROR: //b110
+     case PIB::PIB_TIMEOUT: //b111
        io_errl->addHwCallout( i_target,
                               HWAS::SRCI_PRIORITY_LOW,
                               HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
        break;
 
-     case  PIB::PIB_CLOCK_ERROR:
+     case  PIB::PIB_CLOCK_ERROR: //b101
         if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
                     TARGETING::TYPE_PROC)
         {
-            io_errl->addClockCallout(i_target,
-                                HWAS::OSCREFCLK_TYPE,
-                                HWAS::SRCI_PRIORITY_LOW);
+            //check for PCI range
+            if( ((i_scomAddr & 0xFF000000) == 0x09000000)
+                && ((i_scomAddr & 0x00FF0000) != 0x000F0000) )
+            {
+                io_errl->addClockCallout(i_target,
+                                         HWAS::OSCPCICLK_TYPE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+            }
+            //for everything else blame the ref clock
+            else
+            {
+                io_errl->addClockCallout(i_target,
+                                         HWAS::OSCREFCLK_TYPE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+            }
         }
         else if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
                     TARGETING::TYPE_MEMBUF)
         {
             io_errl->addClockCallout(i_target,
-                                HWAS::MEMCLK_TYPE,
-                                HWAS::SRCI_PRIORITY_LOW);
+                                     HWAS::MEMCLK_TYPE,
+                                     HWAS::SRCI_PRIORITY_LOW);
         }
         else // for anything else, just blame the refclock
         {
@@ -115,8 +122,7 @@ void addFruCallouts(TARGETING::Target* i_target,
        break;
 
      default:
-       // should never commit a log that gets here so that is a
-       //   code bug
+       // Anything else would most likely be a code bug
        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
        break;

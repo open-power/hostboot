@@ -811,6 +811,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                 //add callouts based on the PIB error
                 PIB::addFruCallouts( i_target,
                                      mbsiberr0.piberr,
+                                     i_addr,
                                      l_err );
 
                 //grab some HW regs via FSISCOM

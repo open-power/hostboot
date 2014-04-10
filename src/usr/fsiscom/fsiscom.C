@@ -60,9 +60,19 @@ union ioData6432
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Common function to add callouts and FFDC and recover
+ *   from PIB errors
+ *
+ * @param[in]   i_target    SCom target
+ * @param[in]   i_errlog    Error log to append to
+ * @param[in]   i_status    FSI2PIB status register
+ * @param[in]   i_scomAddr  Address that we failed on
+ */
 void pib_error_handler( TARGETING::Target* i_target,
                         errlHndl_t i_errlog,
-                        uint32_t i_status )
+                        uint32_t i_status,
+                        uint32_t i_scomAddr )
 {
     //Add this target to the FFDC
     ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").addToLog(i_errlog);
@@ -100,6 +110,7 @@ void pib_error_handler( TARGETING::Target* i_target,
         uint32_t pib_error = i_status >> 12;
         PIB::addFruCallouts( i_target,
                              pib_error,
+                             i_scomAddr,
                              i_errlog );
 
         //Grab the PIB2OPB Status reg for a Resource Occupied error
@@ -294,7 +305,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                            l_status));
 
                 // call common error handler to do callouts and recovery
-                pib_error_handler( i_target, l_err, l_status );
+                pib_error_handler( i_target, l_err, l_status, l_scomAddr );
 
                 //Grab the PIB2OPB Status reg for a XSCOM Block error
                 if( (l_status & 0x00007000) == 0x00001000 ) //piberr=001
@@ -381,7 +392,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                                  l_status));
 
                 // call common error handler to do callouts and recovery
-                pib_error_handler( i_target, l_err, l_status );
+                pib_error_handler( i_target, l_err, l_status, l_scomAddr );
 
                 break;
             }

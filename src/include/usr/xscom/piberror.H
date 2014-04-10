@@ -50,12 +50,15 @@ namespace PIB
  *
  * @param[in]  i_target        Operation target
  * @param[in]  i_pibErrStatus  Error Status bits retrieved
+ * @param[in]  i_scomAddr      Address of SCOM operation that led to the fail,
+ *    if operation was not a scom, set to UINT64_MAX
  * @param[in/out] io_errl      Originating errorlog that we will add Fru
  *                             Callouts to.
  * @return none
  */
 void addFruCallouts(TARGETING::Target* i_target,
-                    uint32_t  i_pibErrStatus,
+                    uint32_t i_pibErrStatus,
+                    uint64_t i_scomAddr,
                     errlHndl_t& io_errl);
 
 

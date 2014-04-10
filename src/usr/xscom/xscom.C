@@ -794,6 +794,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
             // Add Callouts to the errorlog
             PIB::addFruCallouts(i_target,
                                 l_hmer.mXSComStatus,
+                                l_addr,
                                 l_err);
 
             // Call XscomCollectFFDC..

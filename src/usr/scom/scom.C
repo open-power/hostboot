@@ -57,8 +57,8 @@ namespace SCOM
  * @param[in] i_target  Target of SCOM operation
  * @param[in] i_addr  SCOM address
  */
-void addScomFailFFFDC( errlHndl_t i_err,
-                       TARGETING::Target* i_target,
+void addScomFailFFDC( errlHndl_t i_err,
+                      TARGETING::Target* i_target,
                        uint64_t i_addr );
 
 
@@ -310,6 +310,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 //Add the callouts for the specific PCB/PIB error
                 PIB::addFruCallouts( i_target,
                                      scomout.piberr,
+                                     i_addr,
                                      l_err );
 
                 //Add this target to the FFDC
@@ -426,6 +427,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 //Add the callouts for the specific PCB/PIB error
                 PIB::addFruCallouts( i_target,
                                      scomout.piberr,
+                                     i_addr,
                                      l_err );
 
                 //Add this target to the FFDC
@@ -553,7 +555,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     //Add some additional FFDC based on the specific operation
     if( l_err )
     {
-        addScomFailFFFDC( l_err, i_target, i_addr );
+        addScomFailFFDC( l_err, i_target, i_addr );
     }
 
     return l_err;
@@ -562,18 +564,18 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void addScomFailFFFDC( errlHndl_t i_err,
-                       TARGETING::Target* i_target,
-                       uint64_t i_addr )
+void addScomFailFFDC( errlHndl_t i_err,
+                      TARGETING::Target* i_target,
+                      uint64_t i_addr )
 {
     // Read some error regs from scom
     ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
     bool addit = false;
+    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     //PBA scoms on the processor
     if( ((i_addr & 0xFFFFF000) == 0x00064000)
-        && (TARGETING::TYPE_PROC
-            == i_target->getAttr<TARGETING::ATTR_TYPE>()) )
+        && (TARGETING::TYPE_PROC == l_type) )
     {
         addit = true;
         //look for hung operations on the PBA
@@ -590,6 +592,59 @@ void addScomFailFFFDC( errlHndl_t i_err,
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs[x]));
+        }
+    }
+    //EX scoms on the processor (not including PCB slave regs)
+    else if( ((i_addr & 0xF0000000) == 0x10000000)
+             && ((i_addr & 0x00FF0000) != 0x000F0000)
+             && (TARGETING::TYPE_PROC == l_type) )
+    {
+        addit = true;
+        uint64_t ex_offset = 0xFF000000 & i_addr;
+        //grab some data related to the PCB slave state
+        uint64_t ffdc_regs[] = {
+            0x0F010B, //Special Wakeup
+            0x0F0012, //GP3
+            0x0F0100, //PowerManagement GP0
+            0x0F0106, //PFET Status Core
+            0x0F010E, //PFET Status ECO
+            0x0F0111, //PM State History
+        };
+        for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
+        {
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(ex_offset|ffdc_regs[x]));
+        }
+    }
+
+    //Any non-PCB Slave and non TP reg on the processor
+    if( ((i_addr & 0x00FF0000) != 0x000F0000)
+        && ((i_addr & 0xFF000000) != 0x00000000)
+        && (TARGETING::TYPE_PROC == l_type) )
+    {
+        addit = true;
+        uint64_t chiplet_offset = 0xFF000000 & i_addr;
+        //grab some data related to the PCB slave state
+        uint64_t ffdc_regs[] = {
+            0x0F0012, //GP3
+            0x0F001F, //Error capture reg
+        };
+        for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
+        {
+            l_scom_data.addData( DEVICE_SCOM_ADDRESS(
+                                 chiplet_offset|ffdc_regs[x]) );
+        }
+
+        //grab the clock/osc regs
+        l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x00050019));
+        l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x0005001A));
+        //grab the clock regs via FSI too, just in case
+        TARGETING::Target* mproc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(mproc);
+        if( (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+            && (i_target != mproc) )
+        {
+            l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2864));//==2819
+            l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2868));//==281A
         }
     }
 
