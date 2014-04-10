@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/occ/occ_procedures/p8_cpu_special_wakeup.C $ */
+/* $Source: src/usr/hwpf/hwp/utility_procedures/p8_cpu_special_wakeup.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* COPYRIGHT International Business Machines Corp. 2014                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_cpu_special_wakeup.C,v 1.19 2014/03/13 01:58:40 stillgs Exp $
+// $Id: p8_cpu_special_wakeup.C,v 1.20 2014/04/07 20:40:45 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -411,12 +411,12 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
                 switch(idle_state)
                 {
 
-                    case      0x0   :       // Running
-                    case      0x1   :       // Special Wakeup
+                    case      0x0   :       // Running                                           
                     case      0x2   :       // Nap
                         poll_during_xstop_flag = true;
                         break;
 
+                    case      0x1   :       // Special Wakeup
                     case      0x4   :       // Fast Sleep
                     case      0x5   :       // Deep Sleep
                     case      0x6   :       // Fast Winkle
