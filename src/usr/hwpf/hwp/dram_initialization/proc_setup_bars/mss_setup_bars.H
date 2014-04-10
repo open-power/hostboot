@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.H,v 1.5 2013/05/23 23:32:23 jmcgill Exp $
+// $Id: mss_setup_bars.H,v 1.9 2014/04/08 16:04:12 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.9    | gpaulraj | 04/08/14|  5/5 FW review feedback - gerrit process - SW251227
+//  1.4    | jdsloat  | 03/13/14| changed const names to stop interfering with eff_grouping
 //  1.3    | bellows  | 07/16/12| added in ID tag
 //  1.1    | gpaulraj | 03/19/12| Updated
 //------------------------------------------------------------------------------
@@ -110,12 +112,14 @@ const uint8_t MSS_MCS_GROUP_32_ALT_SIZE_INDEX      = 13;
 const uint8_t MSS_MCS_GROUP_32_ALT_BASE_INDEX      = 14;
 
 
+
+
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*mss_setup_bars_FP_t)(const fapi::Target& i_pu_target);
+typedef fapi::ReturnCode (*mss_setup_bars_FP_t)(const fapi::Target& i_pu_target, std::vector<fapi::Target> & i_associated_centaurs);
 
 
 //------------------------------------------------------------------------------
@@ -135,7 +139,7 @@ extern "C"
 //            as a member in multiple groups
 //          else failing return code
 //------------------------------------------------------------------------------
-fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target);
+fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target, std::vector<fapi::Target> & i_associated_centaurs);
 
 
 } // extern "C"

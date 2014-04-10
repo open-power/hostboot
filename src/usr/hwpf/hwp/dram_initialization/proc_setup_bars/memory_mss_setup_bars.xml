@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_setup_bars.xml,v 1.1 2013/06/19 18:28:30 bellows Exp $ -->
+<!-- $Id: memory_mss_setup_bars.xml,v 1.2 2014/03/10 17:12:06 gpaulraj Exp $ -->
 <!-- For file ../../ipl/fapi/mss_setup_bars.C -->
 <!-- // *! OWNER NAME  : Girisankar Paulraj      Email: gpaulraj@in.ibm.com -->
 <!-- // *! OWNER NAME  : Mark Bellows            Email: bellows@us.ibm.com -->
@@ -30,12 +30,26 @@
   <hwpError>
     <rc>RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR</rc>
     <description>Invalid non-mirrored alternate BAR configuration.</description>
+    <ffdc>ALT_BASE_INDEX</ffdc>	
+    <ffdc>BASE_INDEX</ffdc>	
+    <ffdc>SIZE_INDEX</ffdc>	
+    <callout>	
+	<procedure>CODE</procedure>
+	<priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 <!-- Original Source for RC_MSS_SETUP_BARS_M_ALT_BAR_ERR memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_SETUP_BARS_M_ALT_BAR_ERR</rc>
     <description>Invalid mirrored alternate BAR configuration.</description>
+   <ffdc>ALT_BASE_INDEX</ffdc> 
+    <ffdc>BASE_INDEX</ffdc>     
+    <ffdc>SIZE_INDEX</ffdc>     
+    <callout>   
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 <!-- Original Source for RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR memory_errors.xml -->
@@ -45,6 +59,10 @@
     <ffdc>MCS_POS</ffdc>
     <ffdc>GROUP_INDEX_A</ffdc>
     <ffdc>GROUP_INDEX_B</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 

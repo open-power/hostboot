@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.33 2013/09/20 14:07:42 jmcgill Exp $
+// $Id: mss_setup_bars.C,v 1.40 2014/04/15 16:05:47 jdsloat Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+// 1.39    | gpaulraj | 04/08/14| 5/5 FW review feedback - gerrit process - SW251227
+// 1.33    |          | 03/09/14| RAS review
 //  1.32   | gpaulraj | 08/16/13| fixed code
 //  1.31   | gpaulraj | 08/13/13| fix HW259884 Mirror BAR Scom Parity Error
 //  1.30   | gpaulraj | 08/13/13| added fix HW259884 Mirror BAR Scom Parity Error
@@ -74,6 +76,13 @@
 
 extern "C" {
 
+
+const int SETUP_BARS_MBA_SIZE_MCS=8;
+const int SETUP_BARS_MBA_SIZE_PORT=2;
+struct MssSetupBarsSizeInfo{
+   uint8_t MBA_size[SETUP_BARS_MBA_SIZE_MCS][SETUP_BARS_MBA_SIZE_PORT]; // mcs, mba pairs, port, dimm
+   uint32_t MCS_size[SETUP_BARS_MBA_SIZE_MCS];
+};
 
 //------------------------------------------------------------------------------
 // function: write non-mirrored BAR registers (MCFGP/MCFGPA) for a single MCS
@@ -191,6 +200,9 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
                      (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
                 {
                     FAPI_ERR("mss_setup_bars_init_nm_bars: Invalid non-mirrored alternate BAR configuration");
+                    const uint32_t & ALT_BASE_INDEX = i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX];
+                    const uint32_t & BASE_INDEX = i_group_data[MSS_MCS_GROUP_32_BASE_INDEX];
+	            const uint32_t & SIZE_INDEX= i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX];
                     FAPI_SET_HWP_ERROR(rc,
                                        RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR);
                     break;
@@ -400,6 +412,9 @@ fapi::ReturnCode mss_setup_bars_init_m_bars(
                      (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
                 {
                     FAPI_ERR("mss_setup_bars_init_m_bars: Invalid mirrored alternate BAR configuration");
+                    const uint32_t & ALT_BASE_INDEX = i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX];
+		    const uint32_t & BASE_INDEX = i_group_data[MSS_MCS_GROUP_32_BASE_INDEX];
+		    const uint32_t & SIZE_INDEX= i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX];
                     FAPI_SET_HWP_ERROR(rc,
                                        RC_MSS_SETUP_BARS_M_ALT_BAR_ERR);
                     break;
@@ -489,17 +504,76 @@ fapi::ReturnCode mss_setup_bars_init_m_bars(
 
 
 //------------------------------------------------------------------------------
+// function: mss_setup_bars_mcs_size
+//------------------------------------------------------------------------------
+fapi::ReturnCode mss_setup_bars_mcs_size(  const fapi::Target & i_target,std::vector<fapi::Target> & i_associated_centaurs, MssSetupBarsSizeInfo & io_sizeInfo)
+{
+      fapi::ReturnCode rc;
+      uint8_t centaur;
+      uint8_t mba_i;
+      uint8_t mba=0;
+      uint8_t dimm=0;
+      uint32_t cenpos;
+      uint32_t procpos;
+      uint8_t port;
+       uint32_t l_unit_pos =0;
+       uint8_t min_group = 1;
+      uint8_t mba_pos[2][2] = { {0, 0},{0,0}};
+      std::vector<fapi::Target> l_mba_chiplets;
+      uint8_t cen_count=0;
+      rc = FAPI_ATTR_GET(ATTR_POS,&i_target, procpos);
+      if(rc) return rc;
+      for(centaur= 0; centaur < i_associated_centaurs.size(); centaur++) {
+        mba=0;port=0;dimm=0;
+        fapi::Target & centaur_t = i_associated_centaurs[centaur];
+        rc = FAPI_ATTR_GET(ATTR_POS,&centaur_t, cenpos);
+        if(rc) return rc;
+        if(cenpos>=procpos*8 && cenpos<(procpos*8+8)){
+                FAPI_INF("... working on centaur %d", cenpos);
+                io_sizeInfo.MCS_size[cenpos - procpos * 8]=0;
+                rc = fapiGetChildChiplets(i_associated_centaurs[centaur], fapi::TARGET_TYPE_MBA_CHIPLET, l_mba_chiplets);
+                if(rc) return rc;
+                for(mba_i=0; mba_i<l_mba_chiplets.size(); mba_i++) {
+
+                  rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_mba_chiplets[mba_i], mba);
+                  if(rc) return rc;
+                  FAPI_INF("... working on mba %d", mba);
+                  rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SIZE, &l_mba_chiplets[mba_i],mba_pos);
+                  if(rc) return rc;
+                  for(port = 0; port<2; port++)
+                  {	
+                    for(dimm=0; dimm<2; dimm++) {
+                       io_sizeInfo.MCS_size[cenpos - procpos * 8]+=mba_pos[port][dimm];
+                       io_sizeInfo.MBA_size[cenpos - procpos * 8][mba] += mba_pos[port][dimm];
+                    }
+                  }
+
+                  FAPI_INF(" Cen Pos %d mba %d DIMM SIZE %d \n",cenpos,mba, io_sizeInfo.MBA_size[cenpos - procpos * 8][mba]);
+                  FAPI_INF(" Cen Pos %d MBA SIZE %d %d  %d %d \n",cenpos, mba_pos[0][0],mba_pos[0][1],mba_pos[1][0],mba_pos[1][1]);
+                  FAPI_INF(" MCS SIZE %d\n",io_sizeInfo.MCS_size[cenpos - procpos * 8]);
+            }
+            cen_count++;l_unit_pos++;
+        }
+      }
+      FAPI_INF("attr_mss_setting %d and  no  of MBAs   %d \n",min_group,l_unit_pos);
+     return rc;
+}
+
+//------------------------------------------------------------------------------
 // function: mss_setup_bars HWP entry point
 //           NOTE: see comments above function prototype in header
 //------------------------------------------------------------------------------
-fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
+fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<fapi::Target> & i_associated_centaurs)
 {
     fapi::ReturnCode rc;
     std::vector<fapi::Target> l_mcs_chiplets;
     uint32_t group_data[16][16];
-
+    uint8_t M_valid;
+    MssSetupBarsSizeInfo sizeInfo;
     do
     {
+
+        rc= mss_setup_bars_mcs_size(i_pu_target,i_associated_centaurs, sizeInfo);
         // obtain group configuration attribute for this chip
         rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32, &i_pu_target, group_data);
         if (!rc.ok())
@@ -507,7 +581,39 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
             FAPI_ERR("mss_setup_bars: Error reading ATTR_MSS_MCS_GROUP_32");
             break;
         }
+        rc = FAPI_ATTR_GET(ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, NULL, M_valid);
+        if (!rc.ok())
+        {
+            FAPI_ERR("mss_setup_bars: Error reading ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING");
+            break;
+        }
 
+
+         //check if all the grouped mcs are valid
+         for (size_t i = MSS_MCS_GROUP_32_NM_START_INDEX;
+                (i <= MSS_MCS_GROUP_32_NM_END_INDEX);
+                i++)
+           {
+               // only process valid groups
+               if (group_data[i][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
+               {
+                   continue;
+               }
+
+               uint32_t mcs_in_group = group_data[i][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+
+               uint32_t mcs_sz = group_data[i][0];
+               for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
+                    (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group);
+                    j++)
+               {
+                    if(mcs_sz !=  sizeInfo.MCS_size[group_data[i][j]])
+                    {
+                          FAPI_INF(" Group %d will not be configured as MCS %d is not valid grouped size is %d , present MCS size is %d \n",i,group_data[i][j],mcs_sz, sizeInfo.MCS_size[group_data[i][j]]);
+                          for(uint8_t k; k<32;k++) { group_data[i][k]=0; }
+                     }
+               }
+           }
         // get child MCS chiplets
         rc = fapiGetChildChiplets(i_pu_target,
                                   fapi::TARGET_TYPE_MCS_CHIPLET,
@@ -521,7 +627,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
 
         // loop through & set configuration of each MCS chiplet
         for (std::vector<fapi::Target>::iterator iter = l_mcs_chiplets.begin();
-             iter != l_mcs_chiplets.end() && rc.ok();
+             iter != l_mcs_chiplets.end();
              iter++)
         {
             // obtain MCS chip unit number
@@ -538,7 +644,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
             uint8_t nm_bar_group_index = 0x0;
             uint8_t nm_bar_group_member_id = 0x0;
             for (size_t i = MSS_MCS_GROUP_32_NM_START_INDEX;
-                 (i <= MSS_MCS_GROUP_32_NM_END_INDEX) && rc.ok();
+                 (i <= MSS_MCS_GROUP_32_NM_END_INDEX);
                  i++)
             {
                 // only process valid groups
@@ -548,9 +654,10 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                 }
 
                 uint32_t mcs_in_group = group_data[i][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+
+
                 for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
-                     (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group) &&
-                     (rc.ok());
+                     (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group);
                      j++)
                 {
                     if (mcs_pos == group_data[i][j])
@@ -573,6 +680,10 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                             j-MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
                     }
                 }
+                if (!rc.ok())
+                {
+                    break;
+                }
             }
             if (!rc.ok())
             {
@@ -592,66 +703,72 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
             }
 
             // determine mirrored member group
-            bool m_bar_valid = false;
-            uint8_t m_bar_group_index = 0x0;
-            for (size_t i = MSS_MCS_GROUP_32_M_START_INDEX;
-                 (i <= MSS_MCS_GROUP_32_M_END_INDEX) && rc.ok();
+            if(M_valid)
+	    {
+            	bool m_bar_valid = false;
+            	uint8_t m_bar_group_index = 0x0;
+            	for (size_t i = MSS_MCS_GROUP_32_M_START_INDEX;
+                 (i <= MSS_MCS_GROUP_32_M_END_INDEX);
                  i++)
-            {
-                // only process valid groups
-                if (group_data[i-8][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
-                {
-                    continue;
-                }
+            	{
+                	// only process valid groups
+                	if (group_data[i-8][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
+                	{
+                    	continue;
+                	}
 
-                uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
-                for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
-                     (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group) &&
-                     (rc.ok());
-                     j++)
-                {
-                    if (mcs_pos == group_data[i-8][j])
-                    {
-                        if (m_bar_valid)
-                        {
-                            const uint8_t& MCS_POS = mcs_pos;
-                            const uint8_t& GROUP_INDEX_A = m_bar_group_index;
-                            const uint8_t& GROUP_INDEX_B = i;
-                            FAPI_ERR("mss_setup_bars: MCS %d is listed as a member in multiple mirrored groups",
+                	uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+                	for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
+                    	 (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group);
+                    	 j++)
+                	{
+                    	if (mcs_pos == group_data[i-8][j])
+                    	{
+                        	if (m_bar_valid)
+                        	{
+                            	const uint8_t& MCS_POS = mcs_pos;
+                            	const uint8_t& GROUP_INDEX_A = m_bar_group_index;
+                            	const uint8_t& GROUP_INDEX_B = i;
+                            	FAPI_ERR("mss_setup_bars: MCS %d is listed as a member in multiple mirrored groups",
                                      mcs_pos);
-                            FAPI_SET_HWP_ERROR(
-                                rc,
-                                RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR);
-                            break;
-                        }
-                        m_bar_valid = true;
-                        m_bar_group_index = i;
-                    }
-                }
+                            	FAPI_SET_HWP_ERROR(
+                                	rc,
+                                 RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR);
+                            	break;
+                       	        }
+                        	m_bar_valid = true;
+                        	m_bar_group_index = i;
+                    	}
+                	}
+            	    if (!rc.ok())
+            	    {
+                	    break;
+            	    }
+            	}
+            	if (!rc.ok())
+            	{
+                	break;
+            	}
+            	// write mirrored BARs based on group configuration
+            	rc = mss_setup_bars_init_m_bars(
+                	*iter,
+                	m_bar_valid,
+                	group_data[m_bar_group_index]);
+            	if (!rc.ok())
+            	{
+                	FAPI_ERR("mss_setup_bars: Error from mss_setup_bars_init_m_bars");
+               		 break;
+            	}
             }
-            if (!rc.ok())
-            {
-                break;
-            }
-            // write mirrored BARs based on group configuration
-            rc = mss_setup_bars_init_m_bars(
-                *iter,
-                m_bar_valid,
-                group_data[m_bar_group_index]);
-            if (!rc.ok())
-            {
-                FAPI_ERR("mss_setup_bars: Error from mss_setup_bars_init_m_bars");
-                break;
-            }
-
             // write attribute signifying BARs are valid & MSS inits are finished
             uint8_t final = 1;
             rc = FAPI_ATTR_SET(ATTR_MSS_MEM_IPL_COMPLETE, &i_pu_target, final);
             if (!rc.ok())
             {
-                FAPI_ERR("mss_setup_bars: Error from FAPI_ATTR_SET (ATTR_MSS_MEM_IPL_COMPLETE)");
-                break;
+               	FAPI_ERR("mss_setup_bars: Error from FAPI_ATTR_SET (ATTR_MSS_MEM_IPL_COMPLETE)");
+               	break;
             }
+
         }
     } while(0);
 

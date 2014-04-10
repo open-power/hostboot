@@ -582,10 +582,33 @@ void*    call_proc_setup_bars( void    *io_pArgs )
         const fapi::Target l_fapi_pCpuTarget( TARGET_TYPE_PROC_CHIP,
                            (const_cast<TARGETING::Target*> (l_pCpuTarget)) );
 
+        TARGETING::TargetHandleList l_membufsList;
+        getChildAffinityTargets(l_membufsList, l_pCpuTarget,
+                                CLASS_CHIP, TYPE_MEMBUF);
+        std::vector<fapi::Target> l_associated_centaurs;
+
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufsList.begin();
+                l_membuf_iter != l_membufsList.end();
+                ++l_membuf_iter)
+        {
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target* l_pTarget = *l_membuf_iter;
+
+            // cast OUR type of target to a FAPI type of target.
+            const fapi::Target l_fapi_centaur_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
+            (const_cast<TARGETING::Target*>(l_pTarget)) );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "target HUID %.8X", TARGETING::get_huid(l_pTarget));
+
+            l_associated_centaurs.push_back(l_fapi_centaur_target);
+        }
+
         //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl,
-                         mss_setup_bars,
-                         l_fapi_pCpuTarget );
+        FAPI_INVOKE_HWP(l_errl,
+                        mss_setup_bars,
+                        l_fapi_pCpuTarget, l_associated_centaurs );
 
         if ( l_errl )
         {
@@ -666,7 +689,7 @@ void*    call_proc_setup_bars( void    *io_pArgs )
                     case 0: l_proc_chip.a0_chip = l_fapiproc_parent; break;
                     case 1: l_proc_chip.a1_chip = l_fapiproc_parent; break;
                     case 2: l_proc_chip.a2_chip = l_fapiproc_parent; break;
-                   default: break; 
+                   default: break;
                 }
             }
 
@@ -903,7 +926,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
         // istep failure when the dump collect portion of this step fails..  We
         // will not fail the istep on any mbox message failures. instead we will
         // simply commit the errorlog and continue.
-   
+
         errlHndl_t l_errMsg = NULL;
 
         // Dump relies upon the runtime module
