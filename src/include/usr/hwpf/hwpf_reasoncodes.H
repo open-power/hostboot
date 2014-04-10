@@ -76,7 +76,8 @@ namespace fapi
     enum hwpfReasonCode
     {
         // FAPI generated errors (must match fapiReturnCodes.H)
-        RC_INVALID_ATTR_GET           = HWPF_COMP_ID | 0x01,
+        RC_INVALID_ATTR_GET            = HWPF_COMP_ID | 0x01,
+        RC_INVALID_CHIP_EC_FEATURE_GET = HWPF_COMP_ID | 0x02,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR        = HWPF_COMP_ID | 0x0f,
@@ -136,6 +137,12 @@ namespace fapi
  * @moduleid     MOD_FAPI_RC_TO_ERRL
  * @reasoncode   RC_INVALID_ATTR_GET
  * @devdesc      InitFile HW Procedure requested an invalid attribute
+ */
+/*@
+ * @errortype
+ * @moduleid     MOD_FAPI_RC_TO_ERRL
+ * @reasoncode   RC_INVALID_CHIP_EC_FEATURE_GET
+ * @devdesc      Request for EC features on an attribute without EC features
  */
 
 #endif
