@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.59 2013/11/11 20:50:06 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.65 2014/04/09 22:47:08 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.65   | jdsloat  |09-APL-14| Fixed ifdef around #include mss_lrdimm_ddr4_funcs.H
+//  1.64   | jdsloat  |01-APL-14| RAS review edits/changes
+//  1.63   | jdsloat  |01-APL-14| RAS review edits/changes
+//  1.62   | jdsloat  |28-MAR-14| RAS review edits/changes
+//  1.61   | kcook    | 03/18/13| Added include mss_lrdimm_ddr4_funcs.H
+//  1.60   | kcook    | 03/14/13| Added calls to DDR4 ISDIMM functions.
 //  1.59   | jdsloat  | 11/11/13| Changed EFF attributes to VPD named attributes
 //  1.58   | jdsloat  | 10/15/13| Added rc checks in ddr4 shadow regs check per review request
 //  1.57   | jdsloat  | 10/09/13| Added mrs_load_ddr4 with defines for ddr4 usage, added shadow regs, removed complicated flow
@@ -114,7 +120,9 @@
 #include <mss_lrdimm_funcs.H>
 #include <mss_ddr4_funcs.H>
 
-
+#ifdef FAPI_LRDIMM
+#include <mss_lrdimm_ddr4_funcs.H>
+#endif
 
 #ifndef FAPI_LRDIMM
 using namespace fapi;
@@ -122,7 +130,7 @@ fapi::ReturnCode mss_lrdimm_rcd_load(Target& i_target, uint32_t port_number, uin
 {
    ReturnCode rc;
 
-   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_ERR("Invalid exec of mss_lrdimm_rcd_load on %s!", i_target.toEcmdString());
    FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
    return rc;
 
@@ -131,20 +139,47 @@ ReturnCode mss_lrdimm_mrs_load(Target& i_target, uint32_t i_port_number, uint32_
 {
    ReturnCode rc;
 
-   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_ERR("Invalid exec of mss_lrdimm_mrs_load function on %s!", i_target.toEcmdString());
    FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
    return rc;
 
 }
 #endif
 
- #ifndef FAPI_DDR4
+#ifndef FAPI_DDR4
 using namespace fapi;
 fapi::ReturnCode mss_mrs_load_ddr4(Target& i_target, uint32_t port_number, uint32_t& ccs_inst_cnt)
 {
    ReturnCode rc;
 
    FAPI_ERR("Invalid exec of mrs_load_ddr4  %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+fapi::ReturnCode mss_rcd_load_ddr4(Target& i_target, uint32_t i_port_number, uint32_t& io_ccs_inst_cnt)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of rcd_load_ddr4  %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+fapi::ReturnCode mss_lrdimm_ddr4_db_load(Target& i_target, uint32_t i_port_number, uint32_t& io_ccs_inst_cnt)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of lrdimm_ddr4_db_load  %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+fapi::ReturnCode mss_ddr4_invert_mpr_write(Target& i_target)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of ddr4_invert_mpr_write  %s!", i_target.toEcmdString());
    FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
    return rc;
 
@@ -339,7 +374,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		rc_num = rc_num | data_buffer_64.setBit(61);
 		rc_num = rc_num | data_buffer_64.setBit(62);
 		rc_num = rc_num | data_buffer_64.setBit(63);
-		rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
 		if(rc) return rc;
 
 		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
@@ -489,7 +524,9 @@ ReturnCode mss_draminit_cloned(Target& i_target)
             FAPI_ERR(" assert_resetn Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
             return rc;
         }
+
         rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES); // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
+	if(rc) return rc;
 
         rc = mss_assert_resetn(i_target, 1 ); // de-assert a reset
         if(rc)
@@ -504,24 +541,46 @@ ReturnCode mss_draminit_cloned(Target& i_target)
             if (!((dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)||(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)))
             {
                 // Step three: Load RCD Control Words
-                rc = mss_rcd_load(i_target, port_number, ccs_inst_cnt);
-                if(rc)
+                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) 
                 {
-                    FAPI_ERR(" rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-                    return rc;
-                }
-
-                if ( dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
-                {
-                   // Set Function 1-13 rcd words
-                   rc = mss_lrdimm_rcd_load(i_target, port_number, ccs_inst_cnt);
+                   rc = mss_rcd_load_ddr4(i_target, port_number, ccs_inst_cnt);
                    if(rc)
                    {
-                       FAPI_ERR(" LRDIMM rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                       FAPI_ERR(" rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
                        return rc;
                    }
+                   if ( dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                   {
+                      // Set Data Buffer Function  words
+                      rc = mss_lrdimm_ddr4_db_load(i_target, port_number, ccs_inst_cnt);
+                      if(rc)
+                      {
+                          FAPI_ERR(" LRDIMM rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                          return rc;
+                      }
+                   }
+
                 }
-     
+                else 
+                {
+                   rc = mss_rcd_load(i_target, port_number, ccs_inst_cnt);
+                   if(rc)
+                   {
+                       FAPI_ERR(" rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                       return rc;
+                   }
+
+                   if ( dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                   {
+                      // Set Function 1-13 rcd words
+                      rc = mss_lrdimm_rcd_load(i_target, port_number, ccs_inst_cnt);
+                      if(rc)
+                      {
+                          FAPI_ERR(" LRDIMM rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                          return rc;
+                      }
+                   }
+                } 
             }
         }
 
@@ -1041,6 +1100,14 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	    }
 	}
 
+        if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) 
+        {
+           FAPI_INF("Performing B-side address inversion MPR write pattern");
+
+           rc = mss_ddr4_invert_mpr_write(i_target);
+           if (rc) return rc;
+        }
+
 	if (rc_num)
 	{
 	    FAPI_ERR( "mss_draminit: Error setting up buffers");
@@ -1144,7 +1211,7 @@ ReturnCode mss_rcd_load(
     ecmdDataBufferBase csn_8(8);
     rc_num = rc_num | csn_8.setBit(0,8);
     ecmdDataBufferBase odt_4(4);
-    rc_num = rc_num | odt_4.setBit(0,4);
+    rc_num = rc_num | odt_4.clearBit(0,4);
     ecmdDataBufferBase ddr_cal_type_4(4);
 
     ecmdDataBufferBase num_idles_16(16);
@@ -1343,7 +1410,7 @@ ReturnCode mss_mrs_load(
     ecmdDataBufferBase csn_8(8);
     rc_num = rc_num | csn_8.setBit(0,8);
     ecmdDataBufferBase odt_4(4);
-    rc_num = rc_num | odt_4.setBit(0,4);
+    rc_num = rc_num | odt_4.clearBit(0,4);
     ecmdDataBufferBase ddr_cal_type_4(4);
 
     ecmdDataBufferBase csn_setup_8(8);
@@ -1777,8 +1844,15 @@ ReturnCode mss_mrs_load(
                     }
                     else
                     {
+			//DECONFIG and FFDC INFO
+			const fapi::Target & TARGET_MBA_ERROR = i_target;
+                        const uint8_t & IMP = dram_rtt_nom[i_port_number][dimm_number][rank_number];
+                        const uint32_t & PORT = i_port_number;
+                        const uint32_t & DIMM = dimm_number;
+                        const uint32_t & RANK = rank_number;
+
                         FAPI_ERR( "mss_mrs_load: Error determining ATTR_VPD_DRAM_RTT_NOM value: %d from attribute", dram_rtt_nom[i_port_number][dimm_number][rank_number]);
-                        FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+                        FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_RTT_NOM_IMP_INPUT_ERROR);
                         return rc;
                     }
 
@@ -1826,8 +1900,16 @@ ReturnCode mss_mrs_load(
                     }
 		    else
 		    {
+
+			//DECONFIG and FFDC INFO
+			const fapi::Target & TARGET_MBA_ERROR = i_target;
+                        const uint8_t & IMP = dram_rtt_nom[i_port_number][dimm_number][rank_number];
+                        const uint32_t & PORT = i_port_number;
+                        const uint32_t & DIMM = dimm_number;
+                        const uint32_t & RANK = rank_number;
+
                         FAPI_ERR( "mss_mrs_load: Error determining ATTR_VPD_DRAM_RTT_WR value: %d from attribute", dram_rtt_wr[i_port_number][dimm_number][rank_number]);
-                        FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+                        FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_RTT_WR_IMP_INPUT_ERROR);
                         return rc;
                     }
 
@@ -1976,7 +2058,8 @@ ReturnCode mss_mrs_load(
             // For LRDIMM  Set Rtt_nom, rtt_wr, driver impedance for R0 and R1
             if ( (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) && lrdimm_rank_mult_mode != 0 )
             {
-                 mss_lrdimm_mrs_load(i_target, i_port_number, dimm_number, io_ccs_inst_cnt);
+                 rc = mss_lrdimm_mrs_load(i_target, i_port_number, dimm_number, io_ccs_inst_cnt);
+                 if(rc) return rc;
             } // end LRDIMM 8R dir MRS 1
 
         } // end if has ranks
@@ -2007,7 +2090,7 @@ ReturnCode mss_assert_resetn (
 
     if (rc_num)
     {
-        FAPI_ERR( "mss_ccs_mode: Error setting up buffers");
+        FAPI_ERR( "mss_assert_resetn: Error setting up buffers");
         rc_buff.setEcmdError(rc_num);
         return rc_buff;
     }

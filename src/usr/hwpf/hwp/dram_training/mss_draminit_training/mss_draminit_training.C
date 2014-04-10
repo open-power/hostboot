@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.77 2014/03/28 19:48:10 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.80 2014/04/01 16:34:50 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.80   | jdsloat  |01-APL-14| RAS review edits/changes
+//  1.79   | jdsloat  |01-APL-14| RAS review edits/changes
+//  1.78   | jdsloat  |28-MAR-14| RAS review edits/changes
 //  1.77   | jdsloat  |28-MAR-14| Added ifdef around #include for mss_lrdimm_ddr4_funcs.H
 //  1.76   | mwuu     |14-MAR-14| Fixed CDIMM full spare case in getC4dq2reg (bbm)
 //  1.75   | kcook    |14-MAR-14| Fixed mss_mxd_training stub function definition
@@ -470,7 +473,9 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
                  (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
             {
                  rc = mss_mrep_training(i_target, port);
+		 if(rc) return rc;
 		 rc = mss_mxd_training(i_target,port,0);
+		 if(rc) return rc;
             }
 	}
 
@@ -828,15 +833,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	return rc;
     }
 
+    // If we hit either of these States, the error callout originates from Mike Jones Bad Bit code. 
     if (complete_status == MSS_INIT_CAL_STALL)
     {
 	FAPI_ERR( "+++ Partial/Full calibration stall. Check Debug trace. +++");
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_INIT_CAL_STALLED);
     }
     else if (error_status == MSS_INIT_CAL_FAIL)
     {
 	FAPI_ERR( "+++ Partial/Full calibration fail. Check Debug trace. +++");
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_INIT_CAL_FAILED);
     }
     else
     {
@@ -3227,7 +3231,8 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	FAPI_INF("Running flash->registers(set)");
 
 	std::vector<Target> mba_dimms;
-	fapiGetAssociatedDimms(mba_target, mba_dimms);	// functional dimms
+	rc = fapiGetAssociatedDimms(mba_target, mba_dimms);	// functional dimms
+	if(rc) return rc;
 
 	// ATTR_EFF_PRIMARY_RANK_GROUP0[port], GROUP1[port],
 	// 						 GROUP2[port], GROUP3[port]
@@ -3265,8 +3270,12 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 			l_dram_width = 32;
 			break;
 		default:
+			//DECONFIG and FFDC INFO
+			const fapi::Target & TARGET_MBA_ERROR = mba_target;
+                        const uint8_t & WIDTH = l_dram_width;
+
 			FAPI_ERR("ATTR_EFF_DRAM_WIDTH is invalid %u", l_dram_width);
-			FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+			FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DRAM_WIDTH_INPUT_ERROR_SETBBM);
 			return rc;
 	}
 
@@ -3539,10 +3548,17 @@ fapi::ReturnCode mss_get_dqs_lane (const fapi::Target & i_mba,
 			o_lane |= 0x03;
 			break;
 		default:
+			//DECONFIG and FFDC INFO
+			const fapi::Target & TARGET_MBA_ERROR = i_mba;
+			const uint8_t & PORT = i_port;
+			const uint8_t & BLOCK = i_block;
+			const uint8_t & QUAD = i_quad;
+			const uint8_t & PHYLANE = phy_lane;
+
 			FAPI_ERR("\t!!!  (Port%i, dp18_%i, q=%i)  phy_lane(%i)"
 				"returned from mss_c4_phy is invalid",
 				i_port, i_block, i_quad, phy_lane);
-//			FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+			FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_C4_PHY_TRANSLATION_ERROR);
 	}
 	return rc;
 } //end mss_get_dqs_lane
@@ -3624,7 +3640,8 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 	FAPI_INF("Running (get)registers->flash");
 
 	std::vector<Target> mba_dimms;
-	fapiGetAssociatedDimms(mba_target, mba_dimms);	// functional dimms
+	rc = fapiGetAssociatedDimms(mba_target, mba_dimms);	// functional dimms
+	if(rc) return rc;
 
 	// 4 dimms per MBA, 2 per port
 	// ATTR_EFF_PRIMARY_RANK_GROUP0[port], GROUP1[port],
@@ -3656,8 +3673,12 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 			l_dram_width = 32;
 			break;
 		default:
+			//DECONFIG and FFDC INFO
+			const fapi::Target & TARGET_MBA_ERROR = mba_target;
+                        const uint8_t & WIDTH = l_dram_width;
+
 			FAPI_ERR("ATTR_EFF_DRAM_WIDTH is invalid %u", l_dram_width);
-			FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+			FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DRAM_WIDTH_INPUT_ERROR_GETBBM);
 			return rc;
 	}
 
@@ -3836,9 +3857,17 @@ ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
 			            spare_bitmap = 0x00;
 		            break;
 					default:
+
+						//DECONFIG and FFDC INFO
+						const fapi::Target & TARGET_MBA_ERROR = i_mba;
+                        			const uint8_t & SPARE = dimm_spare[i_port][i_dimm][i_rank];
+                        			const uint8_t & PORT = i_port;
+                        			const uint8_t & DIMM = i_dimm;
+                        			const uint8_t & RANK = i_rank;
+
 						FAPI_ERR("ATTR_VPD_DIMM_SPARE is invalid %u", 
 							dimm_spare[i_port][i_dimm][i_rank]);
-						FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+						FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DIMM_SPARE_INPUT_ERROR);
 						return rc;
 				}
 

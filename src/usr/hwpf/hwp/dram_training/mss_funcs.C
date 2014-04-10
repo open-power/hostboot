@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.35 2014/02/21 21:58:42 jdsloat Exp $
+// $Id: mss_funcs.C,v 1.38 2014/04/01 15:24:50 jdsloat Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.38   | jdsloat  |01-APL-14| RAS review edits/changes
+//  1.37   | jdsloat  |28-MAR-14| RAS review edits/changes
+//  1.36   | kcook    | 03/12/14| Added check for DDR3 LRDIMM during mss_execut_zq_cal.
 //  1.35   | jdsloat  | 02/21/14| Fixed an inf loop with edit 1.34 and 128GB DIMMs.
 //  1.34   | jdsloat  | 02/20/14| Edited set_end_bit to add a NOP to the end of every CCS execution per CCS defect
 //  1.33   | kcook    | 08/27/13| Removed LRDIMM functions to mss_lrdimm_funcs.C. Use with mss_funcs.H v1.16.
@@ -609,16 +612,28 @@ ReturnCode mss_ccs_fail_type(
 
     if (data_buffer.getBit(3))
     {
+	//DECONFIG and FFDC INFO
+	const fapi::Target & TARGET_MBA_ERROR = i_target;
+	const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
+
         FAPI_ERR("CCS returned a FAIL condtion of \"Read Miscompare\" ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_READ_MISCOMPARE);
     } 
     else if (data_buffer.getBit(4))
     {
+	//DECONFIG and FFDC INFO
+	const fapi::Target & TARGET_MBA_ERROR = i_target;
+	const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
+
         FAPI_ERR("CCS returned a FAIL condition of \"UE or SUE Error\" ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_UE_SUE);
     }
     else if (data_buffer.getBit(5))
     {
+	//DECONFIG and FFDC INFO
+	const fapi::Target & TARGET_MBA_ERROR = i_target;
+	const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
+
         FAPI_ERR("CCS returned a FAIL condition of \"Calibration Operation Time Out\" ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_CAL_TIMEOUT);
     }
@@ -667,6 +682,9 @@ ReturnCode mss_execute_ccs_inst_array(
 	}
 	else
 	{
+	    //DECONFIG and FFDC INFO
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+
             FAPI_ERR("Returning a CCS HUNG RC Value.");
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_HUNG);
 	    return rc;
@@ -739,16 +757,25 @@ ReturnCode mss_rcd_parity_check(
 
     if (rcd_parity_fail)
     {
+	//DECONFIG and FFDC INFO
+	const fapi::Target & TARGET_MBA_ERROR = i_target;
+
         FAPI_ERR("Ports 0 and 1 has exceeded a maximum number of RCD Parity Errors.");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_RCD_PARITY_ERROR_LIMIT);
     }
     else if ((port_0_error) && (i_port == 0))
     {
+	//DECONFIG and FFDC INFO
+	const fapi::Target & TARGET_MBA_ERROR = i_target;
+
         FAPI_ERR("Port 0 has recorded an RCD Parity Error. ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_RCD_PARITY_ERROR_PORT0);
     }
     else if ((port_1_error) && (i_port == 1))
     {
+	//DECONFIG and FFDC INFO
+	const fapi::Target & TARGET_MBA_ERROR = i_target;
+
         FAPI_ERR("Port 1 has recorded an RCD Parity Error. ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_RCD_PARITY_ERROR_PORT1);
     }
@@ -825,6 +852,10 @@ ReturnCode mss_execute_zq_cal(
     uint8_t num_ranks_array[2][2]; //num_ranks_array[port][dimm]
     uint8_t dimm_type;
     uint8_t lrdimm_rank_mult_mode;
+    uint8_t dram_gen = 0;
+
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
+    if(rc) return rc;
 
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
     if(rc) return rc;
@@ -833,6 +864,8 @@ ReturnCode mss_execute_zq_cal(
 
     //Set up CCS Mode Reg for ZQ cal long and Init cal
     rc = fapiGetScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
+    if(rc) return rc;
+
     rc_num = rc_num | data_buffer_64.insert(stop_on_err_buffer_1, 0, 1, 0);
     rc_num = rc_num | data_buffer_64.insert(resetn_buffer_1, 24, 1, 0);
     if(rc_num)
@@ -847,7 +880,7 @@ ReturnCode mss_execute_zq_cal(
     {
         start_rank=(4 * dimm);
 
-        if (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) 
+        if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) ) 
         {
            rc = FAPI_ATTR_GET(ATTR_LRDIMM_RANK_MULT_MODE, &i_target, lrdimm_rank_mult_mode);
            if(rc) return rc;

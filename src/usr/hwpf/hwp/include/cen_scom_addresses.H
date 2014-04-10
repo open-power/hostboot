@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.67 2013/12/16 19:38:35 dsanner Exp $
+// $Id: cen_scom_addresses.H,v 1.68 2014/03/28 21:06:47 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.64   | jdsloat  |28-MAR-14| ADDED MEM SCOM CCS MODEQ, STATQ, and CAL FIR addresses.
 //  1.63   | mwuu     |18-Jun-13| Fixed naming of IO_FET_SLICE_EN_MAP1_P0_ADR0:3
 //  1.62   | mwuu     |18-Jun-13| Fixed naming of IO_FET_SLICE_EN_MAP1_P0_ADR0_3
 //         |          |         | _0x80007C210301143F and for port 1 as well
@@ -276,6 +277,15 @@ CONST_UINT64_T( MEM_SCOM_0x03010000                    , ULL(0x03010000) );
 
 CONST_UINT64_T( MEM_MBA01_CCS_MODEQ_0x030106A7         , ULL(0x030106A7) );
 CONST_UINT64_T( MEM_MBA23_CCS_MODEQ_0x03010EA7         , ULL(0x03010EA7) );
+
+CONST_UINT64_T( MEM_MBA01_STATQ_0x030106A6             , ULL(0x030106A6) );
+CONST_UINT64_T( MEM_MBA23_STATQ_0x03010EA6             , ULL(0x03010EA6) );
+
+CONST_UINT64_T( MEM_MBA01_CCS_CNTLQ_0x030106A5         , ULL(0x030106A5) );
+CONST_UINT64_T( MEM_MBA23_CCS_CNTLQ_0x03010EA5         , ULL(0x03010EA5) );
+
+CONST_UINT64_T( MEM_MBA01_CALFIR_0x03010402            , ULL(0x03010402) );
+CONST_UINT64_T( MEM_MBA23_CALFIR_0x03010C00            , ULL(0x03010C00) );
 
 //------------------------------------------------------------------------------
 //      MEM TRACE
@@ -1797,6 +1807,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.68  2014/03/28 21:06:47  jdsloat
+ADDED MEM SCOM CCS MODEQ, STATQ, and CAL FIR addresses.
+
 Revision 1.67  2013/12/16 19:38:35  dsanner
 Fix compile error for proc_mpipl_clear_xstop.C
 

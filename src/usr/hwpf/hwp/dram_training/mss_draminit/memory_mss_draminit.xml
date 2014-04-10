@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,7 +21,45 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_draminit.xml,v 1.1 2013/06/19 18:27:45 bellows Exp $ -->
+<!-- $Id: memory_mss_draminit.xml,v 1.2 2014/03/28 21:04:03 jdsloat Exp $ -->
 <!-- For file ../../ipl/fapi/mss_draminit.C -->
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_RTT_NOM_IMP_INPUT_ERROR</rc>
+  <description>Unknown Value for RTT_NOM within the VPD</description>
+  <ffdc>IMP</ffdc>
+  <ffdc>PORT</ffdc>
+  <ffdc>DIMM</ffdc>
+  <ffdc>RANK</ffdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_MBA_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_RTT_WR_IMP_INPUT_ERROR</rc>
+  <description>Unknown Value for RTT_WR within the VPD</description>
+  <ffdc>IMP</ffdc>
+  <ffdc>PORT</ffdc>
+  <ffdc>DIMM</ffdc>
+  <ffdc>RANK</ffdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_MBA_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_MBA_ERROR</target>
+  </gard>
+</hwpError>
 
 </hwpErrors>
