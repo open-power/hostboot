@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_grouping.C $ */
+/* $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_grouping.C,v $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.00 2013/11/21 08:50:19 gpaulraj Exp $
+// $Id: mss_eff_grouping.C,v 1.30 2014/04/10 18:43:41 jdsloat Exp $
 // Mike Jones - modified version from 1.28 to 1.00 because it is a sandbox version
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -39,6 +39,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.30   | jdsloat  | 04-10-14| Mike Jones's rewrite.
+//  1.29   | gpaulraj | 04-20-14| Updated Dimm call out/FW defect/Mike's Feedback
 //  1.28   | gpaulraj | 11-21-13| modified 8MCS/group id as per spec
 //  1.27   | gpaulraj | 08-13-13| Fixed alternate BAR settings for Mirror
 //  1.26   | gpaulraj | 08-12-13| added mirror policy and HTM/OCC Bar setup
@@ -66,1338 +68,1602 @@
 //         |          |         | Removed read of attr that has not been written
 //  1.2    | bellows  | 07-16-12| bellows | added in Id tag
 //  1.1    | gpaulraj | 03-19-12| First drop for centaur
-//----------------------------------------------------------------------
-//  Includes
-//----------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//  Includes
+//-----------------------------------------------------------------------------
 #include <fapi.H>
 #include <mss_eff_grouping.H>
-#include "cen_scom_addresses.H"
+#include <cen_scom_addresses.H>
 #include <mss_error_support.H>
 
-//#ifdef FAPIECMD
 extern "C"
 {
 
-//#endif
-  using namespace fapi;
+// Used for decoding ATTR_MSS_INTERLEAVE_ENABLE (iv_groupsAllowed)
+const uint8_t MCS_GROUP_8 = 0x8;
+const uint8_t MCS_GROUP_4 = 0x4;
+const uint8_t MCS_GROUP_2 = 0x2;
+const uint8_t MCS_GROUP_1 = 0x1;
 
-//----------------------------------------------
-// MSS EFF GROUPING FUNCTIONs............
-//----------------------------------------------------
-  ReturnCode mss_eff_grouping (const fapi::Target & i_target, std::vector < fapi::Target > &i_associated_centaurs);     // Target is Proc target & Each MCS connected to each Centaur. Associated centaur is collection of the Centaure location for the processor
-  uint8_t mss_eff_grouping_recursion (uint32_t number);
+// MCS positions
+const uint8_t MCSID_0 = 0x0;
+const uint8_t MCSID_1 = 0x1;
+const uint8_t MCSID_2 = 0x2;
+const uint8_t MCSID_3 = 0x3;
+const uint8_t MCSID_4 = 0x4;
+const uint8_t MCSID_5 = 0x5;
+const uint8_t MCSID_6 = 0x6;
+const uint8_t MCSID_7 = 0x7;
 
-//----------------------------------------------------
-// MSS EFF GROUPING Variables..........
-//----------------------------------------------------
-  const uint8_t MCS_SIZE = 0;
-  const uint8_t MCS_IN_GROUP = 1;
-  const uint8_t GROUP_SIZE = 2;
-  const uint8_t BASE_ADDR = 3;
-  const uint8_t MEMBERS_START_ID = 4;
-  const uint8_t MEMBERS_END = 11;
-  const uint8_t ALT_VALID = 12;
-  const uint8_t ALT_SIZE = 13;
-  const uint8_t ALT_BASE_ADDR = 14;
-  const uint8_t LARGEST_MBA_SIZE = 15;
-  const uint8_t MCS_GROUP_8 = 0x8;
-  const uint8_t MCS_GROUP_4 = 0x4;
-  const uint8_t MCS_GROUP_2 = 0x2;
-  const uint8_t MCS_GROUP_1 = 0x1;
-  const uint8_t MCSID_0 = 0x0;
-  const uint8_t MCSID_1 = 0x1;
-  const uint8_t MCSID_2 = 0x2;
-  const uint8_t MCSID_3 = 0x3;
-  const uint8_t MCSID_4 = 0x4;
-  const uint8_t MCSID_5 = 0x5;
-  const uint8_t MCSID_6 = 0x6;
-  const uint8_t MCSID_7 = 0x7;
-  const uint8_t NORMAL_MODE =    0x0;
-  const uint8_t FLIPPED_MODE =   0x1;
-  const uint8_t SELECTIVE_MODE = 0x2;
+// System structure
+const uint8_t NUM_MBA_PORTS = 2;
+const uint8_t NUM_MBA_DIMMS = 2; // DIMMs per port
+const uint8_t NUM_MBA_PER_MCS = 2;
+const uint8_t NUM_MCS_PER_PROC = 8;
 
-  ReturnCode mss_eff_grouping (const fapi::Target & i_target,
-                               std::vector < fapi::Target >
-                               &i_associated_centaurs)
-  {
-    ReturnCode rc;
-    Eff_Grouping_Data eff_grouping_data, tempgpID;
-    uint64_t mss_base_address;
-    uint64_t mirror_base;
-    uint64_t occ_sandbox_base = 0;
-    uint64_t occ_sandbox_size;
-    uint64_t htm_bar_base = 0;
-    uint64_t htm_bar_size;
-    uint32_t l_unit_pos = 0;
-    uint8_t gp_pos = 0;
-    uint8_t min_group = 1;
-    int i, j;
-    for (i = 0; i < MBA_SIZE_MCS; i++)
-      {
-        eff_grouping_data.MCS_size[i] = 0;
-        for (j = 0; j < MBA_SIZE_PORT; j++)
-          eff_grouping_data.MBA_size[i][j] = 0;
-      }
-    for (i = 0; i < MBA_GROUP_SIZE; i++)
-      {
-        for (j = 0; j < MBA_GROUP_DATA; j++)
-          eff_grouping_data.groupID[i][j] = 0;
-      }
+// Constants used for EffGroupingData
+const uint8_t DATA_GROUPS = 16;   // 8 regular groups, 8 mirrored groups
+const uint8_t MIRR_OFFSET = 8;  // Start of mirrored offset in DATA_GROUPS
+const uint8_t DATA_ELEMENTS = 16; // 16 items of data for each group
 
-//------------------------------------------------
-// do-while used for return rc make more effective
-//------------------------------------------------
-    do
+// Indexes used for EffGroupingData::iv_data DATA ELEMENTS
+const uint8_t MCS_SIZE = 0;           // Memory Size of each MCS in group (GB)
+const uint8_t MCS_IN_GROUP = 1;       // Number of MCSs in group
+const uint8_t GROUP_SIZE = 2;         // Memory Size of entire group (GB)
+const uint8_t BASE_ADDR = 3;          // Base Address
+#define MEMBER_IDX(X) ((X) + 4)       // List of MCSs in group
+const uint8_t ALT_VALID = 12;         // Alt Memory Valid
+const uint8_t ALT_SIZE = 13;          // Alt Memory Size
+const uint8_t ALT_BASE_ADDR = 14;     // Alt Base Address
+const uint8_t LARGEST_MBA_SIZE = 15;  // Largest MBA size
 
-      {
-        FAPI_INF ("MCS level grouping begins");
-        uint8_t centaur;
-        uint8_t mba_i;
-        uint8_t mba = 0;
-        uint8_t dimm = 0;
-        uint32_t cenpos;
-        uint32_t procpos;
-        uint8_t port;
-        uint8_t mba_pos[2][2] = {
-          {
-           0, 0}
-          ,
-          {
-           0, 0}
-        };
-        std::vector < fapi::Target > l_mba_chiplets;
-        std::vector < fapi::Target > l_mcs_chiplets;
-        FAPI_INF ("Happy starting");
-        rc =
-          fapiGetChildChiplets (i_target, fapi::TARGET_TYPE_MCS_CHIPLET,
-                                l_mcs_chiplets);
+/**
+ * @struct EffGroupingData
+ *
+ * Contains Effective Grouping Data for a processor chip
+ */
+struct EffGroupingData
+{
+    /**
+     * @brief Default constructor. Initializes instance variables to zero
+     */
+    EffGroupingData();
+
+    // The ATTR_MSS_MCS_GROUP_32 attribute
+    uint32_t iv_data[DATA_GROUPS][DATA_ELEMENTS];
+
+    // The MCSs that have been grouped
+    bool iv_mcsGrouped[NUM_MCS_PER_PROC];
+
+    // The number of groups
+    uint8_t iv_numGroups;
+
+    // The total non-mirrored memory size in GB
+    uint32_t iv_totalSizeNonMirr;
+};
+
+/**
+ * @struct EffGroupingMemInfo
+ *
+ * Contains Memory Information for a processor chip
+ */
+struct EffGroupingMemInfo
+{
+    /**
+     * @brief Default constructor. Initializes instance variables to zero
+     */
+    EffGroupingMemInfo();
+
+    /**
+     * @brief Gets the memory information
+     *
+     * @param[in]  i_assocCentaurs Reference to vector of Centaur Chips
+     *                             associated with the Proc Chip
+     * @return fapi::ReturnCode
+     */
+    fapi::ReturnCode getMemInfo(
+        const std::vector<fapi::Target> & i_assocCentaurs);
+
+    // MCS memory sizes
+    uint32_t iv_mcsSize[NUM_MCS_PER_PROC];
+
+    // MBA memory sizes
+    uint32_t iv_mbaSize[NUM_MCS_PER_PROC][NUM_MBA_PER_MCS];
+
+    // Largest MBA memory sizes
+    uint32_t iv_largestMbaSize[NUM_MCS_PER_PROC];
+
+    // Membuf chip associated with each MCS (for deconfiguring if cannot group)
+    fapi::Target iv_membufs[NUM_MCS_PER_PROC];
+};
+
+/**
+ * @struct EffGroupingSysAttrs
+ *
+ * Contains system attributes
+ */
+struct EffGroupingSysAttrs
+{
+    /**
+     * @brief Default Constructor. Initializes attributes
+     */
+    EffGroupingSysAttrs() : iv_mcsInterleaveMode(0),
+                            iv_selectiveMode(0),
+                            iv_enhancedNoMirrorMode(0) {}
+    /**
+     * @brief Gets attributes
+     */
+    fapi::ReturnCode getAttrs();
+
+    // Public data
+    uint8_t iv_mcsInterleaveMode;    // ATTR_ALL_MCS_IN_INTERLEAVING_GROUP
+    uint8_t iv_selectiveMode;        // ATTR_MEM_MIRROR_PLACEMENT_POLICY
+    uint8_t iv_enhancedNoMirrorMode; // ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING
+};
+
+/**
+ * @struct EffGroupingProcAttrs
+ *
+ * Contains attributes for a Processor Chip
+ */
+struct EffGroupingProcAttrs
+{
+    /**
+     * @brief Default Constructor. Initializes attributes
+     */
+    EffGroupingProcAttrs() : iv_groupsAllowed(0),
+                             iv_memBaseAddr(0),
+                             iv_mirrorBaseAddr(0),
+                             iv_htmBarSize(0),
+                             iv_occSandboxSize(0) {}
+    /**
+     * @brief Gets attributes
+     * 
+     * @param[in] i_proc Reference to Processor Chip Target
+     */
+    fapi::ReturnCode getAttrs(const fapi::Target & i_proc);
+
+    // Public data
+    uint8_t  iv_groupsAllowed;  // ATTR_MSS_INTERLEAVE_ENABLE
+    uint64_t iv_memBaseAddr;    // ATTR_PROC_MEM_BASE >> 30
+    uint64_t iv_mirrorBaseAddr; // ATTR_PROC_MIRROR_BASE >> 30
+    uint64_t iv_htmBarSize;     // ATTR_PROC_HTM_BAR_SIZE
+    uint64_t iv_occSandboxSize; // ATTR_PROC_OCC_SANDBOX_SIZE
+};
+
+/**
+ * @struct EffGroupingMembufAttrs
+ *
+ * Contains attributes for a Membuf Chip
+ */
+struct EffGroupingMembufAttrs
+{
+    /**
+     * @brief Default Constructor. Initializes attributes
+     * 
+     * @param[in] i_procTarget Reference to Processor Chip Target
+     */
+    EffGroupingMembufAttrs() : iv_pos(0), iv_mcsPos(0) {}
+
+    /**
+     * @brief Gets attributes
+     * 
+     * @param[in] i_membuf Reference to membuf Chip Target
+     */
+    fapi::ReturnCode getAttrs(const fapi::Target & i_membuf);
+
+    uint32_t iv_pos;    // ATTR_POS (Position)
+    uint32_t iv_mcsPos; // Associated MCS unit position derived from iv_pos)
+};
+
+/**
+ * @struct EffGroupingMbaAttrs
+ *
+ * Contains attributes for an MBA Chiplet
+ */
+struct EffGroupingMbaAttrs
+{
+    /**
+     * @brief Default Constructor. Initializes attributes
+     * 
+     * @param[in] i_procTarget Reference to Processor Chip Target
+     */
+    EffGroupingMbaAttrs();
+
+    /**
+     * @brief Gets attributes
+     * 
+     * @param[in] i_mba Reference to MBA chiplet Target
+     */
+    fapi::ReturnCode getAttrs(const fapi::Target & i_mba);
+
+    // Unit Position (ATTR_CHIP_UNIT_POS)
+    uint8_t iv_unitPos;
+
+    // Dimm Size (ATTR_EFF_DIMM_SIZE)
+    uint8_t iv_effDimmSize[NUM_MBA_PORTS][NUM_MBA_DIMMS];
+};
+
+//------------------------------------------------------------------------------
+EffGroupingData::EffGroupingData() : iv_numGroups(0), iv_totalSizeNonMirr(0)
+{
+    // Initialize all instance variables to zero
+    for (uint32_t i = 0; i < DATA_GROUPS; i++)
+    {
+        for (uint32_t j = 0; j < DATA_ELEMENTS; j++)
+        {
+            iv_data[i][j] = 0;
+        }
+    }
+
+    for (uint32_t i = 0; i < NUM_MCS_PER_PROC; i++)
+    {
+        iv_mcsGrouped[i] = false;
+    }
+}
+
+//------------------------------------------------------------------------------
+EffGroupingMemInfo::EffGroupingMemInfo()
+{
+    // Initialize all instance variables to zero
+    for (uint32_t i = 0; i < NUM_MCS_PER_PROC; i++)
+    {
+        iv_mcsSize[i] = 0;
+        for (uint32_t j = 0; j < NUM_MBA_PER_MCS; j++)
+        {
+            iv_mbaSize[i][j] = 0;
+        }
+        iv_largestMbaSize[i] = 0;
+    }
+}
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode EffGroupingMemInfo::getMemInfo (
+    const std::vector<fapi::Target> & i_assocCentaurs)
+{
+    fapi::ReturnCode rc;
+
+    for (uint32_t i = 0; i < i_assocCentaurs.size(); i++)
+    {
+        const fapi::Target & cenTarget = i_assocCentaurs[i];
+
+        // Get the Centaur attributes
+        EffGroupingMembufAttrs centaurAttrs;
+        rc = centaurAttrs.getAttrs(cenTarget);
         if (rc)
-          return rc;
-        FAPI_INF ("Number of MCS chiplets: %d", l_mcs_chiplets.size ());
-        uint8_t cen_count = 0;
-        rc = FAPI_ATTR_GET (ATTR_POS, &i_target, procpos);
-        if (rc)
-          return rc;
-
-//-----------------------------------------------------------------------
-//   Collecting Each centaur total memory size and assigning as MCS size
-//-----------------------------------------------------------------------
-        for (centaur = 0; centaur < i_associated_centaurs.size (); centaur++)
-
-          {
-            mba = 0;
-            port = 0;
-            dimm = 0;
-            fapi::Target & centaur_t = i_associated_centaurs[centaur];
-            rc = FAPI_ATTR_GET (ATTR_POS, &centaur_t, cenpos);
-            if (rc)
-              return rc;
-            if (cenpos >= procpos * 8 && cenpos < (procpos * 8 + 8))
-
-              {
-                FAPI_INF ("... working on centaur %d", cenpos);
-                rc =
-                  fapiGetChildChiplets (i_associated_centaurs[centaur],
-                                        fapi::TARGET_TYPE_MBA_CHIPLET,
-                                        l_mba_chiplets);
-                if (rc)
-                  return rc;
-                for (mba_i = 0; mba_i < l_mba_chiplets.size (); mba_i++)
-
-                  {
-                    rc =
-                      FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS,
-                                     &l_mba_chiplets[mba_i], mba);         // Collecting all Centaur CHIP pos ID for current processor
-                    if (rc)
-                      return rc;
-                    FAPI_INF ("... working on mba %d", mba);
-                    rc =
-                      FAPI_ATTR_GET (ATTR_EFF_DIMM_SIZE,
-                                     &l_mba_chiplets[mba_i], mba_pos);      // Collecting all Centaur DIMM sizes for current processor
-                    if (rc)
-                      return rc;
-                    for (port = 0; port < 2; port++)
-
-                      {
-                        for (dimm = 0; dimm < 2; dimm++)
-
-                          {
-                            eff_grouping_data.MCS_size[cenpos -
-                                                       procpos * 8] +=
-                              mba_pos[port][dimm];
-                            eff_grouping_data.MBA_size[cenpos -
-                                                       procpos * 8][mba] +=
-                              mba_pos[port][dimm];
-                          }
-                      }
-                    FAPI_INF (" Cen Pos %d mba %d DIMM SIZE %d \n", cenpos,
-                              mba,
-                              eff_grouping_data.MBA_size[cenpos -
-                                                         procpos * 8][mba]);
-                    FAPI_INF (" Cen Pos %d MBA SIZE %d %d  %d %d \n", cenpos,
-                              mba_pos[0][0], mba_pos[0][1], mba_pos[1][0],
-                              mba_pos[1][1]);
-                    FAPI_INF (" MCS SIZE %d\n",
-                              eff_grouping_data.MCS_size[cenpos -
-                                                         procpos * 8]);
-                  }
-                cen_count++;
-                l_unit_pos++;
-              }
-          }
-        FAPI_INF ("attr_mss_setting %d and  no  of MBAs   %d \n", min_group,
-                  l_unit_pos);
-
-//-------------------------------------------------------------------------------------
-//    Printing out each MCS size
-//------------------------------------------------------------------------------------
-        for (uint8_t i = 0; i < 8; i++)
-
-          {
-            FAPI_INF ("MCS SIZE %d \n", eff_grouping_data.MCS_size[i]);
-          }
-        FAPI_INF ("Group parsing Starting..");
-        uint8_t count = 0;
-        uint8_t done;
-        uint8_t pos;
-        // Possibility way of forming 4 MCS/GROUP along with priority way assigned in the arrary. array [0] given high priority and array[5] given low priority
-        uint8_t config_4MCS[6][4] = {
-          {
-           MCSID_0, MCSID_1, MCSID_4, MCSID_5}
-          ,
-          {
-           MCSID_2, MCSID_3, MCSID_6, MCSID_7}
-          ,
-          {
-           MCSID_0, MCSID_1, MCSID_6, MCSID_7}
-          ,
-          {
-           MCSID_2, MCSID_3, MCSID_4, MCSID_5}
-          ,
-          {
-           MCSID_0, MCSID_1, MCSID_2, MCSID_3}
-          ,
-          {
-           MCSID_4, MCSID_5, MCSID_6, MCSID_7}
-        };
-        int flag;
-        uint8_t config4_pos[6];
-        uint8_t groups_allowed;
-        uint8_t grouped[16];
-        uint8_t check_board;
-        uint8_t gp = 0;
-        uint8_t pos1 = 0;
-        uint8_t pos2 = 0;
-        uint8_t allowed = 0;
-        uint8_t selective_mode;
-        uint8_t M_valid;
-        uint8_t mcs_pos;
-        for (uint8_t i = 0; i < 6; i++)
-          config4_pos[i] = 0;
-
-//-------------------------------------------------------------------------------------
-//   Getting system and cage attriutes for deciding on MCS grouping policy
-//-------------------------------------------------------------------------------------
-        rc =
-          FAPI_ATTR_GET (ATTR_MSS_INTERLEAVE_ENABLE, &i_target,
-                         groups_allowed);                                               // Allowed grouping policy for example 0x02 means 2 MCS/group is allowed
-        if (!rc.ok ())
-          {
-            FAPI_ERR ("MSS_INTERLEAVE_ENABLE is not available");
-            return rc;
-          }
-        rc = FAPI_ATTR_GET (ATTR_ALL_MCS_IN_INTERLEAVING_GROUP, NULL, check_board);     // system level attribute, Decided Interleaving enabled for MCS level
-        if (!rc.ok ())
-          {
-            FAPI_ERR ("Error reading ATTR_ALL_MCS_IN_INTERLEAVING_GROUP");
-            return rc;
-          }
-        rc =
-          FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY, NULL,
-                         selective_mode);                                              // Baremetal exerciser policy defintation
-        if (!rc.ok ())
-          {
-            FAPI_ERR ("Error reading ATTR_MEM_MIRROR_PLACEMENT_POLICY");
-            return rc;
-          }
-
-    // Mike Jones: Firmware does not support this right now, set to false as
-    // this is value in MRW
-    M_valid = 0;
-//        rc = FAPI_ATTR_GET (ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, NULL, M_valid);    // P-series & stradale support
-//        if (!rc.ok ())
-
-//          {
-//            FAPI_ERR
-//              ("mss_setup_bars: Error reading ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING");
-//            return rc;
-//          }
-        if (M_valid && !(selective_mode == NORMAL_MODE ))
-
-          {
-            if (selective_mode == SELECTIVE_MODE)
-
-              {
-                FAPI_ERR
-                  ("MIRRORING IS DISABLED , SELECTIVE MODE CANNOT BE CONFIGURED");
-              }
-
-            else if (selective_mode == FLIPPED_MODE)
-
-              {
-                FAPI_ERR
-                  ("MIRRORING IS DISABLED , FLIPPED MODE CANNOT BE CONFIGURED");
-              }
-            return rc;
-          }
-        if (check_board)        // this is a 1 when interleaving is required to be on  Only acceptable > 1MCS per group
-          {
-            if ((groups_allowed & MCS_GROUP_2) || (groups_allowed & MCS_GROUP_4)
-                || (groups_allowed & MCS_GROUP_8))
-
-              {
-                FAPI_INF ("FABRIC IS IN NON-CHECKER BOARD MODE.");
-                FAPI_INF ("FABRIC SUPPORTS THE FOLLOWING ");
-                if (groups_allowed & MCS_GROUP_2)
-                  {
-                    FAPI_INF ("2MCS/GROUP");
-                  }
-                if (groups_allowed & MCS_GROUP_4)
-                  {
-                    FAPI_INF ("4MCS/GROUP");
-                  }
-                if (groups_allowed & MCS_GROUP_8)
-                  {
-                    FAPI_INF ("8MCS/GROUP");
-                  }
-                FAPI_INF ("FABRIC DOES NOT SUPPORT THE FOLLOWING ");
-                FAPI_INF ("1MCS/GROUP");
-                if (!(groups_allowed & MCS_GROUP_2))
-                  {
-                    FAPI_INF ("2MCS/GROUP");
-                  }
-                if (!(groups_allowed & MCS_GROUP_4))
-                  {
-                    FAPI_INF ("4MCS/GROUP");
-                  }
-                if (!(groups_allowed & MCS_GROUP_8))
-                  {
-                    FAPI_INF ("8MCS/GROUP");
-                  }
-              }
-
-            else
-
-              {
-                FAPI_ERR ("UNABLE TO GROUP");
-                FAPI_ERR
-                  ("FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' , TO SUPPORT 2MCS , 4MCS AND 8MCS GROUPING. OR ENABLE CHECKER BOARD. ");
-                const fapi::Target & PROC_CHIP = i_target;
-                FAPI_SET_HWP_ERROR (rc,
-                                    RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE);
-                return rc;
-              }
-          }
-
-        else                    // Fabric is in checkerboard mode, allow all sizes.  Anything but 1 will have performance impacts
-          {
-            if ((groups_allowed & MCS_GROUP_1) || (groups_allowed & MCS_GROUP_2)
-                || (groups_allowed & MCS_GROUP_4) || (groups_allowed & MCS_GROUP_8))
-
-              {
-                FAPI_INF
-                  ("FABRIC IS IN CHECKER BOARD MODE AND IT SUPPORTS THE FOLLOWING ");
-                if (groups_allowed & MCS_GROUP_1)
-                  {
-                    FAPI_INF ("1MCS/GROUP");
-                  }
-                if (groups_allowed & MCS_GROUP_2)
-                  {
-                    FAPI_INF ("2MCS/GROUP");
-                  }
-                if (groups_allowed & MCS_GROUP_4)
-                  {
-                    FAPI_INF ("4MCS/GROUP");
-                  }
-                if (groups_allowed & MCS_GROUP_8)
-                  {
-                    FAPI_INF ("8MCS/GROUP");
-                  }
-                FAPI_INF ("FABRIC DOES NOT SUPPORT THE FOLLOWING ");
-                if (!(groups_allowed & MCS_GROUP_1))
-                  {
-                    FAPI_INF
-                      ("FABRIC IS IN CHECKER BOARD MODE BUT YOU ARE ASKING FOR MORE THAN 1MCS/GROUP. YOU ARE NOT GOING TO HAVE PERFOMRANCE YOU COULD GET IF YOU WERE IN CHECKERBOARD MODE");
-                  }
-                if (!(groups_allowed & MCS_GROUP_2))
-                  {
-                    FAPI_INF ("2MCS/GROUP");
-                  }
-                if (!(groups_allowed & MCS_GROUP_4))
-                  {
-                    FAPI_INF ("4MCS/GROUP");
-                  }
-                if (!(groups_allowed & MCS_GROUP_8))
-                  {
-                    FAPI_INF ("8MCS/GROUP");
-                  }
-                if ((groups_allowed & MCS_GROUP_2) || (groups_allowed & MCS_GROUP_4)
-                    || (groups_allowed & MCS_GROUP_8))
-                  {
-                    FAPI_INF
-                      ("FABRIC IS IN CHECKER BOARD MODE BUT YOU ARE ASKING FOR MORE THAN 1MCS/GROUP. YOU ARE NOT GOING TO HAVE PERFOMRANCE YOU COULD GET IF YOU WERE IN CHECKERBOARD MODE");
-                  }
-              }
-
-            else
-
-              {
-                FAPI_ERR ("UNABLE TO GROUP");
-                FAPI_ERR
-                  ("FABRIC IS IN CHECKER BOARD MODE . SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' ");
-                const fapi::Target & PROC_CHIP = i_target;
-                FAPI_SET_HWP_ERROR (rc,
-                                    RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE);
-                return rc;
-              }
-          }
-        for (uint8_t i = 0; i < 16; i++)
-
-          {
-            grouped[i] = 0;
-            for (uint8_t j = 0; j < 16; j++)
-
-              {
-                eff_grouping_data.groupID[i][j] = 0;
-                tempgpID.groupID[i][j] = 0;
-              }
-          }
-        gp_pos = 0;
-        for (pos = 0; pos < 8; pos++)
-
-          {
-            eff_grouping_data.groupID[gp_pos][MCS_SIZE] =
-              eff_grouping_data.MCS_size[pos];
-            eff_grouping_data.groupID[gp_pos][MCS_IN_GROUP] = 1;
-            eff_grouping_data.groupID[gp_pos][MEMBERS_START_ID] = pos;
-            if (eff_grouping_data.MBA_size[pos][0] >
-                eff_grouping_data.MBA_size[pos][1])
-              eff_grouping_data.groupID[gp_pos][LARGEST_MBA_SIZE] =
-                eff_grouping_data.MBA_size[pos][0];
-
-            else
-              eff_grouping_data.groupID[gp_pos][LARGEST_MBA_SIZE] =
-                eff_grouping_data.MBA_size[pos][1];
-            gp_pos++;
-          }
-        done = 0;
-// setting up 8 MCS/group
-        if (!done && (groups_allowed & MCS_GROUP_8))
-
-          {
-            count = 0;
-            for (pos = 0; pos < gp_pos; pos++)
-
-              {
-                if (eff_grouping_data.groupID[0][MCS_SIZE] ==
-                    eff_grouping_data.groupID[pos][MCS_SIZE]
-                    && eff_grouping_data.groupID[pos][MCS_SIZE] != 0)
-
-                  {
-                    count++;
-                  }
-              }
-            if (count == 8)
-
-              {
-                done = 1;
-                eff_grouping_data.groupID[0][MCS_IN_GROUP] = 8;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 0] = MCSID_0;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 1] = MCSID_4;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 2] = MCSID_2;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 3] = MCSID_6;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 4] = MCSID_1;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 5] = MCSID_5;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 6] = MCSID_3;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 7] = MCSID_7;
-                for (uint8_t i = 1; i < 16; i++)
-                  for (uint8_t j = 0; j < 16; j++)
-                    eff_grouping_data.groupID[i][j] = 0;
-              }
-          }
-// setting up 4 MCS/group
-        if (!done && (groups_allowed & MCS_GROUP_4))
-
-          {
-            count = 0;
-            for (uint8_t i = 0; i < 6; i++)
-
-              {
-                flag = 0;
-                for (int j = 0; j < 4; j++)
-
-                  {
-                    if ((eff_grouping_data.groupID[config_4MCS[i][0]][0] ==
-                         0)
-                        || (eff_grouping_data.
-                            groupID[config_4MCS[i][0]][0] !=
-                            eff_grouping_data.groupID[config_4MCS[i][j]][0]))
-
-                      {
-                        flag = 1;
-                      }
-                  }
-                if (!flag)
-
-                  {
-                    config4_pos[i] = 1;
-                    count++;
-                  }
-              }
-            if (count >= 2)
-
-              {
-                if (config4_pos[0] && config4_pos[1])
-
-                  {
-                    allowed = 1;
-                    pos1 = MCSID_0;
-                    pos2 = MCSID_1;
-                  }
-
-                else if (config4_pos[2] && config4_pos[3])
-
-                  {
-                    allowed = 1;
-                    pos1 = MCSID_2;
-                    pos2 = MCSID_3;
-                  }
-
-                else if (config4_pos[4] && config4_pos[5])
-
-                  {
-                    allowed = 1;
-                    pos1 = MCSID_4;
-                    pos2 = MCSID_5;
-                  }
-              }
-            if (allowed)
-
-              {
-                done = 1;
-
-                //define the group_data
-                eff_grouping_data.groupID[0][MCS_SIZE] =
-                  eff_grouping_data.groupID[config_4MCS[pos1][0]][0];
-                eff_grouping_data.groupID[0][MCS_IN_GROUP] = 4;
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 0] =
-                  config_4MCS[pos1][0];
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 1] =
-                  config_4MCS[pos1][2];
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 2] =
-                  config_4MCS[pos1][1];
-                eff_grouping_data.groupID[0][MEMBERS_START_ID + 3] =
-                  config_4MCS[pos1][3];
-                eff_grouping_data.groupID[0][LARGEST_MBA_SIZE] =
-                  eff_grouping_data.groupID[config_4MCS[pos1][0]][15];
-                eff_grouping_data.groupID[1][MCS_SIZE] =
-                  eff_grouping_data.groupID[config_4MCS[pos2][0]][0];
-                eff_grouping_data.groupID[1][MCS_IN_GROUP] = 4;
-                eff_grouping_data.groupID[1][MEMBERS_START_ID + 0] =
-                  config_4MCS[pos2][0];
-                eff_grouping_data.groupID[1][MEMBERS_START_ID + 1] =
-                  config_4MCS[pos2][2];
-                eff_grouping_data.groupID[1][MEMBERS_START_ID + 2] =
-                  config_4MCS[pos2][1];
-                eff_grouping_data.groupID[1][MEMBERS_START_ID + 3] =
-                  config_4MCS[pos2][3];
-                eff_grouping_data.groupID[1][LARGEST_MBA_SIZE] =
-                  eff_grouping_data.groupID[config_4MCS[pos2][0]][15];
-                for (uint8_t i = 2; i < 16; i++)
-                  for (uint8_t j = 0; j < 16; j++)
-                    eff_grouping_data.groupID[i][j] = 0;
-              }
-
-            else if (count == 1 || !allowed)
-
-              {
-                for (uint8_t i = 0; i < 6; i++)
-
-                  {
-                    if (config4_pos[i])
-
-                      {
-                        allowed = 1;
-                        pos1 = i;
-                        break;
-                      }
-                  }
-                if (allowed)
-
-                  {
-
-                    //define the group_data
-                    tempgpID.groupID[0][MCS_SIZE] =
-                      eff_grouping_data.groupID[config_4MCS[pos1][0]][0];
-                    tempgpID.groupID[0][MCS_IN_GROUP] = 4;
-                    tempgpID.groupID[0][MEMBERS_START_ID + 0] =
-                      config_4MCS[pos1][0];
-                    tempgpID.groupID[0][MEMBERS_START_ID + 1] =
-                      config_4MCS[pos1][2];
-                    tempgpID.groupID[0][MEMBERS_START_ID + 2] =
-                      config_4MCS[pos1][1];
-                    tempgpID.groupID[0][MEMBERS_START_ID + 3] =
-                      config_4MCS[pos1][3];
-                    tempgpID.groupID[0][LARGEST_MBA_SIZE] =
-                      eff_grouping_data.groupID[config_4MCS[pos1][0]][15];
-                    gp++;
-                    for (int i = 0; i < 4; i++)
-
-                      {
-                        eff_grouping_data.groupID[config_4MCS[pos1][i]][0] =
-                          0;
-                        grouped[config_4MCS[config4_pos[0]][i]] = 1;
-                      }
-                  }
-              }
-          }
-// setting up 2 MCS/group
-        if (!done && (groups_allowed & MCS_GROUP_2))
-
-          {
-            for (pos = 0; pos < gp_pos;)
-
-              {
-                if (eff_grouping_data.groupID[pos][MCS_SIZE] ==
-                    eff_grouping_data.groupID[pos + 1][MCS_SIZE]
-                    && eff_grouping_data.groupID[pos][MCS_SIZE] != 0)
-
-                  {
-
-                    //group
-                    tempgpID.groupID[gp][MCS_SIZE] =
-                      eff_grouping_data.groupID[pos][MCS_SIZE];
-                    tempgpID.groupID[gp][MCS_IN_GROUP] = 2;
-                    tempgpID.groupID[gp][MEMBERS_START_ID + 0] = pos;
-                    tempgpID.groupID[gp][MEMBERS_START_ID + 1] = pos + 1;
-                    tempgpID.groupID[gp][LARGEST_MBA_SIZE] =
-                      eff_grouping_data.groupID[pos][LARGEST_MBA_SIZE];
-                    grouped[pos] = 1;
-                    grouped[pos + 1] = 1;
-                    eff_grouping_data.groupID[pos][MCS_SIZE] = 0;
-                    eff_grouping_data.groupID[pos + 1][MCS_SIZE] = 0;
-                    gp++;
-                    pos += 2;
-                  }
-
-                else
-                  {
-                    pos++;
-                  }
-              }
-          }
-// setting up 1  MCS/group
-        if (!done && (groups_allowed & MCS_GROUP_1 ) && !check_board)
-
-          {
-            for (pos = 0; pos < gp_pos; pos++)
-
-              {
-                if (eff_grouping_data.groupID[pos][MCS_SIZE] != 0)
-
-                  {
-
-                    //group
-                    tempgpID.groupID[gp][MCS_SIZE] =
-                      eff_grouping_data.groupID[pos][MCS_SIZE];
-                    tempgpID.groupID[gp][MCS_IN_GROUP] = 1;
-                    tempgpID.groupID[gp][MEMBERS_START_ID + 0] = pos;
-                    tempgpID.groupID[gp][LARGEST_MBA_SIZE] =
-                      eff_grouping_data.groupID[pos][LARGEST_MBA_SIZE];
-                    grouped[pos] = 1;
-                    eff_grouping_data.groupID[pos][MCS_SIZE] = 0;
-                    gp++;
-                  }
-              }
-          }
-//-------------------------------------------------------------
-// Identifying ungrouped MCS and setting DIMM unplug call out
-//-------------------------------------------------------------
-        if (!done)
-
-          {
-            uint8_t ungroup = 0;
-            ReturnCode ungroup_rc;
-            for (uint8_t i = 0; i < 8; i++)
-
-              {
-                if (grouped[i] != 1
-                    && eff_grouping_data.groupID[i][MCS_SIZE] != 0)
-
-                  {
-                    FAPI_ERR ("UNABLE TO GROUP MCS%d size is %d", i,
-                              eff_grouping_data.groupID[i][MCS_SIZE]);
-                    ungroup++;
-                    if (ungroup == 1)
-                      {         // First time, call out the Main error
-                        FAPI_SET_HWP_ERROR (ungroup_rc,
-                                            RC_MSS_UNABLE_TO_GROUP_SUMMARY);
-                      }
-                    for (std::vector < fapi::Target >::iterator iter =
-                         l_mcs_chiplets.begin ();
-                         iter != l_mcs_chiplets.end () && rc.ok (); iter++)
-
-                      {
-                        rc =
-                          FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, &(*iter),
-                                         mcs_pos);
-                        if (!rc.ok ())
-
-                          {
-                            FAPI_ERR ("Error reading ATTR_CHIP_UNIT_POS");
-                          }
-                        if (mcs_pos == i)
-
-                          {
-                            FAPI_INF (" Trying to deconfigure MCS num %d", i);
-                            const fapi::Target & TARGET_MCS = *iter;
-                            FAPI_ADD_INFO_TO_HWP_ERROR (rc,
-                                                        RC_MSS_UNABLE_TO_GROUP_MCS);
-                            fapi::ReturnCode l_rc2;
-                            FAPI_SET_HWP_ERROR(l_rc2,RC_MSS_UNABLE_TO_GROUP_MCS);
-                            fapiLogError(l_rc2);
-                            break;      //break for loop
-                          }
-                      }
-                  }
-              }
-            if (ungroup)
-
-              {
-                return ungroup_rc;
-              }
-// defining the group array for temp storage
-            for (uint8_t i = 0; i < gp; i++)
-              for (uint8_t j = 0; j < 16; j++)
-                eff_grouping_data.groupID[i][j] = tempgpID.groupID[i][j];
-            for (uint8_t i = gp; i < 8; i++)
-              for (uint8_t j = 0; j < 16; j++)
-                eff_grouping_data.groupID[i][j] = 0;
-          }
-        flag = 0;
-//--------------------------------------------------------------------------
-//    Printing out MCS_ID position for each group
-//--------------------------------------------------------------------------
-        for (uint8_t i = 0; i < 16; i++)
-          if (grouped[i])
-            flag = 1;
-        gp_pos = 0;
-        if (done || flag)
-
-          {
-            for (uint8_t i = 0; i < 16; i++)
-
-              {
-                if (eff_grouping_data.groupID[i][MCS_SIZE] != 0)
-
-                  {
-                    gp_pos++;
-                    FAPI_INF
-                      (" group no= %d , num of MCS = %d , size of MCS = %d \n ",
-                       i, eff_grouping_data.groupID[i][MCS_IN_GROUP],
-                       eff_grouping_data.groupID[i][MCS_SIZE]);
-                    for (uint8_t k = 0; k < eff_grouping_data.groupID[i][1];
-                         k++)
-
-                      {
-                        FAPI_INF ("MCSID%d = %d \n ", k,
-                                  eff_grouping_data.
-                                  groupID[i][MEMBERS_START_ID + k]);
-                      }
-                  }
-              }
-          }
-        uint32_t temp[16];
-        uint8_t i = 0;
-        uint8_t j = 0;
-        count = 0;
-        uint64_t total_size_non_mirr = 0;
-//----------------------------------------------------------------------------------
-//      Calculating Total group size memory
-//----------------------------------------------------------------------------------
-        for (pos = 0; pos <= gp_pos; pos++)
-
-          {
-            eff_grouping_data.groupID[pos][GROUP_SIZE] =
-              eff_grouping_data.groupID[pos][MCS_SIZE] *
-              eff_grouping_data.groupID[pos][MCS_IN_GROUP];
-            count =
-              mss_eff_grouping_recursion (eff_grouping_data.
-                                          groupID[pos][GROUP_SIZE]);
-/// Calculating alternative memory
-            if (count > 1)
-
-              {
-                FAPI_INF
-                  ("MCS pos %d needs alternate bars defintation group Size %d\n",
-                   pos, eff_grouping_data.groupID[pos][GROUP_SIZE]);
-                eff_grouping_data.groupID[pos][GROUP_SIZE] =
-                  eff_grouping_data.groupID[pos][LARGEST_MBA_SIZE] * 2 *
-                  eff_grouping_data.groupID[pos][MCS_IN_GROUP];
-                eff_grouping_data.groupID[pos][ALT_SIZE] =
-                  eff_grouping_data.groupID[pos][MCS_IN_GROUP] *
-                  (eff_grouping_data.groupID[pos][MCS_SIZE] -
-                   eff_grouping_data.groupID[pos][LARGEST_MBA_SIZE]);
-                eff_grouping_data.groupID[pos][ALT_VALID] = 1;
-              }
-            total_size_non_mirr += eff_grouping_data.groupID[pos][GROUP_SIZE];
-          }
-        for (i = 0; i < gp_pos; i++)
-
-          {
-            for (j = 0; j < 12; j++)
-
-              {
-                FAPI_INF (" groupID[%d][%d] = %d", i, j,
-                          eff_grouping_data.groupID[i][j]);
-              }
-            FAPI_INF ("\n");
-          }
-//----------------------------------------------------------------------------------
-// Reorder groups based on total memory size as descending High to low memory size order
-//----------------------------------------------------------------------------------
-        for (pos = 0; pos <= gp_pos; pos++)
-
-          {
-            for (i = pos; i < gp_pos; i++)
-
-              {
-                if (eff_grouping_data.groupID[i][GROUP_SIZE] >
-                    eff_grouping_data.groupID[pos][GROUP_SIZE])
-
-                  {
-                    for (j = 0; j < 16; j++)
-                      temp[j] = eff_grouping_data.groupID[pos][j];
-                    for (j = 0; j < 16; j++)
-                      eff_grouping_data.groupID[pos][j] =
-                        eff_grouping_data.groupID[i][j];
-                    for (j = 0; j < 16; j++)
-                      eff_grouping_data.groupID[i][j] = temp[j];
-                  }
-
-                else
-                  {
-                  }
-              }
-          }
-
-//-------------------------------------------------------------------------------------
-//     Calculating Mirroring group Size and alternate  group size for Mirroing
-//------------------------------------------------------------------------------------
-        if (!M_valid)
-
-          {
-
-            // calcutate mirrored group size and non mirrored group size
-            for (pos = 0; pos < gp_pos; pos++)
-
-              {
-                if (eff_grouping_data.groupID[pos][MCS_SIZE] != 0
-                    && eff_grouping_data.groupID[pos][MCS_IN_GROUP] > 1)
-
-                  {
-                    eff_grouping_data.groupID[pos + 8][GROUP_SIZE] = eff_grouping_data.groupID[pos][GROUP_SIZE] / 2;    // group size when mirrored
-                    if (eff_grouping_data.groupID[pos][ALT_VALID])
-
-                      {
-                        FAPI_INF
-                          ("Mirrored group pos %d needs alternate bars defintation group Size %d\n",
-                           pos, eff_grouping_data.groupID[pos][GROUP_SIZE]);
-
-                        //mirrored group
-                        eff_grouping_data.groupID[pos + 8][GROUP_SIZE] = eff_grouping_data.groupID[pos][GROUP_SIZE] / 2;        //group size with alternate bars
-                        eff_grouping_data.groupID[pos + 8][ALT_SIZE] =
-                          eff_grouping_data.groupID[pos][ALT_SIZE] / 2;
-                        eff_grouping_data.groupID[pos + 8][ALT_VALID] = 1;
-                      }
-                  }
-              }
-
-            if (selective_mode == SELECTIVE_MODE)
-
-              {
-                mss_base_address = 0;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_MEM_BASE, &i_target,
-                                 mss_base_address);
-                mss_base_address = mss_base_address >> 30;
-                if (!rc.ok ())
-                  return rc;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_MIRROR_BASE, &i_target,
-                                 mirror_base);
-                mirror_base = mirror_base >> 30;
-                if (!rc.ok ())
-                  return rc;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_HTM_BAR_SIZE, &i_target,
-                                 htm_bar_size);
-                if (!rc.ok ())
-                  return rc;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_OCC_SANDBOX_SIZE, &i_target,
-                                 occ_sandbox_size);
-                if (!rc.ok ())
-                  return rc;
-              }
-
-            else
-              {
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_MEM_BASE, &i_target,
-                                 mss_base_address);
-                mss_base_address = mss_base_address >> 30;
-                if (!rc.ok ())
-                  return rc;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_MIRROR_BASE, &i_target,
-                                 mirror_base);
-                mirror_base = mirror_base >> 30;
-                if (!rc.ok ())
-                  return rc;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_HTM_BAR_SIZE, &i_target,
-                                 htm_bar_size);
-                if (!rc.ok ())
-                  return rc;
-                rc =
-                  FAPI_ATTR_GET (ATTR_PROC_OCC_SANDBOX_SIZE, &i_target,
-                                 occ_sandbox_size);
-                if (!rc.ok ())
-                  return rc;
-              }
-// Checking the memory base address overlapping with mirror memory bas address
-// or not
-
-            if (mss_base_address > (mirror_base + total_size_non_mirr / 2)
-                || mirror_base > (mss_base_address + total_size_non_mirr))
-
-              {
-                for (pos = 0; pos < gp_pos; pos++)
-
-                  {
-                    if (pos == 0)
-
-                      {
-                        eff_grouping_data.groupID[pos][BASE_ADDR] =
-                          mss_base_address;
-                        if (eff_grouping_data.groupID[pos][ALT_VALID])
-
-                          {
-                            eff_grouping_data.groupID[pos][ALT_BASE_ADDR] =
-                              eff_grouping_data.groupID[pos][BASE_ADDR] +
-                              eff_grouping_data.groupID[pos][GROUP_SIZE] / 2;
-                          }
-                      }
-
-                    else
-
-                      {
-                        eff_grouping_data.groupID[pos][BASE_ADDR] =
-                          eff_grouping_data.groupID[pos - 1][BASE_ADDR] +
-                          eff_grouping_data.groupID[pos - 1][GROUP_SIZE];
-                        if (eff_grouping_data.groupID[pos][ALT_VALID])
-
-                          {
-                            eff_grouping_data.groupID[pos][ALT_BASE_ADDR] =
-                              eff_grouping_data.groupID[pos][BASE_ADDR] +
-                              eff_grouping_data.groupID[pos][GROUP_SIZE] / 2;
-                          }
-                      }
-                    if (eff_grouping_data.groupID[pos][MCS_IN_GROUP] > 1)
-
-                      {
-                        eff_grouping_data.groupID[pos + 8][BASE_ADDR] =
-                          mirror_base;
-                        mirror_base =
-                          mirror_base + eff_grouping_data.groupID[pos +
-                                                                  8]
-                                                                 [GROUP_SIZE];
-                        if (eff_grouping_data.groupID[pos][ALT_VALID])
-
-                          {
-                            eff_grouping_data.groupID[pos + 8][ALT_BASE_ADDR]  =
-                               eff_grouping_data.groupID[pos + 8][BASE_ADDR]   +
-                               eff_grouping_data.groupID[pos + 8][GROUP_SIZE] / 2;     //mirrored base address with alternate bars
-                            eff_grouping_data.groupID[pos + 8][ALT_VALID] = 1;
-                          }
-                      }
-                  }
-              }
-
-            else
-
-              {
-                FAPI_ERR
-                  ("Mirror Base address overlaps with memory base address. ");
-                const fapi::Target & PROC_CHIP = i_target;
-                FAPI_SET_HWP_ERROR (rc,
-                                    RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS);
-                return rc;
-              }
-          }
-
-        else
-          {
-            rc =
-              FAPI_ATTR_GET (ATTR_PROC_MEM_BASE, &i_target, mss_base_address);
-            mss_base_address = mss_base_address >> 30;
-            if (!rc.ok ())
-              return rc;
-            rc =
-              FAPI_ATTR_GET (ATTR_PROC_HTM_BAR_SIZE, &i_target, htm_bar_size);
-            if (!rc.ok ())
-              return rc;
-            rc =
-              FAPI_ATTR_GET (ATTR_PROC_OCC_SANDBOX_SIZE, &i_target,
-                             occ_sandbox_size);
-            if (!rc.ok ())
-              return rc;
-//------------------------------------------------------------------
-// Assigning mirroring and non-mirroring base address for each group
-//-------------------------------------------------------------------
-            for (pos = 0; pos < gp_pos; pos++)
-
-              {
-                if (pos == 0)
-
-                  {
-                    eff_grouping_data.groupID[pos][BASE_ADDR] =
-                      mss_base_address;
-                    if (eff_grouping_data.groupID[pos][ALT_VALID])
-
-                      {
-                        eff_grouping_data.groupID[pos][ALT_BASE_ADDR] =
-                          eff_grouping_data.groupID[pos][BASE_ADDR] +
-                          eff_grouping_data.groupID[pos][GROUP_SIZE] / 2;
-                      }
-                  }
-
-                else
-
-                  {
-                    eff_grouping_data.groupID[pos][BASE_ADDR] =
-                      eff_grouping_data.groupID[pos - 1][BASE_ADDR] +
-                      eff_grouping_data.groupID[pos - 1][GROUP_SIZE];
-                    if (eff_grouping_data.groupID[pos][ALT_VALID])
-
-                      {
-                        eff_grouping_data.groupID[pos][ALT_BASE_ADDR] =
-                          eff_grouping_data.groupID[pos][BASE_ADDR] +
-                          eff_grouping_data.groupID[pos][GROUP_SIZE] / 2;
-                      }
-                  }
-              }
-          }
-// -------------------------------------------------------------
-// Setting up No of MCS per group attributes
-// -------------------------------------------------------------
-        ecmdDataBufferBase MC_IN_GP (8);
-        uint8_t mcs_in_group[8];
-        for (uint8_t i = 0; i < 8; i++)
-          mcs_in_group[i] = 0;
-        for (uint8_t i = 0; i < gp_pos; i++)
-
-          {
-            count = 0;
-            MC_IN_GP.flushTo0 ();
-            if (eff_grouping_data.groupID[i][MCS_SIZE] != 0)
-
-              {
-                count = eff_grouping_data.groupID[i][MCS_IN_GROUP];
-                for (uint8_t j = 0; j < count; j++)
-                  MC_IN_GP.setBit (eff_grouping_data.
-                                   groupID[i][MEMBERS_START_ID + j]);
-                mcs_in_group[i] = MC_IN_GP.getByte (0);
-              }
-          }
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[0]: 0x%x", mcs_in_group[0]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[1]: 0x%x", mcs_in_group[1]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[2]: 0x%x", mcs_in_group[2]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[3]: 0x%x", mcs_in_group[3]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[4]: 0x%x", mcs_in_group[4]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[5]: 0x%x", mcs_in_group[5]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[6]: 0x%x", mcs_in_group[6]);
-        FAPI_DBG ("  ATTR_MSS_MEM_MC_IN_GROUP[7]: 0x%x", mcs_in_group[7]);
-        rc =
-          FAPI_ATTR_SET (ATTR_MSS_MEM_MC_IN_GROUP, &i_target, mcs_in_group);
-        if (!rc.ok ())
-
-          {
-            FAPI_ERR ("Error writing ATTR_MSS_MEM_MC_IN_GROUP");
+        {
+            FAPI_ERR("mss_eff_grouping: Error getting Centaur chip attributes");
             break;
-          }
+        }
 
-//-----------------------------------------------------------------------
-//   Assigning base address and base size for mirroring/non-mirroring
-//    attributes. There are two sets of attributes group
-//    1) Cronus level attributes which used by msinfo  query
-//    2) FW attributes used by System hostboot IPLing
-//------------------------------------------------------------------------
+        // Store the Centaur Target in iv_membufs (indexed by MCS position)
+        iv_membufs[centaurAttrs.iv_mcsPos] = cenTarget;
 
-        uint64_t mem_bases[8];
-        uint64_t mem_bases_ack[8];
-        uint64_t l_memory_sizes[8];
-        uint64_t l_memory_sizes_ack[8];
-        uint64_t mirror_bases[4];
-        uint64_t mirror_bases_ack[4];
-        uint64_t l_mirror_sizes[4];
-        uint64_t l_mirror_sizes_ack[4];
-        for (uint8_t i = 0; i < 8; i++)
+        // Get the functional MBA children of the Centaur
+        std::vector <fapi::Target> l_mba_chiplets;
+        rc = fapiGetChildChiplets(cenTarget,
+                                  fapi::TARGET_TYPE_MBA_CHIPLET,
+                                  l_mba_chiplets);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error getting child MBA chiplets");
+            break;
+        }
 
-          {
-            if (eff_grouping_data.groupID[i][MCS_SIZE] > 0)
+        for (uint32_t j = 0; j < l_mba_chiplets.size(); j++)
+        {
+            fapi::Target & mbaTarget = l_mba_chiplets[j];
 
-              {
-                FAPI_INF (" Group   %d MCS Size  %4dGB", i,
-                          eff_grouping_data.groupID[i][MCS_SIZE]);
-                FAPI_INF (" No of MCS %4d   ",
-                          eff_grouping_data.groupID[i][MCS_IN_GROUP]);
-                FAPI_INF (" Group Size %4dGB",
-                          eff_grouping_data.groupID[i][GROUP_SIZE]);
-                FAPI_INF (" Base Add.  %4dGB ",
-                          eff_grouping_data.groupID[i][BASE_ADDR]);
-                if (!M_valid)
+            // Get the MBA Chiplet attributes
+            EffGroupingMbaAttrs mbaAttrs;
+            rc = mbaAttrs.getAttrs(mbaTarget);
+            if (rc)
+            {
+                FAPI_ERR("mss_eff_grouping: Error getting MBA attributes");
+                break;
+            }
 
-                  {
-                    FAPI_INF (" Mirrored Group SIze %4dGB",
-                              eff_grouping_data.groupID[i + 8][GROUP_SIZE]);
-                    FAPI_INF (" Mirror Base Add %4dGB",
-                              eff_grouping_data.groupID[i + 8][BASE_ADDR]);
-                  }
-                for (uint8_t j = 4;
-                     j < 4 + eff_grouping_data.groupID[i][MCS_IN_GROUP]; j++)
+            // Add each Effective DIMM size to iv_mcsSize and iv_mbaSize
+            for (uint8_t port = 0; port < NUM_MBA_PORTS; port++)
+            {
+                for (uint8_t dimm = 0; dimm < NUM_MBA_DIMMS; dimm++)
+                {
+                    iv_mcsSize[centaurAttrs.iv_mcsPos]
+                        += mbaAttrs.iv_effDimmSize[port][dimm];
+                    iv_mbaSize[centaurAttrs.iv_mcsPos][mbaAttrs.iv_unitPos]
+                        += mbaAttrs.iv_effDimmSize[port][dimm];
+                }
+            }
 
-                  {
-                    FAPI_INF (" MCSID%d- Pos %4d", (j - 4),
-                              eff_grouping_data.groupID[i][j]);
-                  }
-                FAPI_INF (" Alter-bar  %4d",
-                          eff_grouping_data.groupID[i][ALT_VALID]);
-                FAPI_INF ("Alter-bar base add = %4dGB ",
-                          eff_grouping_data.groupID[i][ALT_BASE_ADDR]);
-                FAPI_INF ("Alter-bar size = %4dGB",
-                          eff_grouping_data.groupID[i][ALT_SIZE]);
-                if (!M_valid)
+            FAPI_INF("mss_eff_grouping: Cen Pos %u, MBA UPos %u, MBA total size %u GB",
+                     centaurAttrs.iv_pos, mbaAttrs.iv_unitPos,
+                     iv_mbaSize[centaurAttrs.iv_mcsPos][mbaAttrs.iv_unitPos]);
+        }
+        if (rc)
+        {
+            break;
+        }
+    }
 
-                  {
-                    FAPI_INF ("Alter-bar Mirrored Base add = %4dGB ",
-                              eff_grouping_data.groupID[i +
-                                                        8][ALT_BASE_ADDR]);
-                    FAPI_INF ("Alter-bar Mirrored size = %4dGB",
-                              eff_grouping_data.groupID[i + 8][ALT_SIZE]);
-                  }
-              }
+    if (!rc)
+    {
+        // Calculate max MBA size
+        for (uint8_t i = 0; i < NUM_MCS_PER_PROC; i++)
+        {
+            iv_largestMbaSize[i] = iv_mbaSize[i][0];
 
-            else
+            for (uint32_t j = 1; j < NUM_MBA_PER_MCS; j++)
+            {
+                if (iv_mbaSize[i][j] > iv_largestMbaSize[i])
+                {
+                    iv_largestMbaSize[i] = iv_mbaSize[i][j];
+                }
+            }
+        }
 
-              {
-                eff_grouping_data.groupID[i][0] = 0;
-                eff_grouping_data.groupID[i][1] = 0;
-                eff_grouping_data.groupID[i][2] = 0;
-                eff_grouping_data.groupID[i][3] = 0;
-                eff_grouping_data.groupID[i][4] = 0;
-                eff_grouping_data.groupID[i][5] = 0;
-                eff_grouping_data.groupID[i][6] = 0;
-                eff_grouping_data.groupID[i][7] = 0;
-                eff_grouping_data.groupID[i][8] = 0;
-                eff_grouping_data.groupID[i][9] = 0;
-              }
-          }
+        // Trace sizes
+        for (uint8_t i = 0; i < NUM_MCS_PER_PROC; i++)
+        {
+            FAPI_INF("mss_eff_grouping: MCS Pos %u, MCS Size %u GB, "
+                     "MBA0 Size %u GB, MBA1 Size %u GB",
+                     i, iv_mcsSize[i], iv_mbaSize[i][0], iv_mbaSize[i][1]);
+        }
+    }
 
-// base addresses for distinct non-mirrored ranges
-        mem_bases[0] = eff_grouping_data.groupID[0][BASE_ADDR];
-        mem_bases[1] = eff_grouping_data.groupID[1][BASE_ADDR];
-        mem_bases[2] = eff_grouping_data.groupID[2][BASE_ADDR];
-        mem_bases[3] = eff_grouping_data.groupID[3][BASE_ADDR];
-        mem_bases[4] = eff_grouping_data.groupID[4][BASE_ADDR];
-        mem_bases[5] = eff_grouping_data.groupID[5][BASE_ADDR];
-        mem_bases[6] = eff_grouping_data.groupID[6][BASE_ADDR];
-        mem_bases[7] = eff_grouping_data.groupID[7][BASE_ADDR];
-        mem_bases_ack[0] = eff_grouping_data.groupID[0][BASE_ADDR];
-        mem_bases_ack[1] = eff_grouping_data.groupID[1][BASE_ADDR];
-        mem_bases_ack[2] = eff_grouping_data.groupID[2][BASE_ADDR];
-        mem_bases_ack[3] = eff_grouping_data.groupID[3][BASE_ADDR];
-        mem_bases_ack[4] = eff_grouping_data.groupID[4][BASE_ADDR];
-        mem_bases_ack[5] = eff_grouping_data.groupID[5][BASE_ADDR];
-        mem_bases_ack[6] = eff_grouping_data.groupID[6][BASE_ADDR];
-        mem_bases_ack[7] = eff_grouping_data.groupID[7][BASE_ADDR];
+    return rc;
+}
 
-///  Base size modified for selective mode to do better packing memory
-//   which  helps to do bare metal exerciser memory stressing
+//------------------------------------------------------------------------------
+fapi::ReturnCode EffGroupingSysAttrs::getAttrs()
+{
+    fapi::ReturnCode rc;
 
-        if (selective_mode == SELECTIVE_MODE)
+    do
+    {
+        rc = FAPI_ATTR_GET(ATTR_ALL_MCS_IN_INTERLEAVING_GROUP, NULL,
+                           iv_mcsInterleaveMode);
+        if (rc)
+        {
+            FAPI_ERR("Error querying sys chip ATTR_ALL_MCS_IN_INTERLEAVING_GROUP");
+            break;
+        }
 
-          {
-            l_memory_sizes[0] = eff_grouping_data.groupID[0][GROUP_SIZE] / 2;
-            l_memory_sizes[1] = eff_grouping_data.groupID[1][GROUP_SIZE] / 2;
-            l_memory_sizes[2] = eff_grouping_data.groupID[2][GROUP_SIZE] / 2;
-            l_memory_sizes[3] = eff_grouping_data.groupID[3][GROUP_SIZE] / 2;
-            l_memory_sizes[4] = eff_grouping_data.groupID[4][GROUP_SIZE] / 2;
-            l_memory_sizes[5] = eff_grouping_data.groupID[5][GROUP_SIZE] / 2;
-            l_memory_sizes[6] = eff_grouping_data.groupID[6][GROUP_SIZE] / 2;
-            l_memory_sizes[7] = eff_grouping_data.groupID[7][GROUP_SIZE] / 2;
-          }
+        rc = FAPI_ATTR_GET(ATTR_MEM_MIRROR_PLACEMENT_POLICY, NULL,
+                           iv_selectiveMode);
+        if (rc)
+        {
+            FAPI_ERR("Error querying sys ATTR_MEM_MIRROR_PLACEMENT_POLICY");
+            break;
+        }
 
+        rc = FAPI_ATTR_GET(ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, NULL,
+                           iv_enhancedNoMirrorMode);
+        if (rc)
+        {
+            FAPI_ERR("Error querying sys ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING");
+            break;
+        }
+
+        FAPI_INF("mss_eff_grouping::EffGroupingSysAttrs: "
+                 "ALL_MCS_IN_INTERLEAVING_GROUP 0x%02x, "
+                 "MEM_MIRROR_PLACEMENT_POLICY 0x%02x, "
+                 "MRW_ENHANCED_GROUPING_NO_MIRRORING 0x%02x",
+                 iv_mcsInterleaveMode, iv_selectiveMode,
+                 iv_enhancedNoMirrorMode);
+    } while(0);
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode EffGroupingProcAttrs::getAttrs(const fapi::Target & i_proc)
+{
+    fapi::ReturnCode rc;
+
+    do
+    {
+        rc = FAPI_ATTR_GET(ATTR_MSS_INTERLEAVE_ENABLE, &i_proc,
+                           iv_groupsAllowed);
+        if (rc)
+        {
+            FAPI_ERR("Error querying proc chip ATTR_MSS_INTERLEAVE_ENABLE for %s",
+                     i_proc.toEcmdString());
+            break;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASE, &i_proc, iv_memBaseAddr);
+        if (rc)
+        {
+            FAPI_ERR("Error querying proc chip ATTR_PROC_MEM_BASE for %s",
+                     i_proc.toEcmdString());
+            break;
+        }
+        iv_memBaseAddr >>= 30;
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASE, &i_proc, iv_mirrorBaseAddr);
+        if (rc)
+        {
+            FAPI_ERR("Error querying proc chip ATTR_PROC_MIRROR_BASE for %s",
+                     i_proc.toEcmdString());
+            break;
+        }
+        iv_mirrorBaseAddr >>= 30;
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_HTM_BAR_SIZE, &i_proc, iv_htmBarSize);
+        if (rc)
+        {
+            FAPI_ERR("Error querying proc chip ATTR_PROC_HTM_BAR_SIZE for %s",
+                     i_proc.toEcmdString());
+            break;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_OCC_SANDBOX_SIZE, &i_proc,
+                           iv_occSandboxSize);
+        if (rc)
+        {
+            FAPI_ERR("Error querying proc chip ATTR_PROC_OCC_SANDBOX_SIZE for %s",
+                     i_proc.toEcmdString());
+            break;
+        }
+
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: "
+                 "MSS_INTERLEAVE_ENABLE 0x%02x", iv_groupsAllowed);
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: 1 MCSs per group %s",
+                 (iv_groupsAllowed & MCS_GROUP_1) ?
+                     "supported" : "not supported");
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: 2 MCSs per group %s",
+                 (iv_groupsAllowed & MCS_GROUP_2) ?
+                     "supported" : "not supported");
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: 4 MCSs per group %s",
+                 (iv_groupsAllowed & MCS_GROUP_4) ?
+                     "supported" : "not supported");
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: 8 MCSs per group %s",
+                 (iv_groupsAllowed & MCS_GROUP_8) ?
+                     "supported" : "not supported");
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: "
+                 "ATTR_PROC_MEM_BASE >> 30 0x%016llx, "
+                 "ATTR_PROC_MIRROR_BASE >> 30 0x%016llx",
+                 iv_memBaseAddr, iv_mirrorBaseAddr);
+        FAPI_INF("mss_eff_grouping::EffGroupingProcAttrs: "
+                 "ATTR_PROC_HTM_BAR_SIZE 0x%016llx, "
+                 "ATTR_PROC_OCC_SANDBOX_SIZE 0x%016llx",
+                 iv_htmBarSize, iv_occSandboxSize);
+    } while(0);
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode EffGroupingMembufAttrs::getAttrs(const fapi::Target & i_membuf)
+{
+    fapi::ReturnCode rc;
+
+    do
+    {
+        rc = FAPI_ATTR_GET(ATTR_POS, &i_membuf, iv_pos);
+        if (rc)
+        {
+            FAPI_ERR("Error querying membuf chip ATTR_POS for %s",
+                     i_membuf.toEcmdString());
+            break;
+        }
+
+        // Assumption is that
+        // Chip pos 0: MCS unit-pos 0: Membuf pos 0
+        // Chip pos 0: MCS unit-pos 1: Membuf pos 1
+        // Chip pos 0: MCS unit-pos 2: Membuf pos 2
+        // Chip pos 0: MCS unit-pos 3: Membuf pos 3
+        // Chip pos 0: MCS unit-pos 4: Membuf pos 4
+        // Chip pos 0: MCS unit-pos 5: Membuf pos 5
+        // Chip pos 0: MCS unit-pos 6: Membuf pos 6
+        // Chip pos 0: MCS unit-pos 7: Membuf pos 7
+        // Chip pos 1: MCS unit-pos 0: Membuf pos 8
+        // Chip pos 1: MCS unit-pos 1: Membuf pos 9
+        // Chip pos 1: MCS unit-pos 2: Membuf pos 10
+        // Chip pos 1: MCS unit-pos 3: Membuf pos 11
+        // Chip pos 1: MCS unit-pos 4: Membuf pos 12
+        // Chip pos 1: MCS unit-pos 5: Membuf pos 13
+        // Chip pos 1: MCS unit-pos 6: Membuf pos 14
+        // Chip pos 1: MCS unit-pos 7: Membuf pos 15
+        // etc.
+        iv_mcsPos = iv_pos % 8;
+
+        FAPI_INF("mss_eff_grouping::EffGroupingMembufAttrs: "
+                 "%s: POS %u, mcsPos %u",
+                 i_membuf.toEcmdString(), iv_pos, iv_mcsPos);
+    } while(0);
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+EffGroupingMbaAttrs::EffGroupingMbaAttrs() : iv_unitPos(0)
+{
+    for (uint8_t i = 0; i < NUM_MBA_PORTS; i++)
+    {
+        for (uint8_t j = 0; j < NUM_MBA_DIMMS; j++)
+        {
+            iv_effDimmSize[i][j] = 0;
+        }
+    }
+}
+//------------------------------------------------------------------------------
+fapi::ReturnCode EffGroupingMbaAttrs::getAttrs(const fapi::Target & i_mba)
+{
+    fapi::ReturnCode rc;
+
+    do
+    {
+        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_mba, iv_unitPos);
+        if (rc)
+        {
+            FAPI_ERR("Error querying MBA ATTR_CHIP_UNIT_POS for %s",
+                     i_mba.toEcmdString());
+            break;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SIZE, &i_mba, iv_effDimmSize);
+        if (rc)
+        {
+            FAPI_ERR("Error querying MBA ATTR_EFF_DIMM_SIZE for %s",
+                     i_mba.toEcmdString());
+            break;
+        }
+
+        FAPI_INF("mss_eff_grouping::EffGroupingMbaAttrs: %s: CHIP_UNIT_POS %u",
+                 i_mba.toEcmdString(), iv_unitPos);
+
+        for (uint8_t i = 0; i < NUM_MBA_PORTS; i++)
+        {
+            for (uint8_t j = 0; j < NUM_MBA_DIMMS; j++)
+            {
+                FAPI_INF("mss_eff_grouping::EffGroupingMbaAttrs: MBA %u: "
+                         "EFF_DIMM_SIZE[%u][%u] %u GB",
+                         iv_unitPos, i, j, iv_effDimmSize[i][j]);
+            }
+        }
+    } while(0);
+
+    return rc;
+}
+
+/**
+ * @brief checks that attributes are valid
+ *
+ * @param[in] i_sysAttrs  Reference to system attributes
+ * @param[in] i_procAttrs Reference to proc chip attributes
+ *
+ * @return fapi::ReturnCode
+ */
+fapi::ReturnCode grouping_checkValidAttributes(
+    const EffGroupingSysAttrs & i_sysAttrs,
+    const EffGroupingProcAttrs & i_procAttrs)
+{
+    fapi::ReturnCode rc;
+    do
+    {
+        if (i_sysAttrs.iv_enhancedNoMirrorMode)
+        {
+            if (i_sysAttrs.iv_selectiveMode ==
+                fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
+            {
+                FAPI_ERR("mss_eff_grouping: Mirroring disabled, selective mode invalid");
+                const uint8_t & MIRROR_PLACEMENT_POLICY =
+                    i_sysAttrs.iv_selectiveMode;
+                FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MIRROR_DISABLED);
+                break;
+            }
+
+            if (i_sysAttrs.iv_selectiveMode ==
+                fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+            {
+                FAPI_ERR("mss_eff_grouping: Mirroring disabled, flipped mode invalid");
+                const uint8_t & MIRROR_PLACEMENT_POLICY =
+                    i_sysAttrs.iv_selectiveMode;
+                FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MIRROR_DISABLED);
+                break;
+            }
+        }
+
+        if (i_sysAttrs.iv_mcsInterleaveMode)
+        {
+            // Fabric interleaving mode, must be 2, 4 or 8 MCSs per group
+            if ( ((!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_2)) &&
+                  (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_4)) &&
+                  (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_8))) ||
+                 (i_procAttrs.iv_groupsAllowed & MCS_GROUP_1) )
+            {
+                FAPI_ERR("mss_eff_grouping: Interleaving mode, but MCSs per group invalid (0x%02x)",
+                         i_procAttrs.iv_groupsAllowed);
+                const uint8_t ALL_MCS_IN_INTERLEAVING_GROUP =
+                    i_sysAttrs.iv_mcsInterleaveMode;
+                const uint8_t MSS_INTERLEAVE_ENABLE =
+                    i_procAttrs.iv_groupsAllowed;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_MSS_EFF_CONFIG_INTERLEAVE_MODE_INVALID_MCS_PER_GROUP);
+                break;
+            }
+        }
         else
+        {
+            // Fabric checkerboard mode, all MCSs per group allowed, but more
+            // than 1 MCS per group will will have a performance impact
+            if ( (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_1)) &&
+                 (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_2)) &&
+                 (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_4)) &&
+                 (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_8)) )
+            {
+                FAPI_ERR("mss_eff_grouping: Checkerboard mode, but MCSs per group invalid (0x%02x)",
+                         i_procAttrs.iv_groupsAllowed);
+                const uint8_t ALL_MCS_IN_INTERLEAVING_GROUP =
+                    i_sysAttrs.iv_mcsInterleaveMode;
+                const uint8_t MSS_INTERLEAVE_ENABLE =
+                    i_procAttrs.iv_groupsAllowed;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_MSS_EFF_CONFIG_CHECKERBOARD_MODE_INVALID_MCS_PER_GROUP);
+                break;
+            }
 
-          {
+            if (!(i_procAttrs.iv_groupsAllowed & MCS_GROUP_1))
+            {
+                FAPI_INF("mss_eff_grouping: Fabric is in checkerboard mode "
+                         "with more than 1 MCS per group, performance would "
+                         "be better in interleaving mode");
+            }
+        }
 
-// sizes for distinct non-mirrored ranges
-            l_memory_sizes[0] =
-              eff_grouping_data.groupID[0][MCS_SIZE] *
-              eff_grouping_data.groupID[0][MCS_IN_GROUP];
-            l_memory_sizes[1] =
-              eff_grouping_data.groupID[1][MCS_SIZE] *
-              eff_grouping_data.groupID[1][MCS_IN_GROUP];
-            l_memory_sizes[2] =
-              eff_grouping_data.groupID[2][MCS_SIZE] *
-              eff_grouping_data.groupID[2][MCS_IN_GROUP];
-            l_memory_sizes[3] =
-              eff_grouping_data.groupID[3][MCS_SIZE] *
-              eff_grouping_data.groupID[3][MCS_IN_GROUP];
-            l_memory_sizes[4] =
-              eff_grouping_data.groupID[4][MCS_SIZE] *
-              eff_grouping_data.groupID[4][MCS_IN_GROUP];
-            l_memory_sizes[5] =
-              eff_grouping_data.groupID[5][MCS_SIZE] *
-              eff_grouping_data.groupID[5][MCS_IN_GROUP];
-            l_memory_sizes[6] =
-              eff_grouping_data.groupID[6][MCS_SIZE] *
-              eff_grouping_data.groupID[6][MCS_IN_GROUP];
-            l_memory_sizes[7] =
-              eff_grouping_data.groupID[7][MCS_SIZE] *
-              eff_grouping_data.groupID[7][MCS_IN_GROUP];
-          }
-        l_memory_sizes_ack[0] = eff_grouping_data.groupID[0][GROUP_SIZE];
-        l_memory_sizes_ack[1] = eff_grouping_data.groupID[1][GROUP_SIZE];
-        l_memory_sizes_ack[2] = eff_grouping_data.groupID[2][GROUP_SIZE];
-        l_memory_sizes_ack[3] = eff_grouping_data.groupID[3][GROUP_SIZE];
-        l_memory_sizes_ack[4] = eff_grouping_data.groupID[4][GROUP_SIZE];
-        l_memory_sizes_ack[5] = eff_grouping_data.groupID[5][GROUP_SIZE];
-        l_memory_sizes_ack[6] = eff_grouping_data.groupID[6][GROUP_SIZE];
-        l_memory_sizes_ack[7] = eff_grouping_data.groupID[7][GROUP_SIZE];
-        if (!M_valid)
+        if (i_sysAttrs.iv_selectiveMode ==
+            fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
+        {
+            if (i_procAttrs.iv_htmBarSize != 0 ||
+                i_procAttrs.iv_occSandboxSize != 0)
+            {
+                FAPI_ERR("mss_eff_grouping: Selective mode does not support "
+                         "HTM and OCC Sandbox BARs");
+                const uint64_t & HTM_BAR_SIZE = i_procAttrs.iv_htmBarSize;
+                const uint64_t & OCC_SANDBOX_BAR_SIZE =
+                    i_procAttrs.iv_occSandboxSize;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_MSS_EFF_GROUPING_SELCTIVE_MODE_HTM_OCC_BAR);
+                break;
+            }
+        }
+    } while (0);
 
-          {
+    return rc;
+}
 
-            // process mirrored ranges
-            //
-            if (selective_mode == SELECTIVE_MODE)
+/**
+ * @brief Attempts to group 8 MCSs per group
+ *
+ * If they can be grouped, fills in the following fields in o_groupData:
+ * - iv_data[<group>][MCS_SIZE]
+ * - iv_data[<group>][MCS_IN_GROUP]
+ * - iv_data[<group>][GROUP_SIZE]
+ * - iv_data[<group>][MEMBER_IDX(<members>)]
+ * - iv_data[<group>][LARGEST_MBA_SIZE]
+ * - iv_mcsGrouped[<group>]
+ * - iv_numGroups
+ *
+ * @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
+ * @param[out] o_groupData Reference to output data
+ */
+void grouping_group8McsPerGroup(const EffGroupingMemInfo & i_memInfo,
+                                EffGroupingData & o_groupData)
+{
+    // There are 8 MCSs in a proc chip, they can be grouped together if they all
+    // have the same memory size. Assume that no MCSs have already been grouped
+    FAPI_INF("mss_eff_grouping: Attempting to group 8 MCSs per group");
+    uint8_t & g = o_groupData.iv_numGroups;
 
-              {
+    if ((NUM_MCS_PER_PROC == 8) && (i_memInfo.iv_mcsSize[0] != 0))
+    {
+        // MCS 0 has memory
+        bool grouped = true;
+        uint32_t maxMbaSize = i_memInfo.iv_largestMbaSize[0];
+
+        for (uint8_t pos = 1; pos < NUM_MCS_PER_PROC; pos++)
+        {
+            if (i_memInfo.iv_mcsSize[0] != i_memInfo.iv_mcsSize[pos])
+            {
+                // This MCS does not have the same size as MCS 0
+                grouped = false;
+                break;
+            }
+            else if (i_memInfo.iv_largestMbaSize[pos] > maxMbaSize)
+            {
+                maxMbaSize = i_memInfo.iv_largestMbaSize[pos];
+            }
+        }
+
+        if (grouped)
+        {
+            // All 8 MCSs are the same size and can be grouped
+            FAPI_INF("mss_eff_grouping: Grouped all 8 MCSs");
+            o_groupData.iv_data[g][MCS_SIZE] = i_memInfo.iv_mcsSize[0];
+            o_groupData.iv_data[g][MCS_IN_GROUP] = 8;
+            o_groupData.iv_data[g][GROUP_SIZE] = 8 * i_memInfo.iv_mcsSize[0];
+            o_groupData.iv_data[g][MEMBER_IDX(0)] = MCSID_0;
+            o_groupData.iv_data[g][MEMBER_IDX(1)] = MCSID_4;
+            o_groupData.iv_data[g][MEMBER_IDX(2)] = MCSID_2;
+            o_groupData.iv_data[g][MEMBER_IDX(3)] = MCSID_6;
+            o_groupData.iv_data[g][MEMBER_IDX(4)] = MCSID_1;
+            o_groupData.iv_data[g][MEMBER_IDX(5)] = MCSID_5;
+            o_groupData.iv_data[g][MEMBER_IDX(6)] = MCSID_3;
+            o_groupData.iv_data[g][MEMBER_IDX(7)] = MCSID_7;
+            o_groupData.iv_data[g][LARGEST_MBA_SIZE] = maxMbaSize;
+            g++;
+
+            // Record which MCSs were grouped
+            for (uint8_t i = 0; i < NUM_MCS_PER_PROC; i++)
+            {
+                o_groupData.iv_mcsGrouped[i] = true;
+            }
+        }
+    }
+}
+
+/**
+ * @brief Attempts to group 4 MCSs per group
+ *
+ * If they can be grouped, fills in the following fields in o_groupData:
+ * - iv_data[<group>][MCS_SIZE]
+ * - iv_data[<group>][MCS_IN_GROUP]
+ * - iv_data[<group>][GROUP_SIZE]
+ * - iv_data[<group>][MEMBER_IDX(<members>)]
+ * - iv_data[<group>][LARGEST_MBA_SIZE]
+ * - iv_mcsGrouped[<group>]
+ * - iv_numGroups
+ *
+ * @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
+ * @param[out] o_groupData Reference to output data
+ */
+void grouping_group4McsPerGroup(const EffGroupingMemInfo & i_memInfo,
+                                EffGroupingData & o_groupData)
+{
+    // The following is all the allowed ways of grouping 4 MCSs per group.
+    // Earlier array entries are higher priority.
+    // First try to group 2 sets of 4 (0/1, 2/3 or 4/5)
+    // If no success then try to group 1 set of 4
+    FAPI_INF("mss_eff_grouping: Attempting to group 4 MCSs per group");
+    uint8_t & g = o_groupData.iv_numGroups;
+    const uint8_t NUM_WAYS_4MCS_PER_GROUP = 6;
+    const uint8_t CFG_4MCS[NUM_WAYS_4MCS_PER_GROUP][4] =
+        { { MCSID_0, MCSID_1, MCSID_4, MCSID_5 },
+          { MCSID_2, MCSID_3, MCSID_6, MCSID_7 },
+          { MCSID_0, MCSID_1, MCSID_6, MCSID_7 },
+          { MCSID_2, MCSID_3, MCSID_4, MCSID_5 },
+          { MCSID_0, MCSID_1, MCSID_2, MCSID_3 },
+          { MCSID_4, MCSID_5, MCSID_6, MCSID_7 } };
+
+    // Array recording which groups of 4 can potentially be grouped
+    uint8_t config4_gp[NUM_WAYS_4MCS_PER_GROUP] = {0};
+
+    // Figure out which groups of 4 can potentially be grouped
+    for (uint8_t i = 0; i < NUM_WAYS_4MCS_PER_GROUP; i++)
+    {
+        if ((!o_groupData.iv_mcsGrouped[CFG_4MCS[i][0]]) &&
+            (i_memInfo.iv_mcsSize[CFG_4MCS[i][0]] != 0))
+        {
+            // First MCS of group is not already grouped and has memory
+            bool potential_group = true;
+            for (uint8_t j = 1; j < 4; j++)
+            {
+                if ( (o_groupData.iv_mcsGrouped[CFG_4MCS[i][j]]) ||
+                     (i_memInfo.iv_mcsSize[CFG_4MCS[i][0]] !=
+                         i_memInfo.iv_mcsSize[CFG_4MCS[i][j]]) )
+                {
+                    // This MCS is already grouped or does not have the same
+                    // size as MCS 0
+                    potential_group = false;
+                    break;
+                }
+            }
+            if (potential_group)
+            {
+                FAPI_INF("mss_eff_grouping: Potential group MCSs %u, %u, %u, %u",
+                         CFG_4MCS[i][0], CFG_4MCS[i][1],
+                         CFG_4MCS[i][2], CFG_4MCS[i][3]);
+                config4_gp[i] = 1;
+            }
+        }
+    }
+
+    // Figure out which groups of 4 to actually group
+    uint8_t gp1 = 0xff;
+    uint8_t gp2 = 0xff;
+
+    // Check if 2 groups of 4 are possible (0/1, 2/3 or 4/5)
+    for (uint8_t i = 0; i < NUM_WAYS_4MCS_PER_GROUP; i += 2)
+    {
+        if (config4_gp[i] && config4_gp[i + 1])
+        {
+            FAPI_INF("mss_eff_grouping: Grouped MCSs %u, %u, %u, %u",
+                     CFG_4MCS[i][0], CFG_4MCS[i][1],
+                     CFG_4MCS[i][2], CFG_4MCS[i][3]);
+            FAPI_INF("mss_eff_grouping: Grouped MCSs %u, %u, %u, %u",
+                     CFG_4MCS[i + 1][0], CFG_4MCS[i + 1][1],
+                     CFG_4MCS[i + 1][2], CFG_4MCS[1 + 1][3]);
+            gp1 = i;
+            gp2 = i + 1;
+            break;
+        }
+    }
+
+    if (gp1 == 0xff)
+    {
+        // 2 groups of 4 are not possible, look for 1 group of 4
+        for (uint8_t i = 0; i < NUM_WAYS_4MCS_PER_GROUP; i++)
+        {
+            if (config4_gp[i])
+            {
+                FAPI_INF("mss_eff_grouping: Grouped MCSs %u, %u, %u, %u",
+                         CFG_4MCS[i][0], CFG_4MCS[i][1],
+                         CFG_4MCS[i][2], CFG_4MCS[i][3]);
+                gp1 = i;
+                break;
+            }
+        }
+    }
+
+    if (gp1 != 0xff)
+    {
+        // Figure out the maximum MBA size for group 1
+        uint32_t maxMbaSize = i_memInfo.iv_largestMbaSize[CFG_4MCS[gp1][0]];
+        for (uint8_t i = 1; i < 4; i++)
+        {
+            if (i_memInfo.iv_largestMbaSize[CFG_4MCS[gp1][i]] > maxMbaSize)
+            {
+                maxMbaSize = i_memInfo.iv_largestMbaSize[CFG_4MCS[gp1][i]];
+            }
+        }
+
+        o_groupData.iv_data[g][MCS_SIZE] =
+            i_memInfo.iv_mcsSize[CFG_4MCS[gp1][0]];
+        o_groupData.iv_data[g][MCS_IN_GROUP] = 4;
+        o_groupData.iv_data[g][GROUP_SIZE] =
+            4 * i_memInfo.iv_mcsSize[CFG_4MCS[gp1][0]];
+        o_groupData.iv_data[g][MEMBER_IDX(0)] = CFG_4MCS[gp1][0];
+        o_groupData.iv_data[g][MEMBER_IDX(1)] = CFG_4MCS[gp1][2];
+        o_groupData.iv_data[g][MEMBER_IDX(2)] = CFG_4MCS[gp1][1];
+        o_groupData.iv_data[g][MEMBER_IDX(3)] = CFG_4MCS[gp1][3];
+        o_groupData.iv_data[g][LARGEST_MBA_SIZE] = maxMbaSize;
+        g++;
+
+        // Record which MCSs were grouped
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            o_groupData.iv_mcsGrouped[CFG_4MCS[gp1][i]] = true;
+        }
+    }
+
+    if (gp2 != 0xff)
+    {
+        // Figure out the maximum MBA size for group 2
+        uint32_t maxMbaSize =
+            i_memInfo.iv_largestMbaSize[CFG_4MCS[gp2][0]];
+        for (uint8_t i = 1; i < 4; i++)
+        {
+            if (i_memInfo.iv_largestMbaSize[CFG_4MCS[gp2][i]] > maxMbaSize)
+            {
+                maxMbaSize = i_memInfo.iv_largestMbaSize[CFG_4MCS[gp2][i]];
+            }
+        }
+
+        o_groupData.iv_data[g][MCS_SIZE] =
+            i_memInfo.iv_mcsSize[CFG_4MCS[gp2][0]];
+        o_groupData.iv_data[g][MCS_IN_GROUP] = 4;
+        o_groupData.iv_data[g][GROUP_SIZE] =
+            4 * i_memInfo.iv_mcsSize[CFG_4MCS[gp2][0]];
+        o_groupData.iv_data[g][MEMBER_IDX(0)] = CFG_4MCS[gp2][0];
+        o_groupData.iv_data[g][MEMBER_IDX(1)] = CFG_4MCS[gp2][2];
+        o_groupData.iv_data[g][MEMBER_IDX(2)] = CFG_4MCS[gp2][1];
+        o_groupData.iv_data[g][MEMBER_IDX(3)] = CFG_4MCS[gp2][3];
+        o_groupData.iv_data[g][LARGEST_MBA_SIZE] = maxMbaSize;
+        g++;
+
+        // Record which MCSs were grouped
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            o_groupData.iv_mcsGrouped[CFG_4MCS[gp2][i]] = true;
+        }
+    }
+}
+
+/**
+ * @brief Attempts to group 2 MCSs per group
+ *
+ * If they can be grouped, fills in the following fields in o_groupData:
+ * - iv_data[<group>][MCS_SIZE]
+ * - iv_data[<group>][MCS_IN_GROUP]
+ * - iv_data[<group>][GROUP_SIZE]
+ * - iv_data[<group>][MEMBER_IDX(<members>)]
+ * - iv_data[<group>][LARGEST_MBA_SIZE]
+ * - iv_mcsGrouped[<group>]
+ * - iv_numGroups
+ *
+ * @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
+ * @param[out] o_groupData Reference to output data
+ */
+void grouping_group2McsPerGroup(const EffGroupingMemInfo & i_memInfo,
+                                EffGroupingData & o_groupData)
+{
+    // 2 adjacent MCSs are grouped if they have the same size
+    // 0/1, 1/2, 2/3, 3/4, 4/5, 5/6, 6/7
+    FAPI_INF("mss_eff_grouping: Attempting to group 2 MCSs per group");
+    uint8_t & g = o_groupData.iv_numGroups;
+
+    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC - 1; pos++)
+    {
+        if ((!o_groupData.iv_mcsGrouped[pos]) &&
+            (!o_groupData.iv_mcsGrouped[pos + 1]) &&
+            (i_memInfo.iv_mcsSize[pos] != 0) &&
+            (i_memInfo.iv_mcsSize[pos] == i_memInfo.iv_mcsSize[pos + 1]))
+        {
+            // These 2 MCSs are not already grouped and have the same amount of
+            // memory
+            FAPI_INF("mss_eff_grouping: Grouped MCSs %u and %u", pos, pos + 1);
+            o_groupData.iv_data[g][MCS_SIZE] = i_memInfo.iv_mcsSize[pos];
+            o_groupData.iv_data[g][MCS_IN_GROUP] = 2;
+            o_groupData.iv_data[g][GROUP_SIZE] = 2 * i_memInfo.iv_mcsSize[pos];
+            o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
+            o_groupData.iv_data[g][MEMBER_IDX(1)] = pos + 1;
+            if (i_memInfo.iv_largestMbaSize[pos] >
+                i_memInfo.iv_largestMbaSize[pos + 1])
+            {
+                o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                    i_memInfo.iv_largestMbaSize[pos];
+            }
+            else
+            {
+                o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                    i_memInfo.iv_largestMbaSize[pos + 1];
+            }
+            g++;
+
+            // Record which MCSs were grouped
+            o_groupData.iv_mcsGrouped[pos] = true;
+            o_groupData.iv_mcsGrouped[pos + 1] = true;
+            pos++;
+        }
+    }
+}
+
+/**
+ * @brief Attempts to group 1 MCS per group
+ *
+ * If they can be grouped, fills in the following fields in o_groupData:
+ * - iv_data[<group>][MCS_SIZE]
+ * - iv_data[<group>][MCS_IN_GROUP]
+ * - iv_data[<group>][GROUP_SIZE]
+ * - iv_data[<group>][MEMBER_IDX(<members>)]
+ * - iv_data[<group>][LARGEST_MBA_SIZE]
+ * - iv_mcsGrouped[<group>]
+ * - iv_numGroups
+ *
+ * @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
+ * @param[out] o_groupData Reference to output data
+ */
+void grouping_group1McsPerGroup(const EffGroupingMemInfo & i_memInfo,
+                                EffGroupingData & o_groupData)
+{
+    // Any MCS with a non-zero size can be 'grouped'
+    FAPI_INF("mss_eff_grouping: Attempting to group 1 MCSs per group");
+    uint8_t & g = o_groupData.iv_numGroups;
+    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC; pos++)
+    {
+        if ((!o_groupData.iv_mcsGrouped[pos]) &&
+            (i_memInfo.iv_mcsSize[pos] != 0))
+        {
+            // This MCS is not already grouped and has memory
+            FAPI_INF("mss_eff_grouping: MCS %u grouped", pos);
+            o_groupData.iv_data[g][MCS_SIZE] = i_memInfo.iv_mcsSize[pos];
+            o_groupData.iv_data[g][MCS_IN_GROUP] = 1;
+            o_groupData.iv_data[g][GROUP_SIZE] = i_memInfo.iv_mcsSize[pos];
+            o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
+            o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                i_memInfo.iv_largestMbaSize[pos];
+            g++;
+
+            // Record which MCS was grouped
+            o_groupData.iv_mcsGrouped[pos] = true;
+        }
+    }
+}
+
+/**
+ * @brief Finds ungrouped MCSs
+ *
+ * If any are found then their associated Membuf chip is deconfigured
+ *
+ * @param[in] i_memInfo   Reference to Memory Info
+ * @param[in] i_groupData Reference to Group data
+ *
+ * @return fapi::ReturnCode
+ */
+fapi::ReturnCode grouping_findUngroupedMCSs(
+    const EffGroupingMemInfo & i_memInfo,
+    const EffGroupingData & i_groupData)
+{
+    fapi::ReturnCode rc;
+
+    bool ungrouped = false;
+    for (uint8_t i = 0; i < NUM_MCS_PER_PROC; i++)
+    {
+        if ((i_memInfo.iv_mcsSize[i] != 0) &&
+            (i_groupData.iv_mcsGrouped[i] == false))
+        {
+            FAPI_ERR("mss_eff_grouping: Unable to group MCS %u", i);
+            ungrouped = true;
+            const fapi::Target & MEMBUF = i_memInfo.iv_membufs[i];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_MCS);
+            fapiLogError(rc);
+            rc = fapi::FAPI_RC_SUCCESS;
+        }
+    }
+
+    if (ungrouped)
+    {
+        // One or more MCSs could not be grouped and errors were logged to
+        // callout the memory plug procedure and deconfigure the membuf.
+        // Return an error
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP);
+    }
+
+    return rc;
+}
+
+/**
+ * @brief Calculates the number of 1s in a memory size
+ *
+ * @param[i] i_size Memory Size
+ * 
+ * @return Number of 1s
+ */
+uint8_t grouping_num1sInSize(uint32_t i_size)
+{
+    uint8_t numOnes = 0;
+    uint32_t l_size = i_size;
+
+    while (l_size != 0)
+    {
+        if (l_size & 1)
+        {
+            numOnes++;
+        }
+        l_size >>= 1;
+    }
+
+    FAPI_DBG("mss_eff_grouping: Num 1s in 0x%08x is %u", i_size, numOnes);
+    return numOnes;
+}
+
+/**
+ * @brief Calculate Alt Memory
+ *
+ * @param[io] io_groupData Group Data
+ */
+void grouping_calcAltMemory(EffGroupingData & io_groupData)
+{
+    FAPI_INF("mss_eff_grouping: Calculating Alt Memory");
+    for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
+    {
+        // Find the number of 1s in the group size
+        uint8_t numOnes = grouping_num1sInSize(
+            io_groupData.iv_data[pos][GROUP_SIZE]);
+
+        if (numOnes > 1)
+        {
+            FAPI_INF("mss_eff_grouping: Group %u needs alt bars definition, group size %u GB",
+                     pos, io_groupData.iv_data[pos][GROUP_SIZE]);
+
+            // New group size is the largest MBA size of the group
+            // multiplied by the number of MBAs in the group
+            io_groupData.iv_data[pos][GROUP_SIZE] =
+                io_groupData.iv_data[pos][LARGEST_MBA_SIZE] *
+                    NUM_MBA_PER_MCS *
+                        io_groupData.iv_data[pos][MCS_IN_GROUP];
+            FAPI_INF("mss_eff_grouping: New Group Size is %u GB",
+                     io_groupData.iv_data[pos][GROUP_SIZE]);
+
+            // Alt size is the number of MCSs in the group multiplied by
+            // (the MCS size minus the largest MBA size)
+            io_groupData.iv_data[pos][ALT_SIZE] =
+                io_groupData.iv_data[pos][MCS_IN_GROUP] *
+                    (io_groupData.iv_data[pos][MCS_SIZE] -
+                     io_groupData.iv_data[pos][LARGEST_MBA_SIZE]);
+            FAPI_INF("mss_eff_grouping: Alt Size is %u GB",
+                     io_groupData.iv_data[pos][ALT_SIZE]);
+
+            io_groupData.iv_data[pos][ALT_VALID] = 1;
+        }
+    }
+}
+
+/**
+ * @brief Sorts groups from high to low memory size
+ *
+ * @param[io] io_groupData Group Data
+ */
+void grouping_sortGroups(EffGroupingData & io_groupData)
+{
+    // Done with a simple bubble sort
+    FAPI_INF("mss_eff_grouping: Sorting Groups");
+    if (io_groupData.iv_numGroups)
+    {
+        uint32_t temp[DATA_ELEMENTS];
+        bool swapped = true;
+        while (swapped == true)
+        {
+            // Make a pass over the groups swapping adjacent sizes as needed
+            swapped = false;
+            for (uint8_t pos = 0; pos < io_groupData.iv_numGroups - 1; pos++)
+            {
+                if (io_groupData.iv_data[pos][GROUP_SIZE] <
+                    io_groupData.iv_data[pos + 1][GROUP_SIZE])
+                {
+                    FAPI_INF("mss_eff_grouping: Swapping groups %u and %u",
+                             pos, pos + 1);
+                    for (uint32_t j = 0; j < DATA_ELEMENTS; j++)
+                    {
+                        temp[j] = io_groupData.iv_data[pos][j];
+                    }
+                    for (uint32_t j = 0; j < DATA_ELEMENTS; j++)
+                    {
+                        io_groupData.iv_data[pos][j] =
+                            io_groupData.iv_data[pos + 1][j];
+                    }
+                    for (uint32_t j = 0; j < DATA_ELEMENTS; j++)
+                    {
+                        io_groupData.iv_data[pos + 1][j] = temp[j];
+                    }
+                    swapped = true;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @brief Calculate Mirror Memory base and alt-base addresses
+ *
+ * @param[in] i_target           Reference to processor chip target
+ * @param[io] io_procAttrs       Processor Attributes (iv_mirrorBaseAddr can be
+ *                                                     updated)
+ * @param[io] io_groupData       Group Data
+ * @param[in] i_totalSizeNonMirr Total non mirrored size
+ *
+ * @return fapi::ReturnCode
+ */
+fapi::ReturnCode grouping_calcMirrorMemory(const fapi::Target & i_target,
+                                           EffGroupingProcAttrs & io_procAttrs,
+                                           EffGroupingData & io_groupData)
+{
+    FAPI_INF("mss_eff_grouping: Calculating Mirror Memory");
+    fapi::ReturnCode rc;
+
+    // Calculate mirrored group size and non mirrored group size
+    for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
+    {
+        if (io_groupData.iv_data[pos][MCS_IN_GROUP] > 1)
+        {
+            // Mirrored size is half the group size
+            io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE] =
+                io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+
+            if (io_groupData.iv_data[pos][ALT_VALID])
+            {
+                FAPI_INF("mss_eff_grouping: Mirrored group %u needs alt bars definition, group size %u GB",
+                         pos, io_groupData.iv_data[pos][GROUP_SIZE]);
+                io_groupData.iv_data[pos + MIRR_OFFSET][ALT_SIZE] =
+                    io_groupData.iv_data[pos][ALT_SIZE] / 2;
+                io_groupData.iv_data[pos + MIRR_OFFSET][ALT_VALID] = 1;
+            }
+        }
+    }
+
+    // Check if the memory base address overlaps with the mirror base address
+    if ( (io_procAttrs.iv_memBaseAddr >
+          (io_procAttrs.iv_mirrorBaseAddr +
+           io_groupData.iv_totalSizeNonMirr / 2)) ||
+         (io_procAttrs.iv_mirrorBaseAddr >
+          (io_procAttrs.iv_memBaseAddr + io_groupData.iv_totalSizeNonMirr)) )
+    {
+        for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
+        {
+            if (pos == 0)
+            {
+                io_groupData.iv_data[pos][BASE_ADDR] =
+                    io_procAttrs.iv_memBaseAddr;
+                if (io_groupData.iv_data[pos][ALT_VALID])
+                {
+                    io_groupData.iv_data[pos][ALT_BASE_ADDR] =
+                        io_groupData.iv_data[pos][BASE_ADDR] +
+                        io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+                }
+            }
+            else
+            {
+                io_groupData.iv_data[pos][BASE_ADDR] =
+                    io_groupData.iv_data[pos - 1][BASE_ADDR] +
+                    io_groupData.iv_data[pos - 1][GROUP_SIZE];
+                if (io_groupData.iv_data[pos][ALT_VALID])
+                {
+                    io_groupData.iv_data[pos][ALT_BASE_ADDR] =
+                        io_groupData.iv_data[pos][BASE_ADDR] +
+                        io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+                }
+            }
+
+            if (io_groupData.iv_data[pos][MCS_IN_GROUP] > 1)
+            {
+                io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
+                    io_procAttrs.iv_mirrorBaseAddr;
+                io_procAttrs.iv_mirrorBaseAddr =
+                    io_procAttrs.iv_mirrorBaseAddr +
+                    io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE];
+                if (io_groupData.iv_data[pos][ALT_VALID])
+                {
+                    io_groupData.iv_data[pos + MIRR_OFFSET][ALT_BASE_ADDR] =
+                        io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] +
+                        io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE] / 2;
+                    io_groupData.iv_data[pos + MIRR_OFFSET][ALT_VALID] = 1;
+                }
+            }
+        }
+    }
+    else
+    {
+        FAPI_ERR("mss_eff_grouping: Mirror Base address overlaps with memory base address");
+        const fapi::Target & PROC_CHIP = i_target;
+        const uint64_t & MEM_BASE_ADDR = io_procAttrs.iv_memBaseAddr;
+        const uint64_t & MIRROR_BASE_ADDR = io_procAttrs.iv_mirrorBaseAddr;
+        const uint32_t & SIZE_NON_MIRROR = io_groupData.iv_totalSizeNonMirr;
+        FAPI_SET_HWP_ERROR(rc,
+            RC_MSS_EFF_GROUPING_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS);
+    }
+
+    return rc;
+}
+
+/**
+ * @brief Calculate Non-mirror Memory base and alt-base addresses
+ *
+ * @param[in] i_procAttrs  Processor Chip Attributes
+ * @param[io] io_groupData Group Data
+ */
+void grouping_calcNonMirrorMemory(const EffGroupingProcAttrs & i_procAttrs,
+                                  EffGroupingData & io_groupData)
+{
+    FAPI_INF("mss_eff_grouping: Calculating Mirror Memory");
+
+    // Assign mirroring and non-mirroring base address for each group
+    for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
+    {
+        if (pos == 0)
+        {
+            io_groupData.iv_data[pos][BASE_ADDR] = i_procAttrs.iv_memBaseAddr;
+            if (io_groupData.iv_data[pos][ALT_VALID])
+            {
+                io_groupData.iv_data[pos][ALT_BASE_ADDR] =
+                    io_groupData.iv_data[pos][BASE_ADDR] +
+                    io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+            }
+        }
+        else
+        {
+            io_groupData.iv_data[pos][BASE_ADDR] =
+                io_groupData.iv_data[pos - 1][BASE_ADDR] +
+                io_groupData.iv_data[pos - 1][GROUP_SIZE];
+            if (io_groupData.iv_data[pos][ALT_VALID])
+            {
+                io_groupData.iv_data[pos][ALT_BASE_ADDR] =
+                    io_groupData.iv_data[pos][BASE_ADDR] +
+                    io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+            }
+        }
+    }
+}
+
+/**
+ * @brief Sets the ATTR_MSS_MEM_MC_IN_GROUP attribute
+ *
+ * @param[in] i_target    Reference to Processor Chip target
+ * @param[in] i_groupData Group Data
+ *
+ * @return fapi::ReturnCode
+ */
+fapi::ReturnCode grouping_setATTR_MSS_MEM_MC_IN_GROUP(
+    const fapi::Target & i_target,
+    const EffGroupingData & i_groupData)
+{
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase MC_IN_GP(8);
+    uint8_t mcs_in_group[8] = {0};
+
+    for (uint8_t i = 0; i < i_groupData.iv_numGroups; i++)
+    {
+        MC_IN_GP.flushTo0();
+        uint8_t count = i_groupData.iv_data[i][MCS_IN_GROUP];
+        for (uint8_t j = 0; j < count; j++)
+        {
+            MC_IN_GP.setBit(i_groupData. iv_data[i][MEMBER_IDX(j)]);
+        }
+        mcs_in_group[i] = MC_IN_GP.getByte(0);
+    }
+
+    FAPI_INF("mss_eff_grouping: ATTR_MSS_MEM_MC_IN_GROUP[0][1][2][3]: "
+             "0x%02x, 0x%02x, 0x%02x, 0x%02x",
+             mcs_in_group[0], mcs_in_group[1], mcs_in_group[2],
+             mcs_in_group[3]);
+    FAPI_INF("mss_eff_grouping: ATTR_MSS_MEM_MC_IN_GROUP[4][5][6][7]: "
+             "0x%02x, 0x%02x, 0x%02x, 0x%02x",
+             mcs_in_group[4], mcs_in_group[5], mcs_in_group[6],
+             mcs_in_group[7]);
+
+    rc = FAPI_ATTR_SET(ATTR_MSS_MEM_MC_IN_GROUP, &i_target, mcs_in_group);
+    if (rc)
+    {
+        FAPI_ERR("Error writing ATTR_MSS_MEM_MC_IN_GROUP");
+    }
+
+    return rc;
+}
+
+/**
+ * @brief Traces the Grouping Data
+ *
+ * @param[in] i_sysAttrs  System Attributes
+ * @param[in] i_groupData Group Data
+ */
+void grouping_traceData(const EffGroupingSysAttrs & i_sysAttrs,
+                        const EffGroupingData & i_groupData)
+{
+    for (uint8_t i = 0; i < i_groupData.iv_numGroups; i++)
+    {
+        FAPI_INF("mss_eff_grouping: Group %u, MCS Size %u GB, "
+                 "Num MCSs %u, GroupSize %u GB", i, 
+                 i_groupData.iv_data[i][MCS_SIZE],
+                 i_groupData.iv_data[i][MCS_IN_GROUP],
+                 i_groupData.iv_data[i][GROUP_SIZE]);
+
+        FAPI_INF("mss_eff_grouping: Group %u, Base Add 0x%08x", i,
+                 i_groupData.iv_data[i][BASE_ADDR]);
+
+        if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+        {
+            FAPI_INF("mss_eff_grouping: Group %u, Mirror Group Size %u GB, "
+                     "Mirror Base Addr 0x%08x", i,
+                     i_groupData.iv_data[i + MIRR_OFFSET][GROUP_SIZE],
+                     i_groupData.iv_data[i + MIRR_OFFSET][BASE_ADDR]);
+        }
+        for (uint8_t j = 0; j <  i_groupData.iv_data[i][MCS_IN_GROUP]; j++)
+        {
+            FAPI_INF("mss_eff_grouping: Group %u, Contains MCS %u", i,
+                     i_groupData.iv_data[i][MEMBER_IDX(j)]);
+        }
+        FAPI_INF("mss_eff_grouping: Group %u, Alt-bar valid %u, "
+                 "Alt-bar size %u GB, Alt-bar base addr 0x%08x", i,
+                 i_groupData.iv_data[i][ALT_VALID],
+                 i_groupData.iv_data[i][ALT_SIZE],
+                 i_groupData.iv_data[i][ALT_BASE_ADDR]);
+        if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+        {
+            FAPI_INF("mss_eff_grouping: Group %u, Mirror Alt-bar valid %u, "
+                     "Mirror Alt-bar Size %u GB, "
+                     "Mirror Alt-bar Base Addr 0x%08x", i,
+                     i_groupData.iv_data[i + MIRR_OFFSET][ALT_VALID],
+                     i_groupData.iv_data[i + MIRR_OFFSET][ALT_SIZE],
+                     i_groupData.iv_data[i + MIRR_OFFSET][ALT_BASE_ADDR]);
+        }
+    }
+}
+
+/**
+ * @brief Sets Base and Size FAPI Attributes
+ *
+ * Attributes set:
+ * - ATTR_PROC_MEM_BASES
+ * - ATTR_PROC_MEM_BASES_ACK
+ * - ATTR_PROC_MEM_SIZES
+ * - ATTR_PROC_MEM_SIZES_ACK
+ * - ATTR_MSS_MCS_GROUP_32
+ * - ATTR_PROC_MIRROR_BASES
+ * - ATTR_PROC_MIRROR_BASES_ACK
+ * - ATTR_PROC_MIRROR_SIZES
+ * - ATTR_PROC_MIRROR_SIZES_ACK
+ * - ATTR_PROC_HTM_BAR_BASE_ADDR
+ * - ATTR_PROC_OCC_SANDBOX_BASE_ADDR
+ *
+ * @param[in] i_target    Reference to Processor Chip Target
+ * @param[in] i_sysAttrs  System Attributes
+ * @param[in] i_procAttrs Processor Chip Attributes (iv_htmBarSize set)
+ * @param[in] i_groupData Group Data
+ */
+fapi::ReturnCode grouping_setBaseSizeAttrs(
+    const fapi::Target & i_target,
+    const EffGroupingSysAttrs & i_sysAttrs,
+    EffGroupingProcAttrs & io_procAttrs,
+    EffGroupingData & i_groupData)
+{
+    FAPI_INF("mss_eff_grouping: Setting Base/Size attributes");
+    fapi::ReturnCode rc;
+
+    do
+    {
+        uint64_t occ_sandbox_base = 0;
+        uint64_t htm_bar_base = 0;
+        uint64_t mem_bases[8] = {0};
+        uint64_t mem_bases_ack[8] = {0};
+        uint64_t l_memory_sizes[8] = {0};
+        uint64_t l_memory_sizes_ack[8] = {0};
+        uint64_t mirror_bases[4] = {0};
+        uint64_t mirror_bases_ack[4] = {0};
+        uint64_t l_mirror_sizes[4] = {0};
+        uint64_t l_mirror_sizes_ack[4] = {0};
+
+        // base addresses for distinct non-mirrored ranges
+        mem_bases[0] = i_groupData.iv_data[0][BASE_ADDR];
+        mem_bases[1] = i_groupData.iv_data[1][BASE_ADDR];
+        mem_bases[2] = i_groupData.iv_data[2][BASE_ADDR];
+        mem_bases[3] = i_groupData.iv_data[3][BASE_ADDR];
+        mem_bases[4] = i_groupData.iv_data[4][BASE_ADDR];
+        mem_bases[5] = i_groupData.iv_data[5][BASE_ADDR];
+        mem_bases[6] = i_groupData.iv_data[6][BASE_ADDR];
+        mem_bases[7] = i_groupData.iv_data[7][BASE_ADDR];
+        mem_bases_ack[0] = i_groupData.iv_data[0][BASE_ADDR];
+        mem_bases_ack[1] = i_groupData.iv_data[1][BASE_ADDR];
+        mem_bases_ack[2] = i_groupData.iv_data[2][BASE_ADDR];
+        mem_bases_ack[3] = i_groupData.iv_data[3][BASE_ADDR];
+        mem_bases_ack[4] = i_groupData.iv_data[4][BASE_ADDR];
+        mem_bases_ack[5] = i_groupData.iv_data[5][BASE_ADDR];
+        mem_bases_ack[6] = i_groupData.iv_data[6][BASE_ADDR];
+        mem_bases_ack[7] = i_groupData.iv_data[7][BASE_ADDR];
+
+        // Base size modified for selective mode to do better packing memory
+        // which helps to do bare metal exerciser memory stressing
+        if (i_sysAttrs.iv_selectiveMode ==
+            fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
+        {
+            l_memory_sizes[0] = i_groupData.iv_data[0][GROUP_SIZE] / 2;
+            l_memory_sizes[1] = i_groupData.iv_data[1][GROUP_SIZE] / 2;
+            l_memory_sizes[2] = i_groupData.iv_data[2][GROUP_SIZE] / 2;
+            l_memory_sizes[3] = i_groupData.iv_data[3][GROUP_SIZE] / 2;
+            l_memory_sizes[4] = i_groupData.iv_data[4][GROUP_SIZE] / 2;
+            l_memory_sizes[5] = i_groupData.iv_data[5][GROUP_SIZE] / 2;
+            l_memory_sizes[6] = i_groupData.iv_data[6][GROUP_SIZE] / 2;
+            l_memory_sizes[7] = i_groupData.iv_data[7][GROUP_SIZE] / 2;
+        }
+        else
+        {
+            // sizes for distinct non-mirrored ranges
+            l_memory_sizes[0] = i_groupData.iv_data[0][MCS_SIZE]
+                * i_groupData.iv_data[0][MCS_IN_GROUP];
+            l_memory_sizes[1] = i_groupData.iv_data[1][MCS_SIZE]
+                * i_groupData.iv_data[1][MCS_IN_GROUP];
+            l_memory_sizes[2] = i_groupData.iv_data[2][MCS_SIZE]
+                * i_groupData.iv_data[2][MCS_IN_GROUP];
+            l_memory_sizes[3] = i_groupData.iv_data[3][MCS_SIZE]
+                * i_groupData.iv_data[3][MCS_IN_GROUP];
+            l_memory_sizes[4] = i_groupData.iv_data[4][MCS_SIZE]
+                * i_groupData.iv_data[4][MCS_IN_GROUP];
+            l_memory_sizes[5] = i_groupData.iv_data[5][MCS_SIZE]
+                * i_groupData.iv_data[5][MCS_IN_GROUP];
+            l_memory_sizes[6] = i_groupData.iv_data[6][MCS_SIZE]
+                * i_groupData.iv_data[6][MCS_IN_GROUP];
+            l_memory_sizes[7] = i_groupData.iv_data[7][MCS_SIZE]
+                * i_groupData.iv_data[7][MCS_IN_GROUP];
+        }
+
+        l_memory_sizes_ack[0] = i_groupData.iv_data[0][GROUP_SIZE];
+        l_memory_sizes_ack[1] = i_groupData.iv_data[1][GROUP_SIZE];
+        l_memory_sizes_ack[2] = i_groupData.iv_data[2][GROUP_SIZE];
+        l_memory_sizes_ack[3] = i_groupData.iv_data[3][GROUP_SIZE];
+        l_memory_sizes_ack[4] = i_groupData.iv_data[4][GROUP_SIZE];
+        l_memory_sizes_ack[5] = i_groupData.iv_data[5][GROUP_SIZE];
+        l_memory_sizes_ack[6] = i_groupData.iv_data[6][GROUP_SIZE];
+        l_memory_sizes_ack[7] = i_groupData.iv_data[7][GROUP_SIZE];
+
+        if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+        {
+            // Process mirrored ranges
+            if (i_sysAttrs.iv_selectiveMode ==
+                fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
+            {
                 uint8_t groupcount = 0;
-                for (i = 0; i < 8; i++)
-
-                  {
-                    if (eff_grouping_data.groupID[i][GROUP_SIZE] > 1)
-                      {
+                for (uint8_t i = 0; i < NUM_MCS_PER_PROC; i++)
+                {
+                    if (i_groupData.iv_data[i][GROUP_SIZE] > 1)
+                    {
                         groupcount++;
-                      }
-                  }
+                    }
+                }
                 if (groupcount < 7)
-
-                  {
+                {
                     mem_bases[groupcount + 0] =
-                      eff_grouping_data.groupID[8][BASE_ADDR] +
-                      (eff_grouping_data.groupID[8][GROUP_SIZE] / 2);
+                        i_groupData.iv_data[8][BASE_ADDR] +
+                            (i_groupData.iv_data[8][GROUP_SIZE] / 2);
                     mem_bases[groupcount + 1] =
-                      eff_grouping_data.groupID[9][BASE_ADDR] +
-                      (eff_grouping_data.groupID[9][GROUP_SIZE] / 2);
+                        i_groupData.iv_data[9][BASE_ADDR] +
+                            (i_groupData.iv_data[9][GROUP_SIZE] / 2);
                     mem_bases[groupcount + 2] =
-                      eff_grouping_data.groupID[10][BASE_ADDR] +
-                      (eff_grouping_data.groupID[10][GROUP_SIZE] / 2);
+                        i_groupData.iv_data[10][BASE_ADDR] +
+                            (i_groupData.iv_data[10][GROUP_SIZE] / 2);
                     mem_bases[groupcount + 3] =
-                      eff_grouping_data.groupID[11][BASE_ADDR] +
-                      (eff_grouping_data.groupID[11][GROUP_SIZE] / 2);
-                  }
-                // Selective mode - Mirroring will be moved in non-mirroring space Virutally
+                        i_groupData.iv_data[11][BASE_ADDR] +
+                            (i_groupData.iv_data[11][GROUP_SIZE] / 2);
+                }
+
+                // Selective mode - Mirroring will be moved in non-mirroring
+                // space virutally
                 mirror_bases[0] = 0;
                 mirror_bases[1] = 0;
                 mirror_bases[2] = 0;
                 mirror_bases[3] = 0;
-              }
-
+            }
             else
-
-              {
-
+            {
                 // base addresses for distinct mirrored ranges
-                mirror_bases[0] = eff_grouping_data.groupID[8][BASE_ADDR];
-                mirror_bases[1] = eff_grouping_data.groupID[9][BASE_ADDR];
-                mirror_bases[2] = eff_grouping_data.groupID[10][BASE_ADDR];
-                mirror_bases[3] = eff_grouping_data.groupID[11][BASE_ADDR];
-              }
-            mirror_bases_ack[0] = eff_grouping_data.groupID[8][BASE_ADDR];
-            mirror_bases_ack[1] = eff_grouping_data.groupID[9][BASE_ADDR];
-            mirror_bases_ack[2] = eff_grouping_data.groupID[10][BASE_ADDR];
-            mirror_bases_ack[3] = eff_grouping_data.groupID[11][BASE_ADDR];
-            if (selective_mode == SELECTIVE_MODE)
+                mirror_bases[0] = i_groupData.iv_data[8][BASE_ADDR];
+                mirror_bases[1] = i_groupData.iv_data[9][BASE_ADDR];
+                mirror_bases[2] = i_groupData.iv_data[10][BASE_ADDR];
+                mirror_bases[3] = i_groupData.iv_data[11][BASE_ADDR];
+            }
+            mirror_bases_ack[0] = i_groupData.iv_data[8][BASE_ADDR];
+            mirror_bases_ack[1] = i_groupData.iv_data[9][BASE_ADDR];
+            mirror_bases_ack[2] = i_groupData.iv_data[10][BASE_ADDR];
+            mirror_bases_ack[3] = i_groupData.iv_data[11][BASE_ADDR];
 
-              {
+            if (i_sysAttrs.iv_selectiveMode ==
+                fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
+            {
                 uint8_t groupcount = 0;
-                for (i = 0; i < 8; i++)
-
-                  {
-                    if (eff_grouping_data.groupID[i][MCS_IN_GROUP] > 1)
-                      {
+                for (uint8_t i = 0; i < NUM_MCS_PER_PROC; i++)
+                {
+                    if (i_groupData.iv_data[i][MCS_IN_GROUP] > 1)
+                    {
                         groupcount++;
-                      }
-                  }
+                    }
+                }
                 if (groupcount < 7)
-
-                  {
+                {
                     l_memory_sizes[groupcount + 0] =
-                      eff_grouping_data.groupID[8][GROUP_SIZE] / 2;
+                        i_groupData.iv_data[8][GROUP_SIZE] / 2;
                     l_memory_sizes[groupcount + 1] =
-                      eff_grouping_data.groupID[9][GROUP_SIZE] / 2;
+                        i_groupData.iv_data[9][GROUP_SIZE] / 2;
                     l_memory_sizes[groupcount + 2] =
-                      eff_grouping_data.groupID[10][GROUP_SIZE] / 2;
+                        i_groupData.iv_data[10][GROUP_SIZE] / 2;
                     l_memory_sizes[groupcount + 3] =
-                      eff_grouping_data.groupID[11][GROUP_SIZE] / 2;
-                  }
+                        i_groupData.iv_data[11][GROUP_SIZE] / 2;
+                }
                 l_mirror_sizes[0] = 0;
                 l_mirror_sizes[1] = 0;
                 l_mirror_sizes[2] = 0;
                 l_mirror_sizes[3] = 0;
-              }
-
+            }
             else
-
-              {
-
+            {
                 // sizes for distinct mirrored ranges
-                for (i = 0; i < 4; i++)
-
-                  {
-                    if (eff_grouping_data.groupID[i][MCS_IN_GROUP] > 1)
-                      l_mirror_sizes[i] =
-                        (eff_grouping_data.groupID[i][MCS_SIZE] *
-                         eff_grouping_data.groupID[0][MCS_IN_GROUP]) / 2;
-
+                for (uint8_t i = 0; i < 4; i++)
+                {
+                    if (i_groupData.iv_data[i][MCS_IN_GROUP] > 1)
+                    {
+                        l_mirror_sizes[i] = 
+                            (i_groupData.iv_data[i][MCS_SIZE] *
+                             i_groupData.iv_data[0][MCS_IN_GROUP]) / 2;
+                    }
                     else
-
-                      {
+                    {
                         l_mirror_sizes[i] = 0;
-                      }
-                  }
-              }
-            l_mirror_sizes_ack[0] = eff_grouping_data.groupID[8][GROUP_SIZE];
-            l_mirror_sizes_ack[1] = eff_grouping_data.groupID[9][GROUP_SIZE];
-            l_mirror_sizes_ack[2] = eff_grouping_data.groupID[10][GROUP_SIZE];
-            l_mirror_sizes_ack[3] = eff_grouping_data.groupID[11][GROUP_SIZE];
-          }
+                    }
+                }
+            }
+            l_mirror_sizes_ack[0] = i_groupData.iv_data[8][GROUP_SIZE];
+            l_mirror_sizes_ack[1] = i_groupData.iv_data[9][GROUP_SIZE];
+            l_mirror_sizes_ack[2] = i_groupData.iv_data[10][GROUP_SIZE];
+            l_mirror_sizes_ack[3] = i_groupData.iv_data[11][GROUP_SIZE];
+        }
+
         mem_bases[0] = mem_bases[0] << 30;
         mem_bases[1] = mem_bases[1] << 30;
         mem_bases[2] = mem_bases[2] << 30;
@@ -1430,9 +1696,9 @@ extern "C"
         l_memory_sizes_ack[5] = l_memory_sizes_ack[5] << 30;
         l_memory_sizes_ack[6] = l_memory_sizes_ack[6] << 30;
         l_memory_sizes_ack[7] = l_memory_sizes_ack[7] << 30;
-        if (!M_valid)
 
-          {
+        if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+        {
             mirror_bases[0] = mirror_bases[0] << 30;
             mirror_bases[1] = mirror_bases[1] << 30;
             mirror_bases[2] = mirror_bases[2] << 30;
@@ -1445,483 +1711,523 @@ extern "C"
             l_mirror_sizes[1] = l_mirror_sizes[1] << 30;
             l_mirror_sizes[2] = l_mirror_sizes[2] << 30;
             l_mirror_sizes[3] = l_mirror_sizes[3] << 30;
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[0]: %016llx",
-                      l_mirror_sizes[0]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[1]: %016llx",
-                      l_mirror_sizes[1]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[2]: %016llx",
-                      l_mirror_sizes[2]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[3]: %016llx",
-                      l_mirror_sizes[3]);
+            FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[0]: 0x%016llx", l_mirror_sizes[0]);
+            FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[1]: 0x%016llx", l_mirror_sizes[1]);
+            FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[2]: 0x%016llx", l_mirror_sizes[2]);
+            FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[3]: 0x%016llx", l_mirror_sizes[3]);
             l_mirror_sizes_ack[0] = l_mirror_sizes_ack[0] << 30;
             l_mirror_sizes_ack[1] = l_mirror_sizes_ack[1] << 30;
             l_mirror_sizes_ack[2] = l_mirror_sizes_ack[2] << 30;
             l_mirror_sizes_ack[3] = l_mirror_sizes_ack[3] << 30;
-          }
-        ReturnCode ungroup_rc;
-        if (selective_mode == SELECTIVE_MODE)
+        }
 
-          {
-            if (htm_bar_size != 0 || occ_sandbox_size != 0)
-
-              {
-                FAPI_ERR
-                  ("Selective mode does not support the HTM and OCC SANDBOX BARS");
-
-                //    FAPI_SET_HWP_ERROR(ungroup_rc,RC_OPT_MEMMAP_ALLOC_ERR);
-                break;
-              }
-          }
-//------------------------------------------------------------------
-//  Defining HTM and OCC base address based on HTM/OCC bar size
-//
-//------------------------------------------------------------------
-        else if (selective_mode == NORMAL_MODE)
-
-          {
+        //------------------------------------------------------------------
+        // Defining HTM and OCC base address based on HTM/OCC bar size
+        //------------------------------------------------------------------
+        if (i_sysAttrs.iv_selectiveMode ==
+            fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+        {
             uint64_t total_size = 0;
             uint8_t memhole = 0;
-            for (i = 0; i < 8; i++)
-
-              {
+            for (uint8_t i = 0; i < 8; i++)
+            {
                 total_size += l_memory_sizes[i];
-                if (eff_grouping_data.groupID[i][ALT_VALID])
-                  {
+                if (i_groupData.iv_data[i][ALT_VALID])
+                {
                     memhole++;
-                  }
-              }
-            if ((total_size >= (htm_bar_size + occ_sandbox_size))
-                && ((htm_bar_size + occ_sandbox_size) > 0))
-
-              {
-                uint64_t other_bar_size = 0;
-                other_bar_size = htm_bar_size + occ_sandbox_size;
+                }
+            }
+            if ((total_size >=
+                 (io_procAttrs.iv_htmBarSize +
+                  io_procAttrs.iv_occSandboxSize)) &&
+                ((io_procAttrs.iv_htmBarSize +
+                  io_procAttrs.iv_occSandboxSize) > 0))
+            {
+                uint64_t other_bar_size = io_procAttrs.iv_htmBarSize +
+                                          io_procAttrs.iv_occSandboxSize;
                 uint64_t non_mirroring_size = total_size - other_bar_size;
                 uint64_t temp_size = 0;
                 uint8_t done = 0;
-                uint8_t j;
-                i = 0;
+                uint8_t j = 0;
+                uint8_t i = 0;
                 while (!done)
-
-                  {
-                    if ((temp_size <= non_mirroring_size)
-                        && (non_mirroring_size <=
+                {
+                    if ((temp_size <= non_mirroring_size) &&
+                        (non_mirroring_size <=
                             (temp_size += l_memory_sizes[i++])))
-
-                      {
+                    {
                         done = 1;
-                      }
-                  }
+                    }
+                }
                 j = i;
 
                 if (memhole)
-
-                  {
+                {
                     if (l_memory_sizes[j - 1] < other_bar_size)
-
-                      {
-                        FAPI_ERR (" MEMORY HTM/OCC BAR not possible ");
-                        FAPI_DBG (" TOTAL MEMORY %016llx",
-                                  l_memory_sizes[j - 1]);
+                    {
+                        FAPI_ERR("mss_eff_grouping: Memory HTM/OCC BAR not "
+                                 "possible (normal), Total Memory 0x%016llx",
+                                 l_memory_sizes[j - 1]);
+                        const uint64_t TOTAL_SIZE = l_memory_sizes[j - 1];
+                        const uint64_t & HTM_BAR_SIZE =
+                            io_procAttrs.iv_htmBarSize;
+                        const uint64_t & OCC_SANDBOX_BAR_SIZE =
+                            io_procAttrs.iv_occSandboxSize;
+                        const uint8_t & MIRROR_PLACEMENT_POLICY =
+                            i_sysAttrs.iv_selectiveMode;
+                        FAPI_SET_HWP_ERROR(rc,
+                            RC_MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE);
                         break;
-                      }
-
+                    }
                     else
-                      {
-                        l_memory_sizes[i - 1] =
-                          l_memory_sizes[i - 1] - (temp_size -
-                                                   non_mirroring_size);
-                      }
-                  }
-
+                    {
+                        l_memory_sizes[i - 1] = l_memory_sizes[i - 1]
+                            - (temp_size - non_mirroring_size);
+                    }
+                }
                 else
-                  {
-                    l_memory_sizes[i - 1] =
-                      l_memory_sizes[i - 1] - (temp_size -
-                                               non_mirroring_size);
+                {
+                    l_memory_sizes[i - 1] = l_memory_sizes[i - 1] - (temp_size
+                        - non_mirroring_size);
                     for (; i < 8; i++)
-                      {
+                    {
                         if (l_memory_sizes[i])
-                          l_memory_sizes[i] = 0;
-                      }
-                  }
-                if (htm_bar_size < occ_sandbox_size)
-
-                  {
-                    occ_sandbox_base =
-                      mem_bases[j - 1] + l_memory_sizes[j - 1];
-                    htm_bar_base = occ_sandbox_base + occ_sandbox_size;
-                  }
-
+                        {
+                            l_memory_sizes[i] = 0;
+                        }
+                    }
+                }
+                if (io_procAttrs.iv_htmBarSize < io_procAttrs.iv_occSandboxSize)
+                {
+                    occ_sandbox_base = mem_bases[j - 1] + l_memory_sizes[j - 1];
+                    htm_bar_base = occ_sandbox_base +
+                        io_procAttrs.iv_occSandboxSize;
+                }
                 else
-
-                  {
+                {
                     htm_bar_base = mem_bases[j - 1] + l_memory_sizes[j - 1];
-                    occ_sandbox_base = htm_bar_base + htm_bar_size;
-                  }
-                FAPI_DBG (" TOTAL MEMORY %016llx", total_size);
-                if (!M_valid)
-
-                  {
-                    FAPI_DBG ("  MIRRORING SIZE: %016llx & %d",
-                              l_mirror_sizes[j - 1], j);
-                    FAPI_DBG ("  Requitred MIRRORING SIZE: %016llx ",
-                              non_mirroring_size);
-                  }
-                FAPI_DBG ("  HTM_BASE : %016llx", htm_bar_base);
-                FAPI_DBG ("  OCC_BASE : %016llx", occ_sandbox_base);
-              }
-
-            else if ((total_size >= (htm_bar_size + occ_sandbox_size))
-                     && ((htm_bar_size + occ_sandbox_size) == 0))
-              {
-              }
-
+                    occ_sandbox_base = htm_bar_base + io_procAttrs.iv_htmBarSize;
+                }
+                FAPI_DBG("mss_eff_grouping: TOTAL MEMORY 0x%016llx", total_size);
+                if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+                {
+                    FAPI_DBG("mss_eff_grouping: MIRRORING SIZE: 0x%016llx & %d",
+                             l_mirror_sizes[j - 1], j);
+                    FAPI_DBG("mss_eff_grouping: Required MIRRORING SIZE: 0x%016llx ",
+                             non_mirroring_size);
+                }
+                FAPI_DBG("mss_eff_grouping: HTM_BASE : 0x%016llx", htm_bar_base);
+                FAPI_DBG("mss_eff_grouping: OCC_BASE : 0x%016llx",
+                         occ_sandbox_base);
+            }
+            else if ((total_size >=
+                     (io_procAttrs.iv_htmBarSize +
+                      io_procAttrs.iv_occSandboxSize)) &&
+                     ((io_procAttrs.iv_htmBarSize +
+                       io_procAttrs.iv_occSandboxSize) == 0))
+            {
+            }
             else
-
-              {
-                FAPI_ERR
-                  (" Required memory space for the HTM and OCC SANDBOX BARS is not available ");
-
-                // FAPI_SET_HWP_ERROR((ungroup_rc,RC_OPT_MEMMAP_ALLOC_ERR);
+            {
+                FAPI_ERR("mss_eff_grouping: Required memory space for the HTM "
+                         "and OCC SANDBOX BARS is not available (normal). "
+                         "Total Size 0x%016llx", total_size);
+                const uint64_t TOTAL_SIZE = total_size;
+                const uint64_t & HTM_BAR_SIZE = io_procAttrs.iv_htmBarSize;
+                const uint64_t & OCC_SANDBOX_BAR_SIZE =
+                    io_procAttrs.iv_occSandboxSize;
+                const uint8_t & MIRROR_PLACEMENT_POLICY =
+                    i_sysAttrs.iv_selectiveMode;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR);
                 break;
-              }
-          }
-
-        else if (selective_mode == FLIPPED_MODE)
-
-          {
+            }
+        }
+        else if (i_sysAttrs.iv_selectiveMode ==
+                 fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+        {
             uint64_t total_size = 0;
             uint8_t memhole = 0;
             uint8_t j = 0;
-            for (i = 0; i < 4; i++)
-
-              {
+            for (uint8_t i = 0; i < 4; i++)
+            {
                 total_size += l_mirror_sizes[i];
-                if (eff_grouping_data.groupID[i][ALT_VALID])
-                  {
+                if (i_groupData.iv_data[i][ALT_VALID])
+                {
                     memhole++;
-                  }
-              }
+                }
+            }
 
-            //if (total_size >= (htm_bar_size+occ_sandbox_size))
-            if ((total_size >= (htm_bar_size + occ_sandbox_size))
-                && ((htm_bar_size + occ_sandbox_size) > 0))
-
-              {
+            if ((total_size >=
+                 (io_procAttrs.iv_htmBarSize + io_procAttrs.iv_occSandboxSize)) &&
+                ((io_procAttrs.iv_htmBarSize + io_procAttrs.iv_occSandboxSize) >
+                 0))
+            {
                 uint64_t other_bar_size = 0;
-                other_bar_size = htm_bar_size + occ_sandbox_size;
+                other_bar_size = io_procAttrs.iv_htmBarSize +
+                    io_procAttrs.iv_occSandboxSize;
                 uint64_t non_mirroring_size = total_size - other_bar_size;
                 uint64_t temp_size = 0;
                 uint8_t done = 0;
-                i = 0;
+                uint8_t i = 0;
                 while (!done)
-
-                  {
+                {
                     if ((temp_size <= non_mirroring_size)
-                        && (non_mirroring_size <=
-                            (temp_size += l_mirror_sizes[i++])))
-
-                      {
+                        && (non_mirroring_size <= (temp_size
+                            += l_mirror_sizes[i++])))
+                    {
                         done = 1;
-                      }
-                  }
+                    }
+                }
                 j = i;
-
                 if (memhole)
-
-                  {
+                {
                     if (l_mirror_sizes[j - 1] < other_bar_size)
-
-                      {
-                        FAPI_ERR (" MEMORY HTM/OCC BAR not possible ");
-                        FAPI_DBG (" TOTAL MEMORY %016llx",
-                                  l_memory_sizes[j - 1]);
+                    {
+                        FAPI_ERR("mss_eff_grouping: Memory HTM/OCC BAR not "
+                                 "possible (flipped), Total Memory 0x%016llx",
+                                 l_memory_sizes[j - 1]);
+                        const uint64_t TOTAL_SIZE = l_memory_sizes[j - 1];
+                        const uint64_t & HTM_BAR_SIZE =
+                            io_procAttrs.iv_htmBarSize;
+                        const uint64_t & OCC_SANDBOX_BAR_SIZE =
+                            io_procAttrs.iv_occSandboxSize;
+                        const uint8_t & MIRROR_PLACEMENT_POLICY =
+                            i_sysAttrs.iv_selectiveMode;
+                        FAPI_SET_HWP_ERROR(rc,
+                            RC_MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE);
                         break;
-                      }
-
+                    }
                     else
-                      {
-                        l_mirror_sizes[i - 1] =
-                          l_mirror_sizes[i - 1] - (temp_size -
-                                                   non_mirroring_size);
-                      }
-                  }
-
+                    {
+                        l_mirror_sizes[i - 1] = l_mirror_sizes[i - 1]
+                            - (temp_size - non_mirroring_size);
+                    }
+                }
                 else
-                  {
-                    l_mirror_sizes[i - 1] =
-                      l_mirror_sizes[i - 1] - (temp_size -
-                                               non_mirroring_size);
+                {
+                    l_mirror_sizes[i - 1] = l_mirror_sizes[i - 1] - (temp_size
+                        - non_mirroring_size);
                     for (; i < 8; i++)
-                      {
+                    {
                         if (l_memory_sizes[i])
-                          l_memory_sizes[i] = 0;
-                      }
-                  }
-                if (htm_bar_size < occ_sandbox_size)
-
-                  {
-                    occ_sandbox_base =
-                      mirror_bases[j - 1] + l_mirror_sizes[j - 1];
-                    htm_bar_size = occ_sandbox_base + occ_sandbox_size;
-                  }
-
+                            l_memory_sizes[i] = 0;
+                    }
+                }
+                if (io_procAttrs.iv_htmBarSize < io_procAttrs.iv_occSandboxSize)
+                {
+                    occ_sandbox_base = mirror_bases[j - 1] +
+                        l_mirror_sizes[j - 1];
+                    io_procAttrs.iv_htmBarSize =
+                        occ_sandbox_base + io_procAttrs.iv_occSandboxSize;
+                }
                 else
-
-                  {
-                    htm_bar_base =
-                      mirror_bases[j - 1] + l_mirror_sizes[j - 1];
-                    occ_sandbox_base = htm_bar_base + htm_bar_size;
-                  }
-                FAPI_DBG (" TOTAL MEMORY %016llx", total_size);
-                FAPI_DBG ("  MIRRORING SIZE: %016llx & %d",
-                          l_mirror_sizes[j - 1], j);
-                FAPI_DBG ("  Requitred MIRRORING SIZE: %016llx ",
-                          non_mirroring_size);
-                FAPI_DBG ("  HTM_BASE : %016llx", htm_bar_base);
-                FAPI_DBG ("  OCC_BASE : %016llx", occ_sandbox_base);
-              }
-
-            else if ((total_size >= (htm_bar_size + occ_sandbox_size))
-                     && ((htm_bar_size + occ_sandbox_size) == 0))
-              {
-              }
-
-//
-//     Calling out No Required memory found for HTM/OCC bars
-//
+                {
+                    htm_bar_base = mirror_bases[j - 1] + l_mirror_sizes[j - 1];
+                    occ_sandbox_base = htm_bar_base + io_procAttrs.iv_htmBarSize;
+                }
+                FAPI_DBG(" TOTAL MEMORY 0x%016llx", total_size);
+                FAPI_DBG("  MIRRORING SIZE: 0x%016llx & %d",
+                         l_mirror_sizes[j - 1], j);
+                FAPI_DBG("  Required MIRRORING SIZE: 0x%016llx ",
+                         non_mirroring_size);
+                FAPI_DBG("  HTM_BASE : 0x%016llx", htm_bar_base);
+                FAPI_DBG("  OCC_BASE : 0x%016llx", occ_sandbox_base);
+            }
+            else if ((total_size >=
+                (io_procAttrs.iv_htmBarSize + io_procAttrs.iv_occSandboxSize)) &&
+                ((io_procAttrs.iv_htmBarSize + io_procAttrs.iv_occSandboxSize) == 0))
+            {
+            }
             else
-              {
-                FAPI_ERR
-                  (" Required memory space for the HTM and OCC SANDBOX BARS is not available ");
-
-                //  FAPI_SET_HWP_ERROR((ungroup_rc,RC_OPT_MEMMAP_ALLOC_ERR);
+            {
+                FAPI_ERR("mss_eff_grouping: Required memory space for the HTM "
+                         "and OCC SANDBOX BARS is not available (flipped). "
+                         "Total Size 0x%016llx", total_size);
+                const uint64_t TOTAL_SIZE = total_size;
+                const uint64_t & HTM_BAR_SIZE = io_procAttrs.iv_htmBarSize;
+                const uint64_t & OCC_SANDBOX_BAR_SIZE =
+                    io_procAttrs.iv_occSandboxSize;
+                const uint8_t & MIRROR_PLACEMENT_POLICY =
+                    i_sysAttrs.iv_selectiveMode;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR);
                 break;
-              }
-          }
+            }
+        }
 
-//--------------------------------------------------------------------------------
-//  Setting up Calculated Attributes in the mss_eff_grouping procedure
-//--------------------------------------------------------------------------------
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[0]: %016llx", mem_bases[0]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[1]: %016llx", mem_bases[1]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[2]: %016llx", mem_bases[2]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[3]: %016llx", mem_bases[3]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[4]: %016llx", mem_bases[4]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[5]: %016llx", mem_bases[5]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[6]: %016llx", mem_bases[6]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES[7]: %016llx", mem_bases[7]);
-        rc = FAPI_ATTR_SET (ATTR_PROC_MEM_BASES, &i_target, mem_bases);
-        if (!rc.ok ())
-
-          {
-            FAPI_ERR ("Error writing ATTR_PROC_MEM_BASES");
+        //----------------------------------------------------------------------
+        //  Setting up Calculated Attributes
+        //----------------------------------------------------------------------
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            FAPI_INF("mss_eff_grouping: ATTR_PROC_MEM_BASES[%u]: 0x%016llx",
+                     i, mem_bases[i]);
+        }
+        rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASES, &i_target, mem_bases);
+        if (rc)
+        {
+            FAPI_ERR("Error writing ATTR_PROC_MEM_BASES");
             break;
-          }
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[0]: %016llx", mem_bases_ack[0]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[1]: %016llx", mem_bases_ack[1]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[2]: %016llx", mem_bases_ack[2]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[3]: %016llx", mem_bases_ack[3]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[4]: %016llx", mem_bases_ack[4]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[5]: %016llx", mem_bases_ack[5]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[6]: %016llx", mem_bases_ack[6]);
-        FAPI_DBG ("  ATTR_PROC_MEM_BASES_ACK[7]: %016llx", mem_bases_ack[7]);
-        rc =
-          FAPI_ATTR_SET (ATTR_PROC_MEM_BASES_ACK, &i_target, mem_bases_ack);
-        if (!rc.ok ())
+        }
 
-          {
-            FAPI_ERR ("Error writing ATTR_PROC_MEM_BASES_ACK");
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            FAPI_INF("mss_eff_grouping: ATTR_PROC_MEM_BASES_ACK[%u]: 0x%016llx",
+                     i, mem_bases_ack[i]);
+        }
+        rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASES_ACK, &i_target, mem_bases_ack);
+        if (rc)
+        {
+            FAPI_ERR("Error writing ATTR_PROC_MEM_BASES_ACK");
             break;
-          }
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[0]: %016llx", l_memory_sizes[0]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[1]: %016llx", l_memory_sizes[1]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[2]: %016llx", l_memory_sizes[2]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[3]: %016llx", l_memory_sizes[3]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[4]: %016llx", l_memory_sizes[4]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[5]: %016llx", l_memory_sizes[5]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[6]: %016llx", l_memory_sizes[6]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES[7]: %016llx", l_memory_sizes[7]);
-        rc = FAPI_ATTR_SET (ATTR_PROC_MEM_SIZES, &i_target, l_memory_sizes);
-        if (!rc.ok ())
+        }
 
-          {
-            FAPI_ERR ("Error writing ATTR_PROC_MEM_SIZES");
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            FAPI_INF("mss_eff_grouping: ATTR_PROC_MEM_SIZES[%u]: 0x%016llx",
+                     i, l_memory_sizes[i]);
+        }
+        rc = FAPI_ATTR_SET(ATTR_PROC_MEM_SIZES, &i_target, l_memory_sizes);
+        if (rc)
+        {
+            FAPI_ERR("Error writing ATTR_PROC_MEM_SIZES");
             break;
-          }
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[0]: %016llx",
-                  l_memory_sizes_ack[0]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[1]: %016llx",
-                  l_memory_sizes_ack[1]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[2]: %016llx",
-                  l_memory_sizes_ack[2]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[3]: %016llx",
-                  l_memory_sizes_ack[3]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[4]: %016llx",
-                  l_memory_sizes_ack[4]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[5]: %016llx",
-                  l_memory_sizes_ack[5]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[6]: %016llx",
-                  l_memory_sizes_ack[6]);
-        FAPI_DBG ("  ATTR_PROC_MEM_SIZES_ACK[7]: %016llx",
-                  l_memory_sizes_ack[7]);
-        rc =
-          FAPI_ATTR_SET (ATTR_PROC_MEM_SIZES_ACK, &i_target,
-                         l_memory_sizes_ack);
-        if (!rc.ok ())
+        }
 
-          {
-            FAPI_ERR ("Error writing ATTR_PROC_MEM_SIZES_ACK");
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            FAPI_INF("mss_eff_grouping: ATTR_PROC_MEM_SIZES_ACK[%u]: 0x%016llx",
+                     i, l_memory_sizes_ack[i]);
+        }
+        rc = FAPI_ATTR_SET(ATTR_PROC_MEM_SIZES_ACK, &i_target,
+                           l_memory_sizes_ack);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error writing ATTR_PROC_MEM_SIZES_ACK");
             break;
-          }
-        rc =
-          FAPI_ATTR_SET (ATTR_MSS_MCS_GROUP_32, &i_target,
-                         eff_grouping_data.groupID);
-        if (!rc.ok ())
+        }
 
-          {
-            FAPI_ERR ("Error writing ATTR_MSS_MCS_GROUP");
+        rc = FAPI_ATTR_SET(ATTR_MSS_MCS_GROUP_32, &i_target,
+                           i_groupData.iv_data);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error writing ATTR_MSS_MCS_GROUP");
             break;
-          }
-        if (!M_valid)
+        }
 
-          {
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[0]: %016llx",
-                      mirror_bases[0]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[1]: %016llx",
-                      mirror_bases[1]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[2]: %016llx",
-                      mirror_bases[2]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[3]: %016llx",
-                      mirror_bases[3]);
-            rc =
-              FAPI_ATTR_SET (ATTR_PROC_MIRROR_BASES, &i_target, mirror_bases);
-            if (!rc.ok ())
-
-              {
-                FAPI_ERR ("Error writing ATTR_PROC_MIRROR_BASES");
+        if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+        {
+            for (uint8_t i = 0; i < 4; i++)
+            {
+                FAPI_INF("mss_eff_grouping: ATTR_PROC_MIRROR_BASES[%u]: "
+                         "0x%016llx", i, mirror_bases[i]);
+            }
+            rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_BASES, &i_target, mirror_bases);
+            if (rc)
+            {
+                FAPI_ERR("Error writing ATTR_PROC_MIRROR_BASES");
                 break;
-              }
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[0]: %016llx",
-                      mirror_bases_ack[0]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[1]: %016llx",
-                      mirror_bases_ack[1]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[2]: %016llx",
-                      mirror_bases_ack[2]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_BASES[3]: %016llx",
-                      mirror_bases_ack[3]);
-            rc =
-              FAPI_ATTR_SET (ATTR_PROC_MIRROR_BASES_ACK, &i_target,
-                             mirror_bases_ack);
-            if (!rc.ok ())
+            }
 
-              {
-                FAPI_ERR ("Error writing ATTR_PROC_MIRROR_BASES_ACK");
+            for (uint8_t i = 0; i < 4; i++)
+            {
+                FAPI_INF("mss_eff_grouping: ATTR_PROC_MIRROR_BASES_ACK[%u]: "
+                         "0x%016llx", i, mirror_bases_ack[i]);
+            }
+            rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_BASES_ACK, &i_target,
+                               mirror_bases_ack);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error writing ATTR_PROC_MIRROR_BASES_ACK");
                 break;
-              }
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[0]: %016llx",
-                      l_mirror_sizes[0]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[1]: %016llx",
-                      l_mirror_sizes[1]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[2]: %016llx",
-                      l_mirror_sizes[2]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES[3]: %016llx",
-                      l_mirror_sizes[3]);
-            rc =
-              FAPI_ATTR_SET (ATTR_PROC_MIRROR_SIZES, &i_target,
-                             l_mirror_sizes);
-            if (!rc.ok ())
+            }
 
-              {
-                FAPI_ERR ("Error writing ATTR_PROC_MIRROR_SIZES");
+            for (uint8_t i = 0; i < 4; i++)
+            {
+                FAPI_INF("mss_eff_grouping: ATTR_PROC_MIRROR_SIZES[%u]: "
+                         "0x%016llx", i, l_mirror_sizes[i]);
+            }
+            rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_SIZES, &i_target,
+                               l_mirror_sizes);
+            if (rc)
+            {
+                FAPI_ERR("Error writing ATTR_PROC_MIRROR_SIZES");
                 break;
-              }
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES_ACK[0]: %016llx",
-                      l_mirror_sizes_ack[0]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES_ACK[1]: %016llx",
-                      l_mirror_sizes_ack[1]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES_ACK[2]: %016llx",
-                      l_mirror_sizes_ack[2]);
-            FAPI_DBG ("  ATTR_PROC_MIRROR_SIZES_ACK[3]: %016llx",
-                      l_mirror_sizes_ack[3]);
-            rc =
-              FAPI_ATTR_SET (ATTR_PROC_MIRROR_SIZES_ACK, &i_target,
-                             l_mirror_sizes_ack);
-            if (!rc.ok ())
+            }
 
-              {
-                FAPI_ERR ("Error writing ATTR_PROC_MIRROR_SIZES_ACK");
+            for (uint8_t i = 0; i < 4; i++)
+            {
+                FAPI_INF("mss_eff_grouping: ATTR_PROC_MIRROR_SIZES_ACK[%u]: "
+                         "0x%016llx", i, l_mirror_sizes_ack[i]);
+            }
+            rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_SIZES_ACK, &i_target,
+                               l_mirror_sizes_ack);
+            if (rc)
+            {
+                FAPI_ERR("Error writing ATTR_PROC_MIRROR_SIZES_ACK");
                 break;
-              }
-          }
-        rc =
-          FAPI_ATTR_SET (ATTR_PROC_HTM_BAR_BASE_ADDR, &i_target,
-                         htm_bar_base);
-        if (!rc.ok ())
+            }
+        }
 
-          {
-            FAPI_ERR ("Error writing ATTR_PROC_HTM_BAR_BASE_ADDR");
+        FAPI_INF("mss_eff_grouping: ATTR_PROC_HTM_BAR_BASE_ADDR: 0x%016llx",
+                 htm_bar_base);
+        rc = FAPI_ATTR_SET(ATTR_PROC_HTM_BAR_BASE_ADDR, &i_target,
+                            htm_bar_base);
+        if (rc)
+        {
+            FAPI_ERR("Error writing ATTR_PROC_HTM_BAR_BASE_ADDR");
             break;
-          }
-        rc =
-          FAPI_ATTR_SET (ATTR_PROC_OCC_SANDBOX_BASE_ADDR, &i_target,
-                         occ_sandbox_base);
-        if (!rc.ok ())
+        }
 
-          {
-            FAPI_ERR ("Error writing  ATTR_PROC_OCC_SANDBOX_BASE_ADDR");
+        FAPI_INF("mss_eff_grouping: ATTR_PROC_OCC_SANDBOX_BASE_ADDR: 0x%016llx",
+                 occ_sandbox_base);
+        rc = FAPI_ATTR_SET(ATTR_PROC_OCC_SANDBOX_BASE_ADDR, &i_target,
+                           occ_sandbox_base);
+        if (rc)
+        {
+            FAPI_ERR("Error writing  ATTR_PROC_OCC_SANDBOX_BASE_ADDR");
             break;
-          }
-      }
-    while (0);
+        }
+    } while (0);
+
     return rc;
-  }
-//--------------------------------------------------------------------------
-//     This function is used for identifying no of 1s in memory size
-//--------------------------------------------------------------------------
-  uint8_t mss_eff_grouping_recursion (uint32_t number)
-  {
-    uint32_t temp = number;
-    uint8_t count = 0;
-    uint8_t buffersize = 0;
-    while (1)
+}
 
-      {
-        if (temp % 2)
+//------------------------------------------------------------------------------
+// mss_eff_grouping HW Procedure
+//------------------------------------------------------------------------------
+fapi::ReturnCode mss_eff_grouping(const fapi::Target & i_target,
+    std::vector<fapi::Target> &i_associated_centaurs)
+{
+    fapi::ReturnCode rc;
+    FAPI_INF("mss_eff_grouping: Start, chip %s", i_target.toEcmdString());
 
-          {
-            count++;
-            buffersize++;
-            temp = temp / 2;
-            FAPI_INF (" %d buffer Size %d*Count %d\n", number, buffersize,
-                      count);
-          }
-
-        else
-
-          {
-            temp = temp / 2;
-            buffersize++;
-          }
-        if (temp == 0 || temp == 1)
-
-          {
-            if (temp)
-
-              {
-                count++;
-              }
-            buffersize++;
-            FAPI_INF (" %d buffer Size %d*Count %d\n", number, buffersize,
-                      count);
+    do
+    {
+        // Fill in the EffGroupingMemInfo structure with memory information
+        EffGroupingMemInfo memInfo;
+        rc = memInfo.getMemInfo(i_associated_centaurs);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error getting mem info");
             break;
-          }
-      }
-    return count;
-  }
+        }
 
-//#ifdef FAPIECMD
-}                               //end extern C
+        // Get the necessary system attributes
+        EffGroupingSysAttrs sysAttrs;
+        rc = sysAttrs.getAttrs();
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error getting system attributes");
+            break;
+        }
 
-//#endif
+        // Get the necessary processor chip attributes
+        EffGroupingProcAttrs procAttrs;
+        rc = procAttrs.getAttrs(i_target);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error getting proc chip attributes");
+            break;
+        }
+
+        // Check that the system and processor chip attributes are valid
+        rc = grouping_checkValidAttributes(sysAttrs, procAttrs);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error validating sys/proc attributes");
+            break;
+        }
+
+        // Create a EffGroupingData structure
+        EffGroupingData groupData;
+
+        // Attempt to Group the MCSs. All of the grouping functions are called
+        // if allowed, if MCSs cannot be grouped by one function they may be
+        // grouped by the subsequent functions
+        if (procAttrs.iv_groupsAllowed & MCS_GROUP_8)
+        {
+            grouping_group8McsPerGroup(memInfo, groupData);
+        }
+        if (procAttrs.iv_groupsAllowed & MCS_GROUP_4)
+        {
+            grouping_group4McsPerGroup(memInfo, groupData);
+        }
+        if (procAttrs.iv_groupsAllowed & MCS_GROUP_2)
+        {
+            grouping_group2McsPerGroup(memInfo, groupData);
+        }
+        if (procAttrs.iv_groupsAllowed & MCS_GROUP_1)
+        {
+            // Note that grouping_checkValidAttributes() ensures that this is
+            // only in checkerboard mode
+            grouping_group1McsPerGroup(memInfo, groupData);
+        }
+
+        // Find the ungrouped MCSs and deconfigure their associated membuf chips
+        rc = grouping_findUngroupedMCSs(memInfo, groupData);
+        if (rc)
+        {
+            // Ungrouped MCSs were found, return the error
+            FAPI_ERR("mss_eff_grouping: Error from grouping_findUngroupedMCSs");
+            break;
+        }
+
+        // Calculate Alt Memory
+        grouping_calcAltMemory(groupData);
+
+        // Sort Groups from high memory size to low
+        grouping_sortGroups(groupData);
+
+        // Calculate the total non mirrored size
+        for (uint8_t pos = 0; pos < groupData.iv_numGroups; pos++)
+        {
+            groupData.iv_totalSizeNonMirr += groupData.iv_data[pos][GROUP_SIZE];
+        }
+        FAPI_INF("mss_eff_grouping: Total non-mirrored size %u GB",
+                 groupData.iv_totalSizeNonMirr);
+
+        if (!sysAttrs.iv_enhancedNoMirrorMode)
+        {
+            // Calculate base and alt-base addresses
+            rc = grouping_calcMirrorMemory(i_target, procAttrs, groupData);
+            if (rc)
+            {
+                FAPI_ERR("mss_eff_grouping: Error from grouping_calcMirrorMemory");
+                break;
+            }
+        }
+        else
+        {
+            // ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING is true
+            // Calculate base and alt-base addresses
+            grouping_calcNonMirrorMemory(procAttrs, groupData);
+        }
+
+        // Set the ATTR_MSS_MEM_MC_IN_GROUP attribute
+        rc = grouping_setATTR_MSS_MEM_MC_IN_GROUP(i_target, groupData);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error from grouping_setATTR_MSS_MEM_MC_IN_GROUP");
+            break;
+        }
+
+        // Trace a summary of the Grouping Data
+        grouping_traceData(sysAttrs, groupData);
+
+        // Set Memory Base and Size FAPI Attributes
+        rc = grouping_setBaseSizeAttrs(i_target, sysAttrs, procAttrs,
+                                       groupData);
+        if (rc)
+        {
+            FAPI_ERR("mss_eff_grouping: Error from grouping_setBaseSizeAttrs");
+            break;
+        }
+    } while (0);
+
+    FAPI_INF("mss_eff_grouping: End");
+    return rc;
+}
+
+} //end extern C

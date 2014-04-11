@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,35 +21,144 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_eff_grouping.xml,v 1.2 2013/06/19 21:33:10 bellows Exp $ -->
+<!-- $Id: memory_mss_eff_grouping.xml,v 1.3 2014/04/10 18:51:55 jdsloat Exp $ -->
 <!-- For file ../../ipl/fapi/mss_eff_grouping.C -->
 
-<!-- Original Source for RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE memory_errors.xml -->
 <hwpError>
-    <rc>RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
-    <description>FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. OR ENABLE CHECKER BOARD, TO SUPPORT '1MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
-    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
+    <rc>RC_MSS_EFF_CONFIG_MIRROR_DISABLED</rc>
+    <description>
+        mss_eff_grouping found that mirroring is disabled but mirror placement
+        policy is selective or  flipped. Firmware error
+        - ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING is true
+        - ATTR_MEM_MIRROR_PLACEMENT_POLICY is SELECTIVE or FLIPPED
+    </description>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
 </hwpError>
 
-<!-- Original Source for RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE memory_errors.xml -->
 <hwpError>
-    <rc>RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
-    <description>FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
-    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
+    <rc>RC_MSS_EFF_CONFIG_INTERLEAVE_MODE_INVALID_MCS_PER_GROUP</rc>
+    <description>
+        mss_eff_grouping found that ATTR_ALL_MCS_IN_INTERLEAVING_GROUP
+        indicates interleaving mode. but ATTR_MSS_INTERLEAVE_ENABLE does not
+        contain a valid (>1) MCS per group number 
+    </description>
+    <ffdc>ALL_MCS_IN_INTERLEAVING_GROUP</ffdc>
+    <ffdc>MSS_INTERLEAVE_ENABLE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
 </hwpError>
 
-<!-- Original Source for RC_MSS_UNABLE_TO_GROUP_SUMMARY memory_errors.xml -->
 <hwpError>
-    <rc>RC_MSS_UNABLE_TO_GROUP_SUMMARY</rc>
-    <description>MCS COULD NOT BE GROUPED.  SEE PREVIOUS ERROR MESSAGES FOR WHICH MCS HAS BEEN RC_MSS_UNABLE_TO_GROUP_MCS</description>
+    <rc>RC_MSS_EFF_CONFIG_CHECKERBOARD_MODE_INVALID_MCS_PER_GROUP</rc>
+    <description>
+        mss_eff_grouping found that ATTR_ALL_MCS_IN_INTERLEAVING_GROUP
+        indicates checkerboard mode. but ATTR_MSS_INTERLEAVE_ENABLE does not
+        contain a valid (>=1) MCS per group number 
+    </description>
+    <ffdc>ALL_MCS_IN_INTERLEAVING_GROUP</ffdc>
+    <ffdc>MSS_INTERLEAVE_ENABLE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
 </hwpError>
 
-<!-- Original Source for RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS memory_errors.xml -->
 <hwpError>
-    <rc>RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
-    <description>MIRROR BASE ADDRESS OVERLAPS WITH MEMORY BASE ADDRESS.</description>
-    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
+    <rc>RC_MSS_EFF_GROUPING_SELCTIVE_MODE_HTM_OCC_BAR</rc>
+    <description>
+        mss_eff_grouping found that there is an HTM or OCC Sandbox bar in
+        selective mode. This is not allowed
+        - ATTR_MEM_MIRROR_PLACEMENT_POLICY is SELECTIVE
+    </description>
+    <ffdc>HTM_BAR_SIZE</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
 </hwpError>
 
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_MCS</rc>
+    <description>
+        mss_eff_grouping found an MCS that could not be grouped.
+        This is a memory plugging error. Refer to memory plugging rules.
+        The attached Memory Buffer Chip is deconfigured as a result
+    </description>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>MEMBUF</target>
+    </deconfigure>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP</rc>
+    <description>
+        mss_eff_grouping found that one or more MCS could not be grouped.
+        Other errors have been logged for each MCS to deconfigure their
+        associated membuf chip and callout the MEMORY_PLUGGING_ERROR procedure.
+    </description>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
+    <description>
+        mss_eff_grouping found that the base address overlaps with the
+        mirror base address
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>MEM_BASE_ADDR</ffdc>
+    <ffdc>MIRROR_BASE_ADDR</ffdc>
+    <ffdc>SIZE_NON_MIRROR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR</rc>
+    <description>
+        mss_eff_grouping found that there is not enough space available for
+        the HTM and OCC Sandbox bars
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>HTM_BAR_SIZE</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE</rc>
+    <description>
+        mss_eff_grouping found that the HTM and OCC Sandbox bars are not
+        possible
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>HTM_BAR_SIZE</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
 
 </hwpErrors>
