@@ -590,19 +590,28 @@ void load_hbrt_image(uint64_t& io_address)
 
 errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 {
-    // Nothing to do for small trees currently.
-    if (i_smallTree) { return NULL; }
-
     errlHndl_t errhdl = NULL;
 
     dtOffset_t rootNode = i_dt->findNode("/");
 
-    /* Add compatibility node */
-    i_dt->addPropertyString(rootNode, "compatible", "ibm,powernv");
+    //Common settings
+    /* Define supported power states -- options:
+                         nap, deep-sleep, fast-sleep, winkle*/
+    const char* pmode_compatStrs[] = {"nap", "winkle", NULL};
+    i_dt->addPropertyStrings(rootNode, "ibm,enabled-idle-states",
+                             pmode_compatStrs);
 
-    /* Add system model node */
-    //TODO RTC:88056 - store model type in attributes?
-    i_dt->addPropertyString(rootNode, "model", "rhesus");
+    // Nothing to do for small trees currently.
+    if (!i_smallTree)
+    {
+
+        /* Add compatibility node */
+        i_dt->addPropertyString(rootNode, "compatible", "ibm,powernv");
+
+        /* Add system model node */
+        //TODO RTC:88056 - store model type in attributes?
+        i_dt->addPropertyString(rootNode, "model", "rhesus");
+    }
 
     return errhdl;
 }
