@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_init.C,v 1.41 2014/04/03 20:29:13 cmolsen Exp $
+// $Id: p8_pmc_init.C,v 1.42 2014/04/10 21:12:22 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1670,8 +1670,9 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target, bool i_dcm )
         }
 
         e_rc  = data.insertFromRight(zero , 0  ,1); //HW_PSTATE_MODE
-        e_rc |= data.insertFromRight(zero , 1  ,1); //FW_PSTATE_AUCTION_MODE
-        e_rc |= data.insertFromRight(one  , 2  ,1); //FW_PSTATE_MODE
+        e_rc |= data.insertFromRight(zero , 1  ,1); //FW_PSTATE_AUCTI
+        e_rc |= data.insertFromRight(one  , 2  ,1); //FW_PSTATE_MODEON_MODE
+        e_rc |= data.insertFromRight(one  , 9  ,1); //ENABLE_PSTATE_STEPPING (hack for PSS miss)
         e_rc |= data.insertFromRight(zero , 13 ,1); //SAFE_MODE_WITHOUT_SPIVID
         if (e_rc)
         {
@@ -2647,6 +2648,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pmc_init.C,v $
+Revision 1.42  2014/04/10 21:12:22  stillgs
+Per SW256701, hardcode the enablement of Pstate Stepping in PMC Mode reg for GA1
+
 Revision 1.41  2014/04/03 20:29:13  cmolsen
 Removed three bool variables that were set only but not used.
 
