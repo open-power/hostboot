@@ -1156,7 +1156,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p$proc") &&
                 ($Fsis[$j][FSI_TARGET_TYPE_FIELD] eq "pu") &&
-                (lc($Fsis[$j][FSI_SLAVE_PORT_FIELD]) eq "fsi_slave0") &&
+                (lc($Fsis[$j][FSI_MASTERPOS_FIELD]) eq "0") &&
                 (lc($Fsis[$j][FSI_TYPE_FIELD]) eq "hub master") )
             {
                 @fsi = @{@Fsis[$j]};
@@ -1169,7 +1169,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             if (($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p$proc") &&
                 ($Fsis[$j][FSI_TARGET_TYPE_FIELD] eq "pu") &&
-                (lc($Fsis[$j][FSI_SLAVE_PORT_FIELD]) eq "fsi_slave1") &&
+                (lc($Fsis[$j][FSI_MASTERPOS_FIELD]) eq "1") &&
                 (lc($Fsis[$j][FSI_TYPE_FIELD]) eq "hub master") )
             {
                 @altfsi = @{@Fsis[$j]};

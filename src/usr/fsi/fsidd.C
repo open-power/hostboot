@@ -498,14 +498,44 @@ errlHndl_t FsiDD::initializeHardware()
                     else
                     {
                         FsiChipInfo_t info2 = getFsiInfo(info.master);
-                        remote_cmfsi[info2.port][info.port].info = info;
-                        remote_cmfsi[info2.port][info.port].targ = *t_itr;
+                        if( info2.master == NULL )
+                        {
+                            TRACFCOMP( g_trac_fsi, "Problem with attribute data for master %.8X for slave %.8X", TARGETING::get_huid(info.master), TARGETING::get_huid(*t_itr) );
+                            /*@
+                             * @errortype
+                             * @moduleid     FSI::MOD_FSIDD_INITIALIZEHARDWARE
+                             * @reasoncode   FSI::RC_BAD_ATTRIBUTES
+                             * @userdata1[00:31]  Slave HUID
+                             * @userdata1[32:63]  Slave FSI LinkId
+                             * @userdata2[00:31]  Master HUID
+                             * @userdata2[32:63]  Master FSI LinkId
+                             * @devdesc      FsiDD::initializeHardware>
+                             *   Unexpected attribute data for remote FSI link
+                             */
+                            l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        FSI::MOD_FSIDD_INITIALIZEHARDWARE,
+                                        FSI::RC_BAD_ATTRIBUTES,
+                                        TWO_UINT32_TO_UINT64(
+                                           TARGETING::get_huid(*t_itr),
+                                           info.linkid.id),
+                                        TWO_UINT32_TO_UINT64(
+                                           TARGETING::get_huid(info.master),
+                                           info2.linkid.id));
+                            break;
+                        }
+                        else
+                        {
+                            remote_cmfsi[info2.port][info.port].info = info;
+                            remote_cmfsi[info2.port][info.port].targ = *t_itr;
+                        }
                     }
                 }
             }
 
             ++t_itr;
         }
+        if( l_err ) { break; }
 
         // Cleanup any initial error states
         l_err = resetPib2Opb( iv_master );

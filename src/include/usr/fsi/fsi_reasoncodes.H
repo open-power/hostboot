@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,6 +40,7 @@ namespace FSI
         MOD_FSIDD_GENFULLFSIADDR      = 0x09, /**< fsidd.C : FsiDD::genFullFsiAddr */
         MOD_FSIDD_CHECKFORERRORS      = 0x0A, /**< fsidd.C : FsiDD::checkForErrors */
         MOD_FSIDD_VERIFYPRESENT       = 0x0B, /**< fsidd.C : FsiDD::verifyPresent */
+        MOD_FSIDD_INITIALIZEHARDWARE  = 0x0C, /**< fsidd.C : FsiDD::initializeHardware */
 
         MOD_FSIPRES_PROCPRESENCEDETECT  = 0x20, /**< fsipres.C : procPresenceDetect */
         MOD_FSIPRES_MEMBPRESENCEDETECT  = 0x21, /**< fsipres.C : membPresenceDetect */
@@ -65,6 +66,7 @@ namespace FSI
         RC_FSI_MVPD_MISMATCH         = FSI_COMP_ID | 0x0F,
         RC_FSI_CVPD_MISMATCH         = FSI_COMP_ID | 0x10,
         RC_ERROR_IN_MAEB             = FSI_COMP_ID | 0x11,
+        RC_BAD_ATTRIBUTES            = FSI_COMP_ID | 0x12,
     };
 
     enum UserDetailsTypes
