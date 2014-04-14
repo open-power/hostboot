@@ -955,9 +955,9 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
             {
                if(TARGETING::is_sapphire_load())
                {
-                   o_pcieBarBase[u][0] = SAPPHIRE_PCIE_BAR0_BASE |
+                   o_pcieBarBase[u][0] = SAPPHIRE_PCIE_BAR0_BASE +
                                      (l_pciMem64[u] & PCIE_BAR0_OFFSET_MASK);
-                   o_pcieBarBase[u][1] = SAPPHIRE_PCIE_BAR1_BASE |
+                   o_pcieBarBase[u][1] = SAPPHIRE_PCIE_BAR1_BASE +
                                      (l_pciMem32[u] & PCIE_BAR1_OFFSET_MASK);
                }
                else
@@ -968,7 +968,8 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
 
                o_pcieBarBase[u][2] = l_phbRegs[u];
 
-               FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Unit %d : %p %p %p",
+               FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Chip %x Unit %d : %p %p %p",
+                         TARGETING::get_huid(l_pProcTarget),
                          u,
                          o_pcieBarBase[u][0],
                          o_pcieBarBase[u][1],
