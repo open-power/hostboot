@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -557,6 +557,15 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
     }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
+
+    if (l_errl)
+    {
+        // Create IStep error log and cross ref error that occurred
+        l_StepError.addErrorDetails( l_errl );
+
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
 
     // delete working buffers
     if( l_rs4_tmp ) { free(l_rs4_tmp); }
