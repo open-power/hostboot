@@ -325,14 +325,15 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_setup_unmask_lock(const fapi::Target & i_t
                     break;
                 }
 
-                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
-                    i_target,
-                    PCIE_CHIPLET_0x09000000);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
-                    break;
-                }
+//TODO: Temporarily undo this unmask for Brazos until Joe McGill fixes SW255565 
+//                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
+//                    i_target,
+//                    PCIE_CHIPLET_0x09000000);
+//                if (!rc.ok())
+//                {
+//                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
+//                    break;
+//                }
 
                 FAPI_INF("Done setting up PCIE PLL. ");
 
