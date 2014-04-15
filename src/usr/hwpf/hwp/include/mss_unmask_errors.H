@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_initialization/mss_thermal_init/mss_unmask_errors.H $ */
+/* $Source: src/usr/hwpf/hwp/include/mss_unmask_errors.H $                */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.H,v 1.1 2012/09/05 21:04:20 gollub Exp $
+// $Id: mss_unmask_errors.H,v 1.2 2014/04/09 19:49:26 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -29,6 +29,9 @@
 // Version:|   Date:  | Author: | Comment:
 //---------|----------|---------|-----------------------------------------------
 //   1.1   | 09/05/12 | gollub  | Created
+//   1.2   |07-APR-14 | gollub  | Added mss_unmask_pervasive_errors
+//         |          |         | Version was set back from 1.2 to 1.1 when I moved from procedures/ipl/fapi to procedures/
+//   1.2   |09-APR-14 | gollub  | Checked in a second time just to get version to 1.2
 
 #ifndef _MSS_UNMASK_ERRORS_H
 #define _MSS_UNMASK_ERRORS_H
@@ -54,6 +57,28 @@
 
 
 
+//------------------------------------------------------------------------------
+// mss_unmask_pervasive_errors
+//------------------------------------------------------------------------------
+
+
+/**
+ * @brief  To be called at the end of cen_mem_startclocks.C
+ *         Sets action regs and mask settings for pervasive errors to their 
+ *         runtime settings.
+ *
+ * @param  i_target         Centaur target
+ * @param  i_bad_rc         If cen_mem_startclocks.C already has a bad rc
+ *                          before it calls this function, we pass it in as 
+ *                          i_bad_rc. If this function gets it's own bad local 
+ *                          l_rc, i_bad_rc will be commited, and l_rc will be 
+ *                          passed back as return value. Else if no l_rc, 
+ *                          i_bad_rc will be passed back as return value.
+ * @return Non-SUCCESS if i_bad_rc Non_SUCCESS, or if internal function fails, 
+ *         SUCCESS otherwise.
+ */
+fapi::ReturnCode mss_unmask_pervasive_errors( const fapi::Target & i_target,
+                                              fapi::ReturnCode i_bad_rc );
 
 
 
@@ -63,12 +88,12 @@
 
 
 /**
- * @brief  To be called at the end of proc_cen_set_inband_addr.C
+ * @brief  To be called at the end of proc_cen_framelock.C
  *         Sets action regs and mask settings for inband errors to their 
  *         runtime settings.
  *
  * @param  i_target         Centaur target
- * @param  i_bad_rc         If proc_cen_set_inband_addr.C already has a bad rc
+ * @param  i_bad_rc         If proc_cen_framelock.C already has a bad rc
  *                          before it calls this function, we pass it in as 
  *                          i_bad_rc. If this function gets it's own bad local 
  *                          l_rc, i_bad_rc will be commited, and l_rc will be 

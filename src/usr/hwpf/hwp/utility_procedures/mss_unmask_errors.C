@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.6 2014/03/11 03:07:42 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.8 2014/04/08 16:15:56 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -38,6 +38,32 @@
 //         |          |         | to use cmd complete attention instead.
 //   1.5   | 10/31/13 | gollub  | For DD1 use MBSPA[8], for DD2 using MBSPA[0].
 //   1.6   | 10/03/14 | gollub  | Unmkask MBS_FIR_REG[15]: dir_ce for DD2 only
+//   1.7   |07-APR-14 | gollub  | Added mss_unmask_pervasive_errors
+//         |          |         | TP_PERV_LFIR: 0,13,14 change to recoverable unmask
+//         |          |         | NEST_PERV_LFIR: 0 changed to recoverable unmask
+//         |          |         | MEM_PERV_LFIR: 0 changed to recoverable unmask
+//         |          |         |
+//         |          |         | MBS_FIR_REG: 29,30 change to recoverable unmask
+//         |          |         | MBECCFIR: 48,50,51 change to recoverable unmask
+//         |          |         | MBSFIR: 15,16 change to recoverable unmask
+//         |          |         | SCAC_LFIR: 35,35 change to recoverable unmask
+//         |          |         | MBAFIR 7 changed to channel checkstop
+//         |          |         | MBAFIR 15,16 change to recoverable unmask
+//         |          |         | DDRPHY_FIR_REG 53 change to recoverable unmask
+//         |          |         | MBACALFIR 19,20,21 change to recoverable unmask
+//         |          |         |
+//         |          |         | MBS_FIR_REG 6 changed to channel checkstop
+//         |          |         | MBSFIR 0 changed to channel checkstop
+//         |          |         | MBAFIR 3,5 changed to channel checkstop
+//         |          |         | MBACALFIR 13,18 changed to channel checkstop
+//         |          |         |
+//         |          |         | New DD2: MBS_FIR_REG 29 recoverable masked
+//         |          |         | New DD2: MBS_FIR_REG 30 channel checkstop unmasked
+//         |          |         | New DD2: MBSFIR 2 recoverable masked
+//         |          |         | New DD2: MBSFIR 3 recoverable masked
+//         |          |         | New DD2: MBAFIR 8 channel checkstop unmasked
+//         |          |         | New DD2: MBACALFIR 20,21,22 recoverable masked
+//   1.8   |08-APR-14 | gollub  | Removed debug trace
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -54,6 +80,384 @@ using namespace fapi;
         
 
 //------------------------------------------------------------------------------
+// mss_unmask_pervasive_errors
+//------------------------------------------------------------------------------
+                                           
+fapi::ReturnCode mss_unmask_pervasive_errors( const fapi::Target & i_target,
+                                              fapi::ReturnCode i_bad_rc )
+                                           
+{
+
+    FAPI_INF("ENTER mss_unmask_pervasive_errors()"); 
+    
+    fapi::ReturnCode l_rc;
+    uint32_t l_ecmd_rc = 0;            
+
+    //*************************
+    //*************************
+    // TP_PERV_LFIR
+    //*************************
+    //*************************
+
+    ecmdDataBufferBase l_tp_perv_lfir_mask_or(64);    
+    ecmdDataBufferBase l_tp_perv_lfir_mask_and(64);
+    ecmdDataBufferBase l_tp_perv_lfir_action0(64);
+    ecmdDataBufferBase l_tp_perv_lfir_action1(64);
+        
+    // TODO: Here is where I could clear bits that were bogus, before I unmask 
+    //       them. But typically we are expecting the bit set at this point
+    //       to be valid errors for PRD to log.
+
+
+    //(Action0, Action1, Mask)
+    //
+    // (0,0,0) = checkstop
+    // (0,1,0) = recoverable error
+    // (1,0,0) = report unused
+    // (1,1,0) = machine check
+    // (x,x,1) = error is masked
+
+
+    // Read action0
+    l_rc = fapiGetScom_w_retry(i_target, TP_PERV_LFIR_ACT0_0x01040010, l_tp_perv_lfir_action0);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Read action1
+    l_rc = fapiGetScom_w_retry(i_target, TP_PERV_LFIR_ACT1_0x01040011, l_tp_perv_lfir_action1);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+
+    l_ecmd_rc |= l_tp_perv_lfir_mask_or.flushTo0();
+    l_ecmd_rc |= l_tp_perv_lfir_mask_and.flushTo1();
+
+    // 0	CFIR internal parity error		    recoverable	    unmask
+    l_ecmd_rc |= l_tp_perv_lfir_action0.clearBit(0);     
+    l_ecmd_rc |= l_tp_perv_lfir_action1.setBit(0);
+    l_ecmd_rc |= l_tp_perv_lfir_mask_and.clearBit(0);
+
+    // 1	GPIO (PCB error)	        		recoverable 	mask (forever)
+    // 2	CC (PCB error)		        		recoverable 	mask (forever)
+    // 3	CC (OPCG, parity, scan collision)	recoverable 	mask (forever)
+    // 4	PSC (PCB error)				        recoverable 	mask (forever)
+    // 5	PSC (parity error)			        recoverable 	mask (forever)
+    // 6	Thermal (parity error)			    recoverable 	mask (forever)
+    // 7	Thermal (PCB error)			        recoverable 	mask (forever)
+    // 8	Thermal (critical Trip error)		recoverable 	mask (forever)
+    // 9	Thermal (fatal Trip error)		    recoverable 	mask (forever)
+    // 10	Thermal (Voltage trip error)		recoverable 	mask (forever)
+    // 11	Trace Array				            recoverable 	mask (forever)
+    // 12	Trace Array				            recoverable 	mask (forever)
+    l_ecmd_rc |= l_tp_perv_lfir_action0.clearBit(1,12);     
+    l_ecmd_rc |= l_tp_perv_lfir_action1.setBit(1,12);
+    l_ecmd_rc |= l_tp_perv_lfir_mask_or.setBit(1,12);
+    
+    // 13	ITR 				                recoverable 	unmask
+    l_ecmd_rc |= l_tp_perv_lfir_action0.clearBit(13);     
+    l_ecmd_rc |= l_tp_perv_lfir_action1.setBit(13);
+    l_ecmd_rc |= l_tp_perv_lfir_mask_and.clearBit(13);
+
+    // 14	ITR 				                recoverable 	unmask
+    l_ecmd_rc |= l_tp_perv_lfir_action0.clearBit(14);     
+    l_ecmd_rc |= l_tp_perv_lfir_action1.setBit(14);
+    l_ecmd_rc |= l_tp_perv_lfir_mask_and.clearBit(14);
+
+
+    // 15	ITR (itr_tc_pcbsl_slave_fir_err)	recoverable 	mask (forever)
+    // 16	PIB					                recoverable 	mask (forever)
+    // 17	PIB					                recoverable 	mask (forever)
+    // 18	PIB					                recoverable 	mask (forever)
+    l_ecmd_rc |= l_tp_perv_lfir_action0.clearBit(15,4);     
+    l_ecmd_rc |= l_tp_perv_lfir_action1.setBit(15,4);
+    l_ecmd_rc |= l_tp_perv_lfir_mask_or.setBit(15,4);
+
+
+    // NOTE: 19 and 20 already cleared and unmasked in cen_mem_pll_setup.C
+    // 19	nest PLLlock				        recoverable 	unmask
+    // 20	mem PLLlock				            recoverable 	unmask
+
+    // 21:39	unused local errors		        recoverable 	mask (forever)
+    // 40	local xstop in another chiplet		recoverable 	mask (forever)
+    l_ecmd_rc |= l_tp_perv_lfir_action0.clearBit(21,20);     
+    l_ecmd_rc |= l_tp_perv_lfir_action1.setBit(21,20);
+    l_ecmd_rc |= l_tp_perv_lfir_mask_or.setBit(21,20);
+
+    // 41:63	Reserved			not implemented, so won't touch these
+
+    
+    if(l_ecmd_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }                                                                              
+
+    // Write action0
+    l_rc = fapiPutScom_w_retry(i_target, TP_PERV_LFIR_ACT0_0x01040010, l_tp_perv_lfir_action0);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Write action1
+    l_rc = fapiPutScom_w_retry(i_target, TP_PERV_LFIR_ACT1_0x01040011, l_tp_perv_lfir_action1);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    
+    // Write mask OR
+    l_rc = fapiPutScom_w_retry(i_target, TP_PERV_LFIR_MASK_OR_0x0104000F, l_tp_perv_lfir_mask_or); 
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Write mask AND
+    l_rc = fapiPutScom_w_retry(i_target,  TP_PERV_LFIR_MASK_AND_0x0104000E, l_tp_perv_lfir_mask_and); 
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+
+    //*************************
+    //*************************
+    // NEST_PERV_LFIR
+    //*************************
+    //*************************
+
+    ecmdDataBufferBase l_nest_perv_lfir_mask_or(64);    
+    ecmdDataBufferBase l_nest_perv_lfir_mask_and(64);
+    ecmdDataBufferBase l_nest_perv_lfir_action0(64);
+    ecmdDataBufferBase l_nest_perv_lfir_action1(64);
+        
+    // TODO: Here is where I could clear bits that were bogus, before I unmask 
+    //       them. But typically we are expecting the bit set at this point
+    //       to be valid errors for PRD to log.
+
+
+    //(Action0, Action1, Mask)
+    //
+    // (0,0,0) = checkstop
+    // (0,1,0) = recoverable error
+    // (1,0,0) = report unused
+    // (1,1,0) = machine check
+    // (x,x,1) = error is masked
+
+    l_ecmd_rc |= l_nest_perv_lfir_action0.flushTo0();
+    l_ecmd_rc |= l_nest_perv_lfir_action1.flushTo0();
+    l_ecmd_rc |= l_nest_perv_lfir_mask_or.flushTo0();
+    l_ecmd_rc |= l_nest_perv_lfir_mask_and.flushTo1();
+
+    // 0	CFIR internal parity error		    recoverable	    unmask
+    l_ecmd_rc |= l_nest_perv_lfir_action0.clearBit(0);     
+    l_ecmd_rc |= l_nest_perv_lfir_action1.setBit(0);
+    l_ecmd_rc |= l_nest_perv_lfir_mask_and.clearBit(0);
+
+    // 1	GPIO (PCB error)	        		recoverable 	mask (forever)
+    // 2	CC (PCB error)		        		recoverable 	mask (forever)
+    // 3	CC (OPCG, parity, scan collision)	recoverable 	mask (forever)
+    // 4	PSC (PCB error)				        recoverable 	mask (forever)
+    // 5	PSC (parity error)			        recoverable 	mask (forever)
+    // 6	Thermal (parity error)			    recoverable 	mask (forever)
+    // 7	Thermal (PCB error)			        recoverable 	mask (forever)
+    // 8	Thermal (critical Trip error)		recoverable 	mask (forever)
+    // 9	Thermal (fatal Trip error)		    recoverable 	mask (forever)
+    // 10	Thermal (Voltage trip error)		recoverable 	mask (forever)
+    // 11	Trace Array				            recoverable 	mask (forever)
+    // 12	Trace Array				            recoverable 	mask (forever)
+    // 13:39	unused local errors		        recoverable 	mask (forever)
+    // 40	local xstop in another chiplet		recoverable 	mask (forever)
+    l_ecmd_rc |= l_nest_perv_lfir_action0.clearBit(1,40);     
+    l_ecmd_rc |= l_nest_perv_lfir_action1.setBit(1,40);
+    l_ecmd_rc |= l_nest_perv_lfir_mask_or.setBit(1,40);
+
+    // 41:63	Reserved			not implemented, so won't touch these
+
+    
+    if(l_ecmd_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }                                                                              
+
+    // Write action0
+    l_rc = fapiPutScom_w_retry(i_target, NEST_PERV_LFIR_ACT0_0x02040010, l_nest_perv_lfir_action0);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Write action1
+    l_rc = fapiPutScom_w_retry(i_target, NEST_PERV_LFIR_ACT1_0x02040011, l_nest_perv_lfir_action1);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    
+    // Write mask OR
+    l_rc = fapiPutScom_w_retry(i_target, NEST_PERV_LFIR_MASK_OR_0x0204000F, l_nest_perv_lfir_mask_or); 
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Write mask AND
+    l_rc = fapiPutScom_w_retry(i_target,  NEST_PERV_LFIR_MASK_AND_0x0204000E, l_nest_perv_lfir_mask_and); 
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+
+    //*************************
+    //*************************
+    // MEM_PERV_LFIR
+    //*************************
+    //*************************
+
+    ecmdDataBufferBase l_mem_perv_lfir_mask_or(64);    
+    ecmdDataBufferBase l_mem_perv_lfir_mask_and(64);
+    ecmdDataBufferBase l_mem_perv_lfir_action0(64);
+    ecmdDataBufferBase l_mem_perv_lfir_action1(64);
+        
+    // TODO: Here is where I could clear bits that were bogus, before I unmask 
+    //       them. But typically we are expecting the bit set at this point
+    //       to be valid errors for PRD to log.
+
+
+    //(Action0, Action1, Mask)
+    //
+    // (0,0,0) = checkstop
+    // (0,1,0) = recoverable error
+    // (1,0,0) = report unused
+    // (1,1,0) = machine check
+    // (x,x,1) = error is masked
+
+    l_ecmd_rc |= l_mem_perv_lfir_action0.flushTo0();
+    l_ecmd_rc |= l_mem_perv_lfir_action1.flushTo0();
+    l_ecmd_rc |= l_mem_perv_lfir_mask_or.flushTo0();
+    l_ecmd_rc |= l_mem_perv_lfir_mask_and.flushTo1();
+
+    // 0	CFIR internal parity error		    recoverable	    unmask
+    l_ecmd_rc |= l_mem_perv_lfir_action0.clearBit(0);     
+    l_ecmd_rc |= l_mem_perv_lfir_action1.setBit(0);
+    l_ecmd_rc |= l_mem_perv_lfir_mask_and.clearBit(0);
+
+    // 1	GPIO (PCB error)	        		recoverable 	mask (forever)
+    // 2	CC (PCB error)		        		recoverable 	mask (forever)
+    // 3	CC (OPCG, parity, scan collision)	recoverable 	mask (forever)
+    // 4	PSC (PCB error)				        recoverable 	mask (forever)
+    // 5	PSC (parity error)			        recoverable 	mask (forever)
+    // 6	Thermal (parity error)			    recoverable 	mask (forever)
+    // 7	Thermal (PCB error)			        recoverable 	mask (forever)
+    // 8	Thermal (critical Trip error)		recoverable 	mask (forever)
+    // 9	Thermal (fatal Trip error)		    recoverable 	mask (forever)
+    // 10	Thermal (Voltage trip error)		recoverable 	mask (forever)
+    // 11	mba01 Trace Array		            recoverable 	mask (forever)
+    // 12	mba01 Trace Array		            recoverable 	mask (forever)
+    // 13	mba23 Trace Array		            recoverable 	mask (forever)
+    // 14	mba23 Trace Array		            recoverable 	mask (forever)
+    // 15:39	unused local errors		        recoverable 	mask (forever)
+    // 40	local xstop in another chiplet		recoverable 	mask (forever)
+    l_ecmd_rc |= l_mem_perv_lfir_action0.clearBit(1,40);     
+    l_ecmd_rc |= l_mem_perv_lfir_action1.setBit(1,40);
+    l_ecmd_rc |= l_mem_perv_lfir_mask_or.setBit(1,40);
+
+    // 41:63	Reserved			not implemented, so won't touch these
+
+    
+    if(l_ecmd_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }                                                                              
+
+    // Write action0
+    l_rc = fapiPutScom_w_retry(i_target, MEM_PERV_LFIR_ACT0_0x03040010, l_mem_perv_lfir_action0);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Write action1
+    l_rc = fapiPutScom_w_retry(i_target, MEM_PERV_LFIR_ACT1_0x03040011, l_mem_perv_lfir_action1);
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    
+    // Write mask OR
+    l_rc = fapiPutScom_w_retry(i_target, MEM_PERV_LFIR_MASK_OR_0x0304000F, l_mem_perv_lfir_mask_or); 
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+    // Write mask AND
+    l_rc = fapiPutScom_w_retry(i_target,  MEM_PERV_LFIR_MASK_AND_0x0304000E, l_mem_perv_lfir_mask_and); 
+    if(l_rc)
+    {
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);        
+        return l_rc;
+    }
+
+
+    
+    
+    FAPI_INF("EXIT mss_unmask_pervasive_errors()"); 
+
+    return i_bad_rc;
+}
+
+
+
+
+//------------------------------------------------------------------------------
 // mss_unmask_inband_errors
 //------------------------------------------------------------------------------
                                            
@@ -62,7 +466,7 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
                                            
 {
 
-    FAPI_INF("ENTER mss_unmask_inband_errors()");
+    FAPI_INF("ENTER mss_unmask_inband_errors()"); 
     
     fapi::ReturnCode l_rc;
     uint32_t l_ecmd_rc = 0;            
@@ -78,6 +482,18 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
     ecmdDataBufferBase l_mbs_fir_mask_and(64);
     ecmdDataBufferBase l_mbs_fir_action0(64);
     ecmdDataBufferBase l_mbs_fir_action1(64);
+    
+    uint8_t l_dd2_fir_bit_defn_changes = 0;
+
+    // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2    
+    l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES, &i_target, l_dd2_fir_bit_defn_changes);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES");
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);                
+        return l_rc;
+    }        
     
     // Read mask 
     l_rc = fapiGetScom_w_retry(i_target, MBS_FIR_MASK_REG_0x02011403, l_mbs_fir_mask); 
@@ -136,9 +552,10 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbs_fir_action1.setBit(5);
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(5);
 
-    // 6    int_buffer_ue           recoverable         unmask
+    // 6    int_buffer_ue           channel checkstop   unmask
+    // HW278850: 8B ecc UE from SRB,PFB not transformed to SUE when allocating into L4
     l_ecmd_rc |= l_mbs_fir_action0.clearBit(6);            
-    l_ecmd_rc |= l_mbs_fir_action1.setBit(6);
+    l_ecmd_rc |= l_mbs_fir_action1.clearBit(6);
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(6);
 
     // 7    int_buffer_sue          recoverable         mask (forever)
@@ -252,17 +669,55 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbs_fir_action1.setBit(28);
     l_ecmd_rc |= l_mbs_fir_mask_or.setBit(28);
 
-    // 29    internal_scom_error     recoverable         mask (tbd)
-    l_ecmd_rc |= l_mbs_fir_action0.clearBit(29);            
-    l_ecmd_rc |= l_mbs_fir_action1.setBit(29);
-    l_ecmd_rc |= l_mbs_fir_mask_or.setBit(29);
+    if (l_dd2_fir_bit_defn_changes)
+    {
+        // 29    dir_purge_ce		        recoverable          mask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(29);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(29);
+        l_ecmd_rc |= l_mbs_fir_mask_or.setBit(29);
 
-    // 30    internal_scom_error_copy recoverable        mask (tbd)
-    l_ecmd_rc |= l_mbs_fir_action0.clearBit(30);            
-    l_ecmd_rc |= l_mbs_fir_action1.setBit(30);
-    l_ecmd_rc |= l_mbs_fir_mask_or.setBit(30);
+    	// 30    proximal_ce_ue             channel checkstop    mask (until unmask_fetch_errors)
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(30);            
+        l_ecmd_rc |= l_mbs_fir_action1.clearBit(30);
+        l_ecmd_rc |= l_mbs_fir_mask_or.setBit(30);
 
-    // 31:63    Reserved                not implemented, so won't touch these
+        // 31    spare			            recoverable 	     mask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(31);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(31);
+        l_ecmd_rc |= l_mbs_fir_mask_or.setBit(31);
+        
+        // 32    spare			            recoverable 	     mask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(32);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(32);
+        l_ecmd_rc |= l_mbs_fir_mask_or.setBit(33);
+
+        // 33    internal_scom_error        recoverable          unmask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(33);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(33);
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(33);
+
+        // 34    internal_scom_error_copy   recoverable          unmask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(34);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(34);
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(34);
+
+        // 35:63    Reserved                not implemented, so won't touch these
+    }
+    
+    else
+    {
+        // 29    internal_scom_error     recoverable         unmask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(29);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(29);
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(29);
+
+        // 30    internal_scom_error_copy recoverable        unmask
+        l_ecmd_rc |= l_mbs_fir_action0.clearBit(30);            
+        l_ecmd_rc |= l_mbs_fir_action1.setBit(30);
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(30);
+
+        // 31:63    Reserved                not implemented, so won't touch these
+    }
     
     if(l_ecmd_rc)
     {
@@ -418,10 +873,10 @@ fapi::ReturnCode mss_unmask_ddrphy_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_ddrphy_fir_action1.setBit(52);
     l_ecmd_rc |= l_ddrphy_fir_mask_and.clearBit(52);
 
-    // 53   ddr01_fir_parity_err    recoverable         mask (forever)
+    // 53   ddr01_fir_parity_err    recoverable         unmask
     l_ecmd_rc |= l_ddrphy_fir_action0.clearBit(53);            
     l_ecmd_rc |= l_ddrphy_fir_action1.setBit(53);
-    l_ecmd_rc |= l_ddrphy_fir_mask_or.setBit(53);
+    l_ecmd_rc |= l_ddrphy_fir_mask_and.clearBit(53);
     
     // 54   Reserved                recoverable         mask (forever)
     l_ecmd_rc |= l_ddrphy_fir_action0.clearBit(54);            
@@ -561,6 +1016,27 @@ fapi::ReturnCode mss_unmask_ddrphy_errors( const fapi::Target & i_target,
     ecmdDataBufferBase l_mbafir_action0(64);
     ecmdDataBufferBase l_mbafir_action1(64);
             
+    uint8_t l_dd2_fir_bit_defn_changes = 0;
+    fapi::Target l_targetCentaur;
+    
+    // Get Centaur target for the given MBA
+    l_rc = fapiGetParentChip(i_target, l_targetCentaur);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting Centaur parent target for the given MBA");
+        return l_rc;
+    }
+    
+    // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2    
+    l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES, &l_targetCentaur, l_dd2_fir_bit_defn_changes);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES");
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);                
+        return l_rc;
+    }        
+
     
     // Read mask
     l_rc = fapiGetScom_w_retry(i_target,
@@ -607,9 +1083,9 @@ fapi::ReturnCode mss_unmask_ddrphy_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbafir_action1.setBit(2);
     l_ecmd_rc |= l_mbafir_mask_or.setBit(2);
 
-    // 3	Internal_fsm_error          recoverable         unmask
+    // 3	Internal_fsm_error          channel checkstop   unmask
     l_ecmd_rc |= l_mbafir_action0.clearBit(3);            
-    l_ecmd_rc |= l_mbafir_action1.setBit(3);
+    l_ecmd_rc |= l_mbafir_action1.clearBit(3);
     l_ecmd_rc |= l_mbafir_mask_and.clearBit(3);
 
     // 4	MCBIST_Error                recoverable         mask (forever)
@@ -617,9 +1093,9 @@ fapi::ReturnCode mss_unmask_ddrphy_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbafir_action1.setBit(4);
     l_ecmd_rc |= l_mbafir_mask_or.setBit(4);
     
-    // 5	scom_cmd_reg_pe             recoverable         unmask
+    // 5	scom_cmd_reg_pe             channel checkstop   unmask
     l_ecmd_rc |= l_mbafir_action0.clearBit(5);            
-    l_ecmd_rc |= l_mbafir_action1.setBit(5);
+    l_ecmd_rc |= l_mbafir_action1.clearBit(5);
     l_ecmd_rc |= l_mbafir_mask_and.clearBit(5);
 
     // 6	channel_chkstp_err          channel checkstop   unmask
@@ -627,25 +1103,40 @@ fapi::ReturnCode mss_unmask_ddrphy_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbafir_action1.clearBit(6);
     l_ecmd_rc |= l_mbafir_mask_and.clearBit(6);
 
-    // 7	wrd_caw2_data_ce_ue_err     recoverable         masked (until mss_unmask_maint_errors)
+    // 7	wrd_caw2_data_ce_ue_err     channel checkstop   masked (until mss_unmask_maint_errors)
     l_ecmd_rc |= l_mbafir_action0.clearBit(7);            
-    l_ecmd_rc |= l_mbafir_action1.setBit(7);
+    l_ecmd_rc |= l_mbafir_action1.clearBit(7);
     l_ecmd_rc |= l_mbafir_mask_or.setBit(7);
 
-    // 8:14	RESERVED                    recoverable         mask (forever)
-    l_ecmd_rc |= l_mbafir_action0.clearBit(8,7);            
-    l_ecmd_rc |= l_mbafir_action1.setBit(8,7);
-    l_ecmd_rc |= l_mbafir_mask_or.setBit(8,7);
+    if (l_dd2_fir_bit_defn_changes)
+    {
+        // 8	maint_1hot_st_error_dd2 channel checkstop   unmask
+        l_ecmd_rc |= l_mbafir_action0.clearBit(8);            
+        l_ecmd_rc |= l_mbafir_action1.clearBit(8);
+        l_ecmd_rc |= l_mbafir_mask_and.clearBit(8);    
+    }
+    else
+    {
+        // 8	RESERVED                recoverable         mask (forever)
+        l_ecmd_rc |= l_mbafir_action0.clearBit(8);            
+        l_ecmd_rc |= l_mbafir_action1.setBit(8);
+        l_ecmd_rc |= l_mbafir_mask_or.setBit(8);    
+    }
 
-    // 15	internal scom error         recoverable         mask (tbd)
+    // 9:14	RESERVED                    recoverable         mask (forever)
+    l_ecmd_rc |= l_mbafir_action0.clearBit(9,6);            
+    l_ecmd_rc |= l_mbafir_action1.setBit(9,6);
+    l_ecmd_rc |= l_mbafir_mask_or.setBit(9,6);
+
+    // 15	internal scom error         recoverable         unmask
     l_ecmd_rc |= l_mbafir_action0.clearBit(15);            
     l_ecmd_rc |= l_mbafir_action1.setBit(15);
-    l_ecmd_rc |= l_mbafir_mask_or.setBit(15);
+    l_ecmd_rc |= l_mbafir_mask_and.clearBit(15);
 
-    // 16	internal scom error clone   recoverable         mask (tbd)
+    // 16	internal scom error clone   recoverable         unmask
     l_ecmd_rc |= l_mbafir_action0.clearBit(16);            
     l_ecmd_rc |= l_mbafir_action1.setBit(16);
-    l_ecmd_rc |= l_mbafir_mask_or.setBit(16);
+    l_ecmd_rc |= l_mbafir_mask_and.clearBit(16);
 
 
     // 17:63 RESERVED           not implemented, so won't touch these
@@ -770,6 +1261,28 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     ecmdDataBufferBase l_mbacalfir_mask_and(64);        
     ecmdDataBufferBase l_mbacalfir_action0(64);
     ecmdDataBufferBase l_mbacalfir_action1(64);
+    
+    uint8_t l_dd2_fir_bit_defn_changes = 0;
+    fapi::Target l_targetCentaur;
+    
+    // Get Centaur target for the given MBA
+    l_rc = fapiGetParentChip(i_target, l_targetCentaur);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting Centaur parent target for the given MBA");
+        return l_rc;
+    }    
+
+    // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2    
+    l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES, &l_targetCentaur, l_dd2_fir_bit_defn_changes);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES");
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);                
+        return l_rc;
+    }        
+    
 
 
     // Read mask
@@ -799,17 +1312,17 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbacalfir_mask_or.flushTo0();
     l_ecmd_rc |= l_mbacalfir_mask_and.flushTo1();        
     
-    // 0	MBA Recoverable Error       recoverable         mask
+    // 0	MBA Recoverable Error       recoverable         mask (until after draminit_training)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(0);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(0);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(0);
 
-    // 1	MBA Nonrecoverable Error    channel checkstop   mask
+    // 1	MBA Nonrecoverable Error    channel checkstop   mask (until after draminit_mc)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(1);            
     l_ecmd_rc |= l_mbacalfir_action1.clearBit(1);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(1);
 
-    // 2	Refresh Overrun             recoverable         mask
+    // 2	Refresh Overrun             recoverable         mask (until after draminit_mc)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(2);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(2);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(2);
@@ -825,12 +1338,12 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbacalfir_action1.setBit(4);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(4);
 
-    // 5	ddr0_cal_timeout_err        recoverable         mask
+    // 5	ddr0_cal_timeout_err        recoverable         mask (until after draminit_mc)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(5);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(5);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(5);
 
-    // 6	ddr1_cal_timeout_err        recoverable         mask
+    // 6	ddr1_cal_timeout_err        recoverable         mask (until after draminit_mc)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(6);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(6);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(6);
@@ -842,79 +1355,114 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(7);
 
 
-    // 8	mbx to mba par error        channel checkstop   mask
+    // 8	mbx to mba par error        channel checkstop   mask (until after draminit_training_adv)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(8);            
     l_ecmd_rc |= l_mbacalfir_action1.clearBit(8);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(8);
 
-    // 9	mba_wrd ue                  recoverable         mask
+    // 9	mba_wrd ue                  recoverable         mask (until mainline traffic)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(9);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(9);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(9);
 
-    // 10	mba_wrd ce                  recoverable         mask
+    // 10	mba_wrd ce                  recoverable         mask (until mainline traffic)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(10);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(10);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(10);
 
-    // 11	mba_maint ue                recoverable         mask
+    // 11	mba_maint ue                recoverable         mask (until after draminit_training_adv)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(11);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(11);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(11);
 
-    // 12	mba_maint ce                recoverable         mask
+    // 12	mba_maint ce                recoverable         mask (until after draminit_training_adv)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(12);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(12);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(12);
 
-    // 13	ddr_cal_reset_timeout       channel checkstop   mask
-    // TODO: Leaving masked until I find proper spot to unmask this
+    // 13	ddr_cal_reset_timeout       channel checkstop   unmask
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(13);            
     l_ecmd_rc |= l_mbacalfir_action1.clearBit(13);
-    l_ecmd_rc |= l_mbacalfir_mask_or.setBit(13);
+    l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(13);
 
-    // 14	wrq_data_ce                 recoverable         mask
+    // 14	wrq_data_ce                 recoverable         mask (until mainline traffic)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(14);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(14);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(14);
 
-    // 15	wrq_data_ue                 recoverable         mask
+    // 15	wrq_data_ue                 recoverable         mask (until mainline traffic)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(15);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(15);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(15);
 
-    // 16	wrq_data_sue                recoverable         mask
+    // 16	wrq_data_sue                recoverable         mask (forever)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(16);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(16);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(16);
 
-    // 17	wrq_rrq_hang_err            recoverable         mask
+    // 17	wrq_rrq_hang_err            recoverable         mask (until after draminit_training_adv)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(17);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(17);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(17);
 
-    // 18	sm_1hot_err                 recoverable         unmask
+    // 18	sm_1hot_err                 channel checkstop   unmask
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(18);            
-    l_ecmd_rc |= l_mbacalfir_action1.setBit(18);
+    l_ecmd_rc |= l_mbacalfir_action1.clearBit(18);
     l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(18);
 
-    // 19	wrd_scom_error              recoverable         mask (tbd)
+    // 19	wrd_scom_error              recoverable         unmask
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(19);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(19);
-    l_ecmd_rc |= l_mbacalfir_mask_or.setBit(19);
+    l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(19);
 
-    // 20	internal_scom_error         recoverable         mask (tbd)
-    l_ecmd_rc |= l_mbacalfir_action0.clearBit(20);            
-    l_ecmd_rc |= l_mbacalfir_action1.setBit(20);
-    l_ecmd_rc |= l_mbacalfir_mask_or.setBit(20);
+    if (l_dd2_fir_bit_defn_changes)
+    {
+        // 20	rhmr_prim_reached_max       recoverable         mask (forever)
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(20);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(20);
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(20);
+        
+        // 21	rhmr_sec_reached_max        recoverable         mask (forever)
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(21);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(21);
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(21);
+        
+        // 22	rhmr_sec_already_full       recoverable         mask (forever)
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(22);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(22);
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(22);
 
-    // 21	internal_scom_error_copy    recoverable         mask (tbd)
-    l_ecmd_rc |= l_mbacalfir_action0.clearBit(21);            
-    l_ecmd_rc |= l_mbacalfir_action1.setBit(21);
-    l_ecmd_rc |= l_mbacalfir_mask_or.setBit(21);
+        // 23	Reserved                    recoverable         mask (forever)
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(23);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(23);
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(23);
 
-    // 22-63	Reserved            not implemented, so won't touch these          
+        // 24	internal_scom_error         recoverable         unmask
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(24);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(24);
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(24);
 
+        // 25	internal_scom_error_copy    recoverable         unmask
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(25);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(25);
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(25);
+
+        // 26-63	Reserved            not implemented, so won't touch these          
+    }
+    else
+    {
+        // 20	internal_scom_error         recoverable         unmask
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(20);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(20);
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(20);
+
+        // 21	internal_scom_error_copy    recoverable         unmask
+        l_ecmd_rc |= l_mbacalfir_action0.clearBit(21);            
+        l_ecmd_rc |= l_mbacalfir_action1.setBit(21);
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(21);
+
+        // 22-63	Reserved            not implemented, so won't touch these          
+    }
 
     if(l_ecmd_rc)
     {
@@ -1297,9 +1845,9 @@ fapi::ReturnCode mss_unmask_draminit_training_advanced_errors(
     l_ecmd_rc |= l_mbsfir_mask_or.flushTo0();
     l_ecmd_rc |= l_mbsfir_mask_and.flushTo1();
 
-    // 0	scom_par_errors             recoverable         unmask
+    // 0	scom_par_errors             channel checkstop   unmask
     l_ecmd_rc |= l_mbsfir_action0.clearBit(0);            
-    l_ecmd_rc |= l_mbsfir_action1.setBit(0);
+    l_ecmd_rc |= l_mbsfir_action1.clearBit(0);
     l_ecmd_rc |= l_mbsfir_mask_and.clearBit(0);
 
     // 1	mbx_par_errors              channel checkstop   unmask
@@ -1307,20 +1855,37 @@ fapi::ReturnCode mss_unmask_draminit_training_advanced_errors(
     l_ecmd_rc |= l_mbsfir_action1.clearBit(1);
     l_ecmd_rc |= l_mbsfir_mask_and.clearBit(1);
 
+    // 2    DD1: reserved               recoverable         mask (forever)
+    // 2    DD2: dram_eventn_bit0       recoverable         mask (forever)
+    l_ecmd_rc |= l_mbsfir_action0.clearBit(2);            
+    l_ecmd_rc |= l_mbsfir_action1.setBit(2);
+    l_ecmd_rc |= l_mbsfir_mask_or.setBit(2);
+
+    // 3    DD1: reserved               recoverable         mask (forever)
+    // 3    DD2: dram_eventn_bit1       recoverable         mask (forever)
+    l_ecmd_rc |= l_mbsfir_action0.clearBit(3);            
+    l_ecmd_rc |= l_mbsfir_action1.setBit(3);
+    l_ecmd_rc |= l_mbsfir_mask_or.setBit(3);
+
+    // 4:14	RESERVED                    recoverable         mask (forever)
+    l_ecmd_rc |= l_mbsfir_action0.clearBit(4,11);            
+    l_ecmd_rc |= l_mbsfir_action1.setBit(4,11);
+    l_ecmd_rc |= l_mbsfir_mask_or.setBit(4,11);
+
     // 2:14	RESERVED                    recoverable         mask (forever)
     l_ecmd_rc |= l_mbsfir_action0.clearBit(2,13);            
     l_ecmd_rc |= l_mbsfir_action1.setBit(2,13);
     l_ecmd_rc |= l_mbsfir_mask_or.setBit(2,13);
 
-    // 15	internal scom error         recoverable         mask (tbd)
+    // 15	internal scom error         recoverable         unmask
     l_ecmd_rc |= l_mbsfir_action0.clearBit(15);            
     l_ecmd_rc |= l_mbsfir_action1.setBit(15);
-    l_ecmd_rc |= l_mbsfir_mask_or.setBit(15);
+    l_ecmd_rc |= l_mbsfir_mask_and.clearBit(15);
 
-    // 16	internal scom error clone   recoverable         mask (tbd)
+    // 16	internal scom error clone   recoverable         unmask
     l_ecmd_rc |= l_mbsfir_action0.clearBit(16);            
     l_ecmd_rc |= l_mbsfir_action1.setBit(16);
-    l_ecmd_rc |= l_mbsfir_mask_or.setBit(16);
+    l_ecmd_rc |= l_mbsfir_mask_and.clearBit(16);
 
     // 17:63 RESERVED           not implemented, so won't touch these
     
@@ -1654,7 +2219,7 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         l_ecmd_rc |= l_mbafir_mask_and.clearBit(2);
 
 
-        // 7	wrd_caw2_data_ce_ue_err     recoverable         unmask
+        // 7	wrd_caw2_data_ce_ue_err     channel checkstop   unmask
         l_ecmd_rc |= l_mbafir_mask_and.clearBit(7);
 
         if(l_ecmd_rc)
@@ -1974,25 +2539,25 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         l_ecmd_rc |= l_mbeccfir_action1.clearBit(47);
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(47);
 
-        // 48	Maskable reg parity error   recoverable         mask (forever)
+        // 48	Maskable reg parity error   recoverable         unmask
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(48);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(48);
-        l_ecmd_rc |= l_mbeccfir_mask_or.setBit(48);
+        l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(48);
 
         // 49	ecc datapath parity error   channel checkstop   unmask
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(49);            
         l_ecmd_rc |= l_mbeccfir_action1.clearBit(49);
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(49);
 
-        // 50	internal scom error         recovereble         mask
+        // 50	internal scom error         recovereble         unmask
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(50);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(50);
-        l_ecmd_rc |= l_mbeccfir_mask_or.setBit(50);
+        l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(50);
 
-        // 51	internal scom error clone   recovereble         mask
+        // 51	internal scom error clone   recovereble         unmask
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(51);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(51);
-        l_ecmd_rc |= l_mbeccfir_mask_or.setBit(51);
+        l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(51);
 
         // 52:63	Reserved    not implemented, so won't touch these
 
@@ -2294,15 +2859,15 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     l_ecmd_rc |= l_scac_lfir_action1.setBit(34);
     l_ecmd_rc |= l_scac_lfir_mask_or.setBit(34);
 
-    // 35	internal_scom_error         recoverable         masked (tbd)
+    // 35	internal_scom_error         recoverable         unmask
     l_ecmd_rc |= l_scac_lfir_action0.clearBit(35);            
     l_ecmd_rc |= l_scac_lfir_action1.setBit(35);
-    l_ecmd_rc |= l_scac_lfir_mask_or.setBit(35);
+    l_ecmd_rc |= l_scac_lfir_mask_and.clearBit(35);
 
-    // 36	internal_scom_error_clone   recoverable         masked (tbd)
+    // 36	internal_scom_error_clone   recoverable         unmask
     l_ecmd_rc |= l_scac_lfir_action0.clearBit(36);            
     l_ecmd_rc |= l_scac_lfir_action1.setBit(36);
-    l_ecmd_rc |= l_scac_lfir_mask_or.setBit(36);
+    l_ecmd_rc |= l_scac_lfir_mask_and.clearBit(36);
 
     // 37:63	Reserved
     // Can we write to these bits?
@@ -2402,9 +2967,10 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     
 
     ecmdDataBufferBase l_mbs_fir_mask(64);
-    ecmdDataBufferBase l_mbs_fir_mask_and(64);
-    
+    ecmdDataBufferBase l_mbs_fir_mask_and(64);    
     uint8_t l_dd2_fir_bit_defn_changes = 0;
+  	std::vector<fapi::Target> l_L4_vector;
+    bool l_L4_functional = false;
 
     l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_FIR_BIT_DEFN_CHANGES, &i_target, l_dd2_fir_bit_defn_changes);
     if(l_rc)
@@ -2414,7 +2980,19 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
         if (i_bad_rc) fapiLogError(i_bad_rc);                
         return l_rc;
     }    
-    
+        
+	// Check if L4 is functional
+	l_rc = fapiGetChildChiplets(i_target, fapi::TARGET_TYPE_L4, l_L4_vector, fapi::TARGET_STATE_FUNCTIONAL);
+	if (l_rc)
+	{
+		FAPI_ERR("Error from fapiGetChildChiplets getting L4 target");
+		return l_rc;
+	}
+	if (l_L4_vector.size() > 0)
+	{
+        l_L4_functional = true;
+	}
+
     // Read mask 
     l_rc = fapiGetScom_w_retry(i_target, MBS_FIR_MASK_REG_0x02011403, l_mbs_fir_mask); 
     if(l_rc)
@@ -2439,45 +3017,55 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     // 4    internal_timeout        channel checkstop   unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(4);
 
-    // 9    cache_srw_ce            recoverable         unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(9);
 
-    // 10    cache_srw_ue           recoverable         unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(10);
-
-    // 12    cache_co_ce            recoverable         unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(12);
-
-    // 13    cache_co_ue            recoverable         unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(13);
-
-    // 15    dir_ce          
-    if (l_dd2_fir_bit_defn_changes)
+    if (l_L4_functional)
     {
-        // NOTE: SW248520: Known DD1 problem - higher temp causes
-        // L4 Dir CEs. Want to ignore. Unmask for DD2 only
-        
-        //                          recoverable         unmask        
-        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(15);
+        // 9    cache_srw_ce            recoverable         unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(9);
+
+        // 10    cache_srw_ue           recoverable         unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(10);
+
+        // 12    cache_co_ce            recoverable         unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(12);
+
+        // 13    cache_co_ue            recoverable         unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(13);
+
+        // 15    dir_ce          
+        if (l_dd2_fir_bit_defn_changes)
+        {
+            // NOTE: SW248520: Known DD1 problem - higher temp causes
+            // L4 Dir CEs. Want to ignore. Unmask for DD2 only
+            
+            //                          recoverable         unmask        
+            l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(15);
+        }
+
+        // 16    dir_ue                 channel checkstop   unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(16);
+
+        // 18    dir_all_members_deleted channel checkstop  unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(18);
+
+        // 19    lru_error               recoverable        unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(19);
+
+        // 20    eDRAM error             channel checkstop  unmask
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(20);
     }
-    
-    // 16    dir_ue                 channel checkstop   unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(16);
-
-    // 18    dir_all_members_deleted channel checkstop  unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(18);
-
-    // 19    lru_error               recoverable        unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(19);
-
-    // 20    eDRAM error             channel checkstop  unmask
-    l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(20);
 
     // 26    srb_buffer_ce           recoverable        unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(26);
 
     // 27    srb_buffer_ue           recoverable        unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(27);
+    
+    if (l_dd2_fir_bit_defn_changes && l_L4_functional)
+    {
+	    // 30    proximal_ce_ue      channel checkstop  unmask    
+        l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(30);
+    }
     
     if(l_ecmd_rc)
     {

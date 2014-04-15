@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.68 2014/03/28 21:06:47 jdsloat Exp $
+// $Id: cen_scom_addresses.H,v 1.69 2014/04/07 17:59:13 gollub Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.69   | gollub   |07-APR-14| Added MBSCFGQ so we can enable/disable exit point 1
 //  1.64   | jdsloat  |28-MAR-14| ADDED MEM SCOM CCS MODEQ, STATQ, and CAL FIR addresses.
 //  1.63   | mwuu     |18-Jun-13| Fixed naming of IO_FET_SLICE_EN_MAP1_P0_ADR0:3
 //  1.62   | mwuu     |18-Jun-13| Fixed naming of IO_FET_SLICE_EN_MAP1_P0_ADR0_3
@@ -765,6 +766,11 @@ CONST_UINT64_T( CEN_DMIFIR_WOF_0x02010408              , ULL(0x02010408) );
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBAXCR01Q_0x0201140B           , ULL(0x0201140B) );
 CONST_UINT64_T( MBAXCR23Q_0x0201140C           , ULL(0x0201140C) );
+
+//------------------------------------------------------------------------------
+//      MBS Configuration Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBSCFGQ_0x02011411             , ULL(0x02011411) );
 
 //------------------------------------------------------------------------------
 //      MBS ECC Decoder FIR Registers
@@ -1807,6 +1813,10 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.69  2014/04/07 17:59:13  gollub
+
+/!/  1.69   | gollub   |07-APR-14| Added MBSCFGQ so we can enable/disable exit point 1
+
 Revision 1.68  2014/03/28 21:06:47  jdsloat
 ADDED MEM SCOM CCS MODEQ, STATQ, and CAL FIR addresses.
 

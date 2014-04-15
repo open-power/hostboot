@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_maint_cmds.xml,v 1.1 2013/06/19 18:28:17 bellows Exp $ -->
+<!-- $Id: memory_mss_maint_cmds.xml,v 1.2 2014/04/07 18:41:53 gollub Exp $ -->
 <!-- For file ../../ipl/fapi/mss_maint_cmds.C -->
 
 <!-- Original Source for RC_MSS_MAINT_UNSUCCESSFUL_FORCED_MAINT_CMD_STOP memory_errors.xml -->
@@ -88,7 +88,8 @@
     <ffdc>CMD_TYPE</ffdc>        
     <!-- FFDC: MBMCT[0:4] contains the cmd type previously run -->
     <ffdc>MBMCT</ffdc>                
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>
     <!-- Callout MBA LOW -->
     <callout><target>MBA</target><priority>LOW</priority></callout>
     <!-- Deconfigure MBA -->
@@ -105,7 +106,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: Capture register we are checking -->    
     <ffdc>MBAXCR</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_CCS_MUX_NOT_MAINLINE memory_errors.xml -->
@@ -118,7 +120,8 @@
     <ffdc>CCS_MODE</ffdc>
     <!-- FFDC: Capture command type we are trying to run -->        
     <ffdc>CMD_TYPE</ffdc>        
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_ECC_DISABLED memory_errors.xml -->
@@ -131,7 +134,8 @@
     <ffdc>MBSECC</ffdc>
     <!-- FFDC: Capture command type we are trying to run -->        
     <ffdc>CMD_TYPE</ffdc>        
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_CMD memory_errors.xml -->
@@ -146,7 +150,8 @@
     <ffdc>CMD_TYPE</ffdc>        
     <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
     <ffdc>MBMCT</ffdc>                
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_ADDR memory_errors.xml -->
@@ -166,7 +171,8 @@
       <id>REG_FFDC_INVALID_ADDR</id>
       <target>MBA</target>
     </collectRegisterFfdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_CMD_TIMEOUT memory_errors.xml -->
@@ -185,7 +191,8 @@
       <id>REG_FFDC_CMD_TIMEOUT_MBS_REGS</id>
       <target>CENTAUR</target>
     </collectRegisterFfdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>
     <!-- Callout MBA LOW -->
     <callout><target>MBA</target><priority>LOW</priority></callout>
     <!-- Deconfigure MBA -->
@@ -202,7 +209,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: Capture command type we are trying to run -->        
     <ffdc>CMD_TYPE</ffdc>        
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH memory_errors.xml -->
@@ -217,7 +225,8 @@
     <ffdc>DRAM_WIDTH</ffdc>
     <!-- FFDC: DRAM gen: DDR3 or DDR4 -->    
     <ffdc>DRAM_GEN</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_DIMM_CNFG memory_errors.xml -->
@@ -228,7 +237,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: Capture register we are checking -->    
     <ffdc>MBAXCR</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_GET_ADDRESS_RANGE_BAD_INPUT memory_errors.xml -->
@@ -239,7 +249,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: RANK we are trying to get address range for -->    
     <ffdc>RANK</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_GET_MARK_STORE_BAD_INPUT memory_errors.xml -->
@@ -250,7 +261,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: RANK we are trying read markstore for -->    
     <ffdc>RANK</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_X4_SYMBOL_ON_READ memory_errors.xml -->
@@ -265,7 +277,8 @@
     <ffdc>RANK</ffdc>
     <!-- FFDC: Markstore with non-zero symbol entry -->    
     <ffdc>MARKSTORE</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_MARKSTORE memory_errors.xml -->
@@ -280,7 +293,8 @@
     <ffdc>RANK</ffdc>
     <!-- FFDC: Markstore with invalid galois field  -->    
     <ffdc>MARKSTORE</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_PUT_MARK_STORE_BAD_INPUT memory_errors.xml -->
@@ -291,7 +305,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: RANK we are trying write markstore for -->    
     <ffdc>RANK</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_X4_SYMBOL_ON_WRITE memory_errors.xml -->
@@ -308,7 +323,8 @@
     <ffdc>SYMBOL_MARK</ffdc>
     <!-- FFDC: Chip mark we are trying to write to markstore -->    
     <ffdc>CHIP_MARK</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_SYMBOL_INDEX memory_errors.xml -->
@@ -325,7 +341,8 @@
     <ffdc>SYMBOL_MARK</ffdc>
     <!-- FFDC: Chip mark we are trying to write to markstore -->    
     <ffdc>CHIP_MARK</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_CHIP_INDEX memory_errors.xml -->
@@ -342,7 +359,8 @@
     <ffdc>SYMBOL_MARK</ffdc>
     <!-- FFDC: Chip mark we are trying to write to markstore -->    
     <ffdc>CHIP_MARK</ffdc>
-    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED memory_errors.xml -->
@@ -373,7 +391,8 @@
     <ffdc>RANK</ffdc>
     <!-- FFDC: MUX_TYPE: read or write -->    
     <ffdc>MUX_TYPE</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_STEER_MUX memory_errors.xml -->
@@ -390,7 +409,8 @@
     <ffdc>MUX_TYPE</ffdc>
     <!-- FFDC: Capture steer mux -->    
     <ffdc>STEER_MUX</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_PUT_STEER_MUX_BAD_INPUT memory_errors.xml -->
@@ -407,7 +427,8 @@
     <ffdc>STEER_TYPE</ffdc>
     <!-- FFDC: SYMBOL: 0-71 -->    
     <ffdc>SYMBOL</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER memory_errors.xml -->
@@ -426,7 +447,8 @@
     <ffdc>STEER_TYPE</ffdc>
     <!-- FFDC: SYMBOL: Symbol we are trying to steer -->    
     <ffdc>SYMBOL</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_NO_X8_ECC_SPARE memory_errors.xml -->
@@ -445,7 +467,8 @@
     <ffdc>STEER_TYPE</ffdc>
     <!-- FFDC: SYMBOL: Symbol we are trying to steer -->    
     <ffdc>SYMBOL</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_DO_STEER_INPUT_OUT_OF_RANGE memory_errors.xml -->
@@ -460,7 +483,8 @@
     <ffdc>SYMBOL</ffdc>
     <!-- FFDC: X4ECCSPARE: true or false -->    
     <ffdc>X4ECCSPARE</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
 </hwpError>
 
 <!-- Original Source for RC_MSS_MAINT_NO_UE_TRAP memory_errors.xml -->

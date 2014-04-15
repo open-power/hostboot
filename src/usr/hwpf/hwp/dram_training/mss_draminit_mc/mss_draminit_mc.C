@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.45 2014/02/17 15:16:14 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.46 2014/04/07 19:02:27 gollub Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.46   | gollub   |07-APR-14| Removed call to mss_unmask_inband_errors (moved it to proc_cen_framelock)
 //  1.45   | dcadiga  |14-FEB-14| Periodic Cal Fix for DD2
 //  1.44   | bellows  |12-FEB-14| Workaround for ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
 //  1.43   | dcadiga  |28-OCT-13| Fixed code review comments for parent chip and typos
@@ -138,12 +139,6 @@ ReturnCode mss_draminit_mc(Target& i_target)
 	// Else if mss_unmask_maint_errors runs clean,
 	// it will just return the passed in rc.
 	l_rc = mss_unmask_maint_errors(i_target, l_rc);
-
-	// If mss_unmask_inband_errors gets it's own bad rc,
-	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
-	// Else if mss_unmask_inband_errors runs clean,
-	// it will just return the passed in rc.
-	l_rc = mss_unmask_inband_errors(i_target, l_rc);
 
 	return l_rc;
 }

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.34 2014/03/11 19:04:19 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.35 2014/04/07 18:58:03 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -95,7 +95,12 @@
 //         |          |         |     mss_put_dummy_steer_mux
 //         |          |         | SW249600: Adding 1ms delay to allow cmd to stop properly in mss_stopCmd()
 //   1.34  |11-MAR-14 | gollub  | SW250519: More options for enum TimeBaseSpeed
-
+//   1.35  |07-APR-14 | gollub  | Added enable/disable exit point 1 to get/put markstore functions
+//         |          |         | Added official x4 and x8 patterns
+//         |          |         | Implemented correct scrub interval settings for: 
+//         |          |         |     FAST_MIN_BW_IMPACT
+//         |          |         |     FAST_MED_BW_IMPACT
+//         |          |         |     FAST_MAX_BW_IMPACT
 //------------------------------------------------------------------------------
 //    Includes
 //------------------------------------------------------------------------------
@@ -414,153 +419,281 @@ static const uint8_t mss_eccSpareIndex_to_symbol[MSS_X4_ECC_STEER_OPTIONS]={
 // NOTE: DRAM 0 (x4) (symbols 0,1) used for the ECC spare.
 // NOTE: Can't use ECC spare to fix bad spare DRAMs on Port0 or Port1
 
-// TODO: Update with actual patterns from Luis Lastras when they are ready
-static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
 
+static const uint32_t mss_maintBufferData[2][MSS_MAX_PATTERNS][16][2]={
+
+/*
+---Pattern 00
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  0000000000000000 0000000000000000
+t1  0000000000000000 0000000000000000
+t2  0000000000000000 0000000000000000
+t3  0000000000000000 0000000000000000 MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+t4  0000000000000000 0000000000000000
+t5  0000000000000000 0000000000000000
+t6  0000000000000000 0000000000000000
+t7  0000000000000000 0000000000000000 MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+*/
 
 // PATTERN_0
-  {{0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000},
-   {0x00000000, 0x00000000}},
+  // port0,2
+ {{{0x00000000, 0x00000000}, // DW0
+   {0x00000000, 0x00000000}, // DW2
+   {0x00000000, 0x00000000}, // DW4
+   {0x00000000, 0x00000000}, // DW6
+   {0x00000000, 0x00000000}, // DW8
+   {0x00000000, 0x00000000}, // DW10
+   {0x00000000, 0x00000000}, // DW12
+   {0x00000000, 0x00000000}, // DW14
+  // port1,3
+   {0x00000000, 0x00000000}, // DW1
+   {0x00000000, 0x00000000}, // DW3
+   {0x00000000, 0x00000000}, // DW5
+   {0x00000000, 0x00000000}, // DW7
+   {0x00000000, 0x00000000}, // DW9
+   {0x00000000, 0x00000000}, // DW11
+   {0x00000000, 0x00000000}, // DW13
+   {0x00000000, 0x00000000}},// DW15
+
+
+/*
+---Pattern 1
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  ffffffffffffffff ffffffffffffffff
+t1  ffffffffffffffff ffffffffffffffff
+t2  ffffffffffffffff ffffffffffffffff
+t3  ffffffffffffffff ffffffffffffffff MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+t4  ffffffffffffffff ffffffffffffffff
+t5  ffffffffffffffff ffffffffffffffff
+t6  ffffffffffffffff ffffffffffffffff
+t7  ffffffffffffffff ffffffffffffffff MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+*/
 
 // PATTERN_1
-  {{0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff},
-   {0xffffffff, 0xffffffff}},
+  // port0,2
+  {{0xffffffff, 0xffffffff}, // DW0
+   {0xffffffff, 0xffffffff}, // DW2
+   {0xffffffff, 0xffffffff}, // DW4
+   {0xffffffff, 0xffffffff}, // DW6
+   {0xffffffff, 0xffffffff}, // DW8
+   {0xffffffff, 0xffffffff}, // DW10
+   {0xffffffff, 0xffffffff}, // DW12
+   {0xffffffff, 0xffffffff}, // DW14
+  // port1,3
+   {0xffffffff, 0xffffffff}, // DW1
+   {0xffffffff, 0xffffffff}, // DW3
+   {0xffffffff, 0xffffffff}, // DW5
+   {0xffffffff, 0xffffffff}, // DW7
+   {0xffffffff, 0xffffffff}, // DW9
+   {0xffffffff, 0xffffffff}, // DW11
+   {0xffffffff, 0xffffffff}, // DW13
+   {0xffffffff, 0xffffffff}},// DW15
+
+
+/*---Pattern 2
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  6789555555555555 5555555555555555
+t1  6f2eaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+t2  ae79555555555555 5555555555555555
+t3  84edaaaaaaaaaaaa aaaaaaaaaaaaaaaa MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+t4  545eaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+t5  a791555555555555 5555555555555555
+t6  6622aaaaaaaaaaaa aaaaaaaaaaaaaaaa
+t7  f7f8555555555555 5555555555555555 MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+*/
 
 // PATTERN_2
-  {{0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0},
-   {0xf0f0f0f0, 0xf0f0f0f0}},
+  // port0,2
+  {{0x67895555, 0x55555555}, // DW0
+   {0x6f2eaaaa, 0xaaaaaaaa}, // DW2
+   {0xae795555, 0x55555555}, // DW4
+   {0x84edaaaa, 0xaaaaaaaa}, // DW6
+   {0x545eaaaa, 0xaaaaaaaa}, // DW8
+   {0xa7915555, 0x55555555}, // DW10
+   {0x6622aaaa, 0xaaaaaaaa}, // DW12
+   {0xf7f85555, 0x55555555}, // DW14
+  // port1,3
+   {0x55555555, 0x55555555}, // DW1
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW3
+   {0x55555555, 0x55555555}, // DW5
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW7
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW9
+   {0x55555555, 0x55555555}, // DW11
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW13
+   {0x55555555, 0x55555555}},// DW15
+
+/*
+---Pattern 3
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  aaaaaac47aaaaaaa aaaaaaaaaaaaaaaa
+t1  555555abf1555555 5555555555555555
+t2  aaaaaa01aeaaaaaa aaaaaaaaaaaaaaaa
+t3  5555550c81555555 5555555555555555 MDI= (0,0), tag(0,1,2,3) = (1,1,1,1)
+t4  5555557a7f555555 5555555555555555
+t5  aaaaaaccafaaaaaa aaaaaaaaaaaaaaaa
+t6  555555456d555555 5555555555555555
+t7  aaaaaa21deaaaaaa aaaaaaaaaaaaaaaa MDI= (1,1), tag(0,1,2,3) = (0,0,0,0)
+*/
 
 // PATTERN_3
-  {{0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f},
-   {0x0f0f0f0f, 0x0f0f0f0f}},
+  // port0,2
+  {{0xaaaaaac4, 0x7aaaaaaa}, // DW0
+   {0x555555ab, 0xf1555555}, // DW2
+   {0xaaaaaa01, 0xaeaaaaaa}, // DW4
+   {0x5555550c, 0x81555555}, // DW6
+   {0x5555557a, 0x7f555555}, // DW8
+   {0xaaaaaacc, 0xafaaaaaa}, // DW10
+   {0x55555545, 0x6d555555}, // DW12
+   {0xaaaaaa21, 0xdeaaaaaa}, // DW14
+  // port1,3
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW1
+   {0x55555555, 0x55555555}, // DW3
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW5
+   {0x55555555, 0x55555555}, // DW7
+   {0x55555555, 0x55555555}, // DW9
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW11
+   {0x55555555, 0x55555555}, // DW13
+   {0xaaaaaaaa, 0xaaaaaaaa}},// DW15
+
+/*
+---Pattern 4
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  ffffffffffff8403 ffffffffffffffff
+t1  ffffffffffff83d3 ffffffffffffffff
+t2  ffffffffffffbf89 ffffffffffffffff
+t3  ffffffffffff1133 ffffffffffffffff MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+t4  000000000000006c 0000000000000000
+t5  000000000000468a 0000000000000000
+t6  000000000000cf7e 0000000000000000
+t7  ffffffffffff6d37 ffffffffffffffff MDI= (1,0), tag(0,1,2,3) = (1,1,1,0)
+*/
 
 // PATTERN_4
-  {{0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa},
-   {0xaaaaaaaa, 0xaaaaaaaa}},
+  // port0,2
+  {{0xffffffff, 0xffff8403}, // DW0
+   {0xffffffff, 0xffff83d3}, // DW2
+   {0xffffffff, 0xffffbf89}, // DW4
+   {0xffffffff, 0xffff1133}, // DW6
+   {0x00000000, 0x0000006c}, // DW8
+   {0x00000000, 0x0000468a}, // DW10
+   {0x00000000, 0x0000cf7e}, // DW12
+   {0xffffffff, 0xffff6d37}, // DW14
+  // port1,3
+   {0xffffffff, 0xffffffff}, // DW1
+   {0xffffffff, 0xffffffff}, // DW3
+   {0xffffffff, 0xffffffff}, // DW5
+   {0xffffffff, 0xffffffff}, // DW7
+   {0x00000000, 0x00000000}, // DW9
+   {0x00000000, 0x00000000}, // DW11
+   {0x00000000, 0x00000000}, // DW13
+   {0xffffffff, 0xffffffff}},// DW15
+
+/*
+---Pattern 5
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  0000000000000000 0000000006c00000
+t1  0000000000000000 0000000068f40000
+t2  0000000000000000 00000000701c0000
+t3  0000000000000000 00000000f7640000 MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+t4  ffffffffffffffff ffffffffe523ffff
+t5  ffffffffffffffff ffffffff5603ffff
+t6  ffffffffffffffff fffffffffeb5ffff
+t7  0000000000000000 0000000098a40000 MDI= (0,1), tag(0,1,2,3) = (0,0,0,1)
+*/
 
 // PATTERN_5
-  {{0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555},
-   {0x55555555, 0x55555555}},
+  // port0,2
+  {{0x00000000, 0x00000000}, // DW0
+   {0x00000000, 0x00000000}, // DW2
+   {0x00000000, 0x00000000}, // DW4
+   {0x00000000, 0x00000000}, // DW6
+   {0xffffffff, 0xffffffff}, // DW8
+   {0xffffffff, 0xffffffff}, // DW10
+   {0xffffffff, 0xffffffff}, // DW12
+   {0x00000000, 0x00000000}, // DW14
+  // port1,3
+   {0x00000000, 0x06c00000}, // DW1
+   {0x00000000, 0x68f40000}, // DW3
+   {0x00000000, 0x701c0000}, // DW5
+   {0x00000000, 0xf7640000}, // DW7
+   {0xffffffff, 0xe523ffff}, // DW9
+   {0xffffffff, 0x5603ffff}, // DW11
+   {0xffffffff, 0xfeb5ffff}, // DW13
+   {0x00000000, 0x98a40000}},// DW15
+
+/*
+---Pattern 6
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  ffffffffffffffff ffffffffceb3ffff
+t1  0000000000000000 0000000034460000
+t2  ffffffffffffffff ffffffffb1afffff
+t3  0000000000000000 00000000fd080000 MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+t4  0000000000000000 0000000037540000
+t5  ffffffffffffffff ffffffff3443ffff
+t6  0000000000000000 000000001a260000
+t7  ffffffffffffffff ffffffff3f3fffff MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+*/
 
 // PATTERN_6
-  {{0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc},
-   {0xcccccccc, 0xcccccccc}},
+  // port0,2
+  {{0xffffffff, 0xffffffff}, // DW0
+   {0x00000000, 0x00000000}, // DW2
+   {0xffffffff, 0xffffffff}, // DW4
+   {0x00000000, 0x00000000}, // DW6
+   {0x00000000, 0x00000000}, // DW8
+   {0xffffffff, 0xffffffff}, // DW10
+   {0x00000000, 0x00000000}, // DW12
+   {0xffffffff, 0xffffffff}, // DW14
+  // port1,3
+   {0xffffffff, 0xceb3ffff}, // DW1
+   {0x00000000, 0x34460000}, // DW3
+   {0xffffffff, 0xb1afffff}, // DW5
+   {0x00000000, 0xfd080000}, // DW7
+   {0x00000000, 0x37540000}, // DW9
+   {0xffffffff, 0x3443ffff}, // DW11
+   {0x00000000, 0x1a260000}, // DW13
+   {0xffffffff, 0x3f3fffff}},// DW15
+
+/*
+---Pattern 7
+Pattern sent to encoder (x8 mode):
+    port0,2           port1,3
+t0  83dc000000000000 0000000000000000
+t1  d4b7ffffffffffff ffffffffffffffff
+t2  8c2c000000000000 0000000000000000
+t3  5d8affffffffffff ffffffffffffffff MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+t4  ec57ffffffffffff ffffffffffffffff
+t5  a9d4000000000000 0000000000000000
+t6  8447ffffffffffff ffffffffffffffff
+t7  eafe000000000000 0000000000000000 MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+*/
 
 // PATTERN_7
-  {{0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333},
-   {0x33333333, 0x33333333}},
+  // port0,2
+  {{0x83dc0000, 0x00000000}, // DW0
+   {0xd4b7ffff, 0xffffffff}, // DW2
+   {0x8c2c0000, 0x00000000}, // DW4
+   {0x5d8affff, 0xffffffff}, // DW6
+   {0xec57ffff, 0xffffffff}, // DW8
+   {0xa9d40000, 0x00000000}, // DW10
+   {0x8447ffff, 0xffffffff}, // DW12
+   {0xeafe0000, 0x00000000}, // DW14
+  // port1,3
+   {0x00000000, 0x00000000}, // DW1
+   {0xffffffff, 0xffffffff}, // DW3
+   {0x00000000, 0x00000000}, // DW5
+   {0xffffffff, 0xffffffff}, // DW7
+   {0xffffffff, 0xffffffff}, // DW9
+   {0x00000000, 0x00000000}, // DW11
+   {0xffffffff, 0xffffffff}, // DW13
+   {0x00000000, 0x00000000}},// DW15
 
 // PATTERN_8: random seed
   {{0x12345678, 0x87654321},
@@ -578,130 +711,582 @@ static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
    {0x12345678, 0x87654321},
    {0x87654321, 0x12345678},
    {0x12345678, 0x87654321},
-   {0x87654321, 0x12345678}}};
+   {0x87654321, 0x12345678}}},
+
+
+/*
+---Pattern 00
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  0000000000000000 0000000000000000
+t1  0000000000000000 0000000000000000
+t2  0000000000000000 0000000000000000
+t3  0000000000000000 0000000000000000 MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+t4  0000000000000000 0000000000000000
+t5  0000000000000000 0000000000000000
+t6  0000000000000000 0000000000000000
+t7  0000000000000000 0000000000000000 MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+*/
+
+// PATTERN_0
+  // port0,2
+ {{{0x00000000, 0x00000000}, // DW0
+   {0x00000000, 0x00000000}, // DW2
+   {0x00000000, 0x00000000}, // DW4
+   {0x00000000, 0x00000000}, // DW6
+   {0x00000000, 0x00000000}, // DW8
+   {0x00000000, 0x00000000}, // DW10
+   {0x00000000, 0x00000000}, // DW12
+   {0x00000000, 0x00000000}, // DW14
+  // port1,3
+   {0x00000000, 0x00000000}, // DW1
+   {0x00000000, 0x00000000}, // DW3
+   {0x00000000, 0x00000000}, // DW5
+   {0x00000000, 0x00000000}, // DW7
+   {0x00000000, 0x00000000}, // DW9
+   {0x00000000, 0x00000000}, // DW11
+   {0x00000000, 0x00000000}, // DW13
+   {0x00000000, 0x00000000}},// DW15
+
+
+/*
+---Pattern 1
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  ffffffffffffffff ffffffffffffffff
+t1  ffffffffffffffff ffffffffffffffff
+t2  ffffffffffffffff ffffffffffffffff
+t3  ffffffffffffffff ffffffffffffffff MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+t4  ffffffffffffffff ffffffffffffffff
+t5  ffffffffffffffff ffffffffffffffff
+t6  ffffffffffffffff ffffffffffffffff
+t7  ffffffffffffffff ffffffffffffffff MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+*/
+
+// PATTERN_1
+  // port0,2
+  {{0xffffffff, 0xffffffff}, // DW0
+   {0xffffffff, 0xffffffff}, // DW2
+   {0xffffffff, 0xffffffff}, // DW4
+   {0xffffffff, 0xffffffff}, // DW6
+   {0xffffffff, 0xffffffff}, // DW8
+   {0xffffffff, 0xffffffff}, // DW10
+   {0xffffffff, 0xffffffff}, // DW12
+   {0xffffffff, 0xffffffff}, // DW14
+  // port1,3
+   {0xffffffff, 0xffffffff}, // DW1
+   {0xffffffff, 0xffffffff}, // DW3
+   {0xffffffff, 0xffffffff}, // DW5
+   {0xffffffff, 0xffffffff}, // DW7
+   {0xffffffff, 0xffffffff}, // DW9
+   {0xffffffff, 0xffffffff}, // DW11
+   {0xffffffff, 0xffffffff}, // DW13
+   {0xffffffff, 0xffffffff}},// DW15
+
+
+/*---Pattern 2
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  5055555555555555 5555555555555555
+t1  a96aaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+t2  6215555555555555 5555555555555555
+t3  dd5aaaaaaaaaaaaa aaaaaaaaaaaaaaaa MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+t4  89eaaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+t5  7fd5555555555555 5555555555555555
+t6  b32aaaaaaaaaaaaa aaaaaaaaaaaaaaaa
+t7  acc5555555555555 5555555555555555 MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+*/
+
+// PATTERN_2
+  // port0,2
+  {{0x50555555, 0x55555555}, // DW0
+   {0xa96aaaaa, 0xaaaaaaaa}, // DW2
+   {0x62155555, 0x55555555}, // DW4
+   {0xdd5aaaaa, 0xaaaaaaaa}, // DW6
+   {0x89eaaaaa, 0xaaaaaaaa}, // DW8
+   {0x7fd55555, 0x55555555}, // DW10
+   {0xb32aaaaa, 0xaaaaaaaa}, // DW12
+   {0xacc55555, 0x55555555}, // DW14
+  // port1,3
+   {0x55555555, 0x55555555}, // DW1
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW3
+   {0x55555555, 0x55555555}, // DW5
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW7
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW9
+   {0x55555555, 0x55555555}, // DW11
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW13
+   {0x55555555, 0x55555555}},// DW15
+
+/*
+---Pattern 3
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  aaaaaab7caaaaaaa aaaaaaaaaaaaaaaa
+t1  555555f2d5555555 5555555555555555
+t2  aaaaaad8aaaaaaaa aaaaaaaaaaaaaaaa
+t3  5555552495555555 5555555555555555 MDI= (0,0), tag(0,1,2,3) = (1,1,1,1)
+t4  55555540b5555555 5555555555555555
+t5  aaaaaa04baaaaaaa aaaaaaaaaaaaaaaa
+t6  555555c095555555 5555555555555555
+t7  aaaaaa956aaaaaaa aaaaaaaaaaaaaaaa MDI= (1,1), tag(0,1,2,3) = (0,0,0,0)
+*/
+
+// PATTERN_3
+  // port0,2
+  {{0xaaaaaab7, 0xcaaaaaaa}, // DW0
+   {0x555555f2, 0xd5555555}, // DW2
+   {0xaaaaaad8, 0xaaaaaaaa}, // DW4
+   {0x55555524, 0x95555555}, // DW6
+   {0x55555540, 0xb5555555}, // DW8
+   {0xaaaaaa04, 0xbaaaaaaa}, // DW10
+   {0x555555c0, 0x95555555}, // DW12
+   {0xaaaaaa95, 0x6aaaaaaa}, // DW14
+  // port1,3
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW1
+   {0x55555555, 0x55555555}, // DW3
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW5
+   {0x55555555, 0x55555555}, // DW7
+   {0x55555555, 0x55555555}, // DW9
+   {0xaaaaaaaa, 0xaaaaaaaa}, // DW11
+   {0x55555555, 0x55555555}, // DW13
+   {0xaaaaaaaa, 0xaaaaaaaa}},// DW15
+
+/*
+---Pattern 4
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  ffffffffffff93ff ffffffffffffffff
+t1  ffffffffffffb5bf ffffffffffffffff
+t2  ffffffffffff207f ffffffffffffffff
+t3  ffffffffffffb37f ffffffffffffffff MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+t4  0000000000002340 0000000000000000
+t5  00000000000062e0 0000000000000000
+t6  0000000000006740 0000000000000000
+t7  ffffffffffff6a3f ffffffffffffffff MDI= (1,0), tag(0,1,2,3) = (1,1,1,0)    
+*/
+
+// PATTERN_4
+  // port0,2
+  {{0xffffffff, 0xffff93ff}, // DW0
+   {0xffffffff, 0xffffb5bf}, // DW2
+   {0xffffffff, 0xffff207f}, // DW4
+   {0xffffffff, 0xffffb37f}, // DW6
+   {0x00000000, 0x00002340}, // DW8
+   {0x00000000, 0x000062e0}, // DW10
+   {0x00000000, 0x00006740}, // DW12
+   {0xffffffff, 0xffff6a3f}, // DW14
+  // port1,3
+   {0xffffffff, 0xffffffff}, // DW1
+   {0xffffffff, 0xffffffff}, // DW3
+   {0xffffffff, 0xffffffff}, // DW5
+   {0xffffffff, 0xffffffff}, // DW7
+   {0x00000000, 0x00000000}, // DW9
+   {0x00000000, 0x00000000}, // DW11
+   {0x00000000, 0x00000000}, // DW13
+   {0xffffffff, 0xffffffff}},// DW15
+
+/*
+---Pattern 5
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  0000000000000000 0000000090c00000
+t1  0000000000000000 00000000b0400000
+t2  0000000000000000 0000000087a00000
+t3  0000000000000000 0000000033000000 MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+t4  ffffffffffffffff ffffffff9dbfffff
+t5  ffffffffffffffff ffffffffa69fffff
+t6  ffffffffffffffff ffffffff257fffff
+t7  0000000000000000 00000000c7400000 MDI= (0,1), tag(0,1,2,3) = (0,0,0,1)
+*/
+
+// PATTERN_5
+  // port0,2
+  {{0x00000000, 0x00000000}, // DW0
+   {0x00000000, 0x00000000}, // DW2
+   {0x00000000, 0x00000000}, // DW4
+   {0x00000000, 0x00000000}, // DW6
+   {0xffffffff, 0xffffffff}, // DW8
+   {0xffffffff, 0xffffffff}, // DW10
+   {0xffffffff, 0xffffffff}, // DW12
+   {0x00000000, 0x00000000}, // DW14
+  // port1,3
+   {0x00000000, 0x90c00000}, // DW1
+   {0x00000000, 0xb0400000}, // DW3
+   {0x00000000, 0x87a00000}, // DW5
+   {0x00000000, 0x33000000}, // DW7
+   {0xffffffff, 0x9dbfffff}, // DW9
+   {0xffffffff, 0xa69fffff}, // DW11
+   {0xffffffff, 0x257fffff}, // DW13
+   {0x00000000, 0xc7400000}},// DW15
+
+/*
+---Pattern 6
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  ffffffffffffffff ffffffff7e3fffff
+t1  0000000000000000 0000000018c00000
+t2  ffffffffffffffff ffffffffc8bfffff
+t3  0000000000000000 000000006b800000 MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+t4  0000000000000000 00000000f2800000
+t5  ffffffffffffffff ffffffff659fffff
+t6  0000000000000000 00000000c5c00000
+t7  ffffffffffffffff ffffffff473fffff MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+*/
+
+// PATTERN_6
+  // port0,2
+  {{0xffffffff, 0xffffffff}, // DW0
+   {0x00000000, 0x00000000}, // DW2
+   {0xffffffff, 0xffffffff}, // DW4
+   {0x00000000, 0x00000000}, // DW6
+   {0x00000000, 0x00000000}, // DW8
+   {0xffffffff, 0xffffffff}, // DW10
+   {0x00000000, 0x00000000}, // DW12
+   {0xffffffff, 0xffffffff}, // DW14
+  // port1,3
+   {0xffffffff, 0x7e3fffff}, // DW1
+   {0x00000000, 0x18c00000}, // DW3
+   {0xffffffff, 0xc8bfffff}, // DW5
+   {0x00000000, 0x6b800000}, // DW7
+   {0x00000000, 0xf2800000}, // DW9
+   {0xffffffff, 0x659fffff}, // DW11
+   {0x00000000, 0xc5c00000}, // DW13
+   {0xffffffff, 0x473fffff}},// DW15
+
+/*
+---Pattern 7
+Pattern sent to encoder (x4 mode):
+    port0,2           port1,3
+t0  8200000000000000 0000000000000000
+t1  d3bfffffffffffff ffffffffffffffff
+t2  d080000000000000 0000000000000000
+t3  539fffffffffffff ffffffffffffffff MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+t4  63ffffffffffffff ffffffffffffffff
+t5  d640000000000000 0000000000000000
+t6  5c3fffffffffffff ffffffffffffffff
+t7  dcb0000000000000 0000000000000000 MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+*/
+
+// PATTERN_7
+  // port0,2
+  {{0x82000000, 0x00000000}, // DW0
+   {0xd3bfffff, 0xffffffff}, // DW2
+   {0xd0800000, 0x00000000}, // DW4
+   {0x539fffff, 0xffffffff}, // DW6
+   {0x63ffffff, 0xffffffff}, // DW8
+   {0xd6400000, 0x00000000}, // DW10
+   {0x5c3fffff, 0xffffffff}, // DW12
+   {0xdcb00000, 0x00000000}, // DW14
+  // port1,3
+   {0x00000000, 0x00000000}, // DW1
+   {0xffffffff, 0xffffffff}, // DW3
+   {0x00000000, 0x00000000}, // DW5
+   {0xffffffff, 0xffffffff}, // DW7
+   {0xffffffff, 0xffffffff}, // DW9
+   {0x00000000, 0x00000000}, // DW11
+   {0xffffffff, 0xffffffff}, // DW13
+   {0x00000000, 0x00000000}},// DW15
+
+// PATTERN_8: random seed
+  {{0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678},
+   {0x12345678, 0x87654321},
+   {0x87654321, 0x12345678}}}};
 
 
 
-// TODO: Update with actual patterns from Luis Lastras when they are ready
-static const uint8_t mss_65thByte[MSS_MAX_PATTERNS][4]={
+
+
+static const uint8_t mss_65thByte[2][MSS_MAX_PATTERNS][4]={
+
 
 // bit1=tag0_2, bit2=tag1_3, bit3=MDI
 
-// PATTERN_0 - verified
-  {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+// PATTERN_0 (x8 mode)
+
+    // MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+ {{0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
    0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    // MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
    0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
    0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
 
-// PATTERN_1 - verified
+// PATTERN_1 (x8 mode)
+
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
   {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
    0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
-   0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
-   0x70},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
-
-// PATTERN_2 - verified
-  {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
-   0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
    0x70,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
-   0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
+   0xF0},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
 
-// PATTERN_3 - verified
-  {0x80,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
-   0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
-   0x80,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
-   0x70},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+// PATTERN_2 (x8 mode)
 
-// PATTERN_4 - verified
-  {0xB0,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=1
-   0xD0,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=1
-   0xA0,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=0
-   0x40},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+  {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+   0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
 
-// PATTERN_5 - verified
-  {0xE0,   // 1st 64B of cachline: tag0=1, tag1=0, MDI=0
-  0x20,   // 1st 64B of cachline: tag2=0, tag3=1, MDI=0
-  0x50,   // 2nd 64B of cachline: tag0=1, tag1=0, MDI=1
-  0x30},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
+// PATTERN_3 (x8 mode)
+    // MDI= (0,0), tag(0,1,2,3) = (1,1,1,1)
+  {0x60,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=0
+   0x60,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=0
+    // MDI= (1,1), tag(0,1,2,3) = (0,0,0,0)
+   0x90,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=1
+   0x90},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=1
 
-// PATTERN_6 - verified
-  {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+// PATTERN_4 (x8 mode)
+    // MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+  {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+   0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    // MDI= (1,0), tag(0,1,2,3) = (1,1,1,0)
+   0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xC0},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
+
+// PATTERN_5 (x8 mode)
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+  {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    // MDI= (0,1), tag(0,1,2,3) = (0,0,0,1)
+   0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
+   0x10},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
+
+// PATTERN_6 (x8 mode)
+    // MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+  {0x30,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=1
+   0x30,   // 1st 64B of cachline: tag2=0, tag3=1, MDI=1
+    // MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+   0xC0,   // 2nd 64B of cachline: tag0=1, tag1=0, MDI=0
+   0xC0},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
+
+// PATTERN_7 (x8 mode)
+    // MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+  {0xC0,   // 1st 64B of cachline: tag0=1, tag1=0, MDI=0
    0xC0,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=0
-   0x60,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=0
-   0x50},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=1
-
-// PATTERN_7 - verified
-  {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
-   0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    // MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
    0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
-   0xE0},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=0
+   0x30},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
 
-// PATTERN_8: random seed
+// PATTERN_8: random seed  (x8 mode)
   {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
    0x60,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=0
    0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
-   0x70}}; // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+   0x70}}, // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
 
-// TODO: Update with actual patterns from Luis Lastras when they are ready
-static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
+
+
+
+// bit1=tag0_2, bit2=tag1_3, bit3=MDI
+
+// PATTERN_0 (x4 mode)
+
+    // MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+ {{0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+   0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    // MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+   0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
+   0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
+
+// PATTERN_1 (x4 mode)
+
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+  {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+   0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+
+// PATTERN_2 (x4 mode)
+
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+  {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+   0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+
+// PATTERN_3 (x4 mode)
+    // MDI= (0,0), tag(0,1,2,3) = (1,1,1,1)
+  {0x60,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=0
+   0x60,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=0
+    // MDI= (1,1), tag(0,1,2,3) = (0,0,0,0)
+   0x90,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=1
+   0x90},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=1
+
+// PATTERN_4 (x4 mode)
+    // MDI= (0,0), tag(0,1,2,3) = (0,0,0,0)
+  {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+   0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    // MDI= (1,0), tag(0,1,2,3) = (1,1,1,0)
+   0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xC0},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
+
+// PATTERN_5 (x4 mode)
+    // MDI= (1,1), tag(0,1,2,3) = (1,1,1,1)
+  {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+   0xF0,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    // MDI= (0,1), tag(0,1,2,3) = (0,0,0,1)
+   0x80,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
+   0x10},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
+
+// PATTERN_6 (x4 mode)
+    // MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+  {0x30,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=1
+   0x30,   // 1st 64B of cachline: tag2=0, tag3=1, MDI=1
+    // MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+   0xC0,   // 2nd 64B of cachline: tag0=1, tag1=0, MDI=0
+   0xC0},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
+
+// PATTERN_7 (x4 mode)
+    // MDI= (0,0), tag(0,1,2,3) = (1,0,1,0)
+  {0xC0,   // 1st 64B of cachline: tag0=1, tag1=0, MDI=0
+   0xC0,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=0
+    // MDI= (1,1), tag(0,1,2,3) = (0,1,0,1)
+   0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
+   0x30},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
+
+// PATTERN_8: random seed  (x8 mode)
+  {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
+   0x60,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=0
+   0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
+   0x70}}};// 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+
+
+
+static const uint32_t mss_ECC[2][MSS_MAX_PATTERNS][4]={
 
 // bit 4:15 ECC_c6_c5_c4, bit 16:31 ECC_c3_c2_c1_c0
 
-// PATTERN_0 - verified
-  {0x00000000,   // 1st 64B of cachline
+// PATTERN_0 (x8 mode)
+ {{0x00000000,   // 1st 64B of cachline
    0x00000000,   // 1st 64B of cachline
    0x00000000,   // 2nd 64B of cachline
    0x00000000},  // 2nd 64B of cachline
 
-// PATTERN_1 - verified
+// PATTERN_1 (x8 mode)
   {0x0DA49500,   // 1st 64B of cachline
    0x0234A60E,   // 1st 64B of cachline
    0x0DA49500,   // 2nd 64B of cachline
    0x0234A60E},  // 2nd 64B of cachline
 
-// PATTERN_2 - verified
-  {0x08A0AB54,   // 1st 64B of cachline
-   0x05CD9A13,   // 1st 64B of cachline
-   0x08A0AB54,   // 2nd 64B of cachline
-   0x05CD9A13},  // 2nd 64B of cachline
+// PATTERN_2 (x8 mode)
+  {0x0FFFFFFF,   // 1st 64B of cachline
+   0x0FFFFFFF,   // 1st 64B of cachline
+   0x0FFFFFFF,   // 2nd 64B of cachline
+   0x0FFFFFFF},  // 2nd 64B of cachline
 
-// PATTERN_3 - verified
-  {0x05043E54,   // 1st 64B of cachline
-   0x07F93C1D,   // 1st 64B of cachline
-   0x05043E54,   // 2nd 64B of cachline
-   0x07F93C1D},  // 2nd 64B of cachline
+// PATTERN_3 (x8 mode)
+  {0x056A55AA,   // 1st 64B of cachline
+   0x056A55AA,   // 1st 64B of cachline
+   0x0A95AA55,   // 2nd 64B of cachline
+   0x0A95AA55},  // 2nd 64B of cachline
 
-// PATTERN_4 - verified
-  {0x021C0F3D,   // 1st 64B of cachline
-   0x04332068,   // 1st 64B of cachline
-   0x0C33F1DA,   // 2nd 64B of cachline
-   0x0FF3F7AF},  // 2nd 64B of cachline
+// PATTERN_4 (x8 mode)
+  {0x00000000,   // 1st 64B of cachline
+   0x00000000,   // 1st 64B of cachline
+   0x0FFFFFFF,   // 2nd 64B of cachline
+   0x0FC0FF00},  // 2nd 64B of cachline
 
-// PATTERN_5 - verified
-  {0x04CA8334,   // 1st 64B of cachline
-   0x04F3D0DA,   // 1st 64B of cachline
-   0x019764DA,   // 2nd 64B of cachline
-   0x0DC751A1},  // 2nd 64B of cachline
+// PATTERN_5 (x8 mode)
+  {0x0FFFFFFF,   // 1st 64B of cachline
+   0x0FFFFFFF,   // 1st 64B of cachline
+   0x0ED81C6A,   // 2nd 64B of cachline
+   0x0D970552},  // 2nd 64B of cachline
 
-// PATTERN_6 - verified
-  {0x0CF6B55C,   // 1st 64B of cachline
-   0x08CCE671,   // 1st 64B of cachline
-   0x02D94BBB,   // 2nd 64B of cachline
-   0x030C31B6},  // 2nd 64B of cachline
+// PATTERN_6 (x8 mode)
+  {0x003F00FF,   // 1st 64B of cachline
+   0x003F00FF,   // 1st 64B of cachline
+   0x0FC0FF00,   // 2nd 64B of cachline
+   0x0FC0FF00},  // 2nd 64B of cachline
 
-// PATTERN_7 - verified
-  {0x09150CD1,   // 1st 64B of cachline
-   0x0F9D48C9,   // 1st 64B of cachline
-   0x073AF236,   // 2nd 64B of cachline
-   0x045D9F0E},  // 2nd 64B of cachline
+// PATTERN_7 (x8 mode)
+  {0x0FC0FF00,   // 1st 64B of cachline
+   0x0FC0FF00,   // 1st 64B of cachline
+   0x003F00FF,   // 2nd 64B of cachline
+   0x003F00FF},  // 2nd 64B of cachline
 
 // PATTERN_8: random
   {0x00000000,   // 1st 64B of cachline
    0x00000000,   // 1st 64B of cachline
    0x00000000,   // 2nd 64B of cachline
-   0x00000000}}; // 2nd 64B of cachline
+   0x00000000}}, // 2nd 64B of cachline
+
+// bit 4:15 ECC_c6_c5_c4, bit 16:31 ECC_c3_c2_c1_c0
+
+// PATTERN_0 (x4 mode)
+ {{0x00000000,   // 1st 64B of cachline
+   0x00000000,   // 1st 64B of cachline
+   0x00000000,   // 2nd 64B of cachline
+   0x00000000},  // 2nd 64B of cachline
+
+// PATTERN_1 (x4 mode)
+  {0x09978000,   // 1st 64B of cachline
+   0x03DBC0C0,   // 1st 64B of cachline
+   0x09978000,   // 2nd 64B of cachline
+   0x03DBC0C0},  // 2nd 64B of cachline
+
+// PATTERN_2 (x4 mode)
+  {0x0FFFF0F0,   // 1st 64B of cachline
+   0x0FFFF0F0,   // 1st 64B of cachline
+   0x0FFFF0F0,   // 2nd 64B of cachline
+   0x0FFFF0F0},  // 2nd 64B of cachline
+
+// PATTERN_3 (x4 mode)
+  {0x056A50A0,   // 1st 64B of cachline
+   0x056A50A0,   // 1st 64B of cachline
+   0x0A95A050,   // 2nd 64B of cachline
+   0x0A95A050},  // 2nd 64B of cachline
+
+// PATTERN_4 (x4 mode)
+  {0x00000000,   // 1st 64B of cachline
+   0x00000000,   // 1st 64B of cachline
+   0x0FFFF0F0,   // 2nd 64B of cachline
+   0x0FC0F000},  // 2nd 64B of cachline
+
+// PATTERN_5 (x4 mode)
+  {0x0FFFF0F0,   // 1st 64B of cachline
+   0x0FFFF0F0,   // 1st 64B of cachline
+   0x07BB8020,   // 2nd 64B of cachline
+   0x07A4A0D0},  // 2nd 64B of cachline
+
+// PATTERN_6 (x4 mode)
+  {0x003F00F0,   // 1st 64B of cachline
+   0x003F00F0,   // 1st 64B of cachline
+   0x0FC0F000,   // 2nd 64B of cachline
+   0x0FC0F000},  // 2nd 64B of cachline
+
+// PATTERN_7 (x4 mode)
+  {0x0FC0F000,   // 1st 64B of cachline
+   0x0FC0F000,   // 1st 64B of cachline
+   0x003F00F0,   // 2nd 64B of cachline
+   0x003F00F0},  // 2nd 64B of cachline
+
+// PATTERN_8: random
+  {0x00000000,   // 1st 64B of cachline
+   0x00000000,   // 1st 64B of cachline
+   0x00000000,   // 2nd 64B of cachline
+   0x00000000}}};// 2nd 64B of cachline
+
+
+
+
 
 //------------------------------------------------------------------------------
-// Function Porottypes - These are not externally called, so per RAS review, they
+// Function Prototypes - These are not externally called, so per RAS review, they
 // go in here
 //------------------------------------------------------------------------------
     void mss_get_dummy_mark_store( const fapi::Target & i_target,
@@ -1042,7 +1627,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
         FAPI_ERR("MBMSRQ[0]: Can't start new cmd if previous cmd still in progress on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // Calling out MBA target low, deconfig, gard
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture register we are checking
@@ -1064,7 +1649,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
         FAPI_ERR("MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture register we are checking
@@ -1082,7 +1667,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
         FAPI_ERR("CCS_MODEQ[29] = 1, meaning mux set for CCS instead of mainline on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture register we are checking
@@ -1102,7 +1687,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
         FAPI_ERR("MBSECC[0] = 1, meaning ECC check/correct disabled on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture register we are checking
@@ -1409,7 +1994,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
         FAPI_ERR("MBAFIRQ[0], invalid_maint_cmd on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture register we are checking
@@ -1431,7 +2016,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
         FAPI_ERR("MBAFIRQ[1], cmd started with invalid_maint_address on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture register we are checking
@@ -1500,7 +2085,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
       {
         FAPI_ERR("Maint cmd timeout on %s.",iv_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // Calling out MBA target low, deconfig, gard
         const fapi::Target & MBA = iv_target;
 // FFDC: Capture command type we are trying to run
@@ -1643,183 +2228,205 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
       FAPI_INF("ENTER mss_MaintCmd::loadPattern()");
 
-static const uint32_t maintBufferDataRegs[2][16][2]={
-// port0
-        {{MAINT0_MBS_MAINT_BUFF0_DATA0_0x0201160A, MAINT0_MBS_MAINT_BUFF0_DATA_ECC0_0x02011612},
-        {MAINT0_MBS_MAINT_BUFF2_DATA0_0x0201162A, MAINT0_MBS_MAINT_BUFF2_DATA_ECC0_0x02011632},
-        {MAINT0_MBS_MAINT_BUFF0_DATA1_0x0201160B, MAINT0_MBS_MAINT_BUFF0_DATA_ECC1_0x02011613},
-        {MAINT0_MBS_MAINT_BUFF2_DATA1_0x0201162B, MAINT0_MBS_MAINT_BUFF2_DATA_ECC1_0x02011633},
-        {MAINT0_MBS_MAINT_BUFF0_DATA2_0x0201160C, MAINT0_MBS_MAINT_BUFF0_DATA_ECC2_0x02011614},
-        {MAINT0_MBS_MAINT_BUFF2_DATA2_0x0201162C, MAINT0_MBS_MAINT_BUFF2_DATA_ECC2_0x02011634},
-        {MAINT0_MBS_MAINT_BUFF0_DATA3_0x0201160D, MAINT0_MBS_MAINT_BUFF0_DATA_ECC3_0x02011615},
-        {MAINT0_MBS_MAINT_BUFF2_DATA3_0x0201162D, MAINT0_MBS_MAINT_BUFF2_DATA_ECC3_0x02011635},
+        static const uint32_t maintBufferDataRegs[2][16][2]={
+        // port0
+        {{MAINT0_MBS_MAINT_BUFF0_DATA0_0x0201160A, MAINT0_MBS_MAINT_BUFF0_DATA_ECC0_0x02011612},// DW0
+        {MAINT0_MBS_MAINT_BUFF2_DATA0_0x0201162A, MAINT0_MBS_MAINT_BUFF2_DATA_ECC0_0x02011632}, // DW2
+        {MAINT0_MBS_MAINT_BUFF0_DATA1_0x0201160B, MAINT0_MBS_MAINT_BUFF0_DATA_ECC1_0x02011613}, // DW4
+        {MAINT0_MBS_MAINT_BUFF2_DATA1_0x0201162B, MAINT0_MBS_MAINT_BUFF2_DATA_ECC1_0x02011633}, // DW6
+        {MAINT0_MBS_MAINT_BUFF0_DATA2_0x0201160C, MAINT0_MBS_MAINT_BUFF0_DATA_ECC2_0x02011614}, // DW8
+        {MAINT0_MBS_MAINT_BUFF2_DATA2_0x0201162C, MAINT0_MBS_MAINT_BUFF2_DATA_ECC2_0x02011634}, // DW10
+        {MAINT0_MBS_MAINT_BUFF0_DATA3_0x0201160D, MAINT0_MBS_MAINT_BUFF0_DATA_ECC3_0x02011615}, // DW12
+        {MAINT0_MBS_MAINT_BUFF2_DATA3_0x0201162D, MAINT0_MBS_MAINT_BUFF2_DATA_ECC3_0x02011635}, // DW14
 
-// port1
-        {MAINT0_MBS_MAINT_BUFF1_DATA0_0x0201161A, MAINT0_MBS_MAINT_BUFF1_DATA_ECC0_0x02011622},
-        {MAINT0_MBS_MAINT_BUFF3_DATA0_0x0201163A, MAINT0_MBS_MAINT_BUFF3_DATA_ECC0_0x02011642},
-        {MAINT0_MBS_MAINT_BUFF1_DATA1_0x0201161B, MAINT0_MBS_MAINT_BUFF1_DATA_ECC1_0x02011623},
-        {MAINT0_MBS_MAINT_BUFF3_DATA1_0x0201163B, MAINT0_MBS_MAINT_BUFF3_DATA_ECC1_0x02011643},
-        {MAINT0_MBS_MAINT_BUFF1_DATA2_0x0201161C, MAINT0_MBS_MAINT_BUFF1_DATA_ECC2_0x02011624},
-        {MAINT0_MBS_MAINT_BUFF3_DATA2_0x0201163C, MAINT0_MBS_MAINT_BUFF3_DATA_ECC2_0x02011644},
-        {MAINT0_MBS_MAINT_BUFF1_DATA3_0x0201161D, MAINT0_MBS_MAINT_BUFF1_DATA_ECC3_0x02011625},
-        {MAINT0_MBS_MAINT_BUFF3_DATA3_0x0201163D, MAINT0_MBS_MAINT_BUFF3_DATA_ECC3_0x02011645}},
+        // port1
+        {MAINT0_MBS_MAINT_BUFF1_DATA0_0x0201161A, MAINT0_MBS_MAINT_BUFF1_DATA_ECC0_0x02011622}, // DW1
+        {MAINT0_MBS_MAINT_BUFF3_DATA0_0x0201163A, MAINT0_MBS_MAINT_BUFF3_DATA_ECC0_0x02011642}, // DW3
+        {MAINT0_MBS_MAINT_BUFF1_DATA1_0x0201161B, MAINT0_MBS_MAINT_BUFF1_DATA_ECC1_0x02011623}, // DW5
+        {MAINT0_MBS_MAINT_BUFF3_DATA1_0x0201163B, MAINT0_MBS_MAINT_BUFF3_DATA_ECC1_0x02011643}, // DW7
+        {MAINT0_MBS_MAINT_BUFF1_DATA2_0x0201161C, MAINT0_MBS_MAINT_BUFF1_DATA_ECC2_0x02011624}, // DW9
+        {MAINT0_MBS_MAINT_BUFF3_DATA2_0x0201163C, MAINT0_MBS_MAINT_BUFF3_DATA_ECC2_0x02011644}, // DW11
+        {MAINT0_MBS_MAINT_BUFF1_DATA3_0x0201161D, MAINT0_MBS_MAINT_BUFF1_DATA_ECC3_0x02011625}, // DW13
+        {MAINT0_MBS_MAINT_BUFF3_DATA3_0x0201163D, MAINT0_MBS_MAINT_BUFF3_DATA_ECC3_0x02011645}},// DW15
 
-// port2
-        {{MAINT1_MBS_MAINT_BUFF0_DATA0_0x0201170A, MAINT1_MBS_MAINT_BUFF0_DATA_ECC0_0x02011712},
-        {MAINT1_MBS_MAINT_BUFF2_DATA0_0x0201172A, MAINT1_MBS_MAINT_BUFF2_DATA_ECC0_0x02011732},
-        {MAINT1_MBS_MAINT_BUFF0_DATA1_0x0201170B, MAINT1_MBS_MAINT_BUFF0_DATA_ECC1_0x02011713},
-        {MAINT1_MBS_MAINT_BUFF2_DATA1_0x0201172B, MAINT1_MBS_MAINT_BUFF2_DATA_ECC1_0x02011733},
-        {MAINT1_MBS_MAINT_BUFF0_DATA2_0x0201170C, MAINT1_MBS_MAINT_BUFF0_DATA_ECC2_0x02011714},
-        {MAINT1_MBS_MAINT_BUFF2_DATA2_0x0201172C, MAINT1_MBS_MAINT_BUFF2_DATA_ECC2_0x02011734},
-        {MAINT1_MBS_MAINT_BUFF0_DATA3_0x0201170D, MAINT1_MBS_MAINT_BUFF0_DATA_ECC3_0x02011715},
-        {MAINT1_MBS_MAINT_BUFF2_DATA3_0x0201172D, MAINT1_MBS_MAINT_BUFF2_DATA_ECC3_0x02011735},
+        // port2
+        {{MAINT1_MBS_MAINT_BUFF0_DATA0_0x0201170A, MAINT1_MBS_MAINT_BUFF0_DATA_ECC0_0x02011712},// DW0
+        {MAINT1_MBS_MAINT_BUFF2_DATA0_0x0201172A, MAINT1_MBS_MAINT_BUFF2_DATA_ECC0_0x02011732}, // DW2
+        {MAINT1_MBS_MAINT_BUFF0_DATA1_0x0201170B, MAINT1_MBS_MAINT_BUFF0_DATA_ECC1_0x02011713}, // DW4
+        {MAINT1_MBS_MAINT_BUFF2_DATA1_0x0201172B, MAINT1_MBS_MAINT_BUFF2_DATA_ECC1_0x02011733}, // DW6
+        {MAINT1_MBS_MAINT_BUFF0_DATA2_0x0201170C, MAINT1_MBS_MAINT_BUFF0_DATA_ECC2_0x02011714}, // DW8
+        {MAINT1_MBS_MAINT_BUFF2_DATA2_0x0201172C, MAINT1_MBS_MAINT_BUFF2_DATA_ECC2_0x02011734}, // DW10
+        {MAINT1_MBS_MAINT_BUFF0_DATA3_0x0201170D, MAINT1_MBS_MAINT_BUFF0_DATA_ECC3_0x02011715}, // DW12
+        {MAINT1_MBS_MAINT_BUFF2_DATA3_0x0201172D, MAINT1_MBS_MAINT_BUFF2_DATA_ECC3_0x02011735}, // DW14
 
-// port3
-        {MAINT1_MBS_MAINT_BUFF1_DATA0_0x0201171A, MAINT1_MBS_MAINT_BUFF1_DATA_ECC0_0x02011722},
-        {MAINT1_MBS_MAINT_BUFF3_DATA0_0x0201173A, MAINT1_MBS_MAINT_BUFF3_DATA_ECC0_0x02011742},
-        {MAINT1_MBS_MAINT_BUFF1_DATA1_0x0201171B, MAINT1_MBS_MAINT_BUFF1_DATA_ECC1_0x02011723},
-        {MAINT1_MBS_MAINT_BUFF3_DATA1_0x0201173B, MAINT1_MBS_MAINT_BUFF3_DATA_ECC1_0x02011743},
-        {MAINT1_MBS_MAINT_BUFF1_DATA2_0x0201171C, MAINT1_MBS_MAINT_BUFF1_DATA_ECC2_0x02011724},
-        {MAINT1_MBS_MAINT_BUFF3_DATA2_0x0201173C, MAINT1_MBS_MAINT_BUFF3_DATA_ECC2_0x02011744},
-        {MAINT1_MBS_MAINT_BUFF1_DATA3_0x0201171D, MAINT1_MBS_MAINT_BUFF1_DATA_ECC3_0x02011725},
-        {MAINT1_MBS_MAINT_BUFF3_DATA3_0x0201173D, MAINT1_MBS_MAINT_BUFF3_DATA_ECC3_0x02011745}}};
-
-
-static const uint32_t maintBuffer65thRegs[4][2]={
-          {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x0201164A,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x0201174A},
-          {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x0201164B,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x0201174B},
-          {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x0201164C,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x0201174C},
-          {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x0201164D,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x0201174D}};
+        // port3
+        {MAINT1_MBS_MAINT_BUFF1_DATA0_0x0201171A, MAINT1_MBS_MAINT_BUFF1_DATA_ECC0_0x02011722}, // DW1
+        {MAINT1_MBS_MAINT_BUFF3_DATA0_0x0201173A, MAINT1_MBS_MAINT_BUFF3_DATA_ECC0_0x02011742}, // DW3
+        {MAINT1_MBS_MAINT_BUFF1_DATA1_0x0201171B, MAINT1_MBS_MAINT_BUFF1_DATA_ECC1_0x02011723}, // DW5
+        {MAINT1_MBS_MAINT_BUFF3_DATA1_0x0201173B, MAINT1_MBS_MAINT_BUFF3_DATA_ECC1_0x02011743}, // DW6
+        {MAINT1_MBS_MAINT_BUFF1_DATA2_0x0201171C, MAINT1_MBS_MAINT_BUFF1_DATA_ECC2_0x02011724}, // DW9
+        {MAINT1_MBS_MAINT_BUFF3_DATA2_0x0201173C, MAINT1_MBS_MAINT_BUFF3_DATA_ECC2_0x02011744}, // DW11
+        {MAINT1_MBS_MAINT_BUFF1_DATA3_0x0201171D, MAINT1_MBS_MAINT_BUFF1_DATA_ECC3_0x02011725}, // DW13
+        {MAINT1_MBS_MAINT_BUFF3_DATA3_0x0201173D, MAINT1_MBS_MAINT_BUFF3_DATA_ECC3_0x02011745}}};// DW15
 
 
-          fapi::ReturnCode l_rc;
-          uint32_t l_ecmd_rc = 0;
-          ecmdDataBufferBase l_data(64);
-          ecmdDataBufferBase l_ecc(64);
-          ecmdDataBufferBase l_65th(64);
-          ecmdDataBufferBase l_mbmmr(64);
-          ecmdDataBufferBase l_mbsecc(64);
-          uint32_t loop = 0;
+        static const uint32_t maintBuffer65thRegs[4][2]={
+        // MBA01                                                 MBA23
+        {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x0201164A,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x0201174A}, // 1st 64B of cacheline
+        {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x0201164B,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x0201174B}, // 1st 64B of cacheline
+        {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x0201164C,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x0201174C}, // 2nd 64B of cacheline
+        {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x0201164D,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x0201174D}};// 2nd 64B of cacheline
+        
 
-          FAPI_INF("pattern = 0x%.8X 0x%.8X",
-                   mss_maintBufferData[i_initPattern][0][0],
-                   mss_maintBufferData[i_initPattern][0][1]);
+        fapi::ReturnCode l_rc;
+        uint32_t l_ecmd_rc = 0;
+        ecmdDataBufferBase l_data(64);
+        ecmdDataBufferBase l_ecc(64);
+        ecmdDataBufferBase l_65th(64);
+        ecmdDataBufferBase l_mbmmr(64);
+        ecmdDataBufferBase l_mbsecc(64);
+        uint32_t loop = 0;
+        uint8_t l_dramWidth = 0;
 
-//----------------------------------------------------
-// Load the data: 16 loops x 64bits = 128B cacheline
-//----------------------------------------------------
-          FAPI_INF("Load the data: 16 loops x 64bits = 128B cacheline");
+        FAPI_INF("pattern = 0x%.8X 0x%.8X",
+                   mss_maintBufferData[l_dramWidth][i_initPattern][0][0],
+                   mss_maintBufferData[l_dramWidth][i_initPattern][0][1]);
 
-// Set bit 9 so that hw will generate the fabric ECC.
-// This is an 8B ECC protecting the data moving on internal buses in
-// the Centaur.
-          l_ecmd_rc |= l_ecc.flushTo0();
-          l_ecmd_rc |= l_ecc.setBit(9);
-          if(l_ecmd_rc)
-          {
+        //----------------------------------------------------
+        // Get l_dramWidth
+        //----------------------------------------------------          
+        l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &iv_target, l_dramWidth);
+        if(l_rc)
+        {
+            FAPI_ERR("Error getting DRAM width on %s.",iv_target.toEcmdString());
+            return l_rc;
+        }
+        
+        // Convert from attribute enum values: 8,4 to index values: 0,1
+        if(l_dramWidth == mss_MemConfig::X8)
+        {
+            l_dramWidth = 0;
+        }
+        else
+        {
+            l_dramWidth = 1;
+        }
+            
+
+        //----------------------------------------------------
+        // Load the data: 16 loops x 64bits = 128B cacheline
+        //----------------------------------------------------
+        FAPI_INF("Load the data: 16 loops x 64bits = 128B cacheline");
+
+        // Set bit 9 so that hw will generate the fabric ECC.
+        // This is an 8B ECC protecting the data moving on internal buses in
+        // the Centaur.
+        l_ecmd_rc |= l_ecc.flushTo0();
+        l_ecmd_rc |= l_ecc.setBit(9);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          for(loop=0; loop<16; loop++ )
-          {
-// A write to MAINT_BUFFx_DATAy will not update until the corresponding
-// MAINT_BUFFx_DATA_ECCy is written to.
-            l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][0], 0, 32, 0);
-            l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][1], 32, 32, 0);
+        for(loop=0; loop<16; loop++ )
+        {
+            // A write to MAINT_BUFFx_DATAy will not update until the corresponding
+            // MAINT_BUFFx_DATA_ECCy is written to.
+            l_ecmd_rc |= l_data.insert(mss_maintBufferData[l_dramWidth][i_initPattern][loop][0], 0, 32, 0);
+            l_ecmd_rc |= l_data.insert(mss_maintBufferData[l_dramWidth][i_initPattern][loop][1], 32, 32, 0);
             if(l_ecmd_rc)
             {
-              l_rc.setEcmdError(l_ecmd_rc);
-              return l_rc;
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
             }
             l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][0], l_data);
             if(l_rc) return l_rc;
 
             l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][1], l_ecc);
             if(l_rc) return l_rc;
-          }
+        }
 
-//----------------------------------------------------
-// Load the 65th byte: 4 loops to fill in the two 65th bytes in cacheline
-//----------------------------------------------------
-          FAPI_INF("Load the 65th byte: 4 loops to fill in the two 65th bytes in the cacheline");
+        //----------------------------------------------------
+        // Load the 65th byte: 4 loops to fill in the two 65th bytes in cacheline
+        //----------------------------------------------------
+        FAPI_INF("Load the 65th byte: 4 loops to fill in the two 65th bytes in the cacheline");
 
-          l_ecmd_rc |= l_65th.flushTo0();
+        l_ecmd_rc |= l_65th.flushTo0();
 
-// Set bit 56 so that hw will generate the fabric ECC.
-// This is an 8B ECC protecting the data moving on internal buses in Centaur.
-          l_ecmd_rc |= l_65th.setBit(56);
-          if(l_ecmd_rc)
-          {
+        // Set bit 56 so that hw will generate the fabric ECC.
+        // This is an 8B ECC protecting the data moving on internal buses in Centaur.
+        l_ecmd_rc |= l_65th.setBit(56);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          for(loop=0; loop<4; loop++ )
-          {
-            l_ecmd_rc |= l_65th.insert(mss_65thByte[i_initPattern][loop], 1, 3, 1);
+        for(loop=0; loop<4; loop++ )
+        {
+            l_ecmd_rc |= l_65th.insert(mss_65thByte[l_dramWidth][i_initPattern][loop], 1, 3, 1);
             if(l_ecmd_rc)
             {
-              l_rc.setEcmdError(l_ecmd_rc);
-              return l_rc;
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
             }
 
             l_rc = fapiPutScom(iv_targetCentaur, maintBuffer65thRegs[loop][iv_mbaPosition], l_65th);
             if(l_rc) return l_rc;
-          }
+        }
 
-//----------------------------------------------------
-// Save i_initPattern in unused maint mark reg
-// so we know what pattern was used when we do
-// UE isolation
-//----------------------------------------------------
+        //----------------------------------------------------
+        // Save i_initPattern in unused maint mark reg
+        // so we know what pattern was used when we do
+        // UE isolation
+        //----------------------------------------------------
 
-// No plans to use maint mark, but make sure it's disabled to be safe
-          l_rc = fapiGetScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
-          if(l_rc) return l_rc;
-          l_ecmd_rc |= l_mbsecc.clearBit(4);
-          if(l_ecmd_rc)
-          {
+        // No plans to use maint mark, but make sure it's disabled to be safe
+        l_rc = fapiGetScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
+        if(l_rc) return l_rc;
+        l_ecmd_rc |= l_mbsecc.clearBit(4);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          uint8_t l_attr_centaur_ec_enable_rce_with_other_errors_hw246685;
-          l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685, &iv_targetCentaur, l_attr_centaur_ec_enable_rce_with_other_errors_hw246685);
-          if(l_rc) return l_rc;
+        uint8_t l_attr_centaur_ec_enable_rce_with_other_errors_hw246685;
+        l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685, &iv_targetCentaur, l_attr_centaur_ec_enable_rce_with_other_errors_hw246685);
+        if(l_rc) return l_rc;
 
-          if(l_attr_centaur_ec_enable_rce_with_other_errors_hw246685) {
+        if(l_attr_centaur_ec_enable_rce_with_other_errors_hw246685)
+        {
             l_ecmd_rc = l_ecmd_rc | l_mbsecc.setBit(16);
-          }
+        }
 
-          if(l_ecmd_rc)
-          {
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
 
-          l_rc = fapiPutScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
-          if(l_rc) return l_rc;
+        l_rc = fapiPutScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
+        if(l_rc) return l_rc;
 
 
-          l_ecmd_rc |= l_mbmmr.flushTo0();
-// Store i_initPattern, with range 0-8, in MBMMR bits 4-7
-          l_ecmd_rc |= l_mbmmr.insert((uint8_t)i_initPattern, 4, 4, 8-4);
-          if(l_ecmd_rc)
-          {
+        l_ecmd_rc |= l_mbmmr.flushTo0();
+        // Store i_initPattern, with range 0-8, in MBMMR bits 4-7
+        l_ecmd_rc |= l_mbmmr.insert((uint8_t)i_initPattern, 4, 4, 8-4);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
-          l_rc = fapiPutScom(iv_targetCentaur, mss_mbmmr[iv_mbaPosition] , l_mbmmr);
-          if(l_rc) return l_rc;
+        }
+        l_rc = fapiPutScom(iv_targetCentaur, mss_mbmmr[iv_mbaPosition] , l_mbmmr);
+        if(l_rc) return l_rc;
 
 
+        FAPI_INF("EXIT mss_MaintCmd::loadPattern()");
 
-
-          FAPI_INF("EXIT mss_MaintCmd::loadPattern()");
-
-          return l_rc;
+        return l_rc;
     }
 
 //---------------------------------------------------------
@@ -1827,216 +2434,216 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 //---------------------------------------------------------
     fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
     {
+    
+        FAPI_INF("ENTER mss_MaintCmd::loadSpeed()");
 
-      FAPI_INF("ENTER mss_MaintCmd::loadSpeed()");
+        fapi::ReturnCode l_rc;
+        uint32_t l_ecmd_rc = 0;
+        ecmdDataBufferBase l_data(64);
+        uint32_t l_ddr_freq = 0;
+        uint64_t l_step_size = 0;
+        uint64_t l_num_address_bits = 0;
+        uint64_t l_num_addresses = 0;
+        uint64_t l_address_bit = 0;
+        ecmdDataBufferBase l_start_address(64);
+        ecmdDataBufferBase l_end_address(64);
+        uint64_t l_cmd_interval = 0;
 
-      fapi::ReturnCode l_rc;
-      uint32_t l_ecmd_rc = 0;
-      ecmdDataBufferBase l_data(64);
-      uint32_t l_ddr_freq = 0;
-      uint64_t l_step_size = 0;
-      uint64_t l_num_address_bits = 0;
-      uint64_t l_num_addresses = 0;
-      uint64_t l_address_bit = 0;
-      ecmdDataBufferBase l_start_address(64);
-      ecmdDataBufferBase l_end_address(64);
-      uint64_t l_cmd_interval = 0;
+        // burst_window_sel
+        // MBMCTQ[6]: 0 = 512 Maint Clks
+        //            1 = 536870912 Maint Clks
+        uint8_t l_burst_window_sel = 0;
 
-// burst_window_sel
-// MBMCTQ[6]: 0 = 512 Maint Clks
-//            1 = 536870912 Maint Clks
-      uint8_t l_burst_window_sel = 0;
+        // timebase_sel
+        // MBMCTQ[9:10]: 00 = 1 Maint Clk
+        //               01 = 8192 Maint clks
+        uint8_t l_timebase_sel = 0;
 
-// timebase_sel
-// MBMCTQ[9:10]: 00 = 1 Maint Clk
-//               01 = 8192 Maint clks
-      uint8_t l_timebase_sel = 0;
+        // timebase_burst_sel
+        // MBMCTQ[11]: 0 = disable burst mode
+        //             1 = enable burst mode
+        uint8_t l_timebase_burst_sel = 0;
 
-// timebase_burst_sel
-// MBMCTQ[11]: 0 = disable burst mode
-//             1 = enable burst mode
-      uint8_t l_timebase_burst_sel = 0;
+        // timebase_interval
+        // MBMCTQ[12:23]: The operation interval for timebase operations
+        //                equals the timebase_sel x MBMCTQ[12:23].
+        // NOTE: Should never be 0, or will hang mainline traffic.
+        uint32_t l_timebase_interval = 1;
 
-// timebase_interval
-// MBMCTQ[12:23]: The operation interval for timebase operations
-//                equals the timebase_sel x MBMCTQ[12:23].
-// NOTE: Should never be 0, or will hang mainline traffic.
-      uint32_t l_timebase_interval = 1;
+        // burst_window
+        // MBMCTQ[24:31]: The burst window for timebase operations with burst mode
+        //                enabled equals burst_window_sel x MBMCTQ[24:31]
+        uint8_t l_burst_window = 0;
 
-// burst_window
-// MBMCTQ[24:31]: The burst window for timebase operations with burst mode
-//                enabled equals burst_window_sel x MBMCTQ[24:31]
-      uint8_t l_burst_window = 0;
+        // burst_interval
+        // MBMCTQ[32:39]: The burst interval for timebase operations with burst mode
+        //                enabled equals the number of burst windows that will have
+        //                no operations occurring in them.
+        uint8_t l_burst_interval = 0;
 
-// burst_interval
-// MBMCTQ[32:39]: The burst interval for timebase operations with burst mode
-//                enabled equals the number of burst windows that will have
-//                no operations occurring in them.
-      uint8_t l_burst_interval = 0;
-
-      l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_data);
-      if(l_rc) return l_rc;
+        l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_data);
+        if(l_rc) return l_rc;
 
 
-
-      if ( (FAST_MIN_BW_IMPACT == i_speed) ||
-           (FAST_MED_BW_IMPACT == i_speed) ||
-           (FAST_MAX_BW_IMPACT == i_speed) )           
-      {
-        l_burst_window_sel = 0;
-        l_timebase_sel = 0;
-        l_timebase_burst_sel = 0;
-        l_timebase_interval = 512;
-        l_burst_window = 0;
-        l_burst_interval = 0;
-      }
-
-      else // BG_SCRUB
-      {
-// Get l_ddr_freq from ATTR_MSS_FREQ
-// Possible frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz
-// NOTE: Max 32 address bits using 800 and 1066 result in scrub
-// taking longer than 12h, but these is no plan to actually use
-// those frequencies.
-        l_rc = FAPI_ATTR_GET( ATTR_MSS_FREQ, &iv_targetCentaur, l_ddr_freq);
-        if (l_rc)
+        if (FAST_MAX_BW_IMPACT == i_speed)           
         {
-          FAPI_ERR("Failed to get attribute: ATTR_MSS_FREQ on %s.",iv_target.toEcmdString());
-          return l_rc;
+            l_timebase_sel = 0;
+            l_timebase_interval = 1;
+        }
+      
+        else if (FAST_MED_BW_IMPACT == i_speed)           
+        {
+            l_timebase_sel = 0;
+            l_timebase_interval = 512;
+        }
+      
+        else if (FAST_MIN_BW_IMPACT == i_speed)           
+        {
+            l_timebase_sel = 1;
+            l_timebase_interval = 12;
         }
 
-// Make sure it's non-zero, to avoid divide by 0
-        if (l_ddr_freq == 0)
+        else // BG_SCRUB
         {
-          FAPI_ERR("ATTR_MSS_FREQ set to zero so can't calculate scrub rate on %s.",iv_target.toEcmdString());
+            // Get l_ddr_freq from ATTR_MSS_FREQ
+            // Possible frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz
+            // NOTE: Max 32 address bits using 800 and 1066 result in scrub
+            // taking longer than 12h, but these is no plan to actually use
+            // those frequencies.
+            l_rc = FAPI_ATTR_GET( ATTR_MSS_FREQ, &iv_targetCentaur, l_ddr_freq);
+            if (l_rc)
+            {
+                FAPI_ERR("Failed to get attribute: ATTR_MSS_FREQ on %s.",iv_target.toEcmdString());
+                return l_rc;
+            }
 
-// TODO: Calling out FW high
-// FFDC: MBA target
-          const fapi::Target & MBA = iv_target;
-// FFDC: Capture command type we are trying to run
-          const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+            // Make sure it's non-zero, to avoid divide by 0
+            if (l_ddr_freq == 0)
+            {
+                FAPI_ERR("ATTR_MSS_FREQ set to zero so can't calculate scrub rate on %s.",iv_target.toEcmdString());
 
-// Create new log
-          FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_ZERO_DDR_FREQ);
-          return l_rc;
-        }
+                // Calling out FW high
+                // FFDC: MBA target
+                const fapi::Target & MBA = iv_target;
+                // FFDC: Capture command type we are trying to run
+                const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
 
-// l_timebase_sel
-// MBMCTQ[9:10]: 00 = 1 * Maint Clk
-//               01 = 8192 * Maint Clk
-// Where Maint Clk = 2/1_ddr_freq
-        l_timebase_sel = 1;
+                // Create new log
+                FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_ZERO_DDR_FREQ);
+                return l_rc;
+            }
 
-// Get l_step_size in nSec
-        l_step_size = 8192*2*1000/l_ddr_freq;
+            // l_timebase_sel
+            // MBMCTQ[9:10]: 00 = 1 * Maint Clk
+            //               01 = 8192 * Maint Clk
+            // Where Maint Clk = 2/1_ddr_freq
+            l_timebase_sel = 1;
 
-        FAPI_DBG("l_ddr_freq = %d MHz, l_step_size = %d nSec",
+            // Get l_step_size in nSec
+            l_step_size = 8192*2*1000/l_ddr_freq;
+
+            FAPI_DBG("l_ddr_freq = %d MHz, l_step_size = %d nSec",
                  (uint32_t)l_ddr_freq, (uint32_t)l_step_size);
 
-// Get l_end_address
-        l_rc = mss_get_address_range( iv_target,
+            // Get l_end_address
+            l_rc = mss_get_address_range( iv_target,
                                       MSS_ALL_RANKS,
                                       l_start_address,
                                       l_end_address );
-        if (l_rc)
-        {
-          FAPI_ERR("mss_get_address_range failed on %s.",iv_target.toEcmdString());
-          return l_rc;
-        }
+            if (l_rc)
+            {
+                FAPI_ERR("mss_get_address_range failed on %s.",iv_target.toEcmdString());
+                return l_rc;
+            }
 
-// Get l_num_address_bits by counting bits set to 1 in l_end_address.
-        for(l_address_bit=0; l_address_bit<37; l_address_bit++ )
-        {
-          if(l_end_address.isBitSet(l_address_bit))
-          {
-            l_num_address_bits++;
-          }
-        }
+            // Get l_num_address_bits by counting bits set to 1 in l_end_address.
+            for(l_address_bit=0; l_address_bit<37; l_address_bit++ )
+            {
+                if(l_end_address.isBitSet(l_address_bit))
+                {
+                    l_num_address_bits++;
+                }
+            }
 
-// NOTE: Assumption is max 32 address bits, which can be done
-// in 12h (+/- 2h). More than 32 address bits would
-// double scrub time for every extra address bit.
-        if (l_num_address_bits > 32)
-        {
-          FAPI_INF("WARNING: l_num_address_bits: %d, is greater than 32, so scrub will take longer than 12h.",(uint32_t)l_num_address_bits);
-        }
+            // NOTE: Assumption is max 32 address bits, which can be done
+            // in 12h (+/- 2h). More than 32 address bits would
+            // double scrub time for every extra address bit.
+            if (l_num_address_bits > 32)
+            {
+                FAPI_INF("WARNING: l_num_address_bits: %d, is greater than 32, so scrub will take longer than 12h.",(uint32_t)l_num_address_bits);
+            }
 
-// NOTE: Smallest number of address bits is supposed to be 25.
-// So if for some reason it's less (like in VBU),
-// use 25 anyway so the scrub rate calculation still works.
-        if (l_num_address_bits < 25)
-        {
-          FAPI_INF("WARNING: l_num_address_bits: %d, is less than 25, but using 25 in calculation anyway.",(uint32_t)l_num_address_bits);
-          l_num_address_bits = 25;
-        }
+            // NOTE: Smallest number of address bits is supposed to be 25.
+            // So if for some reason it's less (like in VBU),
+            // use 25 anyway so the scrub rate calculation still works.
+            if (l_num_address_bits < 25)
+            {
+                FAPI_INF("WARNING: l_num_address_bits: %d, is less than 25, but using 25 in calculation anyway.",(uint32_t)l_num_address_bits);
+                l_num_address_bits = 25;
+            }
 
- // Get l_num_addresses
-        l_num_addresses = 1;
-        for(uint32_t i=0; i<l_num_address_bits; i++ )
-        {
-          l_num_addresses *=2;
-        }
- // Convert to M addresses
-        l_num_addresses /=1000000;
+            // Get l_num_addresses
+            l_num_addresses = 1;
+            for(uint32_t i=0; i<l_num_address_bits; i++ )
+            {
+                l_num_addresses *=2;
+            }
+            // Convert to M addresses
+            l_num_addresses /=1000000;
 
- // Get interval between cmds in order to through l_num_addresses in 12h
-        l_cmd_interval = (12 * 60 * 60 * 1000)/l_num_addresses;
+            // Get interval between cmds in order to through l_num_addresses in 12h
+            l_cmd_interval = (12 * 60 * 60 * 1000)/l_num_addresses;
 
- // How many times to multiply l_step_size to get l_cmd_interval?
-        l_timebase_interval = l_cmd_interval/l_step_size;
+            // How many times to multiply l_step_size to get l_cmd_interval?
+            l_timebase_interval = l_cmd_interval/l_step_size;
 
- // Round up to nearest integer for more accurate number
-        l_timebase_interval += (l_cmd_interval % l_step_size >= l_step_size/2) ? 1:0;
+            // Round up to nearest integer for more accurate number
+            l_timebase_interval += (l_cmd_interval % l_step_size >= l_step_size/2) ? 1:0;
 
- // Make sure smallest is 1
-        if (l_timebase_interval == 0) l_timebase_interval = 1;
+            // Make sure smallest is 1
+            if (l_timebase_interval == 0) l_timebase_interval = 1;
 
-        FAPI_DBG("l_num_address_bits = %d, l_num_addresses = %d (M), l_cmd_interval = %d nSec, l_timebase_interval = %d",
+            FAPI_DBG("l_num_address_bits = %d, l_num_addresses = %d (M), l_cmd_interval = %d nSec, l_timebase_interval = %d",
                  (uint32_t)l_num_address_bits, (uint32_t)l_num_addresses, (uint32_t)l_cmd_interval, (uint32_t)l_timebase_interval);
 
- // Disable burst mode
-        l_timebase_burst_sel = 0;   // Disable burst mode
-        l_burst_window_sel = 0;     // Don't care since burst mode disabled
-        l_burst_window = 0;         // Don't care since burst mode disabled
-        l_burst_interval = 0;       // Don't care since burst mode disabled
-      }
+        } // End BG_SCRUB
 
-// burst_window_sel
-// MBMCTQ[6]
-      l_ecmd_rc |= l_data.insert( l_burst_window_sel, 6, 1, 8-1 );
+        // burst_window_sel
+        // MBMCTQ[6]
+        l_ecmd_rc |= l_data.insert( l_burst_window_sel, 6, 1, 8-1 );
 
-// timebase_sel
-// MBMCTQ[9:10]
-      l_ecmd_rc |= l_data.insert( l_timebase_sel, 9, 2, 8-2 );
+        // timebase_sel
+        // MBMCTQ[9:10]
+        l_ecmd_rc |= l_data.insert( l_timebase_sel, 9, 2, 8-2 );
 
-// timebase_burst_sel
-// MBMCTQ[11]
-      l_ecmd_rc |= l_data.insert( l_timebase_burst_sel, 11, 1, 8-1 );
+        // timebase_burst_sel
+        // MBMCTQ[11]
+        l_ecmd_rc |= l_data.insert( l_timebase_burst_sel, 11, 1, 8-1 );
 
-// timebase_interval
-// MBMCTQ[12:23]
-      l_ecmd_rc |= l_data.insert( l_timebase_interval, 12, 12, 32-12 );
+        // timebase_interval
+        // MBMCTQ[12:23]
+        l_ecmd_rc |= l_data.insert( l_timebase_interval, 12, 12, 32-12 );
 
-// burst_window
-// MBMCTQ[24:31]
-      l_ecmd_rc |= l_data.insert( l_burst_window, 24, 8, 8-8 );
+        // burst_window
+        // MBMCTQ[24:31]
+        l_ecmd_rc |= l_data.insert( l_burst_window, 24, 8, 8-8 );
 
-// burst_interval
-// MBMCTQ[32:39]
-      l_ecmd_rc |= l_data.insert( l_burst_interval, 32, 8, 8-8 );
+        // burst_interval
+        // MBMCTQ[32:39]
+        l_ecmd_rc |= l_data.insert( l_burst_interval, 32, 8, 8-8 );
 
-      if(l_ecmd_rc)
-      {
-        l_rc.setEcmdError(l_ecmd_rc);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+        l_rc = fapiPutScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_data);
+        if(l_rc) return l_rc;
+
+        FAPI_INF("EXIT mss_MaintCmd::loadSpeed()");
+
         return l_rc;
-      }
-
-      l_rc = fapiPutScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_data);
-      if(l_rc) return l_rc;
-
-      FAPI_INF("EXIT mss_MaintCmd::loadSpeed()");
-
-      return l_rc;
     }
 
 
@@ -2129,6 +2736,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(iv_poll == false)
       {
         FAPI_INF("Cmd has started. Use attentions to detect cmd complete.");
+        FAPI_INF("EXIT mss_SuperFastInit::setupAndExecuteCmd()");
         return l_rc;
       }
 
@@ -2239,6 +2847,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(iv_poll == false)
       {
         FAPI_INF("Cmd has started. Use attentions to detect cmd complete.");
+        FAPI_INF("EXIT mss_SuperFastRandomInit::setupAndExecuteCmd()");
         return l_rc;
       }
 
@@ -2362,6 +2971,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(iv_poll == false)
       {
         FAPI_INF("Cmd has started. Use attentions to detect cmd complete.");
+        FAPI_INF("EXIT mss_SuperFastRead::setupAndExecuteCmd()");
         return l_rc;
       }
 
@@ -2627,6 +3237,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(iv_poll == false)
       {
         FAPI_INF("Cmd has started. Use attentions to detect cmd complete.");
+        FAPI_INF("EXIT Display::setupAndExecuteCmd()");
         return l_rc;
       }
 
@@ -2783,8 +3394,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, l_mbmacaq);
       if(l_rc) return l_rc;
 
-// Collect FFDC
-      l_rc = collectFFDC(); if(l_rc) return l_rc;
 
 // Clear bits 0 and 8 in MBSPA AND register
       l_ecmd_rc |= l_mbspa_and.flushTo1();
@@ -2884,6 +3493,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(iv_poll == false)
       {
         FAPI_INF("Cmd has started. Use attentions to detect cmd complete.");
+        FAPI_INF("EXIT mss_TimeBaseScrub::setupAndExecuteCmd()");
         return l_rc;
       }
 
@@ -2958,8 +3568,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       l_rc = loadEndAddress(); if(l_rc) return l_rc;
 
 // Load speed: MBMCTQ
-// TODO: May be able to go faster during IPL than runtime, since don't
-// have to worry about hanging fetch traffic during IPL.
       l_rc = loadSpeed(iv_speed); if(l_rc) return l_rc;
 
 // Load stop conditions: MBASCTLQ
@@ -2975,6 +3583,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if(iv_poll == false)
       {
         FAPI_INF("Cmd has started. Use attentions to detect cmd complete.");
+        FAPI_INF("EXIT mss_TimeBaseSteerCleanup::setupAndExecuteCmd()");
         return l_rc;
       }
 
@@ -3028,7 +3637,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         {{0x01,         0x41},         {0x03,        0x43},         {0x07,         0x47},       {0xff,         0xff}},  // TYPE_6
         {{0x11,         0x51},         {0x13,        0x53},         {0x17,         0x57},       {0xff,         0xff}},  // TYPE_7
         {{0x31,         0x71},         {0x33,        0x73},         {0x37,         0x77},       {0xff,         0xff}}}; // TYPE_8
-// TODO: Need to update when 5D config confirmed.
+
 
         fapi::ReturnCode l_rc;
         uint32_t l_ecmd_rc = 0;
@@ -3098,7 +3707,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         {
           FAPI_ERR("MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
           const fapi::Target & MBA = i_target;
 // FFDC: Capture register we are checking
@@ -3236,7 +3845,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                    l_dramSize, l_dramWidth, l_dram_gen, i_target.toEcmdString());
 
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
           const fapi::Target & MBA = i_target;
 // FFDC: Capture register we are checking
@@ -3284,7 +3893,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         {
           FAPI_ERR("MBAXCRn configured with unsupported combination of l_configType, l_configSubType, l_slotConfig on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
           const fapi::Target & MBA = i_target;
 // FFDC: Capture register we are checking
@@ -3368,7 +3977,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           if (i_rank>=8)
           {
             FAPI_ERR("i_rank input to mss_get_address_range out of range on %s.",i_target.toEcmdString());
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
             const fapi::Target & MBA = i_target;
 // FFDC: Capture i_rank;
@@ -3468,11 +4077,13 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       uint8_t l_symbolsPerChip = 4;
       fapi::Target l_targetCentaur;
       uint8_t l_mbaPosition = 0;
+      ecmdDataBufferBase l_mbscfg(64);
+      uint8_t l_dd2_enable_exit_point_1 = 0;
 
       o_symbolMark = MSS_INVALID_SYMBOL;
       o_chipMark = MSS_INVALID_SYMBOL;
 
-// Get Centaur target for the given MBA
+      // Get Centaur target for the given MBA
       l_rc = fapiGetParentChip(i_target, l_targetCentaur);
       if(l_rc)
       {
@@ -3481,7 +4092,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       }
 
 
-// Get MBA position: 0 = mba01, 1 = mba23
+      // Get MBA position: 0 = mba01, 1 = mba23
       l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
       if(l_rc)
       {
@@ -3489,7 +4100,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Get l_dramWidth
+      // Get l_dramWidth
       l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
       if(l_rc)
       {
@@ -3497,27 +4108,27 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Check for i_rank out of range
+      // Check for i_rank out of range
       if (i_rank>=8)
       {
         FAPI_ERR("i_rank input to mss_get_mark_store out of range on %s.",i_target.toEcmdString());
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: Capture i_rank;
+        // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_MARK_STORE_BAD_INPUT);
         return l_rc;
       }
 
-// Read markstore register for the given rank
+      // Read markstore register for the given rank
       l_rc = fapiGetScom(l_targetCentaur, mss_markStoreRegs[i_rank][l_mbaPosition], l_markstore);
       if(l_rc) return l_rc;
 
-// If MPE FIR for the given rank (scrub or fetch) is on after the read,
-// we will read one more time just to make sure we get latest.
+      // If MPE FIR for the given rank (scrub or fetch) is on after the read,
+      // we will read one more time just to make sure we get latest.
       l_rc = fapiGetScom(l_targetCentaur, mss_mbeccfir[l_mbaPosition], l_mbeccfir);
       if(l_rc) return l_rc;
       if (l_mbeccfir.isBitSet(i_rank) || l_mbeccfir.isBitSet(20 + i_rank))
@@ -3526,7 +4137,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         if(l_rc) return l_rc;
       }
 
-// Get l_symbolMarkGalois
+      // Get l_symbolMarkGalois
       l_ecmd_rc |= l_markstore.extractPreserve(&l_symbolMarkGalois, 0, 8, 8-8);
       if(l_ecmd_rc)
       {
@@ -3542,17 +4153,17 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("l_symbolMarkGalois invalid: symbol mark not allowed in x4 mode on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capture markstore
+        // FFDC: Capture markstore
         ecmdDataBufferBase & MARKSTORE = l_markstore;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_X4_SYMBOL_ON_READ);
         return l_rc;
       }
@@ -3572,23 +4183,23 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         {
           FAPI_ERR("Invalid galois field in markstore on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
           const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
           uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
           uint8_t RANK = i_rank;
-// FFDC: Capture markstore
+        // FFDC: Capture markstore
           ecmdDataBufferBase & MARKSTORE = l_markstore;
 
-// Create new log.
+        // Create new log.
           FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_MARKSTORE);
           return l_rc;
         }
       }
 
-// Get l_chipMarkGalois
+      // Get l_chipMarkGalois
       l_ecmd_rc |= l_markstore.extractPreserve(&l_chipMarkGalois, 8, 8, 8-8);
       if(l_ecmd_rc)
       {
@@ -3622,27 +4233,60 @@ static const uint32_t maintBuffer65thRegs[4][2]={
             break;
           }
         }
-// TODO: create error if x4 mode and symbol 0,1?
+      // TODO: create error if x4 mode and symbol 0,1?
 
         if ( MSS_SYMBOLS_PER_RANK <= o_chipMark )
         {
           FAPI_ERR("Invalid galois field in markstore on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
           const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
           uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
           uint8_t RANK = i_rank;
-// FFDC: Capture markstore
+        // FFDC: Capture markstore
           ecmdDataBufferBase & MARKSTORE = l_markstore;
 
-// Create new log.
+        // Create new log.
           FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_MARKSTORE);
           return l_rc;
         }
       }
+
+
+      // Get attribute that tells we have cen DD2, and can enable exit poing 1
+      l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_ENABLE_EXIT_POINT_1, &i_target, l_dd2_enable_exit_point_1);
+      if(l_rc)
+      {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_DD2_ENABLE_EXIT_POINT_1");
+        return l_rc;
+      }    
+
+      if(l_dd2_enable_exit_point_1)
+      {   
+          // If valid chip or symbol mark, enable exit point 1
+          if ((o_chipMark != MSS_INVALID_SYMBOL) || (o_symbolMark != MSS_INVALID_SYMBOL))
+          {
+
+              // Read MBSCFGQ
+              l_rc = fapiGetScom(l_targetCentaur, MBSCFGQ_0x02011411, l_mbscfg);
+              if(l_rc) return l_rc;
+              
+              l_ecmd_rc |= l_mbscfg.setBit(0);
+              if(l_ecmd_rc)
+              {
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
+              }
+           
+              // Write MBSCFGQ
+              l_rc = fapiPutScom(l_targetCentaur, MBSCFGQ_0x02011411, l_mbscfg);
+              if(l_rc) return l_rc;
+          }
+      }
+        
 
       FAPI_INF("mss_get_mark_store(): rank%d, chip mark = %d, symbol mark = %d",
                i_rank, o_chipMark, o_symbolMark );
@@ -3674,8 +4318,13 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       uint8_t l_chipMarkGalois = 0;
       fapi::Target l_targetCentaur;
       uint8_t l_mbaPosition = 0;
+      uint8_t l_rank_index = 0;
+      bool l_exit_point_1_needed = false;
+      ecmdDataBufferBase l_mbscfg(64);
+      uint8_t l_dd2_enable_exit_point_1 = 0;
+      
 
-// Get Centaur target for the given MBA
+      // Get Centaur target for the given MBA
       l_rc = fapiGetParentChip(i_target, l_targetCentaur);
       if(l_rc)
       {
@@ -3684,7 +4333,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       }
 
 
-// Get MBA position: 0 = mba01, 1 = mba23
+      // Get MBA position: 0 = mba01, 1 = mba23
       l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
       if(l_rc)
       {
@@ -3693,7 +4342,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       }
 
 
-// Get l_dramWidth
+      // Get l_dramWidth
       l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
       if(l_rc)
       {
@@ -3701,22 +4350,22 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Check for i_rank out of range
+      // Check for i_rank out of range
       if (i_rank>=8)
       {
         FAPI_ERR("i_rank input to mss_put_mark_store out of range on %s.",i_target.toEcmdString());
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: Capture i_rank;
+        // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_PUT_MARK_STORE_BAD_INPUT);
         return l_rc;
       }
 
-// Get l_symbolMarkGalois
+      // Get l_symbolMarkGalois
       if (i_symbolMark == MSS_INVALID_SYMBOL) // No symbol mark
       {
         l_symbolMarkGalois = 0x00;
@@ -3725,19 +4374,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("i_symbolMark invalid: symbol mark not allowed in x4 mode on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_symbolMark;
+        // FFDC: Capure i_symbolMark;
         uint8_t SYMBOL_MARK = i_symbolMark;
-// FFDC: Capure i_chipMark;
+        // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_X4_SYMBOL_ON_WRITE);
         return l_rc;
       }
@@ -3745,19 +4394,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("i_symbolMark invalid: symbol index out of range on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_symbolMark;
+        // FFDC: Capure i_symbolMark;
         uint8_t SYMBOL_MARK = i_symbolMark;
-// FFDC: Capure i_chipMark;
+        // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_INDEX);
         return l_rc;
       }
@@ -3768,7 +4417,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       l_ecmd_rc |= l_markstore.insert( l_symbolMarkGalois, 0, 8, 0 );
 
 
-// Get l_chipMarkGalois
+      // Get l_chipMarkGalois
       if (i_chipMark == MSS_INVALID_SYMBOL) // No chip mark
       {
         l_chipMarkGalois = 0x00;
@@ -3777,19 +4426,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("i_chipMark invalid: symbol index out of range on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_symbolMark;
+        // FFDC: Capure i_symbolMark;
         uint8_t SYMBOL_MARK = i_symbolMark;
-// FFDC: Capure i_chipMark;
+        // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_INDEX);
         return l_rc;
       }
@@ -3797,19 +4446,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("i_chipMark invalid: not first symbol index of a x8 chip on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_symbolMark;
+        // FFDC: Capure i_symbolMark;
         uint8_t SYMBOL_MARK = i_symbolMark;
-// FFDC: Capure i_chipMark;
+        // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CHIP_INDEX);
         return l_rc;
 
@@ -3818,23 +4467,23 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("i_chipMark invalid: not first symbol index of a x4 chip on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_symbolMark;
+        // FFDC: Capure i_symbolMark;
         uint8_t SYMBOL_MARK = i_symbolMark;
-// FFDC: Capure i_chipMark;
+        // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CHIP_INDEX);
         return l_rc;
       }
-// TODO: create error if x4 mode and symbol 0,1?
+      // TODO: create error if x4 mode and symbol 0,1?
       else // Convert from symbol index to galois field
       {
         l_chipMarkGalois = mss_symbol2Galois[i_chipMark];
@@ -3846,39 +4495,93 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Write markstore register for the given rank
+      // Write markstore register for the given rank
       l_rc = fapiPutScom(l_targetCentaur, mss_markStoreRegs[i_rank][l_mbaPosition], l_markstore);
       if(l_rc) return l_rc;
 
-// If MPE FIR for the given rank (scrub or fetch) is on after the write,
-// we will return a fapi::ReturnCode to indicate write may not have worked.
-// Up to caller to read again if they want to see what new chip mark is.
+      // If MPE FIR for the given rank (scrub or fetch) is on after the write,
+      // we will return a fapi::ReturnCode to indicate write may not have worked.
+      // Up to caller to read again if they want to see what new chip mark is.
       l_rc = fapiGetScom(l_targetCentaur, mss_mbeccfir[l_mbaPosition], l_mbeccfir);
       if(l_rc) return l_rc;
       if (l_mbeccfir.isBitSet(i_rank) || l_mbeccfir.isBitSet(20 + i_rank))
       {
-// TODO: Can FW distingish this rc from all the others
-// so they know they just need to retry after clearing MPE FIR?
-
         FAPI_ERR("Markstore write may have been blocked due to MPE FIR set on %s.",i_target.toEcmdString());
 
-// FFDC: MBA target
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_symbolMark;
+        // FFDC: Capure i_symbolMark;
         uint8_t SYMBOL_MARK = i_symbolMark;
-// FFDC: Capure i_chipMark;
+        // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
-// FFDC: Capture MBECCFIR
+        // FFDC: Capture MBECCFIR
         ecmdDataBufferBase & MBECCFIR = l_mbeccfir;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED);
         return l_rc;
       }
+      
+
+      // Get attribute that tells we have cen DD2, and can enable exit poing 1
+      l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DD2_ENABLE_EXIT_POINT_1, &i_target, l_dd2_enable_exit_point_1);
+      if(l_rc)
+      {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_DD2_ENABLE_EXIT_POINT_1");
+        return l_rc;
+      }    
+
+      if(l_dd2_enable_exit_point_1)
+      {   
+          // Read all mark store for both MBAs
+          for ( l_mbaPosition = 0; l_mbaPosition < 2; l_mbaPosition++)
+          {
+              for ( l_rank_index = 0; l_rank_index < MSS_MAX_RANKS; l_rank_index++ )
+              {
+                l_rc = fapiGetScom(l_targetCentaur, mss_markStoreRegs[l_rank_index][l_mbaPosition], l_markstore);
+                if(l_rc) return l_rc;
+                
+                if (l_markstore.isBitSet(0,16))
+                {
+                    // Mark found, so exit point 1 needed
+                    l_exit_point_1_needed = true;
+                    break;
+                }
+              }
+              if (l_exit_point_1_needed) break;
+          }
+
+          // Read MBSCFGQ
+          l_rc = fapiGetScom(l_targetCentaur, MBSCFGQ_0x02011411, l_mbscfg);
+          if(l_rc) return l_rc;
+          
+          // Enable exit point 1
+          if (l_exit_point_1_needed)
+          {
+            l_ecmd_rc |= l_mbscfg.setBit(0);
+          }
+          // Else, disable exit point 1
+          else
+          {
+            l_ecmd_rc |= l_mbscfg.clearBit(0);
+          }
+
+          if(l_ecmd_rc)
+          {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+          }
+       
+          // Write MBSCFGQ
+          l_rc = fapiPutScom(l_targetCentaur, MBSCFGQ_0x02011411, l_mbscfg);
+          if(l_rc) return l_rc;
+          
+      } // End if l_dd2_enable_exit_point_1
+
 
       FAPI_INF("EXIT mss_put_mark_store()");
       return l_rc;
@@ -3914,7 +4617,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       o_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
       o_eccSpareSymbol = MSS_INVALID_SYMBOL;
 
-// Get Centaur target for the given MBA
+      // Get Centaur target for the given MBA
       l_rc = fapiGetParentChip(i_target, l_targetCentaur);
       if(l_rc)
       {
@@ -3923,7 +4626,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       }
 
 
-// Get MBA position: 0 = mba01, 1 = mba23
+      // Get MBA position: 0 = mba01, 1 = mba23
       l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
       if(l_rc)
       {
@@ -3931,7 +4634,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Get l_dramWidth
+      // Get l_dramWidth
       l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
       if(l_rc)
       {
@@ -3940,41 +4643,41 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       }
 
 
-// Check for i_rank or i_muxType out of range
+      // Check for i_rank or i_muxType out of range
       if ((i_rank>=8) ||
           !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)))
       {
         FAPI_ERR("i_rank or i_muxType input to mss_get_steer_mux out of range on %s.",i_target.toEcmdString());
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: Capture i_rank;
+        // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_muxType
+        // FFDC: Capure i_muxType
         uint8_t MUX_TYPE = i_muxType;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_STEER_MUX_BAD_INPUT);
         return l_rc;
       }
 
 
-// Read steer mux register for the given rank and mux type (read or write).
+      // Read steer mux register for the given rank and mux type (read or write).
       if (i_muxType == mss_SteerMux::READ_MUX)
       {
-// Read muxes are in the MBS
+        // Read muxes are in the MBS
         l_rc = fapiGetScom(l_targetCentaur, mss_readMuxRegs[i_rank][l_mbaPosition], l_steerMux);
         if(l_rc) return l_rc;
       }
       else
       {
-// Write muxes are in the MBA
+        // Write muxes are in the MBA
         l_rc = fapiGetScom(i_target, mss_writeMuxRegs[i_rank], l_steerMux);
         if(l_rc) return l_rc;
       }
 
-//***************************************
-// Get l_dramSparePort0Index
+
+      // Get l_dramSparePort0Index
       l_ecmd_rc |= l_steerMux.extractPreserve(&l_dramSparePort0Index, 0, 5, 8-5);
       if(l_ecmd_rc)
       {
@@ -3982,7 +4685,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Get o_dramSparePort0Symbol if index in valid range
+      // Get o_dramSparePort0Symbol if index in valid range
       if ((l_dramWidth == mss_MemConfig::X8) && (l_dramSparePort0Index < MSS_X8_STEER_OPTIONS_PER_PORT))
       {
         o_dramSparePort0Symbol = mss_x8dramSparePort0Index_to_symbol[l_dramSparePort0Index];
@@ -3995,26 +4698,26 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("Steer mux l_dramSparePort0Index out of range on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_muxType
+        // FFDC: Capure i_muxType
         uint8_t MUX_TYPE = i_muxType;
-// FFDC: Capture steer mux
+        // FFDC: Capture steer mux
         ecmdDataBufferBase & STEER_MUX = l_steerMux;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
         return l_rc;
       }
 
 
-//***************************************
-// Get l_dramSparePort1Index
+
+      // Get l_dramSparePort1Index
       l_ecmd_rc |= l_steerMux.extractPreserve(&l_dramSparePort1Index, 5, 5, 8-5);
       if(l_ecmd_rc)
       {
@@ -4022,7 +4725,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Get o_dramSparePort1Symbol if index in valid range
+      // Get o_dramSparePort1Symbol if index in valid range
       if ((l_dramWidth == mss_MemConfig::X8) && (l_dramSparePort1Index < MSS_X8_STEER_OPTIONS_PER_PORT))
       {
         o_dramSparePort1Symbol = mss_x8dramSparePort1Index_to_symbol[l_dramSparePort1Index];
@@ -4035,26 +4738,26 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("Steer mux l_dramSparePort1Index out of range on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_muxType
+        // FFDC: Capure i_muxType
         uint8_t MUX_TYPE = i_muxType;
-// FFDC: Capture steer mux
+        // FFDC: Capture steer mux
         ecmdDataBufferBase & STEER_MUX = l_steerMux;
 
-// Create new log.
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
         return l_rc;
       }
 
 
-//***************************************
-// Get l_eccSpareIndex
+
+      // Get l_eccSpareIndex
       l_ecmd_rc |= l_steerMux.extractPreserve(&l_eccSpareIndex, 10, 6, 8-6);
       if(l_ecmd_rc)
       {
@@ -4062,7 +4765,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         return l_rc;
       }
 
-// Get o_eccSpareSymbol if index in valid range
+      // Get o_eccSpareSymbol if index in valid range
       if (l_eccSpareIndex < MSS_X4_ECC_STEER_OPTIONS)
       {
         o_eccSpareSymbol = mss_eccSpareIndex_to_symbol[l_eccSpareIndex];
@@ -4071,19 +4774,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       {
         FAPI_ERR("o_eccSpareSymbol out of range on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
-// FFDC: MBA target
+        // Calling out FW high
+        // FFDC: MBA target
         const fapi::Target & MBA = i_target;
-// FFDC: DRAM width
+        // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;
-// FFDC: Capure i_rank;
+        // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
-// FFDC: Capure i_muxType
+        // FFDC: Capure i_muxType
         uint8_t MUX_TYPE = i_muxType;
-// FFDC: Capture steer mux
+        // FFDC: Capture steer mux
         ecmdDataBufferBase & STEER_MUX = l_steerMux;
-
-// Create new log.
+        
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
         return l_rc;
       }
@@ -4160,7 +4863,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           (i_symbol >= 72))
       {
         FAPI_ERR("i_rank or i_muxType or i_steerType or i_symbol input to mss_get_steer_mux out of range on %s.",i_target.toEcmdString());
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = i_target;
 // FFDC: Capture i_rank;
@@ -4213,7 +4916,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           {
             FAPI_ERR("No match for i_symbol = %d in mss_x8dramSparePort0Index_to_symbol[] on %s.", i_symbol, i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
             const fapi::Target & MBA = i_target;
 // FFDC: DRAM width
@@ -4249,7 +4952,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           {
             FAPI_ERR("No match for i_symbol in mss_x4dramSparePort0Index_to_symbol[] on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
             const fapi::Target & MBA = i_target;
 // FFDC: DRAM width
@@ -4292,7 +4995,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           {
             FAPI_ERR("No match for i_symbol in mss_x8dramSparePort1Index_to_symbol[] on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
             const fapi::Target & MBA = i_target;
 // FFDC: DRAM width
@@ -4328,7 +5031,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           {
             FAPI_ERR("No match for i_symbol in mss_x4dramSparePort1Index_to_symbol[] on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
             const fapi::Target & MBA = i_target;
 // FFDC: DRAM width
@@ -4372,7 +5075,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
           {
             FAPI_ERR("No match for i_symbol in mss_eccSpareIndex_to_symbol[] on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
             const fapi::Target & MBA = i_target;
 // FFDC: DRAM width
@@ -4395,7 +5098,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         {
           FAPI_ERR("ECC_SPARE not valid with x8 mode on %s.",i_target.toEcmdString());
 
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
           const fapi::Target & MBA = i_target;
 // FFDC: DRAM width
@@ -4490,7 +5193,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
       if ((i_rank>=MSS_MAX_RANKS) || (i_symbol>=MSS_SYMBOLS_PER_RANK))
       {
         FAPI_ERR("i_rank or i_symbol input to mss_do_steer out of range on %s.",i_target.toEcmdString());
-// TODO: Calling out FW high
+// Calling out FW high
 // FFDC: MBA target
         const fapi::Target & MBA = i_target;
 // FFDC: Capture i_rank;
@@ -4556,9 +5259,6 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
       fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY);
 
-// TODO: Could be precise and find cal interval from:
-// ATTR_EFF_ZQCAL_INTERVAL (in clocks... so still have to know freq)
-// ATTR_EFF_MEMCAL_INTERVAL (in clocks... so still have to know freq)
 
 //------------------------------------------------------
 // Update read mux
@@ -5943,16 +6643,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
                                            uint8_t (&o_bad_bits)[2][10])
 
     {
-      FAPI_INF("ENTER mss_IPL_UE_isolation()");
+        FAPI_INF("ENTER mss_IPL_UE_isolation()");
 
-      fapi::ReturnCode l_rc;
-      uint32_t l_ecmd_rc = 0;
+        fapi::ReturnCode l_rc;
+        uint32_t l_ecmd_rc = 0;
 
-      static const uint32_t maintBufferReadDataRegs[2][2][8]={
+        static const uint32_t maintBufferReadDataRegs[2][2][8]={
 
         // UE trap 0:
         // Port0                                    beat  double word
-        {{MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, // 0     DW0
+      {{MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, // 0     DW0
         MAINT0_MBA_MAINT_BUFF2_DATA0_0x03010675, // 1     DW2
         MAINT0_MBA_MAINT_BUFF0_DATA1_0x03010656, // 2     DW4
         MAINT0_MBA_MAINT_BUFF2_DATA1_0x03010676, // 3     DW6
@@ -5962,7 +6662,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         MAINT0_MBA_MAINT_BUFF2_DATA3_0x03010678},// 7     DW14
 
         // Port1
-        {MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665, // 0     DW1
+       {MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665, // 0     DW1
         MAINT0_MBA_MAINT_BUFF3_DATA0_0x03010685, // 1     DW3
         MAINT0_MBA_MAINT_BUFF1_DATA1_0x03010666, // 2     DW5
         MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686, // 3     DW7
@@ -5973,7 +6673,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
         // UE trap 1:
         // Port0
-        {{MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, // 0     DW0
+      {{MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, // 0     DW0
         MAINT0_MBA_MAINT_BUFF2_DATA4_0x03010679, // 1     DW2
         MAINT0_MBA_MAINT_BUFF0_DATA5_0x0301065a, // 2     DW4
         MAINT0_MBA_MAINT_BUFF2_DATA5_0x0301067a, // 3     DW6
@@ -5983,7 +6683,7 @@ static const uint32_t maintBuffer65thRegs[4][2]={
         MAINT0_MBA_MAINT_BUFF2_DATA7_0x0301067c},// 7     DW14
 
         // Port1
-        {MAINT0_MBA_MAINT_BUFF1_DATA4_0x03010669, // 0     DW1
+       {MAINT0_MBA_MAINT_BUFF1_DATA4_0x03010669, // 0     DW1
         MAINT0_MBA_MAINT_BUFF3_DATA4_0x03010689, // 1     DW3
         MAINT0_MBA_MAINT_BUFF1_DATA5_0x0301066a, // 2     DW5
         MAINT0_MBA_MAINT_BUFF3_DATA5_0x0301068a, // 3     DW7
@@ -5994,148 +6694,171 @@ static const uint32_t maintBuffer65thRegs[4][2]={
 
 
         static const uint32_t maintBufferRead65thByteRegs[2][4]={
-          // UE trap 0
-          {MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695,
-          MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x03010696,
-          MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x03010697,
-          MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x03010698},
-          // UE trap 1
-          {MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC4_0x03010699,
-          MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC5_0x0301069a,
-          MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC6_0x0301069b,
-          MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC7_0x0301069c}};
+        // UE trap 0
+       {MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695,
+        MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x03010696,
+        MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x03010697,
+        MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x03010698},
+        // UE trap 1
+       {MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC4_0x03010699,
+        MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC5_0x0301069a,
+        MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC6_0x0301069b,
+        MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC7_0x0301069c}};
+
+        
+        uint8_t l_UE_trap = 0; // 0,1, since UE can be in 1st or 2nd half of buffer
+        uint8_t l_port = 0;    // 0,1
+        uint8_t l_beat = 0;    // 0-7
+        uint8_t l_byte = 0;    // 0-9
+        uint8_t l_nibble = 0;  // 0-17
+        uint8_t l_loop = 0;
+        ecmdDataBufferBase l_data(64);
+        ecmdDataBufferBase l_UE_trap0_signature(64);
+        ecmdDataBufferBase l_UE_trap1_signature(64);
+        ecmdDataBufferBase l_mbmmr(64);
+        ecmdDataBufferBase l_mbmct(64);
+        ecmdDataBufferBase l_mbstr(64);
+        uint8_t l_initPattern = 0;
+        uint8_t l_cmd_type = 0;
+        fapi::Target l_targetCentaur;
+        uint8_t l_mbaPosition = 0;
+        uint32_t l_tmp_data_diff[2];
+        uint8_t l_tag_MDI = 0;
+        uint8_t l_tmp_65th_byte_diff = 0;
+        ecmdDataBufferBase l_diff(64);
+        uint32_t l_ECC = 0;
+        uint32_t l_tmp_ECC_diff = 0;
+        ecmdDataBufferBase l_ECC_diff(32);
+        uint8_t l_ECC_c6_c5_c4_01 = 0;
+        uint8_t l_ECC_c6_c5_c4_23 = 0;
+        uint8_t l_ECC_c3_c2_c1_c0_01 = 0;
+        uint8_t l_ECC_c3_c2_c1_c0_23 = 0;
+        uint8_t l_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
+        uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
+        uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;
+        uint8_t l_dramWidth = 0;
 
 
-          uint8_t l_UE_trap = 0; // 0,1, since UE can be in 1st or 2nd half of buffer
-          uint8_t l_port = 0;    // 0,1
-          uint8_t l_beat = 0;    // 0-7
-          uint8_t l_byte = 0;    // 0-9
-          uint8_t l_loop = 0;
-          ecmdDataBufferBase l_data(64);
-          ecmdDataBufferBase l_UE_trap0_signature(64);
-          ecmdDataBufferBase l_UE_trap1_signature(64);
-          ecmdDataBufferBase l_mbmmr(64);
-          ecmdDataBufferBase l_mbmct(64);
-          ecmdDataBufferBase l_mbstr(64);
-          uint8_t l_initPattern = 0;
-          uint8_t l_cmd_type = 0;
-          fapi::Target l_targetCentaur;
-          uint8_t l_mbaPosition = 0;
-          uint32_t l_tmp_data_diff[2];
-          uint8_t l_tag_MDI = 0;
-          uint8_t l_tmp_65th_byte_diff = 0;
-          ecmdDataBufferBase l_diff(64);
-          uint32_t l_ECC = 0;
-          uint32_t l_tmp_ECC_diff = 0;
-          ecmdDataBufferBase l_ECC_diff(32);
-          uint8_t l_ECC_c6_c5_c4_01 = 0;
-          uint8_t l_ECC_c6_c5_c4_23 = 0;
-          uint8_t l_ECC_c3_c2_c1_c0_01 = 0;
-          uint8_t l_ECC_c3_c2_c1_c0_23 = 0;
-          uint8_t l_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
-          uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
-          uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;
+        //----------------------------------------------------
+        // Get l_dramWidth
+        //----------------------------------------------------          
+        l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
+        if(l_rc)
+        {
+            FAPI_ERR("Error getting DRAM width on %s.",i_target.toEcmdString());
+            return l_rc;
+        }
+        
+        // Convert from attribute enum values: 8,4 to index values: 0,1
+        if(l_dramWidth == mss_MemConfig::X8)
+        {
+            l_dramWidth = 0;
+        }
+        else
+        {
+            l_dramWidth = 1;
+        }
 
-          //----------------------------------------------------
-          // Initialize o_bad_bits
-          //----------------------------------------------------
+        //----------------------------------------------------
+        // Initialize o_bad_bits
+        //----------------------------------------------------
 
-          for(l_port=0; l_port<2; l_port++ )
-          {
+        for(l_port=0; l_port<2; l_port++ )
+        {
             for(l_byte=0; l_byte<10; l_byte++ )
             {
-              o_bad_bits[l_port][l_byte] = 0;
+                o_bad_bits[l_port][l_byte] = 0;
             }
-          }
+        }
 
 
-          //----------------------------------------------------
-          // Get the expected pattern (stored in mbmmr reg)
-          //----------------------------------------------------
+        //----------------------------------------------------
+        // Get the expected pattern (stored in mbmmr reg)
+        //----------------------------------------------------
 
-         // Get Centaur target for the given MBA
-          l_rc = fapiGetParentChip(i_target, l_targetCentaur);
-          if(l_rc)
-          {
+        // Get Centaur target for the given MBA
+        l_rc = fapiGetParentChip(i_target, l_targetCentaur);
+        if(l_rc)
+        {
             FAPI_ERR("Error getting Centaur parent target for the given MBA, on %s.",i_target.toEcmdString());
             return l_rc;
-          }
+        }
 
-          // Get MBA position: 0 = mba01, 1 = mba23
-          l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
-          if(l_rc)
-          {
+        // Get MBA position: 0 = mba01, 1 = mba23
+        l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
+        if(l_rc)
+        {
             FAPI_ERR("Error getting MBA position on %s.",i_target.toEcmdString());
             return l_rc;
-          }
+        }
 
-          // MBMMR[4:7] contains the pattern index
-          l_rc = fapiGetScom(l_targetCentaur, mss_mbmmr[l_mbaPosition], l_mbmmr);
-          if(l_rc) return l_rc;
-          l_ecmd_rc |= l_mbmmr.extractPreserve(&l_initPattern, 4, 4, 8-4);
-          if(l_ecmd_rc)
-          {
+        // MBMMR[4:7] contains the pattern index
+        l_rc = fapiGetScom(l_targetCentaur, mss_mbmmr[l_mbaPosition], l_mbmmr);
+        if(l_rc) return l_rc;
+        l_ecmd_rc |= l_mbmmr.extractPreserve(&l_initPattern, 4, 4, 8-4);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          // MBMCT[0:4] contains the cmd type
-          l_rc = fapiGetScom(i_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
-          if(l_rc) return l_rc;
-          l_ecmd_rc |= l_mbmct.extractPreserve(&l_cmd_type, 0, 5, 8-5);
-          if(l_ecmd_rc)
-          {
+        // MBMCT[0:4] contains the cmd type
+        l_rc = fapiGetScom(i_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
+        if(l_rc) return l_rc;
+        l_ecmd_rc |= l_mbmct.extractPreserve(&l_cmd_type, 0, 5, 8-5);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          // No isolation if cmd is timebased steer cleanup
-          if (l_cmd_type == 2)
-          {
+        // No isolation if cmd is timebased steer cleanup
+        if (l_cmd_type == 2)
+        {
             FAPI_ERR("WARNING: rank%d maint UE during steer cleanup - no bad bit isolation possible on %s.", i_rank, i_target.toEcmdString());
             return l_rc;
-          }
+        }
 
-          // No isolation if pattern is random
-          if (l_initPattern == 8)
-          {
+        // No isolation if pattern is random
+        if (l_initPattern == 8)
+        {
             FAPI_ERR("WARNING: rank%d maint UE with random pattern - no bad bit isolation possible on %s.", i_rank, i_target.toEcmdString());
             return l_rc;
-          }
+        }
 
 
-          FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X",l_initPattern,
-                   mss_maintBufferData[l_initPattern][0][0],
-                   mss_maintBufferData[l_initPattern][0][1]);
+        FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X",l_initPattern,
+                   mss_maintBufferData[l_dramWidth][l_initPattern][0][0],
+                   mss_maintBufferData[l_dramWidth][l_initPattern][0][1]);
 
-          //----------------------------------------------------
-          // Figure out which half of the buffer has the UE...
-          // Remember we had to first load the buffers with
-          // a hex signatue, and whichever gets overwritten
-          // has a UE trapped
-          //----------------------------------------------------
-          l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, l_UE_trap0_signature);
-          if(l_rc) return l_rc;
+        //----------------------------------------------------
+        // Figure out which half of the buffer has the UE...
+        // Remember we had to first load the buffers with
+        // a hex signatue, and whichever gets overwritten
+        // has a UE trapped
+        //----------------------------------------------------
+        l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, l_UE_trap0_signature);
+        if(l_rc) return l_rc;
 
-          l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, l_UE_trap1_signature);
-          if(l_rc) return l_rc;
+        l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, l_UE_trap1_signature);
+        if(l_rc) return l_rc;
 
-          // UE may be trapped in both halves of the buffer,
-          // but we will only use one.
-          if ((l_UE_trap0_signature.getWord(0) != 0xFACEB00C) &&
-              (l_UE_trap0_signature.getWord(0) != 0xD15C0DAD))
-          {
+        // UE may be trapped in both halves of the buffer,
+        // but we will only use one.
+        if ((l_UE_trap0_signature.getWord(0) != 0xFACEB00C) &&
+            (l_UE_trap0_signature.getWord(0) != 0xD15C0DAD))
+        {
             FAPI_INF("UE trapped in 1st half of maint buffer");
             l_UE_trap = 0;
-          }
-          else if ((l_UE_trap1_signature.getWord(0) != 0xFACEB00C) &&
-                   (l_UE_trap1_signature.getWord(0) != 0xD15C0DAD))
-          {
+        }
+        else if ((l_UE_trap1_signature.getWord(0) != 0xFACEB00C) &&
+                 (l_UE_trap1_signature.getWord(0) != 0xD15C0DAD))
+        {
             FAPI_INF("UE trapped in 2nd half of maint buffer");
             l_UE_trap = 1;
-          }
-          else
-          {
+        }
+        else
+        {
             FAPI_ERR("IPL UE trapping didn't work on i_rank = %d on %s.", i_rank, i_target.toEcmdString());
 
             // Read for FFDC: MBSTR[59]: UE trap enable bit
@@ -6159,16 +6882,16 @@ static const uint32_t maintBuffer65thRegs[4][2]={
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_UE_TRAP);
 
             return l_rc;
-          }
+        }
 
 
 
-          //----------------------------------------------------
-          // DATA: Do XOR of expected and actual data to find stuck bits
-          //----------------------------------------------------
+        //----------------------------------------------------
+        // DATA: Do XOR of expected and actual data to find stuck bits
+        //----------------------------------------------------
 
-          for(l_port=0; l_port<2; l_port++ )
-          {
+        for(l_port=0; l_port<2; l_port++ )
+        {
             l_tmp_data_diff[0] = 0;
             l_tmp_data_diff[1] = 0;
 
@@ -6176,19 +6899,19 @@ static const uint32_t maintBuffer65thRegs[4][2]={
             for(l_beat=0; l_beat<8; l_beat++ )
             {
 
-              l_rc = fapiGetScom(i_target, maintBufferReadDataRegs[l_UE_trap][l_port][l_beat], l_data);
-              if(l_rc) return l_rc;
-              FAPI_INF("Actual data, beat%d: 0x%.8X 0x%.8X", l_beat, l_data.getWord(0), l_data.getWord(1));
+                l_rc = fapiGetScom(i_target, maintBufferReadDataRegs[l_UE_trap][l_port][l_beat], l_data);
+                if(l_rc) return l_rc;
+                FAPI_INF("Actual data, beat%d: 0x%.8X 0x%.8X", l_beat, l_data.getWord(0), l_data.getWord(1));
 
-              FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X",l_initPattern,
-                       mss_maintBufferData[l_initPattern][l_port*8 + l_beat][0],
-                       mss_maintBufferData[l_initPattern][l_port*8 + l_beat][1]);
+                FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X",l_initPattern,
+                       mss_maintBufferData[l_dramWidth][l_initPattern][l_port*8 + l_beat][0],
+                       mss_maintBufferData[l_dramWidth][l_initPattern][l_port*8 + l_beat][1]);
 
-              // DO XOR of actual and expected data, and OR the result together for all 8 beats
-              l_tmp_data_diff[0] |= l_data.getWord(0) ^ mss_maintBufferData[l_initPattern][l_port*8 + l_beat][0];
-              l_tmp_data_diff[1] |= l_data.getWord(1) ^ mss_maintBufferData[l_initPattern][l_port*8 + l_beat][1];
+                // DO XOR of actual and expected data, and OR the result together for all 8 beats
+                l_tmp_data_diff[0] |= l_data.getWord(0) ^ mss_maintBufferData[l_dramWidth][l_initPattern][l_port*8 + l_beat][0];
+                l_tmp_data_diff[1] |= l_data.getWord(1) ^ mss_maintBufferData[l_dramWidth][l_initPattern][l_port*8 + l_beat][1];
 
-              FAPI_INF("***************************************** l_tmp_diff: 0x%.8X 0x%.8X", l_tmp_data_diff[0], l_tmp_data_diff[1]);
+                FAPI_INF("***************************************** l_tmp_diff: 0x%.8X 0x%.8X", l_tmp_data_diff[0], l_tmp_data_diff[1]);
             }
 
             // Put l_tmp_diff into a ecmdDataBufferBase to make it easier
@@ -6197,30 +6920,30 @@ static const uint32_t maintBuffer65thRegs[4][2]={
             l_ecmd_rc |= l_diff.insert(l_tmp_data_diff[1], 32, 32, 0);
             if(l_ecmd_rc)
             {
-              l_rc.setEcmdError(l_ecmd_rc);
-              return l_rc;
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
             }
 
             for(l_byte=0; l_byte<8; l_byte++ )
             {
-              l_ecmd_rc |= l_diff.extractPreserve(&o_bad_bits[l_port][l_byte], 8*l_byte, 8, 0);
+                l_ecmd_rc |= l_diff.extractPreserve(&o_bad_bits[l_port][l_byte], 8*l_byte, 8, 0);
             }
             if(l_ecmd_rc)
             {
-              l_rc.setEcmdError(l_ecmd_rc);
-              return l_rc;
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
             }
 
-          } // End loop on ports
+        } // End loop on ports
 
 
 
-          //----------------------------------------------------
-          // 65th byte: Do XOR of expected and actual 65th byte to find stuck bits
-          //----------------------------------------------------
+        //----------------------------------------------------
+        // 65th byte: Do XOR of expected and actual 65th byte to find stuck bits
+        //----------------------------------------------------
 
-          for(l_loop=0; l_loop<4; l_loop++ )
-          {
+        for(l_loop=0; l_loop<4; l_loop++ )
+        {
             l_tag_MDI = 0;
             l_tmp_65th_byte_diff = 0;
 
@@ -6234,57 +6957,57 @@ static const uint32_t maintBuffer65thRegs[4][2]={
             l_ecmd_rc |= l_data.extractPreserve(&l_tag_MDI, 0, 4, 0);
             if(l_ecmd_rc)
             {
-              l_rc.setEcmdError(l_ecmd_rc);
-              return l_rc;
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
             }
-
+            
             FAPI_INF("Actual:   bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", l_tag_MDI);
 
-            FAPI_INF("Expected: bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", mss_65thByte[l_initPattern][l_loop]);
+            FAPI_INF("Expected: bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", mss_65thByte[l_dramWidth][l_initPattern][l_loop]);
 
             // DO XOR of actual and expected data
-            l_tmp_65th_byte_diff = l_tag_MDI ^ mss_65thByte[l_initPattern][l_loop];
+            l_tmp_65th_byte_diff = l_tag_MDI ^ mss_65thByte[l_dramWidth][l_initPattern][l_loop];
             FAPI_INF("***************************************** l_tmp_65th_byte_diff: 0x%.2X", l_tmp_65th_byte_diff);
 
 
             // Check for mismatch in bit 0: Checkbit0_1
             if (l_tmp_65th_byte_diff & 0x80)
             {
-              // Checkbit0_1 maps to port0 bit 64, which is on byte8
-              o_bad_bits[0][8] |= 0x80;
+                // Checkbit0_1 maps to port0 bit 64, which is on byte8
+                o_bad_bits[0][8] |= 0x80;
             }
 
             // Check for mismatch in bit 1: Tag0_2
             if (l_tmp_65th_byte_diff & 0x40)
             {
-              // Tag0_2 maps to port0 bit 65, which is on byte8
-              o_bad_bits[0][8] |= 0x40;
+                // Tag0_2 maps to port0 bit 65, which is on byte8
+                o_bad_bits[0][8] |= 0x40;
             }
 
             // Check for mismatch in bit 2: Tag1_3
             if (l_tmp_65th_byte_diff & 0x20)
             {
-              // Tag1_3 maps to port0 bit 64, which is on byte8
-              o_bad_bits[0][8] |= 0x80;
+                // Tag1_3 maps to port0 bit 64, which is on byte8
+                o_bad_bits[0][8] |= 0x80;
             }
 
             // Check for mismatch in bit 3: MDI
             if (l_tmp_65th_byte_diff & 0x10)
             {
-              // MDI maps to port0 bit 65, which is on byte8
-              o_bad_bits[0][8] |= 0x40;
+                // MDI maps to port0 bit 65, which is on byte8
+                o_bad_bits[0][8] |= 0x40;
             }
-          } // End loops through trapped 65th byte info
+        } // End loops through trapped 65th byte info
 
+        
+        //----------------------------------------------------
+        // ECC: Do XOR of expected and actual ECC bits to find stuck bits
+        //----------------------------------------------------
 
-          //----------------------------------------------------
-          // ECC: Do XOR of expected and actual ECC bits to find stuck bits
-          //----------------------------------------------------
-
-          for(l_loop=0; l_loop<4; l_loop++ )
-          {
+        for(l_loop=0; l_loop<4; l_loop++ )
+        {
             l_ECC = 0;
-
+        
             l_rc = fapiGetScom(i_target, maintBufferRead65thByteRegs[l_UE_trap][l_loop], l_data);
             if(l_rc) return l_rc;
 
@@ -6292,107 +7015,225 @@ static const uint32_t maintBuffer65thRegs[4][2]={
             l_ecmd_rc |= l_data.extractPreserve(&l_ECC, 4, 28, 4);
             if(l_ecmd_rc)
             {
-              l_rc.setEcmdError(l_ecmd_rc);
-              return l_rc;
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
             }
 
             FAPI_INF("Actual:   ECC = 0x%.8X", l_ECC);
 
-            FAPI_INF("Expected: ECC = 0x%.8X", mss_ECC[l_initPattern][l_loop]);
+            FAPI_INF("Expected: ECC = 0x%.8X", mss_ECC[l_dramWidth][l_initPattern][l_loop]);
 
             // DO XOR of actual and expected data
-            l_tmp_ECC_diff |= l_ECC ^ mss_ECC[l_initPattern][l_loop];
+            l_tmp_ECC_diff |= l_ECC ^ mss_ECC[l_dramWidth][l_initPattern][l_loop];
             FAPI_INF("***************************************** l_tmp_ECC_diff: 0x%.8X", l_tmp_ECC_diff);
-          }
+        }
 
-          // Put l_tmp_ECC_diff into a ecmdDataBufferBase to make it easier
-          // to get into o_bad_bits
-          l_ecmd_rc |= l_ECC_diff.insert(l_tmp_ECC_diff, 0, 32, 0);
-          if(l_ecmd_rc)
-          {
+        // Put l_tmp_ECC_diff into a ecmdDataBufferBase to make it easier
+        // to get into o_bad_bits
+        l_ecmd_rc |= l_ECC_diff.insert(l_tmp_ECC_diff, 0, 32, 0);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c6_c5_c4_01, 4, 6, 8-6);
-          l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c6_c5_c4_23, 10, 6, 8-6);
-          l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c3_c2_c1_c0_01, 16, 8, 0);
-          l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c3_c2_c1_c0_23, 24, 8, 0);
-          if(l_ecmd_rc)
-          {
+        l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c6_c5_c4_01, 4, 6, 8-6);
+        l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c6_c5_c4_23, 10, 6, 8-6);
+        l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c3_c2_c1_c0_01, 16, 8, 0);
+        l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c3_c2_c1_c0_23, 24, 8, 0);
+        if(l_ecmd_rc)
+        {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
-          }
+        }
 
-          // The 6 bits of ECC_c6_c5_c4 maps to byte8 on port0
-          o_bad_bits[0][8] |= l_ECC_c6_c5_c4_01 | l_ECC_c6_c5_c4_23;
-          // The 8 bits of ECC_c3_c2_c1_c0 maps to byte8 byte on port1
-          o_bad_bits[1][8] |= l_ECC_c3_c2_c1_c0_01 | l_ECC_c3_c2_c1_c0_23;
+        // The 6 bits of ECC_c6_c5_c4 maps to byte8 on port0
+        o_bad_bits[0][8] |= l_ECC_c6_c5_c4_01 | l_ECC_c6_c5_c4_23;
+        // The 8 bits of ECC_c3_c2_c1_c0 maps to byte8 byte on port1
+        o_bad_bits[1][8] |= l_ECC_c3_c2_c1_c0_01 | l_ECC_c3_c2_c1_c0_23;
 
 
-          //----------------------------------------------------
-          // Spare: Mark byte9 bad if bad bits found in position being steered
-          //----------------------------------------------------
+        //----------------------------------------------------
+        // Spare: Mark byte9 bad if bad bits found in position being steered
+        //----------------------------------------------------
 
-          // READ steer mux, which gets me a symbol for port0 and port1
-          l_rc = mss_check_steering(i_target,
-                                    i_rank,
-                                    l_dramSparePort0Symbol,
-                                    l_dramSparePort1Symbol,
-                                    l_eccSpareSymbol);
-          if(l_rc) return l_rc;
+        // READ steer mux, which gets me a symbol for port0 and port1
+        l_rc = mss_check_steering(i_target,
+                                  i_rank,
+                                  l_dramSparePort0Symbol,
+                                  l_dramSparePort1Symbol,
+                                  l_eccSpareSymbol);
+        if(l_rc) return l_rc;
+        
 
-          // If steering on port0
-          if ( l_dramSparePort0Symbol != 0xff)
-          {
-            // Find the byte being steered
-            l_byte = mss_x8_chip_mark_to_centaurDQ[l_dramSparePort0Symbol/4][0]/8;
-
-            // If that byte has any bad bits in it, copy them to byte9,
-            if (o_bad_bits[0][l_byte])
+        //----------------------------
+        // x8
+        //----------------------------
+        if (l_dramWidth == 0)
+        {
+            // If steering on port0
+            if ( l_dramSparePort0Symbol != 0xff)
             {
-              o_bad_bits[0][9] = o_bad_bits[0][l_byte];
+                // Find the byte being steered
+                l_byte = mss_x8_chip_mark_to_centaurDQ[l_dramSparePort0Symbol/4][0]/8;
 
-            // Clear byte being steered, since it did not contribute to UE
-              o_bad_bits[0][l_byte] = 0;
+                // If that byte has any bad bits in it, copy them to byte9,
+                if (o_bad_bits[0][l_byte])
+                {
+                    o_bad_bits[0][9] = o_bad_bits[0][l_byte];
+
+                    // Clear byte being steered, since it did not contribute to UE
+                    o_bad_bits[0][l_byte] = 0;
+                }
             }
-          }
 
-          // If steering on port1
-          if ( l_dramSparePort1Symbol != 0xff)
-          {
-            // Find the byte being steered
-            l_byte = mss_x8_chip_mark_to_centaurDQ[l_dramSparePort1Symbol/4][0]/8;
-
-            // If that byte has any bad bits in it, copy them to byte9,
-            if (o_bad_bits[1][l_byte])
+            // If steering on port1
+            if ( l_dramSparePort1Symbol != 0xff)
             {
-              o_bad_bits[1][9] = o_bad_bits[1][l_byte];
+                // Find the byte being steered
+                l_byte = mss_x8_chip_mark_to_centaurDQ[l_dramSparePort1Symbol/4][0]/8;
 
-              // Clear byte being steered, since it did not contribute to UE
-              o_bad_bits[1][l_byte] = 0;
+                // If that byte has any bad bits in it, copy them to byte9,
+                if (o_bad_bits[1][l_byte])
+                {
+                    o_bad_bits[1][9] = o_bad_bits[1][l_byte];
+
+                    // Clear byte being steered, since it did not contribute to UE
+                    o_bad_bits[1][l_byte] = 0;
+                }
             }
-          }
+        }
 
-          //----------------------------------------------------
-          // Show results
-          //----------------------------------------------------
+        //----------------------------
+        // x4
+        //----------------------------
+        else
+        {
+            // If steering on port0
+            if ( l_dramSparePort0Symbol != 0xff)
+            {
+                // Find the nibble being steered (0-17)
+                l_nibble = mss_x4_chip_mark_to_centaurDQ[l_dramSparePort0Symbol/2][0]/4;
 
-          FAPI_ERR("WARNING: IPL UE isolation results for rank = %d on %s.", i_rank, i_target.toEcmdString());
-          FAPI_ERR("WARNING: Expected pattern = 0x%.8X", mss_maintBufferData[l_initPattern][0][0]);
-          for(l_port=0; l_port<2; l_port++ )
-          {
+                // If odd nibble (1,3,5,7,9,11,13,15,17)
+                if (l_nibble % 2)
+                {
+                    // If that nibble has any bad bits in it, copy them to byte9,
+                    if (o_bad_bits[0][l_nibble/2] & 0x0f)
+                    {
+                        o_bad_bits[0][9] = (o_bad_bits[0][l_nibble/2] << 4) & 0xf0;
+
+                        // Clear nibble being steered, since it did not contribute to UE
+                        o_bad_bits[0][l_nibble/2] &= 0xf0;
+                    }
+                }
+                
+                // Else even nibble (0,2,4,6,8,10,12,14,16)
+                else
+                {
+                    // If that nibble has any bad bits in it, copy them to byte9,
+                    if (o_bad_bits[0][l_nibble/2] & 0xf0)
+                    {
+                        o_bad_bits[0][9] = o_bad_bits[0][l_nibble/2] & 0xf0;
+
+                        // Clear nibble being steered, since it did not contribute to UE
+                        o_bad_bits[0][l_nibble/2] &= 0x0f;
+                    }
+                }                        
+            }
+
+            // If steering on port1
+            if ( l_dramSparePort1Symbol != 0xff)
+            {
+                // Find the nibble being steered (0-17)
+                l_nibble = mss_x4_chip_mark_to_centaurDQ[l_dramSparePort1Symbol/2][0]/4;
+
+                // If odd nibble (1,3,5,7,9,11,13,15,17)
+                if (l_nibble % 2)
+                {
+                    // If that nibble has any bad bits in it, copy them to byte9,
+                    if (o_bad_bits[1][l_nibble/2] & 0x0f)
+                    {
+                        o_bad_bits[1][9] = (o_bad_bits[1][l_nibble/2] << 4) & 0xf0;
+
+                        // Clear nibble being steered, since it did not contribute to UE
+                        o_bad_bits[1][l_nibble/2] &= 0xf0;
+                    }
+                }
+                
+                // Else even nibble (0,2,4,6,8,10,12,14,16)
+                else
+                {
+                    // If that nibble has any bad bits in it, copy them to byte9,
+                    if (o_bad_bits[1][l_nibble/2] & 0xf0)
+                    {
+                        o_bad_bits[1][9] = o_bad_bits[1][l_nibble/2] & 0xf0;
+
+                        // Clear nibble being steered, since it did not contribute to UE
+                        o_bad_bits[1][l_nibble/2] &= 0x0f;
+                    }
+                }                        
+            }
+
+
+            // If ecc spare used
+            if ( l_eccSpareSymbol != 0xff)
+            {
+                // Find the nibble being steered (0-17)
+                l_nibble = mss_x4_chip_mark_to_centaurDQ[l_eccSpareSymbol/2][0]/4;
+
+                // Find the port being steered (0,1)
+                l_port = mss_x4_chip_mark_to_centaurDQ[l_eccSpareSymbol/2][1];
+
+                // If odd nibble (1,3,5,7,9,11,13,15,17)
+                if (l_nibble % 2)
+                {
+                    // If that nibble has any bad bits in it, copy them to port1,nibble 17
+                    if (o_bad_bits[l_port][l_nibble/2] & 0x0f)
+                    {
+                        o_bad_bits[1][8] |= o_bad_bits[l_port][l_nibble/2] & 0x0f;
+
+                        // Clear nibble being steered, since it did not contribute to UE
+                        o_bad_bits[l_port][l_nibble/2] &= 0xf0;
+                    }
+                }
+                
+                // Else even nibble (0,2,4,6,8,10,12,14,16)
+                else
+                {
+                    // If that nibble has any bad bits in it, copy them to port1,nibble 17
+                    if (o_bad_bits[l_port][l_nibble/2] & 0xf0)
+                    {
+                        o_bad_bits[1][8] |= (o_bad_bits[l_port][l_nibble/2] >> 4) & 0x0f;
+
+                        // Clear nibble being steered, since it did not contribute to UE
+                        o_bad_bits[l_port][l_nibble/2] &= 0x0f;
+                    }
+                }                        
+            }
+        }
+
+
+
+        //----------------------------------------------------
+        // Show results
+        //----------------------------------------------------
+
+        FAPI_ERR("WARNING: IPL UE isolation results for rank = %d on %s.", i_rank, i_target.toEcmdString());
+        FAPI_ERR("WARNING: Expected pattern = 0x%.8X", mss_maintBufferData[l_dramWidth][l_initPattern][0][0]);
+        for(l_port=0; l_port<2; l_port++ )
+        {
             for(l_byte=0; l_byte<10; l_byte++ )
             {
-              FAPI_ERR("WARNING: o_bad_bits[port%d][byte%d] = %02x",
+                FAPI_ERR("WARNING: o_bad_bits[port%d][byte%d] = %02x",
                        l_port, l_byte, o_bad_bits[l_port][l_byte]);
             }
-          }
+        }
 
 
-          FAPI_INF("EXIT mss_IPL_UE_isolation()");
+        FAPI_INF("EXIT mss_IPL_UE_isolation()");
 
-          return l_rc;
+        return l_rc;
 
 
     }

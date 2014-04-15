@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_startclocks.C,v 1.12 2013/11/15 16:30:02 mfred Exp $
+// $Id: cen_mem_startclocks.C,v 1.13 2014/04/07 19:01:06 gollub Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_startclocks.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -77,6 +77,7 @@
 #include <fapi.H>
 #include <cen_scom_addresses.H>
 #include <cen_mem_startclocks.H>
+#include <mss_unmask_errors.H>
 
 //  Constants
 // CFAM FSI GP4 register bit/field definitions
@@ -111,7 +112,30 @@ extern "C" {
 
 using namespace fapi;
 
+// Procedures in this file
+fapi::ReturnCode cen_mem_startclocks_cloned(const fapi::Target & i_target);
+
+//------------------------------------------------------------------------------
 fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
+{
+    // Target is centaur
+    
+    fapi::ReturnCode l_rc;
+    
+    l_rc = cen_mem_startclocks_cloned(i_target);
+    
+	// If mss_unmask_pervasive_errors gets it's own bad rc,
+	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
+	// Else if mss_unmask_pervasive_errors runs clean, 
+	// it will just return the passed in rc.
+	l_rc = mss_unmask_pervasive_errors(i_target, l_rc);
+
+	return l_rc;
+}
+
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode cen_mem_startclocks_cloned(const fapi::Target & i_target)
 {
     // Target is centaur
 
@@ -395,6 +419,10 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_startclocks.C,v $
+Revision 1.13  2014/04/07 19:01:06  gollub
+
+#|   1.55  | gollub   |07-APR-14| Added dependancy on mss_unmask_errors for cen_mem_startclocks.C
+
 Revision 1.12  2013/11/15 16:30:02  mfred
 Changes made by Mike Jones for gerrit review, mostly for improved error handling.
 

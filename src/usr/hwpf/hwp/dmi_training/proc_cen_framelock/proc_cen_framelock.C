@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.22 2014/03/05 22:26:38 baysah Exp $
+/// $Id: proc_cen_framelock.C,v 1.23 2014/04/07 17:56:22 gollub Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -37,8 +37,8 @@
 
 // Change Log
 // Version | who      |Date     | Comment
-//   1.22  | baysah   |05-MAR-14| Fix for Defect SW248451 is to change replay buffer
-//                                overrun to checkstop in MCI
+//   1.23  | gollub   |07-APR-14| Added call to mss_unmask_inband_errors (used to be called in mss_draminit_mc)
+//   1.22  | baysah   |05-MAR-14| Fix for Defect SW248451 is to change replay buffer overrun to checkstop in MCI
 //   1.20  | bellows  |25-NOV-13| Changed include to use <> instead of "" for hostboot
 //   1.19  | bellows  |08-NOV-13| Added ATTR_MSS_INIT_STATE to track IPL states
 
@@ -47,11 +47,16 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <proc_cen_framelock.H>
-
+#include <mss_unmask_errors.H>
 
 extern "C"
 {
 using namespace fapi;
+
+fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
+                                    const fapi::Target& i_mem_target,
+                                    const proc_cen_framelock_args& i_args);
+
 
 //------------------------------------------------------------------------------
 // function: utility subroutine to clear the Centaur MBI Status Register
@@ -1706,8 +1711,29 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
 // P8 and Centaur chips.
 //
 //
+
+
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
+                                    const fapi::Target& i_mem_target,
+                                    const proc_cen_framelock_args& i_args)
+{    
+    fapi::ReturnCode l_rc;
+    
+    l_rc = proc_cen_framelock_cloned(i_pu_target, i_mem_target, i_args);
+    
+	// If mss_unmask_inband_errors gets it's own bad rc,
+	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
+	// Else if mss_unmask_inband_errors runs clean, 
+	// it will just return the passed in rc.
+	l_rc = mss_unmask_inband_errors(i_mem_target, l_rc);
+
+	return l_rc;
+}
+
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
                                     const fapi::Target& i_mem_target,
                                     const proc_cen_framelock_args& i_args)
 {

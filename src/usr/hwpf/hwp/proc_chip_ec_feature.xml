@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.50 2014/02/28 21:12:45 stillgs Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.51 2014/04/07 16:58:28 baysah Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
@@ -305,7 +305,7 @@
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
-        Centaur EC 0x20 or greater 
+        Centaur EC 0x20 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -444,6 +444,65 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MCS_VENDD1_FIR_CONTROL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Venice EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MCS_P8_DD2_FIR_CONTROL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC greater or equal to 0x20
+        Venice EC greater or equal to 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -648,7 +707,7 @@
     <id>ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      True if:        
+      True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
     </description>
@@ -673,7 +732,7 @@
     <id>ATTR_IO_TRAINING_SLS_WORKAROUND</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      For X fabric links only 
+      For X fabric links only
     </description>
     <chipEcFeature>
       <chip>
@@ -689,7 +748,7 @@
     <id>ATTR_IO_TRAINING_DLL_WORKAROUND</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Only For X fabric link 
+      Only For X fabric link
     </description>
     <chipEcFeature>
       <chip>
@@ -720,7 +779,7 @@
     <id>ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      True if:        
+      True if:
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
     </description>
@@ -746,7 +805,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Removes work-around for HW255321
-      True if:        
+      True if:
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
     </description>
@@ -806,7 +865,7 @@
           <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -824,14 +883,14 @@
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>      
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -849,14 +908,14 @@
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>      
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -873,7 +932,7 @@
           <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -891,14 +950,14 @@
           <value>0x20</value>
           <test>GREATER_THAN</test>
         </ec>
-      </chip>      
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -920,7 +979,7 @@
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -952,7 +1011,7 @@
           <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
-      </chip>      
+      </chip>
     </chipEcFeature>
   </attribute>
     <attribute>
@@ -970,14 +1029,14 @@
           <value>0x21</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip> 
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>    
+      </chip>
     </chipEcFeature>
   </attribute>
     <attribute>
@@ -985,9 +1044,9 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     True if chip can support the enablement of L3 purge aborts during Winkle as HW276505 is fixed
-        Not fixed on any Murano EC 
+        Not fixed on any Murano EC
         Venice EC 0x20 or greater
-    </description>    
+    </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
@@ -995,7 +1054,7 @@
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
-      </chip>    
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -1013,14 +1072,14 @@
           <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
-      </chip>  
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
-      </chip>       
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -1041,7 +1100,7 @@
         </ec>
       </chip>
     </chipEcFeature>
-  </attribute> 
+  </attribute>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
