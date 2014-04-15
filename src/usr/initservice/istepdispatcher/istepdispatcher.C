@@ -438,6 +438,11 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
         if (err)
         {
+            // Ensure severity reflects IPL will be terminated
+            if (err->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
+            {
+                err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            }
             break;
         }
         istep++;
