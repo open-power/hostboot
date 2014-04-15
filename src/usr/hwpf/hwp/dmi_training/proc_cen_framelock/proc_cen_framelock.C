@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.23 2014/04/07 17:56:22 gollub Exp $
+/// $Id: proc_cen_framelock.C,v 1.25 2014/04/11 18:15:42 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -37,6 +37,13 @@
 
 // Change Log
 // Version | who      |Date     | Comment
+// -----------------------------------------------------------------------------
+//   1.25  | baysah   |11-APR-14| Changed MBI internal scom FIRs from masked to recoverable error per Marc Gollub
+//         |          |         |
+//   1.24  | baysah   |07-APR-14| Changed seqid_ooo, MBIFIR(4) and MCIFIR(4), to masked per RAS request since it gets trigger by 1 crc error.
+//         |          |         | Made MCIFIR(46,48,49) as checkstop in Vendd1(bit 46 only) and Vendd2 and Murdd2 for all 3 fir bits .
+//         |          |         | Made MCIFIR(40) recoverable for MurDD2 and VenDD2, its a xstop for DD1 processors.
+//         |          |         |
 //   1.23  | gollub   |07-APR-14| Added call to mss_unmask_inband_errors (used to be called in mss_draminit_mc)
 //   1.22  | baysah   |05-MAR-14| Fix for Defect SW248451 is to change replay buffer overrun to checkstop in MCI
 //   1.20  | bellows  |25-NOV-13| Changed include to use <> instead of "" for hostboot
@@ -1717,14 +1724,14 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
 fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                     const fapi::Target& i_mem_target,
                                     const proc_cen_framelock_args& i_args)
-{    
+{
     fapi::ReturnCode l_rc;
-    
+
     l_rc = proc_cen_framelock_cloned(i_pu_target, i_mem_target, i_args);
-    
+
 	// If mss_unmask_inband_errors gets it's own bad rc,
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
-	// Else if mss_unmask_inband_errors runs clean, 
+	// Else if mss_unmask_inband_errors runs clean,
 	// it will just return the passed in rc.
 	l_rc = mss_unmask_inband_errors(i_mem_target, l_rc);
 
@@ -1746,6 +1753,9 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
 
     fapi::ReturnCode l_rc;
     uint32_t l_ecmdRc = 0;
+    uint8_t  l_murdd1_new_mcs_fir = 0;
+    uint8_t  l_vendd1_new_mcs_fir = 0;
+    uint8_t  l_procdd2_new_mcs_fir = 0;
 
     // mark HWP entry
     FAPI_IMP("proc_cen_framelock: Entering ...");
@@ -1768,6 +1778,37 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_CEN_FRAMELOCK_INVALID_ARGS);
         return l_rc;
     }
+
+
+
+    // Get attribute to determine If Murano DD1 processor
+    l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL, &i_pu_target, l_murdd1_new_mcs_fir);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL");
+        return l_rc;
+    }
+
+
+    // Get attribute to determine If Venice DD1 processor
+    l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_MCS_VENDD1_FIR_CONTROL, &i_pu_target, l_vendd1_new_mcs_fir);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CHIP_EC_FEATURE_MCS_VENDD1_FIR_CONTROL");
+        return l_rc;
+    }
+
+
+
+    // Get attribute to determine If Murano or Venice DD2 processor
+    l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_MCS_P8_DD2_FIR_CONTROL, &i_pu_target, l_procdd2_new_mcs_fir);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CHIP_EC_FEATURE_MCS_P8_DD2_FIR_CONTROL");
+        return l_rc;
+    }
+
+
 
     // Execute Framelock
     l_rc = proc_cen_framelock_run_framelock(i_pu_target, i_mem_target, i_args);
@@ -1944,7 +1985,14 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PowerBus
     l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
     l_ecmdRc |= mci_data.setBit(36);    //PowerBus Write Data Buffer UE
-    //l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error (On 5/06/2013 changed this fir to xstop, have to re-eval for Murano dd2)
+
+    if (l_procdd2_new_mcs_fir)
+    {
+    l_ecmdRc |= mci_data.setBit(40);     //MCS Channel Timeout Error is recoverable for DD2 processors, since channel timeout will force channel fail
+    }
+    //l_ecmdRc |= mci_data.setBit(40);   //MCS Channel Timeout Error (On 5/06/2013 changed this fir to xstop, have to re-eval for Murano dd2)
+
+
     l_ecmdRc |= mci_data.copy(mci_mask);
     if (l_ecmdRc)
     {
@@ -1989,7 +2037,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     // Set P8 MCI FIR Mask
     l_ecmdRc |= mci_data.flushTo0();
     l_ecmdRc |= mci_data.setBit(0);     //Replay Timeout
-    l_ecmdRc |= mci_data.setBit(4);     //Seqid OOO
+    //l_ecmdRc |= mci_data.setBit(4);     //Seqid OOO                        //Mask since it can be trigger by a crc error and will overflow the prd logs
     l_ecmdRc |= mci_data.setBit(5);     //Replay Buffer CE
     l_ecmdRc |= mci_data.setBit(6);     //Replay Buffer UE
     l_ecmdRc |= mci_data.setBit(8);     //MCI Internal Control Parity Error
@@ -2015,9 +2063,21 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.setBit(38);    //HA Illegal Consumer Access Error (xstop)
     l_ecmdRc |= mci_data.setBit(39);    //HA Illegal Producer Access Error (xstop)
     l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
+
+    if (!l_murdd1_new_mcs_fir)
+    {
+    l_ecmdRc |= mci_data.setBit(46);    //Non-bypassable data marked as bypass new fir in VenDD1, VenDD2 and MurDD2
+    }
+
+    if (l_procdd2_new_mcs_fir)
+    {
+    l_ecmdRc |= mci_data.setBit(48);    //Processor asked for Centaur to set MDI bit to 1, but Centaur set it to 0.
+    l_ecmdRc |= mci_data.setBit(49);    //SFTAT bit is not the same across an octoword, for non-error cases
+    }
+
     l_ecmdRc |= mci_data.copy(mci_mask);
     l_ecmdRc |= mci_data.clearBit(0);     //Replay Timeout
-    l_ecmdRc |= mci_data.clearBit(4);     //Seqid OOO
+    //l_ecmdRc |= mci_data.clearBit(4);     //Seqid OOO                       //Mask since it can be trigger by a crc error and will overflow the prd logs
     l_ecmdRc |= mci_data.clearBit(5);     //Replay Buffer CE
     l_ecmdRc |= mci_data.clearBit(6);     //Replay Buffer UE
     l_ecmdRc |= mci_data.clearBit(8);     //MCI Internal Control Parity Error
@@ -2043,6 +2103,18 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.clearBit(38);    //HA Illegal Consumer Access Error (xstop)
     l_ecmdRc |= mci_data.clearBit(39);    //HA Illegal Producer Access Error (xstop)
     l_ecmdRc |= mci_data.clearBit(40);    //MCS Channel Timeout Error
+
+    if (!l_murdd1_new_mcs_fir)
+    {
+    l_ecmdRc |= mci_data.clearBit(46);    //Non-bypassable data marked as bypass new fir in VenDD1, VenDD2 and MurDD2
+    }
+
+    if (l_procdd2_new_mcs_fir)
+    {
+    l_ecmdRc |= mci_data.clearBit(48);    //Processor asked for Centaur to set MDI bit to 1, but Centaur set it to 0.
+    l_ecmdRc |= mci_data.clearBit(49);    //SFTAT bit is not the same across an octoword, for non-error cases
+    }
+
     if (l_ecmdRc)
     {
         FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MCI FIRs",
@@ -2050,6 +2122,8 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
         l_rc.setEcmdError(l_ecmdRc);
         return l_rc;
     }
+
+
 
     l_rc = proc_cen_framelock_set_pu_mci_firmask_reg(i_pu_target, mci_data, mci_mask);
     if (l_rc)
@@ -2062,10 +2136,12 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
 
     // Set CEN MBI FIR ACT1
     l_ecmdRc |= mbi_data.flushTo0();
-    l_ecmdRc |= mbi_data.setBit(4);     //Seqid OOO
+    l_ecmdRc |= mbi_data.clearBit(4);   //Seqid OOO
     l_ecmdRc |= mbi_data.setBit(5);     //Replay Buffer CE
     l_ecmdRc |= mbi_data.setBit(10);    //CRC Performance Degradation
     l_ecmdRc |= mbi_data.setBit(16);    //Scom Register parity error
+    l_ecmdRc |= mbi_data.setBit(25);    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE: Internal SCOM Error Clone
+    l_ecmdRc |= mbi_data.setBit(26);    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY: Internal SCOM Error Clone copy
     l_ecmdRc |= mbi_data.copy(mbi_mask);
     if (l_ecmdRc)
     {
@@ -2085,7 +2161,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     // Set Centaur MBI FIR Mask
     l_ecmdRc |= mbi_data.flushTo0();
     l_ecmdRc |= mbi_data.setBit(0);     //Replay Timeout
-    l_ecmdRc |= mbi_data.setBit(4);     //Seqid ooo
+    //l_ecmdRc |= mbi_data.setBit(4);     //Seqid ooo                       //Mask since it can be trigger by a crc error and will overflow the prd logs
     l_ecmdRc |= mbi_data.setBit(5);     //Replay Buffer CE
     l_ecmdRc |= mbi_data.setBit(6);     //Replay Buffer UE
     l_ecmdRc |= mbi_data.setBit(8);     //MBI Internal Control Parity Error
@@ -2094,9 +2170,11 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mbi_data.setBit(16);    //SCOM Register parity
     l_ecmdRc |= mbi_data.setBit(19);    //MBICFGQ Parity Error
     l_ecmdRc |= mbi_data.setBit(20);    //Replay Buffer Overrun Error
+    l_ecmdRc |= mbi_data.setBit(25);    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE: Internal SCOM Error Clone
+    l_ecmdRc |= mbi_data.setBit(26);    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY: Internal SCOM Error Clone copy
     l_ecmdRc |= mbi_data.copy(mbi_mask);
     l_ecmdRc |= mbi_data.clearBit(0);     //Replay Timeout
-    l_ecmdRc |= mbi_data.clearBit(4);     //Seqid ooo
+    //l_ecmdRc |= mbi_data.clearBit(4);     //Seqid ooo                       //Mask since it can be trigger by a crc error and will overflow the prd logs
     l_ecmdRc |= mbi_data.clearBit(5);     //Replay Buffer CE
     l_ecmdRc |= mbi_data.clearBit(6);     //Replay Buffer UE
     l_ecmdRc |= mbi_data.clearBit(8);     //MBI Internal Control Parity Error
@@ -2105,6 +2183,8 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mbi_data.clearBit(16);    //SCOM Register parity
     l_ecmdRc |= mbi_data.clearBit(19);    //MBICFGQ Parity Error
     l_ecmdRc |= mbi_data.clearBit(20);    //Replay Buffer Overrun Error
+    l_ecmdRc |= mbi_data.clearBit(25);    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE: Internal SCOM Error Clone
+    l_ecmdRc |= mbi_data.clearBit(26);    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY: Internal SCOM Error Clone copy
     if (l_ecmdRc)
     {
         FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MBI FIRs",
