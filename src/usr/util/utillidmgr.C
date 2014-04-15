@@ -176,6 +176,7 @@ errlHndl_t UtilLidMgr::getLidSizePnor(size_t& o_lidSize, bool& o_imgInPnor)
         {
             //Lid not in extended image
             delete errl;
+            errl = NULL;
             break;
         }
 
@@ -222,6 +223,7 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
             {
                 //Lid not in extended image
                 delete errl;
+                errl = NULL;
                 break;
             }
         }

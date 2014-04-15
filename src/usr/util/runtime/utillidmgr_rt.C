@@ -92,6 +92,7 @@ errlHndl_t UtilLidMgr::loadLid()
     if (l_errl)
     {
         delete l_errl;
+        l_errl = NULL;
         int rc =
             g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer, &iv_lidSize);
 
