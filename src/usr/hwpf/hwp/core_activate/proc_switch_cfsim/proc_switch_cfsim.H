@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_switch_cfsim.H,v 1.3 2012/05/03 10:41:52 rkoester Exp $
+// $Id: proc_switch_cfsim.H,v 1.4 2014/03/18 12:37:57 bgeukes Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_switch_cfsim.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -48,7 +48,7 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
-#include "p8_scom_addresses.H"
+#include <p8_scom_addresses.H>
 
 
 //------------------------------------------------------------------------------

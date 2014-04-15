@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_thread_control.C,v 1.20 2013/03/15 15:03:58 jklazyns Exp $
+// $Id: proc_thread_control.C,v 1.21 2014/04/07 17:53:56 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -33,11 +33,11 @@
 // *!                 Activate is used to put a POR state thread in the proper
 // *!                 state to enable ram prior to starting.
 // *!               Also used to query the state of a thread.
-// *! OWNER NAME  : Lance Karm          Email: karm@us.ibm.com
+// *! OWNER NAME  : Nick Klazynski      Email: jklazyns@us.ibm.com
 // *! BACKUP NAME : Sebastien Lafontant Email: slafont@us.ibm.com
 //------------------------------------------------------------------------------
 #include <fapi.H>
-#include "proc_thread_control.H"
+#include <proc_thread_control.H>
 
 extern "C"
 {
@@ -130,6 +130,7 @@ extern "C"
             }
 
             FAPI_ERR("proc_thread_control: ERROR - invalid command issued to proc_thread_control");
+            const uint8_t COMMAND = i_command;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_THREAD_CONTROL_INV_COMMAND);
 
         }
@@ -202,6 +203,9 @@ extern "C"
                 else
                 {
                     FAPI_ERR("proc_thread_control_sreset: ERROR: Thread SReset issued, but no instructions have completed.  SReset might have failed for thread %d", i_thread);
+                    const fapi::Target & CORE_TARGET = i_target;
+                    const uint8_t THREAD = i_thread;
+                    const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                     FAPI_SET_HWP_ERROR(rc,
                             RC_PROC_THREAD_CONTROL_SRESET_FAIL);
                     break;
@@ -265,6 +269,9 @@ extern "C"
                 else
                 {
                     FAPI_ERR("proc_thread_control_start: Start Precondition Check failed: RAS Status Maintenance bit is not on for thread %d", i_thread);
+                    const fapi::Target & CORE_TARGET = i_target;
+                    const uint8_t THREAD = i_thread;
+                    const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                     FAPI_SET_HWP_ERROR(rc,
                             RC_PROC_THREAD_CONTROL_START_PRE_NOMAINT);
                     break;
@@ -305,6 +312,9 @@ extern "C"
                 else
                 {
                     FAPI_ERR("proc_thread_control_start: ERROR: Thread Start issued, but no instructions have completed.  Start might have failed for thread %d", i_thread);
+                    const fapi::Target & CORE_TARGET = i_target;
+                    const uint8_t THREAD = i_thread;
+                    const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                     FAPI_SET_HWP_ERROR(rc,
                             RC_PROC_THREAD_CONTROL_START_FAIL);
                     break;
@@ -388,6 +398,9 @@ extern "C"
                 else
                 {
                     FAPI_ERR("proc_thread_control_stop: Thread Stop failed: RAS Status Maintenance bit is not on for thread %d", i_thread);
+                    const fapi::Target & CORE_TARGET = i_target;
+                    const uint8_t THREAD = i_thread;
+                    const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                     FAPI_SET_HWP_ERROR(rc,
                             RC_PROC_THREAD_CONTROL_STOP_FAIL);
                     break;
@@ -447,6 +460,9 @@ extern "C"
             if (!(o_state & THREAD_STATE_MAINT))
             {
                 FAPI_ERR("proc_thread_control_step: Step Precondition failed: RAS Status Maintenance bit is not on for thread %d", i_thread);
+                const fapi::Target & CORE_TARGET = i_target;
+                const uint8_t THREAD = i_thread;
+                const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                 FAPI_SET_HWP_ERROR(rc,
                         RC_PROC_THREAD_CONTROL_STEP_PRE_NOMAINT);
                 break;
@@ -518,6 +534,9 @@ extern "C"
                     else
                     {
                         FAPI_ERR("proc_thread_control_step: Thread Step failed: RAS Status Group/Inst Complete bit is not on after %d poll attempts.  WARNING: RAS_MODE bit %d still in single instruction mode!  Thread %d", PTC_STEP_COMP_POLL_LIMIT, PTC_RAS_MODE_SINGLE, i_thread);
+                        const fapi::Target & CORE_TARGET = i_target;
+                        const uint8_t THREAD = i_thread;
+                        const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                         FAPI_SET_HWP_ERROR(rc,
                                 RC_PROC_THREAD_CONTROL_STEP_FAIL);
                         break;
@@ -615,6 +634,9 @@ extern "C"
             if (scomData.isBitClear(thd_activate_bit))
             {
                 FAPI_ERR("proc_thread_control_activate: Activate Thread failed: Thread Active bit is still off.");
+                const fapi::Target & CORE_TARGET = i_target;
+                const uint8_t THREAD = i_thread;
+                const ecmdDataBufferBase RAS_STATUS = o_ras_status;
                 FAPI_SET_HWP_ERROR(rc,
                         RC_PROC_THREAD_CONTROL_ACTIVATE_FAIL);
                 break;
