@@ -167,6 +167,22 @@ enum BlockPriority
  */
 #define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (96 * MEGABYTE)
 
+/** Region of memory reserved for unsecure memory accesses
+ *
+ *  The Secure BAR is placed at 64MB so that initially, everything above
+ *  is marked secure and everything below is marked unsecure.  External
+ *  entities, such as FSP, can only access memory in the unsecure region.
+ *  Items such as the Mailbox DMA buffer need to be placed into this region.
+ *
+ *  We do not want to place this region directly at zero because in some cases
+ *  we load a payload at address 0 (ex. Sapphire) and need to make sure there
+ *  is enough room for the payload before any reserved unsecure space.
+ *
+ *  Choosing (Secure BAR - Cache Size) as the value for this region, which
+ *  allows us to have a payload image up to that size and up to 'Cache Size'
+ *  worth of unsecure content.
+ */
+#define VMM_UNSECURE_RESERVED_MEMORY_BASEADDR (56 * MEGABYTE)
 
 /**
  * Test Constants

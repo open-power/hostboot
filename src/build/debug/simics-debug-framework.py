@@ -515,7 +515,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         mem_map_entries = (conf.system_cmp0.phys_mem).map
         for entry in mem_map_entries:
             #print ">> %d:%s" % (entry[0], entry[1])
-            if entry[0] == (node_num*per_node): 
+            if (entry[0] == (node_num*per_node)) or (entry[0] == hb_hrmor):
                 mem_object = simics.SIM_object_name(entry[1])
                 #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
                 break
@@ -542,7 +542,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 tracbin[node_num],\
                 hb_tracBinaryBuffer,\
                 hb_tracBinaryBufferSz)
-        
+
 
         cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile >> %s 2>/dev/null) || true\")"\
                 %(tracbin[node_num],\

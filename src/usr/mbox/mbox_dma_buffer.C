@@ -179,7 +179,8 @@ void DmaBuffer::initPhysicalArea(void*& io_addr, uint64_t& o_phys)
     // Move the physical address to the start of the node (unsecure) and
     // add on the DMA buffer offset inside the node.
     o_phys &= ~(hrmor_base-1);
-    o_phys += VmmManager::MBOX_DMA_ADDR;
+    o_phys += reinterpret_cast<uint64_t>(io_addr) +
+              VMM_UNSECURE_RESERVED_MEMORY_BASEADDR;
 
     // Allocate a new VMM block for the buffer.
     io_addr = mm_block_map(reinterpret_cast<void*>(o_phys),
@@ -194,6 +195,8 @@ void DmaBuffer::initPhysicalArea(void*& io_addr, uint64_t& o_phys)
         reinterpret_cast<uint64_t*>(io_addr),
         reinterpret_cast<uint64_t*>(VmmManager::MBOX_DMA_SIZE +
             reinterpret_cast<uint64_t>(io_addr)));
+
+    memset(io_addr, '\0', VmmManager::MBOX_DMA_SIZE);
 
 }
 
