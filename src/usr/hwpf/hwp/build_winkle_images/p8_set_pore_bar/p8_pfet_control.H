@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_control.H,v 1.4 2013/08/02 19:05:23 stillgs Exp $
+// $Id: p8_pfet_control.H,v 1.5 2014/02/25 04:30:36 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_control.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,52 +40,36 @@
 #define _P8_PFETCTL_H_
 
 
-extern "C" {
-
-#include "p8_pfet_types.H"
-
-
-// \todo  Define the read structure for programmatic data return
-
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
+#include "p8_pfet_types.H"
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*p8_pfet_control_FP_t) (const fapi::Target&,
-                                                uint8_t,
-                                                pfet_dom_t,
-                                                pfet_force_t
-                                               );
+                                                  uint8_t,
+                                                  pfet_dom_t,
+                                                  pfet_force_t);
 
-typedef fapi::ReturnCode (*p8_pfet_read_FP_t)   (const fapi::Target&);
+extern "C" {
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// Parameter structure definitions
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// Function prototype
-//------------------------------------------------------------------------------
-/// \param[in] i_target     Chip target
-/// \param[in] i_ex_number  EX number
-/// \param[in] i_domain     Domain: BOTH, ECO, CORE
-/// \param[in] i_op         Operation: VON, VOFF, NONE
+/// Controls the pfets for the specified EX chiplet
 ///
-/// \retval ECMD_SUCCESS if something good happens,
+/// \param[in] i_target    Processor Chip target
+/// \param[in] i_ex_number EX number
+/// \param[in] i_domain    Domain: BOTH, ECO, CORE
+/// \param[in] i_op        Operation:
+///                          VON: Turns a chiplet domain on, VCS then VDD
+///                          VOFF: Turns a chiplet domain off, VDD then VCS
+//                           VOFF_OVERRIDE: Turns a chiplet domain off with
+///                                         controller override
+///
+/// \retval SUCCESS if something good happens,
 /// \retval BAD_RETURN_CODE otherwise
-fapi::ReturnCode
-p8_pfet_control(    const fapi::Target& i_target,
-                    uint8_t             i_ex_number,
-                    pfet_dom_t          domain,
-                    pfet_force_t        op
-                 );
-
+fapi::ReturnCode p8_pfet_control(const fapi::Target& i_target,
+                                 uint8_t             i_ex_number,
+                                 pfet_dom_t          i_domain,
+                                 pfet_force_t        i_op);
 
 } // extern "C"
 

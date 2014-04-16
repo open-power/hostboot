@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_occ_firinit.C,v 1.15 2013/10/28 13:35:49 stillgs Exp $
+// $Id: p8_pm_occ_firinit.C,v 1.18 2014/03/10 15:10:09 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_occ_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -37,6 +37,8 @@
 /// Procedure Prereq:
 ///   o System clocks are running
 /// \endverbatim
+///
+/// buildfapiprcd p8_pm_occ_firinit.C
 //------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -164,19 +166,19 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
 
             SET_RECOV_ATTN(6);  SET_FIR_MASKED(6);        //  6 = pore_gpe0_fatal_err
             SET_RECOV_ATTN(7);  SET_FIR_MASKED(7);        //  7 = pore_gpe1_fatal_err
-            SET_RECOV_ATTN(8);  SET_FIR_MASKED(8);        //  8 = ocb_error
-            SET_RECOV_ATTN(9);                            //  9 = srt_ue
+            SET_RECOV_INTR(8);                            //  8 = ocb_error
+            SET_RECOV_INTR(9);                            //  9 = srt_ue
             SET_RECOV_ATTN(10);                           //  10 = srt_ce
             if (ce_fir_disable)
             {
                 SET_FIR_MASKED(10);
             }
-            SET_RECOV_ATTN(11);                           //  11 = srt_read_error
-            SET_RECOV_ATTN(12);                           //  12 = srt_write_error
-            SET_RECOV_ATTN(13);                           //  13 = srt_dataout_perr
-            SET_RECOV_ATTN(14);                           //  14 = srt_oci_write_data_parity
-            SET_RECOV_ATTN(15);                           //  15 = srt_oci_be_parity_err
-            SET_RECOV_ATTN(16);                           //  16 = srt_oci_addr_parity_err
+            SET_RECOV_INTR(11);                           //  11 = srt_read_error
+            SET_RECOV_INTR(12);                           //  12 = srt_write_error
+            SET_RECOV_INTR(13);                           //  13 = srt_dataout_perr
+            SET_RECOV_INTR(14);                           //  14 = srt_oci_write_data_parity
+            SET_RECOV_INTR(15);                           //  15 = srt_oci_be_parity_err
+            SET_RECOV_INTR(16);                           //  16 = srt_oci_addr_parity_err
             SET_RECOV_ATTN(17); SET_FIR_MASKED(17);       //  17 = pore_sw_error_err                        
             SET_RECOV_ATTN(18); SET_FIR_MASKED(18);       //  18 = pore_gpe0_error_err                      
             SET_RECOV_ATTN(19); SET_FIR_MASKED(19);       //  19 = pore_gpe1_error_err                      
@@ -191,30 +193,30 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
             SET_RECOV_ATTN(28);                           //  28 = ocb_db_oci_slave_error
             SET_RECOV_ATTN(29);                           //  29 = ocb_pib_addr_parity_err
             SET_RECOV_ATTN(30);                           //  30 = ocb_db_pib_data_parity_err
-            SET_RECOV_ATTN(31);                           //  31 = ocb_idc0_error
-            SET_RECOV_ATTN(32);                           //  32 = ocb_idc1_error
-            SET_RECOV_ATTN(33);                           //  33 = ocb_idc2_error
-            SET_RECOV_ATTN(34);                           //  34 = ocb_idc3_error
-            SET_RECOV_ATTN(35);                           //  35 = srt_fsm_err
+            SET_RECOV_ATTN(31); SET_FIR_MASKED(31);       //  31 = ocb_idc0_error
+            SET_RECOV_ATTN(32); SET_FIR_MASKED(32);       //  32 = ocb_idc1_error
+            SET_RECOV_ATTN(33); SET_FIR_MASKED(33);       //  33 = ocb_idc2_error
+            SET_RECOV_ATTN(34); SET_FIR_MASKED(34);       //  34 = ocb_idc3_error
+            SET_RECOV_INTR(35);                           //  35 = srt_fsm_err
             SET_RECOV_ATTN(36); SET_FIR_MASKED(36);       //  36 = jtagacc_err
             SET_RECOV_ATTN(37); SET_FIR_MASKED(37);       //  37 = spare_err_37
-            SET_RECOV_ATTN(38);                           //  38 = c405_ecc_ue
+            SET_RECOV_INTR(38);                           //  38 = c405_ecc_ue
             SET_RECOV_ATTN(39);                           //  39 = c405_ecc_ce
             if (ce_fir_disable)
             {
                 SET_FIR_MASKED(39);
             }
             SET_RECOV_ATTN(40); SET_FIR_MASKED(40);       //  40 = c405_oci_machinecheck
-            SET_RECOV_ATTN(41);                           //  41 = sram_spare_direct_error0
-            SET_RECOV_ATTN(42);                           //  42 = sram_spare_direct_error1
-            SET_RECOV_ATTN(43);                           //  43 = sram_spare_direct_error2
-            SET_RECOV_ATTN(44);                           //  44 = sram_spare_direct_error3
-            SET_RECOV_ATTN(45);                           //  45 = slw_ocislv_err
-            SET_RECOV_ATTN(46);                           //  46 = gpe_ocislv_err
-            SET_RECOV_ATTN(47);                           //  47 = ocb_ocislv_err
-            SET_RECOV_ATTN(48);                           //  48 = c405icu_m_timeout
-            SET_RECOV_ATTN(49);                           //  49 = c405dcu_m_timeout
-            SET_RECOV_ATTN(50); SET_FIR_MASKED(50);       //  50 = spare_fir                   
+            SET_RECOV_ATTN(41); SET_FIR_MASKED(41);       //  41 = sram_spare_direct_error0
+            SET_RECOV_ATTN(42); SET_FIR_MASKED(42);       //  42 = sram_spare_direct_error1
+            SET_RECOV_ATTN(43); SET_FIR_MASKED(43);       //  43 = sram_spare_direct_error2
+            SET_RECOV_ATTN(44); SET_FIR_MASKED(44);       //  44 = sram_spare_direct_error3
+            SET_RECOV_ATTN(45); SET_FIR_MASKED(45);       //  45 = slw_ocislv_err (SW250823)
+            SET_RECOV_INTR(46);                           //  46 = gpe_ocislv_err
+            SET_RECOV_INTR(47);                           //  47 = ocb_ocislv_err
+            SET_RECOV_ATTN(48); SET_FIR_MASKED(48);       //  48 = c405icu_m_timeout
+            SET_RECOV_ATTN(49); SET_FIR_MASKED(49);       //  49 = c405dcu_m_timeout
+            SET_RECOV_ATTN(50);                           //  50 = occ_complex_fault_safe         
             SET_RECOV_ATTN(51); SET_FIR_MASKED(51);       //  51 = spare_fir                   
             SET_RECOV_ATTN(52); SET_FIR_MASKED(52);       //  52 = spare_fir                   
             SET_RECOV_ATTN(53); SET_FIR_MASKED(53);       //  53 = spare_fir                   
