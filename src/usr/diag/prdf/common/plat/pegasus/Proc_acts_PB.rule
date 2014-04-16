@@ -1683,7 +1683,7 @@ group gPbaFir filter singlebit
     /** PBAFIR[3]
      *  PBAFIR_PB_SUE_FW
      */
-    (PbaFir, bit(3)) ? calloutProcLevel2MedThr1;
+    (PbaFir, bit(3)) ? callout2ndLvlMedThr32NoGard;
 
     /** PBAFIR[4]
      *  PBAFIR_PB_UE_FW
