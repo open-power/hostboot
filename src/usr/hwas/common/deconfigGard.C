@@ -622,86 +622,69 @@ errlHndl_t DeconfigGard::_getDeconfigureRecords(
 
 //******************************************************************************
 /**
- * @brief       simple helper fn to find and return the list of MCS targets
- *                  that are in the same MSS_MEM_MC_IN_GROUP as the input.
+ * @brief       simple helper fn to find and return the MCS which is paired to
+ *              the input MCS
  *
  * @param[in]   i_startMcs      pointer to starting MCS target
- * @param[in]   o_McsInGroup    list of functional Targets that are in the same
- *                              group as i_startMcs
  *
- * @return      none
+ * @return      Target          Pointer to Partner MCS of i_startMcs
  *
  */
-void findMcsInGroup(const Target *i_startMcs, TargetHandleList &o_McsInGroup)
+Target * findPartnerForMcs(const Target *i_startMcs)
 {
-    // find the group that this MCS is in by reading the
-    // group list from the proc. this is an array of 8 bitmasks.
-    // the 8 elements are each a different group; the bits in each
-    // element represent the MCS units in each group.
+    // Get CHIP_UNIT of the input MCS (0..7)
+    const ATTR_CHIP_UNIT_type startMcsUnit = i_startMcs->getAttr<ATTR_CHIP_UNIT>();
+    // Declare partner MCS CHIP_UNIT
+    ATTR_CHIP_UNIT_type partnerMcsUnit = 0;
 
-    o_McsInGroup.clear();
-    const Target *l_proc = getParentChip(i_startMcs);
-    ATTR_MSS_MEM_MC_IN_GROUP_type l_group;
-    l_proc->tryGetAttr<ATTR_MSS_MEM_MC_IN_GROUP>(l_group);
-
-    HWAS_DBG("findMcsInGroup MCS %.8X under proc %.8X",
-                 get_huid(i_startMcs), get_huid(l_proc));
-    HWAS_DBG(" groups: %.2X %.2X %.2X %.2X   %.2X %.2X %.2X %.2X",
-        l_group[0], l_group[1], l_group[2], l_group[3],
-        l_group[4], l_group[5], l_group[6], l_group[7]);
-
-    const uint8_t my_bit = 0x80 >> i_startMcs->getAttr<ATTR_CHIP_UNIT>();
-    uint8_t my_group = 0;
-    for (;
-            (my_group < 8 ) && ((l_group[my_group] & my_bit) == 0);
-            ++my_group)
-    {} // nothing - just looking for exit condition
-
-    // if found a match before we hit the end, find the list.
-    if (my_group != 8)
+    // If CHIP_UNIT is even, its partner will be the next MCS
+    if (!(startMcsUnit % 2))
     {
-        //  get MCS CHILDs that are functional
-        PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
-        PredicateIsFunctional isFunctional;
-        PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predMcs).push(&isFunctional).And();
-        targetService().getAssociated(o_McsInGroup, l_proc,
-            TargetService::CHILD_BY_AFFINITY, TargetService::IMMEDIATE,
-            &checkExpr);
+        partnerMcsUnit = startMcsUnit + 1;
+    }
+    // else, partner will be the previous MCS
+    else
+    {
+        partnerMcsUnit = startMcsUnit - 1;
+    }
 
-        for (TargetHandleList::iterator pMcs_it = o_McsInGroup.begin();
-               pMcs_it != o_McsInGroup.end();
-               /* increment will be done in loop */)
-        {
-            TargetHandle_t pMcs = *pMcs_it;
-            const uint8_t mcs_bit = 0x80 >> pMcs->getAttr<ATTR_CHIP_UNIT>();
+    // Get parent proc of i_startMcs to get other child MCSs
+    const Target *l_proc = getParentChip(i_startMcs);
+    HWAS_INF("findPartnerForMcs MCS %.8X (%d) under proc %.8X",
+                 get_huid(i_startMcs), startMcsUnit, get_huid(l_proc));
 
-            // if this is a paired MEMBUF - in the same group
-            if (l_group[my_group] & mcs_bit)
-            {
-                HWAS_INF("findMcsInGroup: MCS %.8X (0x%.2X) paired in group %d",
-                     get_huid(pMcs), mcs_bit, my_group);
+    // Retrieve MCS target whose CHIP_UNIT matches partnerMcsUnit
+    TargetHandleList l_funcMcsList;
+    PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
+    PredicateIsFunctional isFunctional;
+    PredicateAttrVal<ATTR_CHIP_UNIT> unitPosAttr(partnerMcsUnit);
+    PredicatePostfixExpr checkExpr;
+    checkExpr.push(&predMcs).push(&isFunctional).
+              push(&unitPosAttr).And().And();
+    targetService().getAssociated(l_funcMcsList, l_proc,
+        TargetService::CHILD_BY_AFFINITY, TargetService::IMMEDIATE,
+        &checkExpr);
 
-                // keep it in the list
-                pMcs_it++;
-            }
-            else
-            {
-                HWAS_DBG("findMcsInGroup: MCS %.8X (0x%.2X) not in group %d",
-                     get_huid(pMcs), mcs_bit, my_group);
+    // List should either be empty or contain one element
+    HWAS_ASSERT((l_funcMcsList.size() <= 1),
+        "HWAS _deconfigureByAssoc: pParentMcsList > 1");
 
-                 // erase this MCS, and 'increment' to next
-                pMcs_it = o_McsInGroup.erase(pMcs_it);
-            }
-        } // for
+    // If no partner found (partner MCS already deconfigured)
+    if (l_funcMcsList.empty())
+    {
+        HWAS_INF("findPartnerMcs: Partner for MCS %.8X was not found in"
+                 " functional list. Returning NULL",
+                 get_huid(i_startMcs));
+        return NULL;
     }
     else
     {
-        HWAS_INF("findMcsInGroup: can't find MCS %.8X in a group!",
-                get_huid(i_startMcs));
-        // just return an empty list
+        HWAS_INF("findPartnerForMcs found partner: MCS %.8X (%d)",
+                 get_huid(l_funcMcsList[0]),
+                 l_funcMcsList[0]->getAttr<ATTR_CHIP_UNIT>());
+        return l_funcMcsList[0];
     }
-} // findMcsInGroup
+} // findPartnerForMcs
 
 //******************************************************************************
 
@@ -1005,25 +988,23 @@ void DeconfigGard::_deconfigureByAssoc(
             {
                 //  get parent MCS
                 TargetHandleList pParentMcsList;
-                getParentAffinityTargets(pParentMcsList, &i_target,
-                        CLASS_UNIT, TYPE_MCS, true /*functional*/);
-                HWAS_ASSERT((pParentMcsList.size() <= 1),
+                getParentAffinityTargetsByState(pParentMcsList, &i_target,
+                        CLASS_UNIT, TYPE_MCS, UTIL_FILTER_PRESENT);
+                HWAS_ASSERT((pParentMcsList.size() == 1),
                     "HWAS _deconfigureByAssoc: pParentMcsList > 1");
-
-                // done if parent is already deconfigured
-                if (pParentMcsList.empty())
-                {
-                    break;
-                }
-
-                // deconfigure the parent
                 const Target *l_parentMcs = pParentMcsList[0];
-                HWAS_INF("_deconfigureByAssoc MEMBUF parent MCS: %.8X",
-                    get_huid(l_parentMcs));
-                _deconfigureTarget(const_cast<Target &> (*l_parentMcs),
-                    i_errlEid, i_runTimeDeconfigRule);
-                _deconfigureByAssoc(const_cast<Target &> (*l_parentMcs),
-                    i_errlEid, i_runTimeDeconfigRule);
+
+                // If parent is functional, deconfigure it
+                if (isFunctional(l_parentMcs))
+                {
+                    // deconfigure the parent
+                    HWAS_INF("_deconfigureByAssoc MEMBUF parent MCS: %.8X",
+                        get_huid(l_parentMcs));
+                    _deconfigureTarget(const_cast<Target &> (*l_parentMcs),
+                        i_errlEid, i_runTimeDeconfigRule);
+                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMcs),
+                        i_errlEid, i_runTimeDeconfigRule);
+                }
 
                 Target *pSys;
                 targetService().getTopLevelTarget(pSys);
@@ -1034,25 +1015,22 @@ void DeconfigGard::_deconfigureByAssoc(
                 {
                     break;
                 }
-
                 // if paired mode (interleaved)
                 //      deconfigure paired MCS and MEMBUF (Centaur)
                 // find paired MCS / MEMBUF (Centaur)
-                TargetHandleList pMcsList;
-                findMcsInGroup(l_parentMcs, pMcsList);
+                const Target *l_partnerMcs = findPartnerForMcs(l_parentMcs);
 
-                // deconfigure each paired MCS
-                for (TargetHandleList::iterator pMcs_it = pMcsList.begin();
-                        pMcs_it != pMcsList.end();
-                        ++pMcs_it)
+                // If partner MCS is functional (NULL otherwise)
+                if (l_partnerMcs)
                 {
-                    TargetHandle_t pMcs = *pMcs_it;
-
+                    // deconfigure the paired MCS
                     HWAS_INF("_deconfigureByAssoc MCS (& MEMBUF) paired: %.8X",
-                        get_huid(pMcs));
-                    _deconfigureTarget(*pMcs, i_errlEid,i_runTimeDeconfigRule);
-                    _deconfigureByAssoc(*pMcs, i_errlEid,i_runTimeDeconfigRule);
-                } // for
+                        get_huid(l_partnerMcs));
+                    _deconfigureTarget(const_cast<Target &> (*l_partnerMcs),
+                        i_errlEid,i_runTimeDeconfigRule);
+                    _deconfigureByAssoc(const_cast<Target &> (*l_partnerMcs),
+                        i_errlEid,i_runTimeDeconfigRule);
+                }
                 break;
             } // TYPE_MEMBUF
 
@@ -1062,13 +1040,11 @@ void DeconfigGard::_deconfigureByAssoc(
                 const Target *l_parentMembuf = getParentChip(&i_target);
 
                 // get children DIMM that are functional
-                PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
-                PredicatePostfixExpr checkExpr;
-                checkExpr.push(&predDimm).push(&isFunctional).And();
                 TargetHandleList pDimmList;
-                targetService().getAssociated(pDimmList, l_parentMembuf,
-                    TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-                    &checkExpr);
+                getChildAffinityTargetsByState(pDimmList,l_parentMembuf,
+                                               CLASS_LOGICAL_CARD,
+                                               TYPE_DIMM,
+                                               UTIL_FILTER_FUNCTIONAL);
 
                 // if parent MEMBUF (Centaur) has no functional memory
                 if (pDimmList.empty())
@@ -1100,8 +1076,8 @@ void DeconfigGard::_deconfigureByAssoc(
 
                 // find parent MCS
                 TargetHandleList pParentMcsList;
-                getParentAffinityTargets(pParentMcsList, l_parentMembuf,
-                        CLASS_UNIT, TYPE_MCS, true /*functional*/);
+                getParentAffinityTargetsByState(pParentMcsList, l_parentMembuf,
+                        CLASS_UNIT, TYPE_MCS, UTIL_FILTER_FUNCTIONAL);
                 HWAS_ASSERT((pParentMcsList.size() <= 1),
                     "HWAS _deconfigureByAssoc: pParentMcsList > 1");
 
@@ -1115,8 +1091,26 @@ void DeconfigGard::_deconfigureByAssoc(
                 const Target *l_parentMcs = pParentMcsList[0];
 
                 // find paired MCS / MEMBUF (Centaur)
-                TargetHandleList pMcsList;
-                findMcsInGroup(l_parentMcs, pMcsList);
+                const Target *l_partnerMcs = findPartnerForMcs(l_parentMcs);
+
+                // Obtain MBA targets related to paired MCS
+                TargetHandleList pMbaList;
+                getChildAffinityTargetsByState(pMbaList,l_partnerMcs,
+                                               CLASS_UNIT,
+                                               TYPE_MBA,
+                                               UTIL_FILTER_FUNCTIONAL);
+
+                // Declare list to hold any MBA targets we need to deconfigure
+                // as we look for matches.  This list will be used to run
+                // the subsequent _deconfigureByAssoc
+                TargetHandleList l_deconfigList;
+
+                // Now we will check the memory size of each MBA target
+                // of the paired MCS.  If an MBAs memory size matches that
+                // of the original MBA (i_target), then we will deconfigure it
+                // If ATTR_EFF_DIMM_SIZE has not been set yet (returns 0), then
+                // we will deconfigure the MBA whose position matches that of
+                // the original.
 
                 // how much memory does this MBA have
                 ATTR_EFF_DIMM_SIZE_type l_dimmSize;
@@ -1126,43 +1120,46 @@ void DeconfigGard::_deconfigureByAssoc(
                         l_dimmSize[1][0] + l_dimmSize[1][1];
 
                 if (l_mbaDimmSize == 0)
-                {   // before this attribute has been set, so don't check
-                    break;
-                }
-
-                // now we'll walk thru MCS targets in the group, find MBAs
-                // that match in memory size, and deconfigure them, and add
-                // them to this list to do the _deconfigureByAssoc afterward.
-                TargetHandleList l_deconfigList;
-
-                // for each paired MCS in the group
-                for (TargetHandleList::iterator pMcs_it = pMcsList.begin();
-                        pMcs_it != pMcsList.end();
-                        ++pMcs_it)
                 {
-                    TargetHandle_t pMcs = *pMcs_it;
+                    // before this attribute has been set
+                    HWAS_INF("ATTR_EFF_DIMMSIZE not set (returned 0)."
+                        " Deconfiguring same-position MBA of paried MCS.");
 
-                    if (pMcs == l_parentMcs)
-                    {   // this is 'my' MCS - continue
-                        continue;
-                    }
+                    // Get this MBAs position
+                    const ATTR_CHIP_UNIT_type l_mbaPos =
+                        i_target.getAttr<ATTR_CHIP_UNIT>();
 
-                    // search for memory on EITHER of its MBA that matchs
-                    TargetHandleList pMbaList;
-                    PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
-                    PredicatePostfixExpr checkExpr;
-                    checkExpr.push(&predMba).push(&isFunctional).And();
-                    targetService().getAssociated(pMbaList, pMcs,
-                        TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-                        &checkExpr);
-
-                    // if there are 2 functional MBA, then one of them matches
-                    // the MBA we just deconfigured, so we need to find the
-                    // match and deconfigure it.
-
-                    // assumes 2 MBA per MEMBUF. if this changes, then instead
+                    // Assumes 2 MBA per MEMBUF. if this changes, then instead
                     // of '1', count the number of MBAs under this MEMBUF and
                     // use that as the comparison.
+                    if (pMbaList.size() != 1) // this != myMbaCount
+                    {
+                        // Iterate through MBAs looking for position match
+                        for (TargetHandleList::iterator
+                                pMba_it = pMbaList.begin();
+                                pMba_it != pMbaList.end();
+                                ++pMba_it)
+                        {
+                            // Capture current MBA
+                            TargetHandle_t pMba = *pMba_it;
+
+                            // If position matches
+                            if (l_mbaPos == pMba->getAttr<ATTR_CHIP_UNIT>())
+                            {
+                                // Deconfigure it
+                                HWAS_INF("_deconfigureByAssoc MBA matched: %.8X",
+                                    get_huid(pMba));
+                                _deconfigureTarget(*pMba, i_errlEid,
+                                    i_runTimeDeconfigRule);
+                                l_deconfigList.push_back(pMba);
+                                break; // only need to do 1 MBA - we're done.
+                            }
+                        }// 2 functional MBAs
+                    }// size != 1
+                }// ATTR_EFF_DIMM_SIZE not set
+                else
+                {
+                    // ATTR_EFF_DIMM_SIZE was set
                     if (pMbaList.size() != 1) // this != myMbaCount
                     {
                         // unbalanced, so lets find one to deconfigure
@@ -1189,7 +1186,7 @@ void DeconfigGard::_deconfigureByAssoc(
                             }
                         } // for MBA
                     } // if 2 functional MBA
-                } // for paired MCS
+                }// else
 
                 // now loop thru and do the ByAssoc deconfig for each of the
                 // MBA targets. this should get the CHILD associations, but
