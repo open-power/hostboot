@@ -397,6 +397,8 @@ const char* EntityPath::pathElementTypeAsString(
              return "PCIESWITCH";
         case TYPE_CAPP:
             return "CAPP";
+        case TYPE_FSI:
+            return "FSI";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

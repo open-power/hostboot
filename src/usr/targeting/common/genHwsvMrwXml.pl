@@ -1949,16 +1949,35 @@ sub generate_proc
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc});
     my $vpdnum = ${proc};
     my $position = ${proc};
-    my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
-    my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
-    my $scomsize = length($scompath) + 1;
-    my $scansize = length($scanpath) + 1;
-    my $mboxpath = "";
-    my $mboxsize = 0;
-    if (exists $devpath->{chip}->{$ipath}->{'mailbox-path'})
+    my $scomFspApath = $devpath->{chip}->{$ipath}->{'scom-path-a'};
+    my $scanFspApath = $devpath->{chip}->{$ipath}->{'scan-path-a'};
+    my $scomFspAsize = length($scomFspApath) + 1;
+    my $scanFspAsize = length($scanFspApath) + 1;
+    my $scomFspBpath = "";
+    if (ref($devpath->{chip}->{$ipath}->{'scom-path-b'}) ne "HASH")
     {
-        $mboxpath = $devpath->{chip}->{$ipath}->{'mailbox-path'};
-        $mboxsize = length($mboxpath) + 1;
+        $scomFspBpath = $devpath->{chip}->{$ipath}->{'scom-path-b'};
+    }
+    my $scanFspBpath = "";
+    if (ref($devpath->{chip}->{$ipath}->{'scan-path-b'}) ne "HASH")
+    {
+        $scanFspBpath = $devpath->{chip}->{$ipath}->{'scan-path-b'};
+    }
+    my $scomFspBsize = length($scomFspBpath) + 1;
+    my $scanFspBsize = length($scanFspBpath) + 1;
+    my $mboxFspApath = "";
+    my $mboxFspAsize = 0;
+    my $mboxFspBpath = "";
+    my $mboxFspBsize = 0;
+    if (exists $devpath->{chip}->{$ipath}->{'mailbox-path-a'})
+    {
+        $mboxFspApath = $devpath->{chip}->{$ipath}->{'mailbox-path-a'};
+        $mboxFspAsize = length($mboxFspApath) + 1;
+    }
+    if (exists $devpath->{chip}->{$ipath}->{'mailbox-path-b'})
+    {
+        $mboxFspBpath = $devpath->{chip}->{$ipath}->{'mailbox-path-b'};
+        $mboxFspBsize = length($mboxFspBpath) + 1;
     }
 
     my $psichip = 0;
@@ -2167,9 +2186,11 @@ sub generate_proc
 
 
     # fsp-specific proc attributes
-    do_plugin('fsp_proc', $scompath, $scomsize, $scanpath, $scansize,
-            $node, $proc, $fruid, $ipath, $hwTopology, $mboxpath, $mboxsize,
-            $ordinalId );
+    do_plugin('fsp_proc',
+            $scomFspApath, $scomFspAsize, $scanFspApath, $scanFspAsize,
+            $scomFspBpath, $scomFspBsize, $scanFspBpath, $scanFspBsize,
+            $node, $proc, $fruid, $ipath, $hwTopology, $mboxFspApath,
+            $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId );
 
     # Data from PHYP Memory Map
     print "\n";
@@ -3007,10 +3028,22 @@ sub generate_centaur
             $vmemId, $vmemDevPath, $vmemAddr, $ipath) = @_;
     my @fsi = @{$fsiA};
     my @altfsi = @{$altfsiA};
-    my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
-    my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
-    my $scomsize = length($scompath) + 1;
-    my $scansize = length($scanpath) + 1;
+    my $scomFspApath = $devpath->{chip}->{$ipath}->{'scom-path-a'};
+    my $scanFspApath = $devpath->{chip}->{$ipath}->{'scan-path-a'};
+    my $scomFspAsize = length($scomFspApath) + 1;
+    my $scanFspAsize = length($scanFspApath) + 1;
+    my $scomFspBpath = "";
+    if (ref($devpath->{chip}->{$ipath}->{'scom-path-b'}) ne "HASH")
+    {
+        $scomFspBpath = $devpath->{chip}->{$ipath}->{'scom-path-b'};
+    }
+    my $scanFspBpath = "";
+    if (ref($devpath->{chip}->{$ipath}->{'scan-path-b'}) ne "HASH")
+    {
+        $scanFspBpath = $devpath->{chip}->{$ipath}->{'scan-path-b'};
+    }
+    my $scomFspBsize = length($scomFspBpath) + 1;
+    my $scanFspBsize = length($scanFspBpath) + 1;
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
@@ -3150,8 +3183,9 @@ sub generate_centaur
     </attribute>";
 
     # call to do any fsp per-centaur attributes
-    do_plugin('fsp_centaur', $scompath, $scomsize, $scanpath, $scansize,
-                $vmemDevPath, $vmemAddr, $relativeCentaurRid, $ordinalId);
+    do_plugin('fsp_centaur', $scomFspApath, $scomFspAsize, $scanFspApath,
+       $scanFspAsize, $scomFspBpath, $scomFspBsize, $scanFspBpath,
+       $scanFspBsize, $vmemDevPath, $vmemAddr, $relativeCentaurRid, $ordinalId);
 
     print "\n</targetInstance>\n";
 
@@ -3211,7 +3245,7 @@ sub generate_l4
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
-    my $uidstr = sprintf("0x%02X0C%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $uidstr = sprintf("0x%02X0A%04X",${node},$mcs+$proc*8+${node}*8*8);
     my $mruData = get_mruid($ipath);
 
     print "
