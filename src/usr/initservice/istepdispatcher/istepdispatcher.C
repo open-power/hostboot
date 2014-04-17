@@ -1190,7 +1190,7 @@ void IStepDispatcher::iStepBreakPoint(uint32_t i_info)
 // ----------------------------------------------------------------------------
 bool IStepDispatcher::isShutdownRequested()
 {
-    TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::isShutdownRequested");
+    TRACDCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::isShutdownRequested");
 
     mutex_lock(&iv_mutex);
     bool isShutdownRequested = iv_shutdown;
@@ -1201,7 +1201,7 @@ bool IStepDispatcher::isShutdownRequested()
         isShutdownRequested = isFutureShutdownRequested();
     }
 
-    TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::isShutdownRequested");
+    TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::isShutdownRequested");
     return isShutdownRequested;
 }
 
