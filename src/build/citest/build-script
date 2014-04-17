@@ -22,8 +22,48 @@
 #
 # IBM_PROLOG_END_TAG
 
-source "$WORKSPACE/env.bash"
+if [ -z $HOSTBOOTROOT ]; then
+    source "$WORKSPACE/env.bash"
+fi
+
+source "$HOSTBOOTROOT/src/build/citest/setup-env"
+
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
+# Check copyright.
+check-copyright > copyright.log 2>&1 &
+COPYRIGHT_PID=$!
+
+# Create simics sandbox.
+create-sandbox > create-sandbox.log 2>&1 &
+CREATESANDBOX_PID=$!
+
+# Build Hostboot.
 make -j32 || exit -1
-$WORKSPACE/src/build/citest/cxxtest-start.sh || exit -1
+
+# Check sandbox create completion.
+wait $CREATESANDBOX_PID
+if [ $? -eq 0 ]; then
+    cat create-sandbox.log
+else
+    echo "----Sandbox creation failed."
+    cat create-sandbox.log
+    exit -1
+fi
+
+# Add Hostboot files to simics sandbox.
+populate-sandbox || exit -1
+
+# Start CxxTest Simics execution.
+cxxtest-start.sh || exit -1
+
+# Check copyright completion.
+wait $COPYRIGHT_PID
+if [ $? -eq 0 ]; then
+    cat copyright.log
+else
+    echo "----Copyright check failed."
+    cat copyright.log
+    exit -1
+fi
+

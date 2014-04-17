@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -444,16 +444,16 @@ hb_errlparser()
     # Trigger a build of the hostboot plugins we shipped with the
     # hb prime cmd.
     execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw/ \
-                                             && mk -a "  "x86.nfp"
+                                             && mk -a -j32"  "x86.nfp"
 
     # build srci in x86 context
     execute_in_sandbox "cd ${SANDBOXBASE}/src/srci \
-                                             && mk -a "  "x86.nfp"
+                                             && mk -a -j32"  "x86.nfp"
 
     # build errl in x86 context, to pick-up the parser libs from
     # hostboot.
     execute_in_sandbox "cd ${SANDBOXBASE}/src/errl \
-                                             && mk -a "  "x86.nfp"
+                                             && mk -a -j32"  "x86.nfp"
 
     cd ${SANDBOXBASE}/simics
     tar -xvf  $SANDBOXBASE/obj/x86.nfp/errl/nfp/tool/errl.tar  errl

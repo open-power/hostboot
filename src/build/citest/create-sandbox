@@ -1,0 +1,70 @@
+#!/bin/sh
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/citest/create-sandbox $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2014
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+echo "Creating ODE sandbox..."
+
+# Ensure backing build is accessible.
+if [ ! -d "$BACKING_BUILD" ];
+then
+    echo "Cannot access the backing build: $BACKING_BUILD"
+    exit -1
+fi
+
+# Delete existing sandbox if it exists.
+if [ -d "$SANDBOXBASE" ];
+then
+    echo "----Removing old sandbox."
+    mksb -undo -auto -rc $SANDBOXRC -dir $SANDBOXROOT -sb $SANDBOXNAME
+fi
+if [ -d "$SANDBOXBASE" ];
+then
+    rm -rf $SANDBOXBASE
+fi
+
+# Create sandbox.
+mksb -rc $SANDBOXRC -dir $SANDBOXROOT -back $BACKING_BUILD -sb $SANDBOXNAME \
+      -m ppc  || exit -1
+
+# workaround scripts expect $sb variable to be populated.
+export sb=$SANDBOXBASE/src
+
+# Run presimsetup workarounds.
+echo "----Running presimsetup workarounds."
+if [ -f ${CITESTPATH}/etc/workarounds.presimsetup ];
+then
+    ${CITESTPATH}/etc/workarounds.presimsetup || exit -1
+fi
+
+# Run start_simics to populate simics directories.
+echo "----Setting up simics."
+execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
+                   "ppc" || exit -1
+
+# Run postsimsetup workarounds.
+echo "----Running postsimsetup workarounds."
+if [ -f ${CITESTPATH}/etc/workarounds.postsimsetup ];
+then
+    ${CITESTPATH}/etc/workarounds.postsimsetup || exit -1
+fi
+

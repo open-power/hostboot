@@ -1,0 +1,78 @@
+#!/bin/sh
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/citest/setup-env $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2014
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+export CITESTPATH=${HOSTBOOTROOT}/src/build/citest
+export PATH=${CITESTPATH}:${PATH}
+
+# Determine backing build.
+export BACKING_BUILD=`cat ${CITESTPATH}/etc/bbuild`
+
+# If we are running under Jenkins we need to pick a random-ish sandbox name
+# so that the autoipl tools do not have a /tmp name collision.
+if [ -z $JOB_NAME -o -z $BUILD_NUMBER ];
+then
+    CXXTEST_SANDBOX="cxxtest_sb"
+else
+    export RUNNING_UNDER_JENKINS=1
+    CXXTEST_SANDBOX=`echo $JOB_NAME $BUILD_NUMBER | md5sum | head -c10`  
+fi
+
+# Setup sandbox location variables.
+if [ -z $SANDBOXROOT ];
+then
+    export SANDBOXROOT=${HOSTBOOTROOT}
+fi
+export SANDBOXNAME=${CXXTEST_SANDBOX}
+export SANDBOXBASE=${SANDBOXROOT}/${SANDBOXNAME}
+export SANDBOXRC=${SANDBOXROOT}/hbsandboxrc
+
+# Useful utility function.
+execute_in_sandbox()
+{
+    WORKON_CMD="workon -rc ${SANDBOXRC} -sb ${SANDBOXNAME} -m $2 "
+    echo $1 > ${SANDBOXBASE}/src/sandbox_execute_cmd
+    chmod 700 ${SANDBOXBASE}/src/sandbox_execute_cmd
+
+    ${WORKON_CMD} -c ./sandbox_execute_cmd
+
+    if [ $? -ne 0 ]; then
+        return -1
+    fi
+
+    rm ${SANDBOXBASE}/src/sandbox_execute_cmd
+}
+export -f execute_in_sandbox
+
+# Determine if sandbox is in /tmp, which requires -nre to simics.
+echo $SANDBOXROOT | grep "/tmp" > /dev/null
+if [ $? -eq 0 ]; 
+then
+    export SANDBOX_IN_TEMP=1
+fi
+
+# Setup machine type.
+export MACHINE=${MACHINE:-$DEFAULT_MACHINE}
+
+# Indicate we setup the CI environment.
+export HOSTBOOT_CI_ENV_SETUP=1
