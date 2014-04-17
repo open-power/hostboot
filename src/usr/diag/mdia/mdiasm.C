@@ -550,6 +550,14 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
 
     if(i_wfp.status != IN_PROGRESS && allWorkFlowsComplete())
     {
+        // Clear BAD_DQ_BIT_SET bit
+        TargetHandle_t top = NULL;
+        targetService().getTopLevelTarget(top);
+        ATTR_RECONFIGURE_LOOP_type reconfigAttr =
+            top->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        reconfigAttr &= ~RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
+        top->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(reconfigAttr);
+
         // all workFlows are finished
         // release the init service dispatcher
         // thread waiting for completion
