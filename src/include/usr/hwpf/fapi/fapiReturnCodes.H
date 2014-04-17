@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCodes.H,v 1.15 2014/04/11 13:53:50 whs Exp $
+// $Id: fapiReturnCodes.H,v 1.17 2014/04/15 17:50:40 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCodes.H,v $
 
 /**
@@ -46,7 +46,7 @@
  *                          mjjones     05/02/2012  Add FAPI_RC_PLAT_ERR_ADU_LOCKED
  *                          mjjones     11/14/2012  Add FAPI_RC_UNRECOGNIZED_SBE_ERROR
  *                          mjjones     03/26/2014  Remove FAPI_RC_UNRECOGNIZED_SBE_ERROR
- *                          whs         04/09/2014  Remove FAPI_RC_INVALID_PARAM
+ *                          whs         04/14/2014  Remove FAPI_RC_INVALID_PARAM
  */
 
 #ifndef FAPIRETURNCODES_H_
@@ -84,6 +84,9 @@ enum ReturnCodes
 
     // HWP requested a chip EC feature with an invalid attribute ID
     FAPI_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI_RC_FAPI_MASK | 0x02,
+
+    // Invalid multiscom parameters
+    FAPI_RC_INVALID_MULTISCOM_LENGTH    = FAPI_RC_FAPI_MASK | 0x03,
 
     //--------------------------------------------------------------------------
     // PLAT generated return codes. Additional details may be contained in
