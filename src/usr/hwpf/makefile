@@ -212,7 +212,8 @@ HWP_PLL_FILES = hwp/pll_attributes/s1_10_pll_ring.attributes \
                 hwp/pll_attributes/p8_10_pll_ring.attributes \
                 hwp/pll_attributes/p8_20_pll_ring.attributes \
                 hwp/pll_attributes/centaur_10_pll_ring.attributes \
-                hwp/pll_attributes/centaur_20_pll_ring.attributes
+                hwp/pll_attributes/centaur_20_pll_ring.attributes \
+                hwp/pll_attributes/centaur_21_pll_ring.attributes
 
 #------------------------------------------------------------------------------
 # Winkle Ring data files
