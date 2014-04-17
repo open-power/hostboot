@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_force_vsafe.H,v 1.2 2012/09/17 14:00:00 pchatnah Exp $
+// $Id: p8_pmc_force_vsafe.H,v 1.3 2014/03/05 21:10:02 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_force_vsafe.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -43,7 +43,8 @@
 
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*p8_pmc_force_vsafe_FP_t) (const fapi::Target&  );
+typedef fapi::ReturnCode (*p8_pmc_force_vsafe_FP_t) (const fapi::Target&,
+                                                     const fapi::Target&  );
 
 extern "C" {
 
@@ -63,12 +64,14 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
-/// \param[in] i_target Chip target
+/// \param[in] i_target     Chip target
+/// \param[in] i_dcm_target Chip target of the other DCM chip (for FFDC)
 
 /// \retval ECMD_SUCCESS if something good happens,
 /// \retval BAD_RETURN_CODE otherwise
 fapi::ReturnCode 
-p8_pmc_force_vsafe(const fapi::Target& i_target );
+p8_pmc_force_vsafe( const fapi::Target& i_target, 
+                    const fapi::Target& i_dcm_target );
 
 
 } // extern "C"

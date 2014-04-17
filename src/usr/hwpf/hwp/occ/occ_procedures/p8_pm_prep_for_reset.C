@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.27 2014/02/19 16:10:40 stillgs Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.29 2014/04/16 05:59:49 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -133,7 +133,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 
     fapi::ReturnCode                rc;
     fapi::ReturnCode                rc_hold;
-
+    uint32_t                        e_rc = 0;
     std::vector<fapi::Target>       l_exChiplets;
     ecmdDataBufferBase              data(64);
     ecmdDataBufferBase              mask(64);    
@@ -289,6 +289,58 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         }
 
         //  ******************************************************************
+        //  Disable PMC OCC HEARTBEAT before reset OCC
+        //  ******************************************************************       
+        // Primary
+        rc = fapiGetScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+
+        e_rc = data.clearBit(16);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_OCC_HEARTBEAT_REG_0x00062066 on master during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+
+        // Secondary
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+        rc = fapiGetScom(i_secondary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+
+        e_rc = data.clearBit(16);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_OCC_HEARTBEAT_REG_0x00062066 on slave during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_secondary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+        }
+
+        //  ******************************************************************
         //  Put OCC PPC405 into reset
         //  ******************************************************************       
         FAPI_INF("Put OCC PPC405 into reset");
@@ -339,8 +391,8 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_DBG("Executing: p8_pmc_force_vsafe.C");
 
         // Primary
-
-        FAPI_EXEC_HWP(rc, p8_pmc_force_vsafe, i_primary_chip_target);
+        //   Secondary passed in for FFDC reasons upon error
+        FAPI_EXEC_HWP(rc, p8_pmc_force_vsafe, i_primary_chip_target, i_secondary_chip_target);
         if (rc)
         {
             FAPI_ERR("Failed to force Vsafe value into voltage controller. With rc = 0x%x", (uint32_t)rc);
@@ -348,9 +400,10 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         }
         
         // Secondary
+        //   Primary passed in for FFDC reasons upon error
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
-            FAPI_EXEC_HWP(rc, p8_pmc_force_vsafe, i_secondary_chip_target);
+            FAPI_EXEC_HWP(rc, p8_pmc_force_vsafe, i_secondary_chip_target, i_primary_chip_target);
             if (rc)
             {
               FAPI_ERR("Failed to force Vsafe value into voltage controller. With rc = 0x%x", (uint32_t)rc);
@@ -747,12 +800,10 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         rc = rc_hold;
     }
 
-    FAPI_INF("p8_pm_prep_for_reset start  ....");
+    FAPI_INF("p8_pm_prep_for_reset end ....");
 
     return rc;
 } // Procedure
-
-
 
 /**
  * special_wakeup_all - Sets or clears special wake-up on all configured EX on a 
@@ -817,9 +868,6 @@ special_wakeup_all (const fapi::Target &i_target, bool i_action)
     return rc;
 }
 
-
-
-
 //------------------------------------------------------------------------------
 /**
  * Trace PCBS FSMs across primary and secondary chips
@@ -861,9 +909,6 @@ p4rs_pcbs_fsm_trace(const fapi::Target& i_primary_target,
     } while(0);
     return rc;
 }
-
-
-
 
 } //end extern C
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.18 2014/04/11 19:15:17 stillgs Exp $
+// $Id: pstate_tables.c,v 1.20 2014/04/16 17:56:30 cmolsen Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -578,8 +578,9 @@ gpst_create(GlobalPstateTable *gpst,
         // Hardcode the vrm delay settings for GA1
         // This should be set by gpst_stepping_setup() in the future.
         gpst->pstate_stepsize = pstate_stepsize;
-        gpst->vrm_stepdelay_range = 0xF;
-        gpst->vrm_stepdelay_value = 0xFF;
+        // SW256954: Updated following two values
+        gpst->vrm_stepdelay_range = 0x8;
+        gpst->vrm_stepdelay_value = 0x9;
 
     } while (0);
 
