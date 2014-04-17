@@ -99,6 +99,32 @@ void getFsiFFDC( fsiFFDCType_t       i_ffdc_type,
  */
 errlHndl_t resetPib2Opb( TARGETING::Target* i_target );
 
+/**
+ * @brief Structure which defines info necessary to access a chip via FSI
+ */
+struct FsiLinkInfo_t
+{
+    TARGETING::Target* master; ///< FSI Master
+    TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
+    uint8_t link; ///< Which link is this chip hanging off of
+    uint8_t cascade; ///< Slave cascade position
+    uint8_t mPort; ///< FSI Master port (0=A,1=B)
+
+    FsiLinkInfo_t() :
+      master(NULL), type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
+    link(0xFF), cascade(0), mPort(0)
+    {};
+};
+
+/**
+ * @brief Retrieve some FSI attribute information
+ *
+ * @param[in] i_slave  Slave Chip Target to query
+ * @param[out] o_info  FSI Link Information
+ */
+void getFsiLinkInfo( TARGETING::Target* i_slave,
+                     FsiLinkInfo_t& o_info );
+
 
 /**
  * FSI Slave Registers for P8

@@ -131,6 +131,16 @@ class FsiDD
      */
     errlHndl_t resetPib2Opb( TARGETING::Target* i_target );
 
+    /**
+     * @brief Retrieve some FSI attribute information
+     *
+     * @param[in] i_slave  Slave Chip Target to query
+     * @param[out] o_info  FSI Link Information
+     */
+    void getFsiLinkInfo( TARGETING::Target* i_slave,
+                         FSI::FsiLinkInfo_t& o_info );
+
+
   protected:
     /**
      * @brief Constructor
@@ -593,6 +603,11 @@ class FsiDD
      *   Indexed by Target*, returns FsiChipInfo_t
      */
     std::map<TARGETING::Target*,FsiChipInfo_t> iv_fsiInfoMap;
+
+    /**
+     * Mutex to protect the internal maps
+     */
+    mutex_t iv_dataMutex;
 
   private:
 

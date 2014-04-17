@@ -52,6 +52,7 @@ $ */
 #include <util/align.H>
 #include <vector>
 #include <vfs/vfs.H>
+#include <fsi/fsiif.H>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -844,7 +845,7 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
         for ( size_t memb = 0;
               (!errhdl) && (memb < l_memBufList.size()); memb++ )
         {
-            const TARGETING::Target * l_pMemB = l_memBufList[memb];
+            TARGETING::Target * l_pMemB = l_memBufList[memb];
 
             //Get MMIO Offset from parent MCS attribute.
             PredicateCTM l_mcs(CLASS_UNIT,TYPE_MCS, MODEL_NA);
@@ -898,9 +899,10 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             i_dt->addPropertyCell32(membNode, "ibm,chip-id",l_cenId);
 
             //Add the CMFSI (which CMFSI 0 or 1) and port
-            //TODO RTC93298 make which CMFSI correct
+            FSI::FsiLinkInfo_t linkinfo;
+            FSI::getFsiLinkInfo( l_pMemB, linkinfo );
             uint32_t cmfsiCells[2] =
-                           {0,l_pMemB->getAttr<ATTR_FSI_MASTER_PORT>()};
+                           {linkinfo.mPort,linkinfo.link};
             i_dt->addPropertyCells32(membNode, "ibm,fsi-master-port",
                                      cmfsiCells, 2);
         }

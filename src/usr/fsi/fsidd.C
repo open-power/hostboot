@@ -335,6 +335,15 @@ errlHndl_t resetPib2Opb( TARGETING::Target* i_target )
 }
 
 
+/**
+ * @brief Retrieve some FSI attribute information
+ */
+void getFsiLinkInfo( TARGETING::Target* i_slave,
+                     FsiLinkInfo_t& o_info )
+{
+    Singleton<FsiDD>::instance().getFsiLinkInfo( i_slave, o_info );
+}
+
 }; //end FSI namespace
 
 
@@ -1010,6 +1019,8 @@ FsiDD::FsiDD()
     // add a dummy value to catch NULL
     FsiChipInfo_t info;
     iv_fsiInfoMap[NULL] = info;
+
+    mutex_init(&iv_dataMutex);
 }
 
 /**
@@ -2831,7 +2842,8 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 {
     FsiChipInfo_t info;
 
-    //@fixme - Maps aren't threadsafe, fix when RTC:98898 is done
+    mutex_lock(&iv_dataMutex);
+
     // Check if we have a cached version first
     std::map<TARGETING::Target*,FsiChipInfo_t>::iterator itr
       = iv_fsiInfoMap.find(i_target);
@@ -2847,5 +2859,28 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
         iv_fsiInfoMap[i_target] = info;
     }
 
+    mutex_unlock(&iv_dataMutex);
+
     return info;
 }
+
+/**
+ * @brief Retrieve some FSI attribute information
+ */
+void FsiDD::getFsiLinkInfo( TARGETING::Target* i_slave,
+                            FSI::FsiLinkInfo_t& o_info )
+{
+    FsiChipInfo_t info = getFsiInfo( i_slave );
+    o_info.master = info.master;
+    o_info.type = info.type;
+    o_info.link = info.port;
+    o_info.cascade = info.cascade;
+    o_info.mPort = 0;
+    if( info.master
+        && (info.master != iv_master )
+        && (getFsiInfo(info.master).flagbits.flipPort) )
+    {
+        o_info.mPort = 1;
+    }
+}
+
