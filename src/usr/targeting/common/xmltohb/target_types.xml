@@ -105,6 +105,7 @@
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
+    <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
     <attribute><id>FREQ_PCIE</id></attribute>
     <attribute><id>L2_R_T0_EPS</id></attribute>
     <attribute><id>L2_R_T1_EPS</id></attribute>

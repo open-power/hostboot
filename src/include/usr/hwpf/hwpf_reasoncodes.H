@@ -119,6 +119,7 @@ namespace fapi
         RC_NULL_POINTER               = HWPF_COMP_ID | 0x2C,
 
         RC_RT_WAKEUP_FAILED           = HWPF_COMP_ID | 0x2D,
+        RC_NO_MIRRORED_MEMORY         = HWPF_COMP_ID | 0x2E,
     };
 
     /**

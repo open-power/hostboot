@@ -55,6 +55,7 @@
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
+#include    <fapiAttributeIds.H>
 
 #include    "mc_config.H"
 
@@ -455,6 +456,27 @@ void*    call_mss_eff_config( void *io_pArgs )
     IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
+
+    TARGETING::Target* l_sys = NULL;
+    targetService().getTopLevelTarget(l_sys);
+    assert( l_sys != NULL );
+
+    // The attribute ATTR_MEM_MIRROR_PLACEMENT_POLICY should already be
+    // correctly set by default for all platforms except for sapphire.
+    // Don't allow mirroring on sapphire yet @todo-RTC:108314
+    //
+    //ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirrored =
+    //    l_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>();
+    //
+    //if(l_mirrored && is_sapphire_load())
+    //{
+    //    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Mirroring is enabled");
+
+    //    uint8_t l_mmPolicy =
+    //        fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED;
+    //    l_sys->
+    //        setAttr<TARGETING::ATTR_MEM_MIRROR_PLACEMENT_POLICY>(l_mmPolicy);
+    //}
 
     // Get all functional MBA chiplets
     TARGETING::TargetHandleList l_mbaTargetList;

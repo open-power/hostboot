@@ -2615,6 +2615,21 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>PAYLOAD_IN_MIRROR_MEM</id>
+    <description>Indicate that payload should be placed in mirrored memory.
+        Set by the FSP based on the value of the registry key indicating
+        the memory mirroring mode.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default> <!-- false -->
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 <!-- ===== Processor Chip Attributes ===== -->
 
@@ -11449,6 +11464,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
         <macro>DIRECT</macro>

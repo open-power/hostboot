@@ -743,54 +743,179 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
     //  set up loops to go through all targets (if parallel, spin off a task)
     //  extend the memory space from 8MEG to 32Meg
 
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl,
-                     proc_exit_cache_contained
-                     );
-    if ( l_errl )
+    //if mirrored then check that there is going to be memory at that location.
+    //For sapphire with mirrored location flipped and at zero,
+    //this also insures there is memory available to 'exit_cache' to.
+    //Also set ATTR_PAYLOAD_BASE here.
+    TARGETING::Target* l_sys = NULL;
+    targetService().getTopLevelTarget(l_sys);
+    assert( l_sys != NULL );
+
+    uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
+    ATTR_PAYLOAD_BASE_type payloadBase = 0;
+
+    if(!l_mpipl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : call_proc_exit_cache_contained, errorlog PLID=0x%x",
-                  l_errl->plid() );
-    }
-    // no errors so extend VMM.
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : call_proc_exit_cache_contained" );
+        ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirrored = false;
 
-
-
-        // Call the function to extend VMM to 32MEG
-        int rc = mm_extend();
-
-        if (rc!=0)
+        // In Sapphire mode disable mirroring for now - @todo-RTC:108314
+        // and force payload to zero
+        if(!is_sapphire_load())
         {
-            /*@
-             * @errortype
-             * @moduleid     fapi::MOD_EXIT_CACHE_CONTAINED
-             * @reasoncode   fapi::RC_MM_EXTEND_FAILED
-             * @userdata1    rc from mm_extend
-             * @userdata2    <UNUSED>
-             *
-             *   @devdesc  Failure extending memory to 32MEG after
-             *        exiting cache contained mode.
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             fapi::MOD_EXIT_CACHE_CONTAINED,
-                                             fapi::RC_MM_EXTEND_FAILED,
-                                             rc,
-                                             0);
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : call_proc_exit_cache_contained - extendVMM, rc=0x%x",
-                  rc );
+            payloadBase = l_sys->getAttr<ATTR_PAYLOAD_BASE>();
+            l_mirrored = l_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>();
         }
+
+        if(l_mirrored)
+        {
+            ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
+            if(!is_sapphire_load())
+            {
+                l_mirrorBaseAddr = l_sys->getAttr<ATTR_MIRROR_BASE_ADDRESS>();
+            }
+
+            // Verify there is memory at the mirrored location
+            bool mirroredMemExists = false;
+            TARGETING::TargetHandleList l_procList;
+            getAllChips(l_procList, TYPE_PROC);
+
+            for (TargetHandleList::const_iterator proc = l_procList.begin();
+                 proc != l_procList.end() && !mirroredMemExists;
+                 ++proc)
+            {
+                uint64_t mirrorBase[4];
+                uint64_t mirrorSize[4];
+                bool rc = (*proc)->
+                    tryGetAttr<TARGETING::ATTR_PROC_MIRROR_BASES>(mirrorBase);
+                if(false == rc)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Failed to get ATTR_PROC_MIRROR_BASES");
+                    assert(0);
+                }
+
+                rc = (*proc)->
+                    tryGetAttr<TARGETING::ATTR_PROC_MIRROR_SIZES>(mirrorSize);
+                if(false == rc)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Failed to get ATTR_PROC_MIRROR_SIZES");
+                    assert(0);
+                }
+
+                for(uint64_t i = 0; i < 4 && !mirroredMemExists; ++i)
+                {
+                    if(mirrorSize[i] != 0 &&
+                       l_mirrorBaseAddr >= mirrorBase[i] &&
+                       l_mirrorBaseAddr < (mirrorBase[i] + mirrorSize[i]))
+                    {
+                        mirroredMemExists = true;
+                    }
+                }
+            }
+
+            if (mirroredMemExists)
+            {
+                // ATTR_PAYLOAD_BASE is in MB
+                payloadBase += l_mirrorBaseAddr/MEGABYTE;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                          "Request to load payload into mirrored memory,"
+                          " but no memory exists at address 0x%016lx",
+                          l_mirrorBaseAddr);
+
+                /*@
+                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                 *  @moduleid       fapi::MOD_EXIT_CACHE_CONTAINED,
+                 *  @reasoncode     fapi::RC_NO_MIRRORED_MEMORY,
+                 *  @userdata1      Mirrored Memory Address
+                 *  @userdata2      0
+                 *
+                 *  @devdesc        Request given to load payload into mirrored
+                 *                  memory, but no mirrored memory exists at
+                 *                  that location.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry
+                    (
+                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                     fapi::MOD_EXIT_CACHE_CONTAINED,
+                     fapi::RC_NO_MIRRORED_MEMORY,
+                     l_mirrorBaseAddr,
+                     0,
+                     true); // callout firmware
+            }
+        }
+    }
+
+    if(!l_errl)
+    {
+        if(!l_mpipl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Payload base address is 0x%016lx",
+                      payloadBase * MEGABYTE);
+
+            l_sys->setAttr<ATTR_PAYLOAD_BASE>(payloadBase);
+        }
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl,
+                         proc_exit_cache_contained
+                       );
+
+
+
+        if ( l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : call_proc_exit_cache_contained, "
+                      "errorlog PLID=0x%x",
+                      l_errl->plid() );
+        }
+        // no errors so extend VMM.
         else
         {
-           // trace out the extend VMM was successful
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS : call_proc_exit_cache_contained - extendVMM");
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : call_proc_exit_cache_contained" );
+
+
+
+            // Call the function to extend VMM to 32MEG
+            int rc = mm_extend();
+
+            if (rc!=0)
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     fapi::MOD_EXIT_CACHE_CONTAINED
+                 * @reasoncode   fapi::RC_MM_EXTEND_FAILED
+                 * @userdata1    rc from mm_extend
+                 * @userdata2    <UNUSED>
+                 *
+                 *   @devdesc  Failure extending memory to 32MEG after
+                 *        exiting cache contained mode.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry
+                    (ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                     fapi::MOD_EXIT_CACHE_CONTAINED,
+                     fapi::RC_MM_EXTEND_FAILED,
+                     rc,
+                     0);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : call_proc_exit_cache_contained"
+                          " - extendVMM, rc=0x%x",
+                          rc );
+            }
+            else
+            {
+                // trace out the extend VMM was successful
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS : call_proc_exit_cache_contained"
+                          " - extendVMM");
+            }
         }
     }
     if ( l_errl )

@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.40 2014/04/15 16:05:47 jdsloat Exp $
+// $Id: mss_setup_bars.C,v 1.42 2014/05/21 13:43:45 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -38,8 +38,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-// 1.39    | gpaulraj | 04/08/14| 5/5 FW review feedback - gerrit process - SW251227
-// 1.33    |          | 03/09/14| RAS review
+//  1.42   | gpaulraj | 05/21/14| fixed on 1 MCS mirror BAR EN  issue -SW261358
+//  1.40   | gpaulraj | 05/06/14| fixed on mirror configuration issue
+//  1.39   | gpaulraj | 04/08/14| 5/5 FW review feedback - gerrit process - SW251227
+//  1.33   |          | 03/09/14| RAS review
 //  1.32   | gpaulraj | 08/16/13| fixed code
 //  1.31   | gpaulraj | 08/13/13| fix HW259884 Mirror BAR Scom Parity Error
 //  1.30   | gpaulraj | 08/13/13| added fix HW259884 Mirror BAR Scom Parity Error
@@ -703,7 +705,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
             }
 
             // determine mirrored member group
-            if(M_valid)
+            if(!M_valid)
 	    {
             	bool m_bar_valid = false;
             	uint8_t m_bar_group_index = 0x0;
@@ -712,19 +714,21 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
                  i++)
             	{
                 	// only process valid groups
-                	if (group_data[i-8][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
-                	{
+                 if (group_data[i-8][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
+                    {
                     	continue;
-                	}
+                    }
 
-                	uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+                 uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+                 if( mcs_in_group > 1)
+                 {
                 	for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
                     	 (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group);
                     	 j++)
-                	{
-                    	if (mcs_pos == group_data[i-8][j])
-                    	{
-                        	if (m_bar_valid)
+                    {
+                           if (mcs_pos == group_data[i-8][j])
+                           {
+                            if (m_bar_valid)
                         	{
                             	const uint8_t& MCS_POS = mcs_pos;
                             	const uint8_t& GROUP_INDEX_A = m_bar_group_index;
@@ -738,12 +742,13 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
                        	        }
                         	m_bar_valid = true;
                         	m_bar_group_index = i;
-                    	}
+                           }
                 	}
             	    if (!rc.ok())
             	    {
                 	    break;
             	    }
+                  }
             	}
             	if (!rc.ok())
             	{

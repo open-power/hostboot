@@ -779,16 +779,6 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
         }   //  endfor
 
-
-        //If Sapphire Payload need to set payload base to zero
-        if (is_sapphire_load())
-        {
-            TARGETING::Target* sys = NULL;
-            TARGETING::targetService().getTopLevelTarget(sys);
-            assert( sys != NULL );
-            sys->setAttr<ATTR_PAYLOAD_BASE>(0x0);
-        }
-
         // Sync attributes to Fsp
         l_err = syncAllAttributesToFsp();
 
