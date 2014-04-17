@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,13 +20,13 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_init.C,v 1.7 2013/03/05 23:21:06 jklazyns Exp $
+// $Id: proc_tod_init.C,v 1.9 2014/04/04 20:53:11 jmcgill Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 // *!
-// *! TITLE : proc_tod_setup.C
+// *! TITLE : proc_tod_init.C
 // *!
 // *! DESCRIPTION : Initializes the TOD topology to 'running'
 // *!
@@ -308,6 +308,7 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
         if (tod_init_pending_count>=PROC_TOD_UTIL_TIMEOUT_COUNT)
         {
                 FAPI_ERR("init_tod_node: TOD is not running! (It should be)");
+                const fapi::Target & CHIP_TARGET = *target;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_NOT_RUNNING);
                 break;
         }
@@ -339,6 +340,8 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
         if (data.getDoubleWord(0) != 0)
         {
             FAPI_ERR("init_tod_node: FIR bit active! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
+            const fapi::Target & CHIP_TARGET = *target;
+            const uint64_t TOD_ERROR_REG = data.getDoubleWord(0);
             FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_ERROR);
             break;
         }

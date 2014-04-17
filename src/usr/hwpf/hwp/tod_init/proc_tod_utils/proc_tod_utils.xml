@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,36 +20,101 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_tod_utils.xml,v 1.7 2013/05/07 19:14:35 mjjones Exp $ -->
+<!-- $Id: proc_tod_utils.xml,v 1.9 2014/03/27 03:38:24 jmcgill Exp $ -->
 <!-- Error codes for proc_tod_utils (used by setup, init, status) -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_TOD_SETUP_INVALID_TOPOLOGY</rc>
     <description>The TOD topology includes an invalid configuration</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_TOD_SETUP_INVALID_NODE_DELAY</rc>
     <description>Node delay must be between 0 and 0xFF inclusive.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_TOD_INIT_NOT_RUNNING</rc>
     <description>TOD is expected to be running, but is not.</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+    <target>CHIP_TARGET</target>
+    <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>
-  <hwpError>
-    <rc>RC_PROC_TOD_INIT_TIMEOUT</rc>
-    <description>TOD bit did not clear or assert in the allotted time.</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_TOD_INIT_INTERRUPT_PENDING</rc>
-    <description>TFMR indicating an interrupt is pending; step error detected or external OSC not operating properly</description>
-  </hwpError>
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_TOD_INIT_ERROR</rc>
     <description>A FIR bit is active after starting the TOD topology</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOD_ERROR_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+    <target>CHIP_TARGET</target>
+    <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_TOD_NULL_NODE</rc>
     <description>An null node has been passed into the procedure</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_TOD_REGISTERS</id>
+    <scomRegister>TOD_M_PATH_CTRL_REG_00040000</scomRegister>
+    <scomRegister>TOD_PRI_PORT_0_CTRL_REG_00040001</scomRegister>
+    <scomRegister>TOD_PRI_PORT_1_CTRL_REG_00040002</scomRegister>
+    <scomRegister>TOD_SEC_PORT_0_CTRL_REG_00040003</scomRegister>
+    <scomRegister>TOD_SEC_PORT_1_CTRL_REG_00040004</scomRegister>
+    <scomRegister>TOD_S_PATH_CTRL_REG_00040005</scomRegister>
+    <scomRegister>TOD_I_PATH_CTRL_REG_00040006</scomRegister>
+    <scomRegister>TOD_PSS_MSS_CTRL_REG_00040007</scomRegister>
+    <scomRegister>TOD_PSS_MSS_STATUS_REG_00040008</scomRegister>
+    <scomRegister>TOD_M_PATH_STATUS_REG_00040009</scomRegister>
+    <scomRegister>TOD_S_PATH_STATUS_REG_0004000A</scomRegister>
+    <scomRegister>TOD_MISC_RESET_REG_0004000B</scomRegister>
+    <scomRegister>TOD_PROBE_SELECT_REG_0004000C</scomRegister>
+    <scomRegister>TOD_CHIP_CTRL_REG_00040010</scomRegister>
+    <scomRegister>TOD_TRACE_DATA_1_REG_0004001D</scomRegister>
+    <scomRegister>TOD_TRACE_DATA_2_REG_0004001E</scomRegister>
+    <scomRegister>TOD_TRACE_DATA_3_REG_0004001F</scomRegister>
+    <scomRegister>TOD_VALUE_REG_00040020</scomRegister>
+    <scomRegister>TOD_LOAD_TOD_REG_00040021</scomRegister>
+    <scomRegister>TOD_START_TOD_REG_00040022</scomRegister>
+    <scomRegister>TOD_LOW_ORDER_STEP_REG_00040023</scomRegister>
+    <scomRegister>TOD_FSM_REG_00040024</scomRegister>
+    <scomRegister>TOD_TX_TTYPE_CTRL_REG_00040027</scomRegister>
+    <scomRegister>TOD_RX_TTYPE_CTRL_REG_00040029</scomRegister>
+    <scomRegister>TOD_ERROR_REG_00040030</scomRegister>
+    <scomRegister>TOD_ERROR_MASK_STATUS_REG_00040032</scomRegister>
+    <scomRegister>TOD_ERROR_ROUTING_REG_00040033</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>
