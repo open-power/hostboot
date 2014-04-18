@@ -303,6 +303,69 @@
         capture     group TODReg;
     };
 
+    register TOD_MPSR
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_M_PATH_STATUS_REG";
+        scomaddr    0x00040009;
+        capture     group TODReg;
+    };
+
+    register TOD_SPSR
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_S_PATH_STATUS_REG";
+        scomaddr    0x0004000A;
+        capture     group TODReg;
+    };
+
+    register TOD_CCR
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_CHIP_CTRL_REG";
+        scomaddr    0x00040010;
+        capture     group TODReg;
+    };
+
+    register TOD_TRACEDATA_SET_1
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_TRACE_DATA_1_REG";
+        scomaddr    0x0004001D;
+        capture     group TODReg;
+    };
+
+    register TOD_TRACEDATA_SET_2
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_TRACE_DATA_2_REG";
+        scomaddr    0x0004001E;
+        capture     group TODReg;
+    };
+
+    register TOD_TRACEDATA_SET_3
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_TRACE_DATA_3_REG";
+        scomaddr    0x0004001F;
+        capture     group TODReg;
+    };
+
+    register TOD_FSM
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_FSM_REG";
+        scomaddr    0x00040024;
+        capture     group TODReg;
+    };
+
+    register TOD_TX_TTYPE
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_TX_TTYPE_CTRL_REG";
+        scomaddr    0x00040027;
+        capture     group TODReg;
+    };
+
+    register TOD_RX_TTYPE
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_RX_TTYPE_CTRL_REG";
+        scomaddr    0x00040029;
+        capture     group TODReg;
+    };
+
     register TOD_ERRORREGISTER
     {
         name        "EH.TPCHIP.PIB.TOD.TOD_ERROR_REG";
@@ -324,3 +387,4 @@
         scomaddr    0x00040033;
         capture     group TODReg;
     };
+
