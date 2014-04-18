@@ -195,7 +195,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
     HWSV::hwsvTermEnum termFlag = HWSV::HWSV_SYS_NO_TERMINATE;
-    HWSV::hwsvDeconfigSchedule deconfigSched = HWSV::HWSV_DECONFIG_IMMEDIATE;
     uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for sdc flatten
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
@@ -529,8 +528,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     {
         deferDeconfig = true;
         deconfigState = HWAS::DECONFIG;
-        // NOTE: deconfigSched is not actually used in Hostboot. Will remove in
-        // the refactoring effort.
     }
 
 #endif
@@ -887,7 +884,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // for FSP specific SRC handling in the future
         MnfgTrace( esig, pfaData );
 
-        PRDF_HW_COMMIT_ERRL( o_errl, deconfigSched, actionFlag );
+        PRDF_HW_COMMIT_ERRL( o_errl, actionFlag );
         if ( NULL != o_errl )
         {
             // Just commit the log.

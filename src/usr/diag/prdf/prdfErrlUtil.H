@@ -201,7 +201,7 @@
  * @brief Process's pending deconfig and GARD service actions
  *        and thencommits and deletes the error log.
  */
-#define PRDF_HW_COMMIT_ERRL(io_errl, i_deferDeconfig, i_action) \
+#define PRDF_HW_COMMIT_ERRL(io_errl, i_action) \
   PRDF_COMMIT_ERRL(io_errl, i_action);
 
 /**
