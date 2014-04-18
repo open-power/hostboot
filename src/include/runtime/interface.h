@@ -171,33 +171,35 @@ typedef struct runtimeInterfaces
      * @param[in] i_common_addr_phys - The physical mainstore address of the
      *                                 OCC common area.
      * @param[in] i_common_addr_va - Virtual memory address of the common area
-     * @param[in] i_proc_chip - The processor chip id
+     * @param[in] i_chip - XSCOM chip id of processor based on devtree defn
      * @return 0 on success else return code
      */
     int(*loadOCC)(uint64_t i_homer_addr_phys,
                   uint64_t i_homer_addr_va,
                   uint64_t i_common_addr_phys,
                   uint64_t i_common_addr_va,
-                  uint64_t i_proc_chip);
+                  uint64_t i_chip);
 
     /** Start OCC on all chips, by module
      *
-     *  @param[in] i_proc_chip - Array of functional processor chip ids
+     *  @param[in] i_chip - Array of functional processor chip ids
+     *                      XSCOM chip id based on devtree defn
      *  @Note The caller must include a complete modules worth of chips
      *  @param[in] i_num_chips - Number of chips in the array
      *  @return 0 on success else return code
      */
-    int (*startOCCs)(uint64_t* i_proc_chip,
+    int (*startOCCs)(uint64_t* i_chip,
                      size_t i_num_chips);
 
     /** Stop OCC hold OCCs in reset
      *
-     *  @param[in] i_proc_chip - Array of functional processor chip ids
+     *  @param[in] i_chip - Array of functional processor chip ids
+     *                      XSCOM chip id based on devtree defn
      *  @Note The caller must include a complete modules worth of chips
      *  @param[in] i_num_chips - Number of chips in the array
      *  @return 0 on success else return code
      */
-    int (*stopOCCs)(uint64_t* i_proc_chip,
+    int (*stopOCCs)(uint64_t* i_chip,
                     size_t i_num_chips);
 
 
