@@ -200,6 +200,17 @@ class ErrDataService
      */
     void printDebugTraces();
 
+    /**
+     * @brief Deallocate DIMMS represented in mru list.
+     *
+     * This function will get all DIMMS behind MCS, MEMBUF, MBA
+     * in callout list. It will find unique DIMMS per DIMM pair
+     * and send message to PHYP to deallocate memory behind these DIMMS.
+     *
+     * @param i_mruList   MRU callout list.
+     */
+    void deallocateDimms( SDC_MRU_LIST & i_mruList );
+
   private:
 
     bool loggingBufferFull;

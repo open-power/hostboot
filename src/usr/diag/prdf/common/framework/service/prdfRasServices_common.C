@@ -680,6 +680,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
     }
 
+    // Send the dynamic memory Dealloc message for DIMMS for Predictive error
+    // conditions.
+    if( ERRL_SEV_PREDICTIVE == severityParm )
+    {
+        deallocateDimms( fspmrulist );
+    }
+
     //**************************************************************
     // Build Dump Flags and PFA5 data
     //**************************************************************

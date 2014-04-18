@@ -50,5 +50,9 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
     #undef PRDF_FUNC
 }
 
+void ErrDataService::deallocateDimms( SDC_MRU_LIST & i_mruList )
+{
+    //No OP for HB
+}
 } // end namespace PRDF
 
