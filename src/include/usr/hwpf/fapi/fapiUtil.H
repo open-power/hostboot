@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiUtil.H,v 1.19 2013/11/11 19:33:49 mjjones Exp $
+// $Id: fapiUtil.H,v 1.20 2014/01/20 22:37:52 mklight Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiUtil.H,v $
 
 /**
@@ -254,7 +254,7 @@ void fapiBreakPoint(uint32_t i_info);
  *                cores (EX chiplets) of the specified chip
  *              TARGET_TYPE_EX_CHIPLET: Enables/Disables Special Wakeup on the
  *                specified core (EX chiplet)
- * @param[in] i_enable. true = enable. false = disable.
+ * @param[in] i_enable true = enable. false = disable.
  *
  * @return ReturnCode. Zero on success, else platform specified error.
  */

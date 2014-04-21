@@ -12719,10 +12719,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <hasStringConversion/>
     <readable/>
     <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_MASTER_TYPE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMvpdAccess.H,v 1.7 2013/10/15 13:13:34 dcrowell Exp $
+// $Id: fapiMvpdAccess.H,v 1.8 2014/01/20 22:37:51 mklight Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiMvpdAccess.H,v $
 
 /**
@@ -144,7 +144,7 @@ extern "C"
  *  @param[in] i_pBuffer    Pointer to buffer where record will be stored. If
  *                          NULL then the size of record will be stored in
  *                          io_fieldSize
- *  @param[io] io_fieldSize Size of i_pBuffer in bytes
+ *  @param[in,out] io_fieldSize Size of i_pBuffer in bytes
  *
  *  @return fapi::ReturnCode. FAPI_RC_SUCCESS, or failure value.
  */
@@ -163,7 +163,7 @@ fapi::ReturnCode fapiGetMvpdField(const fapi::MvpdRecord i_record,
  *  @param[in] i_keyword    Keyword enumerator
  *  @param[in] i_procTarget Reference to processor chip target for the record
  *  @param[in] i_pBuffer    Pointer to buffer where data to set is stored
- *  @param[io] i_fieldSize  Size of i_pBuffer in bytes
+ *  @param[in] i_fieldSize  Size of i_pBuffer in bytes
  *
  *  @return fapi::ReturnCode. FAPI_RC_SUCCESS, or failure value.
  */

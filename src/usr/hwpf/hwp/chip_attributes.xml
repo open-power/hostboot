@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: chip_attributes.xml,v 1.11 2013/09/06 20:02:21 dcrowell Exp $ -->
+<!-- $Id: chip_attributes.xml,v 1.12 2013/10/31 14:10:49 jmcgill Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
@@ -185,23 +185,6 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_MASTER_TYPE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        Returns a value indicating the master type of this chip:
-        master, alt-master, or not master.
-    </description>
-    <valueType>uint8</valueType>
-    <enum>
-        ACTING_MASTER = 0x00,
-        MASTER_CANDIDATE = 0x01,
-        NOT_MASTER = 0x02
-    </enum>
-    <platInit/>
-    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
