@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.178 2014/03/12 18:55:47 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.180 2014/04/12 03:14:16 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -416,6 +416,7 @@ CONST_UINT64_T( OCC_LFIR_ACT1_0x01010807              , ULL(0x01010807) );
 
 CONST_UINT64_T( OCC_PMC_LFIR_0x01010C00               , ULL(0x01010C00) );
 CONST_UINT64_T( OCC_PMC_LFIR_AND_0x01010C01           , ULL(0x01010C01) );
+CONST_UINT64_T( OCC_PMC_LFIR_MASK_0x01010C03          , ULL(0x01010C03) );
 
 // sram registers
 CONST_UINT64_T( OCC_SRAM_BOOT_VEC0_0x00066004         , ULL(0x00066004) );
@@ -823,18 +824,21 @@ CONST_UINT64_T( PSI_NOTRUST_BAR1_MASK_0x02013F43      , ULL(0x02013F43) );
 CONST_UINT64_T( PSI_HB_FIR_0x02010900                 , ULL(0x02010900) );
 CONST_UINT64_T( PSI_HB_FIR_AND_0x02010901             , ULL(0x02010901) );
 CONST_UINT64_T( PSI_HB_FIR_OR_0x02010902              , ULL(0x02010902) );
+CONST_UINT64_T( PSI_HB_FIR_MASK_0x02010903            , ULL(0x02010903) );
 
 //------------------------------------------------------------------------------
 //      HCA
 //------------------------------------------------------------------------------
 CONST_UINT64_T( HCA_EN_FIR_0x02010940                 , ULL(0x02010940) );
 CONST_UINT64_T( HCA_EN_FIR_AND_0x02010941             , ULL(0x02010941) );
+CONST_UINT64_T( HCA_EN_FIR_MASK_0x02010943            , ULL(0x02010943) );
 CONST_UINT64_T( HCA_EN_BAR_0x0201094A                 , ULL(0x0201094A) );
 CONST_UINT64_T( HCA_EN_MIRROR_BAR_0x02010953          , ULL(0x02010953) );
 CONST_UINT64_T( HCA_MODE_0x0201094F                   , ULL(0x0201094F) );
 
 CONST_UINT64_T( HCA_EN_EHHCA_FIR_0x02010980           , ULL(0x02010980) );
 CONST_UINT64_T( HCA_EN_EHHCA_FIR_AND_0x02010981       , ULL(0x02010981) );
+CONST_UINT64_T( HCA_EN_EHHCA_FIR_MASK_0x02010983      , ULL(0x02010983) );
 
 CONST_UINT64_T( HCA_EH_BAR_0x0201098A                 , ULL(0x0201098A) );
 CONST_UINT64_T( HCA_EH_MIRROR_BAR_0x02010993          , ULL(0x02010993) );
@@ -848,6 +852,7 @@ CONST_UINT64_T( ICP_INTR_INJECT_0x020109CC            , ULL(0x020109CC) );
 
 CONST_UINT64_T( EN_TPC_INTP_SYNC_FIR_0x020109C0       , ULL(0x020109C0) );
 CONST_UINT64_T( EN_TPC_INTP_SYNC_FIR_AND_0x020109C1   , ULL(0x020109C1) );
+CONST_UINT64_T( EN_TPC_INTP_SYNC_FIR_MASK_0x020109C3  , ULL(0x020109C3) );
 
 
 //------------------------------------------------------------------------------
@@ -999,6 +1004,10 @@ CONST_UINT64_T( MCS_MCICRCSYN_0x0201184C              , ULL(0x0201184C) );
 
 CONST_UINT64_T( IOMC_SCOM_MODE_PB_0x02011A20          , ULL(0x02011A20) );
 
+CONST_UINT64_T( IOMC0_BUSCNTL_FIR_0x02011A00          , ULL(0x02011A00) );
+CONST_UINT64_T( IOMC0_BUSCNTL_FIR_AND_0x02011A01      , ULL(0x02011A01) );
+CONST_UINT64_T( IOMC0_BUSCNTL_FIR_MASK_0x02011A03     , ULL(0x02011A03) );
+
 CONST_UINT64_T( MC1_BUSCNTL_FIR_0x02011E00            , ULL(0x02011E00) );
 CONST_UINT64_T( MC1_BUSCNTL_FIR_AND_0x02011E01        , ULL(0x02011E01) );
 
@@ -1145,14 +1154,17 @@ CONST_UINT64_T( NX_DEBUG_SNAPSHOT1_0x020130A5         , ULL(0x020130A5) );
 
 CONST_UINT64_T( NX_DMA_ENG_FIR_0x02013100             , ULL(0x02013100) );
 CONST_UINT64_T( NX_DMA_ENG_FIR_AND_0x02013101         , ULL(0x02013101) );
+CONST_UINT64_T( NX_DMA_ENG_FIR_MASK_0x02013103        , ULL(0x02013103) );
 
 CONST_UINT64_T( NX_DEBUGMUX_CTRL_0x0201310A           , ULL(0x0201310A) );
 
 CONST_UINT64_T( NX_CQ_FIR_0x02013080                  , ULL(0x02013080) );
 CONST_UINT64_T( NX_CQ_FIR_AND_0x02013081              , ULL(0x02013081) );
+CONST_UINT64_T( NX_CQ_FIR_MASK_0x02013083             , ULL(0x02013083) );
 
 CONST_UINT64_T( NX_AS_FIR_0x020130C0                  , ULL(0x020130C0) );
 CONST_UINT64_T( NX_AS_FIR_AND_0x020130C1              , ULL(0x020130C1) );
+CONST_UINT64_T( NX_AS_FIR_MASK_0x020130C3             , ULL(0x020130C3) );
 
 //------------------------------------------------------------------------------
 //      MCD
@@ -1229,6 +1241,8 @@ CONST_UINT64_T( PB_X_MODE_0x04010C0A                  , ULL(0x04010C0A) );
 //------------------------------------------------------------------------------
 //      X-BUS IOPSI
 //------------------------------------------------------------------------------
+CONST_UINT64_T( X_PSI_FIR_0x04012400                  , ULL(0x04012400) );
+CONST_UINT64_T( X_PSI_FIR_MASK_0x04012403             , ULL(0x04012403) );
 CONST_UINT64_T( X_PSI_RXCNTL_0x04012420               , ULL(0x04012420) );
 CONST_UINT64_T( X_PSI_RXSTATUS_0x04012422             , ULL(0x04012422) );
 CONST_UINT64_T( X_PSI_TXCNTL_0x04012430               , ULL(0x04012430) );
@@ -1265,6 +1279,10 @@ CONST_UINT64_T( X_PERV_LFIR_MASK_AND_0x0404000E       , ULL(0x0404000E) );
 CONST_UINT64_T( X_PERV_LFIR_MASK_OR_0x0404000F        , ULL(0x0404000F) );
 CONST_UINT64_T( X_PERV_LFIR_ACT0_0x04040010           , ULL(0x04040010) );
 CONST_UINT64_T( X_PERV_LFIR_ACT1_0x04040011           , ULL(0x04040011) );
+
+CONST_UINT64_T( X_XBUS0_BUSCNTL_FIR_0x04011000        , ULL(0x04011000) );
+CONST_UINT64_T( X_XBUS0_BUSCNTL_FIR_AND_0x04011001    , ULL(0x04011001) );
+CONST_UINT64_T( X_XBUS0_BUSCNTL_FIR_MASK_0x04011003   , ULL(0x04011003) );
 
 CONST_UINT64_T( X_XBUS1_BUSCNTL_FIR_0x04011400        , ULL(0x04011400) );
 CONST_UINT64_T( X_XBUS1_BUSCNTL_FIR_AND_0x04011401    , ULL(0x04011401) );
@@ -1362,6 +1380,7 @@ CONST_UINT64_T( A_PERV_LFIR_ACT1_0x08040011           , ULL(0x08040011) );
 
 CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_0x08010C00         , ULL(0x08010C00) );
 CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_AND_0x08010C01     , ULL(0x08010C01) );
+CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_MASK_0x08010C03    , ULL(0x08010C03) );
 
 CONST_UINT64_T( A_ABUS_SCOM_MODE_PB_0x08010C20        , ULL(0x08010C20) );
 
@@ -1510,6 +1529,7 @@ CONST_UINT64_T( PCIE_PERV_LFIR_ACT1_0x09040011        , ULL(0x09040011) );
 
 CONST_UINT64_T( ES_PBES_WRAP_TOP_FIR_0x09010800       , ULL(0x09010800) );
 CONST_UINT64_T( ES_PBES_WRAP_TOP_FIR_AND_0x09010801   , ULL(0x09010801) );
+CONST_UINT64_T( ES_PBES_WRAP_TOP_FIR_MASK_0x09010803  , ULL(0x09010803) );
 
 CONST_UINT64_T( PCIE_IOP0_PLL_FIR_0x09011400          , ULL(0x09011400) );
 CONST_UINT64_T( PCIE_IOP0_PLL_FIR_AND_0x09011401      , ULL(0x09011401) );
@@ -1771,6 +1791,10 @@ CONST_UINT64_T( EX_PERV_SPRD_L0_100132A3              , ULL(0x100132A3) );
 CONST_UINT64_T( EX_PERV_SPRD_L1_100132A4              , ULL(0x100132A4) );
 CONST_UINT64_T( EX_PERV_SPRD_L2_100132A5              , ULL(0x100132A5) );
 CONST_UINT64_T( EX_PERV_SPRD_L3_100132A6              , ULL(0x100132A6) );
+
+// SPURR regs
+CONST_UINT64_T( EX_PERV_SPURR_FREQ_SCALE_0x1001329F   , ULL(0x1001329F) );
+CONST_UINT64_T( EX_PERV_SPURR_FREQ_REF_0x100132A0     , ULL(0x100132A0) );
 
 // Performance Throttle Mode
 CONST_UINT64_T( EX_PERV_PFTH_THROT_0x100132AD         , ULL(0x100132AD) );
@@ -2083,6 +2107,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.180  2014/04/12 03:14:16  cmolsen
+Added two SPURR regs.
+
+Revision 1.179  2014/03/27 03:43:43  jmcgill
+updates for proc_mpipl_clear_xstop (SW252842)
+
 Revision 1.178  2014/03/12 18:55:47  jmcgill
 add IO SCOM_MODE_PB register constant definitions (DMI/XBUS/ABUS)
 

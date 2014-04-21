@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.67 2014/02/26 04:58:11 jmcgill Exp $
+// $Id: p8_xip_customize.C,v 1.69 2014/04/23 15:32:02 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -31,9 +31,9 @@
 //
 /* *! USAGE : 
               To build (for Hostboot) -
-              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C,p8_mailbox_utils.C"   -e "../../xml/error_info/p8_xip_customize_errors.xml,../../xml/error_info/p8_mailbox_utils_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/hwp/xml/error_info/mvpd_errors.xml"   p8_xip_customize.C
+              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C,p8_mailbox_utils.C"   -e "../../xml/error_info/p8_xip_customize_errors.xml,../../xml/error_info/p8_mailbox_utils_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/working/hwp/xml/error_info/mvpd_errors.xml"   p8_xip_customize.C
               To build (for VBU/command-line) -
-              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C,p8_mailbox_utils.C"   -e "../../xml/error_info/p8_xip_customize_errors.xml,../../xml/error_info/p8_mailbox_utils_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/hwp/xml/error_info/mvpd_errors.xml"   -u "XIPC_COMMAND_LINE"   p8_xip_customize.C
+              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C,p8_mailbox_utils.C"   -e "../../xml/error_info/p8_xip_customize_errors.xml,../../xml/error_info/p8_mailbox_utils_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/working/hwp/xml/error_info/mvpd_errors.xml"   -u "XIPC_COMMAND_LINE"   p8_xip_customize.C
               Other usages -
                             using "IMGBUILD_PPD_IGNORE_VPD" will ignore adding MVPD rings.
                             using "IMGBUILD_PPD_IGNORE_VPD_FIELD" will ignore using fapiGetMvpdField.
@@ -213,7 +213,7 @@ ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
                       ringId,
                       bufVpdRing,
                       sizeVpdRing);
-        FAPI_DBG("XIPC: Mvpd rings: rcFapi=0x%08x",(uint32_t)rcFapi);
+        FAPI_INF("XIPC: Mvpd rings: rcFapi=0x%08x",(uint32_t)rcFapi);
         if (rcFapi==RC_REPAIR_RING_NOT_FOUND)  {
           // No match, do nothing. Next ringId.
           FAPI_INF("XIPC: Mvpd rings: (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X) not found.",iRing,ringId,chipletId);
@@ -314,7 +314,7 @@ ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
                     uint8_t  & RING_ID    = ringId;
                     uint32_t & RING_SIZE  = sizeVpdRing;
                     uint32_t & IMAGE_SIZE = sizeImageOut;
-                    FAPI_DBG("Ring %s won't fit into image. Size would be %i.", (char*)(ring_id_list+iRing)->ringNameImg, sizeImageOut);
+                    FAPI_INF("Ring %s won't fit into image. Size would be %i.", (char*)(ring_id_list+iRing)->ringNameImg, sizeImageOut);
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW);
                     return rc;
                   } else {
@@ -408,7 +408,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   bool       largeSeeprom = false;
   uint8_t    seepromAddrBytes = 0;
   const uint32_t   desiredBootCoreMask = (i_sysPhase==0)?io_bootCoreMask:0x0000FFFF;
-  FAPI_DBG("Desired boot core mask is 0x%08X, io_bootCoreMask is 0x%08X", desiredBootCoreMask, io_bootCoreMask);
+  FAPI_INF("Desired boot core mask is 0x%08X, io_bootCoreMask is 0x%08X", desiredBootCoreMask, io_bootCoreMask);
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
@@ -559,11 +559,11 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     return rc;
   }
   sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostCombGoodVec);
-  FAPI_DBG("Dumping [initial] global variable content of combined_good_vectors, then the updated value:\n");
+  FAPI_INF("Dumping [initial] global variable content of combined_good_vectors, then the updated value:\n");
   for (iVec=0; iVec<MAX_CHIPLETS; iVec++)  {
-    FAPI_DBG("combined_good_vectors[%2i]: Before=0x%016llX\n",iVec,myRev64(*((uint64_t*)hostCombGoodVec+iVec)));
+    FAPI_INF("combined_good_vectors[%2i]: Before=0x%016llX\n",iVec,myRev64(*((uint64_t*)hostCombGoodVec+iVec)));
     *((uint64_t*)hostCombGoodVec+iVec) = myRev64(attrCombGoodVec[iVec]);
-    FAPI_DBG("                             After=0x%016llX\n",myRev64(*((uint64_t*)hostCombGoodVec+iVec)));
+    FAPI_INF("                             After=0x%016llX\n",myRev64(*((uint64_t*)hostCombGoodVec+iVec)));
   }
   
   
@@ -591,11 +591,11 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     return rc;
   }
   sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostL2SingleMember);
-  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+  FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
 						L2_SINGLE_MEMBER_ENABLE_TOC_NAME);
-  FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
+  FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
   *(uint64_t*)hostL2SingleMember = myRev64((uint64_t)attrL2SingleMember<<32);
-  FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
+  FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
   
   
   // ==========================================================================
@@ -623,11 +623,11 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	    return rc;
 	  }
 	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostSecuritySetupVec);
-	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+	  FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
 							SECURITY_SETUP_VECTOR_TOC_NAME);
-	  FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
+	  FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
 	  *(uint64_t*)hostSecuritySetupVec = myRev64(attrSecuritySetupVec);
-	  FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
+	  FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
 	}
 
   // ==========================================================================
@@ -722,7 +722,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  }
 	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostAduUntrustedBar);
     untrustbar_field = (uint64_t*)hostAduUntrustedBar;
-	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+	  FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
 							UNTRUSTED_BAR_TOC_NAME);
 
 	  *(untrustbar_field + 0) = myRev64(attrAduUntrustedBarBase);
@@ -746,7 +746,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  }
 	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostAduUntrustedBar);
     untrustbar_field = (uint64_t*)hostAduUntrustedBar;
-	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+	  FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
 							UNTRUSTED_PBA_BAR_TOC_NAME);
 
 	  *(untrustbar_field + 0) = myRev64(attrPbaUntrustedBarBase);
@@ -794,7 +794,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_UNEXPECTED_FIELD_SIZE);
       return rc;
     }
-    FAPI_DBG("Dumping global variable content of pibmem_repair_vector:\n");
+    FAPI_INF("Dumping global variable content of pibmem_repair_vector:\n");
     sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostPibmemRepairVec);
     FAPI_INF("pibmem_repair_vector:Before (in BE)=0x%016llX\n",*(uint64_t*)hostPibmemRepairVec);
     byteField  = (uint8_t*)bufVpdField;
@@ -842,7 +842,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_UNEXPECTED_FIELD_SIZE);
       return rc;
     }
-    FAPI_DBG("Dumping global variable content of nest_skewadjust_vector:\n");
+    FAPI_INF("Dumping global variable content of nest_skewadjust_vector:\n");
     sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostNestSkewAdjVec);
     FAPI_INF("nest_skewadjust_vector: Before (in BE)=0x%016llX\n",*((uint64_t*)hostNestSkewAdjVec));
     byteField  = (uint8_t*)bufVpdField;
@@ -961,8 +961,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_INF("XIPC: PLL update: Retrieve the raw PLL ring state from attributes.");
     // Get ring size.
     rc = FAPI_ATTR_GET(ATTR_PROC_PERV_BNDY_PLL_LENGTH, &i_target, attrRingDataSize); // This better be in bits.
-    FAPI_DBG("XIPC: PLL update: PLL ring length (bits) = %i",attrRingDataSize);
-    FAPI_DBG("XIPC: PLL update: Size of buf1, i_sizeBuf1 (bytes) = %i",i_sizeBuf1);
+    FAPI_INF("XIPC: PLL update: PLL ring length (bits) = %i",attrRingDataSize);
+    FAPI_INF("XIPC: PLL update: Size of buf1, i_sizeBuf1 (bytes) = %i",i_sizeBuf1);
     if (rc)  {
       FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PERV_BNDY_PLL_LENGTH) returned error.");
       return rc;
@@ -1269,7 +1269,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
               lrc = FAPI_ATTR_GET(ATTR_SBE_IMAGE_MINIMUM_VALID_EXS, NULL, MINIMUM_VALID_EXS);
               if (lrc)
               {
-                FAPI_DBG("Unable to determine ATTR_SBE_IMAGE_MINIMUM_VALID_EXS, so don't know if the minimum was met");
+                FAPI_INF("Unable to determine ATTR_SBE_IMAGE_MINIMUM_VALID_EXS, so don't know if the minimum was met");
                 fapiLogError(lrc);
                 uint32_t & VALID_COUNT = validEXCount;
                 uint32_t & MINIMUM = MINIMUM_VALID_EXS;
@@ -1296,13 +1296,13 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                 // so jump to the end of EXs and continue
                 rc = FAPI_RC_SUCCESS;
                 chipletId = CHIPLET_ID_EX_MAX;
-                FAPI_DBG("Skipping the rest of the EX rings because image is full");
+                FAPI_INF("Skipping the rest of the EX rings because image is full");
               }
             }
             else
             {
               //This is a real error, so return it
-              FAPI_DBG("Hit an error adding cores to the image");
+              FAPI_INF("Hit an error adding cores to the image");
               return rc;
             }
           } else {
@@ -1312,7 +1312,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
             validEXCount++;
           }
         } else {
-          FAPI_DBG("Skipping EX chiplet ID 0x%X because it's not in the bootCoreMask", chipletId);
+          FAPI_INF("Skipping EX chiplet ID 0x%X because it's not in the bootCoreMask", chipletId);
         }
       } else {
         // Normal handling for non-EX chiplet IDs
@@ -1370,10 +1370,10 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
     sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostValidBootCoresMask);
-    FAPI_DBG("Dumping [initial] global variable content of valid_boot_cores_mask, then the updated value:\n");
-    FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostValidBootCoresMask));
+    FAPI_INF("Dumping [initial] global variable content of valid_boot_cores_mask, then the updated value:\n");
+    FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostValidBootCoresMask));
     *(uint64_t*)hostValidBootCoresMask = myRev64(((uint64_t)io_bootCoreMask)<<32);
-    FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostValidBootCoresMask));
+    FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostValidBootCoresMask));
   }
 
 
@@ -1498,7 +1498,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
              ( (uint64_t)attrL2RT2Eps     <<(63-28) & (uint64_t)0x7ff<<(63-28) ) |
              ( (uint64_t)attrL2WEps       <<(63-35) & (uint64_t)0x07f<<(63-35) ) |
              ( (uint64_t)attrL2ForceRT2Eps<<(63-36) & (uint64_t)0x001<<(63-36) );
-  FAPI_DBG("scomData =0x%016llx",scomData);
+  FAPI_INF("scomData =0x%016llx",scomData);
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
@@ -1507,8 +1507,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       (uint32_t)EX_L2_CERRS_RD_EPS_REG_0x10012814, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
-                      1,        // Repl first matching Scom addr,if any, or add to EOT.
-                      0);       // Put in general Scom section.
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
       if (rcLoc)  {
         FAPI_ERR("Updating SCOM NC table w/L2 Epsilon data unsuccessful (rcLoc=%i)\n",rcLoc);
         uint32_t & RC_LOCAL = rcLoc;
@@ -1557,7 +1557,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
              ( (uint64_t)attrL3RT1Eps     <<(63-17) & (uint64_t)0x1ff<<(63-17) ) |
              ( (uint64_t)attrL3RT2Eps     <<(63-28) & (uint64_t)0x7ff<<(63-28) ) |
              ( (uint64_t)attrL3ForceRT2Eps<<(63-30) & (uint64_t)0x003<<(63-30) );
-  FAPI_DBG("scomData =0x%016llx",scomData);
+  FAPI_INF("scomData =0x%016llx",scomData);
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
@@ -1566,8 +1566,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       (uint32_t)EX_L3_CERRS_RD_EPS_REG_0x10010829, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
-                      1,        // Repl first matching Scom addr,if any, or add to EOT.
-                      0);       // Put in general Scom section.
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
       if (rcLoc)  {
         FAPI_ERR("\tUpdating SCOM NC table w/L3 Epsilon data (1) unsuccessful.\n");
         uint32_t & RC_LOCAL = rcLoc;
@@ -1586,7 +1586,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
   bScomEntry = 0;
   scomData = ( (uint64_t)attrL3WEps       <<(63-6)  & (uint64_t)0x07f<<(63-6) );
-  FAPI_DBG("scomData =0x%016llx",scomData);
+  FAPI_INF("scomData =0x%016llx",scomData);
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
@@ -1595,8 +1595,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       (uint32_t)EX_L3_CERRS_WR_EPS_REG_0x1001082A, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
-                      1,        // Repl first matching Scom addr,if any, or add to EOT.
-                      0);       // Put in general Scom section.
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
       if (rcLoc)  {
         FAPI_ERR("\tUpdating SCOM NC table w/L3 Epsilon data (2) unsuccessful.\n");
         uint32_t & RC_LOCAL = rcLoc;
@@ -1639,7 +1639,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
   bScomEntry = 0;
   scomData = ( (uint64_t)attrL3BAR1);
-  FAPI_DBG("scomData =0x%016llx",scomData);
+  FAPI_INF("scomData =0x%016llx",scomData);
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
@@ -1648,8 +1648,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       (uint32_t)EX_L3_BAR1_REG_0x1001080B, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
-                      1,        // Repl first matching Scom addr,if any, or add to EOT.
-                      0);       // Put in general Scom section.
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
       if (rcLoc)  {
         FAPI_ERR("\tUpdating SCOM NC table w/L3 BAR data (1) unsuccessful.\n");
         uint32_t & RC_LOCAL = rcLoc;
@@ -1668,7 +1668,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
   bScomEntry = 0;
   scomData = ( (uint64_t)attrL3BAR2);
-  FAPI_DBG("scomData =0x%016llx",scomData);
+  FAPI_INF("scomData =0x%016llx",scomData);
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
@@ -1677,8 +1677,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       (uint32_t)EX_L3_BAR2_REG_0x10010813, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
-                      1,        // Repl first matching Scom addr,if any, or add to EOT.
-                      0);       // Put in general Scom section.
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
       if (rcLoc)  {
         FAPI_ERR("\tUpdating SCOM NC table w/L3 BAR data (2) unsuccessful.\n");
         uint32_t & RC_LOCAL = rcLoc;
@@ -1697,7 +1697,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
   bScomEntry = 0;
   scomData = ( (uint64_t)attrL3BARMask);
-  FAPI_DBG("scomData =0x%016llx",scomData);
+  FAPI_INF("scomData =0x%016llx",scomData);
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
@@ -1706,8 +1706,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       (uint32_t)EX_L3_BAR_GROUP_MASK_REG_0x10010816, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
-                      1,        // Repl first matching Scom addr,if any, or add to EOT.
-                      0);       // Put in general Scom section.
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
       if (rcLoc)  {
         FAPI_ERR("\tUpdating SCOM NC table w/L3 BAR data (3) unsuccessful.\n");
         uint32_t & RC_LOCAL = rcLoc;
@@ -1725,9 +1725,88 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   }
 
 
-    
+
   // ==========================================================================
-  // CUSTOMIZE item:    Put RAMs in RAM table to suppurt malfunction alert.
+  // CUSTOMIZE item:    SPURR Scom table updates.
+  // Retrieval method:  Attribute.
+  // System phase:      IPL and SLW sysPhase.
+  // ==========================================================================
+
+  uint32_t    attrCoreFreq=0;     //MHz 
+  rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_NOMINAL, NULL, attrCoreFreq);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_FREQ_CORE) returned error.\n");
+    return rc;
+  }
+
+  // SPURR freq ref SCOM
+  bScomEntry = 0;
+  scomData = ~((uint64_t)(attrCoreFreq/64)) + 1;
+  FAPI_INF("Fcore[MHz]=%d and SPURRBASE=0x%016llx",attrCoreFreq,scomData);
+  scomData = scomData<<(63-7) & (uint64_t)0xff<<(63-7);
+  FAPI_INF("scomData=0x%016llx",scomData);
+  for (coreId=0; coreId<=15; coreId++)  {
+    if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
+      rcLoc = p8_pore_gen_scom_fixed( 
+                      o_imageOut, 
+                      i_modeBuild,
+                      (uint32_t)EX_PERV_SPURR_FREQ_REF_0x100132A0,
+                      coreId,   // The core ID.
+                      scomData,
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
+      if (rcLoc)  {
+        FAPI_ERR("\tUpdating SCOM NC table w/SPURR freq ref unsuccessful.\n");
+        uint32_t & RC_LOCAL = rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_SCOM_ERROR); 
+        return rc;
+      }
+      bScomEntry = 1;
+    }
+  }
+  if (bScomEntry)  {
+    FAPI_INF("Updating SCOM NC table w/SPURR freq ref successful.\n");
+  }
+  else  {
+    FAPI_INF("No active cores found. Did not update SCOM NC table w/SPURR freq ref data.\n");
+  }
+
+  // SPURR freq scale SCOM
+  bScomEntry = 0;
+  scomData = (uint64_t)0x40;
+  FAPI_INF("Fscale=0x%016llx",scomData);
+  scomData = scomData<<(63-7) & (uint64_t)0xff<<(63-7);
+  FAPI_INF("scomData=0x%016llx",scomData);
+  for (coreId=0; coreId<=15; coreId++)  {
+    if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
+      rcLoc = p8_pore_gen_scom_fixed( 
+                      o_imageOut, 
+                      i_modeBuild,
+                      (uint32_t)EX_PERV_SPURR_FREQ_SCALE_0x1001329F,
+                      coreId,   // The core ID.
+                      scomData,
+                      P8_PORE_SCOM_REPLACE, // Repl 1st matching Scom addr, or add to EOT.
+                      P8_SCOM_SECTION_NC);  // Put in general Scom section.
+      if (rcLoc)  {
+        FAPI_ERR("\tUpdating SCOM NC table w/SPURR freq scale unsuccessful.\n");
+        uint32_t & RC_LOCAL = rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_SCOM_ERROR); 
+        return rc;
+      }
+      bScomEntry = 1;
+    }
+  }
+  if (bScomEntry)  {
+    FAPI_INF("Updating SCOM NC table w/SPURR freq scale successful.\n");
+  }
+  else  {
+    FAPI_INF("No active cores found. Did not update SCOM NC table w/SPURR freq scale data.\n");
+  }
+
+
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Put RAMs in RAM table to support malfunction alert.
   // Retrieval method:  N/A.
   // System phase:      SLW sysPhase. (By MikeO)
   // ==========================================================================
@@ -1789,7 +1868,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 #ifdef FAPIECMD  // This section only included for Cronus builds.
   if (attrIvrmEnabled==0)  {
     attrIvrmEnabled = 1;
-    FAPI_DBG("Setting ATTR_PM_IVRMS_ENABLED = 0x%x.\n",attrIvrmEnabled);
+    FAPI_INF("Setting ATTR_PM_IVRMS_ENABLED = 0x%x.\n",attrIvrmEnabled);
     rc = FAPI_ATTR_SET(ATTR_PM_IVRMS_ENABLED, &i_target, attrIvrmEnabled);
     if (rc)  {
       FAPI_ERR("FAPI_ATTR_SET(ATTR_PM_IVRMS_ENABLED) return error.\n");
@@ -1813,9 +1892,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
       return rc;
     }
-    FAPI_DBG("slwControlVector=0x%016llx",slwControlVector); 
+    FAPI_INF("slwControlVector=0x%016llx",slwControlVector); 
     slwControlVector = slwControlVector | BIT(63); 
-    FAPI_DBG("slwControlVector=0x%016llx",slwControlVector); 
+    FAPI_INF("slwControlVector=0x%016llx",slwControlVector); 
     rcLoc = sbe_xip_set_scalar( o_imageOut, "slw_control_vector", slwControlVector);
     if (rcLoc)  {
       FAPI_ERR("sbe_xip_set_scalar() failed w/rc=%i", rcLoc);
