@@ -1,0 +1,54 @@
+#!/bin/sh
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/citest/build-errl-parsers $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2014
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+echo "====Building error log parsers===="
+
+if [ -z $HOSTBOOT_CI_ENV_SETUP ];
+then
+    source "$HOSTBOOTROOT/src/build/citest/setup-env"
+fi
+
+if [ ! -d "$SANDBOXBASE" ];
+then
+    echo "Cannot find sandbox $SANDBOXBASE"
+    exit -1
+fi
+
+echo "----Creating directories"
+mkdir -p ${SANDBOXBASE}/src/srci || exit -1
+mkdir -p ${SANDBOXBASE}/src/errl || exit -1
+
+echo "----Building hbfw"
+execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp" \
+    || exit -1
+echo "----Building srci"
+execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp" \
+    || exit -1
+echo "----Building errl"
+execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp" \
+    || exit -1
+
+echo "----Extracting errl tool"
+tar -xvf ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl.tar \
+         -C ${SANDBOXBASE}/simics errl  || exit -1

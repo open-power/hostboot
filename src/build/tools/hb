@@ -436,27 +436,7 @@ hb_errlparser()
         exit -1
     fi
 
-    # make sure the srci and errl dirs are present
-    # x86.nfp context
-    mkdir -p ${SANDBOXBASE}/src/srci
-    mkdir -p ${SANDBOXBASE}/src/errl
-
-    # Trigger a build of the hostboot plugins we shipped with the
-    # hb prime cmd.
-    execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw/ \
-                                             && mk -a -j32"  "x86.nfp"
-
-    # build srci in x86 context
-    execute_in_sandbox "cd ${SANDBOXBASE}/src/srci \
-                                             && mk -a -j32"  "x86.nfp"
-
-    # build errl in x86 context, to pick-up the parser libs from
-    # hostboot.
-    execute_in_sandbox "cd ${SANDBOXBASE}/src/errl \
-                                             && mk -a -j32"  "x86.nfp"
-
-    cd ${SANDBOXBASE}/simics
-    tar -xvf  $SANDBOXBASE/obj/x86.nfp/errl/nfp/tool/errl.tar  errl
+    ${HOSTBOOTROOT}/src/build/citest/build-errl-parsers
 }
 
 hb_cachesync()
