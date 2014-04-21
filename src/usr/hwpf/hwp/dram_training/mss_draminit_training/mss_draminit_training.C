@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.80 2014/04/01 16:34:50 jdsloat Exp $
+
+// $Id: mss_draminit_training.C,v 1.85 2014/04/23 18:23:51 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +29,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.85   | jdsloat  |23-APL-14| Fixed attribute variable l_disable1_rdclk_fixed unitialized error in SW25701/v1.83
+//  1.84   | jdsloat  |23-APL-14| Fixed FAPI_ERR message within v1.83, mss_set_bbm_regs
+//  1.83   | jdsloat  |18-APL-14| SW25701 Workaround - mss_set_bbm_regs - x4s will not mask out RDCLKs on Bad Bits to avoid translation issues
+//  1.82   | jdsloat  |14-APL-14| Gerrit Review. Rc checks.
+//  1.81   | jdsloat  |11-APL-14| HW278227 BBM workaround: Masking out the same bits/bytes across all ranks.
 //  1.80   | jdsloat  |01-APL-14| RAS review edits/changes
 //  1.79   | jdsloat  |01-APL-14| RAS review edits/changes
 //  1.78   | jdsloat  |28-MAR-14| RAS review edits/changes
@@ -830,6 +836,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     if(rc)
     {
 	FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
+	return rc;
+    }
+    //Move the VPD(flash) info back to the disable regs
+    //In order to have the rank masks match with corresponding ranks.
+    rc = mss_set_bbm_regs(i_target);
+    if(rc)
+    {
+	FAPI_ERR( "Error Moving bad bit information to the Phy regs. Exiting.");
 	return rc;
     }
 
@@ -3215,7 +3229,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 		0x8800, 0x4400, 0x2280, 0x1140
 	};
 
-	uint8_t l_dram_width, l_disable1_fixed;
+	uint8_t l_dram_width, l_disable1_fixed, l_disable1_rdclk_fixed;
 	uint64_t l_addr;
 	// 0x8000007d0301143f	 from disable0 register
 	const uint64_t l_disable1_addr_offset = 0x0000000100000000ull;
@@ -3224,7 +3238,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 
 	ReturnCode rc;
 	ecmdDataBufferBase data_buffer(64);
-	ecmdDataBufferBase db_reg(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg(BITS_PER_PORT);
 	uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];		// primary rank group values
 
@@ -3248,12 +3262,15 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &mba_target, l_dram_width);
 	if(rc) return rc;
 
-    fapi::Target l_target_centaur;
-    rc = fapiGetParentChip(mba_target, l_target_centaur);
-    if(rc) return rc;
+        fapi::Target l_target_centaur;
+        rc = fapiGetParentChip(mba_target, l_target_centaur);
+        if(rc) return rc;
 
 	rc = FAPI_ATTR_GET(ATTR_MSS_DISABLE1_REG_FIXED, &l_target_centaur, l_disable1_fixed);
-    if(rc) return rc;
+        if(rc) return rc;
+
+	rc = FAPI_ATTR_GET(ATTR_MSS_DISABLE1_RDCLK_REG_FIXED, &l_target_centaur, l_disable1_rdclk_fixed);
+        if(rc) return rc;
 
 	switch (l_dram_width)
 	{
@@ -3284,7 +3301,6 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	{
 		 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
 				 "- rc 0x%.8X", l_ecmdRc);
-
 		 rc.setEcmdError(l_ecmdRc);
 		 return rc;
 	}
@@ -3479,8 +3495,9 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 							return rc;
 						}
 					}
-		 // does disabling read clocks for unused bytes cause problems?
-					else
+		                        // does disabling read clocks for unused bytes cause problems?
+					// SW25701 Workaround - x4s will not mask out RDCLKs on Bad Bits to avoid translation issues
+					else if ( (!l_disable1_rdclk_fixed) && (l_dram_width != 4) )
 					{
 						uint64_t rdclk_addr =
 							disable_reg[port][prank][i] & 0xFFFFFF040FFFFFFFull;
@@ -3517,12 +3534,16 @@ fapi::ReturnCode mss_get_dqs_lane (const fapi::Target & i_mba,
 	uint8_t phy_lane = i_quad * 4;
 	uint8_t l_block = i_block;
 	// returns dq
-	rc=mss_c4_phy(i_mba,i_port,0,RD_DQ,dq,0,phy_lane,l_block,1);
+	rc=mss_c4_phy(i_mba,i_port,0,RD_DQ,dq,1,phy_lane,l_block,1);
 	if (rc) return rc;
+	FAPI_INF("DQ returning mss_c4_phy inputs port: %d input index: %d phy_lane: %d block: %d",i_port,dq,phy_lane,l_block);
+
 	dqs = dq / 4;
 	// returns phy_lane
-	rc=mss_c4_phy(i_mba,i_port,0,WR_DQS,dqs,0,phy_lane,l_block,0);
+	rc=mss_c4_phy(i_mba,i_port,0,WR_DQS,dqs,1,phy_lane,l_block,0);
 	if (rc) return rc;
+	FAPI_INF("phy_lane returning mss_c4_phy inputs port: %d input index: %d phy_lane: %d block: %d",i_port,dqs,phy_lane,l_block);
+
 	if (l_block != i_block)
 	{
 		FAPI_ERR("\t !!!  blocks don't match from c4 to phy i_block=%i,"
@@ -3630,12 +3651,24 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 		ENUM_ATTR_EFF_PRIMARY_RANK_GROUP3_INVALID,
 	};
 
-    ReturnCode rc;
-    ecmdDataBufferBase data_buffer(64);
-    ecmdDataBufferBase db_reg(BITS_PER_PORT);
+        ReturnCode rc;
+        ecmdDataBufferBase data_buffer(64);
+        ecmdDataBufferBase db_reg(BITS_PER_PORT);
 	uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];		// primary rank group values
 	uint8_t l_dram_width;
+	uint8_t dimm;
+
+	//Storing all the errors across rank/eff dimm
+        ecmdDataBufferBase db_reg_dimm0_rank0(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm0_rank1(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm0_rank2(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm0_rank3(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm1_rank0(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm1_rank1(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm1_rank2(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_dimm1_rank3(BITS_PER_PORT);
+
 
 	FAPI_INF("Running (get)registers->flash");
 
@@ -3693,10 +3726,29 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 	}
 	for (uint8_t port = 0; port < MAX_PORTS; port++ )	// [0:1]
 	{
+		// Initialize all the stored errors to 0.
+		l_ecmdRc |= db_reg_dimm0_rank0.flushTo0();
+		l_ecmdRc |= db_reg_dimm0_rank1.flushTo0();
+		l_ecmdRc |= db_reg_dimm0_rank2.flushTo0();
+		l_ecmdRc |= db_reg_dimm0_rank3.flushTo0();
+		l_ecmdRc |= db_reg_dimm1_rank0.flushTo0();
+		l_ecmdRc |= db_reg_dimm1_rank1.flushTo0();
+		l_ecmdRc |= db_reg_dimm1_rank2.flushTo0();
+		l_ecmdRc |= db_reg_dimm1_rank3.flushTo0();
+
+		if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+		{
+			 FAPI_ERR("Error from ecmdDataBuffer setHalfWord()"
+					 " for wrclk_mask - rc 0x%.8X", l_ecmdRc);
+
+			 rc.setEcmdError(l_ecmdRc);
+			 return rc;
+		}
+
 		// loop through primary ranks [0:3]
 		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
 		{
-			uint8_t dimm = prg[prank][port] >> 2;
+			dimm = prg[prank][port] >> 2;
 			uint8_t rank = prg[prank][port] & 0x03;
 			uint16_t l_data = 0;
 			uint8_t l_has_bad_bits = 0;
@@ -3782,16 +3834,104 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 
 			if (l_has_bad_bits)
 			{
-				rc = setC4dq2reg(mba_target, port, dimm, rank, db_reg);
-				if (rc)
+				if (dimm == 0)
 				{
-					FAPI_ERR("Error from setting register bitmap p%i: "
-						"dimm=%i, rank=%i rc=%i", port, dimm, rank,
-						static_cast<uint32_t>(rc));
-					return rc;
+					if (rank == 0)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank0);
+					}
+					else if (rank == 1)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank1);
+					}
+					else if (rank == 2)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank2);
+					}
+					else if (rank == 3)
+					{
+
+						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank3);
+					}
+				}
+				else if (dimm == 1)
+				{
+					if (rank == 0)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank0);
+					}
+					else if (rank == 1)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank1);
+					}
+					else if (rank == 2)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank2);
+					}
+					else if (rank == 3)
+					{
+						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank3);
+					}
+				}
+
+				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+				{
+					 FAPI_ERR("Error from ecmdDataBuffer copy() "
+						 "- rc 0x%.8X", l_ecmdRc);
+
+					 rc.setEcmdError(l_ecmdRc);
+					 return rc;
 				}
 			}
+
 		} // end primary rank loop
+
+
+		FAPI_INF("HW278227 BBM workaround: Masking out the same bits/bytes across all ranks.");
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank0, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank1, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank2, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank3, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank0, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank1, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank2, 0, 80);
+		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank3, 0, 80);
+
+		if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+		{
+			 FAPI_ERR("Error from ecmdDataBuffer setOr() "
+				 "- rc 0x%.8X", l_ecmdRc);
+
+			 rc.setEcmdError(l_ecmdRc);
+			 return rc;
+		}
+
+
+		// loop through primary ranks [0:3]
+		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
+		{
+			dimm = prg[prank][port] >> 2;
+			uint8_t rank = prg[prank][port] & 0x03;
+
+			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
+			{
+				FAPI_DBG("Primary rank group %i is INVALID, continuing...",
+						prank);
+				continue;
+			}
+
+			FAPI_INF("HW278227 BBM workaround: Setting same BBM across dimm: %d rank: %d", dimm, rank);
+			rc = setC4dq2reg(mba_target, port, dimm, rank, db_reg);
+			if (rc)
+			{
+				FAPI_ERR("Error from setting register bitmap p%i: "
+					"dimm=%i, rank=%i rc=%i", port, dimm, rank,
+					static_cast<uint32_t>(rc));
+				return rc;
+			}
+
+		}// end of primary rank loop
+
 	} // end port loop
     return rc;
 } // end mss_get_bbm_regs

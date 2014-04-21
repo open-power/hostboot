@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.24 2014/01/24 17:21:39 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.25 2014/04/18 19:23:36 jdsloat Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -58,6 +58,7 @@
 //   1.22  |sauchadh  |10-Jan-14| changed dimmtype attribute to ATTR_EFF_CUSTOM_DIMM
 //   1.23  | mjjones  |17-Jan-14| Fixed layout and error handling for RAS Review
 //   1.24  |sauchadh  |24-Jan-14| Added check for unused DQS 
+//   1.25  |sauchadh  |18-Apr-14| SW257010: mss_c4_phy: initialized dqs_lane array and verbose flag, used array indexes rather than counter
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -2769,7 +2770,7 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,
    uint8_t l_dram_width=0;
    uint8_t l_lane=0;
    uint8_t l_block=0;
-   uint8_t lane_dqs[4];
+   uint8_t lane_dqs[4]={0}; //Initialize to 0.  This is a numerical ID of a false lane.  Another function catches this in mss_draminit_training.
    uint8_t l_index=0;
    uint8_t l_dq=0;
    uint8_t l_phy_dq=0;
@@ -2781,6 +2782,7 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,
    ecmdDataBufferBase data_buffer_64(64);
    uint8_t l_dimmtype=0;
    uint8_t l_swizzle=0;
+   i_verbose=1; //Default the verbose flag high 
       
    rc = FAPI_ATTR_GET(ATTR_MSS_DQS_SWIZZLE_TYPE, &i_target_mba, l_swizzle); if(rc) return rc;
       
@@ -2926,47 +2928,46 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,
          
          if (data_buffer_64.isBitSet(48))
          {
-            lane_dqs[l_index]=16;
-            l_index++;
+            lane_dqs[0]=16;
+            
          }
          else if(data_buffer_64.isBitSet(52))
          { 
-            lane_dqs[l_index]=18;
-            l_index++;
+            lane_dqs[0]=18;
+            
          }
         
          if (data_buffer_64.isBitSet(49))
          {
-            lane_dqs[l_index]=16;
-            l_index++;
+            lane_dqs[1]=16;
+            
          }
      
          else if (data_buffer_64.isBitSet(53))
          {
-            lane_dqs[l_index]=18;
-            l_index++;
+            lane_dqs[1]=18;
+            
          }
          
          if (data_buffer_64.isBitSet(54))
          {
-            lane_dqs[l_index]=20;
-            l_index++;
+            lane_dqs[2]=20;
+            
          }
          else if (data_buffer_64.isBitSet(56))
          {
-            lane_dqs[l_index]=22;
-            l_index++;
+            lane_dqs[2]=22;
+           
          }
       
          if (data_buffer_64.isBitSet(55))
          {
-            lane_dqs[l_index]=20;
-            l_index++;
+            lane_dqs[3]=20;
          }
          else if (data_buffer_64.isBitSet(57))   // else is not possible as one of them will definitely get set
          {
-            lane_dqs[l_index]=22;
-            l_index++;
+            lane_dqs[3]=22;
+          
          }
          if(i_verbose==1)
          {
