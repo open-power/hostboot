@@ -212,20 +212,6 @@ public:
                                         const uint8_t i_node);
 
     /**
-     * @brief DEPRECATED
-     *
-     * Will be removed with RTC99917 when FSP code has been changed to call
-     * the new interface with the i_node parameter
-     */
-    virtual void clearNonConstAttribute(const uint32_t i_attrId,
-                                        const uint32_t i_targetType,
-                                        const uint16_t i_pos,
-                                        const uint8_t i_unitPos)
-    {
-        clearNonConstAttribute(i_attrId, i_targetType, i_pos, i_unitPos, 0);
-    }
-
-    /**
      * @brief Set an Attribute
      *
      * The attribute value is copied from i_pVal. If the attribute already
@@ -255,24 +241,6 @@ public:
                               const void * i_pVal);
 
     /**
-     * @brief DEPRECATED
-     *
-     * Will be removed with RTC99917 when FSP code has been changed to call
-     * the new interface with the i_node parameter
-     */
-    virtual void setAttribute(const uint32_t i_attrId,
-                              const uint32_t i_targetType,
-                              const uint16_t i_pos,
-                              const uint8_t i_unitPos,
-                              const uint8_t i_flags,
-                              const uint32_t i_valSize,
-                              const void * i_pVal)
-    {
-        setAttribute(i_attrId, i_targetType, i_pos, i_unitPos, 0, i_flags,
-                     i_valSize, i_pVal);
-    }
-
-    /**
      * @brief Get a copy of an Attribute
      *
      * This is called on an OverrideAttributeTank to query/get an Attribute
@@ -293,22 +261,6 @@ public:
                               const uint8_t i_unitPos,
                               const uint8_t i_node,
                               void * o_pVal) const;
-
-    /**
-     * @brief DEPRECATED
-     *
-     * Will be removed with RTC99917 when FSP code has been changed to call
-     * the new interface with the i_node parameter
-     */
-    virtual bool getAttribute(const uint32_t i_attrId,
-                              const uint32_t i_targetType,
-                              const uint16_t i_pos,
-                              const uint8_t i_unitPos,
-                              void * o_pVal) const
-    {
-        return getAttribute(i_attrId, i_targetType, i_pos, i_unitPos, 0,
-                            o_pVal);
-    }
 
     /**
      * @brief Serialize all Attributes into newly allocated memory chunks
