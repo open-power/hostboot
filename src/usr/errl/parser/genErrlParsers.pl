@@ -75,7 +75,7 @@ my $compPath = $base."/src/usr";
 my $compIncPath = $base."/src/include/usr";
 my $genFilesPath = $base."/obj/genfiles";
 my $hbfwTermRcFile = $genFilesPath."/hbfw_term_rc.H";
-
+my $srcFileName = $genFilesPath."/srcListing";
 #------------------------------------------------------------------------------
 # Call subroutines to populate the following arrays:
 # - @reasonCodeFiles   (The list of files to parse through for reason codes)
@@ -438,6 +438,7 @@ close(OFILE);
 #------------------------------------------------------------------------------
 my %compValueToParseHash;
 my %rcModValuesUsed;
+my %srcList;
 
 foreach my $file (@filesToParse)
 {
@@ -476,6 +477,7 @@ foreach my $file (@filesToParse)
             my $rcValue = "";
             my @userData;
             my $desc = "";
+            my $cdesc = "";
 
             # Read the entire error log tag into an array
             my @tag;
@@ -635,6 +637,38 @@ foreach my $file (@filesToParse)
                         }
                     }
                 }
+                elsif ($line =~ /\@custdesc\s+(\S+.*)/i)
+                {
+                    # Found a customer description. Strip out any double-quotes
+                    # and trailing whitespace
+                    $cdesc = $1;
+                    $cdesc =~ s/\"//g;
+                    $cdesc =~ s/\s+$//;
+
+                    # Look for follow-on lines
+                    for ($lineNum++; $lineNum < $numLines; $lineNum++)
+                    {
+                        $line = $tag[$lineNum];
+
+                        if ($line =~ /\@/)
+                        {
+                            # Found the next element, rewind
+                            $lineNum--;
+                            last;
+                        }
+
+                        # Continuation of description, strip out any double-
+                        # quotes and leading / trailing whitespace
+                        $line =~ s/^.+\*\s+//;
+                        $line =~ s/\"//g;
+                        $line =~ s/\s+$//;
+
+                        if ($line ne "")
+                        {
+                            $cdesc = $cdesc . " " . $line;
+                        }
+                    }
+                }
             }
 
             # Check that the required fields were found
@@ -657,6 +691,21 @@ foreach my $file (@filesToParse)
                 print ("$0: description missing from error log tag in '$file'\n");
                 print ("$0: moduleid is '$modId', reasoncode is '$rc'\n");
                 exit(1);
+            }
+
+            # if no customer desc is provided, then use $desc
+            if ($cdesc eq "")
+            {
+                $cdesc =
+                "During processor/memory subsystem initialization,"
+                . " an error was encountered: $desc";
+            }
+
+            # SRC list - eliminate dups
+            my $srcText = sprintf("%04X", hex($rcValue));
+            if($srcList{$srcText} eq "")
+            {
+                $srcList{$srcText} .= $cdesc;
             }
 
             # Create the combined returncode/moduleid value that the parser looks for and
@@ -694,6 +743,41 @@ foreach my $file (@filesToParse)
 
     close(PARSE_FILE);
 }
+
+## all subsystems HB uses - not every combination is possible, but it makes
+#  the list of SRCs thourough.  It's not clear yet if we are going to put
+#  subsystem text in the output file or not.
+#  TODO RTC:106255  Get rid of hardcoded subsys values
+my %subsys = (
+    '10' => 'Processor',
+    '13' => 'Processor Unit',
+    '14' => 'Processor Bus',
+    '20' => 'Memory',
+    '21' => 'Memory Controller',
+    '22' => 'Memory Bus',
+    '23' => 'Memory DIMM',
+    '50' => 'Central Electronic Complex',
+    '55' => 'VPD Hardware Interface',
+    '56' => 'I2C Hardware',
+    '57' => 'Hardware Chip Interface',
+    '58' => 'Clock Controller',
+    '5A' => 'TOD Hardware',
+    '5C' => 'Service Processor to Hypervisor hardware interface',
+    '60' => 'Power',
+    '70' => 'Miscellaneous',
+    '81' => 'Service Processor Firmware',
+    '82' => 'Hypervisor Firmware',
+    '8A' => 'Hostboot Firmware');
+
+open(OFILE, ">", $srcFileName) or die ("Cannot open: $srcFileName: $!");
+foreach my $sub (sort keys %subsys)
+{
+    foreach my $rcVal (sort keys %srcList)
+    {
+        print OFILE "BC$sub$rcVal, $srcList{$rcVal}\n";
+    }
+}
+close(OFILE);
 
 #------------------------------------------------------------------------------
 # For each component value, print a file containing the parse code

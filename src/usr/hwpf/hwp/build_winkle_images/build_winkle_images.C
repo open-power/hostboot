@@ -134,7 +134,7 @@ errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
              * @userdata1   Hi 32 bits: return code from sbe_xip_image_size
              *              Lo 32 bits: Size of memory requested
              * @userdata2   Size of WINK PNOR partition
-             * @devdesc     Image from PNOR WINK partion invalid, too small,
+             * @devdesc     Image from PNOR WINK partition invalid, too small,
              *              or too big
              */
             l_errl =

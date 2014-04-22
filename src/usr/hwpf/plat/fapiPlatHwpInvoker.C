@@ -617,6 +617,8 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc,
              * @userdata1    RC value from HWP
              * @userdata2    <unused>
              * @devdesc      HW Procedure generated error. See User Data.
+             * @custdesc     Error initializing processor/memory subsystem
+             *               during boot. See FRU list for repair actions
              */
             l_pError = new ERRORLOG::ErrlEntry(i_sev,
                                                MOD_HWP_RC_TO_ERRL,

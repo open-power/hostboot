@@ -174,7 +174,7 @@ uint32_t UtilMem::read(
          * @userdata1[0:31]     Task ID.
          * @userdata1[31:64]    End of File (boolean)
          * @userdata2           Address of memory buffer.
-         * @devdesc             Bad memory pointer recieved.
+         * @devdesc             Bad memory pointer received.
          */
         l_erc = UTIL_ERC_BAD_PTR;
     }
@@ -269,7 +269,7 @@ uint32_t UtilMem::write(
          * @userdata1[0:31]     Task ID.
          * @userdata1[31:64]    End of File (boolean)
          * @userdata2           Address of memory buffer.
-         * @devdesc             Bad memory pointer recieved.
+         * @devdesc             Bad memory pointer received.
          */
         l_erc = UTIL_ERC_BAD_PTR;
     }

@@ -492,7 +492,7 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                 *  @userdata2      Number of EX chips associatd with core
                 *
                 *  @devdesc        Hardware callout could not Gard target
-                $                  because it could not find EX chip
+                *                  because it could not find EX chip
                 *                  associated with the Core to be called out
                 *
                 */

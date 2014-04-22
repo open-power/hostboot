@@ -1368,7 +1368,7 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
              * @userdata2[0:31]  N/A
              * @userdata2[32:63] N/A.
              * @devdesc          handleProcFabIovalidMsg called during MPIPL,
-                                 which is illegal.
+             *                   which is illegal.
              */
             err = new ERRORLOG::ErrlEntry(
                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1745,7 +1745,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      * @userdata1[32:63] SubStep that failed
      * @userdata2[0:31]  Desired istep for reconfig loop.
      * @userdata2[32:63] Desired substep for reconfig loop.
-     * @devdesc          Deconfigured occured during an istep. The reconfig loop
+     * @devdesc          Deconfigured occurred during an istep. The reconfig loop
      *                   was not performed by Hostboot because either the Istep
      *                   is outside the reconfig loop (desired steps 0), too
      *                   many reconfig loops were attempted, in manufacturing

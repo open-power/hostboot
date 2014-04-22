@@ -270,7 +270,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
      * @moduleid         VPD::VPD_RT_WRITE_PNOR
      * @userdata1        target huid
      * @userdata2        VPD type
-     * @devdesc          VPD write not suported at runtime
+     * @devdesc          VPD write not supported at runtime
      */
     err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                    VPD::VPD_RT_WRITE_PNOR,

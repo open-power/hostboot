@@ -74,7 +74,7 @@ namespace SECUREBOOT
                  * @reasoncode  SECUREBOOT::RC_PURGEOP_PENDING
                  * @userdata1   SCOM value.
                  * @userdata2   CPU ID (PIR) encountering failure.
-                 * @devdesc     Attemped to purge cache while purge operation
+                 * @devdesc     Attempted to purge cache while purge operation
                  *              was pending.
                  */
                 l_errl =

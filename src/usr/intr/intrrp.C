@@ -357,7 +357,7 @@ void IntrRp::msgHandler()
                     type = static_cast<ext_intr_t>(xirr & XISR_MASK);
 
                     TRACFCOMP(g_trac_intr,
-                              "External Interrupt recieved. XIRR=%x, PIR=%x",
+                              "External Interrupt received. XIRR=%x, PIR=%x",
                               xirr,pir.word);
 
                     // Acknowlege msg
@@ -380,7 +380,7 @@ void IntrRp::msgHandler()
                         if(rc)
                         {
                             TRACFCOMP(g_trac_intr,ERR_MRK
-                                      "External Interrupt recieved type = %d, "
+                                      "External Interrupt received type = %d, "
                                       "but could not send message to registered"
                                       " handler. Ignoring it. rc = %d",
                                       (uint32_t) type, rc);
@@ -400,7 +400,7 @@ void IntrRp::msgHandler()
                     {
                         // Throw it away for now.
                         TRACFCOMP(g_trac_intr,ERR_MRK
-                                  "External Interrupt recieved type = %d, but "
+                                  "External Interrupt received type = %d, but "
                                   "nothing registered to handle it. "
                                   "Ignoring it.",
                                   (uint32_t)type);
@@ -479,7 +479,7 @@ void IntrRp::msgHandler()
                             if(rc)
                             {
                                 TRACFCOMP(g_trac_intr,ERR_MRK
-                                          "IPI Interrupt recieved, but could "
+                                          "IPI Interrupt received, but could "
                                           "not send message to the registered "
                                           "handler. Ignoring it. rc = %d",
                                           rc);
@@ -1279,7 +1279,7 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
          * @userdata1       The bad virtual address
          * @userdata2       0
          *
-         * @devdesc         The virutal address is not a valid IO address
+         * @devdesc         The virtual address is not a valid IO address
          *
          */
         err = new ERRORLOG::ErrlEntry
