@@ -312,16 +312,7 @@ void setHWStateChanged(TARGETING::TargetHandle_t i_target)
             (TYPE_MEMBUF == type) ||
             (TYPE_MCS    == type) )
         {
-            ATTR_HWAS_STATE_CHANGED_FLAG_type hwcf;
-            hwcf = i_target->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
-
-            if( !(HWAS_CHANGED_BIT_MEMDIAG & hwcf) )
-            {
-                // FIXME - RTC: 87893
-                //Use new set_hwas_changed_bit() when available
-                hwcf |= HWAS_CHANGED_BIT_MEMDIAG;
-                i_target->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(hwcf);
-            }
+            update_hwas_changed_mask(i_target, HWAS_CHANGED_BIT_MEMDIAG);
         }
         else
         {
