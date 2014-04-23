@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingInfoAttr.C,v 1.2 2014/01/17 23:50:05 whs Exp $
+// $Id: getPllRingInfoAttr.C,v 1.3 2014/04/23 17:23:40 thi Exp $
 /**
  *  @file getPllRingInfoAttr.C
  *
@@ -420,7 +420,7 @@ fapi::ReturnCode get_MEMB_DMI_CUPLL_PFD360_OFFSET(
         {
             // Data supplied by HW team
             if ((l_name == fapi::ENUM_ATTR_NAME_CENTAUR) && 
-                ((l_ec == 0x10) || (l_ec == 0x20)))
+                ((l_ec == 0x10) || (l_ec == 0x20) || (l_ec == 0x21)))
             {
                 o_val = 134;
             }
@@ -477,7 +477,7 @@ fapi::ReturnCode get_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET(
         {
             // Data supplied by HW team
             if ((l_name == fapi::ENUM_ATTR_NAME_CENTAUR) && 
-                ((l_ec == 0x10) || (l_ec == 0x20)))
+                ((l_ec == 0x10) || (l_ec == 0x20) || (l_ec == 0x21)))
             {
                 o_val = 92;
             }
