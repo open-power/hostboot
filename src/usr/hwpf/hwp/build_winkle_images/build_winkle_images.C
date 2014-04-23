@@ -72,6 +72,7 @@
 #include    "p8_slw_build/p8_slw_build.H"
 #include    "p8_slw_build/p8_pore_table_gen_api.H"
 #include    "p8_set_pore_bar/p8_set_pore_bar.H"
+#include    "p8_set_pore_bar/p8_pba_bar_config.H"
 #include    "p8_pm.H"                               //  PM_INIT
 #include    "p8_set_pore_bar/p8_poreslw_init.H"
 #include    "p8_slw_build/sbe_xip_image.h"
@@ -718,13 +719,39 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                                       (l_pImage));
         }
 
-
-        if ( l_errl )
+        if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR : p8_set_pore_bar, PLID=0x%x",
                       l_errl->plid()  );
+        }
+        else
+        {
+            //No error on previous call, make sure to
+            //init PBA BAR 0 to 0s.  This is required on MPIPLs
+            //so sapphire can determine when OCC is active.  FSPless
+            //it will be active before hostboot hands over control
+            //FSP mode it will be loaded in sapphire
 
+            FAPI_INVOKE_HWP( l_errl,
+                             p8_pba_bar_config,
+                             l_fapi_cpu_target,
+                             0,                 //PBA BAR 0
+                             0,                 //Addr 0
+                             0,                 //Size 0
+                             0);                //Cmd 0
+
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : p8_pba_bar_config, PLID=0x%x",
+                          l_errl->plid()  );
+            }
+        }
+
+
+        if ( l_errl )
+        {
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
 
