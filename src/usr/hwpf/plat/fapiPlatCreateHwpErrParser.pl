@@ -109,6 +109,7 @@ foreach my $argnum (1 .. $#ARGV)
         $desc =~ s/^ +//g;
         $desc =~ s/ +$//g;
         $desc =~ s/ +/ /g;
+        $desc =~ s/\"//g;
 
         #----------------------------------------------------------------------
         # Print the RC description
