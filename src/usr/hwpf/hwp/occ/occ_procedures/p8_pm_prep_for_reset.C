@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.29 2014/04/16 05:59:49 daviddu Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.30 2014/04/21 14:27:53 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -41,8 +41,8 @@
 ///     - call p8_pm_firinit  *chiptarget, 
 ///             - Mask the PM FIRs
 ///
-///     - call p8_occ_control.C *chiptarget, ENUM:OCC_STOP      ppc405_reset_ctrl = 2
-///             - OCC PPC405 put into reset
+///     - call p8_occ_control.C *chiptarget, ENUM:OCC_STOP      ppc405_reset_ctrl = PPC405_RESET_SEQUENCE
+///             - OCC PPC405 put into reset safely
 ///             - PMC moves to Vsafe value due to heartbeat loss
 ///
 ///     - call p8_cpu_special_wakeup.C  *chiptarget, ENUM:OCC_SPECIAL_WAKEUP
@@ -341,12 +341,12 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         }
 
         //  ******************************************************************
-        //  Put OCC PPC405 into reset
+        //  Put OCC PPC405 into reset safely
         //  ******************************************************************       
-        FAPI_INF("Put OCC PPC405 into reset");
+        FAPI_INF("Put OCC PPC405 into reset safely");
         FAPI_DBG("Executing: p8_occ_control.C");
 
-        FAPI_EXEC_HWP(rc, p8_occ_control, i_primary_chip_target, PPC405_RESET_ON, 0);
+        FAPI_EXEC_HWP(rc, p8_occ_control, i_primary_chip_target, PPC405_RESET_SEQUENCE, 0);
         if (rc)
         {
             FAPI_ERR("p8_occ_control: Failed to prepare OCC for RESET. With rc = 0x%x", (uint32_t)rc);
@@ -355,7 +355,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
-            FAPI_EXEC_HWP(rc, p8_occ_control, i_secondary_chip_target, PPC405_RESET_ON, 0);
+            FAPI_EXEC_HWP(rc, p8_occ_control, i_secondary_chip_target, PPC405_RESET_SEQUENCE, 0);
             if (rc)
             {
               FAPI_ERR("p8_occ_control: Failed to prepare OCC for RESET. With rc = 0x%x", (uint32_t)rc);

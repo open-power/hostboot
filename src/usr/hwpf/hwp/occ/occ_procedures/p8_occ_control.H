@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_occ_control.H,v 1.3 2013/01/08 13:52:08 jimyac Exp $
+// $Id: p8_occ_control.H,v 1.4 2014/04/21 14:27:53 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_occ_control.H,v $
 #ifndef _P8_OCC_CONTROL_H_
 #define _P8_OCC_CONTROL_H_
@@ -47,6 +47,9 @@ fapi::ReturnCode p8_occ_control(const fapi::Target& i_target,
 const uint8_t PPC405_RESET_NULL         = 0x00; 
 const uint8_t PPC405_RESET_OFF          = 0x01;
 const uint8_t PPC405_RESET_ON           = 0x02;
+const uint8_t PPC405_HALT_OFF           = 0x03;
+const uint8_t PPC405_HALT_ON            = 0x04;
+const uint8_t PPC405_RESET_SEQUENCE     = 0x05;
 
 const uint8_t PPC405_BOOT_NULL          = 0x00;
 const uint8_t PPC405_BOOT_SRAM          = 0x01;
