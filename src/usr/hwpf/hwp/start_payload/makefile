@@ -43,6 +43,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/start_payload
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/start_payload/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  start_payload.o

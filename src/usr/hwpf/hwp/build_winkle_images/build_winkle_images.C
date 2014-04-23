@@ -164,14 +164,14 @@ errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
  * @brief   apply cpu reg information to the SLW image using
  *          p8_pore_gen_cpureg() .
  *
- * @param i_cpuTarget   -   proc target
+ * @param i_procChipTarg   -   proc target
  * @param io_image      -   pointer to the SLW image
  * @param i_sizeImage   -   size of the SLW image
  *
  * @return errorlog if error, NULL otherwise.
  *
  */
-errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
+errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_procChipTarg,
                                    void      *io_image,
                                    uint32_t  i_sizeImage )
 {
@@ -179,7 +179,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
 
     TARGETING::TargetHandleList l_coreIds;
     getChildChiplets(   l_coreIds,
-                        i_cpuTarget,
+                        i_procChipTarg,
                         TYPE_CORE,
                         false );
 
@@ -192,6 +192,8 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
     TARGETING::ATTR_CHIP_UNIT_type l_coreId    =   0;
     size_t      l_threadId  =   0;
     uint32_t    l_rc        =   0;
+    uint32_t    l_failAddr  =   0;
+
     uint64_t    l_msrVal    =   cpu_spr_value(CPU_SPR_MSR) ;
 
     uint64_t    l_lpcrVal   =   cpu_spr_value( CPU_SPR_LPCR);
@@ -201,6 +203,9 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
     // See LPCR def, PECE "reg" in Power ISA AS Version: Power8 June 27, 2012
     //  and 23.7.3.5 - 6 in Murano Book 4
     l_lpcrVal   &=  ~(0x0000000000002000) ;
+
+    // Core FIR Action1 Register value from Nick
+    const uint64_t action1_reg = 0xEA5C139705980000;
 
     TARGETING::Target* sys = NULL;
     TARGETING::targetService().getTopLevelTarget(sys);
@@ -236,6 +241,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "ERROR: MSR: core=0x%x,thread=0x%x,l_rc=0x%x",
                        l_coreId, l_threadId, l_rc );
+            l_failAddr = P8_MSR_MSR;
             break;
         }
 
@@ -249,6 +255,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
                        l_coreId, l_threadId, l_rc );
+            l_failAddr = P8_SPR_HRMOR;
             break;
         }
 
@@ -279,6 +286,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "ERROR: LPCR: core=0x%x,thread=0x%x,l_rc=0x%x",
                            l_coreId, l_threadId, l_rc );
+                l_failAddr = P8_SPR_LPCR;
                 break;
             }
         }   // end for l_threadId
@@ -288,26 +296,53 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
         {
             break;
         }
+
+        // Need to force core checkstops to escalate to a system checkstop
+        //  by telling the SLW to update the ACTION1 register when it
+        //  comes out of winkle  (see HW286670)
+        l_rc = p8_pore_gen_scom_fixed( io_image,
+                                       P8_SLW_MODEBUILD_IPL,
+                                       EX_CORE_FIR_ACTION1_0x10013107,
+                                       l_coreId,
+                                       action1_reg,
+                                       P8_PORE_SCOM_REPLACE,
+                                       P8_SCOM_SECTION_NC );
+        if( l_rc )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR: ACTION1: core=0x%x,l_rc=0x%x",
+                       l_coreId, l_rc );
+            l_failAddr = EX_CORE_FIR_ACTION1_0x10013107;
+            break;
+        }
+
     }   // end for l_coreIds
 
     if ( l_rc ){
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR: core=0x%x, thread=0x%x, l_rc=0x%x",
+                   "ERROR: p8_pore_gen api fail core=0x%x, thread=0x%x, l_rc=0x%x",
                    l_coreId, l_threadId, l_rc );
         /*@
          * @errortype
          * @reasoncode  ISTEP_BAD_RC
          * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
          * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
-         * @userdata1   return code from p8_pore_gen_cpureg
+         * @userdata1[00:31]  return code from p8_pore_gen_xxx function
+         * @userdata1[32:63]  address being added to image
+         * @userdata2[00:31]  Failing Core Id
+         * @userdata2[32:63]  Failing Thread Id
          *
-         * @devdesc p8_pore_gen_cpureg returned an error when
+         * @devdesc p8_pore_gen_xxx returned an error when
          *          attempting to change a reg value in the PORE image.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
                                 ISTEP::ISTEP_BAD_RC,
-                                l_rc  );
+                                TWO_UINT32_TO_UINT64(l_rc,l_failAddr),
+                                TWO_UINT32_TO_UINT64(l_coreId,l_threadId) );
+        l_errl->collectTrace(FAPI_TRACE_NAME,256);
+        l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+        l_errl->collectTrace("ISTEPS_TRACE",256);
     }
 
     return  l_errl;
@@ -600,7 +635,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
             l_StepError.addErrorDetails( l_errl );
 
             // Commit error
-            errlCommit( l_errl, HWPF_COMP_ID );
+            errlCommit( l_errl, ISTEP_COMP_ID );
         }
     }
 

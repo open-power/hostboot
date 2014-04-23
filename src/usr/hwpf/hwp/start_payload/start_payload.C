@@ -53,6 +53,8 @@
 #include    <mbox/mboxif.H>
 #include    <i2c/i2cif.H>
 #include    <hwpf/hwp/occ/occ.H>
+#include    <sys/mm.h>
+#include    <devicefw/userif.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
@@ -65,6 +67,8 @@
 #include    <fapiPlatHwpInvoker.H>
 #include    "p8_set_pore_bar.H"
 #include    "p8_cpu_special_wakeup.H"
+#include    "p8_pore_table_gen_api.H"
+#include    <p8_scom_addresses.H>
 
 #include    "start_payload.H"
 #include    <runtime/runtime.H>
@@ -128,6 +132,13 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
  * @return errlHndl_t error handle
  */
 errlHndl_t disableSpecialWakeup();
+
+/**
+ * @brief Re-enables the local core checkstop function
+ *
+ * @return errlHndl_t error handle
+ */
+errlHndl_t enableCoreCheckstops();
 
 
 /**
@@ -377,6 +388,14 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
         }
 
+        // Revert back to standard runtime mode where core checkstops
+        //  do not escalate to system checkstops
+        // Workaround for HW286670
+        l_err = enableCoreCheckstops();
+        if ( l_err )
+        {
+            break;
+        }
 
         //  - Update HDAT/DEVTREE with tpmd logs
 
@@ -816,6 +835,157 @@ errlHndl_t disableSpecialWakeup()
                           "SUCCESS: Disable special wakeup");
             }
         }
+        if(l_errl)
+        {
+            break;
+        }
+    }
+
+    return l_errl;
+}
+
+
+/**
+ * @brief Re-enables the local core checkstop function
+ */
+errlHndl_t enableCoreCheckstops()
+{
+    errlHndl_t l_errl = NULL;
+    void* l_slwPtr = NULL;
+    int mm_rc = 0;
+
+    // loop thru all proc and find all functional ex units
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+    for (TargetHandleList::const_iterator l_procIter =
+         l_procTargetList.begin();
+         l_procIter != l_procTargetList.end();
+         ++l_procIter)
+    {
+        const TARGETING::Target* l_pChipTarget = *l_procIter;
+
+        //  calculate location of the SLW output buffer
+        uint64_t l_physAddr =
+          l_pChipTarget->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
+        l_slwPtr = mm_block_map(reinterpret_cast<void*>(l_physAddr),
+                                HOMER_MAX_SLW_IMG_SIZE_IN_MB*MEGABYTE);
+        if( l_slwPtr == NULL )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_map : phys=%.16X", l_physAddr );
+            /*@
+             * @errortype
+             * @reasoncode   ISTEP::ISTEP_MM_MAP_ERR
+             * @moduleid     ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS
+             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @userdata1    <unused>
+             * @userdata2    Physical address
+             * @devdesc      mm_block_map() returns error
+             */
+            l_errl =
+              new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
+                                      ISTEP::ISTEP_MM_MAP_ERR,
+                                      0,
+                                      l_physAddr);
+        }
+
+        // Get EX list under this proc
+        TARGETING::TargetHandleList l_exList;
+        getChildChiplets( l_exList, l_pChipTarget, TYPE_EX );
+
+        for (TargetHandleList::const_iterator
+             l_exIter = l_exList.begin();
+             l_exIter != l_exList.end();
+             ++l_exIter)
+        {
+            TARGETING::Target* l_exTarget = *l_exIter;
+
+            // Write the runtime version of the Action1 reg
+            // Core FIR Action1 Register value from Nick
+            uint64_t action1_reg = 0xFEFC17F78F9C8A01;
+            size_t opsize = sizeof(uint64_t);
+            l_errl = deviceWrite( l_exTarget,
+                        &action1_reg,
+                        opsize,
+                        DEVICE_SCOM_ADDRESS(EX_CORE_FIR_ACTION1_0x10013107) );
+            if( l_errl )
+            {
+                break;
+            }
+
+            // Need to force core checkstops to escalate to a system checkstop
+            //  by telling the SLW to update the ACTION1 register when it
+            //  comes out of winkle  (see HW286670)
+            TARGETING::ATTR_CHIP_UNIT_type l_coreId =
+              l_exTarget->getAttr<ATTR_CHIP_UNIT>();
+            uint32_t l_rc = p8_pore_gen_scom_fixed( l_slwPtr,
+                                           P8_SLW_MODEBUILD_IPL,
+                                           EX_CORE_FIR_ACTION1_0x10013107,
+                                           l_coreId,
+                                           action1_reg,//ignored
+                                           P8_PORE_SCOM_NOOP,
+                                           P8_SCOM_SECTION_NC );
+            if( l_rc )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR: ACTION1: chip=%.8X, core=0x%x,l_rc=0x%x",
+                           get_huid(l_pChipTarget), l_coreId, l_rc );
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_BAD_RC
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_ENABLE_CORE_CHECKSTOPS
+                 * @userdata1[00:31]  rc from p8_pore_gen_scom_fixed function
+                 * @userdata1[32:63]  address being added to image
+                 * @userdata2[00:31]  Failing Proc HUID
+                 * @userdata2[32:63]  Failing Core Id
+                 *
+                 * @devdesc p8_pore_gen_scom_fixed returned an error when
+                 *          attempting to erase a reg value in the PORE image.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                     ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
+                                     ISTEP::ISTEP_BAD_RC,
+                                     TWO_UINT32_TO_UINT64(l_rc,
+                                             EX_CORE_FIR_ACTION1_0x10013107),
+                                     TWO_UINT32_TO_UINT64(
+                                             get_huid(l_pChipTarget),
+                                             l_coreId) );
+                l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                l_errl->collectTrace("ISTEPS_TRACE",256);
+                break;
+            }
+        }
+
+        mm_rc = mm_block_unmap(l_slwPtr);
+        if( mm_rc )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_unmap : rc=%d, ptr=%p", mm_rc, l_slwPtr );
+            /*@
+             * @errortype
+             * @reasoncode   ISTEP::ISTEP_MM_UNMAP_ERR
+             * @moduleid     ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS
+             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @userdata1    Return Code
+             * @userdata2    Unmap address
+             * @devdesc      mm_block_unmap() returns error
+             */
+            l_errl =
+              new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
+                                      ISTEP::ISTEP_MM_UNMAP_ERR,
+                                      mm_rc,
+                                      reinterpret_cast<uint64_t>
+                                      (l_slwPtr));
+            // Just commit error and keep going
+            errlCommit( l_errl, ISTEP_COMP_ID );
+        }
+        l_slwPtr = NULL;
+
         if(l_errl)
         {
             break;

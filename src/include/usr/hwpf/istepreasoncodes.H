@@ -53,6 +53,7 @@ enum istepModuleId
     ISTEP_PROC_SET_PORE_BAR                             = 0x05,
     ISTEP_HOST_ACTIVATE_MASTER                          = 0x06,
     ISTEP_SBE_CENTAUR_INIT                              = 0x07,
+    ISTEP_ENABLE_CORE_CHECKSTOPS                        = 0x08,
 };
 
 /**
@@ -71,6 +72,7 @@ enum istepReasonCode
     ISTEP_MM_UNMAP_ERR                          = ISTEP_COMP_ID | 0x05,
     ISTEP_LOAD_SLW_FROM_PNOR_FAILED             = ISTEP_COMP_ID | 0x06,
     ISTEP_REPAIR_LOADER_RETRY_OCCURED           = ISTEP_COMP_ID | 0x07,
+    ISTEP_MM_MAP_ERR                            = ISTEP_COMP_ID | 0x08,
 };  // end ISTEP
 
 }
