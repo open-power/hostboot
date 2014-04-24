@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_force_vsafe_errors.xml,v 1.6 2014/03/05 21:04:04 stillgs Exp $ -->
+<!-- $Id: p8_force_vsafe_errors.xml,v 1.7 2014/04/24 17:01:15 daviddu Exp $ -->
 <!-- Error definitions for proc_pmc_force_vsafe procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -57,41 +57,6 @@
       </basedOnPresentChildren>     
     </collectRegisterFfdc>      
     <callout>
-       <target>THISCHIP</target> 
-       <priority>HIGH</priority> 
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_VLT_ERROR</rc>
-    <description>Voltage change not done because of  errors on the status register.</description>   
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PSTATE_REGISTERS</id>
-      <id>REG_FFDC_SPIVID_REGISTERS</id> 
-      <target>THISCHIP</target>
-    </collectRegisterFfdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PSTATE_REGISTERS</id>
-      <id>REG_FFDC_SPIVID_REGISTERS</id> 
-      <target>DCMCHIP</target>
-    </collectRegisterFfdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PCBS_PSSTATE_MONITOR_REGISTERS</id>
-      <basedOnPresentChildren>
-          <target>THISCHIP</target>
-          <childType>TARGET_TYPE_EX_CHIPLET</childType>
-          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
-      </basedOnPresentChildren>     
-    </collectRegisterFfdc> 
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PCBS_PSSTATE_MONITOR_REGISTERS</id>
-      <basedOnPresentChildren>
-          <target>DCMCHIP</target>
-          <childType>TARGET_TYPE_EX_CHIPLET</childType>
-          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
-      </basedOnPresentChildren>     
-    </collectRegisterFfdc>   
-     <callout>
        <target>THISCHIP</target> 
        <priority>HIGH</priority> 
     </callout>

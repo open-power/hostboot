@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_force_vsafe.C,v 1.16 2014/03/21 01:16:09 stillgs Exp $
+// $Id: p8_pmc_force_vsafe.C,v 1.18 2014/04/24 16:54:18 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_force_vsafe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -333,15 +333,24 @@ p8_pmc_force_vsafe( const fapi::Target& i_target,
             
             any_error = (pmc_error || intchp_error);
             
-            // Check for voltage change has any error
+            // log status if voltage change has any error
+            // Due to SW258130
+            // This block only dumps any detected hw error status
+            // without taking out an error log and stop the reset flow. 
+            // Since this procedure is only used by p8_pm_prep_for_reset
+            // we will and should be able to recover from such hardware errors
+            // by going through occ reset flow, thus no FAPI error logged.
+            // Also since if hardware error occurs, there is no need to check 
+            // for pstate ongoing or pstate equals to pvsafe due to possible
+            // hardware stuck; therefore, this if/else logic remains. 
             if (any_error)
             {
-                // An error was detected
+                // dump individual error status 
                 FAPI_INF(" PMC_STATUS_REG upon Error");
                 if (pmcstatusreg.isBitSet(0))
-                    FAPI_ERR("   pstate_processing_is_susp active");
+                    FAPI_INF("   pstate_processing_is_susp active");
                 if (pmcstatusreg.isBitSet(1))
-                    FAPI_ERR("   gpsa_bdcst_error active");
+                    FAPI_INF("   gpsa_bdcst_error active");
 
                 e_rc = pmcstatusreg.extractToRight( &dummy,2,3);
                 if (e_rc)
@@ -350,32 +359,27 @@ p8_pmc_force_vsafe( const fapi::Target& i_target,
                     break;
                 }
                 if (dummy)
-                    FAPI_ERR("   gpsa_bdcst_resp_info is non-zero => %x ",  dummy );
+                    FAPI_INF("   gpsa_bdcst_resp_info is non-zero => %x ",  dummy );
 
                 if (pmcstatusreg.isBitSet(5))
-                    FAPI_ERR("   gpsa_vchg_error active");
+                    FAPI_INF("   gpsa_vchg_error active");
                 if (pmcstatusreg.isBitSet(6))
-                    FAPI_ERR("   gpsa_timeout_error active");
+                    FAPI_INF("   gpsa_timeout_error active");
                 if (pmcstatusreg.isBitSet(7))
-                    FAPI_ERR("   gpsa_chg_ongoing active");
+                    FAPI_INF("   gpsa_chg_ongoing active");
                 if (pmcstatusreg.isBitSet(8))
-                    FAPI_ERR("   volt_chg_ongoing active");
+                    FAPI_INF("   volt_chg_ongoing active");
                 if (pmcstatusreg.isBitSet(9))
-                    FAPI_ERR("   brd_cst_ongoing active");
+                    FAPI_INF("   brd_cst_ongoing active");
                 if (pmcstatusreg.isBitSet(10))
-                    FAPI_ERR("   gpsa_table_error active");
+                    FAPI_INF("   gpsa_table_error active");
                 if (pmcstatusreg.isBitSet(11))
-                    FAPI_ERR("   pstate_interchip_error active");
+                    FAPI_INF("   pstate_interchip_error active");
                 if (pmcstatusreg.isBitSet(12))
-                    FAPI_ERR("   istate_processing_is_susp active");
+                    FAPI_INF("   istate_processing_is_susp active");
 
-                FAPI_ERR("Error detected with PMC on-going deassertion during safe voltage movement ");
-                const fapi::Target & THISCHIP = i_target;
-                const fapi::Target & DCMCHIP = i_dcm_target;
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_VLT_ERROR);
-                break;
-
-            } // end of error if
+                FAPI_INF("Status dumpped with PMC on-going deassertion during safe voltage movement, now continue on reset");
+            } // end of status log if
             else if (any_ongoing == 0)
             {
                 // Voltage change done (not on-going) and not errors
