@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_termination.C,v 1.46 2014/03/14 17:08:42 kcook Exp $
+// $Id: mss_eff_config_termination.C,v 1.47 2014/04/07 23:01:20 lapietra Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.47  | dcadiga  |07-APR-14| FFDC Updates
 //   1.46  | kcook    |14-MAR-14| Fixed create_db_ddr4 stub function definition
 //   1.45  | kcook    |14-MAR-14| Added DDR4 support
 //   1.44  | mjjones  |07-MAR-14| Only compile if FAPI_MSSLABONLY defined
@@ -123,18 +124,19 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba,
                                   uint32_t *var_array_p_array[5])
 {
    ReturnCode rc;
-
+   
    FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_LRDIMM_REWRITE_INVALID_EXEC);
    return rc;
 
 }
 ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba) 
 {
    ReturnCode rc;
+   
 
    FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_LRDIMM_TERM_INVALID_EXEC);
    return rc;
 
 }
@@ -144,27 +146,29 @@ ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
 fapi::ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba)
 {
    ReturnCode rc;
-
+   
    FAPI_ERR("Invalid exec of mss_create_rcd_ddr4 on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_CREATE_RCD_DDR4_INVALID_EXEC);
    return rc;
 
 }
 fapi::ReturnCode mss_create_db_ddr4(const Target& i_target_mba)
 {
    ReturnCode rc;
+   
 
    FAPI_ERR("Invalid exec of mss_create_db_ddr4 on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_CREATE_DB_DDR4_INVALID_EXEC);
    return rc;
 
 }
 fapi::ReturnCode mss_lrdimm_ddr4_term_atts(const Target& i_target_mba)
 {
    ReturnCode rc;
+  
 
    FAPI_ERR("Invalid exec of mss_lrdimm_ddr4_term_atts on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_DDR4_TERM_ATTS_INVALID_EXEC);
    return rc;
 
 }
@@ -648,6 +652,9 @@ extern "C" {
     uint8_t l_num_drops_per_port;
     uint8_t l_dram_width_u8;
 
+   //for xml error usage
+   const fapi::Target& TARGET_MBA = i_target_mba;
+
 // this statement makes only lab version of this code have a raw card attribute
 #ifdef FAPIECMD
     uint8_t l_lab_raw_card_u8 = 0;
@@ -677,7 +684,7 @@ extern "C" {
 
     if (l_mss_freq <= 0) {
       FAPI_ERR("Invalid ATTR_MSS_FREQ = %d on %s!", l_mss_freq, i_target_mba.toEcmdString());
-      FAPI_SET_HWP_ERROR(rc,RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      FAPI_SET_HWP_ERROR(rc,RC_MSS_EFF_CONFIG_TERMINATION_INVALID_FREQ); return rc;
     }
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_AL, &i_target_mba, attr_eff_dram_al); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, l_num_ranks_per_dimm_u8array); if(rc) return rc;
@@ -738,7 +745,7 @@ extern "C" {
       }
       else{
         FAPI_ERR("Invalid Dimm SIM This Should Never Happen!\n");
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_DIMM_USE_ERROR); return rc;
 
       }
 
@@ -776,7 +783,8 @@ extern "C" {
           }
           else{
             FAPI_ERR("Invalid Dimm Type KG3 FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_KG3_FREQ_1333Mbps); return rc;
+            
           }
 
 
@@ -808,7 +816,8 @@ extern "C" {
 
           else{
             FAPI_ERR("Invalid Dimm Type KG3 FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_KG3_FREQ_1600Mbps); return rc;
+            
           }
         }//1600      
       }//MBA0
@@ -838,7 +847,8 @@ extern "C" {
           }
           else{
             FAPI_ERR("Invalid Dimm Type KG3 FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_KG3_FREQ_1333Mbps_MBA1); return rc;
+            
           }
 
 
@@ -870,7 +880,8 @@ extern "C" {
 
           else{
             FAPI_ERR("Invalid Dimm Type KG3 FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_KG3_FREQ_1600Mbps_MBA1); return rc;
+            
           }
         }//1600      
       }//MBA1
@@ -908,7 +919,8 @@ extern "C" {
 
             else{
                FAPI_ERR("Invalid Dimm Type KG4 FREQ %d MBA0\n",l_mss_freq);
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               
+	       FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_KG4_FREQ_1333Mbps); return rc;
             }
               //    memcpy(base_var_array,cdimm_rcb4_2r_1600_mba0,210*sizeof(uint32_t));
               //    FAPI_INF("CDIMM rcb4_2r_1600 MBA0 \n");
@@ -943,7 +955,8 @@ extern "C" {
 
             else{
                FAPI_ERR("Invalid Dimm Type KG4 FREQ %d MBA0\n",l_mss_freq);
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               
+	       FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_KG4_FREQ_1600Mbps); return rc;
             }
          }//1600
       }//MBA1
@@ -975,7 +988,8 @@ extern "C" {
                }
               else{
                  FAPI_ERR("Invalid Dimm Type CDIMM RCB4 FREQ %d\n",l_mss_freq);
-                 FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                
+		 FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_B4_1600Mbps); return rc;
               }
             }
          }//CDIMM RCB4
@@ -994,13 +1008,15 @@ extern "C" {
             }
             else{
               FAPI_ERR("Invalid Dimm Type UDIMM FREQ %d MBA0\n",l_mss_freq);
-              FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+              
+	      FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_UDIMM_1600Mbps_MBA0); return rc;
 
             }
           }
           else{
             FAPI_ERR("Invalid Dimm Type UDIMM FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_UDIMM_1600Mbps_MBA0); return rc;
           }
         }
         else{
@@ -1010,14 +1026,16 @@ extern "C" {
               FAPI_INF("UDIMM ICICLE r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
             else{
-              FAPI_ERR("Invalid Dimm Type UDIMM FREQ %d MBA0\n",l_mss_freq);
-              FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+              FAPI_ERR("Invalid Dimm Type UDIMM FREQ %d MBA1\n",l_mss_freq);
+              
+	      FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_UDIMM_1600Mbps_MBA1); return rc;
 
             }
           }
           else{
             FAPI_ERR("Invalid Dimm Type UDIMM FREQ %d MBA1\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_UDIMM_1600Mbps_MBA1); return rc;
           }
         }
 
@@ -1050,7 +1068,8 @@ extern "C" {
           }
           else{
             FAPI_ERR("Invalid Dimm Type RDIMM FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_MBA0_1333Mbps); return rc;
+            
           }
 
         } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
@@ -1077,7 +1096,8 @@ extern "C" {
 
           else{
             FAPI_ERR("Invalid Dimm Type RDIMM FREQ %d MBA0\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_MBA0_1600Mbps); return rc;
+            
           }
         }//1600      
       }//MBA0
@@ -1093,7 +1113,8 @@ extern "C" {
           }        
           else{
             FAPI_ERR("Invalid Dimm Type RDIMM FREQ %d MBA1\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_MBA1_1066Mbps); return rc;
+            
           }
 
         } else if ( l_mss_freq <= 1466 ) { // 1333Mbps
@@ -1130,7 +1151,8 @@ extern "C" {
 
           else{
             FAPI_ERR("Invalid Dimm Type RDIMM FREQ %d HERE MBA1\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_MBA1_1333Mbps); return rc;
+            
           }
         } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
 
@@ -1166,7 +1188,8 @@ extern "C" {
           }
           else{
             FAPI_ERR("Invalid Dimm Type RDIMM FREQ %d MBA1\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_MBA1_1600Mbps); return rc;
+            
           }
         }//1600
       }//MBA1
@@ -1198,7 +1221,8 @@ extern "C" {
           }
           else{
             FAPI_ERR("Invalid Dimm Type LRDIMM FREQ %d HERE MBA1\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_LRDIMM_MBA1_1333Mbps); return rc;
+            
           }
         } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
 
@@ -1212,7 +1236,8 @@ extern "C" {
           }
           else{
             FAPI_ERR("Invalid Dimm Type LRDIMM FREQ %d MBA1\n",l_mss_freq);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_LRDIMM_MBA1_1600Mbps); return rc;
+            
           }
         }
       }//MBA1
@@ -1237,13 +1262,15 @@ extern "C" {
         if(rc)
         {
           FAPI_ERR("FAILED LRDIMM rewrite ODT_RD");
-          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+          
+	  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_LRDIMM_ODT_RD); return rc;
         }
       }
     } // LRDIMM
     else{
       FAPI_ERR("Invalid Dimm Type of %d", l_dimm_type_u8);
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_DIMM_TYPE); return rc;
+      
     }
 
    // Now Set All The Attributes
@@ -1701,7 +1728,8 @@ extern "C" {
       if (rc)
       {
         FAPI_ERR("Setting DDR4 RCD words failed \n");
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+        
+	FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_DDR4_RCD); return rc;
       }
 
     }
@@ -1741,7 +1769,7 @@ extern "C" {
             l_mss_freq_mask = 0x0000000000300000LL;
           } else {                           // 1866Mbps
             FAPI_ERR("Invalid RDIMM ATTR_MSS_FREQ = %d on %s!", l_mss_freq, i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_FREQ); return rc;
           }
           if ( l_mss_volt >= 1420 ) {        // 1.5V
             l_mss_volt_mask = 0x0000000000000000LL;
@@ -1749,7 +1777,8 @@ extern "C" {
             l_mss_volt_mask = 0x0000000000010000LL;
           } else {                           // 1.2V 
             FAPI_ERR("Invalid RDIMM ATTR_MSS_VOLT = %d on %s!", l_mss_volt, i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_RDIMM_VOLT); return rc;
+            
           } 
           if ( attr_eff_dimm_rcd_ibt[l_port][l_dimm] == fapi::ENUM_ATTR_EFF_DIMM_RCD_IBT_IBT_OFF ) {
             l_rcd_ibt_mask = 0x0000000070000000LL;
@@ -1763,7 +1792,8 @@ extern "C" {
             l_rcd_ibt_mask = 0x0000000040000000LL;
           } else {
             FAPI_ERR("Invalid DIMM_RCD_IBT on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_DIMM_RCD_IBT); return rc;
+            
           }
           if ( attr_eff_dimm_rcd_mirror_mode[l_port][l_dimm] == fapi::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_IBT_BACK_OFF ) {
             l_rcd_mirror_mode_mask = 0x0000000000000000LL;
@@ -1771,7 +1801,9 @@ extern "C" {
             l_rcd_mirror_mode_mask = 0x0000000080000000LL;
           } else {
             FAPI_ERR("Invalid DIMM_RCD_MIRROR_MODE on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_DIMM_RCD_MIRROR_MODE); return rc;
+	    
+            
           }
           l_attr_eff_dimm_rcd_cntl_word_0_15[l_port][l_dimm] = l_attr_eff_dimm_rcd_cntl_word_0_15[l_port][l_dimm] | l_mss_freq_mask; 
           l_attr_eff_dimm_rcd_cntl_word_0_15[l_port][l_dimm] = l_attr_eff_dimm_rcd_cntl_word_0_15[l_port][l_dimm] | l_mss_volt_mask; 
@@ -1935,7 +1967,8 @@ extern "C" {
     }
     else{
       FAPI_ERR("Invalid Card Type RLO Settings \n");
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_INVALID_CARD_TYPE_RLO); return rc;
+      
 
     } 
 
@@ -2191,7 +2224,8 @@ extern "C" {
       if (rc)
       {
         FAPI_ERR("Setting LR term atts failed \n");
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+        
+	FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_SETTING_LRDIMM_TERM_ATTRS); return rc;
       }
     }
 
@@ -2213,6 +2247,9 @@ extern "C" {
     const char * const PROCEDURE_NAME = "mss_eff_config_termination_vpd";
     FAPI_INF("*** Running %s on %s ... ***", PROCEDURE_NAME, i_target_mba.toEcmdString());
 
+   //for xml error usage
+   const fapi::Target& TARGET_MBA = i_target_mba;
+
     do {
       std::vector<fapi::Target> l_target_dimm_array;
       uint8_t spd_custom;
@@ -2222,7 +2259,8 @@ extern "C" {
       if(rc)
       {
         FAPI_ERR("Error retrieving assodiated dimms");
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+	FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_TERMINATION_ERROR_RETRIEVING_DIMMS); return rc;
+        
         break;
       }
 //------------------------------------------------------------------------------
