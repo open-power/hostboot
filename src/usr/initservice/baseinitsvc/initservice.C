@@ -727,21 +727,37 @@ void InitService::doShutdown(uint64_t i_status,
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
+    static volatile uint64_t worst_status = 0;
+
+    TRACFCOMP(g_trac_initsvc, "doShutdown(i_status=%.16X)",i_status);
+
+    // Hostboot PLIDs always start with 0x9 (32-bit)
+    static const uint64_t PLID_MASK = 0x0000000090000000;
 
     // Ensure no one is manpulating the registry lists and that only one
     // thread actually executes the shutdown path.
     mutex_lock(&iv_registryMutex);
     if (iv_shutdownInProgress)
     {
+        // switch the failing status if an RC comes in after
+        //  a plid fail because we'd rather have the RC
+        if( ((worst_status & 0x00000000F0000000) == PLID_MASK)
+            && ((i_status & 0x00000000F0000000) != PLID_MASK)
+            && (i_status > SHUTDOWN_STATUS_GOOD) )
+        {
+            worst_status = i_status;
+        }
         mutex_unlock(&iv_registryMutex);
         return;
     }
+    worst_status = i_status; //first thread in is the default
     iv_shutdownInProgress = true;
     mutex_unlock(&iv_registryMutex);
 
+    TRACFCOMP(g_trac_initsvc, "doShutdown> status=%.16X",worst_status);
+
     // Call registered services and notify of shutdown
     msg_t * l_msg = msg_allocate();
-    l_msg->data[0] = i_status;
     l_msg->data[1] = 0;
     l_msg->extra_data = 0;
 
@@ -750,6 +766,7 @@ void InitService::doShutdown(uint64_t i_status,
         ++i)
     {
         l_msg->type = i->msgType;
+        l_msg->data[0] = worst_status;
         msg_sendrecv(i->msgQ,l_msg);
     }
 
@@ -787,7 +804,16 @@ void InitService::doShutdown(uint64_t i_status,
         l_rb_iter++;
     }
 
-    shutdown(i_status,
+    // Wait a little bit to give other tasks a chance to call shutdown
+    // before moving on in case we want to modify the status we are
+    // failing with.  This is after shutting down all daemons and flushing
+    // out memory to make it most likely for the important work to have
+    // a chance to log a better RC (e.g. pnor errors).
+    task_yield();
+    nanosleep(0,TEN_CTX_SWITCHES_NS);
+    TRACFCOMP(g_trac_initsvc, "doShutdown> Final status=%.16X",worst_status);
+
+    shutdown(worst_status,
              i_payload_base,
              i_payload_entry,
              i_payload_data,
