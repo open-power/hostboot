@@ -884,12 +884,6 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
             mbsFirAnd->ClearBit(26);
         }
 
-        if ( mbsFir->IsBitSet(27)
-             && mbsFir->IsBitSet(10) && ( ! mbsFirMask->IsBitSet(10)))
-        {
-            mbsFirAnd->ClearBit(27);
-        }
-
         if( mbsFir->IsBitSet(3) ||  mbsFir->IsBitSet(4) )
         {
             SCAN_COMM_REGISTER_CLASS * mbiFir = i_chip->getRegister("MBIFIR");
@@ -925,6 +919,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 } PRDF_PLUGIN_DEFINE( Membuf, ClearMbsSecondaryBits );
+
 //------------------------------------------------------------------------------
 
 /**
@@ -962,27 +957,28 @@ int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
             ExtensibleChip * mbaChip = membdb->getMbaChip(i);
             if ( NULL == mbaChip ) continue;
 
+            SCAN_COMM_REGISTER_CLASS * mbaCalFir =
+                                mbaChip->getRegister("MBACALFIR");
+
+            if( SUCCESS != mbaCalFir->Read() )
+            {
+                // Do not break. Just print error trace and look for
+                // other MBA.
+                PRDF_ERR( PRDF_FUNC"MBACALFIR read failed"
+                         "for 0x%08x", mbaChip->GetId());
+                continue;
+            }
+
+            if( !( mbaCalFir->IsBitSet( 10 ) || mbaCalFir->IsBitSet( 14 ) ))
+                continue;
+
             SCAN_COMM_REGISTER_CLASS * mbaCalAndFir =
                                 mbaChip->getRegister("MBACALFIR_AND");
 
-            if( NULL == mbaCalAndFir ) continue;
-
             mbaCalAndFir->setAllBits();
 
-            // Not checking if MBACALFir bits are set or not.
-            // Clearing them blindly as it will give better performance.
-
-            if( mbsFir->IsBitSet(12) && ( ! mbsFirMask->IsBitSet(12) ) )
-            {
-                 mbaCalAndFir->ClearBit(10);
-                 mbaCalAndFir->ClearBit(14);
-            }
-
-            if( mbsFir->IsBitSet(13) && ( ! mbsFirMask->IsBitSet(13) ) )
-            {
-                 mbaCalAndFir->ClearBit(9);
-                 mbaCalAndFir->ClearBit(15);
-            }
+            mbaCalAndFir->ClearBit(10);
+            mbaCalAndFir->ClearBit(14);
 
             l_rc = mbaCalAndFir->Write();
             if ( SUCCESS != l_rc )
@@ -1000,6 +996,88 @@ int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 
 } PRDF_PLUGIN_DEFINE( Membuf, ClearMbaCalSecondaryBits );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @fn MaskMbsSecondaryBits
+ * @brief Mask MBS secondary Fir bits which may come up because of L4 UE.
+ * @param  i_chip       The Centaur chip.
+ * @param  i_sc         ServiceDataColector.
+ * @return SUCCESS.
+ */
+int32_t MaskMbsSecondaryBits( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[MaskMbsSecondaryBits] "
+
+    int32_t l_rc = SUCCESS;
+    do
+    {
+        SCAN_COMM_REGISTER_CLASS * mbsFirMaskOr =
+                                        i_chip->getRegister("MBSFIR_MASK_OR");
+        mbsFirMaskOr->SetBit(27);
+        l_rc = mbsFirMaskOr->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MBSFIR_MASK_OR write failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
+
+    }while( 0 );
+
+    return SUCCESS;
+    #undef PRDF_FUNC
+
+} PRDF_PLUGIN_DEFINE( Membuf, MaskMbsSecondaryBits );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @fn MaskMbaCalSecondaryBits
+ * @brief Mask MBACAL secondary Fir bits which may come up because of L4 UE.
+ * @param  i_chip       The Centaur chip.
+ * @param  i_sc         ServiceDataColector.
+ * @return SUCCESS.
+ */
+int32_t MaskMbaCalSecondaryBits( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[MaskMbaCalSecondaryBits ] "
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        CenMembufDataBundle * membdb = getMembufDataBundle( i_chip );
+
+        for( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
+        {
+            ExtensibleChip * mbaChip = membdb->getMbaChip(i);
+            if ( NULL == mbaChip ) continue;
+
+            SCAN_COMM_REGISTER_CLASS * mbaCalFirMaskOr =
+                                mbaChip->getRegister("MBACALFIR_MASK_OR");
+
+            mbaCalFirMaskOr->SetBit(9);
+            mbaCalFirMaskOr->SetBit(15);
+            l_rc = mbaCalFirMaskOr->Write();
+            if ( SUCCESS != l_rc )
+            {
+                // Do not break. Just print error trace and look for
+                // other MBA.
+                PRDF_ERR( PRDF_FUNC"MBACALFIR_MASK_OR write failed"
+                         "for 0x%08x", mbaChip->GetId());
+            }
+        }
+    }while( 0 );
+
+    return SUCCESS;
+    #undef PRDF_FUNC
+
+} PRDF_PLUGIN_DEFINE( Membuf, MaskMbaCalSecondaryBits );
+
+//------------------------------------------------------------------------------
 
 /**
  * @fn checkChnlReplayTimeOut

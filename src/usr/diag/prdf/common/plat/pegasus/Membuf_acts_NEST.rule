@@ -614,7 +614,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[10]
      *  MBS_FIR_REG_CACHE_SRW_UE
      */
-    (MbsFir, bit(10)) ? clearSecMbsBitsAndConnL4UE;
+    (MbsFir, bit(10)) ? maskSecMbsBitsAndConnL4UE;
 
     /** MBSFIR[11]
      *  MBS_FIR_REG_CACHE_SRW_SUE
@@ -629,7 +629,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[13]
      *  MBS_FIR_REG_CACHE_CO_UE
      */
-    (MbsFir, bit(13)) ? clearSecMbaCalBitsAndConnL4UE;
+    (MbsFir, bit(13)) ? maskSecMbaCalBitsAndConnL4UE;
 
     /** MBSFIR[14]
      *  MBS_FIR_REG_CACHE_CO_SUE
@@ -1406,21 +1406,21 @@ actionclass clearSecMbaCalBitsAndLineDelete
     funccall("ClearMbaCalSecondaryBits");
 };
 
-/** Clear MBACAL SecondaryBits and callout Connected L4*/
-actionclass clearSecMbaCalBitsAndConnL4UE
+/** Mask MBACAL SecondaryBits and callout Connected L4*/
+actionclass maskSecMbaCalBitsAndConnL4UE
 {
-    funccall("ClearMbaCalSecondaryBits");
     calloutL4;
     threshold1;
+    funccall("MaskMbaCalSecondaryBits");
     SUEGenerationPoint;
 };
 
-/** Clear MBS SecondaryBits and callout Connected L4*/
-actionclass clearSecMbsBitsAndConnL4UE
+/** Mask MBS SecondaryBits and callout Connected L4*/
+actionclass maskSecMbsBitsAndConnL4UE
 {
-    funccall("ClearMbsSecondaryBits");
     calloutL4;
     threshold1;
+    funccall("MaskMbsSecondaryBits");
     SUEGenerationPoint;
 };
 

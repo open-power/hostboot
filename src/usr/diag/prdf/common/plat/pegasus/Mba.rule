@@ -190,6 +190,14 @@ chip Mba
         capture     group MemChipletRegs;
     };
 
+    register MBACALFIR_MASK_OR
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK OR";
+        scomaddr    0x03010405;
+        capture     group never;
+        access      write_only;
+    };
+
     register MBACALFIR_ACT0
     {
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
