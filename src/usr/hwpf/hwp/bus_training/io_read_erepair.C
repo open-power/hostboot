@@ -20,26 +20,26 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_read_erepair.C,v 1.11 2014/03/06 11:44:04 varkeykv Exp $
+// $Id: io_read_erepair.C,v 1.12 2014/04/17 15:58:23 steffen Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
 // *!                   *** IBM Confidential ***
 // *!***************************************************************************
 // *! FILENAME             : io_read_erepair.C
-// *! TITLE                : 
-// *! DESCRIPTION          : Read e-repair data 
-// *! CONTEXT              : 
+// *! TITLE                :
+// *! DESCRIPTION          : Read e-repair data
+// *! CONTEXT              :
 // *!
 // *! OWNER  NAME          : Varghese, Varkey         Email: varkey.kv@in.ibm.com
-// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com      
+// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com
 // *!
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
-//   1.0   |varkeykv|21-Jan-13|Initial check in 
+//   1.0   |varkeykv|21-Jan-13|Initial check in
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
@@ -75,19 +75,19 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 			rc.setEcmdError(rc_ecmd);
 			return(rc);
 		}
-  
-		// Check which type of bus this is and do setup needed 
+
+		// Check which type of bus this is and do setup needed
 		fapi::TargetType l_type = target.getType();
         switch (l_type)
         {
             case fapi::TARGET_TYPE_ABUS_ENDPOINT:
 				start_group=0;
 				end_group=0;
-				interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
+				interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT
 				break;
 			case fapi::TARGET_TYPE_XBUS_ENDPOINT:
 				start_group=0;
-				end_group=3;
+				end_group=0;
 				interface=CP_FABRIC_X0; // base scom for X bus
 				break;
 			case fapi::TARGET_TYPE_MCS_CHIPLET:
@@ -102,14 +102,14 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 				break;
 			default:
 				FAPI_ERR("Invalid io_read_erepair HWP invocation");
-		        FAPI_SET_HWP_ERROR(rc, IO_READ_EREPAIR_INVALID_INVOCATION_RC);
+		        FAPI_SET_HWP_ERROR(rc,IO_READ_EREPAIR_INVALID_INVOCATION_RC);
 				break;
 		}
 		if (rc)
 		{
 			return(rc);
 		}
-   
+
 		FAPI_INF("Reading erepair data \n");
 
 		for(uint8_t clock_group=start_group;clock_group<=end_group;++clock_group)
@@ -138,16 +138,16 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 				}
 			}
 
-			//Collect the RX bad lanes 
+			//Collect the RX bad lanes
 			rc_ecmd|=data_one.flushTo0();
-            
+
 			if(rc_ecmd)
 			{
 				FAPI_ERR("io_read_erepair hit an error while flushing data");
 				rc.setEcmdError(rc_ecmd);
 				return(rc);
 			}
-      
+
 			rc = GCR_read( target, interface,  rx_bad_lane_enc_gcrmsg_pg, clock_group,  0,  data_one);
 			if(rc)
 			{
@@ -155,7 +155,7 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 				return(rc);
 			}
 
-			// RX lane records 
+			// RX lane records
 			// Set the RX bad lanes in the RX vector
 			uint8_t status=0;
 			
@@ -176,7 +176,7 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 			      data_one.extract(&lane,7,7);
 			      lane=lane>>1;
 			      FAPI_DBG("Second bad lane is %d",lane);
-			      rx_lanes.push_back(lane); // 16 to 31 bad lanes 
+			      rx_lanes.push_back(lane); // 16 to 31 bad lanes
 			  }
 			}
 			else{

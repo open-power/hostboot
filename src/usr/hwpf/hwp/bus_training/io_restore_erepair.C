@@ -20,26 +20,26 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_restore_erepair.C,v 1.17 2014/03/05 12:01:03 varkeykv Exp $
+// $Id: io_restore_erepair.C,v 1.19 2014/04/18 21:25:49 steffen Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
 // *!                   *** IBM Confidential ***
 // *!***************************************************************************
 // *! FILENAME             : io_restore_erepair.C
-// *! TITLE                : 
-// *! DESCRIPTION          : Restore e-repair data 
-// *! CONTEXT              : 
+// *! TITLE                :
+// *! DESCRIPTION          : Restore e-repair data
+// *! CONTEXT              :
 // *!
 // *! OWNER  NAME          : Varghese, Varkey         Email: varkey.kv@in.ibm.com
-// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com      
+// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com
 // *!
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK 
+//   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK
 //------------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ using namespace fapi;
 //! Read repair values from VPD into the HW
 /*
  This function will perform erepair for one IO type target  -- eithe MCS or XBUS or ABUS
- * In Cronus the tx_lanes and rx_lanes vectors should be passed empty so we will use the accessor provided data instead 
+ * In Cronus the tx_lanes and rx_lanes vectors should be passed empty so we will use the accessor provided data instead
  * This is due to a MFG FW requirement that needed to pass in bad lanes as args instead of via VPD
  * Note that power down of lanes is done by a seperate HWP called io_power_down_lanes
  * Its up to the caller to call that separately to power down a lane
@@ -77,19 +77,19 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
   uint32_t rc_ecmd=0;
   uint8_t start_group=0;
   uint8_t end_group=0;
-  
+
     rc_ecmd=mask.flushTo1();
     if(rc_ecmd)
     {
         rc.setEcmdError(rc_ecmd);
         return(rc);
     }
-  
-  // Check which type of bus this is and do setup needed 
+
+  // Check which type of bus this is and do setup needed
   if(target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT) {
     start_group=0;
     end_group=0;
-    interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
+    interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT
   }
   else if(target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT ) {
     start_group=0;
@@ -117,42 +117,42 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
   // And we still need to run this in Cronus
   // Since the hack was not made in the accessor to detect this,
   // Provision was made to detect if arguments passed in are empty.
-  // If so then the accessor is called to determine from VPD data directly . 
-  
-  // This is specially for Cronus/Lab 
+  // If so then the accessor is called to determine from VPD data directly .
+
+  // This is specially for Cronus/Lab
   if(tx_lanes.size()==0 && rx_lanes.size()==0){
-   // rc=erepairGetFailedLanes(target,tx_lanes,rx_lanes); 
+   // rc=erepairGetFailedLanes(target,tx_lanes,rx_lanes);
     //FAPI_EXEC_HWP(rc,erepairGetFailedLanesHwp,target,tx_lanes,rx_lanes);
     if(!rc.ok()){
       FAPI_ERR("Accessor HWP has returned a fail");
       return rc;
     }
   }
-  
+
    FAPI_INF("Restoring erepair data \n");
 
     for(uint8_t clock_group=start_group;clock_group<=end_group;++clock_group){
       rc_ecmd|=data_one.flushTo0();
       rc_ecmd|=data_two.flushTo0();
-      
+
       if(rc_ecmd)
       {
           rc.setEcmdError(rc_ecmd);
           return(rc);
       }
-      
+
       // Read in original data
-      
-      // Read in values for RMW 
+
+      // Read in values for RMW
       rc = GCR_read( target,interface,rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one);
       if(rc){return rc;}
       rc = GCR_read( target,interface,rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two);
       if(rc){return rc;}
-      
-      // RX lane records 
-      // Set the RX bad lanes in the buffer 
+
+      // RX lane records
+      // Set the RX bad lanes in the buffer
       for(uint8_t i=0;i<rx_lanes.size();++i){
-        
+
             if(interface==CP_FABRIC_X0){
                   if(clock_group==0 && rx_lanes[i]<20){
                     lane=rx_lanes[i];
