@@ -3044,6 +3044,11 @@
         <name>BRAZOS_WRAP_CONFIG</name>
         <value>0x00010000</value>
     </enumerator>
+    <enumerator>
+        <!-- FSP is responsible for updating Processor SBE Image -->
+        <name>FSP_UPDATE_SBE_IMAGE</name>
+        <value>0x00020000</value>
+    </enumerator>
 </enumerationType>
 
 <!-- Support for pm_hwp_attributes.xml -->

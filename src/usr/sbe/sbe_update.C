@@ -116,11 +116,28 @@ namespace SBE
             (void) tS.getTopLevelTarget( sys );
             assert(sys, "updateProcessorSbeSeeproms() system target is NULL");
 
+            // @todo RTC 97441 - remove this check
             if ( sys->getAttr<ATTR_ISTEP_MODE>() &&     // true => istep mode
                  INITSERVICE::spBaseServicesEnabled() ) // true => FSP present
             {
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
                            "istep mode and FSP present");
+                break;
+            }
+
+            /*****************************************************************/
+            /* Skip Update if MNFG_FLAG_FSP_UPDATE_SBE_IMAGE is set          */
+            /* AND there is a FSP present                                    */
+            /*****************************************************************/
+            ATTR_MNFG_FLAGS_type mnfg_flags = sys->getAttr<ATTR_MNFG_FLAGS>();
+            if ( (mnfg_flags & MNFG_FLAG_FSP_UPDATE_SBE_IMAGE)
+                 && INITSERVICE::spBaseServicesEnabled() // true => FSP present
+               )
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
+                           "FSP present and MNFG_FLAG_FSP_UPDATE_SBE_IMAGE "
+                           "(0x%.16X) is set in MNFG Flags 0x%.16X",
+                           MNFG_FLAG_FSP_UPDATE_SBE_IMAGE, mnfg_flags);
                 break;
             }
 
