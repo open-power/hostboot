@@ -76,7 +76,7 @@ ErrlManager::ErrlManager()
     }
     else
     {
-        iv_currLogId = 0x9fbad000; 
+        iv_currLogId = 0x9fbad000;
         TRACFCOMP( g_trac_errl, ERR_MRK"HOSTSVC_PLID not available" );
     }
 
@@ -157,6 +157,8 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
         }
 
         delete [] temp_buff;
+        delete io_err;
+        io_err = NULL;
 
     } while (0);
 
