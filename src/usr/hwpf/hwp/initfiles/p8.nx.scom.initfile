@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.10 2014/01/22 18:53:48 johnre Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.11 2014/04/02 14:42:26 johnre Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -175,8 +175,9 @@ scom 0x02013086 {
     14    ,   0b0           ;   #-- 0b01      ACK_DEAD cresp received by write command
     15    ,   0b0           ;   #-- 0b01      Link check aborted while waiting on data
     16    ,   0b0           ;   #-- 0b01      Hang poll time expired on internal transfer
-    17    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error
-    18    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error duplicate
+    17    ,   0b0           ;   #-- 0b00 mask Write to secure RNG control register when not enabled
+    18    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error
+    19    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error duplicate
 }
 scom 0x02013087 {
     bits  ,  scom_data      ;   #--Action
@@ -197,8 +198,9 @@ scom 0x02013087 {
     14    ,   0b1           ;   #-- 0b01      ACK_DEAD cresp received by write command
     15    ,   0b1           ;   #-- 0b01      Link check aborted while waiting on data
     16    ,   0b1           ;   #-- 0b01      Hang poll time expired on internal transfer
-    17    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error
-    18    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error duplicate
+    17    ,   0b0           ;   #-- 0b00 mask Write to secure RNG control register when not enabled
+    18    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error
+    19    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error duplicate
 }
 
 
@@ -222,8 +224,9 @@ scom 0x02013083 {
     14    ,   0b0           ;   #--           ACK_DEAD cresp received by write command
     15    ,   0b0           ;   #--           Link check aborted while waiting on data
     16    ,   0b0           ;   #--           Hang poll time expired on internal transfer
-    17    ,   0b1           ;   #-- mask      FIR/SCOM satellite parity error
-    18    ,   0b1           ;   #-- mask      FIR/SCOM satellite parity error duplicate
+    17    ,   0b1           ;   #-- mask      Write to secure RNG control register when not enabled
+    18    ,   0b1           ;   #-- mask      FIR/SCOM satellite parity error
+    19    ,   0b1           ;   #-- mask      FIR/SCOM satellite parity error duplicate
 }
 
 
