@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api_fixed.C,v 1.12 2014/01/28 04:16:57 cmolsen Exp $
+// $Id: p8_pore_table_gen_api_fixed.C,v 1.13 2014/04/11 01:24:31 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
@@ -74,7 +74,7 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
   SbeXipItem    xipTocItem;
   RamTableEntry ramEntryThis, *ramEntryNext;
   uint32_t  sprSwiz=0;
-  
+
   // -------------------------------------------------------------------------
   // Validate Ramming parameters.
   //
@@ -106,6 +106,11 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
     rcLoc = 1;
   }
   // ...check thread ID
+  // - ensure it's zero if SPR is not thread scoped, i.e. if SPR is core scoped.
+  // - error out if threadId exceed max num of threads.
+  if (i_regName!=P8_SPR_HSPRG0 && i_regName!=P8_SPR_LPCR && i_regName!=P8_MSR_MSR)  {
+    i_threadId = 0;
+  }
   if (i_threadId>=SLW_CORE_THREADS)  {
     MY_ERR("Thread ID = %i is not within valid range of [0;%i]\n",i_threadId,SLW_CORE_THREADS-1);
     rcLoc = 1;
@@ -137,7 +142,7 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
       return IMGBUILD_ERR_RAM_HDRS_NOT_SYNCED;
     }
     else  {
-      MY_DBG("hostSlwSectionFixed == hostSlwRamSection(from image api).\n");
+      MY_INF("hostSlwSectionFixed == hostSlwRamSection(from image api).\n");
     }
   }
   else  {  // SRAM non-fixed image.
@@ -454,7 +459,7 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
       return IMGBUILD_ERR_SCOM_HDRS_NOT_SYNCD;
     }
     else  {
-      MY_DBG("hostSlwSectionFixed == hostSlwSection(from image api).\n");
+      MY_INF("hostSlwSectionFixed == hostSlwSection(from image api).\n");
     }
   }
   else  {                 // SRAM non-fixed image.
@@ -605,10 +610,10 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
   // - For an append operation, if a NOP is found (before a RET obviously), the 
   //   SCOM is replacing that NNNN sequence.
   hostScomEntryNext = hostScomTableThis;
-  MY_DBG("hostScomEntryNext (addr): 0x%016llx\n ",(uint64_t)hostScomEntryNext);
+  MY_INF("hostScomEntryNext (addr): 0x%016llx\n ",(uint64_t)hostScomEntryNext);
   while (memcmp(hostScomEntryNext, bufRET, sizeof(uint32_t)))  {
     entriesCount++;
-    MY_DBG("Number of SCOM entries: %i\n ",entriesCount);
+    MY_INF("Number of SCOM entries: %i\n ",entriesCount);
     if (*((uint32_t*)bufIIS+1)==*((uint32_t*)hostScomEntryNext+1) && entriesMatch==0)  {// +1 skips 1st word in Scom entry (which loads the PC in an LS operation.)
       hostScomEntryMatch = hostScomEntryNext;
       entriesMatch++;

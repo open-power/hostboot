@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: p8_mailbox_utils.C,v 1.3 2014/02/26 04:58:11 jmcgill Exp $
+// $Id: p8_mailbox_utils.C,v 1.4 2014/04/01 21:52:25 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -760,17 +760,27 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
             l_fapirc =  FAPI_ATTR_GET(  ATTR_MNFG_FLAGS,
                                         NULL,
                                         l_mnfg_flags );
-            if  (l_fapirc )
+            if (l_fapirc )
             {
                 FAPI_ERR("fapiGetAttribute of ATTR_MNFG_FLAGS failed");
                 break;
             }
             FAPI_INF(   "ATTR_MNFG_FLAGS => %016llX", l_mnfg_flags);
 
-            if ((l_mnfg_flags & fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ==
-                fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG)
+            // get chip type
+            // TODO RTC 102992 
+            fapi::ATTR_NAME_Type l_chip_type;
+            l_fapirc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_target, l_chip_type);
+            if (l_fapirc)
             {
-                FAPI_INF("ATTR_MNFG_FLAGS => %016llX", l_mnfg_flags);
+                FAPI_ERR("fapiGetAttribute (Privildged) of ATTR_NAME failed");
+                break;
+            }
+
+            if (((l_mnfg_flags & fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ==
+                 fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ||
+                (l_chip_type == fapi::ENUM_ATTR_NAME_MURANO))
+            {
                 o_set_data |= 1 << (sizeof(o_set_data)*8 - WRAP_TEST_BIT - 1);
             }
 
