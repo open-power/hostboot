@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,9 +40,6 @@ class FsiScomTest : public CxxTest::TestSuite
     {
         TRACFCOMP( g_trac_fsiscom, "FsiScomTest::test_Error> Start" );
 
-        //@fixme: RTC:80081
-        TRACFCOMP( g_trac_fsiscom, "FsiScomTest::test_Error> Disabling test until D892724 is in a build" );
-#if 0
         uint64_t fails = 0;
         uint64_t total = 0;
         errlHndl_t l_err = NULL;
@@ -119,6 +116,5 @@ class FsiScomTest : public CxxTest::TestSuite
         }
 
         TRACFCOMP( g_trac_fsiscom, "FsiScomTest::test_Error> %d/%d fails", fails, total );
-#endif
     };
 };
