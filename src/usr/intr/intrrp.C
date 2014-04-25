@@ -843,39 +843,34 @@ errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
         // This also sets the source isn and PIR destination
         // such that if an interrupt is pending when when the ISRN
         // is written, simics get the right destination for the
-        // interrupt.
+        // interrupt.  err is from deviceWrite(...)
         err = maskXIVR(i_target);
 
-        // Setup PHBISR
-        // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
-        PSIHB_ISRN_REG_t reg;
-
-        PIR_t pir(0);
-        pir.nodeId = node;
-        pir.chipId = chip;
-        // IRSN must be unique for each processor chip
-        reg.irsn = makeXISR(pir,0);
-        reg.die  = PSIHB_ISRN_REG_t::ENABLE;
-        reg.uie  = PSIHB_ISRN_REG_t::ENABLE;
-        reg.mask = PSIHB_ISRN_REG_t::IRSN_MASK;
-
-        TRACFCOMP(g_trac_intr,"PSIHB_ISRN_REG: 0x%016lx",reg.d64);
-
-        err = deviceWrite
-            ( i_target,
-              &reg,
-              scom_len,
-              DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
-
-        if(err)
+        if(!err)
         {
-            // add callout
-            err->addHwCallout(i_target,
-                              HWAS::SRCI_PRIORITY_HIGH,
-                              HWAS::DECONFIG,
-                              HWAS::GARD_NULL);
+            // Setup PHBISR
+            // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
+            PSIHB_ISRN_REG_t reg;
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            // IRSN must be unique for each processor chip
+            reg.irsn = makeXISR(pir,0);
+            reg.die  = PSIHB_ISRN_REG_t::ENABLE;
+            reg.uie  = PSIHB_ISRN_REG_t::ENABLE;
+            reg.mask = PSIHB_ISRN_REG_t::IRSN_MASK;
+
+            TRACFCOMP(g_trac_intr,"PSIHB_ISRN_REG: 0x%016lx",reg.d64);
+
+            err = deviceWrite
+                ( i_target,
+                  &reg,
+                  scom_len,
+                  DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
         }
-        else
+
+        if(!err)
         {
             iv_chipList.push_back(i_target);
         }
