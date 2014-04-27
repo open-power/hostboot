@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
+#include <devicefw/userif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -71,6 +72,7 @@ namespace SLAVE_SBE
 {
 
 uint8_t getMembufsAttachedBitMask( TARGETING::Target * i_procChipHandle  );
+void fenceAttachedMembufs( TARGETING::Target * i_procChipHandle  );
 
 //******************************************************************************
 // call_proc_revert_sbe_mcs_setup function
@@ -446,6 +448,11 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         // this processor
         l_membufsAttached = getMembufsAttachedBitMask( *l_proc_iter );
 
+        //Perform a workaround for GA1 to raise fences on centaurs
+        //to prevent FSP from analyzing if HB TIs for recoverable
+        //errors
+        //RTC 106276
+        fenceAttachedMembufs( *l_proc_iter );
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "passing target HUID %.8X and 0x%x mask",
@@ -564,6 +571,73 @@ uint8_t getMembufsAttachedBitMask( TARGETING::Target * i_procTarget  )
 
     // return the bitmask
     return l_attachedMembufs;
+
+}
+
+//******************************************************************************
+// fenceAttachedMembufs - helper function for hwp proc_cen_ref_clk_enable
+//******************************************************************************
+void fenceAttachedMembufs( TARGETING::Target * i_procTarget  )
+{
+     errlHndl_t  l_errl = NULL;
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "Fencing attached (present) membuf chips downstream from "
+            "proc chip with HUID of 0x%08X",
+            i_procTarget->getAttr<TARGETING::ATTR_HUID>());
+
+
+    // Get list of membuf chips downstream from the given proc chip
+    TARGETING::TargetHandleList MembufChipList;
+
+    getChildAffinityTargets( MembufChipList,
+                      const_cast<TARGETING::Target*>(i_procTarget ),
+                      TARGETING::CLASS_CHIP,
+                      TARGETING::TYPE_MEMBUF,
+                      false);
+
+    // loop through the membufs
+    for(TARGETING::TargetHandleList::const_iterator pTargetItr
+                            = MembufChipList.begin();
+                            pTargetItr != MembufChipList.end();
+                            pTargetItr++)
+    {
+        //Get CFAM "1012" -- FSI GP3 and set bits 23-27 (various fence bits)
+        //Note 1012 is ecmd addressing, real address is 0x1048 (byte)
+        uint64_t l_addr = 0x1048;
+        const uint32_t l_fence_bits= 0x000001F0;
+        uint32_t l_data = 0;
+        size_t l_size = sizeof(uint32_t);
+        l_errl = deviceRead(*pTargetItr,
+                         &l_data,
+                         l_size,
+                         DEVICE_FSI_ADDRESS(l_addr));
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+             "Failed getcfam 1012 to HUID 0x%08X, ignoring, skipping",
+             (*pTargetItr)->getAttr<TARGETING::ATTR_HUID>());
+            delete l_errl;
+            l_errl = NULL;
+            continue;
+        }
+
+        l_data |= l_fence_bits;
+
+        l_errl = deviceWrite(*pTargetItr,
+                         &l_data,
+                         l_size,
+                         DEVICE_FSI_ADDRESS(l_addr));
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Failed putcfam 1012 to HUID 0x%08X, ignoring, skipping",
+                      (*pTargetItr)->getAttr<TARGETING::ATTR_HUID>());
+            delete l_errl;
+            l_errl = NULL;
+            continue;
+        }
+    }
 
 }
 
