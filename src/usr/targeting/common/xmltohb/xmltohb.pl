@@ -3983,7 +3983,7 @@ sub getAttributeDefault {
                 {
                     if( exists $attribute->{nativeType}->{default} )
                     {
-                        $default = $attribute->{nativeType}->{default};                        
+                        $default = $attribute->{nativeType}->{default};
                     }
                     else
                     {
@@ -4779,162 +4779,6 @@ sub ASSOC_IMP
 }
 
 ################################################################################
-# Given an association type, return name of corresponding attribute
-################################################################################
-
-sub getAttributeNameForAssociationTypeOf
-{
-    my ($associationType) = @_;
-
-    my $attributeName = ATTR_UNKNOWN;
-    if(   ($associationType eq PARENT_BY_CONTAINMENT)
-       || ($associationType eq CHILD_BY_CONTAINMENT))
-    {
-        $attributeName = ATTR_PHYS_PATH;
-    }
-    elsif (   ($associationType eq PARENT_BY_AFFINITY)
-           || ($associationType eq CHILD_BY_AFFINITY))
-    {
-        $attributeName = ATTR_AFFINITY_PATH;
-    }
-    else
-    {
-        fatal (  "FATAL ERROR! Couldn't determine attribute name for "
-               . "$associationType associationType");
-    }
-    return $attributeName;
-}
-
-################################################################################
-# For a given target, compute parent/children of given type
-################################################################################
-
-sub buildAssociations
-{
-    my ($targetAddrHashRef, $targetId,
-        $associationType, $offsetToTargetsInBinary) = @_;
-
-    ASSOC_ENTER("targetId = $targetId, associationType = $associationType, " .
-        "offsetToTargetsInBinary = " . toDecAndHex($offsetToTargetsInBinary) );
-
-    my $attributeName = getAttributeNameForAssociationTypeOf($associationType);
-
-    # Look at all targets except the one given as input, and see if any
-    # of them have entity paths which are immediate children or parents
-    # of this target
-    foreach my $id (keys %$targetAddrHashRef)
-    {
-        # Skip input target
-        if($id eq $targetId)
-        {
-            next;
-        }
-
-        if($attributeName eq ATTR_PHYS_PATH)
-        {
-            my $destPath = $targetAddrHashRef->{$id}{$attributeName};
-            my $targetPath = $targetAddrHashRef->{$targetId}{$attributeName};
-            if($associationType eq PARENT_BY_CONTAINMENT)
-            {
-                # Parent path matches current target's entity path except
-                # missing last path component
-                my $index = rindex $targetPath, "/";
-                my $parentPath = substr $targetPath , 0, $index;
-                ASSOC_DBG("GIVEN: Current physical path = $targetPath");
-                ASSOC_DBG("CHECKING: Candidate parent physical path "
-                          . "= $destPath");
-                ASSOC_DBG("CHECKING: Parent of current physical path "
-                          . "= $parentPath");
-                if($parentPath eq $destPath)
-                {
-                    ASSOC_IMP("FOUND: parent physical path "
-                              . "= $destPath ($targetPath)");
-                    unshift
-                         @ { $targetAddrHashRef->{$targetId}
-                                 {ParentByContainmentAssociations} },
-                         $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
-                            {OffsetToTargetWithinTargetList};
-                    last;
-                }
-            }
-            elsif($associationType eq CHILD_BY_CONTAINMENT)
-            {
-                # Child path matches current target's entity path except there
-                # is one extraneous path component at end
-                my $index = rindex $destPath , "/";
-                my $parentOfDestPath = substr $destPath , 0, $index;
-                ASSOC_DBG("GIVEN: Current physical path = $targetPath");
-                ASSOC_DBG("CHECKING: Candidate child physical path "
-                          . "= $destPath");
-                ASSOC_DBG("CHECKING: Parent of child physical path "
-                          . "= $parentOfDestPath");
-                if($parentOfDestPath eq $targetPath )
-                {
-                    ASSOC_IMP("FOUND: Child physical path "
-                              . "= $destPath ($targetPath)");
-                    unshift
-                         @ { $targetAddrHashRef->{$targetId}
-                                 {ChildByContainmentAssociations} },
-                        $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
-                            {OffsetToTargetWithinTargetList};
-                }
-            }
-        }
-        elsif($attributeName eq ATTR_AFFINITY_PATH)
-        {
-            my $destPath = $targetAddrHashRef->{$id}{$attributeName};
-            my $targetPath = $targetAddrHashRef->{$targetId}{$attributeName};
-            if($associationType eq PARENT_BY_AFFINITY)
-            {
-                # Parent path matches current target's entity path except
-                # missing last path component
-                my $index = rindex $targetPath, "/";
-                my $parentPath = substr $targetPath , 0, $index;
-                ASSOC_DBG("GIVEN: Current affinty path = $targetPath");
-                ASSOC_DBG("CHECKING: Candidate parent affinity path "
-                          . "= $destPath");
-                ASSOC_DBG("CHECKING: Parent of current affinity path "
-                          . "= $parentPath");
-                if($parentPath eq $destPath)
-                {
-                    ASSOC_IMP("FOUND: parent affinty path "
-                              . "= $destPath ($targetPath)");
-                    unshift
-                         @ { $targetAddrHashRef->{$targetId}
-                                 {ParentByAffinityAssociations} },
-                         $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
-                             {OffsetToTargetWithinTargetList};
-                    last;
-                }
-            }
-            elsif($associationType eq CHILD_BY_AFFINITY)
-            {
-                # Child path matches current target's entity path except there
-                # is one extraneous path component at end
-                my $index = rindex $destPath , "/";
-                my $parentOfDestPath = substr $destPath , 0, $index;
-                ASSOC_DBG("GIVEN: Current affinty path = $targetPath");
-                ASSOC_DBG("CHECKING: Candidate child affinity path "
-                          . "= $destPath");
-                ASSOC_DBG("CHECKING: Parent of child affinty path "
-                          . "= $parentOfDestPath");
-                if($parentOfDestPath eq $targetPath )
-                {
-                    ASSOC_IMP("FOUND: Child affinity path "
-                              . "= $destPath ($targetPath)");
-                    unshift
-                         @ { $targetAddrHashRef->{$targetId}
-                                 {ChildByAffinityAssociations} },
-                        $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
-                            {OffsetToTargetWithinTargetList};
-                }
-            }
-        }
-    }
-    ASSOC_EXIT();
-}
-
-################################################################################
 # Update dummy pointers with real pointers in binary blob of target structs
 ################################################################################
 
@@ -5136,7 +4980,7 @@ sub generateTargetingImage {
         }
         push(@targetsAoH, $targetInstance);
     }
-    unshift(@targetsAoH, $targetSystemInstance); 
+    unshift(@targetsAoH, $targetSystemInstance);
     unshift(@targetsAoH, $targetNodeInstance);
 
     my $numTargets = @targetsAoH;
@@ -5367,7 +5211,7 @@ sub generateTargetingImage {
                     $ifFspOnlyTargetWithCommonAttr = "true";
                 }
             }
-            
+
             my $section;
             # Split "fsp" into more sections later
             if( (exists $attributeDef->{fspOnly})
@@ -5505,7 +5349,7 @@ sub generateTargetingImage {
                 my ($heapZeroInitData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
-                
+
                 my $hex = unpack ("H*",$heapZeroInitData);
                 push @attrDataforSM, [$attrValue, $huidValue,
                     $hex, $section, $targetInstance->{id}, $attributeId];
@@ -5529,7 +5373,7 @@ sub generateTargetingImage {
                 my ($heapPnorInitData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
-                
+
                 my $hex = unpack ("H*",$heapPnorInitData);
                 push @attrDataforSM, [$attrValue, $huidValue,
                     $hex, $section, $targetInstance->{id}, $attributeId];
@@ -5560,7 +5404,7 @@ sub generateTargetingImage {
                          $hex, $section, $targetInstance->{id}, $attributeId];
                     $ifFspOnlyTargetWithCommonAttr = "false";
                 }
-                
+
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP0DefaultedFromZeroOffset
                             % $alignment)) % $alignment;
@@ -5731,15 +5575,58 @@ sub generateTargetingImage {
     }
 
     # Build the parent/child relationships for all targets
-    foreach my $targetInstance (@targetsAoH)
+    my %targetPhysicalPath = ();
+    my %targetAffinityPath = ();
+    foreach my $id (keys %targetAddrHash)
     {
-        foreach my $associationType (@associationTypes)
+        my $phys_attr = ATTR_PHYS_PATH;
+        my $affn_attr = ATTR_AFFINITY_PATH;
+        $targetPhysicalPath{ $targetAddrHash{$id}{$phys_attr} } =
+            $id;
+        $targetAffinityPath{ $targetAddrHash{$id}{$affn_attr} } =
+            $id;
+    }
+    foreach my $id (keys %targetAddrHash)
+    {
+        my $phys_attr = ATTR_PHYS_PATH;
+        my $affn_attr = ATTR_AFFINITY_PATH;
+
+        my $phys_path = $targetAddrHash{$id}{$phys_attr};
+        my $parent_phys_path = substr $phys_path, 0, (rindex $phys_path, "/");
+
+        my $affn_path = $targetAddrHash{$id}{$affn_attr};
+        my $parent_affn_path = substr $affn_path, 0, (rindex $affn_path, "/");
+
+        if (defined $targetPhysicalPath{$parent_phys_path})
         {
-            buildAssociations(
-                \%targetAddrHash,
-                $targetInstance->{id},
-                $associationType,
-                $firstTgtPtr)
+            my $parent = $targetPhysicalPath{$parent_phys_path};
+            unshift
+                @ { $targetAddrHash{$id}
+                    {ParentByContainmentAssociations} },
+                $firstTgtPtr + $targetAddrHash{$parent}
+            {OffsetToTargetWithinTargetList};
+
+            unshift
+                @ { $targetAddrHash{$parent}
+                    {ChildByContainmentAssociations} },
+                $firstTgtPtr + $targetAddrHash{$id}
+            {OffsetToTargetWithinTargetList};
+
+        }
+        if (defined $targetAffinityPath{$parent_affn_path})
+        {
+            my $parent = $targetAffinityPath{$parent_affn_path};
+            unshift
+                @ { $targetAddrHash{$id}
+                    {ParentByAffinityAssociations} },
+                $firstTgtPtr + $targetAddrHash{$parent}
+            {OffsetToTargetWithinTargetList};
+
+            unshift
+                @ { $targetAddrHash{$parent}
+                    {ChildByAffinityAssociations} },
+                $firstTgtPtr + $targetAddrHash{$id}
+            {OffsetToTargetWithinTargetList};
         }
     }
 
