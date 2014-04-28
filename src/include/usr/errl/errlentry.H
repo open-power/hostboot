@@ -163,7 +163,8 @@ public:
      *  The severity of a log determines how severe the
      *  problem is perceived to be.  The severity is
      *  initially set by the parameter in the constructor
-     *  and can be changed at any point thereafter.
+     *  and can be changed at any point thereafter, unless the
+     *  the severity has been set as "final".
      *
      *  @param[in]  i_sev Severity. See errl/errltypes.H
      *
@@ -171,9 +172,36 @@ public:
      */
     void setSev(const errlSeverity_t i_sev)
     {
-        iv_User.iv_severity = i_sev;
+        if (false == iv_sevFinal) // update severity as long as not set "final"
+        {
+            iv_User.iv_severity = i_sev;
+        }
     }
 
+    /**
+     *  @brief Set the log's severity "final".
+     *  The severity being set will be set as "final" such that it can
+     *  not be changed again. Setting a severity as "final" can be used
+     *  in the less frequent case that a severity should not be
+     *  changed by code at a higher level.
+     *
+     *  @param[in]  i_sev    Severity. See errl/errltypes.H
+     *  @param[in]  i_final  true: If not already "final", sets severity and
+     *                             marks the severity as "final"
+     *                       false: If not "final", sets severity
+     *
+     *  @return     void
+     */
+    void setSev(const errlSeverity_t i_sev,
+                bool  i_final)
+    {
+
+        if (false == iv_sevFinal) // as long as not already set as "final"
+        {
+            iv_User.iv_severity = i_sev;  // set severity
+            iv_sevFinal = i_final;        // set whether severity is "final"
+        }
+    }
 
     /**
      *  @brief Get reason code. See errl/errlreasoncodes.H
@@ -664,6 +692,9 @@ private:
     // termstate will not be flattend into PEL, its only used by
     // hostboot.
     errlTermState_t iv_termState;
+
+   // when true, the severity has been set "final" and can not be changed.
+   bool iv_sevFinal;
 
 };
 

@@ -273,7 +273,8 @@ errlHndl_t InitService::startTask(
             if ((l_childsts == TASK_STATUS_CRASHED) &&
                 (NULL != l_childerrl))
             {
-                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                               true);  //set severity "final"
             }
             break;
         } // endif tidretrc
@@ -404,7 +405,8 @@ errlHndl_t InitService::executeFn(
             if ((l_childsts == TASK_STATUS_CRASHED) &&
                 (NULL != l_childerrl))
             {
-                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                               true);  //set severity "final"
             }
 
             TRACFCOMP(g_trac_initsvc,

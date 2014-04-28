@@ -151,7 +151,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     // The SRC_ERR_INFO becomes part of the SRC; example, B1 in SRC B180xxxx
     // iv_Src assigns the epubSubSystem_t; example, 80 in SRC B180xxxx
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
-    iv_termState(TERM_STATE_UNKNOWN)
+    iv_termState(TERM_STATE_UNKNOWN),
+    iv_sevFinal(false)
 {
     TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
     // Collect the Backtrace and add it to the error log
