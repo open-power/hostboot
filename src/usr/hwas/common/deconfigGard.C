@@ -1093,6 +1093,14 @@ void DeconfigGard::_deconfigureByAssoc(
                 // find paired MCS / MEMBUF (Centaur)
                 const Target *l_partnerMcs = findPartnerForMcs(l_parentMcs);
 
+                // If partner MCS is non-functional
+                // (findPartnerForMcs returned NULL)
+                if (!l_partnerMcs)
+                {
+                    // We're done.
+                    break;
+                }
+
                 // Obtain MBA targets related to paired MCS
                 TargetHandleList pMbaList;
                 getChildAffinityTargetsByState(pMbaList,l_partnerMcs,
