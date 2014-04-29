@@ -2796,13 +2796,19 @@ errlHndl_t FsiDD::verifyPresent( TARGETING::Target* i_target )
         uint32_t mlevp_data = 0x12345678;
         if( iv_ffdcTask == 0 )
         {
-            errlHndl_t tmp_err = read( chipinfo.master,
-                                       FSI_MLEVP0_018,
-                                       &mlevp_data );
-            if( tmp_err )
+            // doing a read for MLEVP will end up calling verifyPresent(..)
+            // again so make sure chipinfo.master is valid or there will be
+            // an infinite loop until stack space is exhausted.
+            if(chipinfo.master != NULL)
             {
-                delete tmp_err;
-                mlevp_data = 0x12345678;
+                errlHndl_t tmp_err = read( chipinfo.master,
+                                           FSI_MLEVP0_018,
+                                           &mlevp_data );
+                if( tmp_err )
+                {
+                    delete tmp_err;
+                    mlevp_data = 0x12345678;
+                }
             }
         }
 
