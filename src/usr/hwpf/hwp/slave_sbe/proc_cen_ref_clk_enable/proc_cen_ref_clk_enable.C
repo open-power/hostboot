@@ -20,9 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// -*- mode: C++; c-file-style: "linux";  -*-
-
-// $Id: proc_cen_ref_clk_enable.C,v 1.3 2014/02/28 17:52:45 jmcgill Exp $
+// $Id: proc_cen_ref_clk_enable.C,v 1.4 2014/04/14 18:57:01 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_ref_clk_enable.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -41,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "proc_check_master_sbe_seeprom.H"
 #include "proc_cen_ref_clk_enable.H"
 
 //------------------------------------------------------------------------------
@@ -63,23 +62,30 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
                                          const uint8_t i_attached_centaurs)
 {
 
-    ecmdDataBufferBase fsi_data(64);
+    ecmdDataBufferBase reg_data(32);
     uint32_t           rc_ecmd = 0;
     fapi::ReturnCode   rc;
+    bool               is_master = false;
     uint8_t            configured_centaurs = 0x00;
     std::vector<fapi::Target> mcs_targets;
 
-    do {
-        rc = fapiGetScom(i_target, MBOX_FSIGP8_0x00050017, fsi_data);
-        if (rc)
+
+    do
+    {
+        // determine chip status (master/slave) to differentiate access path to FSI GP8 register
+        //   master: SCOM
+        //   slave:  CFAM
+        rc = proc_check_master_sbe_seeprom(i_target, is_master);
+        if (!rc.ok())
         {
-            FAPI_ERR("proc_cen_ref_clk_enable: fapiGetScom error (MBOX_FSIGP8_0x00050017)");
+            FAPI_ERR("proc_cen_ref_clk_enable: Error from proc_check_master_sbe_seeprom");
             break;
         }
 
-        FAPI_INF("proc_cen_ref_clk_enable: got number of attached centaurs: i_attached_centaurs=0x%02X\n",
-                 (int) i_attached_centaurs);
+        FAPI_INF("proc_cen_ref_clk_enable: Target %s is %s, attached Centaurs: 0x%02X",
+                 i_target.toEcmdString(), (is_master)?("master"):("slave"), i_attached_centaurs);
 
+        // obtain set of functional MCS chiplets
         rc = fapiGetChildChiplets(i_target,
                                   fapi::TARGET_TYPE_MCS_CHIPLET,
                                   mcs_targets,
@@ -141,7 +147,7 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
                     break;
                 }
 
-                rc_ecmd |= fsi_data.setBit(FSI_GP8_CENTAUR_REFCLOCK_START_BIT+
+                rc_ecmd |= reg_data.setBit(FSI_GP8_CENTAUR_REFCLOCK_START_BIT+
                                            refclock_bit);
             }
         }
@@ -151,7 +157,8 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
         }
         if (rc_ecmd)
         {
-            FAPI_ERR("proc_cen_ref_clk_enable: Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
+            FAPI_ERR("proc_cen_ref_clk_enable: Error (0x%x) setting up refclock enable OR data buffer",
+                     rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
@@ -167,13 +174,58 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
             break;
         }
 
-        FAPI_INF("proc_cen_ref_clk_enable: Enable refclk for Centaur ...");
-
-        rc = fapiPutScom(i_target, MBOX_FSIGP8_0x00050017, fsi_data);
-        if (rc)
+        FAPI_INF("proc_cen_ref_clk_enable: Enable refclk for functional Centaur chips...");
+        if (is_master)
         {
-            FAPI_ERR("proc_cen_ref_clk_enable: fapiPutScom error (MBOX_FSIGP8_0x00050017)");
-            break;
+            ecmdDataBufferBase scom_data(64);
+            rc = fapiGetScom(i_target, MBOX_FSIGP8_0x00050017, scom_data);
+            if (rc)
+            {
+                FAPI_ERR("proc_cen_ref_clk_enable: fapiGetScom error (MBOX_FSIGP8_0x00050017)");
+                break;
+            }
+            
+            rc_ecmd |= scom_data.setOr(reg_data.getWord(0), 0, 32);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_cen_ref_clk_enable: Error (0x%x) setting up FSI GP8 write data buffer (SCOM)",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutScom(i_target, MBOX_FSIGP8_0x00050017, scom_data);
+            if (rc)
+            {
+                FAPI_ERR("proc_cen_ref_clk_enable: fapiPutScom error (MBOX_FSIGP8_0x00050017)");
+                break;
+            }
+        }
+        else
+        {
+            ecmdDataBufferBase cfam_data(32);
+            rc = fapiGetCfamRegister(i_target, CFAM_FSI_GP8_0x00002817, cfam_data);
+            if (rc)
+            {
+                FAPI_ERR("proc_cen_ref_clk_enable: fapiGetCfamRegister error (CFAM_FSI_GP8_0x00001017)");
+                break;
+            }
+            
+            rc_ecmd |= cfam_data.setOr(reg_data.getWord(0), 0, 32);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_cen_ref_clk_enable: Error (0x%x) setting up FSI GP8 write data buffer (CFAM)",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutCfamRegister(i_target, CFAM_FSI_GP8_0x00002817, cfam_data);
+            if (rc)
+            {
+                FAPI_ERR("proc_cen_ref_clk_enable: fapiPutCfamRegister error (CFAM_FSI_GP8_0x00001017)");
+                break;
+            }
         }
     } while(0);  // end do
 
@@ -184,6 +236,3 @@ fapi::ReturnCode proc_cen_ref_clk_enable(const fapi::Target & i_target,
 
 
 } // extern "C"
-/* Local Variables: */
-/* c-basic-offset: 4 */
-/* End: */

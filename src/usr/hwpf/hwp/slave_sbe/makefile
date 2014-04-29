@@ -53,7 +53,8 @@ OBJS =  slave_sbe.o \
         proc_getecid.o \
         proc_cen_ref_clk_enable.o \
         proc_spless_sbe_startWA.o \
-        proc_reset_i2cm_bus_fence.o
+        proc_reset_i2cm_bus_fence.o \
+        proc_check_master_sbe_seeprom.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
