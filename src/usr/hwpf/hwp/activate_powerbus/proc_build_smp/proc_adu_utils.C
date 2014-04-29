@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.C,v 1.8 2014/01/19 17:35:55 jmcgill Exp $
+// $Id: proc_adu_utils.C,v 1.9 2014/02/12 05:13:49 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -315,11 +315,10 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         {
             FAPI_ERR("proc_adu_utils_send_fbc_op: Out-of-range value %016llX specified for fabric address argument",
                      i_adu_ctl.address);
-	    const fapi::Target & TARGET = i_target;
+            const fapi::Target & TARGET = i_target;
             const uint64_t & ADDRESS = i_adu_ctl.address;
-            const bool & HP = i_use_hp;
-            const uint32_t & HP_QUIESCE_DLY = i_adu_hp_ctl.post_quiesce_delay;
-            const uint32_t & HP_INIT_DLY = i_adu_hp_ctl.pre_init_delay;
+            const proc_adu_utils_fbc_op & FBC_OP = i_adu_ctl;
+            const proc_adu_utils_fbc_op_hp_ctl & FBC_OP_HP_CTL = i_adu_hp_ctl;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_FBC_OP);
             break;
         }
@@ -329,11 +328,10 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         {
             FAPI_ERR("proc_adu_utils_send_fbc_op: Out-of-range value %d specified for hotplug post-quiesce delay argument",
                      i_adu_hp_ctl.post_quiesce_delay);
-	    const fapi::Target & TARGET = i_target;
+            const fapi::Target & TARGET = i_target;
             const uint64_t & ADDRESS = i_adu_ctl.address;
-            const bool & HP = i_use_hp;
-            const uint32_t & HP_QUIESCE_DLY = i_adu_hp_ctl.post_quiesce_delay;
-            const uint32_t & HP_INIT_DLY = i_adu_hp_ctl.pre_init_delay;
+            const proc_adu_utils_fbc_op & FBC_OP = i_adu_ctl;
+            const proc_adu_utils_fbc_op_hp_ctl & FBC_OP_HP_CTL = i_adu_hp_ctl;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_FBC_OP);
             break;
         }
@@ -343,11 +341,10 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         {
             FAPI_ERR("proc_adu_utils_send_fbc_op: Out-of-range value %d specified for hotplug pre-init delay argument",
                      i_adu_hp_ctl.pre_init_delay);
-	    const fapi::Target & TARGET = i_target;
+	        const fapi::Target & TARGET = i_target;
             const uint64_t & ADDRESS = i_adu_ctl.address;
-            const bool & HP = i_use_hp;
-            const uint32_t & HP_QUIESCE_DLY = i_adu_hp_ctl.post_quiesce_delay;
-            const uint32_t & HP_INIT_DLY = i_adu_hp_ctl.pre_init_delay;
+            const proc_adu_utils_fbc_op & FBC_OP = i_adu_ctl;
+            const proc_adu_utils_fbc_op_hp_ctl & FBC_OP_HP_CTL = i_adu_hp_ctl;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_FBC_OP);
             break;
         }

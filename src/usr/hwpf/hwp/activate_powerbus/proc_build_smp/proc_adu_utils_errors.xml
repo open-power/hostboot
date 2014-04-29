@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_adu_utils_errors.xml,v 1.4 2014/01/20 19:55:04 jmcgill Exp $ -->
+<!-- $Id: proc_adu_utils_errors.xml,v 1.5 2014/02/12 05:01:56 jmcgill Exp $ -->
 <!-- Error definitions for proc_adu_utils library -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -50,9 +50,8 @@
     <rc>RC_PROC_ADU_UTILS_INVALID_FBC_OP</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
-    <ffdc>HP</ffdc>
-    <ffdc>HP_QUIESCE_DLY</ffdc>
-    <ffdc>HP_INIT_DLY</ffdc>
+    <ffdc>FBC_OP</ffdc>
+    <ffdc>FBC_OP_HP_CTL</ffdc>
     <description>Invalid fabric op programming parameters presented to proc_adu_utils library routine.</description>
     <callout>
       <procedure>CODE</procedure>
