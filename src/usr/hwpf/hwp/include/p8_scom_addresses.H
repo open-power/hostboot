@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.180 2014/04/12 03:14:16 cmolsen Exp $
+// $Id: p8_scom_addresses.H,v 1.182 2014/04/24 23:14:55 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -458,6 +458,10 @@ CONST_UINT64_T( PMC_STATUS_REG_0x00062009             , ULL(0x00062009) );
 CONST_UINT64_T( PMC_OCC_HEARTBEAT_REG_0x00062066      , ULL(0x00062066) );
 CONST_UINT64_T( PMC_CORE_DECONFIG_REG_0x0006200D      , ULL(0x0006200D) );
 CONST_UINT64_T( PMC_FSMSTATE_STATUS_REG_0x00062020    , ULL(0x00062020) );
+CONST_UINT64_T( PMC_PIRR0_REG_0x00062080              , ULL(0x00062080) );
+CONST_UINT64_T( PMC_PIRR0_REG_0x00062081              , ULL(0x00062081) );
+CONST_UINT64_T( PMC_PIRR0_REG_0x00062082              , ULL(0x00062082) );
+CONST_UINT64_T( PMC_PIRR0_REG_0x00062083              , ULL(0x00062083) );
 CONST_UINT64_T( PMC_PORRR0_REG_0x0006208E             , ULL(0x0006208E) );
 CONST_UINT64_T( PMC_PORRR1_REG_0x0006208F             , ULL(0x0006208F) );
 CONST_UINT64_T( PMC_PORRS_REG_0x00062090              , ULL(0x00062090) );
@@ -833,14 +837,23 @@ CONST_UINT64_T( HCA_EN_FIR_0x02010940                 , ULL(0x02010940) );
 CONST_UINT64_T( HCA_EN_FIR_AND_0x02010941             , ULL(0x02010941) );
 CONST_UINT64_T( HCA_EN_FIR_MASK_0x02010943            , ULL(0x02010943) );
 CONST_UINT64_T( HCA_EN_BAR_0x0201094A                 , ULL(0x0201094A) );
-CONST_UINT64_T( HCA_EN_MIRROR_BAR_0x02010953          , ULL(0x02010953) );
+CONST_UINT64_T( HCA_EN_COUNT_BAR_0x0201094B           , ULL(0x0201094B) );
+CONST_UINT64_T( HCA_EN_DECAY1_0x0201094C              , ULL(0x0201094C) );
+CONST_UINT64_T( HCA_EN_DECAY2_0x0201094D              , ULL(0x0201094D) );
+CONST_UINT64_T( HCA_EN_REF_BAR_0x0201094E             , ULL(0x0201094E) );
 CONST_UINT64_T( HCA_MODE_0x0201094F                   , ULL(0x0201094F) );
+CONST_UINT64_T( HCA_EN_RESET_0x02010952               , ULL(0x02010952) );
+CONST_UINT64_T( HCA_EN_MIRROR_BAR_0x02010953          , ULL(0x02010953) );
 
 CONST_UINT64_T( HCA_EN_EHHCA_FIR_0x02010980           , ULL(0x02010980) );
 CONST_UINT64_T( HCA_EN_EHHCA_FIR_AND_0x02010981       , ULL(0x02010981) );
 CONST_UINT64_T( HCA_EN_EHHCA_FIR_MASK_0x02010983      , ULL(0x02010983) );
-
 CONST_UINT64_T( HCA_EH_BAR_0x0201098A                 , ULL(0x0201098A) );
+CONST_UINT64_T( HCA_EH_COUNT_BAR_0x0201098B           , ULL(0x0201098B) );
+CONST_UINT64_T( HCA_EH_REF_BAR_0x0201098E             , ULL(0x0201098E) );
+CONST_UINT64_T( HCA_EH_MODE_REG_0x0201098F            , ULL(0x0201098F) );
+CONST_UINT64_T( HCA_EH_FLUSH_0x02010990               , ULL(0x02010990) );
+CONST_UINT64_T( HCA_EH_RESET_0x02010992               , ULL(0x02010992) );
 CONST_UINT64_T( HCA_EH_MIRROR_BAR_0x02010993          , ULL(0x02010993) );
 
 //------------------------------------------------------------------------------
@@ -2107,6 +2120,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.182  2014/04/24 23:14:55  cmolsen
+Added four PIRR reg defs.
+
+Revision 1.181  2014/04/22 03:47:27  jmcgill
+reset HCA logic for MPIPL (SW257953)
+
 Revision 1.180  2014/04/12 03:14:16  cmolsen
 Added two SPURR regs.
 
