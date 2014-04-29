@@ -116,8 +116,9 @@ void update_hwas_changed_mask(Target * i_target)
 void update_hwas_changed_mask(Target * i_target, const uint64_t i_bits)
 {
     i_target->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(
-            i_target->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>() &
-                i_bits);
+            i_target->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>() |
+            (i_target->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>() &
+                i_bits));
 }
 
 /**
