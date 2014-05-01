@@ -222,6 +222,18 @@ namespace SBE
         sbeSeepromVersionInfo_t       new_seeprom_ver;
         bool                          new_readBack_check;
 
+        uint32_t                      err_plid;
+        uint32_t                      err_eid;
+        uint16_t                      err_rc;
+
+        // Constructor to default certain values
+        sbeTargetState_t() :
+          target(NULL), target_is_master(false), ec(0x0),
+          seeprom_0_ver_ECC_fail(false), seeprom_1_ver_ECC_fail(false),
+          customizedImage_size(0x0), customizedImage_crc(0x0),
+          new_readBack_check(false),
+          err_plid(0x0), err_eid(0x0), err_rc(0x0)
+        {};
     };
 
 
@@ -361,7 +373,7 @@ namespace SBE
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t updateSeepromSide(sbeTargetState_t i_sbeState);
+    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState);
 
     /**
      * @brief Check and Update all targets before Re-IPL Request
@@ -394,10 +406,23 @@ namespace SBE
      * @param[in] i_system_situation SBE Situation of the target that requires
      *                               analysis to determine Update Actions
      *
-     * @return    void
+     * @return errlHndl_t    Error log handle on failure.
      */
-    void decisionTreeForUpdates(sbeTargetState_t& io_sbeState,
-                                uint8_t i_system_situation);
+    errlHndl_t decisionTreeForUpdates(sbeTargetState_t& io_sbeState,
+                                      uint8_t i_system_situation);
+
+    /**
+     * @brief Deconfigures any Targets whose version does not match the
+     *        Master Target's Version
+     *
+     * @pre   All planned updates must have been completed
+     *
+     * @param[io/out] io_sbeStates_v   Vector of SBE State structs
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t masterVersionCompare(
+                     std::vector<sbeTargetState_t>& io_sbeStates_v);
 
     /**
      * @brief Creates the memory space needed for SBE Image Customization

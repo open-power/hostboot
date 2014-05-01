@@ -214,7 +214,6 @@ namespace SBE
                            "SBE Update");
                  break;
             }
-
             for(uint32_t i=0; i<procList.size(); i++)
             {
 
@@ -268,7 +267,7 @@ namespace SBE
                     {
                         TRACFCOMP( g_trac_sbe,
                                    INFO_MRK"updateProcessorSbeSeeproms(): "
-                                   "getTargetUpdateActions() Failed ",
+                                   "getTargetUpdateActions() Failed "
                                    "rc=0x%.4X, Target UID=0x%X",
                                    err->reasonCode(),
                                    TARGETING::get_huid(sbeState.target));
@@ -288,7 +287,7 @@ namespace SBE
                     {
                         TRACFCOMP( g_trac_sbe,
                                    INFO_MRK"updateProcessorSbeSeeproms(): "
-                                   "performUpdateActions() Failed ",
+                                   "performUpdateActions() Failed "
                                    "rc=0x%.4X, Target UID=0x%X",
                                    err->reasonCode(),
                                    TARGETING::get_huid(sbeState.target));
@@ -307,25 +306,29 @@ namespace SBE
 
                 }
 
-
-                // Push this sbeState onto the vector
-                sbeStates_vector.push_back(sbeState);
-
                 if ( err )
                 {
                     // Something failed for this target.
+                    // Save error information
+                    sbeState.err_plid = err->plid();
+                    sbeState.err_eid  = err->eid();
+                    sbeState.err_rc   = err->reasonCode();
+
                     // Commit the error here and move on to the next target,
                     // or if no targets left, will just continue the IPL
                     TRACFCOMP( g_trac_sbe,
                                INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "Committing Error Log rc=0x%.4X for "
-                               "Target UID=0x%X, but continuing procedure",
-                               err->reasonCode(),
+                               "Committing Error Log rc=0x%.4X eid=0x%.8X "
+                               "plid=0x%.8X for Target UID=0x%X, but "
+                               "continuing procedure",
+                               sbeState.err_rc, sbeState.err_eid,
+                               sbeState.err_plid,
                                TARGETING::get_huid(sbeState.target));
                     errlCommit( err, SBE_COMP_ID );
                 }
 
-
+                // Push this sbeState onto the vector
+                sbeStates_vector.push_back(sbeState);
 
             } //end of Target for loop collecting each target's SBE State
 
@@ -363,6 +366,20 @@ namespace SBE
                 INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
             }
 
+            /************************************************************/
+            /* Deconfigure any Processors that have a Version different */
+            /*   from the Master Processor's Version                    */
+            /************************************************************/
+            err = masterVersionCompare(sbeStates_vector);
+
+            if ( err )
+            {
+                // Something failed on the check
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateProcessorSbeSeeproms(): Call to "
+                           "masterVersionCompare() failed rc=0x%.4X",
+                           err->reasonCode());
+            }
 
         }while(0);
 
@@ -1546,11 +1563,11 @@ namespace SBE
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t updateSeepromSide(sbeTargetState_t i_sbeState)
+    errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState)
     {
         TRACDCOMP( g_trac_sbe,
                    ENTER_MRK"updateSeepromSide(): HUID=0x%.8X",
-                   TARGETING::get_huid(i_sbeState.target));
+                   TARGETING::get_huid(io_sbeState.target));
         errlHndl_t err = NULL;
         int64_t rc = 0;
 
@@ -1601,18 +1618,18 @@ namespace SBE
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Invalid Info ECC",
                       sbeInfo_data_ECC, sbeInfoSize_ECC);
 
-            err = deviceWrite( i_sbeState.target,
+            err = deviceWrite( io_sbeState.target,
                                sbeInfo_data_ECC,
                                sbeInfoSize_ECC,
                                DEVICE_EEPROM_ADDRESS(
-                                             i_sbeState.seeprom_side_to_update,
+                                             io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS));
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Writing SBE Version Info: HUID=0x%.8X, side=%d",
-                           TARGETING::get_huid(i_sbeState.target),
-                           i_sbeState.seeprom_side_to_update);
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.seeprom_side_to_update);
                 break;
             }
 
@@ -1620,23 +1637,23 @@ namespace SBE
             // was an ECC error when reading this SBE Version Information
             // while collecting data, read back this data to ensure there
             // isn't a permanent ECC error on the SEEPROM
-            if ( i_sbeState.new_readBack_check == true )
+            if ( io_sbeState.new_readBack_check == true )
             {
                 // Read Back Version Information
-                err = deviceRead( i_sbeState.target,
+                err = deviceRead( io_sbeState.target,
                                   sbeInfo_data_ECC_readBack,
                                   sbeInfoSize_ECC,
                                   DEVICE_EEPROM_ADDRESS(
-                                              i_sbeState.seeprom_side_to_update,
-                                              SBE_VERSION_SEEPROM_ADDRESS));
+                                             io_sbeState.seeprom_side_to_update,
+                                             SBE_VERSION_SEEPROM_ADDRESS));
 
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                                "Reading Back SBE Version Info: HUID=0x%.8X, "
                                "size=%d",
-                               TARGETING::get_huid(i_sbeState.target),
-                               i_sbeState.seeprom_side_to_update);
+                               TARGETING::get_huid(io_sbeState.target),
+                               io_sbeState.seeprom_side_to_update);
                     break;
                 }
 
@@ -1644,7 +1661,6 @@ namespace SBE
                 rc_readBack_ECC_memcmp = memcmp( sbeInfo_data_ECC,
                                                  sbeInfo_data_ECC_readBack,
                                                  sbeInfoSize_ECC);
-
 
                 // Remove ECC
                 eccStatus = PNOR::ECC::removeECC( sbeInfo_data_ECC_readBack,
@@ -1670,8 +1686,8 @@ namespace SBE
                                "sI=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
                                eccStatus, rc_readBack_ECC_memcmp,
                                sbeInfoSize, sbeInfoSize_ECC,
-                               TARGETING::get_huid(i_sbeState.target),
-                               i_sbeState.seeprom_side_to_update);
+                               TARGETING::get_huid(io_sbeState.target),
+                               io_sbeState.seeprom_side_to_update);
 
                     TRACFBIN( g_trac_sbe, "updateSeepromSide: readback_wECC",
                               sbeInfo_data_ECC_readBack, sbeInfoSize_ECC);
@@ -1694,20 +1710,20 @@ namespace SBE
                                         SBE_ECC_FAIL,
                                         FOUR_UINT16_TO_UINT64(
                                              eccStatus,
-                                             i_sbeState.seeprom_side_to_update,
+                                             io_sbeState.seeprom_side_to_update,
                                              rc_readBack_ECC_memcmp,
                                              0x0),
                                         TWO_UINT32_TO_UINT64(sbeInfoSize,
                                                              sbeInfoSize_ECC));
 
                     err->collectTrace(SBE_COMP_NAME);
-                    err->addHwCallout( i_sbeState.target,
+                    err->addHwCallout( io_sbeState.target,
                                        HWAS::SRCI_PRIORITY_HIGH,
                                        HWAS::NO_DECONFIG,
                                        HWAS::GARD_NULL );
 
 
-                    ErrlUserDetailsTarget(i_sbeState.target).addToLog(err);
+                    ErrlUserDetailsTarget(io_sbeState.target).addToLog(err);
 
                     break;
                 }
@@ -1732,7 +1748,7 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "from mm_remove_pages : rc=%d,  HUID=0x%.8X.",
-                           rc, TARGETING::get_huid(i_sbeState.target) );
+                           rc, TARGETING::get_huid(io_sbeState.target) );
                 /*@
                  * @errortype
                  * @moduleid     SBE_UPDATE_SEEPROMS
@@ -1749,7 +1765,7 @@ namespace SBE
                                     TO_UINT64(rc));
                 //Target isn't directly related to fail, but could be useful
                 // to see how far we got before failing.
-                ErrlUserDetailsTarget(i_sbeState.target
+                ErrlUserDetailsTarget(io_sbeState.target
                                       ).addToLog(err);
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -1759,7 +1775,7 @@ namespace SBE
 
 
             //align size, calculate ECC size
-            size_t sbeImgSize = ALIGN_8(i_sbeState.customizedImage_size);
+            size_t sbeImgSize = ALIGN_8(io_sbeState.customizedImage_size);
             size_t sbeEccImgSize = static_cast<size_t>(sbeImgSize*9/8);
 
 
@@ -1788,16 +1804,16 @@ namespace SBE
             //Write new data to seeprom
             TRACFCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): Write New "
                        "SBE Image for Target 0x%X to Seeprom %d",
-                       TARGETING::get_huid(i_sbeState.target),
-                       i_sbeState.seeprom_side_to_update );
+                       TARGETING::get_huid(io_sbeState.target),
+                       io_sbeState.seeprom_side_to_update );
 
             //Write image to indicated side
-            err = deviceWrite(i_sbeState.target,
+            err = deviceWrite(io_sbeState.target,
                               reinterpret_cast<void*>
                               (SBE_ECC_IMG_VADDR),
                               sbeEccImgSize,
                               DEVICE_EEPROM_ADDRESS(
-                                            i_sbeState.seeprom_side_to_update,
+                                            io_sbeState.seeprom_side_to_update,
                                             SBE_IMAGE_SEEPROM_ADDRESS));
 
             if(err)
@@ -1806,8 +1822,8 @@ namespace SBE
                            "writing new SBE image to size=%d. HUID=0x%.8X."
                            "SBE_VADDR=0x%.16X, ECC_VADDR=0x%.16X, size=0x%.8X, "
                            "eccSize=0x%.8X, EEPROM offset=0x%X",
-                           i_sbeState.seeprom_side_to_update,
-                           TARGETING::get_huid(i_sbeState.target),
+                           io_sbeState.seeprom_side_to_update,
+                           TARGETING::get_huid(io_sbeState.target),
                            SBE_IMG_VADDR, SBE_ECC_IMG_VADDR, sbeImgSize,
                            sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS);
                 break;
@@ -1819,7 +1835,7 @@ namespace SBE
             /*******************************************/
 
             // The new version has already been created
-            memcpy(sbeInfo_data, &i_sbeState.new_seeprom_ver, sbeInfoSize);
+            memcpy(sbeInfo_data, &io_sbeState.new_seeprom_ver, sbeInfoSize);
 
             // Inject ECC to Data
             memset( sbeInfo_data_ECC, 0, sbeInfoSize_ECC);
@@ -1830,22 +1846,27 @@ namespace SBE
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Info ECC",
                       sbeInfo_data_ECC, sbeInfoSize_ECC);
 
-            err = deviceWrite( i_sbeState.target,
+            err = deviceWrite( io_sbeState.target,
                                sbeInfo_data_ECC,
                                sbeInfoSize_ECC,
                                DEVICE_EEPROM_ADDRESS(
-                                             i_sbeState.seeprom_side_to_update,
+                                             io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS));
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "Writing SBE Version Info: HUID=0x%.8X, side=%d",
-                           TARGETING::get_huid(i_sbeState.target),
-                           i_sbeState.seeprom_side_to_update);
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.seeprom_side_to_update);
                 break;
             }
 
-
+            // Successful update if we get here, so update internal code
+            // structure with the new version information
+            memcpy( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY
+                    ? &io_sbeState.seeprom_0_ver : &io_sbeState.seeprom_1_ver,
+                    &io_sbeState.new_seeprom_ver,
+                    sbeInfoSize );
 
         }while(0);
 
@@ -1910,7 +1931,6 @@ namespace SBE
                 isSimics_check = true;
             }
 
-
             if ( (pnor_check_dirty || crc_check_dirty )
                  && !isSimics_check )
             {
@@ -1964,7 +1984,7 @@ namespace SBE
             {
                 seeprom_1_isDirty = true;
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
-                           "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X), "
+                           "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X), "
                            "isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
@@ -1979,17 +1999,17 @@ namespace SBE
                 TRACFBIN( g_trac_sbe,
                           "PNOR Version",
                           &(io_sbeState.pnorVersion),
-                          SBE_IMAGE_VERSION_SIZE ) ;
+                          16 ) ;
 
                 TRACFBIN( g_trac_sbe,
                           "Seeprom0: Image Version",
                           &(io_sbeState.seeprom_0_ver.image_version),
-                          SBE_IMAGE_VERSION_SIZE ) ;
+                          16 ) ;
 
                 TRACFBIN( g_trac_sbe,
                           "Seeprom1: Image Version",
                           &(io_sbeState.seeprom_1_ver.image_version),
-                          SBE_IMAGE_VERSION_SIZE ) ;
+                          16 ) ;
 
                 TRACFBIN( g_trac_sbe,
                           "MVPD SB",
@@ -2039,14 +2059,15 @@ namespace SBE
 
 
             // Call function to update actions
-            decisionTreeForUpdates(io_sbeState, system_situation);
+            err = decisionTreeForUpdates(io_sbeState, system_situation);
+
+            if ( err ) { break; }
 
             TRACUCOMP( g_trac_sbe, "getTargetUpdateActions() - system_situation"
                        "= 0x%.2X, actions=0x%.8X, Update EEPROM=0x%X",
                        system_situation,
                        io_sbeState.update_actions,
                        io_sbeState.seeprom_side_to_update);
-
 
             /**************************************************************/
             /*  Setup new SBE Image Version Info, if necessary            */
@@ -2119,21 +2140,21 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    void decisionTreeForUpdates(sbeTargetState_t& io_sbeState,
+    errlHndl_t decisionTreeForUpdates(sbeTargetState_t& io_sbeState,
                                 uint8_t i_system_situation)
     {
-
+        errlHndl_t err = NULL;
 
         uint32_t l_actions           = CLEAR_ACTIONS;
         io_sbeState.update_actions   = CLEAR_ACTIONS;
         io_sbeState.seeprom_side_to_update = EEPROM::LAST_CHIP_TYPE;
 
+        // @todo RTC 107721 - Need to handle Habanero 'golden' SEEPROM side
 
         do{
 
             // To be safe, we're only look at the bits defined in sbe_update.H
             i_system_situation &= SITUATION_ALL_BITS_MASK;
-
 
             switch ( i_system_situation )
             {
@@ -2324,12 +2345,11 @@ namespace SBE
                          * @devdesc      Bad Path in decisionUpdateTree:
                          *               cur=PERM/DIRTY
                          */
-                        errlHndl_t err = new ErrlEntry(
-                                             ERRL_SEV_RECOVERED,
-                                             SBE_DECISION_TREE,
-                                             SBE_PERM_SIDE_DIRTY_BAD_PATH,
-                                             TO_UINT64(i_system_situation),
-                                             TO_UINT64(l_actions));
+                        err = new ErrlEntry(ERRL_SEV_RECOVERED,
+                                            SBE_DECISION_TREE,
+                                            SBE_PERM_SIDE_DIRTY_BAD_PATH,
+                                            TO_UINT64(i_system_situation),
+                                            TO_UINT64(l_actions));
                         // Target isn't directly related to fail, but could be
                         // useful to see how far we got before failing.
                         ErrlUserDetailsTarget(io_sbeState.target
@@ -2362,8 +2382,8 @@ namespace SBE
 
                         TRACFCOMP(g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                   "cur=perm/dirty(%d), alt=clean. Not our Re-"
-                                  "IPL. Update alt. re-IPL. (sit=0x%.2X, "
-                                  "act=0x%.8X, flags=0x%.2X)",
+                                  "IPL. Update alt and MVPD. re-IPL. "
+                                  "(sit=0x%.2X, act=0x%.8X, flags=0x%.2X)",
                                   TARGETING::get_huid(io_sbeState.target),
                                   io_sbeState.cur_seeprom_side,
                                   i_system_situation, l_actions,
@@ -2454,7 +2474,7 @@ namespace SBE
 
         }while(0);
 
-        return;
+        return err;
 
     }
 
@@ -3047,6 +3067,370 @@ namespace SBE
 
         TRACDCOMP( g_trac_sbe,
                    EXIT_MRK"preReIplCheck()");
+
+        return err;
+
+    }
+
+
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t masterVersionCompare(
+                     std::vector<sbeTargetState_t>& io_sbeStates_v)
+    {
+        TRACDCOMP( g_trac_sbe,
+                   ENTER_MRK"masterVersionCompare");
+
+        errlHndl_t err = NULL;
+
+        uint8_t mP = UINT8_MAX;
+        sbe_image_version_t mP_version;
+        sbe_image_version_t * ver_ptr;
+
+        do{
+
+            // If running in simics, don't do these checks
+            if ( Util::isSimicsRunning() )
+            {
+                break;
+            }
+
+            /*****************************************************************/
+            /*  Iterate over all the processors to find Master Processor     */
+            /*****************************************************************/
+            for ( uint8_t i=0; i < io_sbeStates_v.size(); i++ )
+            {
+                if ( io_sbeStates_v[i].target_is_master == true )
+                {
+                    mP = i;
+
+                    // Compare against 'current' Master side in case there is
+                    // an issue with the other side
+                    if (io_sbeStates_v[i].cur_seeprom_side == SBE_SEEPROM0)
+                    {
+                        ver_ptr =
+                            &(io_sbeStates_v[i].seeprom_0_ver.image_version);
+                    }
+                    else // SBE_SEEPROM1
+                    {
+                        ver_ptr =
+                            &(io_sbeStates_v[i].seeprom_1_ver.image_version);
+                    }
+
+                    memcpy(&(mP_version),
+                           ver_ptr,
+                           SBE_IMAGE_VERSION_SIZE);
+                    break;
+                }
+            }
+
+            // Handle very unlikely case of not finding Master Processor
+            assert( (mP != UINT8_MAX),
+                    "masterVersionCompare(): master processor not found");
+
+            /*****************************************************************/
+            /*  Make sure that there aren't any errors associated with       */
+            /*  updating the non-master targets; otherwise you can't trust   */
+            /*  their  version                                               */
+            /*  -- AND --                                                    */
+            /*  Compare 'current' Version on all processors to see if they   */
+            /*  match the 'current' version on the Master Processor          */
+            /*                                                               */
+            /*  NOTE: Comparison based on PNOR SBE Image and --NOT--         */
+            /*        based on CRC (which is partly target specific)         */
+            /*                                                               */
+            /*  Also, there are special checks for the Master Processor      */
+            /*****************************************************************/
+
+            // @todo RTC 107721 - Need to handle Habanero 'Golden' SEEPROM side
+
+            for ( uint8_t i=0; i < io_sbeStates_v.size(); i++ )
+            {
+
+                // Special Master Processor checks
+                if ( i == mP )
+                {
+                    // Compare Versions of Both SEEPROMs to PNOR Version
+                    // Create a Predictive Error if there's an issue
+                    if ((0 != memcmp(
+                              &(io_sbeStates_v[i].pnorVersion),
+                              &(io_sbeStates_v[i].seeprom_0_ver.image_version),
+                              SBE_IMAGE_VERSION_SIZE) )
+                        ||
+                        (0 != memcmp(
+                              &(io_sbeStates_v[i].pnorVersion),
+                              &(io_sbeStates_v[i].seeprom_1_ver.image_version),
+                              SBE_IMAGE_VERSION_SIZE) )
+                            )
+                    {
+                        TRACFCOMP( g_trac_sbe,ERR_MRK"masterVersionCompare() - "
+                                   "SBE Version Miscompare Between Master "
+                                   "Target SEEPROMs (HUID=0x%.8X, current "
+                                   "side=%d)",
+                                   TARGETING::get_huid(
+                                                  io_sbeStates_v[mP].target),
+                                   io_sbeStates_v[mP].cur_seeprom_side);
+
+                        // Trace first 8 bytes of each section
+                        // Full Version added to error log below
+                        TRACFBIN( g_trac_sbe,
+                                  "PNOR Version",
+                                  &(io_sbeStates_v[i].pnorVersion),
+                                  8 ) ;
+
+                        TRACFBIN(
+                             g_trac_sbe,
+                             "Seeprom0: Master Image Version",
+                             &(io_sbeStates_v[mP].seeprom_0_ver.image_version),
+                             8 ) ;
+
+                        TRACFBIN(
+                             g_trac_sbe,
+                             "Seeprom1: Master Image Version",
+                             &(io_sbeStates_v[mP].seeprom_1_ver.image_version),
+                             8 ) ;
+
+                        /*@
+                         * @errortype
+                         * @moduleid     SBE_MASTER_VERSION_COMPARE
+                         * @reasoncode   SBE_MASTER_VERSION_DOWNLEVEL
+                         * @userdata1    Master Target HUID
+                         * @userdata2    Master Target Loop Index
+                         * @devdesc      SBE Image Verion Miscompare with
+                         *               Master Target
+                         */
+                        err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                            SBE_MASTER_VERSION_COMPARE,
+                                            SBE_MASTER_VERSION_DOWNLEVEL,
+                                            TARGETING::get_huid(
+                                                  io_sbeStates_v[mP].target),
+                                            mP);
+
+                        err->collectTrace(SBE_COMP_NAME);
+                        err->addHwCallout( io_sbeStates_v[i].target,
+                                           HWAS::SRCI_PRIORITY_HIGH,
+                                           HWAS::NO_DECONFIG,
+                                           HWAS::GARD_NULL );
+
+                        ErrlUserDetailsTarget(io_sbeStates_v[mP].target,
+                                              "Master Target").addToLog(err);
+
+                        // Add general data sections to capture the
+                        // different versions
+                        err->addFFDC( SBE_COMP_ID,
+                                      &(io_sbeStates_v[i].pnorVersion),
+                                      SBE_IMAGE_VERSION_SIZE,
+                                      0,                 // Version
+                                      ERRL_UDT_NOFORMAT, // parser ignores data
+                                      false );           // merge
+
+                        err->addFFDC( SBE_COMP_ID,
+                             &(io_sbeStates_v[mP].seeprom_0_ver.image_version),
+                                      SBE_IMAGE_VERSION_SIZE,
+                                      0,                 // Version
+                                      ERRL_UDT_NOFORMAT, // parser ignores data
+                                      false );           // merge
+
+                        err->addFFDC( SBE_COMP_ID,
+                             &(io_sbeStates_v[mP].seeprom_1_ver.image_version),
+                                      SBE_IMAGE_VERSION_SIZE,
+                                      0,                 // Version
+                                      ERRL_UDT_NOFORMAT, // parser ignores data
+                                      false );           // merge
+
+                        errlCommit( err, SBE_COMP_ID );
+
+                    } // end of check
+
+                    // Continue to avoid remaining non-Master Processor checks
+                    continue;
+                }
+                else
+                {
+                    // Not Master, so get 'current' version
+                    if (io_sbeStates_v[i].cur_seeprom_side == SBE_SEEPROM0)
+                    {
+                        ver_ptr =
+                            &(io_sbeStates_v[i].seeprom_0_ver.image_version);
+                    }
+                    else // SBE_SEEPROM1
+                    {
+                        ver_ptr =
+                            &(io_sbeStates_v[i].seeprom_1_ver.image_version);
+                    }
+
+                }
+
+
+                // See if there was an issue updating this target
+                if ( io_sbeStates_v[i].err_plid != 0 )
+                {
+                    TRACFCOMP( g_trac_sbe,ERR_MRK"masterVersionCompare() - "
+                               "Error Associated with Updating Target "
+                               "HUID=0x%.8X: plid=0x%.8X, eid=0x%.8X, "
+                               "rc=0x%.4X. Can't trust its SBE Version",
+                               TARGETING::get_huid(io_sbeStates_v[i].target),
+                               io_sbeStates_v[i].err_plid,
+                               io_sbeStates_v[i].err_eid,
+                               io_sbeStates_v[i].err_rc);
+
+                    /*@
+                     * @errortype
+                     * @moduleid     SBE_MASTER_VERSION_COMPARE
+                     * @reasoncode   SBE_ERROR_ON_UPDATE
+                     * @userdata1[0:31]     Target HUID
+                     * @userdata1[32:63]    Original Error PLID
+                     * @userdata2[0:31]     Original Error EID
+                     * @userdata2[32:63]    Original Error Reason Code
+                     * @devdesc      Error Associated with Updating this Target
+                     */
+                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                        SBE_MASTER_VERSION_COMPARE,
+                                        SBE_ERROR_ON_UPDATE,
+                                        TWO_UINT32_TO_UINT64(
+                                          TARGETING::get_huid(
+                                                     io_sbeStates_v[i].target),
+                                          io_sbeStates_v[i].err_plid),
+                                        TWO_UINT32_TO_UINT64(
+                                          io_sbeStates_v[i].err_eid,
+                                          io_sbeStates_v[i].err_rc));
+
+                    // Link the 2 logs
+                    err->plid(io_sbeStates_v[i].err_plid);
+
+                }
+
+                // Compare 'current' version of target to 'current' version
+                // of Master target in case Master version is down-level
+                else if ( 0 != memcmp( &(mP_version),
+                                       ver_ptr,
+                                       SBE_IMAGE_VERSION_SIZE) )
+                {
+                    TRACFCOMP( g_trac_sbe,ERR_MRK"masterVersionCompare() - "
+                               "SBE Version Miscompare Between Master Target "
+                               "HUID=0x%.8X (side=%d) and Target HUID=0x%.8X "
+                               "(side=%d)",
+                               TARGETING::get_huid(
+                                          io_sbeStates_v[mP].target),
+                               io_sbeStates_v[mP].cur_seeprom_side,
+                               TARGETING::get_huid(io_sbeStates_v[i].target),
+                               io_sbeStates_v[i].cur_seeprom_side);
+
+                    // Trace first 8 bytes of each section
+                    // Full Version added to error log below
+                    TRACFBIN( g_trac_sbe,
+                              "PNOR Version",
+                              &(io_sbeStates_v[i].pnorVersion),
+                              8 ) ;
+
+                    TRACFBIN( g_trac_sbe,
+                              "Seeprom0: Master Image Version",
+                              &(io_sbeStates_v[mP].seeprom_0_ver.image_version),
+                              8 ) ;
+
+                    TRACFBIN( g_trac_sbe,
+                              "Seeprom1: Master Image Version",
+                              &(io_sbeStates_v[mP].seeprom_1_ver.image_version),
+                              8 ) ;
+
+                    TRACFBIN( g_trac_sbe,
+                              "Seeprom0: Failing Image Version",
+                              &(io_sbeStates_v[i].seeprom_0_ver.image_version),
+                              8  ) ;
+
+                    TRACFBIN( g_trac_sbe,
+                              "Seeprom1: Failing Image Version",
+                              &(io_sbeStates_v[i].seeprom_1_ver.image_version),
+                              8 ) ;
+
+
+                    /*@
+                     * @errortype
+                     * @moduleid     SBE_MASTER_VERSION_COMPARE
+                     * @reasoncode   SBE_MISCOMPARE_WITH_MASTER_VERSION
+                     * @userdata1    Master Target HUID
+                     * @userdata2    Comparison Target HUID
+                     * @devdesc      SBE Verion Miscompare with Master Target
+                     */
+                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                        SBE_MASTER_VERSION_COMPARE,
+                                        SBE_MISCOMPARE_WITH_MASTER_VERSION,
+                                        TARGETING::get_huid(
+                                                   io_sbeStates_v[mP].target),
+                                        TARGETING::get_huid(
+                                                   io_sbeStates_v[i].target));
+
+                    // Add general data sections to capture the
+                    // different versions
+                    err->addFFDC( SBE_COMP_ID,
+                                  &(io_sbeStates_v[i].pnorVersion),
+                                  SBE_IMAGE_VERSION_SIZE,
+                                  0,                 // Version
+                                  ERRL_UDT_NOFORMAT, // parser ignores data
+                                  false );           // merge
+
+                    err->addFFDC( SBE_COMP_ID,
+                             &(io_sbeStates_v[mP].seeprom_0_ver.image_version),
+                                  SBE_IMAGE_VERSION_SIZE,
+                                  0,                 // Version
+                                  ERRL_UDT_NOFORMAT, // parser ignores data
+                                  false );           // merge
+
+                    err->addFFDC( SBE_COMP_ID,
+                             &(io_sbeStates_v[mP].seeprom_1_ver.image_version),
+                              SBE_IMAGE_VERSION_SIZE,
+                                  0,                 // Version
+                                  ERRL_UDT_NOFORMAT, // parser ignores data
+                                  false );           // merge
+
+                   err->addFFDC( SBE_COMP_ID,
+                             &(io_sbeStates_v[i].seeprom_0_ver.image_version),
+                                  SBE_IMAGE_VERSION_SIZE,
+                                  0,                 // Version
+                                  ERRL_UDT_NOFORMAT, // parser ignores data
+                                  false );           // merge
+
+                    err->addFFDC( SBE_COMP_ID,
+                             &(io_sbeStates_v[i].seeprom_1_ver.image_version),
+                              SBE_IMAGE_VERSION_SIZE,
+                                  0,                 // Version
+                                  ERRL_UDT_NOFORMAT, // parser ignores data
+                                  false );           // merge
+
+                }
+
+                // No issues
+                else
+                {
+                    TRACUCOMP( g_trac_sbe, "masterVersionCompare: Successful "
+                               "Version check", i, mP);
+                }
+
+
+                if ( err )
+                {
+                    // Add FFDC and Commit the error log created here
+                    err->collectTrace(SBE_COMP_NAME);
+                    err->addHwCallout( io_sbeStates_v[i].target,
+                                       HWAS::SRCI_PRIORITY_HIGH,
+                                       HWAS::DECONFIG,
+                                       HWAS::GARD_NULL );
+
+                    ErrlUserDetailsTarget(io_sbeStates_v[mP].target,
+                                          "Master Target").addToLog(err);
+
+                    ErrlUserDetailsTarget(io_sbeStates_v[i].target,
+                                          "Failing Target").addToLog(err);
+
+                    errlCommit( err, SBE_COMP_ID );
+
+                }
+            }
+
+        }while(0);
+
+
+        TRACDCOMP( g_trac_sbe,
+                   EXIT_MRK"masterVersionCompare");
 
         return err;
 

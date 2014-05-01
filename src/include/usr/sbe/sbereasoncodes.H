@@ -53,6 +53,7 @@ enum sbeModuleId
     SBE_DECISION_TREE                   = 0x0A,
     SBE_CUSTOMIZE_IMG                   = 0x0B,
     SBE_PERFORM_UPDATE_ACTIONS          = 0x0C,
+    SBE_MASTER_VERSION_COMPARE          = 0x0D,
 };
 
 /**
@@ -87,6 +88,9 @@ enum sbeReasonCode
     SBE_PERM_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x10,
     SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL   = SBE_COMP_ID | 0x11,
     SBE_INFO_LOG                        = SBE_COMP_ID | 0x12,
+    SBE_MISCOMPARE_WITH_MASTER_VERSION  = SBE_COMP_ID | 0x13,
+    SBE_ERROR_ON_UPDATE                 = SBE_COMP_ID | 0x14,
+    SBE_MASTER_VERSION_DOWNLEVEL        = SBE_COMP_ID | 0x15,
 };
 
 };  // end SBE
