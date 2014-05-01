@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_set_pore_bar_errors.xml,v 1.5 2014/01/24 19:19:14 stillgs Exp $ -->
+<!-- $Id: p8_set_pore_bar_errors.xml,v 1.7 2014/03/07 14:32:52 stillgs Exp $ -->
 <!-- Error definitions for p8_set_pore_bar procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -65,7 +65,7 @@
     <rc>RC_PROCPM_PBA_SLVRST_TIMED_OUT</rc>
     <description>PBA Slave Reset timed out in p8_set_pore_bar</description>
     <ffdc>POLLCOUNT</ffdc>
-    <ffdc>TIMEOUTVALUE</ffdc>
+    <ffdc>POLLVALUE</ffdc>
     <ffdc>PSR</ffdc>
     <ffdc>SLVID</ffdc>
     <callout>
@@ -115,11 +115,19 @@
   <hwpError>
     <rc>RC_PROCPM_POREBAR_IMAGE_PLACEMENT_ERROR</rc>
     <description>Image address plus image size overflows PBA region in p8_set_pore_bar</description>
+    <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_POREBAR_IMAGE_ADDR_ERROR</rc>
     <description>Find of XIP of slw_control_vector failed in p8_set_pore_bar</description>
+    <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

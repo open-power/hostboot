@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_set_pore_bar.C,v 1.8 2014/01/24 19:24:37 stillgs Exp $
+// $Id: p8_set_pore_bar.C,v 1.9 2014/03/07 14:38:52 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -644,67 +644,119 @@ fapi::ReturnCode
 bar_pba_slave_reset(const fapi::Target& i_target, uint32_t id)
 {
 
-    uint32_t            poll_count = 0;
     pba_slvrst_t        psr;
     fapi::ReturnCode    rc;
-    uint32_t            l_ecmdRc = 0;
+    uint32_t            e_rc = 0;
     ecmdDataBufferBase  data(64);
+    
+    bool                poll_failure = false;
+    uint32_t            p;
+    
+    uint8_t             ec_has_pba_slvrest_bug = 0;
+    uint8_t             attr_mpipl = 0;
 
 
     // Tell PBA to reset the slave, then poll for completion with timeout.
     // The PBA is always polled at least twice to guarantee that we always
     // poll once after a timeout.
-
-    psr.value = 0;
-    psr.fields.set = PBA_SLVRST_SET(id);
-
-    FAPI_DBG("  PBA_SLVRST%x: 0x%16llx", id, psr.value);
-
-    l_ecmdRc |= data.setDoubleWord(0, psr.value);
-    if(l_ecmdRc)
+    
+    do
     {
-        FAPI_ERR("Error (0x%x) manipulating ecmdDataBufferBase for PBA_SLVRST", l_ecmdRc);
-        rc.setEcmdError(l_ecmdRc);
-        return rc;
-    }
-
-    rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001, data);
-    if (rc)
-    {
-        FAPI_ERR("Put SCOM error for PBA Slave Reset");
-    }
-    else
-    {
-        do
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET,
+                                   &i_target,
+                                   ec_has_pba_slvrest_bug);
+        if(rc)
         {
-            rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001, data);
-            if (rc)
+     	    FAPI_ERR("Error querying Chip EC feature: "
+                     "ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET");
+            break;
+        }
+        
+        rc = FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, attr_mpipl);
+        if(rc)
+        {
+     	    FAPI_ERR("Error querying attribute ATTR_IS_MPIPL");
+            break;
+        }
+
+        psr.value = 0;
+        psr.fields.set = PBA_SLVRST_SET(id);
+
+        FAPI_DBG("  PBA_SLVRST%x: 0x%16llx", id, psr.value);
+
+        e_rc |= data.setDoubleWord(0, psr.value);
+        if(e_rc)
+        {
+            FAPI_ERR("Error (0x%x) manipulating ecmdDataBufferBase for PBA_SLVRST", e_rc);
+            rc.setEcmdError(e_rc);
+            return rc;
+        }
+
+        rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001, data);
+        if (rc)
+        {
+            FAPI_ERR("Put SCOM error for PBA Slave Reset");
+            break;
+        }
+        
+        // Due to HW228485, skip the check of the in-progress bits for MPIPL 
+        // (after the PBA channels have been used at runtime) as they
+        // are unreliable in Murano 1.x.
+        if (attr_mpipl && ec_has_pba_slvrest_bug)
+        {
+            FAPI_INF("PBA Reset Polling being skipped due to MPIPL on a chip with PBA reset bug");
+        }
+        else
+        {                                          
+            poll_failure = true;
+            for (p=0; p<MAX_PBA_RESET_POLLS; p++)
             {
-                FAPI_ERR("Put SCOM error for PBA Slave Reset");
-                break;
+                // Read the reset register to check for reset completion
+                rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001 , data);
+                if (rc)
+                {
+                     FAPI_ERR("fapiGetPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc);
+                     break;
+                }
+                FAPI_DBG("Slave %x reset poll data = 0x%016llX", id, data.getDoubleWord(0));
+
+                // If slave reset in progress, wait and then poll
+                if (data.isBitClear(4+id))
+                {
+                    FAPI_INF("PBA Reset complete for Slave %d", id);
+                    poll_failure = false;
+                    break;
+                }
+                else
+                {
+                    rc = fapiDelay(PBA_RESET_POLL_DELAY*1000, 200000);   // In microseconds
+                    if (rc)
+                    {
+                         FAPI_ERR("fapiDelay failed. With rc = 0x%x", (uint32_t)rc);
+                         break;
+                    }
+                }
+            } 
+
+            // Error exit from above loop
+            if (!rc.ok())
+            {
+                 break;
             }
 
-            psr.value = data.getDoubleWord(0);
-
-            if (!(psr.fields.in_prog & PBA_SLVRST_IN_PROG(id)))
+            if (poll_failure)
             {
-	            break;
-	        }
-
-            poll_count++;
-	        if (poll_count == PBA_SLAVE_RESET_TIMEOUT)
-            {
-                const fapi::Target & CHIP = i_target;
-                const uint32_t     & POLLCOUNT = poll_count;
-                const uint32_t     & TIMEOUTVALUE = PBA_SLAVE_RESET_TIMEOUT;
-                const uint64_t     & PSR = psr.value;
-                const uint32_t     & SLVID = id;
-	            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_SLVRST_TIMED_OUT);
-                break;
-	        }
-
-        } while (1);
-    }
+                 FAPI_ERR("PBA Slave Reset Timout");
+                 const fapi::Target & CHIP = i_target;
+                 const uint32_t     & POLLCOUNT = MAX_PBA_RESET_POLLS;
+                 const uint32_t     & POLLVALUE = PBA_RESET_POLL_DELAY;
+                 const uint64_t     & PSR = data.getDoubleWord(0);
+                 const uint32_t     & SLVID = id;
+	             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_SLVRST_TIMED_OUT);
+                 break;
+            }
+        }
+    } while(0);
     return rc;
 }
 
