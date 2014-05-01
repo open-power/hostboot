@@ -366,6 +366,11 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         // In that case get the secondary signature and update this.
         if ( NULL != l_temp_sdc )
         {
+            // Merge SUE flag
+            if( serviceData.service_data->IsSUE() )
+            {
+                l_temp_sdc->SetSUE();
+            }
 
             // We are having only one secondary signature. Secondary signature
             // here is mainly used for XSTOP error. XSTOP error can only happen
