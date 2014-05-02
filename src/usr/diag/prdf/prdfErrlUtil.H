@@ -64,6 +64,12 @@
     io_errl->addFFDC(PRDF_COMP_ID, i_buf, i_size, i_ver, i_subsec)
 
 /**
+ * @brief Set eLog severity
+ */
+#define PRDF_SET_ERRL_SEV(io_errl, i_sev) \
+    io_errl->setSev(ERRORLOG::i_sev)
+
+/**
  * @brief Commit the log
  */
 // NOTE: Hostboot error log commit function does not need the action flag

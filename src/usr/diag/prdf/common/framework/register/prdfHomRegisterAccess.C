@@ -133,7 +133,8 @@ uint32_t ScomService::Access(TargetHandle_t i_target,
     if( ( NULL != errlH ) && ( MopRegisterAccess::READ == operation )
         && ( IBSCOM::IBSCOM_BUS_FAILURE == errlH->reasonCode() ))
     {
-        PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
+        PRDF_SET_ERRL_SEV(errlH, ERRL_SEV_INFORMATIONAL);
+        PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_HIDDEN);
         PRDF_INF( "Register access failed with reason code IBSCOM_BUS_FAILURE."
                   " Trying again, Target HUID:0x%08X Register 0x%016X Op:%u",
                   PlatServices::getHuid( i_target), registerId, operation );
@@ -168,7 +169,8 @@ uint32_t ScomService::Access(TargetHandle_t i_target,
         PRDF_ABORTING(l_isAbort);
         if (!l_isAbort)
         {
-            PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
+            PRDF_SET_ERRL_SEV(errlH, ERRL_SEV_INFORMATIONAL);
+            PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_HIDDEN);
         }
         else
         {
@@ -471,7 +473,8 @@ uint32_t HomRegisterAccessScan::Access(BIT_STRING_CLASS & bs,
         PRDF_ABORTING(l_isAbort);
         if (!l_isAbort)
         {
-            PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
+            PRDF_SET_ERRL_SEV(errH, ERRL_SEV_INFORMATIONAL);
+            PRDF_COMMIT_ERRL(errH, ERRL_ACTION_HIDDEN);
 
         }
         else
