@@ -1690,6 +1690,11 @@ group gPbaFir filter singlebit
      */
     (PbaFir, bit(4)) ? SelfHighThr1;
 
+    /** PBAFIR[3:4]
+     *  PBAFIR_PB_SUE_FW
+     */
+    (PbaFir, bit(3,4)) ? callout2ndLvlMedThr32NoGard;
+
     /** PBAFIR[5]
      *  PBAFIR_PB_CE_FW
      */
