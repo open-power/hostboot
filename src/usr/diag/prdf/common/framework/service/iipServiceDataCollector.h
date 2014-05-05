@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1998,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -117,13 +119,15 @@ public:
 
   //mk03c
   PRDF_SDC_FLAGS_MAP        // flag positions
-    PRDF_SDC_FLAG(USING_SAVED_SDC,         0x40000)                // mp05
-    PRDF_SDC_FLAG(PROC_CORE_CS,            0x20000)                // mp03
-    PRDF_SDC_FLAG(UNIT_CS,                 0x20000)                // mp06 a (Note this is intentionally the same value as PROC_CORE_CS)
-    PRDF_SDC_FLAG(DONT_COMMIT_ERRL,        0x01000)        // mp02
-    PRDF_SDC_FLAG(DUMP,                    0x00800)              // dg04
-    PRDF_SDC_FLAG(UERE,                    0x00400)              // dg02
-    PRDF_SDC_FLAG(SUE,                     0x00200)              // dg02
+    PRDF_SDC_FLAG(DONT_SAVE_SDC,           0x80000)
+    PRDF_SDC_FLAG(USING_SAVED_SDC,         0x40000)
+    PRDF_SDC_FLAG(PROC_CORE_CS,            0x20000)
+    //(Note UNIT_CS is intentionally the same value as PROC_CORE_CS)
+    PRDF_SDC_FLAG(UNIT_CS,                 0x20000)
+    PRDF_SDC_FLAG(DONT_COMMIT_ERRL,        0x01000)
+    PRDF_SDC_FLAG(DUMP,                    0x00800)
+    PRDF_SDC_FLAG(UERE,                    0x00400)
+    PRDF_SDC_FLAG(SUE,                     0x00200)
     PRDF_SDC_FLAG(AT_THRESHOLD,            0x00080)
     PRDF_SDC_FLAG(DEGRADED,                0x00040)
     PRDF_SDC_FLAG(SERVICE_CALL,            0x00020)

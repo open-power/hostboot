@@ -49,6 +49,7 @@ prd_config += prdfFabricDomain.o
 prd_config += prdfParentDomain.o
 prd_config += prdfRuleChipDomain.o
 prd_config += prdfPllDomain.o
+prd_config += prdfMbaDomain.o
 prd_config += iipSystem.o
 prd_config += prdfExtensibleDomain.o
 
