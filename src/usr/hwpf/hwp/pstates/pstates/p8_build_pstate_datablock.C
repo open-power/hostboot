@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.34 2014/04/07 02:17:52 stillgs Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.35 2014/04/09 22:00:46 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -1078,6 +1078,7 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
   uint8_t    gpsi_max;
   
   const uint32_t MAXIMUM_BOOST_PERCENT_SUPPORTED = 20;
+  const uint32_t MAXIMUM_PSTATE_RANGE = 255;  // maximum represented by uint8_t
 
   do
   {
@@ -1124,7 +1125,7 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
                boosted_pct,  pstate0_frequency_khz, boosted_freq_khz);
       break;
     } 
-    else if (pstate_diff > 255) {
+    else if (pstate_diff > MAXIMUM_PSTATE_RANGE) {
         FAPI_ERR("Percentage boost calculation overrun produced invalid Pstate Difference: %u", pstate_diff);
         const uint32_t& PSTATEDIFF = pstate_diff;
         const uint32_t& BOOSTEDFREQKHZ = boosted_freq_khz;

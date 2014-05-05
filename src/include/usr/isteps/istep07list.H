@@ -119,6 +119,7 @@ namespace   INITSERVICE
 const DepModInfo g_istep07Dependancies = {
     {
         DEP_LIB(libnest_chiplets.so),
+        DEP_LIB(libslave_sbe.so),
         NULL
     }
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.22 2013/11/18 14:43:14 thi Exp $
+// $Id: proc_chiplet_scominit.C,v 1.23 2014/04/21 18:47:07 bgass Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -43,6 +43,7 @@
 #include <fapiHwpExecInitFile.H>
 #include <proc_chiplet_scominit.H>
 #include <p8_scom_addresses.H>
+#include <proc_check_master_sbe_seeprom.H>
 
 extern "C" {
 
@@ -69,13 +70,23 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
     uint8_t enable_xbus_resonant_clocking = 0x0;
 
     ecmdDataBufferBase data(64);
+    ecmdDataBufferBase cfam_data(32);
     ecmdDataBufferBase mask(64);
+
+    bool               is_master = false;
 
     // mark HWP entry
     FAPI_INF("proc_chiplet_scominit: Start");
 
     do
     {
+        rc = proc_check_master_sbe_seeprom(i_target, is_master);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_cen_ref_clk_enable: Error from proc_check_master_sbe_seeprom");
+            break;
+        }
+
         // obtain target type to determine which initfile(s) to execute
         target_type = i_target.getType();
 
@@ -295,14 +306,27 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                     break;
                 }
 
-                rc = fapiPutScom(i_target,
+                if (is_master) 
+                {
+                    rc = fapiPutScom(i_target,
                                  MBOX_FSIGP6_0x00050015,
                                  data);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (MBOX_FSIGP6_0x00050015) on %s",
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (MBOX_FSIGP6_0x00050015) on %s",
                              i_target.toEcmdString());
-                    break;
+                        break;
+                    }
+                }
+                else 
+                {
+                    cfam_data.insert(data, 0, 32, 0);
+                    rc = fapiPutCfamRegister(i_target, CFAM_FSI_GP6_0x00002815, cfam_data);
+                    if (rc)
+                    {
+                        FAPI_ERR("proc_cen_ref_clk_enable: fapiPutCfamRegister error (CFAM_FSI_GP8_0x00001017)");
+                        break;
+                    }
                 }
             }
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_init.C,v 1.24 2014/02/17 02:57:00 stillgs Exp $
+// $Id: p8_pm_init.C,v 1.26 2014/05/02 12:25:37 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -140,18 +140,18 @@ p8_pm_init(const fapi::Target &i_target1 ,const fapi::Target &i_target2 , uint32
         }
 
         int_mode = PM_CONFIG;
-        rc = pm_list(i_target1, i_target2, mode);
+        rc = pm_list(i_target1, i_target2, int_mode);
         if (rc)
         {
-            FAPI_ERR("ERROR: p8_pm_list detected failed ");
+            FAPI_ERR("ERROR: p8_pm_list PM_CONFIG detected failed ");
             break;
         }
 
         int_mode = PM_INIT;      
-        rc = pm_list(i_target1, i_target2, mode);
+        rc = pm_list(i_target1, i_target2, int_mode);
         if (rc)
         {
-            FAPI_ERR("ERROR: p8_pm_list detected failed ");
+            FAPI_ERR("ERROR: p8_pm_list PM_INIT detected failed ");
             break;
         }
 
@@ -458,7 +458,7 @@ pm_list(const Target& i_target, const Target& i_target2, uint32_t i_mode)
         {
             if (effective_mode == PM_RESET)
             {
-                rc = ocb_channel_reset(i_target, effective_mode);
+                rc = ocb_channel_reset(i_target2, effective_mode);
                 if (rc)
                 {
                     FAPI_ERR("ERROR: p8_pm_init detected ocb_channel_reset error");
@@ -467,7 +467,7 @@ pm_list(const Target& i_target, const Target& i_target2, uint32_t i_mode)
             }
             else if (effective_mode == PM_INIT)
             {
-                rc = ocb_channel_init(i_target);
+                rc = ocb_channel_init(i_target2);
                 if (rc)
                 {
                     FAPI_ERR("ERROR: p8_pm_init detected ocb_channel_init error");

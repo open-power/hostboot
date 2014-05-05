@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.15 2014/02/03 18:46:03 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.16 2014/04/29 12:48:04 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -968,7 +968,7 @@ const proc_setup_bars_bar_reg_def hca_nm_bar_reg_def =
     0,
     14,
     31,
-    true,                          // enable: bit 63
+    false,                         // enable: bit 63 (off for SW258328)
     63,
     true,                          // size: bits 33:40
     33,
@@ -986,7 +986,7 @@ const proc_setup_bars_bar_reg_def hca_m_bar_reg_def =
     0,
     14,
     32,
-    true,                          // enable: bit 63
+    false,                         // enable: bit 63 (off for SW258328)
     63,
     false,                         // size: other reg
     0,
