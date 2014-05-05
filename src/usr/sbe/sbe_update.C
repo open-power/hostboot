@@ -120,15 +120,6 @@ namespace SBE
             (void) tS.getTopLevelTarget( sys );
             assert(sys, "updateProcessorSbeSeeproms() system target is NULL");
 
-            // @todo RTC 97441 - remove this check
-            if ( sys->getAttr<ATTR_ISTEP_MODE>() &&     // true => istep mode
-                 INITSERVICE::spBaseServicesEnabled() ) // true => FSP present
-            {
-                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
-                           "istep mode and FSP present");
-                break;
-            }
-
             /*****************************************************************/
             /* Skip Update if MNFG_FLAG_FSP_UPDATE_SBE_IMAGE is set          */
             /* AND there is a FSP present                                    */
@@ -208,16 +199,6 @@ namespace SBE
                  err = NULL;
             }
 
-            // If Master Processor is Venice skip SBE Update
-            // @todo RTC 97441 remove this check
-            if( (masterProcChipTargetHandle->getAttr<TARGETING::ATTR_MODEL>()
-                 == TARGETING::MODEL_VENICE) )
-            {
-                TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
-                           "masterProcChipTargetHandle is Venice: skipping "
-                           "SBE Update");
-                 break;
-            }
             for(uint32_t i=0; i<procList.size(); i++)
             {
 
@@ -366,7 +347,7 @@ namespace SBE
                            INFO_MRK"updateProcessorSbeSeeproms(): Calling "
                            "INITSERVICE::doShutdown() with "
                            "SBE_UPDATE_REQUEST_REIPL = 0x%X",
-                           l_restartNeeded, SBE_UPDATE_REQUEST_REIPL );
+                           SBE_UPDATE_REQUEST_REIPL );
                 INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
             }
 
