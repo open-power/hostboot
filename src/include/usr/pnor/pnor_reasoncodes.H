@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,8 +52,10 @@ namespace PNOR
         MOD_PNORDD_WRITELPC             = 0x19, /**< pnordd.C : PnorDD::writeLPC */
         MOD_PNORDD_ERASEFLASH           = 0x1A, /**< pnordd.C : PnorDD::eraseFlash */
         MOD_PNORDD_MICRONFLAGSTATUS     = 0x1B, /**< pnordd.C : PnorDD::micronFlagStatus */
-        MOD_PNORDD_CHECKFORERRORS       = 0x1D, /**< pnordd.C : PnorDD::checkForErrors */
-
+        MOD_PNORDD_CHECKFORSFCERRORS    = 0x1D, /**< pnordd.C : PnorDD::checkForErrors */
+        MOD_PNORDD_CHECKFOROPBERRORS    = 0x1E, /**< pnordd.C : PnorDD::checkForErrors */
+        MOD_PNORDD_HANDLEECCBERROR      = 0x1F, /**< pnordd.C : PnorDD::handleEccbError */
+        MOD_PNORDD_RESETPNOR            = 0x20, /**< pnordd.C : PnorDD::resetPnor */
     };
 
     enum PNORReasonCode
@@ -77,6 +81,14 @@ namespace PNOR
         //termination_rc
         RC_ECC_UE                    = PNOR_COMP_ID | 0x0F,
         RC_ERROR_IN_STATUS_REG       = PNOR_COMP_ID | 0x10,
+        //termination_rc
+        RC_REINITIALIZE_SFC          = PNOR_COMP_ID | 0x11,
+    };
+
+    enum UserDetailsTypes
+    {
+        PNOR_UDT_NO_FORMAT           = 0x0,
+        PNOR_UDT_PNORDD_PARAMETERS  = 0x1,
     };
 };
 

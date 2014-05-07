@@ -28,6 +28,7 @@
 
 #include <limits.h>
 #include <config.h>
+namespace PNOR { class UdPnorDDParms; }
 
 /** @file pnordd.H
  *  @brief Provides the interfaces to the PNOR Device Driver
@@ -256,7 +257,6 @@ class PnorDD
     };
 
 
-
     /**
      * Flags used to trigger Hardware workarounds
      */
@@ -269,6 +269,33 @@ class PnorDD
         //  commands that return more than 1 word of data
         HWWK_MICRON_EXT_READ  = 0x00000002,
     };
+
+    /**
+     * Enums for different levels of resetting PNOR communication levels
+     */
+    enum ResetLevels {
+        RESET_CLEAR          = 0x00000000, /**< Clear Reset Level */
+        RESET_ECCB           = 0x00000001, /**< ECCB FW Logic */
+        RESET_OPB_LPCHC_SOFT = 0x00000002, /**< OPB LPCHC Clear Errors */
+        RESET_OPB_LPCHC_HARD = 0x00000004, /**< OPB LPCHC Reset Logic */
+        RESET_LPC_SLAVE      = 0x00000008, /**< LPC Slave Logic on SFC */
+        RESET_LPC_SLAVE_ERRS = 0x00000010, /**< LPC Slave Errors on SFC */
+        RESET_SFC_LOCAL_BUS  = 0x00000020, /**< SFC Local Bus */
+        // Known possible combination:
+        RESET_SFCBUS_LPCSLAVE_ERRS  = 0x00000030, /**< Bus and LPC Slave Errs */
+    };
+
+    /**
+     * Enums for different operations that might be re-tried
+     */
+    enum RetryOp {
+        RETRY_NOOP              = 0,
+        RETRY_getNORChipId      = 1,
+        RETRY_bufferedSfcRead   = 2,
+        RETRY_bufferedSfcWrite  = 3,
+        RETRY_eraseFlash        = 4,
+    };
+
 
     /**
      * @brief  SFC Command Register Layout
@@ -381,6 +408,36 @@ class PnorDD
         };
         SfcCustomReg_t() : data32(0) {};
     };
+
+    /**
+     * @brief  OPB-LPCM FIR Register Layout
+     */
+    union OpbLpcmFirReg_t
+    {
+        uint64_t data64;
+        struct
+        {
+            uint64_t rxits : 1;    // Invalid Transfer Size
+            uint64_t rxicmd : 1;   // Invalid Command
+            uint64_t rxiaa : 1;    // Invalid Address Alignment
+            uint64_t rxhopbe : 1;  // OPB Bus Error
+            uint64_t rxhopbt : 1;  // OPB Bus Timeout
+            uint64_t rxctgtel : 1; // CI Load/CI Store/OPB Master Hang Timeout
+            uint64_t rxcbpe : 1;   // Command Buffer Parity Error
+            uint64_t rxdbpe : 1;   // Data Buffer Parity Error
+            uint64_t reserved  : 56;
+        };
+        OpbLpcmFirReg_t() : data64(0) {};
+    };
+
+    /**
+     * @brief LPCHC Registers
+     *    These are offsets within the LPCHC Register Space
+     */
+    enum LpcHcRegAddr {
+        LPCHC_REG_RESET   = 0xFC, /**< RESET : write-only */
+    };
+
 
     /**
      * @brief Write a SFC Register
@@ -547,9 +604,10 @@ class PnorDD
 #endif
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
-        ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */
-        ECCB_STAT_REG = 0x000B0022, /**< ECCB Status Reg (FW) */
-        ECCB_DATA_REG = 0x000B0023, /**< ECCB Data Reg (FW) */
+        ECCB_CTL_REG    = 0x000B0020, /**< ECCB Control Reg (FW) */
+        ECCB_RESET_REG  = 0x000B0021, /**< ECCB Reset Reg (FW) */
+        ECCB_STAT_REG   = 0x000B0022, /**< ECCB Status Reg (FW) */
+        ECCB_DATA_REG   = 0x000B0023, /**< ECCB Data Reg (FW) */
 
         // Default Values to set for all operations
         // 1101.0100.0000.000x.0000.0001.0000.0000.<address>
@@ -558,12 +616,26 @@ class PnorDD
         // Error bits: 41-43, 56  (52=cmd complete) (not 57: only non-fw use)
         ECCB_LPC_STAT_REG_ERROR_MASK = 0x0000000000700080, /**< Error Bits */
 
+        /**< OPB LPCM Sync FIR Reg - used to read the FIR*/
+        OPB_LPCM_FIR_REG = 0x01010C00,
+
+        /**< OPB LPCM Sync FIR Reg WOX_AND - used to clear the FIR */
+        OPB_LPCM_FIR_WOX_AND_REG = 0x01010C01,
+
+        /**< OPB LPCM Sync FIR Mask Reg WO_OR - used to set the mask */
+        OPB_LPCM_FIR_MASK_WO_OR_REG = 0x01010C05,
+
+        OPB_LPCM_FIR_ERROR_MASK = 0xFF00000000000000, /**< Error Bits MASK */
+
+        // LPCHC reset-related registers
+        OPB_MASTER_LS_CONTROL_REG = 0xC0010008, /**<OPBM LS Control Reg */
+        LPCHC_RESET_REG = 0xC00120FC, /**<LPC HC Reset Register */
+
         ERASE_COUNT_MAX = 64,  /**<Max number of tracked erase blocks */
         ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Min Erase Block (bytes) */
         ECCB_POLL_TIME_NS = 400000, /**< max time from Manfred Walz is 400ms */
         ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
     };
-
 
     /**
      * @brief Read an address from LPC space
@@ -579,7 +651,7 @@ class PnorDD
     /**
      * @brief Write an address from LPC space
      *
-     * @parm i_addr  Absolute LPC Address
+
      * @parm o_data  Data to write
      *
      * @return Error from operation
@@ -679,11 +751,22 @@ class PnorDD
                           size_t i_size );
 
     /**
-     * @brief Check For Errors in Status Registers
+     * @brief Check For Errors in SFC Status Registers
      *
+     * @parm o_pnorResetLevel    if error, reset level to clear error
      * @return Error log if error found
      */
-    errlHndl_t checkForErrors( void );
+    errlHndl_t checkForSfcErrors( ResetLevels &o_pnorResetLevel );
+
+
+    /**
+     * @brief Check For Errors in OPB and LPCHC Status Registers
+     *
+     * @parm o_pnorResetLevel    if error, reset level to clear error
+     * @return Error log if error found
+     */
+    errlHndl_t checkForOpbErrors( ResetLevels &o_pnorResetLevel );
+
 
     /**
      * @brief Add FFDC Error Registers to an existing Error Log
@@ -696,7 +779,7 @@ class PnorDD
     /**
      * @brief  ECCB Control Register Layout
      */
-    union ControlReg_t
+    union EccbControlReg_t
     {
         uint64_t data64;
         struct
@@ -711,13 +794,13 @@ class PnorDD
             uint64_t address     : 32; /**< 32:63 = LPC Address */
         };
 
-        ControlReg_t() : data64(ECCB_LPC_CTL_REG_DEFAULT) {};
+        EccbControlReg_t() : data64(ECCB_LPC_CTL_REG_DEFAULT) {};
     };
 
     /**
      * @brief  ECCB Status Register Layout
      */
-    union StatusReg_t
+    union EccbStatusReg_t
     {
         uint64_t data64;
         struct
@@ -734,8 +817,85 @@ class PnorDD
                                                     Parity Error */
             uint64_t unused4     : 7;  /**< 57:63 */
         };
-        StatusReg_t() : data64(0) {};
+        EccbStatusReg_t() : data64(0) {};
     };
+
+
+    /**
+     * @brief Reset PNOR Logic At The Specified Level
+     *
+     * @parm i_pnorResetLevel    Level of PNOR to Reset
+     *
+     * @return Error log if error found
+     */
+    errlHndl_t resetPnor( ResetLevels i_pnorResetLevel );
+
+
+    /**
+     * @brief Reinitialize the SFC
+     *
+     * @return Error log if error found
+     */
+    errlHndl_t reinitializeSfc( void );
+
+
+    /**
+     * @brief Returns if an operation should be retried and handles
+     *        the error logs
+     *
+     * @pre   iv_error_recovery_failed should be 'false' before starting
+     *        the retry loop as it gets checked in the function
+     *
+     * @parm i_op             Operation being retried
+     * @parm io_err           Error log from current attempt of the operation
+     * @parm io_original_err  Error log representing original error
+     * @parm io_retry_count   Count of retries attempted
+     *                        NOTE: count incremented when function returns true
+     * @return bool           true if retry is necessary; false if not
+     *
+     * @post  Logic Table:
+     *
+     * |retries| io_err | io_original_err-     | io_retry_count | function |
+     * | left  |        |  related actions     |                |  returns |
+     * |-------|--------|----------------------|----------------|----------|
+     * | N/A   | NULL   | if NULL then nothing | <nothing>      |  false   |
+     * |       |        | if !NULL then        |                |          |
+     * |       |        |  a) io_original_err  |                |          |
+     * |       |        |     deleted          |                |          |
+     * |       |        |  b) io_original_err  |                |          |
+     * |       |        |     set to NULL      |                |          |
+     * |-------|--------|----------------------|----------------|----------|
+     * | No    | !NULL  | if NULL then nothing | <nothing>      |  false   |
+     * |       |        | if !NULL then:       |                |          |
+     * |       |        |  a) io_err committed |                |          |
+     * |       |        |  b) io_err set to    |                |          |
+     * |       |        |     io_original_err  |                |          |
+     * |       |        |  c) io_original_err  |                |          |
+     * |       |        |     set to NULL      |                |          |
+     * |-------|--------|----------------------|----------------|----------|
+     * | Yes   | !NULL  | if NULL then         | incremented    | true     |
+     * |       |        |  a) io_err saved as  |                |          |
+     * |       |        |     io_original_err  |                |          |
+     * |       |        |  b) io_err set to    |                |          |
+     * |       |        |     NULL             |                |          |
+     * |       |        | if !NULL then        |                |          |
+     * |       |        |  a) io_err info      |                |          |
+     * |       |        |     added to         |                |          |
+     * |       |        |     io_original_err  |                |          |
+     * |       |        |  b) then io_err      |                |          |
+     * |       |        |     deleted and set  |                |          |
+     * |       |        |     to NULL          |                |          |
+     * |-------|--------|----------------------|----------------|----------|
+     *
+     * NOTES: -- if iv_error_recovery_failed is set then no retries
+     *        -- otherwise retries left determined by io_retry_count and
+     *           PNORDD_MAX_RETRIES
+     */
+    bool shouldRetry( RetryOp     i_op,
+                      errlHndl_t& io_err,
+                      errlHndl_t& io_original_err,
+                      uint8_t&    io_retry_count );
+
 
 
   private: // Variables
@@ -808,8 +968,29 @@ class PnorDD
      */
     bool iv_ffdc_active;
 
+    /**
+     * @brief Number of times recovered from an error
+     *
+     */
+    uint32_t iv_error_handled_count;
+
+    /**
+     * @brief Indicates recovery from an error has failed
+     *
+     */
+    bool iv_error_recovery_failed;
+
+    /**
+     * @brief Indicates if class is currently doing a RESET procedure
+     *
+     */
+    bool iv_reset_active;
+
     // Needed for testcases
     friend class PnorDdTest;
+
+    // let the UserDetails classes see internal structures
+    friend class PNOR::UdPnorDDParms;
 };
 
 
