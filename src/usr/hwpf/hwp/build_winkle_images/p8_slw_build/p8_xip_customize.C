@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.69 2014/04/23 15:32:02 cmolsen Exp $
+// $Id: p8_xip_customize.C,v 1.70 2014/04/28 15:49:49 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -1802,49 +1802,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   else  {
     FAPI_INF("No active cores found. Did not update SCOM NC table w/SPURR freq scale data.\n");
   }
-
-
-
-  // ==========================================================================
-  // CUSTOMIZE item:    Put RAMs in RAM table to support malfunction alert.
-  // Retrieval method:  N/A.
-  // System phase:      SLW sysPhase. (By MikeO)
-  // ==========================================================================
-  uint8_t   threadId;
-  uint64_t  lpcrData=(uint64_t)0x00005000; // Set bit(49) and bit(51).
-  uint64_t  hmeerData=((uint64_t)0x80000000)<<32; // Set bit(0).
-  for (coreId=0; coreId<=15; coreId++)  {
-    // Do the LPCR rams.
-    for (threadId=0; threadId<=7; threadId++)  {
-      rcLoc = p8_pore_gen_cpureg_fixed( 
-                      o_imageOut, 
-                      i_modeBuild,
-                      (uint32_t)P8_SPR_LPCR,
-                      lpcrData,
-                      coreId,
-                      threadId);
-      if (rcLoc)  {
-        FAPI_ERR("Updating RAM table w/LPCR ram unsuccessful (rcLoc=%i)\n",rcLoc);
-        uint32_t & RC_LOCAL = rcLoc;
-        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
-        return rc;
-      }
-    }  // End of for(threadId)
-    // Do the HMEER rams.
-    rcLoc = p8_pore_gen_cpureg_fixed( 
-                    o_imageOut, 
-                    i_modeBuild,
-                    (uint32_t)P8_SPR_HMEER,
-                    hmeerData,
-                    coreId,
-                    0);
-    if (rcLoc)  {
-      FAPI_ERR("Updating RAM table w/HMEER ram unsuccessful (rcLoc=%i)\n",rcLoc);
-      uint32_t & RC_LOCAL = rcLoc;
-      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
-      return rc;
-    }
-  }  // End of for(coreId)
 
 
 
