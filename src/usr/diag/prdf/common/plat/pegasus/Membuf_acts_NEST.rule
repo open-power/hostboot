@@ -424,7 +424,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[0]
      *  MBIFIRQ_REPLAY_TIMEOUT
      */
-    (MbiFir, bit(0)) ? clearSecMbsBitsCalloutDmiBusTh1UE;
+    (MbiFir, bit(0)) ? replayTimeOutError;
 
     /** MBIFIR[1]
      *  MBIFIRQ_CHANNEL_FAIL
@@ -1244,6 +1244,13 @@ actionclass calloutDmiBus
     calloutSelfMedA;
     callout(connected(TYPE_MCS), MRU_MEDA);
     calloutDmiBusSymFru;
+};
+
+
+/** Handles MCS Chnl XSTOP if present otherwise handles MBIFIR Replay Timeout */
+actionclass replayTimeOutError
+{
+    try( funccall("handleMcsChnlCs"), clearSecMbsBitsCalloutDmiBusTh1UE );
 };
 
 /** Clear MBS SecondaryBits and calloutDmiBusTh1UE */

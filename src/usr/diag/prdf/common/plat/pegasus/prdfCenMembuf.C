@@ -1153,6 +1153,79 @@ int32_t checkChnlReplayTimeOut( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 /**
+ * @brief Handles MCS Channel fail bits, if they exist.
+ *
+ * @param  i_membChip   The Centaur chip.
+ * @param  i_sc         ServiceDataColector.
+ *
+ * @return SUCCESS if MCS channel fail is present and properly
+ *         handled, FAIL otherwise.
+ */
+int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
+                    STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[handleMcsChnlCs] "
+
+    // We will return FAIL from this function if MCS channel fail  bits
+    // are not set. If MCS channel fail bits are set, we will try to analyze
+    // Mcs. If MCS is not analyzed properly, we will return FAIL.
+    // This will trigger rule code to execute alternate resolution.
+
+    int32_t l_rc = SUCCESS;
+    do
+    {
+        CenMembufDataBundle * mbdb = getMembufDataBundle( i_membChip );
+        ExtensibleChip * mcsChip =    mbdb->getMcsChip();
+        if( NULL == mcsChip )
+        {
+            l_rc = FAIL;
+            break;
+        }
+
+        SCAN_COMM_REGISTER_CLASS * mciFir = mcsChip->getRegister("MCIFIR");
+        SCAN_COMM_REGISTER_CLASS * mciFirMask =
+                                        mcsChip->getRegister("MCIFIR_MASK");
+
+        l_rc = mciFir->Read();
+        l_rc |= mciFirMask->Read();
+
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MCIFIR/MCIFIR_MASK read failed for 0x%08x",
+                      mcsChip->GetId());
+            break;
+        }
+
+        // If any of MCS channel fail bit is set, we will analyze
+        // MCS. It is safe to do hard coded check as channel fail
+        // bits are hard wired and and they can not change without HW
+        // change.
+        // bits 0,1, 6, 8, 9, 22, 23, 40 are channel fail bits.
+        uint64_t chnlCsBitsMask = 0xC2C0030000800000ull;
+        uint64_t mciFirBits     = mciFir->GetBitFieldJustified(0, 64);
+        uint64_t mciFirMaskBits = mciFirMask->GetBitFieldJustified(0, 64);
+
+        if( ( mciFirBits & ( ~mciFirMaskBits ) ) &
+            chnlCsBitsMask )
+        {
+            l_rc = mcsChip->Analyze( i_sc,
+                        i_sc.service_data->GetCauseAttentionType() );
+
+            if( SUCCESS == l_rc ) break;
+        }
+
+        l_rc = FAIL;
+
+    }while( 0 );
+
+    return l_rc;
+    #undef PRDF_FUNC
+
+} PRDF_PLUGIN_DEFINE( Membuf, handleMcsChnlCs );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief   When not in MNFG mode, clear the service call flag so that
  *          thresholding will still be done, but no visible error log committed.
  * @param   i_chip Centaur chip
