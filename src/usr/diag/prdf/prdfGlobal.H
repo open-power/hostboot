@@ -186,16 +186,12 @@ inline prdfScopeMutex::~prdfScopeMutex()
     ivMutex->unlock();
 }
 
-/**
-  * @brief Mutex to prevent concurrent accesses
-  *
-  */
-static prdfMutex g_mutex;
+extern prdfMutex g_prdMutex;
 
 /**
  * @brief macro to acquire global scope mutex
  */
 #define PRDF_SYSTEM_SCOPELOCK         \
-    prdfScopeMutex dataLock(g_mutex);
+    prdfScopeMutex dataLock(g_prdMutex);
 
 #endif // PRDF_GLOBAL_HB_H

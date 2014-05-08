@@ -39,6 +39,16 @@
 using namespace TARGETING;
 using namespace HWAS;
 
+//------------------------------------------------------------------------------
+// Global variable
+//------------------------------------------------------------------------------
+
+/**
+  * @brief Mutex to prevent concurrent accesses
+  *
+  */
+prdfMutex g_prdMutex;
+
 namespace PRDF
 {
 
