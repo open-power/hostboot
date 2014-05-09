@@ -724,7 +724,7 @@
     <attribute><id>FIELD_CORE_OVERRIDE</id></attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!--GARD -->
+        <default>0x00000009</default> <!-- HOSTSVC_HBEL and GARD -->
     </attribute>
 </targetType>
 

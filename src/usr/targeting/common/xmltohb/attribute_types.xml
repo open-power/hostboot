@@ -977,6 +977,10 @@
         <name>DIAG_MASK</name>
         <value>0x00000006</value>
     </enumerator>
+    <enumerator>
+        <name>HOSTSVC_HBEL</name>
+        <value>0x00000008</value>
+    </enumerator>
 </enumerationType>
 
 <!-- For POD Testing -->
