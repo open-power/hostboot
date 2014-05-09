@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -754,7 +754,7 @@ proc SendPnorFiles { sock obj_dir } {
     set pnor_files {}
 
     # Send the image files
-    if {[catch {set pnor_files [glob -dir $obj_dir hostboot.header.bin hostboot_extended.bin hostboot.bin hostboot.stage.bin]} res]} {
+    if {[catch {set pnor_files [glob -dir $obj_dir hostboot.header.bin hostboot_extended.header.bin hostboot_runtime.header.bin]} res]} {
         puts $sock "ERROR: Needed image files not found in $obj_dir"
         puts $log "$sock: Needed image files not found in $obj_dir"
     } else {
