@@ -196,7 +196,6 @@ class UtilSMap
             }
          };
 
-    private:
         data_type * find(const key_type & k)
         {
             if (NULL == iv_memblock)

@@ -98,6 +98,7 @@ class CenMbaTdCtlrCommon
     enum StopConditions
     {
         COND_TARGETED_CMD =
+            mss_MaintCmd::STOP_ON_RETRY_CE_ETE |
             mss_MaintCmd::STOP_ON_END_ADDRESS |
             mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION,
 

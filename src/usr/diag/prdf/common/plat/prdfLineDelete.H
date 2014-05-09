@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2013              */
+/* COPYRIGHT International Business Machines Corp. 2005,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -115,6 +115,17 @@ namespace LineDelete
              *  @return false - if the threshold policy has not been reached.
              */
             bool addAddress(PrdfCacheAddress, STEP_CODE_DATA_STRUCT &);
+
+        /**
+         * @brief  Checks if the threshold had been reached for the given
+         *         address.
+         * @param  i_addr The CE address.
+         * @param  i_sdc  The Service Data Collector.
+         * @return TRUE if threshold has been reached and time interval has not
+         *         elapsed, FALSE otherwise.
+         */
+        bool addrThReached( PrdfCacheAddress i_addr,
+                            STEP_CODE_DATA_STRUCT & i_sdc );
 
             /** @fn PrdfCacheCETable::isIntervalElapsed()
              *  @param STEP_CODE_DATA_STRUCT & i_sdc

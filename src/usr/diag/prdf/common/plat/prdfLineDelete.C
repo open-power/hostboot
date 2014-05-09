@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2013              */
+/* COPYRIGHT International Business Machines Corp. 2005,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -61,6 +61,23 @@ namespace LineDelete
 
         // Return whether the address threshold has been reached or not.
         return ( iv_thPolicy.threshold <= count );
+    }
+
+    bool PrdfCacheCETable::addrThReached( PrdfCacheAddress i_addr,
+                                          STEP_CODE_DATA_STRUCT & i_sdc )
+    {
+        bool o_reached = false;
+
+        if ( cv_flushTimerInited && !isIntervalElapsed(i_sdc) )
+        {
+            uint32_t * count = cv_ceTable.find( i_addr );
+            if ( NULL  != count )
+            {
+                o_reached = ( iv_thPolicy.threshold <= *count );
+            }
+        }
+
+        return o_reached;
     }
 
     /* PrdfCacheCETable::isIntervalElapsed()

@@ -58,8 +58,10 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
     CeTable::iterator it = std::find( iv_table.begin(), iv_table.end(), data );
     if ( iv_table.end() != it )
     {
-        // Update the count
-        data.count = it->count + 1;
+        // Update the count only if the entry is active. Otherwise, use the
+        // reset count from the contructor.
+        if ( it->active )
+            data.count = it->count + 1;
 
         // Update the DRAM pins
         data.dramPins |= it->dramPins;
@@ -89,7 +91,7 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
         for ( CeTable::iterator it = iv_table.begin();
               it != iv_table.end(); it++ )
         {
-            if ( it->addr.getRank() == thisRank )
+            if ( it->active && (it->addr.getRank() == thisRank) )
                 rankCount++;
         }
 
@@ -131,6 +133,9 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
 
 void CenMbaCeTable::deactivateAll()
 {
+    // NOTE: We don't want to reset the count here because it will be used for
+    //       FFDC. Instead the count will be reset in addEntry() if the entry is
+    //       not active.
     for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
         it->active = false;
 }
@@ -139,6 +144,9 @@ void CenMbaCeTable::deactivateAll()
 
 void CenMbaCeTable::deactivateRank( const CenRank & i_rank )
 {
+    // NOTE: We don't want to reset the count here because it will be used for
+    //       FFDC. Instead the count will be reset in addEntry() if the entry is
+    //       not active.
     for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
         if ( it->addr.getRank() == i_rank )
