@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit/proc_dmi_scominit.C $      */
+/* $Source: src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit/proc_dmi_scominit.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_dmi_scominit.C,v 1.9 2014/03/12 18:56:56 jmcgill Exp $
+// $Id: proc_dmi_scominit.C,v 1.10 2014/05/08 20:46:32 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_dmi_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -95,6 +95,7 @@ fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
 
     fapi::Target this_pu_target;
     std::vector<fapi::Target> targets;
+    fapi::Target cen_target;
 
     uint8_t mcs_pos;
     ecmdDataBufferBase data(64);
@@ -108,6 +109,32 @@ fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
         // to execute
         if (i_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
         {
+
+            rc = fapiGetOtherSideOfMemChannel(i_target,
+                                              cen_target,
+                                              fapi::TARGET_STATE_FUNCTIONAL);
+            // use return code only to indicate presence of connected Centaur,
+            // do not propogate/emit error if not connected
+            if (rc.ok())
+            {
+                // set the init state attribute to DMI_ACTIVE
+                uint8_t attr_mss_init_state = fapi::ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE;
+                rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE,
+                                   &cen_target,
+                                   attr_mss_init_state);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_dmi_scominit: Error from FAPI_ATTR_SET (ATTR_MSS_INIT_STATE) on %s",
+                             cen_target.toEcmdString());
+                    break;
+                }
+            }
+            else
+            {
+                rc = fapi::FAPI_RC_SUCCESS;
+            }
+
+
             // assert IO reset to power-up bus endpoint logic
             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, mcs_pos);
             if (!rc.ok())
