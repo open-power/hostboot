@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: io_funcs_errors.xml,v 1.4 2014/03/18 14:58:41 jgrell Exp $ -->
+<!-- $Id: io_funcs_errors.xml,v 1.5 2014/05/08 06:06:40 varkeykv Exp $ -->
 
 <hwpErrors>
 
@@ -46,9 +46,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -75,9 +81,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -103,9 +115,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -131,9 +149,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -159,9 +183,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -204,9 +234,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -260,9 +296,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -322,9 +364,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -390,9 +438,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+          <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
@@ -423,9 +477,15 @@
         <bus>MASTER_TARGET,SLAVE_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
+        <deconfigure>
+        <target>MASTER_TARGET</target>
+    </deconfigure>
     <deconfigure>
         <target>SLAVE_TARGET</target>
     </deconfigure>
+        <gard>
+        <target>MASTER_TARGET</target>
+    </gard>
     <gard>
         <target>SLAVE_TARGET</target>
     </gard>
