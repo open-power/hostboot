@@ -2624,7 +2624,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[12]
      *  MCS0 Too Many Bus Errors
      */
-    (IomcFir_0, bit(12)) ? thresholdAndMask_dmiBus0;
+    (IomcFir_0, bit(12)) ? calloutDmiBus0Th1;
 
     /** IOMCFIR_0[13:15]
      *  Reserved
@@ -2654,7 +2654,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[20]
      *  MCS1 Too Many Bus Errors
      */
-    (IomcFir_0, bit(20)) ? thresholdAndMask_dmiBus1;
+    (IomcFir_0, bit(20)) ? calloutDmiBus1Th1;
 
     /** IOMCFIR_0[21:23]
      *  Reserved
@@ -2684,7 +2684,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[28]
      *  MCS2 Too Many Bus Errors
      */
-    (IomcFir_0, bit(28)) ? thresholdAndMask_dmiBus2;
+    (IomcFir_0, bit(28)) ? calloutDmiBus2Th1;
 
     /** IOMCFIR_0[29:31]
      *  Reserved
@@ -2714,7 +2714,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[36]
      *  MCS3 Too Many Bus Errors
      */
-    (IomcFir_0, bit(36)) ? thresholdAndMask_dmiBus3;
+    (IomcFir_0, bit(36)) ? calloutDmiBus3Th1;
 
     /** IOMCFIR_0[37:39]
      *  Reserved
@@ -2793,7 +2793,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[12]
      *  MCS4 Too Many Bus Errors
      */
-    (IomcFir_1, bit(12)) ? thresholdAndMask_dmiBus4;
+    (IomcFir_1, bit(12)) ? calloutDmiBus4Th1;
 
     /** IOMCFIR_1[13:15]
      *  Reserved
@@ -2823,7 +2823,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[20]
      *  MCS5 Too Many Bus Errors
      */
-    (IomcFir_1, bit(20)) ? thresholdAndMask_dmiBus5;
+    (IomcFir_1, bit(20)) ? calloutDmiBus5Th1;
 
     /** IOMCFIR_1[21:23]
      *  Reserved
@@ -2853,7 +2853,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[28]
      *  MCS6 Too Many Bus Errors
      */
-    (IomcFir_1, bit(28)) ? thresholdAndMask_dmiBus6;
+    (IomcFir_1, bit(28)) ? calloutDmiBus6Th1;
 
     /** IOMCFIR_1[29:31]
      *  Reserved
@@ -2883,7 +2883,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[36]
      *  MCS7 Too Many Bus Errors
      */
-    (IomcFir_1, bit(36)) ? thresholdAndMask_dmiBus7;
+    (IomcFir_1, bit(36)) ? calloutDmiBus7Th1;
 
     /** IOMCFIR_1[37:39]
      *  Reserved
@@ -3119,30 +3119,6 @@ actionclass maxSparesExceeded_dmiBus6
 /** Lane Repair: max spares exceeded - DMI bus 7 */
 actionclass maxSparesExceeded_dmiBus7
 { calloutDmiBus7Th1; funccall("maxSparesExceeded_dmiBus7"); };
-
-/** Callout DMI bus 0 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus0 { calloutDmiBus0; thresholdAndMask; };
-
-/** Callout DMI bus 1 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus1 { calloutDmiBus1; thresholdAndMask; };
-
-/** Callout DMI bus 2 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus2 { calloutDmiBus2; thresholdAndMask; };
-
-/** Callout DMI bus 3 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus3 { calloutDmiBus3; thresholdAndMask; };
-
-/** Callout DMI bus 4 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus4 { calloutDmiBus4; thresholdAndMask; };
-
-/** Callout DMI bus 5 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus5 { calloutDmiBus5; thresholdAndMask; };
-
-/** Callout DMI bus 6 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus6 { calloutDmiBus6; thresholdAndMask; };
-
-/** Callout DMI bus 7 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus7 { calloutDmiBus7; thresholdAndMask; };
 
 /** callout NX associated with Proc with a threshold of 32 per day*/
 actionclass calloutNxThr32
