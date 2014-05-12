@@ -164,6 +164,7 @@ errlHndl_t SecureROM::initialize()
              * @userdata1    TBROM Register Address
              * @userdata2    TBROM Register Data
              * @devdesc      mmio_dev_map() failed for Secure ROM
+             * @custdesc     A problem occurred during the IPL of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             SECUREBOOT::MOD_SECURE_ROM_INIT,
@@ -222,6 +223,7 @@ errlHndl_t SecureROM::initialize()
              * @userdata1    l_rc
              * @userdata2    iv_device_ptr
              * @devdesc      mm_set_permission(EXECUTABLE) failed for Secure ROM
+             * @custdesc     A problem occurred during the IPL of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(
                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -357,6 +359,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
              * @userdata1    l_rc
              * @userdata2    l_hw_parms.log
              * @devdesc      ROM_verify() Call Failed
+             * @custdesc     Failure to verify authenticity of software.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          SECUREBOOT::MOD_SECURE_ROM_VERIFY,
@@ -453,6 +456,7 @@ void SecureROM::_cleanup()
              * @userdata1    l_rc
              * @userdata2    iv_device_ptr
              * @devdesc      mm_set_permission(WRITABLE) failed for Secure ROM
+             * @custdesc     A problem occurred during the IPL of the system.
              */
             errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,

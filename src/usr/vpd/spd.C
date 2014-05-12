@@ -476,6 +476,8 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
              * @userdata2        Number of Bytes to Write
              * @devdesc          g_usePNOR is false, but there isn't an
              *                   alternate way to write PNOR.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_WRITE_DATA,
@@ -541,6 +543,8 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
              * @userdata2[32:63] Memory Type
              * @devdesc          The table entry associated with keyword was
              *                   NULL.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_GET_VALUE,
@@ -672,6 +676,8 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
              * @userdata2[32:63] Memory Type
              * @devdesc          The table entry associated with keyword was
              *                   NULL.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_WRITE_VALUE,
@@ -704,6 +710,8 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
              * @userdata2[0:31]  Buffer Length
              * @userdata2[32:63] Memory Type
              * @devdesc          The SPD Keyword is not writable.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_WRITE_VALUE,
@@ -747,7 +755,10 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
              * @userdata2[0:15]  Keyword Length (in bytes)
              * @userdata2[16:31] Keyword Bitmask
              * @userdata2[32:63] Memory Type
-             * @devdesc          Writes to non-byte SPD keywords are unsupported.
+             * @devdesc          Writes to non-byte SPD keywords are
+             *                   unsupported.
+             * @custdesc         A problem occurred during the IPL of
+             *                   the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_WRITE_VALUE,
@@ -925,6 +936,8 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
              * @userdata1        SPD Keyword
              * @userdata2        UNUSED
              * @devdesc          Keyword is not a special case keyword.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_DDR3_SPECIAL_CASES,
@@ -1065,6 +1078,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
              * @userdata1        SPD Keyword
              * @userdata2        UNUSED
              * @devdesc          Keyword is not a special case keyword.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_DDR4_SPECIAL_CASES,
@@ -1121,6 +1136,8 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
              * @userdata1        SPD Keyword
              * @userdata2        DIMM DDR Revision
              * @devdesc          Invalid DDR Revision
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_SPECIAL_CASES,
@@ -1181,6 +1198,8 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
          * @userdata2[32:63] Expected Buffer Size
          * @devdesc          Buffer Size provided was not big enough for
          *                   the keyword requested.
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        VPD::VPD_SPD_CHECK_SIZE,
@@ -1283,8 +1302,11 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
              * @userdata1        File Size
              * @userdata2[0:48]  Starting offset into file
              * @userdata2[49:63] Number of bytes to read
-             * @devdesc          File is not sufficiently large to read number of
-             *                   bytes at offset given without overrunning file.
+             * @devdesc          File is not sufficiently large to read number
+             *                   of bytes at offset given without overrunning
+             *                   file.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_READ_BINARY_FILE,
@@ -1382,7 +1404,10 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
                  * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not UMM Module specific.
+                 * @devdesc          Keyword requested was not UMM Module
+                 *                   specific.
+                 * @custdesc         A problem occurred during the IPL
+                 *                   of the system.
                  */
                 err = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1425,7 +1450,10 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
                  * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not RMM Module specific.
+                 * @devdesc          Keyword requested was not RMM Module
+                 *                   specific.
+                 * @custdesc         A problem occurred during the IPL
+                 *                   of the system.
                  */
                 err = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1468,7 +1496,10 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
                  * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not CMM Module specific.
+                 * @devdesc          Keyword requested was not CMM Module
+                 *                   specific.
+                 * @custdesc         A problem occurred during the IPL
+                 *                   of the system.
                  */
                 err = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1511,7 +1542,10 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
                  * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not LRMM Module specific.
+                 * @devdesc          Keyword requested was not LRMM Module
+                 *                   specific.
+                 * @custdesc         A problem occurred during the IPL
+                 *                    of the system.
                  */
                 err = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1554,6 +1588,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
              * @userdata1        Module Type
              * @userdata2        Memory Type (byte 2)
              * @devdesc          Unsupported Module Type.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1689,6 +1725,8 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
              * @userdata1        Module Type (byte 3[3:0])
              * @userdata2        Memory Type (byte 2)
              * @devdesc          Unrecognized Module Type.
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1751,6 +1789,8 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
              * @userdata1        SPD Keyword
              * @userdata2        The DDR Revision
              * @devdesc          Invalid DDR Revision
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_GET_KEYWORD_ENTRY,
@@ -1797,6 +1837,8 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
              * @userdata1        SPD Keyword
              * @userdata2        <UNUSED>
              * @devdesc          Invalid SPD Keyword
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_GET_KEYWORD_ENTRY,

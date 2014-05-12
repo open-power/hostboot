@@ -136,6 +136,8 @@ errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
              * @userdata2   Size of WINK PNOR partition
              * @devdesc     Image from PNOR WINK partition invalid, too small,
              *              or too big
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
              */
             l_errl =
               new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -334,6 +336,8 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_procChipTarg,
          *
          * @devdesc p8_pore_gen_xxx returned an error when
          *          attempting to change a reg value in the PORE image.
+         * @custdesc    A problem occurred during the IPL
+         *              of the system.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
@@ -621,6 +625,8 @@ void*    call_host_build_winkle( void    *io_pArgs )
              * @userdata1    Return Code
              * @userdata2    Unmap address
              * @devdesc      mm_block_unmap() returns error
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
              */
             l_errl =
               new ERRORLOG::ErrlEntry(
@@ -743,6 +749,8 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
              * @userdata1    Return Code
              * @userdata2    Unmap address
              * @devdesc      mm_block_unmap() returns error
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
              */
             l_errl =
               new ERRORLOG::ErrlEntry(

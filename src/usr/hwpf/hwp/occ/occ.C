@@ -638,6 +638,8 @@ namespace HBOCC
                  * @userdata1    Return Code
                  * @userdata2    Unmap address
                  * @devdesc      mm_block_unmap() returns error
+                 * @custdesc    A problem occurred during the IPL
+                 *              of the system.
                  */
                 l_tmpErrl =
                   new ERRORLOG::ErrlEntry(

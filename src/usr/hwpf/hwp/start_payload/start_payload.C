@@ -559,6 +559,8 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
              * @userdata1        <UNUSED>
              * @userdata2        <UNUSED>
              * @devdesc          System target was NULL!
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                            ISTEP_START_PAYLOAD_CALL_SHUTDOWN,
@@ -880,6 +882,8 @@ errlHndl_t enableCoreCheckstops()
              * @userdata1    <unused>
              * @userdata2    Physical address
              * @devdesc      mm_block_map() returns error
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
              */
             l_errl =
               new ERRORLOG::ErrlEntry(
@@ -943,6 +947,8 @@ errlHndl_t enableCoreCheckstops()
                  *
                  * @devdesc p8_pore_gen_scom_fixed returned an error when
                  *          attempting to erase a reg value in the PORE image.
+                 * @custdesc         A problem occurred during the IPL
+                 *                   of the system.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -972,9 +978,11 @@ errlHndl_t enableCoreCheckstops()
              * @userdata1    Return Code
              * @userdata2    Unmap address
              * @devdesc      mm_block_unmap() returns error
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
              */
             l_errl =
-              new ERRORLOG::ErrlEntry(
+                new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
                                       ISTEP::ISTEP_MM_UNMAP_ERR,

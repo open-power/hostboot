@@ -467,6 +467,8 @@ namespace SBE
                  * @userdata1    Target Unit Id
                  * @userdata2    Target Type
                  * @devdesc      Unsupported Target Type passed in
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_FIND_IN_PNOR,
@@ -516,6 +518,8 @@ namespace SBE
                  * @userdata1    SBE TOC EYE-CATCHER
                  * @userdata2    Expected EYE-CATCHER
                  * @devdesc      Unsupported EYE-CATCHER found in TOC
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_FIND_IN_PNOR,
@@ -548,6 +552,8 @@ namespace SBE
                      * @userdata2[32:63]  SBE TOC EyeCatch
                      * @devdesc      SBE partition contains unsupported version
                      *               of Table of Contents
+                     * @custdesc     A problem occurred while updating processor
+                     *               boot code.
                      */
                     err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                         SBE_FIND_IN_PNOR,
@@ -604,6 +610,8 @@ namespace SBE
                  * @userdata2[32:63]  SBE TOC EyeCatch
                  * @devdesc      SBE image for current chip EC was not found
                  *               in PNOR
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_FIND_IN_PNOR,
@@ -841,6 +849,8 @@ namespace SBE
                  * @userdata2[0:31]   coreMask of target
                  * @userdata2[32:63]  coreCount - updated on the loops
                  * @devdesc      Unsuccessful in creating Customized SBE Image
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CUSTOMIZE_IMG,
@@ -1069,6 +1079,8 @@ namespace SBE
                  * @userdata1    Discovered VPD Size
                  * @userdata2    Expected VPD Size
                  * @devdesc      SB Keyword in MVPD has invalid size
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_GETSET_MVPD_VERSION,
@@ -1185,6 +1197,8 @@ namespace SBE
                  * @userdata2    Not Used
                  * @devdesc      Image Version not found in PNOR
                  *               SBE image.
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_READ_PNOR_VERSION,
@@ -1757,6 +1771,8 @@ namespace SBE
                  * @userdata2    rc from mm_remove_pages
                  * @devdesc      updateProcessorSbeSeeproms> mm_remove_pages
                  *               RELEASE failed
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_UPDATE_SEEPROMS,
@@ -2344,6 +2360,8 @@ namespace SBE
                          * @userdata2    Update Actions
                          * @devdesc      Bad Path in decisionUpdateTree:
                          *               cur=PERM/DIRTY
+                         * @custdesc     A problem occurred while updating
+                         *               processor boot code.
                          */
                         err = new ErrlEntry(ERRL_SEV_RECOVERED,
                                             SBE_DECISION_TREE,
@@ -2682,6 +2700,8 @@ namespace SBE
                  * @userdata2    rc from mm_alloc_block
                  * @devdesc      updateProcessorSbeSeeproms> Error
                  *               from mm_alloc_block
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CREATE_TEST_SPACE,
@@ -2711,6 +2731,8 @@ namespace SBE
                  * @userdata2    rc from mm_set_permission
                  * @devdesc      updateProcessorSbeSeeproms> Error from
                  *               mm_set_permission on creation
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CREATE_TEST_SPACE,
@@ -2761,6 +2783,8 @@ namespace SBE
                  * @userdata2    rc from mm_set_permission
                  * @devdesc      updateProcessorSbeSeeproms> Error from
                  *               mm_set_permission on cleanup
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CLEANUP_TEST_SPACE,
@@ -2791,6 +2815,8 @@ namespace SBE
                  * @userdata2    rc from mm_remove_pages
                  * @devdesc      updateProcessorSbeSeeproms> mm_remove_pages
                  *               RELEASE failed
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CLEANUP_TEST_SPACE,

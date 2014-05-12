@@ -754,6 +754,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
              * @userdata2[0:31]    ECCB Status Register
              * @devdesc      PnorDD::pollSfcOpComplete> Error or timeout from
              *               SFC Status Register
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_POLLSFCOPCOMPLETE,
@@ -942,6 +943,7 @@ errlHndl_t PnorDD::checkForErrors( void )
          * @userdata2[32:63] <unused>
          * @devdesc      PnorDD::checkForErrors> Error(s) found in SFC
          *               and/or LPC Slave Status Registers
+         * @custdesc    A problem occurred while accessing the boot flash.
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         PNOR::MOD_PNORDD_CHECKFORERRORS,
@@ -1212,6 +1214,7 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
              * @userdata2[0:31]   Micron Flag status register
              * @devdesc      PnorDD::micronFlagStatus> Error or timeout from
              *               Micron Flag Status Register
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_MICRONFLAGSTATUS,
@@ -1764,6 +1767,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
              * @userdata2    ECCB Status Register
              * @devdesc      PnorDD::readLPC> Error or timeout from
              *               LPC Status Register
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_READLPC,
@@ -1882,6 +1886,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
              * @userdata2    ECCB Status Register
              * @devdesc      PnorDD::writeLPC> Error or timeout from
              *               LPC Status Register
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_WRITELPC,
@@ -2088,6 +2093,7 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
              * @userdata1    LPC Address
              * @userdata2    Nearest Erase Boundary
              * @devdesc      PnorDD::eraseFlash> Address not on erase boundary
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_ERASEFLASH,
@@ -2181,6 +2187,7 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
              * @userdata1    NOR Chip ID
              * @userdata2    LPC Address to erase
              * @devdesc      PnorDD::eraseFlash> No support for MODEL_REAL yet
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_ERASEFLASH,

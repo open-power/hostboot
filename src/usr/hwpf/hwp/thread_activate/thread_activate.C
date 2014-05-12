@@ -153,6 +153,8 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
              * @userdata2    Master processor chip huid
              * @devdesc      getCacheDeconfig> Master core is not mapped
              *               to a LRPx Module VPD Record.
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              fapi::MOD_GET_CACHE_DECONFIG,
@@ -180,6 +182,8 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
              * @userdata2    CH Keyword Size
              * @devdesc      getCacheDeconfig> LRPx Record, CH keyword
              *               is incorrect size
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              fapi::MOD_GET_CACHE_DECONFIG,
@@ -293,6 +297,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
              * @userdata2    Master processor chip huid
              * @devdesc      activate_threads> Could not find a target
              *               for the master core
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              fapi::MOD_THREAD_ACTIVATE,

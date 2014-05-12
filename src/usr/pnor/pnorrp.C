@@ -135,9 +135,10 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
          *  @userdata2      0
          *
          *  @devdesc        PNOR startup task returned an error.
+         * @custdesc    A problem occurred while accessing the boot flash.
          */
         l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                 PNOR::MOD_PNORRP_DIDSTARTUPFAIL,
                                 PNOR::RC_BAD_STARTUP_RC,
                                 rc,
@@ -234,6 +235,7 @@ void PnorRP::initDaemon()
              * @userdata1    Requested Address
              * @userdata2    rc from mm_alloc_block
              * @devdesc      PnorRP::initDaemon> Error from mm_alloc_block
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_errhdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -298,6 +300,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
              * @userdata1    Requested Section
              * @userdata2    Startup RC
              * @devdesc      PnorRP::getSectionInfo> RP not properly initialized
+             * @custdesc    A problem occurred while accessing the boot flash.
              */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
@@ -324,7 +327,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
              * @userdata1    Requested Section
              * @userdata2    TOC used
              * @devdesc      PnorRP::getSectionInfo> Invalid Address for read/write
-             */
+             * @custdesc    A problem occurred while accessing the boot flash.
+            */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_INVALID_SECTION,
@@ -697,6 +701,8 @@ void PnorRP::waitForMessage()
                          * @userdata2    Requested Virtual Address
                          * @devdesc      PnorRP::waitForMessage> Unrecognized
                          *               message type
+                         * @custdesc     A problem occurred while accessing
+                         *               the boot flash.
                          */
                         l_errhdl = new ERRORLOG::ErrlEntry(
                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -719,7 +725,10 @@ void PnorRP::waitForMessage()
                  * @reasoncode   PNOR::RC_INVALID_ASYNC_MESSAGE
                  * @userdata1    Message type
                  * @userdata2    Requested Virtual Address
-                 * @devdesc      PnorRP::waitForMessage> Unrecognized message type
+                 * @devdesc      PnorRP::waitForMessage> Unrecognized message
+                 *               type
+                 * @custdesc     A problem occurred while accessing the boot
+                 *               flash.
                  */
                 l_errhdl = new ERRORLOG::ErrlEntry(
                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -940,6 +949,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
          * @userdata2    Base PNOR Address
          * @devdesc      PnorRP::computeDeviceAddr> Virtual Address outside
          *               known PNOR range
+         * @custdesc    A problem occurred while accessing the boot flash.
          */
         l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         PNOR::MOD_PNORRP_COMPUTEDEVICEADDR,
@@ -1021,6 +1031,7 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
          * @userdata1    Requested Virtual Address
          * @userdata2    <unused>
          * @devdesc      PnorRP::computeSection> Invalid Address
+         * @custdesc    A problem occurred while accessing the boot flash.
          */
         errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          PNOR::MOD_PNORRP_COMPUTESECTION,

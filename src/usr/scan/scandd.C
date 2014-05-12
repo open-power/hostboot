@@ -108,6 +108,8 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
             * @userdata1    SCAN Ring Address
             * @userdata2    SCAN ring length
             * @devdesc      ScanDD::scanPerformOp> Invalid ringlength
+            * @custdesc    A problem occurred during the IPL
+            *              of the system.
             */
            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SCAN::MOD_SCANDD_DDOP,
@@ -135,6 +137,8 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
             * @userdata1    SCAN Ring Address
             * @userdata2    TARGET
             * @devdesc      ScanDD::scanPerformOp> Invalid Ring Address
+            * @custdesc    A problem occurred during the IPL
+            *              of the system.
             */
            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SCAN::MOD_SCANDD_DDOP,
@@ -162,6 +166,8 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
             * @userdata1    SCAN IO buffer length
             * @userdata2    SCAN ring length
             * @devdesc      ScanDD::scanPerformOp> Invalid IObuf length
+            * @custdesc    A problem occurred during the IPL
+            *              of the system.
             */
            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SCAN::MOD_SCANDD_DDOP,
@@ -204,6 +210,8 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
             * @userdata1    SCAN Address
             * @userdata2    Operation Type (i_opType)
             * @devdesc      ScanDD::scanPerformOp> Invalid operation type
+            * @custdesc    A problem occurred during the IPL
+            *              of the system.
             */
            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SCAN::MOD_SCANDD_DDOP,
@@ -663,6 +671,8 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                  * @userdata2    Operation Type (i_opType)
                  * @devdesc      ScanDD::scanDoScan> Got a data mismatch
                  *               when reading back the header
+                 * @custdesc    A problem occurred during the IPL
+                 *              of the system.
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,

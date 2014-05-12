@@ -1406,6 +1406,8 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
              * @userdata2[32:63] N/A.
              * @devdesc          handleProcFabIovalidMsg called during MPIPL,
              *                   which is illegal.
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
              */
             err = new ERRORLOG::ErrlEntry(
                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1792,6 +1794,8 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      *                   is outside the reconfig loop (desired steps 0), too
      *                   many reconfig loops were attempted, in manufacturing
      *                   mode or in istep mode.
+     * @custdesc    A hardware error occurred during the IPL. See previous logs
+     *              for details.
      */
     err = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,

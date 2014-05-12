@@ -114,6 +114,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
              * @userdata1    FSI Address
              * @userdata2    Data Length
              * @devdesc      FsiDD::ddOp> Invalid data length (!= 4 bytes)
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_DDOP,
@@ -139,6 +141,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
              * @userdata1    FSI Address
              * @userdata2    Operation Type (i_opType) : 0=READ, 1=WRITE
              * @devdesc      FsiDD::ddOp> Target is NULL
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_DDOP,
@@ -160,6 +164,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
              * @userdata1    FSI Address
              * @userdata2    Operation Type (i_opType) : 0=READ, 1=WRITE
              * @devdesc      FsiDD::ddOp> Target is unsupported Master Sentinel
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_DDOP,
@@ -205,6 +211,8 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
              * @userdata1    FSI Address
              * @userdata2    Operation Type (i_opType)
              * @devdesc      FsiDD::ddOp> Invalid operation type
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_DDOP,
@@ -546,6 +554,8 @@ errlHndl_t FsiDD::initializeHardware()
                              * @userdata2[32:63]  Master FSI LinkId
                              * @devdesc      FsiDD::initializeHardware>
                              *   Unexpected attribute data for remote FSI link
+                             * @custdesc     A problem occurred during the
+                             *               IPL of the system.
                              */
                             l_err = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1303,6 +1313,8 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
          * @userdata2[00:31]  OPB Status Register
          * @userdata2[32:63]  FSI Master HUID
          * @devdesc      FsiDD::handleOpbErrors> Error during FSI access
+         * @custdesc     A problem occurred during the
+         *               IPL of the system.
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         FSI::MOD_FSIDD_HANDLEOPBERRORS,
@@ -1603,6 +1615,8 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
              * @userdata1[32:63]  Absolute FSI Address
              * @userdata2    OPB Status Register
              * @devdesc      FsiDD::pollForComplete> Error during FSI access
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_POLLFORCOMPLETE,
@@ -1671,6 +1685,8 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                  * @userdata1[32:63]  Absolute FSI Address
                  * @userdata2    OPB Status Register
                  * @devdesc      FsiDD::pollForComplete> Read valid never came on
+                 * @custdesc     A problem occurred during the
+                 *               IPL of the system.
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                 FSI::MOD_FSIDD_POLLFORCOMPLETE,
@@ -1773,6 +1789,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
          * @userdata2[48:55]  FSI Master type (0=MFSI,1=CMFSI,2=NO_MASTER)
          * @userdata2[56:63]  Slave link/port number
          * @devdesc      FsiDD::genFullFsiAddr> Master Type is not supported
+         * @custdesc     A problem occurred during the
+         *               IPL of the system.
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                      FSI::MOD_FSIDD_GENFULLFSIADDR,
@@ -1812,6 +1830,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
              * @userdata2[48:55]  FSI Master type (0=MFSI,1=CMFSI,2=NO_MASTER)  [master's master]
              * @userdata2[56:63]  Slave link/port number  [master's master]
              * @devdesc      FsiDD::genFullFsiAddr> Cannot chain 2 masters
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1846,6 +1866,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
              * @userdata2[48:55]  FSI Master type (0=MFSI,1=CMFSI,2=NO_MASTER)  [master's master]
              * @userdata2[56:63]  Slave link/port number  [master's master]
              * @devdesc      FsiDD::genFullFsiAddr> Invalid master type for the target's master
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -2781,6 +2803,8 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
              * @userdata1[24:31]  Slave link/port number
              * @userdata2    MAEB from master
              * @devdesc      FsiDD::checkForErrors> Error discovered in MAEB
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_CHECKFORERRORS,
@@ -2855,6 +2879,8 @@ errlHndl_t FsiDD::verifyPresent( TARGETING::Target* i_target )
          * @userdata2[32:63]  HUID of FSI Master
          * @devdesc      FsiDD::verifyPresent> Target was never detected
          *               during FSI Init
+         * @custdesc     A problem occurred during the
+         *               IPL of the system.
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     FSI::MOD_FSIDD_VERIFYPRESENT,

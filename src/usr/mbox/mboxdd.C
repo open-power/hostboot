@@ -380,6 +380,8 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
              * @userdata1    Target ID String...
              * @userdata2    Data Length
              * @devdesc      MboxDD::write> Invalid data length (> msg_t size)
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             MBOX::MOD_MBOXDD_WRITE,
@@ -513,6 +515,8 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
              * @userdata1    Target ID String...
              * @userdata2    Status/Control Register
              * @devdesc      MboxDD::write> Message still pending
+             * @custdesc     A problem occurred during the
+             *               IPL of the system.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         MBOX::MOD_MBOXDD_WRITE,

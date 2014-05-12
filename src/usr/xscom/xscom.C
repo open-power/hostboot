@@ -305,6 +305,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                          * @userdata1    Return Code
                          * @userdata2    Unmap address
                          * @devdesc      mmio_dev_unmap() returns error
+                         * @custdesc     A problem occurred during the IPL
+                         *               of the system.
                          */
                         l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
