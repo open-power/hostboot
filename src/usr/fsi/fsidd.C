@@ -1986,8 +1986,17 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
           sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
         if( spfuncs.fsiSlaveInit )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init because SP did it" );
+            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init because SP did it, only doing FSI2PIB reset" );
             o_enabled = true;
+
+            //Reset the port to clear up any previous error state
+            //  (using idec reg as arbitrary address for lookups)
+            FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
+            l_err = genFullFsiAddr( addr_info );
+            if( l_err ) { break; }
+            l_err = errorCleanup( addr_info, FSI::RC_ERROR_IN_MAEB );
+            if(l_err) { delete l_err; l_err = NULL; }
+
             break;
         }
 
@@ -1997,8 +2006,17 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
             && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl)
             && is_mpipl )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init in MPIPL" );
+            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init in MPIPL, only doing reset" );
             o_enabled = true;
+
+            //Reset the port to clear up any previous error state
+            //  (using idec reg as arbitrary address for lookups)
+            FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
+            l_err = genFullFsiAddr( addr_info );
+            if( l_err ) { break; }
+            l_err = errorCleanup( addr_info, FSI::RC_ERROR_IN_MAEB );
+            if(l_err) { delete l_err; l_err = NULL; }
+
             break;
         }
 
@@ -2076,6 +2094,17 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
 
         // No support for slave cascades so we're done
         o_enabled = true;
+
+        //Reset the port to clear up any previous error state
+        //  (using idec reg as arbitrary address for lookups)
+        //Note, initial cfam reset should have cleaned up everything
+        // but this makes sure we're in a consistent state
+        FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
+        l_err = genFullFsiAddr( addr_info );
+        if( l_err ) { break; }
+        l_err = errorCleanup( addr_info, FSI::RC_ERROR_IN_MAEB );
+        if(l_err) { delete l_err; l_err = NULL; }
+
     } while(0);
 
     TRACDCOMP( g_trac_fsi, EXIT_MRK"FsiDD::initPort" );
@@ -2614,7 +2643,20 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
             //(putcfam 1007) register of the previously failed FSI2PIB
             //engine on Centaur.
             data = 0xFFFFFFFF;
-            l_err = write( i_addrInfo.fsiTarg,FSI:: FSI2PIB_STATUS, &data );
+            l_err = write( i_addrInfo.fsiTarg, FSI::FSI2PIB_STATUS, &data );
+            if(l_err) break;
+
+            //Need to save/restore the true/comp masks or the FSP will
+            // get annoyed
+            uint32_t compmask = 0;
+            l_err = read( i_addrInfo.fsiTarg,
+                          FSI::FSI2PIB_COMPMASK,
+                          &compmask );
+            if(l_err) break;
+            uint32_t truemask = 0;
+            l_err = read( i_addrInfo.fsiTarg,
+                          FSI::FSI2PIB_TRUEMASK,
+                          &truemask );
             if(l_err) break;
 
             //then, write arbitrary data to 1018  (putcfam 1006) to
@@ -2632,6 +2674,23 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
                 mesrb0_reg = MFSI_CONTROL_REG | FSI_MESRB0_1D0;
                 l_err = write( iv_master, mesrb0_reg, &data );
                 if(l_err) break;
+            }
+
+            //Restore the true/comp masks
+            l_err = write( i_addrInfo.fsiTarg,
+                           FSI::FSI2PIB_COMPMASK,
+                           &compmask );
+            if(l_err) break;
+            l_err = write( i_addrInfo.fsiTarg,
+                           FSI::FSI2PIB_TRUEMASK,
+                           &truemask );
+            if(l_err) break;
+
+            if( iv_ffdcTask == 0 )
+            {
+                //skip the extra FFDC if we aren't in the middle of
+                // handling an error
+                break;
             }
 
             //Trace some values for FFDC in case this cleanup

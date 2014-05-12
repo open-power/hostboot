@@ -146,6 +146,8 @@ enum SlaveRegistersP8
     FSI2PIB_ENGINE   = 0x001000, /**< FSI2PIB Engine (SCOM) */
     FSI2PIB_RESET    = FSI2PIB_ENGINE|0x18, /**< see 1006 */
     FSI2PIB_STATUS   = FSI2PIB_ENGINE|0x1C, /**< see 1007 */
+    FSI2PIB_COMPMASK = FSI2PIB_ENGINE|0x30, /**< see 100C */
+    FSI2PIB_TRUEMASK = FSI2PIB_ENGINE|0x34, /**< see 100D */
 
     FSI_SCRATCHPAD   = 0x001400, /**< FSI Scratchpad */
 
