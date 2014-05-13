@@ -45,6 +45,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <hwpf/hwpf_reasoncodes.H>
+#include <attributeenums.H>
 
 /*****************************************************************************/
 // Forward class declarations
@@ -61,44 +62,69 @@ class HBVddrMsg
 {
 
 public:
-    /**
-     * @struct hwsvPowrVmemRequest_t
-     *
-     * @brief structure to contain the Vmem Voltage rail ID and 
-     *        its corresponding voltage
-     *
-     */
-    struct hwsvPowrVmemRequest_t
-    {
-        TARGETING::ATTR_VMEM_ID_type VmemId;
-        TARGETING::ATTR_MSS_VOLT_type Voltage;
-        
-        hwsvPowrVmemRequest_t()
-        {
-            VmemId=0x0;
-            Voltage=0;
-        }
-    }__attribute__ ((packed));
 
     /**
-     * @struct hwsvPowrVmemReply_t
-     *
-     * @brief structure to contain the Vmem Voltage rail ID and 
-     *        its corresponding errorlog plid from the powr function
-     *        call
-     *
+     *  @brief Enum specifying a memory voltage domain type
      */
-    struct hwsvPowrVmemReply_t
+    enum MEM_VOLTAGE_DOMAIN
     {
-        TARGETING::ATTR_VMEM_ID_type VmemId;
-        uint32_t plid;
-    
-        hwsvPowrVmemReply_t()
+        // For unknown / uninitialized values
+        MEM_VOLTAGE_DOMAIN_UNKNOWN = 0x00,
+
+        // Valid values
+        MEM_VOLTAGE_DOMAIN_VDD  = 0x01,
+        MEM_VOLTAGE_DOMAIN_AVDD = 0x02,
+        MEM_VOLTAGE_DOMAIN_VCS  = 0x03,
+        MEM_VOLTAGE_DOMAIN_VPP  = 0x04,
+        MEM_VOLTAGE_DOMAIN_VDDR = 0x05,
+
+        // Good range markers - Need to be adjusted if the above change
+        MEM_VOLTAGE_DOMAIN_MIN_VALUE = MEM_VOLTAGE_DOMAIN_VDD,
+        MEM_VOLTAGE_DOMAIN_MAX_VALUE = MEM_VOLTAGE_DOMAIN_VDDR,
+    };
+
+    /**
+     *  @struct hwsvPowrMemVoltDomainRequest_t
+     *
+     *  @brief Structure containing a memory voltage domain type, ID, and
+     *      voltage in mV
+     */
+    struct hwsvPowrMemVoltDomainRequest_t
+    {
+        MEM_VOLTAGE_DOMAIN            domain;
+        TARGETING::ATTR_VMEM_ID_type  domainId;
+        TARGETING::ATTR_MSS_VOLT_type voltageMillivolts;
+
+        hwsvPowrMemVoltDomainRequest_t()
+            : domain(MEM_VOLTAGE_DOMAIN_UNKNOWN),
+              domainId(0x0000),
+              voltageMillivolts(0x00000000)
         {
-            VmemId=0x0;
-            plid=0x0;
         }
-    }__attribute__ ((packed));
+
+    } __attribute__ ((packed));
+
+    /**
+     *  @struct hwsvPowrMemVoltDomainReply_t
+     *
+     *  @brief Structure containing a memory voltage domain type, ID, and error
+     *      log PLID as returned by the FSP POWR function when it tried to set
+     *      the implied voltage regulator to the specified voltage.
+     */
+    struct hwsvPowrMemVoltDomainReply_t
+    {
+        MEM_VOLTAGE_DOMAIN           domain;
+        TARGETING::ATTR_VMEM_ID_type domainId;
+        uint32_t                     plid;
+
+        hwsvPowrMemVoltDomainReply_t()
+            : domain(MEM_VOLTAGE_DOMAIN_UNKNOWN),
+              domainId(0x0000),
+              plid(0x00000000)
+        {
+        }
+
+    } __attribute__ ((packed));
 
     /**
      * @enum VDDR_MSG_TYPE
@@ -112,45 +138,50 @@ public:
         HB_VDDR_DISABLE = 0x40000042,
     };
 
-    /** 
+    /**
      * @brief typedefs for containers for structures
      */
-    typedef std::vector<hwsvPowrVmemReply_t> ResponseContainer;
-    typedef std::vector<hwsvPowrVmemRequest_t> RequestContainer;
+    typedef std::vector<hwsvPowrMemVoltDomainReply_t> ResponseContainer;
+    typedef std::vector<hwsvPowrMemVoltDomainRequest_t> RequestContainer;
 
     /**
      * @brief Default constructor
      */
     HBVddrMsg();
-    
+
     /**
      * @brief   Destructor
      *
-     * Releases all resources owned by the handle.  
+     * Releases all resources owned by the handle.
      *
      * @return  None
      *
      */
     ~HBVddrMsg();
 
-
     /**
-      *  @brief  Uses the internal mailbox to send a message to the FSP
-      *
-      *
-      *  @par Detailed Description:
-      *          This funciton will create the request message by 
-      *          going through the attributes and correlating the 
-      *          VID and Voltage into the final message for all the 
-      *          VIDs in the system
-      *
-      *  @param[in/out] io_request
-      *             Contains the voltage and VID pairs to be passed
-      *             to hwsvd on the FSP. 
-      *
-      *  @return     None
-    */  
-    void createVddrData(RequestContainer& io_request)const;
+     *  @brief Accumulates memory voltage domain type/ID/voltage records and
+     *      appends them to the provided container
+     *
+     *  @par Detailed Description:
+     *      This function will accumulates memory voltage domain type/ID/voltage
+     *      records and appends them to the provided container.  If an "enable"
+     *      request, adds records from all memory voltage domains.  If a
+     *      "disable" message, only adds records from the VDDR (a.k.a. VMEM)
+     *      voltage domain.
+     *
+     *  @param[in] i_requestType
+     *      Type of data accumulation request
+     *
+     *  @param[in/out] io_request
+     *      On input, a container to hold the memory voltage domain programming
+     *      records.  On output, the container holds the relevant records.
+     *
+     *  @return N/A
+     */
+    void createVddrData(
+        const VDDR_MSG_TYPE     i_requestType,
+              RequestContainer& io_request) const;
 
     /**
       *  @brief  Uses the internal mailbox to send a message to the FSP
@@ -170,14 +201,66 @@ public:
      */
     errlHndl_t sendMsg(uint32_t i_msgType) const;
 
+private:
+
+    /**
+     *  @brief For a given memory buffer and memory voltage domain, adds a
+     *      voltage programming request record to the input list
+     *
+     *  @tparam OFFSET_DISABLEMENT_ATTR
+     *      ID of the attribute to read to determine if a given memory voltage
+     *      domain offset voltage should be applied or not.  Should be one of
+     *      the TARGETING::ATTR_*_ID attribute IDs, where * = VMEM, VPP, VCS,
+     *      VDD, or AVDD.
+     *
+     *  @tparam VOLTAGE_ATTR_WHEN_OFFSET_ENABLED
+     *      ID of the attribute which should be read to obtain the given memory
+     *      voltage domain's offset voltage to program.  In this case the offset
+     *      voltage acts as the actual voltage.  Should be one of the
+     *      TARGETING::ATTR_MEM_*_OFFSET_MILLIVOLTS attribute IDs, where
+     *      * = VMEM, VPP, VCS, VDD, or AVDD.  Only used when the memory voltage
+     *      domain's offset voltage is enabled.  Otherwise the parameter, below,
+     *      controls how the voltage, if any, is programmed.
+     *
+     *  @tparam VOLTAGE_ATTR_WHEN_OFFSET_DISABLED
+     *      ID of the attribute which should be read to obtain the given memory
+     *      voltage domain's voltage to program.  Only applied if the memory
+     *      voltage domain's offset voltage is disabled -AND- the attribute ID
+     *      is different than the one given by
+     *      VOLTAGE_ATTR_WHEN_OFFSET_ENABLED.   Should be one of
+     *      TARGETING::ATTR_VPP_BASE, TARGETING::ATTR_MSS_VOLT, or
+     *      TARGETING::ATTR_MEM_*_OFFSET_MILLIVOLTS where * = VPP, AVDD, or
+     *      VCS.
+     *
+     *  @note: This function does not ensure that all permutations of the above
+     *    template parameters are valid.
+     *
+     *  @param[in] i_pMembuf
+     *      Handle to a memory buffer target.  Function will assert if NULL or
+     *      not a memory buffer target.
+     *
+     *  @param[in,out] io_domains
+     *      On input, an existing list of 0 or more voltage domain records.  On
+     *      output, that same list with up to 1 additional voltage domain
+     *      record.
+     *
+     *  @return N/A
+     */
+    template<
+        const TARGETING::ATTRIBUTE_ID OFFSET_DISABLEMENT_ATTR,
+        const TARGETING::ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_ENABLED,
+        const TARGETING::ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_DISABLED,
+        const TARGETING::ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
+    void addMemoryVoltageDomains(
+        const TARGETING::Target* const     i_pMembuf,
+              HBVddrMsg::RequestContainer& io_domains) const;
 
 protected:
-
 
      /**
      * @brief function to process a generic message recieved from the FSP
      *
-     * @param[in] i_recvMsg The message from the message queue.  
+     * @param[in] i_recvMsg The message from the message queue.
      *               It contains the response data from the FSP
      *
      * @return     errlHndl_t
@@ -189,11 +272,11 @@ protected:
      /**
      * @brief function to process a power Vmem message recieved from the FSP
      *
-     * @param[in] i_recvMsg The message from the message queue.  
+     * @param[in] i_recvMsg The message from the message queue.
      *               It contains the response data from the FSP
      *
-     * @param[out] i_passed indicates if powr function succeeded or failed on the
-     *               FSP.
+     * @param[out] i_passed indicates if powr function succeeded or failed on
+     *    the FSP.
      *
      * @return     errlHndl_t
      *              return errl ==  NULL  -> success
@@ -204,9 +287,9 @@ protected:
      /**
      * @brief function to create error logs for errors that occured in FSP side
      *
-     * @param[in/out] io_err.  Error log to generate indicating that an error has
-     *                    has occured on HB or in the powr messages.  This error
-     *                    should stop the IPL from processing further.
+     * @param[in/out] io_err.  Error log to generate indicating that an error
+     *     has has occured on HB or in the powr messages.  This error
+     *     should stop the IPL from processing further.
      *
      * @param[in] i_mod. The module where the error occured
      *

@@ -122,7 +122,6 @@ if ($sysname =~ /brazos/)
     $placement = 0x3; #DRAWER
 }
 
-
 push @systemAttr,
 [
     "FREQ_PROC_REFCLOCK", $reqPol->{'processor-refclock-frequency'}->{content},
@@ -217,6 +216,61 @@ else
 if ($MAXNODE > 1 && $sysname !~ m/mfg/)
 {
     push @systemAttr, ["DO_ABUS_DECONFIG", 0];
+}
+
+# Process optional policies related to dyanmic VID
+my $optMrwPolicies = $sysPolicy->{"optional-policy-settings"};
+use constant MRW_NAME => 'mrw-name';
+
+my %optTargPolicies = ();
+$optTargPolicies{'MSS_CENT_AVDD_OFFSET_DISABLE'}{MRW_NAME}
+    = "mem_avdd_offset_disable" ;
+$optTargPolicies{'MSS_CENT_VDD_OFFSET_DISABLE'}{MRW_NAME}
+    = "mem_vdd_offset_disable" ;
+$optTargPolicies{'MSS_CENT_VCS_OFFSET_DISABLE'}{MRW_NAME}
+    = "mem_vcs_offset_disable" ;
+$optTargPolicies{'MSS_VOLT_VPP_OFFSET_DISABLE'}{MRW_NAME}
+    = "mem_vpp_offset_disable" ;
+$optTargPolicies{'MSS_VOLT_VDDR_OFFSET_DISABLE'}{MRW_NAME}
+    = "mem_vddr_offset_disable" ;
+$optTargPolicies{'MSS_CENT_AVDD_SLOPE_ACTIVE'}{MRW_NAME}
+    = "mem_avdd_slope_active" ;
+$optTargPolicies{'MSS_CENT_AVDD_SLOPE_INACTIVE'}{MRW_NAME}
+    = "mem_avdd_slope_inactive" ;
+$optTargPolicies{'MSS_CENT_AVDD_INTERCEPT'}{MRW_NAME}
+    = "mem_avdd_intercept" ;
+$optTargPolicies{'MSS_CENT_VDD_SLOPE_ACTIVE'}{MRW_NAME}
+    = "mem_vdd_slope_active" ;
+$optTargPolicies{'MSS_CENT_VDD_SLOPE_INACTIVE'}{MRW_NAME}
+    = "mem_vdd_slope_inactive" ;
+$optTargPolicies{'MSS_CENT_VDD_INTERCEPT'}{MRW_NAME}
+    = "mem_vdd_intercept" ;
+$optTargPolicies{'MSS_CENT_VCS_SLOPE_ACTIVE'}{MRW_NAME}
+    = "mem_vcs_slope_active" ;
+$optTargPolicies{'MSS_CENT_VCS_SLOPE_INACTIVE'}{MRW_NAME}
+    = "mem_vcs_slope_inactive" ;
+$optTargPolicies{'MSS_CENT_VCS_INTERCEPT'}{MRW_NAME}
+    = "mem_vcs_intercept" ;
+$optTargPolicies{'MSS_VOLT_VPP_SLOPE'}{MRW_NAME}
+    = "mem_vpp_slope" ;
+$optTargPolicies{'MSS_VOLT_VPP_INTERCEPT'}{MRW_NAME}
+    = "mem_vpp_intercept" ;
+$optTargPolicies{'MSS_VOLT_DDR3_VDDR_SLOPE'}{MRW_NAME}
+    = "mem_ddr3_vddr_slope" ;
+$optTargPolicies{'MSS_VOLT_DDR3_VDDR_INTERCEPT'}{MRW_NAME}
+    = "mem_ddr3_vddr_intercept" ;
+$optTargPolicies{'MSS_VOLT_DDR4_VDDR_SLOPE'}{MRW_NAME}
+    = "mem_ddr4_vddr_slope" ;
+$optTargPolicies{'MSS_VOLT_DDR4_VDDR_INTERCEPT'}{MRW_NAME}
+    = "mem_ddr4_vddr_intercept" ;
+
+foreach my $policy ( keys %optTargPolicies )
+{
+    if(exists $optMrwPolicies->{ $optTargPolicies{$policy}{MRW_NAME}})
+    {
+        push @systemAttr, [ $policy ,
+          $optMrwPolicies->{$optTargPolicies{$policy}{MRW_NAME}}];
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -458,60 +512,100 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
 # Process the cent-vrds MRW file
 #------------------------------------------------------------------------------
 my $cent_vrds_file = open_mrw_file($mrwdir, "${sysname}-cent-vrds.xml");
-my $vmemCentaur = XMLin($cent_vrds_file);
+my $mrwMemVoltageDomains = XMLin($cent_vrds_file);
 
-# Capture all pnor attributes into the @unsortedPnorTargets array
-use constant VMEM_DEV_PATH_FIELD => 0;
-use constant VMEM_I2C_ADDR_FIELD => 1;
-use constant VMEM_ID_FIELD => 2;
-use constant VMEM_NODE_FIELD => 3;
-use constant VMEM_POS_FIELD => 4;
+our %vrmHash = ();
+my %membufVrmUuidHash = ();
+my %vrmIdHash = ();
+my %validVrmTypes
+    = ('VMEM' => 1,'AVDD' => 1,'VCS' => 1,'VPP' => 1,'VDD' => 1);
+use constant VRM_I2C_DEVICE_PATH => 'vrmI2cDevicePath';
+use constant VRM_I2C_ADDRESS => 'vrmI2cAddress';
+use constant VRM_DOMAIN_TYPE => 'vrmDomainType';
+use constant VRM_DOMAIN_ID => 'vrmDomainId';
+use constant VRM_UUID => 'vrmUuid';
 
-my $vmemId = 0x0;
-
-my @unsortedVmem;
-my @vmemArray;
-my @vmemDevAddr;
-my $vmemValue =0;
-my $found=0;
-my $loc=0;
-my $newValue =0;
-
-foreach my $i (@{$vmemCentaur->{'centaur-vrd-connection'}})
+foreach my $mrwMemVoltageDomain (
+    @{$mrwMemVoltageDomains->{'centaur-vrd-connection'}})
 {
-    my $vmemDev = $i->{'vrd'}->{'i2c-dev-path'};
-    my $vmemAddr = $i->{'vrd'}->{'i2c-address'};
-
-    for my $j (0 .. $#vmemDevAddr)
+    if(   (!exists $mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'})
+       || (!exists $mrwMemVoltageDomain->{'vrd'}->{'i2c-address'})
+       || (ref($mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'}) eq "HASH")
+       || (ref($mrwMemVoltageDomain->{'vrd'}->{'i2c-address'}) eq "HASH")
+       || ($mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'} eq "")
+       || ($mrwMemVoltageDomain->{'vrd'}->{'i2c-address'} eq ""))
     {
-        if ( ($vmemDev eq $vmemDevAddr[$j][VMEM_DEV_PATH_FIELD]) &&
-             ($vmemAddr eq $vmemDevAddr[$j][VMEM_I2C_ADDR_FIELD]) )
+        next;
+    }
+
+    my $vrmDev  = $mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'};
+    my $vrmAddr = $mrwMemVoltageDomain->{'vrd'}->{'i2c-address'};
+    my $vrmType = uc $mrwMemVoltageDomain->{'vrd'}->{'type'};
+    my $membufInstance =
+        "n"  . $mrwMemVoltageDomain->{'centaur'}->{'target'}->{'node'} .
+        ":p" . $mrwMemVoltageDomain->{'centaur'}->{'target'}->{'position'};
+
+    if(!exists $validVrmTypes{$vrmType})
+    {
+        die "Illegal VRM type of $vrmType used\n";
+    }
+
+    if(!exists $vrmIdHash{$vrmType})
+    {
+        $vrmIdHash{$vrmType} = 0;
+    }
+
+    my $uuid = -1;
+    foreach my $vrm ( keys %vrmHash )
+    {
+        if(   ($vrmHash{$vrm}{VRM_I2C_DEVICE_PATH} eq $vrmDev )
+           && ($vrmHash{$vrm}{VRM_I2C_ADDRESS}     eq $vrmAddr)
+           && ($vrmHash{$vrm}{VRM_DOMAIN_TYPE}     eq $vrmType) )
         {
-            $found =1;
-            $vmemValue=$vmemDevAddr[$j][VMEM_ID_FIELD];
+            $uuid = $vrm;
             last;
         }
-        else
-        {
-            $found=0;
-        }
+
     }
-    if ($found ==0)
+
+    if($uuid == -1)
     {
-        $vmemValue=$newValue++;
-        push (@vmemDevAddr,[$vmemDev, $vmemAddr, $vmemValue]);
+        my $vrm = scalar keys %vrmHash;
+        $vrmHash{$vrm}{VRM_I2C_DEVICE_PATH} = $vrmDev;
+        $vrmHash{$vrm}{VRM_I2C_ADDRESS} = $vrmAddr;
+        $vrmHash{$vrm}{VRM_DOMAIN_TYPE} = $vrmType;
+        $vrmHash{$vrm}{VRM_DOMAIN_ID} =
+            $vrmIdHash{$vrmType}++;
+        $uuid = $vrm;
     }
 
-
-    my $vmemNode = $i->{'centaur'}->{'target'}->{'node'};
-    my $vmemPosition = $i->{'centaur'}->{'target'}->{'position'};
-
-    push (@unsortedVmem,[$vmemDev, $vmemAddr, $vmemValue, $vmemNode,
-                         $vmemPosition]);
+    $membufVrmUuidHash{$membufInstance}{$vrmType}{VRM_UUID} = $uuid;
 }
 
+my $vrmDebug = 0;
+if($vrmDebug)
+{
+    foreach my $membuf ( keys %membufVrmUuidHash)
+    {
+        print STDOUT "Membuf instance: " . $membuf . "\n";
 
-my @SortedVmem = sort byVmemNodePos @unsortedVmem;
+        foreach my $vrmType ( keys %{$membufVrmUuidHash{$membuf}} )
+        {
+            print STDOUT "VRM type: " . $vrmType . "\n";
+            print STDOUT "VRM UUID: " .
+                $membufVrmUuidHash{$membuf}{$vrmType}{VRM_UUID} . "\n";
+        }
+    }
+
+    foreach my $vrm ( keys %vrmHash)
+    {
+        print STDOUT "VRM UUID: " . $vrm . "\n";
+        print STDOUT "VRM type: " . $vrmHash{$vrm}{VRM_DOMAIN_TYPE} . "\n";
+        print STDOUT "VRM id: " . $vrmHash{$vrm}{VRM_DOMAIN_ID} . "\n";
+        print STDOUT "VRM dev: " . $vrmHash{$vrm}{VRM_I2C_DEVICE_PATH} . "\n";
+        print STDOUT "VRM addr: " .  $vrmHash{$vrm}{VRM_I2C_ADDRESS} . "\n";
+    }
+}
 
 #------------------------------------------------------------------------------
 # Process the cec-chips and pcie-busses MRW files
@@ -1021,7 +1115,6 @@ my @fru_paths;
 my $hasProc = 0;
 my $hash_ax_buses;
 my $axBusesHuidInit = 0;
-my $vmem_count =0;
 
 for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
@@ -1260,7 +1353,6 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 my $memb;
 my $membMcs;
 my $mba_count = 0;
-my $vmem_id =0;
 
 for my $i ( 0 .. $#STargets )
 {
@@ -1321,17 +1413,9 @@ for my $i ( 0 .. $#STargets )
         my $relativeCentaurRid = $STargets[$i][PLUG_POS]
             + (CDIMM_RID_NODE_MULTIPLIER * $STargets[$i][NODE_FIELD]);
 
-        #should note that the $SortedVmem is sorted by node and position and
-        #currently $STargets is also sorted by node and postion. If this ever
-        #changes then will need to make a modification here
-        my $vmemDevPath=$SortedVmem[$vmem_count][VMEM_DEV_PATH_FIELD];
-        my $vmemAddr=$SortedVmem[$vmem_count][VMEM_I2C_ADDR_FIELD];
-        my $vmem_id=$SortedVmem[$vmem_count][VMEM_ID_FIELD];
-        $vmem_count++;
-
         generate_centaur( $memb, $membMcs, \@fsi, \@altfsi, $ipath,
                           $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
-                          $vmem_id, $vmemDevPath, $vmemAddr, $ipath);
+                          $ipath, $membufVrmUuidHash{"n${node}:p${memb}"});
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -1636,37 +1720,6 @@ sub byNodePos($$)
          if(int($lhsInstance_pos) eq int($rhsInstance_pos))
          {
                 die "ERROR: Duplicate chip positions: 2 chip with same
-                    node and position, \
-                    NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
-         }
-         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
-         {
-             $retVal = 1;
-         }
-    }
-    elsif(int($lhsInstance_node) > int($rhsInstance_node))
-    {
-        $retVal = 1;
-    }
-    return $retVal;
-}
-
-################################################################################
-# Compares two Vmem instances based on the node and position #
-################################################################################
-sub byVmemNodePos($$)
-{
-    my $retVal = -1;
-
-    my $lhsInstance_node = $_[0][VMEM_NODE_FIELD];
-    my $rhsInstance_node = $_[1][VMEM_NODE_FIELD];
-    if(int($lhsInstance_node) eq int($rhsInstance_node))
-    {
-         my $lhsInstance_pos = $_[0][VMEM_POS_FIELD];
-         my $rhsInstance_pos = $_[1][VMEM_POS_FIELD];
-         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
-         {
-                die "ERROR: Duplicate vmem positions: 2 vmem with same
                     node and position, \
                     NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
          }
@@ -3035,7 +3088,8 @@ sub generate_logicalDimms
 sub generate_centaur
 {
     my ($ctaur, $mcs, $fsiA, $altfsiA, $ipath, $ordinalId, $relativeCentaurRid,
-            $vmemId, $vmemDevPath, $vmemAddr, $ipath) = @_;
+        $ipath, $membufVrmUuidHash) = @_;
+
     my @fsi = @{$fsiA};
     my @altfsi = @{$altfsiA};
     my $scomFspApath = $devpath->{chip}->{$ipath}->{'scom-path-a'};
@@ -3106,10 +3160,6 @@ sub generate_centaur
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
     </compileAttribute>
-    <attribute>
-        <id>VMEM_ID</id>
-        <default>$vmemId</default>
-    </attribute>
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
@@ -3192,10 +3242,21 @@ sub generate_centaur
         <default>$lane_swap</default>
     </attribute>";
 
+    foreach my $vrmType ( keys %$membufVrmUuidHash )
+    {
+        my $key = $membufVrmUuidHash->{$vrmType}{VRM_UUID};
+        print
+              "\n"
+            . "    <attribute>\n"
+            . "        <id>$vrmType" . "_ID</id>\n"
+            . "        <default>$vrmHash{$key}{VRM_DOMAIN_ID}</default>\n"
+            . "    </attribute>";
+    }
+
     # call to do any fsp per-centaur attributes
     do_plugin('fsp_centaur', $scomFspApath, $scomFspAsize, $scanFspApath,
        $scanFspAsize, $scomFspBpath, $scomFspBsize, $scanFspBpath,
-       $scanFspBsize, $vmemDevPath, $vmemAddr, $relativeCentaurRid, $ordinalId);
+       $scanFspBsize, $relativeCentaurRid, $ordinalId, $membufVrmUuidHash);
 
     print "\n</targetInstance>\n";
 

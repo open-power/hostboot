@@ -30,6 +30,7 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 #------------------------------------------------------------------------------
 # Source XML files
 #------------------------------------------------------------------------------
+
 HWP_ERROR_XML_FILES += hwp/fapiHwpErrorInfo.xml
 HWP_ERROR_XML_FILES += hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml
 HWP_ERROR_XML_FILES += hwp/dimm_errors.xml
@@ -95,6 +96,11 @@ HWP_ERROR_XML_FILES += hwp/proc_cfam_registers.xml
 HWP_ERROR_XML_FILES += hwp/p8_slw_registers.xml
 HWP_ERROR_XML_FILES += hwp/utility_procedures/memory_mss_maint_cmds.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_avdd_offset.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_vdd_offset.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_vcs_offset.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_vpp_offset.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_vddr_offset.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_freq/memory_mss_freq.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_grouping.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config_thermal.xml

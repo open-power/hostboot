@@ -22,7 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
-<!-- $Id: memory_mss_volt.xml,v 1.2 2014/03/06 00:11:14 jdsloat Exp $ -->
+<!-- $Id: memory_mss_volt.xml,v 1.3 2014/06/19 18:41:16 jdsloat Exp $ -->
 <!-- For file ../../ipl/fapi/mss_volt.C -->
 <!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
 <!-- // *! BACKUP NAME : -->
@@ -78,6 +78,27 @@
     <deconfigure>
       <target>CHIP_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_OVERIDE_MIXING</rc>
+    <description>An override is trying to be applied to only a part of the voltage domain.  It needs to be applied to the entire domain.</description>
+    <ffdc>OVERRIDE_TYPE</ffdc>
+    <ffdc>OVERRIDE_DOMAIN_TYPE</ffdc>
+    <callout>
+      <target>MEMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_OVERIDE_UKNOWN</rc>
+    <description>An uknown override is trying to be applied to the voltage domain.  It needs to be none, 1.2 or 1.35V. </description>
+    <ffdc>OVERRIDE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 </hwpErrors>

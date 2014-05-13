@@ -1,0 +1,45 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/mc_config/mss_volt/memory_mss_volt_avdd_offset.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+<!-- $Id: memory_mss_volt_avdd_offset.xml,v 1.2 2014/06/18 20:26:57 dcadiga Exp $ -->
+<!-- For file ../../ipl/fapi/mss_volt_avdd_offset.C -->
+<!-- // *! OWNER NAME :   Stephen Glancy (sglancy@us.ibm.com) -->
+<!-- // *! BACKUP NAME :  Jacob Sloat (jdsloat@us.ibm.com) -->
+
+
+<!-- Original Source for RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_AVDD_OFFSET_VALUE_ERROR</rc>
+    <description>One or more dynamic AVDD attributes is 0.</description>
+    <ffdc>AVDD_SLOPE_ACTIVE</ffdc>
+    <ffdc>AVDD_SLOPE_INACTIVE</ffdc>
+    <ffdc>AVDD_SLOPE_INTERCEPT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+</hwpErrors>
+

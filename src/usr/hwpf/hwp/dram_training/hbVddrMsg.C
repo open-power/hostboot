@@ -67,77 +67,231 @@ HBVddrMsg::~HBVddrMsg()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// compareVids 
+// compareVids
 ///////////////////////////////////////////////////////////////////////////////
-bool compareVids(  HBVddrMsg::hwsvPowrVmemRequest_t i_req1,  
-                HBVddrMsg::hwsvPowrVmemRequest_t i_req2)
+
+bool compareVids(
+    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
+    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
 {
-    return( static_cast<uint16_t>(i_req1.VmemId) <
-                static_cast<uint16_t>(i_req2.VmemId));
+    bool lhsLogicallyBeforeRhs = (i_lhs.domain < i_rhs.domain);
+
+    if (i_lhs.domain == i_rhs.domain)
+    {
+        lhsLogicallyBeforeRhs = (  static_cast<uint16_t>(i_lhs.domainId)
+                                 < static_cast<uint16_t>(i_rhs.domainId) );
+    }
+
+    return lhsLogicallyBeforeRhs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// areVidEqual 
+// areVidsEqual
 ///////////////////////////////////////////////////////////////////////////////
-bool areVidsEqual(HBVddrMsg::hwsvPowrVmemRequest_t i_req1,  
-                HBVddrMsg::hwsvPowrVmemRequest_t i_req2)
+
+bool areVidsEqual(
+    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
+    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
 {
-    return( static_cast<uint16_t>(i_req1.VmemId) == 
-                static_cast<uint16_t>(i_req2.VmemId));
+    return(   (   i_lhs.domain
+               == i_rhs.domain)
+           && (   static_cast<uint16_t>(i_lhs.domainId)
+               == static_cast<uint16_t>(i_rhs.domainId)) );
+}
+
+//******************************************************************************
+// addMemoryVoltageDomains (templated)
+//******************************************************************************
+
+template<
+    const ATTRIBUTE_ID OFFSET_DISABLEMENT_ATTR,
+    const ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_ENABLED,
+    const ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_DISABLED,
+    const ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
+void HBVddrMsg::addMemoryVoltageDomains(
+    const TARGETING::Target* const     i_pMembuf,
+          HBVddrMsg::RequestContainer& io_domains) const
+{
+    assert(
+        (i_pMembuf != NULL),
+        "HBVddrMsg::addMemoryVoltageDomains: Code bug!  Caller passed NULL "
+        "memory buffer target handle.");
+
+    assert(
+        (    (   i_pMembuf->getAttr<TARGETING::ATTR_CLASS>()
+              == TARGETING::CLASS_CHIP)
+          && (   i_pMembuf->getAttr<TARGETING::ATTR_TYPE>()
+              == TARGETING::TYPE_MEMBUF)),
+        "HBVddrMsg::addMemoryVoltageDomains: Code bug!  Caller passed non-"
+        "memory buffer target handle of class = 0x%08X and type of 0x%08X.",
+        i_pMembuf->getAttr<TARGETING::ATTR_CLASS>(),
+        i_pMembuf->getAttr<TARGETING::ATTR_TYPE>());
+
+    TARGETING::Target* pSysTarget = NULL;
+    TARGETING::targetService().getTopLevelTarget(pSysTarget);
+
+    assert(
+        (pSysTarget != NULL),
+        "HBVddrMsg::addMemoryVoltageDomains: Code bug!  System target was "
+        "NULL.");
+
+    typename AttributeTraits< OFFSET_DISABLEMENT_ATTR >::Type
+        disableOffsetVoltage =
+            pSysTarget->getAttr< OFFSET_DISABLEMENT_ATTR >();
+
+    assert(
+        (disableOffsetVoltage <= true),
+        "HBVddrMsg::addMemoryVoltageDomains: Code Bug!  Unsupported "
+        "value of 0x%02X for attribute ID of 0x%08X.",
+        disableOffsetVoltage,
+        OFFSET_DISABLEMENT_ATTR);
+
+    // Initialized by constructor to invalid defaults
+    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t entry;
+
+    switch(VOLTAGE_DOMAIN_ID_ATTR)
+    {
+        case TARGETING::ATTR_VMEM_ID:
+            entry.domain = MEM_VOLTAGE_DOMAIN_VDDR;
+            break;
+        case TARGETING::ATTR_VCS_ID:
+            entry.domain = MEM_VOLTAGE_DOMAIN_VCS;
+            break;
+        case TARGETING::ATTR_VPP_ID:
+            entry.domain = MEM_VOLTAGE_DOMAIN_VPP;
+            break;
+        case TARGETING::ATTR_AVDD_ID:
+            entry.domain = MEM_VOLTAGE_DOMAIN_AVDD;
+            break;
+        case TARGETING::ATTR_VDD_ID:
+            entry.domain = MEM_VOLTAGE_DOMAIN_VDD;
+            break;
+        default:
+            assert(
+                0,
+                "HBVddrMsg::addMemoryVoltageDomains: Code Bug!  Unsupported "
+                "voltage domain of 0x%08X.",
+                VOLTAGE_DOMAIN_ID_ATTR);
+            break;
+    }
+
+    // There is no reasonable check to validate if a voltage ID we're reading
+    // is valid so it has to be assumed good
+    entry.domainId = i_pMembuf->getAttr< VOLTAGE_DOMAIN_ID_ATTR >();
+
+    // There is no reasonable check to validate if a voltage we're
+    // reading is valid so it has to be assumed good for the cases below
+    if(!disableOffsetVoltage)
+    {
+        typename
+        TARGETING::AttributeTraits< VOLTAGE_ATTR_WHEN_OFFSET_ENABLED >::Type
+            voltageMillivolts
+                = i_pMembuf->getAttr< VOLTAGE_ATTR_WHEN_OFFSET_ENABLED >();
+
+        entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
+        io_domains.push_back(entry);
+    }
+    else if(   VOLTAGE_ATTR_WHEN_OFFSET_DISABLED
+            != VOLTAGE_ATTR_WHEN_OFFSET_ENABLED)
+    {
+        typename
+        TARGETING::AttributeTraits< VOLTAGE_ATTR_WHEN_OFFSET_DISABLED >::Type
+            voltageMillivolts
+                = i_pMembuf->getAttr< VOLTAGE_ATTR_WHEN_OFFSET_DISABLED >();
+
+        entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
+        io_domains.push_back(entry);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // HBVddrMsg::createVddrData
 ///////////////////////////////////////////////////////////////////////////////
+
 void HBVddrMsg::createVddrData(
-                            RequestContainer& io_request) const
+    const VDDR_MSG_TYPE     i_requestType,
+          RequestContainer& io_request) const
 {
     TRACFCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::createVddrData" );
 
-    //go through all the centaurs and gather the Voltage IDs and voltages
+    // Go through all the memory buffers and gather their domains, domain
+    // specific IDs, and domain specific voltages
     io_request.clear();
 
     do{
-    
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
-    
-        TARGETING::Target* l_Target =NULL;
 
-        hwsvPowrVmemRequest_t l_entry;
+        TARGETING::TargetHandleList membufTargetList;
+        getAllChips(membufTargetList, TYPE_MEMBUF);
 
+        TARGETING::Target* pMembuf =NULL;
         for (TARGETING::TargetHandleList::const_iterator
-                membufIter = l_membufTargetList.begin();
-                membufIter != l_membufTargetList.end();
-                ++membufIter)
+                ppMembuf = membufTargetList.begin();
+             ppMembuf != membufTargetList.end();
+             ++ppMembuf)
         {
-            l_Target = *membufIter;
+            pMembuf = *ppMembuf;
 
-            TARGETING::ATTR_VMEM_ID_type l_VmemId=
-                            l_Target->getAttr<TARGETING::ATTR_VMEM_ID>();
-            TARGETING::ATTR_MSS_VOLT_type l_voltage = 
-                            l_Target->getAttr<TARGETING::ATTR_MSS_VOLT>();  
+            if(i_requestType == HB_VDDR_ENABLE)
+            {
+                (void)addMemoryVoltageDomains<
+                    TARGETING::ATTR_MSS_CENT_VDD_OFFSET_DISABLE,
+                    TARGETING::ATTR_MEM_VDD_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_MEM_VDD_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_VDD_ID>(
+                        pMembuf,
+                        io_request);
 
-            l_entry.VmemId = l_VmemId;
-            l_entry.Voltage = static_cast<uint32_t>(l_voltage);
+                (void)addMemoryVoltageDomains<
+                    TARGETING::ATTR_MSS_CENT_AVDD_OFFSET_DISABLE,
+                    TARGETING::ATTR_MEM_AVDD_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_MEM_AVDD_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_AVDD_ID>(
+                        pMembuf,
+                        io_request);
 
-            io_request.push_back(l_entry);   
+                (void)addMemoryVoltageDomains<
+                    TARGETING::ATTR_MSS_CENT_VCS_OFFSET_DISABLE,
+                    TARGETING::ATTR_MEM_VCS_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_MEM_VCS_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_VCS_ID>(
+                        pMembuf,
+                        io_request);
+
+                // VPP programming not supported in 820
+                // TODO via RTC: 110388
+                //(void)addMemoryVoltageDomains<
+                //    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
+                //    TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
+                //    TARGETING::ATTR_VPP_BASE,
+                //    TARGETING::ATTR_VPP_ID>(
+                //        pMembuf,
+                //        io_request);
+            }
+
+            (void)addMemoryVoltageDomains<
+                TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
+                TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT,
+                TARGETING::ATTR_VMEM_ID>(
+                    pMembuf,
+                    io_request);
         }
 
-        if (l_membufTargetList.size() >1)
+        if (membufTargetList.size() > 1)
         {
-            //take out the duplicates Voltage IDs in io_request by first sorting
-            //and then removing the duplicates
-
+            // Take out the duplicate records in io_request by first
+            // sorting and then removing the duplicates
             std::sort(io_request.begin(), io_request.end(), compareVids);
-
-            std::vector<hwsvPowrVmemRequest_t>::iterator it;
-            it=std::unique(io_request.begin(), io_request.end(), areVidsEqual);
-            io_request.erase(it,io_request.end()); 
+            std::vector<hwsvPowrMemVoltDomainRequest_t>::iterator
+                pInvalidEntries = std::unique(
+                    io_request.begin(),
+                    io_request.end(),
+                    areVidsEqual);
+            io_request.erase(pInvalidEntries,io_request.end());
         }
 
-    }while(0);
-        
+    } while(0);
+
     TRACFCOMP( g_trac_volt, EXIT_MRK "HBVddrMsg::createVddrData" );
     return;
 }
@@ -157,7 +311,9 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
 
         if ( (i_msgType == HB_VDDR_ENABLE) || (i_msgType == HB_VDDR_DISABLE) )
         {
-            createVddrData(l_request);
+            VDDR_MSG_TYPE msgType = (i_msgType == HB_VDDR_ENABLE)
+                ? HB_VDDR_ENABLE : HB_VDDR_DISABLE;
+            createVddrData(msgType, l_request);
         }
         else
         {
@@ -184,7 +340,8 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
         // Only send a message if there is data to send
         if (l_dataCount)
         {
-            uint32_t l_msgSize = l_dataCount*sizeof(hwsvPowrVmemRequest_t);
+            uint32_t l_msgSize = l_dataCount *
+                sizeof(hwsvPowrMemVoltDomainRequest_t);
 
             // Create the message to send to HWSV
             msg_t* l_msg = msg_allocate();
@@ -192,21 +349,26 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
             l_msg->data[0] = 0;
             l_msg->data[1] = l_msgSize;
 
-            TRACFCOMP(g_trac_volt, INFO_MRK "hbVddrMsg::l_dataCount=%d,l_msgSize=%d",
+            TRACFCOMP(g_trac_volt, INFO_MRK "hbVddrMsg::l_dataCount=%d, "
+                      "l_msgSize=%d",
                       l_dataCount, l_msgSize);
             void* l_data = malloc(l_msgSize);
 
-            hwsvPowrVmemRequest_t* l_ptr =
-                reinterpret_cast<hwsvPowrVmemRequest_t*>(l_data);
+            hwsvPowrMemVoltDomainRequest_t* l_ptr =
+                reinterpret_cast<hwsvPowrMemVoltDomainRequest_t*>(l_data);
 
             for (size_t j =0; j<l_dataCount; ++j)
             {
-                l_ptr->VmemId=l_request.at(j).VmemId;
-                l_ptr->Voltage=l_request.at(j).Voltage;
+                l_ptr->domain=l_request.at(j).domain;
+                l_ptr->domainId=l_request.at(j).domainId;
+                l_ptr->voltageMillivolts=l_request.at(j).voltageMillivolts;
 
                 TRACFCOMP(g_trac_volt, ENTER_MRK "hbVddrMsg::sendMsg "
-                         "VmemId=0x%04X, Voltage=%d, index=%d",
-                          l_ptr->VmemId, l_ptr->Voltage,j);
+                          "Voltage domain type = 0x%08X, "
+                          "Voltage domain ID = 0x%04X, "
+                          "Voltage (mV) = %d, index = %d",
+                          l_ptr->domain,
+                          l_ptr->domainId, l_ptr->voltageMillivolts,j);
                 l_ptr++;
             }
 
@@ -249,7 +411,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
     //and is inside the message
 
     uint32_t l_msgSize = i_recvMsg->data[1];
-    uint16_t l_elementCount = l_msgSize/sizeof(hwsvPowrVmemReply_t);
+    uint16_t l_elementCount = l_msgSize/sizeof(hwsvPowrMemVoltDomainReply_t);
     const uint8_t* l_extraData = NULL;
     l_extraData=static_cast<uint8_t*>(i_recvMsg->extra_data);
 
@@ -274,26 +436,31 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                          fapi::RC_VDDR_EMPTY_MSG);
             break;
         }
-        TARGETING::ATTR_VMEM_ID_type l_VmemId =0x0;
+
+        MEM_VOLTAGE_DOMAIN domain = MEM_VOLTAGE_DOMAIN_UNKNOWN;
+        TARGETING::ATTR_VMEM_ID_type l_domainId =0x0;
         uint32_t l_errPlid =0x0;
 
         TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
                     "l_elementCount=%d, l_msgSize =%d", 
                     l_elementCount, l_msgSize);
-        const hwsvPowrVmemReply_t* l_ptr= 
-                    reinterpret_cast<const hwsvPowrVmemReply_t*>(l_extraData);
+        const hwsvPowrMemVoltDomainReply_t* l_ptr=
+            reinterpret_cast<const hwsvPowrMemVoltDomainReply_t*>(l_extraData);
 
         for (size_t i=0; i<l_elementCount; ++i)
         {
-            l_VmemId = l_ptr->VmemId;
+            domain = l_ptr->domain;
+            l_domainId = l_ptr->domainId;
             l_errPlid = l_ptr->plid;
 
             TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
-                      "l_VmemId=0x%08X, l_errPlid=0x%08X", l_VmemId,l_errPlid);
+                      "domain = 0x%08X, l_domainId=0x%08X, l_errPlid=0x%08X",
+                      domain,l_domainId,l_errPlid);
             if (l_errPlid ==0x0)
             {
-                TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: no plid "
-                          "error found for l_VmemId=0x%08X", l_VmemId);
+                TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
+                          "no plid error found for domain = 0x%08X, "
+                          "l_domainId=0x%08X", domain, l_domainId);
             }
             else
             {

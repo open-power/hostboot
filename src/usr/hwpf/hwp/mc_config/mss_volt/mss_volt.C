@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt.C,v 1.13 2014/03/06 00:13:52 jdsloat Exp $
+// $Id: mss_volt.C,v 1.15 2014/06/19 18:44:00 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -54,6 +54,8 @@
 //  1.11   | bellows  | 07/16/12 | added in Id tag
 //  1.11   | jdsloat  | 10/18/12 | Added check for violation of tolerant voltages of non-functional dimms.
 //  1.12   | jdsloat  | 03/05/14 | RAS review Edits -- Error HW callouts
+//  1.13   | jdsloat  | 06/05/14 | Added ATTR_MSS_VOLT_VPP being set, as well as ATTR_MSS_VOLT_OVERRIDE
+//  1.14   | jdsloat  | 06/19/14 | Added error checking associated ATTR_MSS_VOLT_OVERRIDE
 
 // This procedure takes a vector of Centaurs behind a voltage domain,
 // reads in supported DIMM voltages from SPD and determines optimal
@@ -73,6 +75,8 @@
 const uint32_t MAX_TOLERATED_VOLT = 1500;
 const uint32_t MAX_TOLERATED_DDR3_VOLT = 1500;
 const uint32_t MAX_TOLERATED_DDR4_VOLT = 1200;
+const uint32_t DDR3_VPP_VOLT = 0000;
+const uint32_t DDR4_VPP_VOLT = 2500;
 
 fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
 {
@@ -84,8 +88,11 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
     uint8_t l_spd_volts_all_dimms=0x06;  //start assuming all voltages supported
     uint8_t l_dram_ddr3_found_flag=0;
     uint8_t l_dram_ddr4_found_flag=0;
+    uint8_t l_volt_override = 0x00;
+    uint8_t l_volt_override_domain = 0x00;
 
     uint32_t l_selected_dram_voltage=0;  //this gets written into all centaurs when done.
+    uint32_t l_selected_dram_voltage_vpp=0;
     uint32_t l_tolerated_dram_voltage = MAX_TOLERATED_VOLT; //initially set to the max tolerated voltage
 
     do
@@ -97,6 +104,29 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             // Get associated MBA's on this centaur
             l_rc=fapiGetChildChiplets(i_targets_memb[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
             if (l_rc) break;
+
+
+	    l_rc = FAPI_ATTR_GET(ATTR_MSS_VOLT_OVERRIDE, &i_targets_memb[i], l_volt_override);
+	    if (l_rc) break;
+
+	    // Note if there is an overrride being applied on the domain
+	    if ( (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE) && (l_volt_override_domain == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE) )
+	    {
+	    	l_volt_override_domain = l_volt_override;
+	    }
+
+	    // Error if our overides are not the same across the domain
+	    if (l_volt_override_domain != l_volt_override)
+	    {
+                        // this just needs to callout the mismatching memb.
+                        const uint8_t &OVERRIDE_TYPE = l_volt_override;
+                        const uint8_t &OVERRIDE_DOMAIN_TYPE = l_volt_override_domain;
+                        const fapi::Target &MEMB_TARGET = i_targets_memb[i];
+                        FAPI_ERR("Mismatch volt override request.  Domain: 0x%x  Current Target Requests: 0x%x", l_volt_override_domain, l_volt_override);
+                        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_OVERIDE_MIXING);
+                        fapiLogError(l_rc);
+	    }
+
             // Loop through the 2 MBA's
             for (uint32_t j=0; j < l_mbaChiplets.size(); j++)
             {
@@ -104,6 +134,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
                 // Get a vector of DIMM targets
                 l_rc = fapiGetAssociatedDimms(l_mbaChiplets[j], l_dimm_targets, fapi::TARGET_STATE_PRESENT);
                 if (l_rc) break;
+
                 for (uint32_t k=0; k < l_dimm_targets.size(); k++)
                 {
                     l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE, &l_dimm_targets[k], l_spd_dramtype);
@@ -212,17 +243,44 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             break;
         }
 
-        if (l_dram_ddr3_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35))
+
+	if (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE)
+	{
+	    if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_135)
+	    {
+		l_tolerated_dram_voltage = 1350;
+		FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.35V");
+		FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
+	    }
+	    if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_120)
+	    {
+	        l_tolerated_dram_voltage = 1200;
+		FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.20V");
+		FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
+	    }
+	    else
+	    {
+                const uint8_t &OVERRIDE_TYPE = l_volt_override;
+                FAPI_ERR("Unknown volt override request.  Override Request: 0x%x", l_volt_override);
+                FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_OVERIDE_UKNOWN);
+                fapiLogError(l_rc);
+	    }
+
+	}
+        else if (l_dram_ddr3_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35))
         {
             l_selected_dram_voltage=1350;
+	    l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
         }
         else if (l_dram_ddr4_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X))
         {
             l_selected_dram_voltage=1200;
+            l_selected_dram_voltage_vpp = DDR4_VPP_VOLT;
         }
         else if ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5)
         {
             l_selected_dram_voltage=1500;
+	    l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
         }
         else
         {
@@ -273,6 +331,8 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             // Break out of do...while(0)
             break;
         }
+
+
 
         // Must check to see if we violate Tolerent voltages of Non-functional Dimms
         // If so we must error/deconfigure on the dimm level primarily then centaur level.
@@ -367,6 +427,11 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             l_rc = FAPI_ATTR_SET(ATTR_MSS_VOLT, &i_targets_memb[i], l_selected_dram_voltage);
             FAPI_INF( "mss_volt calculation complete.  MSS_VOLT: %d", l_selected_dram_voltage);
             if (l_rc) break;
+
+	    l_rc = FAPI_ATTR_SET(ATTR_MSS_VOLT_VPP, &i_targets_memb[i], l_selected_dram_voltage_vpp);
+            FAPI_INF( "mss_volt calculation complete.  MSS_VOLT_VPP: %d", l_selected_dram_voltage_vpp);
+            if (l_rc) break;
+
         }
     }while(0);
     return l_rc;

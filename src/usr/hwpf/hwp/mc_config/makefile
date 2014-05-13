@@ -29,6 +29,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures/
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
@@ -61,6 +63,12 @@ OBJS += mss_error_support.o
 OBJS += mss_eff_pre_config.o
 OBJS += mss_attr_cleanup.o
 OBJS += mss_eff_mb_interleave.o
+OBJS += mss_volt_vdd_offset.o
+OBJS += mss_volt_avdd_offset.o
+OBJS += mss_volt_vcs_offset.o
+OBJS += mss_volt_vpp_offset.o
+OBJS += mss_volt_vddr_offset.o
+OBJS += mss_count_active_centaurs.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

@@ -247,6 +247,27 @@
     <attribute><id>PM_HWP_ATTR_VERSION</id></attribute>
     <attribute><id>DO_ABUS_DECONFIG</id></attribute>
     <attribute><id>REDUNDANT_CLOCKS</id></attribute>
+    <attribute><id>MSS_VOLT_VDDR_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_CENT_VDD_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_CENT_VCS_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_CENT_AVDD_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_CENT_AVDD_SLOPE_ACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_AVDD_SLOPE_INACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_AVDD_INTERCEPT</id></attribute>
+    <attribute><id>MSS_CENT_VDD_SLOPE_ACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VDD_SLOPE_INACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VDD_INTERCEPT</id></attribute>
+    <attribute><id>MSS_CENT_VCS_SLOPE_ACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VCS_SLOPE_INACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VCS_INTERCEPT</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_SLOPE</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_INTERCEPT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id></attribute>
+    <attribute><id>MSS_VDDR_OVERIDE_SPD</id></attribute>
 </targetType>
 
 <targetType>
@@ -1109,6 +1130,12 @@
     </attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>MSS_VOLT</id></attribute>
+    <attribute><id>VPP_BASE</id></attribute>
+    <attribute><id>MEM_VDDR_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MEM_AVDD_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MEM_VDD_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MEM_VCS_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MEM_VPP_OFFSET_MILLIVOLTS</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>ECID</id></attribute>
@@ -1124,6 +1151,10 @@
     </attribute>
     <attribute><id>MSS_CACHE_ENABLE</id></attribute>
     <attribute><id>VMEM_ID</id></attribute>
+    <attribute><id>AVDD_ID</id></attribute>
+    <attribute><id>VDD_ID</id></attribute>
+    <attribute><id>VCS_ID</id></attribute>
+    <attribute><id>VPP_ID</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
      <!-- Begin poreve_memory_attributes.xml -->
      <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
@@ -1144,6 +1175,9 @@
     <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
     <attribute><id>MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
+    <attribute><id>MSS_VOLT_OVERRIDE</id></attribute>
+    <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
+    <attribute><id>MSS_POWER_CONTROL_CAPABLE</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->

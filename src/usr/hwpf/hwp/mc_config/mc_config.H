@@ -92,7 +92,40 @@ namespace   MC_CONFIG
  */
 void*    call_host_collect_dimm_spd( void * io_pArgs );
 
-
+/**
+ *  @brief For a given memory voltage domain, program the domain's offset
+ *      voltage if this behavior is enabled, otherwise program 0
+ *
+ *  @tparam OFFSET_DISABLEMENT_ATTR
+ *      ID of the attribute to read to determine if a given memory voltage
+ *      domain offset voltage should be applied or not.  Should be one of
+ *      the TARGETING::ATTR_*_ID attribute IDs, where * = VMEM, VPP, VCS,
+ *      VDD, or AVDD.
+ *
+ *  @tparam OFFSET_VOLTAGE_ATTR
+ *      ID of the attribute to receive the given voltage domain's offset voltage
+ *      value.  Should be one of the TARGETING::ATTR_MEM_*_OFFSET_MILLIVOLTS
+ *      attribute IDs, where * = VMEM, VPP, VCS, VDD, or AVDD.  Only set to
+ *      non-zero when memory voltage domain's offset voltage is enabled.
+ *
+ *  @tparam VOLTAGE_DOMAIN_ID_ATTR
+ *      ID of the attribute which should be read to obtain the given memory
+ *      voltage domain's ID.  IDs are only unique within the same memory voltage
+ *      domain type. Must be one of the ATTR_*_ID attributes, where * = VPP,
+ *      AVDD, VMEM, VDD, VCS.
+ *
+ *  @note: This function does not ensure that all permutations of the above
+ *    template parameters are valid.
+ *
+ *  @return Error log handle indicating the status of the request.
+ *
+ *  @retval NULL Offset voltage successfully programmed or set to 0
+ *  @retval Failed setting correct offset voltage
+ */
+template< const TARGETING::ATTRIBUTE_ID OFFSET_DISABLEMENT_ATTR,
+          const TARGETING::ATTRIBUTE_ID OFFSET_VOLTAGE_ATTR,
+          const TARGETING::ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
+errlHndl_t setMemoryVoltageDomainOffsetVoltage();
 
 /**
  *  @brief   mss_volt
