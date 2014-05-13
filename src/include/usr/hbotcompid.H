@@ -325,6 +325,15 @@ const compId_t GPIO_COMP_ID = 0x2300;
 const char GPIO_COMP_NAME[] = "gpio";
 //@}
 
+/** @name LPC
+ * Low Pin Count Bus
+ */
+//@{
+const compId_t LPC_COMP_ID = 0x2400;
+const char LPC_COMP_NAME[] = "lpc";
+//@}
+
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of

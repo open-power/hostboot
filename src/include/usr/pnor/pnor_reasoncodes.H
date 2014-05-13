@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,12 +87,13 @@ namespace PNOR
         RC_ERROR_IN_STATUS_REG       = PNOR_COMP_ID | 0x10,
         //termination_rc
         RC_REINITIALIZE_SFC          = PNOR_COMP_ID | 0x11,
+        RC_SFC_ERROR                 = PNOR_COMP_ID | 0x12,
     };
 
     enum UserDetailsTypes
     {
         PNOR_UDT_NO_FORMAT           = 0x0,
-        PNOR_UDT_PNORDD_PARAMETERS  = 0x1,
+        PNOR_UDT_PNORDD_PARAMETERS   = 0x1,
     };
 };
 

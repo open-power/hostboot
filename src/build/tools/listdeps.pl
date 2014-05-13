@@ -209,6 +209,7 @@ my %resident_modules = (
     "libfsi.so"            => '1',
     "libscan.so"           => '1',
     "libgpio.so"           => '1',
+    "liblpc.so"            => '1',
 
 );
 

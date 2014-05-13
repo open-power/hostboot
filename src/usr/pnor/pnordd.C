@@ -51,6 +51,7 @@
 #include <sys/time.h>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
+#include <lpc/lpcif.H>
 #include <config.h>
 
 
@@ -59,6 +60,7 @@
 /*****************************************************************************/
 #define PNORDD_MAX_RETRIES 1
 
+// Initialized in pnorrp.C
 extern trace_desc_t* g_trac_pnor;
 
 namespace PNOR
@@ -429,7 +431,6 @@ PnorDD::PnorDD( PnorMode_t i_mode,
         iv_mutex_ptr = &iv_mutex;
         mutex_init(iv_mutex_ptr);
         TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using i_target=0x%X (non-master) and iv_mutex_ptr", TARGETING::get_huid(i_target));
-
     }
     else
     {
@@ -740,17 +741,17 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             /*@
              * @errortype
              * @moduleid     PNOR::MOD_PNORDD_POLLSFCOPCOMPLETE
-             * @reasoncode   PNOR::RC_LPC_ERROR
+             * @reasoncode   PNOR::RC_SFC_ERROR
              * @userdata1[0:31]   NOR Flash Chip ID
              * @userdata1[32:63]  Total poll time (ns)
              * @userdata2[0:31]    ECCB Status Register
              * @devdesc      PnorDD::pollSfcOpComplete> Error or timeout from
              *               SFC Status Register
-             * @custdesc    A problem occurred while accessing the boot flash.
+             * @custdesc     Hardware error accessing flash during IPL
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_POLLSFCOPCOMPLETE,
-                                            PNOR::RC_LPC_ERROR,
+                                            PNOR::RC_SFC_ERROR,
                                             TWO_UINT32_TO_UINT64(iv_nor_chipid,
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(sfc_stat.data32,0));
@@ -970,7 +971,7 @@ errlHndl_t PnorDD::checkForSfcErrors( ResetLevels &o_pnorResetLevel )
          * @userdata2    Reset Level
          * @devdesc      PnorDD::checkForSfcErrors> Error(s) found in SFC
          *               and/or LPC Slave Status Registers
-         * @custdesc    A problem occurred while accessing the boot flash.
+         * @custdesc     Hardware error accessing flash during IPL
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         PNOR::MOD_PNORDD_CHECKFORSFCERRORS,
@@ -996,163 +997,6 @@ errlHndl_t PnorDD::checkForSfcErrors( ResetLevels &o_pnorResetLevel )
 }
 
 /**
- * @brief Check For Errors in OPB and LPCHC Status Registers
- */
-errlHndl_t PnorDD::checkForOpbErrors( ResetLevels &o_pnorResetLevel )
-{
-    errlHndl_t l_err = NULL;
-    bool errorFound = false;
-
-    // Used to set Reset Levels, if necessary
-    o_pnorResetLevel = RESET_CLEAR;
-
-    // Default status values in case we fail in reading the registers
-    OpbLpcmFirReg_t fir_reg;
-    fir_reg.data64 = 0xDEADBEEFDEADBEEF;
-    uint64_t fir_data = 0x0;
-
-    // always read/write 64 bits to SCOM
-    size_t scom_size = sizeof(uint64_t);
-
-    do {
-        // Read FIR Register
-        l_err = deviceOp( DeviceFW::READ,
-                          iv_target,
-                          &(fir_data),
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG) );
-        if( l_err ) { break; }
-
-        // Mask data to just the FIR bits we care about
-        fir_reg.data64 = fir_data & OPB_LPCM_FIR_ERROR_MASK;
-
-        // First look for SOFT errors
-        if( 1 == fir_reg.rxits )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> Invalid Transfer Size: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-        if( 1 == fir_reg.rxicmd )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> Invalid Command: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-        if( 1 == fir_reg.rxiaa )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> Invalid Address Alignment: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-        if( 1 == fir_reg.rxcbpe )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> Command Buffer Parity Error: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-        if( 1 == fir_reg.rxdbpe )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> Data Buffer Parity Error: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-
-        // Now look for HARD errors that will override SOFT errors reset Level
-        if( 1 == fir_reg.rxhopbe )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_HARD;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> OPB Bus Error: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-        if( 1 == fir_reg.rxhopbt )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_HARD;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> OPB Bus Timeout: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-        if( 1 == fir_reg.rxctgtel )
-        {
-            errorFound = true;
-            o_pnorResetLevel = RESET_OPB_LPCHC_HARD;
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> CI Load/CI Store/OPB Master Hang Timeout: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_pnorResetLevel);
-        }
-
-
-    }while(0);
-
-
-    // If there is any error create an error log
-    if ( errorFound )
-    {
-        // If we failed on a register read above, but still found an error,
-        // delete register read error log and create an original error log
-        // for the found error
-        if ( l_err )
-        {
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForOpbErrors> Deleting register read error. Returning error created for the found error");
-            delete l_err;
-        }
-
-        /*@
-         * @errortype
-         * @moduleid     PNOR::MOD_PNORDD_CHECKFOROPBERRORS
-         * @reasoncode   PNOR::RC_ERROR_IN_STATUS_REG
-         * @userdata1    OPB FIR Register Data
-         * @userdata2    Reset Level
-         * @devdesc      PnorDD::checkForOpbErrors> Error(s) found in OPB
-         *               and/or LPCHC Status Register
-         */
-        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        PNOR::MOD_PNORDD_CHECKFOROPBERRORS,
-                                        PNOR::RC_ERROR_IN_STATUS_REG,
-                                        fir_reg.data64,
-                                        o_pnorResetLevel );
-
-        // Limited in callout: no PNOR target, so calling out processor
-        l_err->addHwCallout(
-                        iv_target,
-                        HWAS::SRCI_PRIORITY_HIGH,
-                        HWAS::NO_DECONFIG,
-                        HWAS::GARD_NULL );
-
-
-        // Log FIR Register Data
-        ERRORLOG::ErrlUserDetailsLogRegister
-                  l_eud(iv_target);
-
-        l_eud.addDataBuffer(&fir_data, scom_size,
-                            DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
-
-        l_eud.addToLog(l_err);
-
-        addFFDCRegisters(l_err);
-        l_err->collectTrace(PNOR_COMP_NAME);
-
-    }
-
-    return l_err;
-
-}
-
-
-
-/**
  * @brief Add Error Registers to an existing Error Log
  */
 void PnorDD::addFFDCRegisters(errlHndl_t & io_errl)
@@ -1176,7 +1020,9 @@ void PnorDD::addFFDCRegisters(errlHndl_t & io_errl)
                   l_eud(iv_target);
 
         do {
-
+            //@fixme - RTC:107788 Seems like this might not belong here,
+            //   instead only in the LPC layer...
+            // Add ECCB Status Register
             tmp_err = deviceOp( DeviceFW::READ,
                                 iv_target,
                                 &(data64),
@@ -1410,7 +1256,7 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
              * @userdata2[0:31]   Micron Flag status register
              * @devdesc      PnorDD::micronFlagStatus> Error or timeout from
              *               Micron Flag Status Register
-             * @custdesc    A problem occurred while accessing the boot flash.
+             * @custdesc     Hardware error accessing flash during IPL
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_MICRONFLAGSTATUS,
@@ -1929,125 +1775,12 @@ errlHndl_t PnorDD::writeSfcBuffer(size_t i_size,
 errlHndl_t PnorDD::readLPC(uint32_t i_addr,
                            uint32_t& o_data)
 {
-    errlHndl_t l_err = NULL;
-    ResetLevels pnorResetLevel = RESET_CLEAR;
-
-    do {
-
-        // always read/write 64 bits to SCOM
-        size_t scom_size = sizeof(uint64_t);
-
-        // write command register with LPC address to read
-        EccbControlReg_t eccb_cmd;
-        eccb_cmd.read_op = 1;
-        eccb_cmd.address = i_addr;
-        l_err = deviceOp( DeviceFW::WRITE,
+    size_t reg_size = sizeof(uint32_t);
+    errlHndl_t l_err = deviceOp( DeviceFW::READ,
                           iv_target,
-                          &(eccb_cmd.data64),
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
-        if( l_err ) { break; }
-
-        // poll for complete and get the data back
-        EccbStatusReg_t eccb_stat;
-        uint64_t poll_time = 0;
-        uint64_t loop = 0;
-
-        while( poll_time < ECCB_POLL_TIME_NS )
-        {
-            l_err = deviceOp( DeviceFW::READ,
-                              iv_target,
-                              &(eccb_stat.data64),
-                              scom_size,
-                              DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
-            if( l_err ) { break; }
-
-            if( eccb_stat.op_done == 1 )
-            {
-                break;
-            }
-
-
-            // want to start out incrementing by small numbers then get bigger
-            //  to avoid a really tight loop in an error case so we'll increase
-            //  the wait each time through
-            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
-            //nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
-            poll_time += ECCB_POLL_INCR_NS*++loop;
-        }
-        if( l_err ) { break; }
-
-        // check for errors or timeout at ECCB level
-        if( (eccb_stat.data64 & ECCB_LPC_STAT_REG_ERROR_MASK)
-            || (eccb_stat.op_done == 0) )
-        {
-            TRACFCOMP(g_trac_pnor, "PnorDD::readLPC> Error or timeout from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
-
-            /*@
-             * @errortype
-             * @moduleid     PNOR::MOD_PNORDD_READLPC
-             * @reasoncode   PNOR::RC_LPC_ERROR
-             * @userdata1[0:31]   LPC Address
-             * @userdata1[32:63]  Total poll time (ns)
-             * @userdata2    ECCB Status Register
-             * @devdesc      PnorDD::readLPC> Error or timeout from
-             *               LPC Status Register
-             * @custdesc    A problem occurred while accessing the boot flash.
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            PNOR::MOD_PNORDD_READLPC,
-                                            PNOR::RC_LPC_ERROR,
-                                            TWO_UINT32_TO_UINT64(i_addr,poll_time),
-                                            eccb_stat.data64);
-
-            // Limited in callout: no PNOR target, so calling out processor
-            l_err->addHwCallout(
-                            iv_target,
-                            HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::NO_DECONFIG,
-                            HWAS::GARD_NULL );
-
-            addFFDCRegisters(l_err);
-            l_err->collectTrace(PNOR_COMP_NAME);
-            l_err->collectTrace(XSCOM_COMP_NAME);
-
-            // Reset ECCB - handled below
-            pnorResetLevel = RESET_ECCB;
-
-            break;
-        }
-
-        // check for errors at OPB level
-        l_err = checkForOpbErrors( pnorResetLevel );
-
-        if( l_err ) { break; }
-
-        // copy data out to caller's buffer
-        o_data = eccb_stat.read_data;
-
-    } while(0);
-
-
-    // If we have an error that requires a reset, do that here
-    if ( l_err && ( pnorResetLevel != RESET_CLEAR ) )
-    {
-        errlHndl_t tmp_err = NULL;
-        tmp_err = resetPnor(pnorResetLevel);
-
-        if ( tmp_err )
-        {
-            // Commit reset error since we have original error l_err
-            TRACFCOMP(g_trac_pnor, "PnorDD::readLPC Error from resetPnor() after previous error eid=0x%X. Committing resetPnor() error log eid=0x%X.",
-                      l_err->eid(), tmp_err->eid());
-
-            tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            tmp_err->collectTrace(PNOR_COMP_NAME);
-            tmp_err->plid(l_err->plid());
-            errlCommit(tmp_err, PNOR_COMP_ID);
-        }
-    }
-
-
+                          &o_data,
+                          reg_size,
+                          DEVICE_LPC_ADDRESS(LPC::TRANS_ABS,i_addr) );
     return l_err;
 }
 
@@ -2057,135 +1790,13 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
 errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                             uint32_t i_data)
 {
-    errlHndl_t l_err = NULL;
-    ResetLevels pnorResetLevel = RESET_CLEAR;
-
-
+    size_t reg_size = sizeof(uint32_t);
+    errlHndl_t l_err = deviceOp( DeviceFW::WRITE,
+                      iv_target,
+                      &i_data,
+                      reg_size,
+                      DEVICE_LPC_ADDRESS(LPC::TRANS_ABS,i_addr) );
     TRACDCOMP(g_trac_pnor, "writeLPC> %.8X = %.8X", i_addr, i_data );
-
-    do {
-
-        // always read/write 64 bits to SCOM
-        size_t scom_size = sizeof(uint64_t);
-
-        // write data register
-        TRACDCOMP(g_trac_pnor, "writeLPC> Write ECCB data register");
-
-        uint64_t eccb_data = static_cast<uint64_t>(i_data);
-        eccb_data = eccb_data << 32; //left-justify my data
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_target,
-                          &eccb_data,
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(ECCB_DATA_REG) );
-        if( l_err ) { break; }
-
-        // write command register with LPC address to write
-        EccbControlReg_t eccb_cmd;
-        eccb_cmd.read_op = 0;
-        eccb_cmd.address = i_addr;
-        TRACDCOMP(g_trac_pnor, "writeLPC> Write ECCB command register, cmd=0x%.16x", eccb_cmd.data64 );
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_target,
-                          &(eccb_cmd.data64),
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
-        if( l_err ) { break; }
-
-
-        // poll for complete
-        EccbStatusReg_t eccb_stat;
-        uint64_t poll_time = 0;
-        uint64_t loop = 0;
-        while( poll_time < ECCB_POLL_TIME_NS )
-        {
-            l_err = deviceOp( DeviceFW::READ,
-                              iv_target,
-                              &(eccb_stat.data64),
-                              scom_size,
-                              DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
-            TRACDCOMP(g_trac_pnor, "writeLPC> Poll on ECCB Status, poll_time=0x%.16x, stat=0x%.16x", eccb_stat.data64,  poll_time );
-
-            if( l_err ) { break; }
-
-            if( eccb_stat.op_done == 1 )
-            {
-                break;
-            }
-
-            // want to start out incrementing by small numbers then get bigger
-            //  to avoid a really tight loop in an error case so we'll increase
-            //  the wait each time through
-            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
-            //nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
-            poll_time += ECCB_POLL_INCR_NS*++loop;
-        }
-        if( l_err ) { break; }
-
-        // check for errors at ECCB level
-        if( (eccb_stat.data64 & ECCB_LPC_STAT_REG_ERROR_MASK)
-            || (eccb_stat.op_done == 0) )
-        {
-            TRACFCOMP(g_trac_pnor, "PnorDD::writeLPC> Error or timeout from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
-
-            /*@
-             * @errortype
-             * @moduleid     PNOR::MOD_PNORDD_WRITELPC
-             * @reasoncode   PNOR::RC_LPC_ERROR
-             * @userdata1    LPC Address
-             * @userdata2    ECCB Status Register
-             * @devdesc      PnorDD::writeLPC> Error or timeout from
-             *               LPC Status Register
-             * @custdesc    A problem occurred while accessing the boot flash.
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            PNOR::MOD_PNORDD_WRITELPC,
-                                            PNOR::RC_LPC_ERROR,
-                                            TWO_UINT32_TO_UINT64(0,i_addr),
-                                            eccb_stat.data64);
-            // Limited in callout: no PNOR target, so calling out processor
-            l_err->addHwCallout(
-                            iv_target,
-                            HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::NO_DECONFIG,
-                            HWAS::GARD_NULL );
-
-            addFFDCRegisters(l_err);
-            l_err->collectTrace(PNOR_COMP_NAME);
-            l_err->collectTrace(XSCOM_COMP_NAME);
-
-            // Reset ECCB - handled below
-            pnorResetLevel = RESET_ECCB;
-
-            break;
-        }
-
-        // check for errors at OPB level
-        l_err = checkForOpbErrors( pnorResetLevel );
-
-        if( l_err ) { break; }
-
-    } while(0);
-
-    // If we have an error that requires a reset, do that here
-    if ( l_err && ( pnorResetLevel != RESET_CLEAR ) )
-    {
-        errlHndl_t tmp_err = NULL;
-        tmp_err = resetPnor(pnorResetLevel);
-
-        if ( tmp_err )
-        {
-            // Commit reset error since we have original error l_err
-            TRACFCOMP(g_trac_pnor, "PnorDD::writeLPC Error from resetPnor() after previous error eid=0x%X. Committing resetPnor() error log eid=0x%X.",
-                      l_err->eid(), tmp_err->eid());
-
-            tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            tmp_err->collectTrace(PNOR_COMP_NAME);
-            tmp_err->plid(l_err->plid());
-            errlCommit(tmp_err, PNOR_COMP_ID);
-        }
-    }
-
 
     return l_err;
 }
@@ -2246,7 +1857,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         if(need_write == false)
         {
             //No write actually needed, break out here
-            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock>  NO Write Needed! Exiting FUnction");
+            TRACDCOMP(g_trac_pnor,"compareAndWriteBlock>  NO Write Needed! Exiting Function");
             break;
         }
 
@@ -2347,7 +1958,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         delete[] read_data;
     }
 
-    TRACFCOMP(g_trac_pnor,"<<compareAndWriteBlock() Exit");
+    TRACDCOMP(g_trac_pnor,"<<compareAndWriteBlock() Exit");
 
 
     return l_err;
@@ -2370,15 +1981,15 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             /*@
              * @errortype
              * @moduleid     PNOR::MOD_PNORDD_ERASEFLASH
-             * @reasoncode   PNOR::RC_LPC_ERROR
+             * @reasoncode   PNOR::RC_INVALID_ADDRESS
              * @userdata1    LPC Address
              * @userdata2    Nearest Erase Boundary
              * @devdesc      PnorDD::eraseFlash> Address not on erase boundary
-             * @custdesc    A problem occurred while accessing the boot flash.
+             * @custdesc     Firmware error accessing flash during IPL
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_ERASEFLASH,
-                                            PNOR::RC_LPC_ERROR,
+                                            PNOR::RC_INVALID_ADDRESS,
                                             TWO_UINT32_TO_UINT64(0,i_address),
                                             findEraseBlock(i_address),
                                             true /*Add HB SW Callout*/ );
@@ -2652,15 +2263,11 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
         TRACFCOMP(g_trac_pnor, "PnorDD::resetPnor> i_pnorResetLevel=0x%.8X", i_pnorResetLevel);
 
         do {
-
-            // always read/write 64 bits to SCOM
-            uint64_t scom_data_64 = 0x0;
-            size_t scom_size = sizeof(uint64_t);
-
+#if 0
             // 32 bits for address and data for LPC operations
             uint32_t lpc_addr=0;
             uint32_t lpc_data=0;
-
+#endif
 
             // To Avoid Infinite Loop - skip recovery if it already failed
             if ( iv_error_recovery_failed == true )
@@ -2679,85 +2286,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                     break;
                 }
 
-            case RESET_ECCB:
-                {
-                    // Write Reset Register to reset FW Logic registers
-                    TRACFCOMP(g_trac_pnor, "PnorDD::resetPnor> Writing ECCB_RESET_REG to reset ECCB FW Logic");
-                    scom_data_64 = 0x0;
-                    l_err = deviceOp( DeviceFW::WRITE,
-                                      iv_target,
-                                      &(scom_data_64),
-                                      scom_size,
-                                      DEVICE_SCOM_ADDRESS(ECCB_RESET_REG) );
-
-                    break;
-                }
-
-            case RESET_OPB_LPCHC_SOFT:
-                {
-                    TRACFCOMP(g_trac_pnor, "PnorDD::resetPnor> Writing OPB_MASTER_LS_CONTROL_REG to disable then enable First Error Data Capture");
-
-                    // First read OPB_MASTER_LS_CONTROL_REG
-                    lpc_addr = OPB_MASTER_LS_CONTROL_REG;
-                    lpc_data = 0x0;
-
-                    l_err = readLPC(lpc_addr, lpc_data);
-
-                    if (l_err) { break; }
-
-                    // Disable 'First Error Data Capture' - set bit 29 to 0b1
-                    lpc_data |= 0x00000004;
-
-                    l_err = writeLPC(lpc_addr, lpc_data);
-
-                    if (l_err) { break; }
-
-
-                    // Enable 'First Error Data Capture' - set bit 29 to 0b0
-                    // No wait-time needed
-                    lpc_data &= 0xFFFFFFFB;
-
-                    l_err = writeLPC(lpc_addr, lpc_data);
-
-                    if (l_err) { break; }
-
-                    // Clear FIR register
-                    scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
-                    l_err = deviceOp(
-                              DeviceFW::WRITE,
-                              iv_target,
-                              &(scom_data_64),
-                              scom_size,
-                              DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
-                    break;
-                }
-
-            case RESET_OPB_LPCHC_HARD:
-                {
-                    TRACFCOMP(g_trac_pnor, "PnorDD::resetPnor> Writing LPCHC_RESET_REG to reset LPCHC Logic");
-                    lpc_addr = LPCHC_RESET_REG;
-                    lpc_data = 0x0;
-
-                    l_err = writeLPC(lpc_addr, lpc_data);
-
-                    // sleep 1ms for LPCHC to execute internal
-                    // reset+init sequence
-                    nanosleep( 0, NS_PER_MSEC );
-
-                    if (l_err) { break; }
-
-                    // Clear FIR register
-                    scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
-                    l_err = deviceOp(
-                              DeviceFW::WRITE,
-                              iv_target,
-                              &(scom_data_64),
-                              scom_size,
-                              DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
-
-                    break;
-                }
-
+                //@fixme RTC:109859 -- All SFC recovery should move into SFC classes
             case RESET_LPC_SLAVE:
                 {
                     // @todo RTC 109999 - Skipping because SFC resets can
@@ -2774,6 +2303,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                     break;
                 }
 
+                //@fixme RTC:109859 -- All SFC recovery should move into SFC classes
             case RESET_LPC_SLAVE_ERRS:
                 {
                     // @todo RTC 109999 - Skipping because SFC resets can
@@ -2790,6 +2320,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                 }
 
 
+                //@fixme RTC:109859 -- All SFC recovery should move into SFC classes
             case RESET_SFC_LOCAL_BUS:
                 {
                     // @todo RTC 109999 - Skipping because SFC resets can
@@ -2809,6 +2340,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                     break;
                 }
 
+                //@fixme RTC:109859 -- All SFC recovery should move into SFC classes
             case RESET_SFCBUS_LPCSLAVE_ERRS:
                 {
                     // @todo RTC 109999 - Skipping because SFC resets can
@@ -2883,6 +2415,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
 
 
 
+//@fixme RTC:109859 -- All SFC recovery should move into SFC classes
 errlHndl_t PnorDD::reinitializeSfc( void )
 {
     TRACFCOMP(g_trac_pnor, "PnorDD::reinitializeSfc>");

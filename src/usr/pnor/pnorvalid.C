@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +47,7 @@
 #include "pnordd.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
+#include <lpc/lpcif.H>
 
 
 // Used for creating an Invalid TOC ("PNOR")
@@ -139,7 +141,38 @@ errlHndl_t validateAltMaster( void )
             {
                 delete pnordd;
                 pnordd = NULL;
+
+                // Delete the LPC objects we already used
+                l_err = LPC::create_altmaster_objects( false, NULL );
+                if ( l_err )
+                {
+                    // Commit Error Log, but continue the test
+                    TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not delete LPC objects. eid=0x%X, rc=0x%X. Committing log and Continuing", l_err->eid(), l_err->reasonCode());
+
+                    l_err->collectTrace(PNOR_COMP_NAME);
+
+                    // if there was an error, commit here and then proceed to
+                    // the next processor
+                    errlCommit(l_err,PNOR_COMP_ID);
+                    continue;
+                }
             }
+
+            // Create the LPC objects we're going to use
+            l_err = LPC::create_altmaster_objects( true, procList[i] );
+            if ( l_err )
+            {
+                // Commit Error Log, but continue the test
+                TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not create LPC objects for %.8X. eid=0x%X, rc=0x%X. Committing log and Continuing", TARGETING::get_huid(procList[i]), l_err->eid(), l_err->reasonCode());
+
+                l_err->collectTrace(PNOR_COMP_NAME);
+
+                // if there was an error, commit here and then proceed to
+                // the next processor
+                errlCommit(l_err,PNOR_COMP_ID);
+                continue;
+            }
+
             pnordd = new PnorDD(PnorDD::MODEL_REAL_MMIO, 0, 0, procList[i]);
 
             // Read Flash
@@ -248,6 +281,20 @@ errlHndl_t validateAltMaster( void )
     {
         delete pnordd;
         pnordd = NULL;
+
+        // Delete the LPC objects we used
+        l_err = LPC::create_altmaster_objects( false, NULL );
+        if ( l_err )
+        {
+            // Commit Error Log, but continue the test
+            TRACFCOMP( g_trac_pnor, INFO_MRK"PNOR::validateAltMaster> Could not delete LPC objects. eid=0x%X, rc=0x%X. Committing log and Continuing", l_err->eid(), l_err->reasonCode());
+
+            l_err->collectTrace(PNOR_COMP_NAME);
+
+            // if there was an error, commit here and then proceed to
+            // the next processor
+            errlCommit(l_err,PNOR_COMP_ID);
+        }
     }
 
     if(tocBuffer != NULL)

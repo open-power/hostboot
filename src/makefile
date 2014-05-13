@@ -110,6 +110,7 @@ BASE_MODULES += scom
 BASE_MODULES += xscom
 BASE_MODULES += initservice
 BASE_MODULES += secureboot_base
+BASE_MODULES += lpc
 BASE_MODULES += pnor
 BASE_MODULES += vfs
 
@@ -232,7 +233,6 @@ RUNTIME_TESTCASE_MODULES += testscom_rt
 RUNTIME_TESTCASE_MODULES += testutil_rt
 RUNTIME_TESTCASE_MODULES += testvpd_rt
 RUNTIME_TESTCASE_MODULES += testhwpf_rt
-
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

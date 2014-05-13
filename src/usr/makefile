@@ -60,5 +60,6 @@ SUBDIRS += secureboot.d
 SUBDIRS += devtree.d
 SUBDIRS += sbe.d
 SUBDIRS += gpio.d
+SUBDIRS += lpc.d
 
 include ${ROOTPATH}/config.mk

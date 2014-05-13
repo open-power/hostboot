@@ -36,7 +36,7 @@ namespace PNOR { class UdPnorDDParms; }
 
 /**
  *  @brief  PNOR Device Driver Class
- *     Provides access to the PNOR flash via the ECCB/LPC/SPI hardware
+ *     Provides access to the PNOR flash via the ECCB/LPC hardware
  */
 class PnorDD
 {
@@ -123,17 +123,6 @@ class PnorDD
     {
         uint32_t addr;  /**< Address of the erase block */
         uint32_t count;  /**< Num Erases of block */
-    };
-
-    /**
-     * @brief LPC HC Registers
-     *    These are offsets within the LPC Host Controller Register Space
-     */
-    enum LpcRegAddr {
-        LPC_REG_BAR0 = 0x00, /**< BAR0 : OPB register */
-        LPC_REG_BAR1 = 0x04, /**< BAR1 : LPC I/O space */
-        LPC_REG_BAR2 = 0x08, /**< BAR2 : LPC Memory space */
-        LPC_REG_BAR3 = 0x0C, /**< BAR3 : LPC Firmware space */
     };
 
     /**
@@ -282,9 +271,6 @@ class PnorDD
      */
     enum ResetLevels {
         RESET_CLEAR          = 0x00000000, /**< Clear Reset Level */
-        RESET_ECCB           = 0x00000001, /**< ECCB FW Logic */
-        RESET_OPB_LPCHC_SOFT = 0x00000002, /**< OPB LPCHC Clear Errors */
-        RESET_OPB_LPCHC_HARD = 0x00000004, /**< OPB LPCHC Reset Logic */
         RESET_LPC_SLAVE      = 0x00000008, /**< LPC Slave Logic on SFC */
         RESET_LPC_SLAVE_ERRS = 0x00000010, /**< LPC Slave Errors on SFC */
         RESET_SFC_LOCAL_BUS  = 0x00000020, /**< SFC Local Bus */
@@ -414,36 +400,6 @@ class PnorDD
         };
         SfcCustomReg_t() : data32(0) {};
     };
-
-    /**
-     * @brief  OPB-LPCM FIR Register Layout
-     */
-    union OpbLpcmFirReg_t
-    {
-        uint64_t data64;
-        struct
-        {
-            uint64_t rxits : 1;    // Invalid Transfer Size
-            uint64_t rxicmd : 1;   // Invalid Command
-            uint64_t rxiaa : 1;    // Invalid Address Alignment
-            uint64_t rxhopbe : 1;  // OPB Bus Error
-            uint64_t rxhopbt : 1;  // OPB Bus Timeout
-            uint64_t rxctgtel : 1; // CI Load/CI Store/OPB Master Hang Timeout
-            uint64_t rxcbpe : 1;   // Command Buffer Parity Error
-            uint64_t rxdbpe : 1;   // Data Buffer Parity Error
-            uint64_t reserved  : 56;
-        };
-        OpbLpcmFirReg_t() : data64(0) {};
-    };
-
-    /**
-     * @brief LPCHC Registers
-     *    These are offsets within the LPCHC Register Space
-     */
-    enum LpcHcRegAddr {
-        LPCHC_REG_RESET   = 0xFC, /**< RESET : write-only */
-    };
-
 
     /**
      * @brief Write a SFC Register
@@ -610,17 +566,7 @@ class PnorDD
 #endif
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
-        ECCB_CTL_REG    = 0x000B0020, /**< ECCB Control Reg (FW) */
-        ECCB_RESET_REG  = 0x000B0021, /**< ECCB Reset Reg (FW) */
-        ECCB_STAT_REG   = 0x000B0022, /**< ECCB Status Reg (FW) */
-        ECCB_DATA_REG   = 0x000B0023, /**< ECCB Data Reg (FW) */
-
-        // Default Values to set for all operations
-        // 1101.0100.0000.000x.0000.0001.0000.0000.<address>
-        ECCB_LPC_CTL_REG_DEFAULT = 0xD400010000000000,
-
-        // Error bits: 41-43, 56  (52=cmd complete) (not 57: only non-fw use)
-        ECCB_LPC_STAT_REG_ERROR_MASK = 0x0000000000700080, /**< Error Bits */
+        ECCB_STAT_REG = 0x000B0022, /**< ECCB Status Reg (FW) */
 
         /**< OPB LPCM Sync FIR Reg - used to read the FIR*/
         OPB_LPCM_FIR_REG = 0x01010C00,
@@ -639,8 +585,6 @@ class PnorDD
 
         ERASE_COUNT_MAX = 64,  /**<Max number of tracked erase blocks */
         ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Min Erase Block (bytes) */
-        ECCB_POLL_TIME_NS = 400000, /**< max time from Manfred Walz is 400ms */
-        ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
     };
 
     /**
@@ -782,51 +726,6 @@ class PnorDD
      *
      */
     void addFFDCRegisters(errlHndl_t & io_errl);
-
-    /**
-     * @brief  ECCB Control Register Layout
-     */
-    union EccbControlReg_t
-    {
-        uint64_t data64;
-        struct
-        {
-            // unused sections should be set to zero
-            uint64_t magic1      : 8;  /**< 0:7 = b11010100 per spec */
-            uint64_t unused1     : 7;  /**< 8:14 */
-            uint64_t read_op     : 1;  /**< 15 = set for read operation */
-            uint64_t unused2     : 7;  /**< 16:22 */
-            uint64_t addr_len    : 3;  /**< 23:25 = 100 means 4 byte */
-            uint64_t unused3     : 6;  /**< 26:31 */
-            uint64_t address     : 32; /**< 32:63 = LPC Address */
-        };
-
-        EccbControlReg_t() : data64(ECCB_LPC_CTL_REG_DEFAULT) {};
-    };
-
-    /**
-     * @brief  ECCB Status Register Layout
-     */
-    union EccbStatusReg_t
-    {
-        uint64_t data64;
-        struct
-        {
-            uint64_t unused      : 6;  /**< 0:5  */
-            uint64_t read_data   : 32; /**< 6:37 */
-            uint64_t unused1     : 3;  /**< 38:40 */
-            uint64_t eccb_err    : 3;  /**< 41:43 = ECCB_Error_Info */
-            uint64_t busy        : 1;  /**< 44 = Operation Busy */
-            uint64_t unused2     : 7;  /**< 45:51 */
-            uint64_t op_done     : 1;  /**< 52 = Command Complete */
-            uint64_t unused3     : 3;  /**< 53:55 */
-            uint64_t addr_parity_err : 1; /**< 56 = ECC Address Register
-                                                    Parity Error */
-            uint64_t unused4     : 7;  /**< 57:63 */
-        };
-        EccbStatusReg_t() : data64(0) {};
-    };
-
 
     /**
      * @brief Reset PNOR Logic At The Specified Level
