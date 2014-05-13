@@ -228,6 +228,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     GardAction::ErrorType prdGardErrType;
     HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
     HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
+    PRDF_RECONFIG_LOOP(deconfigState);
 
     bool ReturnELog = false;
     bool ForceTerminate = false;

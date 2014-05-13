@@ -206,6 +206,12 @@
   o_abort = false;
 
 /**
+ * @brief  set deconfigEnum based on reconfig loop
+ */
+#define PRDF_RECONFIG_LOOP(o_deconfigEnum) \
+  o_deconfigEnum = HWAS::DELAYED_DECONFIG;
+
+/**
  * @brief Interface to request a Hardware Unit dump collection
  */
 // FIXME:RTC: 65609 will address this issue.
