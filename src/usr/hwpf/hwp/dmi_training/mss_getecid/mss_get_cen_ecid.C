@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.31 2014/03/25 21:08:53 uid157495 Exp $
+// $Id: mss_get_cen_ecid.C,v 1.32 2014/05/08 18:52:38 lapietra Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.32  | sglancy  |08-MAY-14| Changed location of the setting ATTR_MSS_INIT_STATE to track IPL states
 //   1.31  | sglancy  |25-MAR-14| RAS review updates
 //   1.30  | bellows  |11-NOV-13| Gerrit review updates
 //   1.29  | bellows  |08-NOV-13| Added ATTR_MSS_INIT_STATE to track IPL states
@@ -99,6 +100,14 @@ using namespace fapi;
     // return code
     fapi::ReturnCode rc;
 
+
+    // set the init state attribute to CLOCKS_ON
+    uint8_t l_attr_mss_init_state;
+    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON;
+    rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target, l_attr_mss_init_state);
+    if(rc) return rc;
+
+
     if(ecid_struct.valid) {
 
       rc = mss_parse_ecid(ecid_struct.io_ecid,
@@ -111,15 +120,7 @@ using namespace fapi;
                           ecid_struct.o_psro,
                           ecid_struct.o_bluewaterfall_broken,
                           ecid_struct.o_nwell_misplacement );
-      if(rc) return rc;
-
-      // set the init state attribute to CLOCKS_ON
-      uint8_t l_attr_mss_init_state;
-      l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON;
-      rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target, l_attr_mss_init_state);
-      if(rc) return rc;
-
-      // If struct was valid, and the MSS_INIT_STATE set successfully,
+			  
       // procedure is done.
       return rc;
     }
