@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_enable_reconfig.C,v 1.9 2014/05/03 01:10:01 dcrowell Exp $
+// $Id: proc_enable_reconfig.C,v 1.12 2014/05/14 18:08:38 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_enable_reconfig.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -44,6 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.12  | jdsloat  |14-MAY-14| Fixed target name l_target_pu_mcs to i_target_pu_mcs
+//   1.11  | jdsloat  |13-MAY-14| Removed unused attribute l_attr_feature_venice
+//   1.10  | jdsloat  |08-MAY-14| Changed  MC1_BUSCNTL_FIR_0x02011E00 to IOMC0_BUSCNTL_FIR_0x02011A00 chiplet address to cover MC0 for venice.
 ///  1.9   | dcrowell |02-MAY-14| Corrected comment in previous commit
 //   1.8   | jdsloat  |02-MAY-14| Added initializing of MCS_MCFGPR_0x02011802 to all 0s according to SW259625 by Dan Crowell
 //   1.7   | jdsloat  |25-MAR-14| Added return rc to the end of the code
@@ -225,7 +228,7 @@ extern "C" {
       if(rc) return rc;
 
     // #dmi fir
-      rc = fapiPutScom(l_target_pu, MC1_BUSCNTL_FIR_0x02011E00, data_buffer_64);
+      rc = fapiPutScom(i_target_pu_mcs,  IOMC0_BUSCNTL_FIR_0x02011A00, data_buffer_64);
       if(rc) return rc;
 
       //Turn off indication of valid MCS for OCC

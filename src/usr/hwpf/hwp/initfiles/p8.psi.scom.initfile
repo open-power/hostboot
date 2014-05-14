@@ -1,4 +1,4 @@
-#-- $Id: p8.psi.scom.initfile,v 1.5 2013/06/05 15:31:00 jmcgill Exp $
+#-- $Id: p8.psi.scom.initfile,v 1.6 2014/04/23 13:47:41 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -23,6 +23,12 @@ SyntaxVersion = 1
 #-- SCOM initializations
 #--------------------------------------------------------------------------------
 
+# PSI Host Bridge Error Mask Register
+scom 0x0201090F {
+    bits,    scom_data;
+    16:27,   0x000;
+    48:52,   0b00000;
+}
 
 # PSI Host Bridge FIR Action0 Register
 scom 0x02010906 {
@@ -41,3 +47,4 @@ scom 0x02010903 {
     bits,    scom_data;
     0:63,    0x3902FFF800000000;
 }
+
