@@ -126,11 +126,19 @@ class CenRank
 
     struct
     {
+        #ifndef ESW_SIM_COMPILE
         union
         {
             struct { uint8_t unused : 5; uint8_t ds : 1; uint8_t rs : 2; } s;
             uint8_t u;
         } master;
+        #else
+        union
+        {
+            struct { uint8_t rs : 2; uint8_t ds : 1; uint8_t unused : 5; } s;
+            uint8_t u;
+        } master;
+        #endif
 
         uint8_t slave : 3;
 
