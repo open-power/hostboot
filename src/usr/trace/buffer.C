@@ -360,16 +360,23 @@ namespace TRACE
         // Read the component from the entry itself (added as part of claiming).
         ComponentDesc* l_comp = i_entry->comp;
 
+        Entry* l_savedNext = NULL;
+
         // Lockless loop to update component linked-list.
         do
         {
             // Update our entry's "next" pointer.
-            i_entry->next = l_comp->iv_first;
+            // Note: Our next pointer could change out from under us by the
+            // daemon's replaceEntry function, but the component iv_first
+            // cannot change by the daemon until we _producerExit, therefore
+            // we need to save the original next pointer for the atomic update
+            // of l_comp->iv_first below.
+            l_savedNext = i_entry->next = l_comp->iv_first;
 
             // If there is an entry, update its "prev" pointer to this entry.
-            if (i_entry->next)
+            if (l_savedNext)
             {
-                if (!__sync_bool_compare_and_swap(&i_entry->next->prev,
+                if (!__sync_bool_compare_and_swap(&l_savedNext->prev,
                                                   NULL,
                                                   i_entry))
                 {
@@ -403,7 +410,7 @@ namespace TRACE
         // it point at this entry.
         //
         while (!__sync_bool_compare_and_swap(&l_comp->iv_first,
-                                             i_entry->next,
+                                             l_savedNext,
                                              i_entry));
 
 
