@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,6 +34,7 @@
 
 #include    <initservice/initsvcreasoncodes.H>
 #include    "extinitsvc.H"
+#include    <config.h>
 
 namespace   INITSERVICE
 {
@@ -304,6 +308,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
+
+#ifdef CONFIG_GPIODD
+        /**
+         * @brief GPIO code library
+         */
+        {
+            "libgpio.so" ,                        // taskname
+            NULL,                                 // no pointer to fn
+            {
+                INIT_TASK,                        // task type
+                EXT_IMAGE,                        // Extended Module
+            }
+        },
+#endif
 
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

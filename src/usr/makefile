@@ -5,7 +5,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2014
+# [+] Google Inc.
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,5 +59,6 @@ SUBDIRS += dump.d
 SUBDIRS += secureboot.d
 SUBDIRS += devtree.d
 SUBDIRS += sbe.d
+SUBDIRS += gpio.d
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,10 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] Google Inc.                                                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -259,5 +262,43 @@
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
     <hbOnly/>
+</attribute>
+<attribute>
+    <id>GPIO_INFO</id>
+    <description>Information needed to address GPIO device</description>
+    <complexType>
+        <description>Structure to define the addessing for an I2C
+                     slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0/node-0/membuf-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>1</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
+            <type>uint8_t</type>
+            <default>0x40</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 </attributes>

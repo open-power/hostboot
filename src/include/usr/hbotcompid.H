@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -315,6 +318,12 @@ const compId_t SBE_COMP_ID = 0x2200;
 const char SBE_COMP_NAME[] = "sbe";
 //@}
 
+/** @name GPIO
+ * General Purpose IO device
+ */
+const compId_t GPIO_COMP_ID = 0x2300;
+const char GPIO_COMP_NAME[] = "gpio";
+//@}
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID

@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,7 +57,7 @@
 #include    <fapiPlatHwpInvoker.H>
 
 //hb vddr support
-#include    <hbVddrMsg.H>
+#include "platform_vddr.H"
 #include <initservice/initserviceif.H>
 
 // Run on all Centaurs/MBAs, but needs to keep this one handy in case we
@@ -93,52 +96,32 @@ using   namespace   fapi;
 void*    call_host_disable_vddr( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+    IStepError l_StepError;
 
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_disable_vddr entry");
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              ENTER_MRK"call_host_disable_vddr");
 
-    if(INITSERVICE::spBaseServicesEnabled())
+    // This function has Compile-time binding for desired platform
+    l_err = platform_disable_vddr();
+
+    if(l_err)
     {
-        IStepError l_StepError;
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR 0x%.8X: call_host_disable_vddr returns error",
+                  l_err->reasonCode());
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
 
-        HBVddrMsg l_hbVddr;
+        errlCommit( l_err, HWPF_COMP_ID );
 
-        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_DISABLE);
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X: call_host_disable_vddr to sendMsg returns error",
-                          l_err->reasonCode());
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  host_disable_vddr()" );
-        }
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr"
-                    "when a fsp present exit" );
-
-        return l_StepError.getErrorHandle();
-    }
-    else
-    {
-        //This is a fsp less system.  Right now the istep
-        //only works when a FSP is present.  May add code in the future for
-        //Stradale which is a FSP-less system
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_disable_vddr"
-                "no-op because fsp-less");
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr "
-                "for an fsp less system exit" );
-
-        return l_err;
     }
 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               EXIT_MRK"call_host_disable_vddr");
+
+    return l_StepError.getErrorHandle();
 }
+
 
 //
 //  Wrapper function to call mem_pll_initf
@@ -183,7 +166,7 @@ void*    call_mem_pll_initf( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err );
 
-            // Create IStep error log and cross reference to error that occurred
+            //Create IStep error log and cross reference to error that occurred
             l_StepError.addErrorDetails(l_err);
 
             // Commit Error
@@ -245,7 +228,7 @@ void*    call_mem_pll_setup( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
-            // Create IStep error log and cross reference to error that occurred
+            //Create IStep error log and cross reference to error that occurred
             l_StepError.addErrorDetails(l_err);
 
             // Commit Error
@@ -272,7 +255,7 @@ void*    call_mem_startclocks( void *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mem_startclocks entry" );
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_mem_startclocks entry" );
 
     // Get all Centaur targets
     TARGETING::TargetHandleList l_membufTargetList;
@@ -307,7 +290,7 @@ void*    call_mem_startclocks( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
-            // Create IStep error log and cross reference to error that occurred
+            //Create IStep error log and cross reference to error that occurred
             l_StepError.addErrorDetails( l_err );
 
             // Commit Error
@@ -321,7 +304,8 @@ void*    call_mem_startclocks( void *io_pArgs )
         }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_mem_startclocks exit" );
 
     return l_StepError.getErrorHandle();
 }
@@ -334,52 +318,33 @@ void*    call_mem_startclocks( void *io_pArgs )
 void*    call_host_enable_vddr( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_host_enable_vddr entry" );
+            ENTER_MRK"call_host_enable_vddr" );
 
     errlHndl_t l_err = NULL;
+    IStepError l_StepError;
 
-    if(INITSERVICE::spBaseServicesEnabled())
+    // This fuction has compile-time binding for different platforms
+    l_err = platform_enable_vddr();
+
+    if( l_err )
     {
-        IStepError l_StepError;
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR 0x%.8X: call_host_enable_vddr returns error",
+                  l_err->reasonCode());
 
-        HBVddrMsg l_hbVddr;
+        l_StepError.addErrorDetails( l_err );
 
-        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_ENABLE);
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                 "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
-                    l_err->reasonCode());
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  host_enable_vddr()" );
-        }
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                              "call_host_enable_vddr exit" );
-
-        return l_StepError.getErrorHandle();
+        // Commit Error
+        errlCommit( l_err, HWPF_COMP_ID );
     }
-    else
-    {
-        //This is a fsp less system.  Right now the istep
-        //only works when a FSP is present.  May add code in the future for
-        //Stradale which is a FSP-less system
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_enable_vddr"
-                "no-op because fsp-less");
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr "
-                "for an fsp less system exit" );
 
-        return l_err;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               EXIT_MRK"call_host_enable_vddr" );
 
-    }
+    return l_StepError.getErrorHandle();
 }
 
 

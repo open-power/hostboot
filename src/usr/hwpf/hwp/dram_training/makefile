@@ -5,7 +5,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] Google Inc.
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,11 +74,14 @@ OBJS += mss_access_delay_reg.o
 OBJS += mss_generic_shmoo.o
 OBJS += mss_mcbist.o
 OBJS += mss_mcbist_common.o
-OBJS += hbVddrMsg.o
 OBJS += mss_mcbist_address.o
 OBJS += mss_dimm_power_test.o
 OBJS += mss_lrdimm_funcs.o
 OBJS += cen_stopclocks.o
+
+
+#
+OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o, hbVddrMsg.o)
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

@@ -1,0 +1,4 @@
+config GPIODD
+    default n
+    help
+        Enable GPIO device driver support

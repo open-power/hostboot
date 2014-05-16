@@ -1,0 +1,231 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/palmetto_vddr.C $              */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// Rhesus board-specific VDDR support.
+// VDDR is enabled/disabled via a GPIO on the hammock card.
+// A separate GPIO selects between 1.35V and 1.25V output from the VR.
+
+#include "platform_vddr.H"
+
+#include <hwpf/hwpf_reasoncodes.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
+
+#include <kernel/timemgr.H>
+
+#include <usr/devicefw/driverif.H>
+#include <usr/gpio/gpioif.H>
+
+using namespace TARGETING;
+using namespace DeviceFW;
+
+trace_desc_t* g_trac_vddr = NULL;
+TRAC_INIT(&g_trac_vddr, "HB_VDDR",  KILOBYTE);
+
+/**
+ * PCA95X GPIO function assignements
+ */
+enum
+{
+    // Output GPIO to enable VDDR. (GPIO pin 0)
+    GPIO_P1V35_EN = 0,
+
+    // No other GPIO pins are implemented on the Palmetto board
+};
+
+// PCA95X internal register addresses
+enum
+{
+    PCA95X_GPIO_REG_INPUT    = 0x0,
+    PCA95X_GPIO_REG_OUTPUT   = 0x2,
+    PCA95X_GPIO_REG_POLARITY = 0x4,
+    PCA95X_GPIO_POLARITY_NORMAL = 0,
+    PCA95X_GPIO_POLARITY_INVERTED = 1,
+    PCA95X_GPIO_REG_CONFIG   = 0x6,
+};
+
+#define    PCA95X_GPIO_CONFIG_OUTPUT false
+#define    PCA95X_GPIO_CONFIG_INPUT  true
+
+// GPIO bit numbers (0-7) => port addr 0 pin(0-7)
+// GPIO bit numbers  (8-15) => port addr 1 pin(0-7)
+#define GPIO_TO_PORT(gpio) (gpio / 8)
+#define GPIO_TO_BIT(gpio) (gpio % 8)
+
+// Helper function to call provided function pointer on each functional
+// centaur Target.
+static errlHndl_t for_each_centaur(errlHndl_t (*func)(Target *))
+{
+    // Get all Centaur targets
+    TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    errlHndl_t l_err = NULL;
+
+    for (TargetHandleList::iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+    {
+        Target* l_pCentaur = *l_membuf_iter;
+
+        l_err = (*func)(l_pCentaur);
+
+        if( l_err )
+        {
+            break;
+        }
+    }
+
+    return l_err;
+}
+
+static errlHndl_t pca95xGpioSetBit(TARGETING::Target * i_target,
+                                   uint8_t i_reg,
+                                   uint8_t i_gpio,
+                                   bool i_val)
+{
+    errlHndl_t err = NULL;
+    do
+    {
+
+        uint64_t cmd = i_reg + GPIO_TO_PORT(i_gpio);
+        uint8_t data = 0;
+        size_t dataLen = sizeof(data);
+
+        // Might want to make this an attribute;
+        // However, This is already a palmetto only object
+        uint64_t deviceType = GPIO::PCA95X_GPIO;
+
+        err = DeviceFW::deviceOp
+            ( DeviceFW::READ,
+              i_target,
+              &data,
+              dataLen,
+              DEVICE_GPIO_ADDRESS(deviceType, cmd)
+            );
+
+        if( err )
+        {
+            break;
+        }
+
+        uint8_t new_reg_val = data;
+        if( i_val )
+        {
+            new_reg_val |= 1 << GPIO_TO_BIT(i_gpio);
+        }
+        else
+        {
+            new_reg_val &= ~(1 << GPIO_TO_BIT(i_gpio));
+        }
+
+        // Do the write only if actually changing value.
+        if( new_reg_val != data )
+        {
+            data = new_reg_val;
+            cmd = i_reg + GPIO_TO_PORT(i_gpio);
+
+            err = DeviceFW::deviceOp
+                ( DeviceFW::WRITE,
+                  i_target,
+                  &data,
+                  dataLen,
+                  DEVICE_GPIO_ADDRESS(deviceType, cmd)
+                );
+
+            if( err )
+            {
+                break;
+            }
+        }
+
+    } while(0);
+
+    return err;
+}
+
+
+static errlHndl_t pca95xGpioWriteBit(TARGETING::Target * i_target,
+                                     uint8_t i_gpio_pin,
+                                     bool i_val)
+{
+    assert( i_gpio_pin >= 0 && i_gpio_pin < 16 );
+    errlHndl_t err = NULL;
+
+    err = pca95xGpioSetBit(i_target,
+                           PCA95X_GPIO_REG_OUTPUT,
+                           i_gpio_pin,
+                           i_val);
+
+    // Configure gpio bit as output (if necessary).
+    if(!err)
+    {
+        err = pca95xGpioSetBit(i_target,
+                               PCA95X_GPIO_REG_CONFIG,
+                               i_gpio_pin,
+                               PCA95X_GPIO_CONFIG_OUTPUT);
+    }
+
+    return err;
+}
+
+static errlHndl_t palmetto_centaur_enable_vddr(Target *centaur)
+{
+    errlHndl_t l_err = NULL;
+
+    // Enable the DIMM power.
+    l_err = pca95xGpioWriteBit(centaur, GPIO_P1V35_EN, true);
+
+    return l_err;
+}
+
+static errlHndl_t palmetto_centaur_disable_vddr(Target *centaur)
+{
+    return pca95xGpioWriteBit(centaur, GPIO_P1V35_EN, false);
+}
+
+// External interfaces
+
+errlHndl_t platform_enable_vspd()
+{
+    // GPIO pin not implemented on palmetto
+    // VSPD voltage hardwired.
+    return NULL;
+}
+
+errlHndl_t platform_enable_vddr()
+{
+    return for_each_centaur(palmetto_centaur_enable_vddr);
+}
+
+errlHndl_t platform_disable_vddr()
+{
+    return for_each_centaur(palmetto_centaur_disable_vddr);
+}

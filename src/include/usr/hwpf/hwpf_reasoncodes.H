@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -67,6 +70,7 @@ namespace fapi
         MOD_HOST_COALESCE_HOST                     = 0x1C,
         MOD_ATTR_OVERRIDE                          = 0x1D,
         MOD_PLAT_SPECIAL_WAKEUP                    = 0x1E,
+        MOD_PLAT_EN_VDDR                           = 0x1F,
 
     };
 
@@ -120,6 +124,8 @@ namespace fapi
 
         RC_RT_WAKEUP_FAILED           = HWPF_COMP_ID | 0x2D,
         RC_NO_MIRRORED_MEMORY         = HWPF_COMP_ID | 0x2E,
+        RC_VDDR_INVALID_VOLTAGE       = HWPF_COMP_ID | 0x2F,
+        RC_TIMEOUT_EN_VDDR            = HWPF_COMP_ID | 0x30,
     };
 
     /**

@@ -1,0 +1,4 @@
+config PALMETTO_VDDR
+    default n
+    help
+        Enable the Hostboot DRAM VDDR function for Palmetto

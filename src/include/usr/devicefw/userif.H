@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,7 +57,7 @@ namespace DeviceFW
         CVPD,
         SCAN,
         EEPROM,
-
+        GPIO,
         LAST_ACCESS_TYPE,
     };
 
@@ -147,6 +150,15 @@ namespace DeviceFW
     #define DEVICE_EEPROM_ADDRESS( i_eeprom_enum, i_offset )\
         DeviceFW::EEPROM, static_cast<uint64_t>(( i_eeprom_enum )),\
             static_cast<uint64_t>(( i_offset ))
+
+    /**
+     * Construct the device addressing paramters for the GPIO port extender ops
+     * @param[in] i_gpio_num - The port extender device type.
+     * @param[in] i_gpio_pin = The GPIO port address
+     */
+    #define DEVICE_GPIO_ADDRESS( i_device_type , i_gpio_portAddr) \
+        DeviceFW::GPIO, static_cast<uint64_t>(( i_device_type )),\
+            static_cast<uint64_t>(( i_gpio_portAddr ))
 
     /**
      *  @brief Perform a hardware read operation.
