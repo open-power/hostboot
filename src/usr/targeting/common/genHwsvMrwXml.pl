@@ -2050,7 +2050,11 @@ sub generate_proc
         <default>$dcm_installed</default>
     </attribute>";
 
-    #fixme-RTC:103921 - should not default anything to ACTING_MASTER
+    #For FSP-based systems, the default will always get overridden by the
+    # the FSP code before it is used, based on which FSP is being used as
+    # the primary.  Therefore, the default is only relevant in the BMC
+    # case where it is required since the value generated here will not
+    # be updated before it is used by HB.
     ## Master value ##
     if( $is_master && ($proc == 0) )
     {
