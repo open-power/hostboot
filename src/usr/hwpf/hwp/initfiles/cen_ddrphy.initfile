@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.32 2014/03/26 13:49:01 asaetow Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.33 2014/05/14 21:04:08 asaetow Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,9 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#  1.33     |asaetow |05/14/14| Changed ADR/DP18 VCO bit61 from 0b1 to 0b0 and PLL_TUNEF bit54 from 0b1 to 0b0 to dampen noise. Based on Qual FA sample data.
+#           |        |        | Note bit61 is VCO low range from >700MHz to <700MHz.
+#           |        |        | Note bit54 is Cap from 2.5pF to 1.0pF.
 #  1.32     |mwuu    |03/25/14|Changed PERCAL_PWR_DIS
 #		in RD_DIA_CONFIG5, CONSEQ_PASS in RC_CONFIG2, BIG/SMALL_STEP in WC_CONFIG1,
 #		FW_RD_WR in WC_CONFIG2, 8 DQS_OFFSET, FW_WR_RD 32
@@ -555,18 +558,19 @@ scom 0x800(0,1)BC300301143F {		# PHY01 Port[0:1] broadcast ADR32S[0:1]
 
 #	new setting from Joe Iadanza 11/30
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
- 	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ < 1200)		;	# < 600 MHz, 1200 MT/s
+#       Changed cap from 2.5pF to 1pF, per SteveW.
+ 	48:59	,	0x689		,	(CEN.ATTR_MSS_FREQ < 1200)		;	# < 600 MHz, 1200 MT/s
 
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
- 	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ < 1460)		;	# < 730 MHz, < 1460 MT/s
+ 	48:59	,	0x689		,	(CEN.ATTR_MSS_FREQ < 1460)		;	# < 730 MHz, < 1460 MT/s
 
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
- 	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
+ 	48:59	,	0x689		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
 
 #	60:63	,	0x4			,	(def_is_ddr4)					;	# VCO = high for DDR4
 #	60:63	,	0x0			,	any								;	# VCO = low for DDR3
-#  changed from SWyatt review...
-	60:63   ,   0x4         ,   (CEN.ATTR_MSS_FREQ > 1400)      ;   # VCO = high for >= 700MHz or 1400 MT/s
+#  changed from Qual FA32002 and SWyatt re-review...
+	60:63   ,   0x0         ,   (CEN.ATTR_MSS_FREQ > 1400)      ;   # Note, no longer valid --> "VCO = high for >= 700MHz or 1400 MT/s"
     60:63   ,   0x0         ,   any                             ;   # VCO = low for < 700MHz
 }
 
@@ -648,17 +652,18 @@ scom 0x800(0,1)3C760301143F {			# CONFIG0_P[0:1] broadcast [0:4]
 
 #	new setting from Joe Iadanza 11/30
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
- 	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ < 1200)		;	# < 600 MHz, 1200 MT/s
+#       Changed cap from 2.5pF to 1pF, per SteveW.
+ 	48:59	,	0x689		,	(CEN.ATTR_MSS_FREQ < 1200)		;	# < 600 MHz, 1200 MT/s
 
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
- 	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ < 1460)		;	# < 730 MHz, < 1460 MT/s
+ 	48:59	,	0x689		,	(CEN.ATTR_MSS_FREQ < 1460)		;	# < 730 MHz, < 1460 MT/s
 
 #	# 0b011 010 101 00 1		33.33uA, gain 3, SE(400 ohms, 16pF, 3pF)
- 	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
+ 	48:59	,	0x689		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
 
-#   Changed to 700MHz per Swyatt
 #	60:63	,	0x0			,	(def_is_sim)					;	# for SIM
-	60:63	,	0x4			,	(CEN.ATTR_MSS_FREQ > 1400)		;	# VCO = high for >= 700MHz or 1400 MT/s
+#  changed from Qual FA32002 and SWyatt re-review...
+	60:63	,	0x0			,	(CEN.ATTR_MSS_FREQ > 1400)		;	# VCO = high for >= 700MHz or 1400 MT/s
 	60:63	,	0x0			,	any								;	# VCO = low for < 700MHz
 }
 
