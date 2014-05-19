@@ -396,7 +396,8 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // If there is a symbol mark on the same DRAM as the newly verified chip
         // mark, remove the symbol mark.
-        if ( iv_mark.getCM().getDram() == iv_mark.getSM().getDram() )
+        const uint8_t cmDram = iv_mark.getCM().getDram();
+        if ( cmDram == iv_mark.getSM().getDram() )
         {
             iv_mark.clearSM();
             bool blocked; // Won't be blocked because chip mark is in place.
@@ -420,10 +421,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // The chip mark is considered verified, so set it in VPD.
-        // NOTE: If this chip mark was placed on the spare, the original failing
-        //       DRAM will have already been set in VPD so this will be
-        //       redundant but it simplifies the rest of the logic below.
-        o_rc = bitmap.setDram( iv_mark.getCM().getSymbol() );
+        o_rc = bitmap.setDram( iv_mark.getCM() );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"setDram() failed" );
@@ -444,88 +442,65 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         // x4 DIMMS.
         if ( ( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE != spareConfig ) || iv_x4Dimm )
         {
-            // It is possible that a Centaur DIMM does not have spare DRAMs.
-            // Check the VPD for available spares. Note that a x4 DIMM has
-            // DRAM spares and ECC spares, so check for availability on both.
-            bool dramSparePossible = false;
-            o_rc = bitmap.isDramSpareAvailable( ps, dramSparePossible );
+            // Get the current spares in hardware.
+            CenSymbol sp0, sp1, ecc;
+            o_rc = mssGetSteerMux( iv_mbaTrgt, iv_rank, sp0, sp1, ecc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"isDramSpareAvailable() failed" );
+                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed" );
                 break;
             }
 
-            if ( dramSparePossible )
+            // If the verified chip mark is on a spare then the spare is bad and
+            // hardware can not steer it to another DRAM even if one is
+            // available (e.g. ECC spare). In this this case, make error log
+            // predictive (remember that the chip mark has already been added to
+            // the callout list.
+            if ( ( cmDram == (0 == ps ? sp0.getDram() : sp1.getDram()) ) ||
+                 ( cmDram == ecc.getDram() ) )
             {
-                // Verify the spare is not already used.
-                CenSymbol sp0, sp1, ecc;
-                o_rc = mssGetSteerMux( iv_mbaTrgt, iv_rank, sp0, sp1, ecc );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed" );
-                    break;
-                }
-
-                // If spare DRAM is bad, HW can not steer another DRAM even
-                // if it is available ( e.g. ECC spare ). So if chip mark is on
-                // spare DRAM, update VPD and make predictive callout.
-                if ( ( iv_mark.getCM().getDram() ==
-                          (0 == ps ? sp0.getDram() : sp1.getDram()) )
-                     || ( iv_mark.getCM().getDram() == ecc.getDram() ))
-                {
-
-                    setTdSignature( io_sc, PRDFSIG_VcmBadSpare );
-
-                    // The chip mark was on the spare DRAM and it is bad, so
-                    // call it out and set it in VPD.
-
-                    MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
-                    io_sc.service_data->SetCallout( memmru );
-
-                    io_sc.service_data->SetServiceCall();
-
-                    if ( iv_mark.getCM().getDram() == ecc.getDram() )
-                    {
-                        o_rc = bitmap.setEccSpare();
-                        if ( SUCCESS != o_rc )
-                        {
-                            PRDF_ERR( PRDF_FUNC"setEccSpare() failed" );
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        o_rc = bitmap.setDramSpare( ps );
-                        if ( SUCCESS != o_rc )
-                        {
-                            PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
-                            break;
-                        }
-                    }
-                }
-                else if ( ((0 == ps) && !sp0.isValid()) ||
-                          ((1 == ps) && !sp1.isValid()) )
-                {
-                    // A spare DRAM is available.
-                    startDsdProcedure = true;
-                }
-                else if ( isDramWidthX4(iv_mbaTrgt) && !ecc.isValid() )
-                {
-                    startDsdProcedure = true;
-                    iv_isEccSteer = true;
-                }
-                else
-                {
-                    // Chip mark and DRAM spare are both used.
-                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmCmAndSpare );
-                    io_sc.service_data->SetServiceCall();
-                }
+                setTdSignature( io_sc, PRDFSIG_VcmBadSpare );
+                io_sc.service_data->SetServiceCall();
             }
             else
             {
-                // Chip mark is in place and sparing is not possible.
-                setTdSignature( io_sc, PRDFSIG_VcmCmAndSpare );
-                io_sc.service_data->SetServiceCall();
+                // Certain DIMMs may have had spares intentially made
+                // unavailable by the manufacturer. Check the VPD for available
+                // spares. Note that a x4 DIMM has DRAM spares and ECC spares,
+                // so check for availability on both.
+                bool dramSparePossible = false;
+                o_rc = bitmap.isDramSpareAvailable( ps, dramSparePossible );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC"isDramSpareAvailable() failed" );
+                    break;
+                }
+
+                if ( dramSparePossible )
+                {
+                    if ( 0 == ps ? !sp0.isValid() : !sp1.isValid() )
+                    {
+                        // A spare DRAM is available.
+                        startDsdProcedure = true;
+                    }
+                    else if ( isDramWidthX4(iv_mbaTrgt) && !ecc.isValid() )
+                    {
+                        startDsdProcedure = true;
+                        iv_isEccSteer = true;
+                    }
+                    else
+                    {
+                        // Chip mark and DRAM spare are both used.
+                        io_sc.service_data->SetErrorSig(PRDFSIG_VcmCmAndSpare);
+                        io_sc.service_data->SetServiceCall();
+                    }
+                }
+                else
+                {
+                    // Chip mark is in place and sparing is not possible.
+                    setTdSignature( io_sc, PRDFSIG_VcmCmAndSpare );
+                    io_sc.service_data->SetServiceCall();
+                }
             }
         }
         else // DRAM spare not supported.

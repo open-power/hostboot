@@ -127,7 +127,7 @@ int32_t CenDqBitmap::setDq( uint8_t i_dq, uint8_t i_portSlct )
 
 //------------------------------------------------------------------------------
 
-int32_t CenDqBitmap::setSymbol( uint8_t i_symbol, uint8_t i_pins )
+int32_t CenDqBitmap::setSymbol( const CenSymbol & i_symbol, uint8_t i_pins )
 {
     #define PRDF_FUNC "[CenDqBitmap::setSymbol] "
 
@@ -135,19 +135,17 @@ int32_t CenDqBitmap::setSymbol( uint8_t i_symbol, uint8_t i_pins )
 
     do
     {
-        uint8_t evenDq   = symbol2CenDq(    i_symbol );
-        uint8_t portSlct = symbol2PortSlct( i_symbol );
-        if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
+        uint8_t portSlct, byteIdx, bitIdx;
+        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
+        if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );
-            o_rc = FAIL; break;
+            PRDF_ERR( PRDF_FUNC"getPortByteBitIdx() failed" );
+            break;
         }
 
-        uint8_t byteIdx = evenDq / DQS_PER_BYTE;
-        uint8_t bitIdx  = evenDq % DQS_PER_BYTE;
-
         i_pins &= 0x3; // limit to 2 bits
-        uint32_t shift = (((DQS_PER_BYTE-1) - bitIdx) / 2) * 2; // 0,2,4,6
+        uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
+        shift = (shift / DQS_PER_SYMBOL) * DQS_PER_SYMBOL; // 0,2,4,6
         iv_data[portSlct][byteIdx] |= i_pins << shift;
 
     } while (0);
@@ -159,7 +157,7 @@ int32_t CenDqBitmap::setSymbol( uint8_t i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
-int32_t CenDqBitmap::setDram( uint8_t i_symbol, uint8_t i_pins )
+int32_t CenDqBitmap::setDram( const CenSymbol & i_symbol, uint8_t i_pins )
 {
     #define PRDF_FUNC "[CenDqBitmap::setDram] "
 
@@ -167,21 +165,19 @@ int32_t CenDqBitmap::setDram( uint8_t i_symbol, uint8_t i_pins )
 
     do
     {
-        uint8_t evenDq   = symbol2CenDq(    i_symbol );
-        uint8_t portSlct = symbol2PortSlct( i_symbol );
-        if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
+        uint8_t portSlct, byteIdx, bitIdx;
+        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
+        if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );
-            o_rc = FAIL; break;
+            PRDF_ERR( PRDF_FUNC"getPortByteBitIdx() failed" );
+            break;
         }
 
-        uint8_t byteIdx = evenDq / DQS_PER_BYTE;
-        uint8_t bitIdx  = evenDq % DQS_PER_BYTE;
-
-        if ( isDramWidthX4(iv_mba) )
+        if ( iv_x4Dram )
         {
             i_pins &= 0xf; // limit to 4 bits
-            uint32_t shift = (((DQS_PER_BYTE-1) - bitIdx) / 4) * 4; // 0,4
+            uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
+            shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
             iv_data[portSlct][byteIdx] |= i_pins << shift;
         }
         else
@@ -199,7 +195,7 @@ int32_t CenDqBitmap::setDram( uint8_t i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
-int32_t CenDqBitmap::isChipMark( uint8_t i_symbol, bool & o_cm )
+int32_t CenDqBitmap::isChipMark( const CenSymbol & i_symbol, bool & o_cm )
 {
     #define PRDF_FUNC "[CenDqBitmap::isChipMark] "
 
@@ -208,24 +204,22 @@ int32_t CenDqBitmap::isChipMark( uint8_t i_symbol, bool & o_cm )
 
     do
     {
-        uint8_t evenDq   = symbol2CenDq(    i_symbol );
-        uint8_t portSlct = symbol2PortSlct( i_symbol );
-        if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
+        uint8_t portSlct, byteIdx, bitIdx;
+        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
+        if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );
-            o_rc = FAIL; break;
+            PRDF_ERR( PRDF_FUNC"getPortByteBitIdx() failed" );
+            break;
         }
-
-        uint8_t byteIdx = evenDq / DQS_PER_BYTE;
-        uint8_t bitIdx  = evenDq % DQS_PER_BYTE;
 
         uint8_t pins   = 0xff;
         uint8_t cmData = iv_data[portSlct][byteIdx];
 
-        if ( isDramWidthX4(iv_mba) )
+        if ( iv_x4Dram )
         {
             pins = 0xf; // limit to 4 bits
-            uint8_t shift = (((DQS_PER_BYTE-1) - bitIdx) / 4) * 4; // 0,4
+            uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
+            shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
             cmData = (cmData >> shift) & 0xf;
         }
 
@@ -257,7 +251,7 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
         uint8_t spareConfig = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
         o_rc = getDimmSpareConfig( iv_mba , iv_rank, i_portSlct,
                                    spareConfig );
-        if( SUCCESS != o_rc )
+        if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
             o_rc = FAIL; break;
@@ -265,24 +259,24 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
 
         if ( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
         {
-            PRDF_ERR( PRDF_FUNC" Spare is not avaiable" );
+            PRDF_ERR( PRDF_FUNC"DRAM Spare is not avaiable" );
             o_rc = FAIL; break;
         }
 
-        if ( isDramWidthX4(iv_mba) )
+        if ( iv_x4Dram )
         {
             i_pins &= 0xf; // limit to 4 bits
 
-            if( ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
+            if ( ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE == spareConfig )
             {
-                i_pins = i_pins << 4;
+                i_pins = i_pins << DQS_PER_NIBBLE;
             }
-            iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1] |= i_pins;
+            iv_data[i_portSlct][DRAM_SPARE_BYTE] |= i_pins;
         }
         else
         {
             i_pins &= 0xff; // limit to 8 bits
-            iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1] |= i_pins;
+            iv_data[i_portSlct][DRAM_SPARE_BYTE] |= i_pins;
         }
 
     } while (0);
@@ -303,18 +297,20 @@ int32_t CenDqBitmap::setEccSpare( uint8_t i_pins )
 
     do
     {
-        if ( ! isDramWidthX4(iv_mba) )
+        if ( !iv_x4Dram )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid Call. Function called for MBA having "
-                      "non X4 DRAM" );
+            PRDF_ERR( PRDF_FUNC"MBA 0x %08x does not support x4 ECC spare",
+                      getHuid(iv_mba) );
             o_rc = FAIL; break;
         }
-        // ECC spare bits are stored in port1, dq bits 68-71
-        // Call setDram with symbol 0 to update the VPD for these bits.
-        setDram( 0, i_pins );
-    }while( 0 );
+
+        i_pins &= 0xf; // limit to 4 bits
+        iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE] |= i_pins;
+
+    } while( 0 );
 
     return o_rc;
+
     #undef PRDF_FUNC
 }
 
@@ -346,35 +342,25 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
             break;
         }
 
-        uint8_t spareDqBits = iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1];
+        uint8_t spareDqBits = iv_data[i_portSlct][DRAM_SPARE_BYTE];
 
-        if ( isDramWidthX4(iv_mba) )
+        if ( iv_x4Dram )
         {
             // Check for DRAM spare
-            if( ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
+            if ( ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
             {
                 o_available = ( 0 == ( spareDqBits & 0xf0 ) );
             }
-            else if( ENUM_ATTR_VPD_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
+            else if ( ENUM_ATTR_VPD_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
             {
                 o_available = ( 0 == ( spareDqBits & 0x0f ) );
             }
 
-            if( false == o_available )
+            // Check for ECC spare
+            if ( !o_available )
             {
-                // check for ecc spare
-                // ECC spare bits are stored in port1, dq bits 68-71
-                // These bits map to symbol 0. Use isChipMark to check
-                // if these bits are all 1.
-                o_rc = isChipMark( 0, o_available );
-                if( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC"isChipMark() failed" );
-                    break;
-                }
-                // isChipMark return true if chip Mark is present.
-                // Invert its value to get the right result.
-                o_available = !(o_available);
+                uint8_t eccDqBits = iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE];
+                o_available = ( 0 == (eccDqBits & 0x0f) );
             }
         }
         else
@@ -420,6 +406,49 @@ void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
 
     BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
     o_cd.Add( iv_mba, Util::hashString("BAD_DQ_BITMAP"), bs );
+}
+
+//------------------------------------------------------------------------------
+
+int32_t CenDqBitmap::getPortByteBitIdx( const CenSymbol & i_symbol,
+                                        uint8_t & o_portSlct,
+                                        uint8_t & o_byteIdx,
+                                        uint8_t & o_bitIdx ) const
+{
+    #define PRDF_FUNC "[CenDqBitmap::getPortByteBitIdx] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( !i_symbol.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC"i_symbol is invalid" );
+            o_rc = FAIL; break;
+        }
+
+        o_portSlct = i_symbol.getPortSlct();
+        o_byteIdx  = i_symbol.getEvenDq() / DQS_PER_BYTE;
+        o_bitIdx   = i_symbol.getEvenDq() % DQS_PER_BYTE;
+
+        if ( i_symbol.isDramSpared() )
+        {
+            o_byteIdx = DRAM_SPARE_BYTE;
+        }
+        else if ( i_symbol.isEccSpared() )
+        {
+            o_portSlct = ECC_SPARE_PORT;
+            o_byteIdx  = ECC_SPARE_BYTE;
+
+            // x4 ECC spare is the second nibble of the byte.
+            o_bitIdx = (o_bitIdx % DQS_PER_NIBBLE) + DQS_PER_NIBBLE;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 } // end namespace PRDF
