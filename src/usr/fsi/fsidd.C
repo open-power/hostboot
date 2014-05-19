@@ -1778,9 +1778,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
                                      FSI::MOD_FSIDD_GENFULLFSIADDR,
                                      FSI::RC_FSI_NOT_SUPPORTED,
                                      TARGETING::get_huid(io_addrInfo.fsiTarg),
-                                     io_addrInfo.accessInfo.linkid.id );
-        l_err->addProcedureCallout( HWAS::EPUB_PRC_FSI_PATH,
-                                    HWAS::SRCI_PRIORITY_HIGH );
+                                     io_addrInfo.accessInfo.linkid.id,
+                                     true /*SW error*/);
         l_err->collectTrace(FSI_COMP_NAME);
         return l_err;
     }
@@ -1823,9 +1822,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
                           TARGETING::get_huid(io_addrInfo.accessInfo.master)),
                         TWO_UINT32_TO_UINT64(
                           io_addrInfo.accessInfo.linkid.id,
-                          mfsi_info.linkid.id) );
-            l_err->addProcedureCallout( HWAS::EPUB_PRC_FSI_PATH,
-                                        HWAS::SRCI_PRIORITY_HIGH );
+                          mfsi_info.linkid.id),
+                        true /*SW error*/);
             l_err->collectTrace(FSI_COMP_NAME);
             return l_err;
         }
@@ -1858,9 +1856,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
                           TARGETING::get_huid(io_addrInfo.accessInfo.master)),
                         TWO_UINT32_TO_UINT64(
                           io_addrInfo.accessInfo.linkid.id,
-                          mfsi_info.linkid.id) );
-            l_err->addProcedureCallout( HWAS::EPUB_PRC_FSI_PATH,
-                                        HWAS::SRCI_PRIORITY_HIGH );
+                          mfsi_info.linkid.id),
+                        true /*SW error*/);
             l_err->collectTrace(FSI_COMP_NAME);
             return l_err;
         }
@@ -2731,6 +2728,16 @@ errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
                                             FSI::RC_ERROR_IN_MAEB,
                                             i_addrInfo.accessInfo.linkid.id,
                                             maeb_data);
+
+            // We can't really isolate the fail so callout a procedure, but
+            //  deconfigure the slave chip so that we have a chance of moving
+            //  forward
+            l_err->addProcedureCallout( HWAS::EPUB_PRC_FSI_PATH,
+                                        HWAS::SRCI_PRIORITY_HIGH );
+            l_err->addHwCallout( i_addrInfo.fsiTarg,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::DELAYED_DECONFIG,
+                                 HWAS::GARD_NULL );
 
             l_err->collectTrace(FSI_COMP_NAME);
             l_err->collectTrace(FSIR_TRACE_BUF);
