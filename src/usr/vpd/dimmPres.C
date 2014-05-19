@@ -117,29 +117,16 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             break;
         }
 
-        // Read Byte 2 (BASIC_MEMORY_TYPE) for the target passed in.
-        uint16_t data = 0x0;
-        size_t dataSz = sizeof(data);
-        err = deviceRead( i_target,
-                          &data,
-                          dataSz,
-                          DEVICE_SPD_ADDRESS( SPD::BASIC_MEMORY_TYPE ) );
+        // Is the target present
+        present = spdPresent( i_target );
 
-        if( err )
+        if( present == false )
         {
-            // If an error is returned, the DIMM is not present.
-            present = false;
             TRACUCOMP( g_trac_spd,
                        INFO_MRK"Dimm was found to be NOT present." );
-
-            // Delete the error
-            delete err;
-            err = NULL;
         }
         else
         {
-            // DIMM is present...
-            present = true;
             TRACUCOMP( g_trac_spd,
                        INFO_MRK"Dimm was found to be present." );
         }

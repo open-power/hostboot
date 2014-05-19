@@ -322,6 +322,16 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
                                void * o_data );
 
 /**
+ * @brief This function is used to check if the given target
+ *        is present
+ *
+ * @param[in] i_target - DIMM Target device
+ *
+ * @return bool - true if present, false if not present
+ */
+bool spdPresent ( TARGETING::Target * i_target );
+
+/**
  * @brief This function performs the presence detect for all DIMMs.
  *
  * @param[in] i_opType - Operation type, see DeviceFW::OperationType

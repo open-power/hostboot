@@ -800,6 +800,47 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
 }
 
 // ------------------------------------------------------------------
+// spdPresent
+// ------------------------------------------------------------------
+bool spdPresent ( TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+    bool pres = false;
+    
+    TRACSSCOMP( g_trac_spd,
+                ENTER_MRK"spdPresent()" );
+
+    do
+    {
+        // Read the Basic Memory Type
+        uint8_t memType = 0x0;
+        err = getMemType( memType,
+                          i_target );
+
+        if( err )
+        {
+            delete err;
+            err = NULL;
+            break;
+        }
+
+        TRACDCOMP( g_trac_spd,
+                   INFO_MRK"Mem Type: %04x",
+                   memType );
+
+        if(( SPD_DDR3 == memType ) ||
+           ( SPD_DDR4 == memType ))
+        {
+            pres = true;
+        }
+    } while( 0 );
+    
+    return pres;
+}
+
+
+
+// ------------------------------------------------------------------
 // ddr3SpecialCases
 // ------------------------------------------------------------------
 errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
