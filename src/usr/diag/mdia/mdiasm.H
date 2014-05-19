@@ -41,9 +41,9 @@ namespace MDIA
 //MBA timeout value - 30 secs
 static const uint64_t MBA_TIMEOUT = 30000000000;
 
-//MBA timeout count max before timing out (~3 min)
-//TODO: RTC: 106213 enhance memdiags timeout detection
-static const uint64_t MBA_TIMEOUTCNT_MAX = 6;
+//Commit an info log for SW timeout every 10 mins
+static const uint64_t MBA_TIMEOUT_LOG =
+          ( 10 * 60000000000 ) / MBA_TIMEOUT;
 
 /**
  * @brief work flow phases

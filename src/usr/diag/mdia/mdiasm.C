@@ -279,27 +279,51 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // Pending maint cmd complete, reset timer
                 if(mbaspa & ~mbaspamask)
                 {
-                    if((*wit)->timeoutCnt >= MBA_TIMEOUTCNT_MAX)
+                    // Commiting an info log to help debug SW timeout
+                    if((*wit)->timeoutCnt >= MBA_TIMEOUT_LOG)
                     {
-                        MDIA_FAST("sm: work item %d timed out on: %x, "
-                                  "timeoutCnt: %d", *((*wit)->workItem),
-                                  get_huid(target), (*wit)->timeoutCnt);
+                        MDIA_FAST("sm: commiting a SW timed out info log "
+                                  "for %x", get_huid(target));
+
+                        /*@
+                         * @errortype
+                         * @reasoncode       MDIA::MAINT_COMMAND_SW_TIMED_OUT
+                         * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+                         * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
+                         * @userData1        Associated memory diag work item
+                         * @userData2        Target HUID
+                         * @devdesc          A maint command SW timed out
+                         */
+                        err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                            PROCESS_COMMAND_TIMEOUT,
+                                            MAINT_COMMAND_SW_TIMED_OUT,
+                                            *((*wit)->workItem),
+                                            get_huid(target));
+
+                        // collect ffdc
+
+                        addTimeoutFFDC(target, err);
+
+                        errlCommit(err, MDIA_COMP_ID);
+
+                        // reset for the next logging
+                        (*wit)->timeoutCnt = 0;
                     }
                     else
                     {
-                        MDIA_FAST("sm: work item %d reset timed out on: %x, "
-                                  "timeoutCnt: %d", *((*wit)->workItem),
-                                  get_huid(target), (*wit)->timeoutCnt);
-                        // register a new timeout monitor
-                        uint64_t monitorId =
-                                 getMonitor().addMonitor(MBA_TIMEOUT);
-                        (*wit)->timer = monitorId;
-
                         // advance timeout counter
                         (*wit)->timeoutCnt++;
-
-                        break;
                     }
+
+                    MDIA_FAST("sm: work item %d reset SW timed out on: %x, "
+                              "timeoutCnt: %d", *((*wit)->workItem),
+                              get_huid(target), (*wit)->timeoutCnt);
+                    // register a new timeout monitor
+                    uint64_t monitorId =
+                        getMonitor().addMonitor(MBA_TIMEOUT);
+                    (*wit)->timer = monitorId;
+
+                    break;
                 }
 
                 // If maint cmd complete bit is not on, time out
@@ -311,24 +335,26 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 wkflprop = *wit;
 
                 // log a timeout event
-                MDIA_ERR("sm: command %p: %d timed out on: %x",
+                MDIA_ERR("sm: command %p: %d HW timed out on: %x",
                         stopCmds.back(),
                         *((*wit)->workItem),
                         get_huid(target));
 
                 /*@
                  * @errortype
-                 * @reasoncode       MDIA::MAINT_COMMAND_TIMED_OUT
+                 * @reasoncode       MDIA::MAINT_COMMAND_HW_TIMED_OUT
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
                  * @userData1        Associated memory diag work item
-                 * @devdesc          A maint command timed out
+                 * @userData2        Target HUID
+                 * @devdesc          A maint command HW timed out
                  */
                 err = new ErrlEntry(
                         ERRL_SEV_UNRECOVERABLE,
                         PROCESS_COMMAND_TIMEOUT,
-                        MAINT_COMMAND_TIMED_OUT,
-                        *((*wit)->workItem), 0);
+                        MAINT_COMMAND_HW_TIMED_OUT,
+                        *((*wit)->workItem),
+                        get_huid(target));
 
                 // collect ffdc
 
@@ -777,6 +803,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     uint64_t monitorId = getMonitor().addMonitor(MBA_TIMEOUT);
 
     i_wfp.timer = monitorId;
+    i_wfp.timeoutCnt = 0; // reset for new work item
     workItem = *i_wfp.workItem;
     restart = i_wfp.restartCommand;
     targetMba = getTarget(i_wfp);

@@ -56,7 +56,8 @@ enum ModuleId
 enum ReasonCode
 {
     INVALID_REASONCODE           = MDIA_COMP_ID | 0x00,   // Invalid Reasoncode
-    MAINT_COMMAND_TIMED_OUT      = MDIA_COMP_ID | 0x01,
+    MAINT_COMMAND_HW_TIMED_OUT   = MDIA_COMP_ID | 0x01,   // timeout due to HW
+    MAINT_COMMAND_SW_TIMED_OUT   = MDIA_COMP_ID | 0x02,   // timeout due to SW
 };
 
 }
