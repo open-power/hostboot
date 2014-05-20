@@ -688,6 +688,18 @@ fapi::ReturnCode fapiPlatGetL3Length(const fapi::Target * i_pProcTarget,
 fapi::ReturnCode fapiPlatGetPciOscswitchConfig
                                      (const fapi::Target * i_pProcTarget,
                                      uint8_t &o_val);
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_SPD_MODSPEC_COM_REF_RAW_CARD attribute.
+ *        It should not be called directly.
+ *
+ *  @param[in]  i_pDimmTarget Dimm Target pointer
+ *  @param[out] o_data        Reference to output data
+ */
+fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
+                                     (const fapi::Target * i_pDimmTarget,
+                                     uint8_t &o_val);
+
 
 } // namespace platAttrSvc
 
@@ -1761,5 +1773,18 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetPciOscswitchConfig(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACRO to support Modspec raw card info
+//------------------------------------------------------------------------------
+#define ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_REV_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr \
+        (PTARGET, SPD::MODSPEC_COM_REF_RAW_CARD_REV, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

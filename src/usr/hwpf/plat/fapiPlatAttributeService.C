@@ -1506,6 +1506,54 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
     return l_rc;
 }
 
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
+                                     (const fapi::Target * i_pDimmTarget,
+                                     uint8_t &o_val)
+{
+    fapi::ReturnCode l_rc;
+    uint8_t l_cardExt = 0;
+    uint8_t l_card = 0;
+
+    do {
+
+        // Get the Reference Raw Card Extention (0 or 1)
+        l_rc = fapiPlatGetSpdAttr(i_pDimmTarget,
+            SPD::MODSPEC_COM_REF_RAW_CARD_EXT,
+            &l_cardExt, sizeof(l_cardExt));
+        if (l_rc)
+        {
+            break; //break with error
+        }
+
+        // Get the Refernce Raw Card (bits 4-0)
+        // When Reference Raw Card Extension = 0
+        //    Reference raw cards A through AL
+        // When Reference Raw Card Extension = 1
+        //    Reference raw cards AM through CB
+        l_rc = fapiPlatGetSpdAttr(i_pDimmTarget, SPD::MODSPEC_COM_REF_RAW_CARD,
+            &l_card, sizeof(l_card));
+        if (l_rc)
+        {
+            break; //break with error
+        }
+
+        // Raw Card = 0x1f(ZZ) means no JEDEC reference raw card design used.
+        //   Have one ZZ in the return merged enumeration.
+        if (0x1f == l_card)
+        {
+            l_cardExt = 1;  //Just one ZZ in the enumeration (0x3f)
+        }
+
+        // Merge into a single enumeration
+        o_val = (l_cardExt <<5) | l_card;
+
+    } while (0);
+
+    return l_rc;
+}
+
+
 } // End platAttrSvc namespace
 
 } // End fapi namespace

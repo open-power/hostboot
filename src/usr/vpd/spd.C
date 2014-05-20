@@ -1367,7 +1367,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
         // Check Unbuffered Memory Module (UMM)
         if (UMM == modType)
         {
-            if (UMM != i_kwdData.modSpec)
+            if ((UMM != i_kwdData.modSpec) &&
+                (ALL != i_kwdData.modSpec) )
             {
                 TRACFCOMP( g_trac_spd,
                            ERR_MRK"Keyword (0x%04x) is not valid with UMM modules!",
@@ -1409,7 +1410,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
         // Check Registered Memory Module (RMM)
         else if (RMM == modType)
         {
-            if (RMM != i_kwdData.modSpec)
+            if ((RMM != i_kwdData.modSpec) &&
+                (ALL != i_kwdData.modSpec) )
             {
                 TRACFCOMP( g_trac_spd,
                            ERR_MRK"Keyword (0x%04x) is not valid with RMM modules!",
@@ -1451,7 +1453,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
         // Check Clocked Memory Module (CMM)
         else if (CMM == modType)
         {
-            if (CMM != i_kwdData.modSpec)
+            if ((CMM != i_kwdData.modSpec) &&
+                (ALL != i_kwdData.modSpec) )
             {
                 TRACFCOMP( g_trac_spd,
                            ERR_MRK"Keyword (0x%04x) is not valid with CMM modules!",
@@ -1493,7 +1496,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
         // Check Load Reduction Memory Module (LRMM)
         else if (LRMM == modType)
         {
-            if (LRMM != i_kwdData.modSpec)
+            if ((LRMM != i_kwdData.modSpec) &&
+                (ALL != i_kwdData.modSpec) )
             {
                 TRACFCOMP( g_trac_spd,
                            ERR_MRK"Keyword (0x%04x) is not valid with LRMM modules!",
