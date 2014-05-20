@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -30,8 +30,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 CFLAGS += -DPRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS=1
 CFLAGS += -DPRDF_COMPRESSBUFFER_UNCOMPRESS_FUNCTIONS=1
 
-OBJS = ecmdDataBufferBase.o
+OBJS += ecmdDataBufferBase.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

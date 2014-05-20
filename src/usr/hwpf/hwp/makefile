@@ -28,18 +28,32 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 
 include hwp.mk
 
-OBJS += fapiTestHwp.o \
-        fapiTestHwpDq.o \
-        fapiHwpExecInitFile.o \
-        hwpisteperror.o  \
-        hwpistepud.o
+OBJS += fapiTestHwp.o
+OBJS += fapiTestHwpDq.o
+OBJS += fapiHwpExecInitFile.o
+OBJS += hwpisteperror.o
+OBJS += hwpistepud.o
 
-SUBDIRS	=   dmi_training.d  sbe_centaur_init.d mc_config.d \
-            dram_training.d activate_powerbus.d build_winkle_images.d \
-            core_activate.d dram_initialization.d edi_ei_initialization.d \
-            establish_system_smp.d bus_training.d occ.d tod_init.d \
-            nest_chiplets.d start_payload.d thread_activate.d slave_sbe.d \
-            pstates.d proc_hwreconfig.d runtime.d
+SUBDIRS	+= dmi_training.d
+SUBDIRS	+= sbe_centaur_init.d
+SUBDIRS	+= mc_config.d
+SUBDIRS	+= dram_training.d
+SUBDIRS	+= activate_powerbus.d
+SUBDIRS	+= build_winkle_images.d
+SUBDIRS	+= core_activate.d
+SUBDIRS	+= dram_initialization.d
+SUBDIRS	+= edi_ei_initialization.d
+SUBDIRS	+= establish_system_smp.d
+SUBDIRS	+= bus_training.d
+SUBDIRS	+= occ.d
+SUBDIRS	+= tod_init.d
+SUBDIRS	+= nest_chiplets.d
+SUBDIRS	+= start_payload.d
+SUBDIRS	+= thread_activate.d
+SUBDIRS	+= slave_sbe.d
+SUBDIRS	+= pstates.d
+SUBDIRS	+= proc_hwreconfig.d
+SUBDIRS	+= runtime.d
 
 
 include ${ROOTPATH}/config.mk

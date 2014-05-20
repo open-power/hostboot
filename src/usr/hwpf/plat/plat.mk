@@ -26,14 +26,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
-OBJS = fapiPlatHwAccess.o \
-       fapiPlatHwpInvoker.o \
-       fapiPlatReturnCodeDataRef.o \
-       fapiPlatSystemConfig.o \
-       fapiPlatTarget.o \
-       fapiPlatUtil.o \
-       fapiPlatAttributeService.o \
-       fapiPlatMvpdAccess.o \
-       fapiPlatMBvpdAccess.o \
-       fapiPlatAttrOverrideSync.o
+OBJS += fapiPlatHwAccess.o
+OBJS += fapiPlatHwpInvoker.o
+OBJS += fapiPlatReturnCodeDataRef.o
+OBJS += fapiPlatSystemConfig.o
+OBJS += fapiPlatTarget.o
+OBJS += fapiPlatUtil.o
+OBJS += fapiPlatAttributeService.o
+OBJS += fapiPlatMvpdAccess.o
+OBJS += fapiPlatMBvpdAccess.o
+OBJS += fapiPlatAttrOverrideSync.o
 

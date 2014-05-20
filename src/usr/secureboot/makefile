@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -22,6 +22,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-SUBDIRS = base.d ext.d
+SUBDIRS += base.d
+SUBDIRS += ext.d
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -23,9 +23,14 @@
 ROOTPATH = ../../..
 MODULE = util
 
-OBJS = threadpool.o utilbase.o utilstream.o utilmem.o utilfile.o \
-       utillidmgr.o
+OBJS += threadpool.o
+OBJS += utilbase.o
+OBJS += utilstream.o
+OBJS += utilmem.o
+OBJS += utilfile.o
+OBJS += utillidmgr.o
 
-SUBDIRS = test.d runtime.d
+SUBDIRS += test.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

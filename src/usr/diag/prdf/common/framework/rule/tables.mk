@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2005,2013
+# COPYRIGHT International Business Machines Corp. 2005,2014
 #
 # p1
 #
@@ -28,12 +28,11 @@
 
 # Add Rule tables here:
 # FIXME: This is now a duplicate of PRDR_RULE_TABLE_TARGETS in prd_ruletable.mk
-PRDR_RULE_TABLES = \
-	Proc.prf \
-	Ex.prf \
-	Mcs.prf \
-	Membuf.prf \
-	Mba.prf
+PRDR_RULE_TABLES += Proc.prf
+PRDR_RULE_TABLES += Ex.prf
+PRDR_RULE_TABLES += Mcs.prf
+PRDR_RULE_TABLES += Membuf.prf
+PRDR_RULE_TABLES += Mba.prf
 
 #------------------------------------------------------------------
 # Change nothing below this line unless you know what you're doing!

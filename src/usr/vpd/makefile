@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -27,9 +27,12 @@ MODULE = vpd
 include vpd.mk
 
 #include unique objects
-OBJS += vpd.o dimmPres.o rtvpd_load.o
+OBJS += vpd.o
+OBJS += dimmPres.o
+OBJS += rtvpd_load.o
 
-SUBDIRS = test.d runtime.d
+SUBDIRS += test.d
+SUBDIRS += runtime.d
 
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:7dabbe4879dcdd19ed236573aa68e8671fa8c3c7

@@ -59,29 +59,29 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 # objects
 #------------------------------------------------------------------------------
 
-OBJS = prdfsimHomRegisterAccess.o \
-       prdfsimRasServices.o \
-       prdfsimScrDataSet.o \
-       prdfsimScrDB.o \
-       prdfsimServices.o \
-       prdsimSignatureParser.o \
-       prdfsimUtil.o \
-       prdfsimMfgSync.o \
-       prdfsimFspSyncSvc.o \
-       prdfsimFspMfgThresholdFile.o
+OBJS += prdfsimHomRegisterAccess.o
+OBJS += prdfsimRasServices.o
+OBJS += prdfsimScrDataSet.o
+OBJS += prdfsimScrDB.o
+OBJS += prdfsimServices.o
+OBJS += prdsimSignatureParser.o
+OBJS += prdfsimUtil.o
+OBJS += prdfsimMfgSync.o
+OBJS += prdfsimFspSyncSvc.o
+OBJS += prdfsimFspMfgThresholdFile.o
 
-TESTS = prdfTest_MfgSync.H \
-        prdfTest_ABus.H \
-        prdfTest_Ex.H  \
-        prdfTest.H  \
-        prdfTest_Mba.H  \
-        prdfTest_Mcs.H  \
-        prdfTest_Proc.H  \
-        prdfTest_XBus.H \
-        prdfTest_McsMciFir.H \
-        prdfTest_ProcCentFir.H \
-        prdfTest_ProcMbsFir.H \
-        prdfTest_ProcTpLFir.H \
-		prdfTest_CentCs.H
+TESTS += prdfTest_MfgSync.H
+TESTS += prdfTest_ABus.H
+TESTS += prdfTest_Ex.H
+TESTS += prdfTest.H
+TESTS += prdfTest_Mba.H
+TESTS += prdfTest_Mcs.H
+TESTS += prdfTest_Proc.H
+TESTS += prdfTest_XBus.H
+TESTS += prdfTest_McsMciFir.H
+TESTS += prdfTest_ProcCentFir.H
+TESTS += prdfTest_ProcMbsFir.H
+TESTS += prdfTest_ProcTpLFir.H
+TESTS += prdfTest_CentCs.H
 
 include ${ROOTPATH}/config.mk

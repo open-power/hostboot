@@ -36,19 +36,22 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o \
-        io_dccal.o \
-        io_power_down_lanes.o   \
-        io_read_erepair.o   \
-        io_clear_firs.o \
-        io_fir_isolation.o \
-        io_restore_erepair.o \
-        erepairAccessorHwpFuncs.o \
-        erepairGetFailedLanesHwp.o \
-        erepairSetFailedLanesHwp.o \
-        io_post_trainadv.o \
-        io_pre_trainadv.o \
-        io_cleanup.o
+OBJS += gcr_funcs.o
+OBJS += io_funcs.o
+OBJS += io_run_training.o
+OBJS += pbusLinkSvc.o
+OBJS += io_dccal.o
+OBJS += io_power_down_lanes.o
+OBJS += io_read_erepair.o
+OBJS += io_clear_firs.o
+OBJS += io_fir_isolation.o
+OBJS += io_restore_erepair.o
+OBJS += erepairAccessorHwpFuncs.o
+OBJS += erepairGetFailedLanesHwp.o
+OBJS += erepairSetFailedLanesHwp.o
+OBJS += io_post_trainadv.o
+OBJS += io_pre_trainadv.o
+OBJS += io_cleanup.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP

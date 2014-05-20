@@ -42,12 +42,16 @@ VPATH += ${ROOTPATH}/src/usr/hwas/common
 MODULE = hwas
 
 # files in hwas/common directory
-OBJS =  hwas.o hwasCallout.o deconfigGard.o
+OBJS += hwas.o
+OBJS += hwasCallout.o
+OBJS += deconfigGard.o
 
 # files in this directory
-OBJS +=  hwasPlat.o hostbootIstep.o \
-            hwasPlatError.o hwasPlatCallout.o \
-            hwasPlatDeconfigGard.o
+OBJS += hwasPlat.o
+OBJS += hostbootIstep.o
+OBJS += hwasPlatError.o
+OBJS += hwasPlatCallout.o
+OBJS += hwasPlatDeconfigGard.o
 
 SUBDIRS = test.d
 

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -24,7 +24,8 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
 MODULE = testsyslib_rt
-TESTCASES = stltest.H string.H
+TESTCASES += stltest.H
+TESTCASES += string.H
 TESTS = $(addprefix ../,$(TESTCASES))
 
 include $(ROOTPATH)/config.mk

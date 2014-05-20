@@ -25,18 +25,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/mvpd_accessors
 
 VPATH += ${HWPPATH}/mvpd_accessors
 
-OBJS += getMvpdRing.o \
-        getMBvpdRing.o \
-        setMvpdRing.o \
-        mvpdRingFuncs.o \
-        getMvpdExL2SingleMemberEnable.o \
-        getMBvpdPhaseRotatorData.o \
-        getMBvpdAddrMirrorData.o \
-        getMBvpdTermData.o \
-        getMBvpdSlopeInterceptData.o \
-        getMBvpdSpareDramData.o \
-        getMBvpdVersion.o \
-        getMBvpdDram2NModeEnabled.o \
-        getMBvpdSensorMap.o \
-        accessMBvpdL4BankDelete.o
+OBJS += getMvpdRing.o
+OBJS += getMBvpdRing.o
+OBJS += setMvpdRing.o
+OBJS += mvpdRingFuncs.o
+OBJS += getMvpdExL2SingleMemberEnable.o
+OBJS += getMBvpdPhaseRotatorData.o
+OBJS += getMBvpdAddrMirrorData.o
+OBJS += getMBvpdTermData.o
+OBJS += getMBvpdSlopeInterceptData.o
+OBJS += getMBvpdSpareDramData.o
+OBJS += getMBvpdVersion.o
+OBJS += getMBvpdDram2NModeEnabled.o
+OBJS += getMBvpdSensorMap.o
+OBJS += accessMBvpdL4BankDelete.o
 

@@ -21,4 +21,8 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
-OBJS = ipvpd.o mvpd.o cvpd.o spd.o errlud_vpd.o
+OBJS += ipvpd.o
+OBJS += mvpd.o
+OBJS += cvpd.o
+OBJS += spd.o
+OBJS += errlud_vpd.o

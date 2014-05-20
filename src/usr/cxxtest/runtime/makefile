@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -24,7 +24,8 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = cxxtest_rt
 
-OBJS = TestSuite.o rt_cxxtestexec.o
+OBJS += TestSuite.o
+OBJS += rt_cxxtestexec.o
 
 VPATH += ..
 

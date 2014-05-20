@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -30,7 +30,7 @@ include ../scom.mk
 #include unique object modules - currently none
 # OBJS +=
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 VPATH += ..
 include $(ROOTPATH)/config.mk

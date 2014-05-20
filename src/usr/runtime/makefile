@@ -31,10 +31,13 @@ ROOTPATH = ../../..
 MODULE = runtime
 
 
-OBJS = populate_attributes.o hdatservice.o fakepayload.o tce.o \
-       errlud_hdat.o
+OBJS += populate_attributes.o
+OBJS += hdatservice.o
+OBJS += fakepayload.o
+OBJS += tce.o
+OBJS += errlud_hdat.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 ##      support for fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer

@@ -29,7 +29,7 @@ VPATH += ../
 MODULE = occ_rt
 
 ## Objects unique to HBRT
-OBJS =  rt_occ.o
+OBJS += rt_occ.o
 
 ## Objects common to HBRT and HB IPL
 include ../occ.mk

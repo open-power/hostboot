@@ -24,10 +24,10 @@ ROOTPATH = ../../../../..
 
 MODULE = build_winkle_images
 
-SUBDIRS = runtime.d
+SUBDIRS += runtime.d
 
 # objects unique to HB IPL
-OBJS =  build_winkle_images.o
+OBJS += build_winkle_images.o
 
 # include objs common to HBRT and HB IPL
 include build_winkle_images.mk

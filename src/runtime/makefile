@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -23,7 +23,13 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../..
 
-OBJS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o rt_assert.o \
-       rt_vfs.o rt_task.o
+OBJS += rt_start.o
+OBJS += rt_main.o
+OBJS += rt_console.o
+OBJS += rt_stdlib.o
+OBJS += rt_sync.o
+OBJS += rt_assert.o
+OBJS += rt_vfs.o
+OBJS += rt_task.o
 
 include ${ROOTPATH}/config.mk

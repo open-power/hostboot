@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -82,42 +82,44 @@ REG_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${REG_PLUGIN_TARGETS})
 #-------------------------------------------------------------------------------
 
 # Entire directories to link.
-SOURCE_PLUGIN_DIRS = \
-	${SRC_USR}/common/plugins \
-	${SRC_USR}/plugins
+SOURCE_PLUGIN_DIRS += ${SRC_USR}/common/plugins
+SOURCE_PLUGIN_DIRS += ${SRC_USR}/plugins
 
 # Individual source files to link.
-SOURCE_PLUGIN_FILES = \
-	${SRC_USR}/common/framework/rule/tables.mk \
-	${SRC_USR}/common/util/UtilHash.H \
-	${SRC_USR}/common/plat/pegasus/prdfCenConst.H \
-	${SRC_USR}/common/iipconst.h \
-	${SRC_USR}/common/prdf_types.h \
-	${SRC_INC}/common/prdf_service_codes.H \
-	$(foreach d, ${SOURCE_PLUGIN_DIRS}, \
-		      $(addprefix $(d)/, $(notdir $(wildcard ${ROOTPATH}/$(d)/*))))
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/framework/rule/tables.mk
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/UtilHash.H
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/plat/pegasus/prdfCenConst.H
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/iipconst.h
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/prdf_types.h
+SOURCE_PLUGIN_FILES += ${SRC_INC}/common/prdf_service_codes.H
+SOURCE_PLUGIN_FILES += $(foreach d, ${SOURCE_PLUGIN_DIRS}, $(addprefix $(d)/, $(notdir $(wildcard ${ROOTPATH}/$(d)/*))))
 
-LINK_PLUGIN_FILES = \
-	$(addprefix ${OBJ_PLUG_DIR}/,$(notdir ${SOURCE_PLUGIN_FILES}))
+LINK_PLUGIN_FILES += $(addprefix ${OBJ_PLUG_DIR}/,$(notdir ${SOURCE_PLUGIN_FILES}))
 
 #-------------------------------------------------------------------------------
 # CODE_PASS
 #-------------------------------------------------------------------------------
 
-CODE_PASS_BODY += \
-	${PRF_IMG_PATHS} ${ERR_PLUGIN_PATHS} ${REG_PLUGIN_PATHS} \
-	${LINK_PLUGIN_FILES}
+CODE_PASS_BODY += ${PRF_IMG_PATHS}
+CODE_PASS_BODY += ${ERR_PLUGIN_PATHS}
+CODE_PASS_BODY += ${REG_PLUGIN_PATHS}
+CODE_PASS_BODY += ${LINK_PLUGIN_FILES}
 
-CLEAN_TARGETS += \
-	${PRDR_CMP_PATH} ${PRDR_CMP_o_PATH} \
-	${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_YACC_C_PATH} \
-	${PRDR_CMP_YACC_H_PATH} ${PRDR_CMP_FLEX_o_PATH} ${PRDR_CMP_FLEX_C_PATH} \
-	$(addprefix ${OBJ_RULE_DIR}/, ${PRDR_RULE_TABLE_TARGETS}) \
-	$(addprefix ${OBJ_RULE_DIR}/, ${ERR_PLUGIN_TARGETS}) \
-	$(addprefix ${OBJ_RULE_DIR}/, ${REG_PLUGIN_TARGETS}) \
-	$(addprefix ${OBJ_RULE_DIR}/, ${HTML_PLUGIN_TARGETS}) \
-	${PRF_IMG_PATHS} ${ERR_PLUGIN_PATHS} ${REG_PLUGIN_PATHS} \
-	${LINK_PLUGIN_FILES}
+CLEAN_TARGETS += ${PRDR_CMP_PATH}
+CLEAN_TARGETS += ${PRDR_CMP_o_PATH}
+CLEAN_TARGETS += ${PRDR_CMP_YACC_o_PATH}
+CLEAN_TARGETS += ${PRDR_CMP_YACC_C_PATH}
+CLEAN_TARGETS += ${PRDR_CMP_YACC_H_PATH}
+CLEAN_TARGETS += ${PRDR_CMP_FLEX_o_PATH}
+CLEAN_TARGETS += ${PRDR_CMP_FLEX_C_PATH}
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${PRDR_RULE_TABLE_TARGETS})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${ERR_PLUGIN_TARGETS})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${REG_PLUGIN_TARGETS})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${HTML_PLUGIN_TARGETS})
+CLEAN_TARGETS += ${PRF_IMG_PATHS}
+CLEAN_TARGETS += ${ERR_PLUGIN_PATHS}
+CLEAN_TARGETS += ${REG_PLUGIN_PATHS}
+CLEAN_TARGETS += ${LINK_PLUGIN_FILES}
 
 # NOTE: All rules defined in this makefile must be done after this line
 #       otherwise the default rule 'all' will not be called.

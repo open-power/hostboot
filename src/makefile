@@ -23,101 +23,269 @@
 
 ROOTPATH = ..
 
-SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d runtime.d
-IMGS = hbicore hbicore_test hbirt hbirt_test
+SUBDIRS += kernel.d
+SUBDIRS += lib.d
+SUBDIRS += libc++.d
+SUBDIRS += sys.d
+SUBDIRS += usr.d
+SUBDIRS += build.d
+SUBDIRS += runtime.d
 
-BASE_OBJECTS = string.o string_ext.o ctype.o math.o builtins.o stdio.o \
-	       splaytree.o cxxtest_data.o sprintf.o crc32.o utilmisc.o
+IMGS += hbicore
+IMGS += hbicore_test
+IMGS += hbirt
+IMGS += hbirt_test
+
+BASE_OBJECTS += string.o
+BASE_OBJECTS += string_ext.o
+BASE_OBJECTS += ctype.o
+BASE_OBJECTS += math.o
+BASE_OBJECTS += builtins.o
+BASE_OBJECTS += stdio.o
+BASE_OBJECTS += splaytree.o
+BASE_OBJECTS += cxxtest_data.o
+BASE_OBJECTS += sprintf.o
+BASE_OBJECTS += crc32.o
+BASE_OBJECTS += utilmisc.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
 endif
+DIRECT_BOOT_OBJECTS += start.o
+DIRECT_BOOT_OBJECTS += kernel.o
+DIRECT_BOOT_OBJECTS += taskmgr.o
+DIRECT_BOOT_OBJECTS += cpumgr.o
+DIRECT_BOOT_OBJECTS += syscall.o
+DIRECT_BOOT_OBJECTS += scheduler.o
+DIRECT_BOOT_OBJECTS += exception.o
+DIRECT_BOOT_OBJECTS += vmmmgr.o
+DIRECT_BOOT_OBJECTS += timemgr.o
+DIRECT_BOOT_OBJECTS += syscall_stub.o
+DIRECT_BOOT_OBJECTS += syscall_task.o
+DIRECT_BOOT_OBJECTS += syscall_misc.o
+DIRECT_BOOT_OBJECTS += syscall_msg.o
+DIRECT_BOOT_OBJECTS += syscall_mmio.o
+DIRECT_BOOT_OBJECTS += syscall_time.o
+DIRECT_BOOT_OBJECTS += syscall_mm.o
+DIRECT_BOOT_OBJECTS += init_main.o
+DIRECT_BOOT_OBJECTS += vfs_main.o
+DIRECT_BOOT_OBJECTS += sync.o
+DIRECT_BOOT_OBJECTS += futexmgr.o
+DIRECT_BOOT_OBJECTS += ptmgr.o
+DIRECT_BOOT_OBJECTS += segmentmgr.o
+DIRECT_BOOT_OBJECTS += basesegment.o
+DIRECT_BOOT_OBJECTS += devicesegment.o
+DIRECT_BOOT_OBJECTS += block.o
+DIRECT_BOOT_OBJECTS += misc.o
+DIRECT_BOOT_OBJECTS += msghandler.o
+DIRECT_BOOT_OBJECTS += blockmsghdlr.o
+DIRECT_BOOT_OBJECTS += stacksegment.o
+DIRECT_BOOT_OBJECTS += softpatch_p8.o
+DIRECT_BOOT_OBJECTS += shutdown.o
+DIRECT_BOOT_OBJECTS += forceattn_p8.o
+DIRECT_BOOT_OBJECTS += terminate.o
+DIRECT_BOOT_OBJECTS += ipc.o
+DIRECT_BOOT_OBJECTS += machchk.o
+DIRECT_BOOT_OBJECTS += console.o
+DIRECT_BOOT_OBJECTS += spinlock.o
+DIRECT_BOOT_OBJECTS += heapmgr.o
+DIRECT_BOOT_OBJECTS += pagemgr.o
+DIRECT_BOOT_OBJECTS += barrier.o
+DIRECT_BOOT_OBJECTS += idebug.o
+DIRECT_BOOT_OBJECTS += intmsghandler.o
+DIRECT_BOOT_OBJECTS += deferred.o
+DIRECT_BOOT_OBJECTS += idletask.o
+DIRECT_BOOT_OBJECTS += vfs_init.o
+DIRECT_BOOT_OBJECTS += cpuid.o
+DIRECT_BOOT_OBJECTS += stdlib.o
+DIRECT_BOOT_OBJECTS += assert.o
 
-DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
-                      scheduler.o exception.o vmmmgr.o timemgr.o \
-                      syscall_stub.o syscall_task.o syscall_misc.o \
-                      syscall_msg.o syscall_mmio.o syscall_time.o \
-                      syscall_mm.o init_main.o vfs_main.o sync.o futexmgr.o \
-                      ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
-                      block.o misc.o msghandler.o blockmsghdlr.o \
-		      stacksegment.o softpatch_p8.o shutdown.o forceattn_p8.o \
-		      terminate.o ipc.o machchk.o console.o spinlock.o \
-		      heapmgr.o pagemgr.o barrier.o idebug.o intmsghandler.o \
-		      deferred.o idletask.o vfs_init.o cpuid.o stdlib.o \
-		      assert.o
+BASE_MODULES += trace
+BASE_MODULES += errl
+BASE_MODULES += devicefw
+BASE_MODULES += scom
+BASE_MODULES += xscom
+BASE_MODULES += initservice
+BASE_MODULES += secureboot_base
+BASE_MODULES += pnor
+BASE_MODULES += vfs
 
-BASE_MODULES = trace errl devicefw scom xscom initservice \
-               secureboot_base pnor vfs
+EXTENDED_MODULES += targeting
+EXTENDED_MODULES += ecmddatabuffer
+EXTENDED_MODULES += fapi
+EXTENDED_MODULES += hwp
+EXTENDED_MODULES += plat
+EXTENDED_MODULES += extinitsvc
+EXTENDED_MODULES += istepdisp
+EXTENDED_MODULES += hwas
+EXTENDED_MODULES += fsi
+EXTENDED_MODULES += fsiscom
+EXTENDED_MODULES += i2c
+EXTENDED_MODULES += intr
+EXTENDED_MODULES += scan
+EXTENDED_MODULES += vpd
+EXTENDED_MODULES += dmi_training
+EXTENDED_MODULES += fapiporeve
+EXTENDED_MODULES += poreve
+EXTENDED_MODULES += util
+EXTENDED_MODULES += tracedaemon
+EXTENDED_MODULES += sbe_centaur_init
+EXTENDED_MODULES += mc_config
+EXTENDED_MODULES += dram_training
+EXTENDED_MODULES += mdia
+EXTENDED_MODULES += mbox
+EXTENDED_MODULES += prdf
+EXTENDED_MODULES += bus_training
+EXTENDED_MODULES += activate_powerbus
+EXTENDED_MODULES += build_winkle_images
+EXTENDED_MODULES += core_activate
+EXTENDED_MODULES += dram_initialization
+EXTENDED_MODULES += edi_ei_initialization
+EXTENDED_MODULES += establish_system_smp
+EXTENDED_MODULES += occ
+EXTENDED_MODULES += nest_chiplets
+EXTENDED_MODULES += start_payload
+EXTENDED_MODULES += thread_activate
+EXTENDED_MODULES += slave_sbe
+EXTENDED_MODULES += attn
+EXTENDED_MODULES += runtime
+EXTENDED_MODULES += ibscom
+EXTENDED_MODULES += dump
+EXTENDED_MODULES += tod_init
+EXTENDED_MODULES += secureboot_ext
+EXTENDED_MODULES += devtree
+EXTENDED_MODULES += sbe
+EXTENDED_MODULES += proc_hwreconfig
 
-EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
-                   extinitsvc istepdisp hwas fsi fsiscom i2c intr scan \
-                   vpd dmi_training fapiporeve poreve util tracedaemon	\
-                   sbe_centaur_init mc_config dram_training \
-                   mdia mbox prdf bus_training \
-                   activate_powerbus build_winkle_images \
-                   core_activate dram_initialization edi_ei_initialization \
-                   establish_system_smp occ\
-                   nest_chiplets start_payload thread_activate slave_sbe \
-                   attn runtime ibscom dump tod_init secureboot_ext \
-                   devtree sbe proc_hwreconfig
+TESTCASE_MODULES += cxxtest
+TESTCASE_MODULES += testtrace
+TESTCASE_MODULES += testerrl
+TESTCASE_MODULES += testdevicefw
+TESTCASE_MODULES += testsyslib
+TESTCASE_MODULES += testscom
+TESTCASE_MODULES += testxscom
+TESTCASE_MODULES += testtargeting
+TESTCASE_MODULES += testinitservice
+TESTCASE_MODULES += testkernel
+TESTCASE_MODULES += testhwpf
+TESTCASE_MODULES += testecmddatabuffer
+TESTCASE_MODULES += initsvctesttask
+TESTCASE_MODULES += testcxxtest
+TESTCASE_MODULES += testpnor
+TESTCASE_MODULES += testi2c
+TESTCASE_MODULES += testfsi
+TESTCASE_MODULES += testvfs
+TESTCASE_MODULES += testhwas
+TESTCASE_MODULES += testintr
+TESTCASE_MODULES += testvpd
+TESTCASE_MODULES += testpore
+TESTCASE_MODULES += testutil
+TESTCASE_MODULES += testmbox
+TESTCASE_MODULES += testmdia
+TESTCASE_MODULES += testprdf
+TESTCASE_MODULES += testattn
+TESTCASE_MODULES += testscan
+TESTCASE_MODULES += testruntime
+TESTCASE_MODULES += testibscom
+TESTCASE_MODULES += testdump
+TESTCASE_MODULES += testsecureboot
+TESTCASE_MODULES += testfsiscom
+TESTCASE_MODULES += testrtloader
+TESTCASE_MODULES += testsbe
 
-TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
-                   testscom testxscom testtargeting testinitservice testkernel \
-                   testhwpf testecmddatabuffer initsvctesttask testcxxtest \
-                   testpnor testi2c testfsi testvfs testhwas testintr testvpd \
-                   testpore testutil testmbox testmdia testprdf testattn \
-                   testscan testruntime testibscom testdump testsecureboot \
-                   testfsiscom testrtloader testsbe
+RUNTIME_OBJECTS += rt_start.o
+RUNTIME_OBJECTS += rt_main.o
+RUNTIME_OBJECTS += rt_console.o
+RUNTIME_OBJECTS += rt_stdlib.o
+RUNTIME_OBJECTS += rt_sync.o
+RUNTIME_OBJECTS += rt_assert.o
+RUNTIME_OBJECTS += rt_vfs.o
+RUNTIME_OBJECTS += rt_task.o
 
-RUNTIME_OBJECTS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o \
-                  rt_assert.o rt_vfs.o rt_task.o
+RUNTIME_MODULES += trace_rt
+RUNTIME_MODULES += errl_rt
+RUNTIME_MODULES += targeting_rt
+RUNTIME_MODULES += util_rt
+RUNTIME_MODULES += devicefw_rt
+RUNTIME_MODULES += xscom_rt
+RUNTIME_MODULES += scom_rt
+RUNTIME_MODULES += vpd_rt
+RUNTIME_MODULES += ecmddatabuffer
+RUNTIME_MODULES += fapi_rt
+RUNTIME_MODULES += hwp_rt
+RUNTIME_MODULES += plat_rt
+RUNTIME_MODULES += build_winkle_images_rt
+RUNTIME_MODULES += occ_rt
 
-RUNTIME_MODULES = trace_rt errl_rt targeting_rt util_rt devicefw_rt \
-		  xscom_rt scom_rt vpd_rt ecmddatabuffer fapi_rt hwp_rt plat_rt \
-		  build_winkle_images_rt occ_rt
-
-RUNTIME_DATA_MODULES =
-RUNTIME_TESTCASE_MODULES = cxxtest_rt testsyslib_rt testtargeting_rt \
-                           testxscom_rt testerrl_rt testdevicefw_rt \
-			               testscom_rt testutil_rt testvpd_rt testhwpf_rt
+RUNTIME_DATA_MODULES +=
+RUNTIME_TESTCASE_MODULES += cxxtest_rt
+RUNTIME_TESTCASE_MODULES += testsyslib_rt
+RUNTIME_TESTCASE_MODULES += testtargeting_rt
+RUNTIME_TESTCASE_MODULES += testxscom_rt
+RUNTIME_TESTCASE_MODULES += testerrl_rt
+RUNTIME_TESTCASE_MODULES += testdevicefw_rt
+RUNTIME_TESTCASE_MODULES += testscom_rt
+RUNTIME_TESTCASE_MODULES += testutil_rt
+RUNTIME_TESTCASE_MODULES += testvpd_rt
+RUNTIME_TESTCASE_MODULES += testhwpf_rt
 
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
-hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS}
-hbicore_MODULES = ${BASE_MODULES}
-hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
+hbicore_OBJECTS += ${BASE_OBJECTS}
+hbicore_OBJECTS += ${DIRECT_BOOT_OBJECTS}
+hbicore_MODULES += ${BASE_MODULES}
+hbicore_EXTENDED_MODULES += ${EXTENDED_MODULES}
 
 # for PRDR_RULE_TABLE_TARGETS
 include ${ROOTPATH}/src/usr/diag/prdf/common/prd_ruletable.mk
 
-hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
-                        p8.fbc.scom.if mbs_def.if mba_def.if cen_ddrphy.if \
-                        p8.pe.phase1.scom.if p8.pe.phase2.scom.if \
-                        ${PRDR_RULE_TABLE_TARGETS} \
-                        p8.abus.scom.if p8.xbus.scom.if p8.mcs.scom.if \
-                        p8.as.scom.if p8.nx.scom.if p8.dmi.custom.scom.if \
-                        cen.dmi.custom.scom.if p8.abus.custom.scom.if \
-                        p8.xbus.custom.scom.if p8.psi.scom.if p8.tpbridge.scom.if \
-                        p8.cxa.scom.if p8.a_x_pci_dmi_fir.scom.if
+hbicore_DATA_MODULES += sample.if
+hbicore_DATA_MODULES += p8.dmi.scom.if
+hbicore_DATA_MODULES += cen.dmi.scom.if
+hbicore_DATA_MODULES += p8.fbc.scom.if
+hbicore_DATA_MODULES += mbs_def.if
+hbicore_DATA_MODULES += mba_def.if
+hbicore_DATA_MODULES += cen_ddrphy.if
+hbicore_DATA_MODULES += p8.pe.phase1.scom.if
+hbicore_DATA_MODULES += p8.pe.phase2.scom.if
+hbicore_DATA_MODULES += ${PRDR_RULE_TABLE_TARGETS}
+hbicore_DATA_MODULES += p8.abus.scom.if
+hbicore_DATA_MODULES += p8.xbus.scom.if
+hbicore_DATA_MODULES += p8.mcs.scom.if
+hbicore_DATA_MODULES += p8.as.scom.if
+hbicore_DATA_MODULES += p8.nx.scom.if
+hbicore_DATA_MODULES += p8.dmi.custom.scom.if
+hbicore_DATA_MODULES += cen.dmi.custom.scom.if
+hbicore_DATA_MODULES += p8.abus.custom.scom.if
+hbicore_DATA_MODULES += p8.xbus.custom.scom.if
+hbicore_DATA_MODULES += p8.psi.scom.if
+hbicore_DATA_MODULES += p8.tpbridge.scom.if
+hbicore_DATA_MODULES += p8.cxa.scom.if
+hbicore_DATA_MODULES += p8.a_x_pci_dmi_fir.scom.if
 
-hbicore_test_OBJECTS = ${hbicore_OBJECTS}
-hbicore_test_MODULES = ${hbicore_MODULES}
-hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
-hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata \
-                            test_signed_container
+hbicore_test_OBJECTS += ${hbicore_OBJECTS}
+hbicore_test_MODULES += ${hbicore_MODULES}
+hbicore_test_EXTENDED_MODULES += ${hbicore_EXTENDED_MODULES}
+hbicore_test_EXTENDED_MODULES += ${TESTCASE_MODULES}
+hbicore_test_DATA_MODULES += ${hbicore_DATA_MODULES}
+hbicore_test_DATA_MODULES += testdata
+hbicore_test_DATA_MODULES += test_signed_container
 
-hbirt_OBJECTS = ${RUNTIME_OBJECTS} ${BASE_OBJECTS}
-hbirt_MODULES = ${RUNTIME_MODULES}
-hbirt_DATA_MODULES = ${RUNTIME_DATA_MODULES}
+hbirt_OBJECTS += ${RUNTIME_OBJECTS}
+hbirt_OBJECTS += ${BASE_OBJECTS}
+hbirt_MODULES += ${RUNTIME_MODULES}
+hbirt_DATA_MODULES += ${RUNTIME_DATA_MODULES}
 hbirt_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
 
-hbirt_test_OBJECTS = ${hbirt_OBJECTS}
-hbirt_test_MODULES = ${hbirt_MODULES} ${RUNTIME_TESTCASE_MODULES}
-hbirt_test_DATA_MODULES = ${hbirt_DATA_MODULES}
+hbirt_test_OBJECTS += ${hbirt_OBJECTS}
+hbirt_test_MODULES += ${hbirt_MODULES}
+hbirt_test_MODULES += ${RUNTIME_TESTCASE_MODULES}
+hbirt_test_DATA_MODULES += ${hbirt_DATA_MODULES}
 hbirt_test_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
 
-IMAGE_PASS_POST += buildpnor imgsizecheck
+IMAGE_PASS_POST += buildpnor
+IMAGE_PASS_POST += imgsizecheck
 
 IMAGE_PASS_POST += $(IMGDIR)/hbotStringFile
 CLEAN_TARGETS += $(IMGDIR)/hbotStringFile

@@ -23,12 +23,27 @@
 ROOTPATH = ../../..
 MODULE = errl
 
-OBJS = errlentry.o errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
-       errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
-       errludstring.o errludbacktrace.o errludattribute.o errludlogregister.o \
-       errludcallout.o errludprintk.o
+OBJS += errlentry.o
+OBJS += errlmanager.o
+OBJS += errlsctn.o
+OBJS += errlsctnhdr.o
+OBJS += errlprvt.o
+OBJS += errluh.o
+OBJS += errlud.o
+OBJS += errlsrc.o
+OBJS += errluserdetails.o
+OBJS += backtrace.o
+OBJS += errludtarget.o
+OBJS += errludstring.o
+OBJS += errludbacktrace.o
+OBJS += errludattribute.o
+OBJS += errludlogregister.o
+OBJS += errludcallout.o
+OBJS += errludprintk.o
 
-SUBDIRS = test.d  parser.d runtime.d
+SUBDIRS += test.d
+SUBDIRS += parser.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 

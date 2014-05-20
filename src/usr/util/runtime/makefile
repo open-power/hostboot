@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -24,9 +24,12 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = util_rt
 
-OBJS = utilbase.o utilstream.o utilmem.o utillidmgr_rt.o
+OBJS += utilbase.o
+OBJS += utilstream.o
+OBJS += utilmem.o
+OBJS += utillidmgr_rt.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 VPATH += ..
 include $(ROOTPATH)/config.mk

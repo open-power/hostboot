@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -24,7 +24,7 @@
 #
 #  @file src/usr/targeting/test/makefile
 #
-#  @brief Makefile for building Hostboot's targeting test dir 
+#  @brief Makefile for building Hostboot's targeting test dir
 #
 ################################################################################
 
@@ -55,16 +55,19 @@ EXTRAINCDIR +=                                       \
     ${ROOTPATH}/src/include/usr/ecmddatabuffer       \
     ../
 
-# Generate the test suite     
+# Generate the test suite
 
 MODULE = testtargeting
 
 COMMON_TESTCASE_REL_PATHS = \
     $(addprefix ${COMMON_TARGETING_REL_PATH}/test/,${COMMON_TESTCASES})
 
-TESTS = testtargeting.H testattrsync.H testattrtank.H ${COMMON_TESTCASE_REL_PATHS}
+TESTS += testtargeting.H
+TESTS += testattrsync.H
+TESTS += testattrtank.H
+TESTS += ${COMMON_TESTCASE_REL_PATHS}
 
-OBJS = attributestrings.o
+OBJS += attributestrings.o
 
 #debug :
 #	@echo EXTRAINCDIR = ${EXTRAINCDIR}
@@ -74,8 +77,8 @@ OBJS = attributestrings.o
 #	@echo INCLUDES = ${INCLUDES}
 #	@echo COMMON_TESTCASE_REL_PATHS = ${COMMON_TESTCASE_REL_PATHS}
 #	@echo COMMON_TESTCASES = ${COMMON_TESTCASES}
-#	@echo HWPF_INC_DIRS = ${HWPF_INC_DIRS} 
-#	@echo TESTS = ${TESTS} 
+#	@echo HWPF_INC_DIRS = ${HWPF_INC_DIRS}
+#	@echo TESTS = ${TESTS}
 
 include ${ROOTPATH}/config.mk
 

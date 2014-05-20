@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -35,7 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
-##  NOTE: add the base istep dir here. 
+##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
 
 ##  Include sub dirs
@@ -49,8 +49,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_pre_trainadv
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  edi_ei_initialization.o \
-        proc_fab_iovalid.o fabric_io_run_training.o fabric_io_dccal.o
+OBJS += edi_ei_initialization.o
+OBJS += proc_fab_iovalid.o
+OBJS += fabric_io_run_training.o
+OBJS += fabric_io_dccal.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

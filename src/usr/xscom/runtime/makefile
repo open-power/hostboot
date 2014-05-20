@@ -24,9 +24,10 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = xscom_rt
 
-OBJS = rt_xscom.o piberror.o
+OBJS += rt_xscom.o
+OBJS += piberror.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 VPATH += ..
 include $(ROOTPATH)/config.mk

@@ -33,27 +33,26 @@ MODULE = prdf
 #------------------------------------------------------------------------------
 PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
 
-VPATH =  \
-    common \
-    common/util \
-    common/plat \
-    common/plat/pegasus \
-    common/framework \
-    common/framework/resolution \
-    common/framework/register \
-    common/framework/service \
-    common/framework/config \
-    common/framework/rule \
-    common/mnfgtools \
-    mnfgtools \
-    framework \
-    framework/config \
-    framework/rule \
-    framework/service \
-    framework/resolution \
-    plat \
-    plat/pegasus \
-    common/plugins
+VPATH += common
+VPATH += common/util
+VPATH += common/plat
+VPATH += common/plat/pegasus
+VPATH += common/framework
+VPATH += common/framework/resolution
+VPATH += common/framework/register
+VPATH += common/framework/service
+VPATH += common/framework/config
+VPATH += common/framework/rule
+VPATH += common/mnfgtools
+VPATH += mnfgtools
+VPATH += framework
+VPATH += framework/config
+VPATH += framework/rule
+VPATH += framework/service
+VPATH += framework/resolution
+VPATH += plat
+VPATH += plat/pegasus
+VPATH += common/plugins
 
 #FIXME: we can remove most of these as well if we have them include correctly
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
@@ -100,15 +99,14 @@ include common/prd_ruletable.mk
 include common/prd_pegasus.mk
 include prdf_hb_only.mk
 
-OBJS = \
- ${prd_object_files} \
- ${prd_object_files_no_sim} \
- ${prd_ruletable} \
- ${prd_pegasus_specific} \
- ${prd_object_files_HB} \
- ${PRDF_RULE_PLUGINS_PEGASUS} \
- ${PRDF_RULE_PLUGINS_PEGASUS_HB} \
- ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \
+OBJS += ${prd_object_files}
+OBJS += ${prd_object_files_no_sim}
+OBJS += ${prd_ruletable}
+OBJS += ${prd_pegasus_specific}
+OBJS += ${prd_object_files_HB}
+OBJS += ${PRDF_RULE_PLUGINS_PEGASUS}
+OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_HB}
+OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_WSIM}
 
 #------------------------------------------------------------------------------
 # Generated Mfg Threshold Header file

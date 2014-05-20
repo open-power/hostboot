@@ -26,7 +26,7 @@ MODULE = testhwpf
 include hwpftest.mk
 
 TESTS = *.H
-SUBDIRS = runtime.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 

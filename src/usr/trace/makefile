@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -23,9 +23,17 @@
 ROOTPATH = ../../..
 MODULE = trace
 
-OBJS = interface.o service.o compdesc.o buffer.o bufferpage.o daemonif.o \
-       debug.o assert.o
+OBJS += interface.o
+OBJS += service.o
+OBJS += compdesc.o
+OBJS += buffer.o
+OBJS += bufferpage.o
+OBJS += daemonif.o
+OBJS += debug.o
+OBJS += assert.o
 
-SUBDIRS = daemon.d test.d runtime.d
+SUBDIRS += daemon.d
+SUBDIRS += test.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

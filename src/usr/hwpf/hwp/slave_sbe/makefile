@@ -45,16 +45,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_uti
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  slave_sbe.o \
-        proc_revert_sbe_mcs_setup.o     \
-        proc_check_slave_sbe_seeprom_complete.o \
-        proc_extract_sbe_rc.o   \
-        proc_read_seeprom.o \
-        proc_getecid.o \
-        proc_cen_ref_clk_enable.o \
-        proc_spless_sbe_startWA.o \
-        proc_reset_i2cm_bus_fence.o \
-        proc_check_master_sbe_seeprom.o
+OBJS += slave_sbe.o
+OBJS += proc_revert_sbe_mcs_setup.o
+OBJS += proc_check_slave_sbe_seeprom_complete.o
+OBJS += proc_extract_sbe_rc.o
+OBJS += proc_read_seeprom.o
+OBJS += proc_getecid.o
+OBJS += proc_cen_ref_clk_enable.o
+OBJS += proc_spless_sbe_startWA.o
+OBJS += proc_reset_i2cm_bus_fence.o
+OBJS += proc_check_master_sbe_seeprom.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable

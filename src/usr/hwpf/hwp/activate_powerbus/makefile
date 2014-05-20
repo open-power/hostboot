@@ -38,7 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
 
-##  NOTE: add the base istep dir here. 
+##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus
 
 ##  Include sub dirs
@@ -49,11 +49,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/proc_build_smp
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  activate_powerbus.o \
-        proc_build_smp.o proc_build_smp_adu.o proc_build_smp_epsilon.o \
-        proc_build_smp_fbc_ab.o proc_build_smp_fbc_cd.o \
-        proc_build_smp_fbc_nohp.o proc_adu_utils.o
-        
+OBJS += activate_powerbus.o
+OBJS += proc_build_smp.o
+OBJS += proc_build_smp_adu.o
+OBJS += proc_build_smp_epsilon.o
+OBJS += proc_build_smp_fbc_ab.o
+OBJS += proc_build_smp_fbc_cd.o
+OBJS += proc_build_smp_fbc_nohp.o
+OBJS += proc_adu_utils.o
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/<HWP_dir>

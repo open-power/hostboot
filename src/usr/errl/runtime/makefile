@@ -24,12 +24,25 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = errl_rt
 
-OBJS = errlentry.o rt_errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
-       errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
-       errludstring.o errludbacktrace.o errludattribute.o \
-       errludcallout.o rt_vfs.o errludlogregister.o
+OBJS += errlentry.o
+OBJS += rt_errlmanager.o
+OBJS += errlsctn.o
+OBJS += errlsctnhdr.o
+OBJS += errlprvt.o
+OBJS += errluh.o
+OBJS += errlud.o
+OBJS += errlsrc.o
+OBJS += errluserdetails.o
+OBJS += backtrace.o
+OBJS += errludtarget.o
+OBJS += errludstring.o
+OBJS += errludbacktrace.o
+OBJS += errludattribute.o
+OBJS += errludcallout.o
+OBJS += rt_vfs.o
+OBJS += errludlogregister.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 VPATH += ..
 include $(ROOTPATH)/config.mk

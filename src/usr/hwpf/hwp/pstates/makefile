@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -45,12 +45,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  gpstCheckByte.o  \
-    lab_pstates.o  \
-    p8_build_pstate_datablock.o  \
-    proc_get_voltage.o  \
-    pstates.o  \
-    pstate_tables.o
+OBJS += gpstCheckByte.o
+OBJS += lab_pstates.o
+OBJS += p8_build_pstate_datablock.o
+OBJS += proc_get_voltage.o
+OBJS += pstates.o
+OBJS += pstate_tables.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

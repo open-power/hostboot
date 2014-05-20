@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -59,7 +59,8 @@ endef
 
 PNOR_VBU_IMAGES =  $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
 
-CLEAN_TARGETS += ${PNOR_VBU_IMAGES} ${PNOR_VBU_IMAGES:.pnor=_pnor.toc}
+CLEAN_TARGETS += ${PNOR_VBU_IMAGES}
+CLEAN_TARGETS += ${PNOR_VBU_IMAGES:.pnor=_pnor.toc}
 
 include ${ROOTPATH}/config.mk
 

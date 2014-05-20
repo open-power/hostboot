@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -35,8 +35,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 ## pointer to already consumed procedures.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 
-OBJS = sbe_update.o
+OBJS += sbe_update.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

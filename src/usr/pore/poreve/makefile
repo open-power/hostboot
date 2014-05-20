@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -29,7 +29,7 @@
 #               environment (e.g., poreve).
 #
 # pore_model    Model the hardware of the PORE. This containts the "pore-engine-core/interpreter" of the PORe simulation
-#               The code in this directory is owned by Boeblingen team. 
+#               The code in this directory is owned by Boeblingen team.
 #
 # porevesrc     The Source code of the PoreVe class, including the Bus and
 #               Slave models, and the HookManager.
@@ -49,10 +49,28 @@ CFLAGS += -DDEBUG_FASTI2C=1 -D_BIG_ENDIAN=1
 # Override to use C++ compiler for %.c/h files
 CC_OVERRIDE = 1
 
-OBJS = poreveutil.o
-OBJS += transaction.o poreaddress.o poremodel.o poreregister.o poreinterface.o porestate.o
-OBJS += pore_model.o pore_bus.o pore_fi2c.o pore_inline_decode.o vsbe.o pibmem.o
-OBJS += pore.o bus.o hookmanager.o poreve.o pib2cfam.o fasti2c.o sbevital.o create.o
+OBJS += poreveutil.o
+OBJS += transaction.o
+OBJS += poreaddress.o
+OBJS += poremodel.o
+OBJS += poreregister.o
+OBJS += poreinterface.o
+OBJS += porestate.o
+OBJS += pore_model.o
+OBJS += pore_bus.o
+OBJS += pore_fi2c.o
+OBJS += pore_inline_decode.o
+OBJS += vsbe.o
+OBJS += pibmem.o
+OBJS += pore.o
+OBJS += bus.o
+OBJS += hookmanager.o
+OBJS += poreve.o
+OBJS += pib2cfam.o
+OBJS += fasti2c.o
+OBJS += sbevital.o
+OBJS += create.o
+
 HOOK_SOURCE_FILES = $(notdir $(wildcard ./hook/*sbe*.hooks.cc))
 OBJS += $(patsubst %.cc,%.o,$(HOOK_SOURCE_FILES))
 

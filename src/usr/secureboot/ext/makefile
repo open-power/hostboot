@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -22,9 +22,9 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = secureboot_ext
-SUBDIRS =
+SUBDIRS +=
 
-OBJS =
+OBJS +=
 
 CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk

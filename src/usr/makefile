@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -24,12 +24,37 @@ ROOTPATH = ../..
 
 # Do not instrument the module_init.o
 HOSTBOOT_PROFILE_NO_INSTRUMENT = 1
-OBJS = module_init.o
+OBJS += module_init.o
 
-SUBDIRS = trace.d cxxtest.d testcore.d errl.d devicefw.d  \
-          scom.d xscom.d targeting.d initservice.d hwpf.d \
-          ecmddatabuffer.d pnor.d i2c.d vfs.d fsi.d hwas.d fsiscom.d \
-          intr.d pore.d util.d mbox.d diag.d vpd.d scan.d \
-          runtime.d ibscom.d dump.d secureboot.d devtree.d sbe.d
+SUBDIRS += trace.d
+SUBDIRS += cxxtest.d
+SUBDIRS += testcore.d
+SUBDIRS += errl.d
+SUBDIRS += devicefw.d
+SUBDIRS += scom.d
+SUBDIRS += xscom.d
+SUBDIRS += targeting.d
+SUBDIRS += initservice.d
+SUBDIRS += hwpf.d
+SUBDIRS += ecmddatabuffer.d
+SUBDIRS += pnor.d
+SUBDIRS += i2c.d
+SUBDIRS += vfs.d
+SUBDIRS += fsi.d
+SUBDIRS += hwas.d
+SUBDIRS += fsiscom.d
+SUBDIRS += intr.d
+SUBDIRS += pore.d
+SUBDIRS += util.d
+SUBDIRS += mbox.d
+SUBDIRS += diag.d
+SUBDIRS += vpd.d
+SUBDIRS += scan.d
+SUBDIRS += runtime.d
+SUBDIRS += ibscom.d
+SUBDIRS += dump.d
+SUBDIRS += secureboot.d
+SUBDIRS += devtree.d
+SUBDIRS += sbe.d
 
 include ${ROOTPATH}/config.mk

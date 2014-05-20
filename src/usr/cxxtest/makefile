@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -24,8 +24,10 @@
 ROOTPATH = ../../..
 MODULE = cxxtest
 
-SUBDIRS=test.d runtime.d
+SUBDIRS += test.d
+SUBDIRS += runtime.d
 
-OBJS = TestSuite.o cxxtestexec.o
+OBJS += TestSuite.o
+OBJS += cxxtestexec.o
 
 include ${ROOTPATH}/config.mk

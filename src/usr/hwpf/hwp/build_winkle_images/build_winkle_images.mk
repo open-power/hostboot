@@ -47,25 +47,24 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_uti
 CFLAGS += -D __FAPI
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += \
-		p8_image_help.o         \
-		p8_scan_compression.o   \
-		pore_inline_assembler.o \
-		p8_pba_bar_config.o     \
-		sbe_xip_image.o         \
-		p8_pore_table_static_data.o   \
-		p8_pore_table_gen_api_fixed.o \
-		p8_pmc_deconfig_setup.o \
-		p8_poreslw_init.o       \
-		p8_set_pore_bar.o       \
-		p8_xip_customize.o      \
-		p8_ring_identification.o  \
-		p8_slw_build_fixed.o      \
-		p8_image_help_base.o    \
-		p8_pfet_init.o          \
-		p8_pfet_control.o       \
-		p8_block_wakeup_intr.o \
-		p8_mailbox_utils.o
+OBJS += p8_image_help.o
+OBJS += p8_scan_compression.o
+OBJS += pore_inline_assembler.o
+OBJS += p8_pba_bar_config.o
+OBJS += sbe_xip_image.o
+OBJS += p8_pore_table_static_data.o
+OBJS += p8_pore_table_gen_api_fixed.o
+OBJS += p8_pmc_deconfig_setup.o
+OBJS += p8_poreslw_init.o
+OBJS += p8_set_pore_bar.o
+OBJS += p8_xip_customize.o
+OBJS += p8_ring_identification.o
+OBJS += p8_slw_build_fixed.o
+OBJS += p8_image_help_base.o
+OBJS += p8_pfet_init.o
+OBJS += p8_pfet_control.o
+OBJS += p8_block_wakeup_intr.o
+OBJS += p8_mailbox_utils.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

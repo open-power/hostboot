@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -24,7 +24,10 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = trace_rt
 
-OBJS = interface.o assert.o compdesc.o rt_service.o
+OBJS += interface.o
+OBJS += assert.o
+OBJS += compdesc.o
+OBJS += rt_service.o
 
 VPATH += ..
 include $(ROOTPATH)/config.mk

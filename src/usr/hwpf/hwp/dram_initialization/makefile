@@ -56,18 +56,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_power_cleanu
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_throttle_sync
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  dram_initialization.o \
-        proc_exit_cache_contained.o \
-        mss_extent_setup.o \
-        mss_setup_bars.o   \
-        proc_fab_smp.o  \
-        proc_setup_bars.o   \
-        proc_pcie_config.o \
-        proc_mpipl_ex_cleanup.o \
-        proc_mpipl_chip_cleanup.o \
-        mss_thermal_init.o \
-        mss_power_cleanup.o \
-        proc_throttle_sync.o
+OBJS += dram_initialization.o
+OBJS += proc_exit_cache_contained.o
+OBJS += mss_extent_setup.o
+OBJS += mss_setup_bars.o
+OBJS += proc_fab_smp.o
+OBJS += proc_setup_bars.o
+OBJS += proc_pcie_config.o
+OBJS += proc_mpipl_ex_cleanup.o
+OBJS += proc_mpipl_chip_cleanup.o
+OBJS += mss_thermal_init.o
+OBJS += mss_power_cleanup.o
+OBJS += proc_throttle_sync.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP

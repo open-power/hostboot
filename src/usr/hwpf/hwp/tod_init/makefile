@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -47,14 +47,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/tod_init/proc_tod_init
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  tod_init.o  \
-        TodControls.o TodDrawer.o TodProc.o \
-        TodSvc.o TodSvcUtil.o TodHwpIntf.o \
-        TodTopologyManager.o \
-        proc_tod_setup.o \
-        proc_tod_save_config.o \
-        proc_tod_init.o \
-        proc_tod_utils.o
+OBJS += tod_init.o
+OBJS += TodControls.o
+OBJS += TodDrawer.o
+OBJS += TodProc.o
+OBJS += TodSvc.o
+OBJS += TodSvcUtil.o
+OBJS += TodHwpIntf.o
+OBJS += TodTopologyManager.o
+OBJS += proc_tod_setup.o
+OBJS += proc_tod_save_config.o
+OBJS += proc_tod_init.o
+OBJS += proc_tod_utils.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

@@ -22,10 +22,28 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
 
-OBJS = string.o string_ext.o stdlib.o ctype.o assert.o stdio.o math.o sprintf.o
-OBJS += syscall_stub.o syscall_task.o syscall_msg.o
-OBJS += syscall_mmio.o syscall_time.o sync.o syscall_misc.o
-OBJS += syscall_mm.o splaytree.o cxxtest_data.o crc32.o utilmisc.o
+OBJS += string.o
+OBJS += string_ext.o
+OBJS += stdlib.o
+OBJS += ctype.o
+OBJS += assert.o
+OBJS += stdio.o
+OBJS += math.o
+OBJS += sprintf.o
+
+OBJS += syscall_stub.o
+OBJS += syscall_task.o
+OBJS += syscall_msg.o
+
+OBJS += syscall_mmio.o
+OBJS += syscall_time.o
+OBJS += sync.o syscall_misc.o
+
+OBJS += syscall_mm.o
+OBJS += splaytree.o
+OBJS += cxxtest_data.o
+OBJS += crc32.o
+OBJS += utilmisc.o
 
 ifdef HOSTBOOT_MEMORY_LEAKS
 COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1

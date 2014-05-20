@@ -44,23 +44,23 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_attr_cleanup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_mb_interleave
 
-OBJS =  mc_config.o                \
-        mss_volt.o                 \
-        mss_freq.o                 \
-        mss_eff_config.o           \
-        mss_eff_grouping.o         \
-        opt_memmap.o               \
-        mss_eff_config_thermal.o   \
-        mss_eff_config_termination.o \
-        mss_eff_config_rank_group.o  \
-        mss_eff_config_cke_map.o     \
-        mss_bulk_pwr_throttles.o     \
-        mss_throttle_to_power.o      \
-        mss_eff_config_shmoo.o       \
-        mss_error_support.o          \
-        mss_eff_pre_config.o         \
-        mss_attr_cleanup.o           \
-        mss_eff_mb_interleave.o
+OBJS +=  mc_config.o
+OBJS += mss_volt.o
+OBJS += mss_freq.o
+OBJS += mss_eff_config.o
+OBJS += mss_eff_grouping.o
+OBJS += opt_memmap.o
+OBJS += mss_eff_config_thermal.o
+OBJS += mss_eff_config_termination.o
+OBJS += mss_eff_config_rank_group.o
+OBJS += mss_eff_config_cke_map.o
+OBJS += mss_bulk_pwr_throttles.o
+OBJS += mss_throttle_to_power.o
+OBJS += mss_eff_config_shmoo.o
+OBJS += mss_error_support.o
+OBJS += mss_eff_pre_config.o
+OBJS += mss_attr_cleanup.o
+OBJS += mss_eff_mb_interleave.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

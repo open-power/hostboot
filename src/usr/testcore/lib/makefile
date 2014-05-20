@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -25,6 +25,6 @@ ROOTPATH = ../../../..
 MODULE = testsyslib
 TESTS = *.H
 
-SUBDIRS = runtime.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

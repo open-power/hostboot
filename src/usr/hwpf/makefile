@@ -30,226 +30,226 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 #------------------------------------------------------------------------------
 # Source XML files
 #------------------------------------------------------------------------------
-HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
-    hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml \
-    hwp/dimm_errors.xml \
-    hwp/chip_accessors/chip_errors.xml \
-    hwp/dram_training/memory_errors.xml \
-    hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
-    hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
-    hwp/mvpd_accessors/mvpd_errors.xml \
-    hwp/spd_accessors/getSpdAttrAccessorErrors.xml \
-    hwp/winkle_ring_accessors/proc_l3_delta_data_errors.xml \
-    hwp/pll_accessors/getPllRingInfoAttrErrors.xml \
-    hwp/pll_accessors/getPllRingAttrErrors.xml \
-    ../pore/fapiporeve/fapiPoreVe_errors.xml \
-    hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
-    hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \
-    hwp/build_winkle_images/p8_slw_build/p8_slw_build_errors.xml    \
-    hwp/build_winkle_images/p8_slw_build/p8_xip_customize_errors.xml    \
-    hwp/build_winkle_images/p8_slw_build/p8_pba_bar_config_errors.xml \
-    hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml \
-    hwp/core_activate/proc_prep_master_winkle/proc_prep_master_winkle_errors.xml \
-    hwp/core_activate/proc_stop_deadman_timer/proc_stop_deadman_timer_errors.xml \
-    hwp/activate_powerbus/proc_build_smp/proc_build_smp_errors.xml \
-    hwp/activate_powerbus/proc_build_smp/proc_adu_utils_errors.xml \
-    hwp/thread_activate/proc_thread_control/proc_thread_control.xml \
-    hwp/bus_training/erepair_errors.xml \
-    hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_errors.xml \
-    hwp/dram_initialization/proc_pcie_config/proc_pcie_config_errors.xml \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml  \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_pmc_deconfig_setup_errors.xml \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_errors.xml \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_poreslw_errors.xml   \
-    hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_check_slave_sbe_seeprom_complete_errors.xml \
-    hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_sbe_rc_errors.xml \
-    hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_read_seeprom_errors.xml    \
-    hwp/proc_sbe_registers.xml \
-    hwp/runtime_errors/p8_ocb_init_errors.xml \
-    hwp/runtime_errors/p8_occ_control_errors.xml \
-    hwp/runtime_errors/p8_occ_sram_init_errors.xml \
-    hwp/runtime_errors/p8_oha_init_errors.xml \
-    hwp/runtime_errors/p8_pcbs_init_errors.xml \
-    hwp/runtime_errors/p8_pm_prep_for_reset_errors.xml \
-    hwp/runtime_errors/p8_force_vsafe_errors.xml \
-    hwp/runtime_errors/p8_pmc_errors.xml \
-    hwp/runtime_errors/p8_pss_errors.xml \
-    hwp/runtime_errors/proc_cpu_special_wakeup_errors.xml \
-    hwp/runtime_errors/p8_poregpe_errors.xml \
-    hwp/runtime_errors/p8_pba_init_errors.xml \
-    hwp/runtime_errors/proc_ocb_indir_access_errors.xml \
-    hwp/dram_initialization/host_mpipl_service/proc_mpipl_chip_cleanup_errors.xml \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_init_errors.xml \
-    hwp/poreve_errors.xml \
-    hwp/proc_fab_iovalid_errors.xml \
-    hwp/nest_chiplets/proc_chiplet_scominit/proc_abus_scominit_errors.xml \
-    hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit_errors.xml \
-    hwp/dmi_training/proc_dmi_scominit_errors.xml \
-    hwp/dmi_training/cen_dmi_scominit_errors.xml \
-    hwp/sbe_centaur_init/cen_xip_customize_errors.xml \
-    hwp/tod_init/proc_tod_utils/proc_tod_utils.xml \
-    hwp/mc_config/mss_eff_config/opt_memmap_errors.xml \
-    hwp/pstates/pstates/p8_build_pstate_datablock_errors.xml \
-    hwp/pstates/pstates/proc_get_voltage_errors.xml \
-    hwp/proc_cfam_registers.xml \
-    hwp/p8_slw_registers.xml \
-    hwp/utility_procedures/memory_mss_maint_cmds.xml \
-    hwp/mc_config/mss_volt/memory_mss_volt.xml \
-    hwp/mc_config/mss_freq/memory_mss_freq.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_grouping.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_config_thermal.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_bulk_pwr_throttles.xml \
-    hwp/dram_training/memory_mss_funcs.xml \
-    hwp/dram_training/mss_draminit_training/memory_mss_draminit_training.xml  \
-    hwp/dram_training/mss_ddr_phy_reset/memory_mss_ddr_phy_reset.xml \
-    hwp/dram_training/memory_mss_termination_control.xml \
-    hwp/dram_training/mem_startclocks/memory_cen_stopclocks.xml \
-    hwp/dram_training/mss_scominit/memory_mss_scominit.xml \
-    hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist_common.xml \
-    hwp/dram_initialization/proc_setup_bars/memory_mss_setup_bars.xml \
-    hwp/slave_sbe/proc_cen_ref_clk_enable/proc_cen_ref_clk_enable_errors.xml \
-    hwp/dmi_training/mss_getecid/memory_mss_get_cen_ecid.xml \
-    hwp/dram_initialization/mss_extent_setup/memory_mss_extent_setup.xml \
-    hwp/dram_initialization/mss_thermal_init/memory_mss_thermal_init.xml \
-    hwp/dram_training/mss_draminit/memory_mss_draminit.xml \
-    hwp/dram_training/mss_draminit_mc/memory_mss_draminit_mc.xml \
-    hwp/dram_training/mss_draminit_trainadv/memory_mss_access_delay_reg.xml \
-    hwp/dram_training/mss_draminit_trainadv/memory_mss_draminit_training_advanced.xml \
-    hwp/dram_training/mss_draminit_trainadv/memory_mss_generic_shmoo.xml \
-    hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_config.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_config_cke_map.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_config_rank_group.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_config_termination.xml \
-    hwp/build_winkle_images/p8_block_wakeup_intr/p8_block_wakeup_intr_errors.xml \
-    hwp/build_winkle_images/proc_mailbox_utils/p8_mailbox_utils_errors.xml \
-    hwp/proc_otprom_registers.xml \
-    hwp/runtime_errors/p8_gpe_registers.xml \
-    hwp/runtime_errors/p8_pss_registers.xml \
-    hwp/proc_hwreconfig/proc_enable_reconfig/proc_enable_reconfig_errors.xml \
-    hwp/dram_training/mem_startclocks/cen_mem_startclocks_errors.xml \
-    hwp/dram_training/mem_pll_setup/cen_mem_pll_initf_errors.xml \
-    hwp/dram_training/mem_pll_setup/cen_mem_pll_setup_errors.xml \
-    hwp/core_activate/proc_check_slw_done/proc_check_slw_done_errors.xml \
-    hwp/dram_initialization/proc_throttle_sync/proc_throttle_sync_errors.xml \
-    hwp/dram_initialization/mss_power_cleanup/memory_mss_power_cleanup.xml \
-    hwp/runtime_errors/p8_pstate_registers.xml \
-    hwp/mc_config/mss_eff_mb_interleave/memory_mss_eff_mb_interleave.xml \
-    hwp/nest_chiplets/proc_a_x_pci_dmi_pll_registers.xml \
-    hwp/dram_training/mss_lrdimm_funcs/memory_mss_lrdimm_funcs.xml \
-    hwp/bus_training/gcr_funcs_errors.xml \
-    hwp/bus_training/io_run_training_errors.xml \
-    hwp/bus_training/io_funcs_errors.xml \
-    hwp/bus_training/io_dccal_errors.xml \
-    hwp/bus_training/io_power_down_lanes_errors.xml \
-    hwp/bus_training/io_read_erepair_errors.xml \
-    hwp/bus_training/io_fir_isolation_errors.xml \
-    hwp/bus_training/io_restore_erepair_errors.xml \
-    hwp/bus_training/io_cleanup_errors.xml \
-    hwp/proc_pibmem_registers.xml \
-    hwp/proc_clock_control_registers.xml \
-    hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_chiplet_init_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_decompress_scan_halt_codes.xml \
-    hwp/proc_sbe_errors/proc_sbe_ex_dpll_setup_halt_codes.xml \
-    hwp/proc_sbe_errors/proc_sbe_ex_startclocks_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_fabricinit_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_instruct_start_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_lco_loader_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_npll_setup_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_pb_startclocks.xml \
-    hwp/proc_sbe_errors/proc_sbe_pibmem_loader_halt_codes.xml \
-    hwp/proc_sbe_errors/proc_sbe_scominit_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_select_ex_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_setup_evid_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_tp_switch_gears_errors.xml \
-    hwp/proc_sbe_errors/proc_sbe_trigger_winkle_errors.xml \
-    hwp/proc_sbe_errors/proc_slw_base_halt_codes.xml \
-    hwp/proc_sbe_errors/sbe_common_halt_codes.xml \
-    hwp/proc_sbe_errors/sbe_load_ring_vec_ex_errors.xml
+HWP_ERROR_XML_FILES += hwp/fapiHwpErrorInfo.xml
+HWP_ERROR_XML_FILES += hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml
+HWP_ERROR_XML_FILES += hwp/dimm_errors.xml
+HWP_ERROR_XML_FILES += hwp/chip_accessors/chip_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/memory_errors.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml
+HWP_ERROR_XML_FILES += hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml
+HWP_ERROR_XML_FILES += hwp/mvpd_accessors/mvpd_errors.xml
+HWP_ERROR_XML_FILES += hwp/spd_accessors/getSpdAttrAccessorErrors.xml
+HWP_ERROR_XML_FILES += hwp/winkle_ring_accessors/proc_l3_delta_data_errors.xml
+HWP_ERROR_XML_FILES += hwp/pll_accessors/getPllRingInfoAttrErrors.xml
+HWP_ERROR_XML_FILES += hwp/pll_accessors/getPllRingAttrErrors.xml
+HWP_ERROR_XML_FILES += ../pore/fapiporeve/fapiPoreVe_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_slw_build/p8_slw_build_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_slw_build/p8_xip_customize_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_slw_build/p8_pba_bar_config_errors.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml
+HWP_ERROR_XML_FILES += hwp/core_activate/proc_prep_master_winkle/proc_prep_master_winkle_errors.xml
+HWP_ERROR_XML_FILES += hwp/core_activate/proc_stop_deadman_timer/proc_stop_deadman_timer_errors.xml
+HWP_ERROR_XML_FILES += hwp/activate_powerbus/proc_build_smp/proc_build_smp_errors.xml
+HWP_ERROR_XML_FILES += hwp/activate_powerbus/proc_build_smp/proc_adu_utils_errors.xml
+HWP_ERROR_XML_FILES += hwp/thread_activate/proc_thread_control/proc_thread_control.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/erepair_errors.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/proc_pcie_config/proc_pcie_config_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_set_pore_bar/p8_pmc_deconfig_setup_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_set_pore_bar/p8_poreslw_errors.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_check_slave_sbe_seeprom_complete_errors.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_sbe_rc_errors.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_read_seeprom_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_registers.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_ocb_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_occ_control_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_occ_sram_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_oha_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pcbs_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pm_prep_for_reset_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_force_vsafe_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pmc_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pss_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/proc_cpu_special_wakeup_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_poregpe_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pba_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/proc_ocb_indir_access_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/host_mpipl_service/proc_mpipl_chip_cleanup_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/poreve_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_fab_iovalid_errors.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_chiplet_scominit/proc_abus_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/dmi_training/proc_dmi_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/dmi_training/cen_dmi_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/sbe_centaur_init/cen_xip_customize_errors.xml
+HWP_ERROR_XML_FILES += hwp/tod_init/proc_tod_utils/proc_tod_utils.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/opt_memmap_errors.xml
+HWP_ERROR_XML_FILES += hwp/pstates/pstates/p8_build_pstate_datablock_errors.xml
+HWP_ERROR_XML_FILES += hwp/pstates/pstates/proc_get_voltage_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_cfam_registers.xml
+HWP_ERROR_XML_FILES += hwp/p8_slw_registers.xml
+HWP_ERROR_XML_FILES += hwp/utility_procedures/memory_mss_maint_cmds.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_freq/memory_mss_freq.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_grouping.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config_thermal.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_bulk_pwr_throttles.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/memory_mss_funcs.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_training/memory_mss_draminit_training.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_ddr_phy_reset/memory_mss_ddr_phy_reset.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/memory_mss_termination_control.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mem_startclocks/memory_cen_stopclocks.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_scominit/memory_mss_scominit.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist_common.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/proc_setup_bars/memory_mss_setup_bars.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_cen_ref_clk_enable/proc_cen_ref_clk_enable_errors.xml
+HWP_ERROR_XML_FILES += hwp/dmi_training/mss_getecid/memory_mss_get_cen_ecid.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/mss_extent_setup/memory_mss_extent_setup.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/mss_thermal_init/memory_mss_thermal_init.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit/memory_mss_draminit.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_mc/memory_mss_draminit_mc.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_access_delay_reg.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_draminit_training_advanced.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_generic_shmoo.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config_cke_map.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config_rank_group.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config_termination.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/p8_block_wakeup_intr/p8_block_wakeup_intr_errors.xml
+HWP_ERROR_XML_FILES += hwp/build_winkle_images/proc_mailbox_utils/p8_mailbox_utils_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_otprom_registers.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_gpe_registers.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pss_registers.xml
+HWP_ERROR_XML_FILES += hwp/proc_hwreconfig/proc_enable_reconfig/proc_enable_reconfig_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mem_startclocks/cen_mem_startclocks_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mem_pll_setup/cen_mem_pll_initf_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mem_pll_setup/cen_mem_pll_setup_errors.xml
+HWP_ERROR_XML_FILES += hwp/core_activate/proc_check_slw_done/proc_check_slw_done_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/proc_throttle_sync/proc_throttle_sync_errors.xml
+HWP_ERROR_XML_FILES += hwp/dram_initialization/mss_power_cleanup/memory_mss_power_cleanup.xml
+HWP_ERROR_XML_FILES += hwp/runtime_errors/p8_pstate_registers.xml
+HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_mb_interleave/memory_mss_eff_mb_interleave.xml
+HWP_ERROR_XML_FILES += hwp/nest_chiplets/proc_a_x_pci_dmi_pll_registers.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_lrdimm_funcs/memory_mss_lrdimm_funcs.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/gcr_funcs_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_run_training_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_funcs_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_dccal_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_power_down_lanes_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_read_erepair_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_fir_isolation_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_restore_erepair_errors.xml
+HWP_ERROR_XML_FILES += hwp/bus_training/io_cleanup_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_pibmem_registers.xml
+HWP_ERROR_XML_FILES += hwp/proc_clock_control_registers.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_chiplet_init_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_decompress_scan_halt_codes.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_ex_dpll_setup_halt_codes.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_ex_startclocks_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_fabricinit_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_instruct_start_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_lco_loader_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_npll_setup_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_pb_startclocks.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_pibmem_loader_halt_codes.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_scominit_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_select_ex_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_setup_evid_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_tp_switch_gears_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_trigger_winkle_errors.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_slw_base_halt_codes.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/sbe_common_halt_codes.xml
+HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/sbe_load_ring_vec_ex_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
-HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
-                     hwp/L2_L3_attributes.xml \
-                     hwp/scratch_attributes.xml \
-                     hwp/system_attributes.xml \
-                     hwp/chip_attributes.xml \
-                     hwp/dimm_spd_attributes.xml \
-                     hwp/dimm_attributes.xml \
-                     hwp/unit_attributes.xml \
-                     hwp/freq_attributes.xml \
-                     hwp/ei_bus_attributes.xml \
-                     hwp/chip_ec_attributes.xml \
-                     hwp/centaur_ec_attributes.xml \
-                     hwp/common_attributes.xml \
-                     hwp/sync_attributes.xml   \
-                     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
-                     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
-                     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \
-                     hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml    \
-                     hwp/runtime_attributes/pm_plat_attributes.xml \
-                     hwp/runtime_attributes/pm_hwp_attributes.xml \
-                     hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
-                     hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
-                     hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
-                     hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
-                     hwp/poreve_memory_attributes.xml \
-                     hwp/mcbist_attributes.xml \
-                     hwp/proc_winkle_scan_override_attributes.xml \
-                     hwp/erepair_thresholds.xml \
-                     hwp/dram_training/mem_pll_setup/memb_pll_ring_attributes.xml \
-                     hwp/proc_chip_ec_feature.xml \
-                     hwp/proc_abus_dmi_xbus_scominit_attributes.xml \
-                     hwp/runtime_attributes/memory_occ_attributes.xml
+HWP_ATTR_XML_FILES += hwp/memory_attributes.xml
+HWP_ATTR_XML_FILES += hwp/L2_L3_attributes.xml
+HWP_ATTR_XML_FILES += hwp/scratch_attributes.xml
+HWP_ATTR_XML_FILES += hwp/system_attributes.xml
+HWP_ATTR_XML_FILES += hwp/chip_attributes.xml
+HWP_ATTR_XML_FILES += hwp/dimm_spd_attributes.xml
+HWP_ATTR_XML_FILES += hwp/dimm_attributes.xml
+HWP_ATTR_XML_FILES += hwp/unit_attributes.xml
+HWP_ATTR_XML_FILES += hwp/freq_attributes.xml
+HWP_ATTR_XML_FILES += hwp/ei_bus_attributes.xml
+HWP_ATTR_XML_FILES += hwp/chip_ec_attributes.xml
+HWP_ATTR_XML_FILES += hwp/centaur_ec_attributes.xml
+HWP_ATTR_XML_FILES += hwp/common_attributes.xml
+HWP_ATTR_XML_FILES += hwp/sync_attributes.xml
+HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml
+HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml
+HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml
+HWP_ATTR_XML_FILES += hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml
+HWP_ATTR_XML_FILES += hwp/runtime_attributes/pm_plat_attributes.xml
+HWP_ATTR_XML_FILES += hwp/runtime_attributes/pm_hwp_attributes.xml
+HWP_ATTR_XML_FILES += hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
+HWP_ATTR_XML_FILES += hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
+HWP_ATTR_XML_FILES += hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml
+HWP_ATTR_XML_FILES += hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
+HWP_ATTR_XML_FILES += hwp/poreve_memory_attributes.xml
+HWP_ATTR_XML_FILES += hwp/mcbist_attributes.xml
+HWP_ATTR_XML_FILES += hwp/proc_winkle_scan_override_attributes.xml
+HWP_ATTR_XML_FILES += hwp/erepair_thresholds.xml
+HWP_ATTR_XML_FILES += hwp/dram_training/mem_pll_setup/memb_pll_ring_attributes.xml
+HWP_ATTR_XML_FILES += hwp/proc_chip_ec_feature.xml
+HWP_ATTR_XML_FILES += hwp/proc_abus_dmi_xbus_scominit_attributes.xml
+HWP_ATTR_XML_FILES += hwp/runtime_attributes/memory_occ_attributes.xml
 
 #------------------------------------------------------------------------------
 # PLL Ring Data files
 #------------------------------------------------------------------------------
-HWP_PLL_FILES = hwp/pll_attributes/s1_10_pll_ring.attributes \
-                hwp/pll_attributes/s1_13_pll_ring.attributes \
-                hwp/pll_attributes/s1_20_pll_ring.attributes \
-                hwp/pll_attributes/s1_21_pll_ring.attributes \
-                hwp/pll_attributes/p8_10_pll_ring.attributes \
-                hwp/pll_attributes/p8_20_pll_ring.attributes \
-                hwp/pll_attributes/centaur_10_pll_ring.attributes \
-                hwp/pll_attributes/centaur_20_pll_ring.attributes \
-                hwp/pll_attributes/centaur_21_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/s1_10_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/s1_13_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/s1_20_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/s1_21_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/p8_10_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/p8_20_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/centaur_10_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/centaur_20_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/centaur_21_pll_ring.attributes
 
 #------------------------------------------------------------------------------
 # Winkle Ring data files
 #------------------------------------------------------------------------------
-HWP_WINKLE_RING_FILES = hwp/winkle_ring_accessors/s1_10_winkle_ring.attributes \
-                        hwp/winkle_ring_accessors/s1_13_winkle_ring.attributes \
-                        hwp/winkle_ring_accessors/s1_20_winkle_ring.attributes \
-                        hwp/winkle_ring_accessors/s1_21_winkle_ring.attributes \
-                        hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes \
-                        hwp/winkle_ring_accessors/p8_20_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_10_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_13_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_20_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_21_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/p8_20_winkle_ring.attributes
 
 #------------------------------------------------------------------------------
 # Initfiles
 #------------------------------------------------------------------------------
-HWP_INITFILES = hwp/initfiles/sample.initfile \
-                hwp/initfiles/cen.dmi.scom.initfile \
-                hwp/initfiles/p8.dmi.scom.initfile \
-                hwp/initfiles/mbs_def.initfile \
-                hwp/initfiles/mba_def.initfile \
-                hwp/initfiles/cen_ddrphy.initfile \
-                hwp/initfiles/p8.fbc.scom.initfile \
-                hwp/initfiles/p8.pe.phase1.scom.initfile \
-                hwp/initfiles/p8.pe.phase2.scom.initfile \
-                hwp/initfiles/p8.abus.scom.initfile \
-                hwp/initfiles/p8.xbus.scom.initfile \
-                hwp/initfiles/p8.mcs.scom.initfile \
-                hwp/initfiles/p8.as.scom.initfile \
-                hwp/initfiles/p8.nx.scom.initfile \
-                hwp/initfiles/p8.dmi.custom.scom.initfile \
-                hwp/initfiles/cen.dmi.custom.scom.initfile \
-                hwp/initfiles/p8.abus.custom.scom.initfile \
-                hwp/initfiles/p8.xbus.custom.scom.initfile \
-                hwp/initfiles/p8.psi.scom.initfile \
-                hwp/initfiles/p8.tpbridge.scom.initfile \
-                hwp/initfiles/p8.cxa.scom.initfile \
-                hwp/initfiles/p8.a_x_pci_dmi_fir.scom.initfile
+HWP_INITFILES += hwp/initfiles/sample.initfile
+HWP_INITFILES += hwp/initfiles/cen.dmi.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.dmi.scom.initfile
+HWP_INITFILES += hwp/initfiles/mbs_def.initfile
+HWP_INITFILES += hwp/initfiles/mba_def.initfile
+HWP_INITFILES += hwp/initfiles/cen_ddrphy.initfile
+HWP_INITFILES += hwp/initfiles/p8.fbc.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.pe.phase1.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.pe.phase2.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.abus.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.xbus.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.mcs.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.as.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.nx.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.dmi.custom.scom.initfile
+HWP_INITFILES += hwp/initfiles/cen.dmi.custom.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.abus.custom.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.xbus.custom.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.psi.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.tpbridge.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.cxa.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.a_x_pci_dmi_fir.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 
@@ -265,15 +265,15 @@ IF_CMP_YACC_H_TARGET = $(IF_CMP_SUBDIR)/ifcompiler.y.tab.h
 IF_CMP_FLEX_TARGET = $(IF_CMP_SUBDIR)/ifcompiler.lex.yy.c
 IF_CMP_COMPILER_TARGET = ifcompiler
 
-IF_COMPILER_C_FILES = ifcompiler/initCompiler.C \
-                      ifcompiler/initRpn.C \
-                      ifcompiler/initScom.C \
-                      ifcompiler/initSymbols.C
+IF_COMPILER_C_FILES += ifcompiler/initCompiler.C
+IF_COMPILER_C_FILES += ifcompiler/initRpn.C
+IF_COMPILER_C_FILES += ifcompiler/initScom.C
+IF_COMPILER_C_FILES += ifcompiler/initSymbols.C
 
-IF_COMPILER_H_FILES = ifcompiler/initCompiler.H \
-                      ifcompiler/initRpn.H \
-                      ifcompiler/initScom.H \
-                      ifcompiler/initSymbols.H
+IF_COMPILER_H_FILES += ifcompiler/initCompiler.H
+IF_COMPILER_H_FILES += ifcompiler/initRpn.H
+IF_COMPILER_H_FILES += ifcompiler/initScom.H
+IF_COMPILER_H_FILES += ifcompiler/initSymbols.H
 
 IF_COMPILER_O_FILES = $(addprefix $(GENDIR)/$(IF_CMP_SUBDIR)/, \
 			    $(call notdir, $(IF_COMPILER_C_FILES:.C=.host.o)) \
@@ -284,8 +284,10 @@ IF_COMPILER_O_FILES = $(addprefix $(GENDIR)/$(IF_CMP_SUBDIR)/, \
 CLEAN_TARGETS += $(IF_COMPILER_O_FILES)
 
 # The FAPI files generated from Error XML files
-FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiHwpErrorInfo.H \
-                     fapiCollectRegFfdc.C fapiSetSbeError.H
+FAPI_ERROR_TARGETS += fapiHwpReturnCodes.H
+FAPI_ERROR_TARGETS += fapiHwpErrorInfo.H
+FAPI_ERROR_TARGETS += fapiCollectRegFfdc.C
+FAPI_ERROR_TARGETS += fapiSetSbeError.H
 
 # The PLAT HWP Error Parser file generated from Error XML files
 PLAT_HWP_ERR_PARSER = fapiPlatHwpErrParser.H
@@ -300,9 +302,11 @@ FAPI_PLL_TARGET = fapiPllRingAttr.H
 FAPI_WINKLE_RING_TARGET = fapiL3DeltaDataAttr.H
 
 # The FAPI files generated from Attribute XML files
-FAPI_ATTR_TARGETS = fapiChipEcFeature.C fapiAttributePlatCheck.H \
-                    fapiAttributesSupported.html fapiAttrInfo.csv \
-                    fapiAttrEnumInfo.csv
+FAPI_ATTR_TARGETS += fapiChipEcFeature.C
+FAPI_ATTR_TARGETS += fapiAttributePlatCheck.H
+FAPI_ATTR_TARGETS += fapiAttributesSupported.html
+FAPI_ATTR_TARGETS += fapiAttrInfo.csv
+FAPI_ATTR_TARGETS += fapiAttrEnumInfo.csv
 
 # The binary, list and attr files generated from Initfiles
 # Generation depends on ifcompiler and fapiAttributeIds.H
@@ -311,24 +315,25 @@ HWP_IF_BASENAMES = $(basename ${HWP_IF_NAMES})
 HWP_IF_BIN_TARGETS = $(addsuffix .if, ${HWP_IF_BASENAMES})
 HWP_IF_LST_TARGETS = $(addsuffix .if.list.bz2, ${HWP_IF_BASENAMES})
 HWP_IF_ATT_TARGETS = $(addsuffix .if.attr, ${HWP_IF_BASENAMES})
-HWP_IF_ALL_TARGETS = ${HWP_IF_BIN_TARGETS} ${HWP_IF_LST_TARGETS} \
-                     ${HWP_IF_ATT_TARGETS}
+HWP_IF_ALL_TARGETS += ${HWP_IF_BIN_TARGETS}
+HWP_IF_ALL_TARGETS += ${HWP_IF_LST_TARGETS}
+HWP_IF_ALL_TARGETS += ${HWP_IF_ATT_TARGETS}
 
 # The FAPI Initfile attribute service
 # Generation depends on the Initfile <name>.if.attr files
 FAPI_ATTR_IF_TARGET = fapiAttributeService.C
 
-GENFILES = ${IF_CMP_YACC_C_TARGET} \
-           ${IF_CMP_YACC_H_TARGET} \
-           ${IF_CMP_FLEX_TARGET} \
-           ${IF_CMP_COMPILER_TARGET} \
-           ${FAPI_ERROR_TARGETS} \
-           ${FAPI_ATTR_ID_TARGET} \
-           ${FAPI_ATTR_TARGETS} \
-           ${HWP_IF_ALL_TARGETS} \
-           ${FAPI_ATTR_IF_TARGET} \
-           ${FAPI_PLL_TARGET} \
-           ${FAPI_WINKLE_RING_TARGET}
+GENFILES += ${IF_CMP_YACC_C_TARGET}
+GENFILES += ${IF_CMP_YACC_H_TARGET}
+GENFILES += ${IF_CMP_FLEX_TARGET}
+GENFILES += ${IF_CMP_COMPILER_TARGET}
+GENFILES += ${FAPI_ERROR_TARGETS}
+GENFILES += ${FAPI_ATTR_ID_TARGET}
+GENFILES += ${FAPI_ATTR_TARGETS}
+GENFILES += ${HWP_IF_ALL_TARGETS}
+GENFILES += ${FAPI_ATTR_IF_TARGET}
+GENFILES += ${FAPI_PLL_TARGET}
+GENFILES += ${FAPI_WINKLE_RING_TARGET}
 
 GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
 

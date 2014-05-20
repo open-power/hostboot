@@ -29,11 +29,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 
-OBJS += dimmBadDqBitmapAccessHwp.o \
-		dimmBadDqBitmapFuncs.o \
-        fapiTestHwpError.o \
-        fapiTestHwpFfdc.o \
-        fapiTestHwpConfig.o
+OBJS += dimmBadDqBitmapAccessHwp.o
+OBJS += dimmBadDqBitmapFuncs.o
+OBJS += fapiTestHwpError.o
+OBJS += fapiTestHwpFfdc.o
+OBJS += fapiTestHwpConfig.o
 
 include ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors/mvpd.mk
 include ${ROOTPATH}/src/usr/hwpf/hwp/pll_accessors/pll.mk

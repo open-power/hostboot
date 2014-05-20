@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -28,6 +28,7 @@ include devicefw.mk
 
 # add objectcs unique to standard hostboot - currently none
 
-SUBDIRS = test.d runtime.d
+SUBDIRS += test.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -47,15 +47,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/cen_dmi_scominit
 
-OBJS =  dmi_training.o  \
-        proc_cen_framelock.o    \
-        dmi_io_run_training.o \
-        proc_cen_set_inband_addr.o \
-        mss_get_cen_ecid.o \
-        dmi_io_dccal.o \
-        proc_dmi_scominit.o \
-        cen_dmi_scominit.o \
-        mss_get_cen_ecid_decode.o
+OBJS += dmi_training.o
+OBJS += proc_cen_framelock.o
+OBJS += dmi_io_run_training.o
+OBJS += proc_cen_set_inband_addr.o
+OBJS += mss_get_cen_ecid.o
+OBJS += dmi_io_dccal.o
+OBJS += proc_dmi_scominit.o
+OBJS += cen_dmi_scominit.o
+OBJS += mss_get_cen_ecid_decode.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -22,6 +22,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
 
-SUBDIRS = linker.d buildpnor.d trace.d
+SUBDIRS += linker.d
+SUBDIRS += buildpnor.d
+SUBDIRS += trace.d
 
 include ${ROOTPATH}/config.mk

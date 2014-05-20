@@ -27,7 +27,7 @@ HOSTBOOT_RUNTIME = 1
 MODULE = build_winkle_images_rt
 
 # objects unique to HBRT - currently none
-# OBJS =
+# OBJS +=
 
 # include objs common to HBRT and HB IPL
 include ../build_winkle_images.mk

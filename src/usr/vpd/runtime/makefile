@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -31,7 +31,7 @@ include ../vpd.mk
 #add unique object modules
 OBJS += rt_vpd.o 
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 VPATH += ..
 

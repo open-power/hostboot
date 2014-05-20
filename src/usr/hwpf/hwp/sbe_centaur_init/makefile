@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -46,7 +46,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 
 
-OBJS =  sbe_centaur_init.o cen_xip_customize.o
+OBJS += sbe_centaur_init.o
+OBJS += cen_xip_customize.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ## VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/sbe_centaur_init/????

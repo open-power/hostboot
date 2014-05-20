@@ -44,16 +44,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  nest_chiplets.o \
-        proc_start_clocks_chiplets.o \
-        proc_chiplet_scominit.o \
-        proc_scomoverride_chiplets.o \
-        proc_a_x_pci_dmi_pll_initf.o \
-        proc_a_x_pci_dmi_pll_setup.o \
-        proc_pcie_scominit.o \
-        proc_abus_scominit.o \
-        proc_xbus_scominit.o \
-        proc_a_x_pci_dmi_pll_utils.o
+OBJS += nest_chiplets.o
+OBJS += proc_start_clocks_chiplets.o
+OBJS += proc_chiplet_scominit.o
+OBJS += proc_scomoverride_chiplets.o
+OBJS += proc_a_x_pci_dmi_pll_initf.o
+OBJS += proc_a_x_pci_dmi_pll_setup.o
+OBJS += proc_pcie_scominit.o
+OBJS += proc_abus_scominit.o
+OBJS += proc_xbus_scominit.o
+OBJS += proc_a_x_pci_dmi_pll_utils.o
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets

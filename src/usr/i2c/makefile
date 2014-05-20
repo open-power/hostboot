@@ -23,8 +23,10 @@
 ROOTPATH = ../../..
 MODULE = i2c
 
-OBJS = i2c.o eepromdd.o errlud_i2c.o
+OBJS += i2c.o
+OBJS += eepromdd.o
+OBJS += errlud_i2c.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

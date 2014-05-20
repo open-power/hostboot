@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -23,8 +23,10 @@
 ROOTPATH = ../../..
 MODULE = fsi
 
-OBJS = fsidd.o fsipres.o errlud_fsi.o
+OBJS += fsidd.o
+OBJS += fsipres.o
+OBJS += errlud_fsi.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

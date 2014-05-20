@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -22,12 +22,45 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
 
-OBJS = start.o kernel.o console.o pagemgr.o heapmgr.o taskmgr.o cpumgr.o
-OBJS += syscall.o scheduler.o spinlock.o exception.o vmmmgr.o timemgr.o 
-OBJS += futexmgr.o ptmgr.o segmentmgr.o devicesegment.o basesegment.o
-OBJS += block.o cpuid.o misc.o msghandler.o blockmsghdlr.o stacksegment.o
-OBJS += softpatch_p8.o barrier.o idebug.o intmsghandler.o deferred.o
-OBJS += shutdown.o forceattn_p8.o terminate.o ipc.o machchk.o
+OBJS += start.o
+OBJS += kernel.o
+OBJS += console.o
+OBJS += pagemgr.o
+OBJS += heapmgr.o
+OBJS += taskmgr.o
+OBJS += cpumgr.o
+
+OBJS += syscall.o
+OBJS += scheduler.o
+OBJS += spinlock.o
+OBJS += exception.o
+OBJS += vmmmgr.o
+OBJS += timemgr.o
+
+OBJS += futexmgr.o
+OBJS += ptmgr.o
+OBJS += segmentmgr.o
+OBJS += devicesegment.o
+OBJS += basesegment.o
+
+OBJS += block.o
+OBJS += cpuid.o
+OBJS += misc.o
+OBJS += msghandler.o
+OBJS += blockmsghdlr.o
+OBJS += stacksegment.o
+
+OBJS += softpatch_p8.o
+OBJS += barrier.o
+OBJS += idebug.o
+OBJS += intmsghandler.o
+OBJS += deferred.o
+
+OBJS += shutdown.o
+OBJS += forceattn_p8.o
+OBJS += terminate.o
+OBJS += ipc.o
+OBJS += machchk.o
 
 include ${ROOTPATH}/config.mk
 

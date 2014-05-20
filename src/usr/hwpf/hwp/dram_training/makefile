@@ -55,27 +55,27 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/cen_stopclocks
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_throttle_sync
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  dram_training.o \
-        mss_draminit.o \
-        mss_funcs.o \
-        mss_draminit_mc.o \
-        mss_draminit_training.o \
-        mss_ddr_phy_reset.o \
-        mss_termination_control.o \
-        cen_mem_startclocks.o \
-        mss_scominit.o \
-        cen_mem_pll_initf.o \
-        cen_mem_pll_setup.o \
-        mss_draminit_training_advanced.o \
-        mss_access_delay_reg.o \
-        mss_generic_shmoo.o \
-        mss_mcbist.o \
-        mss_mcbist_common.o\
-        hbVddrMsg.o \
-        mss_mcbist_address.o \
-        mss_dimm_power_test.o \
-        mss_lrdimm_funcs.o \
-        cen_stopclocks.o
+OBJS += dram_training.o
+OBJS += mss_draminit.o
+OBJS += mss_funcs.o
+OBJS += mss_draminit_mc.o
+OBJS += mss_draminit_training.o
+OBJS += mss_ddr_phy_reset.o
+OBJS += mss_termination_control.o
+OBJS += cen_mem_startclocks.o
+OBJS += mss_scominit.o
+OBJS += cen_mem_pll_initf.o
+OBJS += cen_mem_pll_setup.o
+OBJS += mss_draminit_training_advanced.o
+OBJS += mss_access_delay_reg.o
+OBJS += mss_generic_shmoo.o
+OBJS += mss_mcbist.o
+OBJS += mss_mcbist_common.o
+OBJS += hbVddrMsg.o
+OBJS += mss_mcbist_address.o
+OBJS += mss_dimm_power_test.o
+OBJS += mss_lrdimm_funcs.o
+OBJS += cen_stopclocks.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

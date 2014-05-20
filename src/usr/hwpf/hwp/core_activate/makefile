@@ -55,14 +55,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  core_activate.o \
-        proc_prep_master_winkle.o   \
-        proc_stop_deadman_timer.o   \
-        proc_switch_cfsim.o         \
-        proc_switch_rec_attn.o      \
-        cen_switch_rec_attn.o       \
-        proc_post_winkle.o          \
-        proc_check_slw_done.o
+OBJS += core_activate.o
+OBJS += proc_prep_master_winkle.o
+OBJS += proc_stop_deadman_timer.o
+OBJS += proc_switch_cfsim.o
+OBJS += proc_switch_rec_attn.o
+OBJS += cen_switch_rec_attn.o
+OBJS += proc_post_winkle.o
+OBJS += proc_check_slw_done.o
 
 
 

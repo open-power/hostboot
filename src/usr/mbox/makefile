@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -23,8 +23,11 @@
 ROOTPATH = ../../..
 MODULE = mbox
 
-OBJS = mboxdd.o mailboxsp.o mbox_dma_buffer.o ipcSp.o
+OBJS += mboxdd.o
+OBJS += mailboxsp.o
+OBJS += mbox_dma_buffer.o
+OBJS += ipcSp.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

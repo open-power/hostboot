@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -23,7 +23,8 @@
 ROOTPATH = ../../../..
 MODULE = tracedaemon
 
-OBJS = daemon.o complist.o
+OBJS += daemon.o
+OBJS += complist.o
 
 #SUBDIRS = test.d
 

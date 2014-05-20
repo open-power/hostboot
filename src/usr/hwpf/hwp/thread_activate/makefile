@@ -33,7 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-##  NOTE: add the base istep dir here. 
+##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate
 
 ##  Include sub dirs
@@ -44,10 +44,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/proc_thread_control
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  thread_activate.o \
-        proc_thread_control.o
+OBJS += thread_activate.o
+OBJS += proc_thread_control.o
 
-        
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/<HWP_dir>

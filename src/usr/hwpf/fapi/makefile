@@ -23,7 +23,7 @@
 ROOTPATH = ../../../..
 MODULE = fapi
 
-SUBDIRS = runtime.d
+SUBDIRS += runtime.d
 
 include fapi.mk
 

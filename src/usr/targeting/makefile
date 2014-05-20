@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -34,22 +34,18 @@ MODULE = targeting
 TARGETING_REL_PATH = .
 include ${TARGETING_REL_PATH}/hostboot_common.mk
 
-ATTR_RP_OBJS = \
-    attrrp.o   \
-    attrsync.o \
-    targplatutil.o
+ATTR_RP_OBJS += attrrp.o
+ATTR_RP_OBJS += attrsync.o
+ATTR_RP_OBJS += targplatutil.o
 
-ENTRY_POINT_OBJS =       \
-    targetservicestart.o
+ENTRY_POINT_OBJS += targetservicestart.o
 
-DEBUG_OBJS =           \
-    attributestrings.o
+DEBUG_OBJS += attributestrings.o
 
-HOSTBOOT_SPECIFIC_OBJS =    \
-    ${ENTRY_POINT_OBJS}     \
-    ${ATTR_RP_OBJS}         \
-    ${DEBUG_OBJS}           \
-    namedtarget.o
+HOSTBOOT_SPECIFIC_OBJS += ${ENTRY_POINT_OBJS}
+HOSTBOOT_SPECIFIC_OBJS += ${ATTR_RP_OBJS}
+HOSTBOOT_SPECIFIC_OBJS += ${DEBUG_OBJS}
+HOSTBOOT_SPECIFIC_OBJS += namedtarget.o
 
 
 #debug :
@@ -59,9 +55,12 @@ HOSTBOOT_SPECIFIC_OBJS =    \
 #	@echo VPATH = ${VPATH}
 #	@echo COMMON_TARGETING_OBJS = ${COMMON_TARGETING_OBJS}
 
-OBJS = ${COMMON_TARGETING_OBJS} ${HOSTBOOT_SPECIFIC_OBJS}
+OBJS += ${COMMON_TARGETING_OBJS}
+OBJS += ${HOSTBOOT_SPECIFIC_OBJS}
 
-SUBDIRS = test.d xmltohb.d runtime.d
+SUBDIRS += test.d
+SUBDIRS += xmltohb.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 

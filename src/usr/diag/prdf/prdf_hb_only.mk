@@ -32,20 +32,16 @@ PRDF_RULE_PLUGINS_PEGASUS_HB = \
 # PRD object files (Hostboot only).
 ################################################################################
 
-prd_config_HB = \
- prdfMbaDomain.o \
+prd_config_HB += prdfMbaDomain.o
 
-prd_mnfgtools_HB = \
- prdfMfgThresholdFile.o \
- prdfMfgSync.o
+prd_mnfgtools_HB += prdfMfgThresholdFile.o
+prd_mnfgtools_HB += prdfMfgSync.o
 
-prd_plat_HB = \
- prdfCenMbaIplCeStats.o \
- prdfDramRepairs.o \
- prdfRasServices.o \
- prdfPlatCalloutUtil.o
+prd_plat_HB += prdfCenMbaIplCeStats.o
+prd_plat_HB += prdfDramRepairs.o
+prd_plat_HB += prdfRasServices.o
+prd_plat_HB += prdfPlatCalloutUtil.o
 
-prd_object_files_HB = \
- ${prd_config_HB} \
- ${prd_mnfgtools_HB} \
- ${prd_plat_HB}
+prd_object_files_HB += ${prd_config_HB}
+prd_object_files_HB += ${prd_mnfgtools_HB}
+prd_object_files_HB += ${prd_plat_HB}

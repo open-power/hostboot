@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -21,5 +21,8 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects used in both runtime and standard hostboot envrionment
-OBJS = driverif.o userif.o assoccontain.o associator.o
+OBJS += driverif.o
+OBJS += userif.o
+OBJS += assoccontain.o
+OBJS += associator.o
 

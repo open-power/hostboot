@@ -28,12 +28,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 CFLAGS += -D_NO_SPY_ACCESS=1
 
-OBJS += fapiReturnCode.o \
-        fapiReturnCodeDataRef.o \
-        fapiTarget.o \
-        fapiHwAccess.o \
-        fapiErrorInfo.o \
-        fapiAttributeService.o \
-        fapiChipEcFeature.o \
-        fapiCollectRegFfdc.o \
+OBJS += fapiReturnCode.o
+OBJS += fapiReturnCodeDataRef.o
+OBJS += fapiTarget.o
+OBJS += fapiHwAccess.o
+OBJS += fapiErrorInfo.o
+OBJS += fapiAttributeService.o
+OBJS += fapiChipEcFeature.o
+OBJS += fapiCollectRegFfdc.o
 

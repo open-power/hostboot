@@ -28,6 +28,6 @@ include plat.mk
 
 OBJS += fapiPlatTask.o
 
-SUBDIRS = runtime.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

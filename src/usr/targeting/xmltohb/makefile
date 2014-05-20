@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -24,7 +24,7 @@
 #
 #  @file targeting/xmltohb/makefile
 #
-#  @brief Makefile for building Hostboot's xmltohb dir 
+#  @brief Makefile for building Hostboot's xmltohb dir
 #
 ################################################################################
 
@@ -41,7 +41,7 @@ COMMON_TARGETING_MAKEFILE = \
 # Include the common targeting makefile for xmltohb verbatim
 include ${COMMON_TARGETING_MAKEFILE}
 
-VPATH = ${COMMON_TARGETING_REL_PATH}   
+VPATH = ${COMMON_TARGETING_REL_PATH}
 
 FAPI_ATTR_SOURCE_DIR = ${ROOTPATH}/src/usr/hwpf/hwp
 
@@ -56,12 +56,11 @@ XMLTOHB_HB_TARGET_SOURCES               = target_types_hb.xml
 
 XMLTOHB_MERGED_COMMON_TARGET_SOURCES    = target_types_merged.xml
 
-#Redefine XMLTOHB_GENERIC_SOURCES
-XMLTOHB_GENERIC_SOURCES =                               \
-    ${XMLTOHB_COMMON_ATTRIBUTE_SOURCES}                 \
-    ${XMLTOHB_HB_ATTRIBUTE_SOURCES}                     \
-    ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}   \
-    ${XMLTOHB_HB_TARGET_SOURCES}
+#Define XMLTOHB_GENERIC_SOURCES
+XMLTOHB_GENERIC_SOURCES += ${XMLTOHB_COMMON_ATTRIBUTE_SOURCES}
+XMLTOHB_GENERIC_SOURCES += ${XMLTOHB_HB_ATTRIBUTE_SOURCES}
+XMLTOHB_GENERIC_SOURCES += ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
+XMLTOHB_GENERIC_SOURCES += ${XMLTOHB_HB_TARGET_SOURCES}
 
 #XML target types merge script
 XMLTOHB_TARGET_MERGE_SCRIPT = updatetargetxml.pl
@@ -89,15 +88,16 @@ GENFILES = ${XMLTOHB_TARGETS}
 #	@echo XMLTOHB_HB_TARGET_SOURCES = ${XMLTOHB_HB_TARGET_SOURCES}
 #	@echo XMLTOHB_MERGED_COMMON_TARGET_SOURCES = ${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
 #	@echo VPATH = ${VPATH}
-    
+
 EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(XMLTOHB_SYSTEM_BINARIES))
 
-CLEAN_TARGETS += $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) \
-          $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml}) \
-              ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML} \
-              ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES} \
-              ${GENDIR}/errl/errludattribute.H \
-              ${GENDIR}/errl/errludtarget.H
+CLEAN_TARGETS += $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) 
+CLEAN_TARGETS += $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml})
+CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_GENERIC_XML}
+CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_FAPI_XML}
+CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
+CLEAN_TARGETS += ${GENDIR}/errl/errludattribute.H
+CLEAN_TARGETS += ${GENDIR}/errl/errludtarget.H
 
 GENDIR_ERRL = $(ROOTPATH)/obj/genfiles/errl
 
@@ -106,7 +106,7 @@ CLEAN_TARGETS += $(XMLTOHB_RAN_INDICATION)
 
 include ${ROOTPATH}/config.mk
 
-# Delete any generated file on error 
+# Delete any generated file on error
 .DELETE_ON_ERROR:
 
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%

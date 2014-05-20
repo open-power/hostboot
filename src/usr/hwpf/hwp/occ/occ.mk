@@ -43,32 +43,31 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/occ/occ_procedures
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += \
-        p8_pba_init.o \
-        p8_pm_init.o \
-        p8_pcbs_init.o \
-        p8_pmc_init.o \
-        p8_poregpe_init.o \
-        p8_oha_init.o \
-        p8_ocb_init.o \
-        p8_pss_init.o \
-        p8_occ_control.o \
-        p8_occ_sram_init.o \
-        p8_pm_firinit.o \
-        p8_pm_oha_firinit.o \
-        p8_pm_pcbs_firinit.o \
-        p8_pm_occ_firinit.o \
-        p8_pm_pba_firinit.o \
-        p8_pm_pmc_firinit.o \
-        p8_pm_utils.o
+OBJS += p8_pba_init.o
+OBJS += p8_pm_init.o
+OBJS += p8_pcbs_init.o
+OBJS += p8_pmc_init.o
+OBJS += p8_poregpe_init.o
+OBJS += p8_oha_init.o
+OBJS += p8_ocb_init.o
+OBJS += p8_pss_init.o
+OBJS += p8_occ_control.o
+OBJS += p8_occ_sram_init.o
+OBJS += p8_pm_firinit.o
+OBJS += p8_pm_oha_firinit.o
+OBJS += p8_pm_pcbs_firinit.o
+OBJS += p8_pm_occ_firinit.o
+OBJS += p8_pm_pba_firinit.o
+OBJS += p8_pm_pmc_firinit.o
+OBJS += p8_pm_utils.o
 
 
 #These procedures are included per Stradale's request so
 #they can implement OCC Reset.
-OBJS+=  p8_pm_prep_for_reset.o \
-        p8_pmc_force_vsafe.o \
-        p8_ocb_indir_access.o \
-        p8_ocb_indir_setup_linear.o
+OBJS += p8_pm_prep_for_reset.o
+OBJS += p8_pmc_force_vsafe.o
+OBJS += p8_ocb_indir_access.o
+OBJS += p8_ocb_indir_setup_linear.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

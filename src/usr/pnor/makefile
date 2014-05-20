@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -23,8 +23,10 @@
 ROOTPATH = ../../..
 MODULE = pnor
 
-OBJS = pnorrp.o pnordd.o ecc.o
+OBJS += pnorrp.o
+OBJS += pnordd.o
+OBJS += ecc.o
 
-SUBDIRS = test.d
+SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

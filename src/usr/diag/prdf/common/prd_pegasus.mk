@@ -22,41 +22,38 @@
 # IBM_PROLOG_END_TAG
 
 # Object files for prdf rule plugins for pegasus
-PRDF_RULE_PLUGINS_PEGASUS = \
-    prdfP8Proc.o \
-    prdfPlatP8Ex.o \
-    prdfP8Ex.o \
-    prdfP8Mcs.o \
-    prdfP8Pll.o \
-    prdfCenMba.o \
-    prdfPlatCenMba.o \
-    prdfCenMembuf.o \
-    prdfP8TodPlugins.o \
-    prdfCenPll.o \
-    prdfPlatP8Proc.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfP8Proc.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfPlatP8Ex.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfP8Ex.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfP8Mcs.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfP8Pll.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfCenMba.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfPlatCenMba.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfCenMembuf.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfP8TodPlugins.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfCenPll.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfPlatP8Proc.o
 
 # Object files for PRDF rule plugins, but include sim extensions.
-PRDF_RULE_PLUGINS_PEGASUS_WSIM = \
-    prdfP8SystemSpecific.o
+PRDF_RULE_PLUGINS_PEGASUS_WSIM += prdfP8SystemSpecific.o
 
 # PEGASUS specific objects, not rule related.
-prd_pegasus_specific = \
-    prdfCalloutUtil.o \
-    prdfPhbUtils.o \
-    prdfCenAddress.o \
-    prdfCenDqBitmap.o \
-    prdfCenMbaCaptureData.o \
-    prdfCenMbaCeTable.o \
-    prdfCenMbaRceTable.o \
-    prdfCenMbaTdCtlr.o \
-    prdfCenMbaTdCtlr_common.o \
-    prdfCenMbaThresholds_common.o \
-    prdfCenMbaUeTable.o \
-    prdfCenMemUtils.o \
-    prdfCenSymbol.o \
-    prdfLaneRepair.o \
-    prdfLineDelete.o \
-    prdfMemoryMru.o \
-    prdfPegasusConfigurator.o \
-    prdfRegisterData.o \
-    prdfParserUtils.o
+prd_pegasus_specific += prdfCalloutUtil.o
+prd_pegasus_specific += prdfPhbUtils.o
+prd_pegasus_specific += prdfCenAddress.o
+prd_pegasus_specific += prdfCenDqBitmap.o
+prd_pegasus_specific += prdfCenMbaCaptureData.o
+prd_pegasus_specific += prdfCenMbaCeTable.o
+prd_pegasus_specific += prdfCenMbaRceTable.o
+prd_pegasus_specific += prdfCenMbaTdCtlr.o
+prd_pegasus_specific += prdfCenMbaTdCtlr_common.o
+prd_pegasus_specific += prdfCenMbaThresholds_common.o
+prd_pegasus_specific += prdfCenMbaUeTable.o
+prd_pegasus_specific += prdfCenMemUtils.o
+prd_pegasus_specific += prdfCenSymbol.o
+prd_pegasus_specific += prdfLaneRepair.o
+prd_pegasus_specific += prdfLineDelete.o
+prd_pegasus_specific += prdfMemoryMru.o
+prd_pegasus_specific += prdfPegasusConfigurator.o
+prd_pegasus_specific += prdfRegisterData.o
+prd_pegasus_specific += prdfParserUtils.o

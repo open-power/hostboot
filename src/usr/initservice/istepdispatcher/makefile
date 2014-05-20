@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -29,9 +29,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
-OBJS =  istepdispatcher.o initsvcudistep.o      \
-        sptask.o splesscommon.o
+OBJS += istepdispatcher.o
+OBJS += initsvcudistep.o
+OBJS += sptask.o
+OBJS += splesscommon.o
 
-## SUBDIRS = test.d
+## SUBDIRS += test.d
 
 include ${ROOTPATH}/config.mk

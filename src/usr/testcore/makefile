@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -22,7 +22,9 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-SUBDIRS = lib.d kernel.d rtloader.d
+SUBDIRS += lib.d
+SUBDIRS += kernel.d
+SUBDIRS += rtloader.d
 
 include ${ROOTPATH}/config.mk
 

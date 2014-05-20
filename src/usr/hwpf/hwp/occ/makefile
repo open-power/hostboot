@@ -24,12 +24,10 @@ ROOTPATH = ../../../../..
 
 MODULE = occ
 
-SUBDIRS = runtime.d
-
-include occ.mk
+SUBDIRS += runtime.d
 
 ## Objects unique to HB IPL
-OBJS =  occ.o
+OBJS += occ.o
 
 ## Objects common to HB IPL and HBRT
 include occ.mk
