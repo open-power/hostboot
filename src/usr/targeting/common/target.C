@@ -84,26 +84,32 @@ bool Target::_tryGetAttr(
         // Check if there are any overrides for this attr ID
         if (cv_overrideTank.attributeExists(i_attr))
         {
-            // Find if there is an attribute override for this target
-            uint32_t l_type = getAttrTankTargetType();
-            uint16_t l_pos = 0;
-            uint8_t l_unitPos = 0;
-            uint8_t l_node = 0;
-            getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
-
-            TRACFCOMP(g_trac_targeting, "Checking for override for ID: 0x%08x, "
-                      "TargType: 0x%08x, Pos/Upos/Node: 0x%08x",
-                      i_attr, l_type,
-                      (static_cast<uint32_t>(l_pos) << 16) +
-                      (static_cast<uint32_t>(l_unitPos) << 8) + l_node);
-
-            l_found = cv_overrideTank.getAttribute(i_attr, l_type,
-                l_pos, l_unitPos, l_node, io_pAttrData);
-
-            if (l_found)
+            // Check if attribute exists for the target
+            void * l_pAttr = NULL;
+            _getAttrPtr(i_attr, l_pAttr);
+            if (l_pAttr)
             {
-                TRACFCOMP(g_trac_targeting, "Returning Override for ID: 0x%08x",
-                          i_attr);
+                // Find if there is an attribute override for this target
+                uint32_t l_type = getAttrTankTargetType();
+                uint16_t l_pos = 0;
+                uint8_t l_unitPos = 0;
+                uint8_t l_node = 0;
+                getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
+
+                TRACFCOMP(g_trac_targeting, "Checking for override for ID: 0x%08x, "
+                          "TargType: 0x%08x, Pos/Upos/Node: 0x%08x",
+                          i_attr, l_type,
+                          (static_cast<uint32_t>(l_pos) << 16) +
+                          (static_cast<uint32_t>(l_unitPos) << 8) + l_node);
+
+                l_found = cv_overrideTank.getAttribute(i_attr, l_type,
+                    l_pos, l_unitPos, l_node, io_pAttrData);
+
+                if (l_found)
+                {
+                    TRACFCOMP(g_trac_targeting, "Returning Override for ID: 0x%08x",
+                              i_attr);
+                }
             }
         }
     }
@@ -156,25 +162,31 @@ bool Target::_trySetAttr(
 
     if (unlikely(l_clearAnyNonConstOverride || l_syncAttribute))
     {
-        uint32_t l_type = getAttrTankTargetType();
-        uint16_t l_pos = 0;
-        uint8_t l_unitPos = 0;
-        uint8_t l_node = 0;
-        getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
-
-        if (l_clearAnyNonConstOverride)
+        // Check if attribute exists for the target
+        void * l_pAttr = NULL;
+        _getAttrPtr(i_attr, l_pAttr);
+        if (l_pAttr)
         {
-            // Clear any non const override for this attribute because the
-            // attribute is being written
-            cv_overrideTank.clearNonConstAttribute(i_attr, l_type, l_pos,
-                l_unitPos, l_node);
-        }
+            uint32_t l_type = getAttrTankTargetType();
+            uint16_t l_pos = 0;
+            uint8_t l_unitPos = 0;
+            uint8_t l_node = 0;
+            getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
 
-        if (l_syncAttribute)
-        {
-            // Write the attribute to the SyncAttributeTank to sync to Cronus
-            cv_syncTank.setAttribute(i_attr, l_type, l_pos, l_unitPos, l_node,
-                0, i_size, i_pAttrData);
+            if (l_clearAnyNonConstOverride)
+            {
+                // Clear any non const override for this attribute because the
+                // attribute is being written
+                cv_overrideTank.clearNonConstAttribute(i_attr, l_type, l_pos,
+                    l_unitPos, l_node);
+            }
+
+            if (l_syncAttribute)
+            {
+                // Write the attribute to the SyncAttributeTank to sync to Cronus
+                cv_syncTank.setAttribute(i_attr, l_type, l_pos, l_unitPos, l_node,
+                    0, i_size, i_pAttrData);
+            }
         }
     }
 

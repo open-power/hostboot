@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.30 2014/04/10 18:43:41 jdsloat Exp $
+// $Id: mss_eff_grouping.C,v 1.31 2014/05/23 15:13:30 thi Exp $
 // Mike Jones - modified version from 1.28 to 1.00 because it is a sandbox version
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.31   | thi      | 05-23-14| Support MEM_MIRROR_PLACEMENT_POLICY_DRAWER for Brazos
 //  1.30   | jdsloat  | 04-10-14| Mike Jones's rewrite.
 //  1.29   | gpaulraj | 04-20-14| Updated Dimm call out/FW defect/Mike's Feedback
 //  1.28   | gpaulraj | 11-21-13| modified 8MCS/group id as per spec
@@ -1724,8 +1725,10 @@ fapi::ReturnCode grouping_setBaseSizeAttrs(
         //------------------------------------------------------------------
         // Defining HTM and OCC base address based on HTM/OCC bar size
         //------------------------------------------------------------------
-        if (i_sysAttrs.iv_selectiveMode ==
-            fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+        if ((i_sysAttrs.iv_selectiveMode ==
+             fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL) ||
+            (i_sysAttrs.iv_selectiveMode ==
+             fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER))
         {
             uint64_t total_size = 0;
             uint8_t memhole = 0;
