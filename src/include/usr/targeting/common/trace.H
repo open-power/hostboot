@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,21 +40,35 @@
 
 // Other includes
 #include <targeting/adapters/traceadapter.H>
+#ifdef __HOSTBOOT_MODULE
+#include <config.h>
+#endif
 
 #define TARG_LOC TARG_NAMESPACE TARG_CLASS TARG_FN ": "
 
 #define TARG_ERR_LOC ERR_MRK " " TARG_LOC
 
 #define TARG_TAG "[TARG]"
+
+#ifdef CONFIG_TARG_TRACE_AS_DEBUG
+#define TARG_ENTER(args...) \
+    TRACDCOMP(TARGETING::g_trac_targeting,TARG_TAG " " \
+        ENTER_MRK " " TARG_NAMESPACE \
+        TARG_CLASS TARG_FN " " args)
+#define TARG_EXIT(args...) \
+    TRACDCOMP(TARGETING::g_trac_targeting,TARG_TAG " " \
+        EXIT_MRK " " TARG_NAMESPACE \
+        TARG_CLASS TARG_FN " " args)
+#else
 #define TARG_ENTER(args...) \
     TRACFCOMP(TARGETING::g_trac_targeting,TARG_TAG " " \
         ENTER_MRK " " TARG_NAMESPACE \
         TARG_CLASS TARG_FN " " args)
-
 #define TARG_EXIT(args...) \
     TRACFCOMP(TARGETING::g_trac_targeting,TARG_TAG " " \
         EXIT_MRK " " TARG_NAMESPACE \
         TARG_CLASS TARG_FN " " args)
+#endif
 
 #define TARG_ERR(args...) \
     TRACFCOMP(TARGETING::g_trac_targeting,TARG_TAG " " ERR_MRK " " args)

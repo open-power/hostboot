@@ -1,0 +1,6 @@
+config TARG_TRACE_AS_DEBUG
+    default n
+    help
+        Reduce number of traces by making TARG_ENTER and TARG_EXIT debug traces
+
+# @TODO RTC:106879 BMC:Console - May reconsider approach to quiet trace.

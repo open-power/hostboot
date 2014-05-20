@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -1222,7 +1225,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
         }
 
-        TARG_TS_TRACE(INF_MRK "Found %d total targets", l_count);
+        TARG_TS_TRACE(INFO_MRK "Found %d total targets", l_count);
 
         PredicateCTM l_procs(CLASS_CHIP);
         PredicateCTM l_enclosures(CLASS_ENC);
@@ -1239,7 +1242,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             l_path.dump();
         }
 
-        TARG_TS_TRACE(INF_MRK "Found %d targets that are chips or enclosures ",
+        TARG_TS_TRACE(INFO_MRK "Found %d targets that are chips or enclosures ",
                  l_count);
 
         l_query.Not();
@@ -1250,7 +1253,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
         }
 
-        TARG_TS_TRACE(INF_MRK "Found %d targets that are not chips or "
+        TARG_TS_TRACE(INFO_MRK "Found %d targets that are not chips or "
                  "enclosures",l_count);
 
         Target* l_pMasterProcChipTargetHandle = NULL;
@@ -1281,7 +1284,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             l_path.dump();
         }
 
-        TARG_TS_TRACE(INF_MRK "Found %d targets that are ex/mba units off "
+        TARG_TS_TRACE(INFO_MRK "Found %d targets that are ex/mba units off "
                  "master processor",l_count);
 
         TARG_TS_TRACE(EXIT_MRK "testComplexFilter" );
@@ -1292,7 +1295,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         TARG_TS_TRACE(ENTER_MRK "testFapiToHbMacros" );
 
-        TARG_TS_TRACE(INF_MRK "Now using direct access macros");
+        TARG_TS_TRACE(INFO_MRK "Now using direct access macros");
 
         using namespace TARGETING;
         using namespace fapi;
@@ -1339,7 +1342,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "attribute access",l_xscom,0x0003FC00000000ULL);
         }
 
-        TARG_TS_TRACE(INF_MRK "Now using FAPI get macros");
+        TARG_TS_TRACE(INFO_MRK "Now using FAPI get macros");
 
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
         fapi::ReturnCode l_rc = FAPI_ATTR_GET(
@@ -1355,7 +1358,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     l_dummyRw[0][2][4]);
         }
 
-        TARG_TS_TRACE(INF_MRK "Now using FAPI set macros");
+        TARG_TS_TRACE(INFO_MRK "Now using FAPI set macros");
 
         l_dummyRw[0][2][3] = 6;
         l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
@@ -1379,7 +1382,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "prior write",l_dummyRw[0][2][3]);
         }
 
-        TARG_TS_TRACE(INF_MRK "Now using targets without the attribute");
+        TARG_TS_TRACE(INFO_MRK "Now using targets without the attribute");
 
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
         EntityPath l_realPath(EntityPath::PATH_PHYSICAL);

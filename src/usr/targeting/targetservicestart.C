@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -104,6 +107,16 @@ static void initTargeting(errlHndl_t& io_pError)
         initializeAttributes(l_targetService);
         checkProcessorTargeting(l_targetService);
 
+        // Print out top-level model value from loaded targeting values.
+        // @TODO RTC:88056 Make the model printed more meaniful
+        Target* l_pTopLevel = NULL;
+        l_targetService.getTopLevelTarget(l_pTopLevel);
+        ATTR_MODEL_type l_model = MODEL_NA;
+        if (l_pTopLevel->tryGetAttr<ATTR_MODEL>(l_model)) {
+            TARG_INF("Initialized targeting for model: %s",
+                     l_pTopLevel->getAttrAsString<ATTR_MODEL>());
+        }
+
         // call ErrlManager function - tell him that TARG is ready!
         ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
     }
@@ -114,7 +127,7 @@ static void initTargeting(errlHndl_t& io_pError)
 }
 
 /**
- *  @brief Create _start entry point using task entry macro and vector to 
+ *  @brief Create _start entry point using task entry macro and vector to
  *      initTargeting function
  */
 TASK_ENTRY_MACRO(initTargeting);

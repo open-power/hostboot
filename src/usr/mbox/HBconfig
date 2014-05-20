@@ -1,0 +1,4 @@
+config DROPPED_MSG_WARNING_AS_DEBUG
+    default n
+    help
+        Debug trace for dropped messages due to mailbox being disabled

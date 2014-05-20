@@ -1,0 +1,10 @@
+config SKIP_RESTRICT_EX_UNITS
+    default n
+    help
+        Skip restricting the number of ex/cores based on PR keyword
+
+config NO_GARD_SUPPORT
+    default n
+    help
+        Skip guarding when set
+

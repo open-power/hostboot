@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +37,9 @@
 /******************************************************************************/
 #include <stdint.h>
 #include <algorithm>
+#ifdef __HOSTBOOT_MODULE
+#include <config.h>
+#endif
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -465,6 +471,7 @@ errlHndl_t discoverTargets()
         //  call to restrict EX units, marking bad units as present=false;
         //  deconfigReason = 0 because present is false so this is not a
         //  deconfigured event.
+#ifndef CONFIG_SKIP_RESTRICT_EX_UNITS
         errl = restrictEXunits(l_procPRList, false, 0);
 
         if (errl)
@@ -472,6 +479,7 @@ errlHndl_t discoverTargets()
             HWAS_ERR("discoverTargets: restrictEXunits failed");
             break;
         }
+#endif
 
         // call invokePresentByAssoc() to obtain functional MCS's, MEMBUFs, and
         // DIMM's, call algorithm function presentByAssoc() to determine

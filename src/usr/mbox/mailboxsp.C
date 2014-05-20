@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -28,6 +31,7 @@
 #include "mailboxsp.H"
 #include "mboxdd.H"
 #include "ipcSp.H"
+#include <config.h>
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
@@ -477,11 +481,19 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
 
     if(iv_disabled)
     {
+#ifdef CONFIG_DROPPED_MSG_WARNING_AS_DEBUG
+        TRACDCOMP(g_trac_mbox,WARN_MRK
+                  "MSGSEND - mailboxsp is disabled. Message dropped!"
+                  " msgQ=0x%x type=0x%x",
+                  mbox_msg.msg_queue_id,
+                  mbox_msg.msg_payload.type);
+#else
         TRACFCOMP(g_trac_mbox,WARN_MRK
                   "MSGSEND - mailboxsp is disabled. Message dropped!"
                   " msgQ=0x%x type=0x%x",
                   mbox_msg.msg_queue_id,
                   mbox_msg.msg_payload.type);
+#endif
 
         if(!i_msg_is_async) // synchronous
         {

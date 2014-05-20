@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,6 +41,7 @@
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
+#include <config.h>
 
 #include <pnor/pnorif.H>
 
@@ -67,6 +71,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
 {
     errlHndl_t l_pErr = NULL;
 
+#ifndef CONFIG_NO_GARD_SUPPORT
     EntityPath l_targetId;
     if (!i_pTarget)
     {
@@ -118,6 +123,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
     }
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
+#endif // CONFIG_NO_GARD_SUPPORT
     return l_pErr;
 }
 
@@ -128,6 +134,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
+#ifndef CONFIG_NO_GARD_SUPPORT
     EntityPath l_targetId;
     if (!i_pTarget)
     {
@@ -173,6 +180,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
     HWAS_INF("Get returning %d GARD Records", o_records.size());
+#endif // CONFIG_NO_GARD_SUPPORT
     return l_pErr;
 }
 
@@ -186,6 +194,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         get_huid(i_pTarget), i_errlEid);
     errlHndl_t l_pErr = NULL;
 
+#ifndef CONFIG_NO_GARD_SUPPORT
     HWAS_MUTEX_LOCK(iv_mutex);
 
     do
@@ -350,6 +359,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
     while (0);
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
+#endif // CONFIG_NO_GARD_SUPPORT
     return l_pErr;
 }
 
