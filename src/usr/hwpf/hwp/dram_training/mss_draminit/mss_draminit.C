@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.65 2014/04/09 22:47:08 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.66 2014/05/09 16:40:04 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.66   | jdsloat  |09-MAY-14| Added an explicit 500us delay before execution of MRS cmds.
 //  1.65   | jdsloat  |09-APL-14| Fixed ifdef around #include mss_lrdimm_ddr4_funcs.H
 //  1.64   | jdsloat  |01-APL-14| RAS review edits/changes
 //  1.63   | jdsloat  |01-APL-14| RAS review edits/changes
@@ -218,9 +219,11 @@ ReturnCode mss_draminit_cloned(Target& i_target);
 const uint64_t  DELAY_100NS             = 100;      // general purpose 100 ns delay for HW mode   (2000 sim cycles if simclk = 20ghz)
 const uint64_t  DELAY_1US               = 1000;     // general purpose 1 usec delay for HW mode   (20000 sim cycles if simclk = 20ghz)
 const uint64_t  DELAY_100US             = 100000;   // general purpose 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
+const uint64_t  DELAY_500US             = 500000;   // general purpose 500 usec delay for HW mode (10000000 sim cycles if simclk = 20ghz)
 const uint64_t  DELAY_2000SIMCYCLES     = 2000;     // general purpose 2000 sim cycle delay for sim mode     (100 ns if simclk = 20Ghz)
 const uint64_t  DELAY_20000SIMCYCLES    = 20000;    // general purpose 20000 sim cycle delay for sim mode    (1 usec if simclk = 20Ghz)
 const uint64_t  DELAY_2000000SIMCYCLES  = 2000000;  // general purpose 2000000 sim cycle delay for sim mode  (100 usec if simclk = 20Ghz)
+const uint64_t  DELAY_10000000SIMCYCLES  = 10000000;  // general purpose 10000000 sim cycle delay for sim mode  (500 usec if simclk = 20Ghz)
 
 ReturnCode mss_draminit(Target& i_target)
 {
@@ -583,6 +586,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
                 } 
             }
         }
+
+       	rc = fapiDelay(DELAY_500US, DELAY_10000000SIMCYCLES); // wait 10000 simcycles (in sim mode) OR 500 uS (in hw mode)
 
         // Cycle through Ports...
         // Ports 0-1
