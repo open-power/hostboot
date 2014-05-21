@@ -1294,27 +1294,6 @@ uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
 
 //------------------------------------------------------------------------------
 
-int32_t getDimmSlct( TARGETING::TargetHandle_t i_dimm, uint8_t & o_dimmSlct)
-{
-    #define PRDF_FUNC "[PlatServices::getDimmSlct] "
-    int32_t o_rc = SUCCESS;
-    do
-    {
-        if ( TYPE_DIMM != getTargetType( i_dimm ) )
-        {
-            PRDF_ERR( PRDF_FUNC"Invalid Target. HUID:0X%08X",
-                      getHuid( i_dimm ) );
-            o_rc = FAIL; break;
-        }
-
-        o_dimmSlct = i_dimm->getAttr<ATTR_MBA_DIMM>();
-    }while(0);
-    return o_rc;
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 //##############################################################################
 //##
 //##                        Clock specific functions

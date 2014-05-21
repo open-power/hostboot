@@ -663,9 +663,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
     }
 
-    // Send the dynamic memory Dealloc message for DIMMS for Predictive error
-    // conditions.
-    if( ERRL_SEV_PREDICTIVE == severityParm )
+    // Send the dynamic memory Dealloc message for DIMMS for Predictive
+    // callouts.
+    // We can not check for ERRL severity here as there are some cases
+    // e.g. DD02 where we create a Predictive error log but callouts
+    // are not predictive.
+    if ( HWAS::GARD_Predictive == gardErrType )
     {
         deallocateDimms( fspmrulist );
     }

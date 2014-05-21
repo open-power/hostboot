@@ -362,14 +362,6 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
  */
 uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
 
-/**
- * @brief   Return DIMM slct for a DIMM
- * @param   i_dimm DIMM target
- * @param   o_dimmSlct dimmSlct value.
- * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
- */
-int32_t getDimmSlct( TARGETING::TargetHandle_t i_dimm, uint8_t & o_dimmSlct);
-
 //##############################################################################
 //##
 //##                        Clock specific functions
