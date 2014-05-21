@@ -62,7 +62,7 @@ void _getClassResources( TARGETING::TargetHandleList & o_vector,
                      CLASS i_class, TYPE  i_type, ResourceState i_state )
 {
     #define TARG_FN "_getClassResources(...)"
-    TARG_ENTER();
+
     switch(i_state)
     {
         case UTIL_FILTER_ALL:
@@ -182,7 +182,6 @@ void _getClassResources( TARGETING::TargetHandleList & o_vector,
         std::sort(o_vector.begin(),o_vector.end(),compareTargetHuid);
     }
 
-    TARG_EXIT();
     #undef TARG_FN
 }
 

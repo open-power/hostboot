@@ -298,7 +298,6 @@ class PnorDD
 
 
     /**
-<<<<<<< HEAD
      * @brief LPC Slave Registers
      *    These are offsets within the LPC Slave Register Space
      */
