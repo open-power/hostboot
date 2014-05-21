@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.24 2014/01/25 05:29:19 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.25 2014/05/12 16:04:52 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -120,8 +120,9 @@ CONST_UINT64_T( EX_PERV_SCRATCH5                      , ULL(0x10013288) );
 CONST_UINT64_T( EX_PERV_SCRATCH6                      , ULL(0x10013289) );  
 CONST_UINT64_T( EX_PERV_SCRATCH7                      , ULL(0x1001328A) );
 
-// RAM Status reg settings.
-CONST_UINT64_T( RAM_STATUS_REG_AFTER_RAM,        0x5000000000000000);
+// Ramming settings.
+CONST_UINT64_T( RAM_STATUS_REG_AFTER_RAM,       0x5000000000000000);
+CONST_UINT64_T( RAM_COMPLETE_POLLS,             0x0000000000000040);
 
 // mfspr gpr0, scratch0  opcode left-shifted 29 bits, ready for ramming.
 CONST_UINT64_T( MTSPR_SCRATCH0_GPR0_RAM_READY,  (0x000000007C1543A6<<29));
