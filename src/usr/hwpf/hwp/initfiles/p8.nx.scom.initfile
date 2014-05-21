@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.11 2014/04/02 14:42:26 johnre Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.13 2014/05/16 02:56:33 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -170,7 +170,7 @@ scom 0x02013086 {
      9    ,   0b0           ;   #-- 0b00      PowerBus write address error
     10    ,   0b0           ;   #-- 0b01      PowerBus miscellaneous error
     11    ,   0b0           ;   #-- 0b01      MMIO BAR parity error
-    12    ,   0b0           ;   #-- 0b00*     CRB kill ISN received while holding ISN with UE error
+    12    ,   0b1           ;   #-- 0b11      CRB kill ISN received while holding ISN with UE error
     13    ,   0b0           ;   #-- 0b01      ACK_DEAD cresp received by read command
     14    ,   0b0           ;   #-- 0b01      ACK_DEAD cresp received by write command
     15    ,   0b0           ;   #-- 0b01      Link check aborted while waiting on data
@@ -193,7 +193,7 @@ scom 0x02013087 {
      9    ,   0b0           ;   #-- 0b00      PowerBus write address error
     10    ,   0b1           ;   #-- 0b01      PowerBus miscellaneous error
     11    ,   0b1           ;   #-- 0b01      MMIO BAR parity error
-    12    ,   0b0           ;   #-- 0b00*     CRB kill ISN received while holding ISN with UE error
+    12    ,   0b1           ;   #-- 0b11      CRB kill ISN received while holding ISN with UE error
     13    ,   0b1           ;   #-- 0b01      ACK_DEAD cresp received by read command
     14    ,   0b1           ;   #-- 0b01      ACK_DEAD cresp received by write command
     15    ,   0b1           ;   #-- 0b01      Link check aborted while waiting on data
@@ -238,7 +238,7 @@ scom 0x02013083 {
 scom 0x02013106 {
     bits  ,  scom_data      ;   #--Action
      0    ,  0b0            ;   #-- 0b00 mask Reserved
-     1    ,  0b0            ;   #-- 0b00*     ICS invalid state error FIR bit
+     1    ,  0b1            ;   #-- 0b11      ICS invalid state error FIR bit
      2:3  ,  0b00           ;   #-- 0b00 mask Reserved
      4    ,  0b0            ;   #-- 0b01      Channel 0 842 array corrected ECC error FIR bit" ;
      5    ,  0b0            ;   #-- 0b01      Channel 0 842 array uncorrectable ECC error FIR bit" ;
@@ -249,15 +249,15 @@ scom 0x02013106 {
     10    ,  0b0            ;   #-- 0b01      DMA outbound write/inbound read correctable ECC error FIR bit" ;
     11:13 ,  0b000          ;   #-- 0b01      Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
     14    ,  0b0            ;   #-- 0b00 mask Error from other SCOM satellites FIR bit" ;
-    15    ,  0b0            ;   #-- 0b00*     DMA invalid state error FIR bit.  Unrecoverable despite name" ;
-    16    ,  0b0            ;   #-- 0b00*     DMA invalid state error FIR bit" ;
+    15    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit.  Unrecoverable despite name" ;
+    16    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit" ;
     17    ,  0b0            ;   #-- 0b01      DMA array uncorrectable ECC error FIR bit" ;
     18    ,  0b0            ;   #-- 0b01      DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
     19    ,  0b0            ;   #-- 0b01      DMA inbound read error FIR bit" ;
-    20:27 ,  0b00000000     ;   #-- 0b00*     Channel 0-7 invalid state error FIR bit" ;
+    20:27 ,  0b11111111     ;   #-- 0b11      Channel 0-7 invalid state error FIR bit" ;
     28:30 ,  0b000          ;   #-- 0b01      Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
-    31    ,  0b0            ;   #-- 0b00*     UE error on CRB(CSB address, CCB) FIR bit" ;
-    32    ,  0b0            ;   #-- 0b00*     SUE error on CRB(CSB address, CCB) FIR bit" ;
+    31    ,  0b1            ;   #-- 0b11      UE error on CRB(CSB address, CCB) FIR bit" ;
+    32    ,  0b1            ;   #-- 0b11      SUE error on CRB(CSB address, CCB) FIR bit" ;
     33    ,  0b0            ;   #-- 0b00 mask SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
     34    ,  0b0            ;   #-- 0b00 mask Reserved
     35    ,  0b0            ;   #-- 0b00 mask Reserved
@@ -270,7 +270,7 @@ scom 0x02013106 {
 scom 0x02013107 {
     bits  ,  scom_data      ;   #--Action
      0    ,  0b0            ;   #-- 0b00 mask Reserved
-     1    ,  0b0            ;   #-- 0b00*     ICS invalid state error FIR bit
+     1    ,  0b1            ;   #-- 0b11      ICS invalid state error FIR bit
      2:3  ,  0b00           ;   #-- 0b00 mask Reserved
      4    ,  0b1            ;   #-- 0b01      Channel 0 842 array corrected ECC error FIR bit" ;
      5    ,  0b1            ;   #-- 0b01      Channel 0 842 array uncorrectable ECC error FIR bit" ;
@@ -281,15 +281,15 @@ scom 0x02013107 {
     10    ,  0b1            ;   #-- 0b01      DMA outbound write/inbound read correctable ECC error FIR bit" ;
     11:13 ,  0b111          ;   #-- 0b01      Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
     14    ,  0b0            ;   #-- 0b00 mask Error from other SCOM satellites FIR bit" ;
-    15    ,  0b0            ;   #-- 0b00*     DMA invalid state error FIR bit.  Unrecoverable despite name" ;
-    16    ,  0b0            ;   #-- 0b00*     DMA invalid state error FIR bit" ;
+    15    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit.  Unrecoverable despite name" ;
+    16    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit" ;
     17    ,  0b1            ;   #-- 0b01      DMA array uncorrectable ECC error FIR bit" ;
     18    ,  0b1            ;   #-- 0b01      DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
     19    ,  0b1            ;   #-- 0b01      DMA inbound read error FIR bit" ;
-    20:27 ,  0b00000000     ;   #-- 0b00*     Channel 0-7 invalid state error FIR bit" ;
+    20:27 ,  0b11111111     ;   #-- 0b11      Channel 0-7 invalid state error FIR bit" ;
     28:30 ,  0b111          ;   #-- 0b01      Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
-    31    ,  0b0            ;   #-- 0b00*     UE error on CRB(CSB address, CCB) FIR bit" ;
-    32    ,  0b0            ;   #-- 0b00*     SUE error on CRB(CSB address, CCB) FIR bit" ;
+    31    ,  0b1            ;   #-- 0b11      UE error on CRB(CSB address, CCB) FIR bit" ;
+    32    ,  0b1            ;   #-- 0b11      SUE error on CRB(CSB address, CCB) FIR bit" ;
     33    ,  0b0            ;   #-- 0b00 mask SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
     34    ,  0b0            ;   #-- 0b00 mask Reserved
     35    ,  0b0            ;   #-- 0b00 mask Reserved

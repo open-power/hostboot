@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.25 2014/04/11 18:15:42 baysah Exp $
+/// $Id: proc_cen_framelock.C,v 1.26 2014/05/16 01:14:16 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2199,12 +2199,6 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
         FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Mask Register");
         return l_rc;
     }
-
-      // set the init state attribute to DMI_ACTIVE
-    uint8_t l_attr_mss_init_state;
-    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE;
-    l_rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_mem_target, l_attr_mss_init_state);
-    if(l_rc) return l_rc;
 
     // mark HWP exit
     FAPI_IMP("proc_cen_framelock: Exiting ...");

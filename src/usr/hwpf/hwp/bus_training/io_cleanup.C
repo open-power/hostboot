@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_cleanup.C,v 1.8 2014/04/09 16:23:51 varkeykv Exp $
+// $Id: io_cleanup.C,v 1.13 2014/05/16 18:23:37 dcrowell Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -216,6 +216,61 @@ ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interfac
                    scom_mode_pb_reg_addr[FIR_CEN_DMI]);
           return rc;
      }
+     ///////////////////////////////SW256413//////////////////////////////
+     ecmdDataBufferBase rx_set_bits(16);
+     ecmdDataBufferBase tx_set_bits(16);
+     ecmdDataBufferBase mask_bits(  16);
+
+     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &master_target, chip_unit);
+     if (!rc.ok()){
+        FAPI_ERR("Error retreiving MCS chiplet number, while setting bus id.");
+        return rc;
+     }
+     mask_bits.flushTo0();
+     uint32_t rxbits = 0;
+     uint32_t txbits = 0;
+     // Tuleta has MCS4-7 corresponding to port DMI1
+     // Brazos has MCS0-7 corresponding to port DMI0 and DMI1
+     if(chip_unit == 0){
+        rxbits = 0x0000;    //bus_id: 0 group_id: 0
+        txbits = 0x0100;    //bus_id: 0 group_id: 32
+     }else if(chip_unit == 1){
+        rxbits = 0x0400;    //bus_id: 1 group_id: 0
+        txbits = 0x0500;    //bus_id: 1 group_id: 32
+     }else if(chip_unit == 2){
+        rxbits = 0x0800;    //bus_id: 2 group_id: 0
+        txbits = 0x0900;    //bus_id: 2 group_id: 32
+     }else if(chip_unit == 3){
+        rxbits = 0x0C00;    //bus_id: 3 group_id: 0
+        txbits = 0x0D00;    //bus_id: 3 group_id: 32
+     }else if(chip_unit == 4){
+        rxbits = 0x0000;    //bus_id: 0 group_id: 0
+        txbits = 0x0100;    //bus_id: 0 group_id: 32
+     }else if(chip_unit == 5){
+        rxbits = 0x0400;    //bus_id: 1 group_id: 0
+        txbits = 0x0500;    //bus_id: 1 group_id: 32
+     }else if(chip_unit == 6){
+        rxbits = 0x0800;    //bus_id: 2 group_id: 0
+        txbits = 0x0900;    //bus_id: 2 group_id: 32
+     }else if(chip_unit == 7){
+        rxbits = 0x0C00;    //bus_id: 3 group_id: 0
+        txbits = 0x0D00;    //bus_id: 3 group_id: 32
+     }else{      //If chip_unit is unkown, set return error
+        FAPI_ERR("Invalid io_cleanup HWP invocation . MCS chiplet number is unknown while setting the bus id.");
+        const fapi::Target & MASTER_TARGET = master_target;
+        FAPI_SET_HWP_ERROR(rc, IO_CLEANUP_INVALID_MCS_RC);
+        return rc;
+     }
+     rc_ecmd |= rx_set_bits.insertFromRight(rxbits, 0, 16);
+     rc_ecmd |= tx_set_bits.insertFromRight(txbits, 0, 16);
+     if(rc_ecmd)
+     {
+        rc.setEcmdError(rc_ecmd);
+        return(rc);
+     }
+     rc = GCR_write(master_target, master_interface, rx_id1_pg, master_group, 0, rx_set_bits, mask_bits,1,1);if (rc) {return(rc);}
+     rc = GCR_write(master_target, master_interface, tx_id1_pg, master_group, 0, tx_set_bits, mask_bits,1,1);if (rc) {return(rc);}
+     ///////////////////////////////SW256413//////////////////////////////
 
 
     // NOW We clear FIRS.. need to see if we need to do this or some other procedure will do this . Bellows/Irving to respond
