@@ -52,6 +52,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include <hwpf/hwp/chip_accessors/getPciOscswitchConfig.H>
+#include <hwpf/hwp/chip_accessors/getOscswitchCtlAttr.H>
 #include <fapiPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
@@ -1549,6 +1550,20 @@ fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
         o_val = (l_cardExt <<5) | l_card;
 
     } while (0);
+
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetOscswitchCtl
+                              (const fapi::Target * i_pProcTarget,
+                               const fapi::getOscswitchCtl::Attr i_attr,
+                               void * o_pVal,
+                               const size_t i_len)
+{
+    fapi::ReturnCode l_rc;
+
+    FAPI_EXEC_HWP(l_rc,getOscswitchCtlAttr,*i_pProcTarget,i_attr,o_pVal,i_len);
 
     return l_rc;
 }

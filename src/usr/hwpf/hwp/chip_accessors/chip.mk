@@ -26,4 +26,5 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/chip_accessors
 VPATH += ${HWPPATH}/chip_accessors
 
 OBJS += getPciOscswitchConfig.o
+OBJS += getOscswitchCtlAttr.o
 

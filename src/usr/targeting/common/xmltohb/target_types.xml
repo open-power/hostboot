@@ -244,6 +244,7 @@
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
     <attribute><id>PM_HWP_ATTR_VERSION</id></attribute>
     <attribute><id>DO_ABUS_DECONFIG</id></attribute>
+    <attribute><id>REDUNDANT_CLOCKS</id></attribute>
 </targetType>
 
 <targetType>

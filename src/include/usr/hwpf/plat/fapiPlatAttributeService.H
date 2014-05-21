@@ -55,6 +55,7 @@
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
+#include <hwpf/hwp/chip_accessors/getOscswitchCtlAttr.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -699,7 +700,22 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
 fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
                                      (const fapi::Target * i_pDimmTarget,
                                      uint8_t &o_val);
-
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_SPD_MODSPEC_COM_REF_RAW_CARD attribute.
+ *        ATTR_OSCSWITCH_CNTL0,1,2  attributes. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[in]  i_attr        Attribute selection
+ *  @param[out] o_pVal        Pointer to output variable
+ *  @param[in]  i_len         Size of o_pVal
+ */
+fapi::ReturnCode fapiPlatGetOscswitchCtl
+                              (const fapi::Target * i_pProcTarget,
+                               const fapi::getOscswitchCtl::Attr i_attr,
+                               void * o_pVal,
+                               const size_t i_len);
 
 } // namespace platAttrSvc
 
@@ -1786,5 +1802,24 @@ fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACROS to support osc switch control
+//------------------------------------------------------------------------------
+#define ATTR_OSCSWITCH_CTL0_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetOscswitchCtl \
+        (PTARGET,fapi::getOscswitchCtl::CTL0,&VAL,sizeof(VAL))
+#define ATTR_OSCSWITCH_CTL1_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetOscswitchCtl \
+        (PTARGET,fapi::getOscswitchCtl::CTL1,&VAL,sizeof(VAL))
+#define ATTR_OSCSWITCH_CTL2_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetOscswitchCtl \
+        (PTARGET,fapi::getOscswitchCtl::CTL2,&VAL,sizeof(VAL))
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: chip_attributes.xml,v 1.12 2013/10/31 14:10:49 jmcgill Exp $ -->
+<!-- $Id: chip_attributes.xml,v 1.14 2014/05/02 14:43:31 szhong Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
@@ -47,7 +47,7 @@
         Provided by the Machine Readable Workbook
     </description>
     <valueType>uint8</valueType>
-    <enum>NONE = 0, VENICE = 1, MURANO = 2, CENTAUR = 3</enum>
+    <enum>NONE = 0, VENICE = 1, MURANO = 2, CENTAUR = 3, NAPLES = 4</enum>
     <platInit/>
     <!-- To make HWPs data driven, this is a privileged attribute that cannot
          be accessed by normal HWPs. -->
@@ -184,6 +184,36 @@
         Defines PCI oscswitch configuration (FSI GP7 bits 0:3)
     </description>
     <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_OSCSWITCH_CTL0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Defines oscswitch ctl0 value (FSI GP3 bits 0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_OSCSWITCH_CTL1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Defines oscswitch ctl1 value (FSI GP6 bits 20:27)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_OSCSWITCH_CTL2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Defines oscswitch ctl2 value (FSI GP7 bits 8:31)
+    </description>
+    <valueType>uint32</valueType>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->

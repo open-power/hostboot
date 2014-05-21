@@ -20,327 +20,339 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: system_attributes.xml,v 1.22 2014/05/23 01:13:54 whs Exp $ -->
 
-<!-- $Id: system_attributes.xml,v 1.20 2014/03/10 11:42:10 whs Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with the system.
     These attributes are not associated with particular targets.
     Each execution platform must initialize.
-    -->
+-->
 
 <attributes>
-    <!-- ********************************************************************* -->
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXECUTION_PLATFORM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Which execution platform the HW Procedure is running on
+        Some HWPs (e.g. special wakeup) use different registers for different
+          platforms to avoid arbitration problems when multiple platforms do
+          the same thing concurrently
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HOST = 0x01, FSP = 0x02, OCC = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_IS_SIMULATION</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MNFG_FLAGS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        The manufacturing flags.
+        This is a bitfield. Each bit is a flag and multiple flags can be set
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        MNFG_NO_FLAG                        = 0x0000000000000000,
+        MNFG_THRESHOLDS                     = 0x0000000000000001,
+        MNFG_AVP_ENABLE                     = 0x0000000000000002,
+        MNFG_HDAT_AVP_ENABLE                = 0x0000000000000004,
+        MNFG_SRC_TERM                       = 0x0000000000000008,
+        MNFG_IPL_MEMORY_CE_CHECKING         = 0x0000000000000010,
+        MNFG_FAST_BACKGROUND_SCRUB          = 0x0000000000000020,
+        MNFG_TEST_DRAM_REPAIRS              = 0x0000000000000040,
+        MNFG_DISABLE_DRAM_REPAIRS           = 0x0000000000000080,
+        MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST = 0x0000000000000100,
+        MNFG_ENABLE_STANDARD_PATTERN_TEST   = 0x0000000000000200,
+        MNFG_ENABLE_MINIMUM_PATTERN_TEST    = 0x0000000000000400,
+        MNFG_DISABLE_FABRIC_eREPAIR         = 0x0000000000000800,
+        MNFG_DISABLE_MEMORY_eREPAIR         = 0x0000000000001000,
+        MNFG_FABRIC_DEPLOY_LANE_SPARES      = 0x0000000000002000,
+        MNFG_DMI_DEPLOY_LANE_SPARES         = 0x0000000000004000,
+        MNFG_PSI_DIAGNOSTIC                 = 0x0000000000008000,
+        MNFG_BRAZOS_WRAP_CONFIG             = 0x0000000000010000
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_IS_MPIPL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_EPS_TABLE_TYPE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Processor epsilon table type. Used to calculate the processor nest
+      epsilon register values.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>EPS_TYPE_LE = 0x01, EPS_TYPE_HE = 0x02, EPS_TYPE_1S = 0x03</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Processor SMP Fabric broadcast scope configuration.
+      MODE1 = default = chip/group/system/remote group/foreign.
+      MODE2 = group/system/remote group/foreign.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>MODE1 = 0x01, MODE2 = 0x02</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_X_BUS_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Processor SMP X bus width.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>W4BYTE = 0x01, W8BYTE = 0x02</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_ALL_MCS_IN_INTERLEAVING_GROUP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      If all MCS chiplets are in an interleaving group (1=true, 0=false).
+      If true the SMP fabric is setup in normal mode.
+      If false the SMP fabric is setup in checkerboard mode.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_NEST_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Nest Freq for system in MHz
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_BOOT_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Boot frequency in MHZ.</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EX_GARD_BITS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Vector to communicate the guarded EX chiplets to SBE
+      One Guard bit per EX chiplet, bit location aligned to chiplet ID
+      (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
+      Guarded EX chiplets are marked by a '1'.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DISABLE_I2C_ACCESS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to skip physical access to i2c interface in SBE execution.
+      Consumed by SBE hooks to permit skipping of selected code when
+      running on a test platform (i.e., wafer) which does not have a physical
+      SEEPROM connected.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PIB_I2C_REFCLOCK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      i2c reference clock for the system
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PIB_I2C_NEST_PLL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      i2c pll for the system
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_IMAGE_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      HostBoot image for SBE, offset to account for ECC
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_BOOT_VOLTAGE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Boot Voltage for system
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RISK_LEVEL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines risk level to consider for initialization values applied during IPL.
+        Risk level 0 should contain solutions for all known errata, and may sacrifice performance to avoid data integrity issue/error checking cases.
+        Risk level 100 may introduce data integrity/error scenarios to provide full performance or visibility to state space/coverage behind known issues.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+        RL0 = 0x000,
+        RL100 = 0x100
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_REFCLOCK_RCVR_TERM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines system specific value of processor refclock receiver termination (FSI GP4 bits 8:9)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PCI_REFCLOCK_RCVR_TERM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines system specific value of PCI refclock receiver termination (FSI GP4 bits 10:11)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEM_FILTER_PLL_SOURCE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines source of MEM filter PLL input (FSI GP4 bit 23)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        PROC_REFCLK = 0x0,
+        PCI_REFCLK = 0x1
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MULTI_SCOM_BUFFER_MAX_SIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Defines maximum size of data buffer to allocate for optimal
+      performance with platform implementation of fapiMultiScom API.
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        MULTI_SCOM_BUFFER_SIZE_1KB   = 0x0000000000000400,
+        MULTI_SCOM_BUFFER_SIZE_2KB   = 0x0000000000000800,
+        MULTI_SCOM_BUFFER_SIZE_4KB   = 0x0000000000001000,
+        MULTI_SCOM_BUFFER_SIZE_8KB   = 0x0000000000002000,
+        MULTI_SCOM_BUFFER_SIZE_16KB  = 0x0000000000004000,
+        MULTI_SCOM_BUFFER_SIZE_32KB  = 0x0000000000008000,
+        MULTI_SCOM_BUFFER_SIZE_64KB  = 0x0000000000010000,
+        MULTI_SCOM_BUFFER_SIZE_128KB = 0x0000000000020000,
+        MULTI_SCOM_BUFFER_SIZE_256KB = 0x0000000000040000,
+        MULTI_SCOM_BUFFER_SIZE_512KB = 0x0000000000080000,
+        MULTI_SCOM_BUFFER_SIZE_1MB   = 0x0000000000100000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RECONFIGURE_LOOP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Used to inidicate if a reconfigure loop is needed
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        DECONFIGURE      = 0x1,
+        BAD_DQ_BIT_SET   = 0x2
+    </enum>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
     <attribute>
-        <id>ATTR_EXECUTION_PLATFORM</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Which execution platform the HW Procedure is running on
-            Some HWPs (e.g. special wakeup) use different registers for different
-            platforms to avoid arbitration problems when multiple platforms do
-            the same thing concurrently
-        </description>
-        <valueType>uint8</valueType>
-        <enum>HOST = 0x01, FSP = 0x02, OCC = 0x03</enum>
-        <platInit/>
+      <id>ATTR_PM_HWP_ATTR_VERSION</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+          Defines HWP version to be checked inside HWPs to determine if new
+          code should be loaded/skipped/modified/etc. Service pack versions
+          of the procedures may diverge from the working branch. Specific
+          values to be defined as needed in the service pack release stream.
+      </description>
+      <valueType>uint32</valueType>
+      <platInit/>
+      <writeable/>
     </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_IS_SIMULATION</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
-        <valueType>uint8</valueType>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_MNFG_FLAGS</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            The manufacturing flags.
-            This is a bitfield. Each bit is a flag and multiple flags can be set
-        </description>
-        <valueType>uint64</valueType>
-        <enum>
-            MNFG_NO_FLAG                        = 0x0000000000000000,
-            MNFG_THRESHOLDS                     = 0x0000000000000001,
-            MNFG_AVP_ENABLE                     = 0x0000000000000002,
-            MNFG_HDAT_AVP_ENABLE                = 0x0000000000000004,
-            MNFG_SRC_TERM                       = 0x0000000000000008,
-            MNFG_IPL_MEMORY_CE_CHECKING         = 0x0000000000000010,
-            MNFG_FAST_BACKGROUND_SCRUB          = 0x0000000000000020,
-            MNFG_TEST_DRAM_REPAIRS              = 0x0000000000000040,
-            MNFG_DISABLE_DRAM_REPAIRS           = 0x0000000000000080,
-            MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST = 0x0000000000000100,
-            MNFG_ENABLE_STANDARD_PATTERN_TEST   = 0x0000000000000200,
-            MNFG_ENABLE_MINIMUM_PATTERN_TEST    = 0x0000000000000400,
-            MNFG_DISABLE_FABRIC_eREPAIR         = 0x0000000000000800,
-            MNFG_DISABLE_MEMORY_eREPAIR         = 0x0000000000001000,
-            MNFG_FABRIC_DEPLOY_LANE_SPARES      = 0x0000000000002000,
-            MNFG_DMI_DEPLOY_LANE_SPARES         = 0x0000000000004000,
-            MNFG_PSI_DIAGNOSTIC                 = 0x0000000000008000,
-            MNFG_BRAZOS_WRAP_CONFIG             = 0x0000000000010000
-        </enum>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_IS_MPIPL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PROC_EPS_TABLE_TYPE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Processor epsilon table type. Used to calculate the processor nest
-            epsilon register values.
-            Provided by the Machine Readable Workbook.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>EPS_TYPE_LE = 0x01, EPS_TYPE_HE = 0x02, EPS_TYPE_1S = 0x03</enum>
-        <platInit/>
-        <persistRuntime/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Processor SMP Fabric broadcast scope configuration.
-            MODE1 = default = chip/group/system/remote group/foreign.
-            MODE2 = group/system/remote group/foreign.
-            Provided by the Machine Readable Workbook.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>MODE1 = 0x01, MODE2 = 0x02</enum>
-        <platInit/>
-        <persistRuntime/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PROC_X_BUS_WIDTH</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Processor SMP X bus width.
-            Provided by the Machine Readable Workbook.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>W4BYTE = 0x01, W8BYTE = 0x02</enum>
-        <platInit/>
-        <persistRuntime/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_ALL_MCS_IN_INTERLEAVING_GROUP</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            If all MCS chiplets are in an interleaving group (1=true, 0=false).
-            If true the SMP fabric is setup in normal mode.
-            If false the SMP fabric is setup in checkerboard mode.
-            Provided by the Machine Readable Workbook.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <persistRuntime/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_NEST_FREQ_MHZ</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Nest Freq for system in MHz
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_BOOT_FREQ_MHZ</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Boot frequency in MHZ.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_EX_GARD_BITS</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Vector to communicate the guarded EX chiplets to SBE
-            One Guard bit per EX chiplet, bit location aligned to chiplet ID
-            (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
-            Guarded EX chiplets are marked by a '1'.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_DISABLE_I2C_ACCESS</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Set to skip physical access to i2c interface in SBE execution.
-            Consumed by SBE hooks to permit skipping of selected code when
-            running on a test platform (i.e., wafer) which does not have a physical
-            SEEPROM connected.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PIB_I2C_REFCLOCK</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            i2c reference clock for the system
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PIB_I2C_NEST_PLL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            i2c pll for the system
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_SBE_IMAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            HostBoot image for SBE, offset to account for ECC
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_BOOT_VOLTAGE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Boot Voltage for system
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_RISK_LEVEL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Defines risk level to consider for initialization values applied during IPL.
-            Risk level 0 should contain solutions for all known errata, and may sacrifice performance to avoid data integrity issue/error checking cases.
-            Risk level 100 may introduce data integrity/error scenarios to provide full performance or visibility to state space/coverage behind known issues.
-        </description>
-        <valueType>uint32</valueType>
-        <enum>
-            RL0 = 0x000,
-            RL100 = 0x100
-        </enum>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PROC_REFCLOCK_RCVR_TERM</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Defines system specific value of processor refclock receiver termination (FSI GP4 bits 8:9)
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PCI_REFCLOCK_RCVR_TERM</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Defines system specific value of PCI refclock receiver termination (FSI GP4 bits 10:11)
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_MEM_FILTER_PLL_SOURCE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Defines source of MEM filter PLL input (FSI GP4 bit 23)
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-            PROC_REFCLK = 0x0,
-            PCI_REFCLK = 0x1
-        </enum>
-        <platInit/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_MULTI_SCOM_BUFFER_MAX_SIZE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Defines maximum size of data buffer to allocate for optimal
-            performance with platform implementation of fapiMultiScom API.
-        </description>
-        <valueType>uint64</valueType>
-        <enum>
-            MULTI_SCOM_BUFFER_SIZE_1KB   = 0x0000000000000400,
-            MULTI_SCOM_BUFFER_SIZE_2KB   = 0x0000000000000800,
-            MULTI_SCOM_BUFFER_SIZE_4KB   = 0x0000000000001000,
-            MULTI_SCOM_BUFFER_SIZE_8KB   = 0x0000000000002000,
-            MULTI_SCOM_BUFFER_SIZE_16KB  = 0x0000000000004000,
-            MULTI_SCOM_BUFFER_SIZE_32KB  = 0x0000000000008000,
-            MULTI_SCOM_BUFFER_SIZE_64KB  = 0x0000000000010000,
-            MULTI_SCOM_BUFFER_SIZE_128KB = 0x0000000000020000,
-            MULTI_SCOM_BUFFER_SIZE_256KB = 0x0000000000040000,
-            MULTI_SCOM_BUFFER_SIZE_512KB = 0x0000000000080000,
-            MULTI_SCOM_BUFFER_SIZE_1MB   = 0x0000000000100000
-        </enum>
-        <platInit/>
-        <persistRuntime/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_RECONFIGURE_LOOP</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Used to inidicate if a reconfigure loop is needed
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-            DECONFIGURE      = 0x1,
-            BAD_DQ_BIT_SET   = 0x2
-        </enum>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
-    <attribute>
-        <id>ATTR_PM_HWP_ATTR_VERSION</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Defines HWP version to be checked inside HWPs to determine if new
-            code should be loaded/skipped/modified/etc. Service pack versions
-            of the procedures may diverge from the working branch. Specific
-            values to be defined as needed in the service pack release stream.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <writeable/>
-    </attribute>
-    <!-- ********************************************************************* -->
+  <!-- ********************************************************************* -->
+    <attribute>
+      <id>ATTR_REDUNDANT_CLOCKS</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+          1 = System has redundant clock oscillators
+          0 = System does not have redundant clock oscillators
+          From the Machine Readable Workbook
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+    </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

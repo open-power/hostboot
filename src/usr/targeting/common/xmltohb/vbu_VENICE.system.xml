@@ -233,6 +233,10 @@
         <id>MNFG_XBUS_MIN_EYE_WIDTH</id>
         <default>0x14</default>
     </attribute>
+    <attribute>
+        <id>REDUNDANT_CLOCKS</id>
+        <default>0x01</default>
+    </attribute>
     <!-- End System Attributes from MRW -->
     <attribute>
         <id>BOOT_FREQ_MHZ</id>
