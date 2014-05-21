@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.C,v 1.15 2014/02/23 21:41:07 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.C,v 1.16 2014/05/15 21:35:33 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -265,7 +265,10 @@ const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR = 0x0;                       
 const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_RR = 0x1;                         // RR_ONLY
 const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR_ON_STARVATION_ELSE_RR = 0x2; // LFSR_ON_STARVATION_ELSE_RR
 const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_RR_ON_STARVATION_ELSE_LFSR = 0x3; // RR_ON_STARVATION_ELSE_LFSR
-const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE = 0x2;                            // LFSR_ON_STARVATION_ELSE_RR
+const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_LFSR = 0x0;                       // LFSR_ONLY
+const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_RR = 0x1;                         // RR_ONLY
+const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_LFSR_ON_STARVATION_ELSE_RR = 0x2; // LFSR_ON_STARVATION_ELSE_RR
+const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_RR_ON_STARVATION_ELSE_LFSR = 0x3; // RR_ON_STARVATION_ELSE_LFSR
 
 
 //
@@ -1120,7 +1123,11 @@ fapi::ReturnCode proc_build_smp_set_sconfig_c9(
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0x0;
     ecmdDataBufferBase data(64);
+    uint8_t ux_scope_arb_mode_lfsr_on_starvation_else_rr = 0;
     uint8_t ux_scope_arb_mode_rr = 0;
+    uint8_t ux_scope_arb_mode;
+    uint8_t ux_local_arb_mode_rr = 0;
+    uint8_t ux_local_arb_mode;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_sconfig_c9: Start");
@@ -1164,6 +1171,15 @@ fapi::ReturnCode proc_build_smp_set_sconfig_c9(
              PB_SCONFIG_C9_FP_STARVE_LIMIT_START_BIT+1));
 
         // ux_scope_arb_mode
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_LFSR_ON_STARVATION_ELSE_RR,
+                           &(i_smp_chip.chip->this_chip),
+                           ux_scope_arb_mode_lfsr_on_starvation_else_rr);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying Chip EC feature: ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_LFSR_ON_STARVATION_ELSE_RR");
+            break;
+        }
+
         rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR,
                            &(i_smp_chip.chip->this_chip),
                            ux_scope_arb_mode_rr);
@@ -1173,17 +1189,46 @@ fapi::ReturnCode proc_build_smp_set_sconfig_c9(
             break;
         }
 
+        if (ux_scope_arb_mode_lfsr_on_starvation_else_rr)
+        {
+            ux_scope_arb_mode = PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR_ON_STARVATION_ELSE_RR;
+        }
+        else if (ux_scope_arb_mode_rr)
+        {
+            ux_scope_arb_mode = PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_RR;
+        }
+        else
+        {
+            ux_scope_arb_mode = PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR;
+        }
+
         rc_ecmd |= data.insertFromRight(
-            ((ux_scope_arb_mode_rr != 0)?
-             (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_RR):
-             (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR)),
+            ux_scope_arb_mode,
             PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT,
             (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_END_BIT-
              PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT+1));
 
         // ux_local_arb_mode
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_UX_LOCAL_ARB_RR,
+                           &(i_smp_chip.chip->this_chip),
+                           ux_local_arb_mode_rr);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying Chip EC feature: ATTR_CHIP_EC_FEATURE_FBC_UX_LOCAL_ARB_RR");
+            break;
+        }
+
+        if (ux_local_arb_mode_rr)
+        {
+            ux_local_arb_mode = PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_RR;
+        }
+        else
+        {
+            ux_local_arb_mode = PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_LFSR_ON_STARVATION_ELSE_RR;
+        }
+
         rc_ecmd |= data.insertFromRight(
-            PB_SCONFIG_C9_UX_LOCAL_ARB_MODE,
+            ux_local_arb_mode,
             PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_START_BIT,
             (PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_END_BIT-
              PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_START_BIT+1));

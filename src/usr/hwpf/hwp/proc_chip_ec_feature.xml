@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.51 2014/04/07 16:58:28 baysah Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.52 2014/05/15 16:36:14 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
@@ -631,9 +631,9 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       True if:
-        Murano/Venice EC greater than or equal to 0x20 (RR mode)
-      False otherwise:
-        Set LFSR mode
+        Murano EC greater than or equal to 0x20
+        Venice EC less than 0x20
+      False otherwise
     </description>
     <chipEcFeature>
       <chip>
@@ -643,6 +643,42 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_LFSR_ON_STARVATION_ELSE_RR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Venice EC greater than or equal to 0x20
+      False otherwise
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_UX_LOCAL_ARB_RR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Venice EC greater than or equal to 0x20
+      False otherwise
+    </description>
+    <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
