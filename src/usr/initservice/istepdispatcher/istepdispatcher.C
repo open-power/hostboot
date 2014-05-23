@@ -1565,6 +1565,7 @@ void IStepDispatcher::runProgressThread()
         // If shutdown has been requested by FSP, stop ProgressThread
         if(iv_shutdown)
         {
+            mutex_unlock( &iv_mutex );
             break;
         }
         if( l_PrevTime.tv_sec == iv_lastProgressMsgTime.tv_sec &&
