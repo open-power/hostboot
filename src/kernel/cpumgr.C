@@ -221,7 +221,8 @@ void CpuManager::startCPU(ssize_t i)
         //     Need to make the xscom mutex a per-core mutex to prevent
         //     multi-threaded access to the HMER.
         if ((CpuID::getCpuType() == CORE_POWER8_MURANO) ||
-            (CpuID::getCpuType() == CORE_POWER8_VENICE))
+            (CpuID::getCpuType() == CORE_POWER8_VENICE) ||
+            (CpuID::getCpuType() == CORE_POWER8_NAPLES))
         {
             const size_t num_threads = getThreadCount();
             size_t cpu_idx = (cpuId / num_threads) * num_threads;
@@ -443,6 +444,7 @@ size_t CpuManager::getThreadCount()
     {
         case CORE_POWER8_VENICE:
         case CORE_POWER8_MURANO:
+        case CORE_POWER8_NAPLES:
             threads = 8;
             break;
 

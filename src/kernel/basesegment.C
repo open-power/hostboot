@@ -54,6 +54,7 @@ void BaseSegment::_init()
     {
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
+        case CORE_POWER8_NAPLES:
         default:
             iv_physMemSize = VMM_BASE_BLOCK_SIZE;
             break;

@@ -45,6 +45,9 @@ namespace CpuID
             case 0x004B0000:
                 return CORE_POWER8_MURANO;
 
+            case 0x004C0000:
+                return CORE_POWER8_NAPLES;
+
             case 0x004D0000:
                 return CORE_POWER8_VENICE;
 

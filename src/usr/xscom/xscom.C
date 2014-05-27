@@ -198,6 +198,7 @@ uint8_t getMaxChipsPerNode()
     {
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
+        case CORE_POWER8_NAPLES:
         case CORE_UNKNOWN:
         default:
             l_numOfChips = 8;

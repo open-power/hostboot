@@ -279,6 +279,7 @@ void kernel_execute_softpatch()
         {
             case CORE_POWER8_MURANO:
             case CORE_POWER8_VENICE:
+            case CORE_POWER8_NAPLES:
             case CORE_UNKNOWN:
                 p8_softpatch_denorm_assist(t->fp_context);
                 break;

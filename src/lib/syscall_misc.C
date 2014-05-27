@@ -61,6 +61,7 @@ size_t cpu_thread_count()
     {
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
+        case CORE_POWER8_NAPLES:
             threads = 8;
             break;
 

@@ -115,6 +115,8 @@ enum ProcessorCoreType
     CORE_POWER8_MURANO,
     /** Power8 "Venice" (high-end) core */
     CORE_POWER8_VENICE,
+    /** Power8 "Naples" core */
+    CORE_POWER8_NAPLES,
 
     CORE_UNKNOWN,
 };
