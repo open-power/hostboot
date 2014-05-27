@@ -20,6 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: erepairSetFailedLanesHwp.C,v 1.2 2014/04/30 09:45:40 bilicon Exp $
 /**
  *  @file erepairSetFailedLanesHwp.C
  *
@@ -296,7 +297,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                ((i_vpdType == EREPAIR_VPD_FIELD) &&
                 (l_bufSize > EREPAIR_P8_MODULE_VPD_FIELD_SIZE)) ||
                ((i_vpdType == EREPAIR_VPD_MNFG) &&
-                 (l_bufSize > EREPAIR_P8_MODULE_VPD_MNFG_SIZE)))
+                (l_bufSize > EREPAIR_P8_MODULE_VPD_MNFG_SIZE)))
             {
                 FAPI_SET_HWP_ERROR(l_rc,
                                    RC_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE);
@@ -384,7 +385,8 @@ ReturnCode writeRepairLanesToBuf(const Target               &i_tgtHandle,
 
             if(l_rc)
             {
-                FAPI_ERR("Error (0x%x), from updateRepairLanesToBuf(DRIVE)");
+                FAPI_ERR("Error (0x%x), from updateRepairLanesToBuf(DRIVE)",
+                          static_cast<uint32_t>(l_rc));
                 break;
             }
         }
@@ -400,7 +402,8 @@ ReturnCode writeRepairLanesToBuf(const Target               &i_tgtHandle,
 
             if(l_rc)
             {
-                FAPI_ERR("Error (0x%x), from updateRepairLanesToBuf(RECEIVE)");
+                FAPI_ERR("Error (0x%x), from updateRepairLanesToBuf(RECEIVE)",
+                          static_cast<uint32_t>(l_rc));
                 break;
             }
         }
@@ -431,7 +434,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
     TargetType       l_tgtType              = TARGET_TYPE_NONE;
     Target           l_mcsTarget;
     Target           l_tgtHandle;
-    std::vector<const uint8_t>::iterator l_it;
+    std::vector<uint8_t>::const_iterator l_it;
     ATTR_CHIP_UNIT_POS_Type l_busNum;
 
     FAPI_DBG(">> updateRepairLanesToBuf, interface: %s",

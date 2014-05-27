@@ -20,6 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: erepairSetFailedLanesHwp.H,v 1.2 2014/04/30 09:45:10 bilicon Exp $
 /**
  *  @file erepairSetFailedLanesHwp.H
  *
@@ -41,10 +42,10 @@
 
 
 typedef fapi::ReturnCode (*erepairSetFailedLanesHwp_FP_t)(
-                          const fapi::Target      &i_tgtHandle,
-                          EREPAIR::erepairVpdType i_vpdType,
-                          std::vector<uint8_t>    &i_txFailLanes,
-                          std::vector<uint8_t>    &i_rxFailLanes);
+                          const fapi::Target         &i_tgtHandle,
+                          EREPAIR::erepairVpdType    i_vpdType,
+                          const std::vector<uint8_t> &i_txFailLanes,
+                          const std::vector<uint8_t> &i_rxFailLanes);
 
 extern "C"
 {

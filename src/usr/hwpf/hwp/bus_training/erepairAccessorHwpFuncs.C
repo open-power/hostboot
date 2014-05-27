@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,6 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: erepairAccessorHwpFuncs.C,v 1.2 2014/04/29 11:58:49 bilicon Exp $
 /**
  *  @file erepairAccessorHwpFuncs.C
  *
@@ -483,7 +484,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp1_txFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
-            l_numTxFailLanes  = o_endp1_txFaillanes.size();
+            l_numTxFailLanes = o_endp1_txFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Tx of endp1 target. No.of lanes: %d",
@@ -494,7 +495,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp1_rxFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
-            l_numRxFailLanes  = o_endp1_rxFaillanes.size();
+            l_numRxFailLanes = o_endp1_rxFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Rx of endp1 target. No.of lanes: %d",
@@ -505,7 +506,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp2_txFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
-            l_numTxFailLanes  = o_endp2_txFaillanes.size();
+            l_numTxFailLanes = o_endp2_txFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Tx of endp2 target. No.of lanes: %d",
@@ -516,7 +517,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp2_rxFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
-            l_numRxFailLanes  = o_endp2_rxFaillanes.size();
+            l_numRxFailLanes = o_endp2_rxFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Rx of endp2 target. No.of lanes: %d",

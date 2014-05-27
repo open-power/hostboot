@@ -20,6 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: erepairAccessorHwpFuncs.H,v 1.2 2014/04/29 11:59:25 bilicon Exp $
 /**
  *  @file erepairAccessorHwpFuncs.H
  *
@@ -38,6 +39,7 @@
 #define EREPAIRACCESSORHWPFUNCS_H_
 
 #include <fapi.H>
+#include <algorithm>
 
 const uint8_t EREPAIR_MAX_CENTAUR_PER_MCS = 1;
 
