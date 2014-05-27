@@ -99,10 +99,17 @@ class PnorDD
 
     /**
      * @brief Constructor
+     *
+     * @parm i_mode       o_buffer  Buffer to read data into
+     * @parm i_fakeStart  Input: Number of bytes to read,
+     * @parm i_fakeSize   Output: Number of bytes actually read
+     * @parm i_target     Processor Target connected to PNOR
+     *       NOTE: i_target can only be used when targetting is loaded
      */
     PnorDD( PnorMode_t i_mode = MODEL_UNKNOWN,
             uint64_t i_fakeStart = 0,
-            uint64_t i_fakeSize =  0);
+            uint64_t i_fakeSize =  0,
+            TARGETING::Target* i_target = NULL );
 
 
     /**
@@ -334,7 +341,6 @@ class PnorDD
         };
         SfcStatReg_t() : data32(0) {};
     };
-
 
     /**
      * @brief LPC Slave Registers
@@ -659,6 +665,7 @@ class PnorDD
     errlHndl_t writeLPC(uint32_t i_addr,
                         uint32_t i_data);
 
+
     /**
      * @brief Erase a block of flash
      *
@@ -903,11 +910,24 @@ class PnorDD
     // NOTE: The layout of the variables in this class must be maintained
     //       along with the offsets in the debug framework.
 
+   /**
+    * @brief Global Mutex to prevent concurrent PNOR accesses to Master Proc
+    *        This needs to be static so we can mutex across multiple
+    *        instances of PnorDD
+    */
+   static mutex_t cv_mutex;
+
     /**
-     * @brief Mutex to prevent concurrent PNOR accesses
-     *     This needs to be static so we can mutex across multiple instances of PnorDD
+     * @brief Class Mutex used to prevent concurrent PNOR accesses
      */
-    static mutex_t cv_mutex;
+    mutex_t iv_mutex;
+
+    /**
+     * @brief Mutex pointer to either class-specific or global mutex to prevent
+     *        concurrent PNOR accesses.
+     *        Each class uses a mutex; some share the static cv_mutex
+     */
+    mutex_t* iv_mutex_ptr;
 
     /**
      * @brief Track PNOR erases for wear monitoring
@@ -924,7 +944,7 @@ class PnorDD
     /**
      * @brief Flag to drive special behavior in VPO.
      */
-     static uint64_t iv_vpoMode;
+     uint64_t iv_vpoMode;
 
     /**
      * @brief describes the erase block size, set based on NOR chip type
@@ -936,19 +956,19 @@ class PnorDD
      * @brief CHIP ID or the NOR chip attached to SFC.
      *
      */
-    static uint32_t cv_nor_chipid;
+    uint32_t iv_nor_chipid;
 
     /**
      * @brief Hardware workarounds
      *
      */
-    static uint32_t cv_hw_workaround;
+    uint32_t iv_hw_workaround;
 
     /**
      * @brief indicates if SFC initialization has been performed.
      *
      */
-    static bool cv_sfcInitDone;
+    bool iv_sfcInitDone;
 
     /**
      * @brief Start of Fake PNOR address range..
@@ -985,6 +1005,12 @@ class PnorDD
      *
      */
     bool iv_reset_active;
+
+    /**
+     * @brief Processor Target used to access PNOR device
+     *
+     */
+    TARGETING::Target* iv_target;
 
     // Needed for testcases
     friend class PnorDdTest;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -996,7 +998,7 @@ class PnorDdTest : public CxxTest::TestSuite
             sfc_cmd.opcode = PnorDD::SFC_OP_INVALID;
             sfc_cmd.length = 0;
 
-            mutex_lock(&(pnordd->cv_mutex));
+            mutex_lock(pnordd->iv_mutex_ptr);
             l_err = pnordd->writeRegSfc(PnorDD::SFC_CMD_SPACE,
                                         PnorDD::SFC_REG_CMD,
                                         sfc_cmd.data32);
@@ -1007,16 +1009,16 @@ class PnorDdTest : public CxxTest::TestSuite
                 fails++;
 
                 // Unlock mutex for Error Log to be commited
-                mutex_unlock(&(pnordd->cv_mutex));
+                mutex_unlock(pnordd->iv_mutex_ptr);
                 errlCommit(l_err,PNOR_COMP_ID);
 
                 // Lock mutex for next operation
-                mutex_lock(&(pnordd->cv_mutex));
+                mutex_lock(pnordd->iv_mutex_ptr);
             }
 
             // Poll for complete status without waiting
             l_err = pnordd->pollSfcOpComplete();
-            mutex_unlock(&(pnordd->cv_mutex));
+            mutex_unlock(pnordd->iv_mutex_ptr);
 
             total++;
             if ( l_err == NULL )
@@ -1037,7 +1039,7 @@ class PnorDdTest : public CxxTest::TestSuite
             sfc_cmd.opcode = PnorDD::SFC_OP_CHIPID;
             sfc_cmd.length = 0;
 
-            mutex_lock(&(pnordd->cv_mutex));
+            mutex_lock(pnordd->iv_mutex_ptr);
             l_err = pnordd->writeRegSfc(PnorDD::SFC_CMD_SPACE,
                                         PnorDD::SFC_REG_CMD,
                                         sfc_cmd.data32);
@@ -1049,11 +1051,11 @@ class PnorDdTest : public CxxTest::TestSuite
                 fails++;
 
                 // Unlock mutex for Error Log to be commited
-                mutex_unlock(&(pnordd->cv_mutex));
+                mutex_unlock(pnordd->iv_mutex_ptr);
                 errlCommit(l_err,PNOR_COMP_ID);
 
                 // Lock mutex for next operation
-                mutex_lock(&(pnordd->cv_mutex));
+                mutex_lock(pnordd->iv_mutex_ptr);
             }
 
             // Poll for complete status without waiting
@@ -1076,7 +1078,7 @@ class PnorDdTest : public CxxTest::TestSuite
             /*         before continuing                           */
             /*******************************************************/
             l_err = pnordd->pollSfcOpComplete();
-            mutex_unlock(&(pnordd->cv_mutex));
+            mutex_unlock(pnordd->iv_mutex_ptr);
 
             total++;
             if (l_err)

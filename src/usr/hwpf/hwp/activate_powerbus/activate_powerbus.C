@@ -48,6 +48,7 @@
 #include    <hwpisteperror.H>
 
 #include    <sbe/sbeif.H>
+#include    <pnor/pnorif.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -338,9 +339,36 @@ void*    call_proc_build_smp( void    *io_pArgs )
 void * call_host_slave_sbe_update( void * io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
+    IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update entry" );
+    do
+    {
+
+        // Call to check state of Processor SBE SEEPROMs and
+        // make any necessary updates
+        l_errl = SBE::updateProcessorSbeSeeproms();
+
+        if (l_errl)
+        {
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl);
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
+        // Call to Validate any Alternative Master's connection to PNOR
+        // Any error returned should not fail istep
+        l_errl = PNOR::validateAltMaster();
+        if (l_errl)
+        {
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
 
 #ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
     //  Loop through all the procs in the system
@@ -398,14 +426,14 @@ void * call_host_slave_sbe_update( void * io_pArgs )
 #endif
 
 
-    // Call to check state of Processor SBE SEEPROMs and
-    // make any necessary updates
-    l_errl = SBE::updateProcessorSbeSeeproms();
+    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update exit" );
 
-    return l_errl;
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
+
 }
 
 };   // end namespace

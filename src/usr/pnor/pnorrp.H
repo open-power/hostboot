@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,6 +33,25 @@
 #include <vmmconst.h>
 #include <map>
 
+namespace PNOR
+{
+
+    /**
+      * @brief Creates a 4-byte Cyclic Redundancy Check (CRC) on the data
+      *        provided. The last iteration of the for-loop includes the ffs
+      *        checksum itself. Therefore if the 4-byte CRC created matches
+      *        the ffs checksum, the resulting CRC will be 0
+      *
+      * @param[in] ptr          Pointer to the data
+      *
+      * @param[in] size         Size of the data
+      *
+      * @return uint32_t        return 4-byte CRC, 0 if checksums match
+      */
+    uint32_t pnor_ffs_checksum(void* data, size_t size);
+
+}; //namespace PNOR
+
 /**
  * PNOR Resource Provider
  */
@@ -54,20 +75,6 @@ class PnorRP
      */
     errlHndl_t getSectionInfo( PNOR::SectionId i_section,
                                PNOR::SectionInfo_t& o_info );
-
-    /**
-      * @brief Creates a 4-byte Cyclic Redundancy Check (CRC) on the data
-      *        provided. The last iteration of the for-loop includes the ffs
-      *        checksum itself. Therefore if the 4-byte CRC created matches
-      *        the ffs checksum, the resulting CRC will be 0
-      *
-      * @param[in] ptr          Pointer to the data
-      *
-      * @param[in] size         Size of the data
-      *
-      * @return uint32_t        return 4-byte CRC, 0 if checksums match
-      */
-    uint32_t pnor_ffs_checksum(void* data, size_t size);
 
   protected:
     /**
@@ -253,6 +260,9 @@ class PnorRP
     // allow testcase to see inside
     friend class PnorRpTest;
     friend class PnorDdTest;
+
+    // allow this function to use constant(s)
+    friend errlHndl_t PNOR::validateAltMaster( void );
 
     /**
      * @brief Static instance function for testcase only

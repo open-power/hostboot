@@ -106,6 +106,11 @@ errlHndl_t ddRead(DeviceFW::OperationType i_opType,
         assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
         assert( io_buflen % 4 == 0 );
 
+        // The PNOR device driver interface is initialized with the
+        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
+        // access requires a separate PnorDD class created
+        assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
+
         // Read the flash
         l_err = Singleton<PnorDD>::instance().readFlash(io_buffer,
                                                         io_buflen,
@@ -157,13 +162,18 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
         assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
         assert( io_buflen % 4 == 0 );
 
+        // The PNOR device driver interface is initialized with the
+        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
+        // access requires a separate PnorDD class created
+        assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
+
         // Write the flash
         l_err = Singleton<PnorDD>::instance().writeFlash(io_buffer,
                                                          io_buflen,
                                                          l_addr);
         if(l_err)
         {
-           break;
+            break;
         }
 
     }while(0);
@@ -226,9 +236,9 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
         }
 
         //If we get here we're doing either MODEL_LPC_MEM, MODEL_REAL_CMD, or MODEL_REAL_MMIO
-        mutex_lock(&cv_mutex);
+        mutex_lock(iv_mutex_ptr);
         l_err = bufferedSfcRead(i_address, io_buflen, o_buffer);
-        mutex_unlock(&cv_mutex);
+        mutex_unlock(iv_mutex_ptr);
 
         if(l_err) { break;}
 
@@ -266,11 +276,11 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
         //If we're in VPO, just do the write directly (no erases)
         if(0 != iv_vpoMode)
         {
-            mutex_lock(&cv_mutex);
+            mutex_lock(iv_mutex_ptr);
             l_err = bufferedSfcWrite(static_cast<uint32_t>(l_address),
                                      8,
                                      i_buffer);
-            mutex_unlock(&cv_mutex);
+            mutex_unlock(iv_mutex_ptr);
             break;
         }
 
@@ -323,7 +333,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
             //note that writestart < blkstart can never happen
 
             // write a single block of data out to flash efficiently
-            mutex_lock(&cv_mutex);
+            mutex_lock(iv_mutex_ptr);
             l_err = compareAndWriteBlock(
                               cur_blkStart_addr,
                               cur_writeStart_addr,
@@ -331,7 +341,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
                               (void*)((uint64_t)i_buffer +
                               ((uint64_t)cur_writeStart_addr-l_address)));
 
-            mutex_unlock(&cv_mutex);
+            mutex_unlock(iv_mutex_ptr);
 
             if( l_err ) { break; }
 
@@ -362,7 +372,6 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
  Private/Protected Methods
  ********************/
 mutex_t PnorDD::cv_mutex = MUTEX_INITIALIZER;
-uint64_t PnorDD::iv_vpoMode = 0;
 
 //
 // @note    fake pnor no longer needs to allow from for SLW
@@ -377,8 +386,13 @@ uint64_t PnorDD::iv_vpoMode = 0;
  */
 PnorDD::PnorDD( PnorMode_t i_mode,
                 uint64_t i_fakeStart,
-                uint64_t i_fakeSize )
+                uint64_t i_fakeSize,
+                TARGETING::Target* i_target )
 : iv_mode(i_mode)
+, iv_vpoMode(0)
+, iv_nor_chipid(0)
+, iv_hw_workaround(0)
+, iv_sfcInitDone(false)
 , iv_ffdc_active(false)
 , iv_error_handled_count(0x0)
 , iv_error_recovery_failed(false)
@@ -388,6 +402,40 @@ PnorDD::PnorDD( PnorMode_t i_mode,
 
     //Zero out erase counter
     memset(iv_erases, 0xff, sizeof(iv_erases));
+
+
+    // Use i_target if all of these apply
+    // 1) not NULL
+    // 2) not MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    // 3) i_target does not correspond to Master processor (ie the
+    //    same processor as MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    // otherwise, use MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    // NOTE: i_target can only be used when targetting is loaded
+    if ( ( i_target != NULL ) &&
+         ( i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL ) )
+    {
+
+        iv_target = i_target;
+
+        // Check if processor is MASTER
+        TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
+                   iv_target->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
+
+        // Master target could collide and cause deadlocks with PnorDD singleton
+        // used for ddRead/ddWrite with MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+        assert( type_enum != TARGETING::PROC_MASTER_TYPE_ACTING_MASTER );
+
+        // Initialize and use class-specific mutex
+        iv_mutex_ptr = &iv_mutex;
+        mutex_init(iv_mutex_ptr);
+        TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using i_target=0x%X (non-master) and iv_mutex_ptr", TARGETING::get_huid(i_target));
+
+    }
+    else
+    {
+        iv_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        iv_mutex_ptr = &(cv_mutex);
+    }
 
     //Use real PNOR for everything except VPO
     if(0 == iv_vpoMode)
@@ -431,6 +479,8 @@ PnorDD::PnorDD( PnorMode_t i_mode,
     if( (MODEL_REAL_CMD == iv_mode) ||
         (MODEL_REAL_MMIO == iv_mode) )
     {
+
+        // @todo RTC 97493 - make sure sfcInit only gets called once per target
         sfcInit( );
     }
 
@@ -445,9 +495,6 @@ PnorDD::~PnorDD()
 
 }
 
-bool PnorDD::cv_sfcInitDone = false;  //Static flag to ensure we only init the SFC one time.
-uint32_t PnorDD::cv_nor_chipid = 0;  //Detected NOR Flash Type
-uint32_t PnorDD::cv_hw_workaround = 0;  //Hardware Workaround flags
 
 /**
  * STATIC
@@ -458,7 +505,7 @@ void PnorDD::sfcInit( )
     TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit> iv_mode=0x%.8x", iv_mode );
     errlHndl_t  l_err  =   NULL;
 
-    mutex_lock(&cv_mutex);
+    mutex_lock(iv_mutex_ptr);
 
     do {
 #ifdef CONFIG_SFC_IS_AST2400
@@ -467,20 +514,16 @@ void PnorDD::sfcInit( )
         //@todo RTC:106881 - Fix up to support erase/write later
 #endif //CONFIG_SFC_IS_AST2400
 
-        if(!cv_sfcInitDone)
+        if(!iv_sfcInitDone)
         {
 #ifdef CONFIG_BMC_DOES_SFC_INIT
 
             // Set OPB LPCM FIR Mask - hostboot will monitor these FIR bits
-            //@todo (RTC:36950) - add non-master support
-            TARGETING::Target* scom_target =
-                       TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
             size_t scom_size = sizeof(uint64_t);
             uint64_t fir_mask_data = OPB_LPCM_FIR_ERROR_MASK;
 
-            // Read FIR Register
             l_err = deviceOp( DeviceFW::WRITE,
-                              scom_target,
+                              iv_target,
                               &(fir_mask_data),
                               scom_size,
                               DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_MASK_WO_OR_REG));
@@ -488,11 +531,11 @@ void PnorDD::sfcInit( )
 
             //Determine NOR Flash type - triggers vendor specific workarounds
             //We also use the chipID in some FFDC situations.
-            l_err = getNORChipId(cv_nor_chipid);
+            l_err = getNORChipId(iv_nor_chipid);
             if(l_err) { break; }
             TRACFCOMP(g_trac_pnor,
-                      "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ",
-                      cv_nor_chipid );
+                      "PnorDD::sfcInit: iv_nor_chipid=0x%.8x> ",
+                      iv_nor_chipid );
 
             // Re-initialize internal erase size cached value.
             l_err = readRegSfc(SFC_CMD_SPACE,
@@ -509,12 +552,12 @@ void PnorDD::sfcInit( )
 
 #endif //CONFIG_BMC_DOES_SFC_INIT
 
-            cv_sfcInitDone = true;
+            iv_sfcInitDone = true;
         }
 
     }while(0);
 
-    mutex_unlock(&cv_mutex);
+    mutex_unlock(iv_mutex_ptr);
 
     if( l_err )
     {
@@ -708,13 +751,13 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_POLLSFCOPCOMPLETE,
                                             PNOR::RC_LPC_ERROR,
-                                            TWO_UINT32_TO_UINT64(cv_nor_chipid,
+                                            TWO_UINT32_TO_UINT64(iv_nor_chipid,
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(sfc_stat.data32,0));
 
             // Limited in callout: no PNOR target, so calling out processor
             l_err->addHwCallout(
-                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            iv_target,
                             HWAS::SRCI_PRIORITY_HIGH,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL );
@@ -743,7 +786,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             // Commit reset error as informational since we have
             // original error l_err
             TRACFCOMP(g_trac_pnor, "PnorDD::pollSfcOpComplete> Error from resetPnor() after previous error eid=0x%X. Committing resetPnor() error log eid=0x%X.",
-            l_err->eid(), tmp_err->eid());
+                      l_err->eid(), tmp_err->eid());
             tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             tmp_err->collectTrace(PNOR_COMP_NAME);
             tmp_err->plid(l_err->plid());
@@ -939,7 +982,7 @@ errlHndl_t PnorDD::checkForSfcErrors( ResetLevels &o_pnorResetLevel )
 
         // Limited in callout: no PNOR target, so calling out processor
         l_err->addHwCallout(
-                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        iv_target,
                         HWAS::SRCI_PRIORITY_HIGH,
                         HWAS::NO_DECONFIG,
                         HWAS::GARD_NULL );
@@ -972,19 +1015,13 @@ errlHndl_t PnorDD::checkForOpbErrors( ResetLevels &o_pnorResetLevel )
     size_t scom_size = sizeof(uint64_t);
 
     do {
-
-        //@todo (RTC:36950) - add non-master support
-        TARGETING::Target* scom_target =
-          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-
         // Read FIR Register
         l_err = deviceOp( DeviceFW::READ,
-                          scom_target,
+                          iv_target,
                           &(fir_data),
                           scom_size,
                           DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG) );
         if( l_err ) { break; }
-
 
         // Mask data to just the FIR bits we care about
         fir_reg.data64 = fir_data & OPB_LPCM_FIR_ERROR_MASK;
@@ -1082,14 +1119,14 @@ errlHndl_t PnorDD::checkForOpbErrors( ResetLevels &o_pnorResetLevel )
          *               and/or LPCHC Status Register
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        PNOR::MOD_PNORDD_CHECKFORSFCERRORS,
+                                        PNOR::MOD_PNORDD_CHECKFOROPBERRORS,
                                         PNOR::RC_ERROR_IN_STATUS_REG,
                                         fir_reg.data64,
                                         o_pnorResetLevel );
 
         // Limited in callout: no PNOR target, so calling out processor
         l_err->addHwCallout(
-                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        iv_target,
                         HWAS::SRCI_PRIORITY_HIGH,
                         HWAS::NO_DECONFIG,
                         HWAS::GARD_NULL );
@@ -1097,7 +1134,7 @@ errlHndl_t PnorDD::checkForOpbErrors( ResetLevels &o_pnorResetLevel )
 
         // Log FIR Register Data
         ERRORLOG::ErrlUserDetailsLogRegister
-                  l_eud(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+                  l_eud(iv_target);
 
         l_eud.addDataBuffer(&fir_data, scom_size,
                             DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
@@ -1136,16 +1173,12 @@ void PnorDD::addFFDCRegisters(errlHndl_t & io_errl)
                    io_errl->eid(), io_errl->plid() );
 
         ERRORLOG::ErrlUserDetailsLogRegister
-                  l_eud(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+                  l_eud(iv_target);
 
         do {
 
-            // Add ECCB Status Register
-            TARGETING::Target* scom_target =
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-
             tmp_err = deviceOp( DeviceFW::READ,
-                                scom_target,
+                                iv_target,
                                 &(data64),
                                 size64,
                                 DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
@@ -1163,7 +1196,7 @@ void PnorDD::addFFDCRegisters(errlHndl_t & io_errl)
 
             // Add OPB Fir Register
             tmp_err = deviceOp( DeviceFW::READ,
-                                scom_target,
+                                iv_target,
                                 &(data64),
                                 size64,
                                 DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG) );
@@ -1382,13 +1415,13 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_MICRONFLAGSTATUS,
                                             PNOR::RC_MICRON_INCOMPLETE,
-                                            TWO_UINT32_TO_UINT64(cv_nor_chipid,
+                                            TWO_UINT32_TO_UINT64(iv_nor_chipid,
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(opStatus,0));
 
             // Limited in callout: no PNOR target, so calling out processor
             l_err->addHwCallout(
-                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            iv_target,
                             HWAS::SRCI_PRIORITY_HIGH,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL );
@@ -1514,7 +1547,7 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
             if( o_chipId == MICRON_NOR_ID )
             {
                 // Assume all Micron chips have this bug
-                cv_hw_workaround |= HWWK_MICRON_EXT_READ;
+                iv_hw_workaround |= HWWK_MICRON_EXT_READ;
 
                 uint32_t outdata[4];
 
@@ -1538,7 +1571,7 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
                 {
                     TRACFCOMP( g_trac_pnor,"PnorDD::getNORChipId> Setting Micron workaround flag");
                     //Set Micron workaround flag
-                    cv_hw_workaround |= HWWK_MICRON_WRT_ERASE;
+                    iv_hw_workaround |= HWWK_MICRON_WRT_ERASE;
                 }
 
 
@@ -1644,7 +1677,7 @@ errlHndl_t PnorDD::flushSfcBuf(uint32_t i_addr,
         if(l_err) { break; }
 
         //check for special Micron Flag Status reg
-        if(cv_hw_workaround & HWWK_MICRON_WRT_ERASE)
+        if(iv_hw_workaround & HWWK_MICRON_WRT_ERASE)
         {
             l_err = micronFlagStatus();
             if(l_err) { break; }
@@ -1901,10 +1934,6 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
 
     do {
 
-        //@todo (RTC:36950) - add non-master support
-        TARGETING::Target* scom_target =
-          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-
         // always read/write 64 bits to SCOM
         size_t scom_size = sizeof(uint64_t);
 
@@ -1913,7 +1942,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
         eccb_cmd.read_op = 1;
         eccb_cmd.address = i_addr;
         l_err = deviceOp( DeviceFW::WRITE,
-                          scom_target,
+                          iv_target,
                           &(eccb_cmd.data64),
                           scom_size,
                           DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
@@ -1927,7 +1956,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
         while( poll_time < ECCB_POLL_TIME_NS )
         {
             l_err = deviceOp( DeviceFW::READ,
-                              scom_target,
+                              iv_target,
                               &(eccb_stat.data64),
                               scom_size,
                               DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
@@ -1937,6 +1966,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
             {
                 break;
             }
+
 
             // want to start out incrementing by small numbers then get bigger
             //  to avoid a really tight loop in an error case so we'll increase
@@ -1972,7 +2002,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
 
             // Limited in callout: no PNOR target, so calling out processor
             l_err->addHwCallout(
-                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            iv_target,
                             HWAS::SRCI_PRIORITY_HIGH,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL );
@@ -2008,7 +2038,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
         {
             // Commit reset error since we have original error l_err
             TRACFCOMP(g_trac_pnor, "PnorDD::readLPC Error from resetPnor() after previous error eid=0x%X. Committing resetPnor() error log eid=0x%X.",
-            l_err->eid(), tmp_err->eid());
+                      l_err->eid(), tmp_err->eid());
 
             tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             tmp_err->collectTrace(PNOR_COMP_NAME);
@@ -2035,10 +2065,6 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
 
     do {
 
-        //@todo (RTC:36950) - add non-master support
-        TARGETING::Target* scom_target =
-          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-
         // always read/write 64 bits to SCOM
         size_t scom_size = sizeof(uint64_t);
 
@@ -2048,7 +2074,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         uint64_t eccb_data = static_cast<uint64_t>(i_data);
         eccb_data = eccb_data << 32; //left-justify my data
         l_err = deviceOp( DeviceFW::WRITE,
-                          scom_target,
+                          iv_target,
                           &eccb_data,
                           scom_size,
                           DEVICE_SCOM_ADDRESS(ECCB_DATA_REG) );
@@ -2060,7 +2086,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         eccb_cmd.address = i_addr;
         TRACDCOMP(g_trac_pnor, "writeLPC> Write ECCB command register, cmd=0x%.16x", eccb_cmd.data64 );
         l_err = deviceOp( DeviceFW::WRITE,
-                          scom_target,
+                          iv_target,
                           &(eccb_cmd.data64),
                           scom_size,
                           DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
@@ -2074,7 +2100,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         while( poll_time < ECCB_POLL_TIME_NS )
         {
             l_err = deviceOp( DeviceFW::READ,
-                              scom_target,
+                              iv_target,
                               &(eccb_stat.data64),
                               scom_size,
                               DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
@@ -2119,7 +2145,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                                             eccb_stat.data64);
             // Limited in callout: no PNOR target, so calling out processor
             l_err->addHwCallout(
-                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            iv_target,
                             HWAS::SRCI_PRIORITY_HIGH,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL );
@@ -2151,7 +2177,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         {
             // Commit reset error since we have original error l_err
             TRACFCOMP(g_trac_pnor, "PnorDD::writeLPC Error from resetPnor() after previous error eid=0x%X. Committing resetPnor() error log eid=0x%X.",
-            l_err->eid(), tmp_err->eid());
+                      l_err->eid(), tmp_err->eid());
 
             tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             tmp_err->collectTrace(PNOR_COMP_NAME);
@@ -2366,7 +2392,6 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
         // reset class variable since we're starting a new operation
         iv_error_recovery_failed = false;
 
-
         // This do-while loop supports retries
         do {
 
@@ -2404,13 +2429,13 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                 break; //all done
             }
 
-            else if(cv_nor_chipid != 0)
+            else if(iv_nor_chipid != 0)
             {
 
                 // group this block together with do-while
                 do{
-                    TRACDCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erasing flash for cv_nor_chipid=0x%.8x, iv_mode=0x%.8x",
-                              cv_nor_chipid, iv_mode);
+                    TRACDCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erasing flash for iv_nor_chipid=0x%.8x, iv_mode=0x%.8x",
+                              iv_nor_chipid, iv_mode);
 
                     //Write erase address to ADR reg
                     l_err = writeRegSfc(SFC_CMD_SPACE,
@@ -2434,7 +2459,7 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                     if(l_err) { break; }
 
                     //check for special Micron Flag Status reg
-                    if(cv_hw_workaround & HWWK_MICRON_WRT_ERASE)
+                    if(iv_hw_workaround & HWWK_MICRON_WRT_ERASE)
                     {
                         l_err = micronFlagStatus();
                         if(l_err) { break; }
@@ -2445,8 +2470,8 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             }
             else
             {
-                TRACFCOMP(g_trac_pnor,"PnorDD::eraseFlash> Erase not supported for cv_nor_chipid=%d",
-                          cv_nor_chipid );
+                TRACFCOMP(g_trac_pnor,"PnorDD::eraseFlash> Erase not supported for iv_nor_chipid=%d",
+                          iv_nor_chipid );
 
                 /*@
                  * @errortype
@@ -2460,7 +2485,7 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       PNOR::MOD_PNORDD_ERASEFLASH,
                                       PNOR::RC_UNSUPPORTED_OPERATION,
-                                      static_cast<uint64_t>(cv_nor_chipid),
+                                      static_cast<uint64_t>(iv_nor_chipid),
                                       i_address,
                                       true /*Add HB SW Callout*/ );
                 l_err->collectTrace(PNOR_COMP_NAME);
@@ -2493,7 +2518,7 @@ errlHndl_t PnorDD::readRegFlash( SfcCustomReg_t i_cmd,
     {
         //Do a read of flash address zero to workaround
         // a micron bug with extended reads
-        if( (HWWK_MICRON_EXT_READ & cv_hw_workaround)
+        if( (HWWK_MICRON_EXT_READ & iv_hw_workaround)
             && (i_cmd.length > 4) )
         {
             l_err = loadSfcBuf( 0, 1 );
@@ -2628,11 +2653,6 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
 
         do {
 
-            // Setup common scom target
-            //@todo (RTC:36950) - add non-master support
-            TARGETING::Target* scom_target =
-            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-
             // always read/write 64 bits to SCOM
             uint64_t scom_data_64 = 0x0;
             size_t scom_size = sizeof(uint64_t);
@@ -2665,7 +2685,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                     TRACFCOMP(g_trac_pnor, "PnorDD::resetPnor> Writing ECCB_RESET_REG to reset ECCB FW Logic");
                     scom_data_64 = 0x0;
                     l_err = deviceOp( DeviceFW::WRITE,
-                                      scom_target,
+                                      iv_target,
                                       &(scom_data_64),
                                       scom_size,
                                       DEVICE_SCOM_ADDRESS(ECCB_RESET_REG) );
@@ -2705,7 +2725,7 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                     scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
                     l_err = deviceOp(
                               DeviceFW::WRITE,
-                              scom_target,
+                              iv_target,
                               &(scom_data_64),
                               scom_size,
                               DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
@@ -2730,8 +2750,8 @@ errlHndl_t PnorDD::resetPnor( ResetLevels i_pnorResetLevel )
                     scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
                     l_err = deviceOp(
                               DeviceFW::WRITE,
-                              scom_target,
-                               &(scom_data_64),
+                              iv_target,
+                              &(scom_data_64),
                               scom_size,
                               DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
 
@@ -2878,7 +2898,7 @@ errlHndl_t PnorDD::reinitializeSfc( void )
 
     do {
 
-#ifdef PNORDD_FSPATTACHED
+#ifdef CONFIG_BMC_DOES_SFC_INIT
 
         TRACFCOMP( g_trac_pnor,  ERR_MRK"PnorDD::reinitializeSfc> Need to Re-Initialize SFC. Calling doShutdown(PNOR::RC_REINITIALIZE_SFC)");
 
@@ -2892,7 +2912,7 @@ errlHndl_t PnorDD::reinitializeSfc( void )
 
         // Clear member variable in case we don't successfully
         // reinitialize PNOR
-        cv_sfcInitDone = false;
+        iv_sfcInitDone = false;
 
         l_err = writeRegSfc(SFC_CMD_SPACE,
                             SFC_REG_OADRNB,
@@ -2922,12 +2942,12 @@ errlHndl_t PnorDD::reinitializeSfc( void )
 
         //Determine NOR Flash type - triggers vendor specific workarounds
         //We also use the chipID in some FFDC situations.
-        l_err = getNORChipId(cv_nor_chipid);
+        l_err = getNORChipId(iv_nor_chipid);
         if(l_err) { break; }
 
         TRACFCOMP(g_trac_pnor,
-                  "PnorDD::reinitializeSfc> cv_nor_chipid=0x%.8x> ",
-                  cv_nor_chipid );
+                  "PnorDD::reinitializeSfc> iv_nor_chipid=0x%.8x> ",
+                  iv_nor_chipid );
 
         l_err = readRegSfc(SFC_CMD_SPACE,
                            SFC_REG_ERASMS,
@@ -2935,7 +2955,7 @@ errlHndl_t PnorDD::reinitializeSfc( void )
         if(l_err) { break; }
 
         // Good path if you made it here: reset class variable
-        cv_sfcInitDone = true;
+        iv_sfcInitDone = true;
 
 #endif
 

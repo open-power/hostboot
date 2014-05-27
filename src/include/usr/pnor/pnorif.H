@@ -101,6 +101,14 @@ errlHndl_t getSectionInfo( SectionId i_section,
  */
 bool usingL3Cache();
 
+/**
+ * @brief Validate the Alternative Master Processor's LPC
+ *        Connection to PNOR
+ *
+ * @return errlHndl_t  Error log if validation failed
+ */
+errlHndl_t validateAltMaster( void );
+
 }
 
 

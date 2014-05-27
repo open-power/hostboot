@@ -16,5 +16,6 @@ config BMC_DOES_SFC_INIT
     default y
     help
         The BMC is completely responsible for initializing and configuring the
-        SFC before Hostboot is started.
+        SFC before Hostboot is started.  The BMC is also responsible for doing
+        any repairs or recovery for the SFC.
 

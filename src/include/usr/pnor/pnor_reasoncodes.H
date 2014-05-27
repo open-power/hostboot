@@ -56,6 +56,9 @@ namespace PNOR
         MOD_PNORDD_CHECKFOROPBERRORS    = 0x1E, /**< pnordd.C : PnorDD::checkForErrors */
         MOD_PNORDD_HANDLEECCBERROR      = 0x1F, /**< pnordd.C : PnorDD::handleEccbError */
         MOD_PNORDD_RESETPNOR            = 0x20, /**< pnordd.C : PnorDD::resetPnor */
+        MOD_PNORVALID_MAIN              = 0x21, /**< pnorvalid.C : Main Function */
+        MOD_PNORVALID_MAGIC             = 0x22, /**< pnorvalid.C : Magic Function */
+
     };
 
     enum PNORReasonCode
