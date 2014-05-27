@@ -12336,6 +12336,44 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MEMB_DMI_REFCLOCK_RCVR_TERM</id>
+    <description>
+        Defines system specific value of DMI refclock receiver termination (FSI GP4 bits 8:9)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_DMI_REFCLOCK_RCVR_TERM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_DDR_REFCLOCK_RCVR_TERM</id>
+    <description>
+        Defines system specific value of DDR refclock receiver termination (FSI GP4 bits 10:11)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_DDR_REFCLOCK_RCVR_TERM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MEM_FILTER_PLL_SOURCE</id>
     <description>
         Defines source of MEM filter PLL input (FSI GP4 bit 23)

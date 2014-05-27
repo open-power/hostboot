@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_xip_customize.C,v 1.12 2013/12/03 05:46:24 cmolsen Exp $
+// $Id: cen_xip_customize.C,v 1.14 2014/05/28 21:17:25 thi Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : cen_xip_customize.C                                               */
 /* *! DESCRIPTION : Customizes Centaur images from a Centaur reference image.   */
@@ -45,6 +45,14 @@
 extern "C"  {
 
 using namespace fapi;
+
+
+const uint32_t FSI_GP4_DMI_REFCLOCK_TERM_START_BIT = 8;
+const uint32_t FSI_GP4_DMI_REFCLOCK_TERM_END_BIT = 9;
+
+const uint32_t FSI_GP4_DDR_REFCLOCK_TERM_START_BIT = 10;
+const uint32_t FSI_GP4_DDR_REFCLOCK_TERM_END_BIT = 11;
+
 
 //  Parameter list:
 //  const fapi::Target &i_target:  Processor chip target.
@@ -298,6 +306,66 @@ ReturnCode cen_xip_customize(const fapi::Target &i_target,
     FAPI_SET_HWP_ERROR(rc, RC_CEN_XIPC_IMGBUILD_ERROR);
     return rc;
   }
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Centaur reference clock termination
+  // Retrieval method:  Attribute.
+  // ==========================================================================
+
+  uint8_t attrDMIRefclockTerm;
+  uint8_t attrDDRRefclockTerm;
+  SbeXipItem xipTocItem;
+  void *xipTocItemPtr;
+  uint64_t *refclockTermPtr;
+  ecmdDataBufferBase refclockTerm(64);
+  SBE_XIP_ERROR_STRINGS(errorStrings);
+
+  rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_REFCLOCK_RCVR_TERM, NULL, attrDMIRefclockTerm);
+  if (rc) {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_MEMB_DMI_REFCLOCK_RCVR_TERM) returned error.\n");
+    return rc;
+  }
+
+  rc = FAPI_ATTR_GET(ATTR_MEMB_DDR_REFCLOCK_RCVR_TERM, NULL, attrDDRRefclockTerm);
+  if (rc) {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_MEMB_DDR_REFCLOCK_RCVR_TERM) returned error.\n");
+    return rc;
+  }
+
+  // form customization data
+  rcLoc |= refclockTerm.insertFromRight(attrDMIRefclockTerm,
+                                        FSI_GP4_DMI_REFCLOCK_TERM_START_BIT,
+                                        (FSI_GP4_DMI_REFCLOCK_TERM_END_BIT-
+                                         FSI_GP4_DMI_REFCLOCK_TERM_START_BIT+1));
+  rcLoc |= refclockTerm.insertFromRight(attrDDRRefclockTerm,
+                                        FSI_GP4_DDR_REFCLOCK_TERM_START_BIT,
+                                        (FSI_GP4_DDR_REFCLOCK_TERM_END_BIT-
+                                         FSI_GP4_DDR_REFCLOCK_TERM_START_BIT+1));
+
+  if (rcLoc) {
+    FAPI_ERR("Error 0x%x forming refclock termination data buffer", rcLoc);
+    rc.setEcmdError(rcLoc);
+    return rc;
+  }
+
+  // look up customization location
+  rcLoc = sbe_xip_find(i_imageOut, REFCLOCK_TERM_TOC_NAME, &xipTocItem);
+  if (rcLoc) {
+    FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+    FAPI_ERR("Probable cause:");
+    FAPI_ERR("\tThe keyword (=%s) was not found.", REFCLOCK_TERM_TOC_NAME);
+    uint32_t & RC_LOCAL = rcLoc;
+    FAPI_SET_HWP_ERROR(rc, RC_CEN_XIPC_KEYWORD_NOT_FOUND_ERROR);
+    return rc;
+  }
+
+  sbe_xip_pore2host(i_imageOut, xipTocItem.iv_address, &xipTocItemPtr);
+  refclockTermPtr = (uint64_t*)xipTocItemPtr;
+  *(refclockTermPtr + 0) = myRev64(refclockTerm.getDoubleWord(0));
+
+  //
+  // Done
+  //  
 
   sbe_xip_image_size( i_imageOut, &io_sizeImageOut);
   

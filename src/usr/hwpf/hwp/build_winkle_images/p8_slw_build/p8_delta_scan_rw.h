@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.48 2013/12/03 05:45:04 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.49 2014/05/13 13:31:51 jmcgill Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -52,6 +52,7 @@
 #define STANDALONE_MBOX3_VALUE_TOC_NAME   "standalone_mbox3_value"
 #define UNTRUSTED_BAR_TOC_NAME            "fabric_config"
 #define UNTRUSTED_PBA_BAR_TOC_NAME        "fabric_config_pba"
+#define REFCLOCK_TERM_TOC_NAME            "refclock_term"
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4

@@ -222,6 +222,8 @@
     <attribute><id>DISABLE_I2C_ACCESS</id></attribute>
     <attribute><id>PROC_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
+    <attribute><id>MEMB_DMI_REFCLOCK_RCVR_TERM</id></attribute>
+    <attribute><id>MEMB_DDR_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>MEM_FILTER_PLL_SOURCE</id></attribute>
     <attribute><id>EFFECTIVE_EC</id></attribute>
     <attribute><id>MIN_FREQ_MHZ</id></attribute>

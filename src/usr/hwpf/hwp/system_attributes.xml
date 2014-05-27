@@ -21,7 +21,6 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- $Id: system_attributes.xml,v 1.22 2014/05/23 01:13:54 whs Exp $ -->
-
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with the system.
@@ -271,6 +270,26 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Defines system specific value of PCI refclock receiver termination (FSI GP4 bits 10:11)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_DMI_REFCLOCK_RCVR_TERM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines system specific value of DMI refclock receiver termination (FSI GP4 bits 8:9)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_DDR_REFCLOCK_RCVR_TERM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines system specific value of DDR refclock receiver termination (FSI GP4 bits 10:11)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
