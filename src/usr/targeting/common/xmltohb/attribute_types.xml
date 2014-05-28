@@ -244,6 +244,9 @@
         <name>MURANO</name>
     </enumerator>
     <enumerator>
+        <name>NAPLES</name>
+    </enumerator>
+    <enumerator>
         <name>CENTAUR</name>
         <value>48</value>
     </enumerator>
@@ -10078,7 +10081,7 @@ Measured in GB</description>
 <attribute>
     <id>DMI_REFCLOCK_SWIZZLE</id>
     <description>
-      Defines Murano/Venice FSI GP8 refclock enable field bit offset (0:7) associated with this MCS chip unit.
+      Defines Murano/Venice/Naples FSI GP8 refclock enable field bit offset (0:7) associated with this MCS chip unit.
     </description>
     <simpleType>
       <uint8_t>

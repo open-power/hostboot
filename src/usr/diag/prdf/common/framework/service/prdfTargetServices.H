@@ -260,7 +260,7 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target );
 
 /**
  * @brief   Returns Model associated with Proc.
- *          Model expected is either MURANO or VENICE.
+ *          Model expected is either MURANO or VENICE or NAPLES.
  * @param   i_proc a proc target
  * @return  proc model if target is valid else MODEL_NA
  */

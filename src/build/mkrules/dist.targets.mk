@@ -182,6 +182,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/defaultPnorLayout.xml \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \
+    img/simics_NAPLES_targeting.bin \
     obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv \

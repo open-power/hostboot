@@ -1563,10 +1563,12 @@ public:
               continue;
           }
           // TODO: engd data for s1 supports XBUS1 only.
-          // For now check if murano chip and target is not XBUS1, then skip this target.
+          // For now check if murano or naples chip and target is not XBUS1, then skip this target.
           // Long term solution would be to change HWAS per RTC 45796.
-          else if ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
-              TARGETING::MODEL_MURANO) && (x != 1))
+          else if ( ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
+                      TARGETING::MODEL_MURANO) && (x != 1)) ||
+                    ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
+                      TARGETING::MODEL_NAPLES) && (x != 1)) )
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Processor is Murano"
                   " - skipping Target %d", x );
@@ -1620,8 +1622,10 @@ public:
           // TODO: engd data for s1 supports XBUS1 only.
           // For now check if murano chip and target is not XBUS1, then skip this target.
           // Long term solution would be to change HWAS per RTC 45796.
-          else if ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
-              TARGETING::MODEL_MURANO) && (x != 1))
+          else if ( ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
+                      TARGETING::MODEL_MURANO) && (x != 1)) ||
+                    ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
+                      TARGETING::MODEL_NAPLES) && (x != 1)) )
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS> Processor is Murano"
                   " - skipping Target %d", x );

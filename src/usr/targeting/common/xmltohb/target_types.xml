@@ -581,6 +581,15 @@
 </targetType>
 
 <targetType>
+    <id>chip-processor-naples</id>
+    <parent>chip-processor-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
+<targetType>
     <id>unit</id>
     <parent>base</parent>
     <attribute>
@@ -667,6 +676,15 @@
     </attribute>
 </targetType>
 
+<targetType>
+    <id>unit-ex-naples</id>
+    <parent>unit-ex-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
 
 <targetType>
     <id>unit-core-power8</id>
@@ -699,6 +717,15 @@
     </attribute>
 </targetType>
 
+<targetType>
+    <id>unit-core-naples</id>
+    <parent>unit-core-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
 
 <targetType>
     <id>unit-pci-power8</id>
@@ -728,6 +755,15 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-pci-naples</id>
+    <parent>unit-pci-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
     </attribute>
 </targetType>
 
@@ -792,6 +828,15 @@
 </targetType>
 
 <targetType>
+    <id>unit-abus-naples</id>
+    <parent>unit-abus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
+<targetType>
     <id>unit-xbus-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -821,6 +866,15 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-xbus-naples</id>
+    <parent>unit-xbus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
     </attribute>
 </targetType>
 
@@ -1158,6 +1212,15 @@
     </attribute>
 </targetType>
 
+<targetType>
+    <id>unit-mcs-naples</id>
+    <parent>unit-mcs-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
 <!-- Processor target types -->
 
 <targetType>
@@ -1175,6 +1238,15 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mba-naples</id>
+    <parent>unit-mba-venice</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
     </attribute>
 </targetType>
 
@@ -1395,6 +1467,15 @@
 </targetType>
 
 <targetType>
+    <id>unit-nx-naples</id>
+    <parent>unit-nx-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
+<targetType>
     <id>unit-pore-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -1435,6 +1516,15 @@
 </targetType>
 
 <targetType>
+    <id>unit-pore-naples</id>
+    <parent>unit-pore-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
+    </attribute>
+</targetType>
+
+<targetType>
     <id>unit-capp-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -1471,6 +1561,15 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-capp-naples</id>
+    <parent>unit-capp-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>NAPLES</default>
     </attribute>
 </targetType>
 

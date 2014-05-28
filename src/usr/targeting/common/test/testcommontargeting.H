@@ -1503,13 +1503,13 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         using namespace TARGETING;
 
-        PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC,MODEL_VENICE);
+        PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC);
         TargetRangeFilter l_filter(
             targetService().begin(),
             targetService().end(),
             &l_procChip);
 
-        PredicateCTM l_memBuf(CLASS_UNIT,TYPE_MEMBUF);
+        PredicateCTM l_memBuf(CLASS_CHIP,TYPE_MEMBUF);
         uint32_t l_count = 0;
         uint32_t l_procs = 0;
 
@@ -1792,7 +1792,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         using namespace TARGETING;
 
-        PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC,MODEL_MURANO);
+        PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC);
         TargetRangeFilter l_filter(
             targetService().begin(),
             targetService().end(),
@@ -1837,7 +1837,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         l_count = 0;
 
-        PredicateCTM l_mcsChip(CLASS_UNIT,TYPE_MCS,MODEL_MURANO);
+        PredicateCTM l_mcsChip(CLASS_UNIT,TYPE_MCS);
         TargetRangeFilter l_filter2(
             targetService().begin(),
             targetService().end(),

@@ -36,6 +36,7 @@
 #include <stdlib.h>
 
 // Other components
+#include <sys/misc.h>
 #include <sys/task.h>
 #include <targeting/common/trace.H>
 #include <targeting/adapters/assertadapter.H>
@@ -73,6 +74,11 @@ namespace TARGETING
 static void initializeAttributes(TargetService& i_targetService);
 
 /**
+ *  @brief Check that at least one processor of our cpu type is being targeted
+ */
+static void checkProcessorTargeting(TargetService& i_targetService);
+
+/**
  *  @brief Entry point for initialization service to initialize the targeting
  *      code
  * 
@@ -96,6 +102,7 @@ static void initTargeting(errlHndl_t& io_pError)
         (void)l_targetService.init();
 
         initializeAttributes(l_targetService);
+        checkProcessorTargeting(l_targetService);
 
         // call ErrlManager function - tell him that TARG is ready!
         ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
@@ -113,6 +120,59 @@ static void initTargeting(errlHndl_t& io_pError)
 TASK_ENTRY_MACRO(initTargeting);
 
 
+/**
+ *  @brief Check that at least one processor of our cpu type is being targeted
+ */
+static void checkProcessorTargeting(TargetService& i_targetService)
+{
+    #define TARG_FN "checkProcessorTargeting()"
+    TARG_ENTER();
+
+    PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC);
+    ProcessorCoreType l_coreType = cpu_core_type();
+    bool l_haveOneCorrectProcessor = false;
+    TargetRangeFilter l_filter(
+        i_targetService.begin(),
+        i_targetService.end(),
+        &l_procChip);
+
+    for(;l_filter && (l_haveOneCorrectProcessor != true);++l_filter)
+    {
+        switch(l_filter->getAttr<ATTR_MODEL>())
+        {
+            case MODEL_VENICE:
+                if(l_coreType == CORE_POWER8_VENICE)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
+
+            case MODEL_MURANO:
+                if(l_coreType == CORE_POWER8_MURANO)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
+
+            case MODEL_NAPLES:
+                if(l_coreType == CORE_POWER8_NAPLES)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
+
+            default:
+                break;
+        };
+    }
+
+    TARG_ASSERT((l_haveOneCorrectProcessor == true), TARG_ERR_LOC "FATAL: No "
+                "targeted processors are of the correct type");
+
+    TARG_EXIT();
+
+    #undef TARG_FN
+}
 
 /*
  * @brief Initialize any attributes that need to be set early on

@@ -230,18 +230,25 @@ HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 MURANO_TARG_IMG = simics_MURANO_targeting.bin
+NAPLES_TARG_IMG = simics_NAPLES_targeting.bin
 VENICE_TARG_IMG = simics_VENICE_targeting.bin
 MURANO_TARG_IMG_ECC = simics_MURANO_targeting.bin.ecc
+NAPLES_TARG_IMG_ECC = simics_NAPLES_targeting.bin.ecc
 VENICE_TARG_IMG_ECC = simics_VENICE_targeting.bin.ecc
 MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
+NAPLES_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
 VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.hdr.bin}
 MURANO_LOCAL_SLW_IMG = s1.ref_image.hdr.bin
+NAPLES_LOCAL_SLW_IMG = s1.ref_image.hdr.bin
 VENICE_LOCAL_SLW_IMG = p8.ref_image.hdr.bin
 MURANO_LOCAL_SLW_IMG_ECC = s1.ref_image.hdr.bin.ecc
+NAPLES_LOCAL_SLW_IMG_ECC = s1.ref_image.hdr.bin.ecc
 VENICE_LOCAL_SLW_IMG_ECC = p8.ref_image.hdr.bin.ecc
 MURANO_SBE_IMG = s1SbePartition.bin
+NAPLES_SBE_IMG = s1SbePartition.bin
 VENICE_SBE_IMG = p8SbePartition.bin
 MURANO_SBE_IMG_ECC = s1SbePartition.bin.ecc
+NAPLES_SBE_IMG_ECC = s1SbePartition.bin.ecc
 VENICE_SBE_IMG_ECC = p8SbePartition.bin.ecc
 SBEC_IMG = centSbePartition.bin
 SBEC_IMG_ECC = centSbePartition.bin.ecc
@@ -250,15 +257,20 @@ TEMP_IMG = temp.bin
 inject_ecc: build_sbe_partitions
 	# cp file with full path to one with local path
 	cp ${MURANO_SLW_IMG} ${MURANO_LOCAL_SLW_IMG}
+	cp ${NAPLES_SLW_IMG} ${NAPLES_LOCAL_SLW_IMG}
 	cp ${VENICE_SLW_IMG} ${VENICE_LOCAL_SLW_IMG}
 	# HBD partition
 	dd if=${${MURANO_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${MURANO_TARG_IMG_ECC} --p8; \
+	dd if=${${NAPLES_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
+	ecc --inject ${TEMP_IMG} --output ${NAPLES_TARG_IMG_ECC} --p8; \
 	dd if=${${VENICE_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${VENICE_TARG_IMG_ECC} --p8; \
 	# SBE partition
 	dd if=${${MURANO_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${MURANO_SBE_IMG_ECC} --p8; \
+	dd if=${${NAPLES_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
+	ecc --inject ${TEMP_IMG} --output ${NAPLES_SBE_IMG_ECC} --p8; \
 	dd if=${${VENICE_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${VENICE_SBE_IMG_ECC} --p8; \
 	# SBEC partition
@@ -267,15 +279,19 @@ inject_ecc: build_sbe_partitions
 	# WINK partition
 	dd if=${${MURANO_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${MURANO_LOCAL_SLW_IMG_ECC} --p8; \
+	dd if=${${NAPLES_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
+	ecc --inject ${TEMP_IMG} --output ${NAPLES_LOCAL_SLW_IMG_ECC} --p8; \
 	dd if=${${VENICE_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${VENICE_LOCAL_SLW_IMG_ECC} --p8; \
 	rm ${TEMP_IMG}
 
 MURANO_SECT = HBD=${MURANO_TARG_IMG_ECC},SBE=${MURANO_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${MURANO_LOCAL_SLW_IMG_ECC}
+NAPLES_SECT = HBD=${NAPLES_TARG_IMG_ECC},SBE=${NAPLES_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NAPLES_LOCAL_SLW_IMG_ECC}
 VENICE_SECT = HBD=${VENICE_TARG_IMG_ECC},SBE=${VENICE_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${VENICE_LOCAL_SLW_IMG_ECC}
 
 PNOR_IMG_INFO = \
    murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   naples.pnor:defaultPnorLayout.xml:${NAPLES_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FIPS_PNOR_INFO}
 

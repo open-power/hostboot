@@ -118,6 +118,11 @@ class HdatServiceTest: public CxxTest::TestSuite
                 {
                     TS_FAIL("testHdat> PVR model != 4D for Venice");
                 }
+                else if( (model == TARGETING::MODEL_NAPLES)
+                         && !((pvr & 0x00FF0000) == 0x004C0000) )
+                {
+                    TS_FAIL("testHdat> PVR model != 4C for Naples");
+                }
             }
         }
         else
