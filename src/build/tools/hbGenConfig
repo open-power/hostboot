@@ -1,0 +1,368 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/hbGenConfig $
+#
+# OpenPOWER HostBoot Project
+#
+# COPYRIGHT International Business Machines Corp. 2014
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+use strict;
+use File::Basename;
+
+# Usage: hbGenConfig <override_file> [config files]
+# Override file may be the string 'default' to indicate no overrides.
+#
+# For file format specifications see bottom of this file.
+#
+
+my $override_config = shift;
+my @config_files = @ARGV;
+
+my @entries = ();
+my %defaults = ();
+my %default_exprs = ();
+my %depends = ();
+my %config_set = ();
+
+# Parse config files.
+foreach my $file (@config_files)
+{
+    parseFile($file);
+}
+
+# Parse override files.
+if ($override_config ne "default")
+{
+    parseOverride($override_config);
+}
+
+# Enable non-override defaults.
+enableDefaults();
+enableDefaultExprs();
+
+# Check dependencies.
+checkDeps();
+
+# Output config.mk/config.h files.
+outputResults();
+
+#######
+
+# @sub parseFile
+# Parse a 'HBconfig' file.
+#
+# @param[in] File name to parse.
+sub parseFile
+{
+    my $file = shift;
+    open FILE, "< $file" or die "Could not open $file";
+
+    my $entry = "";
+
+    while (my $line = <FILE>)
+    {
+        chomp $line;
+        $line =~ s/#.*//;
+
+        # Config title name: 'config FOO'
+        if ($line =~ m/^\s*config\s*(\S*)/)
+        {
+            $entry = $1;
+            push @entries, $1;
+        }
+        # Default value: 'default yes', 'default yes if !BAR'
+        elsif ($line =~ m/^\s*default\s*(\S*)\s*(.*)/)
+        {
+            if ($2 eq "")
+            {
+                if ("y" eq $1)
+                {
+                    $defaults{$entry} = 1;
+                }
+                else
+                {
+                    $defaults{$entry} = 0;
+                }
+            }
+            else
+            {
+                my $y_or_n = $1;
+                my $expr = $2;
+                $expr =~ s/^if\s*//;
+
+                $expr = "!($expr)" if ("y" ne $y_or_n);
+                $default_exprs{$entry} = $expr;
+            }
+        }
+        # Dependency values: 'depends on (FOO && !BAR)'
+        elsif ($line =~ m/^\s*depends on\s*(.*)/)
+        {
+            $depends{$entry} = $1;
+        }
+    }
+
+    close FILE;
+}
+
+# @sub parseOverride
+# Parse an override file.
+#
+# @param[in] Filename of the override file.
+sub parseOverride
+{
+    my $file = shift;
+
+    open FILE, "< $file" or die "Could not open $file";
+
+    while (my $line = <FILE>)
+    {
+        chomp $line;
+        $line =~ s/#.*//;
+
+        if ($line =~ m/^\s*set\s*(\S*)/)
+        {
+            $config_set{$1} = 1;
+        }
+        elsif ($line =~ m/^\s*unset\s*(\S*)/)
+        {
+            $config_set{$1} = 0;
+        }
+        elsif ($line =~ m/^\s*include\s*(\S*)/)
+        {
+            my $subfile = $1;
+            parseOverride(dirname($file)."/$subfile");
+        }
+    }
+
+    close FILE;
+}
+
+# @sub enableDefaults
+# Enables all of the 'default yes', 'default no', or missing default values
+# for config options which are not currently overridden.
+sub enableDefaults
+{
+    foreach my $option (@entries)
+    {
+        if (not defined $config_set{$option} and
+            not defined $default_exprs{$option})
+        {
+            if (defined $defaults{$option})
+            {
+                $config_set{$option} = $defaults{$option};
+            }
+            else
+            {
+                $config_set{$option} = 0;
+            }
+        }
+    }
+}
+
+# @sub enableDefaultExprs
+# Enable 'default yes if EXPR'-style config options which are not currently
+# overridden.
+sub enableDefaultExprs
+{
+    foreach my $option (@entries)
+    {
+        if (not defined $config_set{$option} and
+            defined $default_exprs{$option})
+        {
+            $config_set{$option} = evaluateExpr($default_exprs{$option});
+        }
+    }
+}
+
+# @sub checkDeps
+# Check the dependency requirements for each config option.
+sub checkDeps
+{
+    foreach my $option (@entries)
+    {
+        if (defined $depends{$option} and
+            1 == $config_set{$option})
+        {
+            if (0 == evaluateExpr($depends{$option}))
+            {
+                die "Dependencies not fulfilled for $option: $depends{$option}";
+            }
+        }
+    }
+}
+
+# @sub evaluateExpr
+# Evaluate an expression for default/depends-on statements.
+sub evaluateExpr
+{
+    my $expr = shift;
+
+    # Search for config names and replace them with a value.
+    while ($expr =~ m/([A-Za-z_]\w*)/)
+    {
+        my $suboption = $1;
+
+        # If the referenced config name doesn't have a value, recursively
+        # call this function to determine its value.
+        if (not defined $config_set{$suboption} and
+            defined $default_exprs{$suboption})
+        {
+            $config_set{$suboption} = evaluateExpr($default_exprs{$suboption});
+        }
+        elsif (not defined $config_set{$suboption})
+        {
+            $config_set{$suboption} = 0;
+        }
+
+        # Do the replacement.
+        my $value = $config_set{$suboption};
+        $expr =~ s/$suboption/$value/;
+    }
+
+    # Call perl's 'eval' to perform the logical operations.
+    return eval $expr;
+}
+
+# @sub outputResults
+# Create the config.mk / config.h files with the enabled options.
+sub outputResults
+{
+    die if not defined $ENV{HOSTBOOTROOT};
+    open CONFIGMK, "> $ENV{HOSTBOOTROOT}/obj/genfiles/config.mk" or die;
+    open CONFIGH, "> $ENV{HOSTBOOTROOT}/obj/genfiles/config.h" or die;
+
+    print CONFIGH "#ifndef __HOSTBOOT_CONFIG_H\n";
+    print CONFIGH "#define __HOSTBOOT_CONFIG_H\n";
+
+    foreach my $option (@entries)
+    {
+        if ($config_set{$option})
+        {
+            print CONFIGMK "CONFIG_$option = yes\n";
+            print CONFIGH "#define CONFIG_$option 1\n";
+        }
+        else
+        {
+            print CONFIGMK "#CONFIG_$option = no\n";
+            print CONFIGH "/* CONFIG_$option = no */\n";
+        }
+    }
+
+    print CONFIGH "#endif\n";
+
+    close CONFIGMK;
+    close CONFIGH;
+}
+
+__END__
+
+This tool uses config files, as part of the source code, to identify the
+possible configuration options that can be used to tweak the compiled image's
+behavior.  These config files define the options, their default values, and
+their relationships (ex. dependencies).
+
+The tool also uses override files to override the default behavior of a set
+of options.  This is useful to create a image target for a particular system
+where you would like a set of config values to be delivered as a set.
+
+CONFIG FILES
+These files are placed anywhere in the source tree with the name 'HBconfig'.
+A particular config option should be placed in the HBconfig file located in
+the module directory best "owning" this option.  (Ex. an option changing SPD
+behavior should be placed in the 'src/usr/vpd' directory.)
+
+Syntax:
+    config [A-Z0-9_]+
+        This defines a config option by the name in the regular expression.
+
+    default [yn]
+        This sets default value for the previously referenced config option.
+
+    default [yn] if EXPR
+        This sets the default value for the previously referenced config option
+        based on the current setting value of the expression 'EXPR'.
+
+    depends on EXPR
+        This enables dependency checking to ensure that if the config option
+        is enabled that the expression EXPR also evaluates to true.
+
+    help (text)
+        A human readable description of the config option.
+
+    #
+        The start of a comment line.
+
+    EXPR
+        A logical expression using the following operators: (), !, &&, ||.
+
+Example:
+    config EXAMPLE
+        default y
+        help
+            This is an example config option.
+
+    config EXAMPLE2
+        default n
+        depends on !EXAMPLE
+        help
+            This is another example config option.
+
+    config EXAMPLE3
+        default y if (EXAMPLE || EXAMPLE2)
+        help
+            This is yet another example.
+
+OVERRIDE FILES
+These files can be placed in any location would usually not be part of this
+codebase.  They are enabled by setting the environment variable
+CONFIG_FILE=<file> prior to calling make.
+
+Syntax:
+    set [A-Z0-9_]+
+        Enable the config option named.
+
+    unset [A-Z0-9_]+
+        Disable the config option named.
+
+    include <relative path>
+        Recursively include another override file.
+
+    #
+        The start of a comment line.
+
+Example:
+    unset EXAMPLE
+    set EXAMPLE2
+    include ../foo/override.config
+
+USAGE
+This tool is used to generate a config.mk and a config.h file which can be
+used both in makefiles and in source.  Any config option is given the prefix
+CONFIG_ (ex. CONFIG_EXAMPLE).
+
+In C[++] files you should use:
+    #include <config.h>
+    #ifdef CONFIG_EXAMPLE
+        ...
+    #endif
+
+In makefiles you should use:
+    OBJS += $(if $(CONFIG_EXAMPLE),example.o)
+    OBJS += $(if $(CONFIG_EXAMPLE),,notexample.o)
+

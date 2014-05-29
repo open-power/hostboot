@@ -23,6 +23,13 @@
 SUBDIRS = src.d
 ROOTPATH = .
 
+CONFIG_FILE ?= default
+
+GEN_PASS_PRE += $(GENDIR)/.$(notdir $(CONFIG_FILE)).config
+CLEAN_TARGETS += $(wildcard $(GENDIR)/.*.config)
+CLEAN_TARGETS += $(GENDIR)/config.mk $(GENDIR)/config.h
+SKIP_CONFIG_FILE_LOAD = 1
+
 IMAGE_PASS_POST += $(GENDIR)/hwp_id.html
 CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
 ifndef BUILD_MINIMAL
@@ -57,4 +64,18 @@ $(GENDIR)/hwp_id.html :
 check_istep_modules: $(OBJS)
 	listdeps.pl $(IMGDIR)  -v
 
+GENCONFIG_TOOL = src/build/tools/hbGenConfig
 
+$(GENDIR)/.$(notdir $(CONFIG_FILE)).config: \
+    $(shell find -name HBconfig) \
+    $(filter-out $(GENDIR)/.$(notdir $(CONFIG_FILE)).config,\
+	    $(wildcard $(GENDIR)/.*.config)) \
+    $(GENCONFIG_TOOL) \
+    $(filter-out default,$(CONFIG_FILE))
+	@mkdir -p $(GENDIR)
+	$(C2) "    GENCONFIG"
+	$(C1)$(GENCONFIG_TOOL) $(CONFIG_FILE) \
+	    $(filter-out $(GENCONFIG_TOOL) $(CONFIG_FILE) \
+			 $(wildcard $(GENDIR)/.*.config),$^)
+	@rm -f $(wildcard $(GENDIR)/.*.config)
+	@touch $@

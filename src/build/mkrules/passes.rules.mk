@@ -60,7 +60,11 @@ suppress_nothing_to_do:
 define PASS_template
 
     # Add subdirectories to the 'post' requirements.
+ifeq ($(1),CLEAN)
+$(1)_PASS_PRE += $$(addprefix _BUILD/SUBDIR/$(1)/,$$(SUBDIRS:.d=))
+else
 $(1)_PASS_POST += $$(addprefix _BUILD/SUBDIR/$(1)/,$$(SUBDIRS:.d=))
+endif
 
     # Definition on how to build a subdirectory.
 _BUILD/SUBDIR/$(1)/%:

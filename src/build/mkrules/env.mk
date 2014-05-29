@@ -70,6 +70,9 @@ endif
 endif
 
 # Import more specialized configuration.
+ifeq ($(strip $(SKIP_CONFIG_FILE_LOAD)),)
+-include $(GENDIR)/config.mk
+endif
 include $(MKRULESDIR)/cc.env.mk
 include $(MKRULESDIR)/binfile.env.mk
 include $(MKRULESDIR)/beam.env.mk

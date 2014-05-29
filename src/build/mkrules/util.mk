@@ -33,4 +33,3 @@ __internal__space=$(__internal__empty) $(__internal__empty)
 # Convert a comma separated list to a space separated list.
 MAKE_SPACE_LIST = $(subst $(__internal__comma),$(__internal__space),$(1))
 
-

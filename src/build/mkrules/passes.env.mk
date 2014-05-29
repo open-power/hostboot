@@ -45,7 +45,7 @@ CLEAN_TARGETS += $(addprefix $(GENDIR)/, $(GENFILES))
 GEN_PASS_BODY += $(addprefix $(GENDIR_PLUGINS)/, $(GENFILES_PLUGINS))
 CLEAN_TARGETS += $(addprefix $(GENDIR_PLUGINS)/, $(GENFILES_PLUGINS))
 
-ifneq ($(strip $(GEN_PASS_BODY)),)
+ifneq ($(strip $(GEN_PASS_BODY))$(strip $(GEN_PASS_PRE)),)
 make_gendir:
 	@mkdir -p $(GENDIR)
 	@mkdir -p $(GENDIR_PLUGINS)
