@@ -1,0 +1,23 @@
+config SBE_UPDATE_SEQUENTIAL
+    default y if !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_GOLDEN
+    depends on !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_GOLDEN
+    help
+        If an update is necessary, only 1 SBE SEEPROM will be updated on each
+        IPL per processor.  If a 2nd SBE SEEPROM needs to be updated, a re-IPL
+        will be requested.
+
+config SBE_UPDATE_SIMULTANEOUS
+    default n
+    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_GOLDEN
+    help
+        If an update is necessary, both SBE SEEPROMs on a target will be updated
+        at the same time before a re-IPL request is issued.
+
+config SBE_UPDATE_GOLDEN
+    default n
+    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS
+    help
+        If an update is necessary, only 1 SBE SEEPROM will be updated and
+        then a re-IPL request will be issued.  The other SBE SEEPROM will not
+        be touched and treated as the 'Golden' SEEPROM.
+

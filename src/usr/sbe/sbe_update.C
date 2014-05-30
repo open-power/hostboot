@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,6 +46,7 @@
 #include <sys/msg.h>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H>
+#include <config.h>
 #include <sbe/sbeif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
@@ -509,7 +513,7 @@ namespace SBE
                            "should be: 0x%X",
                            sbeToc->eyeCatch, SBETOC_EYECATCH );
 
-                TRACFBIN( g_trac_sbe, "sbeToc", &sbeToc, sizeof(sbeToc_t));
+                TRACFBIN( g_trac_sbe, "sbeToc", sbeToc, sizeof(sbeToc_t));
 
                 /*@
                  * @errortype
@@ -540,7 +544,7 @@ namespace SBE
                     TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Unsupported "
                                "SBE TOC Version in SBE Partition" );
 
-                    TRACFBIN( g_trac_sbe, "sbeToc", &sbeToc, sizeof(sbeToc_t));
+                    TRACFBIN( g_trac_sbe, "sbeToc", sbeToc, sizeof(sbeToc_t));
 
                     /*@
                      * @errortype
@@ -1579,9 +1583,11 @@ namespace SBE
 /////////////////////////////////////////////////////////////////////
     errlHndl_t updateSeepromSide(sbeTargetState_t& io_sbeState)
     {
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"updateSeepromSide(): HUID=0x%.8X",
-                   TARGETING::get_huid(io_sbeState.target));
+        TRACUCOMP( g_trac_sbe,
+                   ENTER_MRK"updateSeepromSide(): HUID=0x%.8X, side=%d",
+                   TARGETING::get_huid(io_sbeState.target),
+                   io_sbeState.seeprom_side_to_update);
+
         errlHndl_t err = NULL;
         int64_t rc = 0;
 
@@ -1665,7 +1671,7 @@ namespace SBE
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                                "Reading Back SBE Version Info: HUID=0x%.8X, "
-                               "size=%d",
+                               "side=%d",
                                TARGETING::get_huid(io_sbeState.target),
                                io_sbeState.seeprom_side_to_update);
                     break;
@@ -1891,6 +1897,22 @@ namespace SBE
         free( sbeInfo_data_ECC);
         free( sbeInfo_data_readBack );
         free( sbeInfo_data_ECC_readBack );
+
+#ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
+        // If no error, recursively call this function for the other SEEPROM
+        if ( ( err == NULL ) &&
+             ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) )
+        {
+            io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+            TRACFCOMP( g_trac_sbe,
+                       "updateSeepromSide(): Recursively calling itself: "
+                       "HUID=0x%.8X, side=%d",
+                       TARGETING::get_huid(io_sbeState.target),
+                       io_sbeState.seeprom_side_to_update);
+
+            err = updateSeepromSide(io_sbeState);
+        }
+#endif
 
         return err;
 
@@ -2172,6 +2194,81 @@ namespace SBE
             // To be safe, we're only look at the bits defined in sbe_update.H
             i_system_situation &= SITUATION_ALL_BITS_MASK;
 
+#ifdef CONFIG_SBE_UPDATE_GOLDEN
+            // @todo RTC 107721 - Need to handle Habanero 'golden' SEEPROM side
+            // For now default to no update and continue IPL
+                    l_actions = CLEAR_ACTIONS;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "Habanero 'GOLDEN' Seeprom Support to come. "
+                               "For now no updates. cur side=%d. "
+                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               io_sbeState.cur_seeprom_side,
+                               i_system_situation, l_actions);
+
+#elif CONFIG_SBE_UPDATE_SIMULTANEOUS
+            // Updates both SEEPROMs if either side is dirty
+            if ( ( i_system_situation & SITUATION_CUR_IS_DIRTY ) ||
+                 ( i_system_situation & SITUATION_ALT_IS_DIRTY )  )
+            {
+                    // At least one of the sides is dirty
+                    // Update both sides and re-IPL
+                    // Update MVPD flag: make cur=perm (because we know it
+                    //  works a bit)
+
+                    l_actions |= IPL_RESTART;
+                    l_actions |= DO_UPDATE;
+                    l_actions |= UPDATE_MVPD;
+                    l_actions |= UPDATE_SBE;
+
+                    // Set update side to Primary here, but both sides
+                    // will be updated
+                    io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+
+                    // Update MVPD PERMANENT flag: make cur=perm
+                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
+                         // clear bit 0
+                         io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
+                         : //set bit 0
+                         io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
+
+                    // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
+                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                         // clear bit 1
+                         io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
+                         : //set bit 1
+                         io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
+
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "At least one side dirty. cur side=%d. Update "
+                               "alt. Re-IPL. Update MVPD flag "
+                               "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               io_sbeState.cur_seeprom_side,
+                               i_system_situation, l_actions,
+                               io_sbeState.mvpdSbKeyword.flags);
+
+            }
+            else
+            {
+                    // Both sides are clean - no updates
+                    // Continue IPL
+                    l_actions = CLEAR_ACTIONS;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "Both sides clean-no updates. cur side=%d. "
+                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               io_sbeState.cur_seeprom_side,
+                               i_system_situation, l_actions);
+
+
+            }
+
+#elif CONFIG_SBE_UPDATE_SEQUENTIAL
+            // Updating the SEEPROMs 1-at-a-time
             switch ( i_system_situation )
             {
 
@@ -2475,6 +2572,7 @@ namespace SBE
             //  End of i_system_situation switch statement
             ///////////////////////////////////////////////////////////////////
 
+#endif
 
             // Set actions
             io_sbeState.update_actions = static_cast<sbeUpdateActions_t>
@@ -2544,6 +2642,9 @@ namespace SBE
             /**************************************************************/
             if (l_actions & UPDATE_SBE)
             {
+#ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
+                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+#endif
                 err = updateSeepromSide(io_sbeState);
                 if(err)
                 {
@@ -2560,10 +2661,16 @@ namespace SBE
             /**************************************************************/
             /*  3) Create Info Error Log of successful operation          */
             /**************************************************************/
-            TRACFCOMP( g_trac_sbe,ERR_MRK"performUpdateActions(): Successful "
+#ifndef CONFIG_SBE_UPDATE_SIMULTANEOUS
+            TRACFCOMP( g_trac_sbe,INFO_MRK"performUpdateActions(): Successful "
                        "SBE Update of HUID=0x%.8X SEEPROM %d",
                        TARGETING::get_huid(io_sbeState.target),
                        io_sbeState.seeprom_side_to_update);
+#else
+            TRACFCOMP( g_trac_sbe,INFO_MRK"performUpdateActions(): Successful "
+                       "SBE Update of HUID=0x%.8X - Both SEEPROMs",
+                       TARGETING::get_huid(io_sbeState.target));
+#endif
 
             /*@
              * @errortype

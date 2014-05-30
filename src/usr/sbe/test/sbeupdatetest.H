@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +38,7 @@
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
 #include <targeting/common/utilFilter.H>
+#include <config.h>
 #include <sbe/sbeif.H>
 #include "../sbe_update.H"
 
@@ -586,7 +590,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
         }  testData[] =
         {
-
+#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
             // case 0xE0: cur=temp, cur=dirty, alt=dirty
             // Arbitrarily set cur side to 0 (therefore perm set to 1)
             // - update alt=1
@@ -596,7 +600,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x40 },
-
 
             // case 0xC0: cur=temp, cur=dirty, alt=dirty
             // Arbitrarily set cur side to 1 (therefore perm set to 0)
@@ -670,7 +673,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             { 0x01, SBE_SEEPROM0, 0x00,
               static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS),
               EEPROM::LAST_CHIP_TYPE, 0x00 },
-
+#endif // SBE_UPDATE_SEQUENTIAL
         };
 
         const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
