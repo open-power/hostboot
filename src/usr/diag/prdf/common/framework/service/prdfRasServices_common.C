@@ -228,7 +228,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     GardAction::ErrorType prdGardErrType;
     HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
     HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
-    PRDF_RECONFIG_LOOP(deconfigState);
 
     bool ReturnELog = false;
     bool ForceTerminate = false;
@@ -597,6 +596,16 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //**************************************************************
     // Add each mru/callout to the error log.
     //**************************************************************
+
+    // Change deconfigState only based on Gard Types.
+    // This only affects FSP code since Hostboot macro is no-op.
+    // This is needed for FSP Reconfig Loop to work.
+    if ( (HWAS::GARD_NULL != gardErrType) ||
+         (GardAction::DeconfigNoGard == prdGardErrType) )
+    {
+        PRDF_RECONFIG_LOOP(deconfigState);
+    }
+
     fspmrulist = sdc.GetMruList();
     for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
           i < fspmrulist.end(); ++i )

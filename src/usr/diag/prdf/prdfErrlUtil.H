@@ -207,9 +207,9 @@
 
 /**
  * @brief  set deconfigEnum based on reconfig loop
+ * @note   this is a no-op in Hostboot
  */
-#define PRDF_RECONFIG_LOOP(o_deconfigEnum) \
-  o_deconfigEnum = HWAS::DELAYED_DECONFIG;
+#define PRDF_RECONFIG_LOOP(o_deconfigEnum)
 
 /**
  * @brief Interface to request a Hardware Unit dump collection
