@@ -236,6 +236,13 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
             break;
 
+        // Skip if we're analyzing a special attention.
+        // This is a required for a rare scenario when Centaur CS bit comes
+        // up after attention has called PRD and PRD was still at start of
+        // analysis.
+        if ( SPECIAL == i_sc.service_data->GetAttentionType() )
+            break;
+
         // MCIFIR[31] is not always reliable if the unit CS originated on the
         // Centaur. This is due to packets not getting forwarded to the MCS.
         // Instead, check for non-zero GLOBAL_CS_FIR.
