@@ -39,6 +39,7 @@ enum PciOscswitchConfigValues
     MURANO_DD2X = 0x0C,
     VENICE_P0P2 = 0x09, // position 0 and 2
     VENICE_P1P3 = 0x06, // position 1 and 3
+    NAPLES_DD1X = 0x0C, // TODO RTC: 109249, check; based on Murano DD2X
 };
 
 // function pointer typedef definition for HWP call support

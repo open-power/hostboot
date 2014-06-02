@@ -141,7 +141,7 @@ fapi::ReturnCode get_PROC_DMI_CUPLL_PFD360_OFFSET(
         if (!l_rc)
         {
             // Data supplied by HW team
-            if ((l_name == fapi::ENUM_ATTR_NAME_MURANO) && 
+            if ((l_name == fapi::ENUM_ATTR_NAME_MURANO) &&
                 ((l_ec == 0x10) || (l_ec == 0x12) || (l_ec == 0x13) ||
                  (l_ec == 0x20) || (l_ec == 0x21)))
             {
@@ -165,6 +165,20 @@ fapi::ReturnCode get_PROC_DMI_CUPLL_PFD360_OFFSET(
                 o_val[5] = 1406;
                 o_val[6] = 1500;
                 o_val[7] = 1453;
+            }
+            // TODO RTC: 109249 Check to see if this data is valid for Naples
+            // It was based off of Murano.
+            else if ((l_name == fapi::ENUM_ATTR_NAME_NAPLES) &&
+                     (l_ec == 0x10))
+            {
+                o_val[0] = 0;
+                o_val[1] = 0;
+                o_val[2] = 0;
+                o_val[3] = 0;
+                o_val[4] = 360;
+                o_val[5] = 407;
+                o_val[6] = 501;
+                o_val[7] = 454;
             }
             else
             {
@@ -218,7 +232,7 @@ fapi::ReturnCode get_PROC_DMI_CUPLL_REFCLKSEL_OFFSET(
         if (!l_rc)
         {
             // Data supplied by HW team
-            if ((l_name == fapi::ENUM_ATTR_NAME_MURANO) && 
+            if ((l_name == fapi::ENUM_ATTR_NAME_MURANO) &&
                 ((l_ec == 0x10) || (l_ec == 0x12) || (l_ec == 0x13) ||
                  (l_ec == 0x20) || (l_ec == 0x21)))
             {
@@ -242,6 +256,20 @@ fapi::ReturnCode get_PROC_DMI_CUPLL_REFCLKSEL_OFFSET(
                 o_val[5] = 1364;
                 o_val[6] = 1458;
                 o_val[7] = 1411;
+            }
+            // TODO RTC: 109249 Check to see if this data is valid for Naples
+            // It was based off of Murano.
+            else if ((l_name == fapi::ENUM_ATTR_NAME_NAPLES) &&
+                     (l_ec == 0x10))
+            {
+                o_val[0] = 0;
+                o_val[1] = 0;
+                o_val[2] = 0;
+                o_val[3] = 0;
+                o_val[4] = 318;
+                o_val[5] = 365;
+                o_val[6] = 459;
+                o_val[7] = 412;
             }
             else
             {
@@ -295,11 +323,13 @@ fapi::ReturnCode get_PROC_ABUS_CUPLL_PFD360_OFFSET(
         if (!l_rc)
         {
             // Data supplied by HW team
-            if ( ((l_name == fapi::ENUM_ATTR_NAME_MURANO) && 
+            if ( ((l_name == fapi::ENUM_ATTR_NAME_MURANO) &&
                   ((l_ec == 0x10) || (l_ec == 0x12) || (l_ec == 0x13) ||
                    (l_ec == 0x20) || (l_ec == 0x21))) ||
-                 ((l_name == fapi::ENUM_ATTR_NAME_VENICE) && 
-                   ((l_ec == 0x10) || ((l_ec >= 0x20) && (l_ec < 0x30)))) )
+                 ((l_name == fapi::ENUM_ATTR_NAME_VENICE) &&
+                  ((l_ec == 0x10) || ((l_ec >= 0x20) && (l_ec < 0x30)))) ||
+                 ((l_name == fapi::ENUM_ATTR_NAME_NAPLES) &&
+                  (l_ec == 0x10)) )
             {
                 o_val[0] = 198;
                 o_val[1] = 151;
@@ -356,12 +386,16 @@ fapi::ReturnCode get_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET(
 
         if (!l_rc)
         {
+            // TODO RTC: 109249 Check to see if this data is valid for Naples
+            // It was based off of Murano.
             // Data supplied by HW team
-            if ( ((l_name == fapi::ENUM_ATTR_NAME_MURANO) && 
+            if ( ((l_name == fapi::ENUM_ATTR_NAME_MURANO) &&
                   ((l_ec == 0x10) || (l_ec == 0x12) || (l_ec == 0x13) ||
                    (l_ec == 0x20) || (l_ec == 0x21))) ||
-                 ((l_name == fapi::ENUM_ATTR_NAME_VENICE) && 
-                   ((l_ec == 0x10) || ((l_ec >= 0x20) && (l_ec < 0x30)))) )
+                 ((l_name == fapi::ENUM_ATTR_NAME_VENICE) &&
+                   ((l_ec == 0x10) || ((l_ec >= 0x20) && (l_ec < 0x30)))) ||
+                 ((l_name == fapi::ENUM_ATTR_NAME_NAPLES) &&
+                  (l_ec == 0x10)) )
             {
                 o_val[0] = 156;
                 o_val[1] = 109;
@@ -419,7 +453,7 @@ fapi::ReturnCode get_MEMB_DMI_CUPLL_PFD360_OFFSET(
         if (!l_rc)
         {
             // Data supplied by HW team
-            if ((l_name == fapi::ENUM_ATTR_NAME_CENTAUR) && 
+            if ((l_name == fapi::ENUM_ATTR_NAME_CENTAUR) &&
                 ((l_ec == 0x10) || (l_ec == 0x20) || (l_ec == 0x21)))
             {
                 o_val = 134;
@@ -476,7 +510,7 @@ fapi::ReturnCode get_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET(
         if (!l_rc)
         {
             // Data supplied by HW team
-            if ((l_name == fapi::ENUM_ATTR_NAME_CENTAUR) && 
+            if ((l_name == fapi::ENUM_ATTR_NAME_CENTAUR) &&
                 ((l_ec == 0x10) || (l_ec == 0x20) || (l_ec == 0x21)))
             {
                 o_val = 92;

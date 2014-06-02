@@ -92,6 +92,7 @@ COPY_RENAME_FILES = \
     img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
     vbu_MURANO.pnor:img/vbu$(UNDERSCORE_TEST)_MURANO.pnor:vpo \
     vbu_VENICE.pnor:img/vbu$(UNDERSCORE_TEST)_VENICE.pnor:vpo \
+    vbu_NAPLES.pnor:img/vbu$(UNDERSCORE_TEST)_NAPLES.pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
     hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \

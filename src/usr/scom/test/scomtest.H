@@ -104,7 +104,7 @@ public:
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> useFsiScom set to zero on target %d", x );
               scom_targets[x] = NULL; //remove from our list
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -279,7 +279,7 @@ public:
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> useFsiScom set to zero on target %d", x );
               scom_targets[x] = NULL; //remove from our list
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -436,7 +436,7 @@ public:
               TRACDCOMP(g_trac_scom, "INDIRECT SCOM>> SKIPPING ");
               scom_targets[x] = NULL; //remove from our list
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -624,7 +624,7 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_EX> Target %d is not functional", x );
               continue;
@@ -719,7 +719,7 @@ public:
       {
            return;
       }
-        
+
       // Setup some targets to use
       enum {
           myProc0,
@@ -811,7 +811,7 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS> Target %d is not functional", x );
               continue;
@@ -1001,7 +1001,7 @@ public:
           }
 
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS_DMI> Target %d is not functional", x );
               continue;
@@ -1171,7 +1171,7 @@ public:
           }
 
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
               continue;
@@ -1217,7 +1217,7 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
               continue;
@@ -1365,7 +1365,7 @@ public:
           }
 
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_ABUS> Target %d is not functional", x );
               continue;
@@ -1410,7 +1410,7 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_ABUS> Target %d is not functional", x );
               continue;
@@ -1557,12 +1557,13 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
               continue;
           }
           // TODO: engd data for s1 supports XBUS1 only.
+          // TODO: RTC 109249, check XBUS for Naples
           // For now check if murano or naples chip and target is not XBUS1, then skip this target.
           // Long term solution would be to change HWAS per RTC 45796.
           else if ( ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
@@ -1614,12 +1615,13 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS> Target %d is not functional", x );
               continue;
           }
           // TODO: engd data for s1 supports XBUS1 only.
+          // TODO: RTC 109249, check XBUS for Naples
           // For now check if murano chip and target is not XBUS1, then skip this target.
           // Long term solution would be to change HWAS per RTC 45796.
           else if ( ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
@@ -1669,7 +1671,7 @@ public:
 
 
   /**
-   * @brief multi chip SCOM test 
+   * @brief multi chip SCOM test
    *
    */
   void test_MultiChipSCOMreadWrite_proc(void)
@@ -1705,7 +1707,7 @@ public:
           {
               continue;
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -1745,7 +1747,7 @@ public:
                                test_data[x].target,
                                &(test_data[x].data),
                                op_size,
-                               DEVICE_XSCOM_ADDRESS(test_data[x].addr) );              
+                               DEVICE_XSCOM_ADDRESS(test_data[x].addr) );
 
           if( l_err )
           {

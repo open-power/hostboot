@@ -36,7 +36,7 @@
 #  Flag  Track#    Userid    Date      Description
 #  ----  --------  --------  --------  -----------
 #        873826    dpeterso  09/16/13  Based on fapiCreatePllRingAttrVals.pl
-#                                     
+#
 #
 # End Change Log ******************************************************
 
@@ -144,7 +144,7 @@ foreach $ringAttrFile (@fileList)
     print OUTFILE "*/\n";
 
     while (<FILE>)
-    {   
+    {
         # Each section we are interested in begins with ===BEGIN and ends with ===END
         if (/\===BEGIN/../\===END/) {
             # Keep track of how many instances we have in the file and reset some sub-counters.
@@ -152,7 +152,7 @@ foreach $ringAttrFile (@fileList)
             {
                 $count++;
                 $dataCount = 0;
-            }       
+            }
 
             # Store select value in array
             if ($_ =~ m"^#SELECT=(\d)")
@@ -178,7 +178,11 @@ foreach $ringAttrFile (@fileList)
                 {
                    $chipEnum = "fapi::ENUM_ATTR_NAME_VENICE";
                 }
-                else 
+                elsif ($chip eq "n1")
+                {
+                   $chipEnum = "fapi::ENUM_ATTR_NAME_NAPLES";
+                }
+                else
                 {
                     die "$ProgName ERROR: Chip type $chip not supported by this script.  Either the ring attribute file is in error or support for the new chip type needs to be added.\n";
                 }
@@ -201,7 +205,7 @@ foreach $ringAttrFile (@fileList)
                 $dataArrayString = $dataArrayString . $2 . ", ";
                 # If this is the last entry in the array (delta data size = 64
                 if ($dataCount eq 64)
-                { 
+                {
                     print OUTFILE "        $dataArrayString\n";
                     print OUTFILE "   }, // ATTR_PROC_EX_FUNC_L3_DELTA_DATA\n";
                     print OUTFILE "},\n";

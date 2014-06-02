@@ -443,6 +443,18 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                             l_arrayEntryLength;
                     }
                 }
+                else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
+                {
+                    if (l_attrDdLevel == 0x10)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
+                            &N1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                        l_arySize =
+                            sizeof(N1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                }
                 break;
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
 //            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
@@ -494,6 +506,18 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         ( &P8_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                         l_arySize =
                    sizeof(P8_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                }
+                else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
+                {
+                    if (l_attrDdLevel == 0x10)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
+                            &N1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                        l_arySize =
+                            sizeof(N1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }
@@ -551,6 +575,18 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                             l_arrayEntryLength;
                     }
                 }
+                else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
+                {
+                    if (l_attrDdLevel == 0x10)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
+                            &N1_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                        l_arySize =
+                            sizeof(N1_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                }
                 break;
             case fapi::ATTR_PROC_PERV_BNDY_PLL_DATA:
             case fapi::ATTR_PROC_PERV_BNDY_PLL_FLUSH:
@@ -602,6 +638,18 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                              ( &P8_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                         l_arySize =
                             sizeof(P8_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                }
+                else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
+                {
+                    if (l_attrDdLevel == 0x10)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
+                            &N1_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                        l_arySize =
+                            sizeof(N1_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }
@@ -897,7 +945,7 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
         {
            break;
         }
-        
+
         if (l_pllArrayPtr == NULL)
         {
             FAPI_ERR("getPllRingAttr: Bad chip name (0x%02x) or Bad EC (0x%02x) for attrId 0x%x",

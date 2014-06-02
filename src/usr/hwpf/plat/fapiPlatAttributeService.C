@@ -411,6 +411,10 @@ fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pFapiTarget,
         {
             o_name = ENUM_ATTR_NAME_MURANO;
         }
+        else if (l_model == TARGETING::MODEL_NAPLES)
+        {
+            o_name = ENUM_ATTR_NAME_NAPLES;
+        }
         else if (l_model == TARGETING::MODEL_CENTAUR)
         {
             o_name = ENUM_ATTR_NAME_CENTAUR;

@@ -22,6 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 
+<!-- TODO: RTC 109249, check comment block below -->
 <!-- =====================================================================
      HOST BOOT TARGET INSTANCES
      Contains target instance declarations for the Simics NAPLES

@@ -131,6 +131,12 @@ fapi::ReturnCode getPciOscswitchConfig(
                break; // break out with error
             }
         }
+        // TODO RTC: 109249 Check to see if  DD1X is correct,
+        // it was based off Murano DD2X
+        else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
+        {
+            o_val = NAPLES_DD1X;
+        }
         else
         {
             FAPI_ERR("getPciOscswitchConfig: unexpected chip type=0x%02x",

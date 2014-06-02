@@ -593,6 +593,7 @@
 </targetInstance>
 
 <!-- Naples n0p0 MCS units -->
+<!-- TODO: RTC 109249, check MCS units -->
 
 <targetInstance>
     <id>sys0node0proc0mcs4</id>
@@ -732,6 +733,7 @@
     </attribute>
 </targetInstance>
 
+<!-- TODO: RTC 109249, check PCI -->
 <targetInstance>
     <id>sys0node0proc0pci2</id>
     <type>unit-pci-naples</type>
@@ -752,6 +754,7 @@
 
 
 <!-- Naples n0p0 ABUS units -->
+<!-- TODO: RTC 109249, check ABUS -->
 
 <targetInstance>
     <id>sys0node0proc0abus0</id>
@@ -834,6 +837,7 @@
 
 
 <!-- Naples n0p0 XBUS units -->
+<!-- TODO: RTC 109249, check XBUS -->
 
 <targetInstance>
     <id>sys0node0proc0xbus1</id>
@@ -856,6 +860,8 @@
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
 </targetInstance>
+
+<!-- TODO: RTC 109249, check if a target is needed for NVLINK -->
 
 <!-- Naples n0p1 processor chip -->
 

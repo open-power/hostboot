@@ -217,6 +217,7 @@ HWP_PLL_FILES += hwp/pll_attributes/s1_20_pll_ring.attributes
 HWP_PLL_FILES += hwp/pll_attributes/s1_21_pll_ring.attributes
 HWP_PLL_FILES += hwp/pll_attributes/p8_10_pll_ring.attributes
 HWP_PLL_FILES += hwp/pll_attributes/p8_20_pll_ring.attributes
+HWP_PLL_FILES += hwp/pll_attributes/n1_10_pll_ring.attributes
 HWP_PLL_FILES += hwp/pll_attributes/centaur_10_pll_ring.attributes
 HWP_PLL_FILES += hwp/pll_attributes/centaur_20_pll_ring.attributes
 HWP_PLL_FILES += hwp/pll_attributes/centaur_21_pll_ring.attributes
@@ -230,6 +231,7 @@ HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_20_winkle_ring.attributes
 HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_21_winkle_ring.attributes
 HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes
 HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/p8_20_winkle_ring.attributes
+HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/n1_10_winkle_ring.attributes
 
 #------------------------------------------------------------------------------
 # Initfiles
