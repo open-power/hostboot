@@ -70,8 +70,18 @@ my $copyrightSymbol = "";
 # my $copyrightSymbol = "(C)";  # Uncomment if unable to use  character.
 
 my  $projectName            =   "HostBoot";
+my $copyrightStr = "Contributors Listed Below COPYRIGHT";
 
-my $copyright_IBM = 'COPYRIGHT International Business Machines Corp';
+# Constants for company's copyright
+# When adding a new company add constant here and to %fileContributorsCompany
+use constant IBM => 'International Business Machines Corp.';
+use constant GOOGLE => 'Google Inc.';
+
+# Create mapping for git contrubitors to companies
+my %fileContributorsCompany = ();
+$fileContributorsCompany{"ibm.com"} = IBM;
+$fileContributorsCompany{"google.com"} = GOOGLE;
+$fileContributorsCompany{"Google Shared Technology"} = GOOGLE;
 
 ## note that these use single ticks so that the escape chars are NOT evaluated yet.
 my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
@@ -86,15 +96,16 @@ my  $SOURCE_END_TAG         =   "\$";
 #------------------------------------------------------------------------------
 #   Constants
 #------------------------------------------------------------------------------
-use constant    RC_INVALID_PARAMETERS   =>  1;
-use constant    RC_OLD_COPYRIGHT_BLOCK  =>  2;
-use constant    RC_NO_COPYRIGHT_BLOCK   =>  3;
-use constant    RC_INVALID_SOURCE_LINE  =>  4;
-use constant    RC_INVALID_YEAR         =>  5;
-use constant    RC_OLD_DELIMITER_END    =>  6;
-use constant    RC_NOT_HOSTBOOT_BLOCK   =>  7;
-use constant    RC_NO_COPYRIGHT_STRING  =>  8;
-use constant    RC_INVALID_FILETYPE     =>  9;
+use constant    RC_INVALID_PARAMETERS       =>  1;
+use constant    RC_OLD_COPYRIGHT_BLOCK      =>  2;
+use constant    RC_NO_COPYRIGHT_BLOCK       =>  3;
+use constant    RC_INVALID_SOURCE_LINE      =>  4;
+use constant    RC_INVALID_YEAR             =>  5;
+use constant    RC_OLD_DELIMITER_END        =>  6;
+use constant    RC_NOT_HOSTBOOT_BLOCK       =>  7;
+use constant    RC_BAD_CONTRIBUTORS_BLOCK   =>  8;
+use constant    RC_NO_COPYRIGHT_STRING      =>  9;
+use constant    RC_INVALID_FILETYPE         =>  10;
 
 #------------------------------------------------------------------------------
 #   Global Vars
@@ -129,7 +140,8 @@ sub checkCopyrightblock( $$ );
 sub createYearString( $ );
 sub removeCopyrightBlock( $$ );
 sub addEmptyCopyrightBlock( $$$ );
-sub fillinCopyrightBlock( $$ );
+sub fillinEmptyCopyrightBlock( $$ );
+sub getFileContributors( $ );
 #######################################################################
 # Main
 #######################################################################
@@ -385,7 +397,6 @@ sub update( $$ )
     my  ( $filename, $filetype )    =   @_;
     my  $olddelimiter               =   0;
     my  $localrc                    =   0;
-
     $localrc        =   validate( $filename );
 
     if (    $localrc  != 0  )
@@ -582,7 +593,7 @@ sub extractCopyrightBlock( $ )
 
     ##  As long as we're here extract the copyright string within the block
     ##  and save it to a global var
-    $CopyRightString = $1 if ( $prolog[1] =~ /(^.*$copyright_IBM.*$)/m );
+    $CopyRightString = $1 if ( $prolog[1] =~ /(^.*$copyrightStr.*$)/m );
 
     if ( $opt_debug )
     {
@@ -642,6 +653,7 @@ sub checkCopyrightBlock( $$ )
 
     ##  split into lines and check for specific things
     ##      $Source: src/usr/initservice/istepdispatcher/istepdispatcher.H $
+    my  %blockFileContributors = ();
     for ( split /^/, $block )
     {
         chomp( $_ );
@@ -660,9 +672,9 @@ sub checkCopyrightBlock( $$ )
         }
 
         ##  check for the correct year string
-        if  ( m/$copyright_IBM/ )
+        if  ( m/$copyrightStr/ )
         {
-            $goodyearflag = grep /$copyright_IBM.* $yearstring/, $_;
+            $goodyearflag = grep /$copyrightStr.* $yearstring/, $_;
             if  ( !$goodyearflag )
             {
                 print   STDOUT  "WARNING: outdated copyright year: $_\n";
@@ -671,7 +683,40 @@ sub checkCopyrightBlock( $$ )
             }
         }
 
+        # Grab file contributors in block
+        if ( m/[+]/ )
+        {
+            # remove everything through [+]
+            $_ =~ s/[^\]]*\]//;
+            # remove trailing comment string */
+            $_ =~ s/\*\///;
+            # remove trailing and leading whitespace
+            $_ =~ s/^\s+|\s+$//g;
+            # add contributor to hash
+            $blockFileContributors{$_} = 1;
+        }
     }   ## endfor
+
+    # Get file contributors from git log
+    my %fileContributors = getFileContributors( $filename );
+
+    # Make sure no extra or missing contributors
+    if ( (keys %fileContributors) != (keys %blockFileContributors) )
+    {
+        print STDOUT  "WARNING:  Extra or missing file contributors\n";
+        return RC_BAD_CONTRIBUTORS_BLOCK;
+    }
+    # Check if block's contibutors matches every contributor in git log
+    # file history
+    while ( my ($key, $value) = each(%fileContributors) )
+    {
+        # Block does not match file contributors
+        if ( $blockFileContributors{$key} != 1)
+        {
+            print STDOUT  "WARNING:  File contributors section not correct\n";
+            return RC_BAD_CONTRIBUTORS_BLOCK;
+        }
+    }
 
     if ( !$goodsourcelineflag )
     {
@@ -696,7 +741,7 @@ sub createYearString( $ )
     ##  files that are checked in from FSP.  In this case the earliest
     ##  year will be before it was checked into git .  We have to construct
     ##  a yearstring based on the earliest year.
-    if ( $CopyRightString =~  m/$copyright_IBM/ )
+    if ( $CopyRightString =~  m/$copyrightStr/ )
     {
         @years = ( $CopyRightString =~ /([0-9]{4})/g );
     }
@@ -1011,6 +1056,15 @@ sub fillinEmptyCopyrightBlock( $$ )
     my  ( $filename, $filetype )    =   @_;
 
     my  $copyrightYear  =   createYearString( $filename );
+
+    # Get copyright contributors based on hash so no duplicates
+    my  %fileContributors = getFileContributors( $filename );
+    my $copyright_Contributors = "";
+    while ( my ($key, $value) = each(%fileContributors) )
+    {
+        $copyright_Contributors .= "[+] ".$key."\n";
+    }
+
     ##  define the final copyright block template here.
     my $IBMCopyrightBlock = <<EOF;
 $DELIMITER_BEGIN
@@ -1020,7 +1074,8 @@ $SOURCE_BEGIN_TAG $filename $SOURCE_END_TAG
 
 OpenPOWER $projectName Project
 
-$copyright_IBM. $copyrightYear
+$copyrightStr $copyrightYear
+$copyright_Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1114,4 +1169,81 @@ EOF
         ## leave the files around for debug
         unlink( $savedbgfile ) or die " $? can't delete $savedbgfile: $!";
     }
+}
+
+#######################################
+##  Gets file contirbutors based on git log of a file
+##
+##  @parma[in]  filename
+##
+##  @return     hash of contributors (key,value) => (name/company, 1)
+#######################################
+sub getFileContributors( $ )
+{
+    my  ( $filename )    =   @_;
+    # Create a "set like" hash for file contributors to handle duplicates
+    # so key is the only important information
+    my %fileContributors = ();
+
+    # Check file for company Origin
+    my @gitDomain = `git log -- $filename | grep Origin: | sort | uniq`;
+    foreach my $origin (@gitDomain)
+    {
+        chomp($origin);
+        # Remove all characters through word "Origin:"
+        $origin =~ s/[^:]*\://;
+        # Remove white space after colon
+        $origin =~ s/^\s+//;
+        if (exists($fileContributorsCompany{$origin}))
+        {
+            # Add company info for copyright contribution
+            $fileContributors{$fileContributorsCompany{$origin}} = 1;
+        }
+    }
+
+    # Check file for all contributors
+    my @gitAuthors = `git log --pretty="%aN <%aE>" -- $filename | sort | uniq`;
+    foreach my $contributor (@gitAuthors)
+    {
+        my $companyExists = 0;
+        chomp($contributor);
+        # Grab company domain out of contributor's email
+        my $domain = substr ($contributor, index($contributor, '@') + 1, -1);
+
+        # Due to multiple prefixes for IBM like us, in, linux, etc will try
+        # removing characters up to each period (.) until correct domain
+        # address found
+        my @domainSections = split(/\./,$domain);
+        for (my $i = 0; $i < @domainSections; $i++)
+        {
+            if (exists($fileContributorsCompany{$domain}))
+            {
+                $companyExists = 1;
+                last;
+            }
+            # Remove all characters upto & including the first period (.) seen
+            $domain =~ s/[^.]*\.//;
+        }
+
+        #Check if contributor's company exists
+        if ($companyExists)
+        {
+            # Add company info for copyright contribution
+            $fileContributors{$fileContributorsCompany{$domain}} = 1;
+        }
+        else
+        {
+            my $name = substr ($contributor, 0, index($contributor, '<') -1);
+            if($name)
+            {
+                # Add individual info for copyright contribution
+                $fileContributors{$name} = 1;
+            }
+            else
+            {
+                die("Cannot find name of contributor in git commit");
+            }
+        }
+    }
+    return %fileContributors;
 }
