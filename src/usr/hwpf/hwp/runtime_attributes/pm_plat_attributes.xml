@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_plat_attributes.xml,v 1.7 2014/01/13 20:49:25 stillgs Exp $ -->
+<!-- $Id: pm_plat_attributes.xml,v 1.9 2014/05/20 19:33:20 daviddu Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized by the platform.
@@ -145,12 +145,12 @@
     <id>ATTR_PM_SAFE_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Indicates the frequency that the cores will be moved to in the event of
-      the loss of the OCC Heartbeat.  This value needs to be at or below the
-      boot frequency (as defined by ATTR_BOOT_FREQ_MHZ) to make sure safe operation
-      of all chiplets.
+      Frequency (binary in KHz) indicating the frequency that the cores will be moved 
+      to in the event of the loss of the OCC Heartbeat.  This value needs to be the maximum
+      of the DpoMin frequency for proper PowerBus operation and the PowerSave value for
+      the present part.
 
-      Valid Values:-128 thru 127
+      Provided by the Machine Readable Workbook after system characterization.
 
       The value is translated to the Pstate space.
 
@@ -160,7 +160,7 @@
 
       DYNAMIC_ATTRIBUTE: ATTR_PM_SAFE_PSTATE
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint32</valueType>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->

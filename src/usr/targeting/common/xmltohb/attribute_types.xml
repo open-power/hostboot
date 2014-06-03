@@ -4652,25 +4652,23 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 <attribute>
     <id>PM_SAFE_FREQUENCY</id>
     <description>
-      SYSTEM Attribute
-      Indicates the frequency that the cores will be moved to in the event of
-      the loss of the OCC Heartbead.  This value needs to be at or below the
-      nominal frequency to make sure safe operation of all chiplets.
+      Frequency (binary in KHz) indicating the frequency that the cores will be moved
+      to in the event of the loss of the OCC Heartbeat.  This value needs to be the maximum
+      of the DpoMin frequency for proper PowerBus operation and the PowerSave value for
+      the present part.
 
-      Valid Values:-128 thru 127
+      Provided by the Machine Readable Workbook after system characterization.
 
       The value is translated to the Pstate space.
 
-      Consumer: proc_pm_effective.C
+      Producer:  Machine Readable Workbook
+
+      Consumers: p8_build_gpstate_table.C
 
       DYNAMIC_ATTRIBUTE: ATTR_PM_SAFE_PSTATE
-
-      Consumer: proc_pcbs_init.C
-
-      Provided by the Machine Readable Workbook
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

@@ -23,7 +23,7 @@
 #ifndef __PSTATES_H__
 #define __PSTATES_H__
 
-// $Id: pstates.h,v 1.10 2013/10/04 18:38:18 jimyac Exp $
+// $Id: pstates.h,v 1.11 2014/05/27 15:33:49 daviddu Exp $
 
 /// \file pstates.h
 /// \brief Pstate structures and support routines for OCC product firmware
@@ -97,7 +97,7 @@
 /// kept up to date as changes are made to the layout or contents of the
 /// structure. 
 
-#define PSTATE_SUPERSTRUCTURE_MAGIC 0x5053544154453032ull /* PSTATE02 */
+#define PSTATE_SUPERSTRUCTURE_MAGIC 0x5053544154453033ull /* PSTATE03 */
 
 
 /// \defgroup pstate_options Pstate Options
@@ -388,8 +388,8 @@ typedef struct {
     /// The significand of the exponential encoding of Pstate stepping delay
     uint8_t vrm_stepdelay_value;
 
-    /// Pad structure to 8-byte alignment
-    uint8_t pad;
+    /// The Pstate for minimum core frequency in the system, defined by MRW
+    uint8_t pfloor;
 
 } GlobalPstateTable;
 

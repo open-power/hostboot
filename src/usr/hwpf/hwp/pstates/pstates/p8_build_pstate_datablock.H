@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.H,v 1.13 2014/01/15 17:37:16 jimyac Exp $
+// $Id: p8_build_pstate_datablock.H,v 1.14 2014/05/27 15:33:49 daviddu Exp $
 #ifndef _P8_BUILD_PSTATE_DATABLOCK_H_
 #define _P8_BUILD_PSTATE_DATABLOCK_H_
 
@@ -91,7 +91,8 @@ typedef struct {
 
   uint32_t attr_dpll_bias;
   uint32_t attr_undervolting;
-  uint8_t  attr_pm_safe_frequency;
+  uint32_t attr_pm_safe_frequency;
+  uint32_t attr_freq_core_floor;
   uint32_t attr_boot_freq_mhz;
 
   uint32_t attr_pm_resonant_clock_full_clock_sector_buffer_frequency;

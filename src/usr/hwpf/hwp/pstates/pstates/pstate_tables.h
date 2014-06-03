@@ -23,13 +23,13 @@
 #ifndef __PSTATE_TABLES_H__
 #define __PSTATE_TABLES_H__
 
-// $Id: pstate_tables.h,v 1.8 2014/02/18 16:07:34 jimyac Exp $
+// $Id: pstate_tables.h,v 1.9 2014/06/03 16:59:05 daviddu Exp $
 
 /// \file pstate_tables.h 
 /// \brief Code used to generate Pstate tables from real or imagined chip
 /// characterizations. 
 
-#include "pstates.h"
+#include <pstates.h>
 
 // Constants associated with VRM stepping
 

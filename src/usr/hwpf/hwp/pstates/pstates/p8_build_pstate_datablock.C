@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.35 2014/04/09 22:00:46 stillgs Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.37 2014/06/03 16:59:05 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -51,11 +51,13 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <fapi.H>
-#include "pstate_tables.h"
-#include "lab_pstates.h"
-#include "pstates.h"
-#include "p8_pm.H"
-#include "p8_build_pstate_datablock.H"
+#include <pstate_tables.h>
+#include <lab_pstates.h>
+#include <pstates.h>
+#include <p8_pm.H>
+#include <p8_build_pstate_datablock.H>
+
+
 
 extern "C" {
 
@@ -313,6 +315,32 @@ p8_build_pstate_datablock(const Target& i_target,
     l_rc = proc_boost_gpst (io_pss, attr.attr_cpm_turbo_boost_percent);
     if (l_rc) break;
 
+    // --------------------------------------------------------------------
+    // Setup psafe_pstate via attr_pm_safe_frequency (added per SW260812)
+    // --------------------------------------------------------------------
+    Pstate psafe_freq_pstate;
+    FAPI_INF("Converting attr_pm_safe_frequency in %u MHz to Pstate", attr.attr_pm_safe_frequency);
+    rc = freq2pState (&((*io_pss).gpst), attr.attr_pm_safe_frequency*1000, &psafe_freq_pstate);
+    if (rc) break;
+    FAPI_INF("Producing pstate = %d for attr_pm_safe_frequency = %u Mhz", psafe_freq_pstate, attr.attr_pm_safe_frequency);
+    rc = pstate_minmax_chk(&((*io_pss).gpst), &psafe_freq_pstate);      
+    if (rc) break;
+    FAPI_IMP("Now set psafe in Global Pstate Table to be pstate of attr_pm_safe_frequency");
+    (*io_pss).gpst.psafe = psafe_freq_pstate;
+ 
+    // --------------------------------------------------------------------
+    // Setup pmin_clip via attr_freq_core_floor (added per SW260911)
+    // --------------------------------------------------------------------
+    Pstate floor_freq_pstate;
+    FAPI_INF("Converting attr_freq_core_floor in %u MHz to Pstate", attr.attr_freq_core_floor);
+    rc = freq2pState (&((*io_pss).gpst), attr.attr_freq_core_floor*1000, &floor_freq_pstate);
+    if (rc) break;
+    FAPI_INF("Producing pstate = %d for attr_freq_core_floor = %u Mhz", floor_freq_pstate, attr.attr_freq_core_floor);
+    rc = pstate_minmax_chk(&((*io_pss).gpst), &floor_freq_pstate);
+    if (rc) break;
+    FAPI_IMP("Now set pfloor in Global Pstate Table to be pstate of attr_freq_core_floor");
+    (*io_pss).gpst.pfloor = floor_freq_pstate;
+
     // -----------------------------
     // Create the Local Pstate table
     // -----------------------------
@@ -531,6 +559,7 @@ ReturnCode proc_get_attributes(const Target& i_target,
     DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK,                                   NULL, attr_freq_proc_refclock);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_MAX,                                        NULL, attr_freq_core_max);
     DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY,                                    NULL, attr_pm_safe_frequency);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR,                                      NULL, attr_freq_core_floor);
     DATABLOCK_GET_ATTR(ATTR_BOOT_FREQ_MHZ,                                        NULL, attr_boot_freq_mhz);
     DATABLOCK_GET_ATTR(ATTR_CPM_TURBO_BOOST_PERCENT,                              NULL, attr_cpm_turbo_boost_percent);
     DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDD,                                  NULL, attr_proc_r_loadline_vdd);

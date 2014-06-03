@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.20 2014/04/16 17:56:30 cmolsen Exp $
+// $Id: pstate_tables.c,v 1.21 2014/05/27 15:33:49 daviddu Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -565,7 +565,7 @@ gpst_create(GlobalPstateTable *gpst,
 
         // Fill in the defaults
 
-        gpst->pvsafe = gpst->pmin;
+        gpst->pvsafe = gpst->pmin+1;
 
         fNom = revle32(gpst->pstate0_frequency_khz) /
             revle32(gpst->frequency_step_khz);
