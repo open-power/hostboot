@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.C,v 1.18 2014/03/06 15:52:15 jklazyns Exp $
+// $Id: proc_tod_setup.C,v 1.20 2014/05/27 16:30:54 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -110,6 +110,14 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
         }
         display_tod_nodes(i_tod_node,0);
 
+        // If there is a previous topology, it needs to be cleared
+        rc = clear_tod_node(i_tod_node,i_tod_sel);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_tod_setup: Failure clearing previous TOD configuration!");
+            break;
+        }
+
         //Start configuring each node; (configure_tod_node will recurse on each child)
         rc = configure_tod_node(i_tod_node,i_tod_sel,i_osc_sel);
         if (!rc.ok())
@@ -121,6 +129,78 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
     } while (0);
 
     FAPI_INF("proc_tod_setup: End");
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+// function: clear_tod_topology
+//
+// parameters: i_tod_node  Reference to TOD topology (FAPI targets included within)
+//             i_tod_sel   Specifies the topology to clear
+//
+// returns: FAPI_RC_SUCCESS if TOD topology is successfully cleared
+//          else FAPI or ECMD error is sent through
+//------------------------------------------------------------------------------
+fapi::ReturnCode clear_tod_node(tod_topology_node*           i_tod_node,
+                                const proc_tod_setup_tod_sel i_tod_sel)
+{
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase data(64);
+    fapi::Target* target = i_tod_node->i_target;
+    uint32_t port_ctrl_reg = 0;
+    uint32_t port_ctrl_check_reg = 0;
+
+    FAPI_INF("clear_tod_node: Clearing previous %s topology from %s",
+              (i_tod_sel==TOD_PRIMARY)?"Primary":"Secondary",
+              target->toEcmdString());
+    do
+    {
+        if (i_tod_sel==TOD_PRIMARY)
+        {
+            FAPI_DBG("clear_tod_node: TOD_PRI_PORT_0_CTRL_REG_00040001 and TOD_SEC_PORT_0_CTRL_REG_00040003 will be cleared.");
+            port_ctrl_reg = TOD_PRI_PORT_0_CTRL_REG_00040001;
+            port_ctrl_check_reg = TOD_SEC_PORT_0_CTRL_REG_00040003;
+        }
+        else // (i_tod_sel==TOD_SECONDARY)
+        {
+            FAPI_DBG("clear_tod_node: TOD_PRI_PORT_1_CTRL_REG_00040002 and TOD_SEC_PORT_1_CTRL_REG_00040004 will be cleared.");
+            port_ctrl_reg = TOD_SEC_PORT_1_CTRL_REG_00040004;
+            port_ctrl_check_reg = TOD_PRI_PORT_1_CTRL_REG_00040002;
+        }
+
+        rc = fapiPutScom(*target,port_ctrl_reg,data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("clear_tod_node: fapiPutScom error for port_ctrl_reg SCOM.");
+            break;
+        }
+        rc = fapiPutScom(*target,port_ctrl_check_reg,data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("clear_tod_node: fapiPutScom error for port_ctrl_check_reg SCOM.");
+            break;
+        }
+ 
+        // TOD is cleared for this node; if it has children, start clearing their registers
+        for (std::list<tod_topology_node*>::iterator child = (i_tod_node->i_children).begin();
+             child != (i_tod_node->i_children).end();
+             ++child)
+        {
+            tod_topology_node* tod_node = *child;
+            rc = clear_tod_node(tod_node,i_tod_sel);
+            if (!rc.ok())
+            {
+                FAPI_ERR("clear_tod_node: Failure clearing downstream TOD node!");
+                break;
+            }
+        }
+        if (!rc.ok())
+        {
+            break;  // error in above for loop
+        }
+    } while(0);
+
+    FAPI_INF("clear_tod_node: End");
     return rc;
 }
 

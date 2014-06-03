@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.H,v 1.6 2013/03/05 23:21:17 jklazyns Exp $
+// $Id: proc_tod_setup.H,v 1.8 2014/05/27 16:31:03 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -99,6 +99,18 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
 fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
                                     const proc_tod_setup_tod_sel i_tod_sel,
                                     const proc_tod_setup_osc_sel i_osc_sel);
+
+/**
+ * @brief Helper function for proc_tod_setup
+ *
+ * @param[in] i_tod_node  Reference to TOD topology (FAPI targets included within)
+ *            i_tod_sel   Specifies the topology to clear
+ *
+ * @return FAPI_RC_SUCCESS if TOD topology is successfully cleared
+ *         else FAPI or ECMD error is sent through
+ */
+fapi::ReturnCode clear_tod_node(tod_topology_node*           i_tod_node,
+                                const proc_tod_setup_tod_sel i_tod_sel);
 
 /**
  * @brief Calculates TOD_CHIP_CTRL_REG_00040010 value; will be called
