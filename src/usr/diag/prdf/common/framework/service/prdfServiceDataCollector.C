@@ -281,7 +281,6 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
         memcpy(current_ptr,&l_tm,PRDFTM_SIZE);
         current_ptr += PRDFTM_SIZE;
         buffer_append(current_ptr,(uint32_t)causeAttentionType);
-        buffer_append(current_ptr,ivpThermalChipHandle);
 
         // Add as much capture data as we have room.
         uint8_t * cap_size_ptr = current_ptr;  // Place for Capture data size
@@ -354,7 +353,6 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     ivCurrentEventTime.settm(l_tm);
 
     causeAttentionType = (ATTENTION_TYPE) buffer_get32(i_flatdata);
-    ivpThermalChipHandle = buffer_getTarget(i_flatdata);
 
     // Capture data - oh joy
     // do we re-expand the data or change capture date to hang onto the already flattened data?

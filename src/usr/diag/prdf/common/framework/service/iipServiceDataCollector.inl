@@ -41,8 +41,7 @@ ServiceDataCollector::ServiceDataCollector() :
     startingPoint(NULL),
     errorType(GardAction::NoGard),
     ivpDumpRequestChipHandle(NULL),
-    causeAttentionType(INVALID_ATTENTION_TYPE),
-    ivpThermalChipHandle(NULL)
+    causeAttentionType(INVALID_ATTENTION_TYPE)
 {
     PlatServices::getCurrentTime(ivCurrentEventTime);
 }

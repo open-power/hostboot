@@ -83,9 +83,6 @@ enum ReasonCode
 {
     PRDF_FIRST_REASONCODE                   = PRDF_COMP_ID | 0x01,
 
-    // PRD thermal error log FIXME: may be depricated in P8
-    PRDF_THERMAL_FAIL                       = PRDF_COMP_ID | 0x03,
-
     // Note: Ranges from 0x04 through 0x3f are reserved for when callouts are
     //       all hardware only.
 

@@ -120,7 +120,6 @@ public:
     PRDF_SDC_FLAG(USING_SAVED_SDC,         0x40000)                // mp05
     PRDF_SDC_FLAG(PROC_CORE_CS,            0x20000)                // mp03
     PRDF_SDC_FLAG(UNIT_CS,                 0x20000)                // mp06 a (Note this is intentionally the same value as PROC_CORE_CS)
-    PRDF_SDC_FLAG(THERMAL_EVENT,           0x10000)                // pw01
     PRDF_SDC_FLAG(DONT_COMMIT_ERRL,        0x01000)        // mp02
     PRDF_SDC_FLAG(DUMP,                    0x00800)              // dg04
     PRDF_SDC_FLAG(UERE,                    0x00400)              // dg02
@@ -711,9 +710,6 @@ public:
    */
   void SetTOE(Timer& theTime) { ivCurrentEventTime = theTime; }
 
-  /** Is an Thermal Event Flag on? */
-  bool IsThermalEvent(void) const { return (flags & THERMAL_EVENT) != 0 ? true:false; }
-
   /** Is a Proc Core CS flag on? */
   bool IsProcCoreCS (void) const { return (flags & PROC_CORE_CS) != 0 ? true:false; }
 
@@ -748,21 +744,6 @@ public:
   // ServiceDataCollector & operator=(const ServiceDataCollector &scd)-compiler default is sufficent
 
 #endif
-
-  /**
-   * Get the Handle of the chip/core that detected the thermal event.
-   */
-  TARGETING::TargetHandle_t  GetThermalChipId() { return ivpThermalChipHandle; }; //pw01
-
-  /**
-   * Set the Handle of the chip/core that detected the thermal event.
-   * @note As a side effect, the THERMAL_EVENT flag is set.
-   */
-  void SetThermalChipId(TARGETING::TargetHandle_t i_pchipHandle) // pw01
-  {
-      ivpThermalChipHandle = i_pchipHandle;
-      SetFlag(THERMAL_EVENT);
-  };
 
 private:  // functions
   friend class TerminateResolution;
@@ -801,7 +782,6 @@ private:  // Data
   TARGETING::TargetHandle_t ivpDumpRequestChipHandle;
   ATTENTION_TYPE causeAttentionType;    // MCK,REC,SPCL
 
-  TARGETING::TargetHandle_t ivpThermalChipHandle;
   //RTC: 60553 Eventually we shall use hostboot implementation of stack istead
   //of std:list
   static std::list< ExtensibleChip *> cv_ruleChipStack ;

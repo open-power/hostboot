@@ -452,7 +452,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintBool("  TERMINATE",              pfa.TERMINATE          );
         i_parser.PrintBool("  LOGIT",                  pfa.LOGIT              );
         i_parser.PrintBool("  FLOODING",               pfa.FLOODING           );
-        i_parser.PrintBool("  Thermal Event",          pfa.THERMAL_EVENT      );
         i_parser.PrintBool("  Unit CS",                pfa.UNIT_CHECKSTOP     );
         i_parser.PrintBool("  Using Sync'd Saved Sdc", pfa.USING_SAVED_SDC    );
         i_parser.PrintBool("  Last Core Termination",  pfa.LAST_CORE_TERMINATE);
@@ -665,9 +664,6 @@ bool srcDataParse( ErrlUsrParser & i_parser, const SrciSrc & i_src )
         srcErrType = "PRD Detected Hardware Indication";
         switch ( i_src.reasonCode() )
         {
-            case PRDF_THERMAL_FAIL:
-                srcErrClass = "Thermal Error Condition";
-                break;
             case PRDF_DETECTED_FAIL_HARDWARE:
                 srcErrClass = "Hardware Error Detected";
                 break;

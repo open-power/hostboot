@@ -41,7 +41,6 @@ namespace PRDF
 {
 
 #ifndef __HOSTBOOT_MODULE
-  const uint32_t thermalCalloutMax = 4;
   const uint32_t sdcBufferSize = CaptureDataSize + 200;
 #endif
 
@@ -49,7 +48,6 @@ enum sdcSaveFlagsEnum
 {
     SDC_NO_SAVE_FLAGS           = 0x00,
     SDC_ANALYSIS_SAVE_FLAG      = 0x08,
-    SDC_THERMAL_SAVE_FLAG       = 0x04,
     SDC_SAVE_UE_FLAG            = 0x02,
     SDC_SAVE_SUE_FLAG           = 0x01
 };

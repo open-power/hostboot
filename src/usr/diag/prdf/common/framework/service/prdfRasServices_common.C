@@ -66,12 +66,6 @@ using namespace PlatServices;
 //------------------------------------------------------------------------------
 // Local Globals
 //------------------------------------------------------------------------------
-#ifndef __HOSTBOOT_MODULE
-
-const char * ThermalFileKeys[]  = {"fstp/P1_Root","prdf/ThermalSdcPath"};
-char  * ThermalFilename = NULL;
-
-#endif
 
 bool ErrDataService::terminateOnCheckstop = true;
 RasServices thisServiceGenerator;
@@ -361,12 +355,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             //  Recovered error should be Hidden, and No Service Action
             actionFlag = ERRL_ACTION_HIDDEN;
         }
-
-        if (sdc.IsThermalEvent())
-        {  //Make the Thermal Event Hidden
-            severityParm = ERRL_SEV_RECOVERED;
-            actionFlag = ERRL_ACTION_HIDDEN;
-        }
     }
     ////////////////////////////////////////////////////////////////
     // Special ATTN
@@ -444,11 +432,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         {
             prdGardErrType = GardAction::Fatal;
         }
-    }
-
-    if (sdc.IsThermalEvent() && (MACHINE_CHECK != i_attnType) )
-    {  //Force No Gard
-        gardErrType = HWAS::GARD_NULL;
     }
 
     //**************************************************************
@@ -754,13 +737,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             //Terminate in Manufacturing Mode, in IPL mode, for visible log, with no HW callouts.
             PRDF_SRC_WRITE_TERM_STATE_ON(o_errl, SRCI_TERM_STATE_MNFG);
         }
-        //Do not Terminate in Manufacturing Mode if not at threshold.
-        //Allow Manufacturing Mode Terminate for Thermal Event. It's severityParm will be
-        //ERRL_SEV_RECOVERED in the current error log.
-        //MPB1 c Do not Terminate in Manufacturing Mode in Ipl Diag Mode  with Deferred Deconfig
-        else if ( ( ((severityParm == ERRL_SEV_RECOVERED) || (severityParm == ERRL_SEV_INFORMATIONAL)) &&
-                       !sdc.IsThermalEvent() ) ||
-                     deferDeconfig )
+        // Do not terminate if recoverable or informational.
+        // Do not terminate if deferred deconfig.
+        else if ( deferDeconfig                            ||
+                  (severityParm == ERRL_SEV_RECOVERED    ) ||
+                  (severityParm == ERRL_SEV_INFORMATIONAL)  )
         {
             ForceTerminate = false;
             actionFlag = (actionFlag | ERRL_ACTION_DONT_TERMINATE);
@@ -770,10 +751,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             PRDF_SRC_WRITE_TERM_STATE_ON(o_errl, SRCI_TERM_STATE_MNFG);
         }
 
-        if (sdc.IsThermalEvent() )
-        {  //For Manufacturing Mode terminate, change the action flags for Thermal Event.
-            actionFlag = (ERRL_ACTION_SA | ERRL_ACTION_REPORT | ERRL_ACTION_CALL_HOME);
-        }
         pfaData.errlActions = actionFlag;
     }
 
@@ -935,11 +912,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         MnfgTrace( esig, pfaData );
 
         PRDF_DTRAC( PRDF_FUNC"generating a terminating, or MP Fatal SRC" );
-        if (ForceTerminate && sdc.IsThermalEvent() ) //MP42 a  Start
-        {  //For Manufacturing Mode terminate, change the severity in
-           //the error log to be Predictive for Thermal Event.
-            o_errl->setSev(ERRL_SEV_PREDICTIVE);
-        }
     }
 
 #ifndef __HOSTBOOT_MODULE
@@ -1007,7 +979,6 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
     o_pfa.TERMINATE           = i_sdc.Terminate()       ? 1 : 0;
     o_pfa.LOGIT               = i_sdc.IsLogging()       ? 1 : 0;
     o_pfa.FLOODING            = i_sdc.IsFlooding()      ? 1 : 0;
-    o_pfa.THERMAL_EVENT       = i_sdc.IsThermalEvent()  ? 1 : 0;
     o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()        ? 1 : 0;
     o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
     o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc() ? 1 : 0;

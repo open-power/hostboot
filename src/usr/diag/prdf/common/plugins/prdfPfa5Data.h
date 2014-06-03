@@ -157,12 +157,11 @@ struct PfaData
              TERMINATE            :1,
              LOGIT                :1,
              FLOODING             :1,
-             THERMAL_EVENT        :1,
              UNIT_CHECKSTOP       :1,
              USING_SAVED_SDC      :1,
              LAST_CORE_TERMINATE  :1,
              DEFER_DECONFIG       :1,
-             Reserved             :17;
+             Reserved             :18;
 
     // Thresholding
     uint32_t errorCount :16, // Number of occurrences of this attention
@@ -208,7 +207,11 @@ struct PfaData
                     (i_right.TERMINATE            << 24) |
                     (i_right.LOGIT                << 23) |
                     (i_right.FLOODING             << 22) |
-                    (i_right.THERMAL_EVENT        << 21) |
+                    // FYI, a deprecated entry was removed. To make the parser
+                    // compatible with older or newer error logs, this bit must
+                    // remain a hole (i.e. it can be reused, but subsequent data
+                    // must remain in the bit positions that they are currently
+                    // in).
                     (i_right.UNIT_CHECKSTOP       << 20) |
                     (i_right.USING_SAVED_SDC      << 19) |
                     (i_right.LAST_CORE_TERMINATE  << 18) |
@@ -258,7 +261,10 @@ struct PfaData
         i_right.TERMINATE           = (l_tmp[2] >> 24) & 0x01;
         i_right.LOGIT               = (l_tmp[2] >> 23) & 0x01;
         i_right.FLOODING            = (l_tmp[2] >> 22) & 0x01;
-        i_right.THERMAL_EVENT       = (l_tmp[2] >> 21) & 0x01;
+        // FYI, a deprecated entry was removed. To make the parser compatible
+        // with older or newer error logs, this bit must remain a hole (i.e. it
+        // can be reused, but subsequent data must remain in the bit positions
+        // that they are currently in).
         i_right.UNIT_CHECKSTOP      = (l_tmp[2] >> 20) & 0x01;
         i_right.USING_SAVED_SDC     = (l_tmp[2] >> 19) & 0x01;
         i_right.LAST_CORE_TERMINATE = (l_tmp[2] >> 18) & 0x01;
