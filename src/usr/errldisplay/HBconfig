@@ -1,0 +1,6 @@
+config CONSOLE_OUTPUT_ERRORDISPLAY
+    default y if CONSOLE
+    depends on CONSOLE
+    help
+        This is used to display errlogs in a human readable form
+        Error Display will only work when the Console is configured
