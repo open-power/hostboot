@@ -34,8 +34,11 @@ OBJS += rtvpd_load.o
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
+
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
-BINARY_FILES += $(IMGDIR)/procmvpd.dat:7dabbe4879dcdd19ed236573aa68e8671fa8c3c7
-BINARY_FILES += $(IMGDIR)/cvpd.dat:0400a31bf0c8ecfefb3a21af50cf557c5def0352
+#Update to Murano DD2.1 for CCIN 54E6
+BINARY_FILES += $(IMGDIR)/procmvpd.dat:c510eda768a9e3921ff957b549574507fd5c9ce9
+#Update to Centaur DD2.0 for CCIN 31E8
+BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
 
 include ${ROOTPATH}/config.mk

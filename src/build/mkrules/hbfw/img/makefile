@@ -163,17 +163,17 @@ clobber_cp_hbfiles:
 #################################################
 SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
-S1_EC10_BIN = ${ENGD_OBJPATH:Fs1_10.sbe_seeprom.hdr.bin}
-S1_EC12_BIN = ${ENGD_OBJPATH:Fs1_12.sbe_seeprom.hdr.bin}
 S1_EC13_BIN = ${ENGD_OBJPATH:Fs1_13.sbe_seeprom.hdr.bin}
 S1_EC20_BIN = ${ENGD_OBJPATH:Fs1_20.sbe_seeprom.hdr.bin}
+S1_EC21_BIN = ${ENGD_OBJPATH:Fs1_21.sbe_seeprom.hdr.bin}
 P8_EC10_BIN = ${ENGD_OBJPATH:Fp8_10.sbe_seeprom.hdr.bin}
+P8_EC20_BIN = ${ENGD_OBJPATH:Fp8_20.sbe_seeprom.hdr.bin}
 CENT_EC10_BIN = ${ENGD_OBJPATH:Fcentaur_10.sbe_seeprom.hdr.bin}
 CENT_EC20_BIN = ${ENGD_OBJPATH:Fcentaur_20.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  s1SbePartition.bin:10=${S1_EC10_BIN},12=${S1_EC12_BIN},13=${S1_EC13_BIN},20=${S1_EC20_BIN} \
-  p8SbePartition.bin:10=${P8_EC10_BIN} \
+  s1SbePartition.bin:13=${S1_EC13_BIN},20=${S1_EC20_BIN},21=${S1_EC21_BIN} \
+  p8SbePartition.bin:10=${P8_EC10_BIN},20=${P8_EC20_BIN} \
   centSbePartition.bin:10=${CENT_EC10_BIN},20=${CENT_EC20_BIN}
 
 

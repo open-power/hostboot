@@ -592,7 +592,7 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe,ERR_MRK"findSBEInPnor:SBE Image not "
                            "located, ec=0x%.2X",ec );
 
-                TRACFBIN( g_trac_sbe, "sbeToc", &sbeToc, sizeof(sbeToc_t));
+                TRACFBIN( g_trac_sbe, "sbeToc", sbeToc, sizeof(sbeToc_t));
 
                 /*@
                  * @errortype

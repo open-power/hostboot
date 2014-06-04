@@ -281,7 +281,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             {
                 fails++;
                 TRACFCOMP( g_trac_sbe, ERR_MRK"testFindSbeInPnor() - failure "
-                           "finding Proc SBE image for uid=0x%X, ec=0x%.2X"
+                           "finding Proc SBE image for uid=0x%X, ec=0x%.2X "
                            "sbeImgPtr=%p, sbeImgSize=0x%x",
                            TARGETING::get_huid(theTarget),
                            theTarget->getAttr<TARGETING::ATTR_EC>(),
