@@ -148,6 +148,11 @@ bool is_avp_load(void);
 uint64_t get_top_mem_addr(void);
 
 /**
+ * @brief Utility function to obtain the lowest known address in the system
+ */
+uint64_t get_bottom_mem_addr(void);
+
+/**
  * Order two processor targets by NODE_ID then CHIP_ID.
  * @param[in] First processor target
  * @param[in] Second processor target

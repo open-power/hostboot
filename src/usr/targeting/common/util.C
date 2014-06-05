@@ -30,6 +30,7 @@
 //******************************************************************************
 // Includes
 //******************************************************************************
+#include <stdint.h>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
@@ -243,6 +244,52 @@ uint64_t get_top_mem_addr(void)
     }while(0);
 
     return top_addr;
+}
+
+/**
+ * @brief Utility function to obtain the lowest known address in the system
+ */
+uint64_t get_bottom_mem_addr(void)
+{
+    uint64_t bottom_addr = UINT64_MAX;
+
+    do
+    {
+        // Get all functional proc chip targets
+        TARGETING::TargetHandleList l_cpuTargetList;
+        TARGETING::getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        for ( size_t proc = 0; proc < l_cpuTargetList.size(); proc++ )
+        {
+            TARGETING::Target * l_pProc = l_cpuTargetList[proc];
+
+            uint64_t l_mem_bases[8] = {};
+            uint64_t l_mem_sizes[8] = {};
+            TARG_ASSERT(
+               l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases),
+               "Unable to get ATTR_PROC_MEM_BASES attribute");
+
+            TARG_ASSERT(
+               l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes),
+               "Unable to get ATTR_PROC_MEM_SIZES attribute");
+
+            for (size_t i=0; i< 8; i++)
+            {
+                if(l_mem_sizes[i]) //non zero means that there is memory present
+                {
+                    bottom_addr = std::min(bottom_addr, l_mem_bases[i]);
+                }
+            }
+        }
+    }while(0);
+
+    // There's no reason the lowest address should be the largest
+    // 64 bit value
+    TARG_ASSERT(
+        bottom_addr < UINT64_MAX,
+        "Lowest address is maximum 64-bit value");
+
+    return bottom_addr;
 }
 
 

@@ -29,7 +29,8 @@
 #
 ################################################################################
 
-COMMON_TARGETING_SUBDIRS += predicates 
+CFLAGS += -D__STDC_LIMIT_MACROS
+COMMON_TARGETING_SUBDIRS += predicates
 COMMON_TARGETING_SUBDIRS += iterators
 
 PREDICATES_OBJS += predicatebase.o

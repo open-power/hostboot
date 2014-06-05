@@ -847,6 +847,14 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
                      true); // callout firmware
             }
         }
+        // If we're not mirrored, payloadBase is the lowest mem_base.
+        // Note that if we are mirrored, finding the correct mirror
+        // base yields the proper payloadBase. This should also work
+        // for sapphire as a single (working) node will return 0 for
+        // bottom_mem_addr.
+        else {
+            payloadBase += get_bottom_mem_addr()/MEGABYTE;
+        }
     }
 
     if(!l_errl)
