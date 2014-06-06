@@ -662,46 +662,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     TYPE dumpTrgtType = getTargetType( dumpTrgt );
 
     //**************************************************************
-    // Check for Unit CheckStop.
-    // Check for Last Functional Core.
-    // PFA data updates for these item.
+    // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
 
-    // Now the check is for Unit Check Stop and Dump ID for Processor
-    // Skip the termination on Last Core if this is a Saved SDC
-    if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
-    {
-        PRDF_TRAC( PRDF_FUNC"Unit CS on HUID: 0x%08x", dumpId );
-
-        if ( TYPE_CORE == dumpTrgtType )
-        {
-            // Check if this is last functional core
-            if ( PlatServices::checkLastFuncCore(dumpTrgt) )
-            {
-                PRDF_TRAC(PRDF_FUNC"Last Functional Core HUID: 0x%08x", dumpId);
-
-                ForceTerminate = true;
-                pfaData.LAST_CORE_TERMINATE = 1;
-                iv_errl->setSev(ERRL_SEV_UNRECOVERABLE);
-                pfaData.errlSeverity = ERRL_SEV_UNRECOVERABLE;
-            }
-        }
-    }
-
-    // Check the errl for the terminate state
-    // Note: will also be true for CheckStop attn.
-    bool l_termSRC = false;
-    PRDF_GET_TERM_SRC(iv_errl, l_termSRC);
-    if(l_termSRC)
-    {
-        ForceTerminate = true;
-        uint32_t l_plid = 0;
-        PRDF_GET_PLID(iv_errl, l_plid);
-        PRDF_INF(PRDF_FUNC"check for isTerminateSRC is true. PLID=%.8X", l_plid);
-    }
+    ForceTerminate = checkForceTerm( sdc, dumpTrgt, pfaData );
 
     //*************************************************************
-    // Must check for Manufacturing Mode terminate here and then do
+    // Check for Manufacturing Mode terminate here and then do
     // the needed overrides on ForceTerminate flag.
     //*************************************************************
     if ( PlatServices::mnfgTerminate() && !ForceTerminate )

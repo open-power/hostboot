@@ -236,6 +236,17 @@ class ErrDataService
      */
     void deallocateDimms( SDC_MRU_LIST & i_mruList );
 
+    /**
+     * @brief Checks for terminate conditions during non mnfg conditions.
+     * @param i_sdc       The service data collector.
+     * @param i_dumpTrgt  Dump Target.
+     * @param io_pfa      The PFA data struct.
+     * @return  True if PRD should terminate system, False otherwise.
+     */
+    bool checkForceTerm( ServiceDataCollector & i_sdc,
+                         TARGETING::TargetHandle_t i_dumpTrgt,
+                         PfaData &io_pfaData );
+
   private:
 
     bool loggingBufferFull;

@@ -31,6 +31,8 @@
 #include <prdfMfgSync.H>
 #include <prdfErrlUtil.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 
@@ -52,7 +54,7 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
 
 void ErrDataService::deallocateDimms( SDC_MRU_LIST & i_mruList )
 {
@@ -89,6 +91,16 @@ void ErrDataService::createInitialErrl( ATTENTION_TYPE i_attnType )
                         0,
                         PRDF_GET_UINT64_FROM_UINT32( 0, 0 ),
                         PRDF_GET_UINT64_FROM_UINT32( 0, 0 ) );
+}
+
+//--------------------------------------------------------------------
+
+bool ErrDataService::checkForceTerm( ServiceDataCollector & i_sdc,
+                                     TargetHandle_t i_dumpTrgt,
+                                     PfaData &io_pfaData )
+{
+    //Return false from HB
+    return false;
 }
 
 } // end namespace PRDF
