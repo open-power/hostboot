@@ -1572,7 +1572,7 @@ group gL3Fir filter singlebit
     (L3Fir, bit(3)) ? defaultMaskedError;
 
     /** L3FIR[4]
-     *  L3 Cache CE, no line delete requested.
+     *  L3 Cache CE
      */
     (L3Fir, bit(4)) ? L3CE;
 
