@@ -471,7 +471,7 @@ private:
      *
      */
     errlHndl_t _invokeDeconfigureAssocProc(
-                const TARGETING::ConstTargetHandle_t i_node = NULL,
+                TARGETING::ConstTargetHandle_t i_node = NULL,
                 bool i_doAbusDeconfig = true);
 
     /**

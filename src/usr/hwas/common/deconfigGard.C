@@ -722,7 +722,7 @@ errlHndl_t DeconfigGard::deconfigureAssocProc()
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
-            const TARGETING::ConstTargetHandle_t i_node,
+            TARGETING::ConstTargetHandle_t i_node,
             bool i_doAbusDeconfig)
 {
     HWAS_INF("Preparing data for _deconfigureAssocProc ");
@@ -773,10 +773,10 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
         PredicateHwas predPres;
         predPres.present(true);
 
-        // Find master proc
+        // Find master proc on current node
         Target* l_pMasterProcTarget;
         targetService().
-            masterProcChipTargetHandle(l_pMasterProcTarget);
+            masterProcChipTargetHandle(l_pMasterProcTarget, i_node);
 
 
         // Populate vector
