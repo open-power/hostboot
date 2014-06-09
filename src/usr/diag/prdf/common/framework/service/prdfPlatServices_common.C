@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -48,6 +50,7 @@
 #include <io_clear_firs.H>
 #include <erepairAccessorHwpFuncs.H>
 #include <io_fir_isolation.H>
+#include <fapiAttributeIds.H>
 
 using namespace TARGETING;
 
@@ -55,7 +58,7 @@ using namespace TARGETING;
 
 namespace PRDF
 {
-
+using namespace CEN_SYMBOL;
 namespace PlatServices
 {
 
@@ -702,13 +705,78 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO - Get the memory buffer raw card type (i.e. R/C A). This is needed for
-          the DRAM site locations for buffered DIMMs. Should be able to get this
-          from an attribute but doesn't look like this is available yet.
-getMembufRawCardType()
+int32_t getMemBufRawCardType( TargetHandle_t i_mba,
+                              WiringType & o_cardType )
 {
+    #define PRDF_FUNC "[PlatServices::getMemBufRawCardType] "
+
+    o_cardType = WIRING_INVALID;
+    uint8_t l_cardType = WIRING_INVALID;
+    int32_t o_rc = FAIL;
+
+    do
+    {
+        if( TYPE_MBA != getTargetType( i_mba ) )
+        {
+            PRDF_ERR( PRDF_FUNC" Invalid target 0x%08x",getHuid( i_mba ) );
+            break;
+        }
+
+        TargetHandleList l_dimmList = getConnected( i_mba, TYPE_DIMM );
+
+        if( 0 == l_dimmList.size() )
+        {
+            PRDF_ERR( PRDF_FUNC " No DIMM connected with mba 0x%08x",
+                      getHuid( i_mba ) );
+            break;
+        }
+
+        errlHndl_t errl = NULL;
+        fapi::Target fapiDimm = getFapiTarget( l_dimmList[0] );
+
+        PRD_FAPI_TO_ERRL( errl,
+                          fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard,
+                          &fapiDimm,
+                          l_cardType );
+
+        if( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC" fapiPlatGetSpdModspecComRefRawCard failed for"
+                      "DIMM 0x%08X", getHuid( l_dimmList[0] ) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            break;
+        }
+
+        switch( l_cardType )
+        {
+            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_A :
+                o_cardType = CEN_TYPE_A;
+                break;
+
+            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_B :
+                o_cardType = CEN_TYPE_B;
+                break;
+
+            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_D:
+                o_cardType = CEN_TYPE_D;
+                break;
+
+            default:
+                o_cardType = WIRING_INVALID;
+                break;
+        }
+
+    }while(0);
+
+    if( WIRING_INVALID != o_cardType )
+    {
+        o_rc = SUCCESS;
+    }
+
+    return o_rc;
+    #undef PRDF_FUNC
 }
-*/
+
 
 //------------------------------------------------------------------------------
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,6 +41,7 @@
 #include <prdfTargetServices.H> // must include all common targeting code
 #include <prdfCenConst.H>
 #include <prdfTimer.H>
+#include <prdfParserEnums.H>
 
 #include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
@@ -335,13 +338,13 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig );
 
 /**
- * @brief   Returns the memory buffer raw card type (i.e. R/C A).
- * @param   i_memTarget A memory buffer, MBA, or DIMM.
- * @return
+ * @brief   Returns the memory buffer raw card type.
+ * @param   i_mbaTarget     an MBA target.
+ * @param   o_wiringType    Card Type/ Wiring type of DIMM
+ * @return  SUCCESS for a valid card type, FAIL otherwise.
  */
-/* TODO - See .C
-getMembufRawCardType( TARGETING::TargetHandle_t i_memTarget );
-*/
+int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
+                              CEN_SYMBOL::WiringType & o_wiringType );
 
 /**
  * @brief   Returns the type of the card the DIMM is plugged into.
