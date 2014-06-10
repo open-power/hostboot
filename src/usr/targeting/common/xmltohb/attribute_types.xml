@@ -2613,6 +2613,10 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MIRROR_BASE_ADDRESS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.C,v 1.16 2013/10/28 21:17:47 jmcgill Exp $
+// $Id: opt_memmap.C,v 1.18 2014-06-19 14:06:34 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.C,v $
 
 
@@ -34,8 +34,7 @@
 // *! DESCRIPTION : Layout non-mirrored/mirrored address map (FAPI)
 // *!
 // *! OWNER NAME  : Joe McGill    Email: jmcgill@us.ibm.com
-// *! BACKUP NAME : Mark Bellows  Email: bellows@us.ibm.com
-// *! BACKUP NAME : Van Lee       Email: vanlee@us.ibm.com
+// *! BACKUP NAME : ???           Email: ???@us.ibm.com
 // *!
 //------------------------------------------------------------------------------
 
@@ -44,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.17   | dcrowell | 06/19/14| Switch from #define to attr for mirror origin
 //  1.16   | jmcgill  | 10/28/13| Offset drawers by 32TB rather than 1TB
 //  1.15   | jmcgill  | 09/17/13| Add logic to offset memory map based on
 //         |          |         | drawer number (required for multi-drawer
@@ -492,8 +492,18 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
             break;
         }
 
-        FAPI_INF("opt_memmap called with i_init = %d, mirror_policy: %d",
-                 (i_init)?(1):(0), l_mirror_policy);
+        uint64_t l_mirror_origin = 0;
+        rc = FAPI_ATTR_GET(ATTR_MIRROR_BASE_ADDRESS,
+                           NULL,
+                           l_mirror_origin);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying ATTR_MIRROR_BASE_ADDRESS");
+            break;
+        }
+
+        FAPI_INF("opt_memmap called with i_init = %d, mirror_policy: %d, origin=%llX",
+                 (i_init)?(1):(0), l_mirror_policy, l_mirror_origin);
 
         // first pass of execution
         if (i_init)
@@ -505,12 +515,12 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                 ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
             {
                 mem_base = OPT_MEMMAP_BASE_ORIGIN;
-                mirror_base = OPT_MEMMAP_OFFSET_ORIGIN;
+                mirror_base = l_mirror_origin;
             }
             else if (l_mirror_policy ==
                      ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
             {
-                mem_base = OPT_MEMMAP_OFFSET_ORIGIN;
+                mem_base = l_mirror_origin;
                 mirror_base = OPT_MEMMAP_BASE_ORIGIN;
             }
             else if (l_mirror_policy ==
@@ -542,7 +552,7 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                     }
 
                     mem_base = drawer_id * 32 * OPT_MEMMAP_TB;
-                    mirror_base = OPT_MEMMAP_OFFSET_ORIGIN + (mem_base / 2);
+                    mirror_base = l_mirror_origin + (mem_base / 2);
                 }
 
                 rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASE,
@@ -581,13 +591,13 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
             {
                 // non-mirrored at zero, mirrored at offset
                 l_nm_base_curr = OPT_MEMMAP_BASE_ORIGIN;
-                l_m_base_curr  = OPT_MEMMAP_OFFSET_ORIGIN;
+                l_m_base_curr  = l_mirror_origin;
             }
             else if (l_mirror_policy ==
                      ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
             {
                 // mirrored at zero, non-mirrored at offset
-                l_nm_base_curr = OPT_MEMMAP_OFFSET_ORIGIN;
+                l_nm_base_curr = l_mirror_origin;
                 l_m_base_curr  = OPT_MEMMAP_BASE_ORIGIN;
             }
             else if (l_mirror_policy ==
@@ -618,7 +628,7 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                     }
 
                     l_nm_base_curr = drawer_id * 32 * OPT_MEMMAP_TB;
-                    l_m_base_curr = OPT_MEMMAP_OFFSET_ORIGIN + (l_nm_base_curr / 2);
+                    l_m_base_curr = l_mirror_origin + (l_nm_base_curr / 2);
                 }
 
                 ProcChipMemmap p(&(*l_iter), l_mirror_policy);

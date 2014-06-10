@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.H,v 1.8 2013/09/26 17:55:25 jmcgill Exp $
+// $Id: opt_memmap.H,v 1.9 2014-06-19 14:06:35 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.H,v $      */
 
 
@@ -34,8 +34,7 @@
 // *! DESCRIPTION : Layout non-mirrored/mirrored address map (FAPI)
 // *!
 // *! OWNER NAME  : Joe McGill    Email: jmcgill@us.ibm.com
-// *! BACKUP NAME : Mark Bellows  Email: bellows@us.ibm.com
-// *! BACKUP NAME : Van Lee       Email: vanlee@us.ibm.com
+// *! BACKUP NAME : ???           Email: ???@us.ibm.com
 // *!
 //------------------------------------------------------------------------------
 
@@ -44,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.9    | dcrowell | 06/19/14| Remove OPT_MEMMAP_OFFSET_ORIGIN
 //  1.7    | jmcgill  | 07/10/13| Update to match new attributes, selective
 //         |          |         | aligment policy changes
 //  1.6    | jmcgill  | 05/24/13| Correct index name
@@ -74,7 +74,6 @@ const uint64_t OPT_MEMMAP_TB = 0x0000010000000000ULL;
 
 // default origin for non-mirrored/mirrored address regions
 const uint64_t OPT_MEMMAP_BASE_ORIGIN      = 0;                     // 0
-const uint64_t OPT_MEMMAP_OFFSET_ORIGIN    = 0x0002000000000000LL;  // 512TB
 const uint64_t OPT_MEMMAP_SELECTIVE_ORIGIN = 0x0000080000000000LL;  // 8TB
 
 // maximum non-mirrored/mirrored regions supported

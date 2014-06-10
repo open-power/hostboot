@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.10 2013/09/23 22:20:29 jmcgill Exp $ -->
+<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.14 2014-06-19 14:26:21 dcrowell Exp $ -->
 <!-- proc_setup_bars_memory_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -35,17 +35,31 @@
         NORMAL  = non-mirrored start: 0, mirrored start: 512TB
         FLIPPED = mirrored start: 0, non-mirrored start: 512TB
         SELECTIVE = non-mirrored/mirrored start (interleaved): 0
-        DRAWER = non-mirrored start: 1TB*drawer, mirrored start: 512TB+(1TB*drawer/2)
+	DRAWER = non-mirrored start: 32TB*drawer, mirrored start: 512TB+(32TB*drawer)
+	FLIPPED_DRAWER = mirrored start: 32TB * drawer, non-mirrored start: 512TB+(32TB*drawer)
     </description>
     <valueType>uint8</valueType>
     <enum>
       NORMAL    = 0x0,
       FLIPPED   = 0x1,
       SELECTIVE = 0x2,
-      DRAWER    = 0x3
+      DRAWER    = 0x3,
+      FLIPPED_DRAWER = 0x4
     </enum>
     <platInit/>
     <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_MIRROR_BASE_ADDRESS</id>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <description>
+       System-level base address for the start of mirrored memory.
+       Defined by platform as part of the global memory map.
+     </description>
+     <valueType>uint64</valueType>
+     <platInit/>
+     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

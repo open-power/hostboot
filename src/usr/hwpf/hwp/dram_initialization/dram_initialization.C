@@ -771,7 +771,7 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
             if(!is_sapphire_load())
             {
-                l_mirrorBaseAddr = l_sys->getAttr<ATTR_MIRROR_BASE_ADDRESS>();
+                l_mirrorBaseAddr = l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
             }
 
             // Verify there is memory at the mirrored location
