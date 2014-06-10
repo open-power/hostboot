@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,6 +27,7 @@
 #define __PNOR_PNORDD_H
 
 #include <limits.h>
+#include <config.h>
 
 /** @file pnordd.H
  *  @brief Provides the interfaces to the PNOR Device Driver
@@ -140,6 +144,11 @@ class PnorDD
         SPI_MICRON_READ_SFDP    = 0x5A, /**< Read Serial Flash Disc Parms */
         SPI_MICRON_CHIPID       = 0x9F, /**< Read ChipID */
 
+        /* SPI protocol command bytes */
+        SPI_JEDEC_FAST_READ = 0x0B,
+        SPI_JEDEC_SECTOR_ERASE = 0x20,
+        SPI_JEDEC_BLOCK_ERASE = 0xD8,
+
         SPI_SIM_SM_ERASE_OP = 0x00000020, /**< Simics Op Code for Small Erase */
         SPI_SIM_SM_ERASE_SZ = 0x1000, /**< Simics Small Erase Size */
     };
@@ -151,6 +160,7 @@ class PnorDD
     enum NorChipIDs
     {
         /* Note: Simics currently models Micron NOR  */
+        UNKNOWN_NOR_ID    = 0,  /**< Unknown NOR chip ID */
         MICRON_NOR_ID     = 0x20ba2000,  /**< Micron NOR chip ID */
         VPO_NOR_ID        = 0x20201800,  /**< VPO NOR chip ID */
         MACRONIX_NOR_ID   = 0xC2201A00,  /**< Macronix NOR chip ID */
@@ -173,12 +183,14 @@ class PnorDD
     enum SfcRegAddr {
         SFC_REG_CONF    = 0x10, /**< CONF: Direct Access Configuration */
         SFC_REG_STATUS  = 0x0C, /**< STATUS : Status Reg */
+        SFC_REG_SPICLK  = 0x3C, /**< SPICLK: SPI clock rate config */
         SFC_REG_CMD     = 0x40, /**< CMD : Command */
         SFC_REG_ADR     = 0x44, /**< ADR : Address */
         SFC_REG_ERASMS  = 0x48, /**< ERASMS : Small Erase Block Size */
         SFC_REG_ERASLGS = 0x4C, /**< ERALGS : Large Erase Block Size */
         SFC_REG_CONF4   = 0x54, /**< CONF4  : SPI Op Code for Small Erase */
         SFC_REG_CONF5   = 0x58, /**< CONF5  : Small Erase Size config reg */
+        SFC_REG_CONF8   = 0x64, /**< CONF8  : Read Command */
         SFC_REG_ADRCBF  = 0x80, /**< ADRCBF : First Intf NOR Addr Offset */
         SFC_REG_ADRCMF  = 0x84, /**< ADRCMF : First Intf NOR Allocation */
         SFC_REG_ADRCBS  = 0x88, /**< ADRCBS : Second Intf NOR Addr Offset */
@@ -528,7 +540,11 @@ class PnorDD
 
         LPC_SFC_CMDREG_OFFSET = 0xF0000C00, /** LPC Offest to SFC Cmd Regs */
         LPC_SFC_CMDBUF_OFFSET = 0xF0000D00, /** LPC Off to SFC Cmd Buf space */
+#ifdef CONFIG_SFC_IS_AST2400
+        LPC_SFC_MMIO_OFFSET = 0xFE000000, /** LPC Off to SFC Direct Read space*/
+#else //default to IBM DPSS controller
         LPC_SFC_MMIO_OFFSET = 0xFC000000, /** LPC Off to SFC Direct Read space*/
+#endif
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
         ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */

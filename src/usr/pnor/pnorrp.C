@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -499,6 +502,10 @@ errlHndl_t PnorRP::readTOC()
                     {
                         INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
                     }
+                    else
+                    {
+                        TOC_0_failed = true;
+                    }
                     //Try TOC1
                     continue;
                 }
@@ -882,6 +889,13 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
 
     do
     {
+#ifdef CONFIG_SFC_IS_AST2400
+        //@todo RTC:106881 -- Add full write/erase support
+        TRACFCOMP(g_trac_pnor, "PnorRP::writeToDevice> Skipping all writes in BMC for now" );
+        break;
+#endif
+
+
         TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
         // assume a single page to write

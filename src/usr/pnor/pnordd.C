@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,9 +48,7 @@
 #include <sys/time.h>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
-
-// Uncomment this to enable smart writing
-//#define SMART_WRITE
+#include <config.h>
 
 
 extern trace_desc_t* g_trac_pnor;
@@ -444,123 +445,43 @@ void PnorDD::sfcInit( )
     TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit> iv_mode=0x%.8x", iv_mode );
     errlHndl_t  l_err  =   NULL;
 
-    //Initial configuration settings for SFC:
-    #define oadrnb_init 0x0C000000  //Set MMIO/Direct window to start at 64MB
-    #define oadrns_init 0x0000000F  //Set the MMIO/Direct window size to 64MB
-    #define adrcbf_init 0x00000000  //Set the flash index to 0
-    #define adrcmf_init 0x0000000F  //Set the flash size to 64MB
-    #define conf_init 0x00000002  //Disable Direct Access Cache
-
     do {
+#ifdef CONFIG_SFC_IS_AST2400
+        TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Nothing to do yet for AST2400" );
+        break;
+        //@todo RTC:106881 - Fix up to support erase/write later
+#endif //CONFIG_SFC_IS_AST2400
+
         mutex_lock(&cv_mutex);
 
         if(!cv_sfcInitDone)
         {
-#define PNORDD_FSPATTACHED
-#ifdef PNORDD_FSPATTACHED
+#ifdef CONFIG_BMC_DOES_SFC_INIT
 
             //Determine NOR Flash type - triggers vendor specific workarounds
             //We also use the chipID in some FFDC situations.
             l_err = getNORChipId(cv_nor_chipid);
+            if(l_err) { break; }
             TRACFCOMP(g_trac_pnor,
                       "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ",
                       cv_nor_chipid );
 
-
+            // Re-initialize internal erase size cached value.
             l_err = readRegSfc(SFC_CMD_SPACE,
                                SFC_REG_ERASMS,
                                iv_erasesize_bytes);
             if(l_err) { break; }
             TRACFCOMP(g_trac_pnor,"iv_erasesize_bytes=%X",iv_erasesize_bytes);
 
-            cv_sfcInitDone = true;
+#else //==!CONFIG_BMC_DOES_SFC_INIT
 
-#else
-//SPLESS system - not official supported, but keeping framework in place
-//for possible future use.
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_OADRNB,
-                                oadrnb_init);
-            if(l_err) { break; }
+            TRACFCOMP( g_trac_pnor, INFO_MRK "Initializing SFC registers -- unsupported!!!" );
+            //@todo RTC:97493 - Add SFC initialization from Host
+            INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_MODE);
 
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_OADRNS,
-                                oadrns_init);
-            if(l_err) { break; }
-
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_ADRCBF,
-                                adrcbf_init);
-            if(l_err) { break; }
-
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_ADRCMF,
-                                adrcmf_init);
-            if(l_err) { break; }
-
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_CONF,
-                                conf_init);
-            if(l_err) { break; }
-
-            //Determine NOR Flash type, configure SFC and PNOR DD as needed
-            l_err = getNORChipId(cv_nor_chipid);
-            TRACFCOMP(g_trac_pnor,
-                      "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ",
-                      cv_nor_chipid );
-
-            //A proper SPLESS implementation would require enhancements for
-            //Supported NOR Vendors
-            if(MICRON_NOR_ID == cv_nor_chipid)  /* Simics currently Micron */
-            {
-                TRACFCOMP(g_trac_pnor,
-                          "PnorDD::sfcInit: Configuring SFC for SIMICS NOR> " );
-                uint32_t sm_erase_op = SPI_SIM_SM_ERASE_OP;
-                iv_erasesize_bytes = SPI_SIM_SM_ERASE_SZ;
-
-                /*Simics model doesn't currently support this*/
-                l_err = writeRegSfc(SFC_CMD_SPACE,
-                                    SFC_REG_CONF4,
-                                    sm_erase_op);
-                if(l_err) { break; }
-
-
-                l_err = writeRegSfc(SFC_CMD_SPACE,
-                                    SFC_REG_CONF5,
-                                    iv_erasesize_bytes);
-                if(l_err) { break; }
-
-                //Enable 4-byte addressing
-                SfcCmdReg_t sfc_cmd;
-                sfc_cmd.opcode = SPI_START4BA;
-                sfc_cmd.length = 0;
-
-                l_err = writeRegSfc(SFC_CMD_SPACE,
-                                    SFC_REG_CMD,
-                                    sfc_cmd.data32);
-                if(l_err) { break; }
-
-            }
-            else if(VPO_NOR_ID == cv_nor_chipid)
-            {
-                TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Detected VPO NOR Chip(0x%.4X).  Erase not currently supported", cv_nor_chipid );
-                //Set chip ID back to zero to avoid later chip specific logic.
-                cv_nor_chipid = 0;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_pnor,  ERR_MRK"PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%.4X. Calling doShutdown(PNOR::RC_UNSUPPORTED_HARDWARE)",
-                           cv_nor_chipid );
-
-                //Shutdown if we detect unsupported Hardware
-                INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_HARDWARE);
-
-                //Set chip ID back to zero to avoid later chip specific logic.
-                cv_nor_chipid = 0;
-            }
+#endif //CONFIG_BMC_DOES_SFC_INIT
 
             cv_sfcInitDone = true;
-#endif
         }
 
     }while(0);
