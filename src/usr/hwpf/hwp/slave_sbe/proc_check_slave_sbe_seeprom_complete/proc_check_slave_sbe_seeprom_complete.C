@@ -59,7 +59,7 @@ const uint8_t  SBE_EXIT_SUCCESS_0xF = 0xF;
 const uint64_t NS_TO_FINISH = 10000000; //(10 ms)
 const uint64_t MS_TO_FINISH = NS_TO_FINISH/1000000;
 const uint64_t SIM_CYCLES_TO_FINISH = 10000000;
-//Should really be 19.6*NS_TO_FINISH, but sim runs at about 11 hours per 
+//Should really be 19.6*NS_TO_FINISH, but sim runs at about 11 hours per
 //simulated second which is longer than we want to wait in error cases
 
 
@@ -240,7 +240,7 @@ extern "C"
         do
         {
             //Check if the SBE is still running.  Loop until stopped
-            //or loop time is exceeded.  
+            //or loop time is exceeded.
             bool still_running = true;
             size_t loop_time = 0;
             rc = proc_check_slave_sbe_seeprom_complete_check_running(
@@ -325,7 +325,7 @@ extern "C"
             if( halt_code != SBE_EXIT_SUCCESS_0xF )
             {
                 FAPI_ERR(
-                    "SBE halted with error %i (istep 0x%X, substep %i)", 
+                    "SBE halted with error %i (istep 0x%X, substep %i)",
                     halt_code,
                     istep_num,
                     substep_num);
@@ -341,7 +341,7 @@ extern "C"
                ( istep_num != PROC_SBE_EX_HOST_RUNTIME_SCOM_MAGIC_ISTEP_NUM ))
             {
                 FAPI_ERR(
-                    "SBE halted in wrong istep (istep 0x%X, substep %i)", 
+                    "SBE halted in wrong istep (istep 0x%X, substep %i)",
                     istep_num,
                     substep_num);
                 const fapi::Target & CHIP_IN_ERROR = i_target;
@@ -360,7 +360,7 @@ extern "C"
                  ( substep_num != SUBSTEP_ENABLE_PNOR_SLAVE_CHIP )))
             {
                 FAPI_ERR(
-                    "SBE halted in wrong substep (istep 0x%X, substep %i)", 
+                    "SBE halted in wrong substep (istep 0x%X, substep %i)",
                     istep_num,
                     substep_num);
                 const fapi::Target & CHIP_IN_ERROR = i_target;

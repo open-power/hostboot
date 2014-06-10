@@ -67,26 +67,8 @@ fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
     fapi::ReturnCode   rc;
     uint32_t           l_set_data;
     ecmdDataBufferBase  set_data(32);
-    uint8_t l_needSbeStartWA = 0;
 
     do {
-
-        // ---- check if workaround is needed
-        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_CFAM_RESET_SBE_START_WA,
-                           &i_target,
-                           l_needSbeStartWA);
-        if(rc)
-        {
-            FAPI_ERR("Error querying Chip EC feature: "
-                     "ATTR_CHIP_EC_FEATURE_CFAM_RESET_SBE_START_WA");
-            break;
-        }
-
-        if(!l_needSbeStartWA)
-        {
-            //Workaround not needed -- break
-            break;
-        }
 
         // -----------------------------------------------------------
         //Need to set the I2C speed based in the mailbox reg
@@ -118,7 +100,7 @@ fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
         // ------------------------------------------------
         // Now toggle Warmstart bit to circumvent HW254584
         // write it to mbox scratch2
-        rc_ecmd |= set_data.setWord( 0, 0x10000000 );
+        rc_ecmd |= set_data.setWord( 0, 0x30000000 );
 
 
         rc = fapiPutCfamRegister( i_target,
@@ -131,7 +113,7 @@ fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
             break;
         }
 
-        rc_ecmd |= set_data.setWord( 0, 0x90000000 );
+        rc_ecmd |= set_data.setWord( 0, 0xB0000000 );
 
 
         rc = fapiPutCfamRegister( i_target,

@@ -63,6 +63,9 @@
 #include "proc_spless_sbe_startWA.H"
 #include <sbe/sbeif.H>
 
+const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
+const uint64_t MS_TO_WAIT_OTHERS= 100; //(100 ms)
+
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -152,7 +155,6 @@ void* call_host_sbe_start( void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
     IStepError  l_stepError;
-    bool        l_needDelay = false;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start entry" );
 
@@ -201,8 +203,6 @@ void* call_host_sbe_start( void *io_pArgs )
             FAPI_INVOKE_HWP(l_errl,
                             proc_spless_sbe_startWA,
                             l_fapiProcTarget);
-
-            l_needDelay = true;
         }
         else
         {
@@ -235,15 +235,6 @@ void* call_host_sbe_start( void *io_pArgs )
         }
     }   // endfor
 
-    //TODO RTC 87845  Should really move this delay to
-    // check_slave_sbe_seeprom_complete to delay/poll instead
-    // of one big delay here.  For now if we started the slaves
-    // delay ~2.5 sec for them to complete
-    if(l_needDelay)
-    {
-        nanosleep( 2, 500000000 ); //sleep for 2.5 seconds
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start exit" );
 
     // end task, returning any errorlogs to IStepDisp
@@ -260,9 +251,17 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
     IStepError  l_stepError;
     void* sbeImgPtr = NULL;
     size_t sbeImgSize = 0;
+    size_t l_wait_time = MS_TO_WAIT_OTHERS;
+
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_check_slave_sbe_seeprom_complete entry" );
+
+    //If in FSPless environment -- give time for SBE to complete on first chip
+    if (!INITSERVICE::spBaseServicesEnabled())
+    {
+        l_wait_time = MS_TO_WAIT_FIRST;
+    }
 
     //
     //  get the master Proc target, we want to IGNORE this one.
@@ -314,7 +313,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         // Invoke the HWP
         FAPI_INVOKE_HWP(l_errl,
                         proc_check_slave_sbe_seeprom_complete,
-                        l_fapiProcTarget, sbeImgPtr);
+                        l_fapiProcTarget, sbeImgPtr, l_wait_time);
 
         if (l_errl)
         {
@@ -338,6 +337,9 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                       "completed ok");
 
         }
+
+        //after first one default to quick check time
+        l_wait_time = MS_TO_WAIT_OTHERS;
     }   // endfor
 
 
