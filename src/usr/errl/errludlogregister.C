@@ -52,7 +52,15 @@ void ErrlUserDetailsLogRegister::setStateLogHUID()
     iv_merge = true;
 
     // write the HUID of the target into the error log buffer
-    uint32_t attrHuid = get_huid(iv_pTarget);
+    // @todo RTC 108241 - improve workaround for MASTER_..._SENTINEL
+    uint32_t attrHuid = 0;
+    if( iv_pTarget == NULL ) {
+        attrHuid = 0x0;
+    } else if( iv_pTarget == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL ) {
+        attrHuid = 0xFFFFFFFF;
+    } else {
+        attrHuid = get_huid(iv_pTarget);
+    }
     uint8_t *pBuf = reinterpret_cast<uint8_t *>
             (reallocUsrBuf(sizeof(uint32_t) + sizeof(uint8_t)));
     memcpy(pBuf, &attrHuid, sizeof(uint32_t));

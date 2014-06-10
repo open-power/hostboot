@@ -675,6 +675,8 @@ void collectXscomFFDC(TARGETING::Target* i_target,
 
     TRACFCOMP(g_trac_xscom,"collectXscomFFDC: XSCOM COLLECT FFDC STARTED");
 
+    ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
+
     // Loop through the addresses you want to collect.
     for (int i = 0; i<4; i++)
     {
@@ -699,17 +701,6 @@ void collectXscomFFDC(TARGETING::Target* i_target,
                           io_buflen,
                           l_hmer);
 
-        // Always want to collect the Register FFDC.  Will append to the
-        // errorlog passed in by the caller and if the call got an error will
-        // append to that as well.
-
-        // Collect the data from the read
-        ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
-
-        l_logReg.addDataBuffer(&io_buffer, sizeof(io_buffer),
-                               DEVICE_XSCOM_ADDRESS(XscomAddr[i].addr));
-
-
         // If not successful
         if (l_err)
         {
@@ -720,9 +711,9 @@ void collectXscomFFDC(TARGETING::Target* i_target,
         // only add the Register data to the originating errorlog if successfull
         else
         {
-            // Add the register FFDC to the errorlog passed in. DO we do this
-            // all the time?  And can we log to more than one errorlog?
-            l_logReg.addToLog(io_errl);
+            // Collect the data from the read
+            l_logReg.addDataBuffer(&io_buffer, sizeof(io_buffer),
+                                   DEVICE_XSCOM_ADDRESS(XscomAddr[i].addr));
         }
 
         // unmap the device now that we are done with the scom to that area.
@@ -732,6 +723,9 @@ void collectXscomFFDC(TARGETING::Target* i_target,
         }
 
     }
+
+    // Add the register FFDC to the errorlog passed in.
+    l_logReg.addToLog(io_errl);
 
     return;
 }
@@ -792,13 +786,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // If we got a scom error.
         if (l_err)
         {
-
-            // Add Callouts to the errorlog
-            PIB::addFruCallouts(i_target,
-                                l_hmer.mXSComStatus,
-                                l_addr,
-                                l_err);
-
             // Call XscomCollectFFDC..
             collectXscomFFDC(i_target,
                              l_virtAddr,
@@ -826,6 +813,16 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Done, un-pin
         task_affinity_unpin();
 
+        // FRU callouts use targeting so this must be after the
+        //  mutex is unlocked
+        // Add Callouts to the errorlog
+        if( l_err )
+        {
+            PIB::addFruCallouts(i_target,
+                                l_hmer.mXSComStatus,
+                                l_addr,
+                                l_err);
+        }
     } while (0);
 
     return l_err;

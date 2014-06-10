@@ -32,6 +32,7 @@
 #include <xscom/piberror.H>
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
+#include <targeting/common/targetservice.H>
 
 namespace PIB
 {
@@ -87,7 +88,14 @@ void addFruCallouts(TARGETING::Target* i_target,
        break;
 
      case  PIB::PIB_CLOCK_ERROR: //b101
-        if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
+        if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+        {
+            // SENTINEL is a proc so use the OSC path
+            io_errl->addClockCallout(i_target,
+                                HWAS::OSCREFCLK_TYPE,
+                                HWAS::SRCI_PRIORITY_LOW);
+        }
+        else if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
                     TARGETING::TYPE_PROC)
         {
             //check for PCI range
