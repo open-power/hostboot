@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,6 +58,7 @@
 #include    <hwpf/hwp/occ/occ.H>
 #include    <sys/mm.h>
 #include    <devicefw/userif.H>
+#include    <util/misc.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
@@ -77,6 +81,9 @@
 #include    <intr/interrupt.H>
 #include    <kernel/ipc.H> // for internode data areas
 #include    <mbox/ipc_msg_types.H>
+#include    <pnor/pnorif.H>
+#include    <sys/mm.h>
+#include    <algorithm>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
@@ -88,7 +95,6 @@ using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-
 
 /**
  * @brief This function will call the Initservice interface to shutdown
@@ -507,6 +513,77 @@ void*    call_host_start_payload( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+static void simics_load_payload(uint64_t addr) __attribute__((noinline));
+static void simics_load_payload(uint64_t addr)
+{
+    MAGIC_INSTRUCTION(MAGIC_LOAD_PAYLOAD);
+}
+
+static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
+        uint64_t i_physAddr)
+{
+    // Get the section info from PNOR.
+    PNOR::SectionInfo_t pnorSectionInfo;
+    errlHndl_t err = PNOR::getSectionInfo( i_section,
+                                           pnorSectionInfo );
+    if( err != NULL )
+    {
+        return err;
+    }
+    const uint32_t payloadSize = pnorSectionInfo.size;
+
+    printk( "Loading PNOR section %d (%s) %d bytes @0x%lx\n",
+            i_section,
+            pnorSectionInfo.name,
+            payloadSize,
+            i_physAddr );
+
+    // Use simics optimization if we are running under simics which has very
+    // slow PNOR access.
+    if ( Util::isSimicsRunning()  )
+    {
+        simics_load_payload( i_physAddr );
+    }
+    else
+    {
+        // Map in the physical memory we are loading into.
+        uint64_t loadAddr = reinterpret_cast<uint64_t>(
+            mm_block_map( reinterpret_cast<void*>( i_physAddr ),
+                          payloadSize ) );
+
+        // Print out inital progress bar.
+#ifdef CONFIG_CONSOLE
+        const int progressSteps = 80;
+        int progress = 0;
+        for ( int i = 0; i < progressSteps; ++i )
+        {
+            printk( "." );
+        }
+        printk( "\r" );
+#endif
+
+        // Load the data block by block and update the progress bar.
+        const uint32_t BLOCK_SIZE = 4096;
+        for ( uint32_t i = 0; i < payloadSize; i += BLOCK_SIZE )
+        {
+            memcpy( reinterpret_cast<void*>( loadAddr + i ),
+                    reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
+                    std::min( payloadSize - i, BLOCK_SIZE ) );
+#ifdef CONFIG_CONSOLE
+            for ( int new_progress = (i * progressSteps) / payloadSize;
+                progress <= new_progress; progress++ )
+            {
+                printk( "=" );
+            }
+#endif
+        }
+#ifdef CONFIG_CONSOLE
+        printk( "\n" );
+#endif
+    }
+
+    return NULL;
+}
 
 //
 // Call shutdown
@@ -607,6 +684,8 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             // SP Base Services not enabled
             if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()))
             {
+                err = load_pnor_section( PNOR::PAYLOAD, payloadBase );
+                if ( err ) { break; }
                 payloadData = DEVTREE::get_flatdevtree_phys_addr();
             }
         }

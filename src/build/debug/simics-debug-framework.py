@@ -6,7 +6,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] Google Inc.
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -502,6 +505,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7011: #MAGIC_SIMICS_CHECK
         cpu.r3 = 1
         print "TimeManager::cv_isSimicsRunning = true"
+
+    if arg == 7012:  # MAGIC_LOAD_PAYLOAD
+        load_addr = cpu.r3
+        flash_file = conf.fpga0.sfc_master_mmio_image.files[0][0]
+        print 'loading payload from', flash_file, 'to 0x%x' % load_addr
+        cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
+        SIM_run_alone( run_command, cmd )
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
