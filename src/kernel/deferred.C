@@ -31,10 +31,20 @@
     reinterpret_cast<DeferredWork*>((item)->iv_cpus_and_next & 0xFFFFFFFF)
 
 /** Set the DeferredWork pointer part of a iv_cpus_and_next instance var. */
-#define DEFERRED_QUEUE_SET_NEXT_PTR(item) \
-    (item)->iv_cpus_and_next = \
-            ((item)->iv_cpus_and_next & 0xFFFFFFFF00000000ull) | \
-            reinterpret_cast<uint64_t>(item)
+#define DEFERRED_QUEUE_SET_NEXT_PTR(tail,item) \
+    { \
+        uint64_t old_value = 0; \
+        uint64_t new_value = 0; \
+        do \
+        { \
+            old_value = (tail)->iv_cpus_and_next; \
+            new_value = (old_value & 0xFFFFFFFF00000000ull) | \
+                        reinterpret_cast<uint64_t>(item); \
+        } \
+        while (!__sync_bool_compare_and_swap(&(tail)->iv_cpus_and_next, \
+                                             old_value, \
+                                             new_value)); \
+    }
 
 /** Extract the CPU count portion of a iv_cpus_and_next instance var. */
 #define DEFERRED_QUEUE_GET_CPU_COUNT(item) (item)->iv_cpus_and_next >> 32
@@ -79,7 +89,7 @@ void DeferredQueue::_insert(DeferredWork* i_work)
         }
 
         // Add work item to the end of the list.
-        DEFERRED_QUEUE_SET_NEXT_PTR(i_work);
+        DEFERRED_QUEUE_SET_NEXT_PTR(tail, i_work);
     }
 
     lock.unlock();
@@ -124,6 +134,9 @@ void DeferredQueue::_complete(DeferredWork* i_work)
     {
         old_ptr = iv_cpus_and_next;
     } while(!__sync_bool_compare_and_swap(&iv_cpus_and_next, old_ptr, new_ptr));
+
+    // Clean up our own queue pointer.
+    DEFERRED_QUEUE_SET_NEXT_PTR(i_work, (DeferredWork*)NULL);
 
     // Get the CPU count from the old object pointer and wait until those
     // CPUs get into i_work.
