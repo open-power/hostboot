@@ -456,13 +456,14 @@ namespace TRACEDAEMON
                 msg_t* msg = msg_allocate();
                 msg->type = DaemonIf::TRACE_CONT_TRACE_BUFFER;
                 msg->data[1] = i_size;
-                msg->extra_data = i_buffer;
+                msg->extra_data = MBOX::allocate(i_size);
+                memcpy(msg->extra_data,i_buffer,i_size);
+                free(i_buffer);
 
                 errlHndl_t l_errl = MBOX::send(MBOX::FSP_TRACE_MSGQ, msg);
                 if (l_errl)
                 {
                     errlCommit(l_errl, TRACE_COMP_ID);
-                    free(i_buffer);
                     msg_free(msg);
                 }
             }
@@ -494,7 +495,7 @@ namespace TRACEDAEMON
         if (l_errl)
         {
             errlCommit(l_errl, TRACE_COMP_ID);
-            free(i_buffer);
+            MBOX::deallocate(i_buffer);
             msg_free(msg);
         }
     }
@@ -730,7 +731,9 @@ namespace TRACEDAEMON
                             // curBuffer pointer is transfered to mailbox now.
                         }
 
-                        curBuffer = reinterpret_cast<char*>(malloc(PAGESIZE));
+                        curBuffer = reinterpret_cast<char*>
+                            (MBOX::allocate(PAGESIZE));
+
                         memset(curBuffer, '\0', PAGESIZE);
                         curBuffer[0] = TRACE_BUF_CONT;
                         curBufferSize = 1;

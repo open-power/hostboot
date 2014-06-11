@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,6 +39,7 @@
 #include <map>
 #include <util/locked/list.H>
 #include <intr/interrupt.H>
+#include <limits.h>
 
 extern const char* VFS_ROOT_MSG_MBOX;
 
@@ -61,6 +64,8 @@ namespace MBOX
         MSG_MBOX_RESUME,
         MSG_IPC,
         MSG_LOCAL_IPC,
+        MSG_MBOX_ALLOCATE,
+        MSG_MBOX_DEALLOCATE,
     };
 
 
@@ -249,6 +254,20 @@ namespace MBOX
             void invalidMsgResponder(mbox_msg_t & i_mbox_msg);
 
             /**
+             * Handle an allocate message
+             * @param[in] The allocate message
+             */
+            void handleAllocate(msg_t* i_msg);
+
+            /**
+             * Unallocate storage
+             * @param[in] Pointer to allocated storage
+             * @note If i_ptr is not owned by mbox then
+             * storage is just freed
+             */
+            void deallocate(void * i_ptr);
+
+            /**
              * Query Quiesced
              * @returns [true|false]
              */
@@ -258,6 +277,7 @@ namespace MBOX
             enum
             {
                 MAX_RETRY_COUNT = 3,
+                MAX_ALLOCATION = 64 * KILOBYTE,
             };
 
             /**
@@ -288,6 +308,10 @@ namespace MBOX
             typedef std::list<mbox_msg_t> send_q_t;
             typedef Util::Locked::List<msg_respond_t, msg_t *> respond_q_t;
             typedef std::map<queue_id_t,msg_q_t> registry_t;
+            typedef std::list<msg_t *> msg_list_t;
+
+            typedef std::pair<uint64_t, uint64_t> addr_size_t;
+            typedef std::list<addr_size_t> addr_list_t;
 
             msg_q_t     iv_msgQ;        //!< mailbox mesage queue
             send_q_t    iv_sendq;       //!< msg to send queue
@@ -304,6 +328,10 @@ namespace MBOX
             bool        iv_dma_pend;    //!< Request pending for more DMA bufs
             bool        iv_disabled;    //!< Mailboxsp shut off (rejects new)
             bool        iv_suspended;   //!< Mailbox is suspended (queues new)
+            uint64_t    iv_sum_alloc;   //!< Total extra_data storage allocated
+            msg_list_t  iv_pend_alloc;  //!< Pending memory allocations
+            addr_list_t iv_allocAddrs;  //!< memory addresses allocated by mbox
+
     };
 };
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -530,7 +532,16 @@ msg_t *ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
         msg->data[0] = io_err->eid();
         msg->data[1] = l_msgSize;
 
-        void * temp_buff = malloc( l_msgSize );
+        void * temp_buff = NULL;
+        if( iv_isMboxEnabled )
+        {
+            temp_buff = MBOX::allocate( l_msgSize );
+        }
+        else
+        {
+            temp_buff = malloc( l_msgSize );
+        }
+
         io_err->flatten ( temp_buff, l_msgSize );
         msg->extra_data = temp_buff;
 
@@ -551,7 +562,7 @@ msg_t *ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
                TRACFCOMP(g_trac_errl, ERR_MRK"Failed sending error log to FSP");
 
                //Free the extra data due to the error
-               free( msg->extra_data );
+               MBOX::deallocate( msg->extra_data );
                msg_free( msg );
                msg = NULL;
 

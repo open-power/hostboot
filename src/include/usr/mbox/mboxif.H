@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -130,6 +132,27 @@ namespace MBOX
      * @note  FSP Mbox re-enabled, queued messages sent.
      */
     errlHndl_t resume();
+
+    /**
+     * Allocate storage for mailbox message extra_data for asynchronous
+     *  messages.
+     *
+     * @param[in] Number of bytes to allocate
+     * @return pointer to storage
+     *
+     * @note This call may block until memory becomes available if the memory
+     *       sum of of all mbox messages is excessive.
+     *
+     * @note a call to MOX::send(..) will release the storage.
+     */
+    void * allocate(size_t);
+
+    /**
+     * Deallocate storage for a mailbox message extra_data
+     *
+     * @param[in] pointer to storage
+     */
+    void deallocate(void * i_ptr);
 
 }; // end namespace MBOX
 

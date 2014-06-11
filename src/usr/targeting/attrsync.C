@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -107,7 +109,7 @@ namespace TARGETING
                 msg->data[1] = PAGESIZE;
 
                 // allocated storage will always be 4k
-                msg->extra_data = malloc( PAGESIZE );
+                msg->extra_data = MBOX::allocate( PAGESIZE );
 
                 // copy the attributes from mem to our buffer.
                 memcpy( msg->extra_data,

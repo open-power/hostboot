@@ -80,7 +80,10 @@ MailboxSp::MailboxSp()
         iv_rts(true),
         iv_dma_pend(false),
         iv_disabled(true),
-        iv_suspended(false)
+        iv_suspended(false),
+        iv_sum_alloc(0),
+        iv_pend_alloc(),
+        iv_allocAddrs()
 {
     // mailbox target
     TARGETING::targetService().masterProcChipTargetHandle(iv_trgt);
@@ -431,6 +434,17 @@ void MailboxSp::msgHandler()
 
                 break;
 
+            case MSG_MBOX_ALLOCATE:
+                handleAllocate(msg);
+                break;
+
+            case MSG_MBOX_DEALLOCATE:
+                {
+                    void * ptr = reinterpret_cast<void*>(msg->data[0]);
+                    deallocate(ptr);
+                }
+                break;
+
             default:
 
                 TRACFCOMP(g_trac_mbox, ERR_MRK "MailboxSp::msgHandler() "
@@ -530,7 +544,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
             TRACDCOMP( g_trac_mbox, "free extra_data %p",
                         mbox_msg.msg_payload.extra_data );
 
-            free ( mbox_msg.msg_payload.extra_data );
+            deallocate ( mbox_msg.msg_payload.extra_data );
 
             mbox_msg.msg_payload.extra_data = NULL;
         }
@@ -621,7 +635,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                 iv_msg_to_send.msg_payload.extra_data =
                   reinterpret_cast<void*>(iv_dmaBuffer.toPhysAddr(dma_buffer));
 
-                free(payload->extra_data);
+                deallocate( payload->extra_data );
                 payload->extra_data = NULL;
             }
             else  // DMA buffer request from FSP
@@ -1709,6 +1723,17 @@ void MailboxSp::handleShutdown()
         crit_assert(0);
     }
 
+    if(iv_pend_alloc.size() || iv_allocAddrs.size() || iv_sum_alloc)
+    {
+        TRACFCOMP(g_trac_mbox,WARN_MRK
+                  "Pending memory allocations = %d "
+                  "Allocated memory entrys = %d "
+                  "Allocated memory size = %d",
+                  iv_pend_alloc.size(),
+                  iv_allocAddrs.size(),
+                  iv_sum_alloc);
+    }
+
     msg_respond(iv_msgQ,iv_shutdown_msg);
     TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is shutdown");
 }
@@ -1726,6 +1751,71 @@ void MailboxSp::resume()
     if(!iv_disabled)
     {
         send_msg();   // send next message on queue
+    }
+}
+
+void MailboxSp::handleAllocate(msg_t * i_msg)
+{
+    uint64_t size = i_msg->data[0];
+    msg_t * msg = i_msg;
+
+    // Try to allocate storage
+    // If success then respond to message now else respond to message later
+    if((iv_sum_alloc + size) < MAX_ALLOCATION)
+    {
+        uint64_t address = reinterpret_cast<uint64_t>(malloc(size));
+        iv_sum_alloc += size;
+        iv_allocAddrs.push_back(addr_size_t(address,size));
+        msg->data[1] = address;
+        msg_respond(iv_msgQ,msg);
+    }
+    else // save request on pending queue & block task by not responding
+    {
+        iv_pend_alloc.push_back(msg);
+    }
+}
+
+void MailboxSp::deallocate(void * i_ptr)
+{
+    // if MBOX owns this then adjust iv_sum_alloc and
+    // remove addr from iv_allocAddrs
+    addr_list_t::iterator itr = iv_allocAddrs.begin();
+    for(; itr != iv_allocAddrs.end(); ++itr)
+    {
+        if(itr->first == reinterpret_cast<uint64_t>(i_ptr))
+        {
+            break;
+        }
+    }
+
+    free(i_ptr);
+
+    if(itr != iv_allocAddrs.end())
+    {
+        iv_sum_alloc -= itr->second;
+        iv_allocAddrs.erase(itr);
+
+        // check to see if next allocation(s) can be met
+        while(iv_pend_alloc.size() != 0)
+        {
+            msg_t * msg = iv_pend_alloc.front();
+            uint64_t size = msg->data[0];
+            if((iv_sum_alloc + size) < MAX_ALLOCATION)
+            {
+                uint64_t address = reinterpret_cast<uint64_t>(malloc(size));
+                iv_sum_alloc += size;
+                iv_allocAddrs.push_back(addr_size_t(address,size));
+                msg->data[1] = address;
+                msg_respond(iv_msgQ,msg);
+                iv_pend_alloc.pop_front();
+            }
+            else
+            {
+                // stop on first allocation that can't be met
+                // Must keep messages in order
+                break;
+            }
+        }
     }
 }
 
@@ -2017,21 +2107,22 @@ errlHndl_t MBOX::resume()
 
 errlHndl_t MBOX::makeErrlMsgQSendFail(uint64_t i_errno)
 {
-        TRACFCOMP(g_trac_mbox, ERR_MRK"Mailbox Service not available");
+    TRACFCOMP(g_trac_mbox, ERR_MRK"Mailbox Service not available");
 
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        MBOX::MOD_MBOX_MSGQ_FAIL
-         * @reasoncode      MBOX::RC_MSG_SEND_ERROR
-         * @userdata1       kernel errno
-         * @userdata2       <unused>
-         *
-         * @devdesc         Message send to mailbox sp failed
-         *
-         */
-        errlHndl_t err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
+    /*@ errorlog tag
+     * @errortype       ERRL_SEV_INFORMATIONAL
+     * @moduleid        MBOX::MOD_MBOX_MSGQ_FAIL
+     * @reasoncode      MBOX::RC_MSG_SEND_ERROR
+     * @userdata1       kernel errno
+     * @userdata2       <unused>
+     *
+     * @devdesc         Message send to mailbox sp failed
+     * @custdesc        A problem occurred during the IPL of the system
+     *
+     */
+    errlHndl_t err = new ERRORLOG::ErrlEntry
+        (
+         ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
              MBOX::MOD_MBOX_MSGQ_FAIL,            // moduleid
              MBOX::RC_MSG_SEND_ERROR,             // reason code
              i_errno,
@@ -2041,3 +2132,76 @@ errlHndl_t MBOX::makeErrlMsgQSendFail(uint64_t i_errno)
 
         return err;
 }
+
+// ----------------------------------------------------------------------------
+
+void * MBOX::allocate(size_t i_size)
+{
+    void * response = NULL;
+
+    msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
+    if(mboxQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_MBOX_ALLOCATE;
+        msg->data[0] = i_size;
+
+        int rc = msg_sendrecv(mboxQ, msg);
+
+        if (rc)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK
+                      "MBOX::allocate msg_sendrecv() failed. errno = %d",
+                      rc);
+            // Creating error log would cause recursion on this function.
+            // Leave response NULL and get memory from the heap.
+        }
+        else
+        {
+            response = reinterpret_cast<void *>(msg->data[1]);
+        }
+
+        msg_free(msg);
+    }
+    else
+    {
+        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOX::allocate - "
+                  "Mailbox Service not available");
+    }
+
+    if(NULL == response)
+    {
+        response = malloc(i_size);
+    }
+    
+    return response;
+}
+
+void MBOX::deallocate(void * i_ptr)
+{
+    msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
+    if(mboxQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_MBOX_DEALLOCATE;
+        msg->data[0] = reinterpret_cast<uint64_t>(i_ptr);
+
+        int rc = msg_sendrecv(mboxQ, msg);
+        if(rc)
+        {
+            // kernel problem, Creating error log could cause recursion on
+            // this function - just free memory from heap
+            TRACFCOMP(g_trac_mbox, ERR_MRK
+                      "MBOX::deallocate msg_sendrecv() failed. errno = %d",
+                      rc);
+            free(i_ptr);
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOX::deallocate - "
+                  "Mailbox Service not available");
+        free(i_ptr);
+    }
+}
+
