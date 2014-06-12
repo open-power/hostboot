@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -83,5 +85,6 @@ TESTS += prdfTest_ProcCentFir.H
 TESTS += prdfTest_ProcMbsFir.H
 TESTS += prdfTest_ProcTpLFir.H
 TESTS += prdfTest_CentCs.H
+TESTS += prdfTest_CenTpLFir.H
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -526,9 +528,17 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         break;
 
                     case PRDcalloutData::TYPE_TARGET:
-                    case PRDcalloutData::TYPE_PROCCLK:
-                    case PRDcalloutData::TYPE_PCICLK:
                         strcat( data, "(HUID)" );
+                        i_parser.PrintString( header, data );
+                        break;
+
+                    case PRDcalloutData::TYPE_PROCCLK:
+                        strcat( data, "(PROCCLK)" );
+                        i_parser.PrintString( header, data );
+                        break;
+
+                    case PRDcalloutData::TYPE_PCICLK:
+                        strcat( data, "(PCICLK)" );
                         i_parser.PrintString( header, data );
                         break;
 

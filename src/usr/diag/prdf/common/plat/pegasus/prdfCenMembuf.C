@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -289,41 +291,12 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     #define PRDF_FUNC "[Membuf::PostAnalysis] "
     int32_t l_rc;
 
-    #ifdef __HOSTBOOT_MODULE
-
     // In hostboot, we need to clear associated bits in the MCIFIR bits.
-    do
+    l_rc = MemUtils::mcifirCleanup( i_mbChip, i_sc );
+    if( SUCCESS != l_rc )
     {
-        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
-        if ( NULL == mcsChip )
-        {
-            PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );
-            break;
-        }
-
-        // Clear the associated MCIFIR bits for all attention types.
-        // NOTE: If there are any active attentions left in the Centaur the
-        //       associated MCIFIR bit will be redriven with the next packet on
-        //       the bus.
-        SCAN_COMM_REGISTER_CLASS * firand = mcsChip->getRegister("MCIFIR_AND");
-
-        firand->setAllBits();
-        firand->ClearBit(12); // CS
-        firand->ClearBit(15); // RE
-        firand->ClearBit(16); // SPA
-        firand->ClearBit(17); // maintenance command complete
-
-        l_rc = firand->Write();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"MCIFIR_AND write failed" );
-            break;
-        }
-
-    } while (0);
-
-    #endif // __HOSTBOOT_MODULE
+        PRDF_ERR( PRDF_FUNC"mcifirCleanup() failed");
+    }
 
     l_rc = MemUtils::chnlCsCleanup( i_mbChip, i_sc );
     if( SUCCESS != l_rc )

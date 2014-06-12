@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +35,7 @@ PRDF_RULE_PLUGINS_PEGASUS += prdfCenMembuf.o
 PRDF_RULE_PLUGINS_PEGASUS += prdfP8TodPlugins.o
 PRDF_RULE_PLUGINS_PEGASUS += prdfCenPll.o
 PRDF_RULE_PLUGINS_PEGASUS += prdfPlatP8Proc.o
+PRDF_RULE_PLUGINS_PEGASUS += prdfPlatCenMemUtils.o
 
 # Object files for PRDF rule plugins, but include sim extensions.
 PRDF_RULE_PLUGINS_PEGASUS_WSIM += prdfP8SystemSpecific.o

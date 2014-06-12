@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -145,14 +147,27 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
 
     do
     {
-        P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
-        for( ; itr != procPllErrRegList.end(); ++itr)
+        for(P8DataBundle::ProcPllErrRegListIter itr =
+            procPllErrRegList.begin();
+            itr != procPllErrRegList.end(); ++itr)
         {
             rc = (*itr).errReg->Read();
-            if (rc != SUCCESS) break;
+            if (rc != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"ERROR_REG read failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                break;
+            }
 
             rc = (*itr).configReg->Read();
-            if (rc != SUCCESS) break;
+            if (rc != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"CONFIG_REG read failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                break;
+            }
 
             if( P8DataBundle::PB == (*itr).type )
             {
@@ -216,10 +231,20 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
     do
     {
         rc = pciErrReg->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         rc = pciConfigReg->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         if(pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
            !pciConfigReg->IsBitSet(PLL_ERROR_MASK))
@@ -264,10 +289,20 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     do
     {
         rc = TP_LFIR->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         rc = TP_LFIRmask->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         if( ! (TP_LFIR->IsBitSet(PLL_DETECT_P8) &&
                !TP_LFIRmask->IsBitSet(PLL_DETECT_P8)) )
@@ -321,29 +356,50 @@ int32_t ClearPll( ExtensibleChip * i_chip,
             GetProcPllErrRegList( i_chip, procPllErrRegList );
         }
 
-        P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
-        for( ; itr != procPllErrRegList.end(); ++itr)
+        int32_t tmpRC = SUCCESS;
+        for(P8DataBundle::ProcPllErrRegListIter itr =
+            procPllErrRegList.begin();
+            itr != procPllErrRegList.end(); ++itr)
         {
             (*itr).errReg->ClearBit(PLL_ERROR_BIT);
             if( P8DataBundle::PB == (*itr).type )
             {
                 (*itr).errReg->ClearBit(PB_DMI_LEFT_PLL_ERROR);
             }
-            rc |= (*itr).errReg->Write();
+            tmpRC = (*itr).errReg->Write();
+            if (tmpRC != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"ERROR_REG write failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                rc |= tmpRC;
+            }
         }
 
         // Clear pci osc error reg bit
         SCAN_COMM_REGISTER_CLASS * pciErrReg =
                 i_chip->getRegister("PCI_ERROR_REG");
         pciErrReg->ClearBit(PLL_ERROR_BIT);
-        rc |= pciErrReg->Write();
+        tmpRC = pciErrReg->Write();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG write failed"
+                     "for chip: 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
 
         // Clear TP_LFIR
         SCAN_COMM_REGISTER_CLASS * TP_LFIR =
                    i_chip->getRegister("TP_LFIR_AND");
         TP_LFIR->setAllBits();
         TP_LFIR->ClearBit(PLL_DETECT_P8);
-        rc |= TP_LFIR->Write();
+        tmpRC = TP_LFIR->Write();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+                     "for chip: 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
 
         // Need to clear the PLL Err Reg list so it can
         // be populated with fresh data on the next analysis
@@ -379,66 +435,92 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     if (CHECK_STOP != i_sc.service_data->GetAttentionType())
     {
-        MODEL procModel = getProcModel( i_chip->GetChipHandle() );
-        // fence off proc osc error reg bits
-        P8DataBundle * procdb = getDataBundle( i_chip );
-        P8DataBundle::ProcPllErrRegList & procPllErrRegList =
-            procdb->getProcPllErrRegList();
-        if( procPllErrRegList.empty() )
+        bool maskProcPllErr = false;
+        bool maskPciPllErr = false;
+        const SDC_MRU_LIST & l_mrus = i_sc.service_data->GetMruList();
+        int32_t tmpRC = SUCCESS;
+
+        for ( uint32_t i = 0; i  < l_mrus.size(); i++ )
         {
-            GetProcPllErrRegList( i_chip, procPllErrRegList );
+            if((PRDcalloutData::TYPE_PROCCLK ==
+                      l_mrus[i].callout.getType()) ||
+               ((PRDcalloutData::TYPE_TARGET ==
+                      l_mrus[i].callout.getType()) &&
+                (TYPE_OSCREFCLK ==
+                      getTargetType(l_mrus[i].callout.getTarget()))))
+            {
+                maskProcPllErr = true;
+            }
+            else if((PRDcalloutData::TYPE_PCICLK ==
+                      l_mrus[i].callout.getType()) ||
+                   ((PRDcalloutData::TYPE_TARGET ==
+                      l_mrus[i].callout.getType()) &&
+                    (TYPE_OSCPCICLK ==
+                      getTargetType(l_mrus[i].callout.getTarget()))))
+            {
+                maskPciPllErr = true;
+            }
         }
 
-        P8DataBundle::ProcPllErrRegListIter itr =
-                                   procPllErrRegList.begin();
-        for( ; itr != procPllErrRegList.end(); ++itr)
+        // fence off proc osc error reg bits
+        if(true == maskProcPllErr)
         {
-            // Error is already fenced
-            if( (*itr).configReg->IsBitSet(PLL_ERROR_MASK) )
+            P8DataBundle * procdb = getDataBundle( i_chip );
+            P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+                procdb->getProcPllErrRegList();
+            if( procPllErrRegList.empty() )
             {
-                continue;
+                GetProcPllErrRegList( i_chip, procPllErrRegList );
             }
 
-            bool needMask = false;
-            if( P8DataBundle::PB == (*itr).type )
+            for(P8DataBundle::ProcPllErrRegListIter itr =
+                procPllErrRegList.begin();
+                itr != procPllErrRegList.end(); ++itr)
             {
-                if( ((*itr).errReg->IsBitSet(PB_DMI_LEFT_PLL_ERROR)) ||
-                    (( MODEL_VENICE == procModel) &&
-                     ( (*itr).errReg->IsBitSet(PB_DMI_RIGHT_PLL_ERROR))) )
+                // Error is already fenced
+                if( (*itr).configReg->IsBitSet(PLL_ERROR_MASK) )
                 {
-                    (*itr).configReg->SetBit(PLL_ERROR_MASK);
-                    needMask = true;
+                    continue;
+                }
+
+                (*itr).configReg->SetBit(PLL_ERROR_MASK);
+
+                tmpRC = (*itr).configReg->Write();
+                if (tmpRC != SUCCESS)
+                {
+                    PRDF_ERR(PRDF_FUNC"CONFIG_REG write failed"
+                             "for chip: 0x%08x, type: 0x%08x",
+                             (*itr).chip->GetId(), (*itr).type);
+                    rc |= tmpRC;
                 }
             }
-            else if( (*itr).errReg->IsBitSet(PLL_ERROR_BIT) )
-            {
-                (*itr).configReg->SetBit(PLL_ERROR_MASK);
-                needMask = true;
-            }
 
-            if( needMask )
-            {
-                rc |= (*itr).configReg->Write();
-            }
+            // Need to clear the PLL Err Reg list so it can
+            // be populated with fresh data on the next analysis
+            // can do this in error case to save some space
+            procPllErrRegList.clear();
+
         }
 
         // fence off pci osc error reg bit
-        SCAN_COMM_REGISTER_CLASS * pciErrReg =
-            i_chip->getRegister("PCI_ERROR_REG");
-        SCAN_COMM_REGISTER_CLASS * pciConfigReg =
-            i_chip->getRegister("PCI_CONFIG_REG");
-
-        if(pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
-           !pciConfigReg->IsBitSet(PLL_ERROR_MASK))
+        if(true == maskPciPllErr)
         {
-            pciConfigReg->SetBit(PLL_ERROR_MASK);
-            rc |= pciConfigReg->Write();
-        }
+            SCAN_COMM_REGISTER_CLASS * pciConfigReg =
+                i_chip->getRegister("PCI_CONFIG_REG");
 
-        // Need to clear the PLL Err Reg list so it can
-        // be populated with fresh data on the next analysis
-        // can do this in error case to save some space
-        procPllErrRegList.clear();
+            if(!pciConfigReg->IsBitSet(PLL_ERROR_MASK))
+            {
+                pciConfigReg->SetBit(PLL_ERROR_MASK);
+                tmpRC = pciConfigReg->Write();
+                if (tmpRC != SUCCESS)
+                {
+                    PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG write failed"
+                             "for chip: 0x%08x",
+                             i_chip->GetId());
+                    rc |= tmpRC;
+                }
+            }
+        }
 
         // Since TP_LFIR bit is the collection of all of the
         // pll error reg bits, we can't mask it or we will not
@@ -548,10 +630,20 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
             i_chip->getRegister("PCI_CONFIG_REG");
 
         rc = pciErrReg->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         rc = pciConfigReg->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         if(pciErrReg->IsBitSet(PARITY_ERROR_BIT) &&
            !pciConfigReg->IsBitSet(PARITY_ERROR_MASK))
@@ -565,14 +657,27 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
         // Always get a list here since this is the entry point
         GetProcPllErrRegList( i_chip, procPllErrRegList );
 
-        P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
-        for( ; itr != procPllErrRegList.end(); ++itr)
+        for(P8DataBundle::ProcPllErrRegListIter itr =
+            procPllErrRegList.begin();
+            itr != procPllErrRegList.end(); ++itr)
         {
             rc = (*itr).errReg->Read();
-            if (rc != SUCCESS) break;
+            if (rc != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"ERROR_REG read failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                break;
+            }
 
             rc = (*itr).configReg->Read();
-            if (rc != SUCCESS) break;
+            if (rc != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"CONFIG_REG read failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                break;
+            }
 
             if((*itr).errReg->IsBitSet(PARITY_ERROR_BIT) &&
                !(*itr).configReg->IsBitSet(PARITY_ERROR_MASK))
@@ -620,15 +725,16 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
         P8DataBundle * procdb = getDataBundle( i_chip );
         P8DataBundle::ProcPllErrRegList & procPllErrRegList =
             procdb->getProcPllErrRegList();
+        int32_t tmpRC = SUCCESS;
 
         if( procPllErrRegList.empty() )
         {
             GetProcPllErrRegList( i_chip, procPllErrRegList );
         }
 
-        P8DataBundle::ProcPllErrRegListIter itr =
-                                 procPllErrRegList.begin();
-        for( ; itr != procPllErrRegList.end(); ++itr)
+        for(P8DataBundle::ProcPllErrRegListIter itr =
+            procPllErrRegList.begin();
+            itr != procPllErrRegList.end(); ++itr)
         {
             // Error is already fenced
             if( (*itr).configReg->IsBitSet(PARITY_ERROR_MASK) )
@@ -639,7 +745,14 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
             if( (*itr).errReg->IsBitSet(PARITY_ERROR_BIT) )
             {
                 (*itr).configReg->SetBit(PARITY_ERROR_MASK);
-                rc |= (*itr).configReg->Write();
+                tmpRC = (*itr).configReg->Write();
+                if (tmpRC != SUCCESS)
+                {
+                    PRDF_ERR(PRDF_FUNC"CONFIG_REG write failed"
+                             "for chip: 0x%08x, type: 0x%08x",
+                             (*itr).chip->GetId(), (*itr).type);
+                    rc |= tmpRC;
+                }
             }
         }
 
@@ -653,7 +766,13 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
            !pciConfigReg->IsBitSet(PARITY_ERROR_MASK))
         {
             pciConfigReg->SetBit(PARITY_ERROR_MASK);
-            rc |= pciConfigReg->Write();
+            tmpRC = pciConfigReg->Write();
+            if (tmpRC != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG write failed"
+                         "for 0x%08x", i_chip->GetId());
+                rc |= tmpRC;
+            }
         }
 
         // Since TP_LFIR bit is the collection of all of the
@@ -670,7 +789,7 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
 
     return rc;
 
-#undef PRDF_FUNC
+    #undef PRDF_FUNC
 }
 
 /**
@@ -697,26 +816,48 @@ int32_t ClearParityErr( ExtensibleChip * i_chip,
             GetProcPllErrRegList( i_chip, procPllErrRegList );
         }
 
-        P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
-        for( ; itr != procPllErrRegList.end(); ++itr)
+        int32_t tmpRC = SUCCESS;
+
+        for(P8DataBundle::ProcPllErrRegListIter itr =
+            procPllErrRegList.begin();
+            itr != procPllErrRegList.end(); ++itr)
         {
             (*itr).errReg->ClearBit(PARITY_ERROR_BIT);
-            rc |= (*itr).errReg->Write();
+            tmpRC = (*itr).errReg->Write();
+            if (tmpRC != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC"ERROR_REG write failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                rc |= tmpRC;
+            }
         }
 
         // Clear pci parity error
         SCAN_COMM_REGISTER_CLASS * pciErrReg =
                 i_chip->getRegister("PCI_ERROR_REG");
         pciErrReg->ClearBit(PARITY_ERROR_BIT);
-        rc |= pciErrReg->Write();
+        tmpRC = pciErrReg->Write();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG write failed"
+                     "for 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
 
         // Clear TP_LFIR
-        SCAN_COMM_REGISTER_CLASS * TP_LFIR =
+        SCAN_COMM_REGISTER_CLASS * TP_LFIR_and =
                    i_chip->getRegister("TP_LFIR_AND");
-        TP_LFIR->setAllBits();
+        TP_LFIR_and->setAllBits();
         // Parity error also feeds into this LFIR
-        TP_LFIR->ClearBit(PLL_DETECT_P8);
-        rc |= TP_LFIR->Write();
+        TP_LFIR_and->ClearBit(PLL_DETECT_P8);
+        tmpRC = TP_LFIR_and->Write();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+                     "for 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
     }
 
     if( rc != SUCCESS )

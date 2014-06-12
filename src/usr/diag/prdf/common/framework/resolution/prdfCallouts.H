@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2000,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -167,6 +169,8 @@ class PRDcallout
         switch ( iv_type )
         {
             case PRDcalloutData::TYPE_TARGET:
+            case PRDcalloutData::TYPE_PROCCLK:
+            case PRDcalloutData::TYPE_PCICLK:
                 return PlatServices::getHuid(iv_meldValue.target); break;
             case PRDcalloutData::TYPE_MEMMRU:
             case PRDcalloutData::TYPE_SYMFRU:
