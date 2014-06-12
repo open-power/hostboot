@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,7 +180,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     if(i_chipid == 0x0) //Master chip
     {
         uint32_t l_lpcInfo = 0xB0020; /*ECCB FW addr*/
-        dtOffset_t lpcNode = i_dt->addNode(xscomNode,"lpc",l_lpcInfo);
+        dtOffset_t lpcNode = i_dt->addNode(xscomNode,"isa",l_lpcInfo);
         i_dt->addPropertyString(lpcNode, "compatible", "ibm,power8-lpc");
         uint32_t lpc_prop[2] = { l_lpcInfo, 0x4 }; //# of scoms in range
         i_dt->addPropertyCells32(lpcNode, "reg", lpc_prop, 2);
