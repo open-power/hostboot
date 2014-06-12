@@ -2588,7 +2588,11 @@ rule IomcFir_0
   RECOVERABLE: IOMCFIR_0 & ~IOMCFIR_0_MASK & ~IOMCFIR_0_ACT0 &  IOMCFIR_0_ACT1;
 };
 
-group gIomcFir_0 filter singlebit
+group gIomcFir_0 filter priority( 10, 18, 26, 34,   # Channel failure
+                                   2,               # Recoverable
+                                  11, 19, 27, 35,   # Recoverable
+                                  12, 20, 28, 36,   # Recoverable
+                                   9, 17, 25, 33  ) # Recoverable
 {
     /** IOMCFIR_0[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -2757,7 +2761,11 @@ rule IomcFir_1
   RECOVERABLE: IOMCFIR_1 & ~IOMCFIR_1_MASK & ~IOMCFIR_1_ACT0 &  IOMCFIR_1_ACT1;
 };
 
-group gIomcFir_1 filter singlebit
+group gIomcFir_1 filter priority( 10, 18, 26, 34,   # Channel failure
+                                   2,               # Recoverable
+                                  11, 19, 27, 35,   # Recoverable
+                                  12, 20, 28, 36,   # Recoverable
+                                   9, 17, 25, 33  ) # Recoverable
 {
     /** IOMCFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR

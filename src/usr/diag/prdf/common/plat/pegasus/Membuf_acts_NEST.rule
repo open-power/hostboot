@@ -37,8 +37,12 @@ rule NestChipletFir
     ((NEST_CHIPLET_RE_FIR >> 2) & `17fc000000000000`) & ~NEST_CHIPLET_FIR_MASK;
 };
 
-group gNestChipletFir filter singlebit
+group gNestChipletFir filter priority( 3, 6, 5, 7 )
 {
+    # NOTE: The MBIFIR must be analyzed before the DMIFIR and both the MBIFIR
+    # and DMIFIR must be analyzed before the MBSFIR. All other FIRs will be
+    # analyzed in order.
+
     /** NEST_CHIPLET_FIR[3]
      *  Attention from LFIR
      */
@@ -167,7 +171,8 @@ rule DmiFir
     RECOVERABLE: DMIFIR & ~DMIFIR_MASK & ~DMIFIR_ACT0 &  DMIFIR_ACT1;
 };
 
-group gDmiFir filter singlebit
+group gDmiFir filter priority( 10,              # Channel failure
+                                2, 11, 12, 9  ) # Recoverable
 {
     /** DMIFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -421,7 +426,8 @@ rule MbiFir
     RECOVERABLE: MBIFIR & ~MBIFIR_MASK & ~MBIFIR_ACT0 &  MBIFIR_ACT1;
 };
 
-group gMbiFir filter singlebit
+group gMbiFir filter priority(  8, 9, 19, 20, 6, 0, # Channel failure
+                               16, 5, 10 )          # Recoverable
 {
     /** MBIFIR[0]
      *  MBIFIRQ_REPLAY_TIMEOUT
@@ -581,12 +587,12 @@ group gMbsFir filter singlebit
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
      */
-    (MbsFir, bit(3)) ? chkChnlReplTOCalloutMcsSelfThr1UE;
+    (MbsFir, bit(3)) ? calloutDmiBusTh1UE;
 
     /** MBSFIR[4]
      *  MBS_FIR_REG_INTERNAL_TIMEOUT
      */
-    (MbsFir, bit(4)) ? chkChnlReplTOSelfMedThr1UE;
+    (MbsFir, bit(4)) ? SelfMedThr1UE;
 
     /** MBSFIR[5]
      *  MBS_FIR_REG_INT_BUFFER_CE
@@ -1273,29 +1279,6 @@ actionclass calloutDmiBusTh1 { calloutDmiBus; threshold1; };
 
 /** Callout the DMI bus, threshold 2 per day */
 actionclass calloutDmiBusTh2pday { calloutDmiBus; threshold2pday; };
-
-/** Callout MCS, centaur, threshold 1 and set SUE genreation point */
-actionclass CalloutMcsMedSelfMedThr1UE
-{
-    callout(connected(TYPE_MCS),MRU_MED);
-    calloutSelfMed;
-    threshold1;
-    SUEGenerationPoint;
-};
-
-/** If channel Replay Timeout do nothing else
- *  execute CalloutMcsMedSelfMedThr1UE
- */
-actionclass chkChnlReplTOCalloutMcsSelfThr1UE
-{
-    try( funccall("checkChnlReplayTimeOut"), CalloutMcsMedSelfMedThr1UE );
-};
-
-/** If no channel Replay Timeout, execute SelfMedThr1UE */
-actionclass chkChnlReplTOSelfMedThr1UE
-{
-    try( funccall("checkChnlReplayTimeOut"), SelfMedThr1UE );
-};
 
 /** If no sparebit is set, execute calloutDmiBusTh2pday*/
 actionclass analyzeSpareBitAndThr

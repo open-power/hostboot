@@ -1086,79 +1086,6 @@ int32_t MaskMbaCalSecondaryBits( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 /**
- * @fn checkChnlReplayTimeOut
- * @brief Check if channel Replay Timeout is present
- *
- * @param  i_chip       The Centaur chip.
- * @param  i_sc         ServiceDataColector.
- *
- * @return SUCCESS if Channel replay Timout bits are set, FAIL otherwise.
-
- */
-int32_t checkChnlReplayTimeOut( ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc  )
-{
-    #define PRDF_FUNC "[checkChnlReplayTimeOut] "
-
-    // We will return FAIL from this function if high priority bits are
-    // not set. This will trigger rule code to execute alternate resolution
-
-    int32_t l_rc = SUCCESS;
-    do
-    {
-        SCAN_COMM_REGISTER_CLASS * mbiFir = i_chip->getRegister("MBIFIR");
-        SCAN_COMM_REGISTER_CLASS * mbiFirMask =
-                                        i_chip->getRegister("MBIFIR_MASK");
-
-        l_rc = mbiFir->Read();
-        l_rc |= mbiFirMask->Read();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"MBIFIR/MBIFIR_MASK read failed"
-                     "for 0x%08x", i_chip->GetId());
-            break;
-        }
-
-        if( ( mbiFir->IsBitSet(0)) && ( !  mbiFirMask->IsBitSet(0)) ) break;
-
-        CenMembufDataBundle * mbdb = getMembufDataBundle( i_chip );
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
-
-        if( NULL == mcsChip )
-        {
-            l_rc = FAIL;
-            break;
-        }
-
-        SCAN_COMM_REGISTER_CLASS * mciFir = mcsChip->getRegister("MCIFIR");
-        SCAN_COMM_REGISTER_CLASS * mciFirMask =
-                                            mcsChip->getRegister("MCIFIR_MASK");
-        l_rc = mciFir->Read();
-        l_rc |= mciFirMask->Read();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"MCIFIR/MCIFIR_MASK read failed"
-                     "for 0x%08x", mcsChip->GetId());
-            break;
-        }
-        if( ( mciFir->IsBitSet(0)) && ( ! mciFirMask->IsBitSet(0)) ) break;
-
-        l_rc = FAIL;
-
-    }while( 0 );
-
-    // Do not commit error log as primary ( high priority )
-    // FIR bits are set and this is just a side effect.
-    if( SUCCESS == l_rc)
-        i_sc.service_data->DontCommitErrorLog();
-
-    return l_rc;
-    #undef PRDF_FUNC
-} PRDF_PLUGIN_DEFINE( Membuf, checkChnlReplayTimeOut );
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief Handles MCS Channel fail bits, if they exist.
  *
  * @param  i_membChip   The Centaur chip.
@@ -1211,8 +1138,7 @@ int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
         uint64_t mciFirBits     = mciFir->GetBitFieldJustified(0, 64);
         uint64_t mciFirMaskBits = mciFirMask->GetBitFieldJustified(0, 64);
 
-        if( ( mciFirBits & ( ~mciFirMaskBits ) ) &
-            chnlCsBitsMask )
+        if ( mciFirBits & ~mciFirMaskBits & chnlCsBitsMask )
         {
             l_rc = mcsChip->Analyze( i_sc,
                         i_sc.service_data->GetCauseAttentionType() );
