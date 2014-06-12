@@ -334,27 +334,28 @@ void* host_prd_hwreconfig( void *io_pArgs )
             if (errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: proc_enable_reconfig HWP returns error",
+                         "ERROR 0x%.8X: proc_enable_reconfig HWP returns error",
                           errl->reasonCode());
 
                 // Capture the target data in the elog
                 ERRORLOG::ErrlUserDetailsTarget(l_pMcs).addToLog( errl );
 
-                // Create IStep error log and cross reference error that occurred
+                //Create IStep error log and cross reference error that occurred
                 l_stepError.addErrorDetails(errl);
 
                 // Commit Error
                 errlCommit(errl, HWPF_COMP_ID);
+
+                // Don't keep calling proc_enable_reconfig. Treat as a fatal
+                // unexpected unrecoverable error and terminate the IPL.
+                break ; // break with error
             }
-            else
-            {
-                // Success
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Successfully ran proc_enable_reconfig HWP on "
-                        "MCS target HUID %.8X CENTAUR target HUID %.8X",
-                        l_currMcsHuid,
-                        l_currCentaurHuid);
-            }
+            // Success
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Successfully ran proc_enable_reconfig HWP on "
+                    "MCS target HUID %.8X CENTAUR target HUID %.8X",
+                    l_currMcsHuid,
+                    l_currCentaurHuid);
         }
     }
     while(0);
