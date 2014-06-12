@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -99,7 +101,7 @@ namespace LineDelete
          */
         explicit PrdfCacheCETable(
                     const ThresholdResolution::ThresholdPolicy i_thPolicy ) :
-            iv_thPolicy(i_thPolicy), cv_flushTimerInited(false), cv_total(0)
+            iv_thPolicy(i_thPolicy), cv_flushTimerInited(false)
         {}
 
         // NOTE: iv_thPolicy should never be deleted in this class so the
@@ -116,17 +118,6 @@ namespace LineDelete
              */
             bool addAddress(PrdfCacheAddress, STEP_CODE_DATA_STRUCT &);
 
-        /**
-         * @brief  Checks if the threshold had been reached for the given
-         *         address.
-         * @param  i_addr The CE address.
-         * @param  i_sdc  The Service Data Collector.
-         * @return TRUE if threshold has been reached and time interval has not
-         *         elapsed, FALSE otherwise.
-         */
-        bool addrThReached( PrdfCacheAddress i_addr,
-                            STEP_CODE_DATA_STRUCT & i_sdc );
-
             /** @fn PrdfCacheCETable::isIntervalElapsed()
              *  @param STEP_CODE_DATA_STRUCT & i_sdc
              *  @return TRUE if the interval time has elapsed.
@@ -138,56 +129,12 @@ namespace LineDelete
              */
             void flushTable();
 
-            /** @fn getTotalCount
-             *  Returns the total amount of CE hits in a table
-             *
-             *  @return uint32_t - the total CE hits in a table
-             */
-            uint32_t getTotalCount();        //zs01
-
-            /** @fn addToCaptureData
-             *  Adds CE table to the capture data.
-             *
-             *        @param The chip Handle.
-             *        @param The scom id.
-                *  @param The Service Data Collector.
-             */
-            void addToCaptureData(TARGETING::TargetHandle_t i_pchipHandle, int32_t, CaptureData &); // zs02
-
-            /** @fn getLargestEntry
-             *  @brief Will search the PrdfCacheCETable for the address with the
-             *         largest count.
-             *  @param The count of the highest entry (default = NULL).
-             *  @return Address with the largest count.
-             */
-            PrdfCacheAddress getLargestEntry( uint32_t * o_count = NULL );
-
-            /** @fn PrdfCacheCETable::getTableSize
-             *  @return uint32_t - The total number of entries in the table
-             */
-            uint32_t getTableSize(); //zs04
-
-             //mp26 a
-            /** @fn getCRCAnalysisEntries
-             *  @brief Will search the PrdfCacheCETable for the different count
-             *         values..
-             *  @param Output the highest count..
-             *  @param Output the second highest count..
-             *  @param Output the lowest count..
-             *  @return Address with the largest count.
-             */
-            PrdfCacheAddress getCRCAnalysisEntries(
-                                             uint32_t & o_countHigh,
-                                             uint32_t & o_count2ndHigh,
-                                             uint32_t & o_countLow);
-
       private:
 
         ThresholdResolution::ThresholdPolicy iv_thPolicy;
         PrdfCacheAddressTable cv_ceTable;
         Timer cv_flushTimer;
         bool cv_flushTimerInited;
-        uint32_t cv_total;        //zs01
 
     };
 

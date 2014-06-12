@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,7 +31,8 @@
 // Framwork includes
 #include <iipCaptureData.h>
 #include <prdfPlatServices.H>
-#include <prdfLineDelete.H>
+#include <prdfThresholdUtils.H>
+
 // Other includes
 #include <map>
 
@@ -88,7 +91,7 @@ class CenMbaRceTable
 
   private: // structs, typedefs
 
-    typedef std::map<CenRank, LineDelete::PrdfCacheCETable> RceTable;
+    typedef std::map<CenRank, TimeBasedThreshold> RceTable;
 
   private: // instance variables
 
