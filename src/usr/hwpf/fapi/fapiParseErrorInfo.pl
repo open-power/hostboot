@@ -21,7 +21,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseErrorInfo.pl,v 1.28 2014/03/26 21:31:21 mjjones Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.29 2014/06/11 16:47:16 maploetz Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -67,6 +67,8 @@
 #                  mjjones   03/20/14  Fix register FFDC collection bug when
 #                                      collecting chiplet registers
 #                  mjjones   03/26/14  Generate HWP error on unknown SBE error
+#                  maploetz  06/11/14  Callout deconfig/gard target on all SBE
+#                                      errors
 #
 # End Change Log *****************************************************
 #
@@ -342,6 +344,7 @@ print SBFILE "// XML.\n\n";
 print SBFILE "#ifndef FAPISETSBEERROR_H_\n";
 print SBFILE "#define FAPISETSBEERROR_H_\n\n";
 print SBFILE "#define FAPI_SET_SBE_ERROR(RC, ERRVAL)\\\n";
+print SBFILE "{\\\n";
 print SBFILE "switch (ERRVAL)\\\n";
 print SBFILE "{\\\n";
 
@@ -1201,6 +1204,16 @@ print EIFILE "\n\n#endif\n";
 print SBFILE "    default:\\\n";
 print SBFILE "        FAPI_SET_HWP_ERROR(RC, RC_SBE_UNKNOWN_ERROR);\\\n";
 print SBFILE "        break;\\\n";
+print SBFILE "}\\\n";
+print SBFILE "const void * l_objects[] = {&CHIP_IN_ERROR};\\\n";
+print SBFILE "fapi::ReturnCode::ErrorInfoEntry l_entries[1];\\\n";
+print SBFILE "l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_CDG;\\\n";
+print SBFILE "l_entries[0].target_cdg.iv_targetObjIndex = 0;\\\n";
+print SBFILE "l_entries[0].target_cdg.iv_callout = 1;\\\n";
+print SBFILE "l_entries[0].target_cdg.iv_deconfigure = 1;\\\n";
+print SBFILE "l_entries[0].target_cdg.iv_gard = 1;\\\n";
+print SBFILE "l_entries[0].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::HIGH;\\\n";
+print SBFILE "RC.addErrorInfo(l_objects, l_entries, 1);\\\n";
 print SBFILE "}\n\n";
 print SBFILE "#endif\n";
 
