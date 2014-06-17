@@ -32,34 +32,55 @@ namespace PNOR
 {
     enum PNORModuleId
     {
-        MOD_PNORRP_WAITFORMESSAGE       = 0x01, /**< pnorrp.C : PnorRP::waitForMessage */
-        MOD_PNORRP_COMPUTEDEVICEADDR    = 0x02, /**< pnorrp.C : PnorRP::computeDeviceAddr */
-        MOD_PNORRP_GETSECTIONINFO       = 0x03, /**< pnorrp.C : PnorRP::getSectionInfo */
-        MOD_PNORRP_COMPUTESECTION       = 0x04, /**< pnorrp.C : PnorRP::computeSection */
-        MOD_PNORRP_INITDAEMON           = 0x05, /**< pnorrp.C : PnorRP::initDaemon */
-        MOD_PNORRP_READTOC              = 0x06, /**< pnorrp.C : PnorRP::readTOC */
-        MOD_PNORRP_READFROMDEVICE       = 0x07, /**< pnorrp.C : PnorRP::readFromDevice */
-        MOD_PNORRP_WRITETODEVICE        = 0x08, /**< pnorrp.C : PnorRP::writeToDevice */
-        MOD_PNORRP_DIDSTARTUPFAIL       = 0x1C,  /** didStartupFail(rc) */
+        // pnorrp.C
+        MOD_PNORRP_WAITFORMESSAGE       = 0x01, /**< PnorRP::waitForMessage */
+        MOD_PNORRP_COMPUTEDEVICEADDR    = 0x02, /**< PnorRP::computeDeviceAddr */
+        MOD_PNORRP_GETSECTIONINFO       = 0x03, /**< PnorRP::getSectionInfo */
+        MOD_PNORRP_COMPUTESECTION       = 0x04, /**< PnorRP::computeSection */
+        MOD_PNORRP_INITDAEMON           = 0x05, /**< PnorRP::initDaemon */
+        MOD_PNORRP_READTOC              = 0x06, /**< PnorRP::readTOC */
+        MOD_PNORRP_READFROMDEVICE       = 0x07, /**< PnorRP::readFromDevice */
+        MOD_PNORRP_WRITETODEVICE        = 0x08, /**< PnorRP::writeToDevice */
+        MOD_PNORRP_DIDSTARTUPFAIL       = 0x09, /**< didStartupFail(rc) */
 
-        MOD_PNORDD_VERIFYADDRESSRANGE   = 0x11, /**< pnordd.C : PnorDD::verifyAddressRange */
-        MOD_PNORDD_READFLASH            = 0x12, /**< pnordd.C : PnorDD::readFlash */
-        MOD_PNORDD_WRITEFLASH           = 0x13, /**< pnordd.C : PnorDD::writeFlash */
-        MOD_PNORDD_POLLSFCOPCOMPLETE    = 0x14, /**< pnordd.C : PnorDD::pollSfcOpComplete */
-        MOD_PNORDD_SFCINIT              = 0x15, /**< pnordd.C : PnorDD::sfcInit */
-        MOD_PNORDD_READREGSPI           = 0x16, /**< pnordd.C : PnorDD::readRegSPI */
-        MOD_PNORDD_WRITEREGSPI          = 0x17, /**< pnordd.C : PnorDD::writeRegSPI */
-        MOD_PNORDD_READLPC              = 0x18, /**< pnordd.C : PnorDD::readLPC */
-        MOD_PNORDD_WRITELPC             = 0x19, /**< pnordd.C : PnorDD::writeLPC */
-        MOD_PNORDD_ERASEFLASH           = 0x1A, /**< pnordd.C : PnorDD::eraseFlash */
-        MOD_PNORDD_MICRONFLAGSTATUS     = 0x1B, /**< pnordd.C : PnorDD::micronFlagStatus */
-        MOD_PNORDD_CHECKFORSFCERRORS    = 0x1D, /**< pnordd.C : PnorDD::checkForErrors */
-        MOD_PNORDD_CHECKFOROPBERRORS    = 0x1E, /**< pnordd.C : PnorDD::checkForErrors */
-        MOD_PNORDD_HANDLEECCBERROR      = 0x1F, /**< pnordd.C : PnorDD::handleEccbError */
-        MOD_PNORDD_RESETPNOR            = 0x20, /**< pnordd.C : PnorDD::resetPnor */
-        MOD_PNORVALID_MAIN              = 0x21, /**< pnorvalid.C : Main Function */
-        MOD_PNORVALID_MAGIC             = 0x22, /**< pnorvalid.C : Magic Function */
+        // pnorvalid.C
+        MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
+        MOD_PNORVALID_MAGIC             = 0x0F, /**< validateAltMaster */
 
+        // pnordd.C
+        MOD_PNORDD_VERIFYADDRESSRANGE   = 0x11, /**< PnorDD::verifyAddressRange */
+        MOD_PNORDD_READFLASH            = 0x12, /**< PnorDD::readFlash */
+        MOD_PNORDD_WRITEFLASH           = 0x13, /**< PnorDD::writeFlash */
+        MOD_PNORDD_SFCINIT              = 0x14, /**< PnorDD::sfcInit */
+        MOD_PNORDD_ERASEFLASH           = 0x15, /**< PnorDD::eraseFlash */
+        MOD_PNORDD_CHECKFORERRORS       = 0x16, /**< PnorDD::checkForErrors */
+
+        // sfc_ibm.C
+        MOD_SFCIBM_VERIFYADDRESSRANGE   = 0x40, /**< SfcIBM::verifyAddressRange */
+        MOD_SFCIBM_READFLASH            = 0x41, /**< SfcIBM::readFlash */
+        MOD_SFCIBM_WRITEFLASH           = 0x42, /**< SfcIBM::writeFlash */
+        MOD_SFCIBM_POLLOPCOMPLETE       = 0x43, /**< SfcIBM::pollSfcOpComplete */
+        MOD_SFCIBM_SFCINIT              = 0x44, /**< SfcIBM::sfcInit */
+        MOD_SFCIBM_ERASEFLASH           = 0x45, /**< SfcIBM::eraseFlash */
+        MOD_SFCIBM_CHECKFORERRORS       = 0x46, /**< SfcIBM::checkForErrors */
+        MOD_SFCIBM_HWRESET              = 0x47, /**< SfcIBM::hwReset */
+
+        // sfc_fake.C
+        MOD_SFCFAKE_VERIFYADDRESSRANGE  = 0x60, /**< SfcFake::verifyAddressRange */
+        MOD_SFCFAKE_READFLASH           = 0x61, /**< SfcFake::readFlash */
+        MOD_SFCFAKE_WRITEFLASH          = 0x62, /**< SfcFake::writeFlash */
+        MOD_SFCFAKE_ERASEFLASH          = 0x63, /**< SfcFake::eraseFlash */
+        MOD_SFCFAKE_SENDSPICMD          = 0x64, /**< SfcFake::sendSpiCmd */
+
+        // sfc_ast2400.C
+        MOD_SFCAST2400_ENABLEWRITEMODE  = 0x80, /**< SfcAST2400::verifyAddressRange */
+        MOD_SFCAST2400_READFLASH        = 0x81, /**< SfcAST2400::readFlash */
+        MOD_SFCAST2400_WRITEFLASH       = 0x82, /**< SfcAST2400::writeFlash */
+        MOD_SFCAST2400_POLLOPCOMPLETE   = 0x83, /**< SfcAST2400::pollSfcOpComplete */
+        MOD_SFCAST2400_ERASEFLASH       = 0x84, /**< SfcAST2400::eraseFlash */
+
+        // nor_micron.C
+        MOD_NORMICRON_MICRONFLAGSTATUS  = 0xA0, /**< micronFlagStatus */
     };
 
     enum PNORReasonCode
@@ -88,6 +109,10 @@ namespace PNOR
         //termination_rc
         RC_REINITIALIZE_SFC          = PNOR_COMP_ID | 0x11,
         RC_SFC_ERROR                 = PNOR_COMP_ID | 0x12,
+        //termination_rc
+        RC_PNOR_INIT_FAILURE         = PNOR_COMP_ID | 0x13,
+        RC_CANNOT_ENABLE_WRITES      = PNOR_COMP_ID | 0x14,
+        RC_SFC_TIMEOUT               = PNOR_COMP_ID | 0x15,
     };
 
     enum UserDetailsTypes

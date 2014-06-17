@@ -92,9 +92,10 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
     errlHndl_t l_err = NULL;
 
-    assert( io_buflen == sizeof(uint8_t) ||
-        io_buflen == sizeof(uint16_t) ||
-        io_buflen == sizeof(uint32_t) );
+    // Only able to do 1,2,4 byte LPC operations
+    assert( (io_buflen == sizeof(uint8_t)) ||
+            (io_buflen == sizeof(uint16_t)) ||
+            (io_buflen == sizeof(uint32_t)) );
 
     // if the request is for something besides the master sentinel
     //  then we have to use our special side copy of the driver
@@ -180,9 +181,10 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
     errlHndl_t l_err = NULL;
 
-    assert( io_buflen == sizeof(uint8_t) ||
-        io_buflen == sizeof(uint16_t) ||
-        io_buflen == sizeof(uint32_t) );
+    // Only able to do 1,2,4 byte LPC operations
+    assert( (io_buflen == sizeof(uint8_t)) ||
+            (io_buflen == sizeof(uint16_t)) ||
+            (io_buflen == sizeof(uint32_t)) );
 
     // if the request is for something besides the master sentinel
     //  then we have to use our special side copy of the driver
@@ -236,7 +238,6 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     }
 
     return l_err;
-
 }
 
 // Register LPC access functions to DD framework
@@ -442,6 +443,22 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                         break;
                     }
 
+                case RESET_INIT:
+                    {
+                        // Set OPB LPCM FIR Mask
+                        //  hostboot will monitor these FIR bits
+                        size_t scom_size = sizeof(uint64_t);
+                        uint64_t fir_mask_data = OPB_LPCM_FIR_ERROR_MASK;
+                        // Write FIR Register
+                        l_err = deviceOp( DeviceFW::WRITE,
+                                      iv_proc,
+                                      &(fir_mask_data),
+                                      scom_size,
+                                      DEVICE_SCOM_ADDRESS(
+                                         OPB_LPCM_FIR_MASK_WO_OR_REG));
+                        if( l_err ) { break; }
+                    }
+
                 case RESET_ECCB:
                     {
                         // Write Reset Register to reset FW Logic registers
@@ -558,7 +575,6 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                                             0,
                                             true /*SW error*/);
 
-                        l_err->collectTrace(PNOR_COMP_NAME);
                         l_err->collectTrace(LPC_COMP_NAME);
 
                         break;
@@ -567,7 +583,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
 
             if ( l_err )
             {
-                // Indicate that we weren't successful in resetting LPC
+                // Indicate that we weren't successful in resetting
                 iv_errorRecoveryFailed = true;
                 TRACFCOMP( g_trac_lpc,ERR_MRK"LpcDD::hwReset> Fail doing LPC reset at level 0x%X (recovery count=%d): eid=0x%X", i_resetLevel, iv_errorHandledCount, l_err->eid());
             }
@@ -621,19 +637,9 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
             *o_addr = i_addr + LPCHC_MEM_SPACE;
             break;
         case LPC::TRANS_FW:
-            if( i_addr < LPCHC_FW_SPACE )
-            {
-                invalid_address = true;
-                break;
-            }
-            *o_addr = i_addr;
+            *o_addr = i_addr + LPCHC_FW_SPACE;
             break;
         case LPC::TRANS_REG:
-            if( i_addr >= 0x100 )
-            {
-                invalid_address = true;
-                break;
-            }
             *o_addr = i_addr + LPCHC_REG_SPACE;
             break;
         case LPC::TRANS_ABS:
@@ -646,6 +652,7 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
 
     if( invalid_address )
     {
+        TRACFCOMP( g_trac_lpc, "LpcDD::checkAddr() Invalid address : i_type=%d, i_addr=%X", i_type, i_addr );
         /*@
          * @errortype
          * @moduleid     LPC::MOD_LPCDD_CHECKADDR
@@ -776,9 +783,6 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
                 assert( false );
                 break;
         }
-
-        LPC_TRACFCOMP(g_trac_lpc, "writeLPC> %08X[%d] = %08X", l_addr, io_buflen,
-                      eccb_data >> (32 + 8 * (4 - io_buflen)));
 
         // Write data out
         size_t scom_size = sizeof(uint64_t);
@@ -913,7 +917,6 @@ errlHndl_t LpcDD::pollComplete(const ControlReg_t &i_ctrl,
 
             addFFDC(l_err);
             l_err->collectTrace(LPC_COMP_NAME);
-            l_err->collectTrace(PNOR_COMP_NAME);
             l_err->collectTrace(XSCOM_COMP_NAME);
 
             // Reset ECCB - handled below
@@ -932,18 +935,26 @@ errlHndl_t LpcDD::pollComplete(const ControlReg_t &i_ctrl,
     if ( l_err && ( l_resetLevel != RESET_CLEAR ) )
     {
         errlHndl_t tmp_err = hwReset(l_resetLevel);
-
         if ( tmp_err )
         {
             // Commit reset error since we have original error l_err
             TRACFCOMP(g_trac_lpc, "LpcDD::pollComplete> Error from reset() after previous error eid=0x%X. Committing reset() error log eid=0x%X.", l_err->eid(), tmp_err->eid());
 
             tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            tmp_err->collectTrace(PNOR_COMP_NAME);
             tmp_err->collectTrace(LPC_COMP_NAME);
             tmp_err->plid(l_err->plid());
             errlCommit(tmp_err, LPC_COMP_ID);
         }
+
+        // Limited in callout: no LPC sub-target, so calling out processor
+        l_err->addHwCallout( iv_proc,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::NO_DECONFIG,
+                             HWAS::GARD_NULL );
+
+        addFFDC(l_err);
+        l_err->collectTrace(LPC_COMP_NAME);
+        l_err->collectTrace(XSCOM_COMP_NAME);
     }
 
     return l_err;
@@ -964,19 +975,15 @@ void LpcDD::addFFDC(errlHndl_t & io_errl)
 
         ERRORLOG::ErrlUserDetailsLogRegister l_eud(iv_proc);
 
-        do {
-            // Add ECCB Status Register
-            l_eud.addData(DEVICE_SCOM_ADDRESS(ECCB_STAT_REG));
+        // Add ECCB Status Register
+        l_eud.addData(DEVICE_SCOM_ADDRESS(ECCB_STAT_REG));
 
-            // Add OPB LPC Master FIR
-            l_eud.addData(DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
+        // Add OPB LPC Master FIR
+        l_eud.addData(DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
 
-            //@todo - add more LPC regs RTC:37744
-            //LPCIRQ_STATUS = 0x38
-            //SYS_ERR_ADDR = 0x40
-
-        } while(0);
-
+        //@todo - add more LPC regs RTC:37744
+        //LPCIRQ_STATUS = 0x38
+        //SYS_ERR_ADDR = 0x40
 
         l_eud.addToLog(io_errl);
 
@@ -1117,7 +1124,6 @@ errlHndl_t LpcDD::checkForOpbErrors( ResetLevels &o_resetLevel )
                                         fir_reg.data64,
                                         o_resetLevel );
 
-        // Limited in callout: no PNOR target, so calling out processor
         l_err->addHwCallout( iv_proc,
                              HWAS::SRCI_PRIORITY_HIGH,
                              HWAS::NO_DECONFIG,
@@ -1133,7 +1139,6 @@ errlHndl_t LpcDD::checkForOpbErrors( ResetLevels &o_resetLevel )
         l_eud.addToLog(l_err);
 
         addFFDC(l_err);
-        l_err->collectTrace(PNOR_COMP_NAME);
         l_err->collectTrace(LPC_COMP_NAME);
 
     }

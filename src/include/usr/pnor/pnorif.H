@@ -55,7 +55,9 @@ enum SectionId
     MODULE_VPD,     /**< Module VPD */
     CENTAUR_VPD,    /**< Centaur VPD */
     ATTR_OVER,      /**< Attribute Override */
+    NVRAM,          /**< Opal NVRAM */
     TEST,           /**< Scratch space for PNOR test cases */
+
     NUM_SECTIONS,   /**< Number of defined sections */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
@@ -115,7 +117,5 @@ const uint32_t pnorTestSec_smartwrite_offset = 0x120;
 const uint32_t pnorTestSec_BMCAttrOverride_offset = 0x200;
 
 }
-
-
 
 #endif

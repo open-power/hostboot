@@ -46,7 +46,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
-TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW); //2K
+TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //2K
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -72,7 +72,8 @@ const char* cv_EYECATCHER[] = {
     "MVPD",     /**< PNOR::MODULE_VPD     : Module VPD */
     "CVPD",     /**< PNOR::CENTAUR_VPD    : Centaur VPD */
     "ATTROVER", /**< PNOR::ATTR_OVER      : Attribute Override */
-    "TEST",     /**< PNOR::TEST           : Test space for PNOR*/
+    "NVRAM",    /**< PNOR::NVRAM         : OPAL Storage */
+    "TEST",     /**< PNOR::TEST          : Test space for PNOR*/
 
     //Not currently used
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */

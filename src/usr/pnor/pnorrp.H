@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -260,6 +261,8 @@ class PnorRP
     // allow testcase to see inside
     friend class PnorRpTest;
     friend class PnorDdTest;
+    friend class SfcIBMTest;
+    friend class SfcAST2400Test;
 
     // allow this function to use constant(s)
     friend errlHndl_t PNOR::validateAltMaster( void );

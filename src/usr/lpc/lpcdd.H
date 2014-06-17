@@ -85,8 +85,7 @@ class LpcDD
         RESET_ECCB           = 0x00000001, /**< ECCB FW Logic */
         RESET_OPB_LPCHC_SOFT = 0x00000002, /**< OPB LPCHC Clear Errors */
         RESET_OPB_LPCHC_HARD = 0x00000004, /**< OPB LPCHC Reset Logic */
-
-        RESET_INIT    = RESET_CLEAR, // Nothing to do for initial boot yet
+        RESET_INIT           = 0x00000008, /**< Initial HW setup */
     };
 
 

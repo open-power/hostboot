@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -141,6 +144,14 @@ public:
                         numArgs = 2;
                         addrParams.push_back("  I2C slave device address");
                         addrParams.push_back("  EEPROM chip number");
+                        break;
+                    case DeviceFW::LPC:     // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::LPC");
+                        i_parser.PrintString("Ranges",
+                                             "0=IO,1=MEM,2=FW,3=REG,4=ABS");
+                        numArgs = 2;
+                        addrParams.push_back("  Range");
+                        addrParams.push_back("  Addr");
                         break;
                     // three parameters
                     case DeviceFW::I2C:         // driverif.H

@@ -36,10 +36,10 @@ namespace LPC
  * @brief LPC Transaction Types
  */
 enum TransType {
-    TRANS_IO,
-    TRANS_MEM,
-    TRANS_FW,
-    TRANS_REG,  // LPCHC Register space
+    TRANS_IO,  // LPC IO Space
+    TRANS_MEM, // LPC Memory Space
+    TRANS_FW,  // LPC Firmware Space
+    TRANS_REG, // LPCHC Register space
     TRANS_ABS, // Address parm is absolute
     TRANS_LAST //Invalid, used for looping and tests
 };

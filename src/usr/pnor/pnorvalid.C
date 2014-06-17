@@ -173,7 +173,7 @@ errlHndl_t validateAltMaster( void )
                 continue;
             }
 
-            pnordd = new PnorDD(PnorDD::MODEL_REAL_MMIO, 0, 0, procList[i]);
+            pnordd = new PnorDD(procList[i]);
 
             // Read Flash
             l_err = pnordd->readFlash(tocBuffer, read_size,

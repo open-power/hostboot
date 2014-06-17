@@ -6,7 +6,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] Google Inc.
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -301,41 +304,10 @@ sub getHRMOR
 }
 
 
-use constant PNOR_MODE_UNKNOWN => 0;
-use constant PNOR_MODE_MEMCPY => PNOR_MODE_UNKNOWN + 1;
-use constant PNOR_MODE_LPC_MEM => PNOR_MODE_MEMCPY + 1;
-use constant PNOR_MODE_REAL_CMD => PNOR_MODE_LPC_MEM + 1;
-use constant PNOR_MODE_REAL_MMIO => PNOR_MODE_REAL_CMD + 1;
-my $extImageMode = PNOR_MODE_UNKNOWN;
-my $extImageOffset = 0;
-
-use constant PNOR_DD_MODE_OFFSET => 8;
-use constant PNOR_DD_FAKESTART_OFFSET => PNOR_DD_MODE_OFFSET + 16;
-
 use constant PNOR_RP_HBEXT_SECTION => 1;
 use constant PNOR_RP_SECTIONDATA_SIZE => 3 * 8 + 2;
 use constant PNOR_RP_SECTIONDATA_FLASHADDR_OFFSET => 2 * 8;
 
-sub determineExtImageInfo
-{
-    my ($pnorDDAddr, $pnorDDSize) =
-        ::findSymbolAddress("Singleton<PnorDD>::instance()::instance");
-
-    $extImageMode = read32($pnorDDAddr + PNOR_DD_MODE_OFFSET);
-    if ((PNOR_MODE_MEMCPY == $extImageMode) ||
-        (PNOR_MODE_LPC_MEM == $extImageMode))
-    {
-        $extImageOffset = read32($pnorDDAddr + PNOR_DD_FAKESTART_OFFSET);
-    }
-
-    my ($pnorRPAddr, $pnorRPSize) =
-        ::findSymbolAddress("Singleton<PnorRP>::instance()::instance");
-
-    $extImageOffset +=
-        read32($pnorRPAddr +
-               (PNOR_RP_SECTIONDATA_SIZE * PNOR_RP_HBEXT_SECTION) +
-               PNOR_RP_SECTIONDATA_FLASHADDR_OFFSET);
-}
 
 # @sub readExtImage
 #
@@ -348,26 +320,24 @@ sub readExtImage
     my $addr = shift;
     my $size = shift;
 
-    if ($extImageMode == PNOR_MODE_UNKNOWN) { determineExtImageInfo(); }
+    my ($pnorRPAddr, $pnorRPSize) =
+        ::findSymbolAddress("Singleton<PnorRP>::instance()::instance");
 
-    if ((PNOR_MODE_MEMCPY == $extImageMode) ||
-        (PNOR_MODE_LPC_MEM == $extImageMode))
+    my $extImageOffset +=
+        read32($pnorRPAddr +
+               (PNOR_RP_SECTIONDATA_SIZE * PNOR_RP_HBEXT_SECTION) +
+               PNOR_RP_SECTIONDATA_FLASHADDR_OFFSET);
+
+    $addr += $extImageOffset;
+    sendIPCMsg("read-pnor", "$addr,$size");
+
+    my ($type, $data) = recvIPCMsg();
+
+    if (length($data) == $size)
     {
-        $addr += getHRMOR() + $extImageOffset;
-        return readData($addr, $size);
+        return $data;
     }
-    else
-    {
-        $addr += $extImageOffset;
-        sendIPCMsg("read-pnor", "$addr,$size");
 
-        my ($type, $data) = recvIPCMsg();
-
-        if (length($data) == $size)
-        {
-            return $data;
-        }
-    }
     return "";
 
 }

@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -544,12 +545,12 @@ class PnorRpTest : public CxxTest::TestSuite
             // Check if cur_TOC failed that other TOC is used
             PnorRP::getInstance().readTOC();
             TOC_used = PnorRP::getInstance().iv_TOC_used;
-            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Header Toc_used = %d", cur_TOC, TOC_used);
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Header, Toc_used = %d", cur_TOC, TOC_used);
 
             if (TOC_used == cur_TOC)
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC", cur_TOC);
-                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC");
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d header is corrupted, did not use other TOC", cur_TOC);
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d header is corrupted, did not use other TOC");
             }
 
             // Fix cur_TOC header
@@ -571,12 +572,12 @@ class PnorRpTest : public CxxTest::TestSuite
             TOC_used = cur_TOC;
             PnorRP::getInstance().readTOC();
             TOC_used = PnorRP::getInstance().iv_TOC_used;
-            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Entry Toc_used = %d", cur_TOC, TOC_used);
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Entry, Toc_used = %d", cur_TOC, TOC_used);
 
             if (TOC_used == cur_TOC)
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC ENTRY", cur_TOC);
-                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC", cur_TOC);
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d entry is corrupted, did not use other TOC ENTRY", cur_TOC);
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d entry is corrupted, did not use other TOC", cur_TOC);
             }
 
             // Fix cur_TOC first entry
