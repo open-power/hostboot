@@ -252,14 +252,7 @@ namespace MBOX
              * Query Quiesced
              * @returns [true|false]
              */
-            ALWAYS_INLINE
-            bool quiesced()
-            {
-                return (iv_rts &&
-                        !iv_dma_pend &&
-                        iv_sendq.empty() &&
-                        iv_respondq.empty());
-            }
+            bool quiesced();
 
 
             enum

@@ -527,8 +527,12 @@ namespace INTR
 
             /**
              * Shutdown procedure
+             * @param[in] shutdown status.
+             *            Set to SHUTDOWN_STATUS_GOOD on a clean shutdown,
+             *            Otherwise is plid or other ShutdownStatus enum.
+             *            @see ShutdownStatus enums in sys/misc.h
              */
-            void shutDown();
+            void shutDown(uint64_t i_status);
 
             /**
              * Wait for all nodes to disable interrupts on MPIPL

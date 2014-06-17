@@ -43,6 +43,7 @@
 #include <kernel/ipc.H>
 #include <arch/ppc.H>
 #include <errl/errlmanager.H>
+#include <sys/misc.h>
 
 // Local functions
 namespace MBOX
@@ -307,7 +308,9 @@ void MailboxSp::msgHandler()
 
             case MSG_MBOX_SHUTDOWN:
                 {
-                    TRACFCOMP(g_trac_mbox,"MBOXSP Shutdown event received");
+                    TRACFCOMP(g_trac_mbox,
+                              "MBOXSP Shutdown event received. Status 0x%x",
+                              msg->data[1]);
 
                     iv_shutdown_msg = msg;      // Respond to this when done
                     iv_disabled = true;         // stop incomming new messages
@@ -1469,6 +1472,49 @@ errlHndl_t MailboxSp::handleInterrupt()
     }
 
     return err;
+}
+
+bool MailboxSp::quiesced()
+{
+    bool result = iv_rts && !iv_dma_pend && iv_sendq.empty();
+
+    if( result == true )
+    {
+        if(iv_shutdown_msg == NULL ||
+           (iv_shutdown_msg->data[1] == SHUTDOWN_STATUS_GOOD))
+        {
+            result = result && iv_respondq.empty();
+        }
+        else // mbox is shutting down and system status is bad
+        {
+            // Wait for HB to FSP sync message to complete.
+            // Don't wait for FSP to HB sync message to complete
+            msg_respond_t * resp = iv_respondq.begin();
+            while(resp)
+            {
+                if( resp->msg_queue_id >= MBOX::FSP_FIRST_MSGQ)
+                {
+                    // stil have pending HB->FSP sync messages
+                    result = false;
+                    break;
+                }
+                resp = resp->next;
+            }
+            // if result is still true then remaining responds, if any,
+            // should be ignored - mbox is quiesced.
+            if(result)
+            {
+                while(!iv_respondq.empty())
+                {
+                    resp = iv_respondq.begin();
+                    iv_respondq.erase(resp);
+                    delete resp;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 void MailboxSp::handleIPC(queue_id_t i_msg_q_id, msg_t * i_msg)
