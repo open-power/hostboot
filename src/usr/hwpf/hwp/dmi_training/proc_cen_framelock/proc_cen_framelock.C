@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.26 2014/05/16 01:14:16 jmcgill Exp $
+// $Id: proc_cen_framelock.C,v 1.27 2014/06/01 16:20:59 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -38,6 +38,8 @@
 // Change Log
 // Version | who      |Date     | Comment
 // -----------------------------------------------------------------------------
+//   1.27  | baysah   |09-MAY-14| Added Delay in status register polling routine
+//         |          |         |
 //   1.25  | baysah   |11-APR-14| Changed MBI internal scom FIRs from masked to recoverable error per Marc Gollub
 //         |          |         |
 //   1.24  | baysah   |07-APR-14| Changed seqid_ooo, MBIFIR(4) and MCIFIR(4), to masked per RAS request since it gets trigger by 1 crc error.
@@ -673,6 +675,11 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
             polls++;
             FAPI_INF("proc_cen_framelock_run_framelock: Framelock not done, loop %d of %d...",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS);
+
+
+            // 1ms/100simcycles delay
+            fapiDelay(1000000, 100); //fapiDelay(nanoseconds, simcycles)
+
         }
     }
 
@@ -813,6 +820,10 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
             polls++;
             FAPI_INF("proc_cen_framelock_run_frtl: FRTL not done, loop %d of %d...",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS);
+
+
+            // 1ms/100simcycles delay
+            fapiDelay(1000000, 100); //fapiDelay(nanoseconds, simcycles)
         }
     }
 
@@ -1129,6 +1140,11 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
             polls++;
             FAPI_INF("proc_cen_framelock_run_errstate_framelock: Framelock not done, loop %d of %d...",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS);
+
+
+            // 1ms/100simcycles delay
+            fapiDelay(1000000, 100); //fapiDelay(nanoseconds, simcycles)
+
         }
     }
 
@@ -1342,6 +1358,10 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
             polls++;
             FAPI_INF("proc_cen_framelock_run_errstate_frtl: FRTL not done, loop %d of %d ...\n",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS);
+
+            // 1ms/100simcycles delay
+            fapiDelay(1000000, 100); //fapiDelay(nanoseconds, simcycles)
+
         }
     }
 
@@ -1688,6 +1708,10 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
             polls++;
             FAPI_INF("proc_cen_framelock_run_manual_frtl: FRTL not done, loop %d of %d...\n",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS);
+
+            // 1ms/100simcycles delay
+            fapiDelay(1000000, 100); //fapiDelay(nanoseconds, simcycles)
+
         }
     }
 
