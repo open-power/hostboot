@@ -1190,19 +1190,19 @@ group gCoreFir filter singlebit
     /** COREFIR[33]
      *  LS_TLB_MULTIHIT_ERR: special recovery error TLB multi hit error occurred
      */
-    (CoreFir, bit(33)) ? defaultMaskedError;
+    (CoreFir, bit(33)) ? thresholdAndMask_self;
 
     /** COREFIR[34]
      *  LS_SLB_MULTIHIT_ERR: special recovery error SLBFEE multi hit
      *  error occurred
      */
-    (CoreFir, bit(34)) ? defaultMaskedError;
+    (CoreFir, bit(34)) ? thresholdAndMask_self;
 
     /** COREFIR[35]
      *  LS_DERAT_MULTIHIT_ERR: special recovery error ERAT multi hit error
      *  occurred
      */
-    (CoreFir, bit(35)) ? defaultMaskedError;
+    (CoreFir, bit(35)) ? thresholdAndMask_self;
 
     /** COREFIR[36]
      *  FORWARD_PROGRESS_ERR: forward progress error
