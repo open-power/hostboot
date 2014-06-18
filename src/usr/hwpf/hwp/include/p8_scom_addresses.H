@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.182 2014/04/24 23:14:55 cmolsen Exp $
+// $Id: p8_scom_addresses.H,v 1.183 2014/06/08 19:49:24 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1211,6 +1211,7 @@ CONST_UINT64_T( X_GP0_0x04000000                      , ULL(0x04000000) );
 CONST_UINT64_T( X_GP1_0x04000001                      , ULL(0x04000001) );
 CONST_UINT64_T( X_GP2_0x04000002                      , ULL(0x04000002) );
 
+CONST_UINT64_T( X_CLK_ADJ_DAT_REG_0x040F0015          , ULL(0x040F0015) );
 CONST_UINT64_T( X_CLK_ADJ_SET_0x040F0016              , ULL(0x040F0016) );
 
 //------------------------------------------------------------------------------
@@ -2120,6 +2121,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.183  2014/06/08 19:49:24  jmcgill
+add XBUS skew adjust data register definition
+
 Revision 1.182  2014/04/24 23:14:55  cmolsen
 Added four PIRR reg defs.
 

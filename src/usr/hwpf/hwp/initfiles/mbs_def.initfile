@@ -1,8 +1,9 @@
-#-- $Id: mbs_def.initfile,v 1.47 2014/03/19 19:38:44 yctschan Exp $
+#-- $Id: mbs_def.initfile,v 1.48 2014/05/20 20:37:38 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.48  |baysah  |04/21/14| Added L4 Cleaner settings per rank group to improve memory performance
 #--   1.47  |tschang | 3/19/14| SW252733 - L4 Cache UE Handling
 #--   1.46  |tschang | 3/19/14| SW252733 - L4 Cache UE Handling typo
 #--   1.45  |tschang | 2/24/14| fixed MBA1 only cfg
@@ -405,6 +406,16 @@ define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mb
 ## Temp defines until the code adds these attributes
 
 
+
+
+# Define the number of ranks per MBS (2 MBAs) for L4 Cleaner setup
+#define def_mba01_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1]);
+#define def_mba23_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+define def_num_mbs_ranks = (MBA0.ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + MBA0.ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] + MBA1.ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + MBA1.ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+
+
+
+
 #--******************************************************************************
 #-- MBS FIR MASK Register
 #--******************************************************************************
@@ -562,12 +573,21 @@ scom 0x0201140F   {
     11  ,       0b1     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 0);         # MBCCFGQ_srw_prefetch_dis
     12  ,       0b0     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 1);         # MBCCFGQ_prq_prefetch_dis
     12  ,       0b1     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 0);         # MBCCFGQ_prq_prefetch_dis
- 13:16  ,       0xE     , any                       ;         # MBCCFGQ_cln_page_mode_bundle_max_cnt_0_3
- 17:22  ,       0x1F    , any                       ;         # MBCCFGQ_cln_wrq_tgt_alloc_0_5
- 23:28  ,       0x7     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_hwmark_0_5
- 29:34  ,       0x6     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_lwmark_0_5
- 35:48  ,       0x1000  , any                       ;         # MBCCFGQ_cln_wr_priority_dv_hwmark_0_13
- 49:62  ,       0x0FC0  , any                       ;         # MBCCFGQ_cln_wr_priority_dv_lwmark_0_13
+ #13:16  ,       0xE     , any                       ;         # MBCCFGQ_cln_page_mode_bundle_max_cnt_0_3
+ #17:22  ,       0x1F    , any                       ;         # MBCCFGQ_cln_wrq_tgt_alloc_0_5
+ #23:28  ,       0x7     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_hwmark_0_5
+ #29:34  ,       0x6     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_lwmark_0_5
+ #35:48  ,       0x1000  , any                       ;         # MBCCFGQ_cln_wr_priority_dv_hwmark_0_13
+ #49:62  ,       0x0FC0  , any                       ;         # MBCCFGQ_cln_wr_priority_dv_lwmark_0_13
+ 13:16  ,       0b1111     , ( (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && ((def_num_mbs_ranks == 2 ) || (def_num_mbs_ranks == 4)) );  # MBCCFGQ_cln_page_mode_bundle_max_cnt_0_3 is 15 for 2 and 4 rnkgrp
+ 13:16  ,       0b0111     , ( (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 8 ) );                                # MBCCFGQ_cln_page_mode_bundle_max_cnt_0_3 is  7 for 8 rnkgrp
+ 17:22  ,       0b100000   , ( (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 2 ) );         # MBCCFGQ_cln_wrq_tgt_alloc_0_5 is 32 for 2 rnkgrp
+ 17:22  ,       0b010000   , ( (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 4 ) );         # MBCCFGQ_cln_wrq_tgt_alloc_0_5 is 16 for 4 rnkgrp
+ 17:22  ,       0b001000   , ( (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 8 ) );         # MBCCFGQ_cln_wrq_tgt_alloc_0_5 is  8 for 8 rnkgrp
+ 23:28  ,       0b000111   , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_hwmark_0_5 is 7 for all rank groups
+ 29:34  ,       0b000110   , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_lwmark_0_5 is 6 for all rank groups
+ 35:48  ,       0b00001000000000   , any            ;         # MBCCFGQ_cln_wr_priority_dv_hwmark_0_13 is 512 for all rank groups
+ 49:62  ,       0b00000111110000   , any            ;         # MBCCFGQ_cln_wr_priority_dv_lwmark_0_13 is 512-16 for all rank groups
 }
 
 

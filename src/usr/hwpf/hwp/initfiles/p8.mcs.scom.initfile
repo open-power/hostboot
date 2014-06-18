@@ -1,8 +1,10 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.12 2014/01/08 18:22:31 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.13 2014/05/21 19:17:17 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.13|baysah  |05/20/14|- Added Best MCS Spec filter setting to MODE2 reg (2011809 16 20 9007F) for power and perf improvement
 #--         |        |        |
 #--     1.12|baysah  |01/08/14|- Moved ECC bypass qualifier from MCMODE1(63) TO MCMODE1(62), bit 63 is perfmon.
 #--         |        |        |
@@ -114,10 +116,12 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      1:13 ,                    0b0000000000000  ;              # MCMODE2Q_DISABLE_WRITE_MDI_TO_ZERO
      14   ,                    0b0              ;              # MCMODE2Q_DISABLE_SFU_OPERATIONS
      15   ,                    0b0              ;              # MCMODE2Q_DISABLE_FASTPATH_QOS
-     16   ,                    0b0              ;              # MCMODE2Q_ENABLE_2K_SPEC_READ_DISABLE_COUNTERS
+ #   16   ,                    0b0              ;              # MCMODE2Q_ENABLE_2K_SPEC_READ_DISABLE_COUNTERS
+     16   ,                    0b1              ;              # MCMODE2Q_ENABLE_2K_SPEC_READ_DISABLE_COUNTERS
      17   ,                    0b0              ;              # MCMODE2Q_ENABLE_ZERO_SPEC_HASH_ADDR_48_TO_50
      18   ,                    0b0              ;              # MCMODE2Q_DISABLE_SPEC_DISABLE_HINT_BIT
-     19   ,                    0b0              ;              # MCMODE2Q_ENABLE_RESET_2K_COUNT_IF_HINT_BIT_SET
+ #   19   ,                    0b0              ;              # MCMODE2Q_ENABLE_RESET_2K_COUNT_IF_HINT_BIT_SET
+     19   ,                    0b1              ;              # MCMODE2Q_ENABLE_RESET_2K_COUNT_IF_HINT_BIT_SET
      20:23,                    0x0              ;              # MCMODE2Q_D2K_SPEC_FILTER_COUNTER_LFSR_INC_SELECT
      24:27,                    0x0              ;              # MCMODE2Q_D2K_SPEC_FILTER_COUNTER_LFSR_DEC__SELECT
      28   ,                    0b0              ;              # MCMODE2Q_SPEC_READ_FILTER_NO_HASH_MODE
