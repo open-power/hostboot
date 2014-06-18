@@ -1,0 +1,4 @@
+config VPD_GETMACRO_USE_EFF_ATTR
+    default n
+    help
+        Use EFF attribute in VPD GETMACRO

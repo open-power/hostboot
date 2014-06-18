@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,6 +76,17 @@
 #include    "mss_volt/mss_volt_vddr_offset.H"
 #include    "mss_volt/mss_volt_vpp_offset.H"
 
+#include <config.h>
+
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+#include <hwas/common/hwas.H>
+#include <hwas/common/hwasCommon.H>
+#endif  // CONFIG_DJVPD_READ_FROM_HW
+
+#ifdef CONFIG_PALMETTO_VDDR
+#include "../dram_training/platform_vddr.H"
+#endif // CONFIG_PALMETTO_VDDR
+
 namespace   MC_CONFIG
 {
 
@@ -81,6 +95,78 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
+
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+// Detect all present DIMMs by reading SPD or PNOR.
+static errlHndl_t detect_present_dimms() {
+    errlHndl_t l_err = NULL;
+
+    TARGETING::Target* pSys;
+    targetService().getTopLevelTarget(pSys);
+
+    // Find list of all DIMMs to call platPresenceDetect against
+    PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+    TARGETING::TargetHandleList pCheckPres;
+    targetService().getAssociated( pCheckPres, pSys,
+        TargetService::CHILD, TargetService::ALL, &predDimm );
+
+    // Actually check for present DIMMs by PNOR or SPD, this function will
+    // prune missing DIMMs from its argument.
+    l_err = HWAS::platPresenceDetect(pCheckPres);
+
+    if (l_err != NULL)
+    {
+        return l_err;
+    }
+
+    // Mark remaining DIMMs as present.
+    // @todo RTC:111211, may need to handle turning the dimms off
+    for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
+            pTarget_it != pCheckPres.end();
+            ++pTarget_it)
+    {
+        // set HWAS state to show DIMM is present, functional.
+        TARGETING::Target *target = *pTarget_it;
+        HwasState hwasState = target->getAttr<ATTR_HWAS_STATE>();
+        hwasState.poweredOn     = true;
+        hwasState.present       = true;
+        hwasState.functional    = true;
+        target->setAttr<ATTR_HWAS_STATE>( hwasState );
+    }
+
+    return l_err;
+}
+
+// Disable any MBAs that don't have any DIMMs under them, otherwise
+// they will fail checks in mss_eff_config later.
+static errlHndl_t disable_unused_mbas() {
+    TARGETING::TargetHandleList l_mbaTargetList;
+    getAllChiplets(l_mbaTargetList, TYPE_MBA);
+
+    // @todo RTC:111211, may need to handle turning the dimms off
+    for (TargetHandleList::const_iterator
+            l_mba_iter = l_mbaTargetList.begin();
+            l_mba_iter != l_mbaTargetList.end();
+            ++l_mba_iter)
+    {
+        TARGETING::Target *mba = *l_mba_iter;
+
+        TARGETING::TargetHandleList l_dimmTargetList;
+        getChildAffinityTargets(l_dimmTargetList, mba,
+                                CLASS_LOGICAL_CARD, TYPE_DIMM, true);
+
+        if (l_dimmTargetList.empty())
+        {
+            // No DIMMs found, mark the MBA as non-functional.
+            HwasState hwasState = mba->getAttr<ATTR_HWAS_STATE>();
+            hwasState.functional    = false;
+            mba->setAttr<ATTR_HWAS_STATE>( hwasState );
+        }
+    }
+
+    return NULL;
+}
+#endif // CONFIG_DJVPD_READ_FROM_HW
 
 //
 //  Wrapper function to call host_collect_dimm_spd
@@ -91,6 +177,31 @@ void*    call_host_collect_dimm_spd( void *io_pArgs )
     IStepError l_stepError;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                       "call_host_collect_dimm_spd entry" );
+
+#ifdef CONFIG_PALMETTO_VDDR
+    // Enable VSPD for reading SPDs.
+    l_err = platform_enable_vspd();
+    if ( l_err != NULL )
+    {
+        return l_err;
+    }
+#endif // CONFIG_PALMETTO_VDDR
+
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+    // Detect all DIMMs by reading SPD or PNOR.
+    l_err = detect_present_dimms();
+    if ( l_err != NULL )
+    {
+        return l_err;
+    }
+
+    // Disable any unused MBAs that do not have DIMMs under them.
+    l_err = disable_unused_mbas();
+    if ( l_err != NULL )
+    {
+        return l_err;
+    }
+#endif // CONFIG_DJVPD_READ_FROM_HW
 
     // Get a list of all present Centaurs
     TargetHandleList l_presCentaurs;

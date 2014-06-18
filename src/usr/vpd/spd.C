@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +39,8 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
+#include <devicefw/userif.H>
+#include <i2c/eepromif.H>
 #include <vfs/vfs.H>
 #include <pnor/pnorif.H>
 #include <vpd/vpdreasoncodes.H>
@@ -45,6 +50,7 @@
 #include "spdDDR3.H"
 #include "spdDDR4.H"
 #include "errlud_vpd.H"
+#include <config.h>
 
 // ----------------------------------------------
 // Trace definitions
@@ -389,6 +395,16 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
     {
         if( likely( g_usePNOR ) )
         {
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+            // Need to read directly from target's EEPROM.
+            err = DeviceFW::deviceOp( DeviceFW::READ,
+                                      i_target,
+                                      o_data,
+                                      i_numBytes,
+                                      DEVICE_EEPROM_ADDRESS(
+                                          EEPROM::VPD_PRIMARY,
+                                          i_byteAddr ) );
+#elif CONFIG_DJVPD_READ_FROM_PNOR
             // Setup info needed to read from PNOR
             VPD::pnorInformation info;
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
@@ -401,7 +417,7 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                                  info,
                                  g_spdPnorAddr,
                                  &g_spdMutex );
-
+#endif // CONFIG_DJVPD_READ_FROM_PNOR
             if( err )
             {
                 break;

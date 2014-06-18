@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,6 +53,8 @@ enum vpdModuleId
     VPD_IPVPD_FIND_RECORD_OFFSET            = 0x22,
     VPD_IPVPD_FIND_KEYWORD_ADDR             = 0x23,
     VPD_IPVPD_CHECK_BUFFER_SIZE             = 0x24,
+    VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM    = 0x30,
+    VPD_IPVPD_FETCH_DATA                    = 0x31,
 
 
     // DIMM SPD
@@ -115,6 +120,8 @@ enum vpdReasonCode
     VPD_RT_NULL_VPD_PTR                 = VPD_COMP_ID | 0x1a,
     VPD_INSUFFICIENT_SPACE_FOR_IMAGE    = VPD_COMP_ID | 0x1b,
     VPD_MBOX_NOT_SUPPORTED_RT           = VPD_COMP_ID | 0x1c,
+    VPD_RECORD_INVALID_VHDR             = VPD_COMP_ID | 0x30,
+    VPD_READ_CONFIG_NOT_SET             = VPD_COMP_ID | 0x31,
 };
 
 

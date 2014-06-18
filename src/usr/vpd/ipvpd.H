@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,7 +53,23 @@ class IpVpdFacade
         KEYWORD_SIZE_BYTE_SIZE  = 1,
         RECORD_TOC_UNUSED       = 2,
         RT_SKIP_BYTES           = 3,
+        VHDR_ECC_DATA_SIZE      = 11,
+        VHDR_RESOURCE_ID_SIZE   = 1,
     };
+
+    /**
+     * @brief Structure representing the format of each record 
+     *      in the PT keyword of the VTOC or VHDR.
+     */
+    struct TocPtRecord {
+        char record_name[4];
+        // All uint16 fields are stored in little endian.
+        uint16_t record_type;
+        uint16_t record_offset;
+        uint16_t record_length;
+        uint16_t ecc_offset;
+        uint16_t ecc_length;
+    } PACKED;
 
     /**
      * @brief typdef for ipVpdRecord values
@@ -88,6 +107,16 @@ class IpVpdFacade
         char keywordName[KEYWORD_BYTE_SIZE+1];
     } keywordInfo;
 
+    /**
+     * @brief Structure defining where to read/write VPD data
+     */
+    typedef struct
+    {
+        bool vpdReadPNOR;
+        bool vpdReadHW;
+        bool vpdWritePNOR;
+        bool vpdWriteHW;
+    } configInfo;
 
     /**
      * @brief  Constructor
@@ -213,8 +242,8 @@ class IpVpdFacade
                                   const char *& o_keyword );
 
     /**
-     * @brief This function will read the VPD TOC to find the offset where the
-     *      given record is located within the chunk of data.
+     * @brief This function calls the PNOR or EEPROM version of
+     *      the findRecordOffset fuction based on the configInfo.
      *
      * @param[in] i_record - String value for the record to look for.
      *
@@ -233,6 +262,46 @@ class IpVpdFacade
                                   input_args_t i_args );
 
     /**
+     * @brief This function will read the VPD TOC to find the offset where the
+     *      given record is located within the chunk of data.
+     *
+     * @param[in] i_record - String value for the record to look for.
+     *
+     * @param[out] o_offset - The offset where the record is located.
+     *
+     * @param[in] i_target - The target to retrieve the data for.
+     *
+     * @param[in] i_args - The input arguments.
+     *
+     * @return errHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t findRecordOffsetPnor ( const char * i_record,
+                                      uint16_t & o_offset,
+                                      TARGETING::Target * i_target,
+                                      input_args_t i_args );
+
+    /**
+     * @brief This function will read the VPD VTOC to find the offset where the
+     *      given record is located within the chunk of data.
+     *
+     * @param[in] i_record - String value for the record to look for.
+     *
+     * @param[out] o_offset - The offset where the record is located.
+     *
+     * @param[in] i_target - The target to retrieve the data for.
+     *
+     * @param[in] i_args - The input arguments.
+     *
+     * @return errHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t findRecordOffsetSeeprom ( const char * i_record,
+                                         uint16_t & o_offset,
+                                         TARGETING::Target * i_target,
+                                         input_args_t i_args );
+
+    /**
      * @brief This function will read the required keyword from the VPD data.
      *
      * @param[in] i_keywordName - String representation of the keyword.
@@ -240,6 +309,9 @@ class IpVpdFacade
      * @param[in] i_recordName - String representation of the record.
      *
      * @param[in] i_offset - The offset to start reading.
+     *
+     * @param[in] i_index - The index of the keyword to return if there are
+     *       multiple instances of the same keyword.
      *
      * @param[in] i_target - The target to retrieve data for.
      *
@@ -259,6 +331,7 @@ class IpVpdFacade
     errlHndl_t retrieveKeyword ( const char * i_keywordName,
                                  const char * i_recordName,
                                  uint16_t i_offset,
+                                 uint16_t i_index,
                                  TARGETING::Target * i_target,
                                  void * io_buffer,
                                  size_t & io_buflen,
@@ -302,7 +375,10 @@ class IpVpdFacade
      *
      * @param[in] i_recordName - String representation of the record.
      *
-     * @param[in] i_offset - The offset to start writing.
+     * @param[in] i_offset - The offset to start searching.
+     *
+     * @param[in] i_index - The index of the keyword to return if there are
+     *    multiple instances of the same keyword.
      *
      * @param[in] i_target - The target to write data for.
      *
@@ -319,13 +395,15 @@ class IpVpdFacade
     errlHndl_t findKeywordAddr ( const char * i_keywordName,
                                  const char * i_recordName,
                                  uint16_t i_offset,
+                                 uint16_t i_index,
                                  TARGETING::Target * i_target,
                                  size_t& o_keywordSize,
                                  uint64_t& o_byteAddr,
                                  input_args_t i_args );
+    
     /**
-     * @brief This function actually reads the data from the source of the VPD
-     *      data.
+     * @brief This function calls the PNOR or EEPROM version of
+     *           the fetchData function based on the configInfo
      *
      * @param[in] i_byteAddr - The offset to be read.
      *
@@ -342,6 +420,44 @@ class IpVpdFacade
                            size_t i_numBytes,
                            void * o_data,
                            TARGETING::Target * i_target );
+
+    /**
+     * @brief This function actually reads the data from PNOR
+     *
+     * @param[in] i_byteAddr - The offset to be read.
+     *
+     * @param[in] i_numBytes - The number of bytes to read.
+     *
+     * @param[out] o_data - The data buffer where the data will be placed.
+     *
+     * @param[in] i_target - Target device.
+     *
+     * @return errHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t fetchDataFromPnor ( uint64_t i_byteAddr,
+                                   size_t i_numBytes,
+                                   void * o_data,
+                                   TARGETING::Target * i_target );
+
+    /**
+     * @brief This function actually reads the data from EEPROM
+     *
+     * @param[in] i_byteAddr - The offset to be read.
+     *
+     * @param[in] i_numBytes - The number of bytes to read.
+     *
+     * @param[out] o_data - The data buffer where the data will be placed.
+     *
+     * @param[in] i_target - Target device.
+     *
+     * @return errHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t fetchDataFromEeprom ( uint64_t i_byteAddr,
+                                     size_t i_numBytes,
+                                     void * o_data,
+                                     TARGETING::Target * i_target );
 
 
     /**
@@ -443,13 +559,19 @@ class IpVpdFacade
      * @brief cached PNOR offset for VPD
      *
      */
-     uint64_t iv_cachePnorAddr;
+    uint64_t iv_cachePnorAddr;
 
-     /**
-      * @brief cached PNOR offset for VPD
-      *
-      */
-     VPD::VPD_MSG_TYPE iv_vpdMsgType;
+    /**
+     * @brief cached PNOR offset for VPD
+     *
+     */
+    VPD::VPD_MSG_TYPE iv_vpdMsgType;
+
+    /**
+     * @brief Config defining where to read/write
+     *          VPD data
+     */
+    configInfo iv_configInfo;
 };
 
 

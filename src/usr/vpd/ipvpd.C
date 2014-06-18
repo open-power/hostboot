@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,8 +34,11 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
+#include <devicefw/userif.H>
+#include <i2c/eepromif.H>
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
+#include <config.h>
 
 #include "vpd.H"
 #include "ipvpd.H"
@@ -80,6 +86,10 @@ IpVpdFacade::IpVpdFacade(uint64_t i_vpdSectionSize,
 ,iv_cachePnorAddr(0x0)
 ,iv_vpdMsgType(i_vpdMsgType)
 {
+    iv_configInfo.vpdReadPNOR   = false;
+    iv_configInfo.vpdReadHW     = false;
+    iv_configInfo.vpdWritePNOR  = false;
+    iv_configInfo.vpdWriteHW    = false;
     TRACUCOMP(g_trac_vpd, "IpVpdFacade::IpVpdFacade> " );
 }
 
@@ -137,6 +147,7 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
         err = retrieveKeyword( keywordName,
                                recordName,
                                recordOffset,
+                               0,
                                i_target,
                                io_buffer,
                                io_buflen,
@@ -383,6 +394,50 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                            input_args_t i_args )
 {
     errlHndl_t err = NULL;
+
+    if ( iv_configInfo.vpdReadPNOR )
+    {
+        return findRecordOffsetPnor(i_record, o_offset, i_target, i_args);
+    }
+    else if ( iv_configInfo.vpdReadHW )
+    {
+        return findRecordOffsetSeeprom(i_record, o_offset, i_target, i_args);
+    }
+    else
+    {
+        TRACFCOMP( g_trac_vpd,
+          ERR_MRK"IpVpdFacade::findRecordOffset:vpdReadPNOR and vpdReadHW false!");
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_READ_CONFIG_NOT_SET
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
+         * @userdata1        Target HUID
+         * @userdata2        <UNUSED>
+         * @devdesc          Both VPD read PNOR and VPD read HW
+         *                   configs are set to false
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       VPD::VPD_IPVPD_FIND_RECORD_OFFSET,
+                                       VPD::VPD_READ_CONFIG_NOT_SET,
+                                       TARGETING::get_huid(i_target),
+                                       0x0,
+                                       true /*Add HB SW Callout*/ );
+        err->collectTrace( "VPD", 256 );
+    }
+    return NULL;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::findRecordOffsetPnor
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
+                                               uint16_t & o_offset,
+                                               TARGETING::Target * i_target,
+                                               input_args_t i_args )
+{
+    errlHndl_t err = NULL;
     uint64_t tmpOffset = 0x0;
     char record[RECORD_BYTE_SIZE] = { '\0' };
     uint16_t offset = 0x0;
@@ -495,6 +550,145 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
     return err;
 }
 
+// ------------------------------------------------------------------
+// IpVpdFacade::findRecordOffsetSeeprom
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
+                                                  uint16_t & o_offset,
+                                                  TARGETING::Target * i_target,
+                                                  input_args_t i_args )
+{
+    errlHndl_t err = NULL;
+    char l_buffer[256] = { 0 };
+    uint16_t offset = 0x0;
+
+    TRACSSCOMP( g_trac_vpd,
+                ENTER_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
+
+    // Skip the ECC data + large resource ID in the VHDR
+    offset = VHDR_ECC_DATA_SIZE + VHDR_RESOURCE_ID_SIZE;
+
+    // Read PT keyword from VHDR to find the VTOC.
+    size_t pt_len = sizeof(l_buffer);
+    err = retrieveKeyword( "PT", "VHDR", offset, 0, i_target, l_buffer,
+                           pt_len, i_args );
+    if (err) {
+        return err;
+    }
+
+    TocPtRecord *toc_rec = reinterpret_cast<TocPtRecord*>(l_buffer);
+    if (pt_len < sizeof(TocPtRecord) ||
+        (memcmp(toc_rec->record_name, "VTOC",
+                sizeof(toc_rec->record_name)) != 0))
+    {
+        TRACFCOMP( g_trac_vpd,
+                   ERR_MRK"IpVpdFacade::findRecordOffset: VHDR is invalid!");
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM
+         * @userdata1        VHDR length
+         * @userdata2        Target HUID
+         * @devdesc          The VHDR was invalid
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM,
+                                       VPD::VPD_RECORD_INVALID_VHDR,
+                                       pt_len,
+                                       TARGETING::get_huid(i_target) );
+
+        // Could be the VPD of the target wasn't set up properly
+        // -- DECONFIG so that we can possibly keep booting
+        err->addHwCallout( i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL );
+
+        // Or HB code didn't look for the record properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
+        err->collectTrace( "VPD" );
+        return err;
+    }
+
+    offset = le16toh( toc_rec->record_offset ) + 1;  // skip 'large resource'
+
+    // Read the PT keyword(s) (there may be more than 1) from the VTOC to
+    // find the requested record.
+    bool found = false;
+    for (uint16_t index = 0; !found; ++index)
+    {
+        pt_len = sizeof(l_buffer);
+        err = retrieveKeyword( "PT", "VTOC", offset, index, i_target, l_buffer,
+                               pt_len, i_args );
+        if ( err ) {
+            break;
+        }
+
+        // Scan through the VTOC PT keyword records looking for a record
+        // name match.
+        for (size_t vtoc_pt_offset = 0; vtoc_pt_offset < pt_len;
+            vtoc_pt_offset += sizeof(TocPtRecord))
+        {
+            toc_rec = reinterpret_cast<TocPtRecord*>(l_buffer + vtoc_pt_offset);
+            TRACUCOMP( g_trac_vpd, "Scanning record %s", toc_rec->record_name);
+
+            if (memcmp(toc_rec->record_name, i_record,
+                       sizeof(toc_rec->record_name)) == 0)
+            {
+                // Byte swap field on output, skip 'large resource' byte
+                o_offset = le16toh( toc_rec->record_offset ) + 1;
+                found = true;
+                break;
+            }
+        }
+    }
+
+    if ( !found && err == NULL ) {
+        TRACFCOMP( g_trac_vpd,
+                   ERR_MRK"IpVpdFacade::findRecordOffsetSeeprom: "
+                   "No matching Record (%s) found in VTOC!", i_record );
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM
+         * @userdata1[0:31]  Requested Record
+         * @userdata1[32:63] Requested Keyword
+         * @userdata2        Target HUID
+         * @devdesc          The requested record was not found in the VPD VTOC.
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM,
+                                       VPD::VPD_RECORD_NOT_FOUND,
+                                       TWO_UINT32_TO_UINT64(i_args.record,
+                                                            i_args.keyword),
+                                       TARGETING::get_huid(i_target) );
+        
+        // Could be the VPD of the target wasn't set up properly
+        // -- DECONFIG so that we can possibly keep booting
+        err->addHwCallout( i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL );
+
+        // Or HB code didn't look for the record properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
+        err->collectTrace( "VPD" );
+    }
+
+    TRACSSCOMP( g_trac_vpd,
+                EXIT_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
+
+    return err;
+}
+
 
 // ------------------------------------------------------------------
 // IpVpdFacade::retrieveKeyword
@@ -502,6 +696,7 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
 errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
                                           const char * i_recordName,
                                           uint16_t i_offset,
+                                          uint16_t i_index,
                                           TARGETING::Target * i_target,
                                           void * io_buffer,
                                           size_t & io_buflen,
@@ -520,6 +715,7 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
         err = findKeywordAddr( i_keywordName,
                                i_recordName,
                                i_offset,
+                               i_index,
                                i_target,
                                keywordSize,
                                byteAddr,
@@ -566,7 +762,6 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
     return err;
 }
 
-
 // ------------------------------------------------------------------
 // IpVpdFacade::fetchData
 // ------------------------------------------------------------------
@@ -577,8 +772,52 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
 {
     errlHndl_t err = NULL;
 
+    if ( iv_configInfo.vpdReadPNOR )
+    {
+        return fetchDataFromPnor( i_byteAddr, i_numBytes, o_data, i_target );
+    }
+    else if ( iv_configInfo.vpdReadHW )
+    {
+        return fetchDataFromEeprom( i_byteAddr, i_numBytes, o_data, i_target );
+    }
+    else
+    {
+        TRACFCOMP( g_trac_vpd,
+          ERR_MRK"IpVpdFacade::fetchData:vpdReadPNOR and vpdReadHW false!");
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_READ_CONFIG_NOT_SET
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_FETCH_DATA
+         * @userdata1        Target HUID
+         * @userdata2        <UNUSED>
+         * @devdesc          Both VPD read PNOR and VPD read HW
+         *                   configs are set to false
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       VPD::VPD_IPVPD_FETCH_DATA,
+                                       VPD::VPD_READ_CONFIG_NOT_SET,
+                                       TARGETING::get_huid(i_target),
+                                       0x0,
+                                       true /*Add HB SW Callout*/ );
+        err->collectTrace( "VPD", 256 );
+    }
+    return NULL;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::fetchDataFromPnor
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
+                                            size_t i_numBytes,
+                                            void * o_data,
+                                            TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::fetchData()" );
+                ENTER_MRK"IpVpdFacade::fetchDataFromPnor()" );
 
     do
     {
@@ -599,11 +838,45 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
         {
             break;
         }
-
     } while( 0 );
 
     TRACSSCOMP( g_trac_vpd,
-                EXIT_MRK"IpVpdFacade::fetchData()" );
+                EXIT_MRK"IpVpdFacade::fetchDataFromPnor()" );
+
+    return err;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::fetchDataFromEeprom
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::fetchDataFromEeprom ( uint64_t i_byteAddr,
+                                              size_t i_numBytes,
+                                              void * o_data,
+                                              TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_vpd,
+                ENTER_MRK"IpVpdFacade::fetchDataFromEeprom()" );
+
+    do
+    {
+        // Need to read directly from target's EEPROM.
+        err = DeviceFW::deviceOp( DeviceFW::READ,
+                                  i_target,
+                                  o_data,
+                                  i_numBytes,
+                                  DEVICE_EEPROM_ADDRESS(
+                                      EEPROM::VPD_PRIMARY,
+                                      i_byteAddr ) );
+        if( err )
+        {
+            break;
+        }
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_vpd,
+                EXIT_MRK"IpVpdFacade::fetchDataFromEeprom()" );
 
     return err;
 }
@@ -614,6 +887,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
 errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                           const char * i_recordName,
                                           uint16_t i_offset,
+                                          uint16_t i_index,
                                           TARGETING::Target * i_target,
                                           size_t& o_keywordSize,
                                           uint64_t& o_byteAddr,
@@ -625,7 +899,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
     uint16_t keywordSize = 0x0;
     char record[RECORD_BYTE_SIZE] = { '\0' };
     char keyword[KEYWORD_BYTE_SIZE] = { '\0' };
-    bool matchFound = false;
+    int matchesFound = 0;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"IpVpdFacade::findKeywordAddr()" );
@@ -776,8 +1050,10 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                 o_byteAddr = offset - i_offset; //make address relative
 
                 // found our match, break out
-                matchFound = true;
-                break;
+                matchesFound++;
+                if ( matchesFound == i_index + 1 ) {
+                    break;
+                }
             }
             else
             {
@@ -787,14 +1063,14 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         }
 
         if( err ||
-            matchFound )
+            matchesFound == i_index + 1 )
         {
             break;
         }
     } while( 0 );
 
     // If keyword not found in expected Record, flag error.
-    if( !matchFound &&
+    if( matchesFound != i_index + 1 &&
         NULL == err )
     {
         TRACFCOMP( g_trac_vpd,
@@ -807,7 +1083,8 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
          * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
          * @moduleid         VPD::VPD_IPVPD_FIND_KEYWORD_ADDR
-         * @userdata1        Start of Record Offset
+         * @userdata1[0:31]  Start of Record Offset
+         * @userdata1[32:63] Keyword Index
          * @userdata2[0:31]  Requested Record
          * @userdata2[32:63] Requested Keyword
          * @devdesc          Keyword was not found in Record starting at given
@@ -816,7 +1093,8 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        VPD::VPD_IPVPD_FIND_KEYWORD_ADDR,
                                        VPD::VPD_KEYWORD_NOT_FOUND,
-                                       i_offset,
+                                       TWO_UINT32_TO_UINT64( i_offset,
+                                                             i_index ),
                                        TWO_UINT32_TO_UINT64( i_args.record,
                                                              i_args.keyword ) );
 
@@ -873,6 +1151,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         err = findKeywordAddr( i_keywordName,
                                i_recordName,
                                i_offset,
+                               0,
                                i_target,
                                keywordSize,
                                byteAddr,
@@ -890,48 +1169,58 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         {
             break;
         }
-
-        // Setup info needed to write from PNOR
-        VPD::pnorInformation info;
-        info.segmentSize = iv_vpdSectionSize;
-        info.maxSegments = iv_vpdMaxSections;
-        info.pnorSection = iv_pnorSection;
-        err = VPD::writePNOR( i_offset+byteAddr,
-                              keywordSize,
-                              i_buffer,
-                              i_target,
-                              info,
-                              iv_cachePnorAddr,
-                              &iv_mutex );
-        if( err )
+        if ( iv_configInfo.vpdWriteHW )
         {
+            // @todo RTC 106884 - Need to handle vpd write to HW
+        }
+        if ( iv_configInfo.vpdWritePNOR )
+        {
+            // Setup info needed to write from PNOR
+            VPD::pnorInformation info;
+            info.segmentSize = iv_vpdSectionSize;
+            info.maxSegments = iv_vpdMaxSections;
+            info.pnorSection = iv_pnorSection;
+            err = VPD::writePNOR( i_offset+byteAddr,
+                                  keywordSize,
+                                  i_buffer,
+                                  i_target,
+                                  info,
+                                  iv_cachePnorAddr,
+                                  &iv_mutex );
+            if( err )
+            {
+                break;
+            }
+
+            VPD::VpdWriteMsg_t msgdata;
+
+            // Quick double-check that our constants agree with the values
+            //  in the VPD message structure
+            assert( sizeof(msgdata.record) == RECORD_BYTE_SIZE );
+            assert( sizeof(msgdata.keyword) == KEYWORD_BYTE_SIZE );
+
+            // Finally, send it down to the FSP
+            msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+            memcpy( msgdata.record, i_recordName, RECORD_BYTE_SIZE );
+            memcpy( msgdata.keyword, i_keywordName, KEYWORD_BYTE_SIZE );
+            err = VPD::sendMboxWriteMsg( keywordSize,
+                                         i_buffer,
+                                         i_target,
+                                         iv_vpdMsgType,
+                                         msgdata );
+
+            if( err )
+            {
+                break;
+            }
+        }
+        else
+        {
+            // No PNOR, just eat the write attempt.
+            TRACFCOMP(g_trac_vpd, "VPD record %s:%s - write ignored",
+                      i_keywordName, i_recordName);
             break;
         }
-
-
-        VPD::VpdWriteMsg_t msgdata;
-
-        // Quick double-check that our constants agree with the values in the
-        //  VPD message structure
-        assert( sizeof(msgdata.record) == RECORD_BYTE_SIZE );
-        assert( sizeof(msgdata.keyword) == KEYWORD_BYTE_SIZE );
-
-        // Finally, send it down to the FSP
-        msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-        memcpy( msgdata.record, i_recordName, RECORD_BYTE_SIZE );
-        memcpy( msgdata.keyword, i_keywordName, KEYWORD_BYTE_SIZE );
-        err = VPD::sendMboxWriteMsg( keywordSize,
-                                     i_buffer,
-                                     i_target,
-                                     iv_vpdMsgType,
-                                     msgdata );
-
-        if( err )
-        {
-            break;
-        }
-
-
     } while(0);
 
     TRACSSCOMP( g_trac_vpd,

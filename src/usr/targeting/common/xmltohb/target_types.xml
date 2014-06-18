@@ -5,7 +5,10 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] Google Inc.                                                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -1418,6 +1421,7 @@
     <parent>lcard-dimm</parent>
     <attribute><id>MODEL</id><default>JEDEC</default></attribute>
     <attribute><id>CEN_DQ_TO_DIMM_CONN_DQ</id></attribute>
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 </targetType>
 
 <targetType>

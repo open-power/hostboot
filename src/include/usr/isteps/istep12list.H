@@ -58,6 +58,8 @@
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/mc_config/mc_config.H"
 
+#include <config.h>
+
 namespace   INITSERVICE
 {
 
@@ -97,6 +99,9 @@ const   TaskInfo    g_istep12[]  =   {
 const DepModInfo g_istep12Dependancies = {
     {
         DEP_LIB(libmc_config.so),
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+        DEP_LIB(libdram_training.so),
+#endif // CONFIG_DJVPD_READ_FROM_HW
         NULL
     }
 };

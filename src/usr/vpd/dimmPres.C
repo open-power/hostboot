@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,6 +40,7 @@
 #include <devicefw/driverif.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/spdenums.H>
+#include <config.h>
 
 #include "spd.H"
 
@@ -118,6 +122,24 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         }
 
         // Is the target present
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+        // Check if the parent MBA is functional.
+        // If it is non-functional then no reason to check the DIMM which
+        // would otherwise generate tons of FSI errors.
+        TARGETING::TargetHandleList membuf_parent;
+        TARGETING::PredicateIsFunctional isFunctional;
+        TARGETING::targetService().getAssociated(
+            membuf_parent,
+            i_target,
+            TARGETING::TargetService::PARENT_BY_AFFINITY,
+            TARGETING::TargetService::IMMEDIATE,
+            &isFunctional);
+        if ( membuf_parent.size() != 1 )
+        {
+            present = false;
+            break;
+        }
+#endif
         present = spdPresent( i_target );
 
         if( present == false )

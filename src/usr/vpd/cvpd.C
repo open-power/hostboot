@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,6 +36,7 @@
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/cvpdenums.H>
+#include <config.h>
 #include "cvpd.H"
 #include "vpd.H"
 
@@ -196,4 +200,24 @@ IpVpdFacade(CVPD::SECTION_SIZE,
 {
     TRACUCOMP(g_trac_vpd, "CvpdFacade::CvpdFacade> " );
 
+#ifdef CONFIG_CVPD_READ_FROM_PNOR
+    iv_configInfo.vpdReadPNOR = true;
+#else
+    iv_configInfo.vpdReadPNOR = false;
+#endif
+#ifdef CONFIG_CVPD_READ_FROM_HW
+    iv_configInfo.vpdReadHW = true;
+#else
+    iv_configInfo.vpdReadHW = false;
+#endif    
+#ifdef CONFIG_CVPD_WRITE_TO_PNOR
+    iv_configInfo.vpdWritePNOR = true;
+#else
+    iv_configInfo.vpdWritePNOR = false;
+#endif    
+#ifdef CONFIG_CVPD_WRITE_TO_HW
+    iv_configInfo.vpdWriteHW = true;
+#else
+    iv_configInfo.vpdWriteHW = false;
+#endif
 }

@@ -1,0 +1,77 @@
+config CVPD_READ_FROM_PNOR
+    default y
+    depends on !CVPD_READ_FROM_HW
+    help
+        Read Centaur VPD data from PNOR cache
+
+config CVPD_READ_FROM_HW
+    default y if !CVPD_READ_FROM_PNOR
+    depends on !CVPD_READ_FROM_PNOR
+    help
+        Read Centaur VPD data from HW resources
+
+config CVPD_WRITE_TO_PNOR
+    default y
+    help
+        Write Centaur VPD data to PNOR cache
+
+config CVPD_WRITE_TO_HW
+    default n
+    depends on !PALMETTO_PASS1
+    help
+        Write Centaur VPD data to HW resources
+
+config MVPD_READ_FROM_PNOR
+    default y
+    depends on !MVPD_READ_FROM_HW
+    help
+        Read Module VPD data from PNOR cache
+
+config MVPD_READ_FROM_HW
+    default y if !MVPD_READ_FROM_PNOR
+    depends on !MVPD_READ_FROM_PNOR
+    help
+        Read Module VPD data from HW resources
+
+config MVPD_WRITE_TO_PNOR
+    default y
+    help
+        Write Module VPD data to PNOR cache
+
+config MVPD_WRITE_TO_HW
+    default n
+    help
+        Write Module VPD data to HW resources
+
+config DJVPD_READ_FROM_PNOR
+    default y
+    depends on !DJVPD_READ_FROM_HW
+    help
+        Read Dimm JEDEC VPD/SPD data from PNOR cache
+    
+config DJVPD_READ_FROM_HW
+    default y if !DJVPD_READ_FROM_PNOR
+    depends on !DJVPD_READ_FROM_PNOR
+    help
+        Read Dimm JEDEC VPD/SPD data from HW resources
+
+config DJVPD_WRITE_TO_PNOR
+    default y
+    help
+        Write Dimm JEDEC VPD/SPD data to PNOR cache
+
+config DJVPD_WRITE_TO_HW
+    default n
+    help
+        Write Dimm JEDEC VPD/SPD data to HW resources
+
+config HAVE_MBVPD
+    default y if CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
+    depends on CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
+    help
+        Have MemBuff/Centaur VPD, PNOR or HW
+
+config PALMETTO_PASS1
+    default n
+    help
+        Palmetto pass1 specific changes

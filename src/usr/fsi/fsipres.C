@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +32,7 @@
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
+#include <config.h>
 
 
 extern trace_desc_t* g_trac_fsi;
@@ -105,45 +109,25 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     }
 
     // Next look for valid Module VPD
+    bool check_for_mvpd = true;
+#ifdef CONFIG_MVPD_READ_FROM_HW
+    check_for_mvpd = fsi_present;
+#endif // CONFIG_MVPD_READ_FROM_HW
+
     bool mvpd_present = false;
     size_t theSize = 0;
 
-    l_errl = deviceRead( i_target,
-                         NULL,
-                         theSize,
-                         DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                              MVPD::VD ) );
-    if( l_errl )
+    if ( check_for_mvpd )
     {
-        if( fsi_present )
-        {
-            // Save this plid to use later
-            l_saved_plid = l_errl->plid();
-
-            // commit this log because we expected to have VPD
-            errlCommit( l_errl,
-                        FSI_COMP_ID );
-        }
-        else
-        {
-            // just delete this
-            delete l_errl;
-        }
-    }
-
-    if( theSize > 0 )
-    {
-        uint8_t theData[theSize];
         l_errl = deviceRead( i_target,
-                             theData,
-                             theSize,
-                             DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                  MVPD::VD ) );
+                            NULL,
+                            theSize,
+                            DEVICE_MVPD_ADDRESS( MVPD::CP00,
+                                                 MVPD::VD ) );
         if( l_errl )
         {
             if( fsi_present )
             {
-
                 // Save this plid to use later
                 l_saved_plid = l_errl->plid();
 
@@ -157,9 +141,37 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                 delete l_errl;
             }
         }
-        else
+
+        if( theSize > 0 )
         {
-            mvpd_present = true;
+            uint8_t theData[theSize];
+            l_errl = deviceRead( i_target,
+                                 theData,
+                                 theSize,
+                                 DEVICE_MVPD_ADDRESS( MVPD::CP00,
+                                                      MVPD::VD ) );
+            if( l_errl )
+            {
+                if( fsi_present )
+                {
+
+                    // Save this plid to use later
+                    l_saved_plid = l_errl->plid();
+
+                    // commit this log because we expected to have VPD
+                    errlCommit( l_errl,
+                                FSI_COMP_ID );
+                }
+                else
+                {
+                    // just delete this
+                    delete l_errl;
+                }
+            }
+            else
+            {
+                mvpd_present = true;
+            }
         }
     }
 
@@ -275,42 +287,22 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     bool fsi_present = isSlavePresent(i_target);
 
     // Next look for memb FRU VPD
+    bool check_for_cvpd = true;
+#ifdef CONFIG_CVPD_READ_FROM_HW
+    check_for_cvpd = fsi_present;
+#endif // CONFIG_CVPD_READ_FROM_HW
+
     bool cvpd_present = false;
     size_t theSize = 0;
-
-    l_errl = deviceRead( i_target,
-                         NULL,
-                         theSize,
-                         DEVICE_CVPD_ADDRESS( CVPD::VEIR,
-                                              CVPD::PF ) );
-
-    if( l_errl )
+    
+    if ( check_for_cvpd )
     {
-
-        if( fsi_present )
-        {
-            // Save this plid to use later
-            l_saved_plid = l_errl->plid();
-
-            // commit this log because we expected to have VPD
-            errlCommit( l_errl,
-                        FSI_COMP_ID );
-        }
-        else
-        {
-            // just delete this
-            delete l_errl;
-        }
-    }
-
-    if( theSize > 0 )
-    {
-        uint8_t theData[theSize];
         l_errl = deviceRead( i_target,
-                             theData,
+                             NULL,
                              theSize,
                              DEVICE_CVPD_ADDRESS( CVPD::VEIR,
                                                   CVPD::PF ) );
+
         if( l_errl )
         {
 
@@ -329,12 +321,39 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                 delete l_errl;
             }
         }
-        else
+
+        if( theSize > 0 )
         {
-            cvpd_present = true;
+            uint8_t theData[theSize];
+            l_errl = deviceRead( i_target,
+                                 theData,
+                                 theSize,
+                                 DEVICE_CVPD_ADDRESS( CVPD::VEIR,
+                                                      CVPD::PF ) );
+            if( l_errl )
+            {
+
+                if( fsi_present )
+                {
+                    // Save this plid to use later
+                    l_saved_plid = l_errl->plid();
+
+                    // commit this log because we expected to have VPD
+                    errlCommit( l_errl,
+                                FSI_COMP_ID );
+                }
+                else
+                {
+                    // just delete this
+                    delete l_errl;
+                }
+            }
+            else
+            {
+                cvpd_present = true;
+            }
         }
     }
-
 
     // Finally compare the 2 methods
     if( fsi_present != cvpd_present )
@@ -384,7 +403,6 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         errlCommit( l_errl,
                     FSI_COMP_ID );
     }
-
     bool present = fsi_present && cvpd_present;
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);

@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,6 +46,7 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <fsi/fsiif.H>
+#include <config.h>
 
 namespace HWAS
 {
@@ -393,6 +397,17 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             pTarget_it++;
             continue;
         }
+
+        // HW backed by VPD cannot detect DIMMs at this stage of IPL, so will
+        // force all DIMMs on to be present for now and then fix up later
+        // @TODO RTC: 111211 - fix DIMMs later
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+        if ( pTarget->getAttr<ATTR_TYPE>() == TYPE_DIMM )
+        {
+            pTarget_it++;
+            continue;
+        }
+#endif
 
         // call deviceRead() to see if they are present
         bool present = false;
