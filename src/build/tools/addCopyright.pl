@@ -445,6 +445,8 @@ sub filetype
        ||( $filename =~ m/\.lex$/ ) # flex
        ||( $fileinfo =~ m/c program text/i )
        ||( $fileinfo =~ m/c\+\+ program text/i )
+       ||( $fileinfo =~ m/c source/i )
+       ||( $fileinfo =~ m/c\+\+ source/i )
        )
     {
         return "C";
