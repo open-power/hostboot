@@ -1,4 +1,4 @@
-#-- $Id: p8.fbc.scom.initfile,v 1.14 2014/02/03 18:44:14 jmcgill Exp $
+#-- $Id: p8.fbc.scom.initfile,v 1.15 2014/06/07 19:04:40 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -38,8 +38,8 @@ define mcd_hang_poll_bug = (ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG != 0);
 scom 0x02010C(0,4,8)A {
     bits,                       scom_data;
     chip_is_system,             0b1;                                                      #-- single chip
-    avp_mode,                   0b0;                                                      #-- AVP mode (TODO: link to attribute)
-    sw_ab_wait,                 0x0;                                                      #-- no delay
+    avp_mode,                   0b0;                                                      #-- AVP mode
+    sw_ab_wait,                 0x8;                                                      #-- 8 (HW218406/HW214831)
     sp_hw_mark,                 0x20;                                                     #-- 32
     gp_hw_mark,                 0x20;                                                     #-- 32
     lcl_hw_mark,                0x20;                                                     #-- 32
@@ -141,7 +141,7 @@ scom 0x02013416 {
 #-- PB X Link Mode Register (PB_X_MODE / 0x04010C0A)
 scom 0x04010C0A {
     bits,                       scom_data,          expr;
-    x_avp_mode,                 0b0,                (xbus_enabled);                       #-- X AVP mode (TODO: link to attribute)
+    x_avp_mode,                 0b0,                (xbus_enabled);                       #-- X AVP mode
     x_4b_mode,                  0b1,                (xbus_enabled) && (def_x_is_4b);      #-- X bus 4/8B switch
     x_tod_wait_limit,           0b0100,             (xbus_enabled);                       #-- X bus TOD wait limit
 }
@@ -149,7 +149,7 @@ scom 0x04010C0A {
 #-- PB A Link Mode Register (PB_IOA_MODE / 0x0801080A)
 scom 0x0801080A {
     bits,                       scom_data,          expr;
-    a_avp_mode,                 0b0,                (abus_enabled);                       #-- A AVP mode (TODO: link to attribute)
+    a_avp_mode,                 0b0,                (abus_enabled);                       #-- A AVP mode
 }
 
 #-- PB A Link Framer Configuration Register (PB_IOA_FMR_CFG / 0x08010813)
@@ -168,7 +168,7 @@ scom 0x08010813 {
 #-- PB F Link Mode Register (PB_IOF_MODE / 0x0901080A)
 scom 0x0901080A {
     bits,                       scom_data,          expr;
-    f_avp_mode,                 0b0,                (pcie_enabled);                       #-- F AVP mode (TODO: link to attribute)
+    f_avp_mode,                 0b0,                (pcie_enabled);                       #-- F AVP mode
 }
 
 #-- PB F Link Framer Configuration Register (PB_IOF_FMR_CFG / 0x09010813)
