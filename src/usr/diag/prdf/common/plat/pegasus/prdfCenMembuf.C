@@ -1227,6 +1227,44 @@ PRDF_PLUGIN_DEFINE( Membuf, ClearServiceCallFlag );
 //------------------------------------------------------------------------------
 
 /**
+ * @brief   Captures trapped address for L4 cache ECC errors.
+ * @param   i_mbChip Centaur chip
+ * @param   i_sc     Step code data struct
+ * @returns SUCCESS always
+ * @note    This function also reset ECC trapped address regsiters so that HW
+ *          can capture address for next L4 ecc error.
+ */
+int32_t CaptureL4CacheErr( ExtensibleChip * i_mbChip,
+                           STEP_CODE_DATA_STRUCT & i_sc )
+{
+    #define PRDF_FUNC "[CaptureL4CacheErr] "
+    do
+    {
+        i_mbChip->CaptureErrorData( i_sc.service_data->GetCaptureData(),
+                                    Util::hashString( "L4CacheErr" ) );
+
+        // NOTE: FW should write on MBCELOG so that HW can capture
+        // address for next L4 CE error.
+
+        SCAN_COMM_REGISTER_CLASS * mbcelogReg =
+                                i_mbChip->getRegister("MBCELOG");
+        mbcelogReg->clearAllBits();
+
+        if ( SUCCESS != mbcelogReg->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC"MBCELOG write failed for 0x%08x",
+                      i_mbChip->GetId());
+            break;
+        }
+    }while( 0 );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Membuf, CaptureL4CacheErr );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief   Checks DD level. If DD1, implements the DD1 callout actions for
  *          MBSFIR bit 30.
  * @param   i_membChip Centaur chip

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -898,3 +900,14 @@
         capture     group never;
     };
 
+    ############################################################################
+    #  L4 cache trapped address.
+    #  This is FFDC only register.
+    ############################################################################
+
+    register MBCELOG
+    {
+        name        "MBU.MBS.MBCELOGQ";
+        scomaddr    0x02011416;
+        capture     group L4CacheErr;
+    };

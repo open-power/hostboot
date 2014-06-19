@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1246,7 +1248,6 @@ actionclass calloutDmiBus
     calloutDmiBusSymFru;
 };
 
-
 /** Handles MCS Chnl XSTOP if present otherwise handles MBIFIR Replay Timeout */
 actionclass replayTimeOutError
 {
@@ -1397,6 +1398,7 @@ actionclass clearSecMbsBitsAndLineDelete
 {
     calloutL4;
     threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
+    funccall("CaptureL4CacheErr");
     funccall("ClearServiceCallFlag");
     funccall("ClearMbsSecondaryBits");
 };
@@ -1406,6 +1408,7 @@ actionclass clearSecMbaCalBitsAndLineDelete
 {
     calloutL4;
     threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
+    funccall("CaptureL4CacheErr");
     funccall("ClearServiceCallFlag");
     funccall("ClearMbaCalSecondaryBits");
 };
@@ -1415,6 +1418,7 @@ actionclass maskSecMbaCalBitsAndConnL4UE
 {
     calloutL4;
     threshold1;
+    funccall("CaptureL4CacheErr");
     funccall("MaskMbaCalSecondaryBits");
     SUEGenerationPoint;
 };
@@ -1424,6 +1428,7 @@ actionclass maskSecMbsBitsAndConnL4UE
 {
     calloutL4;
     threshold1;
+    funccall("CaptureL4CacheErr");
     funccall("MaskMbsSecondaryBits");
     SUEGenerationPoint;
 };
