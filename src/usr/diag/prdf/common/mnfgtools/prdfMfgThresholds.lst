@@ -20,4 +20,4 @@ P8CHIP_OFFNODE_BUS_CES  1
 CEN_MBA_RT_SOFT_CE_TH_ALGO         2
 CEN_MBA_IPL_SOFT_CE_TH_ALGO        2
 CEN_MBA_RT_RCE_PER_RANK            2
-CEN_L4_CACHE_CES                   0
+CEN_L4_CACHE_CES                   2
