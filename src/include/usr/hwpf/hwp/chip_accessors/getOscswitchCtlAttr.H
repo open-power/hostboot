@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getOscswitchCtlAttr.H,v 1.1 2014/05/23 01:23:14 whs Exp $
+// $Id: getOscswitchCtlAttr.H,v 1.2 2014/06/19 14:35:43 whs Exp $
 /**
  *  @file getOscswitchCtlAttr.H
  *
@@ -69,7 +69,7 @@ namespace fapi
                 ENUM_ATTR_NAME_VENICE,
                 0x0A02,
                 0x2E,
-                0x00,
+                0x00400000,
             }
         };
 
