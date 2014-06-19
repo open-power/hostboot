@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.52 2014/05/15 16:36:14 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.54 2014/06/11 16:30:11 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
@@ -863,31 +863,6 @@
     </chipEcFeature>
   </attribute>
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_CFAM_RESET_SBE_START_WA</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      True if:
-        Murano EC less than 0x20
-        Venice EC less than 0x20
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_MURANO</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_VENICE</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OCC_CE_FIR_DISABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -1150,6 +1125,24 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HCA_BAR_SCOM_BUG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        True if chip has HCA BAR SCOM bug
+        Causes HCA BAR range data read via SCOM to be shifted relative to HW state
+        Venice EC greater than or equal to 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
