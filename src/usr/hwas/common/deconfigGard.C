@@ -489,6 +489,7 @@ errlHndl_t DeconfigGard::getGardRecords(
 errlHndl_t DeconfigGard::deconfigureTarget(
         Target & i_target,
         const uint32_t i_errlEid,
+        bool *o_targetDeconfigured,
         const DeconfigureRuntime i_runTimeDeconfigRule)
 {
     HWAS_DBG("Deconfigure Target");
@@ -562,7 +563,8 @@ errlHndl_t DeconfigGard::deconfigureTarget(
         HWAS_MUTEX_LOCK(iv_mutex);
 
         // Deconfigure the Target
-        _deconfigureTarget(i_target, i_errlEid, i_runTimeDeconfigRule);
+        _deconfigureTarget(i_target, i_errlEid, o_targetDeconfigured,
+                i_runTimeDeconfigRule);
 
         // Deconfigure other Targets by association
         _deconfigureByAssoc(i_target, i_errlEid, i_runTimeDeconfigRule);
@@ -986,7 +988,8 @@ void DeconfigGard::_deconfigureByAssoc(
         TargetHandle_t pChild = *pChild_it;
 
         HWAS_INF("_deconfigureByAssoc CHILD: %.8X", get_huid(pChild));
-        _deconfigureTarget(*pChild, i_errlEid, i_runTimeDeconfigRule);
+        _deconfigureTarget(*pChild, i_errlEid, NULL,
+                i_runTimeDeconfigRule);
         // Deconfigure other Targets by association
         _deconfigureByAssoc(*pChild, i_errlEid, i_runTimeDeconfigRule);
     } // for CHILD
@@ -1012,7 +1015,8 @@ void DeconfigGard::_deconfigureByAssoc(
 
             HWAS_INF("_deconfigureByAssoc CHILD_BY_AFFINITY: %.8X",
                     get_huid(pChild));
-            _deconfigureTarget(*pChild, i_errlEid, i_runTimeDeconfigRule);
+            _deconfigureTarget(*pChild, i_errlEid, NULL,
+                    i_runTimeDeconfigRule);
             // Deconfigure other Targets by association
             _deconfigureByAssoc(*pChild, i_errlEid, i_runTimeDeconfigRule);
         } // for CHILD_BY_AFFINITY
@@ -1039,7 +1043,7 @@ void DeconfigGard::_deconfigureByAssoc(
                     HWAS_INF("_deconfigureByAssoc MEMBUF parent MCS: %.8X",
                         get_huid(l_parentMcs));
                     _deconfigureTarget(const_cast<Target &> (*l_parentMcs),
-                        i_errlEid, i_runTimeDeconfigRule);
+                        i_errlEid, NULL, i_runTimeDeconfigRule);
                     _deconfigureByAssoc(const_cast<Target &> (*l_parentMcs),
                         i_errlEid, i_runTimeDeconfigRule);
                 }
@@ -1065,7 +1069,7 @@ void DeconfigGard::_deconfigureByAssoc(
                     HWAS_INF("_deconfigureByAssoc MCS (& MEMBUF) paired: %.8X",
                         get_huid(l_partnerMcs));
                     _deconfigureTarget(const_cast<Target &> (*l_partnerMcs),
-                        i_errlEid,i_runTimeDeconfigRule);
+                        i_errlEid, NULL,i_runTimeDeconfigRule);
                     _deconfigureByAssoc(const_cast<Target &> (*l_partnerMcs),
                         i_errlEid,i_runTimeDeconfigRule);
                 }
@@ -1091,7 +1095,7 @@ void DeconfigGard::_deconfigureByAssoc(
                     HWAS_INF("_deconfigureByAssoc MEMBUF parent with no memory: %.8X",
                         get_huid(l_parentMembuf));
                     _deconfigureTarget(const_cast<Target &> (*l_parentMembuf),
-                        i_errlEid, i_runTimeDeconfigRule);
+                        i_errlEid, NULL, i_runTimeDeconfigRule);
                     _deconfigureByAssoc(const_cast<Target &> (*l_parentMembuf),
                         i_errlEid, i_runTimeDeconfigRule);
 
@@ -1196,7 +1200,7 @@ void DeconfigGard::_deconfigureByAssoc(
                                 HWAS_INF("_deconfigureByAssoc MBA matched: %.8X",
                                     get_huid(pMba));
                                 _deconfigureTarget(*pMba, i_errlEid,
-                                    i_runTimeDeconfigRule);
+                                    NULL, i_runTimeDeconfigRule);
                                 l_deconfigList.push_back(pMba);
                                 break; // only need to do 1 MBA - we're done.
                             }
@@ -1226,7 +1230,7 @@ void DeconfigGard::_deconfigureByAssoc(
                                 HWAS_INF("_deconfigureByAssoc MBA matched: %.8X",
                                     get_huid(pMba));
                                 _deconfigureTarget(*pMba, i_errlEid,
-                                    i_runTimeDeconfigRule);
+                                    NULL, i_runTimeDeconfigRule);
                                 l_deconfigList.push_back(pMba);
                                 break; // only need to do 1 MBA - we're done.
                             }
@@ -1267,7 +1271,7 @@ void DeconfigGard::_deconfigureByAssoc(
                     HWAS_INF("_deconfigureByAssoc DIMM parent MBA: %.8X",
                         get_huid(l_parentMba));
                     _deconfigureTarget(const_cast<Target &> (*l_parentMba),
-                        i_errlEid, i_runTimeDeconfigRule);
+                        i_errlEid, NULL, i_runTimeDeconfigRule);
                     _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
                         i_errlEid, i_runTimeDeconfigRule);
                 }
@@ -1288,7 +1292,8 @@ void DeconfigGard::_deconfigureByAssoc(
                     HWAS_INF("_deconfigureByAssoc BUS Peer: %.8X",
                         get_huid(l_pDstTarget));
                     _deconfigureTarget(const_cast<Target &> (*l_pDstTarget),
-                                       i_errlEid, i_runTimeDeconfigRule);
+                                       i_errlEid, NULL,
+                                       i_runTimeDeconfigRule);
                 }
                 break;
             } // TYPE_XBUS, TYPE_ABUS
@@ -1300,7 +1305,8 @@ void DeconfigGard::_deconfigureByAssoc(
                 HWAS_INF("deconfigByAssoc parent proc: %.8X",
                     get_huid(l_pParentProc));
                 _deconfigureTarget(const_cast<Target &> (*l_pParentProc),
-                                   i_errlEid, i_runTimeDeconfigRule);
+                                   i_errlEid, NULL,
+                                   i_runTimeDeconfigRule);
                 _deconfigureByAssoc(const_cast<Target &> (*l_pParentProc),
                                     i_errlEid, i_runTimeDeconfigRule);
                 break;
@@ -1318,6 +1324,7 @@ void DeconfigGard::_deconfigureByAssoc(
 void DeconfigGard::_deconfigureTarget(
         Target & i_target,
         const uint32_t i_errlEid,
+        bool *o_targetDeconfigured,
         const DeconfigureRuntime i_runTimeDeconfigRule)
 {
     HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
@@ -1353,6 +1360,10 @@ void DeconfigGard::_deconfigureTarget(
 
         l_state.deconfiguredByEid = i_errlEid;
         i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+        if (o_targetDeconfigured)
+        {
+            *o_targetDeconfigured = true;
+        }
 
         // if this is a real error, deconfigure
         if (i_errlEid & DECONFIGURED_BY_PLID_MASK)

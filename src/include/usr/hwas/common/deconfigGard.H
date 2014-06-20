@@ -239,14 +239,17 @@ public:
      * and the function continues. The only errors returned are usage errors.
      * By default, targets are NOT deconfigured if the system is at Runtime.
      *
-     * @param[in] i_target   Reference to Target to deconfigure.
-     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
-     * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
+     * @param[in]  i_target   Reference to Target to deconfigure.
+     * @param[in]  i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[out] o_targetDeconfigured - if pointer is valid, bool is set
+     *                  to true if target was deconfigured; NOT SET OTHERWISE
+     * @param[in]  i_runTimeDeconfigRule Deconfigure Runtime options -
      *              default not at runtime
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
                            const uint32_t i_errlEid,
+                           bool *o_targetDeconfigured = NULL,
                            const DeconfigureRuntime i_runTimeDeconfigRule =
                                     NOT_AT_RUNTIME);
 
@@ -425,11 +428,14 @@ private:
      *
      * @param[in] i_target   Reference to Target to deconfigure.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[out] o_targetDeconfigured - if pointer is valid, bool is set
+     *                  to true if target was deconfigured; NOT SET OTHERWISE
      * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
      *              default not at runtime
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
                             const uint32_t i_errlEid,
+                            bool *o_targetDeconfigured = NULL,
                             const DeconfigureRuntime i_runTimeDeconfigRule =
                                     NOT_AT_RUNTIME);
 

@@ -190,11 +190,17 @@ public:
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
 
             // Deconfigure the target.
+            bool l_targetDeconfigured = false;
             l_pErr = theDeconfigGard().
-                    deconfigureTarget(*l_pTarget, 0x12);
+                    deconfigureTarget(*l_pTarget, 0x12, &l_targetDeconfigured);
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure3: Error from deconfigureTarget");
+                break;
+            }
+            if (l_targetDeconfigured == false)
+            {
+                TS_FAIL("testDeconfigure3: deconfigureTarget didn't set targetDeconfigured correctly");
                 break;
             }
 
