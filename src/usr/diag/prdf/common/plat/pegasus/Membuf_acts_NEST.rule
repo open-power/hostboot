@@ -444,7 +444,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[4]
      *  MBIFIRQ_SEQID_OUT_OF_ORDER
      */
-    (MbiFir, bit(4)) ? calloutDmiBusLvl2Th1;
+    (MbiFir, bit(4)) ? defaultMaskedError;
 
     /** MBIFIR[5]
      *  MBIFIRQ_REPLAY_BUFFER_ECC_CE
@@ -1272,9 +1272,6 @@ actionclass calloutDmiBusTh1 { calloutDmiBus; threshold1; };
 
 /** Callout the DMI bus, threshold 2 per day */
 actionclass calloutDmiBusTh2pday { calloutDmiBus; threshold2pday; };
-
-/** Callout the DMI bus and 2nd Level (LOW), threshold 1 */
-actionclass calloutDmiBusLvl2Th1 { calloutDmiBusTh1; callout2ndLvlLow; };
 
 /** Callout MCS, centaur, threshold 1 and set SUE genreation point */
 actionclass CalloutMcsMedSelfMedThr1UE

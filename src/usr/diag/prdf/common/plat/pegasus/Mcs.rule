@@ -209,7 +209,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[4]
      *  MCIFIRQ_SEQID_OUT_OF_ORDER
      */
-    (MciFir, bit(4)) ? calloutDmiBusAndLvl2Th1;
+    (MciFir, bit(4)) ? defaultMaskedError;
 
     /** MCIFIR[5]
      *  MCIFIRQ_REPLAY_BUFFER_ECC_CE
@@ -332,7 +332,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
      */
-    (MciFir, bit(27)) ? callout2ndLvlMedThr1NoGard;
+    (MciFir, bit(27)) ? calloutDmiBusAndLvl2Th1;
 
     /** MCIFIR[28]
      *  MCIFIRQ_MULTIPLE_RCMD_OR_CRESP_ACTIVE
