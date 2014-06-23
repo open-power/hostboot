@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_sbe_enable_pnor.H,v 1.1 2012/10/16 02:44:44 jmcgill Exp $
+// $Id: proc_sbe_enable_pnor.H,v 1.2 2014/06/08 19:18:37 jmcgill Exp $
 
 /// Substep numbers for proc_sbe_enable_pnor
 
@@ -33,8 +33,6 @@
 CONST_UINT8_T(SUBSTEP_ENABLE_PNOR_PROC_ENTRY,    ULL(0x0));
 CONST_UINT8_T(SUBSTEP_ENABLE_PNOR_SLAVE_CHIP,    ULL(0x1));
 CONST_UINT8_T(SUBSTEP_ENABLE_PNOR_MASTER_CHIP,   ULL(0x2));
-CONST_UINT8_T(SUBSTEP_ENABLE_PNOR_CONFIG_I2C_E1, ULL(0x3));
-CONST_UINT8_T(SUBSTEP_ENABLE_PNOR_INIT_PROC,     ULL(0x4));
 
 
 #endif  // __PROC_SBE_ENABLE_PNOR_H
