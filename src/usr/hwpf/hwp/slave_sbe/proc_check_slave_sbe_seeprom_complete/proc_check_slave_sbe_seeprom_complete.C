@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.13 2014/02/19 02:31:45 jmcgill Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.14 2014/06/10 12:41:40 dsanner Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -56,7 +56,8 @@
 //------------------------------------------------------------------------------
 const uint8_t  SBE_STOPPED_AT_BREAKPOINT_0xB = 0xB;
 const uint8_t  SBE_EXIT_SUCCESS_0xF = 0xF;
-const uint64_t NS_TO_FINISH = 10^9; //(1 second)
+const uint64_t NS_TO_FINISH = 10000000; //(10 ms)
+const uint64_t MS_TO_FINISH = NS_TO_FINISH/1000000;
 const uint64_t SIM_CYCLES_TO_FINISH = 10000000;
 //Should really be 19.6*NS_TO_FINISH, but sim runs at about 11 hours per 
 //simulated second which is longer than we want to wait in error cases
@@ -213,13 +214,15 @@ extern "C"
 //
 // parameters: i_target           => slave chip target
 //             i_pSEEPROM         => pointer to the seeprom image (for errors)
+//             i_wait_in_ms       => pointer to the seeprom image (for errors)
 //
 // returns: FAPI_RC_SUCCESS if the slave SBE stopped with success at the correct
 //          location, else error
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_check_slave_sbe_seeprom_complete(
         const fapi::Target & i_target,
-        const void         * i_pSEEPROM)
+        const void         * i_pSEEPROM,
+        const size_t       i_wait_in_ms)
     {
         // data buffer to hold register values
         ecmdDataBufferBase data(64);
@@ -236,51 +239,59 @@ extern "C"
 
         do
         {
-            //Check if the SBE is still running
+            //Check if the SBE is still running.  Loop until stopped
+            //or loop time is exceeded.  
             bool still_running = true;
+            size_t loop_time = 0;
             rc = proc_check_slave_sbe_seeprom_complete_check_running(
-                i_target,
-                still_running );
+                   i_target,
+                   still_running );
             if( rc )
-            {      
+            {
                 break;
             }
 
-            if( still_running )
+            while (still_running && (loop_time < i_wait_in_ms))
             {
-                //SBE still running, so give it a second to finish
-                FAPI_DBG("Waiting for SBE to stop (%lldns, %lld cycles)",
-                         NS_TO_FINISH,
-                         SIM_CYCLES_TO_FINISH );
+                //Not done -- sleep 10ms, then check again
+                loop_time += MS_TO_FINISH;
                 rc = fapiDelay(NS_TO_FINISH, SIM_CYCLES_TO_FINISH);
-                if(rc)
+                if( rc )
                 {
                     FAPI_ERR("Error with delay\n");
                     break;
                 }
 
-                //Check the SBE again
                 rc = proc_check_slave_sbe_seeprom_complete_check_running(
-                    i_target,
-                    still_running );
+                       i_target,
+                       still_running );
                 if( rc )
                 {
                     break;
                 }
+            }
 
-                //Give up if we're still running
-                if( still_running )
-                {
-                    FAPI_ERR(
-                        "SBE still running after waiting (%lldns, %lld cycles)",
-                        NS_TO_FINISH,
-                        SIM_CYCLES_TO_FINISH );
+            //Break if took an error
+            if( rc )
+            {
+                break;
+            }
 
-                    const fapi::Target & CHIP_IN_ERROR = i_target;
-                    FAPI_SET_HWP_ERROR(rc,
-                        RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_STILL_RUNNING);
-                    break;
-                }
+            FAPI_INF("SBE is running [%d], wait time in ms[%d]",
+                     still_running, loop_time);
+
+            //Give up if we're still running
+            if( still_running )
+            {
+                FAPI_ERR(
+                        "SBE still running after waiting (%dns, %lld cycles)",
+                        loop_time,
+                        loop_time/MS_TO_FINISH*SIM_CYCLES_TO_FINISH );
+
+                const fapi::Target & CHIP_IN_ERROR = i_target;
+                FAPI_SET_HWP_ERROR(rc,
+                      RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_STILL_RUNNING);
+                break;
             } //end if(still_running)
 
             //SBE is stopped. Let's see where
