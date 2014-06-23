@@ -20,8 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: mss_draminit_training.C,v 1.85 2014/04/23 18:23:51 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.87 2014/06/09 22:46:59 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -29,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.87   | jdsloat  |09-JUN-14| Fixed log numbering... Added additonal error logs for more debug ability in a training error situation.
 //  1.85   | jdsloat  |23-APL-14| Fixed attribute variable l_disable1_rdclk_fixed unitialized error in SW25701/v1.83
 //  1.84   | jdsloat  |23-APL-14| Fixed FAPI_ERR message within v1.83, mss_set_bbm_regs
 //  1.83   | jdsloat  |18-APL-14| SW25701 Workaround - mss_set_bbm_regs - x4s will not mask out RDCLKs on Bad Bits to avoid translation issues
@@ -267,11 +267,11 @@ ReturnCode mss_draminit_training(Target& i_target)
 
     fapi::ReturnCode l_rc;
 
-    l_rc = mss_reset_delay_values(i_target);
-    if (l_rc)
-    {
-	return l_rc;
-    }
+    //l_rc = mss_reset_delay_values(i_target);
+    //if (l_rc)
+    //{
+    //	return l_rc;
+    //}
 
     l_rc = mss_draminit_training_cloned(i_target);
     if (l_rc)
@@ -936,6 +936,10 @@ ReturnCode mss_check_error_status( Target& i_target,
     ecmdDataBufferBase cal_error_buffer_64(64);
     ReturnCode rc;
 
+    uint8_t MBA_POSITION;
+    uint8_t PORT_POSITION;
+    uint8_t RANKGROUP_POSITION;
+
     if(i_port == 0)
     {
         rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, cal_error_buffer_64);
@@ -954,38 +958,92 @@ ReturnCode mss_check_error_status( Target& i_target,
         if(cal_error_buffer_64.isBitSet(48))
         {
             FAPI_ERR( "+++ Write leveling error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_WR_LVL_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(50))
         {
             FAPI_ERR( "+++ DQS Alignment error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(51))
         {
             FAPI_ERR( "+++ RDCLK to SysClk alignment error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(52))
         {
             FAPI_ERR( "+++ Read centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_RD_CENTERING_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(53))
         {
             FAPI_ERR( "+++ Write centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_WR_CENTERING_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(55))
         {
             FAPI_ERR( "+++ Coarse read centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_COURSE_RD_CENTERING_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(56))
         {
             FAPI_ERR( "+++ Custom pattern read centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_CENTERING_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(57))
         {
             FAPI_ERR( "+++ Custom pattern write centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_WR_CENTERING_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
         if(cal_error_buffer_64.isBitSet(58))
         {
             FAPI_ERR( "+++ Digital eye error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
+	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+	    MBA_POSITION = i_mbaPosition;
+	    PORT_POSITION = i_port;
+	    RANKGROUP_POSITION = i_group;
+	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DIGITAL_EYE_ERROR);
+	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
         }
     }
     else
