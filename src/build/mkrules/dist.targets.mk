@@ -38,7 +38,7 @@ ROOTPATH = ../../..
 #
 
 # Content targets.
-VALID_TARGETS = fsp tools
+VALID_TARGETS = fsp tools openpower
 
 #
 # Files which are to be directly copied into content targets.
@@ -46,7 +46,7 @@ VALID_TARGETS = fsp tools
 # Format is <source file>:<comma separated targets>
 #
 COPY_FILES = \
-    src/build/debug/hb-dump-debug:tools,vpo \
+    src/build/debug/hb-dump-debug:tools,vpo,openpower \
     src/build/debug/vpo-debug-framework.pl:vpo \
     src/build/debug/fsp-memdump.sh:tools,vpo \
     src/build/vpo/hb-dump:vpo \
@@ -56,7 +56,7 @@ COPY_FILES = \
     src/build/simics/hb-pnor-vpd-preload.pl:vpo \
     src/build/buildpnor/pnorLayoutVpo.xml:vpo \
     img/errlparser:tools,vpo \
-    img/hbotStringFile:tools,vpo \
+    img/hbotStringFile:tools,vpo,openpower \
     img/isteplist.csv:tools,vpo \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
@@ -66,6 +66,8 @@ COPY_FILES = \
     obj/genfiles/targAttrInfo.csv:vpo \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
+    src/build/buildpnor/buildSbePart.pl:openpower \
+    src/build/buildpnor/buildpnor.pl:openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
 
 #
@@ -74,22 +76,22 @@ COPY_FILES = \
 # Format is <dest file>:<source file>:<comma separated targets>
 #
 COPY_RENAME_FILES = \
-    makefile:src/build/mkrules/hbfw/makefile:fsp \
+    makefile:src/build/mkrules/hbfw/makefile:fsp\
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
-    img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp \
-    img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp \
-    img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp \
+    img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
+    img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
+    img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
     vbu_MURANO.pnor:img/vbu$(UNDERSCORE_TEST)_MURANO.pnor:vpo \
     vbu_VENICE.pnor:img/vbu$(UNDERSCORE_TEST)_VENICE.pnor:vpo \
-    hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
-    hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo \
+    hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
+    hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
-    hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
-    hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo \
+    hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
+    hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
     hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
-	Hostboot/$(notdir $(file)):$(file):tools,vpo)
+	Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower)
 
 #
 # Symbolic links created in the target.

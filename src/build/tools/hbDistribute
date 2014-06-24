@@ -68,6 +68,10 @@ do
             TARGET="fsp_TARGET"
         ;;
 
+        "--openpower")
+            TARGET="openpower_TARGET"
+        ;;
+
         "--release")
             TARGET="ALL"
         ;;
