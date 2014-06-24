@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vpp_offset.C,v 1.6 2014/06/18 20:34:41 dcadiga Exp $
+// $Id: mss_volt_vpp_offset.C,v 1.8 2014/06/25 16:49:11 dcadiga Exp $
 /* File mss_volt_vpp_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.8    | sglancy  | 06/25/14 | Commented out DRAM_GEN checking section of the code and forced it to default DDR3 - WILL UPDATE TO CHECK THE DRAM GENERATIONS FOR FUTURE CODE GENERATIONS
+//  1.7    | sglancy  | 06/24/14 | Fixed bugs associated with empty returns from fapiGetChildChiplets
 //  1.6    | sglancy  | 06/18/14 | Deletes two unused variables and updated errors
 //  1.5    | sglancy  | 06/09/14 | Updated debug statements
 //  1.4    | sglancy  | 06/04/14 | Updated to include output attribute
@@ -75,13 +77,15 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     uint32_t num_chips = 0;
     uint32_t vpp_slope, vpp_intercept;
     uint8_t dram_width, enable, dram_gen;
-    uint8_t cur_dram_gen;
+    dram_gen = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3;
+    ///uint8_t cur_dram_gen;  WILL BE UNCOMMENTED IN A FUTURE RELEASE - need to fix the checking for the DRAM technology generation section of the code
     uint8_t num_spares[2][2][4];
     uint8_t rank_config[2][2];
     std::vector<fapi::Target>  l_mbaChiplets;
       
+    /* ///////////////////////// WILL BE UNCOMMENTED IN A FUTURE RELEASE - need to fix the checking for the DRAM technology generation section of the code
     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
-    l_rc=fapiGetChildChiplets(i_targets[0], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+    l_rc=fapiGetChildChiplets(i_targets[0], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
     if(l_rc) return l_rc;
     l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,&l_mbaChiplets[0],dram_gen); 
     if(l_rc) return l_rc;
@@ -90,7 +94,7 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     for(uint32_t i = 0; i < i_targets.size();i++) {
        //loops through all MBA chiplets to compare the DRAM technology generation attribute
        l_mbaChiplets.clear();
-       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
        for(uint32_t j=0;j<l_mbaChiplets.size();j++) {
           //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
           l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,&l_mbaChiplets[j],cur_dram_gen); 
@@ -109,7 +113,8 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
           }//end if
        }//end for
     }//end for
-
+    */
+    
     //checks to see if the DIMMs are DDR3 DIMMs if so, return 0 and exit
     if(dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3) {
        uint32_t param_vpp_voltage_mv = 0; 
@@ -152,7 +157,7 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     for(uint32_t i=0;i<i_targets.size();i++) {
        //resets the number of ranks and spares
        l_mbaChiplets.clear();
-       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
        //loops through the each MBA chiplet to get the number of ranks and the number of spares
        for(uint32_t mba = 0;mba<l_mbaChiplets.size();mba++) {
           //gets if the centaur is a x4 or a x8

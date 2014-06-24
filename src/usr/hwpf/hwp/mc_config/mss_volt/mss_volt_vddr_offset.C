@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vddr_offset.C,v 1.6 2014/06/18 20:34:37 dcadiga Exp $
+// $Id: mss_volt_vddr_offset.C,v 1.10 2014/06/25 21:04:50 dcadiga Exp $
 /* File mss_volt_vddr_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.10   | sglancy  | 06/25/14 | Fixed targetting bug
+//  1.9    | sglancy  | 06/25/14 | Removed all references to EFF attributes
+//  1.8    | sglancy  | 06/25/14 | Commented out DRAM_GEN checking section of the code and forced it to default DDR3 - WILL UPDATE TO CHECK THE DRAM GENERATIONS FOR FUTURE CODE GENERATIONS
+//  1.7    | sglancy  | 06/24/14 | Fixed bugs associated with empty returns from fapiGetChildChiplets
 //  1.6    | sglancy  | 06/18/14 | Updated to add more debug information into error
 //  1.5    | sglancy  | 06/09/14 | Updated to change output attribute name and update debug statements
 //  1.4    | sglancy  | 06/04/14 | Updated to include output attribute
@@ -77,24 +81,49 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     uint32_t var_power_on_vddr = 0;
     uint32_t data_bus_util;
     uint32_t num_logical_dimms;
-    uint8_t dram_gen, cur_dram_gen;
+    uint8_t dram_gen =  fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3; //, cur_dram_gen; WILL BE UNCOMMENTED IN A FUTURE RELEASE - need to fix the checking for the DRAM technology generation section of the code   
+    //bool dram_gen_found = false;
     uint8_t enable, is_functional;
     uint8_t percent_uplift;
-    uint8_t rank_config[2][2];
     std::vector<fapi::Target>  l_mbaChiplets;
+    std::vector<fapi::Target>  l_dimm_targets;
 
+    /*
+    ///////////////////////// WILL BE UNCOMMENTED IN A FUTURE RELEASE - need to fix the checking for the DRAM technology generation section of the code    
     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
-    l_rc=fapiGetChildChiplets(i_targets[0], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+    l_rc=fapiGetChildChiplets(i_targets[0], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
     if(l_rc) return l_rc;
     l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,&l_mbaChiplets[0],dram_gen); 
     if(l_rc) return l_rc;
     
     //checks to make sure that all of the DRAM generation attributes are the same, if not error out
     for(uint32_t i = 0; i < i_targets.size();i++) {
+       //gets the functional attribute to check for an active centaur
+       l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL,&i_targets[i],is_functional);
+       //found an error
+       if(l_rc) return l_rc;
+       
        //loops through all MBA chiplets to compare the DRAM technology generation attribute
        l_mbaChiplets.clear();
-       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
        for(uint32_t j=0;j<l_mbaChiplets.size();j++) {
+          //gets the dimm level target
+          l_dimm_targets.clear();
+          //gets the number of declared dimms
+	  l_rc = fapiGetAssociatedDimms(l_mbaChiplets[i], l_dimm_targets);
+	  for(uint32_t dimm=0;dimm<l_dimm_targets.size();dimm++) {
+	     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
+             l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_GEN,&l_mbaChiplets[j],cur_dram_gen); 
+	     //found an error reading the VPD
+	     if(l_rc) {
+	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
+	        if()
+		//otherwise, just return the error code
+		return l_rc;
+	     }
+	     return l_rc;
+	  }
+	  
           //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
           l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,&l_mbaChiplets[j],cur_dram_gen); 
 	  if(l_rc) return l_rc;
@@ -112,7 +141,8 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
           }//end if
        }//end for
     }//end for
-
+    */
+    
     //voltage should not be updated if the disable is set
     l_rc = FAPI_ATTR_GET(ATTR_MSS_VDDR_OFFSET_DISABLE,NULL,enable); 
     //error check
@@ -188,29 +218,26 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
        
        //loops through all MBA chiplets to compare the compute the total number of logical dimms on a dimm
        l_mbaChiplets.clear();
-       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+       l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
        num_logical_dimms = 0;
        for(uint32_t mba=0;mba<l_mbaChiplets.size();mba++) {
-          //gets the number of declared ranks
-	  l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_RANKS_CONFIGED,&l_mbaChiplets[mba],rank_config); 
+          l_dimm_targets.clear();
+          //gets the number of declared dimms
+	   l_rc = fapiGetAssociatedDimms(l_mbaChiplets[mba], l_dimm_targets);
 	  if(l_rc) return l_rc;
-	  for(uint32_t port=0;port<2;port++) {
-	     for(uint32_t dimm=0;dimm<2;dimm++) {
-	        if(rank_config[port][dimm]) num_logical_dimms++;
-	     }
-          }//end for
+	  num_logical_dimms += l_dimm_targets.size();
        }//end for
        
        //found an active centaur
        //multiply by total number of active logical dimms
        if(is_functional == fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
            var_power_on_vddr += (vpd_master_power_slope*volt_util_active/10000+vpd_master_power_intercept)*num_logical_dimms;
-	   FAPI_INF("var_power_on_vddr: %d cW vpd_master_power_slope: %d cW volt_util_active: %d per 10k vpd_master_power_intercept %d cW",var_power_on_vddr,vpd_master_power_slope,volt_util_active,vpd_master_power_intercept);
+	   FAPI_INF("var_power_on_vddr: %d cW vpd_master_power_slope: %d cW volt_util_active: %d per 10k vpd_master_power_intercept %d cW num_logical_dimms %d",var_power_on_vddr,vpd_master_power_slope,volt_util_active,vpd_master_power_intercept,num_logical_dimms);
        }
        //centaur must be inactive
        else  {
            var_power_on_vddr += (vpd_master_power_slope*volt_util_inactive/10000+vpd_master_power_intercept)*num_logical_dimms;
-	   FAPI_INF("var_power_on_vddr: %d cW vpd_master_power_slope: %d cW volt_util_inactive: %d per 10k vpd_master_power_intercept %d cW",var_power_on_vddr,vpd_master_power_slope,volt_util_inactive,vpd_master_power_intercept);
+	   FAPI_INF("var_power_on_vddr: %d cW vpd_master_power_slope: %d cW volt_util_inactive: %d per 10k vpd_master_power_intercept %d cW num_logical_dimms %d",var_power_on_vddr,vpd_master_power_slope,volt_util_inactive,vpd_master_power_intercept,num_logical_dimms);
        }
     }//end for
     
