@@ -109,6 +109,9 @@ void IpcSp::msgHandler()
                 }
                 if(!err)
                 {
+                    RUNTIME::setPayloadBaseAddress
+                        (reinterpret_cast<uint64_t>(msg->extra_data));
+
                     err = RUNTIME::populate_node_attributes( msg->data[0] );
                 }
 

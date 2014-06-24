@@ -760,6 +760,7 @@ errlHndl_t populate_attributes( void )
         uint64_t this_node = INTR::PIR_t(task_getcpuid()).nodeId;
         task_affinity_unpin();
 
+        uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
 
         //loop though all possible drawers whether they exist or not
         // An invalid or non-existant logical node number in that drawer
@@ -785,6 +786,7 @@ errlHndl_t populate_attributes( void )
                     msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
                     msg->data[0] = drawer;     // offset in attribute table
                     msg->data[1] = this_node;  // node to send a msg back to
+                    msg->extra_data = reinterpret_cast<uint64_t*>(payloadBase);
                     errhdl = MBOX::send(MBOX::HB_IPC_MSGQ, msg, node);
                     if (errhdl)
                     {
@@ -815,6 +817,13 @@ errlHndl_t populate_attributes( void )
     } while(0);
 
     return errhdl;
+}
+
+void setPayloadBaseAddress(uint64_t i_payloadAddress)
+{
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    sys->setAttr<TARGETING::ATTR_PAYLOAD_BASE>(i_payloadAddress);
 }
 
 } //namespace RUNTIME

@@ -129,6 +129,12 @@ errlHndl_t writeActualCount( RUNTIME::SectionId i_id );
 void add_host_data_ffdc( SectionId i_section,
                          errlHndl_t& io_errlog );
 
+/*
+ * @brief Set the PAYLOAD_BASE attribute
+ * @param[in] i_payloadAddress in MEGABYTES
+ */
+void setPayloadBaseAddress(uint64_t i_payloadAddress);
+
 }
 
 #endif 
