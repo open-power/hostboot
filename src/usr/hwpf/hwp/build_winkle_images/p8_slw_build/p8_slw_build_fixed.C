@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build_fixed.C,v 1.18 2013/12/16 21:41:47 cmolsen Exp $
+// $Id: p8_slw_build_fixed.C,v 1.19 2014/05/28 02:32:41 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build_fixed                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -99,6 +99,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   uint32_t  dataTmp1, dataTmp2, dataTmp3;
   uint64_t  ptrTmp1, ptrTmp2;
   uint32_t  bufLC;
+  uint8_t   ffdc_temp;
 
 	// Sanity checks on buffers and image.
   // - validate image.
@@ -185,6 +186,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   if (i_modeBuild>P8_SLW_MODEBUILD_MAX_VALUE)  {
     FAPI_ERR("modeBuild=%i invalid. Valid range is [0;%i].",
       i_modeBuild,P8_SLW_MODEBUILD_MAX_VALUE);
+    ffdc_temp = i_modeBuild;
+    uint8_t & MODE_BUILD=ffdc_temp;
 		FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_BAD_CODE_OR_PARM);
     return rc;
   }
@@ -223,6 +226,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   rcLoc = sbe_xip_delete_section( i_imageOut, SBE_XIP_SECTION_DCRINGS);
   if (rcLoc)  {
     FAPI_ERR("xip_delete_section(.dcrings) failed w/rcLoc=%i",rcLoc);
+    ffdc_temp=(uint8_t)SBE_XIP_SECTION_DCRINGS;
+    uint8_t & SBE_XIP_SECTION=ffdc_temp;
 	  uint32_t & RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_DELETE_IMAGE_SECTION_ERROR);
     return rc;
@@ -240,6 +245,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   rcLoc = sbe_xip_delete_section( i_imageOut, SBE_XIP_SECTION_RINGS);
   if (rcLoc)  {
     FAPI_ERR("xip_delete_section(.rings) failed w/rcLoc=%i",rcLoc);
+    ffdc_temp=(uint8_t)SBE_XIP_SECTION_RINGS;
+    uint8_t & SBE_XIP_SECTION=ffdc_temp;
 	  uint32_t & RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_DELETE_IMAGE_SECTION_ERROR);
     return rc;
@@ -257,6 +264,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   rcLoc = sbe_xip_delete_section( i_imageOut, SBE_XIP_SECTION_PIBMEM0);
   if (rcLoc)  {
     FAPI_ERR("xip_delete_section(.pibmem0) failed w/rcLoc=%i",rcLoc);
+    ffdc_temp=(uint8_t)SBE_XIP_SECTION_PIBMEM0;
+    uint8_t & SBE_XIP_SECTION=ffdc_temp;
 	  uint32_t & RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_DELETE_IMAGE_SECTION_ERROR);
     return rc;
@@ -727,6 +736,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 		// Default case - Should never get here.
 		default:
 			FAPI_ERR("Bad code, or bad modeBuild (=%i) parm.",i_modeBuild);
+      ffdc_temp = i_modeBuild;
+      uint8_t & MODE_BUILD=ffdc_temp;
 			FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_BAD_CODE_OR_PARM);
 			return rc;
 		}

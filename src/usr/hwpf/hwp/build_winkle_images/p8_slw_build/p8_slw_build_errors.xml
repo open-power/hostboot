@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_slw_build_errors.xml,v 1.8 2013-04-23 22:47:26 wenning Exp $   -->
+<!-- $Id: p8_slw_build_errors.xml,v 1.9 2014/05/28 02:33:33 cmolsen Exp $   -->
 <!-- Error definitions for proc_slw_build procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -29,13 +29,21 @@
     <description>Supplied max image size is too small or image too large.</description>
     <ffdc>DATA_IMG_SIZE_INP</ffdc>
     <ffdc>DATA_IMG_SIZE_MAX</ffdc>
-</hwpError>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_IMG_PTR_ERROR</rc>
     <description>Supplied image ptrs are the same. This is not allowed.</description>
     <ffdc>DATA_BUF1_PTR</ffdc>
     <ffdc>DATA_BUF2_PTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -43,6 +51,10 @@
     <description>Supplied buffer(s) is invalid. Either it (they) does not exist or they are the same. This is not allowed.</description>
     <ffdc>DATA_BUF1_PTR</ffdc>
     <ffdc>DATA_BUF2_PTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -51,6 +63,10 @@
     <ffdc>DATA_BUF1_SIZE</ffdc>
     <ffdc>DATA_BUF2_SIZE</ffdc>
     <ffdc>DATA_BUF_SIZE_FIXED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -58,6 +74,10 @@
     <description>Supplied max output image size differs from agreed upon fixed SLW image size.</description>
     <ffdc>DATA_IMG_SIZE_MAX</ffdc>
     <ffdc>DATA_IMG_SIZE_FIXED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -65,6 +85,10 @@
     <description>Supplied image size differs from size in image header.</description>
     <ffdc>DATA_IMG_SIZE_INP</ffdc>
     <ffdc>DATA_IMG_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -72,6 +96,10 @@
     <description>Supplied image size differs from size in mainstore image header.</description>
     <ffdc>DATA_IMG_SIZE_INP</ffdc>
     <ffdc>DATA_IMG_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -79,6 +107,10 @@
     <description>Ring block is too large.</description>
     <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
     <ffdc>DATA_SIZE_OF_BUF1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -86,12 +118,20 @@
     <description>Problem with WF ring block alignment.</description>
     <ffdc>DATA_RING_BLOCK_ENTRYOFFSET</ffdc>
     <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_IMGBUILD_ERROR</rc>
     <description>Local IMGBUILD_xyz error from non-FAPI routine. Check rc code in p8_delta_scan_rw.h.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -100,36 +140,61 @@
     <ffdc>DATA_IMG_SIZE_OLD</ffdc>
     <ffdc>DATA_IMG_SIZE_EST</ffdc>
     <ffdc>DATA_IMG_SIZE_MAX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_INTERNAL_IMAGE_ERR</rc>
     <description>Unable to obtain either image size or to validate image.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_MS_INTERNAL_IMAGE_ERR</rc>
     <description>Unable to obtain either image size or to validate image in mainstore.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_DELETE_IMAGE_SECTION_ERROR</rc>
     <description>Error associated with deleting an image section.</description>
+    <ffdc>SBE_XIP_SECTION</ffdc>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_RING_RETRIEVAL_ERROR</rc>
     <description>Error associated with retrieving RS4 ring from image.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_RS4_DECOMPRESSION_ERROR</rc>
     <description>RS4 decompression failed.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -138,58 +203,99 @@
     <ffdc>DATA_FAIL_BYTE_NO</ffdc>
     <ffdc>DATA_EXISTING_RING_BYTE</ffdc>
     <ffdc>DATA_OVERLAY_RING_BYTE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
 </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_WF_CREATION_ERROR</rc>
     <description>Wiggle-flip programming failed.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_IMAGE_UPDATE_ERROR</rc>
     <description>Error associated with updating mainstore image.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_APPEND_SLW_SECTION_ERROR</rc>
     <description>Error associated with adding empty SLW section for ramming table.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_CREATE_FIXED_IMAGE_ERROR</rc>
     <description>Error associated with creating and initializing fixed image and fixed .slw and .ffdc sections.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_KEYWORD_NOT_FOUND_ERROR</rc>
     <description>A keyword in the XIP image was not found.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_UNKNOWN_XIP_ERROR</rc>
     <description>Unknown XIP error, except it's not an _ITEM_NOT_FOUND error.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_UNKNOWN_ERROR</rc>
     <description>Unknown error. (Shouldn't be in this code section.)</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_BAD_CODE_OR_PARM</rc>
     <description>Shouldn't be in this code section or invalid parm.</description>
+    <ffdc>MODE_BUILD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_MEMORY_ERROR</rc>
     <description>Memory allocation error.</description>
     <ffdc>RC_LOCAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

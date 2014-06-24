@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.70 2014/04/28 15:49:49 cmolsen Exp $
+// $Id: p8_xip_customize.C,v 1.71 2014/05/28 15:34:53 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -408,6 +408,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   bool       largeSeeprom = false;
   uint8_t    seepromAddrBytes = 0;
   const uint32_t   desiredBootCoreMask = (i_sysPhase==0)?io_bootCoreMask:0x0000FFFF;
+  uint8_t    ffdc_temp;
+
   FAPI_INF("Desired boot core mask is 0x%08X, io_bootCoreMask is 0x%08X", desiredBootCoreMask, io_bootCoreMask);
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
@@ -1453,6 +1455,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // Default case - Should never get here.
   default:
     FAPI_ERR("Bad code, or bad modeBuild (=%i) parm.",i_modeBuild);
+    ffdc_temp = i_modeBuild;
+    uint8_t & MODE_BUILD=ffdc_temp;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_BAD_CODE_OR_PARM);
     return rc;
   
