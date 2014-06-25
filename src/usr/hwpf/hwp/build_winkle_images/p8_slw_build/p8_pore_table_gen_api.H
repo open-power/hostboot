@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.25 2014/05/12 16:04:52 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.27 2014/06/02 18:21:55 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -291,14 +291,22 @@ enum  {
 #define P8_CID_EX_HIGH        0x1f        // Highest EX chiplet addr
 
 // SCOM Operators
-#define P8_PORE_SCOM_FIRST_OP 0  // First supported INPUT Scom operation.
-#define P8_PORE_SCOM_APPEND   0  // Add Scom to end of table
-#define P8_PORE_SCOM_REPLACE  1  // Repl 1st matching Scom addr or add to end of table
-#define P8_PORE_SCOM_OR       2  // Overlay data onto existing Scom by bitwise OR
-#define P8_PORE_SCOM_AND      3  // Overlay data onto existing Scom by bitwise AND
-#define P8_PORE_SCOM_NOOP     4  // Replace existing Scom PORE NOP instruction
-#define P8_PORE_SCOM_RESET    5  // Delete all entries for given coreID. Repl w/RNNN IIS
-#define P8_PORE_SCOM_LAST_OP  5  // Keep track of the last op for checking correctness of op input
+#define P8_PORE_SCOM_FIRST_OP   0  // First supported Scom operation.
+#define P8_PORE_SCOM_APPEND     0  // Add Scom to end of table or at first PORE NOP
+                                   // instruction, whichever comes first.
+#define P8_PORE_SCOM_REPLACE    1  // Repl 1st matching Scom addr or treat as APPEND
+                                   // if Scom entry is not found.
+#define P8_PORE_SCOM_OR         2  // Overlay data onto existing Scom by bitwise OR.
+#define P8_PORE_SCOM_AND        3  // Overlay data onto existing Scom by bitwise AND.
+#define P8_PORE_SCOM_NOOP       4  // Replace existing Scom with a PORE NOP instruction,
+                                   // NNNN.
+#define P8_PORE_SCOM_RESET      5  // Delete all entries for given coreID. Replace with
+                                   // PORE RET instructions, RNNN.
+#define P8_PORE_SCOM_OR_APPEND  6  // Same as OR but treat as APPEND if Scom entry is
+                                   // not found.
+#define P8_PORE_SCOM_AND_APPEND 7  // Same as AND but treat as APPEND if Scom entry is
+                                   // not found.
+#define P8_PORE_SCOM_LAST_OP    7  // Last supported Scom operation.
 
 
 // Enumeration of SLW image build modes.

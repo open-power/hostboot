@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api_fixed.C,v 1.13 2014/04/11 01:24:31 cmolsen Exp $
+// $Id: p8_pore_table_gen_api_fixed.C,v 1.15 2014/05/30 20:31:24 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
@@ -382,13 +382,13 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
 // i_operation - What to do with the scom addr and data.
 // i_section -   0: General Scoms, 1: L2 cache, 2: L3 cache.
 */
-uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
-                            uint8_t    i_modeBuild,
-                            uint32_t   i_scomAddr,
-                            uint32_t   i_coreId,     // [0:15] 
-                            uint64_t   i_scomData,
-                            uint32_t   i_operation,  // [0:5]
-                            uint32_t   i_section)    // [0,1,2]
+uint32_t p8_pore_gen_scom_fixed(void       *io_image,
+                                uint8_t    i_modeBuild,
+                                uint32_t   i_scomAddr,
+                                uint32_t   i_coreId,     // [0:15] 
+                                uint64_t   i_scomData,
+                                uint32_t   i_operation,  // [0:7]
+                                uint32_t   i_section)    // [0,1,2]
 {
   uint32_t  rc=0, rcLoc=0, iEntry=0;
   uint32_t  chipletId=0;
@@ -576,7 +576,9 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
   // - If no NOP found, insert at first RET.
   //
   
-  // First, create search strings for addr, nop and ret.
+  //----------------------------------------------------------------------------
+  // 1. Create search strings for addr, nop and ret.
+  //----------------------------------------------------------------------------
   // Note, the following IIS will also be used in case of
   // - i_operation==append
   // - i_operation==replace
@@ -600,12 +602,13 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
   
-  // Second, search for addr and nop in relevant coreId table until first RET.
+  //----------------------------------------------------------------------------
+  // 2. Search for addr and nop in relevant coreId table until first RET.
+  //----------------------------------------------------------------------------
   // Note:
   // - We go through ALL entries until first RET instr. We MUST find a RET instr,
-  //   though we don't check for overrun until later. (Should be improved.)
-  // - Count number of entries and check for overrun, though we'll continue
-  //   searching until we find an RET. (Should be improved.)
+  //   though we don't check for overrun until later. (Could be improved.)
+  // - Count number of entries, incl the NOOPs, until we find an RET.
   // - The STI(+SCOM_addr) opcode is in the 2nd word of the Scom entry.
   // - For an append operation, if a NOP is found (before a RET obviously), the 
   //   SCOM is replacing that NNNN sequence.
@@ -626,39 +629,15 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
   }
   hostScomEntryRET = hostScomEntryNext; // The last EntryNext is always the first RET.
   
-  switch (i_section)  {
-  case P8_SCOM_SECTION_NC:
-    if (entriesCount>=SLW_MAX_SCOMS_NC)  {
-      MY_ERR("SCOM table NC is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_NC);
-      return IMGBUILD_ERR_CHECK_CODE;
-    }
-    break;
-  case P8_SCOM_SECTION_L2:
-    if (entriesCount>=SLW_MAX_SCOMS_L2)  {
-      MY_ERR("SCOM table L2 is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_L2);
-      return IMGBUILD_ERR_CHECK_CODE;
-    }
-    break;
-  case P8_SCOM_SECTION_L3:
-    if (entriesCount>=SLW_MAX_SCOMS_L3)  {
-      MY_ERR("SCOM table L3 is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_L3);
-      return IMGBUILD_ERR_CHECK_CODE;
-    }
-    break;
-  default:
-    MY_ERR("Invalid value for i_section (=%i).\n",i_section);
-    MY_ERR("Valid values for i_section = [%i,%i,%i].\n",
-        P8_SCOM_SECTION_NC,P8_SCOM_SECTION_L2,P8_SCOM_SECTION_L3);
-    return IMGBUILD_ERR_SCOM_INVALID_SUBSECTION;
-  }
-
-  //
-  // Further qualify (translate) operation and IIS.
-  //
-  if (i_operation==P8_PORE_SCOM_APPEND)  {
+  //----------------------------------------------------------------------------
+  // 3. Qualify (translate) operation and IIS.
+  //----------------------------------------------------------------------------
+  if (i_operation==P8_PORE_SCOM_APPEND)  
+  {
     operation = i_operation;
   }
-  else if (i_operation==P8_PORE_SCOM_REPLACE)  {
+  else if (i_operation==P8_PORE_SCOM_REPLACE)  
+  {
     if (hostScomEntryMatch)
       // ... do a replace
       operation = i_operation;
@@ -666,7 +645,8 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
       // ... do an append
       operation = P8_PORE_SCOM_APPEND;
   }
-  else if (i_operation==P8_PORE_SCOM_NOOP)  {
+  else if (i_operation==P8_PORE_SCOM_NOOP)  
+  {
     // ...overwrite earlier bufIIS from the search step
     pore_inline_context_create( &ctx, (void*)bufIIS, XIPSIZE_SCOM_ENTRY, 0, 0);
     pore_NOP( &ctx);
@@ -679,12 +659,32 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
     }
     operation = i_operation;
   }
-  else if (i_operation==P8_PORE_SCOM_AND ||
-           i_operation==P8_PORE_SCOM_OR)  {
+  else if ( i_operation==P8_PORE_SCOM_AND        ||
+            i_operation==P8_PORE_SCOM_OR )  
+  {
     operation = i_operation;
+  }            
+  else if ( i_operation==P8_PORE_SCOM_AND_APPEND )  
+  {
+    if (hostScomEntryMatch)
+      // ... do the AND on existing Scom
+      operation = P8_PORE_SCOM_AND;
+    else
+      // ... do an append (this better be to an _AND register type)
+      operation = P8_PORE_SCOM_APPEND;  
   }
-  else if (i_operation==P8_PORE_SCOM_RESET)  {
-  // ... create RNNN instruction sequence.
+  else if ( i_operation==P8_PORE_SCOM_OR_APPEND )  
+  {
+    if (hostScomEntryMatch)
+      // ... do the OR on existing Scom
+      operation = P8_PORE_SCOM_OR;
+    else
+      // ... do an append (this better be to an _OR register type)
+      operation = P8_PORE_SCOM_APPEND;  
+  }
+  else if (i_operation==P8_PORE_SCOM_RESET)  
+  {
+    // ... create RNNN instruction sequence.
     pore_inline_context_create( &ctx, (void*)bufIIS, XIPSIZE_SCOM_ENTRY, 0, 0);
     pore_RET( &ctx);
     pore_NOP( &ctx);
@@ -696,13 +696,65 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
     }
     operation = i_operation;
   }
-  else  {
+  else  
+  {
     MY_ERR("Scom operation = %i is not within valid range of [%d;%d]\n",
       i_operation, P8_PORE_SCOM_FIRST_OP, P8_PORE_SCOM_LAST_OP);
     return IMGBUILD_ERR_SCOM_INVALID_PARM;
   }
   
-  // -------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  // 4. Check for overrun.
+  //----------------------------------------------------------------------------
+  // Note:
+  // - An entry count exceeding the max allocated entry count will result in a code error
+  //   because the allocation is based on an agreed upon max number of entries and 
+  //   therefore either the code header file needs to change or the caller is not abiding 
+  //   by the rules.
+  // - An entry count equalling the max allocated entry count is allowed for all commands
+  //   except the APPEND command, incl the translated REPLACE->APPEND, which will result 
+  //   in the previously mentioned code error being returned.
+  // - The table can be full but still include NOOPs. If so, we can still APPEND since
+  //   we append at first occurrance of a NOOP or at the end of the table (at the RET).
+  switch (i_section)  {
+  case P8_SCOM_SECTION_NC:
+    if ( ( (operation==P8_PORE_SCOM_APPEND && entriesCount==SLW_MAX_SCOMS_NC) &&
+           hostScomEntryNOP==NULL ) ||
+           entriesCount>SLW_MAX_SCOMS_NC )
+    {
+      MY_ERR("SCOM table NC is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_NC);
+      return IMGBUILD_ERR_CHECK_CODE;
+    }
+    break;
+  case P8_SCOM_SECTION_L2:
+    if ( ( (operation==P8_PORE_SCOM_APPEND && entriesCount==SLW_MAX_SCOMS_L2) &&
+           hostScomEntryNOP==NULL ) ||
+           entriesCount>SLW_MAX_SCOMS_L2 )
+    {
+      MY_ERR("SCOM table L2 is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_L2);
+      return IMGBUILD_ERR_CHECK_CODE;
+    }
+    break;
+  case P8_SCOM_SECTION_L3:
+    if ( ( (operation==P8_PORE_SCOM_APPEND && entriesCount==SLW_MAX_SCOMS_L3) &&
+           hostScomEntryNOP==NULL ) ||
+           entriesCount>SLW_MAX_SCOMS_L3 )
+    {
+      MY_ERR("SCOM table L3 is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_L3);
+      return IMGBUILD_ERR_CHECK_CODE;
+    }
+    break;
+  default:
+    MY_ERR("Invalid value for i_section (=%i).\n",i_section);
+    MY_ERR("Valid values for i_section = [%i,%i,%i].\n",
+        P8_SCOM_SECTION_NC,P8_SCOM_SECTION_L2,P8_SCOM_SECTION_L3);
+    return IMGBUILD_ERR_SCOM_INVALID_SUBSECTION;
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // 5.  Insert the SCOM.
+  // ---------------------------------------------------------------------------
   // Assuming pre-allocated Scom table (after pre-allocated Ram table):
   // - Table is pre-filled with RNNN ISS.
   // - Each core Id has dedicated space, uniformly distributed by SLW_MAX_SCOMS_NC*
@@ -745,8 +797,9 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
       MY_INF("Replace existing Scom w/NOPs\n");
       memcpy(hostScomEntryMatch,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
     }
-    else  { 
-      // do nothing, and assume everything is fine, since we did no damage.
+    else  {
+      MY_ERR("No Scom entry found to replace NOOPs with.\n");
+      return IMGBUILD_ERR_SCOM_ENTRY_NOT_FOUND;
     }
     break;
   case P8_PORE_SCOM_OR:      // Overlay Scom data onto existing data by bitwise OR
