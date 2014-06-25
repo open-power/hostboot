@@ -22,7 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.C,v 1.20 2014/04/07 02:55:10 stillgs Exp $
+
+// $Id: p8_pm_pmc_firinit.C,v 1.24 2014/07/09 14:49:32 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -103,19 +104,44 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
     ecmdDataBufferBase  action_0(64);
     ecmdDataBufferBase  action_1(64);
     ecmdDataBufferBase  mask(64);
+    ecmdDataBufferBase  data(64);
     ecmdDataBufferBase  pmc_ocb_mask_hi(64);
     ecmdDataBufferBase  pmc_ocb_mask_lo(64);
     uint32_t            e_rc = 0;
-
+    uint64_t            attr_pm_pmc_lfir_mask;
+    uint8_t             attr_pm_firinit_done_once_flag;
    
     FAPI_DBG("Executing p8_pm_pmc_firinit  ...");
     do
     {
         if (mode == PM_RESET)
         {
+
+            // -----------
+            // SW260003
+            // -----------
+            rc = FAPI_ATTR_GET(ATTR_PM_FIRINIT_DONE_ONCE_FLAG, &i_target, attr_pm_firinit_done_once_flag);
+            if (!rc.ok()) {
+              FAPI_ERR("fapiGetAttribute of ATTR_PM_FIRINIT_DONE_ONCE_FLAG failed.");
+              break;
+            }
+            if (attr_pm_firinit_done_once_flag == 1) { 
+                rc = fapiGetScom(i_target, PMC_LFIR_MASK_0x01010843, data );
+                if (!rc.ok())
+                {
+                        FAPI_ERR("fapiGetScom(PMC_LFIR_MASK_0x01010843) failed.");
+                        break;
+                }
+                attr_pm_pmc_lfir_mask = data.getDoubleWord(0);
+                rc = FAPI_ATTR_SET(ATTR_PM_PMC_LFIR_MASK, &i_target, attr_pm_pmc_lfir_mask);
+                if (!rc.ok()) {
+                  FAPI_ERR("fapiSetAttribute of ATTR_PM_PMC_LFIR_MASK failed");
+                  break;
+                }
+            }
+
             FAPI_INF("Hard reset detected.  Full PMC LFIR is masked");
-            e_rc  = mask.flushTo0();
-            e_rc |= mask.setBit(0,PMC_FIR_REGISTER_LENGTH);
+            e_rc  = mask.flushTo1();
             if (e_rc)
             {
                 rc.setEcmdError(e_rc);
@@ -334,6 +360,29 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             {
                 FAPI_ERR("fapiPutScom(PMC_LFIR_ACT1_0x01010847) failed.");
                 break;
+            }
+
+            // -----------
+            // SW260003
+            // -----------
+            rc = FAPI_ATTR_GET(ATTR_PM_FIRINIT_DONE_ONCE_FLAG, &i_target, attr_pm_firinit_done_once_flag);
+            if (!rc.ok()) {
+              FAPI_ERR("fapiGetAttribute of ATTR_PM_FIRINIT_DONE_ONCE_FLAG failed.");
+              break;
+            }
+            if (attr_pm_firinit_done_once_flag) {
+                rc = FAPI_ATTR_GET(ATTR_PM_PMC_LFIR_MASK, &i_target, attr_pm_pmc_lfir_mask);
+                if (!rc.ok()) {
+                  FAPI_ERR("fapiGetAttribute of ATTR_PM_PMC_LFIR_MASK failed.");
+                  break;
+                }
+                e_rc |= data.setDoubleWord(0, attr_pm_pmc_lfir_mask);
+                e_rc |= mask.setOr(data, 0, 64);
+                if (e_rc)
+                {
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
             }
 
             //--******************************************************************************

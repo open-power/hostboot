@@ -272,6 +272,7 @@
     <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE</id></attribute>
     <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id></attribute>
     <attribute><id>MSS_VDDR_OVERIDE_SPD</id></attribute>
+    <attribute><id>PM_PFET_WORKAROUND_RUN_FLAG</id></attribute>
 </targetType>
 
 <targetType>
@@ -478,7 +479,10 @@
     <attribute><id>CPM_INFLECTION_POINTS</id></attribute>
     <attribute><id>PROC_SELECT_BOOT_SEEPROM_IMAGE</id></attribute>
     <attribute><id>TOD_ROLE</id></attribute>
-
+    <attribute><id>PM_OCC_LFIR_MASK</id></attribute>
+    <attribute><id>PM_PBA_FIR_MASK</id></attribute>
+    <attribute><id>PM_PMC_LFIR_MASK</id></attribute>
+    <attribute><id>PM_FIRINIT_DONE_ONCE_FLAG</id></attribute>
 </targetType>
 
 <targetType>

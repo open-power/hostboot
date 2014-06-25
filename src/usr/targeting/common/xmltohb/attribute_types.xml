@@ -14119,4 +14119,93 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PM_PFET_WORKAROUND_RUN_FLAG</id>
+    <description>
+    Flag to store that the work-around for HW250017 as been run so that during any resets it is skipped.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_PFET_WORKAROUND_RUN_FLAG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_OCC_LFIR_MASK</id>
+    <description>
+    Upon an UE event, PRD may update some fir masks in occ domain. To avoid this update getting lost during occ reset, which could eventually cause multiple occ resets, this attribute is added to be the storage to remember the OCC_LFIR_MASK in the RESET phase so that reset procedures can later overlay this updated settings with the default instalation in INIT phase. See details in SW260003.
+    Producer/Consumer: p8_pm_occ_firinit.C
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_OCC_LFIR_MASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_PBA_FIR_MASK</id>
+    <description>
+    Upon an UE event, PRD may update some fir masks in occ domain. To avoid this update getting lost during occ reset, which could eventually cause multiple occ resets, this attribute is added to be the storage to remember the PBA_FIR_MASK in the RESET phase so that reset procedures can later overlay this updated settings with the default instalation in INIT phase. See details in SW260003.
+    Producer/Consumer: p8_pm_pba_firinit.C
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_PBA_FIR_MASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_PMC_LFIR_MASK</id>
+    <description>
+    Upon an UE event, PRD may update some fir masks in occ domain. To avoid this update getting lost during occ reset, which could eventually cause multiple occ resets, this attribute is added to be the storage to remember the PMC_LFIR_MASK in the RESET phase so that reset procedures can later overlay this updated settings with the default instalation in INIT phase. See details in SW260003.
+    Producer/Consumer: p8_pm_pmc_firinit.C
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_PMC_LFIR_MASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_FIRINIT_DONE_ONCE_FLAG</id>
+    <description>
+    Due to SW260003, a flag is needed to remember if we executed the p8_pm_firinit procedures at least once.
+    Producer/Consumer: p8_pm_firinit.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_FIRINIT_DONE_ONCE_FLAG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

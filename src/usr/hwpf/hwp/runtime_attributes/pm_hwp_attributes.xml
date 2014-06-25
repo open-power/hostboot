@@ -20,7 +20,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_hwp_attributes.xml,v 1.11 2014/02/06 19:08:22 stillgs Exp $ -->
+<!-- $Id: pm_hwp_attributes.xml,v 1.13 2014/07/09 15:25:15 dcrowell Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized to zero by the platform and set to a
@@ -833,6 +833,62 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Overridable attribute to allow for Global checkstop and recoverable FIR tracing by Power Management procedures
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_WORKAROUND_RUN_FLAG</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Flag to store that the work-around for HW250017 as been run so that during any resets it is skipped.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_OCC_LFIR_MASK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Upon an UE event, PRD may update some fir masks in occ domain. To avoid this update getting lost during occ reset, which could eventually cause multiple occ resets, this attribute is added to be the storage to remember the OCC_LFIR_MASK in the RESET phase so that reset procedures can later overlay this updated settings with the default instalation in INIT phase. See details in SW260003.
+    Producer/Consumer: p8_pm_occ_firinit.C
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PBA_FIR_MASK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Upon an UE event, PRD may update some fir masks in occ domain. To avoid this update getting lost during occ reset, which could eventually cause multiple occ resets, this attribute is added to be the storage to remember the PBA_FIR_MASK in the RESET phase so that reset procedures can later overlay this updated settings with the default instalation in INIT phase. See details in SW260003.
+    Producer/Consumer: p8_pm_pba_firinit.C
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PMC_LFIR_MASK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Upon an UE event, PRD may update some fir masks in occ domain. To avoid this update getting lost during occ reset, which could eventually cause multiple occ resets, this attribute is added to be the storage to remember the PMC_LFIR_MASK in the RESET phase so that reset procedures can later overlay this updated settings with the default instalation in INIT phase. See details in SW260003.
+    Producer/Consumer: p8_pm_pmc_firinit.C
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_FIRINIT_DONE_ONCE_FLAG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    0 = OCC has never been loaded and FIR Masks have never been initialized,
+    1 = FIR masks have been initialized and the hardware should reflect correct values,
+    2 = FIR masks have been initialized but the current hardware state is the reset value
+    Producer/Consumer: p8_pm_firinit.C
     </description>
     <valueType>uint8</valueType>
     <writeable/>

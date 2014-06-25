@@ -22,7 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_firinit.C,v 1.14 2013/10/30 17:13:05 stillgs Exp $
+
+// $Id: p8_pm_firinit.C,v 1.17 2014/07/09 14:49:32 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -115,12 +116,13 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
     ecmdDataBufferBase  data(64);
     uint64_t            any_error = 0;
     const char *        PM_MODE_NAME_VAR; // Defines storage for PM_MODE_NAME
+    uint8_t             attr_pm_firinit_done_once_flag;
 
     FAPI_INF("p8_pm_firinit start for mode %s", PM_MODE_NAME(i_mode));
 
     do
     {
-       
+
         // *************************************************************
         // CHECKING FOR FIRS BEFORE RESET and INIT
         // *************************************************************
@@ -238,6 +240,37 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
         {
             FAPI_ERR("ERROR: p8_pm_occ_firinit detected failed result");
             break;
+        }
+
+        // -----------
+        // SW260003
+        // -----------
+
+        rc = FAPI_ATTR_GET(ATTR_PM_FIRINIT_DONE_ONCE_FLAG, &i_target, attr_pm_firinit_done_once_flag);
+        if (!rc.ok()) {
+                        FAPI_ERR("fapiGetAttribute of ATTR_PM_FIRINIT_DONE_ONCE_FLAG failed.");
+            break;
+        }
+
+        if (i_mode == PM_INIT) {    
+            if (attr_pm_firinit_done_once_flag != 1) {
+                attr_pm_firinit_done_once_flag = 1;
+                rc = FAPI_ATTR_SET(ATTR_PM_FIRINIT_DONE_ONCE_FLAG, &i_target, attr_pm_firinit_done_once_flag);
+                if (!rc.ok()) {
+                  FAPI_ERR("fapiSetAttribute of ATTR_PM_FIRINIT_DONE_ONCE_FLAG failed");
+                  break;
+                }
+            }
+        }
+        else if (i_mode == PM_RESET) {    
+            if (attr_pm_firinit_done_once_flag == 1) {
+                attr_pm_firinit_done_once_flag = 2;
+                rc = FAPI_ATTR_SET(ATTR_PM_FIRINIT_DONE_ONCE_FLAG, &i_target, attr_pm_firinit_done_once_flag);
+                if (!rc.ok()) {
+                  FAPI_ERR("fapiSetAttribute of ATTR_PM_FIRINIT_DONE_ONCE_FLAG failed");
+                  break;
+                }
+            }
         }
 
     } while(0);

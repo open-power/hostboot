@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Thu Apr 24 11:24:01 CDT 2014 by cswenson from
+// Generated on Wed Jul  9 14:34:55 CDT 2014 by dcrowell from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
@@ -53,6 +53,7 @@ HSVC_LOAD_ATTR( ATTR_SBE_IMAGE_MINIMUM_VALID_EXS );
 // -- Input: ../../xml/attribute_info/pm_hwp_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_PM_GLOBAL_FIR_TRACE_EN );
 HSVC_LOAD_ATTR( ATTR_PM_PCBS_FSM_TRACE_EN );
+HSVC_LOAD_ATTR( ATTR_PM_PFET_WORKAROUND_RUN_FLAG );
 HSVC_LOAD_ATTR( ATTR_PM_SLW_CONTROL_VECTOR_OFFSET );
 HSVC_LOAD_ATTR( ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR );
 HSVC_LOAD_ATTR( ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR );
@@ -115,6 +116,8 @@ HSVC_LOAD_ATTR( ATTR_EXECUTION_PLATFORM );
 HSVC_LOAD_ATTR( ATTR_EX_GARD_BITS );
 HSVC_LOAD_ATTR( ATTR_IS_MPIPL );
 HSVC_LOAD_ATTR( ATTR_IS_SIMULATION );
+HSVC_LOAD_ATTR( ATTR_MEMB_DDR_REFCLOCK_RCVR_TERM );
+HSVC_LOAD_ATTR( ATTR_MEMB_DMI_REFCLOCK_RCVR_TERM );
 HSVC_LOAD_ATTR( ATTR_MEM_FILTER_PLL_SOURCE );
 HSVC_LOAD_ATTR( ATTR_MNFG_FLAGS );
 HSVC_LOAD_ATTR( ATTR_MULTI_SCOM_BUFFER_MAX_SIZE );
@@ -128,6 +131,7 @@ HSVC_LOAD_ATTR( ATTR_PROC_FABRIC_PUMP_MODE );
 HSVC_LOAD_ATTR( ATTR_PROC_REFCLOCK_RCVR_TERM );
 HSVC_LOAD_ATTR( ATTR_PROC_X_BUS_WIDTH );
 HSVC_LOAD_ATTR( ATTR_RECONFIGURE_LOOP );
+HSVC_LOAD_ATTR( ATTR_REDUNDANT_CLOCKS );
 HSVC_LOAD_ATTR( ATTR_RISK_LEVEL );
 HSVC_LOAD_ATTR( ATTR_SBE_IMAGE_OFFSET );
 // -- Input: ../../xml/attribute_info/unit_attributes.xml --
