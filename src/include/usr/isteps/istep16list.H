@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -88,6 +90,7 @@ const DepModInfo g_istep16Dependancies = {
     {
         DEP_LIB(libcore_activate.so),
         DEP_LIB(libbuild_winkle_images.so),
+        DEP_LIB(libactivate_powerbus.so),
         NULL
     }
 };

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +48,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/proc_build_smp
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/proc_pcie_slot_power
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += activate_powerbus.o
@@ -57,12 +59,13 @@ OBJS += proc_build_smp_fbc_ab.o
 OBJS += proc_build_smp_fbc_cd.o
 OBJS += proc_build_smp_fbc_nohp.o
 OBJS += proc_adu_utils.o
+OBJS += proc_pcie_slot_power.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/proc_build_smp
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/proc_pcie_slot_power
 
 include ${ROOTPATH}/config.mk
 

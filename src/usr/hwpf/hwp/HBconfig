@@ -1,0 +1,4 @@
+config PCIE_HOTPLUG_CONTROLLER
+    default y
+    help
+        Turn PCIe Hot Plug Controller on and off during IPL

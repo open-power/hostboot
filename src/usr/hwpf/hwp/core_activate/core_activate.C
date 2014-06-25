@@ -37,6 +37,7 @@
 /******************************************************************************/
 #include    <stdint.h>
 #include    <errno.h>
+#include    <config.h>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -77,6 +78,7 @@
 #include    "proc_check_slw_done.H"
 #include    "p8_block_wakeup_intr.H"
 #include    "p8_cpu_special_wakeup.H"
+#include    "proc_pcie_slot_power.H"
 
 // mss_scrub support
 #include    <diag/prdf/prdfMain.H>
@@ -780,6 +782,66 @@ void*    call_host_ipl_complete( void    *io_pArgs )
             }
 
         }   //  endfor
+
+#ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
+        //  Loop through all the procs in the system
+        //  and run proc_pcie_slot_power to  power on the hot plug controller
+        //  for Sapphire systems. PowerVM will turn on the hot plug
+        //  controller.
+        if (is_sapphire_load())
+        {
+
+            //  get a list of all the procs in the system
+            TARGETING::Target* l_pMasterProcTarget = NULL;
+            TARGETING::targetService().
+                       masterProcChipTargetHandle(l_pMasterProcTarget);
+            TARGETING::TargetHandleList l_procTargetList;
+            getAllChips(l_procTargetList, TYPE_PROC);
+
+            for (TargetHandleList::const_iterator
+                    l_proc_iter = l_procTargetList.begin();
+                    l_proc_iter != l_procTargetList.end();
+                    ++l_proc_iter)
+            {
+                //  make a local copy of the Processor target
+                TARGETING::Target* l_pProcTarget = *l_proc_iter;
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "target HUID %.8X",
+                    TARGETING::get_huid(l_pProcTarget));
+
+                fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                       l_pProcTarget    );
+
+                // Invoke the HWP
+                FAPI_INVOKE_HWP(l_err,
+                        proc_pcie_slot_power,
+                        l_fapiProcTarget,
+                        true  );  // turn on
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : proc_pcie_hotplug_control",
+                          " failed, returning errorlog" );
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_err );
+
+                    // informational. Don't add to istep error or return error
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+                    // Commit error log
+                    errlCommit( l_err, HWPF_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS : proc_pcie_hotplug_control",
+                      " completed ok");
+                }
+            }   // endfor
+        }
+#endif
 
         // Sync attributes to Fsp
         l_err = syncAllAttributesToFsp();

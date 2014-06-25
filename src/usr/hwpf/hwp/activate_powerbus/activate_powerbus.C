@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +37,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <config.h>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -60,6 +63,7 @@
 #include    "proc_build_smp/proc_build_smp.H"
 #include    <intr/interrupt.H>
 #include    <fsi/fsiif.H>
+#include    "proc_pcie_slot_power.H"
 
 namespace   ACTIVATE_POWERBUS
 {
@@ -337,6 +341,62 @@ void * call_host_slave_sbe_update( void * io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update entry" );
+
+#ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
+    //  Loop through all the procs in the system
+    //  and run proc_pcie_slot_power to
+    //  power off hot plug controller to avoid downstream MEX issues
+
+    TARGETING::Target* l_pMasterProcTarget = NULL;
+    TARGETING::targetService().
+                       masterProcChipTargetHandle(l_pMasterProcTarget);
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    for (TargetHandleList::const_iterator
+            l_proc_iter = l_procTargetList.begin();
+            l_proc_iter != l_procTargetList.end();
+            ++l_proc_iter)
+    {
+        //  make a local copy of the Processor target
+        TARGETING::Target* l_pProcTarget = *l_proc_iter;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "target HUID %.8X",
+                    TARGETING::get_huid(l_pProcTarget));
+
+        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                       l_pProcTarget    );
+
+        // Invoke the HWP
+        FAPI_INVOKE_HWP(l_errl,
+                        proc_pcie_slot_power,
+                        l_fapiProcTarget,
+                        false  );  // turn off
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : proc_pcie_hotplug_control",
+                  " failed, returning errorlog" );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+            // informational. Don't add to istep error or return error
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "SUCCESS : proc_pcie_hotplug_control",
+              " completed ok");
+        }
+    }   // endfor
+#endif
+
 
     // Call to check state of Processor SBE SEEPROMs and
     // make any necessary updates
