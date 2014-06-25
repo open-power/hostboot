@@ -277,9 +277,8 @@ void* host_prd_hwreconfig( void *io_pArgs )
             break;
         }
 
-        // Lists for present MCS/Centaurs
+        // Lists for present MCS
         TARGETING::TargetHandleList l_presMcsList;
-        TARGETING::TargetHandleList l_presCentaurList;
 
         // find all present MCS chiplets of all procs
         getChipletResources(l_presMcsList, TYPE_MCS, UTIL_FILTER_PRESENT);
@@ -295,41 +294,17 @@ void* host_prd_hwreconfig( void *io_pArgs )
             TARGETING::ATTR_HUID_type l_currMcsHuid =
                 TARGETING::get_huid(l_pMcs);
 
-            // Find all the present Centaurs that are associated with this MCS
-            getChildAffinityTargetsByState(l_presCentaurList, l_pMcs,
-                           CLASS_CHIP, TYPE_MEMBUF, UTIL_FILTER_PRESENT);
-
-            // There will always be 1 Centaur associated with a MCS.
-            if(1 != l_presCentaurList.size())
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "No present Centaurs found for "
-                        "MCS target HUID %.8X , skipping this MCS",
-                        l_currMcsHuid);
-                continue;
-            }
-
-            // Make a local copy
-            const TARGETING::Target * l_pCentaur = l_presCentaurList[0];
-            // Retrieve HUID of current Centaur
-            TARGETING::ATTR_HUID_type l_currCentaurHuid =
-                TARGETING::get_huid(l_pCentaur);
-
             // Dump current run on target
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "Running proc_enable_reconfig HWP on "
-                    "MCS target HUID %.8X CENTAUR target HUID %.8X",
-                    l_currMcsHuid, l_currCentaurHuid);
+                    "MCS target HUID %.8X", l_currMcsHuid);
 
             // Create FAPI Targets.
             fapi::Target l_fapiMcsTarget(TARGET_TYPE_MCS_CHIPLET,
                     (const_cast<TARGETING::Target*>(l_pMcs)));
-            fapi::Target l_fapiCentaurTarget(TARGET_TYPE_MEMBUF_CHIP,
-                    (const_cast<TARGETING::Target*>(l_pCentaur)));
 
             // Call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP(errl, proc_enable_reconfig,
-                            l_fapiMcsTarget, l_fapiCentaurTarget);
+            FAPI_INVOKE_HWP(errl, proc_enable_reconfig, l_fapiMcsTarget);
 
             if (errl)
             {
@@ -353,9 +328,7 @@ void* host_prd_hwreconfig( void *io_pArgs )
             // Success
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "Successfully ran proc_enable_reconfig HWP on "
-                    "MCS target HUID %.8X CENTAUR target HUID %.8X",
-                    l_currMcsHuid,
-                    l_currCentaurHuid);
+                    "MCS target HUID %.8X", l_currMcsHuid);
         }
     }
     while(0);

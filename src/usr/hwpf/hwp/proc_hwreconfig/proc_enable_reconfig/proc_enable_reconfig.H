@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_enable_reconfig.H,v 1.3 2013/11/11 21:29:36 bellows Exp $
+// $Id: proc_enable_reconfig.H,v 1.6 2014/06/20 18:58:18 steffen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_enable_reconfig.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -52,28 +52,29 @@
 
 #include <fapi.H>
 #include <p8_scom_addresses.H>
+#include "io_clear_firs.H"
 
-typedef fapi::ReturnCode (*proc_enable_reconfig_FP_t)(fapi::Target &  i_target_pu_mcs, fapi::Target &  i_target_cen);
+  using namespace fapi;
+
+	CONST_UINT64_T( CENTAUR_MBI_CFG_0x0201080A                     , ULL(0x0201080A) );
+	CONST_UINT64_T( CENTAUR_MBI_FIR_0x02010800                     , ULL(0x02010800) );
+	CONST_UINT64_T( CENTAUR_MBI_CRCSYN_0x0201080C                  , ULL(0x0201080C) );
+	CONST_UINT64_T( CENTAUR_CEN_DMIFIR_0x02010400                  , ULL(0x02010400) );
+
+typedef fapi::ReturnCode (*proc_enable_reconfig_FP_t)(fapi::Target & i_target_pu_mcs);
 
 extern "C"
 {
-  using namespace fapi;
-
-  CONST_UINT64_T( CENTAUR_MBI_CFG_0x0201080A                     , ULL(0x0201080A) );
-  CONST_UINT64_T( CENTAUR_MBI_FIR_0x02010800                     , ULL(0x02010800) );
-  CONST_UINT64_T( CENTAUR_MBI_CRCSYN_0x0201080C                  , ULL(0x0201080C) );
-  CONST_UINT64_T( CENTAUR_CEN_DMIFIR_0x02010400                  , ULL(0x02010400) );
 
 /**
- * @brief proc_clear_firs procedure. Turn off FIR spreading and causes a channel fail
+ * @brief proc_enable_reconfig procedure. Reset memory controller to known state which includes masking/clearing FIRs, causing a channel fails, and global resetting the memory controller and gcr ring.
  *
- * @param[in]   std::vector<fapi::Target> i_target_mcs,  // an MCS with an attached centaur
- * @param[in]   std::vector<fapi::Target> i_target_cen,  // The associated centaur
+ * @param[in]   fapi::Target i_target_mcs,  // an MCS with an attached centaur
  *
  * @return ReturnCode
  */
 
-  ReturnCode proc_enable_reconfig(fapi::Target &  i_target_pu_mcs, fapi::Target &  i_target_cen);
+  ReturnCode proc_enable_reconfig(fapi::Target & i_target_pu_mcs);
 
 } // extern "C"
 

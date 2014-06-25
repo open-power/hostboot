@@ -25,6 +25,7 @@ ROOTPATH = ../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas/common
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/proc_hwreconfig/proc_enable_reconfig
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer

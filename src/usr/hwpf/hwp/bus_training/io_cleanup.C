@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_cleanup.C,v 1.13 2014/05/16 18:23:37 dcrowell Exp $
+// $Id: io_cleanup.C,v 1.14 2014/06/06 19:43:41 steffen Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -44,280 +44,332 @@
 #include <fapi.H>
 #include "io_cleanup.H"
 #include "gcr_funcs.H"
-
+#include <p8_scom_addresses.H>
 
 
 extern "C" {
-     using namespace fapi;
+	using namespace fapi;
+
 // For clearing the FIR mask , used by io run training
 // As per Irving , it should be ok to clear all FIRs here since we will scom init , also we dont touch mask values
 ReturnCode clear_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
-    ReturnCode rc;
-    ecmdDataBufferBase data(64);
-    FAPI_INF("io_cleanup:In the Clear FIR RW register function ");
-
-     // use FIR AND mask register to un-mask selected bits
-     rc = fapiPutScom(i_target, fir_rw_reg_addr[i_chip_interface], data);
-     if (!rc.ok())
-     {
-         FAPI_ERR("Error writing FIR mask register (=%08X)!",
-                  fir_rw_reg_addr[i_chip_interface]);
-     }
-    return(rc);
+	ReturnCode rc;
+	ecmdDataBufferBase data(64);
+	FAPI_INF("io_cleanup:In the Clear FIR RW register function on %s", i_target.toEcmdString());
+	rc = fapiPutScom(i_target, fir_rw_reg_addr[i_chip_interface], data);
+	if (!rc.ok()){FAPI_ERR("Error writing FIR mask register (=%08X)!",fir_rw_reg_addr[i_chip_interface]);}
+	return(rc);
 }
 
-/*
- from Megan's ipl1.sh
 
- istep -s0..11
-## forcing channel fail
-getscom pu  02011C4A -pall -call -vs1
-        getscom cen 0201080A -pall -call -vs1
-        putscom pu 02011C4A 8000000480400000 -pall -call
-        putscom cen 0201080A 8000000000000000 -pall -call
-        getscom pu  02011C4A -pall -call -vs1
-        getscom cen 0201080A -pall -call -vs1
-## masking fir bit
-putscom pu.mcs 2011843 FFFFFFFFFFFFFFFF -all
-### IO reset
-iotk put rx_fence=1 -t=p8:bmcs
-iotk put rx_fence=1 -t=cn
-iotk put ioreset_hard_bus0=111111 -t=p8:bmcs
-iotk put ioreset_hard_bus0=111111 -t=cn
+ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interface,uint32_t master_group){
+	ReturnCode rc;
+	uint32_t rc_ecmd                             = 0;
+	ecmdDataBufferBase   set_bits(16);
+	ecmdDataBufferBase clear_bits(16);
+	ecmdDataBufferBase mask_buffer_64(64);
+	ecmdDataBufferBase data_buffer_64(64);
+	ecmdDataBufferBase rx_set_bits(16);
+	ecmdDataBufferBase tx_set_bits(16);
+	bool memory_attached                         = false;
+	bool reset_required                          = false;
+	uint8_t l_attr_mss_init_state                = 0x0;
+	uint8_t l_attr_proc_ec_mss_reconfig_possible = 0x0;
+	uint8_t mcs_unit_id                          = 0x0;
+	uint8_t mcs_unit_lower_limit                 = 0;
+	uint8_t mcs_unit_upper_limit                 = 3;
+	io_interface_t slave_interface               = CEN_DMI; // Centaur scom base
+	uint32_t slave_group                         = 0x0;
+	// vector to hold MCS chiplet targets
+	std::vector<fapi::Target> mcs_chiplets;
+	fapi::Target master_parent_target;
+	fapi::Target attached_cen_target;
 
-#exit
-##clear_fir
-./clear_fir.pl
-### Reload
-istep proc_dmi_scominit
-istep dmi_scominit
-##checking Zcal
-iotk get tx_zcal_p_4x -t=p8:bmcs
-iotk get tx_zcal_p_4x -t=cn
-iotk get  tx_zcal_sm_min_val -t=p8:bmcs
-iotk get tx_zcal_sm_min_val -t=cn
-iotk get  tx_zcal_sm_max_val -t=p8:bmcs
-iotk get tx_zcal_sm_max_val -t=cn
-### Loading Zcal
-iotk put tx_zcal_p_4x=00100
-iotk put tx_zcal_sm_min_val=0010101
-iotk put tx_zcal_sm_max_val=1000110
-## Runing Zcal
-istep dmi_io_dccal
-## forcing channel fail
-        getscom pu  02011C4A -pall -call -vs1
-        getscom cen 0201080A -pall -call -vs1
-        putscom pu 02011C4A 8000000480400000 -pall -call
-        putscom cen 0201080A 8000000000000000 -pall -call
-        getscom pu  02011C4A -pall -call -vs1
-        getscom cen 0201080A -pall -call -vs1
-*/
+	// Find DMI0 or DMI1 controller limits based on passed in target.
+	rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &master_target, mcs_unit_id);   // read chip unit number
+	if(rc){return rc;}
+	if(mcs_unit_id == 0){        // DMI0, not on Tuleta, on Brazos
+		mcs_unit_lower_limit = 0;
+		mcs_unit_upper_limit = 3;
+	}else if(mcs_unit_id == 4){  // DMI1, on Tuleta and Brazos
+		mcs_unit_lower_limit = 4;
+		mcs_unit_upper_limit = 7;
+	}else{
+		return rc;
+	}
 
-ReturnCode do_cleanup(const Target &master_target,io_interface_t master_interface,uint32_t master_group,const Target &slave_target,io_interface_t slave_interface,uint32_t slave_group)
-{
-     ReturnCode rc;
-     uint32_t rc_ecmd = 0;
-     uint8_t chip_unit = 0;
-     ecmdDataBufferBase data(64);
-     ecmdDataBufferBase reg_data(16),set_bits(16),clear_bits(16),temp_bits(16);
+	//Get Master Parent Target
+	rc = fapiGetParentChip(master_target, master_parent_target); if(rc){return rc;}
 
-     //iotk put rx_fence=1 -t=p8:bmcs
-     // No other field in this reg , so no need for RMW
-     rc_ecmd = temp_bits.setBit(0);
-     if(rc_ecmd)
-     {
-        rc.setEcmdError(rc_ecmd);
-        return(rc);
-     }
-     rc=GCR_write(master_target, master_interface,  rx_fence_pg, master_group,0,   temp_bits, temp_bits,1,1);
-     if(rc) return rc;
+	// Loop over all present MCS chiplets in the controller, to see if a reset is required
+	rc = fapiGetChildChiplets(master_parent_target,fapi::TARGET_TYPE_MCS_CHIPLET,mcs_chiplets, fapi::TARGET_STATE_PRESENT);
+	for (std::vector<fapi::Target>::iterator i = mcs_chiplets.begin(); i != mcs_chiplets.end(); i++){
+		rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*i), mcs_unit_id);   // read chip unit number
+		if(rc){return rc;}
+		if((mcs_unit_lower_limit <= mcs_unit_id) && (mcs_unit_id <= mcs_unit_upper_limit)){    //To limit these actions to a single DMI controller
+			rc = fapiGetOtherSideOfMemChannel( *i, attached_cen_target, fapi::TARGET_STATE_PRESENT);
+			if(!rc){     // An error from this means that there is no centaur attached.
+				rc = FAPI_ATTR_GET(ATTR_MSS_INIT_STATE, &attached_cen_target, l_attr_mss_init_state);  if(rc) return rc;
+				if(l_attr_mss_init_state != ENUM_ATTR_MSS_INIT_STATE_COLD){
+					reset_required = true;
+				}
+			}else{
+				rc = FAPI_RC_SUCCESS;
+			}
+		}
+	}
+	if(!reset_required){
+		return(rc);
+	}
+	FAPI_INF("IO CleanUp: Global Reset Required");
 
-     //iotk put rx_fence=1 -t=cn
-     rc=GCR_write(slave_target, slave_interface, rx_fence_pg, slave_group,0,   temp_bits, temp_bits,1,1);
-     if(rc) return rc;
+	//
+	rc = FAPI_ATTR_GET(ATTR_PROC_EC_MSS_RECONFIG_POSSIBLE, &master_parent_target, l_attr_proc_ec_mss_reconfig_possible); if(rc){return rc;}
+	// Loop over all present MCS chiplets in the controller
+	// Turn off FIR propagator, Mask FIRs, and force channel fail
+	rc = fapiGetChildChiplets(master_parent_target,fapi::TARGET_TYPE_MCS_CHIPLET,mcs_chiplets, fapi::TARGET_STATE_PRESENT);
+	for (std::vector<fapi::Target>::iterator i = mcs_chiplets.begin(); i != mcs_chiplets.end(); i++){
+		rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*i), mcs_unit_id);   // read chip unit number
+		if(rc){return rc;}
+		if((mcs_unit_lower_limit <= mcs_unit_id) && (mcs_unit_id <= mcs_unit_upper_limit)){    //To limit these actions to a single DMI controller
+			memory_attached = true;
+			rc = fapiGetOtherSideOfMemChannel( *i, attached_cen_target, fapi::TARGET_STATE_PRESENT);
+			if(rc){    // An error from this means that there is no centaur attached.
+				memory_attached = false;
+			}else{
+				rc = FAPI_ATTR_GET(ATTR_MSS_INIT_STATE, &attached_cen_target, l_attr_mss_init_state);  if(rc) return rc;
+			}
+			// turn off the FIR propagator
+			if( l_attr_proc_ec_mss_reconfig_possible){
+				rc_ecmd = data_buffer_64.setBit(42);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc_ecmd = mask_buffer_64.setBit(42);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc = fapiPutScomUnderMask(*i, MCS_MCICFG_0x0201184A, data_buffer_64, mask_buffer_64);  if(rc) return rc;
+			}else{
+				FAPI_ERR("This processor cannot go through a reconfig loop. Please upgrade to > DD1\n");
+				const fapi::Target & PROC =  master_parent_target;
+				FAPI_SET_HWP_ERROR(rc, RC_IO_CLEANUP_UNSUPPORTED);
+				return rc;
+			}
+			// Mask firs in the MCS
+			rc_ecmd = data_buffer_64.setBit(0,64);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			rc = fapiPutScom(*i, MCS_MCIFIRMASK_0x02011843, data_buffer_64); if(rc) return rc;
+			// force a channel fail only if you are up to DMI ACTIVE state on this pair
+			rc_ecmd = data_buffer_64.clearBit(0,64);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			rc_ecmd = data_buffer_64.setBit(0);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			rc_ecmd = mask_buffer_64.clearBit(0,64);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			rc_ecmd = mask_buffer_64.setBit(0);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			rc = fapiPutScomUnderMask(master_target, MCS_MCICFG_0x0201184A, data_buffer_64, mask_buffer_64); if(rc) return rc;
+			if((memory_attached) && ((l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON) || (l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE)) ){
+				rc_ecmd = data_buffer_64.clearBit(0,64);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc_ecmd = data_buffer_64.setBit(0);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc = fapiPutScom(attached_cen_target, CENTAUR_MBI_CFG_0x0201080A, data_buffer_64);
+			}
+			rc_ecmd = set_bits.setBit(0);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			rc=GCR_write(*i, master_interface,  rx_fence_pg, master_group, 0, set_bits, set_bits, 1, 1);
+			if(rc) return rc;
+			if((memory_attached) && ((l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON) || (l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE)) ){
+				rc=GCR_write(attached_cen_target, slave_interface, rx_fence_pg, slave_group, 0, set_bits, set_bits, 1, 1);
+				if(rc) return rc;
+			}
+		}
+	}
 
-     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
-                    &master_target,
-                    chip_unit);
-     if (!rc.ok())
-     {
-     FAPI_ERR("Error retreiving MCS chiplet number!");
-     return rc;
-     }
+	/// reset start
+	// pu
+	rc = fapiGetScom(master_target, scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0], data_buffer_64);
+	if (!rc.ok()){FAPI_ERR("Error Reading SCOM mode PB register for ioreset_hard_bus0 on master side(=%08X)!",scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0]); return rc;}
+	rc_ecmd = data_buffer_64.setBit(2,6);  // Scom_mode_pb ,ioreset starts at bit 2
+	if(rc_ecmd){rc.setEcmdError(rc_ecmd);return(rc);}
+	rc = fapiPutScom(master_target, scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0], data_buffer_64);
+	if (!rc.ok()){FAPI_ERR("Error Reading SCOM mode PB register for ioreset_hard_bus0 on master side(=%08X)!",scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0]); return rc;}
 
-     // swizzle to DMI number
-     if (master_interface == CP_IOMC0_P0)
-     {
-          chip_unit = 3-(chip_unit % 4);
-          // swap 0 and 1 due to Clock group swap in layout
-          if(chip_unit==1){
-               chip_unit=0;
-          }
-          else if(chip_unit==0){
-               chip_unit=1;
-          }
+	// cen
+	rc = fapiGetChildChiplets(master_parent_target,fapi::TARGET_TYPE_MCS_CHIPLET,mcs_chiplets, fapi::TARGET_STATE_PRESENT);
+	for (std::vector<fapi::Target>::iterator i = mcs_chiplets.begin(); i != mcs_chiplets.end(); i++){
+		rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*i), mcs_unit_id);   // read chip unit number
+		if (!rc.ok()){FAPI_ERR("Error retreiving MCS chiplet number, while setting bus id.");return rc;}
+		if((mcs_unit_lower_limit <= mcs_unit_id) && (mcs_unit_id <= mcs_unit_upper_limit)){    //To limit these actions to a single DMI controller
+			rc = fapiGetOtherSideOfMemChannel( *i, attached_cen_target, fapi::TARGET_STATE_PRESENT);
+			if(!rc){   // An error from this means that there is no centaur attached.
+				rc = FAPI_ATTR_GET(ATTR_MSS_INIT_STATE, &attached_cen_target, l_attr_mss_init_state);  if(rc) return rc;
+				if((l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON) || (l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE) ){
+					rc_ecmd = data_buffer_64.flushTo0();
+					if(rc_ecmd){rc.setEcmdError(rc_ecmd);return(rc);}
+					rc = fapiGetScom(attached_cen_target, scom_mode_pb_reg_addr[FIR_CEN_DMI], data_buffer_64);
+					if(!rc.ok()){FAPI_ERR("Error Reading SCOM mode PB register for ioreset_hard_bus0 on Slave side(=%08X)!",scom_mode_pb_reg_addr[FIR_CEN_DMI]); return rc;}
+					rc_ecmd = data_buffer_64.setBit(2,1);  // Scom_mode_pb ,ioreset starts at bit 2
+					if(rc_ecmd){rc.setEcmdError(rc_ecmd);return(rc);}
+					rc = fapiPutScom(attached_cen_target, scom_mode_pb_reg_addr[FIR_CEN_DMI], data_buffer_64);
+					if(!rc.ok()){FAPI_ERR("Error Reading SCOM mode PB register for ioreset_hard_bus0 on Slave side(=%08X)!",scom_mode_pb_reg_addr[FIR_CEN_DMI]); return rc;}
+				}
+			}
+		}
+	}
+	FAPI_INF("IO CleanUp: Global Reset Done");
+	/// reset end
 
-
-          FAPI_DBG("CHIP UNIT IS %d",chip_unit);
-
-     }
-     rc = fapiGetScom(master_target, scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0], data);
-     if (!rc.ok())
-     {
-         FAPI_ERR("Error Reading SCOM mode PB register for ioreset_hard_bus0 on master side(=%08X)!",
-                  scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0]);
-          return rc;
-     }
-
-     rc_ecmd = data.setBit(2+chip_unit,1);  // Scom_mode_pb ,ioreset starts at bit 2
-     if(rc_ecmd)
-     {
-        rc.setEcmdError(rc_ecmd);
-        return(rc);
-     }
-     FAPI_DBG("Writing the Hard reset on PU ");
-     // use FIR AND mask register to un-mask selected bits
-     rc = fapiPutScom(master_target, scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0], data);
-     if (!rc.ok())
-     {
-         FAPI_ERR("Error writing SCOM mode PB register for ioreset_hard_bus0 on master side(=%08X)!",
-                  scom_mode_pb_reg_addr[FIR_CP_IOMC0_P0]);
-          return rc;
-     }
-
-     rc_ecmd = data.flushTo0();
-     if(rc_ecmd)
-     {
-        rc.setEcmdError(rc_ecmd);
-        return(rc);
-     }
-     // Centaur is always bus0 in reset register
-     if(slave_interface == CEN_DMI){
-          chip_unit=0;
-     }
-     rc = fapiGetScom(slave_target, scom_mode_pb_reg_addr[FIR_CEN_DMI], data);
-     if (!rc.ok())
-     {
-         FAPI_ERR("Error Reading SCOM mode PB register for ioreset_hard_bus0 on Slave side(=%08X)!",
-                   scom_mode_pb_reg_addr[FIR_CEN_DMI]);
-          return rc;
-     }
-     rc_ecmd = data.setBit(2+chip_unit,1);  // Scom_mode_pb ,ioreset starts at bit 2
-     if(rc_ecmd)
-     {
-        rc.setEcmdError(rc_ecmd);
-        return(rc);
-     }
-     // use FIR AND mask register to un-mask selected bits
-     rc = fapiPutScom(slave_target, scom_mode_pb_reg_addr[FIR_CEN_DMI], data);
-     if (!rc.ok())
-     {
-         FAPI_ERR("Error writing SCOM mode PB register for ioreset_hard_bus0 on Slave side(=%08X)!",
-                   scom_mode_pb_reg_addr[FIR_CEN_DMI]);
-          return rc;
-     }
-     ///////////////////////////////SW256413//////////////////////////////
-     ecmdDataBufferBase rx_set_bits(16);
-     ecmdDataBufferBase tx_set_bits(16);
-     ecmdDataBufferBase mask_bits(  16);
-
-     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &master_target, chip_unit);
-     if (!rc.ok()){
-        FAPI_ERR("Error retreiving MCS chiplet number, while setting bus id.");
-        return rc;
-     }
-     mask_bits.flushTo0();
-     uint32_t rxbits = 0;
-     uint32_t txbits = 0;
-     // Tuleta has MCS4-7 corresponding to port DMI1
-     // Brazos has MCS0-7 corresponding to port DMI0 and DMI1
-     if(chip_unit == 0){
-        rxbits = 0x0000;    //bus_id: 0 group_id: 0
-        txbits = 0x0100;    //bus_id: 0 group_id: 32
-     }else if(chip_unit == 1){
-        rxbits = 0x0400;    //bus_id: 1 group_id: 0
-        txbits = 0x0500;    //bus_id: 1 group_id: 32
-     }else if(chip_unit == 2){
-        rxbits = 0x0800;    //bus_id: 2 group_id: 0
-        txbits = 0x0900;    //bus_id: 2 group_id: 32
-     }else if(chip_unit == 3){
-        rxbits = 0x0C00;    //bus_id: 3 group_id: 0
-        txbits = 0x0D00;    //bus_id: 3 group_id: 32
-     }else if(chip_unit == 4){
-        rxbits = 0x0000;    //bus_id: 0 group_id: 0
-        txbits = 0x0100;    //bus_id: 0 group_id: 32
-     }else if(chip_unit == 5){
-        rxbits = 0x0400;    //bus_id: 1 group_id: 0
-        txbits = 0x0500;    //bus_id: 1 group_id: 32
-     }else if(chip_unit == 6){
-        rxbits = 0x0800;    //bus_id: 2 group_id: 0
-        txbits = 0x0900;    //bus_id: 2 group_id: 32
-     }else if(chip_unit == 7){
-        rxbits = 0x0C00;    //bus_id: 3 group_id: 0
-        txbits = 0x0D00;    //bus_id: 3 group_id: 32
-     }else{      //If chip_unit is unkown, set return error
-        FAPI_ERR("Invalid io_cleanup HWP invocation . MCS chiplet number is unknown while setting the bus id.");
-        const fapi::Target & MASTER_TARGET = master_target;
-        FAPI_SET_HWP_ERROR(rc, IO_CLEANUP_INVALID_MCS_RC);
-        return rc;
-     }
-     rc_ecmd |= rx_set_bits.insertFromRight(rxbits, 0, 16);
-     rc_ecmd |= tx_set_bits.insertFromRight(txbits, 0, 16);
-     if(rc_ecmd)
-     {
-        rc.setEcmdError(rc_ecmd);
-        return(rc);
-     }
-     rc = GCR_write(master_target, master_interface, rx_id1_pg, master_group, 0, rx_set_bits, mask_bits,1,1);if (rc) {return(rc);}
-     rc = GCR_write(master_target, master_interface, tx_id1_pg, master_group, 0, tx_set_bits, mask_bits,1,1);if (rc) {return(rc);}
-     ///////////////////////////////SW256413//////////////////////////////
-
-
-    // NOW We clear FIRS.. need to see if we need to do this or some other procedure will do this . Bellows/Irving to respond
-
-    rc = clear_fir_reg(slave_target,FIR_CEN_DMI);
-     if(rc)
-     {
-        return(rc);
-     }
-    rc = clear_fir_reg(master_target,FIR_CP_IOMC0_P0);
-     if(rc)
-     {
-        return(rc);
-     }
-    return rc;
+	// Set Bus IDs, Clear FIRs, Turn on FIR Propagator
+	rc = fapiGetChildChiplets(master_parent_target,fapi::TARGET_TYPE_MCS_CHIPLET,mcs_chiplets, fapi::TARGET_STATE_PRESENT);
+	for (std::vector<fapi::Target>::iterator i = mcs_chiplets.begin(); i != mcs_chiplets.end(); i++){
+		rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*i), mcs_unit_id);   // read chip unit number
+		if (!rc.ok()){FAPI_ERR("Error retreiving MCS chiplet number, while setting bus id.");return rc;}
+		if((mcs_unit_lower_limit <= mcs_unit_id) && (mcs_unit_id <= mcs_unit_upper_limit)){    //To limit these actions to a single DMI controller
+			// Set Bus IDs
+			clear_bits.flushTo0();
+			uint32_t rxbits = 0;
+			uint32_t txbits = 0;
+			// Tuleta has MCS4-7 corresponding to port DMI1
+			// Brazos has MCS0-7 corresponding to port DMI0 and DMI1
+			if(mcs_unit_id == 0){
+				rxbits = 0x0000;    //bus_id: 0 group_id: 0
+				txbits = 0x0100;    //bus_id: 0 group_id: 32
+			}else if(mcs_unit_id == 1){
+				rxbits = 0x0400;    //bus_id: 1 group_id: 0
+				txbits = 0x0500;    //bus_id: 1 group_id: 32
+			}else if(mcs_unit_id == 2){
+				rxbits = 0x0800;    //bus_id: 2 group_id: 0
+				txbits = 0x0900;    //bus_id: 2 group_id: 32
+			}else if(mcs_unit_id == 3){
+				rxbits = 0x0C00;    //bus_id: 3 group_id: 0
+				txbits = 0x0D00;    //bus_id: 3 group_id: 32
+			}else if(mcs_unit_id == 4){
+				rxbits = 0x0000;    //bus_id: 0 group_id: 0
+				txbits = 0x0100;    //bus_id: 0 group_id: 32
+			}else if(mcs_unit_id == 5){
+				rxbits = 0x0400;    //bus_id: 1 group_id: 0
+				txbits = 0x0500;    //bus_id: 1 group_id: 32
+			}else if(mcs_unit_id == 6){
+				rxbits = 0x0800;    //bus_id: 2 group_id: 0
+				txbits = 0x0900;    //bus_id: 2 group_id: 32
+			}else if(mcs_unit_id == 7){
+				rxbits = 0x0C00;    //bus_id: 3 group_id: 0
+				txbits = 0x0D00;    //bus_id: 3 group_id: 32
+			}else{      //If chip_unit is unkown, set return error
+				FAPI_ERR("Invalid io_cleanup HWP. MCS chiplet number is unknown while setting the bus id.");
+				const fapi::Target & TARGET = *i;
+				FAPI_SET_HWP_ERROR(rc, IO_CLEANUP_POST_RESET_MCS_UNIT_ID_FAIL);
+				return rc;
+			}
+			rc_ecmd |= rx_set_bits.insertFromRight(rxbits, 0, 16);
+			rc_ecmd |= tx_set_bits.insertFromRight(txbits, 0, 16);
+			if(rc_ecmd){rc.setEcmdError(rc_ecmd);return(rc);}
+			rc = GCR_write(*i, master_interface, rx_id1_pg, master_group, 0, rx_set_bits, clear_bits,1,1);
+			if(rc){
+				FAPI_INF("io_cleanup rx putscom fail");
+				return(rc);
+			}
+			rc = GCR_write(*i, master_interface, tx_id1_pg, master_group, 0, tx_set_bits, clear_bits,1,1);
+			if(rc){
+				FAPI_INF("in_cleanup tx putscom fail");
+				return(rc);
+			}
+			memory_attached = true;
+			rc = fapiGetOtherSideOfMemChannel( *i, attached_cen_target, fapi::TARGET_STATE_PRESENT);
+			if(rc){     // An error from this means that there is no centaur attached.
+				memory_attached = false;
+			}else{
+				rc = FAPI_ATTR_GET(ATTR_MSS_INIT_STATE, &attached_cen_target, l_attr_mss_init_state);  if(rc) return rc;
+			}
+			// Clear FIR on MCS and CEN (DMI FIR)
+			if((memory_attached) && ((l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON) || (l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE)) ){
+				rc = clear_fir_reg(attached_cen_target,FIR_CEN_DMI);
+				if(rc){return(rc);}
+			}
+			rc = clear_fir_reg(*i,FIR_CP_IOMC0_P0);
+			rc_ecmd = data_buffer_64.clearBit(0,64);
+			if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+			if(rc){return(rc);}
+			// # cen mbi fir
+			if((memory_attached) && ((l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON) || (l_attr_mss_init_state == ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE)) ){
+				rc = fapiPutScom(attached_cen_target, CENTAUR_MBI_FIR_0x02010800, data_buffer_64);
+				if(rc) return rc;
+				// # cen mbicrc syndromes
+				rc = fapiPutScom(attached_cen_target, CENTAUR_MBI_CRCSYN_0x0201080C, data_buffer_64);
+				if(rc) return rc;
+				// # cen mbicfg configuration register
+				rc = fapiPutScom(attached_cen_target, CENTAUR_MBI_CFG_0x0201080A, data_buffer_64);
+				if(rc) return rc;
+				// # cen dmi fir
+				rc = fapiPutScom(attached_cen_target, CENTAUR_CEN_DMIFIR_0x02010400, data_buffer_64);
+				if(rc) return rc;
+			}
+			rc = fapiPutScom(*i, MCS_MCIFIR_0x02011840, data_buffer_64);
+			if(rc) return rc;
+			// # pu mcicrcsyn
+			rc = fapiPutScom(*i, MCS_MCICRCSYN_0x0201184C, data_buffer_64);
+			if(rc) return rc;
+			// # pu mcicfg
+			rc = fapiPutScom(*i, MCS_MCICFG_0x0201184A, data_buffer_64);
+			if(rc) return rc;
+			// #dmi fir
+			rc = fapiPutScom(*i, IOMC0_BUSCNTL_FIR_0x02011A00, data_buffer_64);
+			if(rc) return rc;
+			//Turn off indication of valid MCS for OCC
+			rc = fapiPutScom(*i, MCS_MCFGPR_0x02011802, data_buffer_64);
+			if(rc) return rc;
+			// turn on the FIR propagator so FIR bits shut down the DMI
+			if(l_attr_proc_ec_mss_reconfig_possible){
+				rc_ecmd = data_buffer_64.clearBit(0,64);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc_ecmd = mask_buffer_64.clearBit(0,64);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc_ecmd = data_buffer_64.clearBit(42);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc_ecmd = mask_buffer_64.setBit(42);
+				if(rc_ecmd){ rc.setEcmdError(rc_ecmd); return(rc);}
+				rc = fapiPutScomUnderMask(*i, MCS_MCICFG_0x0201184A, data_buffer_64, mask_buffer_64);
+				if(rc) return rc;
+			}else{
+				FAPI_ERR("This processor cannot go through a reconfig loop. Please upgrade to > DD1\n");
+				const fapi::Target & PROC =  master_parent_target;
+				FAPI_SET_HWP_ERROR(rc, RC_IO_CLEANUP_UNSUPPORTED);
+				return rc;
+			}
+		}
+	}
+	FAPI_INF("IO CleanUp: Done");
+	return rc;
 }
 
 
 // Cleans up for Centaur Reconfig or Abus hot plug case
-ReturnCode io_cleanup(const Target &master_target,const Target &slave_target){
-     ReturnCode rc;
-     io_interface_t master_interface,slave_interface;
-     uint32_t master_group=0;
-     uint32_t slave_group=0;
+ReturnCode io_cleanup(const Target &master_target){
+	ReturnCode rc;
+	io_interface_t master_interface;
+	uint32_t master_group  = 0;
 
+	// This is a DMI/MC bus
+	if( master_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET ){
+		FAPI_DBG("This is a DMI bus using base DMI scom address");
+		master_interface = CP_IOMC0_P0; // base scom for MC bus
+		master_group     = 3; // Design requires us to do this as per scom map and layout
+		rc=do_cleanup(master_target,master_interface,master_group);
+		if(rc){
+			FAPI_INF("io_cleanup exited early.");
+			return rc;
+		}
+	}
 
-     // This is a DMI/MC bus
-     if( (master_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )&& (slave_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)){
-          FAPI_DBG("This is a DMI bus using base DMI scom address");
-          master_interface=CP_IOMC0_P0; // base scom for MC bus
-          slave_interface=CEN_DMI; // Centaur scom base
-          master_group=3; // Design requires us to do this as per scom map and layout
-          slave_group=0;
-          rc=do_cleanup(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-          if(rc) return rc;
-     }
-     //This is an A Bus
-     else if( (master_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT )&& (slave_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT)){
-        // This procedure only supports DMI for now
-     }
-     else{
-          const Target &MASTER_TARGET = master_target;
-          const Target &SLAVE_TARGET = slave_target;
-          FAPI_ERR("Invalid io_cleanup HWP invocation . Pair of targets dont belong to DMI or A bus instances");
-          FAPI_SET_HWP_ERROR(rc, IO_CLEANUP_INVALID_INVOCATION_RC);
-     }
-     return rc;
+	//This is an A Bus
+	else if( master_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT ){
+		// This procedure only supports DMI for now
+	}
+	else{
+		const Target &MASTER_TARGET = master_target;
+		FAPI_ERR("Invalid io_cleanup HWP invocation . Pair of targets dont belong to DMI or A bus instances");
+		FAPI_SET_HWP_ERROR(rc, IO_CLEANUP_INVALID_MCS_RC);
+	}
+	return rc;
 }
 
 

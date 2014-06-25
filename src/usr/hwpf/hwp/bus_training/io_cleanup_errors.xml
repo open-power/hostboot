@@ -20,27 +20,32 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: io_cleanup_errors.xml,v 1.5 2014/05/16 18:33:48 dcrowell Exp $ -->
+<!-- $Id: io_cleanup_errors.xml,v 1.6 2014/06/06 19:37:30 steffen Exp $ -->
 <hwpErrors>
-  <hwpError>
-    <rc>IO_CLEANUP_INVALID_INVOCATION_RC</rc>
-    <description>io_cleanup invoked with wrong pair of targets</description>
-    <ffdc>MASTER_TARGET</ffdc>
-    <ffdc>SLAVE_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
   <hwpError>
     <rc>IO_CLEANUP_INVALID_MCS_RC</rc>
     <description>io_cleanup invoked with invalid mcs target</description>
     <ffdc>MASTER_TARGET</ffdc>
-    <ffdc>chip_unit</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_IO_CLEANUP_UNSUPPORTED</rc>
+    <description>Processor Hardware does not support reconfiguration loops.  For Venice and Murano, DD2.0 and greater hardware support this function</description>
+    <deconfigure><target>PROC</target></deconfigure>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_CLEANUP_POST_RESET_MCS_UNIT_ID_FAIL</rc>
+    <description>io cleanup was unable to determine the correct mcs unit id to set the bus id. </description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+    <!-- *********************************************************************** -->
 </hwpErrors>
