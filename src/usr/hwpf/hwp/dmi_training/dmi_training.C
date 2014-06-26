@@ -76,6 +76,7 @@
 #include    "dmi_io_dccal/dmi_io_dccal.H"
 #include    <pbusLinkSvc.H>
 #include    <ibscom/ibscomif.H>
+#include    <config.h>
 
 namespace   DMI_TRAINING
 {
@@ -470,9 +471,13 @@ void*    call_dmi_scominit( void *io_pArgs )
 void* call_dmi_erepair( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_StepError;
-    errlHndl_t l_errPtr = NULL;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
+#ifdef CONFIG_NO_DMI_EREPAIR
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "DMI erepair is disabled" );
+#else
+
+    errlHndl_t l_errPtr = NULL;
     fapi::ReturnCode l_rc;
     std::vector<uint8_t> l_endp1_txFaillanes;
     std::vector<uint8_t> l_endp1_rxFaillanes;
@@ -662,6 +667,7 @@ void* call_dmi_erepair( void *io_pArgs )
         } // end of if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
     } // end for l_mcs_target
 
+#endif
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );
 
     return l_StepError.getErrorHandle();
