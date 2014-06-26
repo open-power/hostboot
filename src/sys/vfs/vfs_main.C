@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -59,6 +61,9 @@ struct VfsEntry
 
 void* vfs_main(void* i_barrier)
 {
+    // Detach this task from the parent
+    task_detach();
+
     barrier_t * barrier = (barrier_t *)i_barrier;
     // Create message queue, register with kernel.
     msg_q_t vfsMsgQ = msg_q_create();
