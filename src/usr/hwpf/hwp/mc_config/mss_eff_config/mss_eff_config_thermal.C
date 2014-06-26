@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.26 2014/03/10 16:32:09 jdsloat Exp $
+// $Id: mss_eff_config_thermal.C,v 1.27 2014/06/02 13:11:01 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.27  | pardeik  |22-MAY-14| Removed attribute update section not needed
+//         |          |         | Initialize runtime throttle attributes before
+//         |          |         |   calling bulk_pwr_throttles
+//         |          |         | RAS update to split code into smaller
+//         |          |         |   subfunctions (powercurve and throttles)
 //   1.26  | jdsloat  |10-MAR-14| Edited comments
 //   1.25  | pardeik  |21-JAN-14| fixed default power curve values for CDIMM
 //         |          |         | removed unneeded comments
@@ -159,6 +164,14 @@ extern "C" {
 					    const fapi::Target & i_target_mba
 					    );
 
+    fapi::ReturnCode mss_eff_config_thermal_powercurve(
+					    const fapi::Target & i_target_mba
+					    );
+
+    fapi::ReturnCode mss_eff_config_thermal_throttles(
+					    const fapi::Target & i_target_mba
+					    );
+
     fapi::ReturnCode mss_eff_config_thermal_term
       (
        const char nom_or_wc_term[4],
@@ -196,21 +209,58 @@ extern "C" {
        uint8_t &o_cen_dq_dqs_drv_imp
        );
 
+
 //------------------------------------------------------------------------------
-// @brief mss_eff_config_thermal(): This function determines the power and
-// throttle attribute values to use
+// @brief mss_eff_config_thermal(): This function determines the
+// power curve and throttle attribute values to use
 //
 // @param[in]	const fapi::Target & i_target_mba:  MBA Target passed in
 //
 // @return fapi::ReturnCode
 //------------------------------------------------------------------------------
 
-    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target_mba
-					    )
+    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target_mba)
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
 	const char* procedure_name = "mss_eff_config_thermal";
+
+	FAPI_IMP("*** Running %s on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
+
+	rc = mss_eff_config_thermal_powercurve(i_target_mba);
+	if (rc)
+	{
+	    FAPI_ERR("Error (0x%x) calling mss_eff_config_thermal_powercurve", static_cast<uint32_t>(rc));
+	    return rc;
+	}
+	rc = mss_eff_config_thermal_throttles(i_target_mba);
+	if (rc)
+	{
+	    FAPI_ERR("Error (0x%x) calling mss_eff_config_thermal_throttles", static_cast<uint32_t>(rc));
+	    return rc;
+	}
+
+
+	FAPI_IMP("*** %s COMPLETE on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
+	return rc;
+    }
+
+//------------------------------------------------------------------------------
+// @brief mss_eff_config_thermal_powercurve(): This function determines the
+// power curve attribute values to use
+//
+// @param[in]	const fapi::Target & i_target_mba:  MBA Target passed in
+//
+// @return fapi::ReturnCode
+//------------------------------------------------------------------------------
+
+    fapi::ReturnCode mss_eff_config_thermal_powercurve(const fapi::Target & i_target_mba)
+    {
+	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
+
+	const char* procedure_name = "mss_eff_config_thermal_powercurve";
 
 	FAPI_IMP("*** Running %s on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());
@@ -278,7 +328,6 @@ extern "C" {
 
 // other variables used in this function
 	fapi::Target target_chip;
-	std::vector<fapi::Target> target_mba_array;
 	std::vector<fapi::Target> target_dimm_array;
 	uint8_t port;
 	uint8_t dimm;
@@ -320,27 +369,15 @@ extern "C" {
 	uint8_t cen_dq_dqs_rcv_imp_wc[NUM_PORTS];
 	uint8_t cen_dq_dqs_drv_imp_wc[NUM_PORTS];
 	uint8_t num_dimms_on_port;
-	uint32_t throttle_n_per_mba;
-	uint32_t throttle_n_per_chip;
-	uint32_t throttle_d;
-	uint32_t runtime_throttle_n_per_mba;
-	uint32_t runtime_throttle_n_per_chip;
-	uint32_t runtime_throttle_d;
 	uint8_t dram_rtt_nom[NUM_PORTS][NUM_DIMMS][NUM_RANKS];
 	uint8_t dram_rtt_wr[NUM_PORTS][NUM_DIMMS][NUM_RANKS];
 	char dram_gen_str[4];
-	uint32_t dimm_thermal_power_limit;
-	uint32_t channel_pair_thermal_power_limit;
-	uint8_t num_mba_with_dimms = 0;
-	uint8_t mba_index;
 	uint8_t dimm_number_registers[NUM_PORTS][NUM_DIMMS];
 	uint8_t dimm_index;
 	uint32_t cdimm_master_power_slope;
 	uint32_t cdimm_master_power_intercept;
 	uint32_t cdimm_supplier_power_slope;
 	uint32_t cdimm_supplier_power_intercept;
-	uint8_t ras_increment;
-	uint8_t cas_increment;
 
 	power_table_size = (sizeof(power_table))/(sizeof(power_data_t));
 
@@ -475,12 +512,6 @@ extern "C" {
 		return rc;
 	    }
 	}
-	rc = FAPI_ATTR_GET(ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT,
-			   NULL, dimm_thermal_power_limit);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT");
-	    return rc;
-	}
 
 // Get voltage and frequency attributes
 	rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &target_chip, dimm_voltage);
@@ -493,7 +524,6 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_MSS_FREQ");
 	    return rc;
 	}
-
 
 // get any attributes from DIMM SPD
 	if (
@@ -533,33 +563,6 @@ extern "C" {
 	    }
 	}
 
-// Get number of Centaur MBAs that have dimms present
-	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
-	{
-	    rc = fapiGetChildChiplets(target_chip,
-				      fapi::TARGET_TYPE_MBA_CHIPLET,
-				      target_mba_array,
-				      fapi::TARGET_STATE_PRESENT);
-	    if (rc) {
-		FAPI_ERR("Error from fapiGetChildChiplets");
-		return rc;
-	    }
-	    num_mba_with_dimms = 0;
-	    for (mba_index=0; mba_index < target_mba_array.size(); mba_index++)
-	    {
-		rc = fapiGetAssociatedDimms(target_mba_array[mba_index],
-					    target_dimm_array,
-					    fapi::TARGET_STATE_PRESENT);
-		if (rc) {
-		    FAPI_ERR("Error from fapiGetAssociatedDimms");
-		    return rc;
-		}
-		if (target_dimm_array.size() > 0)
-		{
-		    num_mba_with_dimms++;
-		}
-	    }
-	}
 
 // determine worst case termination settings here for ISDIMMs (to be used later)
 	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
@@ -992,6 +995,123 @@ extern "C" {
 	    return rc;
 	}
 
+	FAPI_IMP("*** %s COMPLETE on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
+	return rc;
+    }
+
+//------------------------------------------------------------------------------
+// @brief mss_eff_config_thermal_throttles(): This function determines the
+// throttle attribute values to use
+//
+// @param[in]	const fapi::Target & i_target_mba:  MBA Target passed in
+//
+// @return fapi::ReturnCode
+//------------------------------------------------------------------------------
+
+    fapi::ReturnCode mss_eff_config_thermal_throttles(const fapi::Target & i_target_mba)
+    {
+	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
+
+	const char* procedure_name = "mss_eff_config_thermal_throttles";
+
+	FAPI_IMP("*** Running %s on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
+
+// variables used in this function
+	fapi::Target target_chip;
+	std::vector<fapi::Target> target_mba_array;
+	std::vector<fapi::Target> target_dimm_array;
+	uint8_t custom_dimm;
+	uint8_t num_dimms_on_port;
+	uint32_t runtime_throttle_n_per_mba;
+	uint32_t runtime_throttle_n_per_chip;
+	uint32_t runtime_throttle_d;
+	uint32_t dimm_thermal_power_limit;
+	uint32_t channel_pair_thermal_power_limit;
+	uint8_t num_mba_with_dimms = 0;
+	uint8_t mba_index;
+	uint8_t ras_increment;
+	uint8_t cas_increment;
+	uint32_t l_max_dram_databus_util;
+
+//------------------------------------------------------------------------------
+// Get input attributes
+//------------------------------------------------------------------------------
+
+// Get Centaur target for the given MBA
+	rc = fapiGetParentChip(i_target_mba, target_chip);
+	if (rc) {
+	    FAPI_ERR("Error from fapiGetParentChip");
+	    return rc;
+	}
+
+	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, custom_dimm);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_CUSTOM_DIMM");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT,
+			   &i_target_mba, num_dimms_on_port);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_NUM_DROPS_PER_PORT");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT,
+			   NULL, dimm_thermal_power_limit);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT");
+	    return rc;
+	}
+
+	rc = FAPI_ATTR_GET(ATTR_MRW_MEM_THROTTLE_DENOMINATOR, NULL, runtime_throttle_d);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_MEM_THROTTLE_DENOMINATOR");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_MAX_DRAM_DATABUS_UTIL,
+			   NULL, l_max_dram_databus_util);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_MAX_DRAM_DATABUS_UTIL");
+	    return rc;
+	}
+
+
+
+// Get number of Centaur MBAs that have dimms present
+// Custom dimms (CDIMMs) use mba/chip throttling, so count number of mbas that have dimms
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+	{
+	    rc = fapiGetChildChiplets(target_chip,
+				      fapi::TARGET_TYPE_MBA_CHIPLET,
+				      target_mba_array,
+				      fapi::TARGET_STATE_PRESENT);
+	    if (rc) {
+		FAPI_ERR("Error from fapiGetChildChiplets");
+		return rc;
+	    }
+	    num_mba_with_dimms = 0;
+	    for (mba_index=0; mba_index < target_mba_array.size(); mba_index++)
+	    {
+		rc = fapiGetAssociatedDimms(target_mba_array[mba_index],
+					    target_dimm_array,
+					    fapi::TARGET_STATE_PRESENT);
+		if (rc) {
+		    FAPI_ERR("Error from fapiGetAssociatedDimms");
+		    return rc;
+		}
+		if (target_dimm_array.size() > 0)
+		{
+		    num_mba_with_dimms++;
+		}
+	    }
+	}
+// ISDIMM (non custom dimm) uses dimm/mba throttling, so set num_mba_with_dimms to 1
+	else
+	{
+	    num_mba_with_dimms = 1;
+	}
+
 
 //------------------------------------------------------------------------------
 // Memory Throttle Determination
@@ -1031,6 +1151,33 @@ extern "C" {
 		FAPI_ERR("Error writing attribute ATTR_MSS_MEM_WATT_TARGET");
 		return rc;
 	    }
+
+// Initialize the runtime throttle attributes to an unthrottled value for mss_bulk_pwr_throttles
+// max utilization comes from MRW value in c% - convert to %
+	    float MAX_UTIL = (float) l_max_dram_databus_util / 100;
+	    runtime_throttle_n_per_mba = (int)(runtime_throttle_d * (MAX_UTIL / 100) / 4);
+	    runtime_throttle_n_per_chip = (int)(runtime_throttle_d * (MAX_UTIL / 100) / 4) *
+	      num_mba_with_dimms;
+
+	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
+			       &i_target_mba, runtime_throttle_n_per_mba);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
+			       &i_target_mba, runtime_throttle_n_per_chip);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
+			       &i_target_mba, runtime_throttle_d);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
+		return rc;
+	    }
+
 
 // Call the procedure function that takes a channel pair power limit and
 // converts it to throttle values
@@ -1098,34 +1245,6 @@ extern "C" {
 		FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT");
 		return rc;
 	    }
-
-
-// Initialize the generic throttle attributes to be used for scominit 
-// These throttles will be the runtime throttles for mcbist/msdiag
-// safemode throttles will be set in thermal_init step
-	throttle_n_per_mba = runtime_throttle_n_per_mba;
-	throttle_n_per_chip = runtime_throttle_n_per_chip;
-	throttle_d = runtime_throttle_d;
-
-// write output attributes
-	rc = FAPI_ATTR_SET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			   &i_target_mba, throttle_n_per_mba);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA");
-	    return rc;
-	}
-	rc = FAPI_ATTR_SET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			   &i_target_mba, throttle_n_per_chip);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-	    return rc;
-	}
-	rc = FAPI_ATTR_SET(ATTR_MSS_MEM_THROTTLE_DENOMINATOR,
-			   &i_target_mba, throttle_d);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_MEM_THROTTLE_DENOMINATOR");
-	    return rc;
-	}
 
 	FAPI_IMP("*** %s COMPLETE on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());

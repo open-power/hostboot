@@ -20,7 +20,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.21 2014/03/10 16:31:45 jdsloat Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.22 2014/06/02 13:10:53 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -71,6 +71,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.22  | pardeik  |21-MAY-14| Removed section that adjusts power limit
+//         |          |         | (was not getting correct throttle values
+//         |          |         | to have channel pair power be under limit)
+//         |          |         | Limit channel pair power limit to thermal limit
+//         |          |         | Start with runtime throttle attributes
 //   1.21  | jdsloat  |10-MAR-14| Edited comments
 //   1.20  | pardeik  |06-MAR-14| RAS update for HWP error
 //         |          |         |   (changed the callout from centaur to mba)
@@ -171,39 +176,22 @@ extern "C" {
 	FAPI_IMP("*** Running %s on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());
 
-
-// other variables used in this procedure
-	const uint8_t MAX_NUM_PORTS = 2;
-	const uint8_t MAX_NUM_DIMMS = 2;
 // min utilization (percent of max) allowed for floor
 	const float MIN_UTIL = 1;
 
-	fapi::Target target_chip;
-	std::vector<fapi::Target> target_mba_array;
-	std::vector<fapi::Target> target_dimm_array;
 	uint32_t channel_pair_watt_target;
-	uint32_t channel_pair_watt_target_orig;
 	uint32_t throttle_n_per_mba;
 	uint32_t throttle_n_per_chip;
 	uint32_t throttle_d;
-	uint8_t port;
-	uint8_t dimm;
 	bool not_enough_available_power;
 	bool channel_pair_throttle_done;
 	float channel_pair_power;
 	uint8_t custom_dimm;
-	uint8_t num_mba_with_dimms;
-	uint32_t power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
-	uint8_t mba_index;
-	uint32_t l_max_dram_databus_util;
+	uint32_t runtime_throttle_n_per_mba;
+	uint32_t runtime_throttle_n_per_chip;
+	uint32_t runtime_throttle_d;
 
 // Get input attributes
-	rc = FAPI_ATTR_GET(ATTR_MRW_MAX_DRAM_DATABUS_UTIL,
-			   NULL, l_max_dram_databus_util);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_MAX_DRAM_DATABUS_UTIL");
-	    return rc;
-	}
 	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, custom_dimm);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_CUSTOM_DIMM");
@@ -215,61 +203,30 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_MSS_MEM_WATT_TARGET");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_MSS_POWER_INT, &i_target_mba, power_int_array);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_POWER_INT");
-	    return rc;
-	}
 	rc = FAPI_ATTR_GET(ATTR_MRW_MEM_THROTTLE_DENOMINATOR, NULL, throttle_d);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_MRW_MEM_THROTTLE_DENOMINATOR");
 	    return rc;
 	}
-
-// max utilization (percent of max) allowed for ceiling
-// Comes from MRW value in c% - convert to %
-	float MAX_UTIL = (float) l_max_dram_databus_util / 100;
-
-// get number of mba's  with dimms for a CDIMM
-	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
-	{
-// Get Centaur target for the given MBA
-	    rc = fapiGetParentChip(i_target_mba, target_chip);
-	    if (rc) {
-		FAPI_ERR("Error calling fapiGetParentChip");
-		return rc;
-	    }
-// Get MBA targets from the parent chip centaur
-	    rc = fapiGetChildChiplets(target_chip,
-				      fapi::TARGET_TYPE_MBA_CHIPLET,
-				      target_mba_array,
-				      fapi::TARGET_STATE_PRESENT);
-	    if (rc) {
-		FAPI_ERR("Error calling fapiGetChildChiplets");
-		return rc;
-	    }
-	    num_mba_with_dimms = 0;
-	    for (mba_index=0; mba_index < target_mba_array.size(); mba_index++)
-	    {
-		rc = fapiGetAssociatedDimms(target_mba_array[mba_index],
-					    target_dimm_array,
-					    fapi::TARGET_STATE_PRESENT);
-		if (rc) {
-		    FAPI_ERR("Error calling fapiGetAssociatedDimms");
-		    return rc;
-		}
-		if (target_dimm_array.size() > 0)
-		{
-		    num_mba_with_dimms++;
-		}
-	    }
-
+	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
+			   &i_target_mba, runtime_throttle_n_per_mba);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
+	    return rc;
 	}
-	else
-	{
-// ISDIMMs, set to a value of one since they are handled on a per MBA basis
-	    num_mba_with_dimms = 1;
+	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
+			   &i_target_mba, runtime_throttle_n_per_chip);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+	    return rc;
 	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
+			   &i_target_mba, runtime_throttle_d);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
+	    return rc;
+	}
+
 
 //------------------------------------------------------------------------------
 // THROTTLE SECTION
@@ -282,49 +239,9 @@ extern "C" {
 // If over limit, then increase throttle value until it is at or below limit
 // If unable to get power below limit, then call out an error
 
-	throttle_n_per_mba = (int)(throttle_d * (MAX_UTIL / 100) / 4);
-	throttle_n_per_chip = (int)(throttle_d * (MAX_UTIL / 100) / 4) *
-	  num_mba_with_dimms;
-
-// Adjust power limit value as needed here
-// For CDIMM, we want the throttles to be per-chip, and to allow all commands to
-// go to one MBA to get to the power limit
-	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
-	{
-// Set channel pair power limit to whole CDIMM power limit (multiply by number
-// of MBAs used) and subtract off idle power for dimms on other MBA
-	    channel_pair_watt_target_orig = channel_pair_watt_target;
-	    channel_pair_watt_target = channel_pair_watt_target *
-	      num_mba_with_dimms;
-	    for (port=0; port < MAX_NUM_PORTS; port++)
-	    {
-		for (dimm=0; dimm < MAX_NUM_DIMMS; dimm++)
-		{
-// Only subtract idle power of other MBA's dimms if less than the target wattage
-//   to prevent negative values for the limit
-		    if (
-			((num_mba_with_dimms - 1) * (power_int_array[port][dimm]))
-			<
-			channel_pair_watt_target
-			)
-		    {
-			channel_pair_watt_target = channel_pair_watt_target -
-			  ((num_mba_with_dimms - 1) *
-			   (power_int_array[port][dimm]));
-		    }
-		    else
-		    {
-			break;
-		    }
-		}
-	    }
-// check to see if calculated power limit is less than original power limit
-// if so then set them the same
-	    if (channel_pair_watt_target < channel_pair_watt_target_orig)
-	    {
-		channel_pair_watt_target = channel_pair_watt_target_orig;
-	    }
-	}
+// Start with the runtime throttle settings since we may have a thermal/power limit
+	throttle_n_per_mba = runtime_throttle_n_per_mba;
+	throttle_n_per_chip = runtime_throttle_n_per_chip;
 
 // calculate power and change throttle values in this while loop until limit has
 // been satisfied or throttles have reached the minimum limit
@@ -392,7 +309,7 @@ extern "C" {
 // channel pair power is less than limit, so keep existing throttles
 	    else
 	    {
-		FAPI_DBG("There is enough available memory power [Channel Pair Power %4.2f/%d cW]", channel_pair_power, channel_pair_watt_target);
+		FAPI_INF("There is enough available memory power [Channel Pair Power %4.2f/%d cW]", channel_pair_power, channel_pair_watt_target);
 		channel_pair_throttle_done = true;
 	    }
 	}
@@ -407,7 +324,7 @@ extern "C" {
 	    throttle_n_per_mba = throttle_n_per_chip;
 	}
 
-	FAPI_DBG("Final Throttle Settings [N_per_mba/N_per_chip/M %d/%d/%d]", throttle_n_per_mba, throttle_n_per_chip, throttle_d);
+	FAPI_INF("Final Throttle Settings [N_per_mba/N_per_chip/M %d/%d/%d]", throttle_n_per_mba, throttle_n_per_chip, throttle_d);
 
 //------------------------------------------------------------------------------
 // update output attributes

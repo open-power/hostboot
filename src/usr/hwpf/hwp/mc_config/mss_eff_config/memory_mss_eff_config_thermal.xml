@@ -21,21 +21,10 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_eff_config_thermal.xml,v 1.1 2013/06/19 18:28:01 bellows Exp $ -->
+<!-- $Id: memory_mss_eff_config_thermal.xml,v 1.2 2014/06/02 15:01:56 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_eff_config_thermal.C -->
 <!-- // *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com -->
 <!-- // *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com -->
-
-<!-- Original Source for RC_MSS_DIMM_POWER_CURVE_DATA_LAB memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_DIMM_POWER_CURVE_DATA_LAB</rc>
-    <description>DIMM power curve data is lab data not MSL</description>
-    <ffdc>FFDC_DATA_1</ffdc>	
-    <ffdc>FFDC_DATA_2</ffdc>	
-    <ffdc>FFDC_DATA_3</ffdc>	
-    <ffdc>FFDC_DATA_4</ffdc>	
-    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
-</hwpError>
 
 <!-- Original Source for RC_MSS_DIMM_POWER_CURVE_DATA_INVALID memory_errors.xml -->
   <hwpError>
