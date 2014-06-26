@@ -104,10 +104,14 @@ if [ "${TARGET_DIR}" == "invalid directory" ]; then
 fi
 
 # Find root of repository.
-REPO_ROOT=`git rev-parse --show-toplevel`
-if [ -z $REPO_ROOT ]; then
-    echo "ERROR: Not in a git repo."
-    exit
+if [ -e "src/build/tools/hbDistribute" ]; then
+    REPO_ROOT="./"
+else
+    REPO_ROOT=`git rev-parse --show-toplevel`
+    if [ -z $REPO_ROOT ]; then
+        echo "ERROR: Not in a git repo."
+        exit
+    fi
 fi
 
 # Execute makefile for distribution.
