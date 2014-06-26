@@ -5987,8 +5987,7 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <!-- 64Mb -->
-            <default>0x0000000004000000</default>
+            <default>0x0000000000000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6102,8 +6101,7 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <!-- 64Mb -->
-            <default>0x0000000004000000</default>
+            <default>0x0000000000000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6145,8 +6143,7 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <!-- 64Mb -->
-            <default>0x0000000004000000</default>
+            <default>0x0000000000000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6168,7 +6165,7 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <default>0x0000000000000000</default>
+            <default>0x8000000080000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
