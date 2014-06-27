@@ -182,6 +182,7 @@
     <!-- End proc_abus_dmi_xbus_scominit.xml -->
 
     <attribute><id>ENABLED_THREADS</id></attribute>
+    <attribute><id>MSS_ZSERIES</id></attribute>
 
     <!-- Max/min config attributes -->
     <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
@@ -872,12 +873,32 @@
     <attribute><id>EFF_QUATERNARY_RANK_GROUP1</id></attribute>
     <attribute><id>EFF_QUATERNARY_RANK_GROUP2</id></attribute>
     <attribute><id>EFF_QUATERNARY_RANK_GROUP3</id></attribute>
+    <attribute><id>EFF_CKE_MAP</id></attribute>
+    <attribute><id>EFF_SPCKE_MAP</id></attribute>
     <attribute><id>EFF_DIMM_SPARE</id></attribute>
+<!-- TODO RTC 87603. These termination data EFF attributes have corresponding
+     VPD attributes that come from CVPD. When all HWPs are using the VPD
+     versions, these EFF versions can be deleted -->
+    <attribute><id>EFF_DRAM_RON</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
+    <attribute><id>EFF_ODT_RD</id></attribute>
+    <attribute><id>EFF_ODT_WR</id></attribute>
     <attribute><id>EFF_DRAM_WR_VREF</id></attribute>
+    <attribute><id>EFF_DRAM_WRDDR4_VREF</id></attribute>
     <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_ADDR</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CNTL</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CLK</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_SPCKE</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_DQ_DQS</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_ADDR</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CLK</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_SPCKE</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CNTL</id></attribute>
     <attribute><id>EFF_CEN_RD_VREF</id></attribute>
+<!-- TODO RTC 87603. Down to here -->
     <attribute><id>EFF_CEN_RD_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_DRAM_WR_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id></attribute>
@@ -954,9 +975,12 @@
     <attribute><id>MSS_POWER_INT2</id></attribute>
     <attribute><id>MSS_DIMM_MAXBANDWIDTH_GBS</id></attribute>
     <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id></attribute>
     <attribute><id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_MRS</id></attribute>
     <attribute><id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id></attribute>
     <attribute><id>MSS_DIMM_MAXPOWER</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXPOWER</id></attribute>
     <attribute><id>MSS_CHANNEL_PAIR_MAXPOWER</id></attribute>
     <attribute><id>MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
     <attribute><id>MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id></attribute>
@@ -966,6 +990,58 @@
     <attribute><id>MSS_SLEW_RATE_DATA</id></attribute>
     <attribute><id>MSS_SLEW_RATE_ADR</id></attribute>
     <attribute><id>MSS_ALLOW_SINGLE_PORT</id></attribute>
+<!-- TODO RTC 87603. These phase rotator EFF attributes have corresponding
+     VPD attributes that come from CVPD. When all HWPs are using the VPD
+     versions, these EFF versions can be deleted -->
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CLK_P0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CLK_P1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CLK_P0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CLK_P1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A4</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A5</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A6</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A7</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A8</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A9</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A10</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A11</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A12</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A13</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A14</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A15</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_BA0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_BA1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_BA2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_CASN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_RASN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_WEN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_PAR</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_ACTN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_ODT0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_ODT1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_ODT0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_ODT1</id></attribute>
+<!-- TODO RTC 87603. Down to here -->
     <attribute><id>MSS_DQS_SWIZZLE_TYPE</id></attribute>
     <attribute><id>MCBIST_PATTERN</id></attribute>
     <attribute><id>MCBIST_TEST_TYPE</id></attribute>
@@ -1021,6 +1097,17 @@
     <attribute><id>VREF_DQ_TRAIN_ENABLE</id></attribute>
     <attribute><id>TCCD_L</id></attribute>
     <attribute><id>EFF_WRITE_CRC</id></attribute>
+    <attribute><id>EFF_DRAM_2N_MODE_ENABLED</id></attribute>
+    <attribute><id>EFF_DRAM_ADDRESS_MIRRORING</id></attribute>
+    <attribute><id>EFF_RLO</id></attribute>
+    <attribute><id>EFF_WLO</id></attribute>
+    <attribute><id>EFF_GPO</id></attribute>
+    <attribute><id>EFF_CKE_PRI_MAP</id></attribute>
+    <attribute><id>EFF_CKE_PWR_MAP</id></attribute>
+    <attribute><id>EFF_RDTAG</id></attribute>
+    <attribute><id>EFF_TSYS_ADR</id></attribute>
+    <attribute><id>EFF_TSYS_DP18</id></attribute>
+    <attribute><id>EFF_DQ_WR_OFFSET</id></attribute>
     <attribute><id>EFF_BUFFER_LATENCY</id></attribute>
     <attribute><id>LRDIMM_MR12_REG</id></attribute>
     <attribute><id>LRDIMM_ADDITIONAL_CNTL_WORDS</id></attribute>
@@ -1169,6 +1256,8 @@
     <attribute><id>MSS_FREQ_OVERRIDE</id></attribute>
     <attribute><id>MEMB_TP_BNDY_PLL_SCAN_SELECT</id></attribute>
     <attribute><id>MSS_FREQ_BIAS_PERCENTAGE</id></attribute>
+    <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
+    <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
     <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
     <attribute><id>MSS_INIT_STATE</id></attribute>
