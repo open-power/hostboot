@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -240,6 +242,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         {
             serviceData.SetFlooding();
         }
+
+        // Create Initial error log
+        serviceGenerator.createInitialErrl( i_attentionType );
 
         int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
         // flush Cache to free up the memory

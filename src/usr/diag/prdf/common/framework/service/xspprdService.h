@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1999,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -174,6 +176,18 @@ public:
    */
 
   virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type, ServiceDataCollector & sdc)=0; // mp01 c
+
+    /**
+     * @brief Create initial error log for analyze( attn analysis) code flow.
+     * @param i_attnType attention type.
+     */
+    virtual void createInitialErrl( ATTENTION_TYPE i_attnType ) = 0;
+
+    /**
+     * @brief  Return error log associated with current analysis flow.
+     * @return error log handle.
+     */
+    virtual errlHndl_t getErrl() = 0;
 
 private:
 
