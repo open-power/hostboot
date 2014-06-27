@@ -51,7 +51,8 @@ use constant PAGESIZE           => 4096;     # 4KB
 
 ##  each target object takes up space for:
 ##      uint32_t iv_attrs + void *iv_pAttrNames + void *iv_pAttrValues
-use constant TARGETSIZE             =>  20;
+##      + void* iv_ppAssociations[4]
+use constant TARGETSIZE             =>  52;
 ##  Attribute id's are uint32_t enums
 use constant    ATTRID_SIZE         =>  4;
 ##  pointers to attribute values should be 8 bytes
