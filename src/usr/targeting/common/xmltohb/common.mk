@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,8 +63,8 @@ FAPI_ATTR_SOURCES += L2_L3_attributes.xml
 FAPI_ATTR_SOURCES += scratch_attributes.xml
 FAPI_ATTR_SOURCES += system_attributes.xml
 FAPI_ATTR_SOURCES += chip_attributes.xml
-FAPI_ATTR_SOURCES += dimm_spd_attributes.xml
-FAPI_ATTR_SOURCES += dimm_attributes.xml
+FAPI_ATTR_SOURCES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), lab_dimm_spd_attributes.xml, dimm_spd_attributes.xml)
+FAPI_ATTR_SOURCES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), lab_dimm_attributes.xml, dimm_attributes.xml)
 FAPI_ATTR_SOURCES += unit_attributes.xml
 FAPI_ATTR_SOURCES += freq_attributes.xml
 FAPI_ATTR_SOURCES += ei_bus_attributes.xml

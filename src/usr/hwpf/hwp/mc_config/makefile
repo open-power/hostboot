@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +25,9 @@
 ROOTPATH = ../../../../..
 
 MODULE = mc_config
+
+CFLAGS += $(if $(CONFIG_PALMETTO_VDDR), -D FAPI_MSSLABONLY -D FAPI_LRDIMM)
+EXTRAINCDIR += $(if $(CONFIG_PALMETTO_VDDR), ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit)
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer

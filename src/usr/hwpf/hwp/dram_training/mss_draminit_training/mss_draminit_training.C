@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -170,6 +172,8 @@
 #ifdef FAPI_LRDIMM
 #include <mss_lrdimm_ddr4_funcs.H>
 #endif
+
+#include <config.h>
 
 #ifndef FAPI_LRDIMM
 using namespace fapi;
@@ -474,6 +478,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
 
+#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
             // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
 	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
                  (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
@@ -483,9 +488,10 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		 rc = mss_mxd_training(i_target,port,0);
 		 if(rc) return rc;
             }
+#endif
 	}
 
-        if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) && 
+        if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) &&
 				(dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
         {
             FAPI_INF("Performing LRDIMM MB-DRAM training");
@@ -713,6 +719,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			       if(rc) return rc;
                             }
 			}
+#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
                         // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
                         else if ( (group == 0) && (cur_cal_step == 1)
                                   && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
@@ -721,6 +728,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
                            rc = mss_dram_write_leveling(i_target, port);
                            if(rc) return rc;
                         }
+#endif
 
 		        //Set the config register
 			if(port == 0)
@@ -847,7 +855,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	return rc;
     }
 
-    // If we hit either of these States, the error callout originates from Mike Jones Bad Bit code. 
+    // If we hit either of these States, the error callout originates from Mike Jones Bad Bit code.
     if (complete_status == MSS_INIT_CAL_STALL)
     {
 	FAPI_ERR( "+++ Partial/Full calibration stall. Check Debug trace. +++");
@@ -3417,7 +3425,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 					 rc.setEcmdError(l_ecmdRc);
 					 return rc;
 				}
-				
+
 				for (uint8_t n=0; n < 4; n++)	// check each nibble
 				{
 					uint16_t nmask = 0xF000 >> (4*n);
@@ -3456,7 +3464,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 				}
 
 				FAPI_DBG("\t\tdisable1_data=0x%04X", disable1_data);
-				
+
 				// set disable0(dq) reg
 				l_ecmdRc = data_buffer.setHalfWord(3, l_data);
 				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
@@ -3481,7 +3489,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 					FAPI_ERR("Error from fapiPutScom writing disable0 reg");
 					return rc;
 				}
-					
+
 				// set address for disable1(dqs) register
 				l_addr += l_disable1_addr_offset;
 				if (disable1_data != 0)
@@ -4063,7 +4071,7 @@ ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
                         			const uint8_t & DIMM = i_dimm;
                         			const uint8_t & RANK = i_rank;
 
-						FAPI_ERR("ATTR_VPD_DIMM_SPARE is invalid %u", 
+						FAPI_ERR("ATTR_VPD_DIMM_SPARE is invalid %u",
 							dimm_spare[i_port][i_dimm][i_rank]);
 						FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DIMM_SPARE_INPUT_ERROR);
 						return rc;
@@ -4158,7 +4166,7 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
 	uint8_t phy_lane;
 	uint8_t phy_block;
  	uint8_t data;
-	
+
     // get Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
     rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
     if (rc)

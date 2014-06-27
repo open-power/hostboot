@@ -1413,7 +1413,7 @@
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
-
+    <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
 </targetType>
 
 <targetType>

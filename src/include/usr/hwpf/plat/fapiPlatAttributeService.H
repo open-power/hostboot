@@ -1128,7 +1128,7 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
     fapi::platAttrSvc::fapiPlatGetProcPcieBarBaseAddr (PTARGET, VAL )
 #define ATTR_PROC_PCIE_BAR_SIZE_GETMACRO( ID, PTARGET, VAL )   \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetProcPcieBarSize (PTARGET, VAL ) 
+    fapi::platAttrSvc::fapiPlatGetProcPcieBarSize (PTARGET, VAL )
 
 //------------------------------------------------------------------------------
 //  MACROS to support enable attributes in p8_xip_customize_attributes.xml
@@ -1613,6 +1613,152 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
         fapi::FAPI_RC_SUCCESS :\
         fapi::platAttrSvc::getTargetingAttr\
            (PTARGET, TARGETING::ATTR_EFF_TSYS_DP18, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CLK_P0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CLK_P1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CLK_P0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CLK_P1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A2_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A3_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A4_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A5_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A6_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A7_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A8_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A9_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A10_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A11_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A12_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A13_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A14_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A15_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA2_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_CASN_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_RASN_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_WEN_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_PAR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_PAR, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M_ACTN_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_ACTN, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE2_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE3_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN2_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN3_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_ODT0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_ODT1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE2_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE3_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN2_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN3_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0, sizeof(VAL), &VAL)
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT1_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1, sizeof(VAL), &VAL)
+
 #endif // CONFIG_VPD_GETMACRO_USE_EFF_ATTR
 
 //------------------------------------------------------------------------------
@@ -1629,6 +1775,11 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
         fapi::FAPI_RC_SUCCESS :\
         fapi::platAttrSvc::getTargetingAttr\
            (PTARGET, TARGETING::ATTR_EFF_DRAM_ADDRESS_MIRRORING, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_ADDRESS_MIRRORING_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::getTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_ADDRESS_MIRRORING, sizeof(VAL), &VAL)
+
 #endif // CONFIG_VPD_GETMACRO_USE_EFF_ATTR
 
 //------------------------------------------------------------------------------
@@ -1923,57 +2074,166 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
         fapi::FAPI_RC_SUCCESS :\
         fapi::platAttrSvc::getTargetingAttr\
            (PTARGET, TARGETING::ATTR_EFF_CKE_PWR_MAP, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_ODT_WR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_ODT_WR, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_RON_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_RON, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_RTT_NOM_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_RTT_NOM, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_RTT_WR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_RTT_WR, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CKE_PRI_MAP_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CKE_PRI_MAP, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_DRV_IMP_CNTL_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_DRV_IMP_CNTL, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA0_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_DRV_IMP_CNTL_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_DRV_IMP_CNTL, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_DRV_IMP_ADDR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_DRV_IMP_ADDR, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CKE_PWR_MAP_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CKE_PWR_MAP, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_DRV_IMP_CLK_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_DRV_IMP_CLK, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_DRV_IMP_SPCKE_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_DRV_IMP_SPCKE, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_RD_VREF_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_RD_VREF, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_SLEW_RATE_CNTL_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_SLEW_RATE_CNTL, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_SLEW_RATE_ADDR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_SLEW_RATE_ADDR, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_SLEW_RATE_CLK_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_SLEW_RATE_CLK, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_SLEW_RATE_SPCKE_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_SLEW_RATE_SPCKE, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_WR_VREF_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_WR_VREF, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_WRDDR4_VREF_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_WRDDR4_VREF, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_RCV_IMP_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_RCV_IMP_DQ_DQS, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_ODT_RD_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_ODT_RD, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_DRV_IMP_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_DRV_IMP_DQ_DQS, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_RLO_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_RLO, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_WLO_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_WLO, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_GPO_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_GPO, sizeof(VAL), &VAL)
+
 #endif // CONFIG_VPD_GETMACRO_USE_EFF_ATTR
 
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Slope Intercept attributes
 //------------------------------------------------------------------------------
-#define ATTR_CDIMM_VPD_MASTER_POWER_SLOPE_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-    fapi::FAPI_RC_SUCCESS :\
-    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+#define ATTR_CDIMM_VPD_MASTER_POWER_SLOPE_GETMACRO(ID, PTARGET, VAL)  \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+    fapi::FAPI_RC_SUCCESS :                                           \
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData                  \
         (PTARGET, fapi::MASTER_POWER_SLOPE , VAL)
-#define ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-    fapi::FAPI_RC_SUCCESS :\
-    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+#define ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+    fapi::FAPI_RC_SUCCESS :                                           \
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData                  \
         (PTARGET, fapi::MASTER_POWER_INTERCEPT , VAL)
-#define ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-    fapi::FAPI_RC_SUCCESS :\
-    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+#define ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+    fapi::FAPI_RC_SUCCESS :                                           \
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData                  \
         (PTARGET, fapi::SUPPLIER_POWER_SLOPE , VAL)
-#define ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-    fapi::FAPI_RC_SUCCESS :\
-    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+#define ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+    fapi::FAPI_RC_SUCCESS :                                           \
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData                  \
         (PTARGET, fapi::SUPPLIER_POWER_INTERCEPT , VAL)
 
 //------------------------------------------------------------------------------
 //  MACRO to support BAD_DQ_BITMAP Attribute
 //------------------------------------------------------------------------------
-#define ATTR_BAD_DQ_BITMAP_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatDimmGetBadDqBitmap\
+#define ATTR_BAD_DQ_BITMAP_GETMACRO(ID, PTARGET, VAL)                 \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatDimmGetBadDqBitmap \
         (PTARGET, VAL)
-#define ATTR_BAD_DQ_BITMAP_SETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::setAttrActionsFunc(fapi::ID, PTARGET,\
-                                               sizeof(VAL), &VAL),\
+#define ATTR_BAD_DQ_BITMAP_SETMACRO(ID, PTARGET, VAL)                 \
+    fapi::AttrOverrideSync::setAttrActionsFunc(fapi::ID, PTARGET,     \
+                                               sizeof(VAL), &VAL),    \
     fapi::platAttrSvc::fapiPlatDimmSetBadDqBitmap(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
 //  MACRO to support VPD_DIMM_SPARE Attribute
 //------------------------------------------------------------------------------
 #ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
-#define ATTR_VPD_DIMM_SPARE_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatDimmGetSpareDram\
+#define ATTR_VPD_DIMM_SPARE_GETMACRO(ID, PTARGET, VAL)                \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatDimmGetSpareDram \
         (PTARGET, VAL)
 #else
-#define ATTR_VPD_DIMM_SPARE_GETMACRO(ID, PTARGET, VAL)\
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+#define ATTR_VPD_DIMM_SPARE_GETMACRO(ID, PTARGET, VAL)                \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
         fapi::FAPI_RC_SUCCESS :\
         fapi::platAttrSvc::getTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DIMM_SPARE, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DIMM_SPARE_SETMACRO(ID, PTARGET, VAL)                \
+        fapi::platAttrSvc::setTargetingAttr\
            (PTARGET, TARGETING::ATTR_EFF_DIMM_SPARE, sizeof(VAL), &VAL)
 #endif // CONFIG_VPD_GETMACRO_USE_EFF_ATTR
 
@@ -2157,6 +2417,12 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetVpdVersion\
         (PTARGET, VAL)
 
+#ifdef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
+#define ATTR_VPD_VERSION_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_MSS_EFF_VPD_VERSION, sizeof(VAL), &VAL)
+#endif
+
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Get Dram 2N Mode Enabled
 //------------------------------------------------------------------------------
@@ -2171,6 +2437,11 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
         fapi::FAPI_RC_SUCCESS :\
         fapi::platAttrSvc::getTargetingAttr\
            (PTARGET, TARGETING::ATTR_EFF_DRAM_2N_MODE_ENABLED, sizeof(VAL), &VAL)
+
+#define ATTR_VPD_DRAM_2N_MODE_ENABLED_SETMACRO(ID, PTARGET, VAL)\
+        fapi::platAttrSvc::setTargetingAttr\
+           (PTARGET, TARGETING::ATTR_EFF_DRAM_2N_MODE_ENABLED, sizeof(VAL), &VAL)
+
 #endif // CONFIG_VPD_GETMACRO_USE_EFF_ATTR
 
 //------------------------------------------------------------------------------

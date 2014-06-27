@@ -27,6 +27,8 @@ ROOTPATH = ../../../../..
 
 MODULE = dram_training
 
+CFLAGS += $(if $(CONFIG_PALMETTO_VDDR), -D FAPI_MSSLABONLY -D FAPI_LRDIMM)
+
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi

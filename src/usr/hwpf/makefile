@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -180,8 +182,8 @@ HWP_ATTR_XML_FILES += hwp/L2_L3_attributes.xml
 HWP_ATTR_XML_FILES += hwp/scratch_attributes.xml
 HWP_ATTR_XML_FILES += hwp/system_attributes.xml
 HWP_ATTR_XML_FILES += hwp/chip_attributes.xml
-HWP_ATTR_XML_FILES += hwp/dimm_spd_attributes.xml
-HWP_ATTR_XML_FILES += hwp/dimm_attributes.xml
+HWP_ATTR_XML_FILES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), hwp/lab_dimm_spd_attributes.xml, hwp/dimm_spd_attributes.xml)
+HWP_ATTR_XML_FILES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), hwp/lab_dimm_attributes.xml, hwp/dimm_attributes.xml)
 HWP_ATTR_XML_FILES += hwp/unit_attributes.xml
 HWP_ATTR_XML_FILES += hwp/freq_attributes.xml
 HWP_ATTR_XML_FILES += hwp/ei_bus_attributes.xml

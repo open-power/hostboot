@@ -45,7 +45,7 @@
 //  1.8    | kcook    |13-FEB-14| More FW updates.
 //  1.7    | kcook    |12-FEB-14| Updated HWP_ERROR per RAS review to be used with memory_mss_lrdimm_funcs.xml
 //  1.6    | bellows  |02-JAN-14| VPD attribute removal
-//  1.5    | kcook    |12/03/13 | Updated VPD attributes. 
+//  1.5    | kcook    |12/03/13 | Updated VPD attributes.
 //  1.4    | bellows  |09/16/13 | Hostboot compile update
 //  1.3    | bellows  |09/16/13 | Added ID tag.
 //  1.2    | kcook    |09/13/13 | Updated define FAPI_LRDIMM token.
@@ -266,7 +266,7 @@ fapi::ReturnCode mss_lrdimm_rcd_load( fapi::Target& i_target, uint32_t port_numb
           data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_7, 28,4);
 
           func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
-        
+
           //check for rc but not seeing where rc is set in this loop/if statment
           if(rc) return rc;
        }
@@ -477,7 +477,7 @@ fapi::ReturnCode mss_lrdimm_rcd_load( fapi::Target& i_target, uint32_t port_numb
              data_buff_rcd_word.insert(ext_funcs[dimm_number][i][1], 60,4);        // msb data
 
              func_rcd_control_word[dimm_number] = data_buff_rcd_word.getDoubleWord(0);
-            
+
             //not sure where the rc call is made
              if(rc) return rc;
            } // end if  has ranks
@@ -574,11 +574,11 @@ fapi::ReturnCode mss_lrdimm_mrs_load( fapi::Target& i_target , uint32_t i_port_n
 
         ecmdDataBufferBase mrs1(16);
         uint16_t MRS1 = 0;
-        uint32_t mrs_number;
+//        uint32_t mrs_number;
         uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
         uint8_t is_sim = 0;
         uint8_t dram_2n_mode = 0;
- 
+
         uint32_t rank_number;
         uint16_t num_ranks = 2;
         uint8_t func13_rcd_number_array_size;
@@ -689,7 +689,7 @@ fapi::ReturnCode mss_lrdimm_mrs_load( fapi::Target& i_target , uint32_t i_port_n
               data_buff_rcd_word.clearBit(0,64);
               data_buff_rcd_word.insertFromRight(&l_rcd_cntl_word_14, 56,4);
               func_rcd_control_word[dimm_num] = data_buff_rcd_word.getDoubleWord(0);
-            
+
               //not sure need this rc check
               if(rc) return rc;
            }
@@ -877,7 +877,7 @@ fapi::ReturnCode mss_lrdimm_mrs_load( fapi::Target& i_target , uint32_t i_port_n
            // Only corresponding CS to rank
            rc_num = rc_num | csn_8.setBit(0,8);
            rc_num = rc_num | csn_8.insert(lrdimm_cs8n[rank_number],(4*dimm_number),4,4);
-           mrs_number = 2;
+//           mrs_number = 2;
 
            // Copying the current MRS into address buffer matching the MRS_array order
            // Setting the bank address
@@ -1246,7 +1246,7 @@ fapi::ReturnCode  mss_execute_lrdimm_mb_dram_training(fapi::Target &i_target)
    return rc;
 }
 
-fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba, 
+fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
                                  uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE],
                                  uint32_t mss_freq, uint8_t eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE])
 {
@@ -1265,7 +1265,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
    uint8_t eff_ibm_type[PORT_SIZE][DIMM_SIZE];
    uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
 
-   do 
+   do
    {
       rc = fapiGetAssociatedDimms(i_target_mba, l_target_dimm_array);
       if(rc)
@@ -1273,7 +1273,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
           FAPI_ERR("Error retrieving assodiated dimms");
           break;
       }
-   
+
       for (uint8_t l_dimm_index = 0; l_dimm_index < l_target_dimm_array.size(); l_dimm_index += 1)
       {
          rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &l_target_dimm_array[l_dimm_index],
@@ -1290,7 +1290,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
              FAPI_ERR("Error retrieving ATTR_MBA_DIMM");
              break;
          }
-   
+
          // Setup SPD attributes
          rc = FAPI_ATTR_GET(ATTR_SPD_LR_ADDR_MIRRORING, &l_target_dimm_array[l_dimm_index],
              p_l_lr_spd_data->lr_addr_mirroring[l_cur_mba_port][l_cur_mba_dimm]);
@@ -1365,14 +1365,14 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
              p_l_lr_spd_data->lr_mr12_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm]);
          if(rc) break;
       }
-   
+
       if(rc)
       {
           FAPI_ERR("Error reading spd data from caller");
           break;
       }
-   
-   
+
+
       // Setup attributes
       for (int l_cur_mba_port = 0; l_cur_mba_port < PORT_SIZE; l_cur_mba_port += 1)
       {
@@ -1381,38 +1381,38 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
             if (cur_dimm_spd_valid_u8array[l_cur_mba_port][l_cur_mba_dimm] == MSS_EFF_VALID)
             {
                FAPI_INF("  !! LRDIMM Detected  -MW");
-   
-               ecmdDataBuffer rcd(64);
+
+               ecmdDataBufferBase rcd(64);
                rcd.flushTo0();
-   
+
                rcd.setDoubleWord(0,eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm]);
                FAPI_INF("rcd0_15=0x%016llX",rcd.getDoubleWord(0));
-   
+
                rcd.insert(p_l_lr_spd_data->lr_f0rc3_f0rc2[l_cur_mba_port][l_cur_mba_dimm],12,4,0);  //rcd3
                rcd.insert(p_l_lr_spd_data->lr_f0rc3_f0rc2[l_cur_mba_port][l_cur_mba_dimm],8,4,4);   //rcd2
-   
+
                rcd.insert(p_l_lr_spd_data->lr_f0rc5_f0rc4[l_cur_mba_port][l_cur_mba_dimm],20,4,0);  //rcd5
                rcd.insert(p_l_lr_spd_data->lr_f0rc5_f0rc4[l_cur_mba_port][l_cur_mba_dimm],16,4,4);  //rcd4
-   
+
                rcd.insert(p_l_lr_spd_data->lr_addr_mirroring[l_cur_mba_port][l_cur_mba_dimm],59,1,7); // address mirroring
-   
+
                eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm]=rcd.getDoubleWord(0);
-   
-               ecmdDataBuffer rcd_1(64);
+
+               ecmdDataBufferBase rcd_1(64);
                rcd_1.flushTo0();
                     // F[1]RC11,8
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc11_f1rc8[l_cur_mba_port][l_cur_mba_dimm],44,4,0);  //F[1]RC11 -> rcd11
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc11_f1rc8[l_cur_mba_port][l_cur_mba_dimm],32,4,4);  //F[1]RC8  -> rcd8
-   
+
                     // F[1]RC13,12
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc13_f1rc12[l_cur_mba_port][l_cur_mba_dimm],52,4,0);  //F[1]RC13 -> rcd13
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc13_f1rc12[l_cur_mba_port][l_cur_mba_dimm],48,4,4);  //F[1]RC12 -> rcd12
-   
+
                     // F[1]RC15,14
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc15_f1rc14[l_cur_mba_port][l_cur_mba_dimm],60,4,0);  //F[1]RC15 -> rcd15
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc15_f1rc14[l_cur_mba_port][l_cur_mba_dimm],56,4,4);  //F[1]RC14 -> rcd14
-   
-   
+
+
                if ( mss_freq > 1733 ) {
                     rcd_1.insert(p_l_lr_spd_data->lr_f3rc9_f3rc8_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm],36,4,0);       // F[3]RC9 -> rcd9
                     rcd_1.insert(p_l_lr_spd_data->lr_f3rc9_f3rc8_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm],40,4,4);       // F[3]RC8 -> rcd10
@@ -1424,9 +1424,9 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
                     rcd_1.insert(p_l_lr_spd_data->lr_f78rc11_f78rc10_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm],16,4,4);   // F[7,8]RC10 -> rcd4
                     rcd_1.insert(p_l_lr_spd_data->lr_f910rc11_f910rc10_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm],28,4,0); // F[9,10]RC11 -> rcd7
                     rcd_1.insert(p_l_lr_spd_data->lr_f910rc11_f910rc10_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm],24,4,4); // F[9,10]RC10 -> rcd6
-   
+
                     lrdimm_mr12_reg[l_cur_mba_port][l_cur_mba_dimm] = p_l_lr_spd_data->lr_mr12_for_1866_2133[l_cur_mba_port][l_cur_mba_dimm];
-   
+
                } else if ( mss_freq > 1200 )  {
                     rcd_1.insert(p_l_lr_spd_data->lr_f3rc9_f3rc8_for_1333_1600[l_cur_mba_port][l_cur_mba_dimm],36,4,0);       // F[3]RC9 -> rcd9
                     rcd_1.insert(p_l_lr_spd_data->lr_f3rc9_f3rc8_for_1333_1600[l_cur_mba_port][l_cur_mba_dimm],40,4,4);       // F[3]RC8 -> rcd10
@@ -1438,9 +1438,9 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
                     rcd_1.insert(p_l_lr_spd_data->lr_f78rc11_f78rc10_for_1333_1600[l_cur_mba_port][l_cur_mba_dimm],16,4,4);   // F[7,8]RC10 -> rcd4
                     rcd_1.insert(p_l_lr_spd_data->lr_f910rc11_f910rc10_for_1333_1600[l_cur_mba_port][l_cur_mba_dimm],28,4,0); // F[9,10]RC11 -> rcd7
                     rcd_1.insert(p_l_lr_spd_data->lr_f910rc11_f910rc10_for_1333_1600[l_cur_mba_port][l_cur_mba_dimm],24,4,4); // F[9,10]RC10 -> rcd6
-   
+
                     lrdimm_mr12_reg[l_cur_mba_port][l_cur_mba_dimm] = p_l_lr_spd_data->lr_mr12_for_1333_1600[l_cur_mba_port][l_cur_mba_dimm];
-   
+
                } else {
                     rcd_1.insert(p_l_lr_spd_data->lr_f3rc9_f3rc8_for_800_1066[l_cur_mba_port][l_cur_mba_dimm],36,4,0);       // F[3]RC9 -> rcd9
                     rcd_1.insert(p_l_lr_spd_data->lr_f3rc9_f3rc8_for_800_1066[l_cur_mba_port][l_cur_mba_dimm],40,4,4);       // F[3]RC8 -> rcd10
@@ -1452,20 +1452,20 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
                     rcd_1.insert(p_l_lr_spd_data->lr_f78rc11_f78rc10_for_800_1066[l_cur_mba_port][l_cur_mba_dimm],16,4,4);   // F[7,8]RC10 -> rcd4
                     rcd_1.insert(p_l_lr_spd_data->lr_f910rc11_f910rc10_for_800_1066[l_cur_mba_port][l_cur_mba_dimm],28,4,0); // F[9,10]RC11 -> rcd7
                     rcd_1.insert(p_l_lr_spd_data->lr_f910rc11_f910rc10_for_800_1066[l_cur_mba_port][l_cur_mba_dimm],24,4,4); // F[9,10]RC10 -> rcd6
-   
+
                     lrdimm_mr12_reg[l_cur_mba_port][l_cur_mba_dimm] = p_l_lr_spd_data->lr_mr12_for_800_1066[l_cur_mba_port][l_cur_mba_dimm];
                }
-   
+
                uint64_t rcd1 = rcd_1.getDoubleWord(0);
                lrdimm_additional_cntl_words[l_cur_mba_port][l_cur_mba_dimm] = rcd1;
-   
+
                if ( eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8 ) {
                   lrdimm_rank_mult_mode = 4; // Default for 8R is 4x mult mode
                }
-   
+
                    // ========================================================================================
-   
-   
+
+
                                 // FIX finding stack type properly.
                if ( eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1 ) {
                   //p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
@@ -1492,7 +1492,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
             } // end valid dimm
          } // end dimm loop
       } // end port loop
-   
+
       rc = FAPI_ATTR_SET(ATTR_EFF_IBM_TYPE, &i_target_mba,
               eff_ibm_type);
       rc = FAPI_ATTR_SET(ATTR_LRDIMM_MR12_REG, &i_target_mba,
@@ -1503,7 +1503,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
               lrdimm_rank_mult_mode);
       rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target_mba,
               eff_dimm_rcd_cntl_word_0_15);
-   
+
       if(rc)
       {
          FAPI_ERR("Error setting attributes");
@@ -1521,8 +1521,8 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt(const fapi::Target& i_target_mba, uint32
 //   uint8_t l_arr_offset;
    uint32_t l_mss_freq = 0;
    uint8_t l_dram_width_u8;
-   
-   uint32_t *odt_array;
+
+//   uint32_t *odt_array;
 
    // For dual drop, Set ODT_RD as 2rank (8R LRDIMM) or 4rank (4R LRDIMM)
    fapi::Target l_target_centaur;
@@ -1534,20 +1534,20 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt(const fapi::Target& i_target_mba, uint32
 
 //   uint8_t l_start=44, l_end=60;
    if ( (l_num_ranks_per_dimm_u8array[0][1] == 4) || (l_num_ranks_per_dimm_u8array[1][1] == 4) ) {
-      odt_array = var_array_p_array[0];
+//      odt_array = var_array_p_array[0];
       FAPI_INF("Setting LRDIMM ODT_RD as 4 rank dimm");
    } else if ( (l_num_ranks_per_dimm_u8array[0][1] == 8) || (l_num_ranks_per_dimm_u8array[1][1] == 8) ) {
       if ( l_mss_freq <= 1466 ) { // 1333Mbps
          if ( l_dram_width_u8 == 4 ) {
-            odt_array = var_array_p_array[1];
+//            odt_array = var_array_p_array[1];
          } else if ( l_dram_width_u8 == 8 ) {
-            odt_array = var_array_p_array[2];
+//            odt_array = var_array_p_array[2];
          }
       } else if ( l_mss_freq <= 1733 ) { // 1600 Mbps
          if ( l_dram_width_u8 == 4 ) {
-            odt_array = var_array_p_array[3];
+//            odt_array = var_array_p_array[3];
          } else if ( l_dram_width_u8 == 8 ) {
-            odt_array = var_array_p_array[4];
+//            odt_array = var_array_p_array[4];
          }
       }
       FAPI_INF("Setting LRDIMM ODT_RD as 2 logical rank dimm");
@@ -1580,7 +1580,7 @@ fapi::ReturnCode mss_lrdimm_term_atts(const fapi::Target& i_target_mba)
    uint8_t l_num_drops_per_port;
    uint8_t l_dram_density;
    uint8_t l_dram_width_u8;
-   
+
    uint8_t l_lrdimm_mr12_u8array[PORT_SIZE][DIMM_SIZE];
    uint8_t l_lrdimm_rank_mult_mode;
 
@@ -1710,7 +1710,7 @@ fapi::ReturnCode mss_lrdimm_term_atts(const fapi::Target& i_target_mba)
             if ( l_dram_density == 1 ) {
                l_rcd_cntl_word_15 = 5;    // A[15:14]; 4x multiplication, 1 Gbit DDR3 SDRAM
             } else if ( l_dram_density == 2 ) {
-               l_rcd_cntl_word_15 = 6;    // A[16:15]; 4x multiplication, 2 Gbit DDR3 SDRAM               
+               l_rcd_cntl_word_15 = 6;    // A[16:15]; 4x multiplication, 2 Gbit DDR3 SDRAM
             } else if ( l_dram_density == 4 ) {
                l_rcd_cntl_word_15 = 7;    // A[17:16]; 4x multiplication, 4 Gbit DDR3 SDRAM
             } else {
