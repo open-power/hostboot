@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,6 +56,7 @@
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
+#include <config.h>
 
 // DQ Data format in DIMM SPD
 const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
@@ -506,6 +509,7 @@ fapi::ReturnCode dimmBadDqBitmapSet(
         // 'OR' values in case of multiple reasons for reconfigure
         l_reconfigAttr |= fapi::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
 
+#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
         l_rc = FAPI_ATTR_SET(ATTR_RECONFIGURE_LOOP, NULL, l_reconfigAttr);
         if (l_rc)
         {
@@ -513,6 +517,7 @@ fapi::ReturnCode dimmBadDqBitmapSet(
                      "ATTR_RECONFIGURE_LOOP");
             return l_rc;
         }
+#endif
     }
 
     // DQ SPD Attribute
