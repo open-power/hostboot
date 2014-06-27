@@ -43,6 +43,7 @@
 #include <vector>
 #include <vfs/vfs.H>
 #include <fsi/fsiif.H>
+#include <config.h>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -935,13 +936,14 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
             break;
         }
 
+#ifndef CONFIG_DISABLE_HOSTBOOT_RUNTIME
         TRACFCOMP( g_trac_devtree, "---devtree reserved mem ---" );
         errhdl = bld_fdt_reserved_mem(dt, l_homerRegions, i_smallTree);
         if(errhdl)
         {
             break;
         }
-
+#endif
         TRACFCOMP( g_trac_devtree, "---devtree mem ---" );
         errhdl = bld_fdt_mem(dt, i_smallTree);
         if(errhdl)

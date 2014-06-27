@@ -1,0 +1,6 @@
+
+config DISABLE_HOSTBOOT_RUNTIME
+    default n
+    help
+        Disable the Hostboot Runtime (HBRT)
+
