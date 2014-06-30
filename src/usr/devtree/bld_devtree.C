@@ -601,7 +601,7 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 
         /* Add system model node */
         //TODO RTC:88056 - store model type in attributes?
-        i_dt->addPropertyString(rootNode, "model", "rhesus");
+        i_dt->addPropertyString(rootNode, "model", "palmetto");
     }
 
     return errhdl;
