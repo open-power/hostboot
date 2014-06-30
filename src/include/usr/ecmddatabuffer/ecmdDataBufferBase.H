@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,22 +22,22 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef ecmdDataBufferBase_H 
+#ifndef ecmdDataBufferBase_H
 #define ecmdDataBufferBase_H
 /* $Header: /gsa/rchgsa/projects/e/ecmd/.cvsroot/capi/ecmdDataBufferBase.H,v 1.2 2012/09/14 18:52:12 farrugia Exp $ */
 // Copyright **********************************************************
-//                                                                      
-// File ecmdDataBufferBase.H                                               
-//                                                                      
-// IBM Confidential                                                     
-// OCO Source Materials                                                 
-// 9400 Licensed Internal Code                                          
+//
+// File ecmdDataBufferBase.H
+//
+// IBM Confidential
+// OCO Source Materials
+// 9400 Licensed Internal Code
 // (C) COPYRIGHT IBM CORP. 2003
-//                                                                      
-// The source code for this program is not published or otherwise       
-// divested of its trade secrets, irrespective of what has been         
-// deposited with the U.S. Copyright Office.                             
-//                                                                      
+//
+// The source code for this program is not published or otherwise
+// divested of its trade secrets, irrespective of what has been
+// deposited with the U.S. Copyright Office.
+//
 // End Copyright ******************************************************
 
 /**
@@ -88,14 +90,14 @@ extern tracDesc_t g_etrc; /** Trace Descriptor **/
  #define ECMD_DBUF_UNDEFINED_FUNCTION            (ECMD_ERR_ECMD | 0x2031) ///< Function not included in this version of DataBuffer
  #define ECMD_DBUF_INVALID_ARGS                  (ECMD_ERR_ECMD | 0x2041) ///< Args provided to dataBuffer were invalid
  #define ECMD_DBUF_INVALID_DATA_FORMAT           (ECMD_ERR_ECMD | 0x2043) ///< String data didn't match expected input format
- #define ECMD_DBUF_FOPEN_FAIL                    (ECMD_ERR_ECMD | 0x2051) ///< File open on file for reading or writing the data buffer failed 
+ #define ECMD_DBUF_FOPEN_FAIL                    (ECMD_ERR_ECMD | 0x2051) ///< File open on file for reading or writing the data buffer failed
  #define ECMD_DBUF_FILE_FORMAT_MISMATCH          (ECMD_ERR_ECMD | 0x2053) ///< In readFile specified format not found in the data file
  #define ECMD_DBUF_DATANUMBER_NOT_FOUND          (ECMD_ERR_ECMD | 0x2055) ///< In readFileMultiple specified data number  not found in file
  #define ECMD_DBUF_FILE_OPERATION_FAIL           (ECMD_ERR_ECMD | 0x2057) ///< File operation failed
  #define ECMD_DBUF_NOT_OWNER                     (ECMD_ERR_ECMD | 0x2061) ///< Don't own this buffer so can't do this operation
  #define ECMD_DBUF_XSTATE_NOT_ENABLED            (ECMD_ERR_ECMD | 0x2063) ///< Xstate function called on a buffer that doesn't have xstates enabled
  #define ECMD_DBUF_MISMATCH                      (ECMD_ERR_ECMD | 0x2065) ///< There was a mismatch between a comparision operation in the buffer
- #define ECMD_DBUF_NULL_POINTER                  (ECMD_ERR_ECMD | 0x2067) ///< Null pointer passed 
+ #define ECMD_DBUF_NULL_POINTER                  (ECMD_ERR_ECMD | 0x2067) ///< Null pointer passed
 #endif
 
 //--------------------------------------------------------------------
@@ -192,7 +194,7 @@ extern tracDesc_t g_etrc; /** Trace Descriptor **/
 //----------------------------------------------------------------------
 
 //--------------------------------------------------------------------
-//  Defines                                                
+//  Defines
 //--------------------------------------------------------------------
 /**
  @brief This is the different write modes for writing databuffer into a file
@@ -243,7 +245,7 @@ public:
    * @post ecmdDataBufferBase is initialized and zero'd out
    */
   //STGC01056640 - remove implicit conversion ability. data = 08FF doesn't work
-  explicit ecmdDataBufferBase(uint32_t i_numBits); 
+  explicit ecmdDataBufferBase(uint32_t i_numBits);
 
   /**
    * @brief Copy Constructor
@@ -313,11 +315,11 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
-   * 
+   *
    * NOTE : Capacity will be adjusted to fit new size if neccesary
    * CAUTION : All data stored in buffer will be lost
    */
-  uint32_t  setDoubleWordLength(uint32_t i_newNumDoubleWords);   
+  uint32_t  setDoubleWordLength(uint32_t i_newNumDoubleWords);
 
   /**
    * @brief Reinitialize the Buffer to specified length
@@ -326,11 +328,11 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
-   * 
+   *
    * NOTE : Capacity will be adjusted to fit new size if neccesary
    * CAUTION : All data stored in buffer will be lost
    */
-  uint32_t  setWordLength(uint32_t i_newNumWords);   
+  uint32_t  setWordLength(uint32_t i_newNumWords);
 
   /**
    * @brief Reinitialize the Buffer to specified length
@@ -339,11 +341,11 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
-   * 
+   *
    * NOTE : Capacity will be adjusted to fit new size if neccesary
    * CAUTION : All data stored in buffer will be lost
    */
-  uint32_t  setHalfWordLength(uint32_t i_newNumHalfWords);   
+  uint32_t  setHalfWordLength(uint32_t i_newNumHalfWords);
 
   /**
    * @brief Reinitialize the Buffer to specified length
@@ -352,11 +354,11 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
-   * 
+   *
    * NOTE : Capacity will be adjusted to fit new size if neccesary
    * CAUTION : All data stored in buffer will be lost
    */
-  uint32_t  setByteLength(uint32_t i_newNumBytes);   
+  uint32_t  setByteLength(uint32_t i_newNumBytes);
 
   /**
    * @brief Reinitialize the Buffer to specified length
@@ -450,7 +452,7 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_BUFFER_OVERFLOW i_wordoffset is not contained in the size of this buffer
    *
-   * NOTE : If the buffer length != word boundary, when setting the last word 
+   * NOTE : If the buffer length != word boundary, when setting the last word
    *        data in i_value past the buffer length is cleared before being stored in the buffer
    */
   virtual uint32_t setWord(uint32_t i_wordoffset, uint32_t i_value);
@@ -469,7 +471,7 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_BUFFER_OVERFLOW i_byteoffset is not contained in the size of this buffer
    *
-   * NOTE : If the buffer length != byte boundary, when setting the last byte 
+   * NOTE : If the buffer length != byte boundary, when setting the last byte
    *        data in i_value past the buffer length is cleared before being stored in the buffer
    */
   virtual uint32_t setByte(uint32_t i_byteoffset, uint8_t i_value);
@@ -490,7 +492,7 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_BUFFER_OVERFLOW i_halfwordoffset is not contained in the size of this buffer
    *
-   * NOTE : If the buffer length != half word boundary, when setting the last half word 
+   * NOTE : If the buffer length != half word boundary, when setting the last half word
    *        data in i_value past the buffer length is cleared before being stored in the buffer
    */
   virtual uint32_t setHalfWord(uint32_t i_halfwordoffset, uint16_t i_value);
@@ -509,7 +511,7 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_BUFFER_OVERFLOW i_doublewordoffset is not contained in the size of this buffer
    *
-   * NOTE : If the buffer length != double word boundary, when setting the last double word 
+   * NOTE : If the buffer length != double word boundary, when setting the last double word
    *        data in i_value past the buffer length is cleared before being stored in the buffer
    */
   virtual uint32_t setDoubleWord(uint32_t i_doublewordoffset, uint64_t i_value);
@@ -584,7 +586,7 @@ public:
    * @param i_bit Start bit to test
    * @param i_len Number of consecutive bits to test
    * @retval Number of bits set in range
-   */      
+   */
   uint32_t getNumBitsSet(uint32_t i_bit, uint32_t i_len) const;
   //@}
 
@@ -812,7 +814,7 @@ public:
   uint32_t insertFromRight(uint16_t i_datain, uint32_t i_start, uint32_t i_len);
 
   /**
-   * @brief Copy part of a uint8_t array into this DataBuffer 
+   * @brief Copy part of a uint8_t array into this DataBuffer
    * @param i_data uint8_t array to copy into this DataBuffer - data is taken left aligned
    * @param i_targetStart Start bit to insert into
    * @param i_len Length of bits to insert
@@ -838,7 +840,7 @@ public:
   uint32_t insert(uint8_t i_datain, uint32_t i_targetStart, uint32_t i_len, uint32_t i_sourceStart = 0);
 
   /**
-   * @brief Copy a right aligned (decimal) uint8_t array into this DataBuffer 
+   * @brief Copy a right aligned (decimal) uint8_t array into this DataBuffer
    * @param i_data uint8_t array to copy into this DataBuffer - data is taken right aligned
    * @param i_start Start bit to insert into
    * @param i_len Length of bits to insert
@@ -852,7 +854,7 @@ public:
   uint32_t insertFromRight(const uint8_t * i_data, uint32_t i_start, uint32_t i_len);
 
   /**
-   * @brief Copy a right aligned (decimal) uint8_t array into this DataBuffer 
+   * @brief Copy a right aligned (decimal) uint8_t array into this DataBuffer
    * @param i_datain uint8_t array to copy into this DataBuffer - data is taken right aligned
    * @param i_start Start bit to insert into
    * @param i_len Length of bits to insert
@@ -937,11 +939,11 @@ public:
    * @retval ECMD_DBUF_INIT_FAIL unable to allocate databuffer
    * @retval ECMD_DBUF BUFFER_OVERFLOW request is out of range for this DataBuffer, output buffer is NOT checked for overflow
    */
-  uint32_t extractPreserve(uint32_t * o_data, uint32_t i_start, uint32_t i_len, uint32_t i_targetStart = 0) const; 
+  uint32_t extractPreserve(uint32_t * o_data, uint32_t i_start, uint32_t i_len, uint32_t i_targetStart = 0) const;
 
 #ifndef ECMD_PERLAPI
   /**
-   * @brief Copy data from this DataBuffer into a generic output buffer at a given offset, preserving the size and other data in the output buffer 
+   * @brief Copy data from this DataBuffer into a generic output buffer at a given offset, preserving the size and other data in the output buffer
    * @param o_data Array of data to write into, must be pre-allocated
    * @param i_start Start bit in this DataBuffer to begin the copy
    * @param i_len Length of consecutive bits to copy
@@ -954,7 +956,7 @@ public:
   uint32_t extractPreserve(uint16_t * o_data, uint32_t i_start, uint32_t i_len, uint32_t i_targetStart = 0) const;
 
   /**
-   * @brief Copy data from this DataBuffer into a generic output buffer at a given offset, preserving the size and other data in the output buffer 
+   * @brief Copy data from this DataBuffer into a generic output buffer at a given offset, preserving the size and other data in the output buffer
    * @param o_data Array of data to write into, must be pre-allocated
    * @param i_start Start bit in this DataBuffer to begin the copy
    * @param i_len Length of consecutive bits to copy
@@ -1144,7 +1146,7 @@ public:
   uint32_t setAnd(uint32_t i_data, uint32_t i_startbit, uint32_t i_len);
 
   /**
-   * @brief Copy entire contents of this ecmdDataBufferBase into o_copyBuffer 
+   * @brief Copy entire contents of this ecmdDataBufferBase into o_copyBuffer
    * @param o_copyBuffer DataBuffer to copy data into
    * @post copyBuffer is allocated, is an exact duplicate of this DataBuffer
    * @retval ECMD_DBUF_SUCCESS on success
@@ -1226,7 +1228,7 @@ public:
 
   /**
    * @brief Flatten all the object data into a uint8_t buffer
-   * @param o_data Byte buffer to write the flattened data to - should 
+   * @param o_data Byte buffer to write the flattened data to - should
    * @param i_len Number of bytes in the o_data buffer
    * @post o_data buffer has a flattened version of the DataBuffer - must be pre-allocated
    * Data format (all in network byte order):
@@ -1293,7 +1295,7 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_BUFFER_OVERFLOW operation requested out of range
    */
-  uint32_t evenParity(uint32_t i_start, uint32_t i_stop, uint32_t i_insertpos); 
+  uint32_t evenParity(uint32_t i_start, uint32_t i_stop, uint32_t i_insertpos);
   //@}
 
 
@@ -1304,27 +1306,27 @@ public:
    * @brief This function will take the passed in buffer, delete any current data it holds, and point its data var to that which is owned by the one being called with.  It will not have iv_UserOwned flag set, so it should not delete the buffer it points to, nor resize it, but it can alter the data.  The use of this function is for caching data for reads.
    * @param i_sharingBuffer input buffer
    * @retval ECMD_DBUF_SUCCESS on success
-   */   
+   */
   uint32_t shareBuffer(ecmdDataBufferBase* i_sharingBuffer);
 
   /**
-   * @brief Compress the data in the buffer 
+   * @brief Compress the data in the buffer
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval non-zero on failure
-   */   
+   */
   uint32_t compressBuffer(ecmdCompressionMode_t i_mode = ECMD_COMP_PRD);
 
   /**
-   * @brief Compress the data in the buffer 
+   * @brief Compress the data in the buffer
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval non-zero on failure
-   */   
+   */
   uint32_t uncompressBuffer();
 
   /**
-   * @brief Look to see if the compression header is at the start of the buffer 
+   * @brief Look to see if the compression header is at the start of the buffer
    * @retval true if compressed, false if not
-   */   
+   */
   bool isBufferCompressed();
 
 
@@ -1340,22 +1342,22 @@ public:
   /**
    * @brief Overload the == operator
    */
-  int operator == (const ecmdDataBufferBase& i_other) const;    
+  int operator == (const ecmdDataBufferBase& i_other) const;
 
   /**
    * @brief Overload the != operator
    */
-  int operator != (const ecmdDataBufferBase& i_other) const;    
+  int operator != (const ecmdDataBufferBase& i_other) const;
 
   /**
    * @brief Overload the & operator
    */
-  ecmdDataBufferBase operator & (const ecmdDataBufferBase& i_other) const;    
+  ecmdDataBufferBase operator & (const ecmdDataBufferBase& i_other) const;
 
   /**
    * @brief Overload the | operator
    */
-  ecmdDataBufferBase operator | (const ecmdDataBufferBase& i_other) const;    
+  ecmdDataBufferBase operator | (const ecmdDataBufferBase& i_other) const;
 
   //@}
 
@@ -1417,7 +1419,7 @@ class ecmdOptimizableDataBufferBase : public ecmdDataBufferBase {
       * @brief Constructor with bit length specified
       */
      ecmdOptimizableDataBufferBase(uint32_t i_numBits);
-     
+
      /**
       * @brief Destructor for ecmdOptimizableDataBufferBase class
       */

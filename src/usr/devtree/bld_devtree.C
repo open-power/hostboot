@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,19 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* $IBMCopyrightBlock:
- IBM Confidential
-
- OCO Source Materials
-
- 5733-907
-
- (C) Copyright IBM Corp. 2011
-
- The source code for this program is not published or other-
- wise divested of its trade secrets, irrespective of what has
- been deposited with the U.S. Copyright Office.
-$ */
 
 #include <trace/interface.H>
 #include <errl/errlentry.H>
