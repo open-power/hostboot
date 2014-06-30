@@ -690,8 +690,17 @@ sub checkCopyrightBlock( $$ )
         {
             # remove everything through [+]
             $_ =~ s/[^\]]*\]//;
-            # remove trailing comment string */
-            $_ =~ s/\*\///;
+            # remove closing comment string depening on language
+            if ( filetype($filename) eq "C")
+            {
+                # remove */
+                $_ =~ s/\*\///;
+            }
+            elsif ( filetype($filename)  eq "xml" )
+            {
+                # remove -->
+                $_ =~ s/\-\-\>//;
+            }
             # remove trailing and leading whitespace
             $_ =~ s/^\s+|\s+$//g;
             # add contributor to hash
@@ -702,8 +711,10 @@ sub checkCopyrightBlock( $$ )
     # Get file contributors from git log
     my %fileContributors = getFileContributors( $filename );
 
-    # Make sure no extra or missing contributors
-    if ( (keys %fileContributors) != (keys %blockFileContributors) )
+    # Make sure no extra or missing contributors by checking if the current
+    # contributor block matches the git log history
+    if ( (scalar keys %fileContributors) !=
+         (scalar keys %blockFileContributors) )
     {
         print STDOUT  "WARNING:  Extra or missing file contributors\n";
         return RC_BAD_CONTRIBUTORS_BLOCK;
@@ -713,7 +724,7 @@ sub checkCopyrightBlock( $$ )
     while ( my ($key, $value) = each(%fileContributors) )
     {
         # Block does not match file contributors
-        if ( $blockFileContributors{$key} != 1)
+        if ( !exists($blockFileContributors{$key}) )
         {
             print STDOUT  "WARNING:  File contributors section not correct\n";
             return RC_BAD_CONTRIBUTORS_BLOCK;
@@ -1205,6 +1216,12 @@ sub getFileContributors( $ )
 
     # Check file for all contributors
     my @gitAuthors = `git log --pretty="%aN <%aE>" -- $filename | sort | uniq`;
+    # Add current commiter, add < > around the email to follow the same format
+    # as the above array
+    my $curAuthorEmail = `git config user.email`;
+    chomp($curAuthorEmail);
+    my $curGitAuthor = "<".$curAuthorEmail.">";
+    push(@gitAuthors, $curGitAuthor);
     foreach my $contributor (@gitAuthors)
     {
         my $companyExists = 0;
