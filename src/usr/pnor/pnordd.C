@@ -445,14 +445,14 @@ void PnorDD::sfcInit( )
     TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit> iv_mode=0x%.8x", iv_mode );
     errlHndl_t  l_err  =   NULL;
 
+    mutex_lock(&cv_mutex);
+
     do {
 #ifdef CONFIG_SFC_IS_AST2400
         TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Nothing to do yet for AST2400" );
         break;
         //@todo RTC:106881 - Fix up to support erase/write later
 #endif //CONFIG_SFC_IS_AST2400
-
-        mutex_lock(&cv_mutex);
 
         if(!cv_sfcInitDone)
         {
