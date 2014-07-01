@@ -274,7 +274,9 @@ hbicore_test_EXTENDED_MODULES += ${hbicore_EXTENDED_MODULES}
 hbicore_test_EXTENDED_MODULES += ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES += ${hbicore_DATA_MODULES}
 hbicore_test_DATA_MODULES += testdata
+ifndef SKIP_BINARY_FILES
 hbicore_test_DATA_MODULES += test_signed_container
+endif
 
 hbirt_OBJECTS += ${RUNTIME_OBJECTS}
 hbirt_OBJECTS += ${BASE_OBJECTS}

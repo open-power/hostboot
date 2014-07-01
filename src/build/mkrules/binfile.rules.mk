@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +27,7 @@
 # Description:
 #     Rules for copying files from the binary file cache.
 
+ifndef SKIP_BINARY_FILES
 ifdef BINARY_FILES
 
 # Rules for BINARY_FILES directive.
@@ -64,4 +67,5 @@ $(foreach file,$(BINARY_FILES), \
 	  )) \
 )
 
+endif
 endif
