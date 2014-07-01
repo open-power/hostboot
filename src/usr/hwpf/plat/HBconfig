@@ -1,4 +1,4 @@
 config VPD_GETMACRO_USE_EFF_ATTR
-    default n
+    default y if !HAVE_MBVPD
     help
         Use EFF attribute in VPD GETMACRO

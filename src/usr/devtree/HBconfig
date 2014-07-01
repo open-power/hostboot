@@ -1,6 +1,6 @@
 
 config DISABLE_HOSTBOOT_RUNTIME
-    default n
+    default y if !HAVE_MBVPD
     help
         Disable the Hostboot Runtime (HBRT)
 
