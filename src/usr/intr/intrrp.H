@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -299,7 +301,8 @@ namespace INTR
 
             enum
             {
-                CPU_WAKEUP_SECONDS = 1,
+                // TODO: RTC 111512; change back to 1s
+                CPU_WAKEUP_SECONDS = 2,
                 CPU_WAKEUP_INTERVAL_COUNT = 10,
                 CPU_WAKEUP_INTERVAL_NS = (NS_PER_SEC * CPU_WAKEUP_SECONDS) /
                                          CPU_WAKEUP_INTERVAL_COUNT,
