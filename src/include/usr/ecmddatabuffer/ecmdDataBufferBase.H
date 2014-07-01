@@ -29,7 +29,7 @@
 //
 // File ecmdDataBufferBase.H
 //
-// IBM Confidential
+// 
 // OCO Source Materials
 // 9400 Licensed Internal Code
 // (C) COPYRIGHT IBM CORP. 2003

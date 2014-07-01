@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,7 +48,7 @@
 //
 // *!**************************************************************************
 // *!           All Rights Reserved -- Property of IBM
-// *!                   *** IBM Confidential ***
+// *!                   ***  ***
 // *!***************************************************************************
 // *! FILENAME    : /afs/apd.pok.ibm.com/func/vlsi/eclipz/c22/verif/p8dd1/system_pervasive/common/include/edi_regs.h
 //

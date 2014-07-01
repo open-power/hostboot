@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,7 @@
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2014
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 // *!  Licensed material - Program property of IBM
 // *!  Refer to copyright instructions form no. G120-2083
 // *! Created on Wed Jan  8 2014 at 07:56:26
