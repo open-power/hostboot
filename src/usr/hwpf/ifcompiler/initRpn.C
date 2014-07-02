@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -1312,7 +1314,7 @@ bool Rpn::resolve(SYMBOL_VAL_LIST & i_varlist)
 
 uint8_t Rpn::extract8(BINSEQ::const_iterator & bli)
 {
-    uint8_t val;
+    uint8_t val = 0;
     val += (uint8_t)(*bli++);
     return val;
 }
@@ -1322,7 +1324,7 @@ uint8_t Rpn::extract8(BINSEQ::const_iterator & bli)
 
 uint16_t Rpn::extract16(BINSEQ::const_iterator & bli)
 {
-    uint16_t val;
+    uint16_t val = 0;
     val = ((uint16_t)(*bli++)) << 8;
     val += (uint16_t)(*bli++);
     return val;
