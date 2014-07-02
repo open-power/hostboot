@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -473,7 +475,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         }
 
         node_data_t* node_data = reinterpret_cast<node_data_t*>(node_data_addr);
-        memset( node_data, 'A', sizeof(node_data) );
+        memset( node_data, 'A', sizeof(node_data_t) );
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
         uint64_t* _num_attr = NULL; //pointer to numAttr in struct
