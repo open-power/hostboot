@@ -247,6 +247,30 @@ class ErrDataService
                          TARGETING::TargetHandle_t i_dumpTrgt,
                          PfaData &io_pfaData );
 
+    /**
+     * @brief Handles unit checkstops.
+     * @param i_unitCsTarget chip(let) target.
+     */
+    void handleUnitCS( TARGETING::TargetHandle_t i_unitCsTarget );
+
+    /**
+     * @brief Handles Centaur checkstop.
+     * @param i_memTarget memory chip(let) target.
+     */
+    void handleChannelFail( TARGETING::TargetHandle_t i_memTarget );
+
+    /**
+     * @brief Handles Core checkstop.
+     * @param i_exTarget EX target.
+     */
+    void handleCoreUnitCS( TARGETING::TargetHandle_t i_exTarget );
+
+    /**
+     * @brief Handles NX checkstops.
+     * @param i_nxTarget NX target.
+     */
+    void handleNxUnitCS( TARGETING::TargetHandle_t i_nxTarget );
+
   private:
 
     bool loggingBufferFull;

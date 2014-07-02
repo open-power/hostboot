@@ -658,9 +658,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
                  prdGardErrType, pfaData, dumpTrgt );
 
-    HUID dumpId       = pfaData.msDumpInfo.id;
-    TYPE dumpTrgtType = getTargetType( dumpTrgt );
-
     //**************************************************************
     // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
@@ -741,86 +738,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
     else if ( !ReturnELog && !ForceTerminate && !i_sdc.Terminate() )
     {
-        // Check to see if we need to do a Proc Core dump
+        // Handle any unit checkstop conditions, if needed (i.e. runtime
+        // deconfiguration, dump/FFDC collection, etc.
         if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
         {
-            if ( dumpTrgtType == TYPE_PROC )
-            {
-                // NX Unit Checktop - runtime deconfig each accelerator
-                int32_t l_rc = SUCCESS;
-                SDC_MRU_LIST mrulist = sdc.GetMruList();
-                for ( SDC_MRU_LIST::iterator i = mrulist.begin();
-                      i < mrulist.end(); ++i )
-                {
-                    /* FIXME: need to add accelerators runtime deconfig
-                    TargetHandle_t accelTarget = i->callout.getMruValues();
-                    if ( TYPE_CORE == PlatServices::getTargetType(accelTarget) )
-                    {
-                        l_rc = PRDF_RUNTIME_DECONFIG( accelTarget );
-                        if ( SUCCESS != l_rc )
-                            break;
-                    }
-                    */
-                }
-
-                if ( SUCCESS == l_rc )
-                {
-                    l_rc = PRDF_HWUDUMP( iv_errl, CONTENT_HWNXLCL,
-                                         dumpId );
-                }
-            }
-            else if (dumpTrgtType == TYPE_MEMBUF ||
-                     dumpTrgtType == TYPE_MBA    ||
-                     dumpTrgtType == TYPE_MCS)
-            {
-                // Centaur Checkstop
-                TargetHandle_t centaurHandle = dumpTrgt;
-                if ( TYPE_MCS == dumpTrgtType )
-                {
-                    centaurHandle = getConnectedChild( dumpTrgt,
-                                                       TYPE_MEMBUF, 0 );
-                }
-                else if ( TYPE_MBA == dumpTrgtType )
-                {
-                    centaurHandle = getConnectedParent( dumpTrgt,
-                                                        TYPE_MEMBUF );
-                }
-
-                if (centaurHandle)
-                {
-                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle,
-                                                         iv_errl,
-                                                         false);
-                    if ( SUCCESS != l_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC"runtime deconfig failed 0x%08x",
-                                  dumpId );
-                    }
-                    // No unit dump for Centaur checkstop
-                }
-            }
-            else
-            {
-                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt, iv_errl,
-                                                      true);
-                if ( SUCCESS == l_rc )
-                {
-                    // Call Dump for Proc Core CS
-                    if ( TYPE_EX == dumpTrgtType )
-                    {
-                        l_rc = PRDF_HWUDUMP( iv_errl,
-                                             CONTENT_SINGLE_CORE_CHECKSTOP,
-                                             dumpId );
-                    }
-                    // FIXME: Will need to add Centaur DMI channel checkstop
-                    //        support later.
-                    else
-                    {
-                        PRDF_ERR( PRDF_FUNC"Unsupported dump for target 0x%08x",
-                                  dumpId );
-                    }
-                }
-            }
+            handleUnitCS( dumpTrgt );
         }
 
         // Commit the Error log

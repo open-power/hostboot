@@ -30,11 +30,14 @@
 #include <prdfRasServices.H>
 #include <prdfMfgSync.H>
 #include <prdfErrlUtil.H>
+#include <prdfPlatServices.H>
 
 using namespace TARGETING;
 
 namespace PRDF
 {
+
+using namespace PlatServices;
 
 void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
                                 const PfaData & i_pfaData )
@@ -101,6 +104,34 @@ bool ErrDataService::checkForceTerm( ServiceDataCollector & i_sdc,
 {
     //Return false from HB
     return false;
+}
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::handleUnitCS( TargetHandle_t i_unitCsTarget )
+{
+    // No-op in Hostboot
+}
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::handleChannelFail( TargetHandle_t i_memTarget )
+{
+    // No-op in Hostboot
+}
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::handleCoreUnitCS( TargetHandle_t i_exTarget )
+{
+    // No-op in Hostboot
+}
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::handleNxUnitCS( TargetHandle_t i_nxTarget )
+{
+    // No-op in Hostboot
 }
 
 } // end namespace PRDF
