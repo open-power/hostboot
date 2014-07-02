@@ -153,7 +153,6 @@ HWP_ERROR_XML_FILES += hwp/bus_training/io_power_down_lanes_errors.xml
 HWP_ERROR_XML_FILES += hwp/bus_training/io_read_erepair_errors.xml
 HWP_ERROR_XML_FILES += hwp/bus_training/io_fir_isolation_errors.xml
 HWP_ERROR_XML_FILES += hwp/bus_training/io_restore_erepair_errors.xml
-HWP_ERROR_XML_FILES += hwp/bus_training/io_cleanup_errors.xml
 HWP_ERROR_XML_FILES += hwp/proc_pibmem_registers.xml
 HWP_ERROR_XML_FILES += hwp/proc_clock_control_registers.xml
 HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml
