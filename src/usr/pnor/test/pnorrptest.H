@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -238,7 +240,7 @@ class PnorRpTest : public CxxTest::TestSuite
         }
 
         // read the same data through the RP, ECC errors should be corrected
-        for( size_t i = i; i < PAGESIZE/sizeof(uint64_t); i++ )
+        for( size_t i = 0; i < PAGESIZE/sizeof(uint64_t); i++ )
         {
             total++;
             if( dataptr[i] != FIRST_VAL+i )
