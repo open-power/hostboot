@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -204,7 +206,7 @@ ${OBJ_RULE_DIR}/%.prf.err.C \
 ${OBJ_RULE_DIR}/%.prf.reg.C : %.rule ${PRDR_CMP_PATH}
 	${PRD_OUT_MAKE}
 	$(C1)cat $< | ${SRC_USR_DIR}/common/framework/rule/prdrpp \
-			 ${PRDRPP_SEARCHDIRS} | $(HOST_PREFIX)jail ${PRDR_CMP_PATH} $@
+			 ${PRDRPP_SEARCHDIRS} | $(JAILCMD) ${PRDR_CMP_PATH} $@
 
 # Copy all .prf files from ${OBJ_RULE_DIR} to ${IMGDIR}
 ${PRF_IMG_PATHS}: ${IMGDIR}/% : ${OBJ_RULE_DIR}/%

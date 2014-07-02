@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +30,8 @@
 CROSS_PREFIX ?= powerpc64-unknown-linux-gnu-
 HOST_PREFIX ?= x86_64-pc-linux-gnu-
 
+JAILCMD ?= $(HOST_PREFIX)jail
+
 CC_RAW = $(CROSS_PREFIX)gcc -std=c99
 CXX_RAW = $(CROSS_PREFIX)g++
 CC = $(CCACHE) $(CC_RAW)
@@ -38,9 +42,9 @@ OBJDUMP = $(CROSS_PREFIX)objdump
 GCOV = $(CROSS_PREFIX)gcov
 
 CUSTOM_LINKER_EXE = $(ROOTPATH)/src/build/linker/linker
-CUSTOM_LINKER = $(HOST_PREFIX)jail $(CUSTOM_LINKER_EXE)
+CUSTOM_LINKER = $(JAILCMD) $(CUSTOM_LINKER_EXE)
 
 TRACE_HASHER_EXE = $(ROOTPATH)/src/build/trace/tracehash
 #TRACE_HASHER = $(TRACE_HASHER_EXE)
-TRACE_HASHER = $(HOST_PREFIX)jail $(TRACE_HASHER_EXE)
+TRACE_HASHER = $(JAILCMD) $(TRACE_HASHER_EXE)
 

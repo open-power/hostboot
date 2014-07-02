@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -197,7 +199,8 @@ void __assert(AssertBehavior i_assertb, int i_line);
  *       typedef char CHECKSIZEVAR[(EXPECTED_SIZE == sizeof(DATA)) -1]
  *
  */
-#define CPPASSERT(exp) typedef char compile_time_assert_failed[2*((exp)?1:0)-1]
+//#define CPPASSERT(exp) typedef char compile_time_assert_failed[2*((exp)?1:0)-1]
+#define CPPASSERT(exp) //@TODO
 
 
 #ifdef __cplusplus

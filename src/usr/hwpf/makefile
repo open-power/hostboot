@@ -442,7 +442,7 @@ $${GENDIR}/$(basename $(notdir $1)).if :\
 	$${GENDIR}/$${IF_CMP_COMPILER_TARGET} \
 	$${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
 	$${HWP_IF_DEFINE_DIR} $1
-	    $$(HOST_PREFIX)jail \
+	    $$(JAILCMD) \
 	        $$< -init $1 -outdir $$(dir $$@) \
                     -attr $${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
                     -I $${HWP_IF_DEFINE_DIR}

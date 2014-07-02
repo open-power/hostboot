@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,10 +27,19 @@ ROOTPATH = ../../..
 GEN_PASS_BODY += tracehash
 CLEAN_TARGETS += tracehash tracehash.o
 
+ifdef HOST_BINUTILS_DIR
+BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
+BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a \
+	      $(HOST_BINUTILS_DIR)/libiberty/libiberty.a -lz
+else
+BFD_LDFLAGS = -lbfd
+endif
+
 include $(ROOTPATH)/config.mk
 
 tracehash: tracehash.c
 	$(C2) "    CC         $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g -c $< -o $@.o
-	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -O3 -g $@.o -o $@ -lbfd
+	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g -c $< -o $@.o \
+					 $(BFD_CFLAGS)
+	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -O3 -g $@.o -o $@ $(BFD_LDFLAGS)
 	$(C1)rm $@.o

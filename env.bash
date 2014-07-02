@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,10 +28,15 @@ if [ -e ./customrc ]; then
     source ./customrc
 fi
 
-export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20130412}
-export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
-export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
-export PATH=${FAKEROOT}/wrappers:${PATH}
+if [ -n "${OPENPOWER_BUILD}" ]; then
+    export SKIP_BINARY_FILES=1
+    export JAILCMD=""
+else
+    export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20130412}
+    export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
+    export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
+    export PATH=${FAKEROOT}/wrappers:${PATH}
+fi
 
 export PATH=${PATH}:`pwd`/src/build/trace
 export PATH=${PATH}:`pwd`/src/build/tools
@@ -46,6 +53,8 @@ fi
 export DEFAULT_MACHINE=MURANO
 
 ##  run setupgithooks.pl
+if [ -e .git/hooks ]; then
 if [ -e $TOOLSDIR/setupgithooks.sh ]; then
     $TOOLSDIR/setupgithooks.sh
+fi
 fi

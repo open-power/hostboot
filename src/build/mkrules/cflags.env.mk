@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +39,8 @@ CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
           -Wall -Werror -mtraceback=no -pipe \
 	  -ffunction-sections -fdata-sections
 ASMFLAGS += $(COMMONFLAGS) -mcpu=power7
-CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall
+CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall \
+	    -fuse-cxa-atexit
 LDFLAGS += --nostdlib --sort-common $(COMMONFLAGS)
 
 INCFLAGS = $(addprefix -I, $(INCDIR) )

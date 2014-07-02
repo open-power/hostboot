@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +30,7 @@
 AFSCELL := austin
 BEAMVER = beam-3.6.1
 BEAMPATH = /afs/${AFSCELL}/projects/esw/beam/$(BEAMVER)
-BEAMCMD = $(HOST_PREFIX)jail $(BEAMPATH)/bin/beam_compile
+BEAMCMD = $(JAILCMD) $(BEAMPATH)/bin/beam_compile
 
 ifdef MODULE
 BEAMDIR = $(ROOTPATH)/obj/beam/$(MODULE)

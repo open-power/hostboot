@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +24,14 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
+ifdef HOST_BINUTILS_DIR
+BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
+BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a \
+	      $(HOST_BINUTILS_DIR)/libiberty/libiberty.a -lz
+else
+BFD_LDFLAGS = -lbfd -liberty -lz
+endif
+
 CODE_PASS_POST += linker gensyms genlist
 CLEAN_TARGETS += linker linker.o gensyms gensyms.o genlist genlist.o
 
@@ -29,9 +39,10 @@ include $(ROOTPATH)/config.mk
 
 linker: linker.C
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.C -o linker.o -c
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.C -o linker.o -c \
+					 $(BFD_CFLAGS)
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.o -o linker \
-				         -lbfd -liberty -lz
+				         $(BFD_LDFLAGS)
 	$(C1)rm linker.o
 
 gensyms: gensyms.C
