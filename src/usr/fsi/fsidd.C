@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -501,13 +503,16 @@ errlHndl_t FsiDD::initializeHardware()
         } target_chipInfo_t ;
 
         // list of ports off of local MFSI
-        target_chipInfo_t local_mfsi[MAX_SLAVE_PORTS] = {};
+        target_chipInfo_t local_mfsi[MAX_SLAVE_PORTS];// = {};
+        memset(local_mfsi, '\0', sizeof(local_mfsi)); // TODO: GCC ICE.
 
         // list of possible ports off of local cMFSI
-        target_chipInfo_t local_cmfsi[MAX_SLAVE_PORTS] = {};
+        target_chipInfo_t local_cmfsi[MAX_SLAVE_PORTS]; // = {}
+        memset(local_cmfsi, '\0', sizeof(local_cmfsi)); // TODO: GCC ICE.
 
         // array of possible ports to initialize : [mfsi port][cmfsi port]
-        target_chipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS] = {};
+        target_chipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS]; // = {};
+        memset(remote_cmfsi, '\0', sizeof(remote_cmfsi)); // TODO: GCC ICE.
 
         FsiChipInfo_t info;
 
