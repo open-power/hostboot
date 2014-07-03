@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,6 +35,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+
+#ifndef be64toh
+    #include <byteswap.h>
+    #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #define be64toh(x) __bswap_64(x)
+    #else
+        #define be64toh(x) (x)
+    #endif
+#endif
+
 
 using namespace std;
 

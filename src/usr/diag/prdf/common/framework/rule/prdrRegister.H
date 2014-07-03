@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,6 +47,14 @@
 #ifdef __HOSTBOOT_MODULE
   #include <endian.h>
   # define htonll(x) htobe64(x)
+  #ifndef htobe64
+    #include <byteswap.h>
+    #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #define htobe64(x) __bswap_64(x)
+    #else
+        #define htobe64(x) (x)
+    #endif
+  #endif
 #else
   #include <utilendian.H>
 #endif

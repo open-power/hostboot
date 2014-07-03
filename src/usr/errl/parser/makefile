@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +45,11 @@ ERRLPARSE_TARGETS = \
 	${GENDIR}/plugins/hbfwUdIds.H \
     ${GENDIR}/plugins/makefile
 
-CC=$(HOST_PREFIX)g++ -m32 -static
+ifndef OPENPOWER_BUILD
+    ERRL_LINK_STATIC = -static
+endif
+
+CC=$(HOST_PREFIX)g++ -m32 $(ERRL_LINK_STATIC)
 CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr -I ${GENDIR}
 
 all: GEN_PASS CODE_PASS
