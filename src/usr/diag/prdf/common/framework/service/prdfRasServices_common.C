@@ -435,9 +435,17 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     bool SecondLevel = false;
     uint32_t SrcWord7 = 0;
     uint32_t SrcWord9 = 0;
+
+    // Should not gard hardware if there is a hardware callout at LOW priority
+    // and a symbolic FRU indicating a possibility of a software error at MED or
+    // HIGH priority.
+    bool sappSwNoGardReq = false, sappHwNoGardReq = false;
+
     fspmrulist = sdc.GetMruList();
     int32_t calloutsPlusDimms = fspmrulist.size();
-    for (SDC_MRU_LIST::iterator i = fspmrulist.begin(); i < fspmrulist.end(); ++i)
+
+    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin(); i < fspmrulist.end();
+          ++i)
     {
         thiscallout = i->callout;
         if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
@@ -446,6 +454,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                  (EPUB_PRC_PHYP_CODE == thiscallout.flatten()) )
             {
                 SW = true;
+
+                if ( MRU_LOW != i->priority )
+                {
+                    sappSwNoGardReq = true;
+                }
+
                 if ( MRU_MED == i->priority )
                 {
                     SW_High = true;
@@ -454,6 +468,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             else if ( EPUB_PRC_LVL_SUPP == thiscallout.flatten())
             {
                 SecondLevel = true;
+
+                if ( MRU_LOW != i->priority )
+                {
+                    sappSwNoGardReq = true;
+                }
             }
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
@@ -467,12 +486,22 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             calloutsPlusDimms = calloutsPlusDimms + partCount -1;
             HW = true; //hardware callout
 
+            if ( MRU_LOW == i->priority )
+            {
+                sappHwNoGardReq = true;
+            }
         }
         else // PRDcalloutData::TYPE_TARGET
         {
             HW = true; // Hardware callout
-        }
 
+            // Determines if all the hardware callouts have low priority.
+
+            if ( MRU_LOW == i->priority )
+            {
+                sappHwNoGardReq = true;
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////
@@ -564,14 +593,34 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         PRDF_RECONFIG_LOOP(deconfigState);
     }
 
+    //**********************************************************
+    // Systems where Hypervisor is not PHYP, we should not gard
+    // a hardware resource until we are very sure that it is a
+    // hardware issue. Idea is to prevent a loss of hardware
+    // resource in cases where software could have been
+    // a cause as well.
+    //**********************************************************
+
+    if ( isSapphireRunning() && sappSwNoGardReq && sappHwNoGardReq )
+    {
+        // It is a Sapphire based system.
+        // Hardware callout is of low priority but SW callout priority
+        // is High/Medium.
+        gardErrType = HWAS::GARD_NULL;
+        prdGardErrType = GardAction::NoGard;
+    }
+
     fspmrulist = sdc.GetMruList();
+
     for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
           i < fspmrulist.end(); ++i )
     {
         thispriority = (*i).priority;
         thiscallout = (*i).callout;
+
         if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
+
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
                                 deconfigState,

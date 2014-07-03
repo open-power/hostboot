@@ -135,6 +135,12 @@ bool atRuntime();
  */
 bool isSmpCoherent();
 
+/**
+ * @brief   Checks if system is running in a Sapphire mode.
+ * @return  True if Sapphire is in running state false otherwise.
+ */
+ bool isSapphireRunning( );
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

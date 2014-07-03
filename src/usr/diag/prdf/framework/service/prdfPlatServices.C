@@ -77,6 +77,11 @@ bool isMemoryPreservingIpl()
     return l_isMemPreservingIpl;
 }
 
+bool isSapphireRunning( )
+{
+    return false;
+}
+
 //------------------------------------------------------------------------------
 
 void getCurrentTime( Timer & o_timer )
