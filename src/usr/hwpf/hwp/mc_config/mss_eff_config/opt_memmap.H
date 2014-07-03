@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.H,v 1.9 2014-06-19 14:06:35 dcrowell Exp $
+// $Id: opt_memmap.H,v 1.9 2014/06/19 14:06:35 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.H,v $      */
 
 
@@ -30,7 +30,7 @@
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 // *|
 // *! TITLE       : opt_memmap.H
 // *! DESCRIPTION : Layout non-mirrored/mirrored address map (FAPI)
