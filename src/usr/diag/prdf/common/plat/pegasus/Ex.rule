@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -844,6 +846,41 @@ chip Ex
         capture     group PllFIRs;
     };
 
+    ############################################################################
+    # Core registers for FFDC
+    ############################################################################
+
+    register EX_FREQ_CTRL_REG
+    {
+        name        "EX.TP_PCB_SLAVE_PM_INST.FREQ_CTRL_REG";
+        scomaddr    0x100F0151;
+        capture     group default;
+        access      read_only;
+    };
+
+    register EX_DPLL_STATUS_REG
+    {
+        name        "EX.TP_PCB_SLAVE_PM_INST.PCBS_DPLL_STAT_REG";
+        scomaddr    0x100F0161;
+        capture     group default;
+        access      read_only;
+    };
+
+    register EX_POWER_MGMT_STATUS_REG
+    {
+        name        "EX.TP_PCB_SLAVE_PM_INST.PCBS_PWR_MGMT_STAT_REG";
+        scomaddr    0x100F0153;
+        capture     group default;
+        access      read_only;
+    };
+
+    register EX_POWER_MGMT_CTRL_REG
+    {
+        name        "EX.TP_PCB_SLAVE_PM_INST.PCBS_PWR_MGMT_CTRL_REG";
+        scomaddr    0x100F0159;
+        capture     group default;
+        access      read_only;
+    };
 
 };
 
@@ -1018,7 +1055,6 @@ rule CoreFir
     RECOVERABLE: COREFIRWOF & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-#Based on RAS SpreadSheet p8dd1_mss_FFDC_72.xls
 group gCoreFir filter singlebit
 {
     /** COREFIR[0]
@@ -1297,7 +1333,7 @@ group gCoreFir filter singlebit
     /** COREFIR[54]
      *  AMBI_HANG_DETECT: Hang detected unknown source
      */
-    (CoreFir, bit(54)) ? calloutExAndSecLvlThr1NoGard;
+    (CoreFir, bit(54)) ? SelfHighThr1;
 
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
@@ -2050,14 +2086,6 @@ actionclass calloutExThr5pHr
 actionclass calloutExThr32pDay
 {
     SelfMedThr32PerDay;
-};
-
-/** callout Ex,Sec Level on first instance ,initiate core dump,
- *  garding not done */
-actionclass calloutExAndSecLvlThr1NoGard
-{
-    calloutSelfAndLevel2MedThr1;
-    gard(NoGard);
 };
 
 actionclass calloutExLowSecLvlThr1MedDumpSh
