@@ -56,22 +56,23 @@ TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW); //2K
  * Eyecatcher strings for PNOR TOC entries
  */
 const char* cv_EYECATCHER[] = {
-    "part",   /**< PNOR::TOC           : Table of Contents */
-    "HBI",    /**< PNOR::HB_EXT_CODE   : Hostboot Extended Image */
-    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
-    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
-    "SBEC",   /**< PNOR::CENTAUR_SBE   : Centaur Self-Boot Engine image */
-    "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
-    "WINK",   /**< PNOR::WINK          : Sleep Winkle Reference image */
-    "PAYLOAD",/**< PNOR::PAYLOAD       : HAL/OPAL */
-    "HBRT",   /**< PNOR::HB_RUNTIME    : Hostboot Runtime (for Sapphire) */
-    "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
-    "GUARD",  /**< PNOR::GUARD_DATA    : Hostboot Data */
-    "HBEL",   /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */
-    "DJVPD",  /**< PNOR::DIMM_JEDEC_VPD: Dimm JEDEC VPD */
-    "MVPD",   /**< PNOR::MODULE_VPD    : Module VPD */
-    "CVPD",   /**< PNOR::CENTAUR_VPD   : Centaur VPD */
-    "TEST",   /**< PNOR::TEST          : Test space for PNOR*/
+    "part",     /**< PNOR::TOC            : Table of Contents */
+    "HBI",      /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
+    "GLOBAL",   /**< PNOR::GLOBAL_DATA    : Global Data */
+    "HBB",      /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
+    "SBEC",     /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
+    "SBE",      /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
+    "WINK",     /**< PNOR::WINK           : Sleep Winkle Reference image */
+    "PAYLOAD",  /**< PNOR::PAYLOAD        : HAL/OPAL */
+    "HBRT",     /**< PNOR::HB_RUNTIME     : Hostboot Runtime (for Sapphire) */
+    "HBD",      /**< PNOR::HB_DATA        : Hostboot Data */
+    "GUARD",    /**< PNOR::GUARD_DATA     : Hostboot Data */
+    "HBEL",     /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
+    "DJVPD",    /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
+    "MVPD",     /**< PNOR::MODULE_VPD     : Module VPD */
+    "CVPD",     /**< PNOR::CENTAUR_VPD    : Centaur VPD */
+    "ATTROVER", /**< PNOR::ATTR_OVER      : Attribute Override */
+    "TEST",     /**< PNOR::TEST           : Test space for PNOR*/
 
     //Not currently used
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
@@ -810,7 +811,6 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
                                         data_to_read,
                                         read_size,
                                         DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
-
         if( l_errhdl )
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
@@ -829,7 +829,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
             // create an error if we couldn't correct things
             if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
             {
-                TRACFCOMP( g_trac_pnor, "PnorRP::readFromDevice> Uncorrectable ECC error : chip=%d, offset=0x%.X", i_chip, i_offset );
+                TRACFCOMP( g_trac_pnor, "PnorRP::readFromDevice> Uncorrectable ECC error : chip=%d,offset=0x%.X", i_chip, i_offset );
 
                 // Need to shutdown here instead of creating an error log
                 //  because the bad page could be critical to the regular

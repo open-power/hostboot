@@ -53,7 +53,8 @@ enum SectionId
     HB_ERRLOGS,     /**< Hostboot Error log Repository */
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
-    CENTAUR_VPD,     /**< Centaur VPD */
+    CENTAUR_VPD,    /**< Centaur VPD */
+    ATTR_OVER,      /**< Attribute Override */
     TEST,           /**< Scratch space for PNOR test cases */
     NUM_SECTIONS,   /**< Number of defined sections */
 
@@ -76,9 +77,6 @@ struct SectionInfo_t
     bool sha512Version; /**< Version Checking */
     bool sha512perEC; /**< Version Checking perEC */
 };
-
-
-
 
 /**
  * @brief  Return the size and address of a given section of PNOR data
@@ -108,6 +106,13 @@ bool usingL3Cache();
  * @return errlHndl_t  Error log if validation failed
  */
 errlHndl_t validateAltMaster( void );
+
+/** @brief PNOR::TEST section offsets for test cases to prevent
+ *         concurrency problems
+ */
+const uint32_t pnorTestSec_readwrite_offset = 0x100;
+const uint32_t pnorTestSec_smartwrite_offset = 0x120;
+const uint32_t pnorTestSec_BMCAttrOverride_offset = 0x200;
 
 }
 

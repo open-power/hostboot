@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,6 +35,7 @@
 #include <list>
 #include <vector>
 #include <targeting/adapters/mutexadapter.H>
+#include <targeting/common/error.H>
 
 namespace TARGETING
 {
@@ -81,6 +84,8 @@ public:
         TANK_LAYER_NONE,
         TANK_LAYER_FAPI,
         TANK_LAYER_TARG,
+        TANK_LAYER_PERM,
+        TANK_LAYER_LAST = TANK_LAYER_PERM,
     };
 
     /**
@@ -155,6 +160,9 @@ public:
         uint8_t * iv_pAttributes;   // Pointer to chunk of memory
     };
 
+
+    typedef std::vector<AttributeTank::AttributeSerializedChunk>
+                AttributeSerializedChunks_t;
     /**
      * @brief Default constructor
      */
@@ -336,6 +344,15 @@ public:
      * return true if any attributes exist
      */
     virtual bool attributeExists(const uint32_t i_attrId) const;
+
+    /**
+     * @brief This function writes attributes in an AttributeTank to targeting
+     *
+     * This is called for the permanent AttributeTank in getAttrOverrides()
+     *
+     * @return errlHndl_t Error log handle.
+     */
+    errlHndl_t writePermAttributes();
 
 private:
     // Copy constructor and assignment operator disabled

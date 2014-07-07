@@ -34,3 +34,24 @@
 #egrep -v "WSALIAS DEFAULT FIPSLEVEL|WSALIAS DEFAULT SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
 #echo "WSALIAS DEFAULT FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS DEFAULT SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
+
+echo "+++ Patching P8_MURANO.config for mailbox move."
+mkdir -p $sb/simu/configs
+grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
+    $BACKING_BUILD/src/simu/configs/P8_MURANO.config > \
+    $sb/simu/configs/P8_MURANO.config
+echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
+    $sb/simu/configs/P8_MURANO.config
+
+echo "+++ Patching P8_VENICE.config for mailbox move."
+grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
+    $BACKING_BUILD/src/simu/configs/P8_VENICE.config > \
+    $sb/simu/configs/P8_VENICE.config
+echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
+    $sb/simu/configs/P8_VENICE.config
+
+echo "+++ Patching attrPredicate.patch for BMC Attr Override."
+mkdir -p $sb/hbfw/fsp/targeting
+cp $BACKING_BUILD/src/hbfw/fsp/targeting/makefile $sb/hbfw/fsp/targeting
+patch $sb/hbfw/fsp/targeting/makefile \
+      ${HOSTBOOTROOT}/src/build/citest/etc/patches/attrPredicate.patch

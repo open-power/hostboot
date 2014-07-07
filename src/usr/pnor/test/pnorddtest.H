@@ -130,7 +130,8 @@ class PnorDdTest : public CxxTest::TestSuite
 
             // Perform PnorDD Write 1
 
-            uint64_t l_address = base_address+0x100;
+            uint64_t l_address = base_address +
+                                 PNOR::pnorTestSec_readwrite_offset;
             uint64_t l_writeData = 0x12345678FEEDB0B0;
             l_size = sizeof(uint64_t);
             l_err = deviceWrite(l_testTarget,
@@ -153,7 +154,7 @@ class PnorDdTest : public CxxTest::TestSuite
             }
 
             // Perform PnorDD Write 2
-            l_address = base_address+0x108;
+            l_address = base_address + PNOR::pnorTestSec_readwrite_offset + 0x8;
             l_writeData = 0xFEEDBEEF000ABCDE;
             l_size = sizeof(uint64_t);
             l_err = deviceWrite(l_testTarget,
@@ -176,7 +177,7 @@ class PnorDdTest : public CxxTest::TestSuite
             }
 
             // Perform PnorDD read 1
-            l_address = base_address+0x100;
+            l_address = base_address + PNOR::pnorTestSec_readwrite_offset;
             uint64_t l_readData = 0;
             l_size = sizeof(uint64_t);
             l_err = deviceRead(l_testTarget,
@@ -206,7 +207,7 @@ class PnorDdTest : public CxxTest::TestSuite
             }
 
             // Perform PnorDD read 2
-            l_address = base_address+0x108;
+            l_address = base_address + PNOR::pnorTestSec_readwrite_offset + 0x8;
             l_size = sizeof(uint64_t);
             l_err = deviceRead(l_testTarget,
                                &l_readData,
@@ -265,7 +266,8 @@ class PnorDdTest : public CxxTest::TestSuite
                 break;
             }
 
-            uint64_t l_address = base_address+0x120;
+            uint64_t l_address = base_address +
+                                 PNOR::pnorTestSec_smartwrite_offset;
             uint64_t l_writeData = 0xAAAAAAAA55555555;
             l_size = sizeof(uint64_t);
             l_err = deviceWrite(l_testTarget,

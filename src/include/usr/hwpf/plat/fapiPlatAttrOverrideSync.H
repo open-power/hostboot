@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,10 +40,18 @@
 #include <mbox/mboxif.H>
 #include <fapiAttributeIds.H>
 #include <targeting/common/attributeTank.H>
+#include <pnor/pnorif.H>
 
 //******************************************************************************
 // Interface
 //******************************************************************************
+namespace TARGETING
+{
+    errlHndl_t getAttrOverrides(PNOR::SectionId section,
+                          AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST],
+                          uint32_t i_pnorSecOffset);
+}
+
 namespace fapi
 {
 
@@ -75,6 +85,13 @@ public:
      * @brief Allow a debug tool to directly access the override tank
      */
     friend void directOverride();
+
+    /**
+     * @brief Allow a attribute override to directly access the override tank
+     */
+    friend errlHndl_t TARGETING::getAttrOverrides(PNOR::SectionId section,
+            TARGETING::AttributeTank* io_tanks[TARGETING::AttributeTank::TANK_LAYER_LAST],
+            uint32_t i_pnorSecOffset);
 
     /**
      * @brief Maximum size of a direct attribute override
@@ -196,6 +213,7 @@ public:
                                    const fapi::Target * const i_pTarget,
                                    const uint32_t i_size,
                                    const void * i_pVal);
+
 private:
 
     /**

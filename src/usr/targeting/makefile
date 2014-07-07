@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +39,8 @@ include ${TARGETING_REL_PATH}/hostboot_common.mk
 ATTR_RP_OBJS += attrrp.o
 ATTR_RP_OBJS += attrsync.o
 ATTR_RP_OBJS += targplatutil.o
+ATTR_RP_OBJS += attrPlatOverride.o
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 
 ENTRY_POINT_OBJS += targetservicestart.o
 

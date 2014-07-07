@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,15 @@
 #include <string.h>
 #include <targeting/common/attributeTank.H>
 #include <targeting/common/trace.H>
+#include <targeting/common/predicates/predicatepostfixexpr.H>
+#include <targeting/common/predicates/predicatectm.H>
+#include <targeting/common/predicates/predicateattrtanktargetpos.H>
+#include <targeting/common/iterators/rangefilter.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/targplatutil.H>
+#include <targeting/common/targreasoncodes.H>
+
+
 
 namespace TARGETING
 {
@@ -277,7 +288,6 @@ void AttributeTank::serializeAttributes(
     uint32_t l_index = 0;
 
     AttributesCItr_t l_itr = iv_attributes.begin();
-
     while (l_itr != iv_attributes.end())
     {
         // Fill up the buffer with as many attributes as possible
@@ -465,6 +475,116 @@ AttributeTank::Attribute::~Attribute()
 {
     delete[] iv_pVal;
     iv_pVal = NULL;
+}
+
+//******************************************************************************
+errlHndl_t AttributeTank::writePermAttributes()
+{
+    errlHndl_t l_err = NULL;
+
+    for(AttributesCItr_t l_attrIter = iv_attributes.begin();
+        l_attrIter != iv_attributes.end(); ++l_attrIter)
+    {
+        Attribute* l_attr = *l_attrIter;
+        AttributeHeader l_attrHdr = l_attr->iv_hdr;
+        PredicatePostfixExpr l_permAttrOverrides;
+
+        // Predicate to match target type
+        PredicateCTM l_targetTypeFilter
+                (CLASS_NA, static_cast<TYPE>(l_attrHdr.iv_targetType));
+
+        // Predicate to match attribute tank target position
+        PredicateAttrTankTargetPos l_targetPosFilter(l_attrHdr.iv_pos,
+                                                     l_attrHdr.iv_unitPos,
+                                                     l_attrHdr.iv_node);
+
+        l_permAttrOverrides.push(&l_targetTypeFilter)
+            .push(&l_targetPosFilter).And();
+
+        // Apply the filter through all targets
+        TargetRangeFilter l_permTargetList( targetService().begin(),
+                                            targetService().end(),
+                                            &l_permAttrOverrides);
+
+        // Write permanent attributes to target
+        for ( ; l_permTargetList; ++l_permTargetList)
+        {
+            bool l_success = (*l_permTargetList)->_trySetAttr(
+                                static_cast<ATTRIBUTE_ID>(l_attrHdr.iv_attrId),
+                                l_attrHdr.iv_valSize,
+                                l_attr->iv_pVal );
+
+            if (l_success)
+            {
+                TRACFCOMP(g_trac_targeting, "writePermAttributes: Successful permanent override of Attr ID:0x%X Value:0x%lX applied to target 0x%X",
+                    l_attrHdr.iv_attrId,
+                    *reinterpret_cast<uint64_t *>(l_attr->iv_pVal),
+                    (*l_permTargetList)->getAttr<ATTR_HUID>() );
+            }
+            else
+            {
+                uint8_t * io_pAttrData = NULL;
+                bool l_found = (*l_permTargetList)->_tryGetAttr(
+                                static_cast<ATTRIBUTE_ID>(l_attrHdr.iv_attrId),
+                                l_attrHdr.iv_valSize,
+                                io_pAttrData);
+
+                if (l_found)
+                {
+                    TRACFCOMP(g_trac_targeting, "writePermAttributes: Value NOT applied to target, override failed for Attr ID:0x%X Value:0x%lX on target 0x%X - current value 0x%lX",
+                        l_attrHdr.iv_attrId,
+                        *reinterpret_cast<uint64_t *>(l_attr->iv_pVal),
+                        (*l_permTargetList)->getAttr<ATTR_HUID>(),
+                        *reinterpret_cast<uint64_t *>(io_pAttrData) );
+                    /*@
+                     * @errortype
+                     * @moduleid     TARG_WRITE_PERM_ATTR
+                     * @reasoncode   TARG_RC_WRITE_PERM_ATTR_FAIL
+                     * @userdata1    Target specified
+                     * @userdata2    Attribute specified
+                     * @devdesc      Failure applying given attribute override
+                     *               on given target
+                     */
+                    UTIL::createTracingError(
+                       TARG_WRITE_PERM_ATTR,
+                       TARG_RC_WRITE_PERM_ATTR_FAIL,
+                       (*l_permTargetList)->getAttr<ATTR_HUID>(),
+                       l_attrHdr.iv_attrId,
+                       0,0,
+                       l_err);
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_targeting, "writePermAttributes: Target does not have attribute, override NOT applied for Attr ID:0x%X on target 0x%X",
+                        l_attrHdr.iv_attrId,
+                        (*l_permTargetList)->getAttr<ATTR_HUID>() );
+                    /*@
+                     * @errortype
+                     * @moduleid     TARG_WRITE_PERM_ATTR
+                     * @reasoncode   TARG_RC_WRITE_PERM_ATTR_TARGET_FAIL
+                     * @userdata1    Target specified
+                     * @userdata2    Attribute specified
+                     * @devdesc      Given target does not have given attribute
+                     *               to apply override
+                     */
+                     UTIL::createTracingError(
+                       TARG_WRITE_PERM_ATTR,
+                       TARG_RC_WRITE_PERM_ATTR_TARGET_FAIL,
+                       (*l_permTargetList)->getAttr<ATTR_HUID>(),
+                       l_attrHdr.iv_attrId,
+                       0,0,
+                       l_err);
+                    break;
+                }
+            }
+        }
+        if (l_err)
+        {
+            break;
+        }
+    }
+    return l_err;
 }
 
 }

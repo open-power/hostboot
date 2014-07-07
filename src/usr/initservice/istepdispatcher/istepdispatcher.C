@@ -61,6 +61,7 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas.H>
 #include <hwas/hwasPlat.H>
+#include <targeting/attrPlatOverride.H>
 
 namespace ISTEPS_TRACE
 {
@@ -240,6 +241,20 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 tid_t msgHndlrTaskTid = task_create(startMsgHndlrThread, this);
                 assert(msgHndlrTaskTid > 0);
             }
+            // Get Attribute overrides from PNOR
+            else
+            {
+                err = TARGETING::getAttrOverrides();
+                if (err)
+                {
+                    TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides");
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_initsvc,"Success getAttrOverrides");
+                }
+            }
 
             err = executeAllISteps();
 
@@ -252,7 +267,10 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
             // Send the potentially modified set of Attribute overrides and any
             // Attributes to sync to the FSP
-            fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+            if(iv_spBaseServicesEnabled)
+            {
+                fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+            }
         }
     } while(0);
 
@@ -1058,13 +1076,13 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
         mutex_lock(&iv_mutex);
         if (iv_futureShutdown)
         {
-            //Multiple shutdown messages have been received use the one that 
+            //Multiple shutdown messages have been received use the one that
             // will happen first
             if ((istep < iv_istepToCompleteBeforeShutdown) ||
                 (istep == iv_istepToCompleteBeforeShutdown
                      && substep < iv_substepToCompleteBeforeShutdown) )
             {
-                TRACFCOMP(g_trac_initsvc, INFO_MRK"handleShutdownMsg: Future " 
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"handleShutdownMsg: Future "
                   "shutdown msg rcvd, updating future poweroff to istep"
                   " [%d], substep [%d]", istep, substep);
                 iv_istepToCompleteBeforeShutdown = istep;

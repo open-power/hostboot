@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -48,7 +50,6 @@
 
 // This component
 #include <targeting/common/attributes.H>
-#include <targeting/common/attributeTank.H>
 
 //******************************************************************************
 // Forward declarations to allow friend functions to work
@@ -78,7 +79,7 @@ namespace TARGETING
 //******************************************************************************
 // Type Aliases
 //******************************************************************************
-
+class AttributeTank;
 class Target;
 typedef const Target* ConstTargetHandle_t;
 typedef       Target* TargetHandle_t;
@@ -570,6 +571,7 @@ class Target
         friend class TargetCloner;
         friend class TargetService;
         friend class AssociationManager;
+        friend class AttributeTank;
 
         // Friend functions to allow FAPI Attribute code to directly call
         // _tryGetAttr and _trySetAttr for code size optimization

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,27 +38,34 @@ namespace TARGETING
 
 enum TargetingModuleId
 {
-    TARG_MOD_TEST           = 0x01,
-    TARG_MOD_ATTRRP         = 0x02,
-    TARG_MOD_ATTR_SYNC      = 0x03,
-    TARG_RT_GET_RT_TARGET   = 0x04,
-    TARG_RT_GET_HB_TARGET   = 0x05,
+    TARG_MOD_TEST         = 0x01,
+    TARG_MOD_ATTRRP       = 0x02,
+    TARG_MOD_ATTR_SYNC    = 0x03,
+    TARG_RT_GET_RT_TARGET = 0x04,
+    TARG_RT_GET_HB_TARGET = 0x05,
+    TARG_GET_ATTR_OVER    = 0x06,
+    TARG_WRITE_PERM_ATTR  = 0x07,
+
 };
 
 enum TargetingReasonCode
 {
-    TARG_RC_TEST_TARGET_FFDC             = TARG_COMP_ID | 0x01,
-    TARG_RC_BAD_EYECATCH                 = TARG_COMP_ID | 0x02,
-    TARG_RC_MM_BLOCK_FAIL                = TARG_COMP_ID | 0x03,
-    TARG_RC_MM_PERM_FAIL                 = TARG_COMP_ID | 0x04,
-    TARG_RC_ATTR_MSG_FAIL                = TARG_COMP_ID | 0x05,
-    TARG_RC_UNHANDLED_ATTR_SEC_TYPE      = TARG_COMP_ID | 0x06,
-    TARG_RC_ATTR_SYNC_TO_FSP_FAIL        = TARG_COMP_ID | 0x07,
-    TARG_RC_ATTR_SYNC_REQUEST_TO_HB_FAIL = TARG_COMP_ID | 0x08,
-    TARG_RC_ATTR_SYNC_TO_HB_FAIL         = TARG_COMP_ID | 0x09,
-    TARG_RT_UNIT_TARGET_NOT_FOUND        = TARG_COMP_ID | 0x0a,
-    TARG_RT_NO_PROC_TARGET               = TARG_COMP_ID | 0x0b,
-    TARG_RT_TARGET_TYPE_NOT_SUPPORTED    = TARG_COMP_ID | 0x0c,
+    TARG_RC_TEST_TARGET_FFDC              = TARG_COMP_ID | 0x01,
+    TARG_RC_BAD_EYECATCH                  = TARG_COMP_ID | 0x02,
+    TARG_RC_MM_BLOCK_FAIL                 = TARG_COMP_ID | 0x03,
+    TARG_RC_MM_PERM_FAIL                  = TARG_COMP_ID | 0x04,
+    TARG_RC_ATTR_MSG_FAIL                 = TARG_COMP_ID | 0x05,
+    TARG_RC_UNHANDLED_ATTR_SEC_TYPE       = TARG_COMP_ID | 0x06,
+    TARG_RC_ATTR_SYNC_TO_FSP_FAIL         = TARG_COMP_ID | 0x07,
+    TARG_RC_ATTR_SYNC_REQUEST_TO_HB_FAIL  = TARG_COMP_ID | 0x08,
+    TARG_RC_ATTR_SYNC_TO_HB_FAIL          = TARG_COMP_ID | 0x09,
+    TARG_RT_UNIT_TARGET_NOT_FOUND         = TARG_COMP_ID | 0x0a,
+    TARG_RT_NO_PROC_TARGET                = TARG_COMP_ID | 0x0b,
+    TARG_RT_TARGET_TYPE_NOT_SUPPORTED     = TARG_COMP_ID | 0x0c,
+    TARG_RC_ATTR_OVER_PNOR_SEC_SPACE_FAIL = TARG_COMP_ID | 0x0d,
+    TARG_RC_ATTR_OVER_ATTR_DATA_SIZE_FAIL = TARG_COMP_ID | 0x0e,
+    TARG_RC_WRITE_PERM_ATTR_FAIL          = TARG_COMP_ID | 0x0f,
+    TARG_RC_WRITE_PERM_ATTR_TARGET_FAIL   = TARG_COMP_ID | 0x10,
 };
 
 }; // End TARGETING namespace

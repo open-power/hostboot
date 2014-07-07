@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,6 +34,8 @@
 #include <cxxtest/TestSuite.H>
 
 #include <targeting/common/attributeTank.H>
+#include <targeting/attrPlatOverride.H>
+#include <pnor/pnorif.H>
 
 using namespace TARGETING;
 
@@ -132,7 +136,7 @@ public:
                 TS_FAIL("tankTest2: Error. Attribute not in tank (2)");
                 break;
             }
-            
+
             if (l_tank.attributeExists(1))
             {
                 TS_FAIL("tankTest2: Error. Wrong attribute in tank (3)");
@@ -1141,6 +1145,222 @@ public:
         } while (0);
 
         TS_TRACE("tankTest7 complete" );
+    }
+
+    /**
+     * @brief Test BMC Attr Override function
+     *        Set attributes into 3 different tanks for attribute override and
+     *        serialize the data of each tank. Then call getAttrOverrides to
+     *        deserialize each sections data and check that the data is correct
+     *
+     */
+    void testBMCAttrOverride(void)
+    {
+        do
+        {
+            errlHndl_t errhdl = NULL;
+            // Use the TEST partition as scratch space
+            PNOR::SectionInfo_t info;
+            errhdl = PNOR::getSectionInfo( PNOR::TEST, info );
+            if (errhdl)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride could not get PNOR test section info");
+                break;
+            }
+
+            // Create local AttributeTanks
+            AttributeTank l_FapiTank;
+            AttributeTank l_TargetTank;
+            AttributeTank l_PermTank;
+
+            // Add ATTR_SCRATCH_UINT64_1 to the Fapi tank
+            uint64_t l_val = 4;
+            l_FapiTank.setAttribute(ATTR_SCRATCH_UINT64_1,
+                                    TYPE_PROC,
+                                    AttributeTank::ATTR_POS_NA,
+                                    AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
+                                    0, sizeof(l_val), &l_val);
+
+            // Add ATTR_SCRATCH_UINT64_1 to the Target tank
+            l_TargetTank.setAttribute(ATTR_SCRATCH_UINT64_1,
+                                      TYPE_PROC,
+                                      1,
+                                      AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
+                                      0, sizeof(l_val), &l_val);
+            // Add ATTR_SCRATCH_UINT64_1 to the Perm tank
+            l_PermTank.setAttribute(ATTR_SCRATCH_UINT64_1,
+                                    TYPE_PROC,
+                                    1,
+                                    AttributeTank::ATTR_UNIT_POS_NA,
+                                    AttributeTank::ATTR_NODE_NA,
+                                    0, sizeof(l_val), &l_val);
+
+            ////////////////////////////////////////////////////////////////////
+            // Fapi
+
+            // Serialize all attributes from each tank
+            AttributeTank::AttributeSerializedChunks_t l_attributes;
+            l_FapiTank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
+                    4096, l_attributes);
+
+            // Copy Fapi Override chunk to PNOR
+            uint32_t l_index = PNOR::pnorTestSec_BMCAttrOverride_offset;
+            for (AttributeTank::AttributeSerializedChunks_t::iterator
+                    chunkIter = l_attributes.begin();
+                    chunkIter != l_attributes.end();
+                    ++chunkIter)
+            {
+                AttrOverrideSection * l_pAttrOverSec =
+                    reinterpret_cast<AttrOverrideSection *>
+                        (info.vaddr + l_index);
+                AttributeTank::AttributeSerializedChunk l_chunk = *chunkIter;
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_FAPI;
+                l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                l_index += sizeof(AttrOverrideSection)+l_pAttrOverSec->iv_size;
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Targeting
+
+            // Serialize all attributes from each tank
+            l_attributes.clear();
+            l_TargetTank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
+                    4096, l_attributes);
+
+            // Copy Target Override chunk to PNOR
+            for (AttributeTank::AttributeSerializedChunks_t::iterator
+                    chunkIter = l_attributes.begin();
+                    chunkIter != l_attributes.end();
+                    ++chunkIter)
+            {
+                AttrOverrideSection * l_pAttrOverSec =
+                    reinterpret_cast<AttrOverrideSection *>
+                        (info.vaddr + l_index);
+                AttributeTank::AttributeSerializedChunk l_chunk = *chunkIter;
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TARG;
+                l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                l_index += sizeof(AttrOverrideSection)+l_pAttrOverSec->iv_size;
+
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Permanent
+
+            // Serialize all attributes from each tank
+            l_attributes.clear();
+            l_PermTank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
+                    4096, l_attributes);
+
+            // Copy Target Override chunk to PNOR
+            for (AttributeTank::AttributeSerializedChunks_t::iterator
+                    chunkIter = l_attributes.begin();
+                    chunkIter != l_attributes.end();
+                    ++chunkIter)
+            {
+                AttrOverrideSection * l_pAttrOverSec =
+                    reinterpret_cast<AttrOverrideSection *>
+                        (info.vaddr + l_index);
+                AttributeTank::AttributeSerializedChunk l_chunk = *chunkIter;
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_PERM;
+                l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                l_index += sizeof(AttrOverrideSection)+l_pAttrOverSec->iv_size;
+
+            }
+
+            // Add termination section
+            AttrOverrideSection * l_pAttrOverSecTerm =
+                    reinterpret_cast<AttrOverrideSection *>
+                        (info.vaddr + l_index);
+            l_pAttrOverSecTerm->iv_layer = AttributeTank::TANK_LAYER_NONE;
+            l_pAttrOverSecTerm->iv_size = 0;
+
+            // Clear tanks
+            l_FapiTank.clearAllAttributes();
+            l_TargetTank.clearAllAttributes();
+            l_PermTank.clearAllAttributes();
+
+            // Call function that actually reads in attribute overrides
+            AttributeTank* l_tanks[AttributeTank::TANK_LAYER_LAST];
+            l_tanks[AttributeTank::TANK_LAYER_FAPI-1] = &l_FapiTank;
+            l_tanks[AttributeTank::TANK_LAYER_TARG-1] = &l_TargetTank;
+            l_tanks[AttributeTank::TANK_LAYER_PERM-1] = &l_PermTank;
+            errhdl = getAttrOverrides(PNOR::TEST,
+                             l_tanks,
+                             PNOR::pnorTestSec_BMCAttrOverride_offset);
+            if (errhdl)
+            {
+                errlCommit(errhdl, TARG_COMP_ID);
+                TS_FAIL("testattrtank::testBMCAttrOverride getAttrOverrides() failed");
+                break;
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Check the first attribute made it back into the Fapi tank
+            l_val = 0;
+            if (!(l_FapiTank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                          TYPE_PROC,
+                                          AttributeTank::ATTR_POS_NA,
+                                          AttributeTank::ATTR_UNIT_POS_NA,
+                                          AttributeTank::ATTR_NODE_NA,
+                                          &l_val)))
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. Did not get attr from Fapi Tank");
+                break;
+            }
+            if (l_val != 4)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. Got bad value (0x%X) from Fapi Tank",
+                        l_val);
+                break;
+            }
+
+            // Check the first attribute made it back into the Target tank
+            l_val = 0;
+            if (!(l_TargetTank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                            TYPE_PROC,
+                                            1,
+                                            AttributeTank::ATTR_UNIT_POS_NA,
+                                            AttributeTank::ATTR_NODE_NA,
+                                            &l_val)))
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. Did not get attr from Target Tank");
+                break;
+            }
+            if (l_val != 4)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. Got bad value (0x%X) from Target Tank",
+                        l_val);
+                break;
+            }
+
+            // Check the first attribute made it back into the Perm tank
+            l_val = 0;
+            if (!(l_PermTank.getAttribute(ATTR_SCRATCH_UINT64_1,
+                                          TYPE_PROC,
+                                          1,
+                                          AttributeTank::ATTR_UNIT_POS_NA,
+                                          AttributeTank::ATTR_NODE_NA,
+                                          &l_val)))
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. Did not get attr from Perm Tank");
+                break;
+            }
+            if (l_val != 4)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. Got bad value (0x%X) from Perm Tank",
+                        l_val);
+                break;
+            }
+        } while(0);
+        TRACFCOMP(g_trac_targeting, "testattrtank::testBMCAttrOverride: Success steve");
     }
 };
 

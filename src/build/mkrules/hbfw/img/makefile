@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -124,7 +126,7 @@ cp_hbfiles: .SPECTARG
 	dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
 	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
 	# create data for a test partition in pnor
-	dd if=/dev/urandom of=${TESTDATA} count=1 bs=28K
+	dd if=/dev/urandom of=${TESTDATA} count=1 bs=32K
 	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
 	# Fill the following partitions with FF's and then ECC them
 	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
