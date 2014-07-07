@@ -78,6 +78,7 @@ TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, KILOBYTE );
 // Global Variables for MBOX Ipl Query
 static bool g_mbox_query_done   = false;
 static bool g_mbox_query_result = false;
+static bool g_istep_mode        = false;
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -111,9 +112,6 @@ namespace SBE
 
         do{
 
-            /*****************************************************************/
-            /* Skip Update if in istep mode with a FSP present               */
-            /*****************************************************************/
             // Get Target Service, and the system target.
             TargetService& tS = targetService();
             TARGETING::Target* sys = NULL;
@@ -134,6 +132,13 @@ namespace SBE
                            "(0x%.16X) is set in MNFG Flags 0x%.16X",
                            MNFG_FLAG_FSP_UPDATE_SBE_IMAGE, mnfg_flags);
                 break;
+            }
+
+            // For a future check, determine if in istep mode and FSP is present
+            if ( sys->getAttr<ATTR_ISTEP_MODE>() && // true => istep mode
+                 INITSERVICE::spBaseServicesEnabled() ) // true => FSP present
+            {
+                g_istep_mode = true;
             }
 
             //Make sure procedure constants keep within expected range.
@@ -2396,6 +2401,24 @@ namespace SBE
                          io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
                          : // set bit 1
                          io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
+
+                    // If istep mode, re-IPL bit won't be checked, so also
+                    // change perm flag to boot off of alt on next IPL
+                    if ( g_istep_mode )
+                    {
+                        // Update MVPD PERMANENT flag: make alt=perm
+                        (io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                         // clear bit 0
+                         io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
+                         : //set bit 0
+                         io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "istep mode: update alt to perm, (sit="
+                                   "0x%.2X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   i_system_situation);
+                    }
 
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "cur=perm/dirty(%d), alt=dirty. Update alt. re-"
