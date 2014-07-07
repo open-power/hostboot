@@ -389,7 +389,7 @@ $(GENDIR)/$(IF_CMP_FLEX_TARGET:.c=.host.o): \
     $(GENDIR)/$(IF_CMP_FLEX_TARGET) $(IF_COMPILER_H_FILES) \
     $(GENDIR)/$(IF_CMP_YACC_H_TARGET)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -DHOSTBOOT_COMPILE $< -I ifcompiler -I $(GENDIR) \
 			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
 			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 

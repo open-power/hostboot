@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,7 +48,7 @@
 //                                   Handle case where after row_optimize(), there's no Scom to write
 //                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
-
+// $Id: initScom.C,v 1.11 2014/06/30 20:20:00 thi Exp $
 /**
  * @file initSpy.C
  * @brief Definition of the initScom Class. Represents the information parsed from an initfile scom

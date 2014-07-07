@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,7 +42,7 @@
 //        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
 //                 camvanng 06/27/12 Delete push_attr_enum()
 // End Change Log *********************************************************************************
-
+// $Id: initRpn.H,v 1.8 2014/06/30 19:56:53 thi Exp $
 /**
  * @file initRpn.H
  * @brief Declaration of the initRpn class. Handles Reverse Polish Notation equations for initfiles

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -21,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /* Change Log *************************************************************************************
+// $Id: initCompiler.lex,v 1.15 2014/07/07 20:44:40 thi Exp $
 //                                                                      
 //  Flag Track    Userid   Date       Description                
 //  ---- -------- -------- --------   -------------------------------------------------------------
@@ -46,6 +49,7 @@
 //                camvanng 06/15/12   Ability to do bitwise OR and AND operations
 //                camvanng 06/27/12   Improve error handling
 //                camvanng 07/12/12   Support for "ANY"
+//                thi      07/07/14   Add compilation option to sync with HB and CVS
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -61,7 +65,12 @@
 #include <iomanip>
 #include <vector>
 #include <initRpn.H>
+
+#ifdef HOSTBOOT_COMPILE
 #include <ifcompiler.y.tab.h>
+#else
+#include <y.tab.h>
+#endif
 
 uint64_t bits2int( const char * bitString);
 uint64_t hexs2int(const char * hexString, int32_t size);

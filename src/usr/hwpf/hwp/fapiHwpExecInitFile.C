@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,7 @@
  *
  *  @brief Implements a Hardware Procedure to execute an initfile.
  */
-
+// $Id: fapiHwpExecInitFile.C,v 1.21 2014/06/30 16:48:42 thi Exp $
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
@@ -66,6 +68,7 @@
  *          SW187788        mww         02/27/2013  Add minimal succinct trace
  *          SW195717        mww         04/22/2013  Add function to dump ffdc
  *                                                  and trace.
+ *          SW251791        muqahmed    03/14/2014  Fixed compile warning
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -262,7 +265,7 @@ public:
             iv_attrSymbolTableSize( 0 ),
 
             iv_pLitSymbolTableAddr( NULL ),
-            iv_litSymbolTableSize( NULL ),
+            iv_litSymbolTableSize( 0 ),
 
             iv_pScomSectionAddr( NULL ),
             iv_scomSectionSize( 0 ),
@@ -564,7 +567,7 @@ void    InitFileStats::dump()
                   iv_litSymbolTableSize );
         for ( int i=0; i<iv_litSymbolTableSize; i++ )
         {
-            FAPI_IMP( "    0xX%03x    0x%08x",
+            FAPI_IMP( "    0xX%03x    0x%08llx",
                 i+1,
                 iv_pLitSymbolTableAddr[i] );
         }
