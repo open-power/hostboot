@@ -483,7 +483,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-pnorVersion",
                       &sbeState.pnorVersion, sizeof(sbe_image_version_t));
             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-mvpdSbKeyword",
-                      &sbeState.mvpdSbKeyword, sizeof(mvpdSbeVersion_t));
+                      &sbeState.mvpdSbKeyword, sizeof(mvpdSbKeyword_t));
             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-seeprom_0_ver",
                       &sbeState.seeprom_0_ver,
                       sizeof(sbeSeepromVersionInfo_t));

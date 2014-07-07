@@ -991,9 +991,13 @@ void ErrDataService::printDebugTraces( )
     if( sdc.IsDegraded() )     PRDF_DTRAC( "PRDTRACE: Performance is degraded");
 
     if( sdc.IsServiceCall() )
+    {
         PRDF_DTRAC( "PRDTRACE: SERVICE REQUIRED" );
+    }
     else
+    {
         PRDF_DTRAC( "PRDTRACE: SERVICE NOT REQUIRED" );
+    }
 
     if( sdc.IsMfgTracking() ) PRDF_DTRAC( "PRDTRACE: Track this error" );
     if( sdc.Terminate() )     PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );

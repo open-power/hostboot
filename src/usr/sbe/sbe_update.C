@@ -1371,7 +1371,7 @@ namespace SBE
 
             TRACDBIN(g_trac_sbe, "getSbeInfoState-spA",
                      &(io_sbeState.seeprom_0_ver),
-                     sizeof(sbeVersion_t));
+                     sizeof(sbeSeepromVersionInfo_t));
 
             /*******************************************/
             /*  Get SEEPROM B SBE Version Information  */
@@ -1392,7 +1392,7 @@ namespace SBE
 
             TRACDBIN(g_trac_sbe, "getSbeInfoState-spB",
                      &(io_sbeState.seeprom_1_ver),
-                    sizeof(sbeVersion_t));
+                    sizeof(sbeSeepromVersionInfo_t));
 
             /***********************************************/
             /*  Determine which SEEPROM System Booted On   */
