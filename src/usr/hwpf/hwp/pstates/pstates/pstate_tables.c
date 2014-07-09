@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.21 2014/05/27 15:33:49 daviddu Exp $
+// $Id: pstate_tables.c,v 1.22 2014/07/03 02:57:52 daviddu Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -217,11 +219,13 @@ chip_characterization_create(ChipCharacterization *characterization,
 
             ops[gpst_points].vdd_corrected_uv =
                 ops[gpst_points].vdd_uv +
-                ((ops[gpst_points].idd_ma * (parameters->vdd_load_line_uohm + parameters->vdd_distribution_uohm)) / 1000); // jwy add in distribution_uohm
+                ((ops[gpst_points].idd_ma * (parameters->vdd_load_line_uohm + parameters->vdd_distribution_uohm)) / 1000) + // jwy add in distribution_uohm
+                parameters->vdd_voffset_uv; // SW267784 add in offset in uohm
 
             ops[gpst_points].vcs_corrected_uv =
                 ops[gpst_points].vcs_uv +
-                ((ops[gpst_points].ics_ma * (parameters->vcs_load_line_uohm + parameters->vcs_distribution_uohm)) / 1000); // jwy add in distribution_uohm
+                ((ops[gpst_points].ics_ma * (parameters->vcs_load_line_uohm + parameters->vcs_distribution_uohm)) / 1000) +  // jwy add in distribution_uohm
+                parameters->vcs_voffset_uv;   // SW267784 add in offset in uohm
 
             // iVRM 'Effective' voltages are set to the measured voltages
 
