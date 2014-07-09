@@ -124,10 +124,10 @@ my  $RUNCLKSCMD =   "simclock";
 #   "proc_thread_control: Thread Start failed: RAS Status Run bit is not on"
 # Temporary workaround is using only one thread as shown below.
 # Lance Karm is still investigating.
-my  $QUERYCMD   =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -query  $CORE -tall -quiet | sed -n -e '/State/s/ *//gp'\"";
-my  $STARTCMD   =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -start  $CORE -tall -quiet -warncheck \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
-my  $STARTCMD_T0   =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet -warncheck \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
-my  $STOPCMD    =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -stop   $CORE -tall -quiet \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
+my  $QUERYCMD   =   "bash -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -query  $CORE -tall -quiet | sed -n -e '/State/s/ *//gp'\"";
+my  $STARTCMD   =   "bash -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -start  $CORE -tall -quiet -warncheck \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
+my  $STARTCMD_T0   =   "bash -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet -warncheck \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
+my  $STOPCMD    =   "bash -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -stop   $CORE -tall -quiet \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
 my  $RESETCMD   =   "$vbuProcsRoot/proc_thread_control_wrap.x86 -sreset $CORE -tall -quiet";
 
 ##
@@ -151,7 +151,7 @@ sub readcacheline( $ )
 
     $cmd    =   "$GETMEMCMD $hexaddr 1 -f $CLfile -binmode -quiet $CORE";
     if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   }
-    ( system( "sh -c \"$cmd  \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"" ) == 0)
+    ( system( "bash -c \"$cmd  \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"" ) == 0)
         or die "$cmd failed $? : $! \n";
 
 }
