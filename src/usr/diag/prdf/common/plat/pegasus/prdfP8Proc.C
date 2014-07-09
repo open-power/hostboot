@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -552,15 +554,15 @@ PLUGIN_PHB_CONFIGURED( 2 )
 //------------------------------------------------------------------------------
 
 /**
- * @brief   calls out master Ex of the node
+ * @brief   calls out master Ex of the node and SBE FFDC
  * @param   i_chip   P8 chip
  * @param   i_sc     service data collector
  * @returns Success
  */
-int32_t calloutMasterCore( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc )
+int32_t deadManTimerCalloutAndFFDC( ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[calloutMasterCore] "
+    #define PRDF_FUNC "[deadManTimerCalloutAndFFDC] "
 
     TargetHandle_t l_procTgt = i_chip->GetChipHandle();
 
@@ -573,11 +575,14 @@ int32_t calloutMasterCore( ExtensibleChip * i_chip,
     else
         io_sc.service_data->SetCallout( l_masterCore );
 
+    // Call proc_extract_sbe_rc here to see what went wrong
+    PlatServices::collectSBE_FFDC(l_procTgt);
+
     return SUCCESS;
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, calloutMasterCore );
+PRDF_PLUGIN_DEFINE( Proc, deadManTimerCalloutAndFFDC );
 
 //------------------------------------------------------------------------------
 

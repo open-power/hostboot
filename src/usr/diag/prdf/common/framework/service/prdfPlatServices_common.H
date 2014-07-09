@@ -139,6 +139,12 @@ bool isSmpCoherent();
 //##                       Processor specific functions
 //##############################################################################
 
+/**
+ * @brief capture SBE image failure Registers for FFDC
+ * @param i_procTarget Processor target
+ */
+void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
+
 //##############################################################################
 //##                       Lane Repair functions
 //##############################################################################

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -63,6 +65,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ibscom
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 #FIXME: once we fix the PRD includes, we can move most of the prd subdirs below
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf

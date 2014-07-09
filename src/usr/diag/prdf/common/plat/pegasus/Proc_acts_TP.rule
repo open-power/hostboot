@@ -334,7 +334,7 @@ group gTpLFir filter singlebit
     /** TP_LFIR[36]
      *  Deadman Timer
      */
-    (TpLFir, bit(36)) ? calloutMasterCoreThr1NoGard;
+    (TpLFir, bit(36)) ? deadManTimer;
 
     /** TP_LFIR[37|38|39]
      *  Unused error
@@ -1244,9 +1244,9 @@ actionclass maskTodError
 };
 
 /** callout the master core of the Proc */
-actionclass calloutMasterCoreThr1NoGard
+actionclass deadManTimer
 {
-    funccall("calloutMasterCore");
+    funccall("deadManTimerCalloutAndFFDC");
     callout2ndLvlMed;
     threshold1;
     dumpSH;
