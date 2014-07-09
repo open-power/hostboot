@@ -1,8 +1,10 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.13 2014/05/21 19:17:17 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.14 2014/06/12 22:59:56 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.14|baysah  |06/12/14|- SW265488 : enable channel checkstop for MCIFIR[40]: channel timeout error
 #--         |        |        |
 #--     1.13|baysah  |05/20/14|- Added Best MCS Spec filter setting to MODE2 reg (2011809 16 20 9007F) for power and perf improvement
 #--         |        |        |
@@ -61,7 +63,7 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      28:31,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HTM_OPS
      32:35,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HA_ASSIST
      36   ,                    0b1           ,     any                 ;              # MCMODE0Q_MCFGRP_19_IS_HO_BIT
-     37   ,                    0b0           ,     any                 ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
+     37   ,                    0b1           ,     any                 ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
      38   ,                    0b0           ,     any                 ;              # MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP
      39:43,                    0b00000       ,     any                 ;              # MCMODE0Q_RESERVED_39_43 Reserved
      44:52,                    0b001100010   ,     any                 ;              # MCMODE0Q_ADDRESS_COLLISION_MODES
