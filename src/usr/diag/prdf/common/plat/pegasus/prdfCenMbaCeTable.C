@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,10 +45,10 @@ using namespace CE_TABLE;
 
 //------------------------------------------------------------------------------
 
-bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
-                              const CenSymbol & i_symbol, bool i_isHard )
+uint32_t CenMbaCeTable::addEntry( const CenAddr & i_addr,
+                                  const CenSymbol & i_symbol, bool i_isHard )
 {
-    bool o_doTps = false;
+    uint32_t o_rc = NO_TH_REACHED;
 
     TableData data ( i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
                      i_symbol.getPortSlct(), i_symbol.getWiringType(),
@@ -79,25 +81,21 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
     // Check the new entry's count for single entry threshold.
     if ( TPS_ENTRY_COUNT_TH <= data.count )
     {
-        o_doTps = true;
+        o_rc |= ENTRY_TH_REACHED;
     }
 
     // Get number of entries in this table on the same rank as the new entry and
     // threshold if needed.
-    if ( !o_doTps ) // no point iterating the table if o_doTps is already true
+    CenRank thisRank = data.addr.getRank();
+    uint32_t rankCount = 0;
+    for ( CeTable::iterator it = iv_table.begin(); it != iv_table.end(); it++ )
     {
-        CenRank thisRank = data.addr.getRank();
-        uint32_t rankCount = 0;
-        for ( CeTable::iterator it = iv_table.begin();
-              it != iv_table.end(); it++ )
-        {
-            if ( it->active && (it->addr.getRank() == thisRank) )
-                rankCount++;
-        }
-
-        if ( TPS_RANK_ENTRY_TH <= rankCount )
-            o_doTps = true;
+        if ( it->active && (it->addr.getRank() == thisRank) )
+            rankCount++;
     }
+
+    if ( TPS_RANK_ENTRY_TH <= rankCount )
+        o_rc |= RANK_TH_REACHED;
 
     // Note that we intentially checked the entries-per-rank threshold before
     // removing any entries, if the table is full. This is to catch the corner
@@ -120,13 +118,14 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
     // If the table is still full, all entries are active. Pop off the oldest
     // active entry.
     if ( MAX_ENTRIES < iv_table.size() )
+    {
         iv_table.pop_front();
 
-    // Do TPS if the table is full.
-    if ( MAX_ENTRIES == iv_table.size() )
-        o_doTps = true;
+        // The table is full of active entries so do TPS.
+        o_rc |= TABLE_FULL;
+    }
 
-    return o_doTps;
+    return o_rc;
 }
 
 //------------------------------------------------------------------------------

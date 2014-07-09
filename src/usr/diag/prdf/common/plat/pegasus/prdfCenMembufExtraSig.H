@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,7 +31,10 @@
 PRDR_ERROR_SIGNATURE(MnfgDramCte,    0x44440000, "", "MNFG per DRAM CTE");
 PRDR_ERROR_SIGNATURE(MnfgHrCte,      0x44440001, "", "MNFG per half-rank CTE");
 PRDR_ERROR_SIGNATURE(MnfgDimmCte,    0x44440002, "", "MNFG per DIMM CTE");
-PRDR_ERROR_SIGNATURE(MbsFir_30_DD1Signature, 0x44440003, "MBSFIR[30]",
+PRDR_ERROR_SIGNATURE(MnfgTableFull,  0x44440003, "", "MNFG CE table full");
+PRDR_ERROR_SIGNATURE(MnfgEntryCte,   0x44440004, "", "MNFG CE table entry CTE");
+
+PRDR_ERROR_SIGNATURE(MbsFir_30_DD1Signature, 0x44440008, "MBSFIR[30]",
                                    "DD1: MBS_FIR_REG_INTERNAL_SCOM_ERROR_COPY");
 
 #endif // __prdfCenMembufExtraSig_H

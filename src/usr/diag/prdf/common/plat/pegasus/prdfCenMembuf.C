@@ -560,15 +560,15 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 
             // Add the DIMM to the callout list
             MemoryMru memmru ( mbaTrgt, rank, symbol );
-            i_sc.service_data->SetCallout( memmru );
+            i_sc.service_data->SetCallout( memmru, MRU_MEDA );
 
             // Add to CE table
             CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
-            bool doTps = mbadb->iv_ceTable.addEntry( addr, symbol );
+            uint32_t ceTableRc = mbadb->iv_ceTable.addEntry( addr, symbol );
+            bool doTps = ( CenMbaCeTable::NO_TH_REACHED != ceTableRc );
 
-            // Check MNFG thresholds, if needed. No need to check if a TPS
-            // request is already needed.
-            if ( !doTps && mfgMode() )
+            // Check MNFG thresholds, if needed.
+            if ( mfgMode() )
             {
                 // Get the MNFG CE thresholds.
                 uint16_t dramTh, hrTh, dimmTh;
@@ -590,35 +590,61 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDramCte );
+                    i_sc.service_data->SetServiceCall();
                     doTps = true;
                 }
-
-                if ( hrTh < hrCount )
+                else if ( hrTh < hrCount )
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgHrCte );
+                    i_sc.service_data->SetServiceCall();
                     doTps = true;
                 }
-
-                if ( dimmTh < dimmCount )
+                else if ( dimmTh < dimmCount )
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDimmCte );
+                    i_sc.service_data->SetServiceCall();
                     doTps = true;
+                }
+                else if ( 0 != (CenMbaCeTable::TABLE_FULL & ceTableRc) )
+                {
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgTableFull);
+
+                    // The table is full and no other threshold has been met.
+                    // We are in a state where we may never hit a MNFG
+                    // threshold. Callout all memory behind the MBA. Also, since
+                    // the counts are all over the place, there may be a problem
+                    // with the MBA. So call it out as well.
+                    MemoryMru all_mm ( mbaTrgt, rank,
+                                       MemoryMruData::CALLOUT_ALL_MEM );
+                    i_sc.service_data->SetCallout( all_mm,  MRU_MEDA );
+                    i_sc.service_data->SetCallout( mbaTrgt, MRU_MEDA );
+                    i_sc.service_data->SetServiceCall();
+                }
+                else if ( 0 != (CenMbaCeTable::ENTRY_TH_REACHED & ceTableRc) )
+                {
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgEntryCte );
+
+                    // There is a single entry threshold and no other threshold
+                    // has been met. This is a potential flooding issue, so make
+                    // the DIMM callout predictive.
+                    i_sc.service_data->SetServiceCall();
                 }
             }
 
             // Initiate a TPS procedure, if needed.
             if ( doTps )
             {
-                #ifdef __HOSTBOOT_MODULE
-                // Will not be able to do TPS during hostboot so make the error
-                // log predictive in MNFG mode. Note that we will still call
-                // handleTdEvent() so we can get the trace statement indicating
-                // TPS was requested during Hostboot.
-                if ( mfgMode() )
-                    i_sc.service_data->SetServiceCall();
-                #endif
+                // If a MNFG threshold has been reached (predictive callout), we
+                // will still try to start TPS just in case MNFG disables the
+                // termination policy.
+
+                // Will not be able to do TPS during hostboot. Note that we will
+                // still call handleTdEvent() so we can get the trace statement
+                // indicating TPS was requested during Hostboot.
 
                 l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
                                                 CenMbaTdCtlrCommon::TPS_EVENT );

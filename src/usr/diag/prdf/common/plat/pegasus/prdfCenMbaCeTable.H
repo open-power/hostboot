@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,6 +54,17 @@ class CenMark;
 class CenMbaCeTable
 {
 
+  public: // constants, enums
+
+    /** @brief Return values from addEntry(). */
+    enum AddEntryRc
+    {
+        NO_TH_REACHED    = 0x00, ///< No thresholds reached.
+        ENTRY_TH_REACHED = 0x01, ///< The entry threshold has been reached.
+        RANK_TH_REACHED  = 0x02, ///< The rank threshold has been reached.
+        TABLE_FULL       = 0x04, ///< The table is full of active entries.
+    };
+
   private: // constants, enums
 
     /** @brief Table size limits. */
@@ -86,10 +99,10 @@ class CenMbaCeTable
      * @param  i_addr   The address reporting the CE.
      * @param  i_symbol The symbol reporting the CE.
      * @param  i_isHard TRUE if a hard CE was detected on this address/symbol.
-     * @return TRUE if TPS is required, FALSE otherwise.
+     * @return Mask of possible return codes (see enum AddEntryRc).
      */
-    bool addEntry( const CenAddr & i_addr, const CenSymbol & i_symbol,
-                   bool i_isHard = false );
+    uint32_t addEntry( const CenAddr & i_addr, const CenSymbol & i_symbol,
+                       bool i_isHard = false );
 
     /**
      * @brief Deactivates all entries in the table.
