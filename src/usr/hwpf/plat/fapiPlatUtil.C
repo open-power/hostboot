@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -112,7 +114,7 @@ void fapiLogError(fapi::ReturnCode & io_rc,
 
     errlHndl_t l_pError = NULL;
 
-    FAPI_ERR("fapiLogError: logging error");
+    FAPI_INF("fapiLogError: logging error");
 
     // Convert a FAPI severity to a ERRORLOG severity
     ERRORLOG::errlSeverity_t l_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;

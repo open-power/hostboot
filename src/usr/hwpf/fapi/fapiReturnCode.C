@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCode.C,v 1.19 2014/03/12 00:48:21 whs Exp $
+// $Id: fapiReturnCode.C,v 1.20 2014/07/23 16:20:32 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.C,v $
 
 /**
@@ -57,6 +59,7 @@
  *                          mjjones     06/24/2013  Support Children CDGs
  *                          mjjones     08/26/2013  Support HW Callouts
  *                          whs         03/11/2014  Add FW traces to error logs
+ *                          whs         07/23/2014  Reduce traces
  */
 
 #include <fapiReturnCode.H>
@@ -297,14 +300,16 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
             {
                 const Target * l_pRefTarget = static_cast<const Target *>(
                     i_pObjects[l_refIndex]);
-                FAPI_ERR("addErrorInfo: Adding hw callout with ref, hw: %d, pri: %d",
+                FAPI_DBG("addErrorInfo: Adding hw callout with ref, hw:"
+                     " %d, pri: %d",
                      l_hw, l_pri);
                 addEIHwCallout(l_hw, l_pri, *l_pRefTarget);
             }
             else
             {
                 Target l_emptyTarget;
-                FAPI_ERR("addErrorInfo: Adding hw callout with no ref, hw: %d, pri: %d",
+                FAPI_DBG("addErrorInfo: Adding hw callout with no ref, hw:"
+                     " %d, pri: %d",
                      l_hw, l_pri);
                 addEIHwCallout(l_hw, l_pri, l_emptyTarget);
             }
@@ -319,7 +324,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                     i_pEntries[i].proc_callout.iv_calloutPriority);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding proc callout, proc: %d, pri: %d",
+            FAPI_DBG("addErrorInfo: Adding proc callout, proc: %d, pri: %d",
                      l_proc, l_pri);
             addEIProcedureCallout(l_proc, l_pri);
         }
@@ -338,7 +343,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 i_pObjects[l_ep2Index]);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding bus callout, pri: %d", l_pri);
+            FAPI_DBG("addErrorInfo: Adding bus callout, pri: %d", l_pri);
             addEIBusCallout(*l_pTarget1, *l_pTarget2, l_pri);
         }
         else if (l_type == EI_TYPE_CDG)
@@ -356,7 +361,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 i_pObjects[l_targIndex]);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding target cdg (%d:%d:%d), pri: %d",
+            FAPI_DBG("addErrorInfo: Adding target cdg (%d:%d:%d), pri: %d",
                      l_callout, l_deconf, l_gard, l_pri);
             addEICdg(*l_pTarget, l_callout, l_deconf, l_gard, l_pri);
         }
@@ -381,7 +386,8 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 i_pObjects[l_parentIndex]);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding children cdg (%d:%d:%d), type: 0x%08x, pri: %d",
+            FAPI_DBG("addErrorInfo: Adding children cdg (%d:%d:%d), type:"
+                     " 0x%08x, pri: %d",
                      l_callout, l_deconf, l_gard, l_childType, l_pri);
             addEIChildrenCdg(*l_pParent, l_childType, l_callout, l_deconf,
                              l_gard, l_pri, l_childPort, l_childNumber );

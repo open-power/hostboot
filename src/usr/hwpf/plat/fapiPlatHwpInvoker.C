@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -213,7 +215,7 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
         uint32_t l_ffdcId = (*l_itr)->getFfdcId();
 
         // Add the FFDC ID as the first word, then the FFDC data
-        FAPI_ERR("processEIFfdcs: Adding %d bytes of FFDC (id:0x%08x)", l_size,
+        FAPI_DBG("processEIFfdcs: Adding %d bytes of FFDC (id:0x%08x)", l_size,
                  l_ffdcId);
         ERRORLOG::ErrlUD * l_pUD = io_pError->addFFDC(
             HWPF_COMP_ID, &l_ffdcId, sizeof(l_ffdcId), 1, HWPF_UDT_HWP_FFDC);
@@ -257,7 +259,8 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
             HWAS::clockTypeEnum l_clock =
                 xlateClockHwCallout((*l_itr)->iv_hw);
 
-            FAPI_ERR("processEIHwCallouts: Adding clock-callout (clock:%d, pri:%d)",
+            FAPI_ERR("processEIHwCallouts: Adding clock-callout"
+                     " (clock:%d, pri:%d)",
                      l_clock, l_priority);
             io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
         }
@@ -290,7 +293,8 @@ void processEIProcCallouts(const ErrorInfo & i_errInfo,
         HWAS::callOutPriority l_priority =
             xlateCalloutPriority((*l_itr)->iv_calloutPriority);
 
-        FAPI_ERR("processEIProcCallouts: Adding proc-callout (proc:0x%02x, pri:%d)",
+        FAPI_DBG("processEIProcCallouts: Adding proc-callout"
+                 " (proc:0x%02x, pri:%d)",
                  l_procedure, l_priority);
         io_pError->addProcedureCallout(l_procedure, l_priority);
     }
@@ -351,7 +355,8 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
 
         if (l_busTypeValid)
         {
-            FAPI_ERR("processEIBusCallouts: Adding bus-callout (bus:%d, pri:%d)",
+            FAPI_DBG("processEIBusCallouts: Adding bus-callout"
+                     " (bus:%d, pri:%d)",
                      l_busType, l_priority);
             io_pError->addBusCallout(l_pTarget1, l_pTarget2, l_busType,
                                      l_priority);
@@ -391,7 +396,8 @@ void processEICDGs(const ErrorInfo & i_errInfo,
             l_gard = HWAS::GARD_Unrecoverable;
         }
 
-        FAPI_ERR("processEICDGs: Calling out target (huid:%.8x, pri:%d, deconf:%d, gard:%d)",
+        FAPI_DBG("processEICDGs: Calling out target"
+                 " (huid:%.8x, pri:%d, deconf:%d, gard:%d)",
                  TARGETING::get_huid(l_pTarget), l_priority, l_deconfig,
                  l_gard);
         io_pError->addHwCallout(l_pTarget, l_priority, l_deconfig, l_gard);
@@ -575,7 +581,8 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
                 l_itr = l_children.begin();
                 l_itr != l_children.end(); ++l_itr)
         {
-            FAPI_ERR("processEIChildrenCDGs: Calling out target (huid:%.8x, pri:%d, deconf:%d, gard:%d)",
+            FAPI_DBG("processEIChildrenCDGs: Calling out target"
+                     " (huid:%.8x, pri:%d, deconf:%d, gard:%d)",
                      TARGETING::get_huid(*l_itr), l_priority, l_deconfig,
                      l_gard);
             io_pError->addHwCallout(*l_itr, l_priority, l_deconfig, l_gard);
@@ -685,7 +692,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc,
 
         // add the fapi traces to the elog
         l_pError->collectTrace(FAPI_TRACE_NAME, 256 );
-        l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 256 );
+        l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
         l_pError->collectTrace(FAPI_SCAN_TRACE_NAME, 256 );
     }
 
