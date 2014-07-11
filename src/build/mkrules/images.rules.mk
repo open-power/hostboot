@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,15 +49,17 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
     $(wildcard $(IMGDIR)/*.so) $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
     $(CUSTOM_LINKER_EXE)
 	$(C2) "    LINKER     $(notdir $@)"
-	$(C1)set -o pipefail && $(CUSTOM_LINKER) $@ $< \
+	$(eval TMPFILE = $(shell mktemp))
+	$(C1)$(CUSTOM_LINKER) $@ $< \
               $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_MODULES))) \
 	      $(if $($*_EXTENDED_MODULES), \
                   --extended=0x40000 $(IMGDIR)/$*_extended.bin \
                   $(addprefix $(IMGDIR)/lib, \
 	              $(addsuffix .so, $($*_EXTENDED_MODULES))) \
 	      ) \
-              $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
-              | bzip2 -zc > $(IMGDIR)/.$*.lnkout.bz2
+              $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) > $(TMPFILE) && \
+              bzip2 -zc > $(IMGDIR)/.$*.lnkout.bz2 < $(TMPFILE)
+	rm $(TMPFILE)
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<
 
 $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
