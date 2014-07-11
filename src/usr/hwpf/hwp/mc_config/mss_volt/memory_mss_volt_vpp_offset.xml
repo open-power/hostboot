@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -22,7 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
-<!-- $Id: memory_mss_volt_vpp_offset.xml,v 1.2 2014/06/18 20:27:08 dcadiga Exp $ -->
+<!-- $Id: memory_mss_volt_vpp_offset.xml,v 1.4 2014/07/16 18:15:25 sglancy Exp $ -->
 <!-- For file ../../ipl/fapi/mss_volt_vpp_offset.C -->
 <!-- // *! OWNER NAME :   Stephen Glancy (sglancy@us.ibm.com) -->
 <!-- // *! BACKUP NAME :  Jacob Sloat (jdsloat@us.ibm.com) -->
@@ -40,6 +42,32 @@
     <deconfigure>
       <target>CHIP_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR</rc>
+    <description>Unable to read the VPD from a non-functional dimm.</description>
+    <ffdc>TARGET_POSITION</ffdc>
+    <ffdc>MBA_POSITION</ffdc>
+    <ffdc>DIMM_POSITION</ffdc>
+    <ffdc>FAILING_ATTRIBUTE</ffdc>
+    <callout>
+      <target>TARGET_DIMM_ERROR</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  
+  <hwpError>
+    <rc>RC_VOLT_VPP_DRAM_GEN_NOT_FOUND</rc>
+    <description>Code did not find a DIMM with a readable attribute for DRAM_GEN.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>

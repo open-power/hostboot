@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vpp_offset.C,v 1.8 2014/06/25 16:49:11 dcadiga Exp $
+// $Id: mss_volt_vpp_offset.C,v 1.10 2014/07/16 18:16:01 sglancy Exp $
 /* File mss_volt_vpp_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.10   | sglancy  | 07/16/14 | Fixed attribute name bug
+//  1.9    | sglancy  | 07/01/14 | Included updates for DDR4
 //  1.8    | sglancy  | 06/25/14 | Commented out DRAM_GEN checking section of the code and forced it to default DDR3 - WILL UPDATE TO CHECK THE DRAM GENERATIONS FOR FUTURE CODE GENERATIONS
 //  1.7    | sglancy  | 06/24/14 | Fixed bugs associated with empty returns from fapiGetChildChiplets
 //  1.6    | sglancy  | 06/18/14 | Deletes two unused variables and updated errors
@@ -79,13 +81,13 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     uint32_t num_chips = 0;
     uint32_t vpp_slope, vpp_intercept;
     uint8_t dram_width, enable, dram_gen;
-    dram_gen = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3;
-    ///uint8_t cur_dram_gen;  WILL BE UNCOMMENTED IN A FUTURE RELEASE - need to fix the checking for the DRAM technology generation section of the code
+    uint8_t cur_dram_gen, is_functional; 
+    bool dram_gen_found = false;
     uint8_t num_spares[2][2][4];
-    uint8_t rank_config[2][2];
+    uint8_t rank_config;
     std::vector<fapi::Target>  l_mbaChiplets;
+    std::vector<fapi::Target>  l_dimm_targets;
       
-    /* ///////////////////////// WILL BE UNCOMMENTED IN A FUTURE RELEASE - need to fix the checking for the DRAM technology generation section of the code
     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
     l_rc=fapiGetChildChiplets(i_targets[0], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
     if(l_rc) return l_rc;
@@ -94,31 +96,73 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     
     //checks to make sure that all of the DRAM generation attributes are the same, if not error out
     for(uint32_t i = 0; i < i_targets.size();i++) {
+       //gets the functional attribute to check for an active centaur
+       l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL,&i_targets[i],is_functional);
+       //found an error
+       if(l_rc) return l_rc;
+       
        //loops through all MBA chiplets to compare the DRAM technology generation attribute
        l_mbaChiplets.clear();
        l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
-       for(uint32_t j=0;j<l_mbaChiplets.size();j++) {
-          //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
-          l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,&l_mbaChiplets[j],cur_dram_gen); 
-	  if(l_rc) return l_rc;
-          //values are not equal -> set the fapi RC and exit out
-          if(cur_dram_gen != dram_gen){
-             // this just needs to be deconfiged at the dimm level
-             const fapi::Target & CHIP_TARGET = i_targets[i];
-             const uint8_t &DRAM_GEN_MISCOMPARE = cur_dram_gen;
-             const uint8_t &DRAM_GEN_START = dram_gen;
-             const uint32_t &CEN_MBA_NUM = j;
-             const uint32_t &CEN_TARGET_NUM = i;
-             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_VPP_OFFSET_DRAM_GEN_MISCOMPARE);
-             FAPI_ERR("Not all DRAM technology generations are the same.\nExiting....");
-             if(l_rc) return l_rc;
-          }//end if
+       for(uint32_t mba=0;mba<l_mbaChiplets.size();mba++) {
+          //gets the dimm level target
+          l_dimm_targets.clear();
+          //gets the number of declared dimms
+	  l_rc = fapiGetAssociatedDimms(l_mbaChiplets[mba], l_dimm_targets);
+	  for(uint32_t dimm=0;dimm<l_dimm_targets.size();dimm++) {
+	     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
+             l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE,&l_dimm_targets[dimm],cur_dram_gen); 
+	     //found an error reading the VPD
+	     if(l_rc) {
+	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
+	        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
+		   FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
+		   fapi::ReturnCode temp_rc;
+		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
+		   const uint32_t MBA_POSITION = mba;
+	    	   const uint32_t TARGET_POSITION = i;
+	    	   const uint32_t DIMM_POSITION = dimm;
+		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_DRAM_DEVICE_TYPE;
+	    	   FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
+	           fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+		   continue;
+		}
+		//otherwise, just return the error code
+		return l_rc;
+	     }
+	     //if this is the first DIMM that has a valid DRAM Technology level, then set the level and continue
+	     //otherwise throw an error and exit
+	     if(!dram_gen_found) {
+	        dram_gen = cur_dram_gen;
+		dram_gen_found = true;
+	     } //end if
+	     else {
+	        //values are not equal -> set the fapi RC and exit out
+    	  	if(cur_dram_gen != dram_gen){
+    	  	   // this just needs to be deconfiged at the dimm level
+    	  	   const fapi::Target & CHIP_TARGET = i_targets[i];
+    	  	   const uint8_t &DRAM_GEN_MISCOMPARE = cur_dram_gen;
+    	  	   const uint8_t &DRAM_GEN_START = dram_gen;
+    	  	   const uint32_t &CEN_MBA_NUM = mba;
+    	  	   const uint32_t &CEN_TARGET_NUM = i;
+    	  	   FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_VPP_OFFSET_DRAM_GEN_MISCOMPARE);
+    	  	   FAPI_ERR("Not all DRAM technology generations are the same.\nExiting....");
+    	  	   return l_rc;
+    	  	}//end if
+	     }//end else
+	  }
        }//end for
     }//end for
-    */
+    
+    //checks to make sure that the code actually found a dimm with a value for it's dram generation. if not throw an error and exit out
+    if(!dram_gen_found) {
+       FAPI_SET_HWP_ERROR(l_rc, RC_VOLT_VPP_DRAM_GEN_NOT_FOUND);
+       FAPI_ERR("Could not find a DIMM with a valid DRAM Generation.\nExiting....");
+       return l_rc;
+    }
     
     //checks to see if the DIMMs are DDR3 DIMMs if so, return 0 and exit
-    if(dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3) {
+    if(dram_gen == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
        uint32_t param_vpp_voltage_mv = 0; 
        //debug output statement
        FAPI_INF("ATTR_MSS_VPP_OFFSET: %d",param_vpp_voltage_mv);
@@ -162,37 +206,108 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
        l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
        //loops through the each MBA chiplet to get the number of ranks and the number of spares
        for(uint32_t mba = 0;mba<l_mbaChiplets.size();mba++) {
-          //gets if the centaur is a x4 or a x8
-          l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH,&l_mbaChiplets[mba],dram_width); 
-	  if(l_rc) return l_rc;
-          l_rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM,&l_mbaChiplets[mba],rank_config); 
-	  if(l_rc) return l_rc;
-          l_rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_SPARE,&l_mbaChiplets[mba],num_spares); 
-	  if(l_rc) return l_rc;
-	  for(uint32_t port=0;port<2;port++) {
-	     for(uint32_t dimm=0;dimm<2;dimm++) {
-	        //adds the appropriate number of DRAM found per dimm for each rank
-		if(dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) num_chips += 18*rank_config[port][dimm];
-		else num_chips += 9*rank_config[port][dimm];
-	        for(uint32_t rank=0;rank<4;rank++) {
-		   //figures out the spares
-		   if(dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) {
-		      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE) {
-		         num_chips += rank_config[port][dimm];
-		      }
-		      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE) {
-		         num_chips += rank_config[port][dimm];
-		      }
-		      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE) {
-		         num_chips += 2*rank_config[port][dimm];
-		      }
-		   }
-		   else {
-		      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE) {
-		         num_chips += rank_config[port][dimm];
+	  //gets the dimm level target
+	  l_rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_SPARE,&l_mbaChiplets[mba],num_spares); 
+          //found an error reading the VPD
+	  if(l_rc) {
+	     //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
+	     if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
+	     	FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
+	     	fapi::ReturnCode temp_rc;
+	     	const fapi::Target & TARGET_DIMM_ERROR = l_mbaChiplets[mba];
+	     	const uint32_t MBA_POSITION = mba;
+	     	const uint32_t TARGET_POSITION = i;
+	     	const uint32_t DIMM_POSITION = 0xff;
+	     	const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_VPD_DIMM_SPARE;
+	     	FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
+	  	fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+	     	//uses assumed value
+		for(uint32_t port=0;port<2;port++) {
+		   for(uint32_t dimm=0;dimm<2;dimm++) {
+		      for(uint32_t rank=0;rank<4;rank++) {
+	     	         num_spares[port][dimm][rank] = DIMM_SPARE_DEFAULT;
 		      }
 		   }
 		}
+	     }
+	     //otherwise, just return the error code
+	     else return l_rc;
+	  }
+	  
+          l_dimm_targets.clear();
+          //gets the number of declared dimms
+	  l_rc = fapiGetAssociatedDimms(l_mbaChiplets[mba], l_dimm_targets);
+	  for(uint32_t dimm=0;dimm<l_dimm_targets.size();dimm++) {
+	     //gets if the centaur is a x4 or a x8
+             l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_WIDTH,&l_dimm_targets[dimm],dram_width); 
+             //found an error reading the VPD
+	     if(l_rc) {
+	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
+	        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
+		   FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
+		   fapi::ReturnCode temp_rc;
+		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
+		   const uint32_t MBA_POSITION = mba;
+	    	   const uint32_t TARGET_POSITION = i;
+	    	   const uint32_t DIMM_POSITION = dimm;
+		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_DRAM_WIDTH;
+	    	   FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
+	           fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+		   //uses assumed value
+		   dram_width = DRAM_WIDTH_DEFAULT;
+		}
+		//otherwise, just return the error code
+		else return l_rc;
+	     }
+             l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,&l_dimm_targets[dimm],rank_config); 
+             //found an error reading the VPD
+	     if(l_rc) {
+	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
+	        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
+		   FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
+		   fapi::ReturnCode temp_rc;
+		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
+		   const uint32_t MBA_POSITION = mba;
+	    	   const uint32_t TARGET_POSITION = i;
+	    	   const uint32_t DIMM_POSITION = dimm;
+		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_NUM_RANKS;
+	    	   FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
+	           fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+		   //uses assumed value
+		   rank_config = NUM_RANKS_PER_DIMM_DEFAULT;
+		}
+		//otherwise, just return the error code
+		else return l_rc;
+	     }
+	     //adjusts the number of ranks so it's the actual number of ranks on the DIMM
+	     rank_config++;
+	     
+	     //adds the appropriate number of DRAM found per dimm for each rank
+	     if(dram_width == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4) num_chips += 18*rank_config;
+	     else num_chips += 9*rank_config;
+	  }
+	  //loops through and computes the number of spares
+	  //assuming that all dram_widths are the same across the centaur and am using the last one
+	  for(uint32_t port=0;port<2;port++) {
+	     for(uint32_t dimm=0;dimm<2;dimm++) {
+	     	for(uint32_t rank=0;rank<4;rank++) {
+	     	   if(dram_width == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4) {
+	     	      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE) {
+	     		 num_chips += 1;
+	     	      }
+	     	      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_VPD_DIMM_SPARE_HIGH_NIBBLE) {
+	     		 num_chips += 1;
+	     	      }
+	     	      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE) {
+	     		 num_chips += 2;
+	     	      }
+	     	   }
+	     	   else {
+	     	      if(num_spares[port][dimm][rank] == fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE) {
+	     		 num_chips += 1;
+	     	      }
+	     	   }
+	     	}
 	     }
 	  }
        }
