@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -382,7 +384,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
             int rc = cpu_start_core(pir,en_threads);
 
             // Handle time out error
-            if (ETIME == rc)
+            if (-ETIME == rc)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "call_host_activate_slave_cores: "
