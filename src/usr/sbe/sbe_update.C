@@ -2615,13 +2615,27 @@ namespace SBE
         do{
 
             /**************************************************************/
-            /*  Update Actions:                                           */
-            /*  1) Update MVPD, if necessary                              */
-            /*  2) Update SEEPROM, if necessary                           */
+            /*  Update SEEPROM, if necessary                              */
             /**************************************************************/
+            if (l_actions & UPDATE_SBE)
+            {
+#ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
+                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+#endif
+                err = updateSeepromSide(io_sbeState);
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
+                               "updateProcessorSbeSeeproms() failed. "
+                               "HUID=0x%.8X.",
+                               TARGETING::get_huid(io_sbeState.target));
+                    break;
+                }
+                l_actions |= SBE_UPDATE_COMPLETE;
+            }
 
             /**************************************************************/
-            /*  1) Update MVPD, if necessary                              */
+            /*  Update MVPD, if necessary                                 */
             /**************************************************************/
             if (l_actions & UPDATE_MVPD)
             {
@@ -2642,28 +2656,7 @@ namespace SBE
             }
 
             /**************************************************************/
-            /*  2) Update SEEPROM, if necessary                           */
-            /**************************************************************/
-            if (l_actions & UPDATE_SBE)
-            {
-#ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
-                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
-#endif
-                err = updateSeepromSide(io_sbeState);
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
-                               "updateProcessorSbeSeeproms() failed. "
-                               "HUID=0x%.8X.",
-                               TARGETING::get_huid(io_sbeState.target));
-                    break;
-                }
-                l_actions |= SBE_UPDATE_COMPLETE;
-            }
-
-
-            /**************************************************************/
-            /*  3) Create Info Error Log of successful operation          */
+            /*  Create Info Error Log of successful operation             */
             /**************************************************************/
 #ifndef CONFIG_SBE_UPDATE_SIMULTANEOUS
             TRACFCOMP( g_trac_sbe,INFO_MRK"performUpdateActions(): Successful "
