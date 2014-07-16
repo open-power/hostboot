@@ -417,6 +417,7 @@ use constant PBUS_UPSTREAM_INDEX => 3;
 use constant PBUS_TX_MSB_LSB_SWAP => 4;
 use constant PBUS_RX_MSB_LSB_SWAP => 5;
 use constant PBUS_ENDPOINT_INSTANCE_PATH => 6;
+use constant PBUS_NODE_CONFIG_FLAG => 7;
 foreach my $i (@{$powerbus->{'power-bus'}})
 {
     # Pull out the connection information from the description
@@ -426,6 +427,7 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     my $endp2 = "null";
     my $dwnstrm_swap = 0;
     my $upstrm_swap = 0;
+    my $nodeconfig = "null";
 
     my $present = index $endp1, 'not connected';
     if ($present eq -1)
@@ -437,6 +439,13 @@ foreach my $i (@{$powerbus->{'power-bus'}})
        # Grab the lane swap information
        $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
        $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
+
+       # Abort if node config information is not found
+       if(!(exists $i->{'include-for-node-config'}))
+       {
+           die "include-for-node-config element not found ";
+       }
+       $nodeconfig = $i->{'include-for-node-config'};
     }
     else
     {
@@ -464,12 +473,22 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     my $endpoint1_ipath = $i->{'endpoint'}[0]->{'instance-path'};
     my $endpoint2_ipath = $i->{'endpoint'}[1]->{'instance-path'};
     #print STDOUT "powerbus: $endp1, $endp2, $dwnstrm_swap, $upstrm_swap\n";
-    push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap,
-                  $upstrm_swap, $tx_swap, $rx_swap, $endpoint1_ipath ];
-    push @pbus, [ lc($endp2), lc($endp1), $dwnstrm_swap,
-                  $upstrm_swap, $tx_swap, $rx_swap, $endpoint2_ipath ];
-}
 
+    # Brazos: Populate power bus list only for "2-node" & "all" configuration
+    #         for ABUS. Populate all entries for other bus type.
+
+    # Other targets(tuleta, alphine..etc) : nodeconfig will be "all".
+
+    if ( (lc($bustype) ne "a") || ($nodeconfig eq "2-node") ||
+         ($nodeconfig eq "all") )
+    {
+        push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap,
+                      $upstrm_swap, $tx_swap, $rx_swap, $endpoint1_ipath,
+                      $nodeconfig ];
+        push @pbus, [ lc($endp2), lc($endp1), $dwnstrm_swap,
+                      $upstrm_swap, $tx_swap, $rx_swap, $endpoint2_ipath,
+                      $nodeconfig ];
+    }
 #------------------------------------------------------------------------------
 # Process the dmi-busses MRW file
 #------------------------------------------------------------------------------
@@ -2749,6 +2768,7 @@ sub generate_ax_buses
         my $lane_swap = 0;
         my $msb_swap = 0;
         my $ipath = "abus_or_xbus:TO_BE_ADDED";
+        my $node_config = "null";
         foreach my $pbus ( @pbus )
         {
             if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq
@@ -2764,6 +2784,7 @@ sub generate_ax_buses
                     $p_node =~ s/^n(.*):p.*:.*$/$1/;
                     $p_proc =~ s/^.*:p(.*):.*$/$1/;
                     $p_port =~ s/.*:p.*:.(.*)$/$1/;
+                    $node_config = $pbus->[PBUS_NODE_CONFIG_FLAG];
 
                     # Calculation from Pete Thomsen for 'master' chip
                     if(((${node}*100) + $proc) < (($p_node*100) + $p_proc))
@@ -2819,6 +2840,42 @@ sub generate_ax_buses
         {
             my $peerPhysPath = "physical:sys-${sys}/node-${p_node}/"
                 ."proc-${p_proc}/${type}bus-${p_port}";
+
+            if ( $type eq "a" )
+            {
+                # Brazos : Generate ABUS peer info only for "2-node" and "all"
+                # configuration.
+                # All other targets(tuleta,alphine..etc) will have "all"
+                # configuration.
+                if( ($node_config eq "2-node") || ($node_config eq "all") )
+                {
+                    print "
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>$peerPhysPath</default>
+    </attribute>
+    <compileAttribute>
+        <id>PEER_HUID</id>
+        <default>$hash_ax_buses->{$peerPhysPath}</default>
+    </compileAttribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
+            . "${type}bus-$p_port</default>
+    </attribute>";
+
+                }
+                else
+                {
+                    print "
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>";
+                }
+            }
+            else
+            {
             print "
     <attribute>
         <id>PEER_TARGET</id>
@@ -2828,14 +2885,6 @@ sub generate_ax_buses
         <id>PEER_HUID</id>
         <default>$hash_ax_buses->{$peerPhysPath}</default>
     </compileAttribute>";
-            if ($type eq "a")
-            {
-                print "
-    <attribute>
-        <id>PEER_PATH</id>
-        <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
-            . "${type}bus-$p_port</default>
-    </attribute>";
             }
             if (($node != $p_node) && ($type eq "a"))
             {
