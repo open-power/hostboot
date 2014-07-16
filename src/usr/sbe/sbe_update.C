@@ -204,6 +204,12 @@ namespace SBE
                  err = NULL;
             }
 
+#ifdef CONFIG_NO_SBE_UPDATES
+            TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
+                       "SBE updates not configured");
+            break;
+#endif
+
             for(uint32_t i=0; i<procList.size(); i++)
             {
 

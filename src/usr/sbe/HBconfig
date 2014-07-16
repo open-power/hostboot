@@ -21,3 +21,7 @@ config SBE_UPDATE_GOLDEN
         then a re-IPL request will be issued.  The other SBE SEEPROM will not
         be touched and treated as the 'Golden' SEEPROM.
 
+config NO_SBE_UPDATES
+    default n
+    help
+        Don't update the SBE SEEPROMs at all
