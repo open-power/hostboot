@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -138,6 +140,8 @@ namespace Systemcalls
         MMIO_SCRATCH_READ = 0x0802,
             /** mmio_scratch_write() */
         MMIO_SCRATCH_WRITE = 0x0803,
+            /** mmio_pvr_read() */
+        MMIO_PVR_READ = 0x0804,
 
         SYSCALL_FASTPATH_MAX
     };
