@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_ocb_indir_access.C,v 1.3 2014/03/07 14:55:01 stillgs Exp $
+// $Id: p8_ocb_indir_access.C,v 1.5 2014/07/28 21:34:47 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_ocb_indir_access.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -158,6 +158,7 @@ p8_ocb_indir_access(  const fapi::Target& i_target, \
         case 3:
             OCBAR_address = OCB3_ADDRESS_0x0006B070;
             OCBDR_address = OCB3_DATA_0x0006B075;
+            OCBCSR_address = OCB3_STATUS_CONTROL_0x0006B071;
             break;
         default:
             FAPI_ERR("Invalid OCB access channel %x", i_ocb_chan);
@@ -226,8 +227,8 @@ p8_ocb_indir_access(  const fapi::Target& i_target, \
             FAPI_ERR("Get SCOM error for address 0x%08llX", temp_address);
             return rc;
         }
-        
-        if (data.isBitSet(4) && data.isBitSet(5))
+        //OCB Channel 3 doesnt do circular operation, therefore no need to check
+        if (data.isBitSet(4) && data.isBitSet(5) && (i_ocb_chan != 3))
         {
             FAPI_DBG("Put: (MurDD1) Circular mode Put detected.  Engage extra checks");
             
