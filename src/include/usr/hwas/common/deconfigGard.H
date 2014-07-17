@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -164,7 +166,7 @@ public:
     typedef std::vector<GardRecord> GardRecords_t;
     typedef std::vector<GardRecord>::iterator GardRecordsItr_t;
     typedef std::vector<GardRecord>::const_iterator GardRecordsCItr_t;
-
+    typedef struct GardRecord GardRecord;
     /**
      * @struct DeconfigureRecord
      *
@@ -212,7 +214,18 @@ public:
      */
     errlHndl_t deconfigureTargetsFromGardRecordsForIpl(
                 const TARGETING::PredicateBase *i_pPredicate = NULL);
-
+    /**
+     * @brief Re-log the PEL which caused the input Gard event
+     *
+     * @param  i_gardRecord    Reference to the Gard Record which will be
+     *                         re-logged
+     *
+     * Called by HWAS common as part of the deconfigure targets from Gard
+     * Records for IPL. Caller must pass distinct Gard PEL.
+     *
+     * @return errlHndl_t. Error log Handle
+     * */
+     errlHndl_t platReLogGardError(GardRecord &i_gardRecord);
     /**
      * @brief Processes the Field Core Override attribute
      *
@@ -354,6 +367,10 @@ public:
      */
     errlHndl_t platGetGardRecords(const TARGETING::Target * const i_pTarget,
                               GardRecords_t & o_records);
+
+
+
+
 
 
 protected:

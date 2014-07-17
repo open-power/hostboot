@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -233,6 +235,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         HWAS_DBG("%d GARD Records found", l_gardRecords.size());
 
+        std::vector<uint32_t> errlLogEidList;
         // For each GARD Record
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
              l_itr != l_gardRecords.end();
@@ -315,6 +318,24 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             _deconfigureByAssoc(*l_pTarget, l_errlogEid);
 
             HWAS_MUTEX_UNLOCK(iv_mutex);
+
+            //If the errlogEid is already in the errLogEidList, then
+            //don't need to log it again as a single error log can
+            //create multiple guard records and we only need to repost
+            //it once.
+            std::vector<uint32_t>::iterator low =
+                std::lower_bound(errlLogEidList.begin(),
+                errlLogEidList.end(), l_errlogEid);
+            if((low == errlLogEidList.end()) || ((*low) != l_errlogEid))
+            {
+                errlLogEidList.insert(low, l_errlogEid);
+                l_pErr = platReLogGardError(l_gardRecord);
+                if (l_pErr)
+                {
+                    HWAS_ERR("platReLogGardError returned an error");
+                    break;
+                }
+            }
 
             l_pErr = platLogEvent(l_pTarget, GARD_APPLIED);
             if (l_pErr)

@@ -65,6 +65,16 @@ errlHndl_t DeconfigGard::platLogEvent(
 
     return l_pErr;
 }
+/* Hostboot plat implementation of this function does not need to
+ * re-log the error. Currently, it is handled by FSP since it's a
+ * FSP-based-system requirement.
+ */
+errlHndl_t DeconfigGard::platReLogGardError (GardRecord &i_gardRecord)
+{
+    errlHndl_t l_pErr = NULL;
+    HWAS_INF("Error Log ID: 0x%.8X", i_gardRecord.iv_errlogEid);
+    return l_pErr;
+}
 
 errlHndl_t DeconfigGard::platClearGardRecords(
     const Target * const i_pTarget)
