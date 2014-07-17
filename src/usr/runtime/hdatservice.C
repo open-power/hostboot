@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -880,7 +882,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             errhdl = getSpiraTupleVA(tuple, base_addr);
             if( errhdl ) { break; }
 
-           hdatHDIF_t* ipl_parms = reinterpret_cast<hdatHDIF_t*>
+            hdatHDIF_t* ipl_parms = reinterpret_cast<hdatHDIF_t*>
               (base_addr);
             TRACUCOMP( g_trac_runtime, "ipl_parms=%p", ipl_parms );
 
@@ -911,9 +913,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
             // Find the right tuple and verify it makes sense
             hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
+            if( iv_spiraH )
             {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_SRC_TBL]);
+                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_SRC_TBL]);
             }
             else if( unlikely(iv_spiraL != NULL) )
             {
@@ -939,9 +941,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
             // Find the right tuple and verify it makes sense
             hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
+            if( iv_spiraH )
             {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_DST_TBL]);
+                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_DST_TBL]);
             }
             else if( unlikely(iv_spiraL != NULL) )
             {
@@ -967,9 +969,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
             // Find the right tuple and verify it makes sense
             hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
+            if( iv_spiraH )
             {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
+                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
             }
             else if( unlikely(iv_spiraL != NULL) )
             {
@@ -1311,9 +1313,9 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
 
             // Find the right tuple and verify it makes sense
             hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
+            if( iv_spiraH )
             {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
+                tuple = &(iv_spiraH->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
             }
             else if( unlikely(iv_spiraL != NULL) )
             {
