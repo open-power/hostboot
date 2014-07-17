@@ -301,8 +301,7 @@ namespace INTR
 
             enum
             {
-                // TODO: RTC 111512; change back to 1s
-                CPU_WAKEUP_SECONDS = 2,
+                CPU_WAKEUP_SECONDS = 1,
                 CPU_WAKEUP_INTERVAL_COUNT = 10,
                 CPU_WAKEUP_INTERVAL_NS = (NS_PER_SEC * CPU_WAKEUP_SECONDS) /
                                          CPU_WAKEUP_INTERVAL_COUNT,

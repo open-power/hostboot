@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -293,7 +295,7 @@ void CpuManager::startSlaveCPU(cpu_t* cpu)
         };
 
         SyncTimebase* deferred = new SyncTimebase();
-        DeferredQueue::insert(deferred);
+        DeferredQueue::insert(deferred, true /* only if empty */);
         DeferredQueue::execute();
     }
 
