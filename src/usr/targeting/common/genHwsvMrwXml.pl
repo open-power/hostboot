@@ -1534,7 +1534,7 @@ sub preCalculateAxBusesHUIDs
         my $uidstr = sprintf( "0x%02X%02X%04X",
             ${my_node},
             $typenum,
-            $proc*MAX_PCIE_PER_PROC + $i;
+            $proc*MAX_PCIE_PER_PROC + $i);
         my $phys_path =
             "physical:sys-$sys/node-$my_node/proc-$proc/${type}bus-$i";
         $hash_ax_buses->{$phys_path} = $uidstr;
