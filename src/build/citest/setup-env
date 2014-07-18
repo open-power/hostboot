@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2014
+# Contributors Listed Below - COPYRIGHT 2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +37,7 @@ then
     CXXTEST_SANDBOX="cxxtest_sb"
 else
     export RUNNING_UNDER_JENKINS=1
-    CXXTEST_SANDBOX=`echo $JOB_NAME $BUILD_NUMBER | md5sum | head -c10`  
+    CXXTEST_SANDBOX=`echo $JOB_NAME $BUILD_NUMBER | md5sum | head -c10`
 fi
 
 # Setup sandbox location variables.
@@ -43,9 +45,20 @@ if [ -z $SANDBOXROOT ];
 then
     export SANDBOXROOT=${HOSTBOOTROOT}
 fi
-export SANDBOXNAME=${CXXTEST_SANDBOX}
-export SANDBOXBASE=${SANDBOXROOT}/${SANDBOXNAME}
-export SANDBOXRC=${SANDBOXROOT}/hbsandboxrc
+
+if [ -z $SANDBOXNAME ];
+then
+    export SANDBOXNAME=${CXXTEST_SANDBOX}
+fi
+if [ -z $SANDBOXBASE ];
+then
+    export SANDBOXBASE=${SANDBOXROOT}/${SANDBOXNAME}
+fi
+
+if [ -z $SANDBOXRC ];
+then
+    export SANDBOXRC=${SANDBOXROOT}/hbsandboxrc
+fi
 
 # Useful utility function.
 execute_in_sandbox()
