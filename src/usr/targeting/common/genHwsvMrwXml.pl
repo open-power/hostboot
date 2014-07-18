@@ -1534,7 +1534,7 @@ sub preCalculateAxBusesHUIDs
         my $uidstr = sprintf( "0x%02X%02X%04X",
             ${my_node},
             $typenum,
-            $proc*MAX_PCIE_PER_PROC + $i);
+            $proc*$numperchip + $i);
         my $phys_path =
             "physical:sys-$sys/node-$my_node/proc-$proc/${type}bus-$i";
         $hash_ax_buses->{$phys_path} = $uidstr;
@@ -2722,7 +2722,7 @@ sub getBusInfo
 
     my $minbus = ($type eq "A") ? 0 : ($chipName eq "murano") ? 1 : 0;
     my $maxbus = ($type eq "A") ? 2 : ($chipName eq "murano") ? 1 : 3;
-    my $numperchip = ($type eq "A") ? 3 : 4;
+    my $numperchip = ($type eq "A") ? MAX_ABUS_PER_PROC : MAX_XBUS_PER_PROC;
     my $typenum = ($type eq "A") ? 0x0F : 0x0E;
     $type = lc( $type );
 
