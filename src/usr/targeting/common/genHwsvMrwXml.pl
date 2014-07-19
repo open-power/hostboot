@@ -69,7 +69,6 @@ use constant
     MAX_EX_PER_PROC => 16,
     MAX_ABUS_PER_PROC => 3,
     MAX_XBUS_PER_PROC => 4,
-    MAX_PCIE_PER_PROC => 3,
     MAX_MCS_PER_PROC => 8,
     MAX_MBA_PER_MEMBUF => 2,
 };
@@ -2677,7 +2676,7 @@ sub generate_phb
 sub generate_a_pcie
 {
     my ($proc, $phb, $max_pcie, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X10%04X",${node},$proc*MAX_PCIE_PER_PROC + $phb);
+    my $uidstr = sprintf("0x%02X10%04X",${node},$proc*$max_pcie + $phb);
 
     # Get the PHB info
     if ($phbInit == 0)
