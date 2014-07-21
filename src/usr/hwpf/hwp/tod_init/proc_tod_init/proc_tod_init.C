@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_init.C,v 1.9 2014/04/04 20:53:11 jmcgill Exp $
+// $Id: proc_tod_init.C,v 1.10 2014/07/09 18:20:13 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -345,6 +345,22 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
             const fapi::Target & CHIP_TARGET = *target;
             const uint64_t TOD_ERROR_REG = data.getDoubleWord(0);
             FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_ERROR);
+            break;
+        }
+
+        FAPI_INF("init_tod_node: set error mask to runtime configuration");
+        rc_ecmd |= data.flushTo0();
+        rc_ecmd |= data.setWord(1,0x03F00000); // Mask TTYPE received informational bits 38:43
+        if (rc_ecmd)
+        {
+            FAPI_ERR("init_tod_node: Error 0x%08X in ecmdDataBuffer setup for TOD_ERROR_MASK_STATUS_REG_00040032 SCOM.",  rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+        rc = fapiPutScom(*target, TOD_ERROR_MASK_STATUS_REG_00040032, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("init_tod_node: Could not write TOD_ERROR_MASK_STATUS_REG_00040032");
             break;
         }
 
