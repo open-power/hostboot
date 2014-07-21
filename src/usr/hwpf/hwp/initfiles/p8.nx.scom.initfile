@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.13 2014/05/16 02:56:33 jmcgill Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.14 2014/06/26 21:00:42 johnre Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -263,7 +263,8 @@ scom 0x02013106 {
     35    ,  0b0            ;   #-- 0b00 mask Reserved
     36    ,  0b0            ;   #-- 0b01      Channel 4 AMF array corrected ECC error FIR bit" ;
     37    ,  0b0            ;   #-- 0b01      Channel 4 AMF array uncorrectable ECC error FIR bit" ;
-    38:47 ,  0b0000000000   ;   #-- 0b00 mask Reserved
+    38    ,  0b0            ;   #-- 0b01      PHYP uses to signal PRD during NX freeze
+    39:47 ,  0b000000000    ;   #-- 0b00 mask Reserved
     48    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit" ;
     49    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit duplicate"
 }
@@ -295,7 +296,8 @@ scom 0x02013107 {
     35    ,  0b0            ;   #-- 0b00 mask Reserved
     36    ,  0b1            ;   #-- 0b01      Channel 4 AMF array corrected ECC error FIR bit" ;
     37    ,  0b1            ;   #-- 0b01      Channel 4 AMF array uncorrectable ECC error FIR bit" ;
-    38:47 ,  0b0000000000   ;   #-- 0b00 mask Reserved
+    38    ,  0b1            ;   #-- 0b01      PHYP uses to signal PRD during NX freeze
+    39:47 ,  0b000000000    ;   #-- 0b00 mask Reserved
     48    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit" ;
     49    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit duplicate"
 }
@@ -330,7 +332,8 @@ scom 0x02013103 {
     35    ,  0b1            ;   #-- mask      Reserved
     36    ,  0b0            ;   #--           Channel 4 AMF array corrected ECC error FIR bit" ;
     37    ,  0b0            ;   #--           Channel 4 AMF array uncorrectable ECC error FIR bit" ;
-    38:47 ,  0b1111111111   ;   #-- mask      Reserved
+    38    ,  0b0            ;   #--           PHYP uses to signal PRD during NX freeze
+    39:47 ,  0b111111111    ;   #-- mask      Reserved
     48    ,  0b1            ;   #-- mask      FIR/SCOM satellite parity error FIR bit" ;
     49    ,  0b1            ;   #-- mask      FIR/SCOM satellite parity error FIR bit duplicate"
 }
