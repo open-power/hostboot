@@ -72,8 +72,6 @@ using namespace PlatServices;
 RasServices thisServiceGenerator;
 
 //------------------------------------------------------------------------------
-// Member Functions
-//------------------------------------------------------------------------------
 
 ServiceGeneratorClass & ServiceGeneratorClass::ThisServiceGenerator(void)
 {
@@ -82,67 +80,9 @@ ServiceGeneratorClass & ServiceGeneratorClass::ThisServiceGenerator(void)
 
 //------------------------------------------------------------------------------
 
-RasServices::RasServices() :
-    iv_ErrDataService(NULL)
-{
-    //PRDF_DTRAC("RasServices() initializing default iv_ErrDataService");
-    iv_ErrDataService = new ErrDataService();
-}
-
-//------------------------------------------------------------------------------
-RasServices::~RasServices()
-{
-    if(NULL != iv_ErrDataService)
-    {
-        PRDF_DTRAC("~RasServices() deleting iv_ErrDataService");
-        delete iv_ErrDataService;
-        iv_ErrDataService = NULL;
-    }
-}
-
-//------------------------------------------------------------------------------
-
 void ErrDataService::Initialize()
 {
     iv_serviceActionCounter = 0;
-}
-
-void RasServices::Initialize()
-{
-    iv_ErrDataService->Initialize();
-}
-
-//------------------------------------------------------------------------------
-
-void RasServices::setErrDataService(ErrDataService & i_ErrDataService)
-{
-    PRDF_TRAC("RasServices::setErrDataService() setting new ErrDataService");
-
-    if(NULL != iv_ErrDataService)
-    {
-        PRDF_DTRAC("RasServices::setErrDataService() deleting old iv_ErrDataService");
-        delete iv_ErrDataService;
-        iv_ErrDataService = NULL;
-    }
-
-    iv_ErrDataService = &i_ErrDataService;
-}
-
-//------------------------------------------------------------------------------
-
-errlHndl_t RasServices::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                        ServiceDataCollector & i_sdc,
-                                        bool & o_initiateHwudump,
-                                        TargetHandle_t & o_dumpTrgt,
-                                        errlHndl_t & o_dumpErrl,
-                                        uint32_t & o_dumpErrlActions)
-
-{
-    return iv_ErrDataService->GenerateSrcPfa( i_attnType, i_sdc,
-                                              o_initiateHwudump,
-                                              o_dumpTrgt,
-                                              o_dumpErrl,
-                                              o_dumpErrlActions);
 }
 
 //------------------------------------------------------------------------------
@@ -1182,7 +1122,76 @@ bool ErrDataService::SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer)
 
 #endif // if not __HOSTBOOT_MODULE
 
-} // End namespace PRDF
+//------------------------------------------------------------------------------
+// RasServices class
+//------------------------------------------------------------------------------
+
+RasServices::RasServices() :
+    iv_eds(NULL)
+{
+    iv_eds = new ErrDataService();
+}
+
+//------------------------------------------------------------------------------
+
+RasServices::~RasServices()
+{
+    if ( NULL != iv_eds )
+    {
+        delete iv_eds;
+        iv_eds = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void RasServices::Initialize()
+{
+    iv_eds->Initialize();
+}
+
+//------------------------------------------------------------------------------
+
+void RasServices::setErrDataService( ErrDataService & i_eds )
+{
+    if ( NULL != iv_eds )
+    {
+        delete iv_eds;
+        iv_eds = NULL;
+    }
+
+    iv_eds = &i_eds;
+}
+
+//------------------------------------------------------------------------------
+
+errlHndl_t RasServices::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                        ServiceDataCollector & i_sdc,
+                                        bool & o_initiateHwudump,
+                                        TargetHandle_t & o_dumpTrgt,
+                                        errlHndl_t & o_dumpErrl,
+                                        uint32_t & o_dumpErrlActions )
+
+{
+    return iv_eds->GenerateSrcPfa( i_attnType, i_sdc, o_initiateHwudump,
+                                   o_dumpTrgt, o_dumpErrl, o_dumpErrlActions );
+}
+
+//------------------------------------------------------------------------------
+
+void RasServices::createInitialErrl( ATTENTION_TYPE i_attnType )
+{
+    iv_eds->createInitialErrl( i_attnType );
+}
+
+//------------------------------------------------------------------------------
+
+errlHndl_t RasServices::getErrl() const
+{
+    return iv_eds->getErrl();
+}
+
+} // end namespace PRDF
 
 /******************************************************************************/
 // Servicability tags for PRDF Ras Services.

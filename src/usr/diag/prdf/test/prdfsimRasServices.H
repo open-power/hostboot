@@ -33,23 +33,16 @@
 namespace PRDF
 {
 
-/**
- Interface to RAS services provided to PRD
-*/
-class SimErrDataService: public ErrDataService
+/** Interface to RAS services provided to PRD */
+class SimErrDataService : public ErrDataService
 {
-
   public:
 
-  /**
-   Default ctor
-   */
-  inline SimErrDataService() {}
+    /** @brief Constructor */
+    inline SimErrDataService() {}
 
-  /**
-   Default dtor
-   */
-  inline virtual ~SimErrDataService() {}
+    /** @brief Destructor */
+    inline virtual ~SimErrDataService() {}
 
     /**
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
@@ -69,13 +62,6 @@ class SimErrDataService: public ErrDataService
                                        TARGETING::TargetHandle_t & o_dumpTrgt,
                                        errlHndl_t & o_dumpErrl,
                                        uint32_t & o_dumpErrlActions );
-
-private:  // functions
-
-
-private:  // Data
-
-
 
 };
 

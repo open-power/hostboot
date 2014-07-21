@@ -33,13 +33,12 @@ using namespace TARGETING;
 namespace PRDF
 {
 
-errlHndl_t SimErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                             ServiceDataCollector & i_sdc,
-                                             bool & o_initiateHwudump,
-                                             TargetHandle_t & o_dumpTrgt,
-                                             errlHndl_t & o_dumpErrl,
-                                             uint32_t & o_dumpErrlActions )
-
+errlHndl_t SimErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                              ServiceDataCollector & i_sdc,
+                                              bool & o_initiateHwudump,
+                                              TargetHandle_t & o_dumpTrgt,
+                                              errlHndl_t & o_dumpErrl,
+                                              uint32_t & o_dumpErrlActions )
 {
     using namespace TARGETING;
     using namespace PlatServices;
@@ -48,11 +47,9 @@ errlHndl_t SimErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     errlHndl_t errLog = NULL;
 
     // call the actual ras services function
-    errLog = ErrDataService::GenerateSrcPfa(attn_type, i_sdc,
-                                            o_initiateHwudump,
-                                            o_dumpTrgt,
-                                            o_dumpErrl,
-                                            o_dumpErrlActions);
+    errLog = ErrDataService::GenerateSrcPfa( i_attnType, i_sdc,
+                                             o_initiateHwudump, o_dumpTrgt,
+                                             o_dumpErrl, o_dumpErrlActions );
 
     ErrorSignature * esig = i_sdc.GetErrorSignature();
 

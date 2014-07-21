@@ -54,22 +54,16 @@ class ErrDataService
 {
   public:
 
-    /**
-     * @brief ctor
-     */
-    inline ErrDataService() :
+    /** @brief Constructor */
+    ErrDataService() :
         iv_serviceActionCounter(0),
         iv_errl(NULL)
     {}
 
-    /**
-     * @brief dtor
-     */
-    inline virtual ~ErrDataService() {}
+    /** @brief Destructor */
+    virtual ~ErrDataService() {}
 
-    /**
-     * @brief initializer
-     */
+    /** @brief Initializer */
     virtual void Initialize();
 
     /**
@@ -110,8 +104,8 @@ class ErrDataService
     void MnfgTrace( ErrorSignature * i_esig, const PfaData & i_pfaData );
 
     /**
-     * @brief Create initial error log for analyze( attn analysis) code flow.
-     * @param i_attnType attention type.
+     * @brief Creates the initial error log for PRDF::main() analysis path.
+     * @param i_attnType Analysis attention type.
      */
     void createInitialErrl( ATTENTION_TYPE i_attnType );
 
@@ -129,20 +123,18 @@ class ErrDataService
 
     /**
      * @brief  Return error log associated with current analysis flow.
-     * @return error log handle.
+     * @note   For normal analysis paths only. Will return NULL if
+               createInitialErrl() has not been called in PRDF::main().
+     * @return An error log.
      */
-    errlHndl_t getErrl() { return iv_errl; };
+    errlHndl_t getErrl() const { return iv_errl; }
 
   private:
 
-    /**
-     * @brief disable copy
-     */
+    /** @brief Disable copy. */
     ErrDataService(const ErrDataService &);
 
-    /**
-     * @brief disable assignment
-     */
+    /** @brief Disable assignment. */
     ErrDataService & operator=(const ErrDataService &);
 
     #ifndef __HOSTBOOT_MODULE
@@ -265,33 +257,25 @@ class ErrDataService
 
 };
 
-/**
- Interface to RAS services provided to PRD
-*/
-class RasServices: public ServiceGeneratorClass
+/** Interface to RAS services provided to PRD */
+class RasServices : public ServiceGeneratorClass
 {
-public:
+  public:
 
-  /**
-   @brief Default ctor
-   */
-  RasServices(void);
+    /** @brief Constructor */
+    RasServices();
 
-  /**
-   @brief Default dtor
-   */
-  ~RasServices();
+    /** @brief Destructor */
+    ~RasServices();
 
-  // Compiler generated dtor is sufficient
+    /** @brief Initializer */
+    virtual void Initialize();
 
-  virtual void Initialize();
-
-  /**
-   * @brief set the err data service to be used
-   *
-   * @param[in] i_ErrDataService new err data service
-   */
-  virtual void setErrDataService(ErrDataService & i_ErrDataService);
+    /**
+     * @brief Sets the ErrDataService to be used.
+     * @param i_eds Target ErrDataService.
+     */
+    virtual void setErrDataService( ErrDataService & i_eds );
 
     /**
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
@@ -313,26 +297,22 @@ public:
                                        uint32_t & o_dumpErrlActions );
 
     /**
-     * @brief Create initial error log for analyze( attn analysis) code flow.
-     * @param i_attnType attention type.
+     * @brief Creates the initial error log for PRDF::main() analysis path.
+     * @param i_attnType Analysis attention type.
      */
-    void createInitialErrl( ATTENTION_TYPE i_attnType )
-    {
-        iv_ErrDataService->createInitialErrl( i_attnType );
-    }
+    virtual void createInitialErrl( ATTENTION_TYPE i_attnType );
 
     /**
      * @brief  Return error log associated with current analysis flow.
-     * @return error log handle.
+     * @note   For normal analysis paths only. Will return NULL if
+               createInitialErrl() has not been called in PRDF::main().
+     * @return An error log.
      */
-    virtual errlHndl_t getErrl()
-    {
-        return iv_ErrDataService->getErrl();
-    };
+    virtual errlHndl_t getErrl() const;
 
-private:  // Data
-  // actual or sim err data service
-  ErrDataService * iv_ErrDataService;
+  private: // instance variables
+
+    ErrDataService * iv_eds; ///< Actual or simulated ErrDataService.
 
 };
 

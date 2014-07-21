@@ -69,56 +69,25 @@ class ErrDataService;
  */
 class ServiceGeneratorClass
 {
-public:
+  public:
 
-  // dg00 start
-  /**
-   Access the current concrete service generator
-   <ul>
-   <br><b>Paramters:   </b> None
-   <br><b>Returns:     </b> Reference to active ServiceGenerator
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> ServiceGenerator
-   <br><b>Notes:       </b> The definition of this function should exist
-                            in the *.C of the derived class
-   </ul><br>
-   */
-  static ServiceGeneratorClass & ThisServiceGenerator(void);
-  // dg00 end
+    /** Access the current service generator */
+    static ServiceGeneratorClass & ThisServiceGenerator();
 
-  /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> Nothing
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> Object created
-   <br><b>Exceptions:  </b> None
-   </ul><br>
-   */
-  ServiceGeneratorClass(void){}
+    /** @brief Constructor */
+    ServiceGeneratorClass() {}
 
-  /*
-   Destructor
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> No value returned
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> Compiler default is sufficient
-   </ul><br>
-   */
-  virtual ~ServiceGeneratorClass(void) {};
+    /** @brief Destructor */
+    virtual ~ServiceGeneratorClass() {}
 
+    /** @brief Initializer */
+    virtual void Initialize() = 0;
 
-  virtual void Initialize()=0;
-
-  /**
-   * @brief set the err data service to be used
-   * @param[in] i_errDataService new err data service
-   */
-  virtual void setErrDataService(ErrDataService & i_errDataService)=0;
+    /**
+     * @brief Sets the ErrDataService to be used.
+     * @param i_eds Target ErrDataService.
+     */
+    virtual void setErrDataService( ErrDataService & i_eds ) = 0;
 
     /**
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
@@ -140,19 +109,18 @@ public:
                                        uint32_t & o_dumpErrlActions ) = 0;
 
     /**
-     * @brief Create initial error log for analyze( attn analysis) code flow.
-     * @param i_attnType attention type.
+     * @brief Creates the initial error log for PRDF::main() analysis path.
+     * @param i_attnType Analysis attention type.
      */
     virtual void createInitialErrl( ATTENTION_TYPE i_attnType ) = 0;
 
     /**
      * @brief  Return error log associated with current analysis flow.
-     * @return error log handle.
+     * @note   For normal analysis paths only. Will return NULL if
+               createInitialErrl() has not been called in PRDF::main().
+     * @return An error log.
      */
-    virtual errlHndl_t getErrl() = 0;
-
-private:
-
+    virtual errlHndl_t getErrl() const = 0;
 
 };
 
