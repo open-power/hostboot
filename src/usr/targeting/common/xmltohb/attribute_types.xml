@@ -2613,7 +2613,7 @@
     <description>System Mirrorable base address</description>
     <simpleType>
         <uint64_t>
-            <default>0x0002000000000000</default><!-- 512 TB -->
+            <default>0x0000800000000000</default><!-- 128 TB -->
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
