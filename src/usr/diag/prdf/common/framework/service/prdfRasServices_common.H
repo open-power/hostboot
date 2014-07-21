@@ -35,10 +35,6 @@
 #include <iipServiceDataCollector.h>
 #include <prdfPfa5Data.h>
 
-#ifndef __HOSTBOOT_MODULE
-  #include <tmgt.H>
-#endif
-
 namespace PRDF
 {
 
@@ -62,7 +58,6 @@ class ErrDataService
      * @brief ctor
      */
     inline ErrDataService() :
-        loggingBufferFull(false),
         iv_serviceActionCounter(0),
         savedPrdReturnCode(0),
         iv_errl(NULL)
@@ -109,14 +104,6 @@ class ErrDataService
       */
     virtual void SetErrorTod( ATTENTION_TYPE the_attention,
                               ServiceDataCollector & sdc );
-
-    /**
-      @brief Query if logging buffer full - indicates attention flooding
-      @return [true | false]
-      @pre None.
-      @post None.
-      */
-    virtual bool QueryLoggingBufferFull(void) const;
 
     /**
       @brief Save a return code for inclusion in the SRC (something failed)
@@ -298,8 +285,6 @@ class ErrDataService
 
   private:
 
-    bool loggingBufferFull;
-
     uint32_t iv_serviceActionCounter;
 
     int32_t savedPrdReturnCode;
@@ -350,15 +335,6 @@ public:
    */
   virtual void SetErrorTod( ATTENTION_TYPE the_attention,
                             ServiceDataCollector & sdc );
-
-  /**
-   @brief Query if logging buffer full - indicates attention flooding
-   @param none.
-   @return [true | false]
-   @pre None.
-   @post None.
-   */
-  virtual bool QueryLoggingBufferFull(void) const;
 
   /**
    @brief Save a return code for inclusion in the SRC (something failed)

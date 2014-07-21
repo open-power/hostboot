@@ -477,7 +477,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintBool("  TRACKIT",                pfa.TRACKIT            );
         i_parser.PrintBool("  TERMINATE",              pfa.TERMINATE          );
         i_parser.PrintBool("  LOGIT",                  pfa.LOGIT              );
-        i_parser.PrintBool("  FLOODING",               pfa.FLOODING           );
         i_parser.PrintBool("  Unit CS",                pfa.UNIT_CHECKSTOP     );
         i_parser.PrintBool("  Using Sync'd Saved Sdc", pfa.USING_SAVED_SDC    );
         i_parser.PrintBool("  Last Core Termination",  pfa.LAST_CORE_TERMINATE);

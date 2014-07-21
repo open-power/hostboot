@@ -134,7 +134,6 @@ public:
     PRDF_SDC_FLAG(TRACKIT,                 0x00010)
     PRDF_SDC_FLAG(TERMINATE,               0x00008)
     PRDF_SDC_FLAG(LOGIT,                   0x00004)
-    PRDF_SDC_FLAG(FLOODING,                0x00001)
   PRDF_SDC_FLAGS_MAP_END
 
    /** Defines Analysis pass related properties.
@@ -554,30 +553,6 @@ public:
    </ul><br>
    */
   uint8_t GetThreshold(void) const { return threshold; }
-
-  /**
-   Indicate that PRD is being called faster than SP can send error logs
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> None.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> IsFlooding() == true
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SetFlooding(void) { flags |= FLOODING; }
-
-  /**
-   Query for flooding
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool IsFlooding(void) const { return (flags & FLOODING)!=0 ? true:false; }
 
     /**
      * @brief returns true if code is in isolation only pass.

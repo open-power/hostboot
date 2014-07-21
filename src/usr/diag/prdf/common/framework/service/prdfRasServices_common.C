@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfRasServices_common.H
+/** @file  prdfRasServices_common.C
  *  @brief Utility code to parse an SDC and produce the appropriate error log.
  */
 
@@ -143,18 +143,6 @@ void RasServices::SetErrorTod(ATTENTION_TYPE the_attention,
                               ServiceDataCollector & sdc)
 {
     iv_ErrDataService->SetErrorTod(the_attention, sdc);
-}
-
-//------------------------------------------------------------------------------
-
-bool ErrDataService::QueryLoggingBufferFull(void) const
-{
-    return (loggingBufferFull);
-}
-
-bool RasServices::QueryLoggingBufferFull(void) const
-{
-    return iv_ErrDataService->QueryLoggingBufferFull();
 }
 
 //------------------------------------------------------------------------------
@@ -934,7 +922,6 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
     o_pfa.TRACKIT             = i_sdc.IsMfgTracking()   ? 1 : 0;
     o_pfa.TERMINATE           = i_sdc.Terminate()       ? 1 : 0;
     o_pfa.LOGIT               = i_sdc.IsLogging()       ? 1 : 0;
-    o_pfa.FLOODING            = i_sdc.IsFlooding()      ? 1 : 0;
     o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()        ? 1 : 0;
     o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
     o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc() ? 1 : 0;
@@ -1087,7 +1074,6 @@ void ErrDataService::printDebugTraces( )
     if( sdc.IsMfgTracking() ) PRDF_DTRAC( "PRDTRACE: Track this error" );
     if( sdc.Terminate() )     PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );
     if( sdc.IsLogging() )     PRDF_DTRAC( "PRDTRACE: Create history log entry");
-    if( sdc.IsFlooding() )    PRDF_DTRAC( "PRDTRACE: Flooding detected" );
 
     #undef PRDF_FUNC
 

@@ -33,11 +33,6 @@
 //  ServiceGenerator serv_generator
 //  ATTENTION_TYPE attentionType = MACHINE_CHECK;  (see iipsdbug.h)
 //
-//
-//  ///// Query for flooding condition
-//  if(serv_generator.QueryLoggingBufferFull())
-//  {  WE ARE FLOODING.... mask errors }
-//
 //  ///// Save a bad return code to be in th SRC
 //  serv_generator.SaveRcForSrc((int32_t)analyzeRc);
 //
@@ -139,17 +134,6 @@ public:
    */
   virtual void SetErrorTod( ATTENTION_TYPE the_attention,
                             ServiceDataCollector & sdc)=0;
-
-  /**
-   Query if logging buffer full - indicates attention flooding
-   <ul>
-   <br><b>Parameters:  </b> none.
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   </ul><br>
-   */
-  virtual bool QueryLoggingBufferFull(void) const=0;
 
   /**
    Save a return code for inclusion in the SRC (something failed)

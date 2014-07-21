@@ -143,8 +143,7 @@ int32_t ThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
   if (iv_count == 1)                                  // Interval begins at the 1st occurrence
   {
     iv_endTime = curTime + iv_policy->interval;       // Project the end of interval (in sec)
-    if((iv_count == iv_policy->threshold) ||
-            (error.service_data->IsFlooding()))       // We've hit threshold within the interval
+    if ( iv_count == iv_policy->threshold )
     {
       error.service_data->SetThresholdMaskId(iv_maskId);  // threshold, degraded YES
       iv_count = 0;                                       // Reset the counter on threshold
@@ -158,8 +157,7 @@ int32_t ThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
         error.service_data->SetHits((uint8_t)iv_count); // pw01
         iv_endTime = curTime + iv_policy->interval;     // Project the new end of interval
     }
-    else if((iv_count == iv_policy->threshold) ||
-            (error.service_data->IsFlooding()))       // We've hit threshold within the interval
+    else if ( iv_count == iv_policy->threshold )
     {
       error.service_data->SetThresholdMaskId(iv_maskId);  // threshold, degraded YES
       iv_count = 0;                                       // Reset the counter on threshold
@@ -232,8 +230,7 @@ int32_t ThresholdSigResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
     if (1 == l_count) // first time: set end timer.
     {
         l_countTime.second = l_curTime + iv_policy->interval;
-        if ((l_countTime.first == iv_policy->threshold) ||
-                 (error.service_data->IsFlooding()))
+        if ( l_countTime.first == iv_policy->threshold )
         {
             // set overthreshold flag / maskid, clear count.
             error.service_data->SetThresholdMaskId(l_sig.getSigId());
@@ -249,8 +246,7 @@ int32_t ThresholdSigResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
             l_countTime.second = l_curTime + iv_policy->interval;
         }
         // Check over threshold and under time interval.
-        else if ((l_countTime.first == iv_policy->threshold) ||
-                 (error.service_data->IsFlooding()))
+        else if ( l_countTime.first == iv_policy->threshold )
         {
             // set overthreshold flag / maskid, clear count.
             error.service_data->SetThresholdMaskId(l_sig.getSigId());

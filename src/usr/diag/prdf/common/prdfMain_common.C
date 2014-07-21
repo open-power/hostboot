@@ -250,11 +250,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         // capture time of day
         serviceGenerator.SetErrorTod( i_attentionType, serviceData );
 
-        if(serviceGenerator.QueryLoggingBufferFull())
-        {
-            serviceData.SetFlooding();
-        }
-
         int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
         // flush Cache to free up the memory
         RegDataCache::getCachedRegisters().flush();
