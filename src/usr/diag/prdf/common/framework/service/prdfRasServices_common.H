@@ -59,7 +59,6 @@ class ErrDataService
      */
     inline ErrDataService() :
         iv_serviceActionCounter(0),
-        savedPrdReturnCode(0),
         iv_errl(NULL)
     {}
 
@@ -74,45 +73,23 @@ class ErrDataService
     virtual void Initialize();
 
     /**
-     @brief Create an SRC, PFA data, and Error log for the ServiceData provided
-     @param[in] attn_type  (see iipsdbug.h)
-     @param[in,out] sdc  (see iipServiceData.h)
-     @param[out] o_initiateHwudump whether or not to initiate hwudump
-     @param[out] o_dumpTrgt The DUMP target
-     @param[out] o_dumpErrl The DUMP error handle
-     @param[out] o_dumpErrlActions DUMP error action flags
-     @return Error Log - Null if successfully committed
-     @pre SetErrorTod()?
-     @post Error log(s) build and logged, SRC built, etc.
-     @exception None.
-     @note
+     * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
+     * @param  i_attnType Analysis attention type.
+     * @param  i_sdc      Target SDC.
+     * @param  o_initiateHwudump whether or not to initiate hwudump
+     * @param  o_dumpTrgt The DUMP target
+     * @param  o_dumpErrl The DUMP error handle
+     * @param  o_dumpErrlActions DUMP error action flags
+     * @return A non-NULL error log indicates a system termination is required.
+     *         Otherwise, PRD will commit the error log generated.
+     * @pre    The Time of Error must be set in the given SDC.
      */
-    virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                      ServiceDataCollector & sdc,
-                                      bool & o_initiateHwudump,
-                                      TARGETING::TargetHandle_t & o_dumpTrgt,
-                                      errlHndl_t & o_dumpErrl,
-                                      uint32_t & o_dumpErrlActions );
-
-    /**
-      @brief Set the TOD of the current error
-      @param[in] the_attention (see iipsdbug.h)
-      @param[in,out] sdc
-      @pre None.
-      @post Error timestamped with TOD, latency state modifed
-      @note Uses the SPC interface to get the TOD
-      */
-    virtual void SetErrorTod( ATTENTION_TYPE the_attention,
-                              ServiceDataCollector & sdc );
-
-    /**
-      @brief Save a return code for inclusion in the SRC (something failed)
-      @param[in] a return code
-      @return none.
-      @pre None.
-      @post Rc stored
-      */
-    virtual void SaveRcForSrc(int32_t the_rc);
+    virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                       ServiceDataCollector & i_sdc,
+                                       bool & o_initiateHwudump,
+                                       TARGETING::TargetHandle_t & o_dumpTrgt,
+                                       errlHndl_t & o_dumpErrl,
+                                       uint32_t & o_dumpErrlActions );
 
     /**
       @brief Add the Service Data Collector Capture Data to the User Data of the Error Log.
@@ -124,11 +101,6 @@ class ErrDataService
       @exception None.
       */
     static void AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl);
-
-    static void SetTerminateOnCheckstop(bool setting)
-    {
-        terminateOnCheckstop = setting;
-    }
 
     /**
      * @brief Add trace data to file for Manufacturing.
@@ -287,11 +259,7 @@ class ErrDataService
 
     uint32_t iv_serviceActionCounter;
 
-    int32_t savedPrdReturnCode;
-
     ServiceDataCollector sdc;
-
-    static bool terminateOnCheckstop;
 
     errlHndl_t iv_errl;
 
@@ -325,50 +293,24 @@ public:
    */
   virtual void setErrDataService(ErrDataService & i_ErrDataService);
 
-  /**
-   @brief Set the TOD of the current error and check for Machine check
-   @param[in] the_attention (see iipsdbug.h)
-   @param[in,out] sdc
-   @pre None.
-   @post Error timestamped with TOD, latency state modifed
-   @note Uses the SPC interface to get the TOD
-   */
-  virtual void SetErrorTod( ATTENTION_TYPE the_attention,
-                            ServiceDataCollector & sdc );
-
-  /**
-   @brief Save a return code for inclusion in the SRC (something failed)
-   @param[in] a return code
-   @return none.
-   @pre None.
-   @post Rc stored
-   */
-  virtual void SaveRcForSrc(int32_t the_rc);
-
-  /**
-   @brief Create an SRC, PFA data, and Error log for the ServiceData provided
-   @param[in] attn_type  (see iipsdbug.h)
-   @param[in,out] sdc  (see iipServiceData.h)
-   @param[out] o_initiateHwudump whether or not to initiate hwudump
-   @param[out] o_dumpTrgt The DUMP target.
-   @param[out] o_dumpErrl The DUMP error handle
-   @param[out] o_dumpErrlActions DUMP error action flags
-   @return Error Log - Null if successfully committed
-   @pre SetErrorTod()?
-   @post Error log(s) build and logged, SRC built, etc.
-   @exception None.
-   */
-  virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE attn_type,
-                                    ServiceDataCollector & sdc,
-                                    bool & o_initiateHwudump,
-                                    TARGETING::TargetHandle_t & o_dumpTrgt,
-                                    errlHndl_t & o_dumpErrl,
-                                    uint32_t & o_dumpErrlActions );
-
-  static void SetTerminateOnCheckstop(bool setting)
-  {
-      ErrDataService::SetTerminateOnCheckstop(setting);
-  }
+    /**
+     * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
+     * @param  i_attnType Analysis attention type.
+     * @param  i_sdc      Target SDC.
+     * @param  o_initiateHwudump whether or not to initiate hwudump
+     * @param  o_dumpTrgt The DUMP target
+     * @param  o_dumpErrl The DUMP error handle
+     * @param  o_dumpErrlActions DUMP error action flags
+     * @return A non-NULL error log indicates a system termination is required.
+     *         Otherwise, PRD will commit the error log generated.
+     * @pre    The Time of Error must be set in the given SDC.
+     */
+    virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                       ServiceDataCollector & i_sdc,
+                                       bool & o_initiateHwudump,
+                                       TARGETING::TargetHandle_t & o_dumpTrgt,
+                                       errlHndl_t & o_dumpErrl,
+                                       uint32_t & o_dumpErrlActions );
 
     /**
      * @brief Create initial error log for analyze( attn analysis) code flow.

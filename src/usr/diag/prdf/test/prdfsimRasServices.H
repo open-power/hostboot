@@ -51,25 +51,24 @@ class SimErrDataService: public ErrDataService
    */
   inline virtual ~SimErrDataService() {}
 
-  /**
-   @brief Create an SRC, PFA data, and Error log for the ServiceData provided
-   @param[in] attn_type  (see iipsdbug.h)
-   @param[in,out] sdc  (see iipServiceData.h)
-   @param[out] o_initiateHwudump whether or not to initiate hwudump
-   @param[out] o_dumpTrgt The DUMP target.
-   @param[out] o_dumpErrl The DUMP error handle
-   @param[out] o_dumpErrlActions DUMP error action flags
-   @return Error Log - Null if successfully committed
-   @pre SetErrorTod()?
-   @post Error log(s) build and logged, SRC built, etc.
-   @exception None.
-   */
-  virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                    ServiceDataCollector & sdc,
-                                    bool & o_initiateHwudump,
-                                    TARGETING::TargetHandle_t & o_dumpTrgt,
-                                    errlHndl_t & o_dumpErrl,
-                                    uint32_t & o_dumpErrlActions );
+    /**
+     * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
+     * @param  i_attnType Analysis attention type.
+     * @param  i_sdc      Target SDC.
+     * @param  o_initiateHwudump whether or not to initiate hwudump
+     * @param  o_dumpTrgt The DUMP target
+     * @param  o_dumpErrl The DUMP error handle
+     * @param  o_dumpErrlActions DUMP error action flags
+     * @return A non-NULL error log indicates a system termination is required.
+     *         Otherwise, PRD will commit the error log generated.
+     * @pre    The Time of Error must be set in the given SDC.
+     */
+    virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                       ServiceDataCollector & i_sdc,
+                                       bool & o_initiateHwudump,
+                                       TARGETING::TargetHandle_t & o_dumpTrgt,
+                                       errlHndl_t & o_dumpErrl,
+                                       uint32_t & o_dumpErrlActions );
 
 private:  // functions
 

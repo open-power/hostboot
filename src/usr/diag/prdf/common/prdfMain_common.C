@@ -247,8 +247,10 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
         serviceData.SetAttentionType(i_attentionType);
 
-        // capture time of day
-        serviceGenerator.SetErrorTod( i_attentionType, serviceData );
+        // Set the time in which PRD handled the error.
+        Timer timeOfError;
+        PlatServices::getCurrentTime( timeOfError );
+        serviceData.SetTOE( timeOfError );
 
         int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
         // flush Cache to free up the memory
@@ -297,8 +299,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     {
         PlatServices::milliSleep( 0, 20 );
     }
-
-    RasServices::SetTerminateOnCheckstop(true);
 
     retErrl = g_prd_errlHndl.release();
 

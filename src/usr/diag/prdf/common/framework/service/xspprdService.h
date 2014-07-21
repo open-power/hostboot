@@ -33,9 +33,6 @@
 //  ServiceGenerator serv_generator
 //  ATTENTION_TYPE attentionType = MACHINE_CHECK;  (see iipsdbug.h)
 //
-//  ///// Save a bad return code to be in th SRC
-//  serv_generator.SaveRcForSrc((int32_t)analyzeRc);
-//
 //  ServiceDataCollector serviceData;
 //  // serviceData = results from PRD Analysis;
 //  ///// Make an SRC for PRD
@@ -123,48 +120,24 @@ public:
    */
   virtual void setErrDataService(ErrDataService & i_errDataService)=0;
 
-  /**
-   Set the TOD of the current error
-   <ul>
-   <br><b>Parameter:   </b> the_attention (see iipsdbug.h)
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> Error timestamped with TOD, latency state modifed
-   <br><b>Notes:       </b> Uses the SPC interface to get the TOD
-   </ul><br>
-   */
-  virtual void SetErrorTod( ATTENTION_TYPE the_attention,
-                            ServiceDataCollector & sdc)=0;
-
-  /**
-   Save a return code for inclusion in the SRC (something failed)
-   <ul>
-   <br><b>Parameters:  </b> a return code
-   <br><b>Returns:     </b> none.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> Rc stored
-   </ul><br>
-   */
-  virtual void SaveRcForSrc(int32_t the_rc)=0;
-
-  /**
-   @brief Create an SRC, PFA data, and Error log for the ServiceData provided
-   @param[in] attn_type  (see iipsdbug.h)
-   @param[in,out] sdc  (see iipServiceData.h)
-   @param[out] o_initiateHwudump whether or not to initiate hwudump
-   @param[out] o_dumpTrgt The DUMP target.
-   @param[out] o_dumpErrl The DUMP error handle
-   @param[out] o_dumpErrlActions DUMP error action flags
-   @return Error Log - Null if successfully committed
-   @pre SetErrorTod()?
-   @post Error log(s) build and logged, SRC built, etc.
-   @exception None.
-   */
-  virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                    ServiceDataCollector & sdc,
-                                    bool & o_initiateHwudump,
-                                    TARGETING::TargetHandle_t & o_dumpTrgt,
-                                    errlHndl_t & o_dumpErrl,
-                                    uint32_t & o_dumpErrlActions )=0;
+    /**
+     * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
+     * @param  i_attnType Analysis attention type.
+     * @param  i_sdc      Target SDC.
+     * @param  o_initiateHwudump whether or not to initiate hwudump
+     * @param  o_dumpTrgt The DUMP target
+     * @param  o_dumpErrl The DUMP error handle
+     * @param  o_dumpErrlActions DUMP error action flags
+     * @return A non-NULL error log indicates a system termination is required.
+     *         Otherwise, PRD will commit the error log generated.
+     * @pre    The Time of Error must be set in the given SDC.
+     */
+    virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                       ServiceDataCollector & i_sdc,
+                                       bool & o_initiateHwudump,
+                                       TARGETING::TargetHandle_t & o_dumpTrgt,
+                                       errlHndl_t & o_dumpErrl,
+                                       uint32_t & o_dumpErrlActions ) = 0;
 
     /**
      * @brief Create initial error log for analyze( attn analysis) code flow.

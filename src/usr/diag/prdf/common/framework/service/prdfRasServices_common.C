@@ -69,7 +69,6 @@ using namespace PlatServices;
 // Local Globals
 //------------------------------------------------------------------------------
 
-bool ErrDataService::terminateOnCheckstop = true;
 RasServices thisServiceGenerator;
 
 //------------------------------------------------------------------------------
@@ -127,34 +126,6 @@ void RasServices::setErrDataService(ErrDataService & i_ErrDataService)
     }
 
     iv_ErrDataService = &i_ErrDataService;
-}
-
-//------------------------------------------------------------------------------
-
-void ErrDataService::SetErrorTod(ATTENTION_TYPE the_attention,
-                                 ServiceDataCollector & sdc)
-{
-  Timer l_curEventTime;
-  PlatServices::getCurrentTime(l_curEventTime);
-  sdc.SetTOE(l_curEventTime);
-}
-
-void RasServices::SetErrorTod(ATTENTION_TYPE the_attention,
-                              ServiceDataCollector & sdc)
-{
-    iv_ErrDataService->SetErrorTod(the_attention, sdc);
-}
-
-//------------------------------------------------------------------------------
-
-void ErrDataService ::SaveRcForSrc(int32_t the_rc)
-{
-    savedPrdReturnCode = the_rc;
-}
-
-void RasServices::SaveRcForSrc(int32_t the_rc)
-{
-    iv_ErrDataService->SaveRcForSrc(the_rc);
 }
 
 //------------------------------------------------------------------------------
