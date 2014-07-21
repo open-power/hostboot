@@ -88,7 +88,7 @@ void ErrDataService::Initialize()
 //------------------------------------------------------------------------------
 
 errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                           ServiceDataCollector & i_sdc,
+                                           ServiceDataCollector & io_sdc,
                                            bool & o_initiateHwudump,
                                            TargetHandle_t & o_dumpTrgt,
                                            errlHndl_t & o_dumpErrl,
@@ -108,7 +108,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 #else
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
-    uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for sdc flatten
+    uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for SDC flatten
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
 
@@ -125,10 +125,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     uint32_t actionFlag = (ERRL_ACTION_SA | ERRL_ACTION_REPORT | ERRL_ACTION_CALL_HOME);
 
     HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
-
-    // Use this SDC unless determined in Check Stop processing to use a UE,
-    // or SUE saved SDC
-    sdc = i_sdc;
 
     GardAction::ErrorType prdGardErrType;
     HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
@@ -161,10 +157,10 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         severityParm = ERRL_SEV_UNRECOVERABLE;
 
         // Check for SUE-CS condition flags.
-        if ((!sdc.IsUERE() ) &&
-            ( sdc.IsSUE()  )   )
+        if ((!io_sdc.IsUERE() ) &&
+            ( io_sdc.IsSUE()  )   )
         {
-            //Read current sdc state flags from registry
+            //Read current SDC state flags from registry
             errlHndl_t errorLog = UtilReg::read ( "prdf/RasServices",
                                                   &sdcSaveFlags, sz_uint8 );
             if (errorLog)
@@ -181,22 +177,22 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
-                    ServiceDataCollector origSdc = sdc; // Save original SDC
-                    sdc = sdcBuffer;                    // Set the new SDC
+                    ServiceDataCollector origSdc = io_sdc; // Save original SDC
+                    io_sdc = sdcBuffer;                    // Set the new SDC
 
                     // Add the original signature to the new SDC's
                     // multi-signature list.
-                    sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
+                    io_sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
 
                     // This is a checkstop attention so some values will need
                     // to be overridden.
 
-                    sdc.Gard( origSdc.QueryGard() );
+                    io_sdc.Gard( origSdc.QueryGard() );
 
-                    sdc.SetAttentionType( origSdc.GetAttentionType() );
+                    io_sdc.SetAttentionType( origSdc.GetAttentionType() );
 
                     if ( origSdc.Terminate() )
-                        sdc.SetFlag(ServiceDataCollector::TERMINATE);
+                        io_sdc.SetFlag(ServiceDataCollector::TERMINATE);
                 }
             }
             else if (sdcSaveFlags & SDC_SAVE_SUE_FLAG ) //else check if SUE log
@@ -208,22 +204,22 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
-                    ServiceDataCollector origSdc = sdc; // Save original SDC
-                    sdc = sdcBuffer;                    // Set the new SDC
+                    ServiceDataCollector origSdc = io_sdc; // Save original SDC
+                    io_sdc = sdcBuffer;                    // Set the new SDC
 
                     // Add the original signature to the new SDC's
                     // multi-signature list.
-                    sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
+                    io_sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
 
                     // This is a checkstop attention so some values will need
                     // to be overridden.
 
-                    sdc.Gard( origSdc.QueryGard() );
+                    io_sdc.Gard( origSdc.QueryGard() );
 
-                    sdc.SetAttentionType( origSdc.GetAttentionType() );
+                    io_sdc.SetAttentionType( origSdc.GetAttentionType() );
 
                     if ( origSdc.Terminate() )
-                        sdc.SetFlag(ServiceDataCollector::TERMINATE);
+                        io_sdc.SetFlag(ServiceDataCollector::TERMINATE);
                 }
             }
         }
@@ -236,23 +232,23 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     {
 #ifndef  __HOSTBOOT_MODULE
         if //Ue-Re RECOVERABLE condition.
-            ((sdc.IsUERE()   ) &&
-             (!sdc.IsSUE()   ) &&
-             (!sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an sdc
+            ((io_sdc.IsUERE()   ) &&
+             (!io_sdc.IsSUE()   ) &&
+             (!io_sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an SDC
         {
-            bool l_rc = SdcSave(SDC_SAVE_UE_FLAG, sdc);
+            bool l_rc = SdcSave(SDC_SAVE_UE_FLAG, io_sdc);
             if (l_rc)
             {
                 PRDF_ERR( PRDF_FUNC"Failure in UE SDC Save Function" );
             }
         }
         else if //Sue-Re RECOVERABLE condition.
-            ((!sdc.IsUERE()   ) &&
-             (sdc.IsSUE()     ) &&
-             (!sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an sdc
+            ((!io_sdc.IsUERE()   ) &&
+             (io_sdc.IsSUE()     ) &&
+             (!io_sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an SDC
 
         {
-            bool l_rc = SdcSave(SDC_SAVE_SUE_FLAG, sdc);
+            bool l_rc = SdcSave(SDC_SAVE_SUE_FLAG, io_sdc);
             if (l_rc)
             {
                 PRDF_ERR( PRDF_FUNC"Failure in SUE SDC Save Function" );
@@ -260,13 +256,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
 #endif  // if not __HOSTBOOT_MODULE
 
-        if (!sdc.IsLogging() )
+        if (!io_sdc.IsLogging() )
         {
             // This is a Hidden Log
             severityParm = ERRL_SEV_INFORMATIONAL;
             actionFlag = (actionFlag | ERRL_ACTION_HIDDEN);
         }
-        else if ( sdc.IsServiceCall() ) //At Thresold
+        else if ( io_sdc.IsServiceCall() ) //At Thresold
         {
             severityParm = ERRL_SEV_PREDICTIVE;
         }
@@ -282,18 +278,18 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     else if (i_attnType == SPECIAL)
     {
-        if (sdc.IsServiceCall())
+        if (io_sdc.IsServiceCall())
         //Bit Steered already, or Bit Steer Not supported
         {
             severityParm = ERRL_SEV_PREDICTIVE;
         }
-        else if ( (!sdc.IsServiceCall()) && (!sdc.IsLogging()) ) // Special Attn Clean Up
+        else if ( (!io_sdc.IsServiceCall()) && (!io_sdc.IsLogging()) ) // Special Attn Clean Up
         {
             severityParm = ERRL_SEV_INFORMATIONAL;
             //Hidden, No Service Action for Infomational
             actionFlag = ERRL_ACTION_HIDDEN;
         }
-        else if ( (!sdc.IsServiceCall()) && (sdc.IsLogging()) ) // Special Attn Bit Steer Normal Condition
+        else if ( (!io_sdc.IsServiceCall()) && (io_sdc.IsLogging()) ) // Special Attn Bit Steer Normal Condition
         {
             severityParm = ERRL_SEV_RECOVERED;
             //Hidden, No Service Action for Recovered
@@ -305,7 +301,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Set Gard Error Type and state
     //**************************************************************
 
-    prdGardErrType = sdc.QueryGard();
+    prdGardErrType = io_sdc.QueryGard();
     switch ( prdGardErrType )
     {
         case GardAction::NoGard:     gardErrType = HWAS::GARD_NULL;       break;
@@ -333,7 +329,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // HIGH priority.
     bool sappSwNoGardReq = false, sappHwNoGardReq = false;
 
-    const SDC_MRU_LIST & mruList = sdc.getMruList();
+    const SDC_MRU_LIST & mruList = io_sdc.getMruList();
     int32_t calloutsPlusDimms = mruList.size();
 
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
@@ -421,8 +417,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
     }
 
-    SrcWord7  = sdc.GetAttentionType() << 8;
-    SrcWord7 |= sdc.GetCauseAttentionType();
+    SrcWord7  = io_sdc.GetAttentionType() << 8;
+    SrcWord7 |= io_sdc.GetCauseAttentionType();
 
     //--------------------------------------------------------------------------
     // Check for IPL Diag Mode and set up for Deferred Deconfig
@@ -446,7 +442,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //**************************************************************
     // Update Error Log with SRC
     //**************************************************************
-    ErrorSignature * esig = sdc.GetErrorSignature();
+    ErrorSignature * esig = io_sdc.GetErrorSignature();
 
     updateSrc( esig->getChipId(), SrcWord7, esig->getSigId(),
                SrcWord9, PRD_Reason_Code);
@@ -459,8 +455,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     bool capDataAdded = false;
     if (calloutsPlusDimms > 3)
     {
-        AddCapData(sdc.GetCaptureData(),iv_errl);
-        AddCapData(sdc.getTraceArrayData(), iv_errl);
+        AddCapData( io_sdc.GetCaptureData(),    iv_errl );
+        AddCapData( io_sdc.getTraceArrayData(), iv_errl );
         capDataAdded = true;
     }
 
@@ -592,14 +588,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     PfaData pfaData;
 
-    initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
+    initPfaData( io_sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
                  prdGardErrType, pfaData, o_dumpTrgt );
 
     //**************************************************************
     // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
 
-    ForceTerminate = checkForceTerm( sdc, o_dumpTrgt, pfaData );
+    ForceTerminate = checkForceTerm( io_sdc, o_dumpTrgt, pfaData );
 
     //*************************************************************
     // Check for Manufacturing Mode terminate here and then do
@@ -652,8 +648,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Check to make sure Capture Data wasn't added earlier.
     if (!capDataAdded)
     {
-        AddCapData(sdc.GetCaptureData(), iv_errl);
-        AddCapData(sdc.getTraceArrayData(), iv_errl);
+        AddCapData( io_sdc.GetCaptureData(),    iv_errl );
+        AddCapData( io_sdc.getTraceArrayData(), iv_errl );
     }
 
     // Note moved the code from here, that was associated with checking for the last
@@ -669,18 +665,18 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // This will also perform Gard and Deconfig actions.
     // Do the Unit Dumps if needed.
     //**************************************************************
-    if (sdc.IsDontCommitErrl() && !sdc.IsUnitCS() && (MACHINE_CHECK != i_attnType) )
+    if (io_sdc.IsDontCommitErrl() && !io_sdc.IsUnitCS() && (MACHINE_CHECK != i_attnType) )
     {
         delete iv_errl;
         iv_errl = NULL;
     }
-    else if ( !ReturnELog && !ForceTerminate && !sdc.Terminate() )
+    else if ( !ReturnELog && !ForceTerminate && !io_sdc.Terminate() )
     {
         // Handle any unit checkstop conditions, if needed (i.e. runtime
         // deconfiguration, dump/FFDC collection, etc.
-        if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
+        if ( io_sdc.IsUnitCS() && !io_sdc.IsUsingSavedSdc() )
         {
-            handleUnitCS( o_dumpTrgt, o_initiateHwudump );
+            handleUnitCS( io_sdc, o_dumpTrgt, o_initiateHwudump );
         }
 
         // Commit the Error log
@@ -769,7 +765,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
+void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
                                   uint32_t i_attnType, bool i_deferDeconfig,
                                   uint32_t i_errlAct, uint32_t i_errlSev,
                                   uint32_t i_prdGardType,
@@ -936,7 +932,7 @@ bool ErrDataService::SdcSave( sdcSaveFlagsEnum i_saveFlag,
             break;
         }
 
-          //Read current sdc state flags from registry
+          //Read current SDC state flags from registry
         errorLog = UtilReg::read ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
         if (errorLog)
         {
@@ -1067,14 +1063,14 @@ void RasServices::setErrDataService( ErrDataService & i_eds )
 //------------------------------------------------------------------------------
 
 errlHndl_t RasServices::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                        ServiceDataCollector & i_sdc,
+                                        ServiceDataCollector & io_sdc,
                                         bool & o_initiateHwudump,
                                         TargetHandle_t & o_dumpTrgt,
                                         errlHndl_t & o_dumpErrl,
                                         uint32_t & o_dumpErrlActions )
 
 {
-    return iv_eds->GenerateSrcPfa( i_attnType, i_sdc, o_initiateHwudump,
+    return iv_eds->GenerateSrcPfa( i_attnType, io_sdc, o_initiateHwudump,
                                    o_dumpTrgt, o_dumpErrl, o_dumpErrlActions );
 }
 

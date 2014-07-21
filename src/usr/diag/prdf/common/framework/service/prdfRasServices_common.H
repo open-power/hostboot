@@ -69,7 +69,7 @@ class ErrDataService
     /**
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
      * @param  i_attnType Analysis attention type.
-     * @param  i_sdc      Target SDC.
+     * @param  io_sdc     Target SDC.
      * @param  o_initiateHwudump whether or not to initiate hwudump
      * @param  o_dumpTrgt The DUMP target
      * @param  o_dumpErrl The DUMP error handle
@@ -79,7 +79,7 @@ class ErrDataService
      * @pre    The Time of Error must be set in the given SDC.
      */
     virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                       ServiceDataCollector & i_sdc,
+                                       ServiceDataCollector & io_sdc,
                                        bool & o_initiateHwudump,
                                        TARGETING::TargetHandle_t & o_dumpTrgt,
                                        errlHndl_t & o_dumpErrl,
@@ -174,7 +174,7 @@ class ErrDataService
      * @param o_pfa      The PFA data struct.
      * @param o_dumpTrgt The DUMP target.
      */
-    void initPfaData( ServiceDataCollector & i_sdc,
+    void initPfaData( const ServiceDataCollector & i_sdc,
                       uint32_t i_attnType, bool i_deferDeconfig,
                       uint32_t i_errlAct, uint32_t i_errlSev,
                       uint32_t i_prdGardType,
@@ -210,16 +210,18 @@ class ErrDataService
      * @param io_pfa      The PFA data struct.
      * @return  True if PRD should terminate system, False otherwise.
      */
-    bool checkForceTerm( ServiceDataCollector & i_sdc,
+    bool checkForceTerm( const ServiceDataCollector & i_sdc,
                          TARGETING::TargetHandle_t i_dumpTrgt,
                          PfaData &io_pfaData );
 
     /**
      * @brief Handles unit checkstops.
-     * @param i_unitCsTarget chip(let) target.
-     * @param o_initiateHwudump whether or not to initiate hwudump
+     * @param i_sdc             The service data collector.
+     * @param i_unitCsTarget    Chip(let) target.
+     * @param o_initiateHwudump Whether or not to initiate hwudump
      */
-    void handleUnitCS( TARGETING::TargetHandle_t i_unitCsTarget,
+    void handleUnitCS( const ServiceDataCollector & i_sdc,
+                       TARGETING::TargetHandle_t i_unitCsTarget,
                        bool & o_initiateHwudump );
 
     /**
@@ -245,8 +247,6 @@ class ErrDataService
   private:
 
     uint32_t iv_serviceActionCounter;
-
-    ServiceDataCollector sdc;
 
     errlHndl_t iv_errl;
 
@@ -275,7 +275,7 @@ class RasServices : public ServiceGeneratorClass
     /**
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
      * @param  i_attnType Analysis attention type.
-     * @param  i_sdc      Target SDC.
+     * @param  io_sdc     Target SDC.
      * @param  o_initiateHwudump whether or not to initiate hwudump
      * @param  o_dumpTrgt The DUMP target
      * @param  o_dumpErrl The DUMP error handle
@@ -285,7 +285,7 @@ class RasServices : public ServiceGeneratorClass
      * @pre    The Time of Error must be set in the given SDC.
      */
     virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                       ServiceDataCollector & i_sdc,
+                                       ServiceDataCollector & io_sdc,
                                        bool & o_initiateHwudump,
                                        TARGETING::TargetHandle_t & o_dumpTrgt,
                                        errlHndl_t & o_dumpErrl,

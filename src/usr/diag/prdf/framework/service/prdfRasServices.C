@@ -39,6 +39,8 @@ namespace PRDF
 
 using namespace PlatServices;
 
+//------------------------------------------------------------------------------
+
 void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
                                 const PfaData & i_pfaData )
 {
@@ -57,7 +59,7 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
     #undef PRDF_FUNC
 }
 
-//--------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 {
@@ -109,7 +111,7 @@ void ErrDataService::checkMpIplEligibility( ATTENTION_TYPE i_attnType,
 
 //------------------------------------------------------------------------------
 
-bool ErrDataService::checkForceTerm( ServiceDataCollector & i_sdc,
+bool ErrDataService::checkForceTerm( const ServiceDataCollector & i_sdc,
                                      TargetHandle_t i_dumpTrgt,
                                      PfaData &io_pfaData )
 {
@@ -119,7 +121,8 @@ bool ErrDataService::checkForceTerm( ServiceDataCollector & i_sdc,
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleUnitCS( TargetHandle_t i_unitCsTarget,
+void ErrDataService::handleUnitCS( const ServiceDataCollector & i_sdc,
+                                   TargetHandle_t i_unitCsTarget,
                                    bool & o_initiateHwudump)
 {
     // No-op in Hostboot

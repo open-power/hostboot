@@ -34,7 +34,7 @@ namespace PRDF
 {
 
 errlHndl_t SimErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                              ServiceDataCollector & i_sdc,
+                                              ServiceDataCollector & io_sdc,
                                               bool & o_initiateHwudump,
                                               TargetHandle_t & o_dumpTrgt,
                                               errlHndl_t & o_dumpErrl,
@@ -47,11 +47,11 @@ errlHndl_t SimErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     errlHndl_t errLog = NULL;
 
     // call the actual ras services function
-    errLog = ErrDataService::GenerateSrcPfa( i_attnType, i_sdc,
+    errLog = ErrDataService::GenerateSrcPfa( i_attnType, io_sdc,
                                              o_initiateHwudump, o_dumpTrgt,
                                              o_dumpErrl, o_dumpErrlActions );
 
-    ErrorSignature * esig = i_sdc.GetErrorSignature();
+    ErrorSignature * esig = io_sdc.GetErrorSignature();
 
     // report the actual signature
     getSimServices().reportSig(esig->getChipId(), esig->getSigId());
