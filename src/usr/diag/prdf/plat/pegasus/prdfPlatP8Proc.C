@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -92,6 +94,34 @@ int32_t calloutPeerPsiBusTgt( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Proc, calloutPeerPsiBusTgt );
+
+/**
+ * @brief Check if we're running in hostboot
+ * @param i_chip Proc chip.
+ * @param i_sc Step Code data struct
+ * @return SUCCESS because this is the Hostboot file
+ */
+int32_t inHostboot( ExtensibleChip * i_chip,
+                    STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return SUCCESS;
+} PRDF_PLUGIN_DEFINE( Proc, inHostboot );
+
+/**
+ * @brief Collect NX debug traces
+ * @param i_chip Proc chip.
+ * @param i_sc Step Code data struct
+ * @return SUCCESS
+ */
+int32_t collectNxTraceArray( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    // This error should not occur during Hostboot
+    // but if it is, no trace collection is needed.
+
+    return SUCCESS;
+
+} PRDF_PLUGIN_DEFINE( Proc, collectNxTraceArray );
 
 }//namespace Proc ends
 

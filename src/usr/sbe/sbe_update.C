@@ -78,6 +78,7 @@ TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, KILOBYTE );
 // Global Variables for MBOX Ipl Query
 static bool g_mbox_query_done   = false;
 static bool g_mbox_query_result = false;
+static bool g_istep_mode        = false;
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -111,23 +112,11 @@ namespace SBE
 
         do{
 
-            /*****************************************************************/
-            /* Skip Update if in istep mode with a FSP present               */
-            /*****************************************************************/
             // Get Target Service, and the system target.
             TargetService& tS = targetService();
             TARGETING::Target* sys = NULL;
             (void) tS.getTopLevelTarget( sys );
             assert(sys, "updateProcessorSbeSeeproms() system target is NULL");
-
-            // @todo RTC 97441 - remove this check
-            if ( sys->getAttr<ATTR_ISTEP_MODE>() &&     // true => istep mode
-                 INITSERVICE::spBaseServicesEnabled() ) // true => FSP present
-            {
-                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
-                           "istep mode and FSP present");
-                break;
-            }
 
             /*****************************************************************/
             /* Skip Update if MNFG_FLAG_FSP_UPDATE_SBE_IMAGE is set          */
@@ -143,6 +132,13 @@ namespace SBE
                            "(0x%.16X) is set in MNFG Flags 0x%.16X",
                            MNFG_FLAG_FSP_UPDATE_SBE_IMAGE, mnfg_flags);
                 break;
+            }
+
+            // For a future check, determine if in istep mode and FSP is present
+            if ( sys->getAttr<ATTR_ISTEP_MODE>() && // true => istep mode
+                 INITSERVICE::spBaseServicesEnabled() ) // true => FSP present
+            {
+                g_istep_mode = true;
             }
 
             //Make sure procedure constants keep within expected range.
@@ -208,16 +204,12 @@ namespace SBE
                  err = NULL;
             }
 
-            // If Master Processor is Venice skip SBE Update
-            // @todo RTC 97441 remove this check
-            if( (masterProcChipTargetHandle->getAttr<TARGETING::ATTR_MODEL>()
-                 == TARGETING::MODEL_VENICE) )
-            {
-                TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
-                           "masterProcChipTargetHandle is Venice: skipping "
-                           "SBE Update");
-                 break;
-            }
+#ifdef CONFIG_NO_SBE_UPDATES
+            TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
+                       "SBE updates not configured");
+            break;
+#endif
+
             for(uint32_t i=0; i<procList.size(); i++)
             {
 
@@ -366,7 +358,7 @@ namespace SBE
                            INFO_MRK"updateProcessorSbeSeeproms(): Calling "
                            "INITSERVICE::doShutdown() with "
                            "SBE_UPDATE_REQUEST_REIPL = 0x%X",
-                           l_restartNeeded, SBE_UPDATE_REQUEST_REIPL );
+                           SBE_UPDATE_REQUEST_REIPL );
                 INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
             }
 
@@ -1385,7 +1377,7 @@ namespace SBE
 
             TRACDBIN(g_trac_sbe, "getSbeInfoState-spA",
                      &(io_sbeState.seeprom_0_ver),
-                     sizeof(sbeVersion_t));
+                     sizeof(sbeSeepromVersionInfo_t));
 
             /*******************************************/
             /*  Get SEEPROM B SBE Version Information  */
@@ -1406,7 +1398,7 @@ namespace SBE
 
             TRACDBIN(g_trac_sbe, "getSbeInfoState-spB",
                      &(io_sbeState.seeprom_1_ver),
-                    sizeof(sbeVersion_t));
+                    sizeof(sbeSeepromVersionInfo_t));
 
             /***********************************************/
             /*  Determine which SEEPROM System Booted On   */
@@ -2416,6 +2408,24 @@ namespace SBE
                          : // set bit 1
                          io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
 
+                    // If istep mode, re-IPL bit won't be checked, so also
+                    // change perm flag to boot off of alt on next IPL
+                    if ( g_istep_mode )
+                    {
+                        // Update MVPD PERMANENT flag: make alt=perm
+                        (io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                         // clear bit 0
+                         io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
+                         : //set bit 0
+                         io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "istep mode: update alt to perm, (sit="
+                                   "0x%.2X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   i_system_situation);
+                    }
+
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "cur=perm/dirty(%d), alt=dirty. Update alt. re-"
                                "IPL. (sit=0x%.2X, act=0x%.8X, flags=0x%.2X)",
@@ -2611,13 +2621,27 @@ namespace SBE
         do{
 
             /**************************************************************/
-            /*  Update Actions:                                           */
-            /*  1) Update MVPD, if necessary                              */
-            /*  2) Update SEEPROM, if necessary                           */
+            /*  Update SEEPROM, if necessary                              */
             /**************************************************************/
+            if (l_actions & UPDATE_SBE)
+            {
+#ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
+                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+#endif
+                err = updateSeepromSide(io_sbeState);
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
+                               "updateProcessorSbeSeeproms() failed. "
+                               "HUID=0x%.8X.",
+                               TARGETING::get_huid(io_sbeState.target));
+                    break;
+                }
+                l_actions |= SBE_UPDATE_COMPLETE;
+            }
 
             /**************************************************************/
-            /*  1) Update MVPD, if necessary                              */
+            /*  Update MVPD, if necessary                                 */
             /**************************************************************/
             if (l_actions & UPDATE_MVPD)
             {
@@ -2638,28 +2662,7 @@ namespace SBE
             }
 
             /**************************************************************/
-            /*  2) Update SEEPROM, if necessary                           */
-            /**************************************************************/
-            if (l_actions & UPDATE_SBE)
-            {
-#ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
-                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
-#endif
-                err = updateSeepromSide(io_sbeState);
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
-                               "updateProcessorSbeSeeproms() failed. "
-                               "HUID=0x%.8X.",
-                               TARGETING::get_huid(io_sbeState.target));
-                    break;
-                }
-                l_actions |= SBE_UPDATE_COMPLETE;
-            }
-
-
-            /**************************************************************/
-            /*  3) Create Info Error Log of successful operation          */
+            /*  Create Info Error Log of successful operation             */
             /**************************************************************/
 #ifndef CONFIG_SBE_UPDATE_SIMULTANEOUS
             TRACFCOMP( g_trac_sbe,INFO_MRK"performUpdateActions(): Successful "

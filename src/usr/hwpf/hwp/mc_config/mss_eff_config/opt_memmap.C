@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.C,v 1.18 2014-06-19 14:06:34 dcrowell Exp $
+// $Id: opt_memmap.C,v 1.19 2014/06/20 20:23:44 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.C,v $
 
 
@@ -30,7 +30,7 @@
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 // *|
 // *! TITLE       : opt_memmap.C
 // *! DESCRIPTION : Layout non-mirrored/mirrored address map (FAPI)
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.18   | jmcgill  | 06/20/14| Add logic for flipped drawer enum
 //  1.17   | dcrowell | 06/19/14| Switch from #define to attr for mirror origin
 //  1.16   | jmcgill  | 10/28/13| Offset drawers by 32TB rather than 1TB
 //  1.15   | jmcgill  | 09/17/13| Add logic to offset memory map based on
@@ -83,6 +84,9 @@
 //
 //    This provides a basis for mss_eff_grouping() to stack all on-chip
 //    groups.
+//    
+//    NOTE: offset/mirrored origin (512TB above/below) is controlled by
+//          value of ATTR_MIRROR_BASE_ADDRESS
 //
 // 2) mss_eff_grouping() call
 //    - The HWP updates each proc's ATTR_PROC_[MEM|MIRROR]_[BASES|SIZES]
@@ -102,8 +106,9 @@
 //         policy       sort criteria        origin         origin
 //        --------      -------------      ------------    --------
 //         NORMAL            nm                0TB           512TB
-//         DRAWER            nm             1TB*drawer     512TB+(1TB*drawer/2)
+//         DRAWER            nm            32TB*drawer     512TB+(32TB*drawer)/2
 //         FLIPPED           m                512TB           0TB
+//      FLIPPED_DRAWER       m         512TB+(32TB*drawer) 32TB*drawer
 //        SELECTIVE         nm+m               0TB            8TB
 //
 //    - Write ATTR_PROC_[MEM|MIRROR]_BASE attributes to their final
@@ -245,8 +250,10 @@ public:
             l_rhs_eff_size  = rhs.iv_nm_eff_size;
         }
         // sort by mirrored size
-        else if ((iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED) &&
-                 (rhs.iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED))
+        else if (((iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED) &&
+                  (rhs.iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)) ||
+                 ((iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER) &&
+                  (rhs.iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER)))
         {
             l_this_eff_size = iv_m_eff_size;
             l_rhs_eff_size  = rhs.iv_m_eff_size;
@@ -504,7 +511,7 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
             break;
         }
 
-        FAPI_INF("opt_memmap called with i_init = %d, mirror_policy: %d, origin=%llX",
+        FAPI_INF("opt_memmap called with i_init: %d, mirror_policy: %d, mirror_origin: %016llX",
                  (i_init)?(1):(0), l_mirror_policy, l_mirror_origin);
 
         // first pass of execution
@@ -539,9 +546,9 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                  l_iter != i_procs.end();
                  ++l_iter)
             {
-                if ((l_mirror_policy ==
-                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) &&
-                    (l_iter == i_procs.begin()))
+                if ((l_iter == i_procs.begin()) &&
+                    ((l_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) ||
+                     (l_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER)))
                 {
                     uint8_t drawer_id;
                     rc = FAPI_ATTR_GET(ATTR_FABRIC_NODE_ID,
@@ -553,8 +560,16 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                         break;
                     }
 
-                    mem_base = drawer_id * 32 * OPT_MEMMAP_TB;
-                    mirror_base = l_mirror_origin + (mem_base / 2);
+                    if (l_mirror_policy ==  ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER)
+                    {
+                        mem_base = drawer_id * 32 * OPT_MEMMAP_TB;
+                        mirror_base = l_mirror_origin + (mem_base / 2);
+                    }
+                    else
+                    {
+                        mirror_base = drawer_id * 32 * OPT_MEMMAP_TB;
+                        mem_base = l_mirror_origin + mirror_base;
+                    }
                 }
 
                 rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASE,
@@ -615,9 +630,9 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                  l_iter != i_procs.end();
                  ++l_iter)
             {
-                if ((l_mirror_policy ==
-                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) &&
-                    (l_iter == i_procs.begin()))
+                if ((l_iter == i_procs.begin()) &&
+                    ((l_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) ||
+                     (l_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER)))
                 {
                     uint8_t drawer_id;
                     rc = FAPI_ATTR_GET(ATTR_FABRIC_NODE_ID,
@@ -629,8 +644,16 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                         break;
                     }
 
-                    l_nm_base_curr = drawer_id * 32 * OPT_MEMMAP_TB;
-                    l_m_base_curr = l_mirror_origin + (l_nm_base_curr / 2);
+                    if (l_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER)
+                    {
+                        l_nm_base_curr = drawer_id * 32 * OPT_MEMMAP_TB;
+                        l_m_base_curr = l_mirror_origin + (l_nm_base_curr / 2);
+                    }
+                    else
+                    {
+                        l_m_base_curr = drawer_id * 32 * OPT_MEMMAP_TB;
+                        l_nm_base_curr = l_mirror_origin + l_m_base_curr;
+                    }
                 }
 
                 ProcChipMemmap p(&(*l_iter), l_mirror_policy);
@@ -682,8 +705,10 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                     l_nm_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size;
                     l_m_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size / 2;
                 }
-                else if (l_mirror_policy ==
-                         ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+                else if ((l_mirror_policy ==
+                          ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED) ||
+                         (l_mirror_policy ==
+                          ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER))
                 {
                     l_nm_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size;
                     l_m_base_curr += l_drawer_memmap[i-1].iv_m_eff_size;

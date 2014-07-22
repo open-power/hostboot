@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +38,9 @@ void* vfs_main(void*);
 
 void* init_main(void* unused)
 {
+    // Detach this task from the parent
+    task_detach();
+
     tid_t   tidrc   =   0;
     barrier_t l_barrier;
     barrier_init(&l_barrier,2);

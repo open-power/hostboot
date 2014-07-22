@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -183,18 +185,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 {
     #define PRDF_FUNC "[ErrDataService::GenerateSrcPfa] "
 
-    errlHndl_t o_errl = NULL;
-
 #ifdef __HOSTBOOT_MODULE
     using namespace ERRORLOG;
     using namespace HWAS;
     errlSeverity_t severityParm = ERRL_SEV_RECOVERED;
 #else
     bool causeAttnPreviouslyReported = false;
-    bool pldCheck = false;  // Default to not do the PLD check. Set it to true for  Machine Check
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
-    HWSV::hwsvTermEnum termFlag = HWSV::HWSV_SYS_NO_TERMINATE;
     uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for sdc flatten
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
@@ -244,14 +242,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         PRDF_ERR( PRDF_FUNC"Hostboot should NOT have any system checkstop!" );
 #else
-        pldCheck = true;              // Do the PLD check
-
-        if (terminateOnCheckstop)
-        {
-            //Also need to return error log for machine check condition
-            termFlag = HWSV::HWSV_SYS_TERMINATE_HW_CHECKSTOP;
-        }
-
         ReturnELog = true;
 
         severityParm = ERRL_SEV_UNRECOVERABLE;
@@ -534,24 +524,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
 
     //**************************************************************
-    // Create Error Log with SRC
+    // Update Error Log with SRC
     //**************************************************************
     ErrorSignature * esig = sdc.GetErrorSignature();
 
-    PRDF_HW_CREATE_ERRL(o_errl,
-                        ERRL_SEV_PREDICTIVE,
-                        ERRL_ETYPE_NOT_APPLICABLE,
-                        SRCI_MACH_CHECK,
-                        SRCI_NO_ATTR,
-                        PRDF_RAS_SERVICES,
-                        FSP_DEFAULT_REFCODE,
-                        PRD_Reason_Code,
-                        esig->getChipId(), //SRC Word 6
-                        SrcWord7,          //code location - SRC Word 7
-                        esig->getSigId(),  //signature - SRC Word 8
-                        SrcWord9,          //user data - SRC Word 9
-                        termFlag,
-                        pldCheck);         //pldCheck
+    updateSrc( esig->getChipId(), SrcWord7, esig->getSigId(),
+               SrcWord9, PRD_Reason_Code);
 
     //**************************************************************
     //  Add SDC Capture data to Error Log User Data here only if
@@ -561,12 +539,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     bool capDataAdded = false;
     if (calloutsPlusDimms > 3)
     {
-        AddCapData(sdc.GetCaptureData(),o_errl);
+        AddCapData(sdc.GetCaptureData(),iv_errl);
         capDataAdded = true;
     }
 
     // make sure serviceAction doesn't override errl severity
-    o_errl->setSev(severityParm);
+    iv_errl->setSev(severityParm);
 
     if (ERRL_ACTION_HIDDEN == actionFlag)
     {  // Diagnostics is not needed in the next IPL cycle for non-visible logs
@@ -597,7 +575,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
                                 deconfigState,
-                                o_errl,
+                                iv_errl,
                                 gardErrType,
                                 severityParm,
                                 l_diagUpdate);
@@ -606,7 +584,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         else if(PRDcalloutData::TYPE_PROCCLK == thiscallout.getType() ||
                 PRDcalloutData::TYPE_PCICLK  == thiscallout.getType())
         {
-            PRDF_ADD_CLOCK_CALLOUT(o_errl,
+            PRDF_ADD_CLOCK_CALLOUT(iv_errl,
                                    thiscallout.getTarget(),
                                    thiscallout.getType(),
                                    thispriority,
@@ -624,7 +602,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 PRDF_HW_ADD_CALLOUT( *it,
                                      thispriority,
                                      deconfigState,
-                                     o_errl,
+                                     iv_errl,
                                      gardErrType,
                                      severityParm,
                                      l_diagUpdate );
@@ -639,7 +617,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
             PRDF_HW_ADD_PROC_CALLOUT(thisProcedureID,
                                      thispriority,
-                                     o_errl,
+                                     iv_errl,
                                      severityParm);
 
             // Use the flags set earlier to determine if the callout is just Software (SP code or Phyp Code).
@@ -651,7 +629,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
                 PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_LVL_SUPP,
                                          MRU_LOW,
-                                         o_errl,
+                                         iv_errl,
                                          severityParm);
 
                 SecondLevel = true;
@@ -680,50 +658,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
                  prdGardErrType, pfaData, dumpTrgt );
 
-    HUID dumpId       = pfaData.msDumpInfo.id;
-    TYPE dumpTrgtType = getTargetType( dumpTrgt );
-
     //**************************************************************
-    // Check for Unit CheckStop.
-    // Check for Last Functional Core.
-    // PFA data updates for these item.
+    // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
 
-    // Now the check is for Unit Check Stop and Dump ID for Processor
-    // Skip the termination on Last Core if this is a Saved SDC
-    if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
-    {
-        PRDF_TRAC( PRDF_FUNC"Unit CS on HUID: 0x%08x", dumpId );
-
-        if ( TYPE_CORE == dumpTrgtType )
-        {
-            // Check if this is last functional core
-            if ( PlatServices::checkLastFuncCore(dumpTrgt) )
-            {
-                PRDF_TRAC(PRDF_FUNC"Last Functional Core HUID: 0x%08x", dumpId);
-
-                ForceTerminate = true;
-                pfaData.LAST_CORE_TERMINATE = 1;
-                o_errl->setSev(ERRL_SEV_UNRECOVERABLE);
-                pfaData.errlSeverity = ERRL_SEV_UNRECOVERABLE;
-            }
-        }
-    }
-
-    // Check the errl for the terminate state
-    // Note: will also be true for CheckStop attn.
-    bool l_termSRC = false;
-    PRDF_GET_TERM_SRC(o_errl, l_termSRC);
-    if(l_termSRC)
-    {
-        ForceTerminate = true;
-        uint32_t l_plid = 0;
-        PRDF_GET_PLID(o_errl, l_plid);
-        PRDF_INF(PRDF_FUNC"check for isTerminateSRC is true. PLID=%.8X", l_plid);
-    }
+    ForceTerminate = checkForceTerm( sdc, dumpTrgt, pfaData );
 
     //*************************************************************
-    // Must check for Manufacturing Mode terminate here and then do
+    // Check for Manufacturing Mode terminate here and then do
     // the needed overrides on ForceTerminate flag.
     //*************************************************************
     if ( PlatServices::mnfgTerminate() && !ForceTerminate )
@@ -735,7 +677,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
              !HW )
         {
             //Terminate in Manufacturing Mode, in IPL mode, for visible log, with no HW callouts.
-            PRDF_SRC_WRITE_TERM_STATE_ON(o_errl, SRCI_TERM_STATE_MNFG);
+            PRDF_SRC_WRITE_TERM_STATE_ON(iv_errl, SRCI_TERM_STATE_MNFG);
         }
         // Do not terminate if recoverable or informational.
         // Do not terminate if deferred deconfig.
@@ -748,7 +690,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
         else
         {
-            PRDF_SRC_WRITE_TERM_STATE_ON(o_errl, SRCI_TERM_STATE_MNFG);
+            PRDF_SRC_WRITE_TERM_STATE_ON(iv_errl, SRCI_TERM_STATE_MNFG);
         }
 
         pfaData.errlActions = actionFlag;
@@ -763,7 +705,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //**************************************************************
     UtilMem l_membuf;
     l_membuf << pfaData;
-    PRDF_ADD_FFDC( o_errl, (const char*)l_membuf.base(), l_membuf.size(),
+    PRDF_ADD_FFDC( iv_errl, (const char*)l_membuf.base(), l_membuf.size(),
                    ErrlVer1, ErrlSectPFA5_1 );
 
     //**************************************************************
@@ -773,7 +715,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Check to make sure Capture Data wasn't added earlier.
     if (!capDataAdded)
     {
-        AddCapData(sdc.GetCaptureData() ,o_errl);
+        AddCapData(sdc.GetCaptureData() ,iv_errl);
     }
 
     // Note moved the code from here, that was associated with checking for the last
@@ -782,7 +724,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Collect PRD trace
     // NOTE: Each line of trace is on average 36 bytes so 768 bytes should get
     //       us around 21 lines of trace output.
-    PRDF_COLLECT_TRACE(o_errl, 768);
+    PRDF_COLLECT_TRACE(iv_errl, 768);
 
     //**************************************************************
     // Commit the eror log.
@@ -791,117 +733,42 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //**************************************************************
     if (sdc.IsDontCommitErrl() && !sdc.IsUnitCS() && (MACHINE_CHECK != i_attnType) )
     {
-        delete o_errl;
-        o_errl = NULL;
+        delete iv_errl;
+        iv_errl = NULL;
     }
     else if ( !ReturnELog && !ForceTerminate && !i_sdc.Terminate() )
     {
-        // Check to see if we need to do a Proc Core dump
+        // Handle any unit checkstop conditions, if needed (i.e. runtime
+        // deconfiguration, dump/FFDC collection, etc.
         if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
         {
-            if ( dumpTrgtType == TYPE_PROC )
-            {
-                // NX Unit Checktop - runtime deconfig each accelerator
-                int32_t l_rc = SUCCESS;
-                SDC_MRU_LIST mrulist = sdc.GetMruList();
-                for ( SDC_MRU_LIST::iterator i = mrulist.begin();
-                      i < mrulist.end(); ++i )
-                {
-                    /* FIXME: need to add accelerators runtime deconfig
-                    TargetHandle_t accelTarget = i->callout.getMruValues();
-                    if ( TYPE_CORE == PlatServices::getTargetType(accelTarget) )
-                    {
-                        l_rc = PRDF_RUNTIME_DECONFIG( accelTarget );
-                        if ( SUCCESS != l_rc )
-                            break;
-                    }
-                    */
-                }
-
-                if ( SUCCESS == l_rc )
-                {
-                    l_rc = PRDF_HWUDUMP( o_errl, CONTENT_HWNXLCL,
-                                         dumpId );
-                }
-            }
-            else if (dumpTrgtType == TYPE_MEMBUF ||
-                     dumpTrgtType == TYPE_MBA    ||
-                     dumpTrgtType == TYPE_MCS)
-            {
-                // Centaur Checkstop
-                TargetHandle_t centaurHandle = dumpTrgt;
-                if ( TYPE_MCS == dumpTrgtType )
-                {
-                    centaurHandle = getConnectedChild( dumpTrgt,
-                                                       TYPE_MEMBUF, 0 );
-                }
-                else if ( TYPE_MBA == dumpTrgtType )
-                {
-                    centaurHandle = getConnectedParent( dumpTrgt,
-                                                        TYPE_MEMBUF );
-                }
-
-                if (centaurHandle)
-                {
-                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle,
-                                                         o_errl,
-                                                         false);
-                    if ( SUCCESS != l_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC"runtime deconfig failed 0x%08x",
-                                  dumpId );
-                    }
-                    // No unit dump for Centaur checkstop
-                }
-            }
-            else
-            {
-                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt, o_errl,
-                                                      true);
-                if ( SUCCESS == l_rc )
-                {
-                    // Call Dump for Proc Core CS
-                    if ( TYPE_EX == dumpTrgtType )
-                    {
-                        l_rc = PRDF_HWUDUMP( o_errl,
-                                             CONTENT_SINGLE_CORE_CHECKSTOP,
-                                             dumpId );
-                    }
-                    // FIXME: Will need to add Centaur DMI channel checkstop
-                    //        support later.
-                    else
-                    {
-                        PRDF_ERR( PRDF_FUNC"Unsupported dump for target 0x%08x",
-                                  dumpId );
-                    }
-                }
-            }
+            handleUnitCS( dumpTrgt );
         }
 
         // Commit the Error log
         // Need to move below here since we'll need
-        // to pass o_errl to PRDF_HWUDUMP
+        // to pass iv_errl to PRDF_HWUDUMP
         // for FSP specific SRC handling in the future
         MnfgTrace( esig, pfaData );
 
-        PRDF_HW_COMMIT_ERRL( o_errl, actionFlag );
-        if ( NULL != o_errl )
+        PRDF_HW_COMMIT_ERRL( iv_errl, actionFlag );
+        if ( NULL != iv_errl )
         {
             // Just commit the log.
             uint32_t dumpPlid = 0;
-            PRDF_GET_PLID(o_errl, dumpPlid);
+            PRDF_GET_PLID(iv_errl, dumpPlid);
 
             uint32_t l_rc = 0;
-            PRDF_GET_RC(o_errl, l_rc);
+            PRDF_GET_RC(iv_errl, l_rc);
 
             uint16_t l_reasonCode = 0;
-            PRDF_GET_REASONCODE(o_errl, l_reasonCode);
+            PRDF_GET_REASONCODE(iv_errl, l_reasonCode);
 
             PRDF_INF( PRDF_FUNC"Committing error log: PLID=%.8X, "
                                "ReasonCode=%.8X, RC=%.8X, actions=%.4X",
                                dumpPlid, l_reasonCode, l_rc, actionFlag );
 
-            PRDF_COMMIT_ERRL(o_errl, actionFlag);
+            PRDF_COMMIT_ERRL(iv_errl, actionFlag);
         }
     }
     // If the Error Log is not committed (as due to a Terminate condtion),
@@ -940,6 +807,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //prints debug traces
 
     printDebugTraces();
+
+    // Reset iv_errl to NULL. This is done to catch logical bug in our code.
+    // It enables us to assert in createInitialErrl function if iv_errl is
+    // not NULL which should catch any logical bug in initial stages of testing.
+    errlHndl_t o_errl = iv_errl;
+    iv_errl = NULL;
 
     return o_errl;
 
@@ -1118,9 +991,13 @@ void ErrDataService::printDebugTraces( )
     if( sdc.IsDegraded() )     PRDF_DTRAC( "PRDTRACE: Performance is degraded");
 
     if( sdc.IsServiceCall() )
+    {
         PRDF_DTRAC( "PRDTRACE: SERVICE REQUIRED" );
+    }
     else
+    {
         PRDF_DTRAC( "PRDTRACE: SERVICE NOT REQUIRED" );
+    }
 
     if( sdc.IsMfgTracking() ) PRDF_DTRAC( "PRDTRACE: Track this error" );
     if( sdc.Terminate() )     PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );

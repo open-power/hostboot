@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -322,12 +324,12 @@ void PegasusConfigurator::addChipsToPllDomain(
                     #ifdef __HOSTBOOT_MODULE
                     (*io_pllDomains)[l_node] = new PllDomain(
                                         i_domainId, ioClock, procClock,
-                                        ThresholdResolution::cv_pllDefault );
+                                        ThresholdResolution::cv_mnfgDefault );
                     #else
                     (*io_pllDomains)[l_node] = new PllDomain(
                                         i_domainId, ioClock, procClock,
                                         CONTENT_HW,
-                                        ThresholdResolution::cv_pllDefault );
+                                        ThresholdResolution::cv_mnfgDefault );
                     #endif
                 }
                 else if(CLOCK_DOMAIN_MEMBUF == i_domainId)
@@ -338,11 +340,11 @@ void PegasusConfigurator::addChipsToPllDomain(
                     #ifdef __HOSTBOOT_MODULE
                     (*io_pllDomains)[l_node] = new PllDomain(
                                         i_domainId, clock,
-                                        ThresholdResolution::cv_pllDefault );
+                                        ThresholdResolution::cv_mnfgDefault );
                     #else
                     (*io_pllDomains)[l_node] = new PllDomain(
                                         i_domainId, clock, CONTENT_HW,
-                                        ThresholdResolution::cv_pllDefault );
+                                        ThresholdResolution::cv_mnfgDefault );
                     #endif
                 }
 

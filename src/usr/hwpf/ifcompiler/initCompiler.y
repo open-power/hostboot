@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,6 +45,7 @@
 //                 camvanng 06/15/12  Ability to do bitwise OR and AND operations
 //                 camvanng 06/27/12  Improve error and debug tracing
 // End Change Log *********************************************************************************
+// $Id: initCompiler.y,v 1.10 2014/06/30 19:49:24 thi Exp $
 /**
  * @file initCompiler.y
  * @brief Contains the yacc/bison code for parsing an initfile.

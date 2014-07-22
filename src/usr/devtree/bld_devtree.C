@@ -337,9 +337,9 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyCells32(cpuNode, "ibm,ppc-interrupt-server#s",
                              interruptServerNum, numThreads);
 
-    /* This is the "architected processor version" as defined in PAPR. Just
-     * stick to 0x0f000004 for P8 and things will be fine */
-    i_dt->addPropertyCell32(cpuNode, "cpu-version", 0x0f000004);
+    /* Fill in the actual PVR of chip -- it is only a 32 bit reg*/
+    uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
+    i_dt->addPropertyCell32(cpuNode, "cpu-version", l_pvr);
 
     i_dt->addPropertyCells32(cpuNode, "ibm,processor-segment-sizes",
                              segmentSizes,

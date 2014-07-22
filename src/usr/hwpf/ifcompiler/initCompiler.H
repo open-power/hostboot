@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,7 +38,7 @@
 //                 camvanng 04/12/12 Ability to specify search paths for include files
 //                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
-
+// $Id: initCompiler.H,v 1.4 2014/06/27 20:02:27 thi Exp $
 /**
  * @file initCompiler.H
  * @brief Compile an initfile into bytecode.

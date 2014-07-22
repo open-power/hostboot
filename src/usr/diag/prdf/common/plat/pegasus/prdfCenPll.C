@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -53,6 +55,8 @@ enum
 int32_t QueryPll( ExtensibleChip * i_chip,
                         bool & o_result)
 {
+    #define PRDF_FUNC "[Membuf::QueryPll] "
+
     int32_t rc = SUCCESS;
     o_result = false;
 
@@ -62,10 +66,20 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     do
     {
         rc = TP_LFIR->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR read failed"
+                 "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         rc = TP_LFIRmask->Read();
-        if (rc != SUCCESS) break;
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK read failed"
+                 "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         if((TP_LFIR->IsBitSet(PLL_DETECT_CENT_MEM)  &&
             !(TP_LFIRmask->IsBitSet(PLL_DETECT_CENT_MEM))) ||
@@ -78,6 +92,8 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     } while(0);
 
     return rc;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Membuf, QueryPll );
 
@@ -91,6 +107,7 @@ PRDF_PLUGIN_DEFINE( Membuf, QueryPll );
 int32_t ClearPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
 {
+    #define PRDF_FUNC "[Membuf::ClearPll] "
     int32_t rc = SUCCESS;
 
     if (CHECK_STOP != i_sc.service_data->GetAttentionType())
@@ -100,9 +117,16 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         TP_LFIR->ClearBit(PLL_DETECT_CENT_MEM);
         TP_LFIR->ClearBit(PLL_DETECT_CENT_NEST);
         rc = TP_LFIR->Write();
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+                 "for 0x%08x", i_chip->GetId());
+        }
     }
 
     return rc;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Membuf, ClearPll );
 
@@ -115,21 +139,27 @@ PRDF_PLUGIN_DEFINE( Membuf, ClearPll );
   */
 int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 {
+    #define PRDF_FUNC "[Membuf::MaskPll] "
     int32_t rc = SUCCESS;
 
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR = i_chip->getRegister("TP_LFIR");
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR_or = i_chip->getRegister("TP_LFIR_MASK_OR");
+    SCAN_COMM_REGISTER_CLASS * TP_LFIR_maskOr =
+             i_chip->getRegister("TP_LFIR_MASK_OR");
 
-    rc = TP_LFIR->Read();
-    TP_LFIR_or->clearAllBits();
+    TP_LFIR_maskOr->clearAllBits();
 
-    if(TP_LFIR->IsBitSet(PLL_DETECT_CENT_MEM))  TP_LFIR_or->SetBit(PLL_DETECT_CENT_MEM);
-    if(TP_LFIR->IsBitSet(PLL_DETECT_CENT_NEST)) TP_LFIR_or->SetBit(PLL_DETECT_CENT_NEST);
+    TP_LFIR_maskOr->SetBit(PLL_DETECT_CENT_MEM);
+    TP_LFIR_maskOr->SetBit(PLL_DETECT_CENT_NEST);
 
-    rc |= TP_LFIR_or->Write();
+    rc = TP_LFIR_maskOr->Write();
+    if (rc != SUCCESS)
+    {
+        PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK_OR write failed"
+                 "for 0x%08x", i_chip->GetId());
+    }
 
     return rc;
 
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Membuf, MaskPll );
 

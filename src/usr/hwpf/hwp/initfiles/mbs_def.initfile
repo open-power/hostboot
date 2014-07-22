@@ -1,8 +1,9 @@
-#-- $Id: mbs_def.initfile,v 1.48 2014/05/20 20:37:38 baysah Exp $
+#-- $Id: mbs_def.initfile,v 1.49 2014/06/11 20:01:29 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.49  |tschang | 6/10/14| Enabled clock stop on xstop for the trace arrays FW624741
 #--   1.48  |baysah  |04/21/14| Added L4 Cleaner settings per rank group to improve memory performance
 #--   1.47  |tschang | 3/19/14| SW252733 - L4 Cache UE Handling
 #--   1.46  |tschang | 3/19/14| SW252733 - L4 Cache UE Handling typo
@@ -421,9 +422,41 @@ define def_num_mbs_ranks = (MBA0.ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + MBA0.ATTR_E
 #--******************************************************************************
 # scom 0x02011403              {
 #     bits ,                    scom_data        ;
-#     8    ,                    0b1              ;              # int_parity_error - HW244827 and HW251643
+#     8    ,                    0b1              ;             # int_parity_error - HW244827 and HW251643
 #
 # }
+
+#--******************************************************************************
+#-- TRACE clock stop on checkstop  MBA
+#--******************************************************************************
+# TCM.EPS.DBG.DBG_MODE_REG
+ scom 0x03012300              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     7       ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741 == 1);   # EC2.0 or greater enable
+ }
+
+# TCM.EPS.DBG.DBG_TRACE_MODE_REG_2
+ scom 0x0301230B              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     17      ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741 == 1);   # EC2.0 or greater enable
+ }
+
+
+
+#--******************************************************************************
+#-- TRACE clock stop on checkstop MBS
+#--******************************************************************************
+# TCN.EPS.DBG.DBG_MODE_REG
+ scom 0x02012300              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     7       ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741 == 1);   # EC2.0 or greater enable
+ }
+
+# TCN.EPS.DBG.DBG_TRACE_MODE_REG_2
+ scom 0x0201230B              {
+     bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+     17      ,   0b1          ,       1              ,   (ATTR_CENTAUR_EC_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741 == 1);    # EC2.0 or greater enable
+ }
 
 #--******************************************************************************
 # HW246685 : Need RCE FIR bit if NCE/SCE/MPE/MCE on 2nd try

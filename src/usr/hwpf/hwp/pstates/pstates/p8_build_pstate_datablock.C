@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.37 2014/06/03 16:59:05 daviddu Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.38 2014/07/03 02:57:43 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME:  Jim Yacynych         Email: jimyac@us.ibm.com
 // *! BACKUP NAME: Greg Still           Email: stillgs@us.ibm.com
@@ -229,6 +229,9 @@ p8_build_pstate_datablock(const Target& i_target,
     s132a_parms.vcs_load_line_uohm    = attr.attr_proc_r_loadline_vcs;
     s132a_parms.vdd_distribution_uohm = attr.attr_proc_r_distloss_vdd;
     s132a_parms.vcs_distribution_uohm = attr.attr_proc_r_distloss_vcs;
+    // SW267784
+    s132a_parms.vdd_voffset_uv = attr.attr_proc_vrm_voffset_vdd;
+    s132a_parms.vcs_voffset_uv = attr.attr_proc_vrm_voffset_vcs;
 
     // --------------------------------------
     // Create Chip characterization structure

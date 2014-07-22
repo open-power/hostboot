@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -170,9 +172,18 @@ void TaskManager::_endTask(task_t* t, void* retval, int status)
     t->tracker->retval = retval;
     t->tracker->task = NULL; // NULL signifies task is complete for now.
 
-    if (t->detached) // If detached, just clean up the tracker.
+    if (t->detached)
     {
-        removeTracker(t->tracker);
+        if(status == TASK_STATUS_CRASHED)
+        {
+            printk("Critical: Detached task %d crashed.\n",
+                t->tid);
+            kassert(false); // Hostboot shuts down
+        }
+        else
+        {
+            removeTracker(t->tracker);
+        }
     }
     else // If not detached, do join.
     {

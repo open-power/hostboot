@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -387,4 +389,54 @@
         scomaddr    0x00040033;
         capture     group TODReg;
     };
+######################################################################
+#                 Registers for FFDC only
+######################################################################
 
+    register PMC_SPIV_STATUS_REG
+    {
+        name        "PMC_SPIV_STATUS_REG";
+        scomaddr    0x00062046;
+        access      read_only;
+        capture     group default;
+    };
+
+    register PMC_PSTATE_MONITOR_AND_CTRL_REG
+    {
+        name        "PMC_PSTATE_MONITOR_AND_CTRL_REG";
+        scomaddr    0x00062002;
+        access      read_only;
+        capture     group default;
+    };
+
+    register GLOBAL_ACTUAL_VOLTAGE_REG
+    {
+        name        "GLOBAL_ACTUAL_VOLTAGE_REG";
+        scomaddr    0x00062008;
+        access      read_only;
+        capture     group default;
+    };
+
+    register PMC_O2S_STATUS_REG
+    {
+        name        "PMC_O2S_STATUS_REG";
+        scomaddr    0x00062056;
+        access      read_only;
+        capture     group default;
+    };
+
+    register PMC_O2S_WDATA_REG
+    {
+        name        "PMC_O2S_WDATA_REG";
+        scomaddr    0x00062058;
+        access      read_only;
+        capture     group default;
+    };
+
+    register PMC_O2S_RDATA_REG
+    {
+        name        "PMC_O2S_RDATA_REG";
+        scomaddr    0x00062059;
+        access      read_only;
+        capture     group default;
+    };

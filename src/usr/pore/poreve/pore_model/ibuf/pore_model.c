@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -2771,17 +2773,7 @@ void pore_dump(pore_model_t p)
 		"    SCR2/D1:      %016llx IBUF012: %08llx.%08llx.%08llx\n"
 		"    DBG0:         %016llx DBG1:         %016llx\n"
 		"    PC_STACK0:    %016llx PC_STACK1:    %016llx\n"
-		"    PC_STACK2:    %016llx ID_FLAGS:     %016llx\n"
-		"    DATA0:        %016llx MEM_RELOC:	 %016llx\n"
-		"    I2C_E0:       %016llx I2C_E1:	 %016llx\n"
-		"    I2C_E2:       %016llx PC:		 %016llx\n"
-		"  Internal State\n"
-		"    branchTaken/broken:       %lld/%lld\n"
-		"    pore_interrupt_request:   %lld\n"
-		"    oci_fetchBufValid/Cursor: %lld/%lld\n"
-		"    oci_fetchBuf:             %016llx\n"
-		"-------------------------------------"
-		"-------------------------------------\n",
+		"    PC_STACK2:    %016llx ID_FLAGS:     %016llx\n",
 		(long long)p->status.val,	(long long)p->control.val,
 		(long long)p->reset.val,	(long long)p->error_mask.val,
 		(long long)p->prv_base[0].val,	(long long)p->prv_base[1].val,
@@ -2793,7 +2785,19 @@ void pore_dump(pore_model_t p)
 		(long long)p->ibuf_01.ibuf1,	(long long)p->ibuf_2.ibuf2,
 		(long long)p->dbg0.val,		(long long)p->dbg1.val,
 		(long long)p->pc_stack[0].val,	(long long)p->pc_stack[1].val,
-		(long long)p->pc_stack[2].val,	(long long)p->id_flags.val,
+		(long long)p->pc_stack[2].val,	(long long)p->id_flags.val);
+
+    aprintf(""
+		"    DATA0:        %016llx MEM_RELOC:	 %016llx\n"
+		"    I2C_E0:       %016llx I2C_E1:	 %016llx\n"
+		"    I2C_E2:       %016llx PC:		 %016llx\n"
+		"  Internal State\n"
+		"    branchTaken/broken:       %lld/%lld\n"
+		"    pore_interrupt_request:   %lld\n"
+		"    oci_fetchBufValid/Cursor: %lld/%lld\n"
+		"    oci_fetchBuf:             %016llx\n"
+		"-------------------------------------"
+		"-------------------------------------\n",
 		(long long)p->data0,		(long long)p->memory_reloc.val,
 		(long long)p->i2c_e_param[0].val,
 		(long long)p->i2c_e_param[1].val,

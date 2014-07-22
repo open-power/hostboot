@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,8 +33,6 @@ PRDF_RULE_PLUGINS_PEGASUS_HB = \
 ################################################################################
 # PRD object files (Hostboot only).
 ################################################################################
-
-prd_config_HB += prdfMbaDomain.o
 
 prd_mnfgtools_HB += prdfMfgThresholdFile.o
 prd_mnfgtools_HB += prdfMfgSync.o

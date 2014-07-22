@@ -51,7 +51,6 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
-#include <config.h>
 
 namespace HWAS
 {

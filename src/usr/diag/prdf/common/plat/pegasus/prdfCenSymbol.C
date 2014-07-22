@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -216,11 +218,11 @@ int32_t CenSymbol::getWiringType( TargetHandle_t i_mba, const CenRank & i_rank,
         if( isCenDimm )
         {
             //It is a centaur DIMM. Let us find out card type
-            o_rc = MemUtils::getRawCardType( i_mba, o_type );
+            o_rc = getMemBufRawCardType( i_mba, o_type );
 
             if( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getRawCardType returned error" );
+                PRDF_ERR( PRDF_FUNC"getMemBufRawCardType returned error" );
                 o_type = WIRING_INVALID;
                 break;
             }

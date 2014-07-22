@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,7 +45,7 @@
 //                                   Delete obsolete code for defines support 
 //                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
-
+// $Id: initScom.H,v 1.9 2014/06/30 20:19:48 thi Exp $
 /**
  * @file initSpy.H
  * @brief Declairation of the initSpy Class. Represents the information parsed from an initfile spy

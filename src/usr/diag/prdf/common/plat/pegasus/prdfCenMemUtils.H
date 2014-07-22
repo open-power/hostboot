@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -176,6 +178,16 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
  */
 int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
                         CEN_SYMBOL::WiringType & o_type );
+
+/**
+ * @brief  Cleanup MCIFIR bits on proc side for hostboot.
+ * @param  i_mbChip   Membuf chip.
+ * @param  i_sc  Service Data Collector.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t mcifirCleanup( ExtensibleChip *i_mbChip,
+                       STEP_CODE_DATA_STRUCT & i_sc );
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

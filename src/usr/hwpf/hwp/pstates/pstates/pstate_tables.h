@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,7 +25,7 @@
 #ifndef __PSTATE_TABLES_H__
 #define __PSTATE_TABLES_H__
 
-// $Id: pstate_tables.h,v 1.9 2014/06/03 16:59:05 daviddu Exp $
+// $Id: pstate_tables.h,v 1.10 2014/07/03 02:57:52 daviddu Exp $
 
 /// \file pstate_tables.h 
 /// \brief Code used to generate Pstate tables from real or imagined chip
@@ -107,7 +109,8 @@ typedef struct {
     uint32_t vcs_load_line_uohm;
     uint32_t vdd_distribution_uohm;
     uint32_t vcs_distribution_uohm;
-
+    uint32_t vdd_voffset_uv;
+    uint32_t vcs_voffset_uv;
 } OperatingPointParameters;
 
 

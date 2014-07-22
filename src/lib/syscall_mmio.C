@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,6 +39,11 @@ void* mmio_dev_map(void *ra, uint64_t i_devDataSize)
 int mmio_dev_unmap(void *ea)
 {
     return (int64_t) _syscall1(DEV_UNMAP, ea);
+}
+
+uint64_t mmio_pvr_read()
+{
+    return (uint64_t) _syscall0(MMIO_PVR_READ);
 }
 
 uint64_t mmio_hmer_read()

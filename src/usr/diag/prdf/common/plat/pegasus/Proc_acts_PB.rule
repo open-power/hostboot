@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -414,10 +416,17 @@ group gNxDmaEngFir filter singlebit
      */
     (NxDmaEngFir, bit(37)) ? calloutNxThr1;
 
-    /** NXDMAENGFIR[38|39|40|41|42|43|44|45|46|47]
+    /** NXDMAENGFIR[38]
+     *  NX Unit Checkstop
+     */
+    # This is not a hardware attention. Instead, this bit is set manually by the
+    # hypervisor to communicate to PRD that it handled an NX freeze.
+    (NxDmaEngFir, bit(38)) ? nxUnitCheckstop;
+
+    /** NXDMAENGFIR[39|40|41|42|43|44|45|46|47]
      *  Reserved
      */
-    (NxDmaEngFir, bit(38|39|40|41|42|43|44|45|46|47)) ? defaultMaskedError;
+    (NxDmaEngFir, bit(39|40|41|42|43|44|45|46|47)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[48]
      *  FIR/SCOM satellite parity error
@@ -2579,7 +2588,11 @@ rule IomcFir_0
   RECOVERABLE: IOMCFIR_0 & ~IOMCFIR_0_MASK & ~IOMCFIR_0_ACT0 &  IOMCFIR_0_ACT1;
 };
 
-group gIomcFir_0 filter singlebit
+group gIomcFir_0 filter priority( 10, 18, 26, 34,   # Channel failure
+                                   2,               # Recoverable
+                                  11, 19, 27, 35,   # Recoverable
+                                  12, 20, 28, 36,   # Recoverable
+                                   9, 17, 25, 33  ) # Recoverable
 {
     /** IOMCFIR_0[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -2748,7 +2761,11 @@ rule IomcFir_1
   RECOVERABLE: IOMCFIR_1 & ~IOMCFIR_1_MASK & ~IOMCFIR_1_ACT0 &  IOMCFIR_1_ACT1;
 };
 
-group gIomcFir_1 filter singlebit
+group gIomcFir_1 filter priority( 10, 18, 26, 34,   # Channel failure
+                                   2,               # Recoverable
+                                  11, 19, 27, 35,   # Recoverable
+                                  12, 20, 28, 36,   # Recoverable
+                                   9, 17, 25, 33  ) # Recoverable
 {
     /** IOMCFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -3179,3 +3196,11 @@ actionclass calloutPsiLink
     funccall("calloutPeerPsiBusTgt");
 };
 
+/** Callout the NX on first occurrence and collect additional FFDC. */
+actionclass nxUnitCheckstop
+{
+    calloutNxThr1;
+    flag(UNIT_CS);
+    # only collect NX debug traces on FSP
+    try(funccall("inHostboot"), funccall("collectNxTraceArray"));
+};

@@ -45,7 +45,7 @@
 //                 camvanng 06/15/12 Ability to do bitwise OR and AND operations
 //                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
-
+// $Id: initRpn.C,v 1.11 2014/06/30 19:56:40 thi Exp $
 /**
  * @file initRpn.C
  * @brief Definition of the initRpn class. Handles Reverse Polish Notation equations for initfiles

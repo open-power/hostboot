@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -43,6 +45,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
 #include    <errl/errludtarget.H>
+#include    <intr/interrupt.H>    // for PIR_t structure
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -771,7 +774,22 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
             if(!is_sapphire_load())
             {
-                l_mirrorBaseAddr = l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+                uint64_t hrmor_base =
+                    l_sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
+
+                l_mirrorBaseAddr =
+                    l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+
+                // For single-node systems, the non-master processors can be
+                // in a different logical (powerbus) node.
+                // Need to migrate task to master.
+                task_affinity_pin();
+                task_affinity_migrate_to_master();
+                uint64_t this_node = INTR::PIR_t(task_getcpuid()).nodeId;
+                task_affinity_unpin();
+
+                l_mirrorBaseAddr += (this_node * hrmor_base)/2;
+
             }
 
             // Verify there is memory at the mirrored location

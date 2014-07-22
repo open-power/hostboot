@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.21 2014/02/17 18:30:20 stillgs Exp $
+// $Id: p8_poreslw_init.C,v 1.26 2014/06/27 17:23:36 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -416,7 +416,8 @@ poreslw_ex_setup(const Target& i_target)
     uint8_t                         pm_winkle_entry ;
     uint8_t                         pm_winkle_exit ;
     
-
+    uint8_t                         core_vret_voff_value;
+    uint8_t                         eco_vret_voff_value;
 
 
     // These enums must match the enum values in pm_hwp_attributes.xml
@@ -478,12 +479,16 @@ poreslw_ex_setup(const Target& i_target)
         pm_sleep_exit       = 0;   // 0=assisted, 1=HW
         pm_sleep_type       = 1;   // 0=fast, 1=deep
 
+
         // Due to L3 High Availability Write Pointers that must be
         // saved upon a Deep Winkle Entry, this transition must be
         // assisted.
         pm_winkle_entry     = 0;   // 0=assisted, 1=HW
         pm_winkle_exit      = 0;   // 0=assisted, 1=HW
         pm_winkle_type      = 1;   // 0=fast, 1=deep
+        
+        core_vret_voff_value = 0x0B;    // Default PFET control values for Deep
+        eco_vret_voff_value = 0x0B;     // Default PFET control values for Deep
 
         // Sleep
         /*
@@ -613,12 +618,14 @@ poreslw_ex_setup(const Target& i_target)
             // else sleep type  = 0 (fast), sleep power up sel = 0
             if (pm_sleep_type)
             {
-                e_rc |= set_data.setBit(PM_SLEEP_POWER_OFF_SEL_BIT);
+                e_rc |= set_data.setBit(PM_SLEEP_POWER_OFF_SEL_BIT);            
 
             }
             else
             {
                 e_rc |= clear_data.clearBit(PM_SLEEP_POWER_OFF_SEL_BIT);
+                core_vret_voff_value = 0x00;
+                eco_vret_voff_value = 0x00;
             }
 
             // If   winkle entry = 1 (hardware), winkle power down enable = 1
@@ -653,6 +660,8 @@ poreslw_ex_setup(const Target& i_target)
             else
             {
                 e_rc |= clear_data.clearBit(PM_WINKLE_POWER_OFF_SEL_BIT);
+                core_vret_voff_value = 0x00;
+                eco_vret_voff_value = 0x00;
             }
 
             // Check for any errors from set/clear ops into the buffers
@@ -814,6 +823,44 @@ poreslw_ex_setup(const Target& i_target)
                 
                 rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init after OCC clearing Special Wakeup");
                 if (!rc.ok()) { break; }
+            }
+            
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting Core Voff Settings");
+            e_rc |= data.flushTo0();
+            e_rc |= data.insertFromRight(core_vret_voff_value, 0, 8);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            address = EX_CorePFVRET_REG_0x100F0130 + (0x01000000 * l_ex_number);
+            rc = fapiPutScom(i_target, address, data );
+            if(!rc.ok())
+            {
+                FAPI_ERR("PutScom error 0x%08llu", address);
+                break;
+            }
+           
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting ECO Voff Settings");
+            e_rc |= data.flushTo0();
+            e_rc |= data.insertFromRight(eco_vret_voff_value, 0, 8);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            address = EX_ECOPFVRET_REG_0x100F0150 + (0x01000000 * l_ex_number);
+            rc = fapiPutScom(i_target, address, data );
+            if(!rc.ok())
+            {
+                FAPI_ERR("PutScom error 0x%08llu", address);
+                break;
             }
 
             // --------------------------------------

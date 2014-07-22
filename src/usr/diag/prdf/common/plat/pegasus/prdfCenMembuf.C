@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -289,41 +291,12 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     #define PRDF_FUNC "[Membuf::PostAnalysis] "
     int32_t l_rc;
 
-    #ifdef __HOSTBOOT_MODULE
-
     // In hostboot, we need to clear associated bits in the MCIFIR bits.
-    do
+    l_rc = MemUtils::mcifirCleanup( i_mbChip, i_sc );
+    if( SUCCESS != l_rc )
     {
-        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
-        if ( NULL == mcsChip )
-        {
-            PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );
-            break;
-        }
-
-        // Clear the associated MCIFIR bits for all attention types.
-        // NOTE: If there are any active attentions left in the Centaur the
-        //       associated MCIFIR bit will be redriven with the next packet on
-        //       the bus.
-        SCAN_COMM_REGISTER_CLASS * firand = mcsChip->getRegister("MCIFIR_AND");
-
-        firand->setAllBits();
-        firand->ClearBit(12); // CS
-        firand->ClearBit(15); // RE
-        firand->ClearBit(16); // SPA
-        firand->ClearBit(17); // maintenance command complete
-
-        l_rc = firand->Write();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"MCIFIR_AND write failed" );
-            break;
-        }
-
-    } while (0);
-
-    #endif // __HOSTBOOT_MODULE
+        PRDF_ERR( PRDF_FUNC"mcifirCleanup() failed");
+    }
 
     l_rc = MemUtils::chnlCsCleanup( i_mbChip, i_sc );
     if( SUCCESS != l_rc )
@@ -587,15 +560,15 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 
             // Add the DIMM to the callout list
             MemoryMru memmru ( mbaTrgt, rank, symbol );
-            i_sc.service_data->SetCallout( memmru );
+            i_sc.service_data->SetCallout( memmru, MRU_MEDA );
 
             // Add to CE table
             CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
-            bool doTps = mbadb->iv_ceTable.addEntry( addr, symbol );
+            uint32_t ceTableRc = mbadb->iv_ceTable.addEntry( addr, symbol );
+            bool doTps = ( CenMbaCeTable::NO_TH_REACHED != ceTableRc );
 
-            // Check MNFG thresholds, if needed. No need to check if a TPS
-            // request is already needed.
-            if ( !doTps && mfgMode() )
+            // Check MNFG thresholds, if needed.
+            if ( mfgMode() )
             {
                 // Get the MNFG CE thresholds.
                 uint16_t dramTh, hrTh, dimmTh;
@@ -617,35 +590,61 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDramCte );
+                    i_sc.service_data->SetServiceCall();
                     doTps = true;
                 }
-
-                if ( hrTh < hrCount )
+                else if ( hrTh < hrCount )
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgHrCte );
+                    i_sc.service_data->SetServiceCall();
                     doTps = true;
                 }
-
-                if ( dimmTh < dimmCount )
+                else if ( dimmTh < dimmCount )
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDimmCte );
+                    i_sc.service_data->SetServiceCall();
                     doTps = true;
+                }
+                else if ( 0 != (CenMbaCeTable::TABLE_FULL & ceTableRc) )
+                {
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgTableFull);
+
+                    // The table is full and no other threshold has been met.
+                    // We are in a state where we may never hit a MNFG
+                    // threshold. Callout all memory behind the MBA. Also, since
+                    // the counts are all over the place, there may be a problem
+                    // with the MBA. So call it out as well.
+                    MemoryMru all_mm ( mbaTrgt, rank,
+                                       MemoryMruData::CALLOUT_ALL_MEM );
+                    i_sc.service_data->SetCallout( all_mm,  MRU_MEDA );
+                    i_sc.service_data->SetCallout( mbaTrgt, MRU_MEDA );
+                    i_sc.service_data->SetServiceCall();
+                }
+                else if ( 0 != (CenMbaCeTable::ENTRY_TH_REACHED & ceTableRc) )
+                {
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgEntryCte );
+
+                    // There is a single entry threshold and no other threshold
+                    // has been met. This is a potential flooding issue, so make
+                    // the DIMM callout predictive.
+                    i_sc.service_data->SetServiceCall();
                 }
             }
 
             // Initiate a TPS procedure, if needed.
             if ( doTps )
             {
-                #ifdef __HOSTBOOT_MODULE
-                // Will not be able to do TPS during hostboot so make the error
-                // log predictive in MNFG mode. Note that we will still call
-                // handleTdEvent() so we can get the trace statement indicating
-                // TPS was requested during Hostboot.
-                if ( mfgMode() )
-                    i_sc.service_data->SetServiceCall();
-                #endif
+                // If a MNFG threshold has been reached (predictive callout), we
+                // will still try to start TPS just in case MNFG disables the
+                // termination policy.
+
+                // Will not be able to do TPS during hostboot. Note that we will
+                // still call handleTdEvent() so we can get the trace statement
+                // indicating TPS was requested during Hostboot.
 
                 l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
                                                 CenMbaTdCtlrCommon::TPS_EVENT );
@@ -1087,79 +1086,6 @@ int32_t MaskMbaCalSecondaryBits( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 /**
- * @fn checkChnlReplayTimeOut
- * @brief Check if channel Replay Timeout is present
- *
- * @param  i_chip       The Centaur chip.
- * @param  i_sc         ServiceDataColector.
- *
- * @return SUCCESS if Channel replay Timout bits are set, FAIL otherwise.
-
- */
-int32_t checkChnlReplayTimeOut( ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc  )
-{
-    #define PRDF_FUNC "[checkChnlReplayTimeOut] "
-
-    // We will return FAIL from this function if high priority bits are
-    // not set. This will trigger rule code to execute alternate resolution
-
-    int32_t l_rc = SUCCESS;
-    do
-    {
-        SCAN_COMM_REGISTER_CLASS * mbiFir = i_chip->getRegister("MBIFIR");
-        SCAN_COMM_REGISTER_CLASS * mbiFirMask =
-                                        i_chip->getRegister("MBIFIR_MASK");
-
-        l_rc = mbiFir->Read();
-        l_rc |= mbiFirMask->Read();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"MBIFIR/MBIFIR_MASK read failed"
-                     "for 0x%08x", i_chip->GetId());
-            break;
-        }
-
-        if( ( mbiFir->IsBitSet(0)) && ( !  mbiFirMask->IsBitSet(0)) ) break;
-
-        CenMembufDataBundle * mbdb = getMembufDataBundle( i_chip );
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
-
-        if( NULL == mcsChip )
-        {
-            l_rc = FAIL;
-            break;
-        }
-
-        SCAN_COMM_REGISTER_CLASS * mciFir = mcsChip->getRegister("MCIFIR");
-        SCAN_COMM_REGISTER_CLASS * mciFirMask =
-                                            mcsChip->getRegister("MCIFIR_MASK");
-        l_rc = mciFir->Read();
-        l_rc |= mciFirMask->Read();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"MCIFIR/MCIFIR_MASK read failed"
-                     "for 0x%08x", mcsChip->GetId());
-            break;
-        }
-        if( ( mciFir->IsBitSet(0)) && ( ! mciFirMask->IsBitSet(0)) ) break;
-
-        l_rc = FAIL;
-
-    }while( 0 );
-
-    // Do not commit error log as primary ( high priority )
-    // FIR bits are set and this is just a side effect.
-    if( SUCCESS == l_rc)
-        i_sc.service_data->DontCommitErrorLog();
-
-    return l_rc;
-    #undef PRDF_FUNC
-} PRDF_PLUGIN_DEFINE( Membuf, checkChnlReplayTimeOut );
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief Handles MCS Channel fail bits, if they exist.
  *
  * @param  i_membChip   The Centaur chip.
@@ -1212,8 +1138,7 @@ int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
         uint64_t mciFirBits     = mciFir->GetBitFieldJustified(0, 64);
         uint64_t mciFirMaskBits = mciFirMask->GetBitFieldJustified(0, 64);
 
-        if( ( mciFirBits & ( ~mciFirMaskBits ) ) &
-            chnlCsBitsMask )
+        if ( mciFirBits & ~mciFirMaskBits & chnlCsBitsMask )
         {
             l_rc = mcsChip->Analyze( i_sc,
                         i_sc.service_data->GetCauseAttentionType() );
@@ -1250,6 +1175,44 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Membuf, ClearServiceCallFlag );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief   Captures trapped address for L4 cache ECC errors.
+ * @param   i_mbChip Centaur chip
+ * @param   i_sc     Step code data struct
+ * @returns SUCCESS always
+ * @note    This function also reset ECC trapped address regsiters so that HW
+ *          can capture address for next L4 ecc error.
+ */
+int32_t CaptureL4CacheErr( ExtensibleChip * i_mbChip,
+                           STEP_CODE_DATA_STRUCT & i_sc )
+{
+    #define PRDF_FUNC "[CaptureL4CacheErr] "
+    do
+    {
+        i_mbChip->CaptureErrorData( i_sc.service_data->GetCaptureData(),
+                                    Util::hashString( "L4CacheErr" ) );
+
+        // NOTE: FW should write on MBCELOG so that HW can capture
+        // address for next L4 CE error.
+
+        SCAN_COMM_REGISTER_CLASS * mbcelogReg =
+                                i_mbChip->getRegister("MBCELOG");
+        mbcelogReg->clearAllBits();
+
+        if ( SUCCESS != mbcelogReg->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC"MBCELOG write failed for 0x%08x",
+                      i_mbChip->GetId());
+            break;
+        }
+    }while( 0 );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Membuf, CaptureL4CacheErr );
 
 //------------------------------------------------------------------------------
 

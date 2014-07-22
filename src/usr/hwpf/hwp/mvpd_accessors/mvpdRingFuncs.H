@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mvpdRingFuncs.H,v 1.3 2013/10/09 20:54:13 mjjones Exp $
+// $Id: mvpdRingFuncs.H,v 1.4 2014/07/16 19:07:08 cswenson Exp $
 /**
  *  @file mvpdRingFuncs.H
  *
@@ -39,11 +41,13 @@ enum mvpdRingFuncOp
     MVPD_RING_SET,
 };
 
+#ifndef FAPI_NO_MBVPD
 // Only get operation for mbvpd Rings
 enum mbvpdRingFuncOp
 {
     MBVPD_RING_GET,
 };
+#endif
 
 extern "C"
 {
@@ -76,6 +80,7 @@ fapi::ReturnCode mvpdRingFunc(  mvpdRingFuncOp       i_mvpdRingFuncOp,
                                 uint8_t              *i_pRingBuf,
                                 uint32_t             &io_rRingBufsize);
 
+#ifndef FAPI_NO_MBVPD
 /**
  * @brief   get the requested ring for the record and keyword
  *          for the specified target CPU.
@@ -103,7 +108,7 @@ fapi::ReturnCode mbvpdRingFunc( mbvpdRingFuncOp i_mbvpdRingFuncOp,
                                 const uint8_t i_ringId,
                                 uint8_t *i_pRingBuf,
                                 uint32_t &io_rRingBufsize);
-
+#endif
 
 } // extern "C"
 

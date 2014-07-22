@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -255,10 +257,10 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                         {
                             int32_t l_rc = SUCCESS;
                             l_rc = PlatServices::updateExScomToSlwImage(
-                                                              i_target,
-                                                              registerId,
-                                                              buffer,
-                                                              P8_PORE_SCOM_OR );
+                                                        i_target,
+                                                        registerId,
+                                                        buffer,
+                                                        P8_PORE_SCOM_OR_APPEND);
                             if( SUCCESS != l_rc )
                             {
                                 PRDF_ERR("[ScomAccessor::Access()] Error in"

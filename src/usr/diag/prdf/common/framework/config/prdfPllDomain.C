@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -266,7 +268,7 @@ void PllDomain::Order(ATTENTION_TYPE attentionType)
 //------------------------------------------------------------------------------
 
 int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
-                             STEP_CODE_DATA_STRUCT i_sc )
+                             STEP_CODE_DATA_STRUCT & i_sc )
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
@@ -299,7 +301,7 @@ PRDF_PLUGIN_DEFINE( PllDomain, ClearPll );
 //------------------------------------------------------------------------------
 
 int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT i_sc )
+                            STEP_CODE_DATA_STRUCT & i_sc )
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 

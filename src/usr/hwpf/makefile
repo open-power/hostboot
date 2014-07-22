@@ -153,7 +153,6 @@ HWP_ERROR_XML_FILES += hwp/bus_training/io_power_down_lanes_errors.xml
 HWP_ERROR_XML_FILES += hwp/bus_training/io_read_erepair_errors.xml
 HWP_ERROR_XML_FILES += hwp/bus_training/io_fir_isolation_errors.xml
 HWP_ERROR_XML_FILES += hwp/bus_training/io_restore_erepair_errors.xml
-HWP_ERROR_XML_FILES += hwp/bus_training/io_cleanup_errors.xml
 HWP_ERROR_XML_FILES += hwp/proc_pibmem_registers.xml
 HWP_ERROR_XML_FILES += hwp/proc_clock_control_registers.xml
 HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml
@@ -390,7 +389,7 @@ $(GENDIR)/$(IF_CMP_FLEX_TARGET:.c=.host.o): \
     $(GENDIR)/$(IF_CMP_FLEX_TARGET) $(IF_COMPILER_H_FILES) \
     $(GENDIR)/$(IF_CMP_YACC_H_TARGET)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -DHOSTBOOT_COMPILE $< -I ifcompiler -I $(GENDIR) \
 			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
 			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2006,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -130,7 +132,7 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain,
      * @return SUCCESS
      */
     static int32_t ClearPll( ExtensibleDomain * i_domain,
-                             STEP_CODE_DATA_STRUCT i_sc );
+                             STEP_CODE_DATA_STRUCT & i_sc );
 
     /**
      * @brief  Domain level plugin function used to mask PLL attentions in a
@@ -140,7 +142,7 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain,
      * @return SUCCESS
      */
     static int32_t MaskPll( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT i_sc );
+                            STEP_CODE_DATA_STRUCT & i_sc );
 
 protected:
 

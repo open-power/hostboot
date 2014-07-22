@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,6 +32,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
 #include <prdfPlatServices.H>
+#include <prdfCenMemUtils.H>
 
 using namespace TARGETING;
 
@@ -61,6 +64,14 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
 
     do
     {
+        // need to clear associated bits in the MCIFIR bits.
+        o_rc = MemUtils::mcifirCleanup( i_cenChip, i_sc );
+        if( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mcifirCleanup() failed");
+            break;
+        }
+
         // Check to make sure we are at threshold and have something garded.
         if ( !i_sc.service_data->IsAtThreshold() ||
              (GardAction::NoGard == i_sc.service_data->QueryGard()) )

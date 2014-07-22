@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.31 2014/05/23 15:13:30 thi Exp $
+// $Id: mss_eff_grouping.C,v 1.32 2014/06/26 06:52:16 gpaulraj Exp $
 // Mike Jones - modified version from 1.28 to 1.00 because it is a sandbox version
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_grouping.C
 // *! DESCRIPTION : see additional comments below
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.32   |gpaulraj  | 06-26-14| support MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER for Brazos
 //  1.31   | thi      | 05-23-14| Support MEM_MIRROR_PLACEMENT_POLICY_DRAWER for Brazos
 //  1.30   | jdsloat  | 04-10-14| Mike Jones's rewrite.
 //  1.29   | gpaulraj | 04-20-14| Updated Dimm call out/FW defect/Mike's Feedback
@@ -1848,8 +1849,10 @@ fapi::ReturnCode grouping_setBaseSizeAttrs(
                 break;
             }
         }
-        else if (i_sysAttrs.iv_selectiveMode ==
-                 fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+        else if ((i_sysAttrs.iv_selectiveMode ==
+                 fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED) ||
+                 (i_sysAttrs.iv_selectiveMode ==
+                 fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER))
         {
             uint64_t total_size = 0;
             uint8_t memhole = 0;

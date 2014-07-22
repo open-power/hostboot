@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -702,6 +704,7 @@ intvect_system_reset_external:
     ;//         0x801 = HMER write (r4 -> HMER).
     ;//         0x802 = SCRATCH read (r4 -> SPRC, SPRD -> r3).
     ;//         0x803 = SCRATCH write (r4 -> SPRC, r5 -> SPRD).
+    ;//         0x804 = PVR read (PVR -> r3).
 system_call_fast_path:
         ;// Check if this is HMER read (0x800).
         ;// Compare was already done in system call path.
@@ -765,9 +768,15 @@ system_call_fast_path:
     isync
     mtspr SPRD, r5
     b 1f                        ;// Jump to exit point.
-        ;// Invalid system call, loop for debug.
+        ;// Check if this is PVR read (0x804).
 5:
-    b 5b
+    cmpi cr0, r3, 0x804
+    bne cr0, 6f
+    mfspr r3, PVR
+    b 1f                        ;// Jump to exit point.
+        ;// Invalid system call, loop for debug.
+6:
+    b 6b
 1:
     rfid                        ;// Return from interrupt.
 

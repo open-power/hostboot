@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -208,26 +210,26 @@
 
     register IOXFIR_2
     {
-        name        "XBUS23.X0.BUSCTL.SCOM.FIR_REG";
-        scomaddr    0x04011800;
-        reset       (&, 0x04011801);
-        mask        (|, 0x04011805);
+        name        "XBUS23.X1.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x04011C00;
+        reset       (&, 0x04011C01);
+        mask        (|, 0x04011C05);
         capture     req funccall("isVeniceProc");
         capture     group default;
     };
 
     register IOXFIR_2_MASK
     {
-        name        "XBUS23.X0.BUSCTL.SCOM.FIR_MASK_REG";
-        scomaddr    0x04011803;
+        name        "XBUS23.X1.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x04011C03;
         capture     req funccall("isVeniceProc");
         capture     group default;
     };
 
     register IOXFIR_2_ACT0
     {
-        name        "XBUS23.X0.BUSCTL.SCOM.FIR_ACTION0_REG";
-        scomaddr    0x04011806;
+        name        "XBUS23.X1.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x04011C06;
         capture     type secondary;
         capture     req funccall("isVeniceProc");
         capture     req nonzero("IOXFIR_2");
@@ -236,8 +238,8 @@
 
     register IOXFIR_2_ACT1
     {
-        name        "XBUS23.X0.BUSCTL.SCOM.FIR_ACTION1_REG";
-        scomaddr    0x04011807;
+        name        "XBUS23.X1.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x04011C07;
         capture     type secondary;
         capture     req funccall("isVeniceProc");
         capture     req nonzero("IOXFIR_2");
@@ -250,26 +252,26 @@
 
     register IOXFIR_3
     {
-        name        "XBUS23.X1.BUSCTL.SCOM.FIR_REG";
-        scomaddr    0x04011c00;
-        reset       (&, 0x04011c01);
-        mask        (|, 0x04011c05);
+        name        "XBUS23.X0.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x04011800;
+        reset       (&, 0x04011801);
+        mask        (|, 0x04011805);
         capture     req funccall("isVeniceProc");
         capture     group default;
     };
 
     register IOXFIR_3_MASK
     {
-        name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
-        scomaddr    0x04011c03;
+        name        "XBUS23.X0.XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x04011803;
         capture     req funccall("isVeniceProc");
         capture     group default;
     };
 
     register IOXFIR_3_ACT0
     {
-        name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
-        scomaddr    0x04011c06;
+        name        "XBUS23.X0.XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x04011806;
         capture     type secondary;
         capture     req funccall("isVeniceProc");
         capture     req nonzero("IOXFIR_3");
@@ -278,8 +280,8 @@
 
     register IOXFIR_3_ACT1
     {
-        name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG";
-        scomaddr    0x04011c07;
+        name        "XBUS23.X0.XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x04011807;
         capture     type secondary;
         capture     req funccall("isVeniceProc");
         capture     req nonzero("IOXFIR_3");

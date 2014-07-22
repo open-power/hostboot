@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,6 +62,16 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 use constant CHIP_NODE_INDEX => 0; # Position in array of chip's node
 use constant CHIP_POS_INDEX => 1; # Position in array of chip's position
 use constant CHIP_ATTR_START_INDEX => 2; # Position in array of start of attrs
+
+use constant
+{
+    MAX_PROC_PER_NODE => 8,
+    MAX_EX_PER_PROC => 16,
+    MAX_ABUS_PER_PROC => 3,
+    MAX_XBUS_PER_PROC => 4,
+    MAX_MCS_PER_PROC => 8,
+    MAX_MBA_PER_MEMBUF => 2,
+};
 
 our $mrwdir = "";
 my $sysname = "";
@@ -1521,7 +1533,7 @@ sub preCalculateAxBusesHUIDs
         my $uidstr = sprintf( "0x%02X%02X%04X",
             ${my_node},
             $typenum,
-            $i+$proc*($numperchip)+${my_node}*8*($numperchip));
+            $proc*$numperchip + $i);
         my $phys_path =
             "physical:sys-$sys/node-$my_node/proc-$proc/${type}bus-$i";
         $hash_ax_buses->{$phys_path} = $uidstr;
@@ -2448,7 +2460,7 @@ sub generate_proc
 sub generate_ex
 {
     my ($proc, $ex, $ordinalId, $ipath) = @_;
-    my $uidstr = sprintf("0x%02X06%04X",${node},$ex+$proc*16);
+    my $uidstr = sprintf("0x%02X06%04X",${node},$proc*MAX_EX_PER_PROC + $ex);
     my $mruData = get_mruid($ipath);
     print "
 <targetInstance>
@@ -2487,7 +2499,7 @@ sub generate_ex
 sub generate_ex_core
 {
     my ($proc, $ex, $ordinalId, $ipath) = @_;
-    my $uidstr = sprintf("0x%02X07%04X",${node},$ex+$proc*16);
+    my $uidstr = sprintf("0x%02X07%04X",${node},$proc*MAX_EX_PER_PROC + $ex);
     my $mruData = get_mruid($ipath);
     print "
 <targetInstance>
@@ -2526,7 +2538,7 @@ sub generate_ex_core
 sub generate_mcs
 {
     my ($proc, $mcs, $ordinalId, $ipath) = @_;
-    my $uidstr = sprintf("0x%02X0B%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
     my $mruData = get_mruid($ipath);
 
     my $lognode;
@@ -2664,8 +2676,7 @@ sub generate_phb
 sub generate_a_pcie
 {
     my ($proc, $phb, $max_pcie, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X10%04X",${node},$phb+$proc*$max_pcie+
-                                        ${node}*8*$max_pcie);
+    my $uidstr = sprintf("0x%02X10%04X",${node},$proc*$max_pcie + $phb);
 
     # Get the PHB info
     if ($phbInit == 0)
@@ -2710,7 +2721,7 @@ sub getBusInfo
 
     my $minbus = ($type eq "A") ? 0 : ($chipName eq "murano") ? 1 : 0;
     my $maxbus = ($type eq "A") ? 2 : ($chipName eq "murano") ? 1 : 3;
-    my $numperchip = ($type eq "A") ? 3 : 4;
+    my $numperchip = ($type eq "A") ? MAX_ABUS_PER_PROC : MAX_XBUS_PER_PROC;
     my $typenum = ($type eq "A") ? 0x0F : 0x0E;
     $type = lc( $type );
 
@@ -3113,7 +3124,7 @@ sub generate_centaur
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
     my $mruData = get_mruid($ipath);
-    my $uidstr = sprintf("0x%02X04%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $uidstr = sprintf("0x%02X04%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
 
     my $lane_swap = 0;
     my $msb_swap = 0;
@@ -3270,7 +3281,8 @@ sub generate_mba
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
     my $uidstr = sprintf("0x%02X0D%04X",
-                          ${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
+                          ${node},($proc * MAX_MCS_PER_PROC + $mcs)*
+                                   MAX_MBA_PER_MEMBUF + $mba);
     my $mruData = get_mruid($ipath);
 
     print "
@@ -3316,7 +3328,7 @@ sub generate_l4
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
-    my $uidstr = sprintf("0x%02X0A%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $uidstr = sprintf("0x%02X0A%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
     my $mruData = get_mruid($ipath);
 
     print "
@@ -3372,7 +3384,7 @@ sub generate_dimm
     #$y = sprintf ("%d", $y);
     #$z = sprintf ("%d", $z);
     #$zz = sprintf ("%d", $zz);
-    my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
+    my $uidstr = sprintf("0x%02X03%04X",${node},$dimm);
 
     # Calculate the VPD Record number value
     my $vpdRec = 0;

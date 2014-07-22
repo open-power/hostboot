@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,7 +42,7 @@
 //                 camvanng 05/07/12 Support for associated target attributes
 //                 camvanng 06/27/12 Add get_numeric_array_data()
 // End Change Log *********************************************************************************
-
+// $Id: initSymbols.H,v 1.7 2014/06/30 20:28:09 thi Exp $
 /**
  * @file initSymbols.H
  * @brief Definition of the initSymbols class. Handles all symbols for initfiles

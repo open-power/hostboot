@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +23,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-#
+# $Id: fapiCreateIfAttrService.pl,v 1.9 2014/04/21 18:35:11 mjjones Exp $
 # Purpose:  This perl script will parse HWP Attribute XML files and
 # initfile attr files and create the fapiGetInitFileAttr() function
 # in a file called fapiAttributeService.C

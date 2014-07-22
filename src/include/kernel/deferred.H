@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -149,11 +151,13 @@ class DeferredQueue
         /** Insert a work item into the queue.
          *
          *  @param i_work - The item to add.
+         *  @param i_onlyIfEmpty - Only insert the object if the queue is
+         *                         already empty, otherwise delete.
          *
          *  Ownership of the work item is transfered to the queue, which is
          *  responsible for delete once the work is complete.
          */
-        static void insert(DeferredWork* i_work);
+        static void insert(DeferredWork* i_work, bool i_onlyIfEmpty = false);
         /** Execute any pending work items. */
         static void execute();
 
@@ -161,7 +165,7 @@ class DeferredQueue
         friend class DeferredWork;
 
             // Instance functions for static pair.
-        void _insert(DeferredWork* i_work);
+        void _insert(DeferredWork* i_work, bool i_onlyIfEmpty);
         void _execute();
 
         /** Remove a completed work item from the queue.

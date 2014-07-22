@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,6 +35,7 @@
  */
 
 #include <prdfEnums.H>
+#include <prdfRasServices.H>
 
 /**
  * @brief create ErrlEntry in Hostboot
@@ -73,9 +76,12 @@
  * @brief Commit the log
  */
 // NOTE: Hostboot error log commit function does not need the action flag
-#define PRDF_COMMIT_ERRL(io_errl, i_actions) \
+#define PRDF_COMMIT_ERRL(io_errl, i_actions) { \
+    errlHndl_t globalErrl = \
+                ServiceGeneratorClass::ThisServiceGenerator().getErrl(); \
+    if( NULL != globalErrl ) io_errl->plid( globalErrl->plid() ); \
     if(i_actions) {} \
-    errlCommit(io_errl, PRDF_COMP_ID)
+    errlCommit(io_errl, PRDF_COMP_ID); }
 
 /**
  * @brief Collect component trace
@@ -138,27 +144,6 @@
 /*--------------------------------------------------------------------*/
 /*  HW Deconfig Errl macros for Hostboot                              */
 /*--------------------------------------------------------------------*/
-
-/**
- * @brief function to create an error log.
- */
-#define  PRDF_HW_CREATE_ERRL(io_errl,      \
-                             i_sev,        \
-                             i_etype,      \
-                             i_type,       \
-                             i_srcAttr,    \
-                             i_mid,        \
-                             i_refCode,    \
-                             i_reasonCode, \
-                             i_userData1,  \
-                             i_userData2,  \
-                             i_userData3,  \
-                             i_userData4,  \
-                             i_termFlag,   \
-                             i_pldCheck)   \
-  PRDF_CREATE_ERRL(io_errl, i_sev, i_etype, i_type,            \
-                   i_srcAttr, i_mid, i_refCode, i_reasonCode,  \
-                   i_userData1, i_userData2, i_userData3, i_userData4)
 
 /**
  * @brief Add a procedure callout to an existing error log

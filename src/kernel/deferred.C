@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -58,10 +60,10 @@ DeferredQueue::~DeferredQueue()
     kassert(0 == iv_cpus_and_next);
 }
 
-void DeferredQueue::insert(DeferredWork* i_work)
+void DeferredQueue::insert(DeferredWork* i_work, bool i_onlyIfEmpty)
 {
     // Call singleton insert.
-    Singleton<DeferredQueue>::instance()._insert(i_work);
+    Singleton<DeferredQueue>::instance()._insert(i_work, i_onlyIfEmpty);
 }
 
 void DeferredQueue::execute()
@@ -70,7 +72,7 @@ void DeferredQueue::execute()
     Singleton<DeferredQueue>::instance()._execute();
 }
 
-void DeferredQueue::_insert(DeferredWork* i_work)
+void DeferredQueue::_insert(DeferredWork* i_work, bool i_onlyIfEmpty)
 {
     lock.lock();
 
@@ -78,6 +80,10 @@ void DeferredQueue::_insert(DeferredWork* i_work)
     if (0 == iv_cpus_and_next)
     {
         iv_cpus_and_next = reinterpret_cast<uint64_t>(i_work);
+    }
+    else if (i_onlyIfEmpty)
+    {
+        delete i_work;
     }
     else
     {

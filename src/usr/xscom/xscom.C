@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -490,7 +492,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
     } while (io_hmer.mXSComStatus == PIB::PIB_RESOURCE_OCCUPIED);
 
 
-    TRACDCOMP(g_trac_xscom,"xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX" static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
+    TRACDCOMP(g_trac_xscom,"xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX", static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
 
     TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",l_offset,i_virtAddr,i_virtAddr + l_offset);
 

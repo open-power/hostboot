@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -6005,11 +6007,11 @@ firmware notes: Used as override attribute for pstate procedure
 <id>SBE_IMAGE_OFFSET</id>
 <description>
     HostBoot image for SBE, offset to account for ECC
-    Default is calculated from Hostboot base image of 0x3ece000
+    Default is calculated from Hostboot base image of 0x03f67000
 </description>
     <simpleType>
         <uint32_t>
-            <default>0xffef0000</default>
+            <default>0xfff78000</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>

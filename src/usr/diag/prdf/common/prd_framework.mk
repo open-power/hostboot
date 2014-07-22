@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2005,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +39,7 @@ prd_util += iipdigit.o
 prd_util += prdfErrlSmartPtr.o
 prd_util += prdfFilters.o
 prd_util += prdfAssert.o
+prd_util += prdfThresholdUtils.o
 
 prd_config += iipchip.o
 prd_config += iipConfigurator.o
@@ -46,6 +49,7 @@ prd_config += prdfFabricDomain.o
 prd_config += prdfParentDomain.o
 prd_config += prdfRuleChipDomain.o
 prd_config += prdfPllDomain.o
+prd_config += prdfMbaDomain.o
 prd_config += iipSystem.o
 prd_config += prdfExtensibleDomain.o
 

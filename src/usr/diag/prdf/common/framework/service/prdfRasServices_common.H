@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,7 +64,8 @@ class ErrDataService
     inline ErrDataService() :
         loggingBufferFull(false),
         iv_serviceActionCounter(0),
-        savedPrdReturnCode(0)
+        savedPrdReturnCode(0),
+        iv_errl(NULL)
     {}
 
     /**
@@ -138,6 +141,30 @@ class ErrDataService
      */
     void MnfgTrace( ErrorSignature * i_esig, const PfaData & i_pfaData );
 
+    /**
+     * @brief Create initial error log for analyze( attn analysis) code flow.
+     * @param i_attnType attention type.
+     */
+    void createInitialErrl( ATTENTION_TYPE i_attnType );
+
+    /**
+     * @brief Update SRC section for initial error log.
+     * @param i_user1    User data word 1.
+     * @param i_user2    User data word 2.
+     * @param i_user3    User data word 3.
+     * @param i_user4    User data word 4.
+     * @param i_rc       Reason code.
+     */
+    void updateSrc( uint32_t i_user1, uint32_t i_user2,
+                    uint32_t i_user3, uint32_t i_user4,
+                    uint16_t i_rc );
+
+    /**
+     * @brief  Return error log associated with current analysis flow.
+     * @return error log handle.
+     */
+    errlHndl_t getErrl() { return iv_errl; };
+
   private:
 
     /**
@@ -209,6 +236,41 @@ class ErrDataService
      */
     void deallocateDimms( SDC_MRU_LIST & i_mruList );
 
+    /**
+     * @brief Checks for terminate conditions during non mnfg conditions.
+     * @param i_sdc       The service data collector.
+     * @param i_dumpTrgt  Dump Target.
+     * @param io_pfa      The PFA data struct.
+     * @return  True if PRD should terminate system, False otherwise.
+     */
+    bool checkForceTerm( ServiceDataCollector & i_sdc,
+                         TARGETING::TargetHandle_t i_dumpTrgt,
+                         PfaData &io_pfaData );
+
+    /**
+     * @brief Handles unit checkstops.
+     * @param i_unitCsTarget chip(let) target.
+     */
+    void handleUnitCS( TARGETING::TargetHandle_t i_unitCsTarget );
+
+    /**
+     * @brief Handles Centaur checkstop.
+     * @param i_memTarget memory chip(let) target.
+     */
+    void handleChannelFail( TARGETING::TargetHandle_t i_memTarget );
+
+    /**
+     * @brief Handles Core checkstop.
+     * @param i_exTarget EX target.
+     */
+    void handleCoreUnitCS( TARGETING::TargetHandle_t i_exTarget );
+
+    /**
+     * @brief Handles NX checkstops.
+     * @param i_nxTarget NX target.
+     */
+    void handleNxUnitCS( TARGETING::TargetHandle_t i_nxTarget );
+
   private:
 
     bool loggingBufferFull;
@@ -220,6 +282,8 @@ class ErrDataService
     ServiceDataCollector sdc;
 
     static bool terminateOnCheckstop;
+
+    errlHndl_t iv_errl;
 
 };
 
@@ -297,6 +361,23 @@ public:
       ErrDataService::SetTerminateOnCheckstop(setting);
   }
 
+    /**
+     * @brief Create initial error log for analyze( attn analysis) code flow.
+     * @param i_attnType attention type.
+     */
+    void createInitialErrl( ATTENTION_TYPE i_attnType )
+    {
+        iv_ErrDataService->createInitialErrl( i_attnType );
+    }
+
+    /**
+     * @brief  Return error log associated with current analysis flow.
+     * @return error log handle.
+     */
+    virtual errlHndl_t getErrl()
+    {
+        return iv_ErrDataService->getErrl();
+    };
 
 private:  // Data
   // actual or sim err data service

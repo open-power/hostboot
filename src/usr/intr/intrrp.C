@@ -688,7 +688,7 @@ void IntrRp::msgHandler()
             case MSG_INTR_SHUTDOWN:
                 {
                     TRACFCOMP(g_trac_intr,"Shutdown event received");
-                    shutDown();
+                    shutDown(msg->data[0]);
 
                     msg_respond(iv_msgQ, msg);
 
@@ -1290,7 +1290,7 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
     return err;
 }
 
-void IntrRp::shutDown()
+void IntrRp::shutDown(uint64_t i_status)
 {
     errlHndl_t err = NULL;
     msg_t * rmsg = msg_allocate();
@@ -1304,7 +1304,7 @@ void IntrRp::shutDown()
 
         rmsg->type = r->second.msgType;
         rmsg->data[0] = SHUT_DOWN;
-        rmsg->data[1] = 0;
+        rmsg->data[1] = i_status;
         rmsg->extra_data = NULL;
 
         int rc = msg_sendrecv(msgQ,rmsg);

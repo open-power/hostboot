@@ -22,18 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_thread_control.H,v 1.8 2012/09/10 17:34:27 karm Exp $
+// $Id: proc_thread_control.H,v 1.9 2014/07/01 18:17:42 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! TITLE       : proc_thread_control
 // *! DESCRIPTION : Core Thread start/stop/step/query/activate operations
 // *!               Use to start (start or sreset) thread instruction execution,
 // *!                 stop instruction execution, or single instruction step.
 // *!               Also used to query the state of a thread.
-// *! OWNER NAME  : Lance Karm          Email: karm@us.ibm.com
+// *! OWNER NAME  : Nick Klazynski      Email: jklazyns@us.ibm.com
 // *! BACKUP NAME : Sebastien Lafontant Email: slafont@us.ibm.com
 //------------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ const uint8_t PTC_DIR_CTL_SP_STOP       = 63;
 const uint8_t PTC_RAM_THREAD_ACTIVE_T0  = 8;
 const uint8_t PTC_RAS_MODE_SINGLE       = 50;
 
-const uint8_t PTC_RAS_STAT_CHKSTOP      = 2;
+const uint8_t PTC_RAS_STAT_CHKSTOP      = 11;
 const uint8_t PTC_RAS_STAT_INST_COMP    = 12;
 const uint8_t PTC_RAS_STAT_THD_POR      = 20;
 const uint8_t PTC_RAS_STAT_MAINT        = 21;

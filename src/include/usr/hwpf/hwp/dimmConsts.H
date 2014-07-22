@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,7 @@
  *
  *  @brief DIMM Constants
  */
-
+// $Id: dimmConsts.H,v 1.2 2014/06/27 18:58:39 thi Exp $
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description

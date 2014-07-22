@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/prdfLineDelete.C $              */
+/* $Source: src/usr/diag/prdf/common/util/prdfThresholdUtils.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,68 +23,64 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file prdfLineDelete.C
- * Contains the definitions needed for the line delete algorithms and the CE
- * table.
- */
+/** @file prdfThresholdUtils.C */
 
-
-#include <prdfLineDelete.H>
+#include <prdfThresholdUtils.H>
 #include <iipServiceDataCollector.h>
-#include <prdfBitString.H>
 
 namespace PRDF
 {
 
-// See prdfLineDelete.H for full function documentation.
-namespace LineDelete
+void TimeBasedThreshold::reset()
 {
+    iv_timerInited = false;
+    iv_count = 0;
+}
 
-    /* PrdfCacheCETable::addAddress
-     * Insert address into CE table.
-     */
-    bool PrdfCacheCETable::addAddress( PrdfCacheAddress i_addr,
-                                       STEP_CODE_DATA_STRUCT & i_sdc )
+//------------------------------------------------------------------------------
+
+bool TimeBasedThreshold::inc( const STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return inc( i_sc, 1 );
+}
+
+//------------------------------------------------------------------------------
+
+bool TimeBasedThreshold::inc( const STEP_CODE_DATA_STRUCT & i_sc,
+                              uint8_t i_count )
+{
+    if ( !iv_timerInited || timeElapsed(i_sc) )
     {
-        // Get the time of the current error.
-        Timer timeOfError = i_sdc.service_data->GetTOE();
-
-        // Check if time interval has elapsed. If so, flush the table.
-        if ( (timeOfError > cv_flushTimer) || !cv_flushTimerInited )
-        {
-            this->flushTable();
-            cv_flushTimer = timeOfError + iv_thPolicy.interval;
-            cv_flushTimerInited = true;
-        }
-
-        // Increment address hit count.
-        uint32_t count = ++cv_ceTable[i_addr];
-
-        // Return whether the address threshold has been reached or not.
-        return ( iv_thPolicy.threshold <= count );
+        reset();
+        iv_timer = i_sc.service_data->GetTOE() + iv_thPolicy.interval;
+        iv_timerInited = true;
     }
 
-    /* PrdfCacheCETable::isIntervalElapsed()
-     */
-    bool PrdfCacheCETable::isIntervalElapsed( STEP_CODE_DATA_STRUCT & i_sdc )
-    {
-        bool o_rc = false;
-        if ( cv_flushTimerInited )
-            o_rc = ( i_sdc.service_data->GetTOE() > cv_flushTimer );
-        return o_rc;
-    }
+    iv_count += i_count;
 
-    /* PrdfCacheCETable::flushTable()
-     * Clear all entries from CE table.
-     */
-    void PrdfCacheCETable::flushTable()
-    {
-        // wipe interval timer and clear all hits.
-        cv_flushTimerInited = false;
-        cv_ceTable.clear();
-    }
+    return thReached(i_sc);
+}
 
-};
+//------------------------------------------------------------------------------
+
+uint8_t TimeBasedThreshold::getCount() const
+{
+    return iv_timerInited ? iv_count : 0;
+}
+
+//------------------------------------------------------------------------------
+
+bool TimeBasedThreshold::timeElapsed( const STEP_CODE_DATA_STRUCT & i_sc ) const
+{
+    return ( iv_timerInited && (i_sc.service_data->GetTOE() > iv_timer) );
+}
+
+//------------------------------------------------------------------------------
+
+bool TimeBasedThreshold::thReached( const STEP_CODE_DATA_STRUCT & i_sc ) const
+{
+    return ( !timeElapsed(i_sc) && (iv_thPolicy.threshold <= iv_count) );
+}
 
 } // end namespace PRDF
 

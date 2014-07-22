@@ -35,7 +35,7 @@
 //                 camvanng 04/12/12 Ability to specify search paths for include files
 //                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
-
+// $Id: initCompiler.C,v 1.4 2014/06/27 19:59:45 thi Exp $
 /**
  * @file initCompiler.C
  * @brief Compile an initfile into bytecode.

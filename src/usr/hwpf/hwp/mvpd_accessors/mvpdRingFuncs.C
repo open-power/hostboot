@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mvpdRingFuncs.C,v 1.11 2014/04/08 20:52:49 whs Exp $
+// $Id: mvpdRingFuncs.C,v 1.12 2014/07/16 19:06:49 cswenson Exp $
 /**
  *  @file mvpdRingFuncs.C
  *
@@ -109,6 +111,8 @@ fapi::ReturnCode mvpdValidateRecordKeyword( fapi::MvpdRecord i_record,
 
 };
 
+
+#ifndef FAPI_NO_MBVPD
 fapi::ReturnCode mbvpdValidateRecordKeyword(fapi::MBvpdRecord i_record,
                                             fapi::MBvpdKeyword i_keyword)
 {
@@ -142,6 +146,8 @@ fapi::ReturnCode mbvpdValidateRecordKeyword(fapi::MBvpdRecord i_record,
     return l_fapirc;
 
 };
+#endif
+
 
 //******************************************************************************
 // mvpdRingFunc: the getMvpdRing and setMvpdRing wrappers call this function
@@ -228,7 +234,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
                   l_recordLen );
 
         //  allocate buffer for the record. Always works
-        l_recordBuf =   new uint8_t[l_recordLen];
+        l_recordBuf =  static_cast<uint8_t*>(fapiMalloc((size_t)l_recordLen));
 
         //  load ring from MVPD for this target
         l_fapirc = fapiGetMvpdField(  i_record,
@@ -323,7 +329,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
     } while ( 0 );
 
     //  unload the repair ring
-    delete[]  l_recordBuf;
+    fapiFree((void*)l_recordBuf);
     l_recordBuf =   NULL;
 
     FAPI_DBG( "mvpdRingFunc: exit bufsize= 0x%x rc= 0x%x",
@@ -332,6 +338,8 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
     return  l_fapirc;
 }
 
+
+#ifndef FAPI_NO_MBVPD
 //******************************************************************************
 // mbvpdRingFunc: getMBvpdRing calls this function to get repair ring
 // note: io_rRingBufsize is only 'output' for get.
@@ -385,7 +393,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
                   l_recordLen );
 
         //  allocate buffer for the record. Always works
-        l_recordBuf = new uint8_t[l_recordLen];
+        l_recordBuf = static_cast<uint8_t*>(fapiMalloc((size_t)l_recordLen));
 
         //  load ring from MBVPD for this target
         l_fapirc = fapiGetMBvpdField( i_record,
@@ -453,7 +461,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
     } while ( 0 );
 
     //  unload the repair ring
-    delete[]  l_recordBuf;
+    fapiFree((void*)l_recordBuf);
     l_recordBuf =   NULL;
 
     FAPI_DBG( "mbvpdRingFunc: exit bufsize= 0x%x rc= 0x%x",
@@ -461,7 +469,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
                           static_cast<uint32_t>(l_fapirc) );
     return  l_fapirc;
 }
-
+#endif
 
 
 //******************************************************************************
