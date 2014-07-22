@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -385,6 +387,10 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             // merge debug scom data from the two analysis
             l_temp_sdc->GetCaptureData().mergeData(
                             serviceData.service_data->GetCaptureData());
+
+            // merge trace array data from the two analysis
+            l_temp_sdc->getTraceArrayData().mergeData(
+                        serviceData.service_data->getTraceArrayData());
 
             *serviceData.service_data = *l_temp_sdc;
             delete l_temp_sdc;

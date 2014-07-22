@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1998,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,6 +33,7 @@ ServiceDataCollector::ServiceDataCollector() :
 #endif
     error_signature(),
     captureData(),
+    iv_traceArrayData(),
     xMruList(),
     maskId(0),
     attentionType(INVALID_ATTENTION_TYPE),

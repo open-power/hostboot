@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -283,10 +285,21 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
         buffer_append(current_ptr,(uint32_t)causeAttentionType);
 
         // Add as much capture data as we have room.
+        uint32_t cap_size = 0;
         uint8_t * cap_size_ptr = current_ptr;  // Place for Capture data size
-        current_ptr += sizeof(uint32_t);
+        current_ptr += sizeof(cap_size);
 
-        uint32_t cap_size = captureData.Copy(current_ptr,max_size - (current_ptr - i_buffer));
+        cap_size = captureData.Copy(
+                        current_ptr,max_size - (current_ptr - i_buffer));
+        current_ptr += cap_size;
+        buffer_append(cap_size_ptr,cap_size);
+
+        // Add as much TraceArray capture data as we have room.
+        cap_size_ptr = current_ptr;  // Place for Capture data size
+        current_ptr += sizeof(cap_size);
+
+        cap_size = iv_traceArrayData.Copy(
+                        current_ptr,max_size - (current_ptr - i_buffer));
         current_ptr += cap_size;
         buffer_append(cap_size_ptr,cap_size);
 
@@ -355,10 +368,13 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     causeAttentionType = (ATTENTION_TYPE) buffer_get32(i_flatdata);
 
     // Capture data - oh joy
-    // do we re-expand the data or change capture date to hang onto the already flattened data?
+    // do we re-expand the data or change capture date
+    // to hang onto the already flattened data?
     // lets give it back to the capture data object and let it decide.
-
     captureData = i_flatdata;
+
+    // CaptureData::operator= will take care of unflattening the data
+    iv_traceArrayData = i_flatdata;
 
     return *this;
 }

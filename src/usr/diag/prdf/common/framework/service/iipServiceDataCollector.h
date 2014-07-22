@@ -213,6 +213,13 @@ public:
    */
   CaptureData & GetCaptureData() {return(captureData);}
 
+    /**
+     * @brief  Get access to the traceArrayData object
+     *
+     * @Return TraceArray Data
+     */
+    CaptureData & getTraceArrayData() {return iv_traceArrayData;}
+
   /**
    Add a mru to the Callout list
    <ul>
@@ -771,6 +778,12 @@ private:  // Data
 
   ErrorSignature     error_signature;
   CaptureData        captureData;
+
+  // This is used to hold L2/L3/NX trace array data.
+  // We need to separate this out from above scom
+  // reg captureData in case system runs out of errl
+  // storage space and truncates our logs.
+  CaptureData        iv_traceArrayData;
   SDC_MRU_LIST       xMruList;          // dg07
   PRDF_SIGNATURES    iv_SignatureList; // jl00
   uint32_t           maskId;

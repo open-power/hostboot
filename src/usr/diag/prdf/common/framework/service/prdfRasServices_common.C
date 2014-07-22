@@ -569,6 +569,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     if (calloutsPlusDimms > 3)
     {
         AddCapData(sdc.GetCaptureData(),iv_errl);
+        AddCapData(sdc.getTraceArrayData(), iv_errl);
         capDataAdded = true;
     }
 
@@ -764,7 +765,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Check to make sure Capture Data wasn't added earlier.
     if (!capDataAdded)
     {
-        AddCapData(sdc.GetCaptureData() ,iv_errl);
+        AddCapData(sdc.GetCaptureData(), iv_errl);
+        AddCapData(sdc.getTraceArrayData(), iv_errl);
     }
 
     // Note moved the code from here, that was associated with checking for the last
@@ -985,8 +987,10 @@ void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
                        (size_t) l_compressBufSize, ErrlVer2, ErrlCapData_1 );
 
         delete [] l_compressCapBuf;
-        delete l_CapDataBuf;
+
     }while (0);
+
+    delete l_CapDataBuf;
 }
 
 //------------------------------------------------------------------------------

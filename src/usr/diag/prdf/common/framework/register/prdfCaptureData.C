@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -369,18 +371,20 @@ void CaptureData::mergeData(CaptureData & i_cd)
 {
     DataContainerType l_data = *(i_cd.getData());
 
-    // Remove duplicate entries from secondary capture data
-    for (ConstDataIterator i = data.begin(); i != data.end(); i++)
+    if( !l_data.empty() )
     {
-        l_data.remove_if(
-            prdfCompareCaptureDataEntry(i->chipHandle,
-                                          i->address) );
-    }
+        // Remove duplicate entries from secondary capture data
+        for (ConstDataIterator i = data.begin(); i != data.end(); i++)
+        {
+            l_data.remove_if(prdfCompareCaptureDataEntry(i->chipHandle,
+                                                         i->address) );
+        }
 
-    // Add secondary capture data to primary one
-    data.insert( data.end(),
-                 l_data.begin(),
-                 l_data.end() );
+        // Add secondary capture data to primary one
+        data.insert( data.end(),
+                     l_data.begin(),
+                     l_data.end() );
+    }
 }
 
 
