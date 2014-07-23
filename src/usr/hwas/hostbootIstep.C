@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -151,77 +153,118 @@ void* host_discover_targets( void *io_pArgs )
 void* host_gard( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
-
     errlHndl_t errl;
 
-    // Check whether we're in MPIPL mode
-    TARGETING::Target* l_pTopLevel = NULL;
-    targetService().getTopLevelTarget( l_pTopLevel );
-    HWAS_ASSERT(l_pTopLevel, "HWAS host_gard: no TopLevelTarget");
+    do {
+        // Check whether we're in MPIPL mode
+        TARGETING::Target* l_pTopLevel = NULL;
+        targetService().getTopLevelTarget( l_pTopLevel );
+        HWAS_ASSERT(l_pTopLevel, "HWAS host_gard: no TopLevelTarget");
 
-    if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
-
-        // we only want EX units to be processed
-        TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
-                                           TARGETING::TYPE_EX);
-        errl = collectGard(&l_exFilter);
-    }
-    else
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
-
-        errl = collectGard();
-
-        if (errl == NULL)
+        if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
         {
-            //  check and see if we still have enough hardware to continue
-            errl = checkMinimumHardware();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
+
+            // we only want EX units to be processed
+            TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
+                                           TARGETING::TYPE_EX);
+            errl = collectGard(&l_exFilter);
+            if (errl)
+            {
+               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                               "collectGard returned error; breaking out");
+                break;
+            }
         }
-        // If targets are deconfigured as a result of host_gard, they are
-        // done so using the PLID as the reason for deconfiguration.  This
-        // triggers the reconfigure loop attribute to be set, which causes
-        // undesirable behavior, so we need to reset it here:
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
 
-        // Read current value
-        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-        // Turn off deconfigure bit
-        l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
-        // Write back to attribute
-        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
-    }
+            errl = collectGard();
+            if(errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                   "collectGard returned error; breaking out");
+                break;
+            }
 
-    // Send message to FSP sending HUID of EX chip associated with master core
-    msg_t * core_msg = msg_allocate();
-    core_msg->type = SBE::MSG_IPL_MASTER_CORE;
-    const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
-    HWAS_ASSERT(l_masterCore, "HWAS host_gard: no masterCore found");
-    // Get the EX chip associated with the master core as that is the chip that 
-    //   has the IS_MASTER_EX attribute associated with it
-    TARGETING::TargetHandleList targetList;
-    getParentAffinityTargets(targetList,
+            if (errl == NULL)
+            {
+                //  check and see if we still have enough hardware to continue
+                errl = checkMinimumHardware();
+                if(errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "check minimum hardware returned error; breaking out");
+                    break;
+                }
+            }
+            // If targets are deconfigured as a result of host_gard, they are
+            // done so using the PLID as the reason for deconfiguration.  This
+            // triggers the reconfigure loop attribute to be set, which causes
+            // undesirable behavior, so we need to reset it here:
+
+            // Read current value
+            TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+                l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+            // Turn off deconfigure bit
+            l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+            // Write back to attribute
+            l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>
+                    (l_reconfigAttr);
+        }
+
+        // Send message to FSP sending HUID of EX chip associated with
+        // master core
+        msg_t * core_msg = msg_allocate();
+        core_msg->type = SBE::MSG_IPL_MASTER_CORE;
+        const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
+
+         /*@    errorlog tag
+          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+          *  @moduleid       MOD_HOST_GARD
+          *  @reasoncode     RC_MASTER_CORE_NULL
+          *  @userdata1      0
+          *  @userdata2      0
+          *  @devdesc        HWAS host_gard: no masterCore found
+          */
+        if (l_masterCore == NULL)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "No masterCore Found" );
+            const bool hbSwError = true;
+            errl = new ERRORLOG::ErrlEntry
+                    (ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                     HWAS::MOD_HOST_GARD,
+                     HWAS::RC_MASTER_CORE_NULL,
+                     0, 0, hbSwError);
+            break;
+        }
+        // Get the EX chip associated with the master core as that is the
+        // chip that
+        //   has the IS_MASTER_EX attribute associated with it
+        TARGETING::TargetHandleList targetList;
+        getParentAffinityTargets(targetList,
                              l_masterCore,
                              TARGETING::CLASS_UNIT,
                              TARGETING::TYPE_EX);
-    HWAS_ASSERT(targetList.size() == 1, 
+        HWAS_ASSERT(targetList.size() == 1,
              "HWAS host_gard: Incorrect EX chip(s) associated with masterCore");
-    core_msg->data[0] = 0;
-    core_msg->data[1] = TARGETING::get_huid( targetList[0] );
-    core_msg->extra_data = NULL;
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        core_msg->data[0] = 0;
+        core_msg->data[1] = TARGETING::get_huid( targetList[0] );
+        core_msg->extra_data = NULL;
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "Sending MSG_MASTER_CORE message with HUID %08x",
               core_msg->data[1]);
-    errl = MBOX::send(MBOX::IPL_SERVICE_QUEUE,core_msg);
-    if (errl)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        errl = MBOX::send(MBOX::IPL_SERVICE_QUEUE,core_msg);
+        if (errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                       ERR_MRK"MBOX::send failed sending Master Core message");
-        msg_free(core_msg);
-
-    }
-
+            msg_free(core_msg);
+            break;
+        }
+    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
     return errl;

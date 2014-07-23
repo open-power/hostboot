@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,6 +48,7 @@ namespace HWAS
         RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
         RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
         RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
+        RC_MASTER_CORE_NULL                 = HWAS_COMP_ID | 0x84,
     };
 };
 
