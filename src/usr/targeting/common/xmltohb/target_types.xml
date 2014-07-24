@@ -273,6 +273,7 @@
     <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id></attribute>
     <attribute><id>MSS_VDDR_OVERIDE_SPD</id></attribute>
     <attribute><id>PM_PFET_WORKAROUND_RUN_FLAG</id></attribute>
+    <attribute><id>PM_SLEEP_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

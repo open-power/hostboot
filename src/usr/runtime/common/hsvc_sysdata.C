@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -78,6 +80,7 @@ HSVC_LOAD_ATTR( ATTR_PROC_R_LOADLINE_VCS );
 HSVC_LOAD_ATTR( ATTR_PROC_R_LOADLINE_VDD );
 HSVC_LOAD_ATTR( ATTR_PROC_VRM_VOFFSET_VCS );
 HSVC_LOAD_ATTR( ATTR_PROC_VRM_VOFFSET_VDD );
+HSVC_LOAD_ATTR( ATTR_PM_SLEEP_ENABLE );
 // -- Input: ../../xml/attribute_info/poreve_memory_attributes.xml --
 // No attributes found
 // -- Input: ../../xml/attribute_info/proc_chip_ec_feature.xml --

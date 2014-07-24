@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.49 2014/05/13 13:31:51 jmcgill Exp $
+// $Id: p8_delta_scan_rw.h,v 1.51 2014/07/03 19:40:37 jmcgill Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -43,7 +45,10 @@
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
 #define MAX_FUNC_L3_RING_LIST_ENTRIES     64  
 #define MAX_FUNC_L3_RING_SIZE             7000 // Bytes
+#define MAX_FARY_L2_RING_LIST_ENTRIES     2
+#define MAX_FARY_L2_RING_SIZE             8400 // Bytes
 #define FUNC_L3_RING_TOC_NAME             "ex_func_l3_ring"
+#define FARY_L2_RING_TOC_NAME             "ex_fary_l2_ring"
 #define MAX_CEN_PLL_RING_SIZE               80 // Bytes
 #define TP_PLL_BNDY_RING_ALT_TOC_NAME     "tp_pll_bndy_ring_alt"
 #define STANDALONE_MBOX0_VALUE_TOC_NAME   "standalone_mbox0_value"
@@ -53,6 +58,7 @@
 #define UNTRUSTED_BAR_TOC_NAME            "fabric_config"
 #define UNTRUSTED_PBA_BAR_TOC_NAME        "fabric_config_pba"
 #define REFCLOCK_TERM_TOC_NAME            "refclock_term"
+#define PM_SLEEP_ENABLE_TOC_NAME          "pm_sleep_enable"
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4

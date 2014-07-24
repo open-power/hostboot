@@ -14208,4 +14208,26 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PM_SLEEP_ENABLE</id>
+    <description>Control HW response to execution of PPC sleep instruction
+      if OFF, treat sleep as nap
+      if ON, treat sleep as sleep
+      Producer: Hostboot
+      Consumer:  p8_slw_build.C
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SLEEP_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_slw_build_errors.xml,v 1.9 2014/05/28 02:33:33 cmolsen Exp $   -->
+<!-- $Id: p8_slw_build_errors.xml,v 1.10 2014/07/03 19:53:58 jmcgill Exp $   -->
 <!-- Error definitions for proc_slw_build procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -207,7 +209,30 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-</hwpError>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_L2_FARY_OVERLAY_ERROR</rc>
+    <description>Existing ring has 1-bits in overlay locations.</description>
+    <ffdc>DATA_FAIL_BYTE_NO</ffdc>
+    <ffdc>DATA_EXISTING_RING_BYTE</ffdc>
+    <ffdc>DATA_OVERLAY_RING_BYTE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_SLEEP_PROCESSING_ERROR</rc>
+    <description>Unsupported chip type/EC combination found in sleep procesing code.</description>
+    <ffdc>CT</ffdc>
+    <ffdc>EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_WF_CREATION_ERROR</rc>

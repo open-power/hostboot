@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build_fixed.C,v 1.19 2014/05/28 02:32:41 cmolsen Exp $
+// $Id: p8_slw_build_fixed.C,v 1.20 2014/07/25 19:42:24 jmcgill Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build_fixed                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -296,11 +298,16 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   // Get various FAPI attributes and variables needed for ring unraveling.
   // ==========================================================================
 	uint8_t    attrAsyncSafeMode=0, bAsyncSafeMode;
+	uint8_t    attrSleepEnable=1, bSleepEnable;
 	uint32_t   attrFuncL3RingList[MAX_FUNC_L3_RING_LIST_ENTRIES]={0};
 	uint8_t    attrFuncL3RingData[MAX_FUNC_L3_RING_SIZE]={0};
+	uint32_t   attrFaryL2RingList[MAX_FARY_L2_RING_LIST_ENTRIES]={0};
+	uint8_t    attrFaryL2RingData[MAX_FARY_L2_RING_SIZE]={0};
 	uint32_t   attrFuncL3RingLength=0;
+        uint32_t   attrFaryL2RingLength=0;
 	SbeXipItem xipTocItem;
 	uint64_t   xipFuncL3RingVector=0;
+	uint64_t   xipFaryL2RingVector=0;
 	uint32_t   iEntry;
 
 	// Safe mode status.
@@ -349,6 +356,80 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 	  }
 		xipFuncL3RingVector = xipTocItem.iv_address;
 	}
+
+	// sleep enable/disable
+    rc = FAPI_ATTR_GET(ATTR_PM_SLEEP_ENABLE, NULL, attrSleepEnable);
+    FAPI_DBG("--> attrSleepEnable = 0x%x ", attrSleepEnable);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_SLEEP_ENABLE) returned error.");
+      return rc;
+    }
+	bSleepEnable = attrSleepEnable;
+    FAPI_DBG("--> bSleepEnable = 0x%x ",bSleepEnable);
+	// Obtain ring name and ring's vector location from image.
+    if (bSleepEnable) {
+      uint8_t chipType;
+      rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_target, chipType);
+      if (rc)  {
+        FAPI_ERR("FAPI_ATTR_GET_PRIVILEGED() failed w/rc=%i and  chipType=0x%02x",(uint32_t)rc,chipType);
+        return rc;
+      }
+      // configure overlay ring/ring length based on CT/EC
+      if ((chipType == fapi::ENUM_ATTR_NAME_MURANO) && (ddLevel < 0x20))
+      {
+        attrFaryL2RingList[0] = 0x1E2100C0;
+        attrFaryL2RingList[1] = 0xFFFF0000;
+        attrFaryL2RingLength = 82649;
+      }
+      else if ((chipType == fapi::ENUM_ATTR_NAME_MURANO) && (ddLevel >= 0x20))
+      {
+        attrFaryL2RingList[0] = 0x1DC4000C;
+        attrFaryL2RingList[1] = 0xFFFF0000;
+        attrFaryL2RingLength = 83294;
+      }
+      else if ((chipType == fapi::ENUM_ATTR_NAME_VENICE) && (ddLevel < 0x20))
+      {
+        attrFaryL2RingList[0] = 0x1DA600C0;
+        attrFaryL2RingList[1] = 0xFFFF0000;
+        attrFaryL2RingLength = 83050;
+      }
+      else if (((chipType == fapi::ENUM_ATTR_NAME_VENICE) && (ddLevel >= 0x20)) ||
+               (chipType == fapi::ENUM_ATTR_NAME_NAPLES))
+      {
+        attrFaryL2RingList[0] = 0x1DC50003;
+        attrFaryL2RingList[1] = 0xFFFF0000;
+        attrFaryL2RingLength = 83304;
+      }
+      else
+      {
+        FAPI_ERR("Unsupported CT/EC combination in sleep processing code!");
+        const uint8_t CT = chipType;
+        const uint8_t EC = ddLevel;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_SLEEP_PROCESSING_ERROR);
+        return rc;
+      }
+
+      for (iEntry=0; iEntry<MAX_FARY_L2_RING_LIST_ENTRIES; iEntry++)  {
+        if (attrFaryL2RingList[iEntry]!=0xffff0000)  {
+          attrFaryL2RingData[attrFaryL2RingList[iEntry]>>16] = (uint8_t)((attrFaryL2RingList[iEntry]<<24)>>24);
+        }
+        else
+          break;
+      }
+      FAPI_DBG("Overlay [raw] ring created for func L3 ring.");
+
+      // Get ring name from xip image.
+      rcLoc = sbe_xip_find((void*)i_imageIn, FARY_L2_RING_TOC_NAME, &xipTocItem);
+      if (rcLoc)  {
+        FAPI_ERR("sbe_xip_find() failed w/rc=%i", rcLoc);
+        FAPI_ERR("Probable cause:");
+        FAPI_ERR("\tThe keyword (=%s) was not found.", FARY_L2_RING_TOC_NAME);
+        uint32_t & RC_LOCAL = rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_KEYWORD_NOT_FOUND_ERROR);
+        return rc;
+      }
+      xipFaryL2RingVector = xipTocItem.iv_address;
+    }
 #endif
 
 
@@ -491,6 +572,59 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 				}
 			}
 		}
+#endif
+
+
+#ifndef IMGBUILD_PPD_IGNORE_XIPC
+  // ==========================================================================
+  // CUSTOMIZE item:    Overlay ex_fary_l2_ring
+  // Note: Check if ex_fary_l2_ring's vector address matches current backPtr.
+  //       If so, perform OR operation with new attribute data for this ring.
+  // Assumptions:
+  // - Base ring only.
+  // - Correct DD level rings only.
+  // ==========================================================================
+  byteExisting=0, byteOverlay=0, bGoodByte=1;
+  if (bSleepEnable) {
+	// Find ring match by comparing backItemPtr and ring lengths. Note that
+	//   we can't use fwdPtr for finding a match since we don't know which DD 
+	//   level ring it ended up pointing at.
+	if (xipFaryL2RingVector==myRev64(rs4RingLayout.backItemPtr) &&
+		attrFaryL2RingLength==myRev32(deltaRingRS4->iv_length))  {
+      // Perform OR between the existing ring and attribute ring.
+      sizeRingInBytes = (attrFaryL2RingLength-1)/8 + 1;
+      bGoodByte = 1;
+      FAPI_DBG("Byte[  # ]: ER  OR =ER? ");
+      FAPI_DBG("-----------------------");
+      for (iByte=0; (iByte<sizeRingInBytes && bGoodByte); iByte++)  {
+        if (*(attrFaryL2RingData+iByte))  {
+          // Check there are 0-bits in the existing byte where there are
+          //   1-bits in the overlay byte.
+          byteExisting = *((uint8_t*)i_buf2+iByte);
+          byteOverlay  = *(&attrFaryL2RingData[0]+iByte);
+          if (byteExisting!=(byteExisting & ~byteOverlay))  {
+          	FAPI_ERR("Byte[%4i]: %02x  %02x  %02x <-violation",iByte,byteExisting,byteOverlay,byteExisting&~byteOverlay);
+          	bGoodByte = 0;
+          	break;
+          }
+          else  {
+          	FAPI_DBG("Byte[%4i]: %02x  %02x  %02x ",iByte,byteExisting,byteOverlay,byteExisting&~byteOverlay);
+          }
+          // Only update existing ring when there's content in overlay data.
+          *((uint8_t*)i_buf2+iByte) = byteExisting | byteOverlay;
+        }
+      }
+      FAPI_DBG("-----------------------");
+      if (!bGoodByte)  {
+        FAPI_ERR("The existing ex_l2_fary_ring has 1-bits in overlay locations. ");
+      	uint32_t & DATA_FAIL_BYTE_NO = iByte;
+      	uint8_t & DATA_EXISTING_RING_BYTE = byteExisting;
+      	uint8_t & DATA_OVERLAY_RING_BYTE = byteOverlay; 
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_L2_FARY_OVERLAY_ERROR);
+        return rc;
+      }
+    }
+  }
 #endif
 
 	  // ==========================================================================

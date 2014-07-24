@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_plat_attributes.xml,v 1.9 2014/05/20 19:33:20 daviddu Exp $ -->
+<!-- $Id: pm_plat_attributes.xml,v 1.12 2014/07/22 18:34:52 jmcgill Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized by the platform.
@@ -623,6 +625,22 @@
     </description>
     <valueType>uint32</valueType>
     <platInit/>    
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SLEEP_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Control HW response to execution of PPC sleep instruction
+    if OFF, treat sleep as nap
+    if ON, treat sleep as sleep
+
+    Producer: Hostboot
+
+    Consumer:  p8_slw_build.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

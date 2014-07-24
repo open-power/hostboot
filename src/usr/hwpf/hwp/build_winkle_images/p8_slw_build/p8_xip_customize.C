@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.71 2014/05/28 15:34:53 cmolsen Exp $
+// $Id: p8_xip_customize.C,v 1.72 2014/07/03 19:52:55 jmcgill Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -598,7 +600,37 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
   *(uint64_t*)hostL2SingleMember = myRev64((uint64_t)attrL2SingleMember<<32);
   FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
+
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Sleep enable
+  // Retrieval method:  Attribute.
+  // System phase:      IPL and SLW sysPhase.
+  // ==========================================================================
   
+  uint8_t   attrSleepEnable=1;
+  void       *hostSleepEnable;
+  rc = FAPI_ATTR_GET(ATTR_PM_SLEEP_ENABLE, NULL, attrSleepEnable);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_PM_SLEEP_ENABLE) returned error.\n");
+    return rc;
+  }
+  rcLoc = sbe_xip_find( o_imageOut, PM_SLEEP_ENABLE_TOC_NAME, &xipTocItem);
+  if (rcLoc)  {
+    FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+    FAPI_ERR("Probable cause:");
+    FAPI_ERR("\tThe keyword (=%s) was not found.", PM_SLEEP_ENABLE_TOC_NAME);
+    uint32_t & RC_LOCAL = rcLoc;
+    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+    return rc;
+  }
+  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostSleepEnable);
+  FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
+           PM_SLEEP_ENABLE_TOC_NAME);
+  FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostSleepEnable));
+  *(uint64_t*)hostSleepEnable = myRev64((uint64_t)attrSleepEnable);
+  FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostSleepEnable));
+
   
   // ==========================================================================
   // CUSTOMIZE item:    Security setup.
