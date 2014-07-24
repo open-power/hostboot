@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_cpu_special_wakeup.C,v 1.20 2014/04/07 20:40:45 stillgs Exp $
+// $Id: p8_cpu_special_wakeup.C,v 1.21 2014/07/10 21:47:19 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!
@@ -72,6 +72,9 @@
 ///
 ///  Procedure Prereq:
 ///     - System clocks are running
+///     - Caller must follow these rules:
+///       - On a successful assertion of spwu, deassert afterwards!
+///       - On an unsuccessful assertion of spwu, do NOT deassert afterwards!
 /// \endverbatim
 ///
 ///
@@ -155,6 +158,7 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
     uint8_t             ignore_xstop_flag = 0;
     bool                poll_during_xstop_flag = false;
     bool                xstop_flag = false;
+    bool                bSpwuSetOnEntry = false;
 
     uint32_t            idle_state;
 
@@ -384,6 +388,13 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
             {
 
                 GETSCOM(rc, i_ex_target, spwkup_address, data);
+                
+                //cmo-20140710: Make a note of spwu is already asserted.
+                if (data.isBitSet(0))
+                    bSpwuSetOnEntry = true;   // Due to rogue direct hw access.
+                else
+                    bSpwuSetOnEntry = false;  // Just goodness..
+                    
 
                 e_rc  = data.flushTo0();
                 e_rc |= data.setBit(0);
@@ -566,7 +577,7 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
                     if (data.isBitClear(31))
                     {
                         FAPI_ERR("Timed out in setting the CPU in Special wakeup    ... ");
-
+                        
                         GETSCOM(rc, i_ex_target, EX_PMGP0_0x100F0100, data);
                         FAPI_DBG("Special Wake-up Done NOT asserted (PMGP0(31)!! =>0x%016llx", data.getDoubleWord(0));
                         const uint64_t& PMGP0 =  data.getDoubleWord(0);
@@ -584,6 +595,26 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
                         const uint64_t& HISTORY_ADDRESS = history_address;
                         const uint64_t& HISTORY_VALUE =  data.getDoubleWord(0);
 
+                        //cmo-20140710: We can't leave a latent spwu bit in 0x100f010b/c/d. Even though
+                        //  we gave it a very long time to complete, we can't take the chance that it
+                        //  fires later. So, lets clear it now. This will do no harm since the presumption
+                        //  at this point, anyway, is that it failed and so therefore it should be cleared
+                        //  too.
+                        //  Note, we only want to do this for count=0 and if bSpwuSetOnEntry==false as
+                        //  this would be an indication that we, right now, just asserted the spwu
+                        //  from a deasserted state. Therefore, we can safely also deassert it.
+                        //  Question is though, do we also wanna do the following if count>0, which 
+                        //  would be a pretty messed up situation?
+                        if (!bSpwuSetOnEntry)
+                        {
+                            e_rc=data.flushTo0();
+                            E_RC_CHECK(e_rc, rc);
+                            PUTSCOM(rc, i_ex_target, spwkup_address , data);
+                            FAPI_DBG("  Clearing SPWKUP_REG (0x%08llx) => 0x%016llx", spwkup_address, data.getDoubleWord(0));
+                            GETSCOM(rc, i_ex_target, spwkup_address , data);
+                            FAPI_DBG("  After read (delay) of SPWKUP_REG (0x%08llx) 0x%016llx", spwkup_address, data.getDoubleWord(0));
+                        }
+                    
                         const uint64_t& POLLCOUNT =  (uint64_t)pollcount;
                         const uint64_t& EX =  (uint64_t)attr_chip_unit_pos;
                         const uint64_t& ENTITY =  (uint64_t)i_entity;
