@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.12 2014/04/07 02:11:36 stillgs Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.13 2014/07/22 21:46:56 daviddu Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
  <!-- *********************************************************************** -->
@@ -352,7 +354,75 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>  
+  </hwpError> 
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PSAFE_MINMAX_BOUNDS_ERROR</rc>
+    <description>freq2pState or pstate_minmax_chk returned error - computed pstate for freq is out of bounds of MAX/MIN possible</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PSAFE_GT_GPSTPMAX_ERROR</rc>
+    <description>pstate_minmax_chk returned error -  Computed pstate is greater than max pstate in gpst</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PSAFE_ERROR</rc>
+    <description>Bad Return code</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PFLOOR_MINMAX_BOUNDS_ERROR</rc>
+    <description>freq2pState or pstate_minmax_chk returned error - computed pstate for freq is out of bounds of MAX/MIN possible</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PFLOOR_GT_GPSTPMAX_ERROR</rc>
+    <description>pstate_minmax_chk returned error -  Computed pstate is greater than max pstate in gpst</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PFLOOR_ERROR</rc>
+    <description>Bad Return code</description>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_DIFF_ERROR</rc>

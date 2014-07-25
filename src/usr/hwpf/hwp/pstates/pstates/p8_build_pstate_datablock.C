@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.38 2014/07/03 02:57:43 daviddu Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.39 2014/07/22 21:45:45 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -73,6 +73,8 @@ ReturnCode proc_get_attributes   (const Target& i_target, AttributeList *attr_li
 ReturnCode proc_get_extint_bias  (uint32_t attr_mvpd_data[PV_D][PV_W], const AttributeList *attr, double *volt_int_vdd_bias, double *volt_int_vcs_bias);
 ReturnCode proc_boost_gpst       (PstateSuperStructure *pss, uint32_t attr_boost_percent);
 ReturnCode proc_upd_cpmrange     (PstateSuperStructure *pss, const AttributeList *attr);
+ReturnCode proc_upd_psafe_ps     (PstateSuperStructure *pss, const AttributeList *attr);
+ReturnCode proc_upd_floor_ps     (PstateSuperStructure *pss, const AttributeList *attr);
 ReturnCode proc_chk_valid_poundv (const Target& i_target, const uint32_t chiplet_mvpd_data[PV_D][PV_W], uint8_t chiplet_num, uint8_t bucket_id);
 ReturnCode proc_res_clock        (PstateSuperStructure *pss, AttributeList *attr_list);
 // ----------------------------------------------------------------------
@@ -323,28 +325,18 @@ p8_build_pstate_datablock(const Target& i_target,
     // --------------------------------------------------------------------
     // Setup psafe_pstate via attr_pm_safe_frequency (added per SW260812)
     // --------------------------------------------------------------------
-    Pstate psafe_freq_pstate;
-    FAPI_INF("Converting attr_pm_safe_frequency in %u MHz to Pstate", attr.attr_pm_safe_frequency);
-    rc = freq2pState (&((*io_pss).gpst), attr.attr_pm_safe_frequency*1000, &psafe_freq_pstate);
-    if (rc) break;
-    FAPI_INF("Producing pstate = %d for attr_pm_safe_frequency = %u Mhz", psafe_freq_pstate, attr.attr_pm_safe_frequency);
-    rc = pstate_minmax_chk(&((*io_pss).gpst), &psafe_freq_pstate);      
-    if (rc) break;
-    FAPI_IMP("Now set psafe in Global Pstate Table to be pstate of attr_pm_safe_frequency");
-    (*io_pss).gpst.psafe = psafe_freq_pstate;
- 
+    FAPI_INF("Setup psafe_pstate via attr_pm_safe_frequency");
+
+    l_rc = proc_upd_psafe_ps (io_pss, &attr);
+    if (l_rc) break;
+
     // --------------------------------------------------------------------
     // Setup pmin_clip via attr_freq_core_floor (added per SW260911)
     // --------------------------------------------------------------------
-    Pstate floor_freq_pstate;
-    FAPI_INF("Converting attr_freq_core_floor in %u MHz to Pstate", attr.attr_freq_core_floor);
-    rc = freq2pState (&((*io_pss).gpst), attr.attr_freq_core_floor*1000, &floor_freq_pstate);
-    if (rc) break;
-    FAPI_INF("Producing pstate = %d for attr_freq_core_floor = %u Mhz", floor_freq_pstate, attr.attr_freq_core_floor);
-    rc = pstate_minmax_chk(&((*io_pss).gpst), &floor_freq_pstate);
-    if (rc) break;
-    FAPI_IMP("Now set pfloor in Global Pstate Table to be pstate of attr_freq_core_floor");
-    (*io_pss).gpst.pfloor = floor_freq_pstate;
+    FAPI_INF("Setup pmin_clip via attr_freq_core_floor");
+
+    l_rc = proc_upd_floor_ps (io_pss, &attr);
+    if (l_rc) break;
 
     // -----------------------------
     // Create the Local Pstate table
@@ -462,9 +454,10 @@ p8_build_pstate_datablock(const Target& i_target,
     // ------------------------
     // Force optional overrides
     // ------------------------
-    (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                                            PSTATE_FORCE_INITIAL_PMIN);
-    
+    FAPI_INF(" Set PSTATE_FORCE_INITIAL_PMIN in GPST control options");
+    (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) | PSTATE_FORCE_INITIAL_PMIN);
+    FAPI_INF(" GPST control options mask is now: [%x].", (*io_pss).gpst.options.options);
+ 
     //  -------------------
     //  Attributes to write
     //  -------------------
@@ -1073,12 +1066,12 @@ ReturnCode proc_upd_cpmrange (PstateSuperStructure *pss,
     int8_t   & PSTATE      = pstate;
     uint32_t & FREQ_KHZ    = freq_khz;
 
-    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_LT_PSTATE_MIN) {
+    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_GT_PSTATE_MAX) {
       FAPI_ERR("**** ERROR : Computed pstate for freq (%d khz) out of bounds of MAX/MIN possible rc = %d", freq_khz, rc);
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSTATE_MINMAX_BOUNDS_ERROR);
     }
     else if (rc == -GPST_PSTATE_GT_GPST_PMAX){
-      FAPI_ERR("**** ERROR : Computed pstate is greater than max pstate in gpst (max pstate = %d  computed pstate = %d  rc = %d", pstate, gpst_pmax(&(pss->gpst)), rc );
+      FAPI_ERR("**** ERROR : Computed pstate is greater than max pstate in gpst (computed pstate = %d  max pstate = %d  rc = %d", pstate, gpst_pmax(&(pss->gpst)), rc );
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSTATE_GT_GPSTPMAX_ERROR);
     }
     else {
@@ -1313,7 +1306,7 @@ ReturnCode proc_res_clock (PstateSuperStructure *pss,
     int8_t &   PSTATE      = pstate;
     uint32_t & FREQ_KHZ    = freq_khz;
 
-    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_LT_PSTATE_MIN) {
+    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_GT_PSTATE_MAX) {
       FAPI_ERR("**** ERROR : Computed pstate for freq (%d khz) out of bounds of MAX/MIN possible rc = %d", freq_khz, rc);
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_FREQ2PSTATE_PSTATE_MINMAX_BOUNDS_ERROR);
     }
@@ -1325,6 +1318,116 @@ ReturnCode proc_res_clock (PstateSuperStructure *pss,
 
   return l_rc;
 }
+
+
+/// ------------------------------------------------------------
+/// \brief Update Psafe_pstate 
+/// \param[inout] *pss   => pointer to pstate superstructure
+/// \param[in]    *attr  => pointer to attribute list structure
+/// ------------------------------------------------------------
+
+ReturnCode proc_upd_psafe_ps (PstateSuperStructure *pss,
+                              const AttributeList *attr)
+{
+  ReturnCode l_rc;
+  int        rc           = 0;
+  Pstate     pstate;
+  uint32_t   freq_khz;
+
+  do
+  {
+
+    freq_khz = attr->attr_pm_safe_frequency*1000;
+    FAPI_INF("Converting attr_pm_safe_frequency in %u khz to Pstate", freq_khz);
+    rc = freq2pState(&(pss->gpst), freq_khz, &pstate);
+    if(rc) break;
+    FAPI_INF("Producing pstate = %d for attr_pm_safe_frequency = %u khz", pstate, freq_khz);
+    rc = pstate_minmax_chk(&(pss->gpst), &pstate);
+    if(rc) break;
+    FAPI_IMP("Now set psafe in Global Pstate Table to be pstate of attr_pm_safe_frequency");
+    pss->gpst.psafe = pstate;
+
+  } while (0);
+
+  // ------------------------------------------------------
+  // check error code from freq2pState or pstate_minmax_chk
+  // ------------------------------------------------------
+  if (rc) {
+    int      & RETURN_CODE = rc;
+    int8_t   & PSTATE      = pstate;
+    uint32_t & FREQ_KHZ    = freq_khz;
+
+    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_GT_PSTATE_MAX) {
+      FAPI_ERR("**** ERROR : Computed pstate for freq (%d khz) out of bounds of MAX/MIN possible rc = %d", freq_khz, rc);
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSAFE_MINMAX_BOUNDS_ERROR);
+    }
+    else if (rc == -GPST_PSTATE_GT_GPST_PMAX){
+      FAPI_ERR("**** ERROR : Computed pstate is greater than max pstate in gpst (computed pstate = %d  max pstate = %d  rc = %d", pstate, gpst_pmax(&(pss->gpst)), rc );
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSAFE_GT_GPSTPMAX_ERROR);
+    }
+    else {
+      FAPI_ERR("**** ERROR : Bad Return code rc = %d", rc );
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSAFE_ERROR);
+    }
+  }
+
+  return l_rc;
+} // end proc_upd_psafe_ps
+
+
+/// ------------------------------------------------------------
+/// \brief Update Floor_pstate 
+/// \param[inout] *pss   => pointer to pstate superstructure
+/// \param[in]    *attr  => pointer to attribute list structure
+/// ------------------------------------------------------------
+
+ReturnCode proc_upd_floor_ps (PstateSuperStructure *pss,
+                              const AttributeList *attr)
+{
+  ReturnCode l_rc;
+  int        rc           = 0;
+  Pstate     pstate;
+  uint32_t   freq_khz;
+
+  do
+  {
+
+    freq_khz = attr->attr_freq_core_floor*1000;
+    FAPI_INF("Converting attr_freq_core_floor in %u khz to Pstate", freq_khz);
+    rc = freq2pState(&(pss->gpst), freq_khz, &pstate);
+    if(rc) break;
+    FAPI_INF("Producing pstate = %d for attr_freq_core_floor = %u khz", pstate, freq_khz);
+    rc = pstate_minmax_chk(&(pss->gpst), &pstate);
+    if(rc) break;
+    FAPI_IMP("Now set pfloor in Global Pstate Table to be pstate of attr_freq_core_floor");
+    pss->gpst.pfloor = pstate;
+
+  } while (0);
+
+  // ------------------------------------------------------
+  // check error code from freq2pState or pstate_minmax_chk
+  // ------------------------------------------------------
+  if (rc) {
+    int      & RETURN_CODE = rc;
+    int8_t   & PSTATE      = pstate;
+    uint32_t & FREQ_KHZ    = freq_khz;
+
+    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_GT_PSTATE_MAX) {
+      FAPI_ERR("**** ERROR : Computed pstate for freq (%d khz) out of bounds of MAX/MIN possible rc = %d", freq_khz, rc);
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PFLOOR_MINMAX_BOUNDS_ERROR);
+    }
+    else if (rc == -GPST_PSTATE_GT_GPST_PMAX){
+      FAPI_ERR("**** ERROR : Computed pstate is greater than max pstate in gpst (computed pstate = %d  max pstate = %d  rc = %d", pstate, gpst_pmax(&(pss->gpst)), rc );
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PFLOOR_GT_GPSTPMAX_ERROR);
+    }
+    else {
+      FAPI_ERR("**** ERROR : Bad Return code rc = %d", rc );
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PFLOOR_ERROR);
+    }
+  }
+
+  return l_rc;
+} // end proc_upd_floor_ps
 
 
 } //end extern C
