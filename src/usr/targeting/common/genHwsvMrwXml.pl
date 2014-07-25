@@ -489,6 +489,8 @@ foreach my $i (@{$powerbus->{'power-bus'}})
                       $upstrm_swap, $tx_swap, $rx_swap, $endpoint2_ipath,
                       $nodeconfig ];
     }
+}
+
 #------------------------------------------------------------------------------
 # Process the dmi-busses MRW file
 #------------------------------------------------------------------------------
