@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pcbs_init_errors.xml,v 1.7 2013/12/16 15:28:41 stillgs Exp $ -->
+<!-- $Id: p8_pcbs_init_errors.xml,v 1.8 2014/07/22 15:42:46 cmolsen Exp $ -->
 <!-- Error definitions for proc_pcbs_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -31,6 +33,9 @@
     <ffdc>PMSR</ffdc>
     <ffdc>PCBSPM_MON1</ffdc>
     <ffdc>PCBSPM_MON2</ffdc>
+    <ffdc>PMGP1</ffdc>
+    <ffdc>IVRM_CTRL</ffdc>
+    <ffdc>IVRM_VAL</ffdc>
     <callout><target>PROC_CHIP</target><priority>HIGH</priority></callout>
   </hwpError>
   <!-- *********************************************************************** -->

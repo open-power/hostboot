@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.27 2014/02/17 03:00:35 stillgs Exp $
+// $Id: p8_pcbs_init.C,v 1.28 2014/07/22 15:41:26 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Ralf Maier         Email: ralf.maier@de.ibm.com
 // *!
@@ -961,14 +961,27 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
                             const fapi::Target& PROC_CHIP = i_target;
                             const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
                             const uint64_t& PMSR = data.getDoubleWord(0);
-
+                            
                             address =  EX_PCBS_FSM_MONITOR1_REG_0x100F0170 + ex_offset;
                             GETSCOM(rc, i_target, address, data);
                             const uint64_t& PCBSPM_MON1 = data.getDoubleWord(0);
-
+                            
                             address =  EX_PCBS_FSM_MONITOR2_REG_0x100F0171 + ex_offset;
                             GETSCOM(rc, i_target, address, data);
-                            const uint64_t& PCBSPM_MON2 = data.getDoubleWord(0);                        
+                            const uint64_t& PCBSPM_MON2 = data.getDoubleWord(0);
+                            
+                            address =  EX_PMGP1_0x100F0103 + ex_offset;
+                            GETSCOM(rc, i_target, address, data);
+                            const uint64_t& PMGP1 = data.getDoubleWord(0);
+                            
+                            address = EX_PCBS_iVRM_Control_Status_Reg_0x100F0154 + ex_offset;
+                            GETSCOM(rc, i_target, address, data);
+                            const uint64_t& IVRM_CTRL = data.getDoubleWord(0);
+                            
+                            address = EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155 + ex_offset;
+                            GETSCOM(rc, i_target, address, data);
+                            const uint64_t& IVRM_VAL = data.getDoubleWord(0);
+                            
 
                             FAPI_SET_HWP_ERROR(rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
                             break;
@@ -1550,6 +1563,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
+Revision 1.28  2014/07/22 15:41:26  cmolsen
+SW269281 and SW266137: Updated to capture IVRM regs and PMGP1 in case of RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT failure.
+
 Revision 1.27  2014/02/17 03:00:35  stillgs
 - After review (in dealing with  SW240169), removed most *scan0 statements as they were more detrimental than valuable.
   The testcase for SW242617 should be run with this change
