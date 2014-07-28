@@ -333,7 +333,8 @@ void*    call_host_activate_master( void    *io_pArgs )
 //
 void*    call_host_activate_slave_cores( void    *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t  l_timeout_errl  =   NULL;
+    errlHndl_t  l_errl          =   NULL;
 
     IStepError  l_stepError;
 
@@ -399,18 +400,19 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                             rc,
                             pir);
 
-                    FAPI_INVOKE_HWP( l_errl, proc_check_slw_done,
+                    FAPI_INVOKE_HWP( l_timeout_errl, proc_check_slw_done,
                             l_fapi_ex_target);
-                    if (l_errl)
+                    if (l_timeout_errl)
                     {
                         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                                 "ERROR : proc_check_slw_done" );
                         // Add chip target info
-                        ErrlUserDetailsTarget(l_processor).addToLog( l_errl );
+                        ErrlUserDetailsTarget(l_processor).addToLog(
+                                                               l_timeout_errl );
                         // Create IStep error log
-                        l_stepError.addErrorDetails(l_errl);
+                        l_stepError.addErrorDetails(l_timeout_errl);
                         // Commit error
-                        errlCommit( l_errl, HWPF_COMP_ID );
+                        errlCommit( l_timeout_errl, HWPF_COMP_ID );
                         break;
                     }
                     else
@@ -440,7 +442,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                      * @devdesc Kernel returned error when trying to activate
                      *          core.
                      */
-                    errlHndl_t l_tmperrl =
+                    errlHndl_t l_errl =
                         new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 ISTEP_HOST_ACTIVATE_SLAVE_CORES,
@@ -449,19 +451,14 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                                 rc );
 
                     // Callout core that failed to wake up.
-                    l_tmperrl->addHwCallout(*l_core,
+                    l_errl->addHwCallout(*l_core,
                             HWAS::SRCI_PRIORITY_MED,
                             HWAS::DECONFIG,
                             HWAS::GARD_Predictive);
 
-                    if (NULL == l_errl)
-                    {
-                        l_errl = l_tmperrl;
-                    }
-                    else
-                    {
-                        errlCommit( l_tmperrl, HWPF_COMP_ID );
-                    }
+                    l_stepError.addErrorDetails( l_errl );
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    break;
                 }
                 else //Core out of winkle sucessfully, issue SPWU for PRD
                 {
@@ -515,8 +512,10 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                  *
                  * @devdesc     Call to getParentAffinityTarget requesting
                  *              the number of EX chips with parent affinity
-                 *              to a core, returned and incorrect vector size,
+                 *              to a core, returned an incorrect vector size,
                  *              the expected size is 1.
+                 *
+                 * @custdec     A problem occurred during the IPL of the system.
                  *
                  */
                 l_errl =
@@ -525,19 +524,16 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                             ISTEP_INCORRECT_TARGET_COUNT,
                             pir,
                             targetList.size(), true);
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
             }
         }
     }
 
-    if (l_errl)
-    {
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_errl );
-
-        // Commit Error
-        errlCommit(l_errl, HWPF_COMP_ID);
-    }
-    else
+    if( !l_stepError.getErrorHandle() )
     {
         // Call proc_post_winkle
         TARGETING::TargetHandleList l_procTargetList;
