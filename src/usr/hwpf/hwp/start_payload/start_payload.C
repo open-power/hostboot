@@ -986,7 +986,7 @@ errlHndl_t enableCoreCheckstops()
 
             // Write the runtime version of the Action1 reg
             // Core FIR Action1 Register value from Nick
-            uint64_t action1_reg = 0xFEFC17F78F9C8A01;
+            uint64_t action1_reg =  0xFEFC17F7FF9C8A09;
             size_t opsize = sizeof(uint64_t);
             l_errl = deviceWrite( l_exTarget,
                         &action1_reg,
