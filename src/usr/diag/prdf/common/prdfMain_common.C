@@ -214,6 +214,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     ServiceGeneratorClass & serviceGenerator =
         ServiceGeneratorClass::ThisServiceGenerator();
 
+    // Initialize the SDC error log. Required for GenerateSrcPfa() call below.
+    serviceGenerator.createInitialErrl( i_attentionType );
+
     // check for something wrong
     if ( g_initialized == false || rc != SUCCESS || systemPtr == NULL )
     {
@@ -242,9 +245,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         {
             serviceData.SetFlooding();
         }
-
-        // Create Initial error log
-        serviceGenerator.createInitialErrl( i_attentionType );
 
         int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
         // flush Cache to free up the memory
