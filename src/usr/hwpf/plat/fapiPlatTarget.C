@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -155,10 +157,14 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             const char * l_pChipType = NULL;
             const char * l_pChipTypeSpc = NULL;
             uint32_t l_chipPos = 0;
+            uint32_t l_node = 0;
 
             for (uint32_t i = 0; ((i < l_sizePath) && (l_pChipType == NULL));
                  i++)
             {
+                if(l_path[i].type == TARGETING::TYPE_NODE){
+                    l_node = l_path[i].instance;
+                }
                 if (l_path[i].type == TARGETING::TYPE_PROC)
                 {
                     l_pChipType = ECMD_CHIP_PROC;
@@ -238,23 +244,14 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                     l_pStr += strlen(l_pChipTypeSpc);
                 }
 
-                // Middle of the string
-                strcpy(l_pStr, "k0:n0:s0:p");
-                l_pStr += strlen("k0:n0:s0:p");
-                int l_kstringlen = strlen("k0:n0:s0:p");
-
-                // Chip Pos.
-                int l_num = sprintf(l_pStr, "%02d", l_chipPos);
-                l_pStr += l_num;
-                l_kstringlen += l_num;
+                int l_kstringlen = sprintf(l_pStr, "k0:n%d:s0:p%02d",
+                                l_node, l_chipPos);
+                l_pStr += l_kstringlen;
 
                 if (l_pChipletType != NULL)
                 {
                     // Chiplet Pos
-                    strcpy(l_pStr, ":c");
-                    l_pStr += strlen(":c");
-                    l_kstringlen += strlen(":c");
-                    int l_num = sprintf(l_pStr, "%d", l_chipletPos);
+                    int l_num = sprintf(l_pStr, ":c%d", l_chipletPos);
                     l_pStr += l_num;
                     l_kstringlen += l_num;
                 }
