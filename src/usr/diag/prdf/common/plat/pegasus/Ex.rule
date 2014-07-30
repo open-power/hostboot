@@ -58,6 +58,8 @@ chip Ex
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+.include "prdfP8ExExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
