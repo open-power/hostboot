@@ -23,13 +23,13 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_extract_sbe_rc.C,v 1.17 2014/03/24 20:34:44 jmcgill Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.18 2014/06/30 14:32:05 bgeukes Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** IBM Confidential ***
 // *|
 // *! TITLE       : proc_extract_sbe_rc.C
 // *! DESCRIPTION : Create a return code for an SBE/SLW error
@@ -54,6 +54,7 @@
 #include <proc_extract_sbe_rc.H>
 #include <proc_reset_i2cm_bus_fence.H>
 #include <p8_scom_addresses.H>
+#include <proc_tp_collect_dbg_data.H>
 
 
 //------------------------------------------------------------------------------

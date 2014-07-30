@@ -209,6 +209,7 @@ HWP_ATTR_XML_FILES += hwp/dram_training/mem_pll_setup/memb_pll_ring_attributes.x
 HWP_ATTR_XML_FILES += hwp/proc_chip_ec_feature.xml
 HWP_ATTR_XML_FILES += hwp/proc_abus_dmi_xbus_scominit_attributes.xml
 HWP_ATTR_XML_FILES += hwp/runtime_attributes/memory_occ_attributes.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_tp_collect_dbg_data/proc_tp_collect_dbg_data.xml
 
 #------------------------------------------------------------------------------
 # PLL Ring Data files

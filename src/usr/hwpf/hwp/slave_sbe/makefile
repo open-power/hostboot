@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +44,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_getecid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_spless_sbe_startWA
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_tp_collect_dbg_data
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += slave_sbe.o
@@ -55,6 +57,7 @@ OBJS += proc_cen_ref_clk_enable.o
 OBJS += proc_spless_sbe_startWA.o
 OBJS += proc_reset_i2cm_bus_fence.o
 OBJS += proc_check_master_sbe_seeprom.o
+OBJS += proc_tp_collect_dbg_data.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
@@ -62,7 +65,7 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_revert_sbe_mcs_setup
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_getecid
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_spless_sbe_startWA
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_tp_collect_dbg_data
 
 include ${ROOTPATH}/config.mk
 
