@@ -3,7 +3,7 @@
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
 #-- All Rights Reserved -- Property of IBM
-#-- *** IBM Confidential ***
+#-- ***  ***
 #--
 #-- TITLE       : p8.pcie.phase2.scom.initfile
 #-- DESCRIPTION : Perform PCIe PBCQ/AIB Inits (Phase 2, Steps 9-17)

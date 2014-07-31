@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE       : proc_thread_control
 // *! DESCRIPTION : Core Thread start/stop/step/query/activate operations

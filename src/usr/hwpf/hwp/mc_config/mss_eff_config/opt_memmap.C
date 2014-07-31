@@ -30,7 +30,7 @@
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 // *|
 // *! TITLE       : opt_memmap.C
 // *! DESCRIPTION : Layout non-mirrored/mirrored address map (FAPI)

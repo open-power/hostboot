@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_grouping.C
 // *! DESCRIPTION : see additional comments below

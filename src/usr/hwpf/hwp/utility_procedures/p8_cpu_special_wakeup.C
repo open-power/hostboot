@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!

@@ -3,7 +3,7 @@
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
 #-- All Rights Reserved -- Property of IBM
-#-- *** IBM Confidential ***
+#-- ***  ***
 #--
 #-- TITLE       : p8.a_x_pci_dmi_fir.scom.initfile
 #-- DESCRIPTION : Perform base A/X/DMI/PCI base FIR configuration

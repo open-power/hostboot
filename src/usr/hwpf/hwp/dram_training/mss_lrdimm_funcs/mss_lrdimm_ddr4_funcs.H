@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : mss_lrdimm_funcs.H
 // *! DESCRIPTION : Tools for lrdimm centaur procedures

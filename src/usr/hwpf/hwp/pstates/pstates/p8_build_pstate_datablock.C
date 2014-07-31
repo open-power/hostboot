@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME:  Jim Yacynych         Email: jimyac@us.ibm.com
 // *! BACKUP NAME: Greg Still           Email: stillgs@us.ibm.com
