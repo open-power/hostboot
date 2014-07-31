@@ -560,8 +560,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(
              * @moduleid          HWAS::MOD_DECONFIG_GARD
              * @reasoncode        HWAS::RC_TARGET_NOT_DECONFIGURABLE
              * @devdesc           Attempt to deconfigure a target that is not
-             *                    deconfigurable
-             *                    (not DECONFIG_GARDABLE or not present)
+             *                    deconfigurable or not present.
              * @userdata1[00:31]  HUID of input target
              * @userdata1[32:63]  GARD errlog EID
              * @userdata2[00:31]  ATTR_DECONFIG_GARDABLE

@@ -145,6 +145,9 @@ namespace fapi
  * @moduleid     MOD_FAPI_RC_TO_ERRL
  * @reasoncode   RC_INVALID_ATTR_GET
  * @devdesc      InitFile HW Procedure requested an invalid attribute
+ * @custdesc     A problem was detected during the IPL of the system:
+ *               A hardware initialization procedure requested an invalid
+ *               attribute.
  */
 /*@
  * @errortype

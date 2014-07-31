@@ -97,6 +97,7 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
              * @userdata2    MCS HUID
              * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
              *               one target on the other side of the correct state
+             * @custdesc  A problem occurrred during the IPL of the system.
              */
             const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -136,6 +137,7 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
              * @userdata2    Membuf HUID
              * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
              *               one target on the other side of the correct state
+             * @custdesc  A problem occurrred during the IPL of the system.
              */
             const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -168,6 +170,8 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
          * @userdata2    Unsupported Target HUID
          * @devdesc      fapiGetOtherSideOfMemChannel request for unsupported
          *               or invalid target type
+         * @custdesc  A problem occurrred during the IPL of the system: Request
+         *            for unsupported or invalid target type.
          */
         const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -199,6 +203,8 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
             * @userdata2    Other Target HUID
             * @devdesc      fapiGetOtherSideOfMemChannel target not present or
             *               functional as requested
+            * @custdesc     A problem occurred during the IPL of the system:
+            *               Requested target not present or not functional.
             */
            const bool hbSwError = true;
            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -252,6 +258,7 @@ fapi::ReturnCode fapiGetChildChiplets(
          * @userdata1    Type of input target
          * @userdata2    Input Target HUID
          * @devdesc      fapiGetChildChiplets request for non-chip
+         * @custdesc     A problem occurred during the IPL of the system.
          */
         const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -305,6 +312,8 @@ fapi::ReturnCode fapiGetChildChiplets(
              * @userdata2    Input Chip Target HUID
              * @devdesc      fapiGetChildChiplets request for unsupported
              *               or invalid chiplet type
+            * @custdesc     A problem occurred during the IPL of the system:
+            *               Request for an unsupported or invalid chiplet type.
              */
             const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -481,6 +490,7 @@ fapi::ReturnCode fapiGetParentChip(
          * @userdata1    Type of input target
          * @userdata2    Input Target HUID
          * @devdesc      fapiGetParentChip request for non-chiplet
+         * @custdesc     A problem occurred during the IPL of the system.
          */
         const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -528,6 +538,7 @@ fapi::ReturnCode fapiGetParentChip(
                  * @reasoncode   fapi::RC_NO_SINGLE_PARENT
                  * @userdata1    Input Chiplet Target HUID
                  * @devdesc      fapiGetParentChip did not find one parent
+                 * @custdesc     A problem occurred during the IPL of the system.
                  */
                 const bool hbSwError = true;
                 errlHndl_t l_pError = new ERRORLOG::ErrlEntry(

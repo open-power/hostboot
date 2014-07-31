@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -162,6 +164,8 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
              * @userdata1[32:63] Buffer Length
              * @userdata2        Device Max Size (in KB)
              * @devdesc          I2C Buffer Length + Offset > Max Size
+             * @custdesc         A problem occurred during the IPL of the
+             *                   system: I2C buffer offset is too large.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_PERFORM_OP,
@@ -217,7 +221,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
              * @moduleid       EEPROM_PERFORM_OP
              * @userdata1      Operation Type
              * @userdata2      Chip to Access
-             * @devdesc        Invalid Operation type.
+             * @devdesc        Invalid operation type.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_PERFORM_OP,
@@ -835,6 +839,8 @@ errlHndl_t eepromPrepareAddress ( void * io_buffer,
                  * @userdata1        Address Size (aka Device Type)
                  * @userdata2        EEPROM chip
                  * @devdesc          The Device type not supported (addrSize)
+                 * @custdesc         A problem was detected during the IPL of
+                 *                   the system: Device type not supported.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                EEPROM_PREPAREADDRESS,
@@ -965,7 +971,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                  * @moduleid         EEPROM_READATTRIBUTES
                  * @userdata1        HUID of target
                  * @userdata2        EEPROM chip
-                 * @devdesc          EEPROM Attribute was not found
+                 * @devdesc          EEPROM attribute was not found
                  */
                 err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1022,7 +1028,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                  * @moduleid         EEPROM_READATTRIBUTES
                  * @userdata1        HUID of target
                  * @userdata2        Address Offset Size
-                 * @devdesc          Invalid Address Offset Size
+                 * @devdesc          Invalid address offset size
                  */
                 err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1099,7 +1105,7 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                  * @moduleid         EEPROM_GETI2CMASTERTARGET
                  * @userdata1        Attribute Chip Type Enum
                  * @userdata2        HUID of target
-                 * @devdesc          DIMM I2C Master Entity path doesn't exist.
+                 * @devdesc          DIMM I2C master entity path doesn't exist.
                  */
                 err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1130,7 +1136,7 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                  * @moduleid         EEPROM_GETI2CMASTERTARGET
                  * @userdata1        Attribute Chip Type Enum
                  * @userdata2        HUID of target
-                 * @devdesc          I2C Master Path Target is NULL.
+                 * @devdesc          I2C master path target is null.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                EEPROM_GETI2CMASTERTARGET,

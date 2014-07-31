@@ -706,6 +706,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
                  * @reasoncode        RC_SYSAVAIL_NO_NODES_FUNC
                  * @devdesc           checkMinimumHardware found no functional
                  *                    nodes on the system
+                 * @custdesc          A problem occurred during the IPL of the
+                 *                    system: No functional nodes were found on
+                 *                    the system.
                  */
                 l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                                     MOD_CHECK_MIN_HW,
@@ -770,6 +773,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
              * @reasoncode        RC_SYSAVAIL_NO_PROCS_FUNC
              * @devdesc           checkMinimumHardware found no functional
              *                    master processor on this node
+             * @custdesc          A problem occurred during the IPL of the
+             *                    system: No functional master processor
+             *                    was found on this node.
              * @userdata1[00:31]  HUID of node
              * @userdata2[00:31]  number of present procs
              * @userdata2[32:63]  number of present functional non-master procs
@@ -825,6 +831,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
                  * @reasoncode        RC_SYSAVAIL_NO_CORES_FUNC
                  * @devdesc           checkMinimumHardware found no functional
                  *                    processor cores on the master proc
+                 * @custdesc          A problem occurred during the IPL of the
+                 *                    system: No functional processor cores
+                 *                    were found on the master processor.
                  * @userdata1[00:31]  HUID of node
                  * @userdata1[32:63]  HUID of master proc
                  * @userdata2[00:31]  number of present, non-functional cores
@@ -884,6 +893,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
              * @reasoncode        RC_SYSAVAIL_NO_MEMORY_FUNC
              * @devdesc           checkMinimumHardware found no
              *                    functional dimm cards.
+             * @custdesc          A problem occurred during the IPL of the
+             *                    system: Found no functional dimm cards.
              * @userdata1[00:31]  HUID of node
              * @userdata2[00:31]  number of present, non-functional dimms
              */

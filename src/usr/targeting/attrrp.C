@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -221,7 +223,7 @@ namespace TARGETING
                  *   @userdata1         Virtual Address
                  *   @userdata2         (Msg Type << 32) | Section #
                  *
-                 *   @devdesc   The Attribute Resource Provider was unable to
+                 *   @devdesc   The attribute resource provider was unable to
                  *              satisfy a message request from the VMM portion
                  *              of the kernel.  This was either due to an
                  *              address outside a valid range or a message
@@ -282,7 +284,13 @@ namespace TARGETING
                  *              PNOR_TARG_EYE_CATCHER and therefore the
                  *              contents of the Attribute PNOR section are
                  *              unable to be parsed.
-                 */
+                 *   @custdesc  A problem occurred during the IPL of the
+                 *              system.
+                 *              The eyecatch value observed in memory does not
+                 *              match the expected value and therefore the
+                 *              contents of the attribute sections are unable
+                 *              to be parsed.
+                */
                 l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                        TARG_MOD_ATTRRP,
                                        TARG_RC_BAD_EYECATCH,

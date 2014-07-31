@@ -277,8 +277,8 @@ namespace TARGETING
                          *   @reasoncode    TARG_RC_ATTR_SYNC_TO_HB_FAIL
                          *   @userdata1     return code
                          *   @userdata2     section to sync
-                         *   @devdesc       The Attribute synchronization from FSP
-                         *                  failed.
+                         *   @devdesc       The attribute synchronization from
+                         *                  the FSP failed.
                          */
                          l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                                 TARG_MOD_ATTR_SYNC,
@@ -363,7 +363,7 @@ namespace TARGETING
                  *   @userdata1     return code from FSP attribute sync
                  *   @userdata2     section ID of for section being sync'd
                  *
-                 *   @devdesc       The Attribute synchronization code on the
+                 *   @devdesc       The attribute synchronization code on the
                  *                  FSP side was unable to complete the sync
                  *                  operation successfully.
                  */
@@ -415,9 +415,9 @@ namespace TARGETING
                  *   @reasoncode    TARG_RC_ATTR_SYNC_REQUEST_TO_HB_FAIL
                  *   @userdata1     return code from FSP
                  *   @userdata2     section to sync
-                 *   @devdesc       The Attribute synchronization code on the
+                 *   @devdesc       The attribute synchronization code on the
                  *                  FSP side was unable to fulfill the sync to
-                 *                  HB request.
+                 *                  HostBoot request.
                  */
                  l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                        TARG_MOD_ATTR_SYNC,

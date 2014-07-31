@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -228,15 +230,20 @@ enum srcType_t
  *
  * Refer to errentry.H and src/epub/fsp/epub_service_codes.H
  * in fips code.
+ *
+ * @note This enum is parsed by genErrlParsers.pl and requires the subsystem
+ *       name to start with EPUB_  and the value to start with 0x followed by
+ *       exactly two hex digits and a comma. Subsystems that have their SRCs
+ *       published separately (e.g. PRD) are marked as //@PUB_IGNORE
  */
 enum epubSubSystem_t
 {
-    EPUB_RESERVED_0                 = 0x00,
+    EPUB_RESERVED_0                 = 0x00, //@PUB_IGNORE
 
     // Processor subsystem
     EPUB_PROCESSOR_SUBSYS           = 0x10,
-    EPUB_PROCESSOR_FRU              = 0x11,
-    EPUB_PROCESSOR_CHIP_CACHE       = 0x12,
+    EPUB_PROCESSOR_FRU              = 0x11, //@PUB_IGNORE
+    EPUB_PROCESSOR_CHIP_CACHE       = 0x12, //@PUB_IGNORE
     EPUB_PROCESSOR_UNIT             = 0x13,
     EPUB_PROCESSOR_BUS_CTL          = 0x14,
 
@@ -245,20 +252,15 @@ enum epubSubSystem_t
     EPUB_MEMORY_CONTROLLER          = 0x21,
     EPUB_MEMORY_BUS                 = 0x22,
     EPUB_MEMORY_DIMM                = 0x23,
-    EPUB_MEMORY_FRU                 = 0x24,
-    EPUB_EXTERNAL_CACHE             = 0x25,
-
-    // I/O Subsystem: hub
-    EPUB_IO_HUB                     = 0x31,
+    EPUB_MEMORY_FRU                 = 0x24, //@PUB_IGNORE
+    EPUB_EXTERNAL_CACHE             = 0x25, //@PUB_IGNORE
 
     // CEC Hardware
     EPUB_CEC_HDW_SUBSYS             = 0x50,
     EPUB_CEC_HDW_VPD_INTF           = 0x55,
     EPUB_CEC_HDW_I2C_DEVS           = 0x56,
-    EPUB_CEC_HDW_JTAG               = 0x57,
-    EPUB_CEC_HDW_CHIP_INTF          = 0x57,  // includes JTAG, FSI, etc.
+    EPUB_CEC_HDW_CHIP_INTF          = 0x57, // includes JTAG, FSI, etc.
     EPUB_CEC_HDW_CLK_CTL            = 0x58,
-    EPUB_CEC_HDW_OP_PANEL           = 0x59,
     EPUB_CEC_HDW_TOD_HDW            = 0x5A,
     EPUB_CEC_HDW_SP_PHYP_INTF       = 0x5C,
 
@@ -267,18 +269,17 @@ enum epubSubSystem_t
 
     // Others
     EPUB_MISC_SUBSYS                = 0x70,
-    EPUB_MISC_TEST_TOOL             = 0x72,
-    EPUB_MISC_MULTIPLE_SUBSYS       = 0x74,
-    EPUB_MISC_UNKNOWN               = 0x75,
-    EPUB_MISC_INFORMATIONAL         = 0x76,
+    EPUB_MISC_TEST_TOOL             = 0x72, //@PUB_IGNORE
+    EPUB_MISC_MULTIPLE_SUBSYS       = 0x74, //@PUB_IGNORE
+    EPUB_MISC_UNKNOWN               = 0x75, //@PUB_IGNORE
+    EPUB_MISC_INFORMATIONAL         = 0x76, //@PUB_IGNORE
 
     // Platform Firmware
-    EPUB_FIRMWARE_SUBSYS            = 0x80,
+    EPUB_FIRMWARE_SUBSYS            = 0x80, //@PUB_IGNORE
     EPUB_FIRMWARE_SP                = 0x81,
     EPUB_FIRMWARE_PHYP              = 0x82,
 
     EPUB_FIRMWARE_HOSTBOOT          = 0x8A,
-    EPUB_FIRMWARE_OCC               = 0x8B,
     EPUB_UNKNOWN                    = 0xFF,
 };
 

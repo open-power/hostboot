@@ -225,6 +225,9 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
              * @devdesc      Attempt to create a GARD Record for a target that
              *               is not GARDable
              *               (not DECONFIG_GARDABLE or not present)
+             * @custdesc     A problem occurred during the IPL of the system.
+             *               Attempt to create a deconfiguration record for a
+             *               target that is not deconfigurable or not present.
              * @userdata1    HUID of input target // GARD errlog EID
              * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */
@@ -340,6 +343,9 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
              * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
              * @devdesc      Attempt to create a GARD Record and the GARD
              *               Repository is full
+             * @custdesc     A problem occurred during the IPL of the system.
+             *               Attempt to create a deconfiguration record for a
+             *               target, but the deconfiguration repository is full.
              * @userdata1    HUID of input target // GARD errlog EID
              */
             const uint64_t userdata1 =

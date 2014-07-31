@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -71,7 +73,8 @@ public:
         * @reasoncode ERRL_TEST_STRING_UD
         * @userdata1 Test data 1
         * @userdata2 Test data 2
-        * @devdesc  User Details unit test - create string user detail data
+        * @devdesc  User Details unit test - create string user detail data.
+        * @custdesc A problem occurred during the IPL of the system.
         */
         errl = new ErrlEntry(
                 ERRL_SEV_INFORMATIONAL,
@@ -122,7 +125,8 @@ public:
         * @reasoncode ERRL_TEST_ATTRIBUTE_UD
         * @userdata1 Test data 1
         * @userdata2 Test data 2
-        * @devdesc  User Details unit test - create string user detail data
+        * @devdesc  User Details unit test - create string user detail data.
+        * @custdesc A problem occurred during the IPL of the system.
         */
         errl = new ErrlEntry(
                 ERRL_SEV_INFORMATIONAL,
@@ -281,7 +285,9 @@ public:
         * @reasoncode ERRL_TEST_LOGREGISTER_UD
         * @userdata1 Test data 1
         * @userdata2 Test data 2
-        * @devdesc User Details unit test - create log register user detail data
+        * @devdesc User Details unit test
+        *          - create log register user detail data.
+        * @custdesc A problem occurred during the IPL of the system.
         */
         errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,

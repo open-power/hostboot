@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -218,6 +220,8 @@ void VfsRp::_vfsWatcher()
          * @userdata2       task Rc
          *
          * @devdesc         VFS RP Task crashed.
+         * @custdesc  A problem was detected during the IPL of they system:
+         *            Task crashed.
          *
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
@@ -363,7 +367,8 @@ void VfsRp::_loadUnloadMonitored(msg_t * i_msg)
          * @userdata2       Task Status
          *
          * @devdesc         VFS Task crashed.
-         *
+         * @custdesc  A problem was detected during the IPL of they system:
+         *            Task crashed.
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
             (
@@ -500,7 +505,7 @@ void VfsRp::_loadUnload(msg_t * i_msg)
              * @userdata1       first 8 bytes of module name
              * @userdata2       next 8 bytes of module name
              *
-             * @devdesc         Requested Module does not exist.
+             * @devdesc         Requested module does not exist.
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -549,6 +554,8 @@ void VfsRp::_execMonitored(msg_t * i_msg)
          * @userdata2       task Rc
          *
          * @devdesc         VFS Task crashed.
+         * @custdesc  A problem was detected during the IPL of they system:
+         *            Task crashed.
          *
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry

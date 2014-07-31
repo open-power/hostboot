@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -180,6 +182,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              * @userdata1    SCOM Address
              * @userdata2    Data Length
              * @devdesc      fsiScomPerformOp> Invalid data length (!= 8 bytes)
+             * @custdesc     A problem occurred during the IPL of the system:
+             *               Invalid data length for a SCOM operation.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,
@@ -204,6 +208,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              * @userdata2    Target HUID
              * @devdesc      fsiScomPerformOp> Address contains
              *               more than 31 bits.
+             * @custdesc     A problem occurred during the IPL of the system:
+             *               Invalid address on a SCOM operation.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,
@@ -294,6 +300,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  * @userdata2[32:63]  SCOM Status Reg
                  * @devdesc      fsiScomPerformOp> Error returned
                  *               from SCOM Engine after write
+                 * @custdesc     A problem occurred during the IPL of the system:
+                 *               Error returned from SCOM engine after write.
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -382,6 +390,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  * @userdata2[00:31]  Target HUID
                  * @userdata2[32:63]  SCOM Status Reg
                  * @devdesc      fsiScomPerformOp> Error returned from SCOM Engine after read.
+                 * @custdesc     A problem occurred during the IPL of the system:
+                 *               Error returned from SCOM engine after read.
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                 FSISCOM::MOD_FSISCOM_PERFORMOP,
@@ -439,6 +449,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              * @userdata1[32:64]   Input scom address
              * @userdata2    Target HUID
              * @devdesc      fsiScomPerformOp> Unsupported Operation Type specified
+             * @custdesc     A problem occurred during the IPL of the system:
+             *               Unsupported SCOM operation type.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,

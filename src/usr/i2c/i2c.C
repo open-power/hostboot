@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -190,7 +192,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @userdata1      Operation Type requested
              * @userdata2      <UNUSED>
              * @devdesc        Master Sentinel chip was used as a target for an
-             *                 I2C operation.  This is NOT permitted.
+             *                 I2C operation.  This is not permitted.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_PERFORM_OP,
@@ -379,7 +381,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @userdata2[16:31] Master Port
              * @userdata2[32:47] Master Engine
              * @userdata2[48:63] Slave Device Address
-             * @devdesc          Invalid Operation type.
+             * @devdesc          Invalid operation type.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_PERFORM_OP,
@@ -1085,9 +1087,12 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       I2C_CHECK_FOR_ERRORS
              * @userdata1      Status Register Value
-             * @userdata2      Interrupt Register Value (only valid in Interrupt case)
-             * @devdesc        Error was found in I2C status register.  Check userdata1
-             *                 to determine what the error was.
+             * @userdata2      Interrupt Register Value (only valid in
+             *                 Interrupt case)
+             * @devdesc        Error was found in I2C status register.
+             *                 Check userdata1 to determine what the error was.
+             * @custdesc       A problem occurred during the IPL of the system:
+             *                 An error was found in the I2C status register.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,
@@ -1127,6 +1132,8 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
              * @userdata2      Interrupt Register Value
              * @devdesc        Error was found in I2C status register.  Check
              *                 userdata1 to determine what the error was.
+             * @custdesc       A problem occurred during the IPL of the system:
+             *                 An error was found in the I2C status register.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,

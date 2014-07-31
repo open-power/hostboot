@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -224,7 +226,8 @@ fsp.tar_CONTENTS = \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
     src/build/debug/fsp-memdump.sh:src/build/debug/ \
-    obj/genfiles/hbfw_term_rc.H
+    obj/genfiles/hbfw_term_rc.H \
+    obj/genfiles/srcListing
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

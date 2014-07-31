@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -74,7 +76,7 @@ bool retrieveTarget(uint8_t * & io_uData,
              * @errortype
              * @moduleid     HWAS::MOD_PROCESS_CALLOUT
              * @reasoncode   HWAS::RC_INVALID_TARGET
-             * @devdesc      Invalid Target encountered in
+             * @devdesc      Invalid target encountered in
              *               processing of HW callout
              * @userdata1    callout errlog PLID
              */

@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,6 +78,7 @@ my $compIncPath = $base."/src/include/usr";
 my $genFilesPath = $base."/obj/genfiles";
 my $hbfwTermRcFile = $genFilesPath."/hbfw_term_rc.H";
 my $srcFileName = $genFilesPath."/srcListing";
+my $errlTypes = $compIncPath."/errl/hberrltypes.H";
 #------------------------------------------------------------------------------
 # Call subroutines to populate the following arrays:
 # - @reasonCodeFiles   (The list of files to parse through for reason codes)
@@ -639,8 +642,8 @@ foreach my $file (@filesToParse)
                 }
                 elsif ($line =~ /\@custdesc\s+(\S+.*)/i)
                 {
-                    # Found a customer description. Strip out any double-quotes
-                    # and trailing whitespace
+                    # Found a customer description. Strip out any
+                    # double-quotes and trailing whitespace
                     $cdesc = $1;
                     $cdesc =~ s/\"//g;
                     $cdesc =~ s/\s+$//;
@@ -657,8 +660,9 @@ foreach my $file (@filesToParse)
                             last;
                         }
 
-                        # Continuation of description, strip out any double-
-                        # quotes and leading / trailing whitespace
+                        # Continuation of description, strip out any
+                        # double-quotes and leading / trailing
+                        # whitespace
                         $line =~ s/^.+\*\s+//;
                         $line =~ s/\"//g;
                         $line =~ s/\s+$//;
@@ -701,11 +705,15 @@ foreach my $file (@filesToParse)
                 . " an error was encountered: $desc";
             }
 
-            # SRC list - eliminate dups
-            my $srcText = sprintf("%04X", hex($rcValue));
-            if($srcList{$srcText} eq "")
+            # SRC list - Don't add testcase SRCs
+            if(not $file =~ /\/test\//)
             {
-                $srcList{$srcText} .= $cdesc;
+                my $srcText = sprintf("%04X", hex($rcValue));
+                # eliminate dups
+                if($srcList{$srcText} eq "")
+                {
+                    $srcList{$srcText} .= $cdesc;
+                }
             }
 
             # Create the combined returncode/moduleid value that the parser looks for and
@@ -744,37 +752,103 @@ foreach my $file (@filesToParse)
     close(PARSE_FILE);
 }
 
-## all subsystems HB uses - not every combination is possible, but it makes
-#  the list of SRCs thourough.  It's not clear yet if we are going to put
-#  subsystem text in the output file or not.
-#  TODO RTC:106255  Get rid of hardcoded subsys values
-my %subsys = (
-    '10' => 'Processor',
-    '13' => 'Processor Unit',
-    '14' => 'Processor Bus',
-    '20' => 'Memory',
-    '21' => 'Memory Controller',
-    '22' => 'Memory Bus',
-    '23' => 'Memory DIMM',
-    '50' => 'Central Electronic Complex',
-    '55' => 'VPD Hardware Interface',
-    '56' => 'I2C Hardware',
-    '57' => 'Hardware Chip Interface',
-    '58' => 'Clock Controller',
-    '5A' => 'TOD Hardware',
-    '5C' => 'Service Processor to Hypervisor hardware interface',
-    '60' => 'Power',
-    '70' => 'Miscellaneous',
-    '81' => 'Service Processor Firmware',
-    '82' => 'Hypervisor Firmware',
-    '8A' => 'Hostboot Firmware');
+#------------------------------------------------------------------
+# Load the sybsystem values for the System Reference Codes (SRCs)
+#------------------------------------------------------------------
+my %subsysList;
+my $in_enum = 0;
 
+open(SUBSYSTEM_TYPES_FILE, $errlTypes) or die("Cannot open: $errlTypes: $!");
+
+while (my $line = <SUBSYSTEM_TYPES_FILE> and $in_enum lt 2)
+{
+    if($in_enum eq 0)
+    {
+        if($line =~ /^enum epubSubSystem_t/)
+        {
+            $in_enum = 1;
+        }
+    }
+    else
+    {
+        if(not $line =~/\@PUB_IGNORE/)
+        {
+            if($line =~ /^\s*EPUB_(\w+) += +0x([\dA-Fa-f]+),/)
+            {
+                my $epub_desc = $1;
+                my $epub_val = $2;
+                $subsysList{$epub_val} .= $epub_desc;
+            }
+            elsif($line =~ /.*^\}\;/)
+            {
+                $in_enum = 2;
+            }
+        }
+    }
+}
+
+close(SUBSYSTEM_TYPES_FILE);
+
+# ------------------------------------------------------------------
+# Generate a list of all possible SRCs and their descriptions
+# ------------------------------------------------------------------
 open(OFILE, ">", $srcFileName) or die ("Cannot open: $srcFileName: $!");
-foreach my $sub (sort keys %subsys)
+foreach my $sub (sort keys %subsysList)
 {
     foreach my $rcVal (sort keys %srcList)
     {
-        print OFILE "BC$sub$rcVal, $srcList{$rcVal}\n";
+        my $src = "BC$sub$rcVal";
+        print OFILE "//////////////////////////////////////////////////////\n";
+        print OFILE "/****************************************************/\n";
+        print OFILE "#define Refcode_$src 0x$src\n";
+        print OFILE "/****************************************************/\n";
+        print OFILE "\n/***** $src RCDL text starts here.\n";
+        print OFILE "\$OWNER = J.Patel\n";
+        print OFILE "\$LOCATION = Austin\n";
+        print OFILE "\$COMPONENT = FSP\n";
+        print OFILE "\$MODULE = NA\n";
+        print OFILE "\$TYPE = AUTO\n\n";
+        print OFILE "\@SubsystemOrProduct = FSP_SRC\n\n";
+        my $txt = "\$DESCRIPTION = $srcList{$rcVal}";
+        if(not $txt =~/.*\.$/)
+        {
+            $txt = $txt.".";
+        }
+        my @atxt = split(/ +/,$txt);
+        my $word = shift(@atxt);
+        my $line_sz = length($word);
+        print OFILE "$word";
+        while (my $word = shift(@atxt))
+        {
+            if (lc $word eq "fsp")
+            {
+                $word = "service processor";
+            }
+            elsif (lc $word eq "fsp.")
+            {
+                $word = "service processor.";
+            }
+            my $wordlen = length($word);
+            $line_sz = $line_sz + $wordlen + 1;
+            if($line_sz > 76 )
+            {
+                $line_sz = $wordlen;
+                print OFILE "\n$word";
+            }
+            else
+            {
+                print OFILE " $word";
+            }
+        }
+        print OFILE "\n\$ENDDESCRIPTION\n\n";
+        print OFILE "\$RepairAction = The FRU callouts are calculated at the ".
+                     "time of the failure.\n";
+        print OFILE "See the error log for the actual replacement strategy.\n";
+        print OFILE "\$ENDRepairAction\n\n";
+        print OFILE "\@REPORTING_LEVEL = Call_Home\n\n\n";
+        print OFILE "   |------          Callout List          ------|\n";
+        print OFILE "   \$FRU = \$NOFRU\n\n";
+        print OFILE "*****   $src RCDL text ends here.  */\n\n\n";
     }
 }
 close(OFILE);

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -58,6 +60,12 @@ namespace TARGETING
                  *              PNOR_TARG_EYE_CATCHER and therefore the
                  *              contents of the Attribute sections are
                  *              unable to be parsed.
+                 *   @custdesc  A problem occurred during the IPL of the
+                 *              system.
+                 *              The eyecatch value observed in memory does not
+                 *              match the expected value and therefore the
+                 *              contents of the attribute sections are unable
+                 *              to be parsed.
                  */
                 l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                        TARG_MOD_ATTRRP_RT,

@@ -752,8 +752,8 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
          * @moduleid   TARG_MOD_QUERY_MASTER_PROC_CHIP
          * @reasoncode TARG_RC_INVALID_NODE
          * @userData1  HUID of Target Passed
-         * @devdesc    Error: User Passed an invalid Node Target to find the
-         * master proc handle
+         * @devdesc    The caller passed an invalid node target to find the
+         *             master proc handle.
          */
         UTIL::createTracingError(
             TARG_MOD_QUERY_MASTER_PROC_CHIP,
@@ -777,8 +777,8 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
          * @moduleid   TARG_MOD_QUERY_MASTER_PROC_CHIP
          * @reasoncode TARG_RC_TARGET_NOT_FOUND
          * @userData1  HUID of Target Passed
-         * @devdesc    Error: User Passed an invalid Node Target to find the
-         *     master proc handle
+         * @devdesc    The caller passed an invalid node target to find the
+         *             master proc handle
          */
         UTIL::createTracingError(
             TARG_MOD_QUERY_MASTER_PROC_CHIP,
@@ -1206,7 +1206,7 @@ errlHndl_t TargetService::setMasterNode(const Target* i_pTarget)
          * @moduleid   TARG_MOD_SET_MASTER_NODE
          * @reasoncode TARG_RC_INVALID_NODE
          * @userData1  HUID of Target Passed
-         * @devdesc    Error: User Passed an invalid Node Target
+         * @devdesc    The caller passed an invalid node target.
          */
         UTIL::createTracingError(
                 TARG_MOD_SET_MASTER_NODE,
