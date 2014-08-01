@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore_model.c,v 1.26 2013/11/27 15:52:41 thi Exp $
+// $Id: pore_model.c,v 1.29 2014/07/28 21:17:59 jprispol Exp $
 /******************************************************************************
  *
  * Virtual PORe Engine
@@ -98,25 +98,44 @@ static inline int
 pore_stack0_reg_write(pore_model_t p, uint64_t val, uint64_t mask)
 {
 	int me = PORE_SUCCESS;
-	int newSp;
-	pore_pc_stack0_reg pps0;
+	int oldSp, newSp;
+	pore_pc_stack0_reg old_stack[3] = { p->pc_stack[0],
+                                            p->pc_stack[1],
+                                            p->pc_stack[2] };
 
-	val &= PORE_PC_STACK0_VALID_BITS;
+        oldSp = p->status.stack_pointer;	// save current stack pointer
+	val &= PORE_PC_STACK0_VALID_BITS;	// 0xffffffff ffff001f ull
 	p->pc_stack[0].val = ((val		  &  mask) |
 			      (p->pc_stack[0].val & ~mask));
-	p->pc_stack[0].set_stack_pointer = 0;
-	p->pc_stack[0].new_stack_pointer = 0;
 
-	pps0.val = val & mask;
-	if (pps0.set_stack_pointer) {
-		newSp = pps0.new_stack_pointer;
+	if (p->pc_stack[0].set_stack_pointer) {
+		newSp = p->pc_stack[0].new_stack_pointer;
+
 		if ((newSp != 1) &&
 		    (newSp != 2) &&
 		    (newSp != 4) &&
 		    (newSp != 8)) {
 			me = PORE_ERR_INVALID_STACK_POINTER;
 		} else {
-			p->status.stack_pointer = newSp;
+                    // set new stack pointer; fixes HW274698
+                    p->status.stack_pointer = newSp;	
+
+                    if ( oldSp == newSp << 1 ) {
+                    	// manually pop stack
+                        p->pc_stack[0].pc_stack = old_stack[1].pc_stack;
+                        p->pc_stack[0].set_stack_pointer = p->pc_stack[0].set_stack_pointer ;
+                        p->pc_stack[0].new_stack_pointer = p->pc_stack[0].new_stack_pointer ;
+                        p->pc_stack[1].val = old_stack[2].val;
+
+                    } else if ( oldSp == newSp >>1 ) {
+                    	// manually push stack
+                        p->pc_stack[2].pc_stack = old_stack[1].pc_stack;
+                        p->pc_stack[1].pc_stack = old_stack[0].pc_stack;
+                        p->pc_stack[0].pc_stack = 0x000000000000;
+
+                    } else if ( oldSp != newSp ) {
+                        me = PORE_ERR_INVALID_STACK_POINTER;
+                    }
 		}
 	}
 	return me;
@@ -464,7 +483,6 @@ static int setAluFlags(pore_model_t p, int64_t op1, int64_t op2,
 {
 	PoreInlineDecode *dis = &p->dis;
 	pore_id_flags_reg *id_flags = &p->id_flags;
-
 	/* Flags are updated only when target is scr1 or src2 */
 	if (dis->tR != PORE_SCRATCH1_ENC && dis->tR != PORE_SCRATCH2_ENC) {
 		return PORE_SUCCESS;
@@ -489,8 +507,9 @@ static int setAluFlags(pore_model_t p, int64_t op1, int64_t op2,
 	}
 
 	/* C: set carry bit */
-	if( op2 == 0) {
-	  id_flags->c = 1;
+	/* force carry flag when op2 in zero; fixes HW265394 */
+	if (op2 == 0) {
+		id_flags->c = 1;
 	} else if (((op1 & 0x7fffffffffffffffull) +
 	            (op2 & 0x7FFFFFFFFFFFFFFFull)) & (0x1ull << 63)) {
 
@@ -712,7 +731,6 @@ static int push(pore_model_t p, uint64_t next_pc, int error)
 	}
 
 	pc_stack0.val = p->pc_stack[0].val;
-
 	switch (p->status.stack_pointer) {
 	case 0x1:
 	case 0x2:
@@ -721,13 +739,11 @@ static int push(pore_model_t p, uint64_t next_pc, int error)
 		p->pc_stack[1].pc_stack = p->pc_stack[0].pc_stack;
 		pc_stack0.pc_stack	= next_pc;
 		pore_stack0_reg_write(p, pc_stack0.val, PORE_BITS_0_63);
-
 		p->status.stack_pointer = (p->status.stack_pointer << 1);
 		break;
 	default:
 		return PORE_ERR_INVALID_STACK_POINTER;
 	}
-
 	return PORE_SUCCESS;
 }
 
@@ -764,7 +780,6 @@ static int pop(pore_model_t p, _PoreAddress *next_pc)
 	default:
 		return PORE_ERR_INVALID_STACK_POINTER;
 	}
-
 	return PORE_SUCCESS;
 }
 
