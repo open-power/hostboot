@@ -335,6 +335,58 @@ int32_t getDramSize( ExtensibleChip *i_mbaChip, uint8_t & o_size )
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
+                             STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemUtils::checkMcsChannelFail] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Skip if already handling unit checkstop.
+        if ( io_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
+            break;
+
+        // Must be an MCS.
+        if ( TYPE_MCS != getTargetType(i_mcsChip->GetChipHandle()) )
+        {
+            PRDF_ERR( PRDF_FUNC"i_mcsChip is not TYPE_MCS" );
+            o_rc = FAIL; break;
+        }
+
+        // Check MCIFIR[31] for presence of channel fail.
+        SCAN_COMM_REGISTER_CLASS * mcifir = i_mcsChip->getRegister("MCIFIR");
+        o_rc = mcifir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on MCIFIR" );
+            break;
+        }
+
+        if ( !mcifir->IsBitSet(31) ) break; // No channel fail, so exit.
+
+        // Set unit checkstop flag and cause attention type.
+        io_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
+        io_sc.service_data->SetCauseAttentionType(UNIT_CS);
+        io_sc.service_data->SetThresholdMaskId(0);
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: i_mcsChip=0x%08x", i_mcsChip->GetId() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                        STEP_CODE_DATA_STRUCT & i_sc )
 {

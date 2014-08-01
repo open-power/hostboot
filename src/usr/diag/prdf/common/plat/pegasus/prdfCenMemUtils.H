@@ -161,6 +161,15 @@ int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip,
 int32_t getDramSize( ExtensibleChip * i_mbaChip, uint8_t & o_size );
 
 /**
+ * @brief  Check for channel fail attentions on the MCS side of the DMI bus.
+ * @param  i_mcsChip An MCS chip.
+ * @param  io_sc     The step code data struct.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
+                             STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
  * @brief  Cleanup for channel CS on Centaur.
  * @param  i_mbChip   Membuf chip.
  * @param  i_sc  Service Data Collector.

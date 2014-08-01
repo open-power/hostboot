@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -70,48 +72,6 @@ int32_t Initialize( ExtensibleChip * i_mcsChip )
 PRDF_PLUGIN_DEFINE( Mcs, Initialize );
 
 /**
- * @brief Check for and handle a Centaur Unit Checkstop
- * @param i_mcsChip An MCS chip.
- * @param i_sc Step Code Data structure
- * @return failure or success
- */
-int32_t CheckCentaurCheckstop( ExtensibleChip * i_mcsChip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    int32_t l_rc = SUCCESS;
-
-    do
-    {
-        // Skip if we're already at Unit Checkstop in SDC
-        if (i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS))
-            break;
-
-        // Check MCIFIR[31] for presence of Centaur checkstop
-        SCAN_COMM_REGISTER_CLASS * l_mcifir = i_mcsChip->getRegister("MCIFIR");
-        l_rc = l_mcifir->Read();
-
-        if (l_rc)
-        {
-            PRDF_ERR( "[CheckCentaurCheckstop] SCOM fail on 0x%08x rc=%x",
-                      i_mcsChip->GetId(), l_rc);
-            break;
-        }
-
-        if ( ! l_mcifir->IsBitSet(31) )  { break; }
-
-        // Set Unit checkstop flag
-        i_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
-        i_sc.service_data->SetThresholdMaskId(0);
-
-        // Set the cause attention type
-        i_sc.service_data->SetCauseAttentionType(UNIT_CS);
-
-    } while (0);
-
-    return l_rc;
-}
-
-/**
  * @brief Analysis code that is called before the main analyze() function.
  * @param i_mcsChip An MCS chip.
  * @param i_sc Step Code Data structure
@@ -136,10 +96,10 @@ int32_t PreAnalysis( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
     }
 
     // Check for a Centaur Checkstop
-    int32_t o_rc = CheckCentaurCheckstop( i_mcsChip, i_sc );
+    int32_t o_rc = MemUtils::checkMcsChannelFail( i_mcsChip, i_sc );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( "[Mcs::PreAnalysis] CheckCentaurCheckstop() failed" );
+        PRDF_ERR( "[Mcs::PreAnalysis] MemUtils::checkMcsChannelFail() failed" );
     }
 
     return o_rc;

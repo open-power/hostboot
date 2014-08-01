@@ -34,6 +34,9 @@
 #include <prdfLaneRepair.H>
 #include <prdfPhbUtils.H>
 #include <prdfP8DataBundle.H>
+#include <prdfP8McsDataBundle.H>
+#include <prdfCalloutUtil.H>
+#include <prdfCenMemUtils.H>
 
 using namespace TARGETING;
 
@@ -41,6 +44,7 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+using namespace LaneRepair;
 
 namespace Proc
 {
@@ -379,41 +383,117 @@ int32_t CoreConfiguredAndNotHostboot(ExtensibleChip * i_chip,
 // Lane Repair plugins
 //------------------------------------------------------------------------------
 
+/**
+ * @brief  Handles Max Spares Exceeded attentions on the MCS.
+ *
+ * This function will first check for channel fail conditions on the MCS side of
+ * the bus, handle the attention, then do channel fail cleanup if needed. It
+ * would be preferred that the channel fail handling would be done in a more
+ * generic way, like it is done on the MCS and MEMBUF pre/post analysis
+ * functions. Unfortunately, the IOMCFIRs are not on the MCS chiplet, which
+ * complicates things. Fortunately, the only attentions on the IOMCFIRs that are
+ * hardwired to channel fail are the Max Spares Exceeded attentions. Therefore,
+ * we can deal with the channel fail handling within this attention.
+ *
+ * @param  i_procChip A PROC chip.
+ * @param  i_sc       The step code data struct.
+ * @param  i_mcsPos   The MCS position.
+ * @return SUCCESS always.
+ */
+int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
+                               STEP_CODE_DATA_STRUCT & i_sc,
+                               uint32_t i_mcsPos )
+{
+    #define PRDF_FUNC "[Proc::maxSparesExceeded_MCS] "
+
+    int32_t l_rc = SUCCESS;
+
+    TargetHandle_t procTrgt = i_procChip->GetChipHandle();
+    TargetHandle_t mcsTrgt  = NULL;
+    ExtensibleChip * mcsChip  = NULL;
+    ExtensibleChip * membChip = NULL;
+
+    do
+    {
+        // Get the connected MCS chip
+        mcsTrgt = getConnectedChild( procTrgt, TYPE_MCS, i_mcsPos );
+        if ( NULL == mcsTrgt )
+        {
+            PRDF_ERR( PRDF_FUNC"getConnectedChild() returned NULL" );
+            l_rc = FAIL; break;
+        }
+
+        mcsChip = (ExtensibleChip *)systemPtr->GetChip( mcsTrgt );
+        if ( NULL == mcsChip )
+        {
+            PRDF_ERR( PRDF_FUNC"GetChip() returned NULL" );
+            l_rc = FAIL; break;
+        }
+
+        // Check for channel fails on the MCS side of this bus.
+        l_rc = MemUtils::checkMcsChannelFail( mcsChip, i_sc );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"checkMcsChannelFail() failed" );
+            break;
+        }
+
+        // Do additional bus analysis.
+        l_rc = handleLaneRepairEvent( i_procChip, TYPE_MCS, i_mcsPos, i_sc,
+                                      false );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"handleLaneRepairEvent() failed" );
+            break;
+        }
+
+        // Get the connected MEMBUF chip.
+        P8McsDataBundle * mcsdb = getMcsDataBundle( mcsChip );
+        membChip = mcsdb->getMembChip();
+        if ( NULL == membChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMembChip() returned NULL" );
+            l_rc = FAIL; break;
+        }
+
+        // Do channel fail cleanup.
+        l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"chnlCsCleanup() failed" );
+            break;
+        }
+
+    } while (0);
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: i_procChip=0x%08x i_mcsPos=%d",
+                  i_procChip->GetId(), i_mcsPos );
+        CalloutUtil::defaultError( i_sc );
+    }
+
+    return SUCCESS; // Always return SUCCESS
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 #define PLUGIN_LANE_REPAIR( BUS, TYPE, POS ) \
 int32_t spareDeployed_##BUS##POS( ExtensibleChip * i_chip, \
                                   STEP_CODE_DATA_STRUCT & i_sc ) \
-{ return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, true); } \
+{ return handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, true); } \
 PRDF_PLUGIN_DEFINE( Proc, spareDeployed_##BUS##POS ); \
  \
 int32_t maxSparesExceeded_##BUS##POS( ExtensibleChip * i_chip, \
                                       STEP_CODE_DATA_STRUCT & i_sc ) \
-{ return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
-PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_##BUS##POS );
-
-PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 0 )
-PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 1 )
-PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 2 )
-PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 3 )
-
-PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 0 )
-PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 1 )
-PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
-
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 0 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 1 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 2 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 3 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 4 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 5 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 6 )
-PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 7 )
-
-#undef PLUGIN_LANE_REPAIR
-
-#define PLUGIN_LANE_REPAIR( BUS, TYPE, POS ) \
+{ return handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
+PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_##BUS##POS ); \
+\
 int32_t tooManyBusErrors_##BUS##POS( ExtensibleChip * i_chip, \
                                      STEP_CODE_DATA_STRUCT & i_sc ) \
-{ return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
+{ return handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
 PRDF_PLUGIN_DEFINE( Proc, tooManyBusErrors_##BUS##POS );
 
 PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 0 )
@@ -425,7 +505,29 @@ PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 0 )
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 1 )
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
 
-// Plugin not used for DMI buses
+#undef PLUGIN_LANE_REPAIR
+
+#define PLUGIN_LANE_REPAIR( POS ) \
+int32_t spareDeployed_dmiBus##POS( ExtensibleChip * i_chip, \
+                                   STEP_CODE_DATA_STRUCT & i_sc ) \
+{ return handleLaneRepairEvent(i_chip, TYPE_MCS, POS, i_sc, true); } \
+PRDF_PLUGIN_DEFINE( Proc, spareDeployed_dmiBus##POS ); \
+ \
+int32_t maxSparesExceeded_dmiBus##POS( ExtensibleChip * i_chip, \
+                                       STEP_CODE_DATA_STRUCT & i_sc ) \
+{ return maxSparesExceeded_MCS(i_chip, i_sc, POS); } \
+PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_dmiBus##POS );
+
+// Too Many Bus Error attentions not handled on DMI bus.
+
+PLUGIN_LANE_REPAIR( 0 )
+PLUGIN_LANE_REPAIR( 1 )
+PLUGIN_LANE_REPAIR( 2 )
+PLUGIN_LANE_REPAIR( 3 )
+PLUGIN_LANE_REPAIR( 4 )
+PLUGIN_LANE_REPAIR( 5 )
+PLUGIN_LANE_REPAIR( 6 )
+PLUGIN_LANE_REPAIR( 7 )
 
 #undef PLUGIN_LANE_REPAIR
 
