@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.69 2014/04/07 17:59:13 gollub Exp $
+// $Id: cen_scom_addresses.H,v 1.70 2014/07/15 13:42:27 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -219,9 +219,11 @@ CONST_UINT64_T( MEM_CHIPLET_0x03000000                , ULL(0x03000000) );
 //      CENTAUR REPAIR LOADER REGISTERS
 //------------------------------------------------------------------------------
 CONST_UINT64_T( CEN_WRITE_ARRAY_REPAIR_REG_0x00050000,     ULL(0x00050000) );
+CONST_UINT64_T( CEN_REPAIR_FRONTEND_REG_0x00050001,        ULL(0x00050001) );
 CONST_UINT64_T( CEN_WRITE_ARRAY_REPAIR_CMD_0x00050002,     ULL(0x00050002) );
 CONST_UINT64_T( CEN_READ_ARRAY_REPAIR_STATUS_0x00050003,   ULL(0x00050003) );
 CONST_UINT64_T( CEN_READ_ECC_TRAP_REGISTER_0x00050004,     ULL(0x00050004) );
+CONST_UINT64_T( CEN_REPAIR_CONFIG_REG_0x00050005,          ULL(0x00050005) );
 
 CONST_UINT64_T( TP_TRACE_DATA_HI_0x01010440            , ULL(0x01010440) );
 CONST_UINT64_T( TP_TRACE_DATA_LO_0x01010441            , ULL(0x01010441) );
@@ -1040,6 +1042,7 @@ CONST_UINT64_T( MBS23_MBMPERQ_0x02011762              , ULL(0x02011762) );
 CONST_UINT64_T( MBS01_MBUERQ_0x02011663               , ULL(0x02011663) );
 CONST_UINT64_T( MBS23_MBUERQ_0x02011763               , ULL(0x02011763) );
 
+
 //------------------------------------------------------------------------------
 //      MBS FIR Registers
 //------------------------------------------------------------------------------
@@ -1050,6 +1053,42 @@ CONST_UINT64_T( MBS_FIR_MASK_REG_OR_0x02011405      , ULL(0x02011405) );
 CONST_UINT64_T( MBS_FIR_ACTION0_REG_0x02011406      , ULL(0x02011406) );
 CONST_UINT64_T( MBS_FIR_ACTION1_REG_0x02011407      , ULL(0x02011407) );
 CONST_UINT64_T( MBS_FIR_WOF_REG_0x02011408          , ULL(0x02011408) );
+
+//------------------------------------------------------------------------------
+//      FBIST NEST FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( FBISTN_FIR_REG_0x02010880              , ULL(0x02010880) );
+CONST_UINT64_T( FBISTN_FIR_MASK_REG_0x02010883         , ULL(0x02010883) );
+CONST_UINT64_T( FBISTN_FIR_MASK_REG_AND_0x02010884     , ULL(0x02010884) );
+CONST_UINT64_T( FBISTN_FIR_MASK_REG_OR_0x02010885      , ULL(0x02010885) );
+CONST_UINT64_T( FBISTN_FIR_ACTION0_REG_0x02010886      , ULL(0x02010886) );
+CONST_UINT64_T( FBISTN_FIR_ACTION1_REG_0x02010887      , ULL(0x02010887) );
+
+//------------------------------------------------------------------------------
+//      FBIST MEM FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( FBISTM_FIR_REG_0x03010480              , ULL(0x03010480) );
+CONST_UINT64_T( FBISTM_FIR_MASK_REG_0x03010483         , ULL(0x03010483) );
+CONST_UINT64_T( FBISTM_FIR_MASK_REG_AND_0x03010484     , ULL(0x03010484) );
+CONST_UINT64_T( FBISTM_FIR_MASK_REG_OR_0x03010485      , ULL(0x03010485) );
+CONST_UINT64_T( FBISTM_FIR_ACTION0_REG_0x03010486      , ULL(0x03010486) );
+CONST_UINT64_T( FBISTM_FIR_ACTION1_REG_0x03010487      , ULL(0x03010487) );
+
+//------------------------------------------------------------------------------
+//      MBS Secure FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBSS_FIR_REG_0x0201141E              , ULL(0x0201141E) );
+CONST_UINT64_T( MBSS_FIR_MASK_REG_0x02011421         , ULL(0x02011421) );
+CONST_UINT64_T( MBSS_FIR_ACTION0_REG_0x02011424      , ULL(0x02011424) );
+CONST_UINT64_T( MBSS_FIR_ACTION1_REG_0x02011425      , ULL(0x02011425) );
+
+//------------------------------------------------------------------------------
+//      MBA Secure FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBAS_FIR_REG_0x0301041B              , ULL(0x0301041B) );
+CONST_UINT64_T( MBAS_FIR_MASK_REG_0x0301041E         , ULL(0x0301041E) );
+CONST_UINT64_T( MBAS_FIR_ACTION0_REG_0x03010421      , ULL(0x03010421) );
+CONST_UINT64_T( MBAS_FIR_ACTION1_REG_0x03010422      , ULL(0x03010422) );
 
 //------------------------------------------------------------------------------
 //      DDRPHY FIR Registers
@@ -1815,6 +1854,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.70  2014/07/15 13:42:27  jmcgill
+add FIR/repair loader register definitions for FFDC collection (SW260441)
+
 Revision 1.69  2014/04/07 17:59:13  gollub
 
 /!/  1.69   | gollub   |07-APR-14| Added MBSCFGQ so we can enable/disable exit point 1

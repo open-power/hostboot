@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.183 2014/06/08 19:49:24 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.184 2014/07/15 21:12:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1784,6 +1784,15 @@ CONST_UINT64_T( EX_PERV_TCTL5_SPATTN_0x10013057       , ULL(0x10013057) );
 CONST_UINT64_T( EX_PERV_TCTL6_SPATTN_0x10013067       , ULL(0x10013067) );
 CONST_UINT64_T( EX_PERV_TCTL7_SPATTN_0x10013077       , ULL(0x10013077) );
 
+CONST_UINT64_T( EX_PCNE_REG0_HOLD_OUT_0x1001300D      , ULL(0x1001300D) );
+CONST_UINT64_T( EX_PCNE_REG1_HOLD_OUT_0x1001301D      , ULL(0x1001301D) );
+CONST_UINT64_T( EX_PCNE_REG2_HOLD_OUT_0x1001302D      , ULL(0x1001302D) );
+CONST_UINT64_T( EX_PCNE_REG3_HOLD_OUT_0x1001303D      , ULL(0x1001303D) );
+CONST_UINT64_T( EX_PCNE_REG4_HOLD_OUT_0x1001304D      , ULL(0x1001304D) );
+CONST_UINT64_T( EX_PCNE_REG5_HOLD_OUT_0x1001305D      , ULL(0x1001305D) );
+CONST_UINT64_T( EX_PCNE_REG6_HOLD_OUT_0x1001306D      , ULL(0x1001306D) );
+CONST_UINT64_T( EX_PCNE_REG7_HOLD_OUT_0x1001307D      , ULL(0x1001307D) );
+
 // Thread Active Status
 CONST_UINT64_T( EX_PERV_THREAD_ACTIVE_0x1001310E      , ULL(0x1001310E) );
 
@@ -2123,6 +2132,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.184  2014/07/15 21:12:03  jmcgill
+add PC_NE error report hold register definitions for FFDC collection (SW261816)
+
 Revision 1.183  2014/06/08 19:49:24  jmcgill
 add XBUS skew adjust data register definition
 

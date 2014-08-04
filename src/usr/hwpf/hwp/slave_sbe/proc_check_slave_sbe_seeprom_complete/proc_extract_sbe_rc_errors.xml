@@ -22,729 +22,143 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.15 2014/06/30 14:33:53 bgeukes Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.16 2014/07/23 19:51:48 jmcgill Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_IMAGE_POINTER_NULL_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_UNALIGNED</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      NULL image pointer prevented extraction of SBE error code
+      The PORE engine PC isn't properly aligned
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_IMAGE_POINTER_NULL_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      NULL image pointer prevented extraction of SLW error code
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_UNALIGNED_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      The SBE stop address isn't properly aligned
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_UNALIGNED_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      The SLW stop address isn't properly aligned
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      The SBE stop address isn't in a recognized address space
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      The SLW stop address isn't in a reognized address space
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_FROM_ADDR_CODE_BUG_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Extract RC from address subroutine tried to return SUCCESS for SBE, which isn't allowed
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_FROM_ADDR_CODE_BUG_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Extract RC from address subroutine tried to return SUCCESS for SLW, which isn't allowed
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_UNKNOWN_ENGINE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Tried to extract error from unknown engine type
-    </description>
-    <ffdc>ENGINE</ffdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_PIB_ERROR_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Error during PIB access for SBE
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>FSI_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_UNRECOVERABLE_ECC_I2C_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_UNRECOVERABLE_ECC_SEEPROM</rc>
     <description>
       Procedure: proc_extract_sbe_rc
       ECCB indicates unrecoverable ECC error from I2C during SBE execution
       Reload/update of SEEPROM required
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>ECCB_STATUS</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_UNRECOVERABLE_ECC_PNOR_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_UNRECOVERABLE_ECC_PNOR</rc>
     <description>
       Procedure: proc_extract_sbe_rc
       ECCB indicates unrecoverable ECC error from PNOR during SBE execution
       Reload/Update of PNOR required
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>ECCB_STATUS</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_INTERNAL_ERROR_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_INTERNAL_ERROR</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      SBE engine encountered an internal error
+      PORE engine encountered an internal HW error
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
     <ffdc>GROUP_PARITY_ERROR_0_4</ffdc>
     <ffdc>SCAN_DATA_CRC_ERROR</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_INTERNAL_ERROR_SLW</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_I2C_ERROR</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      SLW engine encountered an internal error
+      PORE engine encountered a I2C interface/setup error
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>GROUP_PARITY_ERROR_0_4</ffdc>
-    <ffdc>SCAN_DATA_CRC_ERROR</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
+    <ffdc>I2C_BAD_STATUS_0_3</ffdc>
+    <ffdc>FI2C_HANG</ffdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      SBE engine encountered a SCOM error
+      PORE engine encountered a SCOM error
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
     <ffdc>SCOM_ADDRESS</ffdc>
     <ffdc>PIB_ERROR_CODE</ffdc>
     <ffdc>PIB_DATA_READ_PARITY_ERROR</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR_SLW</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_OCI_ERROR</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      SLW engine encountered a SCOM error
+      PORE SLW engine encountered error on OCI interface
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>SCOM_ADDRESS</ffdc>
-    <ffdc>PIB_ERROR_CODE</ffdc>
-    <ffdc>PIB_DATA_READ_PARITY_ERROR</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_OCI_ERROR_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SLW engine encountered error on OCI interface
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
     <ffdc>OCI_ERROR_CODE</ffdc>
     <ffdc>OCI_DATA_READ_PARITY_ERROR</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_I2C_ERROR_SBE</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_IMAGE_POINTER_NULL</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      SBE engine encountered a I2C interface/setup error
+      PORE image pointer provided was NULL.
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>I2C_BAD_STATUS_0_3</ffdc>
-    <ffdc>FI2C_HANG</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_I2C_ERROR_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SLW engine encountered a I2C interface/setup error
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>I2C_BAD_STATUS_0_3</ffdc>
-    <ffdc>FI2C_HANG</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_INSTRUCTION_ERROR_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SBE engine encountered an instruction fetch/decode/execution error
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>INSTRUCTION_PARITY_ERROR</ffdc>
-    <ffdc>INVALID_INSTRUCTION_NON_ROTATE</ffdc>
-    <ffdc>PC_OVERFLOW_UNDERFLOW</ffdc>
-    <ffdc>PC_STACK_ERROR</ffdc>
-    <ffdc>INSTRUCTION_FETCH_ERROR</ffdc>
-    <ffdc>INVALID_OPERAND</ffdc>
-    <ffdc>I2C_ENGINE_MISS</ffdc>
-    <ffdc>INVALID_START_VECTOR</ffdc>
-    <ffdc>INVALID_INSTRUCTION_ROTATE</ffdc>
-    <ffdc>SOFT_ERR_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_INSTRUCTION_ERROR_SLW</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SLW engine encountered an instruction fetch/decode/execution error
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <ffdc>INSTRUCTION_PARITY_ERROR</ffdc>
-    <ffdc>INVALID_INSTRUCTION_NON_ROTATE</ffdc>
-    <ffdc>PC_OVERFLOW_UNDERFLOW</ffdc>
-    <ffdc>PC_STACK_ERROR</ffdc>
-    <ffdc>INSTRUCTION_FETCH_ERROR</ffdc>
-    <ffdc>INVALID_OPERAND</ffdc>
-    <ffdc>I2C_ENGINE_MISS</ffdc>
-    <ffdc>INVALID_START_VECTOR</ffdc>
-    <ffdc>INVALID_INSTRUCTION_ROTATE</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_BAD_CHIP_TYPE_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SBE execution of OTPROM code failed chip type (Murano/Venice) check
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SEEPROM_MAGIC_NUMBER_MISMATCH_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SBE execution of OTPROM code failed SEEPROM magic number check
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SBE execution of OTPROM code failed to branch to SEEPROM
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SBE execution of OTPROM code halted at an unexpected location
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_NEVER_STARTED_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Procedure was called when no error bits were set and PC is all zeros. SBE
-      was probably never started.
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_CFAM_REGISTERS</id>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-	<collectFfdc>proc_tp_collect_dbg_data,CHIP_IN_ERROR</collectFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -752,28 +166,21 @@
       <priority>LOW</priority>
     </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_NEVER_STARTED_SLW</rc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      Procedure was called when no error bits were set and PC is all zeros. SLW
-      was probably never started.
+      The PORE halt address isn't in a recognized address space
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -781,116 +188,22 @@
       <priority>LOW</priority>
     </callout>
     <deconfigure>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </deconfigure>
     <gard>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
     </gard>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_I2C_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      ECCB indicates correctable ECC error threshold from I2C was exceeded during SBE execution
-      Reload/update of SEEPROM required
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>I2C_ECCB_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_PNOR_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      ECCB indicates correctable ECC error threshold from PNOR was exceeded during SBE execution
-      Reload/update of PNOR required
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PNOR_ECCB_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_I2C_AND_PNOR_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      ECCB indicates correctable ECC error threshold from both I2C and PNOR was exceeded during SBE execution
-      Reload/update of SEEPROM/PNOR required
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>I2C_ECCB_STATUS</ffdc>
-    <ffdc>PNOR_ECCB_STATUS</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_CODE_BUG_SBE</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      SBE reported attention, but procedure attempted to return SUCCESS
-    </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <ffdc>PC</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_SBE_UNKNOWN_ERROR</rc>
     <description>
       Procedure: proc_extract_sbe_rc
-      FAPI_SET_SBE_ERROR did not resolve SBE/SLW PC to known RC.
+      FAPI_SET_SBE_ERROR did not resolve PORE halt code to known return code
       May be caused by platform attempting to resolve engine state with mismatched binary image.
     </description>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_MBOX_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <callout>
-      <target>CHIP_IN_ERROR</target>
+      <target>CHIP</target>
       <priority>LOW</priority>
     </callout>
     <callout>
@@ -899,6 +212,227 @@
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_FROM_ADDR_CODE_BUG</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Failed to association PORE halt code with known return code
+    </description>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_INSTRUCTION_ERROR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      PORE engine encountered an instruction fetch/decode/execution error
+    </description>
+    <ffdc>INSTRUCTION_PARITY_ERROR</ffdc>
+    <ffdc>INVALID_INSTRUCTION_NON_ROTATE</ffdc>
+    <ffdc>PC_OVERFLOW_UNDERFLOW</ffdc>
+    <ffdc>PC_STACK_ERROR</ffdc>
+    <ffdc>INSTRUCTION_FETCH_ERROR</ffdc>
+    <ffdc>INVALID_OPERAND</ffdc>
+    <ffdc>I2C_ENGINE_MISS</ffdc>
+    <ffdc>INVALID_START_VECTOR</ffdc>
+    <ffdc>INVALID_INSTRUCTION_ROTATE</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_BAD_CHIP_TYPE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      PORE SBE execution of OTPROM code failed chip type (Murano/Venice) check
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SEEPROM_MAGIC_NUMBER_MISMATCH</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      PORE SBE execution of OTPROM code failed SEEPROM magic number check
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      PORE SBE execution of OTPROM code failed to branch to SEEPROM
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      PORE SBE execution of OTPROM code halted at an unexpected location
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_NEVER_STARTED</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Procedure was called when no error bits were set and PC is all zeros.
+      PORE engine was probably never started.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_SEEPROM</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      ECCB indicates correctable ECC error threshold from I2C was exceeded during SBE execution
+      Reload/update of SEEPROM required
+    </description>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_PNOR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      ECCB indicates correctable ECC error threshold from PNOR was exceeded during SBE execution
+      Reload/update of PNOR required
+    </description>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_SEEPROM_AND_PNOR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      ECCB indicates correctable ECC error threshold from both I2C and PNOR was exceeded during SBE execution
+      Reload/update of SEEPROM/PNOR required
+    </description>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_CODE_BUG</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      PORE SBE reported attention, but procedure attempted to return SUCCESS
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
+
+
+
 
 

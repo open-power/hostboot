@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: sbe_common_halt_codes.xml,v 1.5 2013/06/21 22:57:28 jeshua Exp $ -->
+<!-- $Id: sbe_common_halt_codes.xml,v 1.6 2014/07/23 19:51:50 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_* procedures common to P8 and Centaur -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -33,13 +35,6 @@
       with the normal successful completion of an IPL by an SBE istep
       procedure.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -50,13 +45,6 @@
       with the normal successful completion of an IPL by an SBE istep
       procedure on a slave chip.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -67,13 +55,6 @@
       with a procedure initiated halt of the SBE code, with the expectation
       that it will be resumed at a later point in time.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -87,13 +68,6 @@
       by setting the PROC_CONTROL_ENTRY_HALT bit in the control word for the
       procedure.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -115,15 +89,18 @@
       procedure.  Use the fields of the SBEVITAL register to identify the
       procedure that failed.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-      and to log the FIR regs? -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -133,16 +110,17 @@
       executing a procedure.  Use the fields of the SBEVITAL register to
       identify the procedure that failed.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-      and to log the FIR regs? -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
-  </hwpError>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_SBE_PROC_SPATTN</rc>
@@ -151,15 +129,18 @@
       executing a procedure.  Use the fields of the SBEVITAL register to
       identify the procedure that failed.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-      and to log the FIR regs? -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <!-- ** Halt codes from proc_sbe_pore_errors.S                            -->
@@ -171,15 +152,25 @@
       returned a non-0 response.  The PORE PIBMS_DBG registers 0 and 1
       (plus the remainder of the PORE state) contain the information required
       for an initial debug of the problem.
+
+      This error should never occur for SBE/SLW, based on the fact that the
+      HW error handler mechanism is disabled.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -190,17 +181,24 @@
       PORE state) contain the information required for an initial debug of the
       problem.
 
-      This error should never occur during an SBE IPL since the SBE does not
-      include an OCI interface.
+      This error should never occur for SBE/SLW, based on the fact that the
+      HW error handler mechanism is disabled.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -212,15 +210,25 @@
       o An I2C hang when fetching code from SEEPROM;
       o A bad branch that starts executing garbage or data;
       o Memory corruption
+
+      This error should never occur for SBE/SLW, based on the fact that the
+      HW error handler mechanism is disabled.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -229,17 +237,24 @@
       This halt code indicates an internal data error during consistency
       checking, e.g., a bad scan-data CRC.
 
-      This error should never occur during an SBE IPL since the SBE IPL does
-      not use the PORE SCAND instruction.
+      This error should never occur for SBE/SLW, based on the fact that the
+      HW error handler mechanism is disabled.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -248,18 +263,24 @@
       This halt code indicates that a second error occurred during processing
       of an initial error.
 
-      It is extremely unlikely that this error would ever occur during an SBE
-      IPL since the PORE error handlers are nothing more than a single HALT
-      statement.
+      This error should never occur for SBE/SLW, based on the fact that the
+      HW error handler mechanism is disabled.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <!-- ** Halt codes from scan0 subroutine                                  -->
@@ -271,15 +292,18 @@
       scan0 DONE polling reached the specified threshold value. The scan0
       subroutine could have been called by various procedures.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target chiplet -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FLUSH_FAIL, POR_FFDC_OFFSET_USE_P1</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <!-- ** Halt codes from arrayinit subroutine                              -->
@@ -291,14 +315,18 @@
       arrayinit DONE polling reached the specified threshold value. The arrayinit
       subroutine could have been called by various procedures.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target chiplet -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_ARRAYINIT_FAIL, POR_FFDC_OFFSET_USE_P1</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

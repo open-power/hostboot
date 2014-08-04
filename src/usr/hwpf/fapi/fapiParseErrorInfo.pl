@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +23,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseErrorInfo.pl,v 1.29 2014/06/11 16:47:16 maploetz Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.30 2014/07/25 00:36:41 jmcgill Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -1205,15 +1207,6 @@ print SBFILE "    default:\\\n";
 print SBFILE "        FAPI_SET_HWP_ERROR(RC, RC_SBE_UNKNOWN_ERROR);\\\n";
 print SBFILE "        break;\\\n";
 print SBFILE "}\\\n";
-print SBFILE "const void * l_objects[] = {&CHIP_IN_ERROR};\\\n";
-print SBFILE "fapi::ReturnCode::ErrorInfoEntry l_entries[1];\\\n";
-print SBFILE "l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_CDG;\\\n";
-print SBFILE "l_entries[0].target_cdg.iv_targetObjIndex = 0;\\\n";
-print SBFILE "l_entries[0].target_cdg.iv_callout = 1;\\\n";
-print SBFILE "l_entries[0].target_cdg.iv_deconfigure = 1;\\\n";
-print SBFILE "l_entries[0].target_cdg.iv_gard = 1;\\\n";
-print SBFILE "l_entries[0].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::HIGH;\\\n";
-print SBFILE "RC.addErrorInfo(l_objects, l_entries, 1);\\\n";
 print SBFILE "}\n\n";
 print SBFILE "#endif\n";
 

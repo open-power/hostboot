@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_slw_base_halt_codes.xml,v 1.9 2013/11/23 00:33:44 cmolsen Exp $ -->
+<!-- $Id: proc_slw_base_halt_codes.xml,v 1.10 2014/07/23 19:51:50 jmcgill Exp $ -->
 <!-- Halt codes for proc_slw_*.S -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -31,11 +33,21 @@
       invalid start vector was detected in the EXE_TRIGGER (ETR) register when 
       kicking off an idle transition. The start vector is in ETR(8:11).
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -44,11 +56,17 @@
       This error is signalled by proc_slw_poweronoff and indicates that a timeout
       occured waiting for the VDD PFET sequencer(s) to complete.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -57,11 +75,17 @@
       This error is signalled by proc_slw_poweronoff and indicates that a timeout
       occured waiting for the VCS PFET sequencer(s) to complete.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -70,11 +94,21 @@
       This error is signalled by proc_slw_poweronoff and indicates that an invalid
       PFET decode was detected.  This is an SLW firmware issue.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -84,11 +118,17 @@
       occured waiting for the internal VRM babystepper to synchronize the idle
       transition command during sleep entry.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -98,11 +138,17 @@
       occured waiting for the internal VRM babystepper to synchronize the idle
       transition command during winkle entry.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -112,11 +158,17 @@
       occured waiting for the internal VRM babystepper to synchronize the idle
       transition command during a fast exit.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -125,11 +177,17 @@
       This error is signalled by proc_slw_base and indicates that a timeout
       occured while polling for the iVRM calibration to complete.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -139,11 +197,17 @@
       occured waiting for the internal VRM babystepper to synchronize the idle
       transition command during a deep exit after iVRM calibration.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -152,11 +216,17 @@
       This error is signalled by proc_slw_base and indicates that a timeout
       occured waiting for the internal VRM force safe mode to take effect.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -165,11 +235,17 @@
       This error is signalled by proc_slw_ram and indicates that a timeout
       occured waiting the RAM hardware to accept the instruction given to it..
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -178,11 +254,17 @@
       This error is signalled by proc_slw_ram and indicates that a timeout
       occured waiting the RAM hardware to quiesce.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -191,11 +273,17 @@
       This error is signalled by proc_slw_ram and indicates that RAM controller
       indicates recovery is inprogress or an exception has occured..
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -204,24 +292,36 @@
       This error is signalled by proc_slw_ram and indicates that a timeout occured
       looking for good status from the RAM Controller.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_SLW_GOTO_TIMEOUT_ERROR</rc>
     <description>
       This error is signalled by proc_slw_base and indicates that a timeout occured
-      looking for the proper PCBS-PM state before issuing a PCBS-PM GOTO command.
+      looking for the proper PCBS-PM state before issuing a PCBS-PM "GOTO" command.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -231,11 +331,17 @@
       updated the PMC status reg but never reached the subsequent halt op.  PMC SLW 
       Timeouts will be indicated without further FIR bits.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -245,11 +351,11 @@
       executed the simple halt error injection.  PMC SLW Timeouts will be indicated
       without further FIR bits.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -258,11 +364,11 @@
       This error is signalled by proc_slw_pro_epi_log and indicates that the image 
       enabled invalid instruction error injection occured.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -271,11 +377,11 @@
       This error is signalled by proc_slw_pro_epi_log and indicates that the image 
       enabled invalid OCI address error injection occured.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -284,11 +390,11 @@
       This error is signalled by proc_slw_pro_epi_log and indicates that the image 
       enabled invalid PIB address error injection occured.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -297,11 +403,11 @@
       This error is signalled by proc_slw_pro_epi_log and indicates that the image 
       enabled PC underflow error injection occured.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -310,11 +416,11 @@
       This error is signalled by proc_slw_pro_epi_log and indicates that the image 
       enabled PC overflow error injection occured.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -323,11 +429,11 @@
       This error is signalled by proc_slw_pro_epi_log and indicates that the image 
       enabled timeout error injection occured.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -336,11 +442,17 @@
       This error is signalled by proc_slw_error_handler upon a detected error 0 
       event (non-masked PIB error code).
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -349,11 +461,17 @@
       This error is signalled by proc_slw_error_handler upon a detected error 1 
       event (non-masked OCI error code).
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -362,11 +480,17 @@
       This error is signalled by proc_slw_error_handler upon a detected error 2 
       event (instruction fetch or decode).
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -375,11 +499,17 @@
       This error is signalled by proc_slw_error_handler upon a detected error 3 
       event (internal data error).
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -388,11 +518,17 @@
       This error is signalled by proc_slw_error_handler upon a detected error 4 
       event (an error was detected upon an error).
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -405,11 +541,21 @@
       Deep Winkle power up bit.  If these bits match, then a hardware fault is 
       the next most probable.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -421,11 +567,21 @@
       causes the loss of the High Availability Log Write pointer in the L3 before it
       could be saved for restoration upon Deep Winkle Exit.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -435,11 +591,17 @@
       achieving the special wake-up state after hitting the PCBS GOTO operation to 
       complete deep sleep exit.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -449,11 +611,21 @@
       special wake-up override isnt enabled which it must be prior to calling
       any of the CPM install or enable routines.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

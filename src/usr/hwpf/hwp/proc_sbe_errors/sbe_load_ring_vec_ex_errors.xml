@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: sbe_load_ring_vec_ex_errors.xml,v 1.3 2013/06/21 22:50:58 jeshua Exp $ -->
+<!-- $Id: sbe_load_ring_vec_ex_errors.xml,v 1.4 2014/07/23 19:51:50 jmcgill Exp $ -->
 <!-- Error definitions for sbe_load_ring_vec_ex procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -30,15 +32,21 @@
       Procedure: proc_sbe_ex_core_gptr_time_initf
       Failed to find a chiplet to scan for ex_time_core
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target EX -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -47,31 +55,44 @@
       Procedure: proc_sbe_ex_gptr_time_initf
       Failed to find a chiplet to scan for ex_time_eco
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target EX -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_SBE_LOAD_RING_VEC_EX_ex_repr_core_ERROR</rc>
     <description>
       Procedure: proc_sbe_ex_core_repair_initf
-      Failed to find a chiplet to scan for ex_repr_core</description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target EX -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
+      Failed to find a chiplet to scan for ex_repr_core
+    </description>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -80,14 +101,21 @@
       Procedure: proc_sbe_ex_repair_initf
       Failed to find a chiplet to scan for ex_repr_eco
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target EX -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

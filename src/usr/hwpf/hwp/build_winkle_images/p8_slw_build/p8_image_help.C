@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.60 2014/01/25 05:28:39 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.61 2014/07/23 20:08:36 jmcgill Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -485,7 +487,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
   PORE_LOCATION( &ctx, src5);
   pore_BRAZ( &ctx, D0, tgt5);
-  pore_HALT( &ctx);
+  pore_inline_instruction1( &ctx, 0x34, 0x616C74);
+  pore_inline_instruction1( &ctx, 0x00, 0xCB0DA9);
   PORE_LOCATION( &ctx, tgt5);
   if (ctx.error > 0)  {
     MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", ctx.error);
@@ -519,7 +522,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
   PORE_LOCATION( &ctx, src8);
   pore_BRAZ( &ctx, D0, tgt8);
-  pore_HALT( &ctx);
+  pore_inline_instruction1( &ctx, 0x34, 0x616C74);
+  pore_inline_instruction1( &ctx, 0x00, 0xCB0DA9);
   PORE_LOCATION( &ctx, tgt8);
 	pore_STI(&ctx, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0, 0x0);
 	pore_RET( &ctx);

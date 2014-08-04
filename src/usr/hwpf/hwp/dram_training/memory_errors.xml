@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -21,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_errors.xml,v 1.45 2014/03/26 21:30:50 lapietra Exp $ -->
+<!-- $Id: memory_errors.xml,v 1.46 2014/07/23 20:16:05 jmcgill Exp $ -->
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 <!-- *********************************************************************** -->
 
@@ -43,37 +45,159 @@
   <hwpError>
     <rc>RC_MSS_UNEXPECTED_NEST_CLK_STATUS</rc>
     <description>A read of the nest clock status register returned an unexpected value.</description>
-</hwpError>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_NEST_CHIPLET</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INIT1_OPCG_DONE_ERROR</rc>
-    <description>Timed out waiting for OPCG done bit(15).</description>
-</hwpError>
+    <description>Timed out waiting for OPCG done bit in SCAN0 module.</description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FLUSH_FAIL, POR_FFDC_OFFSET_USE_P1</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INIT1_FSISTATUS_FAIL</rc>
     <description>Failed VDD status check on FSI2PIB Status Reg bit(16).</description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_STANDBY_REGION</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INIT3_FSISTATUS_FAIL</rc>
     <description>Failed clock region check on FSI2PIB Status Reg bit(31).</description>
-</hwpError>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_TP_CHIPLET</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_PLL_LOCK_TIMEOUT</rc>
-    <description>Timed out waiting for PLL locks in FSI2PIB Status Reg bits(24,25). </description>
-</hwpError>
+    <rc>RC_MSS_NEST_PLL_LOCK_TIMEOUT</rc>
+    <description>Timed out waiting for NEST PLL lock in FSI2PIB Status Reg bit 24. </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_STANDBY_REGION</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEM_PLL_LOCK_TIMEOUT</rc>
+    <description>Timed out waiting for MEM PLL lock in FSI2PIB Status Reg bit 25. </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_STANDBY_REGION</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+
+  <registerFfdc>
+  <id>REG_FFDC_CEN_STANDBY_REGION</id>
+    <cfamRegister>CFAM_FSI_STATUS_0x00001007</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP3_0x00001012</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00001013</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00001013</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP5_0x00001014</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00001015</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00001016</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP3_MIRROR_0x0000101B</cfamRegister>
+  </registerFfdc>
 
   <hwpError>
     <rc>RC_MSS_THOLD_ERROR</rc>
     <description>THOLDS after Clock Start cmd do NOT match to the expected value.</description>
-</hwpError>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_TP_CHIPLET</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_CCREG_MISMATCH</rc>
     <description>Clock Control Register does not match the expected value.</description>
-</hwpError>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_TP_CHIPLET</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_ARRAY_REPAIR_BUSY</rc>

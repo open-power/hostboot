@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_lco_loader_errors.xml,v 1.3 2013/06/21 19:15:05 jeshua Exp $ -->
+<!-- $Id: proc_sbe_lco_loader_errors.xml,v 1.4 2014/07/23 19:51:49 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_lco_loader -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -30,12 +32,11 @@
       Procedure: proc_sbe_lco_loader
       Attempted to execute procedure with cv_multicast option.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -44,58 +45,73 @@
       Procedure: proc_sbe_lco_loader
       LCO load sequence not attempted, fabric arbitration is stopped.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>ADU_PMISC_MODE_0x0202000B</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_FABRICINIT</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_SBE_LCO_LOADER_IMAGE_SIZE_PAD_ERR</rc>
     <description>
       Procedure: proc_sbe_lco_loader
-      Image size is not evenly divisible by cacheline size.
+      Hostboot image size is not evenly divisible by cacheline size.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>OTPC_M_SECURITY_SWITCH_0x00010005</ffdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_SBE_LCO_LOADER_IMAGE_SIZE_OVERFLOW_ERR</rc>
     <description>
       Procedure: proc_sbe_lco_loader
-      Image size is larger than master chiplet cache size.
+      Hostboot image size is larger than master chiplet cache size.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>OTPC_M_SECURITY_SWITCH_0x00010005</ffdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_SBE_LCO_LOADER_IMAGE_WRAP_ERR</rc>
     <description>
       Procedure: proc_sbe_lco_loader
-      Combination of target base address and image size will wrap OCB address.
+      Combination of target base address and hostboot image size will wrap OCB address.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>OTPC_M_SECURITY_SWITCH_0x00010005</ffdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -104,13 +120,15 @@
       Procedure: proc_sbe_lco_loader
       Target base address is not cacheline aligned.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>OTPC_M_SECURITY_SWITCH_0x00010005</ffdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -119,13 +137,45 @@
       Procedure: proc_sbe_lco_loader
       PBA slave reset still in progress or buffer is busy.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>PBA_SLVRST_0x00064001</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_UTILS_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LCO_LOADER_LPCM_FIR_ERR</rc>
+    <description>
+      Procedure: proc_sbe_lco_loader
+      LPCM FIR register was non-zero after PNOR read.
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_UTILS_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -134,13 +184,22 @@
       Procedure: proc_sbe_lco_loader
       Unexpected state in OCB Status Control Register at end of write stream.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>OCB3_STATUS_CONTROL_0x0006B071</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_UTILS_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -149,13 +208,22 @@
       Procedure: proc_sbe_lco_loader
       Unexpected state in PBA FIR Register at end of write stream.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>PBA_FIR_0x02010840</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_UTILS_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -164,13 +232,22 @@
       Procedure: proc_sbe_lco_loader
       Unexpected state in PBA Write Buffer0 Register at end of write stream.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>PBA_WBUFVAL0_0x02010858</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_UTILS_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -179,12 +256,22 @@
       Procedure: proc_sbe_lco_loader
       Unexpected state in PBA Write Buffer1 Register at end of write stream.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>PBA_WBUFVAL1_0x02010859</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_UTILS_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

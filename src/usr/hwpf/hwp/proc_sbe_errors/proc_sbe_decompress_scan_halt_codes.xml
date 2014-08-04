@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_decompress_scan_halt_codes.xml,v 1.3 2013/06/21 22:46:29 jeshua Exp $ -->
+<!-- $Id: proc_sbe_decompress_scan_halt_codes.xml,v 1.4 2014/07/23 19:51:49 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_decompress_scan.S -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -32,12 +34,21 @@
       however it is not a multicast WRITE type as required. The bad chiplet Id
       will be found in P0 at the halt.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -49,12 +60,21 @@
       register D0. The most likely cause of this error is a problem with the
       tool chain used to build the SBE IPL images.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,12 +87,22 @@
       this error is a problem with the tool chain used to build the SBE IPL
       images.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure> 
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -86,12 +116,22 @@
       cause of this error is a problem with the tool chain used to build the
       SBE IPL images.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure> 
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -103,14 +143,22 @@
       excess bits. The most likely cause of this error is a problem with the
       tool chain used to build the SBE IPL images.
     </description>
-    <!-- JDS TODO - this FFDC should log the target chiplet
-         REG_FFDC_PROC_*_CLOCK_CONTROLLER registers as well -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure> 
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -124,13 +172,22 @@
       could be caused by broken hardware, or by any tool problem that would
       misrepresent the length of the actual hardware scan ring.
     </description>
-    <!-- JDS TODO - this FFDC should log the target chiplet
-         REG_FFDC_PROC_*_CLOCK_CONTROLLER registers as well -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure> 
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_ex_dpll_setup_halt_codes.xml,v 1.2 2013/06/21 21:04:33 jeshua Exp $ -->
+<!-- $Id: proc_sbe_ex_dpll_setup_halt_codes.xml,v 1.3 2014/07/23 19:51:49 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_ex_dpll_setup.S -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -30,14 +32,22 @@
       Procedure: proc_sbe_ex_dpll_setup
       This error is signalled when the EX DPLL fails to lock after ~150us.
     </description>
-    <!-- JDS TODO - this FFDC should probably only log the target engine
-         and should log something about the target EX -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_DPLL_LOCK_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>  
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE </procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

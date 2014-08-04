@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_select_ex_errors.xml,v 1.2 2013/06/21 18:22:23 jeshua Exp $ -->
+<!-- $Id: proc_sbe_select_ex_errors.xml,v 1.3 2014/07/23 19:51:50 jmcgill Exp $ -->
 <!-- Error definitions for proc_sbe_select_ex procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -30,13 +32,25 @@
       Procedure: proc_sbe_select_ex
       None of the valid boot cores are enabled
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>EX_PARTIAL_GOOD_0x520F0012</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -45,12 +59,30 @@
       Procedure: proc_sbe_select_ex
       Skipped the first good boot core and no other good boot core was found
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>EX_PARTIAL_GOOD_0x520F0012</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_SBE_SELECT_EX</id>
+    <scomRegister>EX_PARTIAL_GOOD_0x520F0012</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>

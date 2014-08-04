@@ -45,6 +45,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_spless_sbe_startWA
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_tp_collect_dbg_data
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/model/
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += slave_sbe.o
@@ -58,6 +60,9 @@ OBJS += proc_spless_sbe_startWA.o
 OBJS += proc_reset_i2cm_bus_fence.o
 OBJS += proc_check_master_sbe_seeprom.o
 OBJS += proc_tp_collect_dbg_data.o
+OBJS += proc_extract_pore_engine_state.o
+OBJS += proc_extract_pore_base_ffdc.o
+OBJS += proc_extract_pore_halt_ffdc.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable

@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_pibmem_loader_halt_codes.xml,v 1.2 2013/06/21 18:44:47 jeshua Exp $ -->
+<!-- $Id: proc_sbe_pibmem_loader_halt_codes.xml,v 1.3 2014/07/23 19:51:50 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_pibmem_loader.S -->
 <hwpErrors>
   <hwpError>
@@ -32,12 +34,17 @@
       Register are in D0 at the time of the halt. Resetting the PIBMEM prior
       to running proc_sbe_pibmem_loader should clear up this error.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>     
+      <priority>HIGH</priority>
+    </callout> 
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -48,12 +55,17 @@
       execution of the procedure.  The contents of the PIBMEM Status Register
       are in D0 at the time of the halt.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>     
+      <priority>HIGH</priority>
+    </callout> 
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -64,12 +76,17 @@
       is a hard requirement due to the PORE architecture. The image size passed
       to the procedure can be found in SPRG0.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>     
+      <priority>HIGH</priority>
+    </callout> 
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -80,12 +97,17 @@
       is a hard requirement due to the PORE architecture.  The load address
       passed to the procedure can be found in SPRG0.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>     
+      <priority>HIGH</priority>
+    </callout> 
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -96,11 +118,17 @@
       PIBMEM. The image size (in bytes) passed to the procedure is in SPRG0;
       D1 contains the PIBMEM load address passed to the procedure.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
     <sbeError/>
+    <callout>
+      <target>CHIP</target>     
+      <priority>HIGH</priority>
+    </callout> 
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

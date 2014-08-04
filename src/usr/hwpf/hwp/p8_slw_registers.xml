@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_slw_registers.xml,v 1.5 2014/02/10 04:46:50 stillgs Exp $ -->
+<!-- $Id: p8_slw_registers.xml,v 1.6 2014/07/23 19:51:48 jmcgill Exp $ -->
 <!-- Definition of SLW registers to collect on some errors -->
 <hwpErrors>
   <registerFfdc>
@@ -98,5 +100,11 @@
     <scomRegister>EX_PMErr_REG_0x100F0109</scomRegister>   
     <scomRegister>EX_PCBS_DPLL_STATUS_REG_100F0161</scomRegister>   
     <scomRegister>EX_DPLL_CPM_PARM_REG_0x100F0152</scomRegister>        
+  </registerFfdc>
+  <registerFfdc>
+    <id>REG_FFDC_PROC_SLW_SPWKUP_REGISTERS</id>
+    <scomRegister>PM_SPECIAL_WKUP_FSP_0x100F010B</scomRegister>
+    <scomRegister>PM_SPECIAL_WKUP_OCC_0x100F010C</scomRegister>
+    <scomRegister>PM_SPECIAL_WKUP_PHYP_0x100F010D</scomRegister>
   </registerFfdc>
 </hwpErrors>

@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_pore_halt_ffdc.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,41 +22,38 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_check_master_errors.xml,v 1.3 2014/07/23 19:51:49 jmcgill Exp $ -->
-<!-- Halt codes for proc_sbe_check_master -->
+<!-- $Id: proc_extract_pore_halt_ffdc.xml,v 1.1 2014/07/23 19:43:18 jmcgill Exp $ -->
+<!-- Error definitions for proc_extract_pore_halt_ffdc procedure -->
 <hwpErrors>
-  <!-- ******************************************************************** -->
+  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SBE_CHECK_MASTER_NO_VALID_MCS</rc>
+    <rc>RC_PROC_EXTRACT_PORE_HALT_FFDC</rc>
     <description>
-      Procedure: proc_sbe_check_master
-      Both MCL/MCR fences asserted, no functional MCS units are available for use on master chip.
+      FFDC collected on selected PORE engine halt failures
     </description>
-    <sbeError/>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_SBE_CHECK_MASTER</id>
-      <target>CHIP</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP</target>
-    </deconfigure>
-    <gard>
-      <target>CHIP</target>
-    </gard>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PORE_HALT_TYPE</ffdc>
+    <ffdc>FFDC_ADDRESSES</ffdc>
+    <ffdc>FFDC_DATA</ffdc>
   </hwpError>
-  <!-- ******************************************************************** -->
-  <registerFfdc>
-    <id>REG_FFDC_SBE_CHECK_MASTER</id>
-    <scomRegister>NEST_GP0_0x02000000</scomRegister>
-    <scomRegister>DEVICE_ID_REG_0x000F000F</scomRegister>
-  </registerFfdc>
-  <!-- ******************************************************************** -->
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_PORE_HALT_FFDC_BAD_MULTICAST</rc>
+    <description>
+      Unsupported multicast analysis requested
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>MC_GROUP</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_PORE_HALT_FFDC_BAD_TYPE</rc>
+    <description>
+      Unsupported halt type analysis requested
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PORE_HALT_TYPE</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

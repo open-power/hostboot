@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_npll_setup_errors.xml,v 1.4 2013/06/21 19:00:29 jeshua Exp $ -->
+<!-- $Id: proc_sbe_npll_setup_errors.xml,v 1.5 2014/07/23 19:51:49 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_npll_setup -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -30,15 +32,32 @@
       Procedure: proc_sbe_npll_setup
       CP Filter PLL failed to lock.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>TP_PLL_LOCK_0x010F0019</ffdc>
-    <ffdc>MBOX_FSIGP4_0x00050013</ffdc>
-    <ffdc>MBOX_FSIGP3_0x00050012</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SBE_NPLL_SETUP_FILTER_PLL</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <hw>
+        <hwid>PROC_REF_CLOCK</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>  
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <procedure>CODE </procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -47,15 +66,32 @@
       Procedure: proc_sbe_npll_setup
       EM Filter PLL failed to lock.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>TP_PLL_LOCK_0x010F0019</ffdc>
-    <ffdc>MBOX_FSIGP4_0x00050013</ffdc>
-    <ffdc>MBOX_FSIGP3_0x00050012</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SBE_NPLL_SETUP_FILTER_PLL</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <hw>
+        <hwid>PROC_REF_CLOCK</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>  
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <procedure>CODE </procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -64,14 +100,54 @@
       Procedure: proc_sbe_npll_setup
       X-Bus PLL failed to lock.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>MBOX_FSIGP4_0x00050013</ffdc>
-    <ffdc>MBOX_GP3MIR_0x0005001B</ffdc>
-    <ffdc>X_PLLLOCKREG_0x040F0019</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SBE_NPLL_SETUP_XBUS_PLL</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <hw>
+        <hwid>PROC_REF_CLOCK</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>  
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <procedure>CODE </procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_SBE_NPLL_SETUP_FILTER_PLL</id>
+    <cfamRegister>CFAM_FSI_GP3_0x00002812</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00002813</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00002815</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00002816</cfamRegister>
+    <scomRegister>TP_PLL_LOCK_0x010F0019</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_SBE_NPLL_SETUP_XBUS_PLL</id>
+    <cfamRegister>CFAM_FSI_GP3_0x00002812</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00002813</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00002815</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00002816</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP3_MIRROR_0x0000281B</cfamRegister>
+    <scomRegister>X_PLLLOCKREG_0x040F0019</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>
+
+
+

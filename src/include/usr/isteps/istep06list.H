@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -155,6 +157,7 @@ const DepModInfo  g_istep06Dependancies = {
       DEP_LIB(libbuild_winkle_images.so), //proc_mailbox_utils
       DEP_LIB(libslave_sbe.so),
       DEP_LIB(libsbe.so),
+      DEP_LIB(libporeve.so),
       NULL
     }
 };

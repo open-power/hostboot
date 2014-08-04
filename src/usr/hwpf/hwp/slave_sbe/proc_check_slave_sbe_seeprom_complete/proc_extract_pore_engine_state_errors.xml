@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/proc_sbe_errors/proc_sbe_check_master_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_pore_engine_state_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,21 +22,18 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_check_master_errors.xml,v 1.3 2014/07/23 19:51:49 jmcgill Exp $ -->
-<!-- Halt codes for proc_sbe_check_master -->
+<!-- $Id: proc_extract_pore_engine_state_errors.xml,v 1.2 2014/07/24 03:11:21 jmcgill Exp $ $ -->
+<!-- Error definitions for proc_extract_pore_engine_state HWP -->
 <hwpErrors>
-  <!-- ******************************************************************** -->
+  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SBE_CHECK_MASTER_NO_VALID_MCS</rc>
+    <rc>RC_PROC_EXTRACT_PORE_ENGINE_STATE_VSBE_MODEL_ERROR</rc>
     <description>
-      Procedure: proc_sbe_check_master
-      Both MCL/MCR fences asserted, no functional MCS units are available for use on master chip.
+      Procedure: proc_extract_pore_engine_state
+      Virtual SBE model error occurred when attempting to access SBE vital state.
     </description>
-    <sbeError/>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_SBE_CHECK_MASTER</id>
-      <target>CHIP</target>
-    </collectRegisterFfdc>
+    <ffdc>CHIP</ffdc>
+    <ffdc>MODEL_ERROR</ffdc>
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
@@ -52,11 +49,45 @@
       <target>CHIP</target>
     </gard>
   </hwpError>
-  <!-- ******************************************************************** -->
-  <registerFfdc>
-    <id>REG_FFDC_SBE_CHECK_MASTER</id>
-    <scomRegister>NEST_GP0_0x02000000</scomRegister>
-    <scomRegister>DEVICE_ID_REG_0x000F000F</scomRegister>
-  </registerFfdc>
-  <!-- ******************************************************************** -->
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_PORE_ENGINE_STATE_VSBE_PIB_ERROR</rc>
+    <description>
+      Procedure: proc_extract_pore_engine_state
+      PIB error occurred when attempting to access SBE vital state from virtual SBE model.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>PIB_ERROR</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_PORE_ENGINE_STATE_UNSUPPORTED_INVOCATION</rc>
+    <description>
+      Procedure: proc_extract_pore_engine_state
+      Unsupported engine type presented for analysis.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>ENGINE</ffdc>
+    <ffdc>VIRTUAL</ffdc>
+    <ffdc>VIRTUAL_IS_SUPPORTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

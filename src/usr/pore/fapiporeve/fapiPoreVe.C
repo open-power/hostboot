@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVe.C,v 1.35 2014/03/31 15:21:37 thi Exp $
+// $Id: fapiPoreVe.C,v 1.37 2014/07/25 15:19:10 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -69,11 +69,22 @@
 
 #ifdef FAPIECMD
 extern "C" {
+  #if FAPIECMD == 1
+    const uint32_t MBOX_SBEVITAL_0x0005001C = 0x0005001C;
+    #define FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC 0
+  #else
+    #define FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC 1
+  #endif
+#else
+  #define FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC 1
 #endif 
+
+#if FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC == 1
+  #include <proc_extract_sbe_rc.H>
+#endif
 
 using namespace vsbe;
 
-const uint32_t MBOX_SBEVITAL_0x0005001C = 0x0005001C;
 
 //******************************************************************************
 // fapiPoreVe function
@@ -625,7 +636,7 @@ fapi::ReturnCode fapiPoreVe(
                 uint64_t   data_64;
                 int        pib_rc;
                 ModelError me;
-                me = poreve->getscom(MBOX_SBEVITAL_0x0005001C, data_64, pib_rc);
+                me = poreve->getscom((uint32_t) MBOX_SBEVITAL_0x0005001C, data_64, pib_rc);
                 if( me == ME_SUCCESS )
                 {
                     if( pib_rc == 0 )
@@ -635,10 +646,18 @@ fapi::ReturnCode fapiPoreVe(
                         if( haltcode != 0xF )
                         {
                             FAPI_ERR( "Halt code is 0x%x (ERROR)\n", haltcode );
-                            uint32_t & ERROR = haltcode;
-                            FAPI_SET_HWP_ERROR(rc,
-                                              RC_FAPIPOREVE_HALTED_WITH_ERROR);
                             poreve->iv_pore.dumpOnce();
+#if FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC == 1
+                            FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, poreve, 
+                                          (i_target.getType() == fapi::TARGET_TYPE_PROC_CHIP)?(poreve->iv_seepromMemory.iv_images->iv_image):(poreve->iv_pnorMemory.iv_images->iv_image),
+                                          SBE);
+#endif
+                            if (rc.ok())
+                            {
+                                uint32_t & ERROR = haltcode;
+                                FAPI_SET_HWP_ERROR(rc,
+                                                  RC_FAPIPOREVE_HALTED_WITH_ERROR);
+                            }
                         }
                         else
                         {
@@ -667,8 +686,16 @@ fapi::ReturnCode fapiPoreVe(
             {
                 FAPI_ERR( "PORE is stopped due to an architected error\n");
                 runStatus &= ~PORE_STATUS_ERROR_HALT;
-                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ARCHITECTED_ERROR);
                 poreve->iv_pore.dumpOnce();
+#if FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC == 1
+                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, poreve, 
+                              (i_target.getType() == fapi::TARGET_TYPE_PROC_CHIP)?(poreve->iv_seepromMemory.iv_images->iv_image):(poreve->iv_pnorMemory.iv_images->iv_image),
+                              SBE);
+#endif
+                if (rc.ok())
+                {
+                    FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ARCHITECTED_ERROR);
+                }
             }
             if( runStatus & PORE_STATUS_HARDWARE_STOP )
             {
@@ -689,8 +716,16 @@ fapi::ReturnCode fapiPoreVe(
             {
                 FAPI_ERR( "PORE is stopped due to a modeling error\n");
                 runStatus &= ~PORE_STATUS_MODEL_ERROR;
-                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_MODELING_ERROR);
                 poreve->iv_pore.dumpOnce();
+#if FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC == 1
+                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, poreve, 
+                              (i_target.getType() == fapi::TARGET_TYPE_PROC_CHIP)?(poreve->iv_seepromMemory.iv_images->iv_image):(poreve->iv_pnorMemory.iv_images->iv_image),
+                              SBE);
+#endif
+                if (rc.ok())
+                {
+                    FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_MODELING_ERROR);
+                }
             }
             if( runStatus & PORE_STATUS_DEBUG_STOP )
             {
@@ -703,8 +738,17 @@ fapi::ReturnCode fapiPoreVe(
             {
                 FAPI_ERR( "PORE is stopped with an unknown status code:0x%X\n",
                           runStatus);
-                int & STATUS = runStatus;
-                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_UNKNOWN_STATUS_ERROR);
+                poreve->iv_pore.dumpOnce();
+#if FAPIPOREVE_USE_PROC_EXTRACT_SBE_RC == 1
+                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, poreve, 
+                              (i_target.getType() == fapi::TARGET_TYPE_PROC_CHIP)?(poreve->iv_seepromMemory.iv_images->iv_image):(poreve->iv_pnorMemory.iv_images->iv_image),
+                              SBE);
+#endif
+                if (rc.ok())
+                {                
+                    int & STATUS = runStatus;
+                    FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_UNKNOWN_STATUS_ERROR);
+                }
             }
         } else { //runStatus == 0
             FAPI_IMP( "PORE ran the requested number of instructions "
@@ -842,6 +886,8 @@ fapi::ReturnCode fapiPoreVe(
     HookManager::destroy();
 #endif
 
+    FAPI_INF("\nfapiPoreVe return code = 0x%08X\n", (uint32_t) rc);
+
     return rc;
 } //end function
 
@@ -855,6 +901,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVe.C,v $
+Revision 1.37  2014/07/25 15:19:10  jmcgill
+add ifdefs to exclude proc_extract_sbe_rc analysis for Cronus
+
+Revision 1.36  2014/07/23 20:34:14  jmcgill
+invoke proc_extract_sbe_rc on execution errors (SW261816/SW260441)
+
 Revision 1.35  2014/03/31 15:21:37  thi
 Added FFDC and callouts
 

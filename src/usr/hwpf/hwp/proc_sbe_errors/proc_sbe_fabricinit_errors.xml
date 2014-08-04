@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_fabricinit_errors.xml,v 1.3 2013/06/21 18:50:20 jeshua Exp $ -->
+<!-- $Id: proc_sbe_fabricinit_errors.xml,v 1.4 2014/07/23 19:51:49 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_fabricinit -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -30,13 +32,22 @@
       Procedure: proc_sbe_fabricinit
       Fabric init sequence not attempted, fabric arbitration is stopped.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>ADU_PMISC_MODE_0x0202000B</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_FABRICINIT</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -45,12 +56,32 @@
       Procedure: proc_sbe_fabricinit
       Fabric init failed, or mismatch in expected ADU status.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <ffdc>ADU_STATUS_0x02020002</ffdc>
     <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_FABRICINIT</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_FIR_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_SBE_FABRICINIT</id>
+    <scomRegister>PB_MODE_CENT_0x02010C4A</scomRegister>
+    <scomRegister>PB_HP_MODE_NEXT_CENT_0x02010C4B</scomRegister>
+    <scomRegister>PB_HP_MODE_CURR_CENT_0x02010C4C</scomRegister>
+    <scomRegister>PB_HPX_MODE_NEXT_CENT_0x02010C4D</scomRegister>
+    <scomRegister>PB_HPX_MODE_CURR_CENT_0x02010C4E</scomRegister>
+    <scomRegister>ADU_PMISC_MODE_0x0202000B</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>

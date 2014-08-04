@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +35,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/pore_model
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/model
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include/
 
 OBJS += fapiPoreVe.o
 OBJS += fapiPoreVeArg.o

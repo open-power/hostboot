@@ -175,6 +175,13 @@ HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_sbe_trigger_winkle_errors.xml
 HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/proc_slw_base_halt_codes.xml
 HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/sbe_common_halt_codes.xml
 HWP_ERROR_XML_FILES += hwp/proc_sbe_errors/sbe_load_ring_vec_ex_errors.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_tp_collect_dbg_data/proc_tp_collect_dbg_data.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_pore_engine_state_errors.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_pore_base_ffdc.xml
+HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_pore_halt_ffdc.xml
+HWP_ERROR_XML_FILES += hwp/proc_pba_utils_registers.xml
+HWP_ERROR_XML_FILES += hwp/p8_fir_registers.xml
+HWP_ERROR_XML_FILES += hwp/cen_fir_registers.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES += hwp/memory_attributes.xml
@@ -209,7 +216,6 @@ HWP_ATTR_XML_FILES += hwp/dram_training/mem_pll_setup/memb_pll_ring_attributes.x
 HWP_ATTR_XML_FILES += hwp/proc_chip_ec_feature.xml
 HWP_ATTR_XML_FILES += hwp/proc_abus_dmi_xbus_scominit_attributes.xml
 HWP_ATTR_XML_FILES += hwp/runtime_attributes/memory_occ_attributes.xml
-HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_tp_collect_dbg_data/proc_tp_collect_dbg_data.xml
 
 #------------------------------------------------------------------------------
 # PLL Ring Data files

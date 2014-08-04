@@ -1,0 +1,158 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/cen_fir_registers.xml $                      -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: cen_fir_registers.xml,v 1.1 2014/07/23 20:16:05 jmcgill Exp $ -->
+<!-- Definition of FIR registers to collect on some errors -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <!-- All FIRs *********************************************************** -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CEN_FIR_FFDC</rc>
+    <description>
+      FFDC collected on Centaur FIR errors
+    </description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_CHIP_MASTER_INTERRUPT_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_GLOB_XFIR_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_GLOB_RFIR_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_GLOB_FIR_MASK_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_GLOB_ATTN_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_GLOB_ATTN_MASK_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_LFIR_REGISTERS</id>
+      <id>REG_FFDC_CEN_CHIP_LFIR_MASK_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_MBA_LFIR_REGISTERS</id> 
+      <id>REG_FFDC_CEN_MBA_LFIR_MASK_REGISTERS</id>
+      <childTargets>
+        <parent>TARGET</parent>
+        <childType>TARGET_TYPE_MBA_CHIPLET</childType>
+      </childTargets>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- Chip Level FFDC **************************************************** -->
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_MASTER_INTERRUPT_REGISTERS</id>
+    <cfamRegister>CFAM_FSI_STATUS_0x00001007</cfamRegister>
+    <scomRegister>MASTER_PCB_INT_0x000F001A</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_GLOB_XFIR_REGISTERS</id>
+    <scomRegister>READ_GLOBAL_XSTOP_FIR_0x570F001B</scomRegister>
+    <scomRegister>TP_XSTOP_0x01040000</scomRegister>
+    <scomRegister>NEST_XSTOP_0x02040000</scomRegister>
+    <scomRegister>MEM_XSTOP_0x03040000</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_GLOB_RFIR_REGISTERS</id>
+    <scomRegister>READ_GLOBAL_RECOV_FIR_0x570F001C</scomRegister>
+    <scomRegister>TP_RECOV_0x01040001</scomRegister>
+    <scomRegister>NEST_RECOV_0x02040001</scomRegister>
+    <scomRegister>MEM_RECOV_0x03040001</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_GLOB_FIR_MASK_REGISTERS</id>
+    <scomRegister>TP_FIR_MASK_0x01040002</scomRegister>
+    <scomRegister>NEST_FIR_MASK_0x02040002</scomRegister>
+    <scomRegister>MEM_FIR_MASK_0x03040002</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_GLOB_ATTN_REGISTERS</id>
+    <scomRegister>READ_GLOBAL_SPATT_FIR_0x570F001A</scomRegister>
+    <scomRegister>TP_SPATTN_0x01040004</scomRegister>
+    <scomRegister>NEST_SPATTN_0x02040004</scomRegister>
+    <scomRegister>MEM_SPATTN_0x03040004</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_GLOB_ATTN_MASK_REGISTERS</id>
+    <scomRegister>TP_SPATTN_MASK_0x01040007</scomRegister>
+    <scomRegister>NEST_SPATTN_MASK_0x02040007</scomRegister>
+    <scomRegister>MEM_SPATTN_MASK_0x03040007</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_LFIR_REGISTERS</id>
+    <scomRegister>TP_PERV_LFIR_0x0104000A</scomRegister>
+    <scomRegister>NEST_PERV_LFIR_0x0204000A</scomRegister>
+    <scomRegister>CEN_DMIFIR_0x02010400</scomRegister>
+    <scomRegister>MBI_FIR_0x02010800</scomRegister>
+    <scomRegister>MBS_FIR_REG_0x02011400</scomRegister>
+    <scomRegister>MBS_ECC0_MBECCFIR_0x02011440</scomRegister>
+    <scomRegister>MBS_ECC1_MBECCFIR_0x02011480</scomRegister>
+    <scomRegister>MBS01_MBSFIRQ_0x02011600</scomRegister>
+    <scomRegister>MBS23_MBSFIRQ_0x02011700</scomRegister>
+    <scomRegister>FBISTN_FIR_REG_0x02010880</scomRegister>
+    <scomRegister>SCAC_LFIR_0x020115C0</scomRegister>
+    <scomRegister>MBSS_FIR_REG_0x0201141E</scomRegister>
+    <scomRegister>MEM_PERV_LFIR_0x0304000A</scomRegister>
+    <scomRegister>FBISTM_FIR_REG_0x03010480</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_CHIP_LFIR_MASK_REGISTERS</id>
+    <scomRegister>TP_PERV_LFIR_MASK_0x0104000D</scomRegister>
+    <scomRegister>NEST_PERV_LFIR_MASK_0x0204000D</scomRegister>
+    <scomRegister>CEN_DMIFIR_MASK_0x02010403</scomRegister>
+    <scomRegister>MBI_FIRMASK_0x02010803</scomRegister>
+    <scomRegister>MBS_FIR_MASK_REG_0x02011403</scomRegister>
+    <scomRegister>MBS_ECC0_MBECCFIR_MASK_0x02011443</scomRegister>
+    <scomRegister>MBS_ECC1_MBECCFIR_MASK_0x02011483</scomRegister>
+    <scomRegister>MBS01_MBSFIRMASK_0x02011603</scomRegister>
+    <scomRegister>MBS23_MBSFIRMASK_0x02011703</scomRegister>
+    <scomRegister>FBISTN_FIR_MASK_REG_0x02010883</scomRegister>
+    <scomRegister>SCAC_FIRMASK_0x020115C3</scomRegister>
+    <scomRegister>MBSS_FIR_MASK_REG_0x02011421</scomRegister>
+    <scomRegister>MEM_PERV_LFIR_MASK_0x0304000D</scomRegister>
+    <scomRegister>FBISTM_FIR_MASK_REG_0x03010483</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <!-- MBA Chiplet Level FFDC ********************************************* -->
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_MBA_LFIR_REGISTERS</id>
+    <scomRegister>MBA01_MBACALFIR_0x03010400</scomRegister>
+    <scomRegister>MBA01_MBAFIRQ_0x03010600</scomRegister>
+    <scomRegister>PHY01_DDRPHY_FIR_REG_0x800200900301143f</scomRegister>
+    <scomRegister>MBAS_FIR_REG_0x0301041B</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_CEN_MBA_LFIR_MASK_REGISTERS</id>
+    <scomRegister>MBA01_MBACALFIR_MASK_0x03010403</scomRegister>
+    <scomRegister>MBA01_MBAFIRMASK_0x03010603</scomRegister>
+    <scomRegister>PHY01_DDRPHY_FIR_MASK_REG_0x800200930301143f</scomRegister>
+    <scomRegister>MBAS_FIR_MASK_REG_0x0301041E</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+</hwpErrors>

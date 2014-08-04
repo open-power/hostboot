@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_scominit_errors.xml,v 1.6 2014/02/10 04:30:49 stillgs Exp $ -->
+<!-- $Id: proc_sbe_scominit_errors.xml,v 1.7 2014/07/23 19:51:50 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_scomint.S -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -30,24 +32,16 @@
       Procedure: proc_sbe_scominit
       Check of winkle state across all IPLed chiplets using READ-OR failed.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
+    <sbeError/>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
       <basedOnPresentChildren>
-          <target>CHIP_IN_ERROR</target>
-          <childType>TARGET_TYPE_EX_CHIPLET</childType>
-          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+        <target>CHIP</target>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
       </basedOnPresentChildren>     
     </collectRegisterFfdc>    
-     <callout>
+    <callout>
       <target>CHIP</target>     
       <priority>HIGH</priority>
     </callout> 
@@ -55,7 +49,6 @@
       <procedure>CODE</procedure>      
       <priority>LOW</priority>
     </callout>  
-    <sbeError/>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -64,21 +57,13 @@
       Procedure: proc_sbe_scominit
       Check of winkle state across all IPLed chiplets using READ-AND failed.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
+    <sbeError/>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
       <basedOnPresentChildren>
-          <target>CHIP_IN_ERROR</target>
-          <childType>TARGET_TYPE_EX_CHIPLET</childType>
-          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+        <target>CHIP</target>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
       </basedOnPresentChildren>     
     </collectRegisterFfdc>
     <callout>
@@ -89,7 +74,6 @@
       <procedure>CODE</procedure>      
       <priority>LOW</priority>
     </callout>  
-    <sbeError/>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -99,20 +83,11 @@
       Polling of Idle FSM timed out.
     </description>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <collectRegisterFfdc>
       <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
       <basedOnPresentChildren>
-          <target>CHIP_IN_ERROR</target>
-          <childType>TARGET_TYPE_EX_CHIPLET</childType>
-          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+        <target>CHIP</target>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
       </basedOnPresentChildren>     
     </collectRegisterFfdc>
     <callout>
@@ -128,27 +103,19 @@
       Procedure: proc_sbe_scominit
       Polling of PFET controller for idle timed out.
     </description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
+    <sbeError/>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
       <basedOnPresentChildren>
-          <target>CHIP_IN_ERROR</target>
-          <childType>TARGET_TYPE_EX_CHIPLET</childType>
-          <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+        <target>CHIP</target>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
       </basedOnPresentChildren>     
     </collectRegisterFfdc>
     <callout>
       <target>CHIP</target>     
       <priority>HIGH</priority>
     </callout>  
-    <sbeError/>
   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
