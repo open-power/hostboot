@@ -412,6 +412,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
 
     do {
         TRACDCOMP( g_trac_runtime, "-NODE-" );
+        TRACFCOMP( g_trac_runtime, "populate_node_attributes(node=%d)", i_nodeNum );
 
         // allocate memory and fill it with some junk data
         uint64_t node_data_addr = 0;
@@ -690,6 +691,11 @@ errlHndl_t populate_attributes( void )
         TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
             sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
+        // Figure out which node we are running on
+        TARGETING::Target* mproc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(mproc);
+        uint64_t nodeid = mproc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
         // Currently set up in host_sys_fab_iovalid_processing() which only
         // gets called if there are multiple physical nodes.   It eventually
@@ -697,11 +703,7 @@ errlHndl_t populate_attributes( void )
         uint64_t present_nodes = hb_images;
         if(hb_images == 0)
         {
-            // Figure out which node we are running on and set the
-            //  appropriate bit
-            TARGETING::Target* mproc = NULL;
-            TARGETING::targetService().masterProcChipTargetHandle(mproc);
-            uint64_t nodeid = mproc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+            // Set the appropriate bit for our node
             present_nodes = ((uint64_t)0x1
                              << ((sizeof(present_nodes) * 8) - 1))
                              >> nodeid;
@@ -724,9 +726,8 @@ errlHndl_t populate_attributes( void )
         // Single or Multi-node?
         if(hb_images == 0) //Single-node
         {
-            // Single node system
-            errhdl = populate_node_attributes(0);
-
+            // Single node system, call inline and pass in our node number
+            errhdl = populate_node_attributes(nodeid);
             if(errhdl != NULL)
             {
                 TRACFCOMP( g_trac_runtime, "populate_node_attributes failed" );
