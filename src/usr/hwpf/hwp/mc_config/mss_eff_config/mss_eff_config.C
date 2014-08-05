@@ -22,13 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.43 2014/04/04 14:44:32 jdsloat Exp $
+// $Id: mss_eff_config.C,v 1.45 2014/08/05 14:20:54 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_config
 // *! DESCRIPTION : see additional comments below
@@ -46,8 +45,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.44  | jdsloat  |04-APR-14| Fixed DDR4 ifdef flag
-//   1.43  |          |         | 
+//   1.45  | sglancy  |05-AUG-14| Updated comments
+//   1.44  | sglancy  |17-JUL-14| Fixed DDR4 ifdef flag - TARGET_MBA error definition
+//   1.43  | jdsloat  |04-APR-14| Fixed DDR4 ifdef flag
 //   1.42  | asaetow  |31-MAR-14| Added ifdef for three #include from Thi and Jake FW Code review.
 //         |          |         | Added back in bus_width_extension check from SPD byte8[4:3]. 
 //         |          |         | NOTE: Only 64bit with ECC extension is allowed.
@@ -2159,7 +2159,6 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
 //------------------------------------------------------------------------------
 fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 {
-    const fapi::Target& TARGET_MBA = i_target_mba;
 #ifdef FAPI_DDR4
 	fapi::ReturnCode rc;
 	rc = mss_eff_config_ddr4(i_target_mba);
@@ -2171,6 +2170,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 #endif
 #ifndef FAPI_DDR4
     /* Initialize Variables */
+    const fapi::Target& TARGET_MBA = i_target_mba;
     const char * const PROCEDURE_NAME = "mss_eff_config";
     fapi::ReturnCode rc;
     fapi::Target l_target_centaur;
