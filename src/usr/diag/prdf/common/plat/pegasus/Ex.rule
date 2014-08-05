@@ -884,6 +884,15 @@ chip Ex
         access      read_only;
     };
 
+#############################################################################
+#       Non-existent registers for FFDC
+#############################################################################
+
+    register SLW_FFDC_CORE_SECTION
+    {
+        name        "Core section registers captured for SLW malfunction alert";
+        capture     group never;
+    };
 };
 
  ##############################################################################

@@ -440,3 +440,14 @@
         access      read_only;
         capture     group default;
     };
+
+#############################################################################
+#       Non-existent registers for FFDC
+#############################################################################
+
+register SLW_FFDC_CHIP_SECTION
+{
+    name        "Chip section registers captured for SLW malfunction alert";
+    capture     group never;
+};
+
