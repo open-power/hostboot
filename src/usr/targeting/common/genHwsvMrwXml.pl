@@ -117,12 +117,12 @@ if ($sysname =~ /brazos/)
 }
 
 my $mru_ids_file = open_mrw_file($mrwdir, "${sysname}-mru-ids.xml");
-my $mruAttr = XMLin($mru_ids_file);
+my $mruAttr = parse_xml_file($mru_ids_file);
 #------------------------------------------------------------------------------
 # Process the system-policy MRW file
 #------------------------------------------------------------------------------
 my $system_policy_file = open_mrw_file($mrwdir, "${sysname}-system-policy.xml");
-my $sysPolicy = XMLin($system_policy_file);
+my $sysPolicy = parse_xml_file($system_policy_file);
 my $reqPol = $sysPolicy->{"required-policy-settings"};
 
 my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
@@ -289,7 +289,7 @@ foreach my $policy ( keys %optTargPolicies )
 # Process the pm-settings MRW file
 #------------------------------------------------------------------------------
 my $pm_settings_file = open_mrw_file($mrwdir, "${sysname}-pm-settings.xml");
-my $pmSettings = XMLin($pm_settings_file);
+my $pmSettings = parse_xml_file($pm_settings_file);
 
 my @pmChipAttr; # Repeated [NODE, POS, ATTR, VAL, ATTR, VAL, ATTR, VAL...]
 
@@ -334,7 +334,7 @@ if ((scalar @SortedPmChipAttr) == 0)
 #------------------------------------------------------------------------------
 my $proc_pcie_settings_file = open_mrw_file($mrwdir,
                                            "${sysname}-proc-pcie-settings.xml");
-my $ProcPcie = XMLin($proc_pcie_settings_file);
+my $ProcPcie = parse_xml_file($proc_pcie_settings_file);
 
 # Repeated [NODE, POS, ATTR, IOP0-VAL, IOP1-VAL, ATTR, IOP0-VAL, IOP1-VAL]
 my @procPcie;
@@ -389,7 +389,7 @@ my @SortedPcie = sort byNodePos @procPcie;
 # Process the chip-ids MRW file
 #------------------------------------------------------------------------------
 my $chip_ids_file = open_mrw_file($mrwdir, "${sysname}-chip-ids.xml");
-my $chipIds = XMLin($chip_ids_file);
+my $chipIds = parse_xml_file($chip_ids_file);
 
 use constant CHIP_ID_NODE => 0;
 use constant CHIP_ID_POS  => 1;
@@ -407,7 +407,7 @@ foreach my $i (@{$chipIds->{'chip-id'}})
 # Process the power-busses MRW file
 #------------------------------------------------------------------------------
 my $power_busses_file = open_mrw_file($mrwdir, "${sysname}-power-busses.xml");
-my $powerbus = XMLin($power_busses_file);
+my $powerbus = parse_xml_file($power_busses_file);
 
 my @pbus;
 use constant PBUS_FIRST_END_POINT_INDEX => 0;
@@ -495,7 +495,7 @@ foreach my $i (@{$powerbus->{'power-bus'}})
 # Process the dmi-busses MRW file
 #------------------------------------------------------------------------------
 my $dmi_busses_file = open_mrw_file($mrwdir, "${sysname}-dmi-busses.xml");
-my $dmibus = XMLin($dmi_busses_file);
+my $dmibus = parse_xml_file($dmi_busses_file);
 
 my @dbus_mcs;
 use constant DBUS_MCS_NODE_INDEX => 0;
@@ -545,7 +545,7 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
 # Process the cent-vrds MRW file
 #------------------------------------------------------------------------------
 my $cent_vrds_file = open_mrw_file($mrwdir, "${sysname}-cent-vrds.xml");
-my $mrwMemVoltageDomains = XMLin($cent_vrds_file);
+my $mrwMemVoltageDomains = parse_xml_file($cent_vrds_file);
 
 our %vrmHash = ();
 my %membufVrmUuidHash = ();
@@ -644,11 +644,11 @@ if($vrmDebug)
 # Process the cec-chips and pcie-busses MRW files
 #------------------------------------------------------------------------------
 my $cec_chips_file = open_mrw_file($mrwdir, "${sysname}-cec-chips.xml");
-my $devpath = XMLin($cec_chips_file,
+my $devpath = parse_xml_file($cec_chips_file,
                         KeyAttr=>'instance-path');
 
 my $pcie_busses_file = open_mrw_file($mrwdir, "${sysname}-pcie-busses.xml");
-my $pcie_buses = XMLin($pcie_busses_file);
+my $pcie_buses = parse_xml_file($pcie_busses_file);
 
 our %pcie_list;
 
@@ -774,7 +774,7 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 # Process the targets MRW file
 #------------------------------------------------------------------------------
 my $targets_file = open_mrw_file($mrwdir, "${sysname}-targets.xml");
-my $eTargets = XMLin($targets_file);
+my $eTargets = parse_xml_file($targets_file);
 
 # Capture all targets into the @Targets array
 use constant NAME_FIELD => 0;
@@ -814,7 +814,7 @@ foreach my $i (@{$eTargets->{target}})
 # Process the fsi-busses MRW file
 #------------------------------------------------------------------------------
 my $fsi_busses_file = open_mrw_file($mrwdir, "${sysname}-fsi-busses.xml");
-my $fsiBus = XMLin($fsi_busses_file);
+my $fsiBus = parse_xml_file($fsi_busses_file);
 
 # Build all the FSP chip targets / attributes
 my %FSPs = ();
@@ -928,7 +928,7 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
 # Process the psi-busses MRW file
 #------------------------------------------------------------------------------
 my $psi_busses_file = open_mrw_file($mrwdir, "${sysname}-psi-busses.xml");
-our $psiBus = XMLin($psi_busses_file,
+our $psiBus = parse_xml_file($psi_busses_file,
                       forcearray=>['psi-bus']);
 
 # Capture all PSI connections into the @hbPSIs array
@@ -952,7 +952,7 @@ foreach my $i (@{$psiBus->{'psi-bus'}})
 # Process the memory-busses MRW file
 #------------------------------------------------------------------------------
 my $memory_busses_file = open_mrw_file($mrwdir, "${sysname}-memory-busses.xml");
-my $memBus = XMLin($memory_busses_file);
+my $memBus = parse_xml_file($memory_busses_file);
 
 # Capture all memory buses info into the @Membuses array
 use constant MCS_TARGET_FIELD     => 0;
@@ -1963,7 +1963,7 @@ sub generate_compute_node_ipath
 {
     my $location_codes_file = open_mrw_file($::mrwdir,
                                             "${sysname}-location-codes.xml");
-    my $nodeTargets = XMLin($location_codes_file);
+    my $nodeTargets = parse_xml_file($location_codes_file);
 
     #get the node (compute) ipath details
     foreach my $Target (@{$nodeTargets->{'location-code-entry'}})
@@ -2671,7 +2671,7 @@ my %phbList = ();
 sub generate_phb
 {
     my $targets_file = open_mrw_file($::mrwdir, "${sysname}-targets.xml");
-    my $phbTargets = XMLin($targets_file);
+    my $phbTargets = parse_xml_file($targets_file);
 
     #get the PHB details
     foreach my $Target (@{$phbTargets->{target}})
@@ -3119,7 +3119,7 @@ sub generate_logicalDimms
 {
     my $memory_busses_file = open_mrw_file($::mrwdir,
                                            "${sysname}-memory-busses.xml");
-    my $dramTargets = XMLin($memory_busses_file);
+    my $dramTargets = parse_xml_file($memory_busses_file);
 
     #get the DRAM details
     foreach my $Target (@{$dramTargets->{drams}->{dram}})
@@ -3748,6 +3748,17 @@ sub open_mrw_file
         #Return the full path to the file found
         return $file_found;
     }
+}
+
+my %g_xml_cache = ();
+sub parse_xml_file
+{
+    my $parms = Dumper(\@_);
+    if (not defined $g_xml_cache{$parms})
+    {
+        $g_xml_cache{$parms} = XMLin(@_);
+    }
+    return $g_xml_cache{$parms};
 }
 
 sub display_help
