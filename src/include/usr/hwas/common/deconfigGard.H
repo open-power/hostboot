@@ -408,7 +408,7 @@ private:
         TARGETING::ATTR_HUID_type procHUID;
         TARGETING::ATTR_FABRIC_NODE_ID_type procFabricNode;
         TARGETING::ATTR_FABRIC_CHIP_ID_type procFabricChip;
-        bool iv_isMaster;
+        bool iv_masterCapable;
         bool iv_deconfigured;
 
         // targets defining A link connected chips

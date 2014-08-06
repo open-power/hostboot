@@ -1808,7 +1808,7 @@ public:
         l_tuletaProcs[0].procHUID = 0;                 // HUID
         l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[0].iv_isMaster = true;           // Master proc
+        l_tuletaProcs[0].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         // abus1 and 2 linked to proc2
@@ -1824,7 +1824,7 @@ public:
         l_tuletaProcs[1].procHUID = 1;                 // HUID
         l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[1].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[1].iv_pAProcs[0] = &l_tuletaProcs[3];
@@ -1837,7 +1837,7 @@ public:
         l_tuletaProcs[2].procHUID = 2;                 // HUID
         l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[2].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[2].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[2].iv_pAProcs[0] = &l_tuletaProcs[0];
@@ -1851,7 +1851,7 @@ public:
         l_tuletaProcs[3].procHUID = 3;                 // HUID
         l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[3].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[3].iv_pAProcs[0] = &l_tuletaProcs[1];
@@ -1916,7 +1916,7 @@ public:
         l_tuletaProcs[0].procHUID = 0;                 // HUID
         l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[0].iv_isMaster = false;           // Note master proc
+        l_tuletaProcs[0].iv_masterCapable = false;     // Note master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[0].iv_pAProcs[0] = &l_tuletaProcs[2];
@@ -1929,7 +1929,7 @@ public:
         l_tuletaProcs[1].procHUID = 1;                 // HUID
         l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[1].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[1].iv_pAProcs[0] = &l_tuletaProcs[3];
@@ -1942,7 +1942,7 @@ public:
         l_tuletaProcs[2].procHUID = 2;                 // HUID
         l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[2].iv_isMaster = true;          // Master proc
+        l_tuletaProcs[2].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[2].iv_pAProcs[0] = &l_tuletaProcs[0];
@@ -1956,7 +1956,7 @@ public:
         l_tuletaProcs[3].procHUID = 3;                 // HUID
         l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[3].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[3].iv_pAProcs[0] = &l_tuletaProcs[1];
@@ -2020,7 +2020,7 @@ public:
         l_orlenaProcs[0].procHUID = 0;                 // HUID
         l_orlenaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_orlenaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[0].iv_isMaster = true;           // Master proc
+        l_orlenaProcs[0].iv_masterCapable = true;      // Master proc
         l_orlenaProcs[0].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[0].iv_pAProcs[0] = &l_orlenaProcs[2];
@@ -2035,7 +2035,7 @@ public:
         l_orlenaProcs[1].procHUID = 1;                 // HUID
         l_orlenaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_orlenaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[1].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[1].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[1].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[1].iv_pAProcs[0] = &l_orlenaProcs[5];
@@ -2050,7 +2050,7 @@ public:
         l_orlenaProcs[2].procHUID = 2;                 // HUID
         l_orlenaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_orlenaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[2].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[2].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[2].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[2].iv_pAProcs[0] = &l_orlenaProcs[0];
@@ -2064,7 +2064,7 @@ public:
         l_orlenaProcs[3].procHUID = 3;                 // HUID
         l_orlenaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_orlenaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[3].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[3].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[3].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[3].iv_pAProcs[0] = &l_orlenaProcs[7];
@@ -2078,7 +2078,7 @@ public:
         l_orlenaProcs[4].procHUID = 4;                 // HUID
         l_orlenaProcs[4].procFabricNode = 2;           // FABRIC_NODE_ID
         l_orlenaProcs[4].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[4].iv_isMaster = false;           // Master proc
+        l_orlenaProcs[4].iv_masterCapable = false;      // Master proc
         l_orlenaProcs[4].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[4].iv_pAProcs[0] = &l_orlenaProcs[6];
@@ -2092,7 +2092,7 @@ public:
         l_orlenaProcs[5].procHUID = 5;                 // HUID
         l_orlenaProcs[5].procFabricNode = 2;           // FABRIC_NODE_ID
         l_orlenaProcs[5].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[5].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[5].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[5].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[5].iv_pAProcs[0] = &l_orlenaProcs[1];
@@ -2106,7 +2106,7 @@ public:
         l_orlenaProcs[6].procHUID = 6;                 // HUID
         l_orlenaProcs[6].procFabricNode = 3;           // FABRIC_NODE_ID
         l_orlenaProcs[6].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[6].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[6].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[6].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[6].iv_pAProcs[0] = &l_orlenaProcs[4];
@@ -2120,7 +2120,7 @@ public:
         l_orlenaProcs[7].procHUID = 7;                 // HUID
         l_orlenaProcs[7].procFabricNode = 3;           // FABRIC_NODE_ID
         l_orlenaProcs[7].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[7].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[7].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[7].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[7].iv_pAProcs[0] = &l_orlenaProcs[3];
@@ -2189,7 +2189,7 @@ public:
         l_orlenaProcs[0].procHUID = 0;                 // HUID
         l_orlenaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_orlenaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[0].iv_isMaster = true;           // Master proc
+        l_orlenaProcs[0].iv_masterCapable = true;      // Master proc
         l_orlenaProcs[0].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[0].iv_pAProcs[0] = &l_orlenaProcs[2];
@@ -2203,7 +2203,7 @@ public:
         l_orlenaProcs[1].procHUID = 1;                 // HUID
         l_orlenaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_orlenaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[1].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[1].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[1].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[1].iv_pAProcs[0] = &l_orlenaProcs[5];
@@ -2217,7 +2217,7 @@ public:
         l_orlenaProcs[2].procHUID = 2;                 // HUID
         l_orlenaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_orlenaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[2].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[2].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[2].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[2].iv_pAProcs[0] = &l_orlenaProcs[0];
@@ -2232,7 +2232,7 @@ public:
         l_orlenaProcs[3].procHUID = 3;                 // HUID
         l_orlenaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_orlenaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[3].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[3].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[3].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[3].iv_pAProcs[0] = &l_orlenaProcs[7];
@@ -2246,7 +2246,7 @@ public:
         l_orlenaProcs[4].procHUID = 4;                 // HUID
         l_orlenaProcs[4].procFabricNode = 2;           // FABRIC_NODE_ID
         l_orlenaProcs[4].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[4].iv_isMaster = false;           // Master proc
+        l_orlenaProcs[4].iv_masterCapable = false;      // Master proc
         l_orlenaProcs[4].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[4].iv_pAProcs[0] = &l_orlenaProcs[6];
@@ -2261,7 +2261,7 @@ public:
         l_orlenaProcs[5].procHUID = 5;                 // HUID
         l_orlenaProcs[5].procFabricNode = 2;           // FABRIC_NODE_ID
         l_orlenaProcs[5].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[5].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[5].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[5].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[5].iv_pAProcs[0] = &l_orlenaProcs[1];
@@ -2275,7 +2275,7 @@ public:
         l_orlenaProcs[6].procHUID = 6;                 // HUID
         l_orlenaProcs[6].procFabricNode = 3;           // FABRIC_NODE_ID
         l_orlenaProcs[6].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[6].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[6].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[6].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[6].iv_pAProcs[0] = &l_orlenaProcs[4];
@@ -2290,7 +2290,7 @@ public:
         l_orlenaProcs[7].procHUID = 7;                 // HUID
         l_orlenaProcs[7].procFabricNode = 3;           // FABRIC_NODE_ID
         l_orlenaProcs[7].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[7].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[7].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[7].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[7].iv_pAProcs[0] = &l_orlenaProcs[3];
@@ -2361,7 +2361,7 @@ public:
         l_orlenaProcs[0].procHUID = 0;                 // HUID
         l_orlenaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_orlenaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[0].iv_isMaster = true;           // Master proc
+        l_orlenaProcs[0].iv_masterCapable = true;      // Master proc
         l_orlenaProcs[0].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[0].iv_pAProcs[0] = &l_orlenaProcs[2];
@@ -2376,7 +2376,7 @@ public:
         l_orlenaProcs[1].procHUID = 1;                 // HUID
         l_orlenaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_orlenaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[1].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[1].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[1].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[1].iv_pAProcs[0] = &l_orlenaProcs[5];
@@ -2390,7 +2390,7 @@ public:
         l_orlenaProcs[2].procHUID = 2;                 // HUID
         l_orlenaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_orlenaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[2].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[2].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[2].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[2].iv_pAProcs[0] = &l_orlenaProcs[0];
@@ -2405,7 +2405,7 @@ public:
         l_orlenaProcs[3].procHUID = 3;                 // HUID
         l_orlenaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_orlenaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[3].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[3].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[3].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[3].iv_pAProcs[0] = &l_orlenaProcs[7];
@@ -2419,7 +2419,7 @@ public:
         l_orlenaProcs[4].procHUID = 4;                 // HUID
         l_orlenaProcs[4].procFabricNode = 2;           // FABRIC_NODE_ID
         l_orlenaProcs[4].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[4].iv_isMaster = false;           // Master proc
+        l_orlenaProcs[4].iv_masterCapable = false;      // Master proc
         l_orlenaProcs[4].iv_deconfigured = true;      // HWAS state
         // ABus links and states
         l_orlenaProcs[4].iv_pAProcs[0] = &l_orlenaProcs[6];
@@ -2437,7 +2437,7 @@ public:
         l_orlenaProcs[5].procHUID = 5;                 // HUID
         l_orlenaProcs[5].procFabricNode = 2;           // FABRIC_NODE_ID
         l_orlenaProcs[5].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[5].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[5].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[5].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[5].iv_pAProcs[0] = &l_orlenaProcs[1];
@@ -2453,7 +2453,7 @@ public:
         l_orlenaProcs[6].procHUID = 6;                 // HUID
         l_orlenaProcs[6].procFabricNode = 3;           // FABRIC_NODE_ID
         l_orlenaProcs[6].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_orlenaProcs[6].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[6].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[6].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[6].iv_pAProcs[0] = &l_orlenaProcs[4];
@@ -2468,7 +2468,7 @@ public:
         l_orlenaProcs[7].procHUID = 7;                 // HUID
         l_orlenaProcs[7].procFabricNode = 3;           // FABRIC_NODE_ID
         l_orlenaProcs[7].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_orlenaProcs[7].iv_isMaster = false;          // Not master proc
+        l_orlenaProcs[7].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[7].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_orlenaProcs[7].iv_pAProcs[0] = &l_orlenaProcs[3];
@@ -2541,7 +2541,7 @@ public:
         l_brazosProcs[0].procHUID = 0;                 // HUID
         l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_brazosProcs[0].iv_isMaster = true;           // Master proc
+        l_brazosProcs[0].iv_masterCapable = true;      // Master proc
         l_brazosProcs[0].iv_deconfigured = false;      // HWAS state
         // XBus links and states
         l_brazosProcs[0].iv_pXProcs[0] = &l_brazosProcs[1];
@@ -2554,7 +2554,7 @@ public:
         l_brazosProcs[1].procHUID = 1;                 // HUID
         l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_brazosProcs[1].iv_isMaster = false;          // Not master proc
+        l_brazosProcs[1].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
         // XBus links and states
         // XBus links and states
@@ -2568,7 +2568,7 @@ public:
         l_brazosProcs[2].procHUID = 2;                 // HUID
         l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
         l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
-        l_brazosProcs[2].iv_isMaster = false;          // Not master proc
+        l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
         // XBus links and states
         l_brazosProcs[2].iv_pXProcs[0] = &l_brazosProcs[3];
@@ -2580,7 +2580,7 @@ public:
         l_brazosProcs[3].procHUID = 3;                 // HUID
         l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
         l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
-        l_brazosProcs[3].iv_isMaster = false;          // Not master proc
+        l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
         // XBus links and states
         l_brazosProcs[3].iv_pXProcs[0] = &l_brazosProcs[0];
@@ -2791,7 +2791,7 @@ public:
         l_tuletaProcs[0].procHUID = 0;                 // HUID
         l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[0].iv_isMaster = true;           // Master proc
+        l_tuletaProcs[0].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
         l_tuletaProcs[0].iv_pAProcs[0] = &l_tuletaProcs[2];
         l_tuletaProcs[0].iv_pAProcs[1] = &l_tuletaProcs[2];
@@ -2804,7 +2804,7 @@ public:
         l_tuletaProcs[1].procHUID = 1;                 // HUID
         l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[1].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
         l_tuletaProcs[1].iv_pAProcs[0] = &l_tuletaProcs[3];
         l_tuletaProcs[1].iv_pAProcs[1] = &l_tuletaProcs[3];
@@ -2817,7 +2817,7 @@ public:
         l_tuletaProcs[2].procHUID = 2;                 // HUID
         l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[2].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[2].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[2].iv_deconfigured = true;      // HWAS state
         l_tuletaProcs[2].iv_pAProcs[0] = &l_tuletaProcs[0];
         l_tuletaProcs[2].iv_pAProcs[1] = &l_tuletaProcs[0];
@@ -2832,7 +2832,7 @@ public:
         l_tuletaProcs[3].procHUID = 3;                 // HUID
         l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[3].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = true;      // HWAS state
         l_tuletaProcs[3].iv_pAProcs[0] = &l_tuletaProcs[1];
         l_tuletaProcs[3].iv_pAProcs[1] = &l_tuletaProcs[2];
@@ -2898,7 +2898,7 @@ public:
         l_tuletaProcs[0].procHUID = 0;                 // HUID
         l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[0].iv_isMaster = true;           // Master proc
+        l_tuletaProcs[0].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[0].iv_pAProcs[0] = &l_tuletaProcs[2];
@@ -2911,7 +2911,7 @@ public:
         l_tuletaProcs[1].procHUID = 1;                 // HUID
         l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[1].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
         // XBus links and states
         l_tuletaProcs[1].iv_pXProcs[0] = &l_tuletaProcs[0];
@@ -2921,7 +2921,7 @@ public:
         l_tuletaProcs[2].procHUID = 2;                 // HUID
         l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
-        l_tuletaProcs[2].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[2].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
         // ABus links and states
         l_tuletaProcs[2].iv_pAProcs[0] = &l_tuletaProcs[0];
@@ -2933,7 +2933,7 @@ public:
         l_tuletaProcs[3].procHUID = 3;                 // HUID
         l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
-        l_tuletaProcs[3].iv_isMaster = false;          // Not master proc
+        l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = true;      // HWAS state
         // Xbus links still has xbus to proc 2 because proc 2 is functional
         l_tuletaProcs[3].iv_pXProcs[0] = &l_tuletaProcs[2];
@@ -2957,6 +2957,417 @@ public:
         else
         {
             TS_FAIL("testDeconfigureAssocProc9: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfigure Associated Proc10
+     */
+    void testDeconfigureAssocProc10()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssocProc10: Started");
+
+        // This test populates structs which contain information
+        // regarding a processor and its child chiplet's linkage
+        // and states.  A vector of these structs, effectively
+        // describing the system, is passed to the
+        // _deconfigureAssocProc algorithm which marks procs to
+        // be deconfigured based on existing bus deconfigurations.
+
+        // SCENARIO: Single node, 2 master procs (one master, one alternate)
+        // System with proc0xbus0 and proc1xbus3 deconfigured
+
+        // Return error for _deconfigureAssocProc
+        errlHndl_t l_pErr = NULL;
+
+        // User-defined number of procs
+        size_t NUM_PROCS = 4;
+
+        // Define and populate vector
+        DeconfigGard::ProcInfoVector l_brazosProcs;
+        DeconfigGard::ProcInfo l_ProcInfo = DeconfigGard::ProcInfo();
+        l_brazosProcs.insert(l_brazosProcs.begin(), NUM_PROCS, l_ProcInfo);
+
+        // Set proc options
+        // Proc0:
+        l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[0].procHUID = 0;                 // HUID
+        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_brazosProcs[0].iv_masterCapable = true;      // Master proc
+        l_brazosProcs[0].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[0].iv_pXProcs[0] = &l_brazosProcs[1];
+        l_brazosProcs[0].iv_pXProcs[1] = &l_brazosProcs[2];
+        l_brazosProcs[0].iv_pXProcs[3] = &l_brazosProcs[3];
+        l_brazosProcs[0].iv_XDeconfigured[0] = true;
+
+        // Proc1:
+        l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[1].procHUID = 1;                 // HUID
+        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_brazosProcs[1].iv_masterCapable = true;     // Not master proc
+        l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        // XBus links and states
+        l_brazosProcs[1].iv_pXProcs[0] = &l_brazosProcs[2];
+        l_brazosProcs[1].iv_pXProcs[1] = &l_brazosProcs[3];
+        l_brazosProcs[1].iv_pXProcs[3] = &l_brazosProcs[0];
+        l_brazosProcs[1].iv_XDeconfigured[3] = true;
+
+        // Proc2:
+        l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[2].procHUID = 2;                 // HUID
+        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
+        l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[2].iv_pXProcs[0] = &l_brazosProcs[3];
+        l_brazosProcs[2].iv_pXProcs[1] = &l_brazosProcs[0];
+        l_brazosProcs[2].iv_pXProcs[3] = &l_brazosProcs[1];
+
+        // Proc3:
+        l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[3].procHUID = 3;                 // HUID
+        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
+        l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[3].iv_pXProcs[0] = &l_brazosProcs[0];
+        l_brazosProcs[3].iv_pXProcs[1] = &l_brazosProcs[1];
+        l_brazosProcs[3].iv_pXProcs[3] = &l_brazosProcs[2];
+
+        // Call _deconfigureAssocProc to determine which procs
+        // should be deconfigured based on state of system passed in
+        l_pErr = DeconfigGard::_deconfigureAssocProc(l_brazosProcs);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+        }
+
+        // Check result
+        if (l_brazosProcs[0].iv_deconfigured == false &&
+            l_brazosProcs[1].iv_deconfigured == true &&
+            l_brazosProcs[2].iv_deconfigured == false &&
+            l_brazosProcs[3].iv_deconfigured == false)
+        {
+            TS_TRACE(INFO_MRK "testDeconfigureAssocProc10: Success");
+        }
+        else
+        {
+            TS_FAIL("testDeconfigureAssocProc10: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfigure Associated Proc11
+     */
+    void testDeconfigureAssocProc11()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssocProc11: Started");
+
+        // This test populates structs which contain information
+        // regarding a processor and its child chiplet's linkage
+        // and states.  A vector of these structs, effectively
+        // describing the system, is passed to the
+        // _deconfigureAssocProc algorithm which marks procs to
+        // be deconfigured based on existing bus deconfigurations.
+
+        // SCENARIO: Single node, 2 master procs (one master, one alternate)
+        // System with master proc, proc0xbus0 and proc1xbus3 deconfigured
+
+        // Return error for _deconfigureAssocProc
+        errlHndl_t l_pErr = NULL;
+
+        // User-defined number of procs
+        size_t NUM_PROCS = 4;
+
+        // Define and populate vector
+        DeconfigGard::ProcInfoVector l_brazosProcs;
+        DeconfigGard::ProcInfo l_ProcInfo = DeconfigGard::ProcInfo();
+        l_brazosProcs.insert(l_brazosProcs.begin(), NUM_PROCS, l_ProcInfo);
+
+        // Set proc options
+        // Proc0:
+        l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[0].procHUID = 0;                 // HUID
+        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_brazosProcs[0].iv_masterCapable = true;      // Master proc
+        l_brazosProcs[0].iv_deconfigured = true;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[0].iv_pXProcs[0] = &l_brazosProcs[1];
+        l_brazosProcs[0].iv_pXProcs[1] = &l_brazosProcs[2];
+        l_brazosProcs[0].iv_pXProcs[3] = &l_brazosProcs[3];
+        l_brazosProcs[0].iv_XDeconfigured[0] = true;
+
+        // Proc1:
+        l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[1].procHUID = 1;                 // HUID
+        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_brazosProcs[1].iv_masterCapable = true;     // Not master proc
+        l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        // XBus links and states
+        l_brazosProcs[1].iv_pXProcs[0] = &l_brazosProcs[2];
+        l_brazosProcs[1].iv_pXProcs[1] = &l_brazosProcs[3];
+        l_brazosProcs[1].iv_pXProcs[3] = &l_brazosProcs[0];
+        l_brazosProcs[1].iv_XDeconfigured[3] = true;
+
+        // Proc2:
+        l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[2].procHUID = 2;                 // HUID
+        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
+        l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[2].iv_pXProcs[0] = &l_brazosProcs[3];
+        l_brazosProcs[2].iv_pXProcs[1] = &l_brazosProcs[0];
+        l_brazosProcs[2].iv_pXProcs[3] = &l_brazosProcs[1];
+
+        // Proc3:
+        l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[3].procHUID = 3;                 // HUID
+        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
+        l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[3].iv_pXProcs[0] = &l_brazosProcs[0];
+        l_brazosProcs[3].iv_pXProcs[1] = &l_brazosProcs[1];
+        l_brazosProcs[3].iv_pXProcs[3] = &l_brazosProcs[2];
+
+        // Call _deconfigureAssocProc to determine which procs
+        // should be deconfigured based on state of system passed in
+        l_pErr = DeconfigGard::_deconfigureAssocProc(l_brazosProcs);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+        }
+
+        // Check result
+        if (l_brazosProcs[0].iv_deconfigured == true &&
+            l_brazosProcs[1].iv_deconfigured == false &&
+            l_brazosProcs[2].iv_deconfigured == false &&
+            l_brazosProcs[3].iv_deconfigured == false)
+        {
+            TS_TRACE(INFO_MRK "testDeconfigureAssocProc11: Success");
+        }
+        else
+        {
+            TS_FAIL("testDeconfigureAssocProc11: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfigure Associated Proc12
+     */
+    void testDeconfigureAssocProc12()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssocProc12: Started");
+
+        // This test populates structs which contain information
+        // regarding a processor and its child chiplet's linkage
+        // and states.  A vector of these structs, effectively
+        // describing the system, is passed to the
+        // _deconfigureAssocProc algorithm which marks procs to
+        // be deconfigured based on existing bus deconfigurations.
+
+        // SCENARIO: Single node, 2 master procs (one master, one alternate)
+        // System with alt master proc, proc0xbus0 and proc1xbus3 deconfigured
+
+        // Return error for _deconfigureAssocProc
+        errlHndl_t l_pErr = NULL;
+
+        // User-defined number of procs
+        size_t NUM_PROCS = 4;
+
+        // Define and populate vector
+        DeconfigGard::ProcInfoVector l_brazosProcs;
+        DeconfigGard::ProcInfo l_ProcInfo = DeconfigGard::ProcInfo();
+        l_brazosProcs.insert(l_brazosProcs.begin(), NUM_PROCS, l_ProcInfo);
+
+        // Set proc options
+        // Proc0:
+        l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[0].procHUID = 0;                 // HUID
+        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_brazosProcs[0].iv_masterCapable = true;      // Master proc
+        l_brazosProcs[0].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[0].iv_pXProcs[0] = &l_brazosProcs[1];
+        l_brazosProcs[0].iv_pXProcs[1] = &l_brazosProcs[2];
+        l_brazosProcs[0].iv_pXProcs[3] = &l_brazosProcs[3];
+        l_brazosProcs[0].iv_XDeconfigured[0] = true;
+
+        // Proc1:
+        l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[1].procHUID = 1;                 // HUID
+        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_brazosProcs[1].iv_masterCapable = true;     // Not master proc
+        l_brazosProcs[1].iv_deconfigured = true;      // HWAS state
+        // XBus links and states
+        // XBus links and states
+        l_brazosProcs[1].iv_pXProcs[0] = &l_brazosProcs[2];
+        l_brazosProcs[1].iv_pXProcs[1] = &l_brazosProcs[3];
+        l_brazosProcs[1].iv_pXProcs[3] = &l_brazosProcs[0];
+        l_brazosProcs[1].iv_XDeconfigured[3] = true;
+
+        // Proc2:
+        l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[2].procHUID = 2;                 // HUID
+        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
+        l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[2].iv_pXProcs[0] = &l_brazosProcs[3];
+        l_brazosProcs[2].iv_pXProcs[1] = &l_brazosProcs[0];
+        l_brazosProcs[2].iv_pXProcs[3] = &l_brazosProcs[1];
+
+        // Proc3:
+        l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[3].procHUID = 3;                 // HUID
+        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
+        l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[3].iv_pXProcs[0] = &l_brazosProcs[0];
+        l_brazosProcs[3].iv_pXProcs[1] = &l_brazosProcs[1];
+        l_brazosProcs[3].iv_pXProcs[3] = &l_brazosProcs[2];
+
+        // Call _deconfigureAssocProc to determine which procs
+        // should be deconfigured based on state of system passed in
+        l_pErr = DeconfigGard::_deconfigureAssocProc(l_brazosProcs);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+        }
+
+        // Check result
+        if (l_brazosProcs[0].iv_deconfigured == false &&
+            l_brazosProcs[1].iv_deconfigured == true &&
+            l_brazosProcs[2].iv_deconfigured == false &&
+            l_brazosProcs[3].iv_deconfigured == false)
+        {
+            TS_TRACE(INFO_MRK "testDeconfigureAssocProc12: Success");
+        }
+        else
+        {
+            TS_FAIL("testDeconfigureAssocProc12: incorrect configuration returned");
+        }
+    }
+
+    /**
+     *  @brief Test Deconfigure Associated Proc13
+     */
+    void testDeconfigureAssocProc13()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssocProc13: Started");
+
+        // This test populates structs which contain information
+        // regarding a processor and its child chiplet's linkage
+        // and states.  A vector of these structs, effectively
+        // describing the system, is passed to the
+        // _deconfigureAssocProc algorithm which marks procs to
+        // be deconfigured based on existing bus deconfigurations.
+
+        // SCENARIO: Single node, 2 master procs (one master, one alternate)
+        // System with master proc, proc0xbus0, proc1xbus3, proc1xbus0, and
+        // proc2xbus3 deconfigured
+
+        // Return error for _deconfigureAssocProc
+        errlHndl_t l_pErr = NULL;
+
+        // User-defined number of procs
+        size_t NUM_PROCS = 4;
+
+        // Define and populate vector
+        DeconfigGard::ProcInfoVector l_brazosProcs;
+        DeconfigGard::ProcInfo l_ProcInfo = DeconfigGard::ProcInfo();
+        l_brazosProcs.insert(l_brazosProcs.begin(), NUM_PROCS, l_ProcInfo);
+
+        // Set proc options
+        // Proc0:
+        l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[0].procHUID = 0;                 // HUID
+        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
+        l_brazosProcs[0].iv_masterCapable = true;      // Master proc
+        l_brazosProcs[0].iv_deconfigured = true;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[0].iv_pXProcs[0] = &l_brazosProcs[1];
+        l_brazosProcs[0].iv_pXProcs[1] = &l_brazosProcs[2];
+        l_brazosProcs[0].iv_pXProcs[3] = &l_brazosProcs[3];
+        l_brazosProcs[0].iv_XDeconfigured[0] = true;
+
+        // Proc1:
+        l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[1].procHUID = 1;                 // HUID
+        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
+        l_brazosProcs[1].iv_masterCapable = true;      // Not master proc
+        l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        // XBus links and states
+        l_brazosProcs[1].iv_pXProcs[0] = &l_brazosProcs[2];
+        l_brazosProcs[1].iv_pXProcs[1] = &l_brazosProcs[3];
+        l_brazosProcs[1].iv_pXProcs[3] = &l_brazosProcs[0];
+        l_brazosProcs[1].iv_XDeconfigured[0] = true;
+        l_brazosProcs[1].iv_XDeconfigured[3] = true;
+
+        // Proc2:
+        l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[2].procHUID = 2;                 // HUID
+        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
+        l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[2].iv_pXProcs[0] = &l_brazosProcs[3];
+        l_brazosProcs[2].iv_pXProcs[1] = &l_brazosProcs[0];
+        l_brazosProcs[2].iv_pXProcs[3] = &l_brazosProcs[1];
+        l_brazosProcs[2].iv_XDeconfigured[3] = true;
+
+        // Proc3:
+        l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
+        l_brazosProcs[3].procHUID = 3;                 // HUID
+        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
+        l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
+        l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
+        // XBus links and states
+        l_brazosProcs[3].iv_pXProcs[0] = &l_brazosProcs[0];
+        l_brazosProcs[3].iv_pXProcs[1] = &l_brazosProcs[1];
+        l_brazosProcs[3].iv_pXProcs[3] = &l_brazosProcs[2];
+
+        // Call _deconfigureAssocProc to determine which procs
+        // should be deconfigured based on state of system passed in
+        l_pErr = DeconfigGard::_deconfigureAssocProc(l_brazosProcs);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+        }
+
+        // Check result
+        if (l_brazosProcs[0].iv_deconfigured == true &&
+            l_brazosProcs[1].iv_deconfigured == false &&
+            l_brazosProcs[2].iv_deconfigured == true &&
+            l_brazosProcs[3].iv_deconfigured == false)
+        {
+            TS_TRACE(INFO_MRK "testDeconfigureAssocProc13: Success");
+        }
+        else
+        {
+            TS_FAIL("testDeconfigureAssocProc13: incorrect configuration returned");
         }
     }
 

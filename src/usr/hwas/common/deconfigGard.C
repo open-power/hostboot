@@ -748,7 +748,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
             TARGETING::ConstTargetHandle_t i_node,
             bool i_doAbusDeconfig)
 {
-    HWAS_INF("Preparing data for _deconfigureAssocProc ");
+    HWAS_INF("Preparing data for _deconfigureAssocProc");
     // Return error
     errlHndl_t l_pErr = NULL;
 
@@ -795,12 +795,6 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
         PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
         PredicateHwas predPres;
         predPres.present(true);
-
-        // Find master proc on current node
-        Target* l_pMasterProcTarget;
-        targetService().
-            masterProcChipTargetHandle(l_pMasterProcTarget, i_node);
-
 
         // Populate vector
         TargetHandleList l_procs;
@@ -850,14 +844,17 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
             // HWAS state
             l_ProcInfo.iv_deconfigured =
                 !(isFunctional(*l_procsIter));
-            // iv_isMaster
-            if (*l_procsIter == l_pMasterProcTarget)
+            // iv_masterCapable - this includes both master and alternate master
+            // This is done to ensure that both the master and alt master don't
+            // get deconfigured in _deconfigAssocProc()
+            if ( (*l_procsIter)->getAttr<ATTR_PROC_MASTER_TYPE>() ==
+                 PROC_MASTER_TYPE_NOT_MASTER)
             {
-                l_ProcInfo.iv_isMaster = true;
+                l_ProcInfo.iv_masterCapable = false;
             }
             else
             {
-                l_ProcInfo.iv_isMaster = false;
+                l_ProcInfo.iv_masterCapable = true;
             }
             l_procInfo.push_back(l_ProcInfo);
         }
@@ -1539,7 +1536,8 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                  l_procInfoIter != io_procInfo.end();
                  ++l_procInfoIter)
         {
-            if ((*l_procInfoIter).iv_isMaster)
+            if ( ((*l_procInfoIter).iv_masterCapable) &&
+                 (!(*l_procInfoIter).iv_deconfigured) )
             {
                 // Save for subsequent use
                 l_pMasterProcInfo = &(*l_procInfoIter);
@@ -1589,7 +1587,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                  ++l_procInfoIter)
         {
             // Don't deconfigure master proc
-            if ((*l_procInfoIter).iv_isMaster)
+            if ((*l_procInfoIter).iv_masterCapable)
             {
                 continue;
             }
@@ -1655,7 +1653,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                  ++l_procInfoIter)
         {
             // Master proc handled in STEP 1
-            if ((*l_procInfoIter).iv_isMaster)
+            if ((*l_procInfoIter).iv_masterCapable)
             {
                 continue;
             }
@@ -1842,7 +1840,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                  ++l_procInfoIter)
         {
             // Master proc handled in STEP 1
-            if ((*l_procInfoIter).iv_isMaster)
+            if ((*l_procInfoIter).iv_masterCapable)
             {
                 continue;
             }
@@ -1931,7 +1929,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
                  ++l_procInfoIter)
         {
             // If master proc
-            if ((*l_procInfoIter).iv_isMaster)
+            if ((*l_procInfoIter).iv_masterCapable)
             {
                 // Save for subsequent use
                 l_pMasterProcInfo = &(*l_procInfoIter);
@@ -1948,7 +1946,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
                  ++l_procInfoIter)
         {
             // Skip master proc
-            if ((*l_procInfoIter).iv_isMaster)
+            if ((*l_procInfoIter).iv_masterCapable)
             {
                 continue;
             }
