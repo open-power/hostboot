@@ -93,13 +93,13 @@ enum epubProcedureID
 // from srci/fsp/srci.H
 enum callOutPriority
 {
-    SRCI_PRIORITY_NONE  = 0,
-    SRCI_PRIORITY_LOW   = 1,
-    SRCI_PRIORITY_MEDC  = 2,
-    SRCI_PRIORITY_MEDB  = 3,
-    SRCI_PRIORITY_MEDA  = 4,
-    SRCI_PRIORITY_MED   = 5,
-    SRCI_PRIORITY_HIGH  = 6
+    SRCI_PRIORITY_NONE  = 0, //< Invalid externally, but used internally
+    SRCI_PRIORITY_LOW   = 1, //< Replace items one at a time in listed order
+    SRCI_PRIORITY_MEDC  = 2, //< Replace all items together as a group
+    SRCI_PRIORITY_MEDB  = 3, //< Replace all items together as a group
+    SRCI_PRIORITY_MEDA  = 4, //< Replace all items together as a group
+    SRCI_PRIORITY_MED   = 5, //< Replace items one at a time in listed order
+    SRCI_PRIORITY_HIGH  = 6  //< Replace all items together as a group
 };
 
 enum busTypeEnum
