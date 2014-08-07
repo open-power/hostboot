@@ -1,7 +1,7 @@
-#-- $Id: p8.cxa.scom.initfile,v 1.3 2013/11/09 21:10:48 jmcgill Exp $
+#-- $Id: p8.cxa.scom.initfile,v 1.4 2014/08/05 21:26:13 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
-#-- (C) Copyright International Business Machines Corp. 2011
+#-- (C) Copyright International Business Machines Corp. 2013
 #-- All Rights Reserved -- Property of IBM
 #-- ***  ***
 #--
@@ -46,6 +46,18 @@ scom 0x0201301B {
 scom 0x0201301C {
     bits  ,  scom_data;
     15:18 ,  0b1000;                                      #-- TLBI_DATA_POLL_PULSE_DIV
+}
+
+#-- CAPP Flush uOP1 Configuration Register
+scom 0x02013803 {
+    bits  ,  scom_data;
+    0:63  ,  0xB188280728000000;
+}
+
+#-- CAPP Flush uOP2 Configuration Register
+scom 0x02013804 {
+    bits  ,  scom_data;
+    0:63  ,  0xB188400F00000000;
 }
 
 #-- CXA FIR Action0/1 Registers
