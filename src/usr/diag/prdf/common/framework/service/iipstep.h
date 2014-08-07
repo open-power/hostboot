@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -56,7 +58,7 @@
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
 
-//class ERROR_OBJECT_CLASS;
+#include <stddef.h>
 
 namespace PRDF
 {
@@ -104,12 +106,10 @@ class ServiceDataCollector;
 
 struct STEP_CODE_DATA_STRUCT
 {
-  // Used to identify a unique error condition. (Muskie/Cobra)
-  //  ERROR_OBJECT_CLASS *        error_ptr; // obsolete
-
-  //! Used to identify a unique error condition and collect related information
-  ServiceDataCollector *      service_data;
-
+    // Used to identify a unique error condition and collect related
+    // information
+    STEP_CODE_DATA_STRUCT () : service_data( NULL ) {};
+    ServiceDataCollector *     service_data;
 };
 
 } // end namespace PRDF
