@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -85,7 +87,8 @@ union MemMruMeld
         //       version field so that the error log parser know which format to
         //       used.
 
-#ifndef ESW_SIM_COMPILE
+#if !( __BYTE_ORDER == __LITTLE_ENDIAN )
+
         uint32_t valid      : 1; ///< Used to indicate nothing failed while
                                  ///< building the object (1=valid, 0=not valid)
         uint32_t procPos    : 3; ///< Proc position within node (0-7)
