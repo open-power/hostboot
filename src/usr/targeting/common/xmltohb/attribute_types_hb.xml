@@ -301,4 +301,25 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
+<attribute>
+    <id>HB_TARGET_SCOMABLE</id>
+    <description>
+        This attribute indicates if the target can be SCOMed.
+        Set by check_chiplet_states HWP during DUMP process.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TARGET_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

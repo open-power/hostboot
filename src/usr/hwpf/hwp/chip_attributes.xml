@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: chip_attributes.xml,v 1.14 2014/05/02 14:43:31 szhong Exp $ -->
+<!-- $Id: chip_attributes.xml,v 1.16 2014/08/14 16:52:23 thi Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
@@ -217,4 +219,16 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_TARGET_SCOMABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP,TARGET_TYPE_EX_CHIPLET,TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_XBUS_ENDPOINT,TARGET_TYPE_ABUS_ENDPOINT,TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>
+        This attribute indicates if the target can be SCOMed.
+        Set by check_chiplet_states HWP during DUMP process
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <writeable/>
+    <platInit/>
+  </attribute>
 </attributes>
