@@ -106,7 +106,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     using namespace HWAS;
     errlSeverity_t severityParm = ERRL_SEV_RECOVERED;
 #else
-    bool causeAttnPreviouslyReported = false;
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
     uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for sdc flatten
@@ -183,13 +182,22 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
-                    ErrorSignature secSig = *(sdc.GetErrorSignature());
-                    //set the sdc to the Saved SDC for UE
-                    sdc = sdcBuffer;
-                    // Add secondary signature
-                    sdc.AddSignatureList( secSig );
-                    gardErrType = HWAS::GARD_Fatal;
-                    causeAttnPreviouslyReported = true;
+                    ServiceDataCollector origSdc = sdc; // Save original SDC
+                    sdc = sdcBuffer;                    // Set the new SDC
+
+                    // Add the original signature to the new SDC's
+                    // multi-signature list.
+                    sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
+
+                    // This is a checkstop attention so some values will need
+                    // to be overridden.
+
+                    sdc.Gard( origSdc.QueryGard() );
+
+                    sdc.SetAttentionType( origSdc.GetAttentionType() );
+
+                    if ( origSdc.Terminate() )
+                        sdc.SetFlag(ServiceDataCollector::TERMINATE);
                 }
             }
             else if (sdcSaveFlags & SDC_SAVE_SUE_FLAG ) //else check if SUE log
@@ -201,13 +209,22 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
-                    ErrorSignature secSig = *(sdc.GetErrorSignature());
-                    //set the sdc to the Saved SDC for SUE
-                    sdc = sdcBuffer;
-                    // Add secondary signature
-                    sdc.AddSignatureList( secSig );
-                    gardErrType = HWAS::GARD_Fatal;
-                    causeAttnPreviouslyReported = true;
+                    ServiceDataCollector origSdc = sdc; // Save original SDC
+                    sdc = sdcBuffer;                    // Set the new SDC
+
+                    // Add the original signature to the new SDC's
+                    // multi-signature list.
+                    sdc.AddSignatureList( *(origSdc.GetErrorSignature()) );
+
+                    // This is a checkstop attention so some values will need
+                    // to be overridden.
+
+                    sdc.Gard( origSdc.QueryGard() );
+
+                    sdc.SetAttentionType( origSdc.GetAttentionType() );
+
+                    if ( origSdc.Terminate() )
+                        sdc.SetFlag(ServiceDataCollector::TERMINATE);
                 }
             }
         }
@@ -224,7 +241,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
              (!sdc.IsSUE()   ) &&
              (!sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an sdc
         {
-            bool l_rc = SdcSave(SDC_SAVE_UE_FLAG, i_sdc);
+            bool l_rc = SdcSave(SDC_SAVE_UE_FLAG, sdc);
             if (l_rc)
             {
                 PRDF_ERR( PRDF_FUNC"Failure in UE SDC Save Function" );
@@ -236,7 +253,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
              (!sdc.IsUsingSavedSdc() ) )  // Don't save File if we are Re-Syncing an sdc
 
         {
-            bool l_rc = SdcSave(SDC_SAVE_SUE_FLAG, i_sdc);
+            bool l_rc = SdcSave(SDC_SAVE_SUE_FLAG, sdc);
             if (l_rc)
             {
                 PRDF_ERR( PRDF_FUNC"Failure in SUE SDC Save Function" );
@@ -289,54 +306,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Set Gard Error Type and state
     //**************************************************************
 
-    // If gardErrType was determined during UE/SUE processing for Check Stop,
-    // use that and not determine gardErrType from the sdc values.
-    if (gardErrType != HWAS::GARD_Fatal)
+    prdGardErrType = sdc.QueryGard();
+    switch ( prdGardErrType )
     {
-        prdGardErrType = sdc.QueryGard();
-        switch (prdGardErrType)
-        {
-            case GardAction::NoGard:
-                gardErrType = HWAS::GARD_NULL;
-                break;
-            case GardAction::Predictive:
-                gardErrType = HWAS::GARD_Predictive;
-                break;
-            case GardAction::Fatal:
-                gardErrType = HWAS::GARD_Fatal;
-                break;
-            case GardAction::CheckStopOnlyGard:
-                if  (MACHINE_CHECK == i_attnType)
-                {
-                    gardErrType = HWAS::GARD_Fatal;
-                }
-                else
-                {
-                    gardErrType = HWAS::GARD_NULL;
-                }
-                break;
-            case GardAction::DeconfigNoGard:
-                gardErrType = HWAS::GARD_NULL;
-                break;
-            default:
-                gardErrType = HWAS::GARD_NULL;
-                PRDF_DTRAC( PRDF_FUNC"Unknown prdGardErrType" );
-                break;
-        }
-    }
-    else
-    {
-        // gardErrType is GARD_Fatal, set in UE/SUE processing for Check Stop.
-        // If NoGard was specified in this switched sdc, then keep the NoGard
-        if ( sdc.QueryGard() == GardAction::NoGard )
-        {
+        case GardAction::NoGard:     gardErrType = HWAS::GARD_NULL;       break;
+        case GardAction::Predictive: gardErrType = HWAS::GARD_Predictive; break;
+        case GardAction::Fatal:      gardErrType = HWAS::GARD_Fatal;      break;
+        default:
             gardErrType = HWAS::GARD_NULL;
-            prdGardErrType = GardAction::NoGard;
-        }
-        else
-        {
-            prdGardErrType = GardAction::Fatal;
-        }
     }
 
     //**************************************************************
@@ -445,8 +422,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
     }
 
-    SrcWord7  = i_sdc.GetAttentionType() << 8;
-    SrcWord7 |= i_sdc.GetCauseAttentionType();
+    SrcWord7  = sdc.GetAttentionType() << 8;
+    SrcWord7 |= sdc.GetCauseAttentionType();
 
     //--------------------------------------------------------------------------
     // Check for IPL Diag Mode and set up for Deferred Deconfig
@@ -458,8 +435,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     // Deferred Deconfig should be used throughout all of Hostboot (both
     // checkForIplAttns() and MDIA).
-    if ( (HWAS::GARD_NULL != gardErrType) ||
-         (GardAction::DeconfigNoGard == prdGardErrType) )
+    if ( HWAS::GARD_NULL != gardErrType )
     {
         deferDeconfig = true;
         deconfigState = HWAS::DECONFIG;
@@ -504,8 +480,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Change deconfigState only based on Gard Types.
     // This only affects FSP code since Hostboot macro is no-op.
     // This is needed for FSP Reconfig Loop to work.
-    if ( (HWAS::GARD_NULL != gardErrType) ||
-         (GardAction::DeconfigNoGard == prdGardErrType) )
+    if ( HWAS::GARD_NULL != gardErrType )
     {
         PRDF_RECONFIG_LOOP(deconfigState);
     }
@@ -702,7 +677,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         delete iv_errl;
         iv_errl = NULL;
     }
-    else if ( !ReturnELog && !ForceTerminate && !i_sdc.Terminate() )
+    else if ( !ReturnELog && !ForceTerminate && !sdc.Terminate() )
     {
         // Handle any unit checkstop conditions, if needed (i.e. runtime
         // deconfiguration, dump/FFDC collection, etc.

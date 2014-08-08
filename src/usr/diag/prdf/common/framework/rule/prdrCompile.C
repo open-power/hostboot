@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -475,14 +477,6 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         g_ActionArgMap[tmpStr] = errType;
 
         errType = GardAction::Fatal;
-        tmpStr = string(GardAction::ToString(errType));
-        g_ActionArgMap[tmpStr] = errType;
-
-        errType = GardAction::CheckStopOnlyGard;
-        tmpStr = string(GardAction::ToString(errType));
-        g_ActionArgMap[tmpStr] = errType;
-
-        errType = GardAction::DeconfigNoGard;
         tmpStr = string(GardAction::ToString(errType));
         g_ActionArgMap[tmpStr] = errType;
 

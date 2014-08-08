@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,10 +48,6 @@ namespace GardAction
     Predictive    = 1,
     // Checkstop, failing resources can be removed to prevent future occurances
     Fatal         = 2,
-    // This is NoGard unless attn type is CheckStop, then it is Fatal (Func)
-    CheckStopOnlyGard = 3,
-    //This is to allow Deferred Deconfig, with No Garding
-    DeconfigNoGard = 4
   };
 
   inline const char* ToString( uint32_t i_type )
@@ -59,8 +57,6 @@ namespace GardAction
           case NoGard:              return "NoGard";
           case Predictive:          return "Predictive";
           case Fatal:               return "Fatal";
-          case CheckStopOnlyGard:   return "CheckStopOnlyGard";
-          case DeconfigNoGard:      return "DeconfigNoGard";
           default:                  return "Undefined";
       }
   }
