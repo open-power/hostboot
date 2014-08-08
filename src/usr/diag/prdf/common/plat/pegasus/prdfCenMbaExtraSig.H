@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -83,5 +85,11 @@ PRDR_ERROR_SIGNATURE(TpsMarksUnavail, 0xffff0065, "",
                      "TPS: No more marks available");
 PRDR_ERROR_SIGNATURE(TpsCmAndSpare, 0xffff0066, "",
                      "TPS: Both spare and chip mark used");
+
+PRDR_ERROR_SIGNATURE(MnfgDramCte,   0xffff0070, "", "MNFG per DRAM CTE");
+PRDR_ERROR_SIGNATURE(MnfgHrCte,     0xffff0071, "", "MNFG per half-rank CTE");
+PRDR_ERROR_SIGNATURE(MnfgDimmCte,   0xffff0072, "", "MNFG per DIMM CTE");
+PRDR_ERROR_SIGNATURE(MnfgTableFull, 0xffff0073, "", "MNFG CE table full");
+PRDR_ERROR_SIGNATURE(MnfgEntryCte,  0xffff0074, "", "MNFG CE table entry CTE");
 
 #endif // __prdfCenMbaExtraSig_H
