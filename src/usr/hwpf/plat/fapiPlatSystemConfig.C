@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -80,8 +82,8 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
     else if (i_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
     {
         // find the Centaur that is associated with this MCS
-        getChildAffinityTargets(l_targetList, l_target,
-                        CLASS_CHIP, TYPE_MEMBUF, false);
+        getChildAffinityTargetsByState(l_targetList, l_target,
+                        CLASS_CHIP, TYPE_MEMBUF, UTIL_FILTER_PRESENT);
 
         if(l_targetList.size() != 1) // one and only one expected
         {

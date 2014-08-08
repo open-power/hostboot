@@ -594,11 +594,11 @@ void fenceAttachedMembufs( TARGETING::Target * i_procTarget  )
     // Get list of membuf chips downstream from the given proc chip
     TARGETING::TargetHandleList MembufChipList;
 
-    getChildAffinityTargets( MembufChipList,
+    getChildAffinityTargetsByState( MembufChipList,
                       const_cast<TARGETING::Target*>(i_procTarget ),
                       TARGETING::CLASS_CHIP,
                       TARGETING::TYPE_MEMBUF,
-                      false);
+                      TARGETING::UTIL_FILTER_PRESENT);
 
     // loop through the membufs
     for(TARGETING::TargetHandleList::const_iterator pTargetItr
