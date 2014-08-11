@@ -588,8 +588,8 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 
     //Common settings
     /* Define supported power states -- options:
-                         nap, deep-sleep, fast-sleep, winkle*/
-    const char* pmode_compatStrs[] = {"nap", NULL};
+                         nap, deep-sleep, fast-sleep, rvwinkle*/
+    const char* pmode_compatStrs[] = {"nap", "fast-sleep", "rvwinkle", NULL};
     i_dt->addPropertyStrings(rootNode, "ibm,enabled-idle-states",
                              pmode_compatStrs);
 
