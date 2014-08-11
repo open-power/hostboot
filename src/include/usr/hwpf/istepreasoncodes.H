@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,6 +75,7 @@ enum istepReasonCode
     ISTEP_LOAD_SLW_FROM_PNOR_FAILED             = ISTEP_COMP_ID | 0x06,
     ISTEP_REPAIR_LOADER_RETRY_OCCURED           = ISTEP_COMP_ID | 0x07,
     ISTEP_MM_MAP_ERR                            = ISTEP_COMP_ID | 0x08,
+    ISTEP_INCORRECT_TARGET_COUNT                = ISTEP_COMP_ID | 0x09,
 };  // end ISTEP
 
 }

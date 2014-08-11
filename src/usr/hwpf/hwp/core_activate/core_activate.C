@@ -379,115 +379,152 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                                      (*l_core),
                                      TARGETING::CLASS_UNIT,
                                      TARGETING::TYPE_EX);
-            TARGETING::Target* l_ex = targetList[0];
-            const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
-                                 const_cast<TARGETING::Target*>(l_ex) );
 
-            int rc = cpu_start_core(pir,en_threads);
 
-            // Handle time out error
-            if (-ETIME == rc)
+            // verify the list has one entry, see SW272212.
+            if( targetList.size() == 1 )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "call_host_activate_slave_cores: "
-                           "Time out rc from kernel %d on core %x",
-                           rc,
-                           pir);
+                TARGETING::Target* l_ex = targetList[0];
+                const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
+                        const_cast<TARGETING::Target*>(l_ex) );
 
-                FAPI_INVOKE_HWP( l_errl, proc_check_slw_done,
-                                 l_fapi_ex_target);
-                if (l_errl)
+                int rc = cpu_start_core(pir,en_threads);
+
+                // Handle time out error
+                if (-ETIME == rc)
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : proc_check_slw_done" );
-                    // Add chip target info
-                    ErrlUserDetailsTarget(l_processor).addToLog( l_errl );
-                    // Create IStep error log
-                    l_stepError.addErrorDetails(l_errl);
-                    // Commit error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                    break;
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "call_host_activate_slave_cores: "
+                            "Time out rc from kernel %d on core %x",
+                            rc,
+                            pir);
+
+                    FAPI_INVOKE_HWP( l_errl, proc_check_slw_done,
+                            l_fapi_ex_target);
+                    if (l_errl)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR : proc_check_slw_done" );
+                        // Add chip target info
+                        ErrlUserDetailsTarget(l_processor).addToLog( l_errl );
+                        // Create IStep error log
+                        l_stepError.addErrorDetails(l_errl);
+                        // Commit error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        break;
+                    }
+                    else
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "SUCCESS : proc_check_slw_done - "
+                                 "SLW is in clean state");
+                    }
                 }
-                else
+
+                // Create error log
+                if (0 != rc)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "call_host_activate_slave_cores: "
+                            "Error from kernel %d on core %x",
+                            rc,
+                            pir);
+                    /*@
+                     * @errortype
+                     * @reasoncode  ISTEP_BAD_RC
+                     * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid    ISTEP_HOST_ACTIVATE_SLAVE_CORES
+                     * @userdata1   PIR of failing core.
+                     * @userdata2   rc of cpu_start_core().
+                     *
+                     * @devdesc Kernel returned error when trying to activate
+                     *          core.
+                     */
+                    errlHndl_t l_tmperrl =
+                        new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                ISTEP_HOST_ACTIVATE_SLAVE_CORES,
+                                ISTEP_BAD_RC,
+                                pir,
+                                rc );
+
+                    // Callout core that failed to wake up.
+                    l_tmperrl->addHwCallout(*l_core,
+                            HWAS::SRCI_PRIORITY_MED,
+                            HWAS::DECONFIG,
+                            HWAS::GARD_Predictive);
+
+                    if (NULL == l_errl)
+                    {
+                        l_errl = l_tmperrl;
+                    }
+                    else
+                    {
+                        errlCommit( l_tmperrl, HWPF_COMP_ID );
+                    }
+                }
+                else //Core out of winkle sucessfully, issue SPWU for PRD
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS : proc_check_slw_done - SLW is in clean state");
+                            "Running p8_cpu_special_wakeup (ENABLE)"
+                            " EX target HUID %.8X",
+                            TARGETING::get_huid(l_ex));
+
+                    // Enable special wakeup on core
+                    FAPI_INVOKE_HWP( l_errl,
+                            p8_cpu_special_wakeup,
+                            l_fapi_ex_target,
+                            SPCWKUP_ENABLE,
+                            HOST);
+
+                    if( l_errl )
+                    {
+                        ErrlUserDetailsTarget(l_ex).addToLog( l_errl );
+
+                        // Create IStep error log and cross ref error that
+                        // occurred
+                        l_stepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR : enable p8_cpu_special_wakeup, "
+                                "PLID=0x%x", l_errl->plid()  );
+                    }
+                    else
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "SUCCESS: enable p8_cpu_special_wakeup");
+                    }
                 }
             }
-
-            // Create error log
-            if (0 != rc)
+            else
             {
+                // wrong number of targets in the list, create an error log
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "call_host_activate_slave_cores: "
-                           "Error from kernel %d on core %x",
-                           rc,
-                           pir);
+                            "ERROR: call to getParentAffinityTarget "
+                            "returned %d instead of 1", targetList.size() );
                 /*@
                  * @errortype
-                 * @reasoncode  ISTEP_BAD_RC
+                 * @reasoncode  ISTEP_INCORRECT_TARGET_COUNT
                  * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid    ISTEP_HOST_ACTIVATE_SLAVE_CORES
                  * @userdata1   PIR of failing core.
-                 * @userdata2   rc of cpu_start_core().
+                 * @userdata2   number of targets returned
                  *
-                 * @devdesc Kernel returned error when trying to activate core.
+                 * @devdesc     Call to getParentAffinityTarget requesting
+                 *              the number of EX chips with parent affinity
+                 *              to a core, returned and incorrect vector size,
+                 *              the expected size is 1.
+                 *
                  */
-                errlHndl_t l_tmperrl =
+                l_errl =
                     new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                                            ISTEP_BAD_RC,
-                                            pir,
-                                            rc );
-
-                // Callout core that failed to wake up.
-                l_tmperrl->addHwCallout(*l_core,
-                                        HWAS::SRCI_PRIORITY_MED,
-                                        HWAS::DECONFIG,
-                                        HWAS::GARD_Predictive);
-
-                if (NULL == l_errl)
-                {
-                    l_errl = l_tmperrl;
-                }
-                else
-                {
-                    errlCommit( l_tmperrl, HWPF_COMP_ID );
-                }
-            }
-            else //Core out of winkle sucessfully, issue SPWU for PRD
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Running p8_cpu_special_wakeup (ENABLE)"
-                          " EX target HUID %.8X",
-                          TARGETING::get_huid(l_ex));
-
-                // Enable special wakeup on core
-                FAPI_INVOKE_HWP( l_errl,
-                                 p8_cpu_special_wakeup,
-                                 l_fapi_ex_target,
-                                 SPCWKUP_ENABLE,
-                                 HOST);
-
-                if( l_errl )
-                {
-                    ErrlUserDetailsTarget(l_ex).addToLog( l_errl );
-
-                    // Create IStep error log and cross ref error that occurred
-                    l_stepError.addErrorDetails( l_errl );
-
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                             "ERROR : enable p8_cpu_special_wakeup, PLID=0x%x",
-                             l_errl->plid()  );
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "SUCCESS: enable p8_cpu_special_wakeup");
-                }
+                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
+                            ISTEP_INCORRECT_TARGET_COUNT,
+                            pir,
+                            targetList.size(), true);
             }
         }
     }
