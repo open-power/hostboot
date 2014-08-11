@@ -225,7 +225,7 @@ public:
    <br><b>Parameters:  </b> a valid PRDcallout & PRDpriority
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> GetMruList().GetCount()++
+   <br><b>Promises:    </b> getMruList().GetCount()++
    <br><b>Exceptions:  </b> None.
    <br><b>Notes:       </b> No implementation for Apache or Northstar
    </ul><br>
@@ -247,21 +247,14 @@ public:
      */
     void AddSignatureList( ErrorSignature & i_sig );
 
-  /**
-   Access the list of Mrus
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> SDC_MRU_LIST
-   @see MruListClass
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> No implementation for Apache or Northstar
-   </ul><br>
-   */
-  SDC_MRU_LIST & GetMruList(void);  // dg07
+    /** @return The list of MRUs currently stored in the SDC. */
+    const SDC_MRU_LIST & getMruList() const { return xMruList; }
 
-  PRDF_SIGNATURES & GetSignatureList(void);  // jl00
+    /** @return The size of the MRU list currently stored in the SDC. */
+    size_t getMruListSize() const { return xMruList.size(); }
+
+    /** @return The secondary signature list stored in the SDC. */
+    const PRDF_SIGNATURES & getSignatureList() const { return iv_SignatureList;}
 
   /**
    Clear the list of MruCallouts

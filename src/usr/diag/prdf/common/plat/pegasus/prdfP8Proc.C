@@ -840,7 +840,7 @@ int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
     }
 
     // If no PHBs called out, callout 2nd level support.
-    if ( (SUCCESS != l_rc) || (0 == io_sc.service_data->GetMruList().size()) )
+    if ( (SUCCESS != l_rc) || (0 == io_sc.service_data->getMruListSize()) )
         io_sc.service_data->SetCallout( NextLevelSupport_ENUM );
 
     return SUCCESS; // Intentionally returns SUCCESS so rule code does not get

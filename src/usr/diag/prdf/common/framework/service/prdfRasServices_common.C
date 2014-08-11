@@ -112,7 +112,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
 
-    SDC_MRU_LIST fspmrulist;
     PRDcallout thiscallout;
     PRDpriority thispriority;
     epubProcedureID thisProcedureID;
@@ -334,13 +333,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // HIGH priority.
     bool sappSwNoGardReq = false, sappHwNoGardReq = false;
 
-    fspmrulist = sdc.GetMruList();
-    int32_t calloutsPlusDimms = fspmrulist.size();
+    const SDC_MRU_LIST & mruList = sdc.getMruList();
+    int32_t calloutsPlusDimms = mruList.size();
 
-    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin(); i < fspmrulist.end();
-          ++i)
+    for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
+          it < mruList.end(); ++it )
     {
-        thiscallout = i->callout;
+        thiscallout = it->callout;
         if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
             if ( (EPUB_PRC_SP_CODE   == thiscallout.flatten()) ||
@@ -348,12 +347,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             {
                 SW = true;
 
-                if ( MRU_LOW != i->priority )
+                if ( MRU_LOW != it->priority )
                 {
                     sappSwNoGardReq = true;
                 }
 
-                if ( MRU_MED == i->priority )
+                if ( MRU_MED == it->priority )
                 {
                     SW_High = true;
                 }
@@ -362,7 +361,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             {
                 SecondLevel = true;
 
-                if ( MRU_LOW != i->priority )
+                if ( MRU_LOW != it->priority )
                 {
                     sappSwNoGardReq = true;
                 }
@@ -379,7 +378,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             calloutsPlusDimms = calloutsPlusDimms + partCount -1;
             HW = true; //hardware callout
 
-            if ( MRU_LOW == i->priority )
+            if ( MRU_LOW == it->priority )
             {
                 sappHwNoGardReq = true;
             }
@@ -390,7 +389,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
             // Determines if all the hardware callouts have low priority.
 
-            if ( MRU_LOW == i->priority )
+            if ( MRU_LOW == it->priority )
             {
                 sappHwNoGardReq = true;
             }
@@ -502,13 +501,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         prdGardErrType = GardAction::NoGard;
     }
 
-    fspmrulist = sdc.GetMruList();
-
-    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
-          i < fspmrulist.end(); ++i )
+    for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
+          it < mruList.end(); ++it )
     {
-        thispriority = (*i).priority;
-        thiscallout = (*i).callout;
+        thispriority = it->priority;
+        thiscallout = it->callout;
 
         if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
@@ -586,7 +583,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // are not predictive.
     if ( HWAS::GARD_Predictive == gardErrType )
     {
-        deallocateDimms( fspmrulist );
+        deallocateDimms( mruList );
     }
 
     //**************************************************************
@@ -826,18 +823,18 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
     o_pfa.secAttnType = i_sdc.GetCauseAttentionType();
 
     // Build the MRU list into PFA data.
-    SDC_MRU_LIST fspmrulist = i_sdc.GetMruList();
+    const SDC_MRU_LIST & mruList = i_sdc.getMruList();
     uint32_t i; // Iterator used to set limited list count.
-    for ( i = 0; i < fspmrulist.size() && i < MruListLIMIT; i++ )
+    for ( i = 0; i < mruList.size() && i < MruListLIMIT; i++ )
     {
-        o_pfa.mruList[i].callout  = fspmrulist[i].callout.flatten();
-        o_pfa.mruList[i].type     = fspmrulist[i].callout.getType();
-        o_pfa.mruList[i].priority = (uint8_t)fspmrulist[i].priority;
+        o_pfa.mruList[i].callout  = mruList[i].callout.flatten();
+        o_pfa.mruList[i].type     = mruList[i].callout.getType();
+        o_pfa.mruList[i].priority = (uint8_t)mruList[i].priority;
     }
     o_pfa.mruListCount = i;
 
     // Build the signature list into PFA data
-    PRDF_SIGNATURES sigList = i_sdc.GetSignatureList();
+    const PRDF_SIGNATURES & sigList = i_sdc.getSignatureList();
     for ( i = 0; i < sigList.size() && i < SigListLIMIT; i++ )
     {
         o_pfa.sigList[i].chipId    = getHuid(sigList[i].target);
@@ -921,13 +918,12 @@ void ErrDataService::printDebugTraces( )
         PRDF_DTRAC( "PRDTRACE: Mask id: 0x%x", sdc.GetThresholdMaskId() );
     }
 
-    SDC_MRU_LIST fspmrulist = sdc.GetMruList();
-
-    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
-          i < fspmrulist.end(); ++i )
+    const SDC_MRU_LIST & mruList = sdc.getMruList();
+    for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
+          it < mruList.end(); ++it )
     {
         tmp = "Unknown";
-        switch ( i->priority )
+        switch ( it->priority )
         {
             case MRU_LOW:  tmp = "LOW";   break;
             case MRU_MEDC: tmp = "MED_C"; break;
@@ -937,7 +933,7 @@ void ErrDataService::printDebugTraces( )
             case MRU_HIGH: tmp = "HIGH";  break;
         }
         PRDF_DTRAC( "PRDTRACE: Callout=0x%08x Priority=%s",
-                    i->callout.flatten(), tmp );
+                    it->callout.flatten(), tmp );
     }
 
     PRDF_DTRAC ("GardType: %s", GardAction::ToString( sdc.QueryGard() ) );

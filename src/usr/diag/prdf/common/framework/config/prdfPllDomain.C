@@ -206,7 +206,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     // If only one detected the error, add it to the callout list.
     if ( 1 == count )
     {
-        const uint32_t tmpCount = serviceData.service_data->GetMruList().size();
+        const uint32_t tmpCount = serviceData.service_data->getMruListSize();
 
         // Call this chip's CalloutPll plugin if it exists.
         ExtensibleChipFunction * l_callout =
@@ -217,7 +217,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
         }
 
-        if ( tmpCount == serviceData.service_data->GetMruList().size() )
+        if ( tmpCount == serviceData.service_data->getMruListSize() )
         {
             // No additional callouts were made so add this chip to the list.
             serviceData.service_data->SetCallout( chip()[0]->GetChipHandle());

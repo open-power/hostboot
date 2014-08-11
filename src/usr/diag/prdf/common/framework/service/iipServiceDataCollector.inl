@@ -125,18 +125,4 @@ void ServiceDataCollector::ClearSignatureList(void)
   iv_SignatureList.erase(iv_SignatureList.begin(),iv_SignatureList.end());  // jl00
 }
 
-
-inline
-SDC_MRU_LIST & ServiceDataCollector::GetMruList(void)
-{
-  return xMruList;
-}
-
-inline
-PRDF_SIGNATURES & ServiceDataCollector::GetSignatureList(void)
-{
-  return iv_SignatureList;
-}
-
-
 } // end namespace PRDF

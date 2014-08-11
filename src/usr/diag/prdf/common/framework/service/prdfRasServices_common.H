@@ -194,7 +194,7 @@ class ErrDataService
      *
      * @param i_mruList   MRU callout list.
      */
-    void deallocateDimms( SDC_MRU_LIST & i_mruList );
+    void deallocateDimms( const SDC_MRU_LIST & i_mruList );
 
     /**
      * @brief Must check for MP-IPL eligibility before requesting SW or SH

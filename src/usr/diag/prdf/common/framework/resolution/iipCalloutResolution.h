@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1998,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -102,7 +104,7 @@ public:
    <br><b>Parameters:  </b> ServiceDataCollector
    <br><b>Returns:     </b> Return code [SUCCESS | nonZero]
    <br><b>Requirements:</b> none.
-   <br><b>Promises:    </b> serviceData::GetMruList().GetCount()++
+   <br><b>Promises:    </b> serviceData::getMruList().GetCount()++
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */

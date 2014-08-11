@@ -59,7 +59,7 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
 
 //--------------------------------------------------------------------
 
-void ErrDataService::deallocateDimms( SDC_MRU_LIST & i_mruList )
+void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 {
     //No OP for HB
 }

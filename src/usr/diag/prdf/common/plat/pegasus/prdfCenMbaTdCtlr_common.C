@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -693,7 +695,7 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
     // Level Support). Note that iv_mark is not always guaranteed to be
     // valid for every error scenario. For simplicity, callout the rank that
     // was targeted with low priority.
-    if ( 1 == io_sc.service_data->GetMruList().size() )
+    if ( 1 == io_sc.service_data->getMruListSize() )
     {
         MemoryMru memmru ( iv_mbaTrgt, iv_rank, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru, MRU_LOW );
