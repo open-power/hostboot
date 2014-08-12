@@ -37,6 +37,7 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/entitypath.H>
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>
 #include "common/hsvc_attribute_structs.H"
@@ -694,7 +695,14 @@ errlHndl_t populate_attributes( void )
         // Figure out which node we are running on
         TARGETING::Target* mproc = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(mproc);
-        uint64_t nodeid = mproc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+
+        TARGETING::EntityPath epath =
+            mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+        const TARGETING::EntityPath::PathElement pe =
+            epath.pathElementOfType(TARGETING::TYPE_NODE);
+
+        uint64_t nodeid = pe.instance;
 
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
         // Currently set up in host_sys_fab_iovalid_processing() which only
