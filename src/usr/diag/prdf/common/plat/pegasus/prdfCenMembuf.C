@@ -565,7 +565,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             // Add to CE table
             CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
             uint32_t ceTableRc = mbadb->iv_ceTable.addEntry( addr, symbol );
-            bool doTps = ( CenMbaCeTable::NO_TH_REACHED != ceTableRc );
+            bool doTps = false;
 
             // Check MNFG thresholds, if needed.
             if ( mfgMode() )
@@ -622,6 +622,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                     i_sc.service_data->SetCallout( all_mm,  MRU_MEDA );
                     i_sc.service_data->SetCallout( mbaTrgt, MRU_MEDA );
                     i_sc.service_data->SetServiceCall();
+                    doTps = true;
                 }
                 else if ( 0 != (CenMbaCeTable::ENTRY_TH_REACHED & ceTableRc) )
                 {
@@ -632,7 +633,12 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                     // has been met. This is a potential flooding issue, so make
                     // the DIMM callout predictive.
                     i_sc.service_data->SetServiceCall();
+                    doTps = true;
                 }
+            }
+            else // field
+            {
+                doTps = ( CenMbaCeTable::NO_TH_REACHED != ceTableRc );
             }
 
             // Initiate a TPS procedure, if needed.
