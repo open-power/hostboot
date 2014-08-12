@@ -2019,9 +2019,9 @@ group gEnHcaFir filter singlebit
     (EnHcaFir, bit(0)) ? SelfHighThr32PerDay;
 
     /** ENHCAFIR[1]
-     *  DPX0_DAT_SUE: PB0 data UE
+     *  DPX0_DAT_SUE: PB0 data SUE
      */
-    (EnHcaFir, bit(1)) ? SelfHighThr32PerDay;
+    (EnHcaFir, bit(1)) ? defaultMaskedError;
 
     /** ENHCAFIR[2]
      *  DPX0_DAT_CE: PB0 data ue
