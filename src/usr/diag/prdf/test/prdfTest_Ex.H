@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -84,5 +86,39 @@ class ExLFIR:public CxxTest::TestSuite
                 TS_FAIL("L3CE Test failed");
             }
         }
+
+        void TestCoreRecoverable(void)
+        {
+            PRDS_BEGIN("COREFIR recoverable attention");
+            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EX{5}", 0xc8e9003c);
+            // GLOBAL_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x0000040000000000);
+            // GLOBALUNITXSTPFIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x51040001, 0x0000000000000000);
+            // EX_CHIPLET_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040001, 0x2000000000000000);
+            // EX_CHIPLET_RE_FIR_MASK
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040002, 0x20ffffc000000000);
+            // COREFIR bit 60 on
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013100, 0x0000000000000008);
+            // COREFIR WOF bit 60 on
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013108, 0x0000000000000008);
+            // COREFIR_ACT0
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013106, 0x15a20c688a448b01);
+            // COREFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013107, 0xfefc17f7ff9c8a09);
+            // COREHMEER
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x1001329B, 0xac10080000000000);
+            // SPATTN_0
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10013007, 0x0000000000000000);
+
+            PRDS_START_SIM();
+            if(!(PRDS_END()))
+            {
+                TS_FAIL("COREFIR recoverable attention test failed");
+            }
+        }
+
 };
 #endif

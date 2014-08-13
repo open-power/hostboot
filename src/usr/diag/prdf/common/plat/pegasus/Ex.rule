@@ -1354,9 +1354,9 @@ group gCoreFir filter singlebit
     (CoreFir, bit(59)) ? defaultMaskedError;
 
     /** COREFIR[60]
-     *  DBG_FIR_CHECKSTOP_ON_TRIGGER: debug Trigger Error inject
+     *  Debug trigger error inject
      */
-    (CoreFir, bit(60)) ? SelfHighThr1;
+    (CoreFir, bit(60)) ? SelfMedThr32PerDay;
 
     /** COREFIR[61]
      *  SP_INJ_REC_ERR: SCOM or Firmware recoverable Error Inject
@@ -1929,6 +1929,9 @@ group gNcuFir filter singlebit
 actionclass analyzeCore
 {
     funccall("CheckCoreCheckstop");
+    # if core recoverable is not set in COREWOF and
+    # Core CS is on, analyze core checkstop
+    try(funccall("CoreRePresent"), funccall("SetCoreCheckstopCause"));
     analyze(gCoreFir);
     funccall("MaskIfCoreCheckstop");
     funccall("RestartTraceArray");

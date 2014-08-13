@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -151,6 +153,20 @@ int32_t InHostboot( ExtensibleChip * i_chip,
 {
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Ex, InHostboot);
+
+/**
+ * @brief check if both core CS and RE are on at the same time
+ *        and core recoverable is set in COREFIRWOF
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return SUCCESS in Hostboot since we don't want to analyze core CS
+ */
+int32_t CoreRePresent( ExtensibleChip * i_chip,
+                       STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    return SUCCESS;
+
+} PRDF_PLUGIN_DEFINE(Ex, CoreRePresent);
 
 } // end namespace Ex
 } // end namespace PRDF
