@@ -279,6 +279,7 @@
     <attribute><id>PM_SLEEP_ENABLE</id></attribute>
     <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
     <attribute><id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id></attribute>
+    <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
 </targetType>
 
 <targetType>
@@ -1358,7 +1359,6 @@
     <attribute><id>MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
     <attribute><id>MSS_VOLT_OVERRIDE</id></attribute>
-    <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MSS_POWER_CONTROL_CAPABLE</id></attribute>
     <attribute>
         <id>I2C_SWITCHES</id>

@@ -212,6 +212,7 @@ push @systemAttr,
     "MNFG_ABUS_MIN_EYE_HEIGHT", $reqPol->{'mnfg-abus-min-eye-height'},
     "MNFG_XBUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-xbus-min-eye-width'},
     "REDUNDANT_CLOCKS", $reqPol->{'redundant-clocks'},
+    "MSS_DRAMINIT_RESET_DISABLE", $reqPol->{'mss_draminit_reset_disable'},
 ];
 
 if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')

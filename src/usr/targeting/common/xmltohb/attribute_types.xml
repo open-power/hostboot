@@ -9468,7 +9468,12 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 
 <attribute>
     <id>MSS_DQS_SWIZZLE_TYPE</id>
-    <description>DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses. Type 0 is normal, type 1 is for systems with wiring like glacier 1.  Additional types maybe defined if new boards have even different DQS swizzle features</description>
+    <description>DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses. Type 0 is normal, type 1 is for systems with wiring like glacier 1.  Additional types maybe defined if new boards have even different DQS swizzle features
+
+        NORMAL_TYPE_0   = 0
+        GLACIER_TYPE_1  = 1
+        PALMETTO_TYPE_2 = 2
+    </description>
     <simpleType>
         <uint8_t><default>0</default></uint8_t>
     </simpleType>
@@ -14124,6 +14129,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         0x00 = NONE
         0x01 = SLOWEXIT_CAPABLE
         0x02 = FASTEXIT_CAPABLE
+        0x03 = FASTSLOW_CAPABLE
+
     </description>
     <simpleType>
         <uint8_t>
@@ -14291,6 +14298,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
     <simpleType>
         <uint8_t>
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
