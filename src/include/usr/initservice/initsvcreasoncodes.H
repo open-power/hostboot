@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -68,6 +70,8 @@ enum    InitServiceReasonCode
     SHUTDOWN_REQUESTED_BY_FSP    =   INITSVC_COMP_ID | 0x0b,
     ISTEP_INVALID_ON_MPIPL       =   INITSVC_COMP_ID | 0x0c,
     ISTEP_NON_MASTER_NODE_MSG    =   INITSVC_COMP_ID | 0x0d,
+    //termination_rc
+    SBE_EXTRACT_RC_REQUEST_REIPL =   INITSVC_COMP_ID | 0x0e,
 };
 
 enum InitServiceUserDetailDataSubSection

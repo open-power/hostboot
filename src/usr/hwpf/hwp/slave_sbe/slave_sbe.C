@@ -41,6 +41,7 @@
 #include <errl/errlentry.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
+#include <initservice/initsvcreasoncodes.H>
 #include <sys/time.h>
 #include <devicefw/userif.H>
 
@@ -313,9 +314,40 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                                        l_pProcTarget    );
 
         // Invoke the HWP
-        FAPI_INVOKE_HWP(l_errl,
-                        proc_check_slave_sbe_seeprom_complete,
-                        l_fapiProcTarget, sbeImgPtr, l_wait_time);
+        fapi::ReturnCode rc_fapi = fapi::FAPI_RC_SUCCESS;
+        FAPI_EXEC_HWP(rc_fapi,
+                      proc_check_slave_sbe_seeprom_complete,
+                      l_fapiProcTarget,
+                      sbeImgPtr,
+                      l_wait_time);
+
+        // check for re ipl request
+        if(static_cast<uint32_t>(rc_fapi) ==
+           fapi::RC_PROC_EXTRACT_SBE_RC_ENGINE_RETRY)
+        {
+            l_errl = fapi::fapiRcToErrl(rc_fapi);
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : proc_extract_sbe_rc requesting reIPL:"
+                      " Calling INITSERVICE::doShutdown() with "
+                      "SBE_EXTRACT_RC_REQUEST_REIPL = 0x%x",
+                      INITSERVICE::SBE_EXTRACT_RC_REQUEST_REIPL);
+
+            INITSERVICE::doShutdown
+                ( INITSERVICE::SBE_EXTRACT_RC_REQUEST_REIPL);
+            // doShutdown does not return
+        }
+        else
+        {
+            l_errl = fapi::fapiRcToErrl(rc_fapi);
+        }
 
         if (l_errl)
         {
