@@ -1,4 +1,0 @@
-config LPC_CONSOLE
-    default n
-    help
-        Enable the Hostboot console over the LPC bus.

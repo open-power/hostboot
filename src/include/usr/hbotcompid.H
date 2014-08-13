@@ -197,7 +197,14 @@ const compId_t DUMP_COMP_ID = 0x1200;
 const char DUMP_COMP_NAME[] = "dump";
 //@}
 
-// 0x1300 - open to reclaim
+
+/** @name CONSOLE
+ *  Console component.
+ */
+//@{
+const compId_t CONSOLE_COMP_ID = 0x1300;
+const char CONSOLE_COMP_NAME[] = "console";
+//@}
 
 /** @name MDIA
  *  MDIA memory diagnostics component

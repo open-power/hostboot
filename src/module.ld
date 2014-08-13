@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2010,2014                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -35,6 +36,7 @@ SECTIONS
         __minimum_data_start_addr = ALIGN(0x1000);
         ctor_start_address = .;
         *(.ctors)
+        *(.ctors.*)
         ctor_end_address = .;
         *(.rodata)
         *(.rodata.*)

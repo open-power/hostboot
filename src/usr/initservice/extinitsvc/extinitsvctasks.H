@@ -69,6 +69,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief console library
+         */
+#ifdef CONFIG_CONSOLE
+        {
+            "libconsole.so",                       // library name
+            NULL,                                  // no function to run
+            {
+                START_TASK,                        // task type
+                EXT_IMAGE,                         // extended image module
+            }
+        },
+#endif
+
+        /**
          * @brief   FSI Device Driver
          */
 
@@ -76,7 +90,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             "libfsi.so" ,                               // taskname
             NULL,                                       // no pointer to fn
             {
-                INIT_TASK,                          // task type
+                INIT_TASK,                          // init only
                 EXT_IMAGE,                          // Extended Module
             }
         },

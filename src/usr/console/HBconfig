@@ -1,0 +1,4 @@
+config CONSOLE
+    default n
+    help
+        Enable console support.

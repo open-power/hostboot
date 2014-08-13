@@ -8,6 +8,7 @@
 #
 # Contributors Listed Below - COPYRIGHT 2011,2014
 # [+] International Business Machines Corp.
+# [+] Google Inc.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -691,7 +692,8 @@ sub checkCopyrightBlock( $$ )
             # remove everything through [+]
             $_ =~ s/[^\]]*\]//;
             # remove closing comment string depening on language
-            if ( filetype($filename) eq "C")
+            if (( filetype($filename) eq "C") ||
+                ( filetype($filename) eq "LinkerScript"))
             {
                 # remove */
                 $_ =~ s/\*\///;

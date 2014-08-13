@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/usr/console/uartconfig.C $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -23,70 +23,22 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
+#include "uart.H"
 
-SECTIONS
-{
-    . = base_load_address;
+const uint64_t CONSOLE::g_uartBase = 0x3f8;
+const uint64_t CONSOLE::g_uartBaud = 115200;
+const uint64_t CONSOLE::g_uartClock = 1843200;
 
-    .text ALIGN(0x1000): {
-        *(.text.intvects)
-        . = text_load_address;
-        *(.text.kernelasm)
-        *(.text)
-        *(.text._*)
-        *(.text.*)
-    }
-
-    .rodata ALIGN(0x8): {
-        __minimum_data_start_addr = ALIGN(0x1000);
-        ctor_start_address = .;
-        *(.ctors)
-        *(.ctors.*)
-        ctor_end_address = .;
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(8);
-        toc_load_address = .;
-        *(.toc)
-        *(.opd)
-        *(.got)
-        *(.plt)
-        *(.data.rel.ro.*)
-        *(.data.*traceData_codeInfo*)
-
-        . = __minimum_data_start_addr > . ? __minimum_data_start_addr : .;
-    }
-
-    .data ALIGN(0x8): {
-        data_load_address = .;
-        *(.data)
-        *(.data.*)
-
-        *(.bss)
-        *(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .rela : {
-        *(.rela.*)
-    }
-
-    .dynsym : { *(.dynsym) }
-    .dynstr : { *(.dynstr) }
-    .hash : { *(.hash) }
-    .gnu.hash : { *(.gnu.hash) }
-    .eh_frame : { *(.eh_frame) }
-
-    /DISCARD/ : {
-        *(.comment)
-        *(.gnu.attributes)
-        *(.dtors)
-        *(.interp)
-    }
-}
-
-
+/* Someone could decide to make these attributes that are accessed like:
+ *      TARGETING::Target *sys;
+ *      TARGETING::targetService().getTopLevelTarget(sys);
+ *
+ *      g_uartBase = sys->getAttr<TARGETING::ATTR_CONSOLE_UART_BASE>();
+ *      g_uartBaud = sys->getAttr<TARGETING::ATTR_CONSOLE_UART_BAUD_RATE>();
+ *
+ * ( though the variables would need to be initialized via a function call
+ *   indirection )
+ *
+ * In order to do this, we'd have to remove this file from the object
+ * list and insert a new file via a config option.
+ */

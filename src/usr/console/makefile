@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/trace/makefile $
+# $Source: src/usr/console/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2014
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -24,26 +24,10 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
-MODULE = trace
+MODULE = console
 
-OBJS += interface.o
-OBJS += service.o
-OBJS += compdesc.o
-OBJS += buffer.o
-OBJS += bufferpage.o
-OBJS += daemonif.o
-OBJS += debug.o
-OBJS += assert.o
+OBJS += daemon.o
+OBJS += uart.o
+OBJS += uartconfig.o
 
-# We need the client interfaces for console available in the base image,
-# similar to the client interfaces for trace.  Putting 'console.o' from the
-# console component into libtrace.so instead of creating a whole new library
-# for that purpose.
-VPATH += ../console
-OBJS += $(if $(CONFIG_CONSOLE),console.o)
-
-SUBDIRS += daemon.d
-SUBDIRS += test.d
-SUBDIRS += runtime.d
-
-include ${ROOTPATH}/config.mk
+include $(ROOTPATH)/config.mk

@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +46,8 @@
 #include <devicefw/userif.H>
 
 #include <mbox/mboxif.H>
+#include <config.h>
+#include <console/consoleif.H>
 
 namespace TRACE
 {
@@ -128,6 +131,11 @@ namespace TRACEDAEMON
                     // Reduce buffer space in daemon-side buffer.
                     pruneTraceEntries();
                     coalescePages();
+
+#ifdef CONFIG_CONSOLE_OUTPUT_TRACE
+                    // Flush console.
+                    CONSOLE::flush();
+#endif
 
                     msg->data[0] = msg->data[1] = 0;
                     break;

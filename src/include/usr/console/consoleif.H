@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/include/usr/console/consoleif.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -23,70 +23,61 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
+#ifndef __CONSOLE_CONSOLEIF_H
+#define __CONSOLE_CONSOLEIF_H
 
-SECTIONS
+#include <config.h>
+#include <stdarg.h>
+
+namespace CONSOLE
 {
-    . = base_load_address;
 
-    .text ALIGN(0x1000): {
-        *(.text.intvects)
-        . = text_load_address;
-        *(.text.kernelasm)
-        *(.text)
-        *(.text._*)
-        *(.text.*)
-    }
+    /** @brief Display a string to the console.
+     *
+     *  @param[in] - String to display.
+     */
+    extern void display(const char*)
+#ifdef CONFIG_CONSOLE
+    ;
+#else
+    {};
+#endif
 
-    .rodata ALIGN(0x8): {
-        __minimum_data_start_addr = ALIGN(0x1000);
-        ctor_start_address = .;
-        *(.ctors)
-        *(.ctors.*)
-        ctor_end_address = .;
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(8);
-        toc_load_address = .;
-        *(.toc)
-        *(.opd)
-        *(.got)
-        *(.plt)
-        *(.data.rel.ro.*)
-        *(.data.*traceData_codeInfo*)
+    /** @brief Display formatted string to the console.
+     *
+     *  @param[in] - Header (or NULL).
+     *  @param[in] - Format string.
+     */
+    extern void displayf(const char*, const char*, ...)
+#ifdef CONFIG_CONSOLE
+    ;
+#else
+    {};
+#endif
 
-        . = __minimum_data_start_addr > . ? __minimum_data_start_addr : .;
-    }
-
-    .data ALIGN(0x8): {
-        data_load_address = .;
-        *(.data)
-        *(.data.*)
-
-        *(.bss)
-        *(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .rela : {
-        *(.rela.*)
-    }
-
-    .dynsym : { *(.dynsym) }
-    .dynstr : { *(.dynstr) }
-    .hash : { *(.hash) }
-    .gnu.hash : { *(.gnu.hash) }
-    .eh_frame : { *(.eh_frame) }
-
-    /DISCARD/ : {
-        *(.comment)
-        *(.gnu.attributes)
-        *(.dtors)
-        *(.interp)
-    }
-}
+    /** @brief Display formatted string to the console.
+     *
+     *  @param[in] - Header (or NULL).
+     *  @param[in] - Format string.
+     *  @param[in] - va_list of arguments.
+     */
+    extern void vdisplayf(const char*, const char*, va_list)
+#ifdef CONFIG_CONSOLE
+    ;
+#else
+    {};
+#endif
 
 
+    /** @brief Wait for console buffers to be flushed to device.
+     */
+    extern void flush()
+#ifdef CONFIG_CONSOLE
+    ;
+#else
+    {};
+#endif
+
+};
+
+#endif

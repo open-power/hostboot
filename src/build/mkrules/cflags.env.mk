@@ -7,6 +7,7 @@
 #
 # Contributors Listed Below - COPYRIGHT 2013,2014
 # [+] International Business Machines Corp.
+# [+] Google Inc.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,5 +51,9 @@ FLAGS_FILTER ?= $(1)
 
 ifdef HOSTBOOT_RUNTIME
 CFLAGS += -D__HOSTBOOT_RUNTIME=1
+TRACE_FLAGS += --full-strings
+endif
+
+ifdef CONFIG_CONSOLE_OUTPUT_TRACE
 TRACE_FLAGS += --full-strings
 endif

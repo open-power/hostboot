@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,8 +44,9 @@ namespace INITSERVICE
     enum EventPriority_t
     {
         LOWEST_PRIORITY = 0,    //!<< Notifiy last, LIFO order
-        INTR_PRIORITY   = LOWEST_PRIORITY, //!<< Shutdown INTR
-        MBOX_PRIORITY   = 1,    //!<< Shutdown MBOX
+        CONSOLE_PRIORITY = LOWEST_PRIORITY,     //!<< Shutdown Console
+        INTR_PRIORITY   = 1,    //!<< Shutdown INTR
+        MBOX_PRIORITY   = 2,    //!<< Shutdown MBOX
         NO_PRIORITY = 16,       //!<< No dependency / dont' care, LIFO order
         HIGHEST_PRIORITY = 127, //!<< Nofity first, LIFO order
     };

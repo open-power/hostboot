@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +37,10 @@
 #include <util/singleton.H>
 #include <assert.h>
 #include <time.h>
+#include <config.h>
+#include <console/consoleif.H>
+#include <stdio.h>
+#include <ctype.h>
 
 namespace TRACE
 {
@@ -67,6 +74,15 @@ namespace TRACE
                 return;
             }
         }
+
+        #ifdef CONFIG_CONSOLE_OUTPUT_TRACE
+        {
+            va_list args;
+            va_copy(args, i_args);
+            CONSOLE::vdisplayf(i_td->iv_compName, i_fmt, i_args);
+            va_end(args);
+        }
+        #endif
 
         do
         {
@@ -223,6 +239,85 @@ namespace TRACE
                 return;
             }
         }
+
+        #ifdef CONFIG_CONSOLE_OUTPUT_TRACE
+        {
+        // Output binary data.
+        // Format is:
+        // ~[0x0000] 01234567 01234567 01234567 01234567    *012345689abcdef*
+            static size_t BINARY_FORMAT_LENGTH = 69;
+
+            size_t pos = 0;
+            char* output = strdup(i_fmt);
+            size_t output_size = strlen(output)+1;
+            while(pos < i_size)
+            {
+                char bin_output[BINARY_FORMAT_LENGTH];
+
+                // Create length header.
+                size_t bin_pos = sprintf(bin_output,
+                                         "~[0x%04hx]", (uint16_t) pos);
+
+                // Create hex representation.
+                for (int i =0 ; i < 16; ++i)
+                {
+                    if ((i % 4) == 0)
+                    {
+                        bin_output[bin_pos++] = ' ';
+                    }
+                    if ((pos + i) < i_size)
+                    {
+                        sprintf(&bin_output[bin_pos],
+                                "%02x", ((const char*)i_ptr)[pos+i]);
+                        bin_pos += 2;
+                    }
+                    else
+                    {
+                        bin_output[bin_pos++] = ' ';
+                        bin_output[bin_pos++] = ' ';
+                    }
+                }
+
+                for (int i = 0; i < 4; ++i)
+                {
+                    bin_output[bin_pos++] = ' ';
+                }
+                bin_output[bin_pos++] = '*';
+
+                // Create ascii representation.
+                for(int i = 0; i< 16; ++i)
+                {
+                    char ch = ' ';
+                    if ((pos + i) < i_size)
+                    {
+                        ch = ((const char*) i_ptr)[pos+i];
+                        if (!isprint(ch))
+                        {
+                            ch = '.';
+                        }
+                    }
+                    bin_output[bin_pos++] = ch;
+                }
+                bin_output[bin_pos++] = '*';
+                bin_output[bin_pos++] = '\0';
+
+                // Append to output string.
+                output = static_cast<char*>(
+                    realloc(output, output_size + BINARY_FORMAT_LENGTH));
+                strcat(output, "\n");
+                strcat(output, bin_output);
+                output_size += BINARY_FORMAT_LENGTH;
+
+                pos += 16;
+            }
+
+            // Output full binary dump.
+            CONSOLE::displayf(i_td->iv_compName, output);
+            free(output);
+
+        }
+        #endif
+
 
         do
         {

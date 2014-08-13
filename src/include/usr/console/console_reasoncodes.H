@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/include/usr/console/console_reasoncodes.H $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /* [+] Google Inc.                                                        */
 /*                                                                        */
@@ -23,70 +23,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
+#ifndef __CONSOLE_CONSOLE_REASONCODES_H
+#define __CONSOLE_CONSOLE_REASONCODES_H
 
-SECTIONS
+#include <hbotcompid.H>
+
+namespace CONSOLE
 {
-    . = base_load_address;
+    enum ConsoleModuleId
+    {
+        MOD_CONSOLE_INVALID_MODULE      = 0x00,
+        MOD_CONSOLE_UART_PUTC           = 0x01,
+    };
 
-    .text ALIGN(0x1000): {
-        *(.text.intvects)
-        . = text_load_address;
-        *(.text.kernelasm)
-        *(.text)
-        *(.text._*)
-        *(.text.*)
-    }
-
-    .rodata ALIGN(0x8): {
-        __minimum_data_start_addr = ALIGN(0x1000);
-        ctor_start_address = .;
-        *(.ctors)
-        *(.ctors.*)
-        ctor_end_address = .;
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(8);
-        toc_load_address = .;
-        *(.toc)
-        *(.opd)
-        *(.got)
-        *(.plt)
-        *(.data.rel.ro.*)
-        *(.data.*traceData_codeInfo*)
-
-        . = __minimum_data_start_addr > . ? __minimum_data_start_addr : .;
-    }
-
-    .data ALIGN(0x8): {
-        data_load_address = .;
-        *(.data)
-        *(.data.*)
-
-        *(.bss)
-        *(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .rela : {
-        *(.rela.*)
-    }
-
-    .dynsym : { *(.dynsym) }
-    .dynstr : { *(.dynstr) }
-    .hash : { *(.hash) }
-    .gnu.hash : { *(.gnu.hash) }
-    .eh_frame : { *(.eh_frame) }
-
-    /DISCARD/ : {
-        *(.comment)
-        *(.gnu.attributes)
-        *(.dtors)
-        *(.interp)
-    }
+    enum ConsoleReasonCode
+    {
+        RC_INVALID_DATA                 = CONSOLE_COMP_ID | 0x01,
+        RC_TIMEOUT                      = CONSOLE_COMP_ID | 0x02,
+    };
 }
 
-
+#endif
