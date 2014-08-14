@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.C,v 1.20 2014/07/24 03:13:59 jmcgill Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.21 2014/08/12 13:11:26 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -320,7 +320,19 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
                 const uint32_t & SCOM_ADDRESS = scom_address;
                 const uint8_t & PIB_ERROR_CODE = pcb_error;
                 const bool & PIB_DATA_READ_PARITY_ERROR = pore_debug0_reg.isBitSet(32);
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR);
+
+
+                if (is_sbe &&
+                    (scom_address == (uint32_t) TP_GP0_OR_0x01000005) &&
+                    (pore_state.vital_state.getHalfWord(1) == 0x2031))
+                {
+                    FAPI_INF("proc_extract_sbe_rc: Reconfig loop should be attempted");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_ENGINE_RETRY);
+                }
+                else
+                {
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR);
+                }
                 break;
             }
 

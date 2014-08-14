@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.16 2014/07/23 19:51:48 jmcgill Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.18 2014/08/12 20:44:13 jmcgill Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -108,6 +108,22 @@
     <gard>
       <target>CHIP</target>
     </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ENGINE_RETRY</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      First SCOM into pervasive chiplet from SBE failed
+      Trigger reconfig loop with no deconfig/GARD
+    </description>
+    <ffdc>SCOM_ADDRESS</ffdc>
+    <ffdc>PIB_ERROR_CODE</ffdc>
+    <ffdc>PIB_DATA_READ_PARITY_ERROR</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
