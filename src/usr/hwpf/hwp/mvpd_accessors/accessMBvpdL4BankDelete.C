@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: accessMBvpdL4BankDelete.C,v 1.3 2014/02/12 22:11:26 mjjones Exp $
+// $Id: accessMBvpdL4BankDelete.C,v 1.4 2014/08/05 15:04:51 kahnevan Exp $
 /**
  *  @file accessMBvpdL4BankDelete.C
  *
@@ -70,7 +72,7 @@ fapi::ReturnCode accessMBvpdL4BankDelete(
             if (l_bufSize < sizeof(l_l4BankDelete) )
             {
                 FAPI_ERR("accessMBvpdL4BankDelete:"
-                     " less keyword data returned than expected %d < %d",
+                     " less keyword data returned than expected %d < %zd",
                        l_bufSize, sizeof(l_l4BankDelete));
                 const uint32_t & KEYWORD = sizeof(l_l4BankDelete);
                 const uint32_t & RETURNED_SIZE = l_bufSize;

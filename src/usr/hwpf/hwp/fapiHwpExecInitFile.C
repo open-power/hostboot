@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/fapiHwpExecInitFile.C $                      */
+/* $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/hwp/fapiHwpExecInitFile.C,v $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,7 +27,7 @@
  *
  *  @brief Implements a Hardware Procedure to execute an initfile.
  */
-// $Id: fapiHwpExecInitFile.C,v 1.21 2014/06/30 16:48:42 thi Exp $
+// $Id: fapiHwpExecInitFile.C,v 1.22 2014/08/05 15:04:40 kahnevan Exp $
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
@@ -547,7 +547,7 @@ void    InitFileStats::dump()
 {
         iv_ok   =   false;
 
-        FAPI_IMP( "dump stats: initfile %s version %u, addr=%p, size = %u",
+        FAPI_IMP( "dump stats: initfile %s version %u, addr=%p, size = %zu",
                   iv_pInitFileName,
                   iv_initFileVersion,
                   iv_pInitFileAddr,
@@ -653,7 +653,7 @@ fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
 
     if (l_rc.ok())
     {
-        FAPI_IMP( "fapiHwpExecInitFile: initfile addr = %p, size = %u",
+        FAPI_IMP( "fapiHwpExecInitFile: initfile addr = %p, size = %zu",
                   l_ifAddr,
                   l_ifSize );
 
@@ -813,7 +813,7 @@ void ifSeek(ifInfo_t & io_ifInfo, size_t i_offset)
 {
     if (i_offset > io_ifInfo.size)
     {
-        FAPI_ERR("fapiHwpExecInitFile: ifSeek: offset out of range 0x%X",
+        FAPI_ERR("fapiHwpExecInitFile: ifSeek: offset out of range 0x%zX",
                  i_offset );
         fapiAssert(false);
     }
@@ -844,7 +844,7 @@ void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size, bool i_swap)
 
     if ((io_ifInfo.offset + i_size) > io_ifInfo.size)
     {
-        FAPI_ERR( "fapiHwpExecInitFile: ifRead: offset 0x%X + size 0x%X "
+        FAPI_ERR( "fapiHwpExecInitFile: ifRead: offset 0x%zX + size 0x%X "
                   "out of range",
                   io_ifInfo.offset,
                   i_size );
@@ -1015,7 +1015,7 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                 {
                     FAPI_ERR( "fapiHwpExecInitFile: "
                               "getAttr: target# %u is greater "
-                              "than number of targets %u passed in",
+                              "than number of targets %zu passed in",
                               i_targetNum,
                               i_ifData.pTarget->size() );
 
@@ -1434,14 +1434,16 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                     //Is this an associated target attribute
                     if ((l_colId & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
                     {
-                        uint16_t l_colTgtId = 0;
                         //Read the target Id
                         //Don't swap the bytes - it is parsed by bytes later in code.
                         ifRead(io_ifInfo, l_pCol, sizeof(uint16_t), false);
-                        l_colTgtId = (*l_pCol << 8) | (*(l_pCol+1));
-                        IF_DBG2( "loadScomSection: colTgtId[%u] 0x%02x",
-                                 j,
-                                 l_colTgtId );
+                        #ifdef HWPEXECINITFILE_DEBUG2
+                            uint16_t l_colTgtId = 0;
+                            l_colTgtId = (*l_pCol << 8) | (*(l_pCol+1));
+                            IF_DBG2( "loadScomSection: colTgtId[%u] 0x%02x",
+                                     j,
+                                     l_colTgtId );
+                        #endif
                     }
                     l_pCol += 2; //advance past the target Id
                 }
@@ -1981,7 +1983,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData, InitFileStats &i_stats )
     // loop early due to an error (l_rc != 0).
     if (l_scomList.size())
     {
-        FAPI_ERR( "fapiHwpExecInitFile: executeScoms: scom list size = %u, "
+        FAPI_ERR( "fapiHwpExecInitFile: executeScoms: scom list size = %zu, "
                   "expecting zero",
                   l_scomList.size() );
         l_scomList.clear();
@@ -2327,7 +2329,7 @@ void rpnDumpStack(rpnStack_t * i_rpnStack)
 
     if ( i_rpnStack != NULL )
     {
-        FAPI_IMP( ">> fapiHwpExecInitFile: rpnDumpStack: %p, stack size = %d",
+        FAPI_IMP( ">> fapiHwpExecInitFile: rpnDumpStack: %p, stack size = %zd",
                   i_rpnStack,
                   i_rpnStack->size() );
 

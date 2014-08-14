@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getSpdAttrAccessor.C,v 1.2 2014/06/27 19:46:27 thi Exp $
+// $Id: getSpdAttrAccessor.C,v 1.3 2014/08/05 15:04:52 kahnevan Exp $
 /**
  *  @file getSpdAttrAccessor.C
  *
@@ -66,7 +66,7 @@ fapi::ReturnCode checkSize(const fapi::getSpdAttr::Attr i_attr,
 
     if (i_actualSize != i_expectedSize)
     {
-        FAPI_ERR("getSpdAttrAccessor: Incorrect Attribute output buffer size %d:%d:%d",
+        FAPI_ERR("getSpdAttrAccessor: Incorrect Attribute output buffer size %d:%zd:%zd",
                  i_attr, i_actualSize, i_expectedSize);
         const fapi::getSpdAttr::Attr & ATTR_ID = i_attr;
         const size_t & ACTUAL_SIZE = i_actualSize;
