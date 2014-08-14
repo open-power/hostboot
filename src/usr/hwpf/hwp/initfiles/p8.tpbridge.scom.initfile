@@ -1,4 +1,4 @@
-#-- $Id: p8.tpbridge.scom.initfile,v 1.8 2014/03/27 18:02:14 bgeukes Exp $
+#-- $Id: p8.tpbridge.scom.initfile,v 1.9 2014/08/12 14:44:26 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -109,5 +109,5 @@ scom 0x02010947 {
 # EN FIR MASK
 scom 0x02010943 {
     bits,    scom_data;
-    0:63,    0x1FC0000000000000;
+    0:63,    0x5FC0000000000000;
 }
