@@ -354,13 +354,13 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         {
             // Check if Abus decofigures should be considered in algorithm
             bool l_doAbusDeconfig = pSys->getAttr<ATTR_DO_ABUS_DECONFIG>();
-            // Get all present nodes
-            TargetHandleList l_presNodes;
-            getEncResources(l_presNodes, TYPE_NODE, UTIL_FILTER_PRESENT);
+            // Get all functional nodes
+            TargetHandleList l_funcNodes;
+            getEncResources(l_funcNodes, TYPE_NODE, UTIL_FILTER_FUNCTIONAL);
 
             for (TargetHandleList::const_iterator
-                 l_nodesIter = l_presNodes.begin();
-                 l_nodesIter != l_presNodes.end();
+                 l_nodesIter = l_funcNodes.begin();
+                 l_nodesIter != l_funcNodes.end();
                  ++l_nodesIter)
             {
                 l_pErr = _invokeDeconfigureAssocProc(*l_nodesIter,
