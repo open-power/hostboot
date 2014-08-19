@@ -1039,7 +1039,7 @@ void DeconfigGard::_deconfigureByAssoc(
             _deconfigureByAssoc(*pChild, i_errlEid, i_runTimeDeconfigRule);
         } // for CHILD_BY_AFFINITY
 
-        // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS) and
+        // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
         // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
         // deconfigureByAssociation rules
         switch (i_target.getAttr<ATTR_TYPE>())
@@ -1299,6 +1299,7 @@ void DeconfigGard::_deconfigureByAssoc(
             // If target is a bus endpoint, deconfigure its peer
             case TYPE_XBUS:
             case TYPE_ABUS:
+            case TYPE_PSI:
             {
                 // Get peer endpoint target
                 const Target * l_pDstTarget = i_target.
