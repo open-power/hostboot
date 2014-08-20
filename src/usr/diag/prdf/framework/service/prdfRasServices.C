@@ -91,7 +91,9 @@ void ErrDataService::createInitialErrl( ATTENTION_TYPE i_attnType )
     iv_errl = new ErrlEntry(
                         ERRL_SEV_RECOVERED,
                         PRDF_RAS_SERVICES,
-                        0,
+                        PRDF_CODE_FAIL, //ERRL keys off of ReasonCode to set
+                                        //creator id.  ReasonCode will later be
+                                        //changed to reflect the actual one
                         PRDF_GET_UINT64_FROM_UINT32( 0, 0 ),
                         PRDF_GET_UINT64_FROM_UINT32( 0, 0 ) );
 }
