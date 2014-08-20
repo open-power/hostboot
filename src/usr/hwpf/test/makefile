@@ -34,6 +34,7 @@ TESTS += hwpftest.H
 TESTS += hwpisteperrortest.H
 TESTS += hwpMBvpdAccessorTest.H
 TESTS += hwpMvpdAccessorTest.H
+TESTS += hwpDQCompressionTest.H
 TESTS += $(if $(CONFIG_HTMGT),occAccessTest.H)
 SUBDIRS += runtime.d
 

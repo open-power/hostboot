@@ -22,11 +22,13 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+CFLAGS += -DDQCOMPRESSION_TEST=1
+
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/mvpd_accessors
 
 VPATH += ${HWPPATH}/mvpd_accessors
-
+VPATH += ${HWPPATH}/mvpd_accessors/compressionTool
 OBJS += getMvpdRing.o
 OBJS += getMBvpdRing.o
 OBJS += setMvpdRing.o
@@ -44,4 +46,4 @@ OBJS += getControlCapableData.o
 OBJS += accessMBvpdL4BankDelete.o
 OBJS += getDecompressedISDIMMAttrs.o
 OBJS += getISDIMMTOC4DAttrs.o
-
+OBJS += DQCompressionLib.o
