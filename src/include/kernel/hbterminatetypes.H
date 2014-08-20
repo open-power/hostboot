@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,14 +44,14 @@ struct HB_T_SRC_DataArea
         };
         uint32_t SRCword0;          /**< Full SRC word0 */
     };
-    uint32_t SRCword1;              /**< Full SRC word2 */
+     /**< Full SRC word1: Reserved by FSP SRCI comp */
     union{
         struct {
             uint32_t bpCCIN:16;     /**< BP CCIN*/
             uint32_t moduleID:8;    /**< Module ID  */
             uint32_t FSP:8;         /**< subsystem */
         };
-        uint32_t SRCword2;          /**< Full SRC word1 */
+        uint32_t SRCword2;          /**< Full SRC word2 */
     };
 
     uint32_t SRCword3;              /**< Full SRC word3 */
