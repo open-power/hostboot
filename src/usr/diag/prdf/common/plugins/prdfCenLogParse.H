@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -106,6 +108,16 @@ bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
  */
 bool parseBadDqBitmap( uint8_t * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser );
+
+/**
+ * @brief Parses TD Controller state data.
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ * @param i_sigId  The signature ID.
+ */
+bool parseTdCtlrStateData( uint8_t * i_buffer, uint32_t i_buflen,
+                           ErrlUsrParser & i_parser, uint32_t i_sigId );
 
 } // namespace FSP/HOSTBBOT
 } // end namespace PRDF

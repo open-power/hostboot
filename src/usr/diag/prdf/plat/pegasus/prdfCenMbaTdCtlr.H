@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,7 +43,9 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
   private: // constants, enums
 
     // Function pointers for maintenance command complete events.
-    typedef int32_t (CenMbaTdCtlr::*FUNCS)( STEP_CODE_DATA_STRUCT & io_sc );
+    typedef int32_t (CenMbaTdCtlr::*FUNCS)( STEP_CODE_DATA_STRUCT & io_sc,
+                                            const CenAddr & i_stopAddr,
+                                            const CenAddr & i_endAddr );
 
   public: // functions
 
@@ -70,13 +74,27 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
 
     int32_t initialize();
 
-    int32_t analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc );
-    int32_t analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc );
-    int32_t analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc );
-    int32_t analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc );
-    int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc );
-    int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc );
-    int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
+                                const CenAddr & i_stopAddr,
+                                const CenAddr & i_endAddr );
+    int32_t analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                              const CenAddr & i_stopAddr,
+                              const CenAddr & i_endAddr );
+    int32_t analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                              const CenAddr & i_stopAddr,
+                              const CenAddr & i_endAddr );
+    int32_t analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                              const CenAddr & i_stopAddr,
+                              const CenAddr & i_endAddr );
+    int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                              const CenAddr & i_stopAddr,
+                              const CenAddr & i_endAddr );
+    int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                              const CenAddr & i_stopAddr,
+                              const CenAddr & i_endAddr );
+    int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                              const CenAddr & i_stopAddr,
+                              const CenAddr & i_endAddr );
 
     int32_t startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc );
     int32_t startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc );

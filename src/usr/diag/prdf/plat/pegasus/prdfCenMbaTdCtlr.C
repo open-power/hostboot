@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -101,6 +103,26 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
+        // Get address in which the command stopped and the end address.
+        // Some analysis is dependent on if the maintenance command has reached
+        // the end address or stopped in the middle.
+        CenAddr stopAddr;
+        o_rc = getCenMaintStartAddr( iv_mbaChip, stopAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getCenMaintStartAddr() failed" );
+            break;
+        }
+
+        CenAddr endAddr;
+        o_rc = getCenMaintEndAddr( iv_mbaChip, endAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getCenMaintEndAddr() failed" );
+            break;
+        }
+
+        // Call analysis function based on state.
         if ( NULL == cv_cmdCompleteFuncs[iv_tdState] )
         {
             PRDF_ERR( PRDF_FUNC"Function for state %d not supported",
@@ -108,7 +130,8 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        o_rc = (this->*cv_cmdCompleteFuncs[iv_tdState])( io_sc );
+        o_rc = (this->*cv_cmdCompleteFuncs[iv_tdState])( io_sc, stopAddr,
+                                                         endAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"Failed to continue analysis" );
@@ -320,7 +343,9 @@ int32_t CenMbaTdCtlr::initialize()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
+                                          const CenAddr & i_stopAddr,
+                                          const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeCmdComplete] "
 
@@ -334,15 +359,9 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        // Get the rank on which maintenance command stopped
-        CenAddr addr;
-        o_rc = getCenMaintStartAddr( iv_mbaChip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"cenGetMaintAddr() failed" );
-            break;
-        }
-        iv_rank = CenRank( addr.getRank() );
+        // Initialize iv_rank. This must be done before calling other
+        // functions as they require iv_rank to be accurate.
+        iv_rank = CenRank( i_stopAddr.getRank() );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
@@ -399,7 +418,9 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeVcmPhase1] "
 
@@ -455,7 +476,9 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeVcmPhase2] "
 
@@ -538,7 +561,9 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeDsdPhase1] "
 
@@ -594,7 +619,9 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeDsdPhase2] "
 
@@ -670,7 +697,9 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeTpsPhase1] "
 
@@ -745,7 +774,9 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
+int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::analyzeTpsPhase2] "
 

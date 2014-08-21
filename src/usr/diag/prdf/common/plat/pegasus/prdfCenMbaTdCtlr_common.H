@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -200,52 +202,80 @@ class CenMbaTdCtlrCommon
      * function will check for any ECC errors, unverified chip marks from a
      * reset/reload, etc. and starts any TD procedures, if necessary.
      *
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
+                                        const CenAddr & i_stopAddr,
+                                        const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Analyzes VCM Phase 1 results and moves state machine.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                                      const CenAddr & i_stopAddr,
+                                      const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Analyzes VCM Phase 2 results and moves state machine.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                                      const CenAddr & i_stopAddr,
+                                      const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Analyzes DSD Phase 1 results and moves state machine.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                                      const CenAddr & i_stopAddr,
+                                      const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Analyzes DSD Phase 2 results and moves state machine.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                                      const CenAddr & i_stopAddr,
+                                      const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Analyzes Tps Phase 1 results and moves state machine.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
+                                      const CenAddr & i_stopAddr,
+                                      const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Analyzes Tps Phase 2 results and moves state machine.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc      The step code data struct.
+     * @param  i_stopAddr The address in which the command stopped.
+     * @param  i_endAddr  The address set in the MBMEA.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+    virtual int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc,
+                                      const CenAddr & i_stopAddr,
+                                      const CenAddr & i_endAddr ) = 0;
 
     /**
      * @brief  Starts VCM Phase 1.

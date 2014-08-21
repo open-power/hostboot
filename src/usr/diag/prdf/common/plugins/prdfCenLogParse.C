@@ -31,8 +31,9 @@
 
 #include <errlusrparser.H>
 #include <cstring>
+#include <UtilHash.H>
 #include <utilmem.H>
-#include  <iipconst.h>
+#include <iipconst.h>
 #include <prdfDramRepairUsrData.H>
 #include <prdfMemoryMruData.H>
 #include <prdfParserEnums.H>
@@ -2151,6 +2152,189 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
     }
 
     return rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
+                           ErrlUsrParser & i_parser, uint32_t i_sigId )
+{
+    bool o_rc = true;
+
+    if ( Util::hashString("TDCTLR_STATE_DATA_START") == i_sigId )
+        i_parser.PrintString( " TDCTLR_STATE_DATA_START", "" );
+    else if ( Util::hashString("TDCTLR_STATE_DATA_END") == i_sigId )
+        i_parser.PrintString( " TDCTLR_STATE_DATA_END", "" );
+
+    // These are copies of the enums in prdfCenMbaTdCtlr_common.H. This is not
+    // elegant nor robust. It is a quick fix simply to deliver this parser code
+    // quickly. We can make a better fix later.
+    enum
+    {
+        VCM_EVENT = 0,
+        TPS_EVENT,
+
+        NO_OP = 0,
+        VCM_PHASE_1,
+        VCM_PHASE_2,
+        DSD_PHASE_1,
+        DSD_PHASE_2,
+        TPS_PHASE_1,
+        TPS_PHASE_2,
+    };
+
+    uint32_t idx = 0;
+
+    do
+    {
+        if ( NULL == i_buffer ) { o_rc = false; break; }
+
+        //######################################################################
+        // Header data (4 bytes)
+        //######################################################################
+
+        if ( i_buflen < (idx + 4) ) { o_rc = false; break; }
+
+        uint8_t rescount    =  i_buffer[idx];
+        uint8_t badRankMask =  i_buffer[idx+1];
+        uint8_t state       = (i_buffer[idx+2] >> 4) & 0xf;
+        uint8_t mrnk        = (i_buffer[idx+2] >> 1) & 0x7;
+        uint8_t fetchMsk    =  i_buffer[idx+2]       & 0x1;
+        uint8_t srnk        = (i_buffer[idx+3] >> 5) & 0x7;
+
+        idx += 4;
+
+        const char * state_str = "           ";
+        switch ( state )
+        {
+            case NO_OP:       state_str = "NO_OP      "; break;
+            case VCM_PHASE_1: state_str = "VCM_PHASE_1"; break;
+            case VCM_PHASE_2: state_str = "VCM_PHASE_2"; break;
+            case DSD_PHASE_1: state_str = "DSD_PHASE_1"; break;
+            case DSD_PHASE_2: state_str = "DSD_PHASE_2"; break;
+            case TPS_PHASE_1: state_str = "TPS_PHASE_1"; break;
+            case TPS_PHASE_2: state_str = "TPS_PHASE_2"; break;
+        }
+
+        char rank_str[DATA_SIZE] = "    ";
+        switch ( state )
+        {
+            case VCM_PHASE_1: case VCM_PHASE_2:
+            case DSD_PHASE_1: case DSD_PHASE_2:
+                snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );         break;
+            case TPS_PHASE_1: case TPS_PHASE_2:
+                snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );  break;
+        }
+
+        i_parser.PrintString( "   TD State",                   state_str     );
+        i_parser.PrintString( "   Target Rank",                rank_str      );
+        i_parser.PrintNumber( "   Resume Counter",   "0x%02X", rescount      );
+        i_parser.PrintBool(   "   Fetch Attns Masked",         0 != fetchMsk );
+        i_parser.PrintNumber( "   Bad Master Ranks", "0x%02X", badRankMask   );
+
+        //######################################################################
+        // TD Request Queue (min 1 byte, max 33 bytes)
+        //######################################################################
+
+        if ( i_buflen < (idx + 1) ) { o_rc = false; break; }
+
+        uint8_t dataCount = i_buffer[idx] * 2;
+        idx += 1;
+
+        if ( i_buflen < (idx + dataCount) ) { o_rc = false; break; }
+
+        for ( uint8_t i = 0; i < dataCount; i += 2 )
+        {
+            uint8_t type =  i_buffer[idx+i];
+            uint8_t mr   = (i_buffer[idx+i+1] >> 5) & 0x7;
+            uint8_t sr   = (i_buffer[idx+i+1] >> 2) & 0x7;
+
+            const char * type_str = "         ";
+            switch ( type )
+            {
+                case VCM_EVENT: type_str = "VCM_EVENT"; break;
+                case TPS_EVENT: type_str = "TPS_EVENT"; break;
+            }
+
+            char rank_str[DATA_SIZE] = "    ";
+            switch ( type )
+            {
+                case VCM_EVENT:
+                    snprintf( rank_str, DATA_SIZE, "m%d  ", mr );       break;
+                case TPS_EVENT:
+                    snprintf( rank_str, DATA_SIZE, "m%ds%d", mr, sr );  break;
+            }
+
+            char data[DATA_SIZE] = "";
+            snprintf( data, DATA_SIZE, "%s on %s", type_str, rank_str );
+
+            i_parser.PrintString( "   TD Request", data );
+        }
+
+        idx += dataCount;
+
+        //######################################################################
+        // VCM Rank Data (min 1 byte, max 17 bytes)
+        //######################################################################
+
+        if ( i_buflen < (idx + 1) ) { o_rc = false; break; }
+
+        dataCount = i_buffer[idx] * 2;
+        idx += 1;
+
+        if ( i_buflen < (idx + dataCount) ) { o_rc = false; break; }
+
+        for ( uint8_t i = 0; i < dataCount; i += 2 )
+        {
+            uint8_t faCount =  i_buffer[idx+i];
+            uint8_t mr      = (i_buffer[idx+i+1] >> 5) & 0x7;
+
+            char data[DATA_SIZE] = "";
+            snprintf( data, DATA_SIZE,
+                      "rank=m%d    FA count=0x%02x",
+                      mr, faCount );
+
+            i_parser.PrintString( "   VCM Rank Data", data );
+        }
+
+        idx += dataCount;
+
+        //######################################################################
+        // TPS Rank Data (min 1 byte, max 129 bytes)
+        //######################################################################
+
+        if ( i_buflen < (idx + 1) ) { o_rc = false; break; }
+
+        dataCount = i_buffer[idx] * 2;
+        idx += 1;
+
+        if ( i_buflen < (idx + dataCount) ) { o_rc = false; break; }
+
+        for ( uint8_t i = 0; i < dataCount; i += 2 )
+        {
+            uint8_t faCount =  i_buffer[idx+i];
+            uint8_t mr      = (i_buffer[idx+i+1] >> 5) & 0x7;
+            uint8_t sr      = (i_buffer[idx+i+1] >> 2) & 0x7;
+            uint8_t isBan   = (i_buffer[idx+i+1] >> 1) & 0x1;
+
+            char data[DATA_SIZE] = "";
+            snprintf( data, DATA_SIZE,
+                      "rank=m%ds%d  FA count=0x%02x  banned=%s",
+                      mr, sr, faCount, (0 != isBan) ? "true" : "false" );
+
+            i_parser.PrintString( "   TPS Rank Data", data );
+        }
+
+        idx += dataCount;
+
+    } while (0);
+
+    if ( !o_rc )
+    {
+        i_parser.PrintHexDump(i_buffer, i_buflen);
+    }
+
+    return o_rc;
 }
 
 //------------------------------------------------------------------------------

@@ -370,6 +370,11 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseBadDqBitmap( sigData, sigDataSize, i_parser );
             }
+            else if ( (Util::hashString("TDCTLR_STATE_DATA_START") == sigId) ||
+                      (Util::hashString("TDCTLR_STATE_DATA_END")   == sigId) )
+            {
+                 parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
+            }
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
                 // Print one reg/line if the data size <= 8 bytes
