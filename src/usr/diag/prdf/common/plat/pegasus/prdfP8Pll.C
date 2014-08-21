@@ -920,23 +920,6 @@ int32_t AnalyzeParityErr( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, AnalyzeParityErr );
 
-/**
- * @brief  There are some FIR bits that will be cleared manually and must not be
- *         cleared by the framework code. The plugin forces the rule code to
- *         analyze a special copy of the FIR which will not automatically clear
- *         the FIR bits at attention.
- * @param  i_chip P8 chip.
- * @param  i_sc   The step code data struct.
- * @return PRD_NO_CLEAR_FIR_BITS always.
- */
-int32_t NoClearFirBits( ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return PRD_NO_CLEAR_FIR_BITS;
-}
-PRDF_PLUGIN_DEFINE( Proc, NoClearFirBits );
-
-
 } // end namespace Proc
 
 } // end namespace PRDF

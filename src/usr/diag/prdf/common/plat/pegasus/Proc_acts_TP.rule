@@ -1160,17 +1160,19 @@ actionclass analyzeMcs31
     analyze(connected(TYPE_MCS, 7));
 };
 
-# still need to capture PLL FIRs for debugging
+# This action is for the case where TP_LFIR[19] comes on
+# but PLL code fails to isolate to any PLL errors.  The
+# threshold is the same as PLL one 2 per 5 mins with
+# callout/gard the chip at threshold along with PLL scom
+# data captured.
 /** PCB Slave Internal parity error action */
 actionclass PcbSlaveInternalParity
 {
     capture(PllFIRs);
     calloutSelfHigh;
-    threshold5pday;
+    thresholdPll;
     funccall("AnalyzeParityErr");
     funccall("capturePllFfdc");
-    funccall("NoClearFirBits"); # Must be called last so return
-                                # code can be passed on to rule code.
 };
 
 # TOD Actions:

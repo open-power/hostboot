@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -66,7 +68,7 @@ const ThresholdResolution::ThresholdPolicy ThresholdResolution::cv_mnfgDefault
 
 const ThresholdResolution::ThresholdPolicy ThresholdResolution::cv_pllDefault
     = g_thresholdPFW.get(
-        ThresholdResolution::ThresholdPolicy(2,ThresholdResolution::ONE_MIN));
+      ThresholdResolution::ThresholdPolicy(2,5 * ThresholdResolution::ONE_MIN));
 
 //----------------------------------------------------------------------
 //  Macros
