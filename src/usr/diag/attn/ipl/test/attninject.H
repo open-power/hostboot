@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/hostboot/test/attninject.H $                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,72 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+#ifndef __TEST_ATTNINJECT_H
+#define __TEST_ATTNINJECT_H
 
 /**
- * @file attn.H
+ * @file attninject.H
  *
- * @brief HBATTN declarations.
+ * @brief
  */
 
-#include <errl/errlentry.H>
+#include "attntest.H"
 
 namespace ATTN
 {
 
 /**
- * @brief startService Start the HB attention handler service.
+ * @brief InjectSink Attention inject interface.
  *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
+ * Interface definition for classes wishing to allow injection.
  */
-errlHndl_t startService();
+class InjectSink
+{
+    public:
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
+        /**
+         * @brief dtor
+         */
+        virtual ~InjectSink() {}
 
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
+        /**
+         * @brief putAttentions
+         *
+         * Instruct the system to inject the specified attention.
+         *
+         * @param[in] i_list The attentions to inject.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        virtual errlHndl_t putAttentions(
+                const PRDF::AttnList & i_list) = 0;
+
+        /**
+         * @brief clearAttention
+         *
+         * Instruct the system clear the specified attention.
+         *
+         * @param[in] i_attn The attention to clear.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        virtual errlHndl_t clearAttention(
+                const PRDF::AttnData & i_attn) = 0;
+
+        /**
+         * @brief clearAllAttentions
+         *
+         * Instruct the system clear all instances of the specified attention.
+         *
+         * @param[in] i_attn The attention to clear.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        virtual errlHndl_t clearAllAttentions(
+                const PRDF::AttnData & i_attn) = 0;
+};
 }
 #endif

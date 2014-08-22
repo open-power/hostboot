@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/hostboot/test/attntesttrace.H $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,54 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+
+#ifndef __TEST_ATTNTESTTRACE_H
+#define __TEST_ATTNTESTTRACE_H
 
 /**
- * @file attn.H
+ * @file attntesttrace.H
  *
- * @brief HBATTN declarations.
+ * @brief Unit test for the attntrace module.
  */
 
-#include <errl/errlentry.H>
+#include "../../common/attnfwd.H"
+#include "../../common/attntrace.H"
+#include <cxxtest/TestSuite.H>
 
-namespace ATTN
+/**
+ * @brief AttnTraceTest Unit test for the attntrace module.
+ */
+class AttnTraceTest : public CxxTest::TestSuite
 {
+    public:
 
-/**
- * @brief startService Start the HB attention handler service.
- *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t startService();
+        /**
+         * @brief testTrace Unit test for ATTN trace
+         *        macros.
+         */
+        void testTrace(void)
+        {
+            using namespace ATTN;
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
+            TS_TRACE(ENTER_MRK "testTrace");
 
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
-}
+            ATTN_FAST("attn trace unit test");
+            ATTN_FAST("attn trace unit test: %p", 0);
+            ATTN_FAST("attn trace unit test: %d", 1234);
+
+            ATTN_DBG("attn trace unit test");
+            ATTN_DBG("attn trace unit test: %p", 0);
+            ATTN_DBG("attn trace unit test: %d", 1234);
+
+            ATTN_ERR("attn trace unit test");
+            ATTN_ERR("attn trace unit test: %p", 0);
+            ATTN_ERR("attn trace unit test: %d", 1234);
+
+            ATTN_SLOW("attn trace unit test");
+            ATTN_SLOW("attn trace unit test: %p", 0);
+            ATTN_SLOW("attn trace unit test: %d", 1234);
+
+            TS_TRACE(EXIT_MRK "testTrace");
+        }
+};
 #endif

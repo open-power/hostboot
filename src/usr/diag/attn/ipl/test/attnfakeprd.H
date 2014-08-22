@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/hostboot/test/attnfakeprd.H $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,66 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+#ifndef __TEST_ATTNFAKEPRD_H
+#define __TEST_ATTNFAKEPRD_H
 
 /**
- * @file attn.H
+ * @file attnfakeprd.H
  *
- * @brief HBATTN declarations.
+ * @brief HBATTN fake PRD class definitions.
  */
 
-#include <errl/errlentry.H>
+#include "attntest.H"
+#include "../../common/attnprd.H"
 
 namespace ATTN
 {
 
 /**
- * @brief startService Start the HB attention handler service.
+ * @brief FakePrd
  *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
+ * Basic PRD implementation that eventually clears every attention it
+ * receives.
  */
-errlHndl_t startService();
+class FakePrd : public PrdImpl
+{
+    public:
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
+        /**
+         * @brief ctor
+         *
+         * @param[in] i_injectSink The system where attentions
+         *                     should be cleared.
+         */
+        explicit FakePrd(InjectSink & i_injectSink);
 
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
+        /**
+         * @brief dtor
+         */
+        ~FakePrd() {}
+
+        /**
+         * @brief callPrd Simulate a call to PRD.
+         *
+         * Sleeps random intervals, to simulate PRD processing times.  Periodically
+         * does not clear some attentions, to simulate real PRD behavior.
+         *
+         * @param[in] i_attentions List of attentions for PRD to analyze.
+         *
+         * @return errlHndl_t Error log.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t callPrd(const AttentionList & i_attentions);
+
+    private:
+
+        /**
+         * @brief iv_injectSink The system where attentions should
+         *                  be cleared.
+         */
+        InjectSink * iv_injectSink;
+};
 }
 #endif

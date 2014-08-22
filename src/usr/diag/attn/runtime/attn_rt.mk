@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/attn/makefile $
+# $Source: src/usr/diag/attn/runtime/attn_common.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,9 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
 
-SUBDIRS += ipl.d
-SUBDIRS += runtime.d
-
-include ${ROOTPATH}/config.mk
+ATTN_RT_OBJS += attn_rt.o

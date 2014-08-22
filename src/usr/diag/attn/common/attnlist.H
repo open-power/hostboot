@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/common/attnlist.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,66 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+#ifndef __ATTN_ATTNLIST_H
+#define __ATTN_ATTNLIST_H
 
 /**
- * @file attn.H
+ * @file attnlist.H
  *
- * @brief HBATTN declarations.
+ * @brief HBATTN AttentionList definition.
  */
 
-#include <errl/errlentry.H>
+#include "common/attnops.H"
+#include "common/attnfwd.H"
 
 namespace ATTN
 {
 
 /**
- * @brief startService Start the HB attention handler service.
+ * @brief AttentionList Class definition.
  *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
+ * Container for Attentions.  Attentions
+ * kept sorted by attention type priority.
  */
-errlHndl_t startService();
+class AttentionList : public std::vector<Attention>
+{
+    public:
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
+        /**
+         * @brief add Insert a new Attention element.
+         *
+         * @param[in] i_attn The attention element to add.
+         */
+        void add(const Attention & i_attn);
 
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
+        /**
+         * @brief getAttnList Convert to PRDF::AttnList.
+         *
+         * Elements are placed such that attentions with
+         * higher priority appear before those with
+         * lower priority.
+         *
+         * @param[out] o_dest Where PRDF::AttnData elements are placed.
+         */
+        void getAttnList(PRDF::AttnList & o_dest) const;
+
+        /**
+         * @brief forEach Invoke a functor on each element.
+         *
+         * @param[in] i_functor The functor to invoke.
+         *
+         * @return Functor The functor.
+         */
+        template<typename Functor>
+            Functor forEach(Functor i_functor) const
+            {
+                return std::for_each(begin(), end(), i_functor);
+            }
+
+        /**
+         * @brief AttnListTest Provide access to unit test.
+         */
+        friend class ::AttnListTest;
+};
 }
 #endif

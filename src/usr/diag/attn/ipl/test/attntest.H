@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/hostboot/test/attntest.H $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,67 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+#ifndef __TEST_ATTNTEST_H
+#define __TEST_ATTNTEST_H
 
 /**
- * @file attn.H
+ * @file attntest.H
  *
- * @brief HBATTN declarations.
+ * @brief HBATTN test utility function declarations.
  */
 
-#include <errl/errlentry.H>
+#include "../../common/attnfwd.H"
+#include <map>
 
 namespace ATTN
 {
 
-/**
- * @brief startService Start the HB attention handler service.
- *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t startService();
+class FakePresenter;
+struct AttnDataSwo;
+struct AttnDataEq;
+class FakeSystem;
+class FakeReg;
+class FakeSource;
+class InjectSink;
 
 /**
- * @brief stopService Stop the HB attention handler service.
+ * @brief randint Generate random integer between bounds.
  *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
+ * @param[in] i_min The minimum bound.
+ * @param[in] i_max The maximum bound.
  *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
+ * @return uint64_t Generated random integer.
  */
-errlHndl_t stopService();
+uint64_t randint(uint64_t i_min, uint64_t i_max);
 
 /**
- * @brief checkForIplAttentions
+ * @brief generate_random Issue a magic instruction
+ *        with a hap callback that fetches a random
+ *        number from the simics host.
  *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
+ * @return uint64_t Random integer from simics host.
  */
-errlHndl_t checkForIplAttentions();
+extern "C" uint64_t generate_random();
+
+/**
+ * @brief AttnDataMap
+ *
+ * AttnData as key map template.
+ */
+template <typename T>
+    class AttnDataMap :
+        public std::map<PRDF::AttnData, T, AttnDataSwo>
+    {
+
+    };
+
+/**
+ * @brief getRandomAttentionType
+ *
+ * Obtain a random attention type.
+ *
+ * @return The generated attention type.
+ */
+PRDF::ATTENTION_VALUE_TYPE getRandomAttentionType();
 }
 #endif

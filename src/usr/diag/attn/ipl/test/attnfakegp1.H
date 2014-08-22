@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/hostboot/test/attnfakegp1.H $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,67 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+#ifndef __TEST_ATTNFAKEGP1_H
+#define __TEST_ATTNFAKEGP1_H
 
 /**
- * @file attn.H
+ * @file attnfakegp1.H
  *
- * @brief HBATTN declarations.
+ * @brief HBATTN fake Gp1 register class definitions.
  */
 
-#include <errl/errlentry.H>
+#include "attnfakeelement.H"
 
 namespace ATTN
 {
 
 /**
- * @brief startService Start the HB attention handler service.
+ * @brief FakeGp1 Fake GP1 class definition.
  *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
+ * Attach logic to MCI FIR register modifications.
  */
-errlHndl_t startService();
+class FakeGp1 : public FakeReg
+{
+    public:
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
+        /**
+         * @brief dtor
+         */
+        ~FakeGp1() {}
 
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
+        /**
+         * @brief install
+         *
+         * Register this object with the provided system for
+         * the appropriate callbacks.
+         *
+         * @param[in] i_system The system in which to register callbacks.
+         */
+        void install(FakeSystem & i_system);
+
+    private:
+
+        /**
+         * @brief processPutReg Process modified register content.
+         *
+         * Fake implemenation of gp1.  Turns bits on in GP1 when
+         * MCI firs report attentions.
+         *
+         * @param[in] i_sys System that modified register content.
+         * @param[in] i_target Target whose registers were modified.
+         * @param[in] i_address Address of register that was modified.
+         * @param[in] i_new Register content after modification.
+         * @param[in] i_old Register content before modification.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t processPutReg(
+                FakeSystem & i_sys,
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_new,
+                uint64_t i_old);
+};
 }
 #endif

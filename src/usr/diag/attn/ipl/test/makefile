@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/attn/makefile $
+# $Source: src/usr/diag/attn/hostboot/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2014
 # [+] International Business Machines Corp.
 #
 #
@@ -22,9 +22,27 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
+ROOTPATH = ../../../../../..
 
-SUBDIRS += ipl.d
-SUBDIRS += runtime.d
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
+CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
+
+OBJS += attnfakesys.o
+OBJS += attntest.o
+OBJS += attnrand.o
+OBJS += attnfakepresenter.o
+OBJS += attnfakeprd.o
+OBJS += attnfaketarget.o
+OBJS += attnrandsource.o
+OBJS += attnfakegfir.o
+OBJS += attnfakeipoll.o
+OBJS += attnvalidate.o
+OBJS += attnfakemcs.o
+OBJS += attnfakegp1.o
+OBJS += attnmeminject.o
+
+MODULE = testattn
+
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

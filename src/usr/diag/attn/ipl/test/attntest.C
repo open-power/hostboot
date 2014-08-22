@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/hostboot/test/attntest.C $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,87 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
-
 /**
- * @file attn.H
+ * @file attntest.C
  *
- * @brief HBATTN declarations.
+ * @brief HBATTN test utility function definitions.
  */
 
-#include <errl/errlentry.H>
+#include <arch/ppc.H>
+#include <algorithm>
+#include "attntest.H"
+#include "../../common/attntrace.H"
+#include "../../common/attntarget.H"
+
+using namespace std;
+using namespace PRDF;
+using namespace TARGETING;
 
 namespace ATTN
 {
 
-/**
- * @brief startService Start the HB attention handler service.
- *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t startService();
+uint64_t randint(uint64_t i_min, uint64_t i_max)
+{
+    static bool setup = false;
+    static uint64_t seed = 0;
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
+    if(!setup)
+    {
+        uint64_t hapSeed = generate_random();
 
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
+        if(!hapSeed)
+        {
+            ATTN_DBG("falling back to timebase seed for PRNG");
+        }
+        else
+        {
+            ATTN_DBG("hapseed: %d", hapSeed);
+        }
+
+        seed = hapSeed ? hapSeed : getTB() + 1;
+
+        setup = true;
+    }
+
+    uint64_t lo, hi;
+
+    seed = seed * seed;
+    lo = (seed & 0x0000ffffffff0000ull) >> 16;
+    hi = (seed & 0x000000000000ffffull) << 32;
+    hi |= (seed & 0xffff000000000000ull);
+    seed = (lo | hi) + 2;
+
+    static const uint64_t randMax = 0xfffffffffffffffe;
+    uint64_t min = i_min, max = i_max;
+
+    if(i_min > i_max)
+    {
+        swap(min, max);
+    }
+
+    if(max > randMax)
+    {
+        max = randMax;
+    }
+
+    return ((lo | hi) % (max +1 - min)) + min;
 }
-#endif
+
+ATTENTION_VALUE_TYPE getRandomAttentionType()
+{
+    ATTENTION_VALUE_TYPE a;
+
+    switch (randint(1, 3))
+    {
+        case 2:
+            a = RECOVERABLE;
+            break;
+        case 3:
+        default:
+            a = SPECIAL;
+            break;
+    };
+
+    return a;
+}
+}

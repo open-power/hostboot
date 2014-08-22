@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/attn/attn.H $                            */
+/* $Source: src/usr/diag/attn/common/attntrace.H $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,55 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ATTN_ATTN_H
-#define __ATTN_ATTN_H
+
+#ifndef __ATTN_ATTNTRACE_H
+#define __ATTN_ATTNTRACE_H
 
 /**
- * @file attn.H
+ * @file attntrace.H
  *
- * @brief HBATTN declarations.
+ * @brief HBATTN trace macros.
  */
 
-#include <errl/errlentry.H>
+#include <trace/interface.H>
 
 namespace ATTN
 {
 
-/**
- * @brief startService Start the HB attention handler service.
- *
- * Registers with Interrupt Service for callback for attention
- *          or host type interrupts.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t startService();
+extern trace_desc_t * fastTd;
+extern trace_desc_t * slowTd;
 
-/**
- * @brief stopService Stop the HB attention handler service.
- *
- * Stop background threads and unregister from Interrupt Service
- * Attention or host type interrupt messages.  Waits for completion of
- * any in-progress attention analysis.
- *
- * @post All resources reclaimed, no outstanding attentions.
- *
- * @retval[0] No error occurred.
- * @retval[1] Unexpected error occurred.
- */
-errlHndl_t stopService();
-
-/**
- * @brief checkForIplAttentions
- *
- * Check each proc target for any attentions
- * and invoke PRD for analysis.  Will loop indefinitely
- * until all chips stop reporting attentions.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForIplAttentions();
 }
+
+#define ATTN_DBG( _fmt_, _args_...) TRACDCOMP( ATTN::fastTd, INFO_MRK""_fmt_, ##_args_)
+#define ATTN_FAST( _fmt_, _args_...) TRACFCOMP( ATTN::fastTd, INFO_MRK""_fmt_, ##_args_)
+#define ATTN_SLOW( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, INFO_MRK""_fmt_, ##_args_)
+#define ATTN_ERR( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, ERR_MRK""_fmt_, ##_args_)
+
 #endif
