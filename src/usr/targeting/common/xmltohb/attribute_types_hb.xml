@@ -306,20 +306,23 @@
     <id>HB_TARGET_SCOMABLE</id>
     <description>
         This attribute indicates if the target can be SCOMed.
-        Set by check_chiplet_states HWP during DUMP process.
+        It's used in FSP only but declared here because the attribute
+        is defined in chip_attributes.xml, which is a common file
+        between FSP and HB (without this, HB will get a compilation error).
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x1</default>
+            <default>0x0</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_TARGET_SCOMABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <hbOnly/>
 </attribute>
 
 </attributes>
