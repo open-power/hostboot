@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_dimm_power_test.H,v 1.1 2013/04/18 14:14:50 joabhend Exp $
+// $Id: mss_dimm_power_test.H,v 1.2 2014/08/27 20:13:20 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_dimm_power_test.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -45,7 +45,7 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //   1.1   | joabhend |04-APR-13| First Draft.
-
+//   1.2   | whs      |27-AUG-14| Update Shell to new interface
 
 
 #ifndef MSS_DIMM_POWER_TEST_H_
@@ -60,15 +60,30 @@
 //  Defines
 //----------------------------------------------------------------------
 
+    const uint32_t ALGORITHM_RESET = 0; // invalid algorithm version
+
+    // change this value for each new algorithm version
+    const uint32_t ALGORITHM_VERSION = 1;
+
 //----------------------------------------------------------------------
 //  ENUMs
 //----------------------------------------------------------------------
+
+    enum mss_dimm_power_test_command
+    {
+        RETURN_ALGORITHM_VERSION, // return hwp algorithm version
+        CALCULATE,                // calculate and save power curve
+    };
 
 //----------------------------------------------------------------------
 //  Data Types
 //----------------------------------------------------------------------
 
-typedef fapi::ReturnCode (*mss_dimm_power_test_FP_t)(const fapi::Target & i_target);
+typedef fapi::ReturnCode (*mss_dimm_power_test_FP_t)
+                   (std::vector<fapi::Target> &,
+                    const    mss_dimm_power_test_command i_command,
+                    uint32_t &io_version,
+                    bool     i_recalc);
 
 extern "C"
 {
@@ -76,12 +91,29 @@ extern "C"
 /**
  * @brief mss_dimm_power_test procedure. Run power test on ISDIMMs to determine max power draw
  *
- * @param[in]  i_target  Reference to centaur.mba target
+ * @param[in]   std::vector<fapi::Target> l_targets  Reference to vector
+ *                            of Centaur Targets in a particular power domain
+ *          RETURN_ALGORITHM_VERSION - empty list
+ *          CALCULATE - list of mem buff targets with same vme_id
+ * @param[in]      i_command  mss_dimm_power_test_command
+ * @param[in,out]  io_version
+ *          RETURN_ALGORITHM_VERSION -input is persistent algorithm version
+ *                                    output is current hwp algorithm version
+ *          CALCULATE - NA
+ * @param[in]      i_recalc   advise a recalculation
+ *          RETURN_ALGORITHM_VERSION - NA
+ *          CALCULATE - true: versions don't match or hardware has changed
+                        false: versions match and no hardware has changed
  *
  * @return ReturnCode
  */
 
-    fapi::ReturnCode mss_dimm_power_test(const fapi::Target & i_target);
+    fapi::ReturnCode mss_dimm_power_test(
+                   std::vector<fapi::Target> & i_targets,
+                   const mss_dimm_power_test_command i_command,
+                   uint32_t &io_version,
+                   bool     i_recalc);
+
 
 } // extern "C"
 

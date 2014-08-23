@@ -985,6 +985,10 @@
     <enumerator>
        <name>HOSTSVC_HBEL</name>
        <value>0x00000008</value>
+    </enumerator>
+    <enumerator>
+       <name>DIMM_POWER_TEST</name>
+       <value>0x00000010</value>
    </enumerator>
 </enumerationType>
 
@@ -8602,6 +8606,22 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 </attribute>
 
 <attribute>
+    <id>MSS_DRAMINIT_RESET_DISABLE</id>
+    <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DRAMINIT_RESET_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MSS_MEM_IPL_COMPLETE</id>
     <description>A numerical number indicating if the memory procedures are complete.  written by mss_setup_bars when the bars are now functional in the processor.  </description>
     <simpleType>
@@ -14265,6 +14285,60 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<!-- TODO RTC: 113491 ISDIMM DQ data decompression -->
+<attribute>
+    <id>ATTR_VPD_ISDIMMTOC4DQ</id>
+    <description>
+        ISDIMM DQ mapping that comes from QX keyword on the CDIMM VPD.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>4, 80</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_ISDIMMTOC4DQ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- TODO RTC: 113491 ISDIMM DQ data decompression -->
+<attribute>
+    <id>ATTR_VPD_ISDIMMTOC4DQS</id>
+    <description>
+        ISDIMM DQQ mapping that comes from QS keyword on the CDIMM VPD.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>4, 20</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_ISDIMMTOC4DQS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id>
+    <description>Version of algorithm used to calculate ISDIMM power curves
+    </description>
+    <simpleType>
+        <uint32_t><default>0</default></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 </attributes>

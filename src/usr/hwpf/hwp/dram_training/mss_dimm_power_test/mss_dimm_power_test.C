@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_dimm_power_test.C,v 1.1 2013/04/18 14:14:10 joabhend Exp $
+// $Id: mss_dimm_power_test.C,v 1.4 2014/09/08 21:15:02 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_dimm_power_test.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -48,6 +48,7 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //   1.1   | joabhend |04-APR-13| Shell code - Only returns success
+//   1.2   | whs      |27-AUG-14| Update Shell to new interface
 
 
 
@@ -63,22 +64,94 @@ extern "C" {
 
 
    // Procedures in this file
-   fapi::ReturnCode mss_dimm_power_test(const fapi::Target & i_target);
-   
-   
+fapi::ReturnCode mss_dimm_power_test(
+                   std::vector<fapi::Target> & i_targets,
+                   const mss_dimm_power_test_command i_command,
+                   uint32_t &io_version,
+                   bool     i_recalc);
 //******************************************************************************
 //
 //******************************************************************************
-   
-fapi::ReturnCode mss_dimm_power_test(const fapi::Target & i_target)
+fapi::ReturnCode mss_dimm_power_test(
+                   std::vector<fapi::Target> & i_targets,
+                   const mss_dimm_power_test_command i_command,
+                   uint32_t &io_version,
+                   bool     i_recalc)
 {
-   // Target is centaur.mba
-    
    fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
-   
+
+
+    FAPI_IMP ("mss_dimm_power_test command=%d",i_command);
+    switch (i_command)
+    {
+
+        // return calculation dependencies hashed into an algorithm version
+        case RETURN_ALGORITHM_VERSION:
+            {
+                struct calculation_dependencies  // example dependencies
+                {
+                    uint8_t   mrwDimmPowerCurvePercentUplift;
+                    uint32_t  mrwMemThrottleDenominator;
+                    uint32_t  mrwMaxDramDataBusUtil;
+                    uint32_t  algorithmVersion;
+                } cd;
+
+                io_version = ALGORITHM_RESET; // initialize to invalid version
+
+                l_rc = FAPI_ATTR_GET(ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT,
+                                      NULL, cd.mrwDimmPowerCurvePercentUplift);
+                if (l_rc) break; // exit with error
+
+                l_rc = FAPI_ATTR_GET(ATTR_MRW_MEM_THROTTLE_DENOMINATOR,
+                                      NULL, cd.mrwMemThrottleDenominator);
+                if (l_rc) break; // exit with error
+
+                l_rc = FAPI_ATTR_GET(ATTR_MRW_MAX_DRAM_DATABUS_UTIL,
+                                      NULL, cd.mrwMaxDramDataBusUtil);
+                if (l_rc) break; // exit with error
+
+                cd.algorithmVersion = ALGORITHM_VERSION;
+
+                // Hwp writer: insert hash of dependent attributes
+                //       and version here ..
+                // io_verion = FAPI_GEN_HASH(FAPI::HASH::CRC32,
+                //                           cd,
+                //                           sizeof(cd);
+                io_version = ALGORITHM_VERSION; // fake return value for testing
+                                               // Hwp writer: replace with
+                                               // hashed value.
+            }
+            break;
+
+        // calculate power curves if advised due to algorithm change or hw
+        // change. Validate existing values if not advised, and recalculate
+        // if necessary.
+        case CALCULATE:
+            {
+                bool l_recalc = i_recalc;
+                // validate values if not advised to recalculate
+                if (!l_recalc)
+                {
+                    // Hwp writer: insert validation here
+                    FAPI_DBG ("mss_dimm_power_test validate power curves");
+                    l_recalc = true;  //if necessary to recalculate
+                }
+                if (l_recalc)
+                {
+                    //Hwp writer: insert calculation of power curve values
+                    FAPI_DBG ("mss_dimm_power_test calculate power curves");
+                }
+            }
+            break;
+        default:
+            {
+                FAPI_ERR ("mss_dimm_power_test unexpected command %d",
+                                                             i_command);
+                // Hwp writer: l_rc = error
+            }
+   }
    return l_rc;
 }
-   
 
 } //end extern C
 

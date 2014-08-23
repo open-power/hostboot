@@ -37,6 +37,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <map>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -795,12 +796,166 @@ void*    call_mss_draminit_mc( void *io_pArgs )
                     "SUCCESS :  mss_draminit_mc HWP( )" );
         }
 
-    } // End memBuf loop
+    } // End; memBuf loop
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
     return l_stepError.getErrorHandle();
 }
+
+//
+//  support functions for mss_dimm_power_test wrapper
+//
+typedef bool (*mss_dimm_power_test_helper_t) (TARGETING::Target*, bool &);
+
+// helper function to set the change bit for present non-functional targets
+bool mss_dimm_power_test_set (TARGETING::Target* i_target,
+                                bool &o_keepChecking)
+{
+    bool l_changed = false;
+    o_keepChecking = true;
+
+    if ((!i_target->getAttr<ATTR_HWAS_STATE>().functional) &&
+                (i_target->getAttr<ATTR_HWAS_STATE>().present))
+    {
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "===== membuf %.8x non func change flag set",
+                          get_huid(i_target));
+
+        update_hwas_changed_mask( i_target,
+                                HWAS_CHANGED_BIT_DIMM_POWER_TEST);
+
+        l_changed = true;
+    }
+    return l_changed;
+}
+
+// helper function to check if change bit set, stop checking if found
+bool mss_dimm_power_test_check (TARGETING::Target* i_target,
+                                bool &o_keepChecking)
+{
+    bool l_changed = false;
+    o_keepChecking = true;
+
+    ATTR_HWAS_STATE_CHANGED_FLAG_type hwChangeFlag;
+    hwChangeFlag=i_target->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+    if(HWAS_CHANGED_BIT_DIMM_POWER_TEST & hwChangeFlag)
+    {
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "===== membuf %.8x change flag set",
+                          get_huid(i_target));
+        l_changed = true;
+        o_keepChecking = false;
+    }
+    return l_changed;
+};
+
+// helpfer function to clear any set change bits
+bool mss_dimm_power_test_clear (TARGETING::Target* i_target,
+                                bool &o_keepChecking)
+{
+    bool l_changed = false;
+    o_keepChecking = true;
+
+    ATTR_HWAS_STATE_CHANGED_FLAG_type hwChangeFlag;
+    hwChangeFlag=i_target->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+    if(HWAS_CHANGED_BIT_DIMM_POWER_TEST & hwChangeFlag)
+    {
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "===== membuf %.8x clear set change bit",
+                          get_huid(i_target));
+
+        clear_hwas_changed_bit( i_target,
+                                HWAS_CHANGED_BIT_DIMM_POWER_TEST);
+
+        l_changed = true;
+    }
+    return l_changed;
+};
+
+//  Process change bits on Membuf, MBA, and associated DIMMs
+//  i_membufTargetList - list of membufs to transverse
+//  i_cmd - mss_dimm_power_test_cmds
+
+enum mss_dimm_power_test_cmds
+{
+    MSS_DIMM_POWER_TEST_SETNONFUNCTIONAL, //set change if present non-functional
+                                          // return true if any are set
+    MSS_DIMM_POWER_TEST_CHECK,            //check if any change bits set
+                                          // return true if any set
+    MSS_DIMM_POWER_TEST_CLEAR,            //clear all change bits
+                                          // return true if any cleared
+};
+bool  mss_dimm_power_test_process_change_bits (
+                        TARGETING::TargetHandleList * i_pMembufTargetList,
+                        mss_dimm_power_test_cmds i_cmd)
+{
+    bool l_change = false;    // return value. Found any?
+    bool l_keepChecking = true; // loop exit control
+    mss_dimm_power_test_helper_t (l_pFunction) = &mss_dimm_power_test_check;
+
+    bool l_functional = true; //default to functional search
+
+    // set up function controls
+    switch (i_cmd)
+    {
+        case MSS_DIMM_POWER_TEST_SETNONFUNCTIONAL:
+            l_functional = false; // get all targets, not just functional
+            l_pFunction = &mss_dimm_power_test_set;
+            break;
+        case MSS_DIMM_POWER_TEST_CHECK:
+            l_pFunction = &mss_dimm_power_test_check;
+            break;
+        case MSS_DIMM_POWER_TEST_CLEAR:
+            l_pFunction = &mss_dimm_power_test_clear;
+            break;
+    }
+
+    // process membufs and downstream MBAs and DIMMs
+    for (TargetHandleList::const_iterator
+                l_membuf_iter = (*i_pMembufTargetList).begin();
+                l_membuf_iter != (*i_pMembufTargetList).end();
+                ++l_membuf_iter)
+    {
+        l_change |= (*l_pFunction) (*l_membuf_iter,l_keepChecking);
+        if (!l_keepChecking) break;
+
+        // process MBAs and downstream DIMMs
+        TARGETING::TargetHandleList l_mbaTargetList;
+        getChildAffinityTargets(l_mbaTargetList,*l_membuf_iter,
+                            CLASS_UNIT,TYPE_MBA,
+                            l_functional);
+        for (TargetHandleList::const_iterator
+                    l_mba_iter = l_mbaTargetList.begin();
+                    l_mba_iter != l_mbaTargetList.end();
+                    ++l_mba_iter)
+        {
+            l_change |= (*l_pFunction) (*l_mba_iter,l_keepChecking);
+            if (!l_keepChecking) break;
+
+            // process DIMMs
+            TARGETING::TargetHandleList l_dimmTargetList;
+            getChildAffinityTargets(l_dimmTargetList, *l_mba_iter,
+                                CLASS_LOGICAL_CARD, TYPE_DIMM,
+                                l_functional);
+            for (TargetHandleList::const_iterator
+                        l_dimm_iter = l_dimmTargetList.begin();
+                        l_dimm_iter != l_dimmTargetList.end();
+                        ++l_dimm_iter)
+            {
+                l_change |= (*l_pFunction) (*l_dimm_iter,l_keepChecking);
+                if (!l_keepChecking) break;
+            } // loop on DIMMS associated with MBA
+            if (!l_keepChecking) break; // no need to check any further
+        }  // loop on MBAs off membuf
+        if (!l_keepChecking) break; // no need to check any further
+    } // loop on passed mem buf list
+
+    return l_change;
+}
+
 //
 //  Wrapper function to call mss_dimm_power_test
 //
@@ -809,72 +964,189 @@ void*    call_mss_dimm_power_test( void *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_dimm_power_test entry" );
 
-    errlHndl_t l_err = NULL;
-
-    // get a list of mba targets
     IStepError l_stepError;
 
-    TARGETING::TargetHandleList l_mbaTargetList;
-    TARGETING::TargetHandleList::const_iterator pRangeLimitItr;
-    TARGETING::TargetHandleList::const_iterator pTargetItr;
-
-    // Get all MBA targets
-    getAllChiplets(l_mbaTargetList, TYPE_MBA, true);
-
-    // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = l_mbaTargetList.size();
-    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
+    errlHndl_t l_err = NULL;
+    //----------------------------------------------------------------------
+    // only calculate the ISDIMM power curves if needed.
+    // The version of the calculation algorithm and dependent attribute
+    // values are hashed and saved to see if anything has changed.
+    // If the saved version has changed, then a recalcuation is advised.
+    // If hardware has changed, then recalcuation is advised.
+    //----------------------------------------------------------------------
+    do
     {
-        // limit the range to VPO_NUM_OF_MBAS_TO_RUN
-        pRangeLimitItr = l_mbaTargetList.begin() + VPO_NUM_OF_MBAS_TO_RUN;
-    }
-    else
-    {
-        // process all targets
-        pRangeLimitItr = l_mbaTargetList.end();
+        uint32_t l_persistentAlgorithmVersion = ALGORITHM_RESET;
+        uint32_t l_hwpAlgorithmVersion = ALGORITHM_RESET;
+        bool     l_versionChange = false;
+        bool     l_anyCalculationErrors = false;
 
-    }
-    // process each target till we reach the limit set above
-    for (  TARGETING::TargetHandleList::const_iterator pTargetItr
-           = l_mbaTargetList.begin();
-           pTargetItr != pRangeLimitItr; pTargetItr++)
-    {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = *pTargetItr;
+        // Get saved algorithm version
+        TargetHandle_t top = 0;
+        targetService().getTopLevelTarget(top);
 
-        // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running mss_dimm_power_test HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
+        l_persistentAlgorithmVersion =
+           top->getAttr<TARGETING::ATTR_ISDIMM_POWER_CURVE_ALGORITHM_VERSION>();
 
-        // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
-                        (const_cast<TARGETING::Target*>(l_mba_target)) );
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_mss_dimm_power_test entry persistent algorithm version=%d",
+              l_persistentAlgorithmVersion );
 
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_err, mss_dimm_power_test, l_fapi_mba_target);
-
+        // Get current hwp algorithm version
+        std::vector<fapi::Target> l_membufFapiTargets;
+        bool l_dc = false;
+        FAPI_INVOKE_HWP ( l_err,
+                          mss_dimm_power_test,
+                          l_membufFapiTargets,  // empty list
+                          RETURN_ALGORITHM_VERSION,
+                          l_hwpAlgorithmVersion,
+                          l_dc)   // don't care parm
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X: mss_dimm_power_test HWP returns error",
+                 "ERROR 0x%.8X: call_mss_dimm_power_test HWP get version error",
+                 l_err->reasonCode());
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails(l_err);
+            // Commit Error
+            errlCommit(l_err, HWPF_COMP_ID);
+
+            break; // fail istep
+        }
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_mss_dimm_power_test entry hwp algorithm version=%d",
+                l_hwpAlgorithmVersion );
+
+        // advise hwp to recalculate if stored version does not match current
+        l_versionChange = l_persistentAlgorithmVersion != l_hwpAlgorithmVersion;
+
+        //----------------------------------------------------------------------
+        // Set the change bit for all present non-functional Membufs, MBA, and
+        // DIMMs. In case they come back, want to be sure to recalculate
+        //----------------------------------------------------------------------
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF,false);
+
+        mss_dimm_power_test_process_change_bits (
+                              &l_membufTargetList,
+                              MSS_DIMM_POWER_TEST_SETNONFUNCTIONAL);
+
+        l_membufTargetList.clear();
+
+        //----------------------------------------------------------------------
+        // Call mss_dimm_power_test with lists of fucntional mem buffs that
+        // the have the same vmem id.
+        // For each group, check for hardware changes
+        //----------------------------------------------------------------------
+        getAllChips(l_membufTargetList, TYPE_MEMBUF,true); //just functional
+
+        // Build a map of unique vmem ids to the list of mem buffs with that
+        // vmem id.
+        std::map<ATTR_VMEM_ID_type,TARGETING::TargetHandleList>
+                                                    l_vmemidTargetlistMap;
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufTargetList.begin();
+                l_membuf_iter != l_membufTargetList.end();
+                ++l_membuf_iter)
+        {
+            TARGETING::ATTR_VMEM_ID_type l_VmemID =
+                            (*l_membuf_iter)->getAttr<ATTR_VMEM_ID>();
+
+            l_vmemidTargetlistMap[l_VmemID].push_back(*l_membuf_iter);
+
+        }
+
+        // For the subset list of mem buffs for each unique vmem id,
+        // check for hw changes on those targets (membuf, MBA,
+        // DIMMs). Then call the hwp to calculate the power curve, advising
+        // if the algorithm version has changed or if there are hw changes.
+        std::map<ATTR_VMEM_ID_type,TARGETING::TargetHandleList>::iterator
+                                                                   l_vmemidItr;
+        for (l_vmemidItr = l_vmemidTargetlistMap.begin();
+             l_vmemidItr != l_vmemidTargetlistMap.end();
+             ++l_vmemidItr)
+        {
+            std::vector<fapi::Target> l_membufFapiTargets; // to pass to hwp
+            TARGETING::TargetHandleList * l_pMembufSubsetList =
+                       &(l_vmemidItr->second);//list of membufs for this vmem id
+
+            // make a list of fapi targets to pass to the hwp
+            for (TargetHandleList::const_iterator
+                    l_membuf_iter = (*l_pMembufSubsetList).begin();
+                    l_membuf_iter != (*l_pMembufSubsetList).end();
+                    ++l_membuf_iter)
+            {
+
+                fapi::Target l_membuf_fapi_target
+                            (fapi::TARGET_TYPE_MEMBUF_CHIP,
+                            (const_cast<TARGETING::Target*>(*l_membuf_iter)) );
+
+                l_membufFapiTargets.push_back( l_membuf_fapi_target );
+            }
+
+            // check for hw changes
+            bool l_hwChange = mss_dimm_power_test_process_change_bits (
+                              l_pMembufSubsetList,
+                              MSS_DIMM_POWER_TEST_CHECK);
+
+            // advise recalculation when:
+            // 1) The stored algorthim and dependencies have changed
+            // 2) Hardware has changed
+            bool l_recalc = l_hwChange || l_versionChange;
+
+            uint32_t l_dc = ALGORITHM_RESET;
+            FAPI_INVOKE_HWP ( l_err,
+                          mss_dimm_power_test,
+                          l_membufFapiTargets, //list of membufs
+                          CALCULATE,
+                          l_dc,     // don't care about version parm
+                          l_recalc);
+            if ( l_err )
+            {
+                l_anyCalculationErrors = true; // don't update algorithm version
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X: from  mss_dimm_power_test HWP( ) ",
                     l_err->reasonCode());
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
+                // Create IStep error log and cross reference
+                // to error that occurred
+                l_stepError.addErrorDetails( l_err );
 
-            // Create IStep error log and cross reference to error that occurred
-            l_stepError.addErrorDetails( l_err );
+                // Commit Error, and keep going
+                errlCommit( l_err, HWPF_COMP_ID );
+            }
+            else
+            {
+                // success, so clear change flags if any set
+                if (l_hwChange)
+                {
+                    mss_dimm_power_test_process_change_bits (
+                              l_pMembufSubsetList,
+                              MSS_DIMM_POWER_TEST_CLEAR);
+                }
+            }
 
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-        }
-        else
+        } // for each unique vme_id
+
+        //----------------------------------------------------------------------
+        // If there have not been any errors, update the saved
+        // algorithm version.
+        //----------------------------------------------------------------------
+
+        if  (!l_anyCalculationErrors  &&
+            (l_persistentAlgorithmVersion != l_hwpAlgorithmVersion) )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  call_mss_dimm_power_test HWP( )" );
+            top->setAttr<TARGETING::ATTR_ISDIMM_POWER_CURVE_ALGORITHM_VERSION>
+                       (l_hwpAlgorithmVersion);
+
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_mss_dimm_power_test set persistent algorithm version=%d",
+                l_hwpAlgorithmVersion );
         }
-    } // end l_mbaNum loop
+
+    } while (0);
+
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_dimm_power_test exit" );
