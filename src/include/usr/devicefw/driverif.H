@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -51,6 +53,8 @@ namespace DeviceFW
         I2C,
         FSISCOM,
         IBSCOM,
+        HOSTI2C,
+        FSI_I2C,
 
         LAST_DRIVER_ACCESS_TYPE
     };
@@ -98,6 +102,16 @@ namespace DeviceFW
         DeviceFW::IBSCOM, static_cast<uint64_t>((i_address))
 
     /**
+     * @brief Macro that handles the I2C parameters
+     */
+    #define DEVICE_I2C_PARMS(port, engine, devAddr, offset_len, offset)\
+        static_cast<uint64_t>( port ),\
+        static_cast<uint64_t>( engine ),\
+        static_cast<uint64_t>( devAddr ),\
+        static_cast<uint64_t>( offset_len ),\
+        static_cast<uint8_t*>( offset )
+
+    /**
      * Construct the device addressing parameters for the I2C device ops.
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
@@ -105,11 +119,7 @@ namespace DeviceFW
      * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
      */
     #define DEVICE_I2C_ADDRESS( i_port, i_engine, i_devAddr )\
-        DeviceFW::I2C, static_cast<uint64_t>(( i_port )),\
-            static_cast<uint64_t>(( i_engine )),\
-            static_cast<uint64_t>(( i_devAddr )),\
-            0,\
-            NULL
+        DeviceFW::I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, 0, NULL)
 
     /**
      * Construct the device addressing parameters for the I2C-offset device ops.
@@ -120,11 +130,50 @@ namespace DeviceFW
      * @param[in] i_offset - Offset into I2C device
      */
     #define DEVICE_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
-        DeviceFW::I2C, static_cast<uint64_t>(( i_port )),\
-            static_cast<uint64_t>(( i_engine )),\
-            static_cast<uint64_t>(( i_devAddr )),\
-            static_cast<uint64_t>(( i_offset_len )),\
-            static_cast<uint8_t*>(( i_offset ))
+        DeviceFW::I2C,  DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
+
+    /**
+     * Construct the device addressing parameters for the Host I2C device ops.
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_devAddr - The device address on a given engine/port.
+     * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
+     */
+    #define DEVICE_HOSTI2C_ADDRESS( i_port, i_engine, i_devAddr )\
+        DeviceFW::HOSTI2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, 0, NULL)
+
+    /**
+     * Construct the device addressing parameters for the Host I2C-offset device ops.
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_devAddr - The device address on a given engine/port.
+     * @param[in] i_offset_len - Length of offset (in bytes)
+     * @param[in] i_offset - Offset into I2C device
+     */
+    #define DEVICE_HOSTI2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
+        DeviceFW::HOSTI2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
+
+    /**
+     * Construct the device addressing parameters for the FSI I2C device ops.
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_devAddr - The device address on a given engine/port.
+     * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
+     */
+    #define DEVICE_FSI_I2C_ADDRESS( i_port, i_engine, i_devAddr )\
+        DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, 0, NULL)
+
+    /**
+     * Construct the device addressing parameters for the FSI I2C-offset device ops.
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_devAddr - The device address on a given engine/port.
+     * @param[in] i_offset_len - Length of offset (in bytes)
+     * @param[in] i_offset - Offset into I2C device
+     */
+    #define DEVICE_FSI_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
+        DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
+
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

@@ -14230,4 +14230,41 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>I2C_SWITCHES</id>
+    <description>Attribute storing information about which I2C method to use</description>
+    <complexType>
+        <description>Structure which defines which I2C access method to use at
+        a point in time.  Only applicable if target supports one or more I2C
+        types.  Only one bit (of the first two) can ever be set at any one time.
+        </description>
+        <field>
+            <name>useFsiI2C</name>
+            <description>0b0: Do not use FSI I2C at this time.  0b1: Use FSI
+            I2C at this time</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>useHostI2C</name>
+            <description>0b0: Do not use Host I2C at this time.  0b1: Use
+            Host I2C at this time</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future expansion</description>
+            <type>uint8_t</type>
+            <bits>6</bits>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

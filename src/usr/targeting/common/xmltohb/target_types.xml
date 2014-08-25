@@ -484,6 +484,14 @@
     <attribute><id>PM_PBA_FIR_MASK</id></attribute>
     <attribute><id>PM_PMC_LFIR_MASK</id></attribute>
     <attribute><id>PM_FIRINIT_DONE_ONCE_FLAG</id></attribute>
+    <attribute>
+        <id>I2C_SWITCHES</id>
+        <default>
+            <field><id>useFsiI2C</id><value>0</value></field>
+            <field><id>useHostI2C</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -1347,6 +1355,14 @@
     <attribute><id>MSS_VOLT_OVERRIDE</id></attribute>
     <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MSS_POWER_CONTROL_CAPABLE</id></attribute>
+    <attribute>
+        <id>I2C_SWITCHES</id>
+        <default>
+            <field><id>useFsiI2C</id><value>1</value></field>
+            <field><id>useHostI2C</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
 </targetType>
 
 <!-- Centaur L4 -->
