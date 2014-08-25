@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.54 2014/06/11 16:30:11 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.55 2014/08/18 19:55:30 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
@@ -32,6 +34,22 @@
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_NAPLES_SPECIFIC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Naples specific inits. Returns true if Naples.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
