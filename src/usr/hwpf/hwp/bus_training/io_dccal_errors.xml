@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: io_dccal_errors.xml,v 1.5 2014/03/18 14:58:40 jgrell Exp $ -->
+<!-- $Id: io_dccal_errors.xml,v 1.7 2014/08/13 15:27:24 varkeykv Exp $ -->
 
 <!-- Error definitions for io_dccal HWPS  -->
 <hwpErrors>
@@ -35,10 +37,6 @@
 	<callout>
         <target>TARGET</target>
         <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
     </callout>
     <deconfigure>
         <target>TARGET</target>
@@ -56,10 +54,6 @@
         <target>TARGET</target>
         <priority>MEDIUM</priority>
     </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
-    </callout>
     <deconfigure>
         <target>TARGET</target>
     </deconfigure>
@@ -72,39 +66,19 @@
     <rc>IO_DCCAL_ZCAL_K2_EXCEEDED_RC</rc>
     <ffdc>K2</ffdc>
     <description>Post cursor drive ratio has exceeded 0.25</description>
-	<callout>
-        <target>TARGET</target>
-        <priority>MEDIUM</priority>
-    </callout>
     <callout>
         <procedure>CODE</procedure>
         <priority>LOW</priority>
     </callout>
-    <deconfigure>
-        <target>TARGET</target>
-    </deconfigure>
-    <gard>
-        <target>TARGET</target>
-    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>IO_DCCAL_ZCAL_M_EXCEEDED_RC</rc>
     <ffdc>M</ffdc>
-	<callout>
-        <target>TARGET</target>
-        <priority>MEDIUM</priority>
-    </callout>
     <callout>
         <procedure>CODE</procedure>
         <priority>LOW</priority>
     </callout>
-    <deconfigure>
-        <target>TARGET</target>
-    </deconfigure>
-    <gard>
-        <target>TARGET</target>
-    </gard>
     <description>Margin Ratio has exceeded 100 percentage</description>
   </hwpError>
   <!-- *********************************************************************** -->
@@ -116,10 +90,6 @@
 	<callout>
         <target>TARGET</target>
         <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
     </callout>
     <deconfigure>
         <target>TARGET</target>
@@ -137,20 +107,12 @@
         <target>TARGET</target>
         <priority>MEDIUM</priority>
     </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
-    </callout>
     <deconfigure>
         <target>TARGET</target>
     </deconfigure>
     <gard>
         <target>TARGET</target>
     </gard>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>HIGH</priority>
-    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -162,10 +124,6 @@
 	<callout>
         <target>TARGET</target>
         <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
     </callout>
     <deconfigure>
         <target>TARGET</target>
@@ -185,10 +143,6 @@
         <target>TARGET</target>
         <priority>MEDIUM</priority>
     </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
-    </callout>
     <deconfigure>
         <target>TARGET</target>
     </deconfigure>
@@ -205,20 +159,10 @@
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
     </callout>
-	<callout>
-        <target>TARGET</target>
-        <priority>MEDIUM</priority>
-    </callout>
     <callout>
         <procedure>CODE</procedure>
         <priority>LOW</priority>
     </callout>
-    <deconfigure>
-        <target>TARGET</target>
-    </deconfigure>
-    <gard>
-        <target>TARGET</target>
-    </gard>
   </hwpError>
  
 </hwpErrors>
