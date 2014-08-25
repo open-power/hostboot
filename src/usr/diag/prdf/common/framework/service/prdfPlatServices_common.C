@@ -710,51 +710,82 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
 {
     #define PRDF_FUNC "[PlatServices::getMemBufRawCardType] "
 
+    int32_t o_rc = SUCCESS;
+
     o_cardType = WIRING_INVALID;
-    uint8_t l_cardType = WIRING_INVALID;
-    int32_t o_rc = FAIL;
 
     do
     {
-        if( TYPE_MBA != getTargetType( i_mba ) )
+        if ( TYPE_MBA != getTargetType(i_mba) )
         {
-            PRDF_ERR( PRDF_FUNC" Invalid target 0x%08x",getHuid( i_mba ) );
+            PRDF_ERR( PRDF_FUNC"Target 0x%08x is not an MBA", getHuid(i_mba) );
+            o_rc = FAIL; break;
+        }
+
+        bool isCenDimm = false;
+        o_rc = isMembufOnDimm( i_mba, isCenDimm );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed on MBA 0x%08x",
+                      getHuid(i_mba) );
             break;
+        }
+
+        if ( !isCenDimm )
+        {
+            PRDF_ERR( PRDF_FUNC"MBA 0x%08x is not on a buffered DIMM",
+                      getHuid(i_mba) );
+            o_rc = FAIL; break;
         }
 
         TargetHandleList l_dimmList = getConnected( i_mba, TYPE_DIMM );
-
-        if( 0 == l_dimmList.size() )
+        if ( 0 == l_dimmList.size() )
         {
-            PRDF_ERR( PRDF_FUNC " No DIMM connected with mba 0x%08x",
-                      getHuid( i_mba ) );
-            break;
+            PRDF_ERR( PRDF_FUNC"No DIMMs connected to MBA 0x%08x",
+                      getHuid(i_mba) );
+            o_rc = FAIL; break;
         }
+
+        // All logical DIMMs connected to this MBA are on the same card as the
+        // MBA so we can use any connected DIMM to query for the raw card type.
 
         errlHndl_t errl = NULL;
         fapi::Target fapiDimm = getFapiTarget( l_dimmList[0] );
+        uint8_t l_cardType = WIRING_INVALID;
 
         PRD_FAPI_TO_ERRL( errl,
                           fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard,
                           &fapiDimm,
                           l_cardType );
 
-        if( NULL != errl )
+        if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC" fapiPlatGetSpdModspecComRefRawCard failed for"
-                      "DIMM 0x%08X", getHuid( l_dimmList[0] ) );
+            PRDF_ERR( PRDF_FUNC"fapiPlatGetSpdModspecComRefRawCard() failed on"
+                      "DIMM 0x%08X", getHuid(l_dimmList[0]) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            break;
+            o_rc = FAIL; break;
         }
 
-        switch( l_cardType )
+        // Centaur raw card types are only used for DRAM site locations. If an
+        // invalid wiring type is passed to the error log parser, the parser
+        // will simply print out the symbol and other data instead of
+        // translating it into a DRAM site location. Therefore, do not fail out
+        // if the raw card is currently not supported. Otherwise, there may be
+        // some downstream effects to the functional (non-parsing) code for
+        // data that is only needed for parsing.
+
+        switch ( l_cardType )
         {
-            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_A :
+            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_A:
                 o_cardType = CEN_TYPE_A;
                 break;
 
-            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_B :
+            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_B:
                 o_cardType = CEN_TYPE_B;
+                break;
+
+            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_C:
+                o_cardType = CEN_TYPE_C;
                 break;
 
             case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_D:
@@ -762,18 +793,13 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 break;
 
             default:
-                o_cardType = WIRING_INVALID;
-                break;
+                o_cardType = WIRING_INVALID; // Anything unsupported
         }
 
-    }while(0);
-
-    if( WIRING_INVALID != o_cardType )
-    {
-        o_rc = SUCCESS;
-    }
+    } while(0);
 
     return o_rc;
+
     #undef PRDF_FUNC
 }
 

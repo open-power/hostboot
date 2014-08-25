@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -149,15 +151,17 @@ namespace CEN_SYMBOL
         BOTH_SYMBOL_DQS = EVEN_SYMBOL_DQ | ODD_SYMBOL_DQ,
     };
 
-    /** A four bit field in memory MRU. It describes the
-     *  card type in case of Centaur DIMM and wiring type
-     *  in case of ISDIMM */
-
+    /** A three bit field in memory MRU. It describes the raw card type for
+     *  buffered DIMMs or the DIMM plug card type for IS DIMMs. These types are
+     *  used for error log parsing which must be supported independent of the
+     *  drivers (i.e. eblis tool) so enums can be added, but the values of the
+     *  enums cannot be changed */
     enum WiringType
     {
         CEN_TYPE_A          = 0,
         CEN_TYPE_B          = 1,
         CEN_TYPE_D          = 2,
+        CEN_TYPE_C          = 3,
         WIRING_INVALID      = 7, // An invalid card type
     };
 

@@ -350,10 +350,11 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig );
 
 /**
- * @brief   Returns the memory buffer raw card type.
- * @param   i_mbaTarget     an MBA target.
- * @param   o_wiringType    Card Type/ Wiring type of DIMM
- * @return  SUCCESS for a valid card type, FAIL otherwise.
+ * @brief  Returns the raw card type of a buffered DIMM.
+ * @param  i_mbaTarget  An MBA target. This MBA must be on a buffered DIMM.
+ * @param  o_wiringType The DIMM's raw card type. Will return WIRING_INVALID if
+ *                      the raw card type currently is not supported.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
