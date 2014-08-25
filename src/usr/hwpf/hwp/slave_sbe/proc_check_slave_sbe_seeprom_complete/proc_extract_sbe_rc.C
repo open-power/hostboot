@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.C,v 1.21 2014/08/12 13:11:26 jmcgill Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.22 2014/08/18 20:25:15 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -307,7 +307,7 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
             if ((pore_debug0_reg.getNumBitsSet(36,4) != 0) || (pore_debug1_reg.isBitSet(61)))
             {
                 FAPI_ERR("proc_extract_sbe_rc: I2C Error (Event 0)");
-                const uint8_t & I2C_BAD_STATUS_0_3 = pore_debug0_reg.getHalfWord(10);
+                const uint8_t & I2C_BAD_STATUS_0_3 = (pore_debug0_reg.getByte(4) & 0x0F);
                 const bool & FI2C_HANG = pore_debug1_reg.isBitSet(61);
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_I2C_ERROR);
                 break;
