@@ -405,7 +405,7 @@ public:
         ErrlUserDetailsLogRegister(c_target, &reg2_data, reg2_size,
                 DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
 
-        uint64_t reg3_data = 0;
+        uint32_t reg3_data = 0;
         size_t reg3_size = sizeof(reg3_data);
         errl_deviceRead = DeviceFW::deviceRead(c_target,
                         &reg3_data, reg3_size,

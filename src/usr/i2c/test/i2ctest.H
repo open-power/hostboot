@@ -698,10 +698,15 @@ class I2CTest: public CxxTest::TestSuite
                 { I2C::SET_I2C_BUS_400KHZ, 400 },
 
                 // READ_I2C_BUS_ATTRIBUTES should default to 1MHz
+                // with a processor target using Host I2C
                 { I2C::READ_I2C_BUS_ATTRIBUTES, 1000 },
             };
 
             uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
+
+            // set Processor Target to Host I2C mode
+            io_args.switches.useHostI2C = 1;
+            io_args.switches.useFsiI2C = 0;
 
             for ( uint32_t i = 0; i < NUM_CMDS; i++ )
             {
@@ -772,7 +777,9 @@ class I2CTest: public CxxTest::TestSuite
                 I2C::g_I2C_NEST_FREQ_MHZ = testData_2[i].i_nest_freq_mhz;
 
                 cmds++;
-                l_brd = I2C::i2cGetBitRateDivisor(testData_2[i].i_bus_speed);
+                l_brd = I2C::i2cGetBitRateDivisor(
+                                             testData_2[i].i_bus_speed,
+                                             testData_2[i].i_nest_freq_mhz);
                 l_pi = I2C::i2cGetPollingInterval(testData_2[i].i_bus_speed);
                 l_tc = I2C_TIMEOUT_COUNT(l_pi);
 

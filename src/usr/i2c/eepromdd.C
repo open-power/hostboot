@@ -379,7 +379,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
                         err_NACK = err;
 
                         TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromRead(): "
-                                   "NACK Error rc=0x%X, eid=%d, tgt=0x%X, "
+                                   "NACK Error rc=0x%X, eid=0x%X, tgt=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
                                    err_NACK->reasonCode(),
                                    err_NACK->eid(),
@@ -1046,8 +1046,9 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() %d/%d/0x%X "
+    TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() tgt=0x%X, %d/%d/0x%X "
               "wpw=0x%X, dsKb=0x%X, aS=%d (%d), wct=%d",
+              TARGETING::get_huid(i_target),
               o_i2cInfo.port, o_i2cInfo.engine, o_i2cInfo.devAddr,
               o_i2cInfo.writePageSize, o_i2cInfo.devSize_KB,
               o_i2cInfo.addrSize, eepromData.byteAddrOffset,
@@ -1076,85 +1077,75 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
 
     do
     {
-        if( TARGETING::TYPE_DIMM == i_target->getAttr<TARGETING::ATTR_TYPE>() )
+        TARGETING::TargetService& tS = TARGETING::targetService();
+
+        // The path from i_target to its I2C Master was read from the
+        // attribute via eepromReadAttributes() and passed to this function
+        // in i_i2cInfo.i2cMasterPath
+
+        // check that the path exists
+        bool exists = false;
+        tS.exists( i_i2cInfo.i2cMasterPath,
+                   exists );
+
+        if( !exists )
         {
-            TARGETING::TargetService& tS = TARGETING::targetService();
+            TRACFCOMP( g_trac_eeprom,
+                       ERR_MRK"eepromGetI2CMasterTarget() - "
+                       "i2cMasterPath attribute path doesn't exist!" );
 
-            // For DIMMs we need to get the parent that contains the
-            // I2C Master that talks to the DIMM EEPROM
+            /*@
+             * @errortype
+             * @reasoncode       EEPROM_DIMM_I2C_MASTER_PATH_ERROR
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         EEPROM_GETI2CMASTERTARGET
+             * @userdata1        Attribute Chip Type Enum
+             * @userdata2        HUID of target
+             * @devdesc          DIMM I2C master entity path doesn't exist.
+             */
+            err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                EEPROM_GETI2CMASTERTARGET,
+                                EEPROM_DIMM_I2C_MASTER_PATH_ERROR,
+                                i_i2cInfo.chip,
+                                TARGETING::get_huid(i_target),
+                                true /*Add HB SW Callout*/ );
 
-            // The path was read from the attribute via eepromReadAttributes()
-            // and passed to this function in i_i2cInfo
+            err->collectTrace( EEPROM_COMP_NAME );
 
-
-            // check that the path exists
-            bool exists = false;
-            tS.exists( i_i2cInfo.i2cMasterPath,
-                       exists );
-
-            if( !exists )
-            {
-                TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromGetI2CMasterTarget() - i2cMasterPath attribute path "
-                           "doesn't exist!" );
-
-                /*@
-                 * @errortype
-                 * @reasoncode       EEPROM_DIMM_I2C_MASTER_PATH_ERROR
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         EEPROM_GETI2CMASTERTARGET
-                 * @userdata1        Attribute Chip Type Enum
-                 * @userdata2        HUID of target
-                 * @devdesc          DIMM I2C master entity path doesn't exist.
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    EEPROM_GETI2CMASTERTARGET,
-                                    EEPROM_DIMM_I2C_MASTER_PATH_ERROR,
-                                    i_i2cInfo.chip,
-                                    TARGETING::get_huid(i_target),
-                                    true /*Add HB SW Callout*/ );
-
-                err->collectTrace( EEPROM_COMP_NAME );
-
-                break;
-            }
-
-            // Since it exists, convert to a target
-            o_target = tS.toTarget( i_i2cInfo.i2cMasterPath );
-
-            if( NULL == o_target )
-            {
-                TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromGetI2CMasterTarget() - I2C Master "
-                                  "Path target was NULL!" );
-
-                /*@
-                 * @errortype
-                 * @reasoncode       EEPROM_TARGET_NULL
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         EEPROM_GETI2CMASTERTARGET
-                 * @userdata1        Attribute Chip Type Enum
-                 * @userdata2        HUID of target
-                 * @devdesc          I2C master path target is null.
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               EEPROM_GETI2CMASTERTARGET,
-                                               EEPROM_TARGET_NULL,
-                                               i_i2cInfo.chip,
-                                               TARGETING::get_huid(i_target),
-                                               true /*Add HB SW Callout*/ );
-
-                err->collectTrace( EEPROM_COMP_NAME );
-
-                break;
-            }
+            break;
         }
-        else
+
+        // Since it exists, convert to a target
+        o_target = tS.toTarget( i_i2cInfo.i2cMasterPath );
+
+        if( NULL == o_target )
         {
-            // Since current target is not a DIMM, use the target we have
-            o_target = i_target;
+            TRACFCOMP( g_trac_eeprom,
+                       ERR_MRK"eepromGetI2CMasterTarget() - I2C Master "
+                              "Path target was NULL!" );
+
+            /*@
+             * @errortype
+             * @reasoncode       EEPROM_TARGET_NULL
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         EEPROM_GETI2CMASTERTARGET
+             * @userdata1        Attribute Chip Type Enum
+             * @userdata2        HUID of target
+             * @devdesc          I2C master path target is null.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           EEPROM_GETI2CMASTERTARGET,
+                                           EEPROM_TARGET_NULL,
+                                           i_i2cInfo.chip,
+                                           TARGETING::get_huid(i_target),
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( EEPROM_COMP_NAME );
+
+            break;
         }
+
     } while( 0 );
 
     TRACDCOMP( g_trac_eeprom,

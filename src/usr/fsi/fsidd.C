@@ -106,7 +106,10 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
     mutex_lock(&g_fsiOpMux);
 
     do{
-        if (unlikely(io_buflen < sizeof(uint32_t)))
+
+        if (unlikely( ( io_buflen != 4 ) &&
+                      ( io_buflen != 2 ) &&
+                      ( io_buflen != 1 )    ) )
         {
             TRACFCOMP( g_trac_fsi, ERR_MRK "FSI::ddOp> Invalid data length : io_buflen=%d", io_buflen );
             /*@
@@ -115,9 +118,9 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
              * @reasoncode   FSI::RC_INVALID_LENGTH
              * @userdata1    FSI Address
              * @userdata2    Data Length
-             * @devdesc      FsiDD::ddOp> Invalid data length (!= 4 bytes)
-             * @custdesc     A problem occurred during the
-             *               IPL of the system.
+             * @devdesc      FsiDD::ddOp> Invalid data length (!= 4,2,1 bytes)
+             * @custdesc     An internal function called the FSI device driver
+             *               with an improper data length.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_DDOP,
@@ -125,12 +128,10 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
                                             i_addr,
                                             TO_UINT64(io_buflen),
                                             true /*SW error*/);
+
             l_err->collectTrace(FSI_COMP_NAME);
             break;
         }
-
-        // default to the fail path
-        io_buflen = 0;
 
         // look for NULL
         if( NULL == i_target )
@@ -184,24 +185,24 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
         {
             l_err = Singleton<FsiDD>::instance().read(i_target,
                                         i_addr,
-                                        static_cast<uint32_t*>(io_buffer));
+                                        static_cast<uint32_t*>(io_buffer),
+                                        io_buflen);
             if(l_err)
             {
                 break;
             }
-            io_buflen = sizeof(uint32_t);
         }
         // do the write
         else if( DeviceFW::WRITE == i_opType )
         {
             l_err = Singleton<FsiDD>::instance().write(i_target,
                                         i_addr,
-                                        static_cast<uint32_t*>(io_buffer));
+                                        static_cast<uint32_t*>(io_buffer),
+                                        io_buflen);
             if(l_err)
             {
                 break;
             }
-            io_buflen = sizeof(uint32_t);
         }
         else
         {
@@ -227,6 +228,12 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
         }
 
     }while(0);
+
+    if ( l_err )
+    {
+        // On fail, assume no data was read or written
+        io_buflen = 0;
+    }
 
     mutex_unlock(&g_fsiOpMux);//@fixme - RTC:98898
 
@@ -368,7 +375,8 @@ void getFsiLinkInfo( TARGETING::Target* i_slave,
  */
 errlHndl_t FsiDD::read(TARGETING::Target* i_target,
                        uint64_t i_address,
-                       uint32_t* o_buffer)
+                       uint32_t* o_buffer,
+                       uint64_t i_buflen)
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::read(i_target=%.8X,i_address=0x%llX)> ", TARGETING::get_huid(i_target), i_address);
     errlHndl_t l_err = NULL;
@@ -393,7 +401,8 @@ errlHndl_t FsiDD::read(TARGETING::Target* i_target,
         }
 
         // perform the read operation
-        l_err = read( addr_info, o_buffer );
+        l_err = read( addr_info, o_buffer, i_buflen );
+
         if(l_err)
         {
             break;
@@ -408,7 +417,8 @@ errlHndl_t FsiDD::read(TARGETING::Target* i_target,
  */
 errlHndl_t FsiDD::write(TARGETING::Target* i_target,
                         uint64_t i_address,
-                        uint32_t* o_buffer)
+                        uint32_t* o_buffer,
+                        uint64_t i_buflen )
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::write(i_target=%.8X,i_address=0x%llX)> ", TARGETING::get_huid(i_target), i_address);
     errlHndl_t l_err = NULL;
@@ -433,7 +443,7 @@ errlHndl_t FsiDD::write(TARGETING::Target* i_target,
         }
 
         // perform the write operation
-        l_err = write( addr_info, o_buffer );
+        l_err = write( addr_info, o_buffer, i_buflen );
         if(l_err)
         {
             break;
@@ -1052,7 +1062,8 @@ FsiDD::~FsiDD()
  *   using the master processor chip to drive it
  */
 errlHndl_t FsiDD::read(uint64_t i_address,
-                       uint32_t* o_buffer)
+                       uint32_t* o_buffer,
+                       uint64_t  i_buflen )
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::read(i_address=0x%llx)> ", i_address);
 
@@ -1063,7 +1074,7 @@ errlHndl_t FsiDD::read(uint64_t i_address,
     addr_info.absAddr = i_address;
 
     // call to low-level read function
-    errlHndl_t l_err = read( addr_info, o_buffer );
+    errlHndl_t l_err = read( addr_info, o_buffer, i_buflen );
 
     return l_err;
 }
@@ -1074,7 +1085,8 @@ errlHndl_t FsiDD::read(uint64_t i_address,
  *   using the master processor chip to drive it
  */
 errlHndl_t FsiDD::write(uint64_t i_address,
-                        uint32_t* i_buffer)
+                        uint32_t* i_buffer,
+                        uint64_t i_buflen )
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::write(i_address=0x%llx)> ", i_address);
 
@@ -1085,7 +1097,7 @@ errlHndl_t FsiDD::write(uint64_t i_address,
     addr_info.absAddr = i_address;
 
     // call to low-level write function
-    errlHndl_t l_err = write( addr_info, i_buffer );
+    errlHndl_t l_err = write( addr_info, i_buffer, i_buflen );
 
     return l_err;
 }
@@ -1095,7 +1107,8 @@ errlHndl_t FsiDD::write(uint64_t i_address,
  * @brief Performs an FSI Read Operation
  */
 errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
-                       uint32_t* o_buffer)
+                       uint32_t* o_buffer,
+                       uint64_t i_buflen )
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::read(relAddr=0x%.8X,absAddr=0x%.8X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
     errlHndl_t l_err = NULL;
@@ -1105,7 +1118,22 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
 
     do {
         // setup the OPB command register
-        uint64_t fsicmd = i_addrInfo.absAddr | 0x60000000; // 011=Read Full Word
+
+        uint64_t fsicmd = 0;
+
+        if ( i_buflen == 4 )
+        {
+            fsicmd = i_addrInfo.absAddr | 0x60000000; // 011=Read Full Word
+        }
+        else if ( i_buflen == 1 )
+        {
+            fsicmd = i_addrInfo.absAddr | 0x00000000; // 000=Read 1 Byte
+        }
+        else
+        {
+            fsicmd = i_addrInfo.absAddr | 0x20000000; // 001=Read 2 Bytes
+        }
+
         fsicmd <<= 32; // Command is in the upper word
 
         // generate the proper OPB SCOM address
@@ -1181,7 +1209,8 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
  * @brief Write FSI Register
  */
 errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
-                        uint32_t* i_buffer)
+                        uint32_t* i_buffer,
+                        uint64_t i_buflen )
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::write(relAddr=0x%.8X,absAddr=0x%.8X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
     errlHndl_t l_err = NULL;
@@ -1195,7 +1224,22 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
         uint32_t fsidata = *i_buffer;
 
         // setup the OPB command register
-        uint64_t fsicmd = i_addrInfo.absAddr | 0xE0000000; // 111=Write Full Word
+
+        uint64_t fsicmd = 0;
+
+        if ( i_buflen == 4 )
+        {
+            fsicmd = i_addrInfo.absAddr | 0xE0000000; // 111=Write Full Word
+        }
+        else if ( i_buflen == 1 )
+        {
+            fsicmd = i_addrInfo.absAddr | 0x80000000; // 100=Write 1 Byte
+        }
+        else
+        {
+            fsicmd = i_addrInfo.absAddr | 0xA0000000; // 101=Write 2 Bytes
+        }
+
         fsicmd <<= 32; // Command is in the upper 32-bits
         fsicmd |= fsidata; // Data is in the bottom 32-bits
         size_t scom_size = sizeof(uint64_t);
@@ -2733,7 +2777,7 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
                  r++ )
             {
                 l_err = read( i_addrInfo.accessInfo.master,
-                          MFSI_CONTROL_REG|FSI_MSIEP0_030, &data );
+                              MFSI_CONTROL_REG|FSI_MSIEP0_030, &data );
                 if(l_err) break;
                 TRACFCOMP( g_trac_fsi, "errorCleanup> %.8X->%.6X = %.8X", TARGETING::get_huid(i_addrInfo.accessInfo.master), grabregs[r], data );
             }

@@ -81,59 +81,13 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 namespace I2C
 {
 
-/**
- * @brief Addresses for each of the registers in each engine.
- */
-static i2c_addrs_t masterAddrs[] =
-{
-    { /* Master 0 */
-        I2C_MASTER0_ADDR | 0x4,         // FIFO
-        I2C_MASTER0_ADDR | 0x5,         // Command Register
-        I2C_MASTER0_ADDR | 0x6,         // Mode Register
-        I2C_MASTER0_ADDR | 0x8,         // Interrupt Mask Register
-        I2C_MASTER0_ADDR | 0xA,         // Interrupt Register
-        I2C_MASTER0_ADDR | 0xB,         // Status Register (Read)
-        I2C_MASTER0_ADDR | 0xB,         // Reset (Write)
-        I2C_MASTER0_ADDR | 0xD,         // Set SCL Register (write)
-        I2C_MASTER0_ADDR | 0xF,         // Reset SCL Register (write)
-        I2C_MASTER0_ADDR | 0x10,        // Set SDA Register (write)
-        I2C_MASTER0_ADDR | 0x11,        // Reset SDA Register (write)
-    },
-    { /* Master 1 */
-        I2C_MASTER1_ADDR | 0x4,         // FIFO
-        I2C_MASTER1_ADDR | 0x5,         // Command Register
-        I2C_MASTER1_ADDR | 0x6,         // Mode Register
-        I2C_MASTER1_ADDR | 0x8,         // Interrupt Mask Register
-        I2C_MASTER1_ADDR | 0xA,         // Interrupt Register
-        I2C_MASTER1_ADDR | 0xB,         // Status Register (Read)
-        I2C_MASTER1_ADDR | 0xB,         // Reset (Write)
-        I2C_MASTER1_ADDR | 0xD,         // Set SCL Register (write)
-        I2C_MASTER1_ADDR | 0xF,         // Reset SCL Register (write)
-        I2C_MASTER1_ADDR | 0x10,        // Set SDA Register (write)
-        I2C_MASTER1_ADDR | 0x11,        // Reset SDA Register (write)
-    },
-    { /* Master 2 */
-        I2C_MASTER2_ADDR | 0x4,         // FIFO
-        I2C_MASTER2_ADDR | 0x5,         // Command Register
-        I2C_MASTER2_ADDR | 0x6,         // Mode Register
-        I2C_MASTER2_ADDR | 0x8,         // Interrupt Mask Register
-        I2C_MASTER2_ADDR | 0xA,         // Interrupt Register
-        I2C_MASTER2_ADDR | 0xB,         // Status Register (Read)
-        I2C_MASTER2_ADDR | 0xB,         // Reset (Write)
-        I2C_MASTER2_ADDR | 0xD,         // Set SCL Register (write)
-        I2C_MASTER2_ADDR | 0xF,         // Reset SCL Register (write)
-        I2C_MASTER2_ADDR | 0x10,        // Set SDA Register (write)
-        I2C_MASTER2_ADDR | 0x11,        // Reset SDA Register (write)
-    }
-};
-
-// Register the perform Op with the routing code for Procs.
+// Register the generic I2C perform Op with the routing code for Procs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::I2C,
                        TARGETING::TYPE_PROC,
                        i2cPerformOp );
 
-// Register the perform Op with the routing code for Memory Buffers.
+// Register the generic I2C perform Op with the routing code for Memory Buffers.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::I2C,
                        TARGETING::TYPE_MEMBUF,
@@ -150,10 +104,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          va_list i_args )
 {
     errlHndl_t err = NULL;
-    errlHndl_t err_reset = NULL;
-
-    mutex_t * engineLock = NULL;
-    bool mutex_needs_unlock = false;
 
     // Get the input args our of the va_list
     //  Address, Port, Engine, Device Addr.
@@ -163,31 +113,200 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
 
+    // These are additional parms in the case an offset is passed in
+    // via va_list, as well
+
+    args.offset_length = va_arg( i_args, uint64_t);
+
+    if ( args.offset_length != 0 )
+    {
+        args.offset_buffer = reinterpret_cast<uint8_t*>
+                                             (va_arg(i_args, uint64_t));
+    }
+
+    // Set both Host and FSI switches to 0 so that they get set later by
+    // attribute in i2cCommonOp()
+    args.switches.useHostI2C = 0;
+    args.switches.useFsiI2C  = 0;
+
+
+    // Call common function
+    err = i2cCommonOp( i_opType,
+                       i_target,
+                       io_buffer,
+                       io_buflen,
+                       i_accessType,
+                       args );
+
+
+    TRACDCOMP( g_trac_i2c,
+               EXIT_MRK"i2cPerformOp() - %s",
+               ((NULL == err) ? "No Error" : "With Error") );
+
+    return err;
+} // end i2cPerformOp
+
+
+// Register the Host-based I2C perform Op with the routing code for Procs.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::HOSTI2C,
+                       TARGETING::TYPE_PROC,
+                       host_i2cPerformOp );
+
+// Register the Host-based I2C perform Op with the routing code for Mem Buffers.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::HOSTI2C,
+                       TARGETING::TYPE_MEMBUF,
+                       host_i2cPerformOp );
+
+// ------------------------------------------------------------------
+// host_i2cPerformOp
+// ------------------------------------------------------------------
+errlHndl_t host_i2cPerformOp( DeviceFW::OperationType i_opType,
+                              TARGETING::Target * i_target,
+                              void * io_buffer,
+                              size_t & io_buflen,
+                              int64_t i_accessType,
+                              va_list i_args )
+{
+    errlHndl_t err = NULL;
+
+    // Get the input args our of the va_list
+    //  Address, Port, Engine, Device Addr.
+    // Other args set below
+    misc_args_t args;
+    args.port = va_arg( i_args, uint64_t );
+    args.engine = va_arg( i_args, uint64_t );
+    args.devAddr = va_arg( i_args, uint64_t );
 
     // These are additional parms in the case an offset is passed in
     // via va_list, as well
-    uint64_t  l_offset_length = 0;
-    uint8_t * l_offset_buffer = NULL;
 
-    l_offset_length = va_arg( i_args, uint64_t);
+    args.offset_length = va_arg( i_args, uint64_t);
 
-    if ( l_offset_length != 0)
+    if ( args.offset_length != 0 )
     {
-        l_offset_buffer = reinterpret_cast<uint8_t*>(va_arg(i_args, uint64_t));
+        args.offset_buffer = reinterpret_cast<uint8_t*>
+                                             (va_arg(i_args, uint64_t));
     }
 
+    // Set Host switch to 1 and FSI switch to 0
+    args.switches.useHostI2C = 1;
+    args.switches.useFsiI2C  = 0;
+
+
+    // Call common function
+    err = i2cCommonOp( i_opType,
+                       i_target,
+                       io_buffer,
+                       io_buflen,
+                       i_accessType,
+                       args );
+
+
     TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cPerformOp(): i_opType=%d, aType=%d, "
+               EXIT_MRK"host_i2cPerformOp() - %s",
+               ((NULL == err) ? "No Error" : "With Error") );
+
+    return err;
+} // end host_i2cPerformOp
+
+
+// Register the FSI-based I2C perform Op with the routing code for Procs.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::FSI_I2C,
+                       TARGETING::TYPE_PROC,
+                       fsi_i2cPerformOp );
+
+// Register the FSI-based I2C perform Op with the routing code for Mem Buffers.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::FSI_I2C,
+                       TARGETING::TYPE_MEMBUF,
+                       fsi_i2cPerformOp );
+
+// ------------------------------------------------------------------
+// fsi_i2cPerformOp
+// ------------------------------------------------------------------
+errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
+                             TARGETING::Target * i_target,
+                             void * io_buffer,
+                             size_t & io_buflen,
+                             int64_t i_accessType,
+                             va_list i_args )
+{
+    errlHndl_t err = NULL;
+
+    // Get the input args our of the va_list
+    //  Address, Port, Engine, Device Addr.
+    // Other args set below
+    misc_args_t args;
+    args.port = va_arg( i_args, uint64_t );
+    args.engine = va_arg( i_args, uint64_t );
+    args.devAddr = va_arg( i_args, uint64_t );
+
+    // These are additional parms in the case an offset is passed in
+    // via va_list, as well
+
+    args.offset_length = va_arg( i_args, uint64_t);
+
+    if ( args.offset_length != 0 )
+    {
+        args.offset_buffer = reinterpret_cast<uint8_t*>
+                                             (va_arg(i_args, uint64_t));
+    }
+
+    // Set FSI switch to 1 and Host switch to 0
+    args.switches.useHostI2C = 0;
+    args.switches.useFsiI2C  = 1;
+
+
+    // Call common function
+    err = i2cCommonOp( i_opType,
+                       i_target,
+                       io_buffer,
+                       io_buflen,
+                       i_accessType,
+                       args );
+
+
+    TRACDCOMP( g_trac_i2c,
+               EXIT_MRK"fsi_i2cPerformOp() - %s",
+               ((NULL == err) ? "No Error" : "With Error") );
+
+    return err;
+} // end fsi_i2cPerformOp
+
+
+
+// ------------------------------------------------------------------
+// i2cCommonOp
+// ------------------------------------------------------------------
+errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
+                        TARGETING::Target * i_target,
+                        void * io_buffer,
+                        size_t & io_buflen,
+                        int64_t i_accessType,
+                        misc_args_t & i_args )
+{
+    errlHndl_t err = NULL;
+    errlHndl_t err_reset = NULL;
+
+    mutex_t * engineLock = NULL;
+    bool mutex_needs_unlock = false;
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cCommonOp(): i_opType=%d, aType=%d, "
                "p/e/devAddr= %d/%d/0x%X, len=%d, offset=%d/%p",
-               (uint64_t) i_opType, i_accessType, args.port, args.engine,
-               args.devAddr, io_buflen, l_offset_length, l_offset_buffer);
+               (uint64_t) i_opType, i_accessType, i_args.port, i_args.engine,
+               i_args.devAddr, io_buflen, i_args.offset_length,
+               i_args.offset_buffer);
 
     TRACUCOMP( g_trac_i2c,
-               ENTER_MRK"i2cPerformOp(): i_opType=%d, aType=%d, "
+               ENTER_MRK"i2cCommonOp(): i_opType=%d, aType=%d, "
                "p/e/devAddr= %d/%d/0x%x, len=%d, offset=%d/%p",
-               (uint64_t) i_opType, i_accessType, args.port, args.engine,
-               args.devAddr, io_buflen, l_offset_length, l_offset_buffer);
-
+               (uint64_t) i_opType, i_accessType, i_args.port, i_args.engine,
+               i_args.devAddr, io_buflen, i_args.offset_length,
+               i_args.offset_buffer);
 
     do
     {
@@ -195,8 +314,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cPerformOp() - Cannot target Master Sentinel Chip "
-                       "for an I2C Operation!" );
+                       ERR_MRK"i2cCommonOp() - Cannot target Master Sentinel "
+                       "Chip for an I2C Operation!" );
 
             /*@
              * @errortype
@@ -220,9 +339,22 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             break;
         }
 
+        // Set Host vs FSI switches if both values are zero;
+        // Otherwise, caller should have already set them
+        if ( ( i_args.switches.useHostI2C == 0 ) &&
+             ( i_args.switches.useFsiI2C == 0 ) )
+        {
+            if ( !( i_target->tryGetAttr<TARGETING::ATTR_I2C_SWITCHES>
+                                        (i_args.switches) ) )
+            {
+                // Default to Host
+                i_args.switches.useHostI2C = 1;
+                i_args.switches.useFsiI2C  = 0;
+            }
+        }
 
         // Get the mutex for the requested engine
-        switch( args.engine )
+        switch( i_args.engine )
         {
             case 0:
                 engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
@@ -239,7 +371,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             default:
                 TRACFCOMP( g_trac_i2c,
                            ERR_MRK"Invalid engine for getting Mutex! "
-                           "args.engine=%d", args.engine  );
+                           "i_args.engine=%d", i_args.engine  );
                 // @todo RTC:69113 - Create an error here
                 break;
         };
@@ -247,16 +379,16 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         // Lock on this engine
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Obtaining lock for engine: %d",
-                   args.engine );
+                   i_args.engine );
         (void)mutex_lock( engineLock );
         mutex_needs_unlock = true;
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Locked on engine: %d",
-                   args.engine );
+                   i_args.engine );
 
 
         // Calculate variables related to I2C Bus Speed in 'args' struct
-        err =  i2cSetBusVariables( i_target, READ_I2C_BUS_ATTRIBUTES, args);
+        err =  i2cSetBusVariables( i_target, READ_I2C_BUS_ATTRIBUTES, i_args);
 
         if( err )
         {
@@ -273,33 +405,33 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         /* I2C Read with Offset                        */
         /***********************************************/
         if( i_opType        == DeviceFW::READ &&
-            l_offset_length != 0 )
+            i_args.offset_length != 0 )
         {
 
             // First WRITE offset to device without a stop
-            args.read_not_write  = false;
-            args.with_stop       = false;
-            args.skip_mode_setup = false;
+            i_args.read_not_write  = false;
+            i_args.with_stop       = false;
+            i_args.skip_mode_setup = false;
 
             err = i2cWrite( i_target,
-                            l_offset_buffer,
-                            l_offset_length,
-                            args );
+                            i_args.offset_buffer,
+                            i_args.offset_length,
+                            i_args );
 
             if( err == NULL )
             {
                 // Now do the READ with a stop
-                args.read_not_write = true;
-                args.with_stop      = true;
+                i_args.read_not_write = true;
+                i_args.with_stop      = true;
 
                 // Skip mode setup on this cmd -
                 // already set with previous cmd
-                args.skip_mode_setup = true;
+                i_args.skip_mode_setup = true;
 
                 err = i2cRead( i_target,
                                io_buffer,
                                io_buflen,
-                               args );
+                               i_args );
             }
         }
 
@@ -307,30 +439,30 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         /* I2C Write with Offset                       */
         /***********************************************/
         else if( i_opType        == DeviceFW::WRITE &&
-                 l_offset_length != 0 )
+                 i_args.offset_length != 0 )
         {
 
             // Add the Offset Information to the start of the data and
             // then send as a single write operation
 
-            size_t newBufLen = l_offset_length + io_buflen;
+            size_t newBufLen = i_args.offset_length + io_buflen;
             uint8_t * newBuffer = static_cast<uint8_t*>(malloc(newBufLen));
 
             // Add the Offset to the buffer
-            memcpy( newBuffer, l_offset_buffer, l_offset_length);
+            memcpy( newBuffer, i_args.offset_buffer, i_args.offset_length);
 
             // Now add the data the user wanted to write
-            memcpy( &newBuffer[l_offset_length], io_buffer, io_buflen);
+            memcpy( &newBuffer[i_args.offset_length], io_buffer, io_buflen);
 
             // Write parms:
-            args.read_not_write  = false;
-            args.with_stop       = true;
-            args.skip_mode_setup = false;
+            i_args.read_not_write  = false;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
 
             err = i2cWrite( i_target,
                             newBuffer,
                             newBufLen,
-                            args );
+                            i_args );
 
 
             free( newBuffer );
@@ -341,17 +473,17 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         /* I2C Read (no offset)                        */
         /***********************************************/
         else if ( i_opType        == DeviceFW::READ &&
-                  l_offset_length == 0 )
+                  i_args.offset_length == 0 )
         {
             // Do a direct READ
-            args.read_not_write  = true;
-            args.with_stop       = true;
-            args.skip_mode_setup = false;
+            i_args.read_not_write  = true;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
 
             err = i2cRead( i_target,
                            io_buffer,
                            io_buflen,
-                           args);
+                           i_args);
         }
 
 
@@ -359,17 +491,17 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         /* I2C Write (no offset)                       */
         /***********************************************/
         else if( i_opType        == DeviceFW::WRITE &&
-                 l_offset_length == 0 )
+                 i_args.offset_length == 0 )
         {
             // Do a direct WRITE with a stop
-            args.read_not_write  = false;
-            args.with_stop       = true;
-            args.skip_mode_setup = false;
+            i_args.read_not_write  = false;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
 
             err = i2cWrite( i_target,
                             io_buffer,
                             io_buflen,
-                            args);
+                            i_args);
         }
 
         /********************************************************/
@@ -377,13 +509,13 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         /********************************************************/
         else
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cCommonOp() - "
                        "Unsupported Op/Offset-Type Combination=%d/%d",
-                       i_opType, l_offset_length );
-            uint64_t userdata2 = l_offset_length;
-            userdata2 = (userdata2 << 16) | args.port;
-            userdata2 = (userdata2 << 16) | args.engine;
-            userdata2 = (userdata2 << 16) | args.devAddr;
+                       i_opType, i_args.offset_length );
+            uint64_t userdata2 = i_args.offset_length;
+            userdata2 = (userdata2 << 16) | i_args.port;
+            userdata2 = (userdata2 << 16) | i_args.engine;
+            userdata2 = (userdata2 << 16) | i_args.devAddr;
 
             /*@
              * @errortype
@@ -426,13 +558,13 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
             // Reset the I2C Master
             err_reset = i2cReset( i_target,
-                                  args,
+                                  i_args,
                                   l_reset_level);
 
             if( err_reset )
             {
                 // 2 error logs, so commit the reset log here
-                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
+                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cCommonOp() - "
                            "Previous error (rc=0x%X, eid=0x%X) before "
                            "i2cReset() failed.  Committing reset error "
                            "(rc=0x%X, eid=0x%X) and returning original error",
@@ -457,27 +589,27 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         (void) mutex_unlock( engineLock );
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Unlocked engine: %d",
-                   args.engine );
+                   i_args.engine );
     }
 
     // If there is an error, add parameter info to log
     if ( err != NULL )
     {
-
+        // @todo RTC 114298- update this for new parms/switches
         I2C::UdI2CParms( i_opType,
                          i_target,
                          io_buflen,
                          i_accessType,
-                         args  )
+                         i_args  )
                        .addToLog(err);
     }
 
     TRACDCOMP( g_trac_i2c,
-               EXIT_MRK"i2cPerformOp() - %s",
+               EXIT_MRK"i2cCommonOp() - %s",
                ((NULL == err) ? "No Error" : "With Error") );
 
     return err;
-} // end i2cPerformOp
+} // end i2cCommonOp
 
 // ------------------------------------------------------------------
 // i2cRead
@@ -489,8 +621,6 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
     uint64_t bytesRead = 0x0;
-    size_t size = sizeof(uint64_t);
-
 
     // Use Local Variables (timeoutCount gets derecmented)
     uint64_t interval_ns  = i_args.polling_interval_ns;
@@ -614,15 +744,16 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 
             // Read the data from the fifo
             fifo.value = 0x0ull;
-            err = deviceRead( i_target,
-                              &fifo.value,
-                              size,
-                              DEVICE_SCOM_ADDRESS(
-                                  I2C::masterAddrs[i_args.engine].fifo ) );
+
+            err = i2cRegisterOp( DeviceFW::READ,
+                                 i_target,
+                                 &fifo.value,
+                                 I2C_REG_FIFO,
+                                 i_args );
 
             TRACUCOMP( g_trac_i2c,
-                       INFO_MRK"i2cRead() - FIFO[0x%lx] = 0x%016llx",
-                       masterAddrs[i_args.engine].fifo, fifo.value);
+                       INFO_MRK"i2cRead() - FIFO = 0x%016llx",
+                       fifo.value);
 
             if( err )
             {
@@ -676,7 +807,6 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
     uint64_t bytesWritten = 0x0;
-    size_t size = sizeof(uint64_t);
 
     // Define regs we'll be using
     fifo_reg_t fifo;
@@ -717,11 +847,11 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
             fifo.value = 0x0ull;
             fifo.byte_0 = *((uint8_t*)i_buffer + bytesWritten);
 
-            err = deviceWrite( i_target,
-                               &fifo.value,
-                               size,
-                               DEVICE_SCOM_ADDRESS(
-                                   masterAddrs[i_args.engine].fifo ) );
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &fifo.value,
+                                 I2C_REG_FIFO,
+                                 i_args );
 
             if( err )
             {
@@ -771,7 +901,6 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
                       misc_args_t & i_args)
 {
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cSetup(): buf_len=%d, r_nw=%d, w_stop=%d, sms=%d",
@@ -810,11 +939,11 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 
             TRACUCOMP( g_trac_i2c,"i2cSetup(): set mode = 0x%lx", mode.value);
 
-            err = deviceWrite( i_target,
-                               &mode.value,
-                               size,
-                               DEVICE_SCOM_ADDRESS(
-                                   masterAddrs[i_args.engine].mode));
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &mode.value,
+                                 I2C_REG_MODE,
+                                 i_args );
 
             if( err )
             {
@@ -845,11 +974,11 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 
         TRACUCOMP( g_trac_i2c,"i2cSetup(): set cmd = 0x%lx", cmd.value);
 
-        err = deviceWrite( i_target,
-                           &cmd.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS(
-                               masterAddrs[i_args.engine].command ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &cmd.value,
+                             I2C_REG_COMMAND,
+                             i_args );
 
         if( err )
         {
@@ -962,7 +1091,6 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
                               status_reg_t & o_statusReg )
 {
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cReadStatusReg()" );
@@ -970,11 +1098,11 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
     do
     {
         // Read the status Reg
-        err = deviceRead( i_target,
-                          &o_statusReg.value,
-                          size,
-                          DEVICE_SCOM_ADDRESS(
-                              masterAddrs[i_args.engine].status ) );
+        err = i2cRegisterOp( DeviceFW::READ,
+                             i_target,
+                             &o_statusReg.value,
+                             I2C_REG_STATUS,
+                             i_args );
 
         if( err )
         {
@@ -982,8 +1110,8 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
         }
 
         TRACUCOMP(g_trac_i2c,"i2cReadStatusReg(): "
-                  INFO_MRK"status[0x%lx]: 0x%016llx",
-                  masterAddrs[i_args.engine].status, o_statusReg.value );
+                  INFO_MRK"status: 0x%016llx",
+                  o_statusReg.value );
 
 
         // Check for Errors
@@ -1350,7 +1478,6 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
 {
 
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cSendStopSignal" );
@@ -1367,11 +1494,11 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
                   "clock line 0x%016llx",
                   clkdataline.value );
 
-        err = deviceWrite( i_target,
-                   &clkdataline.value,
-                   size,
-                   DEVICE_SCOM_ADDRESS(
-                       masterAddrs[i_args.engine].reset_scl ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &clkdataline.value,
+                             I2C_REG_RESET_SCL,
+                             i_args );
 
         if( err )
         {
@@ -1381,11 +1508,11 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
         }
 
         //set data low: write 0 to immediate reset sda register
-        err = deviceWrite( i_target,
-                   &clkdataline.value,
-                   size,
-                   DEVICE_SCOM_ADDRESS(
-                       masterAddrs[i_args.engine].reset_sda ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &clkdataline.value,
+                             I2C_REG_RESET_SDA,
+                             i_args );
 
         if( err )
         {
@@ -1395,11 +1522,11 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
         }
 
         // set clock high: write 0 to immediate set scl register
-        err = deviceWrite( i_target,
-                   &clkdataline.value,
-                   size,
-                   DEVICE_SCOM_ADDRESS(
-                       masterAddrs[i_args.engine].set_scl ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &clkdataline.value,
+                             I2C_REG_SET_SCL,
+                             i_args );
 
         if( err )
         {
@@ -1409,11 +1536,11 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
         }
 
         //set data high: write 0 to immediate set sda register
-        err = deviceWrite( i_target,
-                   &clkdataline.value,
-                   size,
-                   DEVICE_SCOM_ADDRESS(
-                       masterAddrs[i_args.engine].set_sda ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &clkdataline.value,
+                             I2C_REG_SET_SDA,
+                             i_args );
 
         if( err )
         {
@@ -1435,7 +1562,6 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
 {
 
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cToggleClockLine()" );
@@ -1452,11 +1578,11 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
                   "clock line 0x%016llx",
                   clkline.value );
 
-        err = deviceWrite( i_target,
-                   &clkline.value,
-                   size,
-                   DEVICE_SCOM_ADDRESS(
-                       masterAddrs[i_args.engine].reset_scl ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &clkline.value,
+                             I2C_REG_RESET_SCL,
+                             i_args );
 
         if( err )
         {
@@ -1466,11 +1592,11 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
         }
 
         // set clock high: write 0 to immediate set scl register
-        err = deviceWrite( i_target,
-                   &clkline.value,
-                   size,
-                   DEVICE_SCOM_ADDRESS(
-                       masterAddrs[i_args.engine].set_scl ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &clkline.value,
+                             I2C_REG_SET_SCL,
+                             i_args );
 
         if( err )
         {
@@ -1493,7 +1619,6 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
 {
 
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cForceResetAndUnlock()" );
@@ -1513,11 +1638,11 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
 
         diagnostic.diag_mode = 0x1;
 
-        err = deviceWrite( i_target,
-                           &diagnostic.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS(
-                               masterAddrs[i_args.engine].mode ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &diagnostic.value,
+                             I2C_REG_MODE,
+                             i_args );
 
         if( err )
         {
@@ -1550,11 +1675,12 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
         //set bit in mode register
         diagnostic.diag_mode = 0x0;
 
-        err = deviceWrite( i_target,
-                           &diagnostic.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS(
-                               masterAddrs[i_args.engine].mode ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &diagnostic.value,
+                             I2C_REG_MODE,
+                             i_args );
+
 
         if( err )
         {
@@ -1577,9 +1703,6 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
                       i2c_reset_level i_reset_level)
 {
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
-
-    // Get Args
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cReset()" );
@@ -1591,15 +1714,11 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
     {
         reset.value = 0x0;
 
-        TRACUCOMP(g_trac_i2c,"i2cReset() "
-                  "reset[0x%lx]: 0x%016llx",
-                  masterAddrs[i_args.engine].reset, reset.value );
-
-        err = deviceWrite( i_target,
-                           &reset.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS(
-                               masterAddrs[i_args.engine].reset ) );
+        err = i2cRegisterOp( DeviceFW::WRITE,
+                             i_target,
+                             &reset.value,
+                             I2C_REG_RESET,
+                             i_args );
 
         if( err )
         {
@@ -1648,7 +1767,6 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                               misc_args_t & i_args)
 {
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     // Master Registers
     mode_reg_t mode;
@@ -1662,7 +1780,12 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
         // Need to send slave stop to all ports on the engine
         for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
         {
-            // @todo RTC 109926 - only do port 0 for FSI I2C
+            // Only do port 0 for FSI I2C
+            if ( ( i_args.switches.useFsiI2C == 1 ) &&
+                 ( port != 0 ) )
+            {
+                break;
+            }
 
             mode.value = 0x0ull;
 
@@ -1671,14 +1794,14 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             mode.bit_rate_div = i_args.bit_rate_divisor;
 
             TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
-                      "mode[0x%lx]: 0x%016llx",
-                      masterAddrs[i_args.engine].mode, mode.value );
+                      "mode: 0x%016llx",
+                      mode.value );
 
-            err = deviceWrite( i_target,
-                               &mode.value,
-                               size,
-                               DEVICE_SCOM_ADDRESS(
-                                   masterAddrs[i_args.engine].mode ) );
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &mode.value,
+                                 I2C_REG_MODE,
+                                 i_args );
 
             if( err )
             {
@@ -1689,14 +1812,14 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             cmd.with_stop = 1;
 
             TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
-                      "cmd[0x%lx]: 0x%016llx",
-                      masterAddrs[i_args.engine].command, cmd.value );
+                      "cmd: 0x%016llx",
+                      cmd.value );
 
-            err = deviceWrite( i_target,
-                               &cmd.value,
-                               size,
-                               DEVICE_SCOM_ADDRESS(
-                                   masterAddrs[i_args.engine].command ) );
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &cmd.value,
+                                 I2C_REG_COMMAND,
+                                 i_args );
 
             if( err )
             {
@@ -1731,7 +1854,6 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
                               uint64_t & o_intRegValue )
 {
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
     // Master Regs
     interrupt_reg_t intreg;
@@ -1742,20 +1864,20 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
     do
     {
         intreg.value = 0x0;
-        err = deviceRead( i_target,
-                          &intreg.value,
-                          size,
-                          DEVICE_SCOM_ADDRESS(
-                              masterAddrs[i_args.engine].interrupt ) );
 
+        err = i2cRegisterOp( DeviceFW::READ,
+                             i_target,
+                             &intreg.value,
+                             I2C_REG_INTERRUPT,
+                             i_args );
         if( err )
         {
             break;
         }
 
         TRACUCOMP(g_trac_i2c,"i2cGetInterrupts(): "
-                  "interrupt[0x%lx]: 0x%016llx",
-                  masterAddrs[i_args.engine].interrupt, intreg.value );
+                  "interrupt: 0x%016llx",
+                  intreg.value );
 
         // Return the data read
         o_intRegValue = intreg.value;
@@ -1775,9 +1897,8 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
 errlHndl_t i2cSetupMasters ( void )
 {
     errlHndl_t err = NULL;
-    size_t size = sizeof(uint64_t);
 
-    misc_args_t io_args;
+    misc_args_t args;
 
     mode_reg_t mode;
 
@@ -1824,6 +1945,10 @@ errlHndl_t i2cSetupMasters ( void )
                 continue;
             }
 
+            // Setup Host-based I2C
+            args.switches.useHostI2C = 1;
+            args.switches.useFsiI2C  = 0;
+
             for( uint32_t engine = 0;
                  engine < CENTAUR_MASTER_ENGINES;
                  engine++ )
@@ -1834,7 +1959,7 @@ errlHndl_t i2cSetupMasters ( void )
                 // Hardcode to 400KHz for PHYP
                 err = i2cSetBusVariables ( centList[centaur],
                                            SET_I2C_BUS_400KHZ,
-                                           io_args );
+                                           args );
 
                 if( err )
                 {
@@ -1850,14 +1975,13 @@ errlHndl_t i2cSetupMasters ( void )
                     continue;
                 }
 
-                mode.bit_rate_div = io_args.bit_rate_divisor;
+                mode.bit_rate_div = args.bit_rate_divisor;
 
-                size = sizeof(uint64_t);
-                err = deviceWrite( centList[centaur],
-                                   &mode.value,
-                                   size,
-                                   DEVICE_SCOM_ADDRESS(
-                                       masterAddrs[engine].mode));
+                err = i2cRegisterOp( DeviceFW::WRITE,
+                                     centList[centaur],
+                                     &mode.value,
+                                     I2C_REG_MODE,
+                                     args );
 
                 if( err )
                 {
@@ -1916,15 +2040,22 @@ errlHndl_t i2cSetupMasters ( void )
                 continue;
             }
 
+            // Setup Host-based I2C
+            args.switches.useHostI2C = 1;
+            args.switches.useFsiI2C  = 0;
+
+
             for( uint32_t engine = 0; engine < P8_MASTER_ENGINES; engine++ )
             {
+                args.engine = engine;
+
                 // Write Mode Register:
                 mode.value = 0x0ull;
 
                 // Hardcode to 400KHz for PHYP
                 err = i2cSetBusVariables ( procList[proc],
                                            SET_I2C_BUS_400KHZ,
-                                           io_args );
+                                           args );
 
                 if( err )
                 {
@@ -1941,15 +2072,13 @@ errlHndl_t i2cSetupMasters ( void )
                     continue;
                 }
 
-                mode.bit_rate_div = io_args.bit_rate_divisor;
+                mode.bit_rate_div = args.bit_rate_divisor;
 
-                size = sizeof(uint64_t);
-                err = deviceWrite( procList[proc],
-                                   &mode.value,
-                                   size,
-                                   DEVICE_SCOM_ADDRESS(
-                                       masterAddrs[engine].mode));
-
+                err = i2cRegisterOp( DeviceFW::WRITE,
+                                     procList[proc],
+                                     &mode.value,
+                                     I2C_REG_MODE,
+                                     args );
                 if( err )
                 {
                     TRACFCOMP( g_trac_i2c,
@@ -1995,18 +2124,11 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
 
     TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cSetBusVariables(): nest_freq=%d, i_mode=%d",
-               g_I2C_NEST_FREQ_MHZ, i_mode );
+               ENTER_MRK"i2cSetBusVariables(): i_mode=%d",
+               i_mode );
 
     do
     {
-        // @todo RTC:80614 - sync up reading attributes eventually,
-        // but for now, unless requested for 400KHz, default to 1MHz
-        if ( i_mode != SET_I2C_BUS_400KHZ )
-        {
-            i_mode = SET_I2C_BUS_1MHZ;
-        }
-
         if ( i_mode == SET_I2C_BUS_400KHZ )
         {
             io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
@@ -2017,12 +2139,27 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
             io_args.bus_speed = I2C_BUS_SPEED_1MHZ;
         }
 
-        /* @todo RTC:80614 - sync up reading attributes with MRW
+
+        // @todo RTC:80614 - sync up reading attributes with MRW
+        // MRW does not have Host-based processor set at 1MHz
+        // Otherwise, default everything to 400KHZ
         else if (i_mode == READ_I2C_BUS_ATTRIBUTES)
         {
-
+            // @todo RTC 117430 - Remove when MRWs are updated to have
+            // hostboot SBE Seeproms use 1MHZ speed
+            // Look for Processor and Host I2C mode
+            if ( ( io_args.switches.useHostI2C == 1 ) &&
+                 ( i_target->getAttr<TARGETING::ATTR_TYPE>() ==
+                   TARGETING::TYPE_PROC )
+               )
+            {
+                io_args.bus_speed = I2C_BUS_SPEED_1MHZ;
+            }
+            else
+            {
+                io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
+            }
         }
-        */
 
         else
         {
@@ -2053,15 +2190,33 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
         }
 
         // Set other variables based off of io_args.bus_speed
-        io_args.bit_rate_divisor = i2cGetBitRateDivisor(io_args.bus_speed);
         io_args.polling_interval_ns = i2cGetPollingInterval(io_args.bus_speed);
         io_args.timeout_count = I2C_TIMEOUT_COUNT(io_args.polling_interval_ns);
 
+        // The Bit-Rate-Divisor set in the I2C Master mode register needs
+        // to know the frequency of the "local bus" serving as a reflock
+        // for the I2C Master
+        uint64_t local_bus_MHZ = 0;
+
+        if ( io_args.switches.useFsiI2C == 1 )
+        {
+            // @todo RTC 117560 - verify correct frequency
+            local_bus_MHZ = g_I2C_NEST_FREQ_MHZ;
+        }
+        else
+        {
+            // For Host I2C use Nest Frequency
+            local_bus_MHZ = g_I2C_NEST_FREQ_MHZ;
+        }
+
+        io_args.bit_rate_divisor = i2cGetBitRateDivisor(io_args.bus_speed,
+                                                        local_bus_MHZ);
+
     } while( 0 );
 
-
-    TRACUCOMP(g_trac_i2c,"i2cSetBusVariables(): e/p/dA=%d/%d/0x%X: "
+    TRACUCOMP(g_trac_i2c,"i2cSetBusVariables(): tgt=0x%X, e/p/dA=%d/%d/0x%X: "
               "mode=%d: b_sp=%d, b_r_d=0x%x, p_i=%d, to_c = %d",
+              TARGETING::get_huid(i_target),
               io_args.engine, io_args.port, io_args.devAddr,
               i_mode, io_args.bus_speed, io_args.bit_rate_divisor,
               io_args.polling_interval_ns, io_args.timeout_count);
@@ -2164,6 +2319,11 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
                 io_args.engine = engine;
                 io_args.port = 0; // default to port 0
 
+
+                // For processors just do Host I2C for now
+                io_args.switches.useHostI2C = 1;
+                io_args.switches.useFsiI2C  = 0;
+
                 // Hardcode to 400KHz - should be a safe speed
                 err = i2cSetBusVariables ( procList[proc],
                                            SET_I2C_BUS_400KHZ,
@@ -2231,5 +2391,94 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
 
     return err;
 }
+
+
+
+// ------------------------------------------------------------------
+//  i2cRegisterOp
+// ------------------------------------------------------------------
+errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
+                       TARGETING::Target * i_target,
+                       uint64_t * io_data_64,
+                       i2c_reg_offset_t i_reg,
+                       misc_args_t & i_args )
+{
+    errlHndl_t err = NULL;
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cRegisterOp()");
+
+    uint64_t op_addr = 0x0;
+    uint64_t op_size = 0x0; // in bytes
+
+    do
+    {
+        // Calculate Register Address and data size based on access type
+        if ( i_args.switches.useHostI2C == 1 )
+        {
+            op_addr = I2C_HOST_MASTER_BASE_ADDR + i_reg +
+                        (i_args.engine * 0x20); // engine reg offset
+            op_size=8;
+
+            err = DeviceFW::deviceOp( i_opType,
+                                      i_target,
+                                      io_data_64,
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(op_addr) );
+
+        }
+
+        else // i_args.switches.useFsiI2C == 1
+        {
+            // FSI addresses are at 1-byte offsets, so need to multiply the
+            // i_reg offset by 4 since each I2C register is 4 bytes long.
+            op_addr = I2C_FSI_MASTER_BASE_ADDR + ( i_reg * 4 );
+
+            if ( i_reg == I2C_REG_FIFO )
+            {
+                // Only read/write 1 byte at a time for FIFO register
+                op_size = 1;
+            }
+            else
+            {
+                op_size = 4;
+            }
+
+            // Read or Write, this command should have the data left-justfied
+            err = DeviceFW::deviceOp( i_opType,
+                                      i_target,
+                                      io_data_64,
+                                      op_size,
+                                      DEVICE_FSI_ADDRESS(op_addr));
+
+        }
+
+        if ( err )
+        {
+            TRACFCOMP(g_trac_i2c,"i2cRegisterOp %s FAIL!: plid=0X%X, rc=0x%X "
+                      "tgt=0x%X, reg=%d, addr=0x%.8X, "
+                      "data=0x%.16X",
+                      ( i_opType == DeviceFW::READ ) ? "read" : "write",
+                      err->plid(),  err->reasonCode(),
+                      TARGETING::get_huid(i_target),
+                      i_reg, op_addr, (*io_data_64) );
+        }
+
+    } while( 0 );
+
+    TRACUCOMP(g_trac_i2c,"i2cRegisterOp(%s): tgt=0x%X, h/f=%d/%d(%d) "
+              "i_reg=%d, addr=0x%.8X, data=0x%.16X",
+              ( i_opType == DeviceFW::READ ) ? "r" : "w",
+              TARGETING::get_huid(i_target),
+              i_args.switches.useHostI2C,
+              i_args.switches.useFsiI2C, op_size,
+              i_reg, op_addr, (*io_data_64) );
+
+    TRACDCOMP( g_trac_i2c,
+               EXIT_MRK"i2cRegisterOp()" );
+
+    return err;
+}
+
 
 } // end namespace I2C

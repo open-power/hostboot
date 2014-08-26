@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -60,12 +62,14 @@ class FsiDD
      * @param[in] i_target  Chip target of FSI operation
      * @param[in] i_address  Address to read (relative to target)
      * @param[out] o_buffer  Destination buffer for data
+     * @parm[in]  i_buflen   Length of data to read in bytes
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t read(TARGETING::Target* i_target,
                     uint64_t i_address,
-                    uint32_t* o_buffer);
+                    uint32_t* o_buffer,
+                    size_t  i_buflen = 4);
 
     /**
      * @brief Performs an FSI Write Operation
@@ -73,12 +77,14 @@ class FsiDD
      * @param[in] i_target  Chip target of FSI operation
      * @param[in] i_address  Address to write (relative to target)
      * @param[out] i_buffer  Source buffer for data
+     * @parm[in]  i_buflen   Length of data to write in bytes
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t write(TARGETING::Target* i_target,
                      uint64_t i_address,
-                     uint32_t* i_buffer);
+                     uint32_t* i_buffer,
+                     size_t  i_buflen = 4);
 
 
     /**
@@ -160,11 +166,13 @@ class FsiDD
      * @param[in] i_address  Absolute FSI address to read relative to
      *     the OPB master processor chip
      * @param[out] o_buffer  Destination buffer for data
+     * @parm[in]  i_buflen   Length of data to read in bytes
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t read(uint64_t i_address,
-                    uint32_t* o_buffer);
+                    uint32_t* o_buffer,
+                    size_t  i_buflen = 4);
 
     /**
      * @brief Performs an FSI Write Operation to an absolute address
@@ -173,11 +181,13 @@ class FsiDD
      * @param[in] i_address  Absolute FSI address to write relative to
      *     the OPB master processor chip
      * @param[out] i_buffer  Source buffer for data
+     * @parm[in]  i_buflen   Length of data to write in bytes
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t write(uint64_t i_address,
-                     uint32_t* i_buffer);
+                     uint32_t* i_buffer,
+                     size_t  i_buflen = 4);
 
     /**
      * Common id to identify a FSI position to use in error logs and traces
@@ -248,22 +258,26 @@ class FsiDD
      *
      * @param[in] i_addrInfo  Addressing information
      * @param[out] o_buffer  Destination buffer for data
+     * @parm[in]  i_buflen   Length of data to read in bytes
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t read(FsiAddrInfo_t& i_addrInfo,
-                    uint32_t* o_buffer);
+                    uint32_t* o_buffer,
+                    size_t  i_buflen = 4);
 
     /**
      * @brief Performs an FSI Write Operation to an absolute address
      *
      * @param[in] i_addrInfo  Addressing information
      * @param[out] i_buffer  Source buffer for data
+     * @parm[in]  i_buflen   Length of data to write in bytes
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t write(FsiAddrInfo_t& i_addrInfo,
-                     uint32_t* i_buffer);
+                     uint32_t* i_buffer,
+                     size_t  i_buflen = 4);
 
     /**
      * @brief Initializes the FSI master control registers

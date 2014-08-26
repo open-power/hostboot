@@ -97,6 +97,9 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
     }
     else
     {
+        // FSI only reads 4 bytes for id_ec
+        op_size = sizeof(uint32_t);
+
         errl = DeviceFW::deviceRead(i_target, &id_ec, op_size,
                                     DEVICE_FSI_ADDRESS(0x01028));
     }

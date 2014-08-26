@@ -77,20 +77,23 @@ ALWAYS_INLINE inline uint64_t i2cGetNestFreq()
 };
 static uint64_t g_I2C_NEST_FREQ_MHZ = i2cGetNestFreq();
 
+
 /**
  * @brief Inline function used to calculate Bit Rate Divisor setting
  *        based on I2C Bus Speed and Nest Frequency
  *
- * @param [in] i_bus_speed_khz Bus Speed in KHz
+ * @param [in] i_bus_speed_khz  Bus Speed in KHz
+ * @param [in] i_local_bus_MHZ  Local Bus that feeds I2C Master's clock
  *
  * @return Bit Rate Divisor value
  */
-ALWAYS_INLINE inline uint16_t i2cGetBitRateDivisor(uint64_t i_bus_speed_khz)
+ALWAYS_INLINE inline uint16_t i2cGetBitRateDivisor(uint64_t i_bus_speed_khz,
+                                                   uint64_t i_local_bus_MHZ)
 {
-  // BRD = ( ( ( NEST_FREQ_MHZ / 16 ) / i_bus_speed_khz ) - 1 ) / 4
+  // BRD = ( ( ( LocalBus_MHZ / 16 ) / i_bus_speed_khz ) - 1 ) / 4
 
   // Use tmp variable to convert everything to KHZ safely
-  uint64_t tmp = ( g_I2C_NEST_FREQ_MHZ / 16 ) * 1000;
+  uint64_t tmp = ( i_local_bus_MHZ / 16 ) * 1000;
 
   return ( ( ( tmp / i_bus_speed_khz ) - 1 ) / 4 );
 }
@@ -139,47 +142,36 @@ enum i2c_bus_setting_mode_t
 #define I2C_BUS_SPEED_1MHZ   1000
 
 
+// -----------------------------------------------------------------------
+// NOTE: Host I2C is using the PIB I2C Master 'legacy' registers, which
+//       are analagous to the FSI I2C register space.
+// -----------------------------------------------------------------------
+
 /**
  * @brief I2C Master Base Addresses
- *
- * These addresses will not be needed once there is some solution in
- * the attribute code that can be queried to get the chip base
- * addresses.
  */
-#define I2C_MASTER_BASE_ADDR   0xA0000
+#define I2C_HOST_MASTER_BASE_ADDR   0xA0004
+#define I2C_FSI_MASTER_BASE_ADDR    0x01800
 
 /**
- * @brief I2C Master Offset Addresses
+ * @brief I2C Register Offsets
  */
-#define I2C_MASTER0_OFFSET    0x00
-#define I2C_MASTER1_OFFSET    0x20
-#define I2C_MASTER2_OFFSET    0x40
-
-/**
- * @brief I2C Master Addresses
- */
-#define I2C_MASTER0_ADDR (I2C_MASTER_BASE_ADDR | I2C_MASTER0_OFFSET)
-#define I2C_MASTER1_ADDR (I2C_MASTER_BASE_ADDR | I2C_MASTER1_OFFSET)
-#define I2C_MASTER2_ADDR (I2C_MASTER_BASE_ADDR | I2C_MASTER2_OFFSET)
-
-/**
- * @brief I2C Master register structure and address definition
- */
-struct i2c_addrs_t
+enum i2c_reg_offset_t
 {
-    uint64_t fifo;
-    uint64_t command;
-    uint64_t mode;
-    uint64_t intmask;       // Not Currently used
-    uint64_t interrupt;
-    uint64_t status;
-    uint64_t reset;
-    uint64_t set_scl;
-    uint32_t reset_scl;
-    uint32_t set_sda;
-    uint32_t reset_sda;
+    I2C_REG_FIFO        = 0,
+    I2C_REG_COMMAND     = 1,
+    I2C_REG_MODE        = 2,
+    I2C_REG_INTMASK     = 4,
+    I2C_REG_INTERRUPT   = 6,
+    I2C_REG_STATUS      = 7,
+    I2C_REG_RESET       = 7,
+    I2C_REG_SET_SCL     = 9,
+    I2C_REG_RESET_SCL   = 11,
+    I2C_REG_SET_SDA     = 12,
+    I2C_REG_RESET_SDA   = 13,
 
 };
+
 
 /**
  * @brief Structure used to pass important variables between functions
@@ -196,6 +188,10 @@ struct misc_args_t
     uint16_t bit_rate_divisor;   // uint16_t to match size in mode register
     uint64_t polling_interval_ns;  // in nanoseconds
     uint64_t timeout_count;
+    uint64_t offset_length;
+    uint8_t* offset_buffer;
+
+    TARGETING::I2cSwitches switches;
 
     misc_args_t():port(0xFF),
                   engine(0xFF),
@@ -206,19 +202,14 @@ struct misc_args_t
                   bus_speed(0),
                   bit_rate_divisor(0),
                   polling_interval_ns(0),
-                  timeout_count(0){}
+                  timeout_count(0),
+                  offset_length(0),
+                  offset_buffer(NULL){};
+
 };
-
-
-// -----------------------------------------------------------------------
-// NOTE: Addressing listed below is from the PIB I2C Master Addressing
-//      scheme from the I2C Master specification.  Only the Legacy
-//      registers are being implemented.
-// -----------------------------------------------------------------------
 
 /**
 * @brief I2C FIFO register definition
-*       Address 0x04
 */
 union fifo_reg_t
 {
@@ -232,7 +223,6 @@ union fifo_reg_t
 
 /**
  * @brief I2C Command register definition
- *      Address 0x05
  */
 union command_reg_t
 {
@@ -253,7 +243,6 @@ union command_reg_t
 
 /**
  * @brief I2C Mode register definition
- *      Address 0x06
  */
 union mode_reg_t
 {
@@ -273,7 +262,6 @@ union mode_reg_t
 
 /**
  * @brief Watermark register definition
- *      Address 0x07
  */
 union watermark_reg_t
 {
@@ -291,7 +279,6 @@ union watermark_reg_t
 
 /**
  * @brief Interrupt Mask register definition
- *      Address 0x08
  */
 union interrupt_mask_reg_t
 {
@@ -321,7 +308,6 @@ union interrupt_mask_reg_t
 
 /**
  * @brief Interrupt Condition register definition
- *      Address 0x09
  */
 union interrupt_cond_reg_t
 {
@@ -351,7 +337,6 @@ union interrupt_cond_reg_t
 
 /**
  * @brief Interrupt register definition
- *      Address 0x0A
  */
 union interrupt_reg_t
 {
@@ -381,7 +366,6 @@ union interrupt_reg_t
 
 /**
  * @brief Status register definition
- *      Address 0x0B
  */
 union status_reg_t
 {
@@ -412,7 +396,6 @@ union status_reg_t
 
 /**
  * @brief Extended Status register definition
- *      Address 0x0C
  */
 union extended_status_reg_t
 {
@@ -440,7 +423,6 @@ union extended_status_reg_t
 
 /**
  * @brief Residual Front/Back end length register definition
- *      Address 0x0D
  */
 union residual_length_reg_t
 {
@@ -462,7 +444,7 @@ union residual_length_reg_t
 *       driver framework.
 *
 * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
-*       driververif.H
+*       driverif.H
 *
 * @param[in] i_target - I2C Master Target device
 *
@@ -477,12 +459,10 @@ union residual_length_reg_t
 *           to be read from target device.
 *
 * @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
-*       usrif.H
+*       userif.H
 *
 * @param [in] i_args - This is an argument list for the device driver
-*       framework.  This list of arguments consists of the I2C Master
-*       engine, which port from the I2C master to use, and the slave's
-*       device address.
+*       framework.  This list of arguments is documented in driverif.H.
 *
 * @return errlHndl_t - NULL if successful, otherwise a pointer to the
 *       error log.
@@ -494,6 +474,121 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          size_t & io_buflen,
                          int64_t i_accessType,
                          va_list i_args );
+
+
+/**
+*
+* @brief Perform a Host-based I2C access operation.  It follows a pre-defined
+*       prototype function in order to be registered with the device
+*       driver framework.
+*
+* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+*       driverif.H
+*
+* @param[in] i_target - I2C Master Target device
+*
+* @param [in/out] io_buffer
+*       INPUT: Pointer to the data that will be  written to the target
+*           device.
+*       OUTPUT: Pointer to the data that was read from the target device.
+*
+* @param [in/out] io_buflen
+*       INPUT: Length of the buffer to be written to target device.
+*       OUTPUT: Length of buffer that was written, or length of buffer
+*           to be read from target device.
+*
+* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+*       userif.H
+*
+* @param [in] i_args - This is an argument list for the device driver
+*       framework.  This list of arguments is documented in driverif.H.
+*
+* @return errlHndl_t - NULL if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+errlHndl_t host_i2cPerformOp( DeviceFW::OperationType i_opType,
+                         TARGETING::Target * i_target,
+                         void * io_buffer,
+                         size_t & io_buflen,
+                         int64_t i_accessType,
+                         va_list i_args );
+
+/**
+*
+* @brief Perform a FSI-based I2C access operation.  It follows a pre-defined
+*       prototype function in order to be registered with the device
+*       driver framework.
+*
+* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+*       driverif.H
+*
+* @param[in] i_target - I2C Master Target device
+*
+* @param [in/out] io_buffer
+*       INPUT: Pointer to the data that will be  written to the target
+*           device.
+*       OUTPUT: Pointer to the data that was read from the target device.
+*
+* @param [in/out] io_buflen
+*       INPUT: Length of the buffer to be written to target device.
+*       OUTPUT: Length of buffer that was written, or length of buffer
+*           to be read from target device.
+*
+* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+*       userif.H
+*
+* @param [in] i_args - This is an argument list for the device driver
+*       framework.  This list of arguments is documented in driverif.H.
+*
+* @return errlHndl_t - NULL if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
+                         TARGETING::Target * i_target,
+                         void * io_buffer,
+                         size_t & io_buflen,
+                         int64_t i_accessType,
+                         va_list i_args );
+
+/**
+*
+* @brief Performs the actual I2C operation.
+*        NOTE:  This function handles the MUTEX used to avoid deadlocks.
+*
+* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+*       driverif.H
+*
+* @param[in] i_target - I2C Master Target device
+*
+* @param [in/out] io_buffer
+*       INPUT: Pointer to the data that will be  written to the target
+*           device.
+*       OUTPUT: Pointer to the data that was read from the target device.
+*
+* @param [in/out] io_buflen
+*       INPUT: Length of the buffer to be written to target device.
+*       OUTPUT: Length of buffer that was written, or length of buffer
+*           to be read from target device.
+*
+* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+*       userif.H
+*
+* @param[in] i_args - Structure containing arguments needed for a command
+ *  transaction.
+*
+* @return errlHndl_t - NULL if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
+                         TARGETING::Target * i_target,
+                         void * io_buffer,
+                         size_t & io_buflen,
+                         int64_t i_accessType,
+                         misc_args_t & i_args );
+
 
 /**
  * @brief This function will do the real work of reading from the I2C
@@ -697,6 +792,35 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
 errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
                                 i2c_bus_setting_mode_t i_mode,
                                 misc_args_t & io_args );
+
+/**
+ * @brief This function handles all I2C-related Register operations.
+ *        Host (via scom)  and FSI operations use different size regisers
+ *        and this function converts all data to 64 bits.
+ *
+ * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+ *       driververif.H
+ *
+ * @param[in] i_target - I2C Master Target device
+ *
+ * @param [in/out] io_buffer_64
+ *       INPUT: Pointer to 64 bits of data to be  written to the target
+ *       OUTPUT: Pointer to the 64 bits of data that was read from the target
+ *
+ * @param[in] i_reg - The I2C register of the operation
+ *
+ * @param[in/out] i_args - Structure containing arguments needed for a command
+ *      transaction.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
+                           TARGETING::Target * i_target,
+                           uint64_t * io_data_64,
+                           i2c_reg_offset_t i_reg,
+                           misc_args_t & i_args );
+
 
 
 }; // end I2C namespace
