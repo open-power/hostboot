@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiUtil.H,v 1.20 2014/01/20 22:37:52 mklight Exp $
+// $Id: fapiUtil.H,v 1.21 2014/09/16 14:47:23 pragupta Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiUtil.H,v $
 
 /**
@@ -50,6 +52,7 @@
  *                          mjjones     09/24/2013  Update fapiLogError to
  *                                                  accept another parameter
  *                          dcrowell    10/14/2013  Add explicit inline
+ *                          pragupta    09/16/2014  Add fapi gen hash function
  */
 
 #ifndef FAPIUTIL_H_
@@ -58,6 +61,15 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <fapiReturnCode.H>
+
+namespace fapi
+{
+    namespace hash
+    {
+        enum validHashes { CRC32 };
+    }
+};
+
 #include <fapiPlatUtil.H>
 
 // Defines for endian convertion
@@ -80,6 +92,7 @@
 #define fapiMalloc(s) fapiPlatMalloc(s)
 #define fapiFree(p) fapiPlatFree(p)
 
+#define FAPI_GEN_HASH(type, data, size) FAPI_PLAT_GEN_HASH(type,data,size)
 // It is an eCMD requirement that these functions have a "C" symbol
 // because they may be used from a dynamically linked shared library
 extern "C"

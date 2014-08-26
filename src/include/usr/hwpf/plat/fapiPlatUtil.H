@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,6 +42,19 @@
 
 #include <endian.h>
 #include <stdlib.h>
+#include <util/crc32.H>
+
+#define FAPI_PLAT_GEN_HASH(type, data, size) fapiPlatGenHash<type>(data,size)
+
+template <uint32_t T> uint32_t fapiPlatGenHash
+                     (const void* i_data, size_t i_size);
+
+template <> inline uint32_t fapiPlatGenHash <fapi::hash::CRC32>
+            (const void* i_data, size_t i_size)
+{
+    return Util::crc32_calc(i_data, i_size);
+}
+
 
 // defines for endian conversion
 #define FAPI_PLAT_BE16TOH(x) be16toh(x)
