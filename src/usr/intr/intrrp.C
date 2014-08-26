@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -344,7 +346,8 @@ void IntrRp::msgHandler()
                     // Passed in as upper word of data[0]
                     uint32_t xirr = static_cast<uint32_t>(msg->data[0]>>32);
                     // data[0] (lower word) has the PIR
-                    uint64_t l_data0 = (msg->data[0] & 0xFFFFFFFF);
+                    uint64_t l_xirr_pir = msg->data[0];
+                    uint64_t l_data0 = (l_xirr_pir & 0xFFFFFFFF);
                     PIR_t pir = static_cast<PIR_t>(l_data0);
 
                     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(pir);
@@ -373,10 +376,10 @@ void IntrRp::msgHandler()
                         msg_t * rmsg = msg_allocate();
                         rmsg->type = r->second.msgType;
                         rmsg->data[0] = type;  // interrupt type
-                        rmsg->data[1] = 0;
+                        rmsg->data[1] = l_xirr_pir;
                         rmsg->extra_data = NULL;
 
-                        int rc = msg_sendrecv(msgQ,rmsg);
+                        int rc = msg_sendrecv_noblk(msgQ,rmsg, iv_msgQ);
                         if(rc)
                         {
                             TRACFCOMP(g_trac_intr,ERR_MRK
@@ -385,7 +388,11 @@ void IntrRp::msgHandler()
                                       " handler. Ignoring it. rc = %d",
                                       (uint32_t) type, rc);
                         }
-                        msg_free(rmsg);
+
+                        //Since non IPI EOIs are blocking fashion need to open
+                        //up the interrupt priority to max (CPRR)
+                        uint8_t *cppr = reinterpret_cast<uint8_t*>(xirrAddress);
+                        *cppr = CPPR_ENABLE_ALL; //allow any INTR
                     }
                     else if (type == INTERPROC_XISR)
                     {
@@ -447,35 +454,34 @@ void IntrRp::msgHandler()
                             }
 
                         }
-                    }
 
-                    // Writing the XIRR with the same value read earlier
-                    // tells the interrupt presenter hardware to signal an EOI.
-                    xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
-                    *xirrAddress = xirr;
+                        // Writing the XIRR with the same value read earlier
+                        // to signal an EOI.
+                        xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
+                        *xirrAddress = xirr;
 
-                    TRACDCOMP(g_trac_intr,
-                              "EOI issued. XIRR=%x, PIR=%x",
-                              xirr,pir);
+                        TRACDCOMP(g_trac_intr,
+                                  "EOI issued. XIRR=%x, PIR=%x",
+                                  xirr,pir);
 
-                    // Now handle any IPC messages
-                    if (type == INTERPROC_XISR)
-                    {
-                        // If something is registered for IPIs and
-                        // it has not already been handled then handle
+                        // Now handle any IPC messages
+                        // If something is registered for IPIs
+                        // and msg is ready, then handle
                         if(r != iv_registry.end() &&
-                           KernelIpc::ipc_data_area.msg_queue_id !=
-                           IPC_DATA_AREA_READ)
+                           (KernelIpc::ipc_data_area.msg_queue_id !=
+                           IPC_DATA_AREA_CLEAR) &&
+                            (KernelIpc::ipc_data_area.msg_queue_id !=
+                             IPC_DATA_AREA_LOCKED))
                         {
                             msg_q_t msgQ = r->second.msgQ;
 
                             msg_t * rmsg = msg_allocate();
                             rmsg->type = r->second.msgType;
                             rmsg->data[0] = type;  // interrupt type
-                            rmsg->data[1] = 0;
+                            rmsg->data[1] = l_xirr_pir;
                             rmsg->extra_data = NULL;
 
-                            int rc = msg_sendrecv(msgQ,rmsg);
+                            int rc = msg_sendrecv_noblk(msgQ, rmsg, iv_msgQ);
                             if(rc)
                             {
                                 TRACFCOMP(g_trac_intr,ERR_MRK
@@ -484,18 +490,40 @@ void IntrRp::msgHandler()
                                           "handler. Ignoring it. rc = %d",
                                           rc);
                             }
-                            msg_free(rmsg);
-                        }
-                        if(KernelIpc::ipc_data_area.msg_queue_id ==
-                           IPC_DATA_AREA_READ)
-                        {
-                            KernelIpc::ipc_data_area.msg_queue_id =
-                                IPC_DATA_AREA_CLEAR;
                         }
                     }
-
                 }
                 break;
+
+            case MSG_INTR_EOI:
+                {
+                    // Write the XIRR with the same value read earlier
+                    // to signal EOI. XIRR value was stored in data[1]
+                    // Only do this for non IPI types (type is in data[0])
+                    if(msg->data[0] != INTERPROC_XISR)
+                    {
+                        // Passed in as upper word of data[1]
+                        uint32_t xirr = static_cast<uint32_t>(msg->data[1]>>32);
+                        // data[1] (lower word) has the PIR
+                        uint64_t l_data0 = (msg->data[1] & 0xFFFFFFFF);
+                        PIR_t pir = static_cast<PIR_t>(l_data0);
+
+                        uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(pir);
+                        uint32_t * xirrAddress =
+                          reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
+
+                        xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
+                        *xirrAddress = xirr;
+
+                        TRACDCOMP(g_trac_intr,
+                                  "EOI issued. XIRR=%x, PIR=%x",
+                                  xirr,pir);
+                    }
+                    msg_free(msg);
+                }
+                break;
+
+
 
             case MSG_INTR_REGISTER_MSGQ:
                 {
@@ -703,6 +731,15 @@ void IntrRp::msgHandler()
                         errlCommit(err,INTR_COMP_ID);
                     }
                     msg_free(msg); // async message
+                }
+                break;
+
+            case MSG_INTR_DRAIN_QUEUE:
+                {
+                    //The purpose of this message is allow the
+                    //intrp to drain its message queue of pending EOIs
+                    //just respond
+                    msg_respond(iv_msgQ,msg);
                 }
                 break;
 
@@ -2502,6 +2539,14 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
     return err;
 }
 
+void INTR::sendEOI(msg_q_t i_q, msg_t* i_msg)
+{
+    //Fix up message to make it easier to handle
+    //Users are required to NOT touch it
+    i_msg->type = MSG_INTR_EOI;
+    msg_respond(i_q,i_msg);
+}
+
 // Unregister message queue from interrupt handler
 msg_q_t INTR::unRegisterMsgQ(ext_intr_t i_type)
 {
@@ -2741,3 +2786,21 @@ errlHndl_t INTR::addHbNode(uint64_t i_hbNode)
     return err;
 }
 
+/*
+ * Drain interrupt message queue (if present)
+ */
+void INTR::drainQueue()
+{
+    // send a sync message if queue is found
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+    if(intr_msgQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_INTR_DRAIN_QUEUE;
+
+        msg_sendrecv(intr_msgQ, msg);
+
+        msg_free(msg);
+    }
+    //else no queue, no need to do anything
+}

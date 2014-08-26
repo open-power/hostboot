@@ -239,9 +239,7 @@ void MailboxSp::msgHandler()
                     err = handleInterrupt();
 
                     // Respond to the interrupt handler regardless of err
-                    msg->data[0] = 0;
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ,msg);
+                    INTR::sendEOI(iv_msgQ,msg);
 
                     // err will be set if scom failed in mbox DD
                     // or MBOX_DATA_WRITE_ERR  - serious - assert
@@ -408,16 +406,14 @@ void MailboxSp::msgHandler()
                         isync();
                         *ipc_msg = KernelIpc::ipc_data_area.msg_payload;
                         lwsync();
-                        // Signal message has been read, but keep area locked
-                        // until eoi has been sent
+                        // EOI has already been sent by intrp. Simply clear
+                        // ipc area so another message can be sent
                         KernelIpc::ipc_data_area.msg_queue_id =
-                            IPC_DATA_AREA_READ;
+                            IPC_DATA_AREA_CLEAR;
                         handleIPC(static_cast<queue_id_t>(msg_q_id), ipc_msg);
                     }
 
-                    msg->data[0] = 0;
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ,msg);
+                    INTR::sendEOI(iv_msgQ,msg);
                 }
 
                 break;

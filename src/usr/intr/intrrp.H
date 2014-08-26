@@ -116,6 +116,7 @@ namespace INTR
                 LINKC_OFFSET = 24,             //!< offset to LINKC register
                 XISR_MASK    = 0x00FFFFFF,     //!< XISR MASK in XIRR register
                 CPPR_MASK    = 0xFF000000,     //!< CPPR MASK in XIRR register
+                CPPR_ENABLE_ALL = 0xFF,        //!< All interrupt priorities
 
                 ICPBAR_EN    = 30,              //!< BAR enable bit pos
                 ICPBAR_SCOM_ADDR = 0x020109ca,  //!< ICP BAR scom address

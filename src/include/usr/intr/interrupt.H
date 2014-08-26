@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -147,6 +149,8 @@ namespace INTR
         MSG_INTR_MPIPL_CLEANUP,     //!< Clean up interrupts on MPIPL
         MSG_INTR_ADD_CPU_TIMEOUT,   //!< Check for a timeout waiting for a core.
         MSG_INTR_ADD_HBNODE,        //!< Add node info for MPIPL
+        MSG_INTR_EOI,               //!< Issue EOI when received
+        MSG_INTR_DRAIN_QUEUE,       //!< Allow intrp to drain Q of EOI
     };
 
     /**
@@ -167,8 +171,12 @@ namespace INTR
      * @note when an interrupt of type i_msg_type occurrs, the
      * interrupt presenter sends a sync message with type i_msg_type to
      * i_msgQ with FULL IRSN word 0 and then waits for a response.
-     * the full IRSN has the node/chip/ISN, not just the ISN
+     * Once the underlying hardware has been cleaned up (not driving
+     * the interrupt) then sendEOI should be called.  Note the msg
+     * must not be modified by the recipient.  The full IRSN has the
+     * node/chip/ISN, not just the ISN
      *       @see makeXISR
+
      *
      * @note When HB is shutting down the interrupt presenter will send
      * a message to all registered queues with a sync message type of
@@ -177,6 +185,19 @@ namespace INTR
     errlHndl_t registerMsgQ(msg_q_t i_msgQ,
                             uint32_t i_msg_type,
                             ext_intr_t i_intr_type);
+
+    /**
+     * Responds to the interrupt message and lets the interrupt
+     * resource provide know that it can send the End Of Interrupt
+     * to the hardware.  If the interrupt is being driven at this point
+     * a new interrupt will be fired with an additional message placed
+     * on the client's Queue
+     * @param[in] i_q message queue
+     * @param[in] i_msg The message that was sent to indicate an
+                        interrupt.  This must remain unchanged
+     *                  between receipt and sending the EOI
+     */
+    void sendEOI(msg_q_t i_q, msg_t* i_msg);
 
     /**
      * Un register a message queue from the interrupt handler
@@ -220,6 +241,13 @@ namespace INTR
      * @return error log handle on error
      */
     errlHndl_t addHbNode(uint64_t i_hbNode);
+
+    /**
+     * Method to send synchronous message to interrupt RP.  Intent
+     * is to allow any pending EOIs (since they are async) to
+     * drain     */
+    void drainQueue(void);
+
 
 };
 

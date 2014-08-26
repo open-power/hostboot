@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -49,6 +51,7 @@
 #include <hwpf/plat/fapiPlatAttributeService.H>
 #include <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include <mbox/mboxif.H>                 // register mailbox
+#include <intr/interrupt.H>
 #include <isteps/istepmasterlist.H>
 #include "istepdispatcher.H"
 #include "istep_mbox_msgs.H"
@@ -1483,6 +1486,11 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                 errlCommit(err, INITSVC_COMP_ID);
                 // keep going, since we already responded back to the FSP
             }
+
+            //All interrupt sources are blocked, but intrp could have
+            //pending EOI in message queue.  Send message to drain
+            //the interrupt queue
+            INTR::drainQueue();
 
             TRACFCOMP( g_trac_initsvc, "winkle all cores");
             uint32_t l_rc = cpu_all_winkle();
