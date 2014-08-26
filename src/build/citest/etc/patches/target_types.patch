@@ -1,0 +1,22 @@
+69,89d68
+<     <id>occ</id>
+<     <parent>unit</parent>
+<     <attribute>
+<         <id>TYPE</id>
+<         <default>OCC</default>
+<     </attribute>
+<     <attribute>
+<         <id>MODEL</id>
+<         <default>POWER8</default>
+<     </attribute>
+<     <attribute>
+<         <id>OCC_MASTER_CAPABLE</id>
+<     </attribute>
+<     <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
+<     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+<         <default>0x00000000</default>
+<     </attribute>
+<     <fspOnly/>
+< </targetType>
+< 
+< <targetType>

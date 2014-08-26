@@ -1,0 +1,16 @@
+1413,1427d1412
+<     <attribute>
+<         <id>OCC_MASTER_CAPABLE</id>
+<         <description>
+<             This attribute is to determine whether an occ is master capable.
+<             An OCC is master capable if it's parent processor is wired to the
+<             APSS.
+<         </description>
+<         <simpleType>
+<             <uint8_t>
+<             </uint8_t>
+<         </simpleType>
+<         <persistency>non-volatile</persistency>
+<         <readable/>
+<         <fspOnly/>
+<     </attribute>

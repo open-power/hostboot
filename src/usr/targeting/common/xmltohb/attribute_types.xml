@@ -14298,6 +14298,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
 </attribute>
+
+<attribute>
+    <id>OCC_MASTER_CAPABLE</id>
+    <description>
+        This attribute is to determine whether an occ is master capable.
+        An OCC is master capable if it's parent processor is wired to the
+        APSS.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>   <!-- false -->
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <attribute>
     <id>MSS_DRAMINIT_RESET_DISABLE</id>
     <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>

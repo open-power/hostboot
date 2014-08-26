@@ -355,6 +355,30 @@
         <id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_FUNC_IDS</id>
+        <default>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16</default>
+    </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_GNDS</id>
+        <default>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16</default>
+    </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_GAINS</id>
+        <default>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16</default>
+    </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_OFFSETS</id>
+        <default>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16</default>
+    </attribute>
+    <attribute>
+        <id>APSS_GPIO_PORT_MODES</id>
+        <default>0,1</default>
+    </attribute>
+    <attribute>
+        <id>APSS_GPIO_PORT_PINS</id>
+        <default>1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
@@ -1564,6 +1588,26 @@
     </attribute>
 </targetInstance>
 
+<!-- Venice n0p0 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc0occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130000</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p1 processor chip -->
 
 <targetInstance>
@@ -2770,6 +2814,26 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p1 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc1occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130001</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
         <default>0</default>
     </attribute>
 </targetInstance>
@@ -3984,8 +4048,27 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p3 processor chip -->
+<!-- Venice n0p2 OCC units -->
 
+<targetInstance>
+    <id>sys0node0proc2occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130002</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p3 processor chip -->
 
 <targetInstance>
     <id>sys0node0proc3</id>
@@ -5195,6 +5278,26 @@
     </attribute>
 </targetInstance>
 
+<!-- Venice n0p3 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc3occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130003</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p4 processor chip -->
 
 <targetInstance>
@@ -6370,6 +6473,26 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p4 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc4occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130004</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
         <default>0</default>
     </attribute>
 </targetInstance>
@@ -7551,6 +7674,26 @@
     </attribute>
 </targetInstance>
 
+<!-- Venice n0p5 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc5occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130005</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p6 processor chip -->
 
 <targetInstance>
@@ -8728,6 +8871,26 @@
     </attribute>
 </targetInstance>
 
+<!-- Venice n0p6 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc6occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130006</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p7 processor chip -->
 
 <targetInstance>
@@ -9900,6 +10063,27 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p7 OCC units -->
+
+<targetInstance>
+    <id>sys0node0proc7occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00130007</default></attribute>
+        <!-- <attribute><id>ORDINAL_ID</id><default>3</default></attribute> -->
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
         <default>0</default>
     </attribute>
 </targetInstance>

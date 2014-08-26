@@ -1608,4 +1608,20 @@
     </attribute>
 </targetType>
 
+<targetType>
+    <id>occ</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>OCC</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>POWER8</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+    </attribute>
+</targetType>
+
 </attributes>

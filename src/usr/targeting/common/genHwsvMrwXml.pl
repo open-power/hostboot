@@ -73,6 +73,15 @@ use constant
     MAX_MBA_PER_MEMBUF => 2,
 };
 
+# for SPI connections in the @SPIs array
+use constant SPI_PROC_PATH_FIELD => 0;
+use constant SPI_NODE_FIELD => 1;
+use constant SPI_POS_FIELD  => 2;
+use constant SPI_ENDPOINT_PATH_FIELD => 3;
+use constant SPI_APSS_POS_FIELD => 4;
+use constant SPI_APSS_ORD_FIELD => 5;
+use constant SPI_APSS_RID_FIELD => 6;
+
 our $mrwdir = "";
 my $sysname = "";
 my $usage = 0;
@@ -1389,6 +1398,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 
         generate_proc($proc, $is_master, $ipath, $lognode, $logid,
                       $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology);
+
+        generate_occ($proc, $proc_ordinal_id);
 
         # call to do any fsp per-proc targets (ie, occ, psi)
         do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
@@ -3721,6 +3732,200 @@ sub generate_dimm
 print "\n</targetInstance>\n";
 }
 
+################################################################################
+# Compares two Apss instances based on the node and position #
+################################################################################
+sub byApssNodePos($$)
+{
+    my $retVal = -1;
+
+    my $lhsInstance_node = $_[0][SPI_NODE_FIELD];
+    my $rhsInstance_node = $_[1][SPI_NODE_FIELD];
+    if(int($lhsInstance_node) eq int($rhsInstance_node))
+    {
+         my $lhsInstance_pos = $_[0][SPI_APSS_POS_FIELD];
+         my $rhsInstance_pos = $_[1][SPI_APSS_POS_FIELD];
+         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
+         {
+                die "ERROR: Duplicate apss positions: 2 apss with same
+                    node and position, \
+                    NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
+         }
+         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
+         {
+             $retVal = 1;
+         }
+    }
+    elsif(int($lhsInstance_node) > int($rhsInstance_node))
+    {
+        $retVal = 1;
+    }
+    return $retVal;
+}
+
+our @SPIs;
+our $apssInit = 0;
+
+# This routine is common to FSP and HB
+# TODO RTC 116460 Only FSP uses the RID and ordinal numbering.
+# Refactor FSP only elements to genHwsvMrwXml_fsp.pm
+my $getBaseRidApss = 0;
+my $ridApssBase = 0;
+
+sub init_apss
+{
+    # Not every system currently has a *-proc-spi_busses.xml in the MRW
+    # If no file exists then assume there is no APSS, so just leave @SPIs empty
+    # TODO RTC 116310 revisit the need to allow this file to not exist.
+    my $proc_spi_busses =
+                test_mrw_file($::mrwdir, "${sysname}-proc-spi-busses.xml");
+    if($proc_spi_busses ne "")
+    {
+        my $spiBus = ::parse_xml_file($proc_spi_busses,
+            forcearray=>['processor-spi-bus']);
+
+        # Capture all SPI connections into the @SPIs array
+        my @rawSPIs;
+        foreach my $i (@{$spiBus->{'processor-spi-bus'}})
+        {
+            if($getBaseRidApss == 0)  # TODO RTC 116460 FSP only
+            {
+                my $locCode = $i->{endpoint}->{'location-code'};
+                my @locCodeComp = split( '-', $locCode );
+                $ridApssBase = (@locCodeComp > 2) ? 0x4900 : 0x800;
+                $getBaseRidApss = 1;
+            }
+
+            if ($i->{endpoint}->{'instance-path'} =~ /.*APSS-[0-9]+$/i)
+            {
+                my $pos = $i->{endpoint}->{'instance-path'};
+                while (chop($pos) ne '/') {};
+                $pos = chop($pos);
+                push @rawSPIs, [
+                $i->{processor}->{'instance-path'},
+                $i->{processor}->{target}->{node},
+                $i->{processor}->{target}->{position},
+                $i->{endpoint}->{'instance-path'},
+                $pos, 0, 0
+                ];
+            }
+        }
+
+        @SPIs = sort byApssNodePos @rawSPIs;
+
+        my $ordinalApss = 0;
+        my $apssPos = 0;
+        my $currNode = -1;
+        for my $i (0 .. $#SPIs)
+        {
+            $SPIs[$i][SPI_APSS_ORD_FIELD] = $ordinalApss;
+            $ordinalApss++;
+            if($currNode != $SPIs[$i][SPI_NODE_FIELD])
+            {
+                $apssPos = 0;
+                $currNode = $SPIs[$i][SPI_NODE_FIELD];
+            }
+            $SPIs[$i][SPI_APSS_RID_FIELD]
+            = sprintf("0x%08X", $ridApssBase + (2*$currNode) + $apssPos++);
+        }
+    }
+}
+
+
+my $occInit = 0;
+my %occList = ();
+sub occ_init
+{
+    my $targets_file = open_mrw_file($::mrwdir, "${sysname}-targets.xml");
+    my $occTargets = ::parse_xml_file($targets_file);
+
+    #get the OCC details
+    foreach my $Target (@{$occTargets->{target}})
+    {
+        if($Target->{'ecmd-common-name'} eq "occ")
+        {
+            my $ipath = $Target->{'instance-path'};
+            my $node = $Target->{node};
+            my $position = $Target->{position};
+
+            $occList{$node}{$position} = {
+                'node'         => $node,
+                'position'     => $position,
+                'instancePath' => $ipath,
+            }
+        }
+    }
+}
+
+sub generate_occ
+{
+    # input parameters
+    my ($proc, $ordinalId) = @_;
+
+    if ($apssInit == 0)
+    {
+        init_apss;
+        $apssInit = 1;
+    }
+
+    my $uidstr = sprintf("0x%02X13%04X",${node},$proc);
+    my $mastercapable = 0;
+
+    for my $spi ( 0 .. $#SPIs )
+    {
+        my $ipath = $SPIs[$spi][SPI_ENDPOINT_PATH_FIELD];
+        if(($SPIs[$spi][SPI_ENDPOINT_PATH_FIELD] =~ /.*APSS-[0-9]+$/i) &&
+           ($node eq $SPIs[$spi][SPI_NODE_FIELD]) &&
+           ($proc eq $SPIs[$spi][SPI_POS_FIELD]))
+        {
+            $mastercapable = 1;
+            last;
+        }
+    }
+
+    # Get the OCC info
+    if ($occInit == 0)
+    {
+        occ_init;
+        $occInit = 1;
+    }
+    my $mruData = get_mruid($occList{$node}{$proc}->{'instancePath'});
+
+    print "
+<!-- $SYSNAME n${node}p${proc} OCC units -->
+
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}occ0</id>
+    <type>occ</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>";
+
+    do_plugin('fsp_occ', $ordinalId );
+
+    print "
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/occ-0</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$occList{$node}{$proc}->{'instancePath'}</default>
+    </compileAttribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>$mastercapable</default>
+    </attribute>
+</targetInstance>\n";
+
+}
+
 sub addSysAttrs
 {
     for my $i (0 .. $#systemAttr)
@@ -3957,6 +4162,31 @@ sub open_mrw_file
         return $file_found;
     }
 }
+
+# TODO RTC 116310 Consider removing this once palmetto MRW APSS support
+# is delivered
+sub test_mrw_file
+{
+    my ($paths, $filename) = @_;
+
+    #Need to get list of paths to search
+    my @paths_to_search = split /:/, $paths;
+    my $file_found = "";
+
+    #Check for file at each directory in list
+    foreach my $path (@paths_to_search)
+    {
+        if ( open (FH, "<$path/$filename") )
+        {
+            $file_found = "$path/$filename";
+            close(FH);
+            last; #break out of loop
+        }
+    }
+
+    return $file_found;
+}
+
 
 my %g_xml_cache = ();
 sub parse_xml_file

@@ -55,3 +55,25 @@ mkdir -p $sb/hbfw/fsp/targeting
 cp $BACKING_BUILD/src/hbfw/fsp/targeting/makefile $sb/hbfw/fsp/targeting
 patch $sb/hbfw/fsp/targeting/makefile \
       ${HOSTBOOTROOT}/src/build/citest/etc/patches/attrPredicate.patch
+
+echo "+++ Patching attribute_types_fsp.xml for HTMGT attribute support."
+mkdir -p $sb/hbfw/fsp/targeting/xmltohb
+
+cp $BACKING_BUILD/src/hbfw/fsp/targeting/xmltohb/attribute_types_fsp.xml \
+   $sb/hbfw/fsp/targeting/xmltohb
+patch $sb/hbfw/fsp/targeting/xmltohb/attribute_types_fsp.xml \
+      ${HOSTBOOTROOT}/src/build/citest/etc/patches/attribute_types.patch
+
+echo "+++ Patching target_types_fsp.xml for HTMGT attribute support."
+cp $BACKING_BUILD/src/hbfw/fsp/targeting/xmltohb/target_types_fsp.xml \
+   $sb/hbfw/fsp/targeting/xmltohb
+patch $sb/hbfw/fsp/targeting/xmltohb/target_types_fsp.xml \
+      ${HOSTBOOTROOT}/src/build/citest/etc/patches/target_types.patch
+
+echo "+++ Patching genHwsvMrwXml_fsp.pm for OCC attribute support"
+
+mkdir -p $sb/mrw/tools
+cp $BACKING_BUILD/src/mrw/tools/genHwsvMrwXml_fsp.pm  $sb/mrw/tools
+patch $sb/mrw/tools/genHwsvMrwXml_fsp.pm \
+      ${HOSTBOOTROOT}/src/build/citest/etc/patches/genHwsvMrwXml.patch
+
