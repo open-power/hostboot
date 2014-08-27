@@ -1,8 +1,10 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.14 2014/06/12 22:59:56 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.15 2014/08/21 15:18:34 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.15|baysah  |06/21/14|- SW274463 : Shut down mirror on first mirrored memory UE
 #--         |        |        |
 #--     1.14|baysah  |06/12/14|- SW265488 : enable channel checkstop for MCIFIR[40]: channel timeout error
 #--         |        |        |
@@ -187,6 +189,16 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      34:43,                    0b0000000000     ;              # MCBUSYQ_BUSY_COUNTER_THRESHOLD3
 }
 
+
+#--******************************************************************************
+#-- MCS Hardware Force Mirror Read (MCHWFM)
+#--******************************************************************************
+ scom 0x000000000201181C              {
+     bits ,                    scom_data        ;
+     0    ,                    0b1              ;              # ENABLE FORCED CHANNEL INACTIVE FOR MIRROR UE/SUE FUNCTION
+     4    ,                    0b0              ;              # DON'T SHUT DOWN MIRROR FOR INTERNAL CENTAUR UES, OR PASSED IN SUES
+     5    ,                    0b1              ;              # SHUT DOWN MIRROR FOR MIRRORED MEMORY UE ONLY
+}
 
 #--******************************************************************************
 #-- MCI Configuration Register
