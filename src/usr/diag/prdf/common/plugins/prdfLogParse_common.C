@@ -318,8 +318,8 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
         for ( uint8_t j = 0; j < chipSigCount; j++ )
         {
             // Get register ID and data length from register header.
-            uint16_t sigId;
-            uint16_t sigDataSize;
+            uint16_t sigId = 0;
+            uint16_t sigDataSize = 0;
             if (i_buflen < (byteIndex + sizeof(sigId) + sizeof(sigDataSize)))
                 break;
             lCapDataBS >> sigId >> sigDataSize;

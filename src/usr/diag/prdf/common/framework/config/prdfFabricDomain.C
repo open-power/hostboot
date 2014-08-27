@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -157,6 +159,10 @@ void FabricDomain::SortForXstop()
     uint64_t l_externalDrivers[GetSize()];
     uint64_t l_wofValues[GetSize()];
     bool l_internalCS[GetSize()];
+
+    memset( &l_externalDrivers[0], 0x00, sizeof(l_externalDrivers) );
+    memset( &l_wofValues[0],       0x00, sizeof(l_wofValues)       );
+    memset( &l_internalCS[0],      0x00, sizeof(l_internalCS)      );
 
     union { uint64_t * u; CPU_WORD * c; } ptr; // zs01
     SYSTEM_DEBUG_CLASS sysDebug;

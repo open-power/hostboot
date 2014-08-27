@@ -1950,37 +1950,8 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-void getRceEntry( uint8_t * i_buffer , char * o_entry )
-{
-
-    uint32_t mrnk  = (i_buffer[0] >> 5) & 0x7;              //  3-bit
-    uint32_t srnk  = (i_buffer[0] >> 2) & 0x7;              //  3-bit
-    uint32_t svld  = (i_buffer[0] >> 1) & 0x1;              //  1-bit
-    uint32_t count = i_buffer[1];                         //  8-bit
-
-    // This Function should return string in this format
-    // "Rank Count ".
-    if ( 1 == svld )
-    {
-        snprintf( o_entry, DATA_SIZE, "m%ds%d", mrnk, srnk );
-    }
-    else
-    {
-        snprintf( o_entry, DATA_SIZE, "m%d  ", mrnk );
-    }
-
-    // Reserve some extra space for format
-    // 5 chars for "Count", 1 blank before count , one after count
-    char countStr[8] = { '\0' };
-    snprintf( countStr, 8, "   %d    ", count );
-
-    strcat( o_entry, countStr );
-}
-
-//------------------------------------------------------------------------------
-
 bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
-                      ErrlUsrParser & i_parser )
+                       ErrlUsrParser & i_parser )
 {
     using namespace RCE_TABLE;
 
@@ -1990,48 +1961,34 @@ bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
     if ( ( NULL == i_buffer ) || ( 0 == i_buflen) ) return false;
 
     const uint32_t entries = i_buffer[0];
-    uint32_t idx = 1;
     i_parser.PrintNumber( " MEM_RCE_TABLE", "%d", entries );
 
-    // To conserve space in error log output, have two entries in header
-    // and 4 in Description.
-    const uint32_t entryNumHdr = 2;
-    const uint32_t entryNumDesc = 4;
-    const char * hh = "  Rank Count Rank Count";
-    const char * hd = "Rank Count Rank Count Rank Count Rank Count";
-
-    i_parser.PrintString( hh, hd );
-    hh = "  ---- ----- ---- -----";
-    hd = "---- ----- ---- ----- ---- ----- ---- -----";
-    i_parser.PrintString( hh, hd );
-
-    uint32_t count = 0;
-
-    while( count < entries )
+    for ( uint32_t i = 0; i < entries; i++ )
     {
-        // Get Header
-        char header[HEADER_SIZE] = { '\0' };
-        strcat( header, "  ");
-        for( uint32_t i = 0;  i < entryNumHdr &&  count < entries;
-                                i++, count++, idx += ENTRY_SIZE )
+        uint32_t idx = 1 + i * ENTRY_SIZE;
+
+        uint32_t mrnk  = (i_buffer[idx  ] >> 5) & 0x7;  //  3-bit
+        uint32_t srnk  = (i_buffer[idx  ] >> 2) & 0x7;  //  3-bit
+        uint32_t svld  = (i_buffer[idx  ] >> 1) & 0x1;  //  1-bit
+        uint32_t count =  i_buffer[idx+1];              //  8-bit
+
+        // Get the rank string.
+        char rank_str[DATA_SIZE] = "";
+        if ( 1 == svld )
         {
-            char data[12]     = { '\0' };
-            getRceEntry( i_buffer+idx, data );
-            strcat( header, data );
+            snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );
+        }
+        else
+        {
+            snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
         }
 
-        // Get Description
-        char desc[DATA_SIZE] = { '\0' };
-        for( uint32_t i = 0; i < entryNumDesc && count < entries;
-                                i++, count++, idx += ENTRY_SIZE )
-        {
-            if( count >= entries ) break;
+        // Build the data string.
+        char data[DATA_SIZE] = "";
+        snprintf( data, DATA_SIZE, "rank = %s  count = %d", rank_str, count );
 
-            char data[12]     = { '\0' };
-            getRceEntry( i_buffer+idx, data );
-            strcat( desc, data );
-        }
-        i_parser.PrintString( header, desc );
+        // Print the line.
+        i_parser.PrintString( "", data );
     }
 
     return rc;

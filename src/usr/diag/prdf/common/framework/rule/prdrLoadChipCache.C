@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2006,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -84,62 +86,71 @@ namespace Prdr
                 // partition outside of the cryptographically
                 // signed area just for PRD.
 
-#ifdef __HOSTBOOT_MODULE
+                const char * ext = ".prf";
 
-                char* l_filePathName;
-                size_t l_filePathSize = strlen(i_file) + 4 + 1; // 4 is for ".prf"
-                l_filePathName = new char[l_filePathSize];
-                strcpy(l_filePathName, i_file);
-                strncat(l_filePathName, ".prf", l_filePathSize-1);
+                const size_t sz_file     = strlen( i_file );
+                const size_t sz_ext      = strlen( ext );
+                const size_t sz_filePath = sz_file + sz_ext;
 
-                UtilFile l_ruleFile(l_filePathName);
-                if (!l_ruleFile.exists())
+                char filePath[sz_filePath + 1];
+                memset( filePath, '\0', sizeof(filePath) );
+
+                strncpy( filePath, i_file, sz_file );
+                strncat( filePath, ext,    sz_ext  );
+
+                #ifdef __HOSTBOOT_MODULE
+
+                UtilFile l_ruleFile( filePath );
+                if ( !l_ruleFile.exists() )
                 {
-                    // FIXME: do we need to log and commit an error here?
-                    PRDF_ERR("LoadChipCache::loadChip() failed to find %s", l_filePathName);
+                    PRDF_ERR( "LoadChipCache::loadChip() failed to find %s",
+                              filePath );
                 }
                 else
                 {
                     l_ruleFile.Open("r");
                 }
 
-                delete[] l_filePathName;
+                #else // not __HOSTBOOT_MODULE
 
-#else
+                // Read the correct directory path for flash.
+                const char * prdPath = "prdf/";
+                const size_t sz_prdPath = strlen( prdPath );
 
-                 // Read the correct directory path for flash.
-                size_t l_rootPathSize = 256;
-                char l_rootPath[256] = { '\0' };
-                l_errl = UtilReg::read("fstp/RO_Root",
-                                       (void *) l_rootPath,
-                                       l_rootPathSize);
-                strncat(l_rootPath, "prdf/", 255);
-                strncat(l_rootPath, i_file, 255);
-                strncat(l_rootPath, ".prf", 255);
+                size_t sz_rootPath = 256;
+                char rootPath[ sz_rootPath + sz_prdPath + sz_filePath + 1 ];
+                memset( rootPath, '\0', sizeof(rootPath) );
 
-                if (NULL != l_errl) break;
+                l_errl = UtilReg::read( "fstp/RO_Root", (void *)rootPath,
+                                        sz_rootPath );
+                if ( NULL != l_errl ) break;
 
-                // Read /maint/data/... directory path
-                // for any prf file patch
-                char l_patchPath[256] = { '\0' };
-                strcpy(l_patchPath, "/maint/data/prdf/");
-                strncat(l_patchPath, i_file, 255);
-                strncat(l_patchPath, ".prf", 255);
+                strncat( rootPath, prdPath,  sz_prdPath  );
+                strncat( rootPath, filePath, sz_filePath );
 
-                if (NULL != l_errl) break;
+                // Read /maint/data/... directory path for any prf file patch.
+                const char * maintPath = "/maint/data/prdf/";
+                const size_t sz_maintPath = strlen( maintPath );
+
+                char patchPath[ sz_maintPath + sz_filePath + 1 ];
+                memset( patchPath, '\0', sizeof(patchPath) );
+
+                strncpy( patchPath, maintPath, sz_maintPath );
+                strncat( patchPath, filePath,  sz_filePath );
 
                 // Open File to read chip.
-                UtilFile l_ruleFile(l_patchPath);
-                if (!l_ruleFile.exists())        // check for patch file.
+                UtilFile l_ruleFile( patchPath );
+                if ( !l_ruleFile.exists() ) // check for patch file.
                 {
-                    l_ruleFile.Open(l_rootPath, "r");
+                    l_ruleFile.Open(rootPath, "r");
                 }
                 else
                 {
                     l_ruleFile.Open("r");
                 }
 
-#endif
+                #endif // end __HOSTBOOT_MODULE
+
                 // Load chip object.
                 l_errl = LoadChip(l_ruleFile, *(*o_chip));
 
