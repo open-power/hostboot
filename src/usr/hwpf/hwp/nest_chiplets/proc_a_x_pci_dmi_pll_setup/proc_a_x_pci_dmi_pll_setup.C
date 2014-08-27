@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.15 2014/04/02 14:02:33 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.16 2014/08/27 14:53:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -327,18 +327,6 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_setup_unmask_lock(const fapi::Target & i_t
                     break;
                 }
 
-// TODO: Temporary workaround for SW274072 and SW273877 in order to release 820 driver.
-//       HW team is investigating.  Also, refer to SW255565 for more info.
-//      
-//                rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
-//                    i_target,
-//                    PCIE_CHIPLET_0x09000000);
-//                if (!rc.ok())
-//                {
-//                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
-//                    break;
-//                }
-
                 FAPI_INF("Done setting up PCIE PLL. ");
 
             }  // end PCIE PLL
@@ -357,6 +345,9 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_setup_unmask_lock(const fapi::Target & i_t
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_setup.C,v $
+Revision 1.16  2014/08/27 14:53:40  jmcgill
+shift PCI PLL unlock reporting from istep 7 -> 14 (SW273877)
+
 Revision 1.15  2014/04/02 14:02:33  jmcgill
 respect function input parameters/partial good in unlock error clear/unmask logic (SW252901)
 

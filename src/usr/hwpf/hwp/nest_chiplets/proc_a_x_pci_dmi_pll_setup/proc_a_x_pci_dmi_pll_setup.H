@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.7 2014/04/02 14:02:33 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.8 2014/08/27 14:53:48 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -61,6 +61,16 @@ typedef fapi::ReturnCode (*proc_a_x_pci_dmi_pll_setup_FP_t)(const fapi::Target &
 
 extern "C"
 {
+
+/*
+ * @brief Clear and unmask chiplet PLL lock indication
+ * @param[in] i_target                 Reference to target
+ * @param[in] i_chiplet_base_scom_addr Aligned base address of chiplet SCOM
+ *                                     address space
+ * @return ReturnCode
+ */
+  fapi::ReturnCode proc_a_x_pci_dmi_pll_setup_unmask_lock(const fapi::Target & i_target,
+                                                          const uint32_t i_chiplet_base_scom_addr);
 
 /**
  * @brief Initialize and lock A/X/PCI/DMI PLLs

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.7 2014/01/27 05:22:15 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.9 2014/08/27 14:53:48 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
 #include <proc_pcie_config.H>
+#include <proc_a_x_pci_dmi_pll_setup.H>
 
 extern "C" {
 
@@ -128,7 +129,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                          data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_0x%08X)",
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%zd_FIR_0x%08X)",
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR[i]);
             break;
         }
@@ -139,7 +140,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                          data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_WOF_0x%08X)",
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%zd_FIR_WOF_0x%08X)",
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[i]);
             break;
         }
@@ -159,7 +160,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                          data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_ACTION0_0x%08X)",
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%zd_FIR_ACTION0_0x%08X)",
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i]);
             break;
         }
@@ -179,7 +180,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                          data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_ACTION1_0x%08X)",
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%zd_FIR_ACTION1_0x%08X)",
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i]);
             break;
         }
@@ -199,7 +200,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                          data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_MASK_0x%08X)",
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%zd_FIR_MASK_0x%08X)",
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[i]);
             break;
         }
@@ -257,6 +258,15 @@ fapi::ReturnCode proc_pcie_config(
             if (!rc.ok())
             {
                 FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq_fir");
+                break;
+            }
+
+            rc = proc_a_x_pci_dmi_pll_setup_unmask_lock(
+                i_target,
+                PCIE_CHIPLET_0x09000000);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: Error from proc_a_x_pci_dmi_pll_setup_unmask_lock");
                 break;
             }
         }
