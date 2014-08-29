@@ -167,6 +167,12 @@ actionclass calloutParentProcHighThr1
     threshold1;
 };
 
+actionclass callout2ndLvlMedThr1
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
 actionclass SelfMedThr1
 {
     calloutSelfMed;

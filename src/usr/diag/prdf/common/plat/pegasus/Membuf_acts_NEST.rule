@@ -587,12 +587,17 @@ group gMbsFir filter singlebit
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
      */
-    (MbsFir, bit(3)) ? calloutDmiBusTh1UE;
+    (MbsFir, bit(3)) ? callout2ndLvlMedThr1;
 
     /** MBSFIR[4]
      *  MBS_FIR_REG_INTERNAL_TIMEOUT
      */
-    (MbsFir, bit(4)) ? SelfMedThr1UE;
+    (MbsFir, bit(4)) ? SelfMedThr1;
+
+    /** MBSFIR[3,4]
+     *  MBS_FIR_REG_EXTERNAL_TIMEOUT
+     */
+    (MbsFir, bit(3,4)) ? callout2ndLvlMedThr1;
 
     /** MBSFIR[5]
      *  MBS_FIR_REG_INT_BUFFER_CE
