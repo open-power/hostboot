@@ -120,6 +120,14 @@
         capture     group default;
     };
 
+    register NXDMAENGFIR_MASK_OR
+    {
+        name        "EN.NX.DBG.NX_DMA_ENG_FIR_MASK_OR";
+        scomaddr    0x02013105;
+        capture     group never;
+        access      write_only;
+    };
+
     register NXDMAENGFIR_ACT0
     {
         name        "EN.NX.DBG.NX_DMA_ENG_FIR_ACTION0";
