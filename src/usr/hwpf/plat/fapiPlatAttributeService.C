@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -1569,6 +1571,15 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
 
     FAPI_EXEC_HWP(l_rc,getOscswitchCtlAttr,*i_pProcTarget,i_attr,o_pVal,i_len);
 
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetControlCapable(const fapi::Target * i_pTarget,
+                uint8_t  & o_val)
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc,getControlCapableData,*i_pTarget,o_val);
     return l_rc;
 }
 

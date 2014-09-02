@@ -55,6 +55,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
+#include <hwpf/hwp/mvpd_accessors/getControlCapableData.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
@@ -721,6 +722,19 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
                                void * o_pVal,
                                const size_t i_len);
 
+/**
+ * @brief This function supports a new memory attribute. Called by the
+ * FAPI_ATTR_GET macro when getting the ATTR_MSS_POWER_CONTROL_CAPABLE
+ * attribute.
+ * It should not be called directly.
+ *
+ * @param[in]  i_pTarget Mem Buf Target pointer
+ * @param[out] o_val     Pointer to output variable
+ *
+ */
+fapi::ReturnCode fapiPlatGetControlCapable(const fapi::Target * i_pTarget,
+                uint8_t  & o_val);
+
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -758,6 +772,13 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
 //------------------------------------------------------------------------------
 #define PLAT_GET_CHIP_EC_FEATURE_OVERRIDE(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to support the power control capable memory attribute
+//------------------------------------------------------------------------------
+#define ATTR_MSS_POWER_CONTROL_CAPABLE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetControlCapable(PTARGET,VAL)
 
 //------------------------------------------------------------------------------
 // MACROs to route each ATTR_SPD access to the Hostboot SPD function

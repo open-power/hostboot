@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -56,6 +58,7 @@
 #include    <mvpd_accessors/getMBvpdVersion.H>
 #include    <mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include    <mvpd_accessors/getMBvpdSensorMap.H>
+#include    <mvpd_accessors/getControlCapableData.H>
 #include    <mvpd_accessors/accessMBvpdL4BankDelete.H>
 
 #include <errl/errlmanager.H>
@@ -202,6 +205,59 @@ public:
 
     }
 
+    /**
+     * @brief call getControlCapableData to ensure that it's getting the MR
+     *        keyword correctly, and getting the right data
+     *
+     */
+    void testGetControlCapableData()
+    {
+        fapi::ReturnCode l_fapirc;
+
+        TS_TRACE( "getControlCapableData entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+#if HWPMBVPDACCESSORTEST_UT0
+        uint8_t l_mbNum = 0; //check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            //  make a local copy of the memory buffer target
+            TARGETING::Target*  l_mb_target = l_memBufList[l_mbNum];
+
+            //  dump physical path to target
+            EntityPath l_path;
+            l_path  =   l_mb_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_mb_target(
+                                          TARGET_TYPE_MEMBUF_CHIP,
+                   (const_cast<TARGETING::Target*>(l_mb_target)) );
+
+
+            uint8_t l_val = 5;
+            l_fapirc = FAPI_ATTR_GET(ATTR_MSS_POWER_CONTROL_CAPABLE,
+                                &l_fapi_mb_target,l_val);
+
+            if(l_fapirc) break;
+               TS_TRACE( "Power Control Capable Accessor "
+                         "POWER_CONTROL_CAPABLE=0x%02x", l_val);
+        }
+        if (l_fapirc)
+        {
+            TS_FAIL( "getControlCapableData: FAPI_ATTR_GET fail rc=0x%x",
+                  static_cast<uint32_t>(l_fapirc) );
+            fapiLogError(l_fapirc);
+        }
+
+        TS_TRACE( "testGetControlCapableData exit" );
+
+    }
     /**
      * @brief call getMBvpdSlopeInterceptData to fetch power slope and intercept
      *        attributes from the MW and MV keywords

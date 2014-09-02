@@ -14122,31 +14122,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>MSS_POWER_CONTROL_CAPABLE</id>
-    <description>
-        Supported memory power control types
-
-        0x00 = NONE
-        0x01 = SLOWEXIT_CAPABLE
-        0x02 = FASTEXIT_CAPABLE
-        0x03 = FASTSLOW_CAPABLE
-
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0x00</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_POWER_CONTROL_CAPABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PM_PFET_WORKAROUND_RUN_FLAG</id>
     <description>
     Flag to store that the work-around for HW250017 as been run so that during any resets it is skipped.
