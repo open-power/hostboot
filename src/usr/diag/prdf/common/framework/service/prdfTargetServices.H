@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -230,11 +232,11 @@ TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target );
 TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type );
 
 /**
- * @brief   Determines if the given target is the last functional core.
- * @param   i_coreTarget A core target.
- * @return  TRUE if target is last functional core, FALSE otherwise.
+ * @brief   Determines if the given target is the last functional EX.
+ * @param   i_exTarget A EX target.
+ * @return  TRUE if target is last functional EX, FALSE otherwise.
  */
-bool checkLastFuncCore( TARGETING::TargetHandle_t i_coreTarget );
+bool checkLastFuncEx( TARGETING::TargetHandle_t i_exTarget );
 
 //##############################################################################
 //##

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -855,19 +857,15 @@ TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type )
 
 //------------------------------------------------------------------------------
 
-// FIXME: In the past, this was a wrapper for a GARD interface. Need to make
-//        sure that we have the equivelant functionality.
-bool checkLastFuncCore( TARGETING::TargetHandle_t i_coreTarget )
+bool checkLastFuncEx( TARGETING::TargetHandle_t i_exTarget )
 {
-    bool o_lastCore = false;
+    bool o_lastEx = false;
 
-    // TODO: Possibly support TYPE_EX, TYPE_L2, and TYPE_L3 as target input.
+    TargetHandleList l_list = getFunctionalTargetList( TYPE_EX );
+    if ( 1 == l_list.size() && l_list[0] == i_exTarget )
+        o_lastEx = true;
 
-    TargetHandleList l_list = getFunctionalTargetList( TYPE_CORE );
-    if ( 1 == l_list.size() && l_list[0] == i_coreTarget )
-        o_lastCore = true;
-
-    return o_lastCore;
+    return o_lastEx;
 }
 
 //##############################################################################
