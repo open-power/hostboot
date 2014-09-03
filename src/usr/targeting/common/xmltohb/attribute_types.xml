@@ -302,6 +302,161 @@
     <default>NO_MASTER</default>
 </enumerationType>
 
+
+<enumerationType>
+    <id>ENTITY_ID</id>
+    <description>Enumeration indicating the IPMI entity ID, these values are
+        defined in the IPMI specification.  These values will be used in place
+        of target type when events are sent to the BMC.</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>PROCESSOR</name>
+        <value>0x03</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER_UNIT</name>
+        <value>0x13</value>
+    </enumerator>
+    <enumerator>
+        <name>SYSTEM_CHASSIS</name>
+        <value>0x17</value>
+    </enumerator>
+    <enumerator>
+        <name>MEMORY_DEVICE</name>
+        <value>0x20</value>
+    </enumerator>
+    <enumerator>
+        <name>BIOS</name>
+        <value>0x22</value>
+    </enumerator>
+    <enumerator>
+        <name>OS</name>
+        <value>0x23</value>
+    </enumerator>
+</enumerationType>
+
+<enumerationType>
+    <id>SENSOR_NAME</id>
+    <description>Enumeration indicating the IPMI sensor name, which will
+        be used by hostboot when determining the sensor number to return.
+        The name is unique per hostboot sensor type, actual IPMI sensor
+        types have been overloaded to map our needs.</description>
+    <enumerator>
+        <name>TEMPERATURE</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>VOLTAGE</name>
+        <value>0x02</value>
+    </enumerator>
+    <enumerator>
+        <name>CURRENT</name>
+        <value>0x03</value>
+    </enumerator>
+    <enumerator>
+        <name>INTRUSION</name>
+        <value>0x04</value>
+    </enumerator>
+    <enumerator>
+        <name>STATE</name>
+        <value>0x05</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER_UNIT</name>
+        <value>0x06</value>
+    </enumerator>
+    <enumerator>
+        <name>OS_BOOT</name>
+        <value>0x07</value>
+    </enumerator>
+    <enumerator>
+        <name>HOST_STATUS</name>
+        <value>0x08</value>
+    </enumerator>
+    <enumerator>
+        <name>FW_BOOT_PROGRESS</name>
+        <value>0x09</value>
+    </enumerator>
+    <enumerator>
+        <name>OCC_ACTIVE</name>
+        <value>0x0A</value>
+    </enumerator>
+    <enumerator>
+        <name>SYSTEM_POWER_CAP</name>
+        <value>0x0b</value>
+    </enumerator>
+    <enumerator>
+        <name>PCI_ACTIVE</name>
+        <value>0x0c</value>
+    </enumerator>
+    <enumerator>
+        <name>BOOT_WATCHDOG</name>
+        <value>0x0d</value>
+    </enumerator>
+    <enumerator>
+        <name>REBOOT_COUNT</name>
+        <value>0x0e</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER</name>
+        <value>0x0f</value>
+    </enumerator>
+</enumerationType>
+
+<enumerationType>
+    <id>SENSOR_TYPE</id>
+    <description>Enumeration indicating the IPMI sensor type, these values
+        are defined in the IPMI specification. These values will be used when
+    sending sensor reading events to the BMC.</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>TEMPERATURE</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>VOLTAGE</name>
+        <value>0x02</value>
+    </enumerator>
+    <enumerator>
+        <name>CURRENT</name>
+        <value>0x03</value>
+    </enumerator>
+    <enumerator>
+        <name>PHYSICAL_SECURITY</name>
+        <value>0x05</value>
+    </enumerator>
+    <enumerator>
+        <name>PROCESSOR</name>
+        <value>0x07</value>
+    </enumerator>
+    <enumerator>
+        <name>MEMORY</name>
+        <value>0x0c</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER_UNIT</name>
+        <value>0x09</value>
+    </enumerator>
+    <enumerator>
+        <name>OS_BOOT</name>
+        <value>0x1F</value>
+    </enumerator>
+    <enumerator>
+        <name>APCI_POWER_STATE</name>
+        <value>0x22</value>
+    </enumerator>
+    <enumerator>
+        <name>SYSTEM_FIRMWARE_PROGRESS</name>
+        <value>0x0F</value>
+    </enumerator>
+</enumerationType>
+
 <attribute>
     <id>CLASS</id>
     <description>Attribute indicating the target's class</description>
@@ -352,6 +507,26 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <hasStringConversion/>
+</attribute>
+
+<!-- IPMI Sensor numbers are defined in the IPMI spec as 8 bit values. However
+in the hostboot code they will be defined as a uint16_t to allow us to add
+additonal information. An example relates to error logs returned by the OCC,
+we might want to pass the Entity ID in the upper byte of the sensor ID, this
+would allow hostboot to search only the target type identifed by the Entity
+ID for the sensor number returned with the elog. -->
+
+<!-- attribute to hold 16 pairs of sensor type, sensor number values -->
+<attribute>
+    <id>IPMI_SENSORS</id>
+    <description>Attribute to hold 16 pairs of sensor name, sensor number
+        pairs.</description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>16,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 <attribute>
@@ -1962,7 +2137,6 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
     <id>SP_FUNCTIONS</id>
     <description>

@@ -88,6 +88,8 @@ my $usage = 0;
 my $DEBUG = 0;
 my $outFile = "";
 my $build = "fsp";
+
+
 use Getopt::Long;
 GetOptions( "mrwdir:s"  => \$mrwdir,
             "system:s"  => \$sysname,
@@ -124,6 +126,7 @@ if ($sysname =~ /brazos/)
 {
     $MAXNODE = 4;
 }
+
 
 my $mru_ids_file = open_mrw_file($mrwdir, "${sysname}-mru-ids.xml");
 my $mruAttr = parse_xml_file($mru_ids_file);
@@ -302,6 +305,7 @@ foreach my $policy ( keys %optTargPolicies )
           $optMrwPolicies->{$optTargPolicies{$policy}{MRW_NAME}}];
     }
 }
+
 
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
@@ -1998,7 +2002,38 @@ sub generate_sys
 
     print "    <!-- System Attributes from MRW -->\n";
     addSysAttrs();
-    print "    <!-- End System Attributes from MRW -->\n";
+
+    # $TODO RTC:110399
+    # hardcode for now both palmetto and habenaro are
+    # currently the same - this will change though
+    #
+    if( $haveFSPs == 0 )
+    {
+       print "\n<!-- IPMI sensor numbers -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+        <default>
+            0x07,0x07,
+            0x08,0x04,
+            0x09,0x05,
+            0x0a,0x08,
+            0x0b,0x09,
+            0x0c,0x06,
+            0x0d,0x00,
+            0x0e,0xFF,
+            0x0F,0xFF,
+            0xFF,0xFF,
+            0xFF,0xFF,
+            0xFF,0xFF,
+            0xFF,0xFF,
+            0xFF,0xFF,
+            0xFF,0xFF,
+            0xFF,0xFF
+       </default>
+    </attribute>\n";
+
+    }
+    print "    <!-- End System Attributes from MRW -->";
 
     # If we don't have any FSPs (open-power) then we don't need any SP_FUNCTIONS
     my $HaveSPFunctions = $haveFSPs ? 1 : 0;
@@ -2773,6 +2808,33 @@ sub generate_proc
         print "    <!-- End PM_ attributes -->\n";
     }
 
+    # $TODO RTC:110399
+    if( $haveFSPs == 0 )
+    {
+        print "<!-- IPMI Sensor numbers for processor status -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+        <default>
+            0x01, 0x12,
+            0x05, 0x03,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF
+        </default>
+    </attribute>\n";
+    }
+
     print "    </targetInstance>\n";
 
 }
@@ -2849,6 +2911,35 @@ sub generate_ex_core
 
     # call to do any fsp per-ex_core attributes
     do_plugin('fsp_ex_core', $proc, $ex, $ordinalId );
+
+
+    # $TODO RTC:110399
+    if( $haveFSPs == 0 )
+    {
+      print "\n<!-- IPMI Sensor numbers for Core status -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+         <default>
+             0x01, 0x13,
+             0x05, 0x02,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF,
+             0xFF, 0xFF
+         </default>
+     </attribute>\n";
+    }
+
 
     print "
 </targetInstance>
@@ -3634,6 +3725,36 @@ sub generate_centaur
        $scanFspAsize, $scomFspBpath, $scomFspBsize, $scanFspBpath,
        $scanFspBsize, $relativeCentaurRid, $ordinalId, $membufVrmUuidHash);
 
+    # $TODO RTC:110399
+    if( $haveFSPs == 0 )
+    {
+
+      print "<!-- IPMI Sensor numbers for Centaur status -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+        <default>
+            0x01, 0xFF,
+            0x05, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF
+        </default>
+    </attribute>\n";
+
+    }
+
+
     print "\n</targetInstance>\n";
 
 }
@@ -3827,6 +3948,34 @@ sub generate_is_dimm
         my $dimmHex = sprintf("0xD0%02X",$dimmPos);
         do_plugin('fsp_dimm', $proc, $ctaur, $dimm, $dimm, $dimmHex );
 
+        # $TODO RTC:110399
+        if( $haveFSPs == 0 )
+        {
+            print "\n<!-- IPMI Sensor numbers for DIMM status -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+        <default>
+            0x01, 0xFF,
+            0x05, 0x01,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF
+
+        </default>
+    </attribute>\n";
+        }
+
         print "\n</targetInstance>\n";
 
         $dimmCounter->{$mba} += 1;
@@ -3968,6 +4117,34 @@ sub generate_dimm
 
     # call to do any fsp per-dimm attributes
     do_plugin('fsp_dimm', $proc, $ctaur, $dimm, $ordinalId, $dimmHex );
+
+    # $TODO RTC:110399
+    if( $haveFSPs == 0 )
+    {
+        print "\n<!-- IPMI Sensor numbers for DIMM status -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+        <default>
+            0x01, 0xFF,
+            0x05, 0x01,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF,
+            0xFF, 0xFF
+        </default>
+    </attribute>\n";
+
+    }
 
 print "\n</targetInstance>\n";
 }

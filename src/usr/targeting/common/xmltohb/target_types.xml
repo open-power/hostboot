@@ -282,6 +282,8 @@
     <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>RECONFIG_LOOP_TESTS</id></attribute>
     <attribute><id>RECONFIG_LOOP_TESTS_ENABLE</id></attribute>
+    <!-- IPMI Sensor numbers for reporting system status and info to the BMC -->
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>
 
 <targetType>
@@ -502,6 +504,9 @@
     </attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+     <!-- IPMI Sensor numbers for reporting processor status and info to
+     the BMC -->
+      <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>
 
 <targetType>
@@ -748,6 +753,8 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000000</default>
     </attribute>
+    <!-- IPMI Sensor numbers for reporting CORE status and info to the BMC -->
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>
 
 <targetType>
@@ -1403,8 +1410,9 @@
     </attribute>
     <attribute><id>VPD_ISDIMMTOC4DQ</id></attribute>
     <attribute><id>VPD_ISDIMMTOC4DQS</id></attribute>
-    <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
+    <!-- IPMI Sensor numbers for reporting Centaur status to the BMC -->
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->
@@ -1446,6 +1454,7 @@
         <id>CLASS</id>
         <default>CARD</default>
     </attribute>
+
 </targetType>
 
 <targetType>
@@ -1478,6 +1487,9 @@
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>DIMM</default></attribute>
+
+    <!-- IPMI Sensor numbers for reporting DIMM status and info to the BMC -->
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>
 
 <targetType>
