@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.51 2014/07/03 19:40:37 jmcgill Exp $
+// $Id: p8_delta_scan_rw.h,v 1.52 2014/09/01 20:00:09 jmcgill Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -46,7 +46,7 @@
 #define MAX_FUNC_L3_RING_LIST_ENTRIES     64  
 #define MAX_FUNC_L3_RING_SIZE             7000 // Bytes
 #define MAX_FARY_L2_RING_LIST_ENTRIES     2
-#define MAX_FARY_L2_RING_SIZE             8400 // Bytes
+#define MAX_FARY_L2_RING_SIZE             10500 // Bytes
 #define FUNC_L3_RING_TOC_NAME             "ex_func_l3_ring"
 #define FARY_L2_RING_TOC_NAME             "ex_fary_l2_ring"
 #define MAX_CEN_PLL_RING_SIZE               80 // Bytes
