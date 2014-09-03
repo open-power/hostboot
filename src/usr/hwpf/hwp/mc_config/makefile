@@ -62,6 +62,7 @@ OBJS += mss_eff_config_termination.o
 OBJS += mss_eff_config_rank_group.o
 OBJS += mss_eff_config_cke_map.o
 OBJS += mss_bulk_pwr_throttles.o
+OBJS += mss_util_to_throttle.o
 OBJS += mss_throttle_to_power.o
 OBJS += mss_eff_config_shmoo.o
 OBJS += mss_error_support.o

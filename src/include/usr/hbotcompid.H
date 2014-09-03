@@ -348,6 +348,13 @@ const compId_t IPMI_COMP_ID = 0x2500;
 const char IPMI_COMP_NAME[] = "ipmi";
 //@}
 
+// HTMGT id 2600 matches TMGT id on FSP
+/** @name HTMGT
+ * Host Thermal Management
+ */
+const compId_t HTMGT_COMP_ID = 0x2600;
+const char HTMGT_COMP_NAME[] = "htmgt";
+//@}
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID

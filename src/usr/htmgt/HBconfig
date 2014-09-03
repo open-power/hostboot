@@ -1,0 +1,4 @@
+config HTMGT
+    default n
+    help
+        Enable Host TMGT in hostboot/HBRT

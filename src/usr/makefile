@@ -64,5 +64,6 @@ SUBDIRS += lpc.d
 SUBDIRS += console.d
 SUBDIRS += errldisplay.d
 SUBDIRS += ipmi.d
+SUBDIRS += htmgt.d
 
 include ${ROOTPATH}/config.mk
