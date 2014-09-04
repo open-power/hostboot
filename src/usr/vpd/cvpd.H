@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -66,6 +68,9 @@ namespace CVPD
         { MER0, "MER0" },
         { VSPD, "VSPD" },
         { VINI, "VINI" },
+        { OPFR, "OPFR" },
+        { VNDR, "VNDR" },
+        { VSPX, "VSPX" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_RECORD, "TEST" },
@@ -97,6 +102,54 @@ namespace CVPD
         { VZ,  "VZ" },
         { pdD, "#D" },
         { MX,  "MX" },
+        { DW,  "DW" },
+        { PN,  "PN" },
+        { SN,  "SN" },
+        { DR,  "DR" },
+        { CE,  "CE" },
+        { FN,  "FN" },
+        { CC,  "CC" },
+        { HE,  "HE" },
+        { CT,  "CT" },
+        { HW,  "HW" },
+        { VD,  "VD" },
+        { VN,  "VN" },
+        { VP,  "VP" },
+        { SV,  "SV" },
+        { M0,  "M0" },
+        { M1,  "M1" },
+        { M2,  "M2" },
+        { M3,  "M3" },
+        { M4,  "M4" },
+        { M5,  "M5" },
+        { M6,  "M6" },
+        { M7,  "M7" },
+        { M8,  "M8" },
+        { T1,  "T1" },
+        { T2,  "T2" },
+        { T4,  "T4" },
+        { T5,  "T5" },
+        { T6,  "T6" },
+        { T8,  "T8" },
+        { Q0,  "Q0" },
+        { Q1,  "Q1" },
+        { Q2,  "Q2" },
+        { Q3,  "Q3" },
+        { Q4,  "Q4" },
+        { Q5,  "Q5" },
+        { Q6,  "Q6" },
+        { Q7,  "Q7" },
+        { Q8,  "Q8" },
+        { K0,  "K0" },
+        { K1,  "K1" },
+        { K2,  "K2" },
+        { K3,  "K3" },
+        { K4,  "K4" },
+        { K5,  "K5" },
+        { K6,  "K6" },
+        { K7,  "K7" },
+        { K8,  "K8" },
+
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_KEYWORD, "XX" },
