@@ -103,6 +103,16 @@ bool areVidsEqual(
                == static_cast<uint16_t>(i_rhs.domainId)) );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// isUnusedVoltageDomain
+///////////////////////////////////////////////////////////////////////////////
+
+bool isUnusedVoltageDomain(
+    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_vid)
+{
+    return (!i_vid.voltageMillivolts);
+}
+
 //******************************************************************************
 // addMemoryVoltageDomains (templated)
 //******************************************************************************
@@ -292,6 +302,17 @@ void HBVddrMsg::createVddrData(
                     io_request.end(),
                     areVidsEqual);
             io_request.erase(pInvalidEntries,io_request.end());
+        }
+
+        if(   (i_requestType == HB_VDDR_ENABLE)
+           && (!membufTargetList.empty())      )
+        {
+            // Inhibit sending any request to turn on a domain with no voltage.
+            // When disabling we don't need to do this because the voltage is
+            // ignored.
+            io_request.erase(
+                std::remove_if(io_request.begin(), io_request.end(),
+                    isUnusedVoltageDomain),io_request.end());
         }
 
     } while(0);

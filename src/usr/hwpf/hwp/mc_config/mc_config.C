@@ -372,19 +372,20 @@ errlHndl_t setMemoryVoltageDomainOffsetVoltage()
         TARGETING::ATTRIBUTE_ID domain;
         pOffsetFn_t             fn;
         const char*             fnName;
+        bool                    callIfAllNonFunc;
 
     } fnMap[] = {
 
         {TARGETING::ATTR_AVDD_ID,
-            mss_volt_avdd_offset,"mss_volt_avdd_offset"},
+            mss_volt_avdd_offset,"mss_volt_avdd_offset", true},
         {TARGETING::ATTR_VDD_ID ,
-            mss_volt_vdd_offset ,"mss_volt_vdd_offset"},
+            mss_volt_vdd_offset ,"mss_volt_vdd_offset", true},
         {TARGETING::ATTR_VCS_ID ,
-            mss_volt_vcs_offset ,"mss_volt_vcs_offset"},
+            mss_volt_vcs_offset ,"mss_volt_vcs_offset", true},
         {TARGETING::ATTR_VMEM_ID,
-            mss_volt_vddr_offset,"mss_volt_vddr_offset"},
+            mss_volt_vddr_offset,"mss_volt_vddr_offset", false},
         {TARGETING::ATTR_VPP_ID ,
-            mss_volt_vpp_offset ,"mss_volt_vpp_offset"}
+            mss_volt_vpp_offset ,"mss_volt_vpp_offset", false}
     };
 
     size_t recordIndex = 0;
@@ -459,27 +460,59 @@ errlHndl_t setMemoryVoltageDomainOffsetVoltage()
                || (last))
            && (!membufFapiTargetsList.empty()) )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "INFO invoking %s on domain type 0x%08X, ID 0x%08X",
-                fnMap[recordIndex].fnName,
-                VOLTAGE_DOMAIN_ID_ATTR, lastDomainId);
+            // Skip HWP if this domain has all deconfigured membufs and the
+            // domain rule specifies not running the HWP for that case
+            bool invokeHwp = true;
+            if(fnMap[recordIndex].callIfAllNonFunc == false)
+            {
+                invokeHwp = false;
+                TARGETING::PredicateIsFunctional funcPred;
+                std::vector<fapi::Target>::const_iterator pFapiTarget =
+                    membufFapiTargetsList.begin();
+                for(;pFapiTarget != membufFapiTargetsList.end();++pFapiTarget)
+                {
+                    if(funcPred(
+                           reinterpret_cast<const TARGETING::Target*>(
+                               pFapiTarget->get())))
+                    {
+                        invokeHwp = true;
+                        break;
+                    }
+                }
+            }
 
-            FAPI_INVOKE_HWP(
-                pError,
-                fnMap[recordIndex].fn,
-                membufFapiTargetsList);
-
-            if (pError)
+            if(invokeHwp)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X: %s",
-                    pError->reasonCode(),fnMap[recordIndex].fnName);
-                break;
+                    "INFO invoking %s on domain type 0x%08X, ID 0x%08X",
+                    fnMap[recordIndex].fnName,
+                    VOLTAGE_DOMAIN_ID_ATTR, lastDomainId);
+
+                FAPI_INVOKE_HWP(
+                    pError,
+                    fnMap[recordIndex].fn,
+                    membufFapiTargetsList);
+
+                if (pError)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X: %s",
+                        pError->reasonCode(),fnMap[recordIndex].fnName);
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS : %s",fnMap[recordIndex].fnName );
+                }
             }
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : %s",fnMap[recordIndex].fnName );
+                    "INFO not invoking %s on domain type 0x%08X, ID 0x%08X "
+                    "since domain has no functional memory buffers.",
+                    fnMap[recordIndex].fnName,
+                    VOLTAGE_DOMAIN_ID_ATTR, lastDomainId);
             }
 
             membufFapiTargetsList.clear();
