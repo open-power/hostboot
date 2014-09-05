@@ -110,9 +110,11 @@ bool ErrDataService::checkForceTerm( ServiceDataCollector & i_sdc,
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleUnitCS( TargetHandle_t i_unitCsTarget )
+void ErrDataService::handleUnitCS( TargetHandle_t i_unitCsTarget,
+                                   bool & o_initiateHwudump)
 {
     // No-op in Hostboot
+    o_initiateHwudump = false; // default to not initiate hwudump
 }
 
 //------------------------------------------------------------------------------
@@ -124,9 +126,11 @@ void ErrDataService::handleChannelFail( TargetHandle_t i_memTarget )
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleCoreUnitCS( TargetHandle_t i_exTarget )
+void ErrDataService::handleCoreUnitCS( TargetHandle_t i_exTarget,
+                                       bool & o_initiateHwudump)
 {
     // No-op in Hostboot
+    o_initiateHwudump = false; // default to not initiate hwudump
 }
 
 //------------------------------------------------------------------------------

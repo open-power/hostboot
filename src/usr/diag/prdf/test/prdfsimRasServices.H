@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,19 +52,24 @@ class SimErrDataService: public ErrDataService
   inline virtual ~SimErrDataService() {}
 
   /**
-   Create an SRC, PFA data, and Error log for the ServiceData provided
-   <ul>
-   <br><b>Parameter:   </b> attn_type  (see iipsdbug.h)
-   <br><b>Parameter:   </b> sdc  (see iipServiceData.h)
-   <br><b>Returns:     </b> Error Log - Null if successfully committed
-   <br><b>Requirements:</b> SetErrorTod()?
-   <br><b>Promises:    </b> Error log(s) build and logged, SRC built, etc.
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b>
-   </ul><br>
+   @brief Create an SRC, PFA data, and Error log for the ServiceData provided
+   @param[in] attn_type  (see iipsdbug.h)
+   @param[in,out] sdc  (see iipServiceData.h)
+   @param[out] o_initiateHwudump whether or not to initiate hwudump
+   @param[out] o_dumpTrgt The DUMP target.
+   @param[out] o_dumpErrl The DUMP error handle
+   @param[out] o_dumpErrlActions DUMP error action flags
+   @return Error Log - Null if successfully committed
+   @pre SetErrorTod()?
+   @post Error log(s) build and logged, SRC built, etc.
+   @exception None.
    */
-  virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type, ServiceDataCollector & sdc);
-
+  virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type,
+                                    ServiceDataCollector & sdc,
+                                    bool & o_initiateHwudump,
+                                    TARGETING::TargetHandle_t & o_dumpTrgt,
+                                    errlHndl_t & o_dumpErrl,
+                                    uint32_t & o_dumpErrlActions );
 
 private:  // functions
 

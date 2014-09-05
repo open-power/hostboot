@@ -103,6 +103,20 @@ void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds )
     nanosleep( i_seconds, i_milliseconds * 1000000 );
 }
 
+//------------------------------------------------------------------------------
+
+void initiateUnitDump( TargetHandle_t i_target,
+                       errlHndl_t i_errl,
+                       uint32_t i_errlActions )
+{
+    // no-op in Hostboot but just go ahead and commit
+    // the errorlog in case it's not null.
+    if ( NULL != i_errl )
+    {
+        PRDF_COMMIT_ERRL(i_errl, i_errlActions);
+    }
+}
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

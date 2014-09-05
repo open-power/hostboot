@@ -172,16 +172,28 @@ void RasServices::SaveRcForSrc(int32_t the_rc)
 //------------------------------------------------------------------------------
 
 errlHndl_t RasServices::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                        ServiceDataCollector & i_sdc )
+                                        ServiceDataCollector & i_sdc,
+                                        bool & o_initiateHwudump,
+                                        TargetHandle_t & o_dumpTrgt,
+                                        errlHndl_t & o_dumpErrl,
+                                        uint32_t & o_dumpErrlActions)
 
 {
-    return iv_ErrDataService->GenerateSrcPfa( i_attnType, i_sdc );
+    return iv_ErrDataService->GenerateSrcPfa( i_attnType, i_sdc,
+                                              o_initiateHwudump,
+                                              o_dumpTrgt,
+                                              o_dumpErrl,
+                                              o_dumpErrlActions);
 }
 
 //------------------------------------------------------------------------------
 
 errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                           ServiceDataCollector & i_sdc )
+                                           ServiceDataCollector & i_sdc,
+                                           bool & o_initiateHwudump,
+                                           TargetHandle_t & o_dumpTrgt,
+                                           errlHndl_t & o_dumpErrl,
+                                           uint32_t & o_dumpErrlActions)
 {
     #define PRDF_FUNC "[ErrDataService::GenerateSrcPfa] "
 
@@ -708,6 +720,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
                  prdGardErrType, pfaData, dumpTrgt );
 
+    // set returned dump target
+    o_dumpTrgt = dumpTrgt;
+
     //**************************************************************
     // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
@@ -793,7 +808,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // deconfiguration, dump/FFDC collection, etc.
         if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
         {
-            handleUnitCS( dumpTrgt );
+            handleUnitCS( dumpTrgt, o_initiateHwudump );
         }
 
         // Commit the Error log
@@ -802,24 +817,38 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // for FSP specific SRC handling in the future
         MnfgTrace( esig, pfaData );
 
-        PRDF_HW_COMMIT_ERRL( iv_errl, actionFlag );
-        if ( NULL != iv_errl )
+        if ( true == o_initiateHwudump )
         {
-            // Just commit the log.
-            uint32_t dumpPlid = 0;
-            PRDF_GET_PLID(iv_errl, dumpPlid);
+            // the dump log will be deleted later in PRDF::main
+            // after the hwudump is initiated there.
+            o_dumpErrl = iv_errl;
+            iv_errl = NULL;
+            o_dumpErrlActions = actionFlag;
+            PRDF_TRAC( PRDF_FUNC"for target: 0x%08x, i_errl: 0x%08x, "
+                        "i_errlActions: 0x%08x", getHuid(o_dumpTrgt),
+                        ERRL_GETRC_SAFE(o_dumpErrl), o_dumpErrlActions );
+        }
+        else
+        {
+            PRDF_HW_COMMIT_ERRL( iv_errl, actionFlag );
+            if ( NULL != iv_errl )
+            {
+                // Just commit the log.
+                uint32_t dumpPlid = 0;
+                PRDF_GET_PLID(iv_errl, dumpPlid);
 
-            uint32_t l_rc = 0;
-            PRDF_GET_RC(iv_errl, l_rc);
+                uint32_t l_rc = 0;
+                PRDF_GET_RC(iv_errl, l_rc);
 
-            uint16_t l_reasonCode = 0;
-            PRDF_GET_REASONCODE(iv_errl, l_reasonCode);
+                uint16_t l_reasonCode = 0;
+                PRDF_GET_REASONCODE(iv_errl, l_reasonCode);
 
-            PRDF_INF( PRDF_FUNC"Committing error log: PLID=%.8X, "
-                               "ReasonCode=%.8X, RC=%.8X, actions=%.4X",
-                               dumpPlid, l_reasonCode, l_rc, actionFlag );
+                PRDF_INF( PRDF_FUNC"Committing error log: PLID=%.8X, "
+                          "ReasonCode=%.8X, RC=%.8X, actions=%.4X",
+                          dumpPlid, l_reasonCode, l_rc, actionFlag );
 
-            PRDF_COMMIT_ERRL(iv_errl, actionFlag);
+                PRDF_COMMIT_ERRL(iv_errl, actionFlag);
+            }
         }
     }
     // If the Error Log is not committed (as due to a Terminate condtion),

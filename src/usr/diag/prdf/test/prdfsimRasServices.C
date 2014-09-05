@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,11 +28,17 @@
 #include "stdio.h"
 #include <targeting/common/targetservice.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 
 errlHndl_t SimErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                             ServiceDataCollector & i_sdc)
+                                             ServiceDataCollector & i_sdc,
+                                             bool & o_initiateHwudump,
+                                             TargetHandle_t & o_dumpTrgt,
+                                             errlHndl_t & o_dumpErrl,
+                                             uint32_t & o_dumpErrlActions )
 
 {
     using namespace TARGETING;
@@ -40,7 +48,11 @@ errlHndl_t SimErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     errlHndl_t errLog = NULL;
 
     // call the actual ras services function
-    errLog = ErrDataService::GenerateSrcPfa(attn_type, i_sdc);
+    errLog = ErrDataService::GenerateSrcPfa(attn_type, i_sdc,
+                                            o_initiateHwudump,
+                                            o_dumpTrgt,
+                                            o_dumpErrl,
+                                            o_dumpErrlActions);
 
     ErrorSignature * esig = i_sdc.GetErrorSignature();
 

@@ -174,6 +174,15 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 {
     PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_attentionType );
 
+    // These have to be outside of system scope lock
+    errlHndl_t retErrl = NULL;
+    bool initiateHwudump = false;
+    TARGETING::TargetHandle_t dumpTrgt = NULL;
+    errlHndl_t dumpErrl = NULL;
+    uint32_t dumpErrlActions = 0;
+
+    { // system scope lock starts ------------------------------------------
+
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
@@ -282,7 +291,11 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     }
 
     g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,
-                                                      serviceData );
+                                                      serviceData,
+                                                      initiateHwudump,
+                                                      dumpTrgt,
+                                                      dumpErrl,
+                                                      dumpErrlActions);
 
     // Sleep for 20msec to let attention lines settle if we are at threshold.
     if ( (g_prd_errlHndl == NULL) && serviceData.IsAtThreshold() )
@@ -292,9 +305,19 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
     RasServices::SetTerminateOnCheckstop(true);
 
+    retErrl = g_prd_errlHndl.release();
+
+    } // system scope lock ends ------------------------------------------
+
+
+    if ( true == initiateHwudump )
+    {
+        PlatServices::initiateUnitDump( dumpTrgt, dumpErrl, dumpErrlActions );
+    }
+
     PRDF_EXIT( "PRDF::main()" );
 
-    return(g_prd_errlHndl.release());
+    return retErrl;
 }
 
 //------------------------------------------------------------------------------

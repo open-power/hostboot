@@ -82,13 +82,22 @@ class ErrDataService
      @brief Create an SRC, PFA data, and Error log for the ServiceData provided
      @param[in] attn_type  (see iipsdbug.h)
      @param[in,out] sdc  (see iipServiceData.h)
+     @param[out] o_initiateHwudump whether or not to initiate hwudump
+     @param[out] o_dumpTrgt The DUMP target
+     @param[out] o_dumpErrl The DUMP error handle
+     @param[out] o_dumpErrlActions DUMP error action flags
      @return Error Log - Null if successfully committed
      @pre SetErrorTod()?
      @post Error log(s) build and logged, SRC built, etc.
      @exception None.
      @note
      */
-    virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type, ServiceDataCollector & sdc);
+    virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type,
+                                      ServiceDataCollector & sdc,
+                                      bool & o_initiateHwudump,
+                                      TARGETING::TargetHandle_t & o_dumpTrgt,
+                                      errlHndl_t & o_dumpErrl,
+                                      uint32_t & o_dumpErrlActions );
 
     /**
       @brief Set the TOD of the current error
@@ -250,8 +259,10 @@ class ErrDataService
     /**
      * @brief Handles unit checkstops.
      * @param i_unitCsTarget chip(let) target.
+     * @param o_initiateHwudump whether or not to initiate hwudump
      */
-    void handleUnitCS( TARGETING::TargetHandle_t i_unitCsTarget );
+    void handleUnitCS( TARGETING::TargetHandle_t i_unitCsTarget,
+                       bool & o_initiateHwudump );
 
     /**
      * @brief Handles Centaur checkstop.
@@ -262,8 +273,10 @@ class ErrDataService
     /**
      * @brief Handles Core checkstop.
      * @param i_exTarget EX target.
+     * @param o_initiateHwudump whether or not to initiate hwudump
      */
-    void handleCoreUnitCS( TARGETING::TargetHandle_t i_exTarget );
+    void handleCoreUnitCS( TARGETING::TargetHandle_t i_exTarget,
+                           bool & o_initiateHwudump );
 
     /**
      * @brief Handles NX checkstops.
@@ -348,13 +361,21 @@ public:
    @brief Create an SRC, PFA data, and Error log for the ServiceData provided
    @param[in] attn_type  (see iipsdbug.h)
    @param[in,out] sdc  (see iipServiceData.h)
+   @param[out] o_initiateHwudump whether or not to initiate hwudump
+   @param[out] o_dumpTrgt The DUMP target.
+   @param[out] o_dumpErrl The DUMP error handle
+   @param[out] o_dumpErrlActions DUMP error action flags
    @return Error Log - Null if successfully committed
    @pre SetErrorTod()?
    @post Error log(s) build and logged, SRC built, etc.
    @exception None.
    */
   virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE attn_type,
-                                    ServiceDataCollector & sdc );
+                                    ServiceDataCollector & sdc,
+                                    bool & o_initiateHwudump,
+                                    TARGETING::TargetHandle_t & o_dumpTrgt,
+                                    errlHndl_t & o_dumpErrl,
+                                    uint32_t & o_dumpErrlActions );
 
   static void SetTerminateOnCheckstop(bool setting)
   {

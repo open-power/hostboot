@@ -141,6 +141,17 @@ bool isSmpCoherent();
  */
  bool isSapphireRunning( );
 
+/**
+  * @brief Initiate hwudump.
+  * @param i_target target handle.
+  * @param i_errl   error handle
+  * @param i_errlActions error action flags
+  */
+void initiateUnitDump( TARGETING::TargetHandle_t i_target,
+                       errlHndl_t i_errl,
+                       uint32_t i_errlActions);
+
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################
