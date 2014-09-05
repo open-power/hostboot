@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -47,6 +49,8 @@ extern "C"
     char* strncat(char* d, const char* s, size_t n);
 
     char* strchr(const char* s, int c) __attribute__((pure));
+
+    char* strdup(const char* s);
 
 #ifdef __cplusplus
 };
