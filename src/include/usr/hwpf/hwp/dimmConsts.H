@@ -27,7 +27,7 @@
  *
  *  @brief DIMM Constants
  */
-// $Id: dimmConsts.H,v 1.2 2014/06/27 18:58:39 thi Exp $
+// $Id: dimmConsts.H,v 1.5 2014/11/03 17:16:17 eliner Exp $
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
@@ -58,5 +58,13 @@ const uint8_t DIMM_DQ_NUM_DQS = DIMM_DQ_RANK_BITMAP_SIZE * 8;
 // This must be big enough to contain the bitmap for each rank
 // (DIMM_DQ_MAX_DIMM_RANKS * DIMM_DQ_RANK_BITMAP_SIZE), plus the header
 const uint8_t DIMM_DQ_SPD_DATA_SIZE = 80;
+
+//ISDIMM to C4 DQ and DQS constant
+//Number of Ports needed in the array
+const uint8_t DIMM_TO_C4_PORTS = 4;
+//Number of entries in the DQ attribute
+const uint8_t DIMM_TO_C4_DQ_ENTRIES = 80;
+//Number of entries in the DQS attribute
+const uint8_t DIMM_TO_C4_DQS_ENTRIES = 20;
 
 #endif

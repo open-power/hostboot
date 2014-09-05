@@ -1584,6 +1584,25 @@ fapi::ReturnCode fapiPlatGetControlCapable(const fapi::Target * i_pTarget,
 }
 
 
+fapi::ReturnCode getIsDimmToC4DQ
+                            (const fapi::Target * i_pTarget,
+                             uint8_t (&o_val) [4][80])
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc,getDQAttrISDIMM,*i_pTarget,o_val);
+    return FAPI_RC_SUCCESS;
+}
+
+fapi::ReturnCode getIsDimmToC4DQS
+                            (const fapi::Target * i_pTarget,
+                             uint8_t (&o_val) [4][20])
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc,getDQSAttrISDIMM,*i_pTarget,o_val);
+    return FAPI_RC_SUCCESS;
+}
+
+
 } // End platAttrSvc namespace
 
 } // End fapi namespace

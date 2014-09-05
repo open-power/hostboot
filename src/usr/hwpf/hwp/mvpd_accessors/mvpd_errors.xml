@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.19 2014/10/27 16:13:41 eliner Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.21 2014/11/03 17:56:17 eliner Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -258,6 +258,18 @@
     </callout>
   </hwpError>
   <hwpError>
+    <rc>RC_MBVPD_INVALID_DQ_DATA</rc>
+    <description>
+        To get the proper DQ data, we have to be given
+        a valid copy to collect.
+    </description>
+    <ffdc>DQ_COPY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
     <rc>RC_MBVPD_DIMMS_NOT_FOUND</rc>
     <description>
         To get the proper MT data, we need to find the
@@ -301,6 +313,18 @@
          correct M0 data.
     </description>
     <ffdc>M0_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_MBVPD_INVALID_DQS_DATA</rc>
+    <description>
+        To get the proper DQS data, we have to be given
+        a valid copy to collect.
+    </description>
+    <ffdc>DQS_COPY</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

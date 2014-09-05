@@ -13231,11 +13231,12 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
-    <description>Machine Readable Workbook DIMM power curve percent uplift for this system at idle utilization.</description>
+    <description>
+            Machine Readable Workbook DIMM power
+            curve percent uplife idle for this system
+    </description>
     <simpleType>
-        <uint8_t>
-            <default>0x0</default>
-        </uint8_t>
+        <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14505,47 +14506,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC: 113491 ISDIMM DQ data decompression -->
-<attribute>
-    <id>VPD_ISDIMMTOC4DQ</id>
-    <description>
-        ISDIMM DQ mapping that comes from QX keyword on the CDIMM VPD.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>4, 80</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VPD_ISDIMMTOC4DQ</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<!-- TODO RTC: 113491 ISDIMM DQ data decompression -->
-<attribute>
-    <id>VPD_ISDIMMTOC4DQS</id>
-    <description>
-        ISDIMM DQQ mapping that comes from QS keyword on the CDIMM VPD.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>4, 20</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VPD_ISDIMMTOC4DQS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <attribute>
     <id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id>
-    <description>Version of algorithm used to calculate ISDIMM power curves
+    <description>version of algorithm used to calculate ISDIMM power curves
     </description>
     <simpleType>
         <uint32_t><default>0</default></uint32_t>
@@ -14892,4 +14855,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 </attributes>
+
+
+
+
 

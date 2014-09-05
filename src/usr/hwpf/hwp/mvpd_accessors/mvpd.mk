@@ -42,4 +42,6 @@ OBJS += getMBvpdDram2NModeEnabled.o
 OBJS += getMBvpdSensorMap.o
 OBJS += getControlCapableData.o
 OBJS += accessMBvpdL4BankDelete.o
+OBJS += getDecompressedISDIMMAttrs.o
+OBJS += getISDIMMTOC4DAttrs.o
 

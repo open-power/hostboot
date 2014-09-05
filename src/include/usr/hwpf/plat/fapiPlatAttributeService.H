@@ -57,6 +57,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/mvpd_accessors/getControlCapableData.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
+#include <hwpf/hwp/mvpd_accessors/getISDIMMTOC4DAttrs.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <hwpf/hwp/chip_accessors/getOscswitchCtlAttr.H>
@@ -735,6 +736,30 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
 fapi::ReturnCode fapiPlatGetControlCapable(const fapi::Target * i_pTarget,
                 uint8_t  & o_val);
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_VPD_ISDIMMTOC4DQ attribute.
+ *        It should not be called directly
+ *
+ * @param[in] i_pTarget MBA Target pointer
+ * @param[out] o_val    Pointer to output array
+ */
+fapi::ReturnCode getIsDimmToC4DQ
+               (const fapi::Target * i_pTarget,
+                uint8_t (&o_val) [DIMM_TO_C4_PORTS][DIMM_TO_C4_DQ_ENTRIES]);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_VPD_ISDIMMTOC4DQS attribute.
+ *        It should not be called directly.
+ *
+ * @param[in] i_pTarget MBA Target pointer
+ * @param[out] o_val    Pointer to the output array
+ */
+fapi::ReturnCode getIsDimmToC4DQS
+               (const fapi::Target * i_pTarget,
+                uint8_t (&o_val) [DIMM_TO_C4_PORTS][DIMM_TO_C4_DQS_ENTRIES]);
+
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -779,6 +804,17 @@ fapi::ReturnCode fapiPlatGetControlCapable(const fapi::Target * i_pTarget,
 #define ATTR_MSS_POWER_CONTROL_CAPABLE_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetControlCapable(PTARGET,VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to support the DQ and DQS attributes.
+//------------------------------------------------------------------------------
+#define ATTR_VPD_ISDIMMTOC4DQ_GETMACRO(ID,PTARGET,VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID,PTARGET,&VAL)?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::getIsDimmToC4DQ(PTARGET,VAL)
+
+#define ATTR_VPD_ISDIMMTOC4DQS_GETMACRO(ID,PTARGET,VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID,PTARGET,&VAL)?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::getIsDimmToC4DQS(PTARGET,VAL)
 
 //------------------------------------------------------------------------------
 // MACROs to route each ATTR_SPD access to the Hostboot SPD function

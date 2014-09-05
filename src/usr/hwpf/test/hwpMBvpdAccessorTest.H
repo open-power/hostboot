@@ -60,12 +60,13 @@
 #include    <mvpd_accessors/getMBvpdSensorMap.H>
 #include    <mvpd_accessors/getControlCapableData.H>
 #include    <mvpd_accessors/accessMBvpdL4BankDelete.H>
+#include    <mvpd_accessors/getDecompressedISDIMMAttrs.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
-
+#include <config.h>
 
 using namespace     fapi;
 using   namespace   TARGETING;
@@ -202,6 +203,255 @@ public:
         }
 
         TS_TRACE( "testGetMBvpd exit" );
+
+    }
+
+    void testGetDQAttrISDIMM()
+    {
+        fapi::ReturnCode l_fapirc;
+
+        TS_TRACE("DQ Attributes ISDIMM entry");
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        for(uint8_t l_mbNum = 0; l_mbNum < l_memBufList.size(); l_mbNum++)
+        {
+            TARGETING::TargetHandleList l_mbaList;
+            getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                            CLASS_UNIT,TYPE_MBA,false);
+
+            for(uint8_t l_mbaNum = 0; l_mbaNum < l_mbaList.size(); l_mbaNum++)
+            {
+                //dump physical path to target
+                EntityPath l_mbaPath;
+                l_mbaPath = l_mbaList[l_mbaNum] ->getAttr<ATTR_PHYS_PATH>();
+                l_mbaPath.dump();
+
+                //cast out type of target to a FAPI type of target.
+                fapi::Target l_fapi_mba_target(TARGET_TYPE_MBA_CHIPLET,
+                        (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])));
+
+                uint8_t l_customDimm = 0;
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM,
+                                &l_fapi_mba_target,l_customDimm);
+                if(l_fapirc)
+                {
+                    FAPI_ERR("hwpMBvpdAccessorTest: Read of custom dimm failed");
+                    break;
+                }
+
+                //if custom_dimm = 0, use isdimm otherwise this test is useless
+                if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO == l_customDimm)
+                {
+
+                    // make a local copy of the memory buffer target
+                    TARGETING::Target* l_mb_target = l_memBufList[l_mbNum];
+
+                    // dump physical path to target
+                    EntityPath l_path;
+                    l_path = l_mb_target->getAttr<ATTR_PHYS_PATH>();
+                    l_path.dump();
+
+                    // cast OUR type of target to a FAPI type of target.
+                    fapi::Target l_fapi_mb_target(
+                                TARGET_TYPE_MEMBUF_CHIP,
+                                (const_cast<TARGETING::Target*>(l_mb_target)));
+                    uint8_t l_valDQ[4][80];
+                    l_fapirc = FAPI_ATTR_GET(ATTR_VPD_ISDIMMTOC4DQ,
+                                    &l_fapi_mb_target,l_valDQ);
+
+                    if(l_fapirc) break;
+                    TS_TRACE("DQ Attributes ISDIMM Accessor"
+                             "first element=0x%08x",l_valDQ[0][0]);
+                }
+            }
+        }
+        if (l_fapirc)
+        {
+            TS_FAIL("getDQAttrISDIMM: FAPI_ATTR_GET fail rc=0x%x",
+                  static_cast<uint32_t>(l_fapirc));
+            fapiLogError(l_fapirc);
+        }
+        TS_TRACE("testGetDQAttrISDIMM exit");
+    }
+
+    void testGetDQSAttrISDIMM()
+    {
+         fapi::ReturnCode l_fapirc;
+
+         TS_TRACE("DQS Attributes ISDIMM entry");
+
+         TARGETING::TargetHandleList l_memBufList;
+         getAllChips(l_memBufList, TYPE_MEMBUF);
+
+         for(uint8_t l_mbNum = 0; l_mbNum < l_memBufList.size(); l_mbNum++)
+         {
+             TARGETING::TargetHandleList l_mbaList;
+             getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                             CLASS_UNIT,TYPE_MBA,false);
+
+             for(uint8_t l_mbaNum = 0; l_mbaNum < l_mbaList.size(); l_mbaNum++)
+             {
+                 //dump physical path to target
+                 EntityPath l_mbaPath;
+                 l_mbaPath = l_mbaList[l_mbaNum]->getAttr<ATTR_PHYS_PATH>();
+                 l_mbaPath.dump();
+
+                 //cast our type of target to a FAPI type of target
+                 fapi::Target l_fapi_mba_target(TARGET_TYPE_MBA_CHIPLET,
+                       (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])));
+
+                 uint8_t l_customDimm = 0;
+                 l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM,
+                                 &l_fapi_mba_target,l_customDimm);
+                 if(l_fapirc)
+                 {
+                     FAPI_ERR("hwpMBvpdAccessorTest: Read of custom dimm failed");
+                     break;
+                 }
+
+                 //if custom_dimm = 0, use isdimm otherwise this test is useless
+                 if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO == l_customDimm)
+                 {
+
+                     // make a local copy of the memory buffer target
+                     TARGETING::Target* l_mb_target = l_memBufList[l_mbNum];
+
+                     // dump physical path to target
+                     EntityPath l_path;
+                     l_path = l_mb_target->getAttr<ATTR_PHYS_PATH>();
+                     l_path.dump();
+
+                     // cast OUR type of target to a FAPI type of target.
+                     fapi::Target l_fapi_mb_target(
+                              TARGET_TYPE_MEMBUF_CHIP,
+                              (const_cast<TARGETING::Target*>(l_mb_target)));
+
+                     uint8_t l_valDQS[4][20];
+                     l_fapirc = FAPI_ATTR_GET(ATTR_VPD_ISDIMMTOC4DQS,
+                                    &l_fapi_mb_target,l_valDQS);
+
+                     if(l_fapirc) break;
+                     TS_TRACE("DQS Attributes ISDIMM Accessor"
+                              "first element=0x%08x",l_valDQS[0][0]);
+                 }
+             }
+         }
+         if (l_fapirc)
+         {
+             TS_FAIL("getDQSAttrISDIMM: FAPI_ATTR_GET fail rc=0x%x",
+               static_cast<uint32_t>(l_fapirc));
+             fapiLogError(l_fapirc);
+         }
+         TS_TRACE("testGetDQSAttrISDIMM exit");
+
+    }
+
+    void testDQandDQSISDIMMAttrs()
+    {
+
+        TS_TRACE("testDQandDQSISDIMMAttrs entry");
+        //first testing the 0 test case;
+        ecmdDataBufferBase l_data_buffer_DQ1(136); //17 bits, just one DQ
+        ecmdDataBufferBase l_data_buffer_DQS1(16); //2 bits, just one DQS
+        for(int l_index =0;l_index<136; l_index++)
+        {
+            l_data_buffer_DQ1.writeBit(l_index,0);
+            if(l_index<16) l_data_buffer_DQS1.writeBit(l_index,0);
+        }
+        uint8_t l_finalDQArray[80];
+        uint8_t l_finalDQSArray[20];
+
+        decodeISDIMMAttrs(l_data_buffer_DQ1, l_data_buffer_DQS1,
+                        l_finalDQArray, l_finalDQSArray);
+
+        uint8_t l_DQOutput1[80] = {0,1,2,3,4,5,6,7,
+                                8,9,10,11,12,13,14,15,
+                                16,17,18,19,20,21,22,23,
+                                24,25,26,27,28,29,30,31,
+                                32,33,34,35,36,37,38,39,
+                                40,41,42,43,44,45,46,47,
+                                48,49,50,51,52,53,54,55,
+                                56,57,58,59,60,61,62,63,
+                                64,65,66,67,68,69,70,71,
+                                255,255,255,255,255,255,255,255};
+        uint8_t l_DQSOutput1[20] = {0,1,2,3,4,5,6,7,
+                                 8,9,10,11,12,13,14,
+                                 15,16,17,255,255};
+
+
+        for(int l_zeroFinalIndex = 0; l_zeroFinalIndex<80;l_zeroFinalIndex++)
+        {
+            if(l_finalDQArray[l_zeroFinalIndex] !=
+                            l_DQOutput1[l_zeroFinalIndex])
+            {
+                TS_TRACE("testDQandDQSISDIMMAttrs failed, DQ is wrong");
+                break;
+            }
+            if(l_zeroFinalIndex<20 && (l_finalDQSArray[l_zeroFinalIndex] !=
+                                    l_DQSOutput1[l_zeroFinalIndex]))
+            {
+                TS_TRACE("testDQandDQSISDIMMAttrs failed, DQS is wrong");
+                break;
+            }
+            if(l_zeroFinalIndex == 79)
+            {
+                TS_TRACE("testDQandDQSISDIMMAttrs passed the all zero test");
+            }
+        }
+        //and now for actual data
+        uint32_t l_byteOrder = 0b000000001001111111111001;
+        uint32_t l_nibSwap = 0b0000000111110000;
+        uint32_t l_nibToNib1 = 0b00000010101011110000000000000000;
+        uint32_t l_nibToNib2 = 0b00000000000000000000000010101000;
+        uint32_t l_nibToNib3 = 0b00000000000000000000000000000000;
+        uint32_t l_nibSwapDQS = 0b0000000100010000;
+
+        l_data_buffer_DQ1.insertFromRight(l_byteOrder,0,24);
+        l_data_buffer_DQ1.insertFromRight(l_nibSwap,24,16);
+        l_data_buffer_DQ1.insertFromRight(l_nibToNib1,40,32);
+        l_data_buffer_DQ1.insertFromRight(l_nibToNib2,72,32);
+        l_data_buffer_DQ1.insertFromRight(l_nibToNib3,104,32);
+
+        l_data_buffer_DQS1.insertFromRight(l_nibSwapDQS,0,16);
+
+        decodeISDIMMAttrs(l_data_buffer_DQ1, l_data_buffer_DQS1,
+                        l_finalDQArray, l_finalDQSArray);
+
+        uint8_t l_DQOutput2[80] = {15,13,14,12,10,9,11,8,
+                        4,5,6,7,0,1,2,3,
+                        20,21,22,23,16,17,18,19,
+                        68,69,70,71,64,65,66,67,
+                        36,37,38,39,32,33,34,35,
+                        43,41,42,40,44,45,46,47,
+                        48,49,50,51,52,53,54,55,
+                        56,57,58,59,60,61,62,63,
+                        24,25,26,27,28,29,30,31,
+                        255,255,255,255,255,255,255,255};
+        uint8_t l_DQSOutput2[20] = {3,2,0,1,4,5,16,17,
+                         9,8,10,11,12,13,14,15,
+                         6,7,255,255};
+
+        for(int l_finalIndex = 0; l_finalIndex<80;l_finalIndex++)
+        {
+            if(l_finalDQArray[l_finalIndex] != l_DQOutput2[l_finalIndex])
+            {
+                TS_TRACE("testDQandDQSISDIMMAttrs failed, DQ is wrong");
+                break;
+            }
+            if(l_finalIndex<20 && (l_finalDQSArray[l_finalIndex] !=
+                                    l_DQSOutput2[l_finalIndex]))
+            {
+                TS_TRACE("testDQandDQSISDIMMAttrs failed, DQS is wrong");
+                break;
+            }
+            if(l_finalIndex == 79)
+            {
+                TS_TRACE("testDQandDQSISDIMMAttrs passed the actual data test");
+            }
+        }
+        TS_TRACE("testDQandDQSISDIMMAttrs exit");
 
     }
 

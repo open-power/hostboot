@@ -1408,8 +1408,7 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
-    <attribute><id>VPD_ISDIMMTOC4DQ</id></attribute>
-    <attribute><id>VPD_ISDIMMTOC4DQS</id></attribute>
+    <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <!-- IPMI Sensor numbers for reporting Centaur status to the BMC -->
     <attribute><id>IPMI_SENSORS</id></attribute>
