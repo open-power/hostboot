@@ -8606,22 +8606,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 </attribute>
 
 <attribute>
-    <id>MSS_DRAMINIT_RESET_DISABLE</id>
-    <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DRAMINIT_RESET_DISABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_MEM_IPL_COMPLETE</id>
     <description>A numerical number indicating if the memory procedures are complete.  written by mss_setup_bars when the bars are now functional in the processor.  </description>
     <simpleType>
@@ -13067,6 +13051,22 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+    <description>Machine Readable Workbook DIMM power curve percent uplift for this system at idle utilization.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0x0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
     <description>Machine Readable Workbook throttle value for denominator cfg_nm_m</description>
     <simpleType>
@@ -14286,10 +14286,24 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
 </attribute>
+<attribute>
+    <id>MSS_DRAMINIT_RESET_DISABLE</id>
+    <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DRAMINIT_RESET_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 <!-- TODO RTC: 113491 ISDIMM DQ data decompression -->
 <attribute>
-    <id>ATTR_VPD_ISDIMMTOC4DQ</id>
+    <id>VPD_ISDIMMTOC4DQ</id>
     <description>
         ISDIMM DQ mapping that comes from QX keyword on the CDIMM VPD.
     </description>
@@ -14308,7 +14322,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <!-- TODO RTC: 113491 ISDIMM DQ data decompression -->
 <attribute>
-    <id>ATTR_VPD_ISDIMMTOC4DQS</id>
+    <id>VPD_ISDIMMTOC4DQS</id>
     <description>
         ISDIMM DQQ mapping that comes from QS keyword on the CDIMM VPD.
     </description>
@@ -14342,3 +14356,4 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 </attributes>
+
