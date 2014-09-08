@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -605,22 +607,8 @@ errlHndl_t mboxGetErrStat(TARGETING::Target* i_target,uint64_t &o_status)
 
 errlHndl_t mboxInit(TARGETING::Target* i_target)
 {
-    errlHndl_t err = NULL;
-    size_t scom_len = sizeof(uint64_t);
-
-    // Setup mailbox intr mask reg
-    // Set bits 2,1,0
-    // assume we always use mailbox 1
-    uint64_t scom_data = (static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
-                          static_cast<uint64_t>(MBOX_HW_ACK) |
-                          static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
-
-    err = deviceOp(DeviceFW::WRITE,
-                   i_target,
-                   reinterpret_cast<void*>(&scom_data),
-                   scom_len,
-                   DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RS));
-    return err;
+    //For now init only enables the interrupts
+    return mboxddEnableInterrupts(i_target);
 }
 
 
@@ -642,6 +630,26 @@ errlHndl_t mboxddMaskInterrupts(TARGETING::Target * i_target)
                    scom_len,
                    DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RC));
 
+    return err;
+}
+
+errlHndl_t mboxddEnableInterrupts(TARGETING::Target * i_target)
+{
+    errlHndl_t err = NULL;
+    size_t scom_len = sizeof(uint64_t);
+
+    // Setup mailbox intr mask reg
+    // Set bits 2,1,0
+    // assume we always use mailbox 1
+    uint64_t scom_data = (static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
+                          static_cast<uint64_t>(MBOX_HW_ACK) |
+                          static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
+
+    err = deviceOp(DeviceFW::WRITE,
+                   i_target,
+                   reinterpret_cast<void*>(&scom_data),
+                   scom_len,
+                   DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RS));
     return err;
 }
 

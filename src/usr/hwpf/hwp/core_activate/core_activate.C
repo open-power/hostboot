@@ -160,6 +160,22 @@ void*    call_host_activate_master( void    *io_pArgs )
                        "proc_prep_master_winkle SUCCESS"  );
         }
 
+        //Because of a bug in how the SBE injects the IPI used to wake
+        //up the master core, need to ensure no mailbox traffic
+        //or even an interrupt in the interrupt presenter
+        // 1) suspend the mailbox with interrupt disable
+        // 2) ensure that interrupt presenter is drained
+        l_errl = MBOX::suspend(true, true);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master ERROR : MBOX::suspend");
+            break;
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "drainging interrupt Q");
+        INTR::drainQueue();
+
 
         // Call p8_block_wakeup_intr to prevent stray interrupts from
         // popping core out of winkle before SBE sees it.
@@ -253,6 +269,15 @@ void*    call_host_activate_master( void    *io_pArgs )
         //  --------------------------------------------------------
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Returned from Winkle." );
+
+        //Re-enable the mailbox
+        l_errl = MBOX::resume();
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master ERROR : MBOX::resume");
+            break;
+        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Call proc_stop_deadman_timer. Target %.8X",

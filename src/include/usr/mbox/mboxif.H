@@ -116,13 +116,21 @@ namespace MBOX
     /**
      * Suspend the mailbox. 
      *
+     * @param[in] i_disable_hw_int, disable interrupts from hw along
+     *            with SW suspend.  Defaults to SW suspend only
+     * @param[in] i_allow_resp, Allow suspend to happen even if
+     *            there are pending HB responses to FSP.  Use
+     *            with extreme caution
+     *
      * @return error handle on error
      *
      * @note:
      *     Any message sent to the FSP will be queued and send after the mailbox
-     *     is resumed. Interrupts from the FSP MBox will be masked.
+     *     is resumed. Interrupts from the FSP MBox will be masked if
+     *     i_disable_hw_int is set
      */
-    errlHndl_t suspend();
+    errlHndl_t suspend(bool i_disable_hw_int = false,
+                       bool i_allow_resp = false);
 
     /**
      * Resume the mailbox

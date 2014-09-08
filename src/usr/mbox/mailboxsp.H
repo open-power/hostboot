@@ -328,6 +328,8 @@ namespace MBOX
             bool        iv_dma_pend;    //!< Request pending for more DMA bufs
             bool        iv_disabled;    //!< Mailboxsp shut off (rejects new)
             bool        iv_suspended;   //!< Mailbox is suspended (queues new)
+            bool        iv_suspend_intr;//!< Disable HW interrupts on suspend
+            bool        iv_allow_blk_resp;//!< Disable HW interrupts on suspend
             uint64_t    iv_sum_alloc;   //!< Total extra_data storage allocated
             msg_list_t  iv_pend_alloc;  //!< Pending memory allocations
             addr_list_t iv_allocAddrs;  //!< memory addresses allocated by mbox

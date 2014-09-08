@@ -81,6 +81,8 @@ MailboxSp::MailboxSp()
         iv_dma_pend(false),
         iv_disabled(true),
         iv_suspended(false),
+        iv_suspend_intr(false),
+        iv_allow_blk_resp(false),
         iv_sum_alloc(0),
         iv_pend_alloc(),
         iv_allocAddrs()
@@ -364,6 +366,8 @@ void MailboxSp::msgHandler()
 
                     iv_suspend_msg = msg;   // Respond to this when done
                     iv_suspended = true;    // Queue any new messages
+                    iv_suspend_intr = static_cast<bool>(msg->data[0]);
+                    iv_allow_blk_resp = static_cast<bool>(msg->data[1]);
 
                     if(quiesced())
                     {
@@ -1488,12 +1492,19 @@ bool MailboxSp::quiesced()
 {
     bool result = iv_rts && !iv_dma_pend && iv_sendq.empty();
 
+    TRACFCOMP(g_trac_mbox,INFO_MRK"Checking quiesced.. rts[%d] dma_pend[%d] sendq[%d]",
+              iv_rts, iv_dma_pend, iv_sendq.empty());
+
+
     if( result == true )
     {
+        TRACFCOMP(g_trac_mbox,INFO_MRK"quiesed == true, iv_shutdown_msg[%p]",
+                  iv_shutdown_msg);
         if(iv_shutdown_msg == NULL ||
            (iv_shutdown_msg->data[1] == SHUTDOWN_STATUS_GOOD))
         {
-            result = result && iv_respondq.empty();
+            //Check that respond q is empty OR don't care
+            result = result && (iv_respondq.empty() || iv_allow_blk_resp);
         }
         else // mbox is shutting down and system status is bad
         {
@@ -1523,6 +1534,8 @@ bool MailboxSp::quiesced()
             }
         }
     }
+
+    TRACFCOMP(g_trac_mbox,INFO_MRK"Quiesced [%d]", result);
 
     return result;
 }
@@ -1736,6 +1749,19 @@ void MailboxSp::handleShutdown()
 
 void MailboxSp::suspend()
 {
+    TRACFCOMP(g_trac_mbox,INFO_MRK"Entering suspended");
+    if(iv_suspend_intr)
+    {
+        errlHndl_t err = mboxddMaskInterrupts(iv_trgt);
+        if(err)  // SCOM failed.
+        {
+            // If this failed, the whole system is probably buggered up.
+            errlCommit(err,MBOX_COMP_ID);
+            TRACFCOMP(g_trac_mbox,
+                      ERR_MRK"MBOXSP suspend HALTED on critical error!");
+            crit_assert(0);
+        }
+    }
     msg_respond(iv_msgQ,iv_suspend_msg);
     TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is suspended");
 }
@@ -1743,9 +1769,25 @@ void MailboxSp::suspend()
 void MailboxSp::resume()
 {
     iv_suspended = false;
+    iv_allow_blk_resp = false;
 
     if(!iv_disabled)
     {
+        //If interrupts were disabled, re-enable
+        if(iv_suspend_intr)
+        {
+            errlHndl_t err = mboxddEnableInterrupts(iv_trgt);
+            if(err)  // SCOM failed.
+            {
+                // If this failed, the whole system is probably buggered up.
+                errlCommit(err,MBOX_COMP_ID);
+                TRACFCOMP(g_trac_mbox,
+                          ERR_MRK"MBOXSP resume HALTED on critical error!");
+                crit_assert(0);
+            }
+            iv_suspend_intr = false;
+        }
+
         send_msg();   // send next message on queue
     }
 }
@@ -2042,7 +2084,7 @@ bool MBOX::mailbox_enabled()
     return enabled;
 }
 
-errlHndl_t MBOX::suspend()
+errlHndl_t MBOX::suspend(bool i_disable_hw_int, bool i_allow_resp)
 {
     errlHndl_t err = NULL;
     msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
@@ -2050,6 +2092,8 @@ errlHndl_t MBOX::suspend()
     {
         msg_t * msg = msg_allocate();
         msg->type = MSG_MBOX_SUSPEND;
+        msg->data[0] = static_cast<uint64_t>(i_disable_hw_int);
+        msg->data[1] = static_cast<uint64_t>(i_allow_resp);
 
         int rc = msg_sendrecv(mboxQ, msg);
 
