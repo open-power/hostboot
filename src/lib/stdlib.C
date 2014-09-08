@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -63,6 +65,10 @@ static void memoryleak_magic_instruction(MemoryLeak_FunctionType func,
                                          void* ptr,
                                          void* ptr2)
 {
+    // Newer GCC seems to optimize out the parameter placement unless we
+    // fake them going into an assembly instruction.
+    asm volatile("" :: "r"(func), "r"(size), "r"(ptr), "r"(ptr2));
+
     MAGIC_INSTRUCTION(MAGIC_MEMORYLEAK_FUNCTION);
     return;
 }
