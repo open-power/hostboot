@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,7 @@
 // Includes
 // ----------------------------------------------
 #include <errl/errlentry.H>
+#include <vpd/spdenums.H>
 #include "vpd.H"
 
 namespace SPD
@@ -184,13 +187,16 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
  *
  * @param[in] i_target - The target DIMM to access.
  *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                           size_t i_numBytes,
                           void * o_data,
-                          TARGETING::Target * i_target );
+                          TARGETING::Target * i_target,
+                          VPD::vpdCmdTarget i_location );
 
 /**
  * @brief This function is a wrapper for writing the correct keyword.
@@ -205,13 +211,16 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
  *
  * @param[in] i_target - The target DIMM to access.
  *
+ * @param[in] i_location - The SPD destination (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdWriteData ( uint64_t i_offset,
                           size_t i_numBytes,
                           void * i_data,
-                          TARGETING::Target * i_target );
+                          TARGETING::Target * i_target,
+                          VPD::vpdCmdTarget i_location );
 
 
 /**
@@ -230,14 +239,17 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
  *
  * @param[in] i_DDRRev - The DIMM DDR Revision.
  *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdGetValue ( uint64_t i_keyword,
+errlHndl_t spdGetValue ( VPD::vpdKeyword i_keyword,
                          void * io_buffer,
                          size_t & io_buflen,
                          TARGETING::Target * i_target,
-                         uint64_t i_DDRRev );
+                         uint64_t i_DDRRev,
+                         VPD::vpdCmdTarget i_location );
 
 
 /**
@@ -256,14 +268,17 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
  *
  * @param[in] i_DDRRev - The DIMM DDR Revision.
  *
+ * @param[in] i_location - The SPD destination (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdWriteValue ( uint64_t i_keyword,
+errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
                            void * io_buffer,
                            size_t & io_buflen,
                            TARGETING::Target * i_target,
-                           uint64_t i_DDRRev );
+                           uint64_t i_DDRRev,
+                           VPD::vpdCmdTarget i_location );
 
 
 /**
@@ -278,13 +293,16 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
  *
  * @param[in] i_target - The target DIMM to access the data for.
  *
+ * @param[in] i_location - The SPD source/destination (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
                              void * io_buffer,
                              TARGETING::Target * i_target,
-                             uint64_t i_DDRRev );
+                             uint64_t i_DDRRev,
+                             VPD::vpdCmdTarget i_location );
 
 /**
  * @brief This function checks to make sure that the buffer allocated
@@ -302,7 +320,7 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
  */
 errlHndl_t spdCheckSize ( size_t i_bufferSz,
                           size_t i_expBufferSz,
-                          uint64_t i_keyword );
+                          VPD::vpdKeyword i_keyword );
 
 /**
  * @brief This function will read a binary file from PNOR.  This is
@@ -372,12 +390,15 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
  *
  * @param[in] i_target - The chip target.
  *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                                      uint64_t i_memType,
-                                     TARGETING::Target * i_target );
+                                     TARGETING::Target * i_target,
+                                     VPD::vpdCmdTarget i_location );
 
 /**
  * @brief This function is used to query the attribute code to get the VPD
@@ -392,6 +413,44 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
  */
 errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
                             TARGETING::Target * i_target );
+
+
+/**
+ * @brief This function compares value of the keyword in PNOR/SEEPROM
+ *        and returns the result
+ *
+ * @param[in] i_target - Target device
+ *
+ * @param [in] i_keyword - Keyword to compare
+ *
+ * @param [in] o_match - Result of keyword compare
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *         error log.  A mismatch will not return an error.
+ */
+errlHndl_t cmpPnorToSeeprom( TARGETING::Target * i_target,
+                             VPD::vpdKeyword i_keyword,
+                             bool &o_match );
+
+/**
+ * @brief This function loads the SPD data from the SEEPROM into the PNOR cache
+ *
+ * @param[in] i_target - Target device
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *         error log.
+ */
+errlHndl_t loadPnor ( TARGETING::Target * i_target );
+
+/**
+ * @brief This function invalidates the SPD in the PNOR cache
+ *
+ * @param[in] i_target - Target device
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *         error log.
+ */
+errlHndl_t invalidatePnor ( TARGETING::Target * i_target );
 
 
 }; // end SPD namespace

@@ -86,6 +86,7 @@
     <attribute>
         <id>HOMER_VIRT_ADDR</id>
     </attribute>
+    <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -135,6 +136,7 @@
     <attribute>
         <id>GPIO_INFO</id>
     </attribute>
+    <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -142,6 +144,11 @@
     <attribute>
         <id>HB_PM_SPWUP_OHA_FLAG</id>
     </attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>lcard-dimm</id>
+    <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
 </attributes>

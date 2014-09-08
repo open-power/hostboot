@@ -24,13 +24,11 @@ config CVPD_WRITE_TO_HW
 
 config MVPD_READ_FROM_PNOR
     default y
-    depends on !MVPD_READ_FROM_HW
     help
         Read Module VPD data from PNOR cache
 
 config MVPD_READ_FROM_HW
-    default y if !MVPD_READ_FROM_PNOR
-    depends on !MVPD_READ_FROM_PNOR
+    default n
     help
         Read Module VPD data from HW resources
 
@@ -48,13 +46,11 @@ config MVPD_WRITE_TO_HW
 
 config DJVPD_READ_FROM_PNOR
     default y
-    depends on !DJVPD_READ_FROM_HW
     help
         Read Dimm JEDEC VPD/SPD data from PNOR cache
     
 config DJVPD_READ_FROM_HW
-    default y if !DJVPD_READ_FROM_PNOR
-    depends on !DJVPD_READ_FROM_PNOR
+    default n
     help
         Read Dimm JEDEC VPD/SPD data from HW resources
 

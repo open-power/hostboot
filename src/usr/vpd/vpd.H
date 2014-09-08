@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,6 +26,7 @@
 #define __VPD_H
 
 #include <pnor/pnorif.H>
+#include <vpd/vpd_if.H>
 
 namespace VPD
 {
@@ -190,6 +193,31 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               VPD_MSG_TYPE i_type,
                               VpdWriteMsg_t& i_record );
 
+/**
+ * @brief This function determines the VPD source (PNOR/SEEPROM)
+ *      from configuration and target state information
+ *
+ * @param[in] i_target - Target device.
+ *
+ * @param[in] i_readFromPnorEnabled - Config value specifying
+ *      whether PNOR reads are enabled for this VPD type
+ *
+ * @param[in] i_readFromHwEnabled - Config value specifying
+ *      whether SEEPROM reads are enabled for this VPD type
+ *
+ * @param[in] i_location - The requested VPD source location
+ *      (PNOR/SEEPROM) from the caller
+ *
+ * @param[out] o_source - The resolved VPD source to be accessed
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+bool resolveVpdSource( TARGETING::Target * i_target,
+                       bool i_readFromPnorEnabled,
+                       bool i_readFromHwEnabled,
+                       vpdCmdTarget i_vpdCmdTarget,
+                       vpdCmdTarget& o_vpdSource );
 
 }; //end VPD namespace
 

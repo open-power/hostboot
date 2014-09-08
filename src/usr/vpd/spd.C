@@ -112,11 +112,14 @@ bool compareEntries ( const KeywordData e1,
  *
  * @param[in] i_target - The target to read data from.
  *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *      to the error log.
  */
 errlHndl_t getMemType ( uint8_t & o_memType,
-                        TARGETING::Target * i_target );
+                        TARGETING::Target * i_target,
+                        VPD::vpdCmdTarget i_location );
 
 /**
  * @brief This function will read the DIMM module type.
@@ -127,12 +130,15 @@ errlHndl_t getMemType ( uint8_t & o_memType,
  *
  * @param[in] i_memType - The memory type
  *
+ * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *      to the error log.
  */
 errlHndl_t getModType ( modSpecTypes_t & o_memType,
                         TARGETING::Target * i_target,
-                        uint64_t i_memType );
+                        uint64_t i_memType,
+                        VPD::vpdCmdTarget i_location );
 
 /**
  * @brief This function will scan the table and return the entry
@@ -149,7 +155,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_memType,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t getKeywordEntry ( uint64_t i_keyword,
+errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
                              uint64_t i_memType,
                              TARGETING::Target * i_target,
                              const KeywordData *& o_entry );
@@ -176,7 +182,8 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
                                 va_list i_args )
 {
     errlHndl_t err = NULL;
-    uint64_t keyword = va_arg( i_args, uint64_t );
+    VPD::vpdKeyword keyword = va_arg( i_args, uint64_t );
+    VPD::vpdCmdTarget location = (VPD::vpdCmdTarget)va_arg( i_args, uint64_t );
 
     TRACSSCOMP( g_trac_spd,
                 ENTER_MRK"spdGetKeywordValue(), io_buflen: %d, keyword: 0x%04x",
@@ -187,7 +194,8 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
         // Read the Basic Memory Type
         uint8_t memType = 0x0;
         err = getMemType( memType,
-                          i_target );
+                          i_target,
+                          location );
 
         if( err )
         {
@@ -214,7 +222,8 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
                                io_buffer,
                                io_buflen,
                                i_target,
-                               memType );
+                               memType,
+                               location );
 
             if( err )
             {
@@ -289,7 +298,9 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
                                   va_list i_args )
 {
     errlHndl_t err = NULL;
-    uint64_t keyword = va_arg( i_args, uint64_t );
+    VPD::vpdKeyword keyword = va_arg( i_args, uint64_t );
+    VPD::vpdCmdTarget location =
+            (VPD::vpdCmdTarget)va_arg( i_args, uint64_t );
 
     TRACSSCOMP( g_trac_spd,
                 ENTER_MRK"spdWriteKeywordValue()" );
@@ -299,7 +310,8 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
         // Get memory type
         uint8_t memType = 0x0;
         err = getMemType( memType,
-                          i_target );
+                          i_target,
+                          location );
 
         if( err )
         {
@@ -313,7 +325,8 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
                                  io_buffer,
                                  io_buflen,
                                  i_target,
-                                 memType );
+                                 memType,
+                                 location );
 
             if( err )
             {
@@ -384,7 +397,8 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
 errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                           size_t i_numBytes,
                           void * o_data,
-                          TARGETING::Target * i_target )
+                          TARGETING::Target * i_target,
+                          VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
 
@@ -393,18 +407,35 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
 
     do
     {
-        if( likely( g_usePNOR ) )
+        if( unlikely( !g_usePNOR ) )
         {
+            err = spdReadBinaryFile( i_byteAddr,
+                                     i_numBytes,
+                                     o_data );
+            break;
+        }
+
+        bool readFromPnorEnabled = false;
+#ifdef CONFIG_DJVPD_READ_FROM_PNOR
+        readFromPnorEnabled = true;
+#endif
+        bool readFromHwEnabled = false;
 #ifdef CONFIG_DJVPD_READ_FROM_HW
-            // Need to read directly from target's EEPROM.
-            err = DeviceFW::deviceOp( DeviceFW::READ,
-                                      i_target,
-                                      o_data,
-                                      i_numBytes,
-                                      DEVICE_EEPROM_ADDRESS(
-                                          EEPROM::VPD_PRIMARY,
-                                          i_byteAddr ) );
-#elif CONFIG_DJVPD_READ_FROM_PNOR
+        readFromHwEnabled = true;
+#endif
+
+        // Determine the SPD source (PNOR/SEEPROM)
+        VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
+        bool configError = false;
+        configError = VPD::resolveVpdSource( i_target,
+                                             readFromPnorEnabled,
+                                             readFromHwEnabled,
+                                             i_location,
+                                             vpdSource );
+
+        // Get the data
+        if ( vpdSource == VPD::PNOR )
+        {
             // Setup info needed to read from PNOR
             VPD::pnorInformation info;
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
@@ -417,7 +448,21 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                                  info,
                                  g_spdPnorAddr,
                                  &g_spdMutex );
-#endif // CONFIG_DJVPD_READ_FROM_PNOR
+            if( err )
+            {
+                break;
+            }
+        }
+        else if ( vpdSource == VPD::SEEPROM )
+        {
+            // Need to read directly from target's EEPROM.
+            err = DeviceFW::deviceOp( DeviceFW::READ,
+                                      i_target,
+                                      o_data,
+                                      i_numBytes,
+                                      DEVICE_EEPROM_ADDRESS(
+                                          EEPROM::VPD_PRIMARY,
+                                          i_byteAddr ) );
             if( err )
             {
                 break;
@@ -425,15 +470,39 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
         }
         else
         {
-            err = spdReadBinaryFile( i_byteAddr,
-                                     i_numBytes,
-                                     o_data );
-
-            if( err )
-            {
-                break;
-            }
+            configError = true;
         }
+
+        if( configError )
+        {
+            TRACFCOMP( g_trac_spd, ERR_MRK"spdFetchData: "
+                       "Error resolving VPD source (PNOR/SEEPROM)");
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_READ_SOURCE_UNRESOLVED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_SPD_FETCH_DATA
+             * @userdata1[0:31]  Target HUID
+             * @userdata1[32:63] Requested VPD Source Location
+             * @userdata2[0:31]  CONFIG_DJVPD_READ_FROM_PNOR
+             * @userdata2[32:63] CONFIG_DJVPD_READ_FROM_HW
+             * @devdesc          Unable to resolve the VPD
+             *                   source (PNOR or SEEPROM)
+             */
+            err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        VPD::VPD_SPD_FETCH_DATA,
+                        VPD::VPD_READ_SOURCE_UNRESOLVED,
+                        TWO_UINT32_TO_UINT64( TARGETING::get_huid(i_target),
+                                              i_location ),
+                        TWO_UINT32_TO_UINT64( readFromHwEnabled,
+                                              readFromHwEnabled ),
+                        true /*Add HB SW Callout*/ );
+            err->collectTrace( "VPD", 256 );
+            break;
+        }
+
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
@@ -449,7 +518,8 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
 errlHndl_t spdWriteData ( uint64_t i_offset,
                           size_t i_numBytes,
                           void * i_data,
-                          TARGETING::Target * i_target )
+                          TARGETING::Target * i_target,
+                          VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
 
@@ -480,8 +550,8 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
         }
         else
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"There is no way to write SPD when not using PNOR!" );
+            TRACFCOMP( g_trac_spd, ERR_MRK"spdWriteData: "
+                       "There is no way to write SPD when not using PNOR!" );
 
             /*@
              * @errortype
@@ -518,11 +588,12 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 // ------------------------------------------------------------------
 // spdGetValue
 // ------------------------------------------------------------------
-errlHndl_t spdGetValue ( uint64_t i_keyword,
+errlHndl_t spdGetValue ( VPD::vpdKeyword i_keyword,
                          void * io_buffer,
                          size_t & io_buflen,
                          TARGETING::Target * i_target,
-                         uint64_t i_DDRRev )
+                         uint64_t i_DDRRev,
+                         VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
@@ -579,7 +650,8 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
         // correct values are in place to actually request it
         err = checkModSpecificKeyword( (*entry),
                                        i_DDRRev,
-                                       i_target );
+                                       i_target,
+                                       i_location );
 
         if( err )
         {
@@ -603,7 +675,8 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
             err = spdSpecialCases( (*entry),
                                    io_buffer,
                                    i_target,
-                                   i_DDRRev );
+                                   i_DDRRev,
+                                   i_location );
 
             if (err)
             {
@@ -616,7 +689,8 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
             err = spdFetchData( (*entry).offset,
                                 (*entry).length,
                                 tmpBuffer,
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err )
             {
@@ -653,11 +727,12 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
 // ------------------------------------------------------------------
 // spdWriteValue
 // ------------------------------------------------------------------
-errlHndl_t spdWriteValue ( uint64_t i_keyword,
+errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
                            void * io_buffer,
                            size_t & io_buflen,
                            TARGETING::Target * i_target,
-                           uint64_t i_DDRRev )
+                           uint64_t i_DDRRev,
+                           VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
 
@@ -758,8 +833,9 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
         if( entry->bitMask )
         {
             // Error if not writable
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Trying to write keyword (0x%04x) that is not a full byte size",
+            TRACFCOMP( g_trac_spd, ERR_MRK"spdWriteValue: "
+                       "Trying to write keyword (0x%04x) that is not "
+                       "a full byte size",
                        i_keyword );
 
             /*@
@@ -795,7 +871,8 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
         err = spdWriteData( entry->offset,
                             io_buflen,
                             io_buffer,
-                            i_target );
+                            i_target,
+                            i_location );
 
         if( err )
         {
@@ -833,7 +910,7 @@ bool spdPresent ( TARGETING::Target * i_target )
 {
     errlHndl_t err = NULL;
     bool pres = false;
-    
+
     TRACSSCOMP( g_trac_spd,
                 ENTER_MRK"spdPresent()" );
 
@@ -842,7 +919,8 @@ bool spdPresent ( TARGETING::Target * i_target )
         // Read the Basic Memory Type
         uint8_t memType = 0x0;
         err = getMemType( memType,
-                          i_target );
+                          i_target,
+                          VPD::AUTOSELECT );
 
         if( err )
         {
@@ -861,7 +939,7 @@ bool spdPresent ( TARGETING::Target * i_target )
             pres = true;
         }
     } while( 0 );
-    
+
     return pres;
 }
 
@@ -872,7 +950,8 @@ bool spdPresent ( TARGETING::Target * i_target )
 // ------------------------------------------------------------------
 errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
                             void * io_buffer,
-                            TARGETING::Target * i_target)
+                            TARGETING::Target * i_target,
+                            VPD::vpdCmdTarget i_location)
 {
     errlHndl_t err = NULL;
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
@@ -895,7 +974,8 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[0],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -910,7 +990,8 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset - 1),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[1],
-                                i_target );
+                                i_target,
+                                i_location );
             break;
 
         // ==================================================
@@ -920,7 +1001,8 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[0],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -935,13 +1017,14 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset + 2),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[1],
-                                i_target );
+                                i_target,
+                                i_location );
             break;
 
         // ==================================================
         default:
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Unknown keyword (0x%04x) for DDR3 special cases!",
+            TRACFCOMP( g_trac_spd, ERR_MRK"ddr3SpecialCases: "
+                       "Unknown keyword (0x%04x) for DDR3 special cases!",
                        i_kwdData.keyword );
 
             /*@
@@ -976,7 +1059,8 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
 // ------------------------------------------------------------------
 errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
                             void * io_buffer,
-                            TARGETING::Target * i_target)
+                            TARGETING::Target * i_target,
+                            VPD::vpdCmdTarget i_location)
 {
     errlHndl_t err = NULL;
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
@@ -1003,7 +1087,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[0],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -1018,7 +1103,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset - 1),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[1],
-                                i_target );
+                                i_target,
+                                i_location );
             break;
 
         // ==================================================
@@ -1028,7 +1114,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[0],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -1043,7 +1130,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset + 2),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[1],
-                                i_target );
+                                i_target,
+                                i_location );
             break;
 
         // ==================================================
@@ -1053,7 +1141,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[0],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -1061,7 +1150,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset - 1),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[1],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -1069,7 +1159,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset - 2),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[2],
-                                i_target );
+                                i_target,
+                                i_location );
 
             if( err ) break;
 
@@ -1077,13 +1168,14 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             err = spdFetchData( (i_kwdData.offset - 3),
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[3],
-                                i_target );
+                                i_target,
+                                i_location );
             break;
 
         // ==================================================
         default:
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Unknown keyword (0x%04x) for DDR4 special cases!",
+            TRACFCOMP( g_trac_spd, ERR_MRK"ddr4SpecialCases: "
+                       "Unknown keyword (0x%04x) for DDR4 special cases!",
                        i_kwdData.keyword );
 
             /*@
@@ -1120,7 +1212,8 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
 errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
                              void * io_buffer,
                              TARGETING::Target * i_target,
-                             uint64_t i_DDRRev )
+                             uint64_t i_DDRRev,
+                             VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
 
@@ -1132,11 +1225,11 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
         // Handle each of the special cases here
         if( SPD_DDR3 == i_DDRRev )
         {
-            err = ddr3SpecialCases(i_kwdData,io_buffer,i_target);
+            err = ddr3SpecialCases(i_kwdData,io_buffer,i_target,i_location);
         }
         else if (SPD_DDR4 == i_DDRRev)
         {
-            err = ddr4SpecialCases(i_kwdData,io_buffer,i_target);
+            err = ddr4SpecialCases(i_kwdData,io_buffer,i_target,i_location);
         }
         else
         {
@@ -1191,7 +1284,7 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
 // ------------------------------------------------------------------
 errlHndl_t spdCheckSize ( size_t i_bufferSz,
                           size_t i_expBufferSz,
-                          uint64_t i_keyword )
+                          VPD::vpdKeyword i_keyword )
 {
     errlHndl_t err = NULL;
 
@@ -1200,8 +1293,8 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
     if( i_bufferSz < i_expBufferSz )
     {
         TRACFCOMP( g_trac_spd,
-                   ERR_MRK"Buffer Size (%d) for keyword (0x%04x) wasn't greater "
-                   "than or equal to expected size (%d)",
+                   ERR_MRK"Buffer Size (%d) for keyword (0x%04x) wasn't greater"
+                   " than or equal to expected size (%d)",
                    i_bufferSz, i_keyword, i_expBufferSz );
 
         /*@
@@ -1286,8 +1379,8 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
 
         if( err )
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Error getting starting address of binary SPD file: %s",
+            TRACFCOMP( g_trac_spd, ERR_MRK"spdReadBinaryFile: "
+                       "Error getting starting address of binary SPD file: %s",
                        fileName );
 
             break;
@@ -1300,8 +1393,8 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
         if( (i_byteAddr + i_numBytes) > fileSize )
         {
             TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Unable to read %d bytes from %s at offset 0x%08x "
-                       "because file size is only %d bytes!",
+                       ERR_MRK"Unable to read %d bytes from %s at offset 0x%08x"
+                       " because file size is only %d bytes!",
                        i_numBytes,
                        fileName,
                        i_byteAddr,
@@ -1377,7 +1470,8 @@ bool compareEntries ( const KeywordData e1,
 // ------------------------------------------------------------------
 errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                                      uint64_t i_memType,
-                                     TARGETING::Target * i_target )
+                                     TARGETING::Target * i_target,
+                                     VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
 
@@ -1395,7 +1489,7 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
         // Check that a Module Specific keyword is being accessed from a DIMM
         // of the correct Module Type.
         modSpecTypes_t modType = NA;
-        err = getModType(modType, i_target, i_memType);
+        err = getModType(modType, i_target, i_memType, i_location);
 
         if( err )
         {
@@ -1408,8 +1502,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
             if ((UMM != i_kwdData.modSpec) &&
                 (ALL != i_kwdData.modSpec) )
             {
-                TRACFCOMP( g_trac_spd,
-                           ERR_MRK"Keyword (0x%04x) is not valid with UMM modules!",
+                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
+                           "Keyword (0x%04x) is not valid with UMM modules!",
                            i_kwdData.keyword );
                 /*@
                  * @errortype
@@ -1454,8 +1548,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
             if ((RMM != i_kwdData.modSpec) &&
                 (ALL != i_kwdData.modSpec) )
             {
-                TRACFCOMP( g_trac_spd,
-                           ERR_MRK"Keyword (0x%04x) is not valid with RMM modules!",
+                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
+                           "Keyword (0x%04x) is not valid with RMM modules!",
                            i_kwdData.keyword );
                 /*@
                  * @errortype
@@ -1500,8 +1594,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
             if ((CMM != i_kwdData.modSpec) &&
                 (ALL != i_kwdData.modSpec) )
             {
-                TRACFCOMP( g_trac_spd,
-                           ERR_MRK"Keyword (0x%04x) is not valid with CMM modules!",
+                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
+                           "Keyword (0x%04x) is not valid with CMM modules!",
                            i_kwdData.keyword );
                 /*@
                  * @errortype
@@ -1546,8 +1640,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
             if ((LRMM != i_kwdData.modSpec) &&
                 (ALL != i_kwdData.modSpec) )
             {
-                TRACFCOMP( g_trac_spd,
-                           ERR_MRK"Keyword (0x%04x) is not valid with LRMM modules!",
+                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
+                           "Keyword (0x%04x) is not valid with LRMM modules!",
                            i_kwdData.keyword );
                 /*@
                  * @errortype
@@ -1588,11 +1682,11 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
         }
         else
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Module specific keyword could not be matched with an "
+            TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
+                       "Module specific keyword could not be matched with an "
                        "appropriate scenario!" );
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"  Mem Type: 0x%04x, Mod Type: 0x%04x, Keyword: 0x%04x",
+            TRACFCOMP( g_trac_spd, ERR_MRK
+                       "  Mem Type: 0x%04x, Mod Type: 0x%04x, Keyword: 0x%04x",
                        i_memType,
                        modType,
                        i_kwdData.keyword );
@@ -1643,14 +1737,16 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 // getMemType
 // ------------------------------------------------------------------
 errlHndl_t getMemType ( uint8_t & o_memType,
-                        TARGETING::Target * i_target )
+                        TARGETING::Target * i_target,
+                        VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
 
     err = spdFetchData( MEM_TYPE_ADDR,
                         MEM_TYPE_SZ,
                         &o_memType,
-                        i_target );
+                        i_target,
+                        i_location );
 
     TRACUCOMP( g_trac_spd,
                "SPD::getMemType() - MemType: 0x%02x, Error: %s",
@@ -1665,7 +1761,8 @@ errlHndl_t getMemType ( uint8_t & o_memType,
 // ------------------------------------------------------------------
 errlHndl_t getModType ( modSpecTypes_t & o_modType,
                         TARGETING::Target * i_target,
-                        uint64_t i_memType )
+                        uint64_t i_memType,
+                        VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
     o_modType = NA;
@@ -1674,7 +1771,8 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
     err = spdFetchData( MOD_TYPE_ADDR,
                         MOD_TYPE_SZ,
                         &modTypeVal,
-                        i_target );
+                        i_target,
+                        i_location );
 
     if (err)
     {
@@ -1768,7 +1866,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
 // ------------------------------------------------------------------
 // getKeywordEntry
 // ------------------------------------------------------------------
-errlHndl_t getKeywordEntry ( uint64_t i_keyword,
+errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
                              uint64_t i_memType,
                              TARGETING::Target * i_target,
                              const KeywordData *& o_entry )
@@ -1878,4 +1976,181 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
 }
 
 
-} // end namespace SPD
+// ------------------------------------------------------------------
+// cmpPnorSeeprom
+// ------------------------------------------------------------------
+errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
+                              VPD::vpdKeyword i_keyword,
+                              bool &o_match )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"cmpPnorSeeprom()" );
+
+    o_match = false;
+
+    do
+    {
+        // Read the Basic Memory Type
+        uint8_t memType = 0x0;
+        err = getMemType( memType,
+                          i_target,
+                          VPD::AUTOSELECT );
+        if( err )
+        {
+            break;
+        }
+        if(( SPD_DDR3 != memType ) &&
+           ( SPD_DDR4 != memType ))
+        {
+            break;
+        }
+
+        // Get the keyword size
+        size_t dataSize = 0;
+        if( SPD_DDR3 == memType )
+        {
+            dataSize = ddr3Data[i_keyword].length;
+        }
+        else
+        {
+            dataSize = ddr4Data[i_keyword].length;
+        }
+
+        // Read the keyword from PNOR
+        size_t sizePnor = dataSize;
+        uint8_t dataPnor[sizePnor];
+        err = spdGetValue( i_keyword,
+                           dataPnor,
+                           sizePnor,
+                           i_target,
+                           memType,
+                           VPD::PNOR );
+        if( err )
+        {
+            // PNOR may not be loaded, ignore the error
+            delete err;
+            err = NULL;
+            break;
+        }
+
+        // Read the keyword from SEEPROM
+        size_t sizeSeeprom = dataSize;
+        uint8_t dataSeeprom[sizeSeeprom];
+        err = spdGetValue( i_keyword,
+                           dataSeeprom,
+                           sizeSeeprom,
+                           i_target,
+                           memType,
+                           VPD::SEEPROM );
+        if( err )
+        {
+            break;
+        }
+
+        // Compare the PNOR/SEEPROM size/data
+        if( sizePnor != sizeSeeprom )
+        {
+            break;
+        }
+        if( memcmp( dataPnor, dataSeeprom, sizePnor ) )
+        {
+            break;
+        }
+
+        o_match = true;
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpPnorSeeprom()" );
+
+    return err;
+ }
+
+
+// ------------------------------------------------------------------
+// loadPnor
+// ------------------------------------------------------------------
+errlHndl_t loadPnor ( TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"loadPnorCache()" );
+
+    do
+    {
+        // Invalidate the SPD in PNOR
+        err = invalidatePnor( i_target );
+        if( err )
+        {
+            TRACFCOMP( g_trac_spd,
+                ERR_MRK"loadPnorCache: Error invalidating the SPD in PNOR" );
+            break;
+        }
+
+        // Load PNOR cache from SEEPROM
+
+        // Read the entire SPD section from SEEPROM
+        uint8_t writeData[DIMM_SPD_SECTION_SIZE];
+        err = spdFetchData ( 0x0,
+                             DIMM_SPD_SECTION_SIZE,
+                             writeData,
+                             i_target,
+                             VPD::SEEPROM );
+        if( err )
+        {
+            TRACFCOMP( g_trac_spd,
+                ERR_MRK"loadPnorCache: Error reading SEEPROM SPD data" );
+            break;
+        }
+
+        // Write the entire SPD section to PNOR
+        err = spdWriteData( 0x0,
+                            DIMM_SPD_SECTION_SIZE,
+                            writeData,
+                            i_target,
+                            VPD::PNOR );
+        if( err )
+        {
+            TRACFCOMP( g_trac_spd,ERR_MRK"loadPnorCache: Error writing PNOR SPD data" );
+            break;
+        }
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"loadPnorCache()" );
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// /*invalidatePnorCache*/
+// ------------------------------------------------------------------
+errlHndl_t invalidatePnor ( TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"invalidatePnorCache()" );
+
+    // Write SPD section to all Fs
+    uint8_t writeData[DIMM_SPD_SECTION_SIZE];
+    memset( writeData, 0xFF, DIMM_SPD_SECTION_SIZE );
+    err = spdWriteData( 0x0,
+                        DIMM_SPD_SECTION_SIZE,
+                        writeData,
+                        i_target,
+                        VPD::PNOR );
+    if( err )
+    {
+        TRACFCOMP( g_trac_spd, ERR_MRK"invalidatePnorCache: "
+                   "Error invalidating the SPD in PNOR" );
+    }
+
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"invalidatePnorCache()" );
+
+    return err;
+}
+
+
+}; // end namespace SPD

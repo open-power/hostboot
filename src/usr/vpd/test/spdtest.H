@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -937,7 +939,8 @@ class SPDTest: public CxxTest::TestSuite
                                "valid for all types of modules.  IGNORE!!" );
                     err = checkModSpecificKeyword( kwdData,
                                                    memType,
-                                                   theTarget );
+                                                   theTarget,
+                                                   VPD::AUTOSELECT );
                     if( err )
                     {
                         // This keyword isn't supported with this module type

@@ -105,6 +105,7 @@ namespace CVPD
         IpVpdFacade::input_args_t args;
         args.record = ((cvpdRecord)va_arg( i_args, uint64_t ));
         args.keyword = ((cvpdKeyword)va_arg( i_args, uint64_t ));
+        args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"cvpdRead()" );
@@ -157,6 +158,7 @@ namespace CVPD
         IpVpdFacade::input_args_t args;
         args.record = ((cvpdRecord)va_arg( i_args, uint64_t ));
         args.keyword = ((cvpdKeyword)va_arg( i_args, uint64_t ));
+        args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"cvpdWrite()" );

@@ -37,7 +37,7 @@
 
 /**
  *  @brief  Base class for i/p-Series VPD
- *     
+ *
  */
 class IpVpdFacade
 {
@@ -59,7 +59,7 @@ class IpVpdFacade
     };
 
     /**
-     * @brief Structure representing the format of each record 
+     * @brief Structure representing the format of each record
      *      in the PT keyword of the VTOC or VHDR.
      */
     struct TocPtRecord {
@@ -73,21 +73,13 @@ class IpVpdFacade
     } PACKED;
 
     /**
-     * @brief typdef for ipVpdRecord values
-     */
-    typedef uint32_t ipVpdRecord;
-    /**
-     * @brief typdef for ipVpdKeyword values
-     */
-    typedef uint32_t ipVpdKeyword;
-
-    /**
      * @brief Structure for all VPD dd input parameter arguments
      */
     typedef struct
     {
-        ipVpdRecord record;
-        ipVpdKeyword keyword;
+        VPD::vpdRecord record;
+        VPD::vpdKeyword keyword;
+        VPD::vpdCmdTarget location;
     } input_args_t;
 
     /**
@@ -96,7 +88,7 @@ class IpVpdFacade
      */
     typedef struct
     {
-        ipVpdRecord record;
+        VPD::vpdRecord record;
         char recordName[RECORD_BYTE_SIZE+1];
     } recordInfo;
 
@@ -104,7 +96,7 @@ class IpVpdFacade
      */
     typedef struct
     {
-        ipVpdKeyword keyword;
+        VPD::vpdKeyword keyword;
         char keywordName[KEYWORD_BYTE_SIZE+1];
     } keywordInfo;
 
@@ -118,6 +110,23 @@ class IpVpdFacade
         bool vpdWritePNOR;
         bool vpdWriteHW;
     } configInfo;
+
+    /**
+     * @brief - Data Struct for TOC Entry
+     */
+    struct tocData
+    {
+        tocData()
+        {
+            bzero(asciiRec, sizeof(asciiRec));
+            bzero(offset, sizeof(offset));
+            bzero(unusedByte, sizeof(unusedByte));
+        }
+
+        uint8_t asciiRec[RECORD_BYTE_SIZE];
+        uint8_t offset[RECORD_ADDR_BYTE_SIZE];
+        uint8_t unusedByte[RECORD_ADDR_BYTE_SIZE];
+    };
 
     /**
      * @brief  Constructor
@@ -219,9 +228,51 @@ class IpVpdFacade
      * @return - bool - true if vpd is present, false if it is not.
      */
     bool hasVpdPresent ( TARGETING::Target * i_target,
-                         uint64_t record,
-                         uint64_t keyword );
+                         VPD::vpdRecord record,
+                         VPD::vpdKeyword keyword );
 
+    /**
+     * @brief This function compares the specified record/keyword
+     *      in PNOR/SEEPROM and returns the result.  A mismatch
+     *      will not return an error.
+     *
+     * @param[in] i_target - Target device
+     *
+     * @param[in] i_record - Record to compare
+     *
+     * @param[in] i_keyword - Keyword to compare
+     *
+     * @param[out] o_match - Result of compare
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *       error log.
+     */
+    errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
+                                  VPD::vpdRecord i_record,
+                                  VPD::vpdKeyword i_keyword,
+                                  bool &o_match );
+
+    /**
+     * @brief This function will perform the steps required to load the
+     *      MVPD data from SEEPROM into the PNOR cache.
+     *
+     * @param[in] i_target - Target device
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *       error log.
+     */
+    errlHndl_t loadPnor ( TARGETING::Target * i_target );
+
+    /**
+     * @brief This function will perform the steps required to invalidate
+     *      the MVPD in the PNOR cache.
+     *
+     * @param[in] i_target - Target device
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *       error log.
+     */
+    errlHndl_t invalidatePnor ( TARGETING::Target * i_target );
 
   protected:
 
@@ -237,7 +288,7 @@ class IpVpdFacade
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t translateRecord ( ipVpdRecord i_record,
+    errlHndl_t translateRecord ( VPD::vpdRecord i_record,
                                  const char *& o_record );
 
     /**
@@ -252,7 +303,7 @@ class IpVpdFacade
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t translateKeyword ( ipVpdKeyword i_keyword,
+    errlHndl_t translateKeyword ( VPD::vpdKeyword i_keyword,
                                   const char *& o_keyword );
 
     /**
@@ -322,6 +373,8 @@ class IpVpdFacade
      *
      * @param[out] o_offset - The offset where the record is located.
      *
+     * @param[out] o_length - The length of the record.
+     *
      * @param[in] i_target - The target to retrieve the data for.
      *
      * @param[in] i_args - The input arguments.
@@ -331,6 +384,7 @@ class IpVpdFacade
      */
     errlHndl_t findRecordOffsetSeeprom ( const char * i_record,
                                          uint16_t & o_offset,
+                                         uint16_t & o_length,
                                          TARGETING::Target * i_target,
                                          input_args_t i_args );
 
@@ -385,7 +439,7 @@ class IpVpdFacade
      *
      * @param[in] i_buflen - Length of the buffer to be written
      *       to the target's VPD area.  This value should indicate the
-     *       size of the io_buffer parameter that has been allocated.  
+     *       size of the io_buffer parameter that has been allocated.
      *
      * @param[in] i_args - The input arguments.
      *
@@ -433,7 +487,7 @@ class IpVpdFacade
                                  size_t& o_keywordSize,
                                  uint64_t& o_byteAddr,
                                  input_args_t i_args );
-    
+
     /**
      * @brief This function calls the PNOR or EEPROM version of
      *           the fetchData function based on the configInfo
@@ -446,13 +500,16 @@ class IpVpdFacade
      *
      * @param[in] i_target - Target device.
      *
+     * @param[in] i_location - VPD location to fetch data from (PNOR/SEEPROM)
+     *
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
     errlHndl_t fetchData ( uint64_t i_byteAddr,
                            size_t i_numBytes,
                            void * o_data,
-                           TARGETING::Target * i_target );
+                           TARGETING::Target * i_target,
+                           VPD::vpdCmdTarget i_location );
 
     /**
      * @brief This function actually reads the data from PNOR
@@ -504,7 +561,7 @@ class IpVpdFacade
      * @return bool - Whether or not the e2 value is larger than the e1 value.
      */
     static bool compareKeywords ( const keywordInfo e1,
-                           const keywordInfo e2 );
+                                  const keywordInfo e2 );
 
     /**
      * @brief This function compares 2 vpd keyword values.  Used for binary
@@ -517,7 +574,7 @@ class IpVpdFacade
      * @return bool - Whether or not the e2 value is larger than the e1 value.
      */
     static bool compareRecords ( const recordInfo e1,
-                          const recordInfo e2 );
+                                 const recordInfo e2 );
 
     /**
      * @brief This function compares sizes to be sure buffers are large enough
@@ -554,25 +611,25 @@ class IpVpdFacade
 
     /**
      * @brief Pointer to array of VPD Record information
-     *        
+     *
      */
     const recordInfo* iv_vpdRecords;
 
     /**
      * @brief Number of VPD Records for current chip
-     *        
+     *
      */
     uint64_t iv_recSize;
 
     /**
      * @brief Pointer to array of VPD Keyword information
-     *        
+     *
      */
     const keywordInfo* iv_vpdKeywords;
 
     /**
      * @brief Number of VPD Keywords for current chip
-     *        
+     *
      */
     uint64_t iv_keySize;
 
@@ -605,6 +662,7 @@ class IpVpdFacade
      *          VPD data
      */
     configInfo iv_configInfo;
+
 };
 
 

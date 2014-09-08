@@ -81,6 +81,7 @@
 #ifdef CONFIG_DJVPD_READ_FROM_HW
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
+#include <devicefw/driverif.H>
 #endif  // CONFIG_DJVPD_READ_FROM_HW
 
 #ifdef CONFIG_PALMETTO_VDDR
@@ -110,31 +111,63 @@ static errlHndl_t detect_present_dimms() {
     targetService().getAssociated( pCheckPres, pSys,
         TargetService::CHILD, TargetService::ALL, &predDimm );
 
-    // Actually check for present DIMMs by PNOR or SPD, this function will
-    // prune missing DIMMs from its argument.
-    l_err = HWAS::platPresenceDetect(pCheckPres);
-
-    if (l_err != NULL)
-    {
-        return l_err;
-    }
-
-    // Mark remaining DIMMs as present.
-    // @todo RTC:111211, may need to handle turning the dimms off
+    // Check for present DIMMs
+    // @todo RTC:111211, this should be removed when Mike's FSI changes are in
     for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
             pTarget_it != pCheckPres.end();
             ++pTarget_it)
     {
-        // set HWAS state to show DIMM is present, functional.
         TARGETING::Target *target = *pTarget_it;
-        HwasState hwasState = target->getAttr<ATTR_HWAS_STATE>();
-        hwasState.poweredOn     = true;
-        hwasState.present       = true;
-        hwasState.functional    = true;
-        target->setAttr<ATTR_HWAS_STATE>( hwasState );
+
+
+        // call deviceRead() to see if they are present
+        bool present = false;
+        size_t presentSize = sizeof(present);
+        l_err = deviceRead(target, &present, presentSize,
+                                DEVICE_PRESENT_ADDRESS());
+
+        if (l_err != NULL)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "mc_config failed presence detect "
+                "target HUID %.8X", target->getAttr<ATTR_HUID>());
+
+            // commit the error but keep going
+            errlCommit(l_err, HWPF_COMP_ID);
+
+            // target is not present - fall thru
+            present = false;
+        }
+
+        if (present == true)
+        {
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "mc_config detected present "
+                "target HUID %.8X", target->getAttr<ATTR_HUID>());
+
+            // set HWAS state to show DIMM is present, functional.
+            HwasState hwasState = target->getAttr<ATTR_HWAS_STATE>();
+            hwasState.poweredOn     = true;
+            hwasState.present       = true;
+            hwasState.functional    = true;
+            target->setAttr<ATTR_HWAS_STATE>( hwasState );
+        }
+        else
+        {
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "mc_config no presence target %.8X",
+                target->getAttr<ATTR_HUID>());
+
+            // set HWAS state to show DIMM is not present, not functional.
+            HwasState hwasState = target->getAttr<ATTR_HWAS_STATE>();
+            hwasState.poweredOn     = false;
+            hwasState.present       = false;
+            hwasState.functional    = false;
+            target->setAttr<ATTR_HWAS_STATE>( hwasState );
+        }
     }
 
-    return l_err;
+    return NULL;
 }
 
 // Disable any MBAs that don't have any DIMMs under them, otherwise
@@ -810,7 +843,7 @@ errlHndl_t call_mss_eff_grouping()
                     (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
         TARGETING::TargetHandleList l_membufsList;
-        getChildAffinityTargets(l_membufsList, l_cpu_target, 
+        getChildAffinityTargets(l_membufsList, l_cpu_target,
                    CLASS_CHIP, TYPE_MEMBUF);
         std::vector<fapi::Target> l_associated_centaurs;
 

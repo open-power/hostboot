@@ -107,7 +107,8 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
              * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
              * @userdata1        Buffer Length
              * @userdata2        <UNUSED>
-             * @devdesc          Buffer for checking Presence Detect was not the correct size.
+             * @devdesc          Buffer for checking Presence Detect
+             *                   was not the correct size.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_PRESENCE_DETECT,
@@ -137,9 +138,17 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         if ( membuf_parent.size() != 1 )
         {
             present = false;
+
+            // Invalidate the SPD in PNOR
+            err = VPD::invalidatePnorCache(i_target);
+            if (err)
+            {
+                TRACFCOMP( g_trac_spd, "Error invalidating SPD in PNOR" );
+            }
             break;
         }
 #endif
+
         present = spdPresent( i_target );
 
         if( present == false )
@@ -153,6 +162,29 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                        INFO_MRK"Dimm was found to be present." );
         }
 
+#if defined(CONFIG_DJVPD_READ_FROM_HW) && defined(CONFIG_DJVPD_READ_FROM_PNOR)
+        if( present )
+        {
+            // Check if the VPD data in the PNOR matches the SEEPROM
+            err = VPD::ensureCacheIsInSync( i_target );
+            if( err )
+            {
+                present = false;
+
+                TRACFCOMP(g_trac_spd,ERR_MRK "dimmPresenceDetectt> Error during ensureCacheIsInSync (SPD)" );
+                break;
+            }
+        }
+        else
+        {
+            // SPD is not present, invalidate the SPD in PNOR
+            err = VPD::invalidatePnorCache(i_target);
+            if (err)
+            {
+                TRACFCOMP( g_trac_spd, "Error invalidating SPD in PNOR" );
+            }
+        }
+#endif
         // copy present value into output buffer so caller can read it
         memcpy( io_buffer, &present, presentSz );
         io_buflen = presentSz;

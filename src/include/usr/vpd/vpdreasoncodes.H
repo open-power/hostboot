@@ -46,6 +46,8 @@ enum vpdModuleId
     VPD_INVALID_MODULE                      = 0x00,
 
     // Common VPD
+    VPD_WRITE_PNOR                          = 0x10,
+    VPD_ENSURE_CACHE_IS_IN_SYNC             = 0x11,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,
@@ -72,6 +74,7 @@ enum vpdModuleId
     VPD_SPD_GET_KEYWORD_ENTRY               = 0x6C,
     VPD_SPD_WRITE_DATA                      = 0x6D,
     VPD_SPD_GET_MOD_TYPE                    = 0x6E,
+    VPD_SPD_FETCH_DATA                      = 0x6F,
 
     // Centaur FRU VPD
 
@@ -121,7 +124,9 @@ enum vpdReasonCode
     VPD_INSUFFICIENT_SPACE_FOR_IMAGE    = VPD_COMP_ID | 0x1b,
     VPD_MBOX_NOT_SUPPORTED_RT           = VPD_COMP_ID | 0x1c,
     VPD_RECORD_INVALID_VHDR             = VPD_COMP_ID | 0x30,
-    VPD_READ_CONFIG_NOT_SET             = VPD_COMP_ID | 0x31,
+    VPD_READ_SOURCE_UNRESOLVED          = VPD_COMP_ID | 0x31,
+    VPD_REMOVE_PAGES_FAIL               = VPD_COMP_ID | 0x32,
+    VPD_UNEXPECTED_TARGET_TYPE          = VPD_COMP_ID | 0x33,
 };
 
 

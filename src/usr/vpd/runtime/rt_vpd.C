@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -330,5 +332,74 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
     return err;
 }
+
+// ------------------------------------------------------------------
+// resolveVpdSource
+// ------------------------------------------------------------------
+bool resolveVpdSource( TARGETING::Target * i_target,
+                       bool i_readFromPnorEnabled,
+                       bool i_readFromHwEnabled,
+                       vpdCmdTarget i_vpdCmdTarget,
+                       vpdCmdTarget& o_vpdSource )
+{
+    bool badConfig = false;
+    o_vpdSource = VPD::INVALID_LOCATION;
+
+    if( i_vpdCmdTarget == VPD::PNOR )
+    {
+        if( i_readFromPnorEnabled )
+        {
+            o_vpdSource = VPD::PNOR;
+        }
+        else
+        {
+            badConfig = true;
+        }
+    }
+    else if( i_vpdCmdTarget == VPD::SEEPROM )
+    {
+        if( i_readFromHwEnabled )
+        {
+            o_vpdSource = VPD::SEEPROM;
+        }
+        else
+        {
+            badConfig = true;
+        }
+    }
+    else
+    {
+        if( i_readFromPnorEnabled &&
+            i_readFromHwEnabled )
+        {
+            // PNOR needs to be loaded before we can use it
+            TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
+                    i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+            if( vpdSwitches.pnorLoaded )
+            {
+                o_vpdSource = VPD::PNOR;
+            }
+            else
+            {
+                o_vpdSource = VPD::SEEPROM;
+            }
+        }
+        else if( i_readFromPnorEnabled )
+        {
+            o_vpdSource = VPD::PNOR;
+        }
+        else if( i_readFromHwEnabled )
+        {
+            o_vpdSource = VPD::SEEPROM;
+        }
+        else
+        {
+            badConfig = true;
+        }
+    }
+
+    return badConfig;
+}
+
 
 }; // end namepsace VPD

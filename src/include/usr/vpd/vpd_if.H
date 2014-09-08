@@ -29,30 +29,64 @@
 namespace VPD
 {
     /**
-     * Load the runtime VPD image into memory
+     * @brief typdef for vpdRecord values
+     */
+    typedef uint32_t vpdRecord;
+    /**
+     * @brief typdef for vpdKeyword values
+     */
+    typedef uint32_t vpdKeyword;
+    /**
+     * @brief typdef for vpdCmdTarget values
+     */
+    enum vpdCmdTarget
+    {
+        AUTOSELECT,
+        PNOR,
+        SEEPROM,
+        INVALID_LOCATION   = 0xFFFF,
+    };
+
+    /**
+     * @brief Load the runtime VPD image into memory
      * @param[out] The physical address of the VPD image
      * @return error handle if there was an error
      */
     errlHndl_t vpd_load_rt_image(uint64_t & o_vpd_addr);
 
     /**
-     * @brief this function checks to see if the given mvpd target
-     * is present
-     *
+     * @brief This function checks to see if the given mvpd target
+     *      is present
      * @param[in] i_target - Target device to search for mvpd
-     *
      * @return bool - true if mvpd is present, false if it is not.
      */
     bool mvpdPresent ( TARGETING::Target * i_target );
 
     /**
-     * @brief this function checks to see if the given cvpd target
-     * is present
-     *
+     * @brief This function checks to see if the given cvpd target
+     *      is present
      * @param[in] i_target - Target device to search for cvpd
-     *
      * @return bool - true if cvpd is present, false if it is not.
      */
     bool cvpdPresent ( TARGETING::Target * i_target );
+
+    /**
+     * @brief This function checks if the PNOR cache for this target is in
+     *      sync with the SEEPROM, if not it loads the PNOR cache from SEEPROM.
+     * @param[in] i_target - Target device
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target );
+
+    /**
+     * @brief This function invalidates the VPD data in the PNOR cache.
+     * @param[in] i_target - Target device
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target );
+
 }; //end vpd namespace
+
 #endif

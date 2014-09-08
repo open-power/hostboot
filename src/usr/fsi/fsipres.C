@@ -35,7 +35,6 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <config.h>
 
-
 extern trace_desc_t* g_trac_fsi;
 
 
@@ -69,6 +68,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = NULL;
+    uint32_t l_saved_plid = 0;
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -109,24 +109,50 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     }
 
     // Next look for valid Module VPD
+    bool mvpd_present = false;
     bool check_for_mvpd = true;
+
 #ifdef CONFIG_MVPD_READ_FROM_HW
     check_for_mvpd = fsi_present;
-#endif // CONFIG_MVPD_READ_FROM_HW
-
-    bool mvpd_present = false;
+#endif
 
     if ( check_for_mvpd )
     {
        mvpd_present = VPD::mvpdPresent( i_target );
     }
 
+#if defined(CONFIG_MVPD_READ_FROM_HW) && defined(CONFIG_MVPD_READ_FROM_PNOR)
+    if( mvpd_present )
+    {
+        // Check if the VPD data in the PNOR matches the SEEPROM
+        l_errl = VPD::ensureCacheIsInSync( i_target );
+        if( l_errl )
+        {
+            // Save this plid to use later
+            l_saved_plid = l_errl->plid();
+            mvpd_present = false;
+
+            TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> Error during ensureCacheIsInSync (MVPD)" );
+            errlCommit( l_errl, FSI_COMP_ID );
+        }
+    }
+    else
+    {
+        // Invalidate MVPD in the PNOR
+        l_errl = VPD::invalidatePnorCache(i_target);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_fsi, "Error invalidating MVPD in PNOR" );
+            errlCommit( l_errl, FSI_COMP_ID );
+        }
+    }
+#endif
 
     // Finally compare the 2 methods
     if( fsi_present != mvpd_present )
     {
-        TRACFCOMP(g_trac_fsi,
-                  ERR_MRK "FSI::procPresenceDetect> FSI (=%d) and MVPD (=%d) do not agree for %.8X",
+        TRACFCOMP(g_trac_fsi, ERR_MRK "FSI::procPresenceDetect> "
+                  "FSI (=%d) and MVPD (=%d) do not agree for %.8X",
                   fsi_present, mvpd_present, TARGETING::get_huid(i_target));
         /*@
          * @errortype
@@ -153,15 +179,20 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                               HWAS::GARD_NULL );
 
 
+        // If there is a saved PLID, apply it to this error log
+        if (l_saved_plid)
+        {
+            l_errl->plid(l_saved_plid);
+        }
+
         // Add FFDC for the target to an error log
         getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
-
 
         // Add FSI and VPD trace
         l_errl->collectTrace("FSI");
         l_errl->collectTrace("VPD");
 
-        // commit this log and move on
+        // Commit this log and move on
         errlCommit( l_errl,
                     FSI_COMP_ID );
     }
@@ -200,6 +231,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = NULL;
+    uint32_t l_saved_plid = 0;
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -227,24 +259,51 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     bool fsi_present = isSlavePresent(i_target);
 
     // Next look for memb FRU VPD
+    bool cvpd_present = false;
     bool check_for_cvpd = true;
+
 #ifdef CONFIG_CVPD_READ_FROM_HW
     check_for_cvpd = fsi_present;
-#endif // CONFIG_CVPD_READ_FROM_HW
-
-    bool cvpd_present = false;
+#endif
 
     if ( check_for_cvpd )
     {
        cvpd_present = VPD::cvpdPresent( i_target );
     }
 
+#if defined(CONFIG_CVPD_READ_FROM_HW) && defined(CONFIG_CVPD_READ_FROM_PNOR)
+    if( cvpd_present )
+    {
+        // Check if the VPD data in the PNOR matches the SEEPROM
+        l_errl = VPD::ensureCacheIsInSync( i_target );
+        if( l_errl )
+        {
+            // Save this plid to use later
+            l_saved_plid = l_errl->plid();
+            cvpd_present = false;
+
+            TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> Error during ensureCacheIsInSync (CVPD)" );
+            errlCommit( l_errl, FSI_COMP_ID );
+        }
+    }
+    else
+    {
+        // FSI is not present, invalidate MVPD in the PNOR
+        l_errl = VPD::invalidatePnorCache(i_target);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_fsi, "Error invalidating MVPD in PNOR" );
+            errlCommit( l_errl, FSI_COMP_ID );
+        }
+    }
+#endif
+
     // Finally compare the 2 methods
     if( fsi_present != cvpd_present )
     {
 
-        TRACFCOMP(g_trac_fsi,
-                  ERR_MRK "FSI::membPresenceDetect> FSI (=%d) and VPD (=%d) do not agree for %.8X",
+        TRACFCOMP(g_trac_fsi, ERR_MRK "FSI::membPresenceDetect> "
+                  "FSI (=%d) and VPD (=%d) do not agree for %.8X",
                   fsi_present, cvpd_present, TARGETING::get_huid(i_target));
         /*@
          * @errortype
@@ -270,6 +329,12 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                               HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
 
+
+        // If there is a saved PLID, apply it to this error log
+        if (l_saved_plid)
+        {
+            l_errl->plid(l_saved_plid);
+        }
 
         // Add FFDC for the target to an error log
         getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);

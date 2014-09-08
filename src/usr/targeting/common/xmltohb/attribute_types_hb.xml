@@ -665,4 +665,31 @@ Final values for the following HTMG attributes will come from the MRW -->
 </attribute>
 <!-- end HTMGT attributes -->
 
+<attribute>
+    <id>VPD_SWITCHES</id>
+    <description>Attribute storing VPD state information</description>
+    <complexType>
+        <description>VPD flags</description>
+        <field>
+            <name>pnorLoaded</name>
+            <description>Set when this target's VPD data has been loaded
+                into the PNOR.
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future expansion</description>
+            <type>uint8_t</type>
+            <bits>7</bits>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

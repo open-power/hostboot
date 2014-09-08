@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -51,8 +53,8 @@ using namespace TARGETING;
  */
 struct mvpdTestData
 {
-    IpVpdFacade::ipVpdRecord record;
-    IpVpdFacade::ipVpdRecord keyword;
+    VPD::vpdRecord record;
+    VPD::vpdRecord keyword;
 };
 
 /**
@@ -859,8 +861,8 @@ class MVPDTest: public CxxTest::TestSuite
         void testMvpdCheckStructOrder ( void )
         {
             uint64_t fails = 0x0;
-            IpVpdFacade::ipVpdRecord prevRecord = MVPD::MVPD_FIRST_RECORD;
-            IpVpdFacade::ipVpdKeyword prevKeyword = MVPD::MVPD_FIRST_KEYWORD;
+            VPD::vpdRecord prevRecord = MVPD::MVPD_FIRST_RECORD;
+            VPD::vpdKeyword prevKeyword = MVPD::MVPD_FIRST_KEYWORD;
 
             TRACFCOMP( g_trac_vpd,
                        ENTER_MRK"testMvpdCheckStructOrder()" );

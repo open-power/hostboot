@@ -103,6 +103,7 @@ namespace MVPD
         IpVpdFacade::input_args_t args;
         args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
         args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
+        args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdRead()" );
@@ -156,6 +157,7 @@ namespace MVPD
         IpVpdFacade::input_args_t args;
         args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
         args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
+        args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdWrite()" );
@@ -253,3 +255,4 @@ IpVpdFacade(MVPD::SECTION_SIZE,
     iv_configInfo.vpdWriteHW = false;
 #endif
 }
+

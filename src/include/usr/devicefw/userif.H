@@ -37,6 +37,7 @@
 #ifndef PARSER
 #include <stdint.h>
 #include <errl/errlentry.H>
+#include <vpd/vpd_if.H>
 #include <targeting/common/targetservice.H>
 #endif // not PARSER
 
@@ -98,7 +99,18 @@ namespace DeviceFW
      *      by the device driver.
      */
     #define DEVICE_SPD_ADDRESS( i_keyword )\
-        DeviceFW::SPD, static_cast<uint64_t>(( i_keyword ))
+        DEVICE_SPD_FORCE_ADDRESS( i_keyword, VPD::AUTOSELECT )
+
+    /**
+     * Construct the device addressing parameters for the SPD device ops.
+     * @param[in] i_keyword - The keyword enumeration value to be accessed
+     *      by the device driver.
+     * @param[in] i_location - The location to be used for
+     *      accessing the keyword (PNOR/SEEPROM).
+     */
+    #define DEVICE_SPD_FORCE_ADDRESS( i_keyword, i_location )\
+        DeviceFW::SPD, static_cast<uint64_t>(( i_keyword )),\
+                       static_cast<uint64_t>(( i_location))
 
     /**
      * Construct the device addressing parameters for the MAILBOX device.
@@ -115,8 +127,20 @@ namespace DeviceFW
      *      within the i_record Record to access.
      */
     #define DEVICE_MVPD_ADDRESS( i_record, i_keyword )\
+        DEVICE_MVPD_FORCE_ADDRESS( i_record, i_keyword, VPD::AUTOSELECT )
+
+    /**
+     * Construct the device addressing parameters for the MVPD device ops.
+     * @param[in] i_record - The enumeration of the MVPD record to access.
+     * @param[in] i_keyword - The enumeration of the MVPD keyword, located
+     *      within the i_record Record to access.
+     * @param[in] i_location - The location of the data (PNOR/SEEPROM)
+            see vpd_if.H
+     */
+    #define DEVICE_MVPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
         DeviceFW::MVPD, static_cast<uint64_t>(( i_record )),\
-            static_cast<uint64_t>(( i_keyword ))
+            static_cast<uint64_t>(( i_keyword )),\
+            static_cast<uint64_t>(( i_location ))
 
     /**
      * Construct the device addressing parameters for the CVPD device ops.
@@ -125,8 +149,20 @@ namespace DeviceFW
      *      within the i_record Record to access.
      */
     #define DEVICE_CVPD_ADDRESS( i_record, i_keyword )\
+        DEVICE_CVPD_FORCE_ADDRESS( i_record, i_keyword, VPD::AUTOSELECT )
+
+    /**
+     * Construct the device addressing parameters for the CVPD device ops.
+     * @param[in] i_record - The enumeration of the CVPD record to access.
+     * @param[in] i_keyword - The enumeration of the CVPD keyword, located
+     *      within the i_record Record to access.
+     * @param[in] i_location - The location of the data (PNOR/SEEPROM)
+            see vpd_if.H
+     */
+    #define DEVICE_CVPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
         DeviceFW::CVPD, static_cast<uint64_t>(( i_record )),\
-            static_cast<uint64_t>(( i_keyword ))
+            static_cast<uint64_t>(( i_keyword )),\
+            static_cast<uint64_t>(( i_location ))
 
     /**
      * Construct the device addressing parameters for the SCAN device ops.
