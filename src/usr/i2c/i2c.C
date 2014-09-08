@@ -40,8 +40,9 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
-#include <devicefw/driverif.H>
+#include <targeting/common/utilFilter.H>
 #include <targeting/common/predicates/predicates.H>
+#include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 #include <i2c/i2cif.H>
 
@@ -73,6 +74,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 #define I2C_RESET_DELAY_NS (5 * NS_PER_MSEC)  // Sleep for 5 ms after reset
 #define MAX_I2C_ENGINES 3           // Maximum of 3 engines per I2C Master
 #define P8_MASTER_ENGINES 2         // Number of Engines used in P8
+#define P8_MASTER_PORTS 2           // Number of Ports used in P8
 #define CENTAUR_MASTER_ENGINES 1    // Number of Engines in a Centaur
 // ----------------------------------------------
 
@@ -1349,53 +1351,61 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
     do
     {
-        mode.value = 0x0ull;
-
-        mode.bit_rate_div = i_args.bit_rate_divisor;
-        mode.port_num = i_args.port;
-        mode.enhanced_mode = 1;
-
-        TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
-                  "mode[0x%lx]: 0x%016llx",
-                  masterAddrs[i_args.engine].mode, mode.value );
-
-        err = deviceWrite( i_target,
-                           &mode.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS(
-                               masterAddrs[i_args.engine].mode ) );
-
-        if( err )
+        // Need to send slave stop to all ports on the engine
+        for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
         {
-            break;
-        }
+            // @todo RTC 109926 - only do port 0 for FSI I2C
 
-        cmd.value = 0x0ull;
-        cmd.with_stop = 1;
+            mode.value = 0x0ull;
 
-        TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
-                  "cmd[0x%lx]: 0x%016llx",
-                  masterAddrs[i_args.engine].command, cmd.value );
+            mode.port_num = port;
+            mode.enhanced_mode = 1;
+            mode.bit_rate_div = i_args.bit_rate_divisor;
 
-        err = deviceWrite( i_target,
-                           &cmd.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS(
-                               masterAddrs[i_args.engine].command ) );
+            TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
+                      "mode[0x%lx]: 0x%016llx",
+                      masterAddrs[i_args.engine].mode, mode.value );
 
-        if( err )
-        {
-            break;
-        }
+            err = deviceWrite( i_target,
+                               &mode.value,
+                               size,
+                               DEVICE_SCOM_ADDRESS(
+                                   masterAddrs[i_args.engine].mode ) );
 
-        // Now wait for cmd Complete
-        err = i2cWaitForCmdComp( i_target,
-                                 i_args );
+            if( err )
+            {
+                break;
+            }
 
-        if( err )
-        {
-            break;
-        }
+            cmd.value = 0x0ull;
+            cmd.with_stop = 1;
+
+            TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
+                      "cmd[0x%lx]: 0x%016llx",
+                      masterAddrs[i_args.engine].command, cmd.value );
+
+            err = deviceWrite( i_target,
+                               &cmd.value,
+                               size,
+                               DEVICE_SCOM_ADDRESS(
+                                   masterAddrs[i_args.engine].command ) );
+
+            if( err )
+            {
+                break;
+            }
+
+            // Now wait for cmd Complete
+            err = i2cWaitForCmdComp( i_target,
+                                     i_args );
+
+            if( err )
+            {
+                break;
+            }
+
+        } // end of port for-loop
+
     } while( 0 );
 
     TRACDCOMP( g_trac_i2c,
@@ -1754,5 +1764,164 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
     return err;
 }
 
+/**
+ * @brief This function will handle everything required to reset each I2C master
+ *        engine based on the input argement
+ *        @todo RTC 115832 - additional enums will be added. Currently just
+ *                           supporting I2C_RESET_PROC_HOST
+ */
+errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
+{
+    errlHndl_t err = NULL;
+    bool error_found = false;
+    bool mutex_needs_unlock = false;
+    mutex_t * engineLock = NULL;
+    misc_args_t io_args;
+
+    TRACFCOMP( g_trac_i2c,
+               ENTER_MRK"i2cResetMasters(): %d",
+               i_resetType );
+
+    // @todo RTC 115834 - Check for and support additional reset types
+
+
+    do
+    {
+        // Get list of Procs
+        TARGETING::TargetHandleList procList;
+
+        TARGETING::getAllChips(procList,
+                               TARGETING::TYPE_PROC,
+                               true); // true: return functional targets
+
+        if( 0 == procList.size() )
+        {
+            TRACFCOMP(g_trac_i2c,
+                      INFO_MRK"i2cResetMasters: No Processor chips found!");
+        }
+
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"i2cResetMasters: I2C Master Procs: %d",
+                   procList.size() );
+
+        // Do resets to each Processor
+        for( uint32_t proc = 0; proc < procList.size(); proc++ )
+        {
+
+            // @todo RTC 115832 - look at supporting all engines, but for now
+            // just reseting engine 0 since that's what SBE Update uses
+            for( uint32_t engine = 0; engine < 1; engine++ )
+            {
+
+                error_found = false;
+                mutex_needs_unlock = false;
+
+                // Get the mutex for the requested engine
+                switch( engine )
+                {
+                case 0:
+                    engineLock = procList[proc]->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
+                    break;
+
+                case 1:
+                    engineLock = procList[proc]->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_1>();
+                    break;
+
+               case 2:
+                    engineLock = procList[proc]->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_2>();
+                    break;
+
+                default:
+                    TRACFCOMP( g_trac_i2c,
+                               ERR_MRK"Invalid engine for getting Mutex! "
+                               "engine=%d", engine  );
+                    // @todo RTC:69113 - Create an error here
+                    break;
+                };
+
+                // Lock on this engine
+                TRACUCOMP( g_trac_i2c,
+                           INFO_MRK"i2cResetMasters: Obtaining lock for "
+                           "engine: %d", engine );
+                (void)mutex_lock( engineLock );
+                mutex_needs_unlock = true;
+                TRACUCOMP( g_trac_i2c,
+                           INFO_MRK"i2cResetMasters: Locked on engine: %d",
+                           engine );
+
+                TRACUCOMP( g_trac_i2c,
+                           INFO_MRK"i2cResetMasters: Reset 0x%X engine = %d",
+                           TARGETING::get_huid(procList[proc]), engine );
+
+                io_args.engine = engine;
+                io_args.port = 0; // default to port 0
+
+                // Hardcode to 400KHz - should be a safe speed
+                err = i2cSetBusVariables ( procList[proc],
+                                           SET_I2C_BUS_400KHZ,
+                                           io_args );
+
+                if( err )
+                {
+                    error_found = true;
+
+                    TRACFCOMP( g_trac_i2c,
+                               ERR_MRK"i2cResetMasters: Error Setting Bus "
+                               "Variables: tgt=0x%X engine=%d",
+                               TARGETING::get_huid(procList[proc]), engine );
+
+                    // If we get error skip resetting this target, but still
+                    // need to reset other I2C engines
+                    errlCommit( err,
+                                I2C_COMP_ID );
+
+                    // Don't continue or break - need mutex unlock
+                }
+
+
+                // Now reset the engine/bus
+                if ( error_found == false )
+                {
+                    err = i2cReset ( procList[proc],
+                                     io_args);
+
+                    if( err )
+                    {
+                        TRACFCOMP( g_trac_i2c,
+                                   ERR_MRK"i2cResetMasters: Error reseting "
+                                   "tgt=0x%X, engine=%d",
+                                   TARGETING::get_huid(procList[proc]), engine);
+
+                        // If we get errors on the reset, we still need to
+                        // to reset the other I2C engines
+                        errlCommit( err,
+                                    I2C_COMP_ID );
+
+                        // Don't continue or break - need mutex unlock
+                    }
+                }
+
+                // Check if we need to unlock the mutex
+                if ( mutex_needs_unlock == true )
+                {
+                    // Unlock
+                    (void) mutex_unlock( engineLock );
+                    TRACUCOMP( g_trac_i2c,
+                               INFO_MRK"i2cResetMasters: Unlocked engine: %d",
+                               engine );
+                }
+
+            } // end for-loop engine
+
+        } // end for-loop processor
+
+    } while( 0 );
+
+    TRACFCOMP( g_trac_i2c,
+               EXIT_MRK"i2cResetMasters(): err rc=0x%X, plid=0x%X",
+               ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+
+    return err;
+}
 
 } // end namespace I2C

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,6 +75,8 @@
 #include    "proc_pcie_scominit/proc_pcie_scominit.H"
 #include    "../bus_training/pbusLinkSvc.H"
 #include    <fapiHwpExecInitFile.H>
+#include    "proc_pcie_slot_power.H"
+
 const char * const PROC_CHIPLET_ABUS_IF = "p8.abus.scom.if";
 const char * const PROC_CHIPLET_XBUS_IF = "p8.xbus.scom.if";
 
@@ -290,6 +294,58 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         }
     }
 
+
+#ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
+    //  Loop through all the procs in the system
+    //  and run proc_pcie_slot_power to
+    //  power off hot plug controller to avoid downstream MEX issues
+
+
+    for (TargetHandleList::const_iterator
+            l_proc_iter = l_procTargetList.begin();
+            l_proc_iter != l_procTargetList.end();
+            ++l_proc_iter)
+    {
+        //  make a local copy of the Processor target
+        TARGETING::Target* l_pProcTarget = *l_proc_iter;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "target HUID %.8X",
+                    TARGETING::get_huid(l_pProcTarget));
+
+        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                       l_pProcTarget    );
+
+        // Invoke the HWP
+        FAPI_INVOKE_HWP(l_err,
+                        proc_pcie_slot_power,
+                        l_fapiProcTarget,
+                        false  );  // turn off
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : proc_pcie_hotplug_control",
+                  " failed, returning errorlog" );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_err );
+
+            // informational. Don't add to istep error or return error
+            l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+            // Commit error log
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "SUCCESS : proc_pcie_hotplug_control",
+              " completed ok");
+        }
+    }   // endfor
+#endif
+
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_a_x_pci_dmi_pll_setup exit" );
 
@@ -399,6 +455,7 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
+
 
     for ( TargetHandleList::const_iterator
           l_iter = l_procTargetList.begin();

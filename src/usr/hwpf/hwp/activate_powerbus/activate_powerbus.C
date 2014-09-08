@@ -49,6 +49,7 @@
 
 #include    <sbe/sbeif.H>
 #include    <pnor/pnorif.H>
+#include    <i2c/i2cif.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -64,7 +65,6 @@
 #include    "proc_build_smp/proc_build_smp.H"
 #include    <intr/interrupt.H>
 #include    <fsi/fsiif.H>
-#include    "proc_pcie_slot_power.H"
 
 namespace   ACTIVATE_POWERBUS
 {
@@ -346,6 +346,16 @@ void * call_host_slave_sbe_update( void * io_pArgs )
     do
     {
 
+        // Reset I2C devices before trying to access the SBE SEEPROMs
+        // Any error returned should not fail istep
+        l_errl = I2C::i2cResetMasters( I2C::I2C_RESET_PROC_HOST );
+        if (l_errl)
+        {
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
         // Call to check state of Processor SBE SEEPROMs and
         // make any necessary updates
         l_errl = SBE::updateProcessorSbeSeeproms();
@@ -368,65 +378,7 @@ void * call_host_slave_sbe_update( void * io_pArgs )
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
-
-
-#ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
-    //  Loop through all the procs in the system
-    //  and run proc_pcie_slot_power to
-    //  power off hot plug controller to avoid downstream MEX issues
-
-    TARGETING::Target* l_pMasterProcTarget = NULL;
-    TARGETING::targetService().
-                       masterProcChipTargetHandle(l_pMasterProcTarget);
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
-
-    for (TargetHandleList::const_iterator
-            l_proc_iter = l_procTargetList.begin();
-            l_proc_iter != l_procTargetList.end();
-            ++l_proc_iter)
-    {
-        //  make a local copy of the Processor target
-        TARGETING::Target* l_pProcTarget = *l_proc_iter;
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "target HUID %.8X",
-                    TARGETING::get_huid(l_pProcTarget));
-
-        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
-                                       l_pProcTarget    );
-
-        // Invoke the HWP
-        FAPI_INVOKE_HWP(l_errl,
-                        proc_pcie_slot_power,
-                        l_fapiProcTarget,
-                        false  );  // turn off
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : proc_pcie_hotplug_control",
-                  " failed, returning errorlog" );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
-
-            // informational. Don't add to istep error or return error
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-
-            // Commit error log
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "SUCCESS : proc_pcie_hotplug_control",
-              " completed ok");
-        }
-    }   // endfor
-#endif
-
-
-    } while (0);
+   } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update exit" );

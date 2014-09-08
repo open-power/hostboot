@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +38,31 @@ namespace I2C
  *      the error log.
  */
 errlHndl_t i2cSetupMasters ( void );
+
+
+/**
+* @enum i2cResetType
+*
+* @brief I2C Reset Type specifies what is reset when i2cResetMasters() is called
+*        @todo RTC 115832 - additional enums will be added
+*
+*/
+enum i2cResetType
+{
+    I2C_RESET_INVALID                   = 0x00,
+    I2C_RESET_PROC_HOST                 = 0x01, // Only Host (not FSI)
+};
+
+/**
+ * @brief This function will handle everything required to reset various
+ *        I2C master engines.
+ *
+ * @param[in] i_resetType - Specfies which I2C master engines to reset
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cResetMasters ( i2cResetType i_resetType );
 
 };  // end namespace I2C
 

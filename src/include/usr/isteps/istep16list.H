@@ -90,7 +90,7 @@ const DepModInfo g_istep16Dependancies = {
     {
         DEP_LIB(libcore_activate.so),
         DEP_LIB(libbuild_winkle_images.so),
-        DEP_LIB(libactivate_powerbus.so),
+        DEP_LIB(libnest_chiplets.so),
         NULL
     }
 };
