@@ -1,0 +1,5 @@
+config CONSOLE_OUTPUT_PROGRESS
+    default y if CONSOLE
+    depends on CONSOLE
+    help
+        Display boot progress to console.

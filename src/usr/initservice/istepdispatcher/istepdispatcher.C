@@ -62,6 +62,7 @@
 #include <hwas/common/hwas.H>
 #include <hwas/hwasPlat.H>
 #include <targeting/attrPlatOverride.H>
+#include <console/consoleif.H>
 
 namespace ISTEPS_TRACE
 {
@@ -1575,6 +1576,13 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     errlHndl_t err = NULL;
 
     // Put in rolling bit RTC: 84794
+    // If we send this multiple times, we may need to eliminate the console
+    // write on subsequent.  RTC: 84794
+
+#ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
+    CONSOLE::displayf(NULL, "ISTEP %2d.%2d", iv_curIStep, iv_curSubStep);
+    CONSOLE::flush();
+#endif
 
     msg_t * myMsg = msg_allocate();
     myMsg->type = IPL_PROGRESS_CODE;
