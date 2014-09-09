@@ -1,5 +1,5 @@
 config CONSOLE_OUTPUT_TRACE
-    default y if CONSOLE
+    default n
     depends on CONSOLE
     help
         Enables output of trace to console.

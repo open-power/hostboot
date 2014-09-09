@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Google Inc.                                                        */
 /*                                                                        */
@@ -66,6 +67,8 @@ namespace CONSOLE
         class OutputBuffer : public Util::ConsoleBufferInterface
         {
             public:
+                OutputBuffer() { str.reserve(64); }
+
                 int putc(int c)
                 {
                     str.push_back(c);

@@ -2,3 +2,9 @@ config CONSOLE
     default n
     help
         Enable console support.
+
+config CONSOLE_AST2400
+    default y if CONSOLE
+    depends on CONSOLE
+    help
+        Console support for AST2400 device.

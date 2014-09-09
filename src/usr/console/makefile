@@ -8,6 +8,7 @@
 # Contributors Listed Below - COPYRIGHT 2014
 # [+] Google Inc.
 # [+] International Business Machines Corp.
+# [+] Google Inc.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,5 +30,6 @@ MODULE = console
 OBJS += daemon.o
 OBJS += uart.o
 OBJS += uartconfig.o
+OBJS += $(if $(CONFIG_CONSOLE_AST2400),ast2400.o)
 
 include $(ROOTPATH)/config.mk
