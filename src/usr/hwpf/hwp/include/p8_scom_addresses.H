@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.184 2014/07/15 21:12:03 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.185 2014/09/01 20:16:49 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -988,6 +988,8 @@ CONST_UINT64_T( PCBMS_INTERRUPT_TYPE_REG_0x000F001A ,   ULL(0x000F001A));
 CONST_UINT64_T( CAPP_APC_MASTER_PB_CTL_0x02013018     , ULL(0x02013018) );
 CONST_UINT64_T( CAPP_CXA_SNOOP_CTL_0x0201301B         , ULL(0x0201301B) );
 CONST_UINT64_T( CAPP_APC_MASTER_LCO_TARGET_0x02013021 , ULL(0x02013021) );
+CONST_UINT64_T( CAPP_CXA_SNP_ARRAY_ADDR_0x02013028    , ULL(0x02013028) );
+CONST_UINT64_T( CAPP_CXA_SNP_ARRAY_DATA_0x02013029    , ULL(0x02013029) );
 
 //------------------------------------------------------------------------------
 //      MCS
@@ -2132,6 +2134,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.185  2014/09/01 20:16:49  jmcgill
+add support for CAPI directory dump
+
 Revision 1.184  2014/07/15 21:12:03  jmcgill
 add PC_NE error report hold register definitions for FFDC collection (SW261816)
 
