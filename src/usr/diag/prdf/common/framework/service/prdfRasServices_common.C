@@ -756,10 +756,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     PRDF_INF( PRDF_FUNC"PRD called to analyze an error: 0x%08x 0x%08x",
               esig->getChipId(), esig->getSigId() );
 
-    //prints debug traces
-
-    printDebugTraces();
-
     // Reset iv_errl to NULL. This is done to catch logical bug in our code.
     // It enables us to assert in createInitialErrl function if iv_errl is
     // not NULL which should catch any logical bug in initial stages of testing.
@@ -893,72 +889,6 @@ void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
     }while (0);
 
     delete l_CapDataBuf;
-}
-
-//------------------------------------------------------------------------------
-
-void ErrDataService::printDebugTraces( )
-{
-    #define PRDF_FUNC "[ErrDataService::printDebugTraces()]"
-
-    const char * tmp = "Unknown";
-    switch ( sdc.GetAttentionType() )
-    {
-        case MACHINE_CHECK: tmp = "CHECKSTOP";      break;
-        case UNIT_CS:       tmp = "UNIT CHECKSTOP"; break;
-        case RECOVERABLE:   tmp = "RECOVERABLE";    break;
-        case SPECIAL:       tmp = "SPECIAL";        break;
-    }
-    PRDF_DTRAC( "PRDTRACE: Attention Type = %s", tmp );
-
-    if ( RECOVERABLE == sdc.GetAttentionType() )
-    {
-        PRDF_DTRAC( "PRDTRACE: Hit Count: 0x%x", sdc.GetHits() );
-        PRDF_DTRAC( "PRDTRACE: Threshold at: 0x%x", sdc.GetThreshold() );
-        PRDF_DTRAC( "PRDTRACE: Mask id: 0x%x", sdc.GetThresholdMaskId() );
-    }
-
-    const SDC_MRU_LIST & mruList = sdc.getMruList();
-    for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
-          it < mruList.end(); ++it )
-    {
-        tmp = "Unknown";
-        switch ( it->priority )
-        {
-            case MRU_LOW:  tmp = "LOW";   break;
-            case MRU_MEDC: tmp = "MED_C"; break;
-            case MRU_MEDB: tmp = "MED_B"; break;
-            case MRU_MEDA: tmp = "MED_A"; break;
-            case MRU_MED:  tmp = "MED";   break;
-            case MRU_HIGH: tmp = "HIGH";  break;
-        }
-        PRDF_DTRAC( "PRDTRACE: Callout=0x%08x Priority=%s",
-                    it->callout.flatten(), tmp );
-    }
-
-    PRDF_DTRAC ("GardType: %s", GardAction::ToString( sdc.QueryGard() ) );
-
-    PRDF_DTRAC( "PRDTRACE: Flag Values" );
-    if( sdc.IsSUE() )          PRDF_DTRAC( "PRDTRACE: SUE Flag Set" );
-    if( sdc.IsUERE() )         PRDF_DTRAC( "PRDTRACE: UERE Flag Set" );
-    if( sdc.IsAtThreshold() )  PRDF_DTRAC( "PRDTRACE: AT_THRESHOLD" );
-    if( sdc.IsDegraded() )     PRDF_DTRAC( "PRDTRACE: Performance is degraded");
-
-    if( sdc.IsServiceCall() )
-    {
-        PRDF_DTRAC( "PRDTRACE: SERVICE REQUIRED" );
-    }
-    else
-    {
-        PRDF_DTRAC( "PRDTRACE: SERVICE NOT REQUIRED" );
-    }
-
-    if( sdc.IsMfgTracking() ) PRDF_DTRAC( "PRDTRACE: Track this error" );
-    if( sdc.Terminate() )     PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );
-    if( sdc.IsLogging() )     PRDF_DTRAC( "PRDTRACE: Create history log entry");
-
-    #undef PRDF_FUNC
-
 }
 
 //------------------------------------------------------------------------------

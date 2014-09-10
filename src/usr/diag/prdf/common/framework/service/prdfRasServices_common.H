@@ -181,11 +181,6 @@ class ErrDataService
                       PfaData & o_pfa, TARGETING::TargetHandle_t & o_dumpTrgt );
 
     /**
-     * @brief Prints debug traces
-     */
-    void printDebugTraces();
-
-    /**
      * @brief Deallocate DIMMS represented in mru list.
      *
      * This function will get all DIMMS behind MCS, MEMBUF, MBA
