@@ -167,6 +167,20 @@ namespace CEN_SYMBOL
 
 }//namespace CEN_SYMBOL ends
 
+namespace SLW_FFDC_DATA
+{
+    static const char * const title = "SLW_FFDC_DATA";
+
+    enum
+    {
+        MAX_ENTRIES = 39, ///< Maximum number of entries allowed.
+        ENTRY_SIZE  = 12, ///< Number of bytes per entry.
+
+        MAX_SIZE = MAX_ENTRIES * ENTRY_SIZE, ///< Maximum table size.
+    };
+
+} // namespace SLW_FFDC_DATA
+
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 } // end namespace HOSTBOOT
 #endif

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2004,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +34,7 @@ PRDR_ERRL_LIB = lib${RULE_LIBRARY_NAME}
 LIBRARY_OFILES += prdfLogParse.o
 LIBRARY_OFILES += prdfLogParse_common.o
 LIBRARY_OFILES += prdfCenLogParse.o
+LIBRARY_OFILES += prdfProcLogParse.o
 LIBRARY_OFILES += prdrErrlPluginsSupt.o
 LIBRARY_OFILES += prdfParserUtils.o
 

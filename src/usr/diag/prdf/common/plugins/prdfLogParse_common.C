@@ -48,7 +48,9 @@
 #include <attributeenums.H> // For TARGETING::TYPE enum
 
 #include <prdfCenLogParse.H>
+#include <prdfProcLogParse.H>
 #include <prdfGardType.H>
+#include <prdfParserEnums.H>
 
 //------------------------------------------------------------------------------
 // Data structures
@@ -251,7 +253,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
     uint8_t * l_uncompBuffer = new uint8_t[CaptureDataSize];
     size_t l_uncompBufSize = CaptureDataSize;
     CaptureDataClass * l_capData;
-    memset( l_uncompBuffer, 0xFF,CaptureDataSize);
+    memset( l_uncompBuffer, 0xFF, CaptureDataSize );
 
     if ( 2 <= i_ver ) // version 2 and above are compressed.
     {
@@ -375,6 +377,10 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
             }
+            else if ( Util::hashString(SLW_FFDC_DATA::title) == sigId )
+            {
+                 parseSlwFfdcData( sigData, sigDataSize, i_parser );
+            }
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
                 // Print one reg/line if the data size <= 8 bytes
@@ -407,21 +413,34 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 
     } while (true);
 
+    i_parser.PrintBlank();
+
+    // If rc is false and returned to the error log code it will add a hex dump
+    // of the capture buffer to the end of the user data section. Uncomment this
+    // line if the raw hex is needed for debug.
+    //rc = false;
+
     if ( 2 <= i_ver ) // version 2 and above are compressed.
     {
-        i_parser.PrintBlank();
         i_parser.PrintHeading("Uncompressed Capture Buffer");
         i_parser.PrintBlank();
         i_parser.PrintHexDump( l_uncompBuffer, l_uncompBufSize );
-    }
+        i_parser.PrintBlank();
 
-    i_parser.PrintBlank();
-    i_parser.PrintHeading("Compressed Capture Buffer");
-    // NOTE: The compressed buffer is added by the ERRL component.
+        if ( false == rc )
+        {
+            i_parser.PrintHeading("Compressed Capture Buffer");
+        }
+    }
+    else
+    {
+        i_parser.PrintHeading("Capture Buffer");
+
+        rc = false; // force raw hex dump
+    }
 
     delete [] l_uncompBuffer;
 
-    rc = false;
     return rc;
 }
 
