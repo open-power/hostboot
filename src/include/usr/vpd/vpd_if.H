@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,6 +25,7 @@
 #if !defined(__VPD_IF_H)
 #define __VPD_IF_H
 
+
 namespace VPD
 {
     /**
@@ -31,5 +34,25 @@ namespace VPD
      * @return error handle if there was an error
      */
     errlHndl_t vpd_load_rt_image(uint64_t & o_vpd_addr);
-};
+
+    /**
+     * @brief this function checks to see if the given mvpd target
+     * is present
+     *
+     * @param[in] i_target - Target device to search for mvpd
+     *
+     * @return bool - true if mvpd is present, false if it is not.
+     */
+    bool mvpdPresent ( TARGETING::Target * i_target );
+
+    /**
+     * @brief this function checks to see if the given cvpd target
+     * is present
+     *
+     * @param[in] i_target - Target device to search for cvpd
+     *
+     * @return bool - true if cvpd is present, false if it is not.
+     */
+    bool cvpdPresent ( TARGETING::Target * i_target );
+}; //end vpd namespace
 #endif

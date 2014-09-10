@@ -36,6 +36,7 @@
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/cvpdenums.H>
+#include <vpd/vpd_if.H>
 #include <config.h>
 #include "cvpd.H"
 #include "vpd.H"
@@ -182,6 +183,19 @@ namespace CVPD
 
 
 }; // end namespace CVPD
+
+// --------------------------------------------------------
+// Presence Detection
+//---------------------------------------------------------
+bool VPD::cvpdPresent( TARGETING::Target * i_target )
+{
+    return Singleton<CvpdFacade>::instance().hasVpdPresent( i_target,
+                                                            CVPD::VEIR,
+                                                            CVPD::PF );
+}
+
+
+
 
 //CVPD Class Functions
 /**

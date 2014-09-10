@@ -29,6 +29,7 @@
 #include <fsi/fsi_reasoncodes.H>
 #include <vpd/mvpdenums.H>
 #include <vpd/cvpdenums.H>
+#include <vpd/vpd_if.H>
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
@@ -68,7 +69,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = NULL;
-    uint32_t l_saved_plid = 0;
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -115,64 +115,10 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
 #endif // CONFIG_MVPD_READ_FROM_HW
 
     bool mvpd_present = false;
-    size_t theSize = 0;
 
     if ( check_for_mvpd )
     {
-        l_errl = deviceRead( i_target,
-                            NULL,
-                            theSize,
-                            DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                 MVPD::VD ) );
-        if( l_errl )
-        {
-            if( fsi_present )
-            {
-                // Save this plid to use later
-                l_saved_plid = l_errl->plid();
-
-                // commit this log because we expected to have VPD
-                errlCommit( l_errl,
-                            FSI_COMP_ID );
-            }
-            else
-            {
-                // just delete this
-                delete l_errl;
-            }
-        }
-
-        if( theSize > 0 )
-        {
-            uint8_t theData[theSize];
-            l_errl = deviceRead( i_target,
-                                 theData,
-                                 theSize,
-                                 DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                      MVPD::VD ) );
-            if( l_errl )
-            {
-                if( fsi_present )
-                {
-
-                    // Save this plid to use later
-                    l_saved_plid = l_errl->plid();
-
-                    // commit this log because we expected to have VPD
-                    errlCommit( l_errl,
-                                FSI_COMP_ID );
-                }
-                else
-                {
-                    // just delete this
-                    delete l_errl;
-                }
-            }
-            else
-            {
-                mvpd_present = true;
-            }
-        }
+       mvpd_present = VPD::mvpdPresent( i_target );
     }
 
 
@@ -206,11 +152,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                               HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
 
-        // if there is a saved PLID, apply it to this error log
-        if (l_saved_plid)
-        {
-            l_errl->plid(l_saved_plid);
-        }
 
         // Add FFDC for the target to an error log
         getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
@@ -259,7 +200,6 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = NULL;
-    uint32_t l_saved_plid = 0;
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -293,66 +233,10 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
 #endif // CONFIG_CVPD_READ_FROM_HW
 
     bool cvpd_present = false;
-    size_t theSize = 0;
-    
+
     if ( check_for_cvpd )
     {
-        l_errl = deviceRead( i_target,
-                             NULL,
-                             theSize,
-                             DEVICE_CVPD_ADDRESS( CVPD::VEIR,
-                                                  CVPD::PF ) );
-
-        if( l_errl )
-        {
-
-            if( fsi_present )
-            {
-                // Save this plid to use later
-                l_saved_plid = l_errl->plid();
-
-                // commit this log because we expected to have VPD
-                errlCommit( l_errl,
-                            FSI_COMP_ID );
-            }
-            else
-            {
-                // just delete this
-                delete l_errl;
-            }
-        }
-
-        if( theSize > 0 )
-        {
-            uint8_t theData[theSize];
-            l_errl = deviceRead( i_target,
-                                 theData,
-                                 theSize,
-                                 DEVICE_CVPD_ADDRESS( CVPD::VEIR,
-                                                      CVPD::PF ) );
-            if( l_errl )
-            {
-
-                if( fsi_present )
-                {
-                    // Save this plid to use later
-                    l_saved_plid = l_errl->plid();
-
-                    // commit this log because we expected to have VPD
-                    errlCommit( l_errl,
-                                FSI_COMP_ID );
-                }
-                else
-                {
-                    // just delete this
-                    delete l_errl;
-                }
-            }
-            else
-            {
-                cvpd_present = true;
-            }
-        }
+       cvpd_present = VPD::cvpdPresent( i_target );
     }
 
     // Finally compare the 2 methods
@@ -386,11 +270,6 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                               HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
 
-        // if there is a saved PLID, apply it to this error log
-        if (l_saved_plid)
-        {
-            l_errl->plid(l_saved_plid);
-        }
 
         // Add FFDC for the target to an error log
         getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);

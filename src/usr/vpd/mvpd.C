@@ -36,6 +36,7 @@
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/mvpdenums.H>
+#include <vpd/vpd_if.H>
 #include <config.h>
 
 #include "mvpd.H"
@@ -179,6 +180,15 @@ namespace MVPD
 
 }; // end MVPD namespace
 
+// ---------------------------------------------------------
+// Presence Detection
+// ---------------------------------------------------------
+bool VPD::mvpdPresent( TARGETING::Target * i_target )
+{
+    return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
+                                                            MVPD::CP00,
+                                                            MVPD::VD );
+}
 
 
 //MVPD Class Functions

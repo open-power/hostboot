@@ -38,6 +38,7 @@
 #include <i2c/eepromif.H>
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
+#include <vpd/vpd_if.H>
 #include <config.h>
 
 #include "vpd.H"
@@ -429,22 +430,75 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
     return NULL;
 }
 
+
+
 // ------------------------------------------------------------------
-// IpVpdFacade::findRecordOffsetPnor
+// IpVpdFacade::hasVpdPresent
 // ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
-                                               uint16_t & o_offset,
-                                               TARGETING::Target * i_target,
-                                               input_args_t i_args )
+bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
+                                 uint64_t i_record,
+                                 uint64_t i_keyword )
+{
+    errlHndl_t err = NULL;
+    uint16_t recordOffset = 0x0;
+    input_args_t i_args;
+    bool vpdPresent = false;
+    const char * recordName = NULL;
+    const char * keywordName = NULL;
+
+    i_args.record = i_record;
+    i_args.keyword = i_keyword;
+
+    do
+    {
+        //get the Recod/Keyword names
+        err = translateRecord( i_args.record,
+                               recordName );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"Error occured during translateRecord\
+                        - IpVpdFacade::hasVpdPresent");
+            break;
+        }
+
+        err = translateKeyword( i_args.keyword,
+                                keywordName );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"Error occured during \
+                            translateKeyword - IpVpdFacade::hasVpdPresent" );
+            break;
+        }
+
+        vpdPresent = recordPresent( recordName,
+                                recordOffset,
+                                i_target );
+
+    }while( 0 );
+
+    if( err )
+    {
+        errlCommit( err, VPD_COMP_ID );
+        return false;
+    }
+
+
+    return vpdPresent;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::recordPresent
+// ------------------------------------------------------------------
+bool IpVpdFacade::recordPresent( const char * i_record,
+                                 uint16_t & o_offset,
+                                 TARGETING::Target * i_target )
 {
     errlHndl_t err = NULL;
     uint64_t tmpOffset = 0x0;
     char record[RECORD_BYTE_SIZE] = { '\0' };
-    uint16_t offset = 0x0;
     bool matchFound = false;
-
-    TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::findRecordOffset()" );
 
     do
     {
@@ -462,50 +516,73 @@ errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
         while( ( tmpOffset < IPVPD_TOC_SIZE ) &&
                !matchFound )
         {
-            TRACDCOMP( g_trac_vpd,
-                       INFO_MRK"IpVpdFacade::findRecordOffset: read offset: 0x%08x",
-                       tmpOffset );
-
-            // Read Record Name
-            err = fetchData( tmpOffset,
-                             RECORD_BYTE_SIZE,
-                             record,
-                             i_target );
-            tmpOffset += RECORD_BYTE_SIZE;
-
-            if( err )
-            {
-                break;
-            }
-
-            if( !(memcmp( record, i_record, RECORD_BYTE_SIZE )) )
-            {
-                matchFound = true;
-
-                // Read the matching records offset
+                //Read Record Name
                 err = fetchData( tmpOffset,
-                                 RECORD_ADDR_BYTE_SIZE,
-                                 &offset,
+                                 RECORD_BYTE_SIZE,
+                                 record,
                                  i_target );
+                tmpOffset += RECORD_BYTE_SIZE;
 
                 if( err )
                 {
                     break;
                 }
-            }
-            tmpOffset += (RECORD_ADDR_BYTE_SIZE + RECORD_TOC_UNUSED);
+
+                if( !(memcmp(record, i_record, RECORD_BYTE_SIZE )) )
+                {
+                    matchFound = true;
+
+                    // Read the matching record's offset
+                    err = fetchData( tmpOffset,
+                                     RECORD_ADDR_BYTE_SIZE,
+                                     &o_offset,
+                                     i_target );
+                    if( err )
+                    {
+                        break;
+                    }
+                }
+                tmpOffset += (RECORD_ADDR_BYTE_SIZE + RECORD_TOC_UNUSED);
         }
 
         if( err )
         {
             break;
         }
-    } while( 0 );
+    }while( 0 );
+
+    if( err )
+    {
+        errlCommit( err, VPD_COMP_ID );
+        return false;
+    }
+    return matchFound;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::findRecordOffsetPnor
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
+                                               uint16_t & o_offset,
+                                               TARGETING::Target * i_target,
+                                               input_args_t i_args )
+{
+    errlHndl_t err = NULL;
+    uint16_t offset = 0x0;
+    bool matchFound = false;
+
+    TRACSSCOMP( g_trac_vpd,
+                ENTER_MRK"IpVpdFacade::findRecordOffset()" );
+
+    matchFound = recordPresent( i_record,
+                                offset,
+                                i_target );
 
     if( !matchFound )
     {
         TRACFCOMP( g_trac_vpd,
-                   ERR_MRK"IpVpdFacade::findRecordOffset: No matching Record (%s) found in TOC!",
+                   ERR_MRK"IpVpdFacade::findRecordOffset: No matching\
+                   Record (%s) found in TOC!",
                    i_record );
 
         /*@

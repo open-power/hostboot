@@ -28,6 +28,7 @@
 
 
 #include <pnor/pnorif.H>
+#include <devicefw/driverif.H>
 #include "vpd.H"
 
 /** @file ipvpd.H
@@ -209,6 +210,19 @@ class IpVpdFacade
                       size_t & io_buflen,
                       input_args_t i_args );
 
+    /**
+     * @brief this function checks to see if the given target
+     * is present.
+     *
+     * @param[in] i_target - target VPD to search for.
+     *
+     * @return - bool - true if vpd is present, false if it is not.
+     */
+    bool hasVpdPresent ( TARGETING::Target * i_target,
+                         uint64_t record,
+                         uint64_t keyword );
+
+
   protected:
 
     /**
@@ -260,6 +274,25 @@ class IpVpdFacade
                                   uint16_t & o_offset,
                                   TARGETING::Target * i_target,
                                   input_args_t i_args );
+
+    /**
+     * @brief This function searches for the VPD record and returns
+     * True if it is there, False otherwise. This function works similarly
+     * to findRecordOffsetPnor except it does not create error logs if
+     * the record was not found. This will replace some of the code in
+     * findRecordOffsetPnor
+     *
+     * @param[in] i_record - String value for the record to look for.
+     *
+     * @param[out] offset - The offset where the record is located.
+     *
+     * @param[in] i_target - The target to retrieve the data for.
+     *
+     * @return bool - True if the record is found, False otherwise.
+     */
+    bool recordPresent( const char * i_record,
+                        uint16_t & offset,
+                        TARGETING::Target * i_target );
 
     /**
      * @brief This function will read the VPD TOC to find the offset where the
