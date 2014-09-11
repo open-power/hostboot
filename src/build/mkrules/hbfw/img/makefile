@@ -297,7 +297,6 @@ PNOR_IMG_INFO = \
    venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FIPS_PNOR_INFO}
 
-
 __IMAGE_BUILD/% : .SPECTARG .PMAKE cp_hbfiles inject_ecc
 	@${MAKE:T:R} BUILD_SPECIFIC_IMAGE \
 	    "IMAGE_PARAMS=${.TARGET:s/__IMAGE_BUILD\///:s/:/ /g}"

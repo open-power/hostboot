@@ -175,6 +175,7 @@ simics.tar_CONTENTS = \
     src/build/simics/hb-pnor-vpd-preload.pl \
     img/dimmspd.dat \
     img/procmvpd.dat \
+    img/procmvpd_ven.dat \
     img/cvpd.dat \
     obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \

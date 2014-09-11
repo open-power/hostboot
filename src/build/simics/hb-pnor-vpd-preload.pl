@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +53,7 @@ my $emptyCVPD;
 ($emptyCVPDfh, $emptyCVPD) = tempfile();
 
 my $mvpdFile = "procmvpd.dat";
+my $mvpdFile_ven = "procmvpd_ven.dat";
 my $cvpdFile = "cvpd.dat";
 my $spdFile = "dimmspd.dat";
 my $sysMVPD = "sysmvpd.dat";
@@ -148,6 +151,13 @@ elsif(length($procConfig) != $maxProcs)
 {
     print "ERROR: forceProc arg must specify presence of same number of procs as indicated by maxProcs($maxProcs)\n";
     exit 1;
+}
+
+#if Machine is HABANERO exit out -- HB collects the VPD itself
+if($machine eq "HABANERO")
+{
+    print "PNOR VPD Data Build Not needed.\n";
+    exit 0;
 }
 
 getCentaurConfig();
@@ -271,7 +281,14 @@ sub createMVPDData
         if( substr($procConfig,$proc,1) =~ /1/ )
         {
             # Use real data to the full image.
-            $sourceFile = "$dataPath/$mvpdFile";
+            if( $machine eq "VENICE" )
+            {
+                $sourceFile = "$dataPath/$mvpdFile_ven";
+            }
+            else
+            {
+                $sourceFile = "$dataPath/$mvpdFile";
+            }
         }
         else
         {
@@ -464,25 +481,11 @@ sub getCentaurConfig
             {
                 # Plugging order is:
                 #   Processor 0 - 7
-                #   MCS 4 - 7, then 0 - 3
-                if( ($numCentPerProc <= 4) &&
-                    ($mcs >= 4) &&
-                    ($mcs <= (4 + ($numCentPerProc - 1))) )
+                #   MCS 0 - 7, then 0 - 3
+                if( $mcs >= 0 &&
+                    $mcs <= (($numCentPerProc - 1)) )
                 {
                     $mcsArray[$mcs] = 1;
-                }
-                elsif( $numCentPerProc > 4 )
-                {
-                    if( $mcs >= 4 &&
-                        $mcs <= 7 )
-                    {
-                        $mcsArray[$mcs] = 1;
-                    }
-                    elsif( $mcs >= 0 &&
-                           $mcs < ($numCentPerProc - 4) )
-                    {
-                        $mcsArray[$mcs] = 1;
-                    }
                 }
             }
             elsif( $machine eq "TULETA" )

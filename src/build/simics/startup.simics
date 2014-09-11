@@ -3,7 +3,7 @@ $hb_startup_path = (lookup-file hbfw/startup.simics)
 $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
-$hb_machine = (shell "env | grep 'GFW_P8_.*_PROC_CCIN' | sed 's/GFW_P8_\\(.*\\)_PROC_CCIN.*/\\1/'")
+$hb_machine = (shell "env | grep 'GFW_P8_.*_PROC_EC' | sed 's/GFW_P8_\\(.*\\)_PROC_EC.*/\\1/'")
 $hb_machine = (python "\""+$hb_machine+"\".lower()")
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
