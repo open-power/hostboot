@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -118,52 +120,66 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
 
-    for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; ++r )
+    bool isCen = false;
+    int32_t l_rc = isMembufOnDimm( i_mba, isCen );
+    if ( SUCCESS != l_rc )
     {
-        if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
+        PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed" );
+        analysisErrors = true;
+    }
+    else
+    {
+        bool isX4 = isDramWidthX4( i_mba );
+
+        for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; ++r )
         {
-            continue; // this rank didn't have any repairs
-        }
-
-        CenRank rank ( r );
-        CenMark mark;
-
-        if ( SUCCESS != mssGetMarkStore(i_mba, rank, mark) )
-        {
-            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank.getMaster() );
-            analysisErrors = true;
-            continue; // skip this rank
-        }
-
-        CenSymbol sp0, sp1, sp;
-
-        if ( SUCCESS != mssGetSteerMux(i_mba, rank, sp0, sp1, sp))
-        {
-            PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank.getMaster() );
-            analysisErrors = true;
-            continue; // skip this rank
-        }
-
-        if ( (sp0.isValid() || sp1.isValid() || sp.isValid()) &&
-             mark.getCM().isValid() )
-        {
-            // This rank has both a steer and a chip mark. Call out the DIMM
-            // with the chip mark.
-
-            if ( NULL == errl )
+            if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
             {
-                errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_mba,
-                                   PRDFSIG_RdrRepairsUsed );
+                continue; // this rank didn't have any repairs
             }
 
-            MemoryMru memoryMru( i_mba, rank, mark.getCM() );
-            CalloutUtil::calloutMemoryMru( errl, memoryMru,
-                                           SRCI_PRIORITY_HIGH,
-                                           HWAS::DELAYED_DECONFIG,
-                                           HWAS::GARD_Predictive );
-            o_calloutMade = true;
+            CenRank rank ( r );
+            CenMark mark;
+
+            if ( SUCCESS != mssGetMarkStore(i_mba, rank, mark) )
+            {
+                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed: MBA=0x%08x "
+                          "rank=%d", getHuid(i_mba), rank.getMaster() );
+                analysisErrors = true;
+                continue; // skip this rank
+            }
+
+            CenSymbol sp0, sp1, ecc;
+
+            if ( SUCCESS != mssGetSteerMux(i_mba, rank, sp0, sp1, ecc) )
+            {
+                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed: MBA=0x%08x "
+                          "rank=%d", getHuid(i_mba), rank.getMaster() );
+                analysisErrors = true;
+                continue; // skip this rank
+            }
+
+            if ( mark.getCM().isValid()                       && // chip mark
+                 ( isCen || mark.getSM().isValid()          ) && // symbol mark
+                 (!isCen || (sp0.isValid() || sp1.isValid())) && // DRAM spare
+                 (!isX4  || ecc.isValid()                   ) )  // ECC spare
+            {
+                // This rank has both a steer and a chip mark. Call out the DIMM
+                // with the chip mark.
+
+                if ( NULL == errl )
+                {
+                    errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_mba,
+                                       PRDFSIG_RdrRepairsUsed );
+                }
+
+                MemoryMru memoryMru( i_mba, rank, mark.getCM() );
+                CalloutUtil::calloutMemoryMru( errl, memoryMru,
+                                               SRCI_PRIORITY_HIGH,
+                                               HWAS::DELAYED_DECONFIG,
+                                               HWAS::GARD_Predictive );
+                o_calloutMade = true;
+            }
         }
     }
 
