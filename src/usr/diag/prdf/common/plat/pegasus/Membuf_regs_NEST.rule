@@ -149,6 +149,14 @@
         capture     group FirRegs;
     };
 
+    register MBIFIR_AND
+    {
+        name        "MBU.MBI.MBI.SCOMFIR.MBIFIRQ AND";
+        scomaddr    0x02010801;
+        capture     group never;
+        access      write_only;
+    };
+
     register MBIFIR_MASK
     {
         name        "MBU.MBI.MBI.SCOMFIR.MBIFIRMASK";

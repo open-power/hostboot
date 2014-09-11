@@ -382,36 +382,25 @@ int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
             break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * mciFir =
-          mcsChip->getRegister( "MCIFIR" );
-        int32_t rc = mciFir->Read();
-        if ( SUCCESS != rc )
+        SCAN_COMM_REGISTER_CLASS * mciAnd = mcsChip->getRegister("MCIFIR_AND");
+        SCAN_COMM_REGISTER_CLASS * mbiAnd = mbChip->getRegister( "MBIFIR_AND");
+
+        mciAnd->setAllBits(); mciAnd->ClearBit(10);
+        mbiAnd->setAllBits(); mbiAnd->ClearBit(10);
+
+        l_rc  = mciAnd->Write();
+        l_rc |= mbiAnd->Write();
+
+        if ( SUCCESS != l_rc )
         {
-            PRDF_ERR("cleanupSecondaryFirBits() : Failed to read MCIFIR."
-                     "MCS: 0x%08X", getHuid(mcsTgt) );
-            l_rc |= rc;
-        }
-        else if ( mciFir->IsBitSet(10))
-        {
-            mciFir->ClearBit(10);
-            l_rc |= mciFir->Write();
+            PRDF_ERR( "[cleanupSecondaryFirBits] Write() failed on "
+                      "MCIFIR/MBIFIR: MCS=0x%08x MEMB=0x%08x",
+                      mcsChip->GetId(), mbChip->GetId() );
+            break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * mbiFir =
-          mbChip->getRegister( "MBIFIR" );
-        rc = mbiFir->Read();
-        if ( SUCCESS != rc )
-        {
-            PRDF_ERR("cleanupSecondaryFirBits() : Failed to read MBIFIR."
-                     "MEMBUF: 0x%08X", getHuid(mbTgt) );
-            l_rc |= rc;
-        }
-        else if ( mbiFir->IsBitSet(10))
-        {
-            mbiFir->ClearBit(10);
-            l_rc |= mbiFir->Write();
-        }
     } while (0);
+
     return l_rc;
 }
 
