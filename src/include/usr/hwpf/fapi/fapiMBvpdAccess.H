@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMBvpdAccess.H,v 1.9 2014/01/20 20:03:18 mjjones Exp $
+// $Id: fapiMBvpdAccess.H,v 1.11 2014/10/23 20:57:58 eliner Exp $
 /**
  *  @file fapiMBvpdAccess.H
  *
@@ -54,6 +56,9 @@ namespace fapi
         MBVPD_RECORD_MER0 = 0x02,
         MBVPD_RECORD_VSPD = 0x03,
         MBVPD_RECORD_VINI = 0x04,
+        MBVPD_RECORD_OPFR = 0x05,
+        MBVPD_RECORD_VNDR = 0x06,
+        MBVPD_RECORD_SPDX = 0x07,
     };
 
     enum MBvpdKeyword
@@ -71,6 +76,53 @@ namespace fapi
         MBVPD_KEYWORD_VZ  = 0x0a,
         MBVPD_KEYWORD_PDD = 0x0b,
         MBVPD_KEYWORD_MX  = 0x0c,
+        MBVPD_KEYWORD_DW  = 0x0d,
+        MBVPD_KEYWORD_PN  = 0x0e,
+        MBVPD_KEYWORD_SN  = 0x0f,
+        MBVPD_KEYWORD_DR  = 0x10,
+        MBVPD_KEYWORD_CE  = 0x11,
+        MBVPD_KEYWORD_FN  = 0x12,
+        MBVPD_KEYWORD_CC  = 0x13,
+        MBVPD_KEYWORD_HE  = 0x14,
+        MBVPD_KEYWORD_CT  = 0x15,
+        MBVPD_KEYWORD_HW  = 0x16,
+        MBVPD_KEYWORD_VD  = 0x17,
+        MBVPD_KEYWORD_VN  = 0x18,
+        MBVPD_KEYWORD_VP  = 0x19,
+        MBVPD_KEYWORD_SV  = 0x1a,
+        MBVPD_KEYWORD_M0  = 0x1b,
+        MBVPD_KEYWORD_M1  = 0x1c,
+        MBVPD_KEYWORD_M2  = 0x1d,
+        MBVPD_KEYWORD_M3  = 0x1e,
+        MBVPD_KEYWORD_M4  = 0x1f,
+        MBVPD_KEYWORD_M5  = 0x20,
+        MBVPD_KEYWORD_M6  = 0x21,
+        MBVPD_KEYWORD_M7  = 0x22,
+        MBVPD_KEYWORD_M8  = 0x23,
+        MBVPD_KEYWORD_T1  = 0x24,
+        MBVPD_KEYWORD_T2  = 0x25,
+        MBVPD_KEYWORD_T4  = 0x26,
+        MBVPD_KEYWORD_T5  = 0x27,
+        MBVPD_KEYWORD_T6  = 0x28,
+        MBVPD_KEYWORD_T8  = 0x29,
+        MBVPD_KEYWORD_Q0  = 0x2a,
+        MBVPD_KEYWORD_Q1  = 0x2b,
+        MBVPD_KEYWORD_Q2  = 0x2c,
+        MBVPD_KEYWORD_Q3  = 0x2d,
+        MBVPD_KEYWORD_Q4  = 0x2e,
+        MBVPD_KEYWORD_Q5  = 0x2f,
+        MBVPD_KEYWORD_Q6  = 0x30,
+        MBVPD_KEYWORD_Q7  = 0x31,
+        MBVPD_KEYWORD_Q8  = 0x32,
+        MBVPD_KEYWORD_K0  = 0x33,
+        MBVPD_KEYWORD_K1  = 0x34,
+        MBVPD_KEYWORD_K2  = 0x35,
+        MBVPD_KEYWORD_K3  = 0x36,
+        MBVPD_KEYWORD_K4  = 0x37,
+        MBVPD_KEYWORD_K5  = 0x38,
+        MBVPD_KEYWORD_K6  = 0x39,
+        MBVPD_KEYWORD_K7  = 0x3a,
+        MBVPD_KEYWORD_K8  = 0x3b,
     };
 
 }

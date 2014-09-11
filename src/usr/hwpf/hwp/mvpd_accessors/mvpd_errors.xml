@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.15 2014/02/12 22:26:52 mjjones Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.19 2014/10/27 16:13:41 eliner Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -242,5 +244,66 @@
     <gard>
       <target>MEMBUF_TARGET</target>
     </gard>
+  </hwpError>
+  <hwpError>
+    <rc>RC_MBVPD_INVALID_MT_DATA</rc>
+    <description>
+        To get the proper MT data, we need a valid
+        dimm rank combination.
+    </description>
+    <ffdc>RANK_NUM</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_MBVPD_DIMMS_NOT_FOUND</rc>
+    <description>
+        To get the proper MT data, we need to find the
+        dimm's to get a valid dimm rank combination
+    </description>
+    <ffdc>DIMM_P0S0</ffdc>
+    <ffdc>DIMM_P0S1</ffdc>
+    <ffdc>DIMM_P1S0</ffdc>
+    <ffdc>DIMM_P1S1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_MBVPD_INVALID_DIMM_FOUND</rc>
+    <description>
+        Something went very wrong in the dimm's and
+        the combination received is not valid
+    </description>
+    <ffdc>INVALID_DIMM_P0S0</ffdc>
+    <ffdc>INVALID_DIMM_P0S1</ffdc>
+    <ffdc>INVALID_DIMM_P1S0</ffdc>
+    <ffdc>INVALID_DIMM_P1S1</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MBA</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MBA</target>
+    </deconfigure>
+  </hwpError>
+  <hwpError>
+    <rc>RC_MBVPD_INVALID_M0_DATA</rc>
+    <description>
+         To get the proper MR data, we need to have the
+         correct M0 data.
+    </description>
+    <ffdc>M0_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

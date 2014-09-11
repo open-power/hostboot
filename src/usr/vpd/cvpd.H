@@ -70,7 +70,7 @@ namespace CVPD
         { VINI, "VINI" },
         { OPFR, "OPFR" },
         { VNDR, "VNDR" },
-        { VSPX, "VSPX" },
+        { SPDX, "SPDX" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_RECORD, "TEST" },

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.C,v 1.5 2014/02/12 22:14:28 mjjones Exp $
+// $Id: getMBvpdSpareDramData.C,v 1.7 2014/10/23 21:00:12 eliner Exp $
 #include  <stdint.h>
 
 //  fapi support
@@ -78,80 +80,107 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
 
     do
     {
-        // find the Centaur memory buffer from the passed MBA
-        l_rc = fapiGetParentChip (i_mba, l_mbTarget);
-        if (l_rc)
+        uint8_t l_customDimm = 0;
+
+        l_rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM,&i_mba,l_customDimm);
+        if(l_rc)
         {
-            FAPI_ERR("getMBvpdSpareDramData: Finding the parent mb failed ");
+            FAPI_ERR("getMBvpdSpareDramData: Read of Custom Dimm failed");
             break;
         }
 
-        // Read AM keyword field
-        l_pAmBuffer = new AmKeyword();
-        l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
-                                 fapi::MBVPD_KEYWORD_AM,
-                                 l_mbTarget,
-                                 reinterpret_cast<uint8_t *>(l_pAmBuffer),
-                                 l_AmBufSize);
-        if (l_rc)
+        //if custom_dimm = 0, use isdimm
+        if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO == l_customDimm)
         {
-            FAPI_ERR("getMBvpdSpareDramData: "
-                     "Read of AM Keyword failed");
-            break;
-        }
-
-        // Check for error or incorrect amount of data returned
-        if (l_AmBufSize < AM_KEYWORD_SIZE)
-        {
-            FAPI_ERR("getMBvpdSpareDramData:"
-                     " less AM keyword returned than expected %d < %d",
-                       l_AmBufSize, AM_KEYWORD_SIZE);
-            const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_AM;
-            const uint32_t & RETURNED_SIZE = l_AmBufSize;
-            const fapi::Target & CHIP_TARGET = l_mbTarget;
-            FAPI_SET_HWP_ERROR(l_rc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
-            break;
-        }
-
-        // Find the position of the passed mba on the centuar
-        uint8_t l_mba = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_mba, l_mba);
-
-        if (l_rc)
-        {
-            FAPI_ERR("getMBvpdSpareDramData: Get MBA position failed ");
-            break;
-        }
-        // Data in the AM Keyword contains information for both MBAs and
-        // is stored in [mba][port][dimm] ([2][2][2]) format, where the
-        // third (dimm) dimension contains a byte where each two bits of that
-        // byte are the spare status for a particular rank.
-        // The caller expects data returned for a particular MBA,
-        // and where the ranks for each dimm are separately indexed,
-        // so conversion to a [port][dimm][rank] ([2][2][4]) format
-        // is necessary.
-        for (uint8_t i = 0; i < DIMM_DQ_MAX_MBA_PORTS; i++)
-        {
-            for (uint8_t j = 0; j < DIMM_DQ_MAX_MBAPORT_DIMMS; j++)
+            //ISDIMMs do not have any spare drams,
+            //return 0 for all ports and ranks.
+            for (uint8_t i = 0; i < DIMM_DQ_MAX_MBA_PORTS; i++)
             {
-                // Mask to pull of two bits at a time from iv_dimmSpareData
-                uint8_t l_dimmMask = 0xC0;
-                // Shift amount decrements each time as l_dimmMask is shifted
-                // to the right
-                uint8_t l_rankBitShift = 6;
-                for (uint8_t k = 0; k < DIMM_DQ_MAX_DIMM_RANKS; k++)
+                for (uint8_t j = 0; j < DIMM_DQ_MAX_MBAPORT_DIMMS; j++)
                 {
-                    o_data[i][j][k] = ((l_pAmBuffer->iv_mbaSpareData[l_mba].
+                    for (uint8_t k = 0; k < DIMM_DQ_MAX_DIMM_RANKS; k++)
+                    {
+                        o_data[i][j][k] = 0;
+                    }
+                }
+            }
+        //if custom_dimm = 1, use cdimm
+        }else
+        {
+            // find the Centaur memory buffer from the passed MBA
+            l_rc = fapiGetParentChip (i_mba, l_mbTarget);
+            if (l_rc)
+            {
+                FAPI_ERR("getMBvpdSpareDramData: Finding the parent mb failed ");
+                break;
+            }
+
+            // Read AM keyword field
+            l_pAmBuffer = new AmKeyword();
+            l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
+                                     fapi::MBVPD_KEYWORD_AM,
+                                     l_mbTarget,
+                                     reinterpret_cast<uint8_t *>(l_pAmBuffer),
+                                     l_AmBufSize);
+            if (l_rc)
+            {
+                FAPI_ERR("getMBvpdSpareDramData: "
+                         "Read of AM Keyword failed");
+                break;
+            }
+
+            // Check for error or incorrect amount of data returned
+            if (l_AmBufSize < AM_KEYWORD_SIZE)
+            {
+                FAPI_ERR("getMBvpdSpareDramData:"
+                         " less AM keyword returned than expected %d < %d",
+                           l_AmBufSize, AM_KEYWORD_SIZE);
+                const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_AM;
+                const uint32_t & RETURNED_SIZE = l_AmBufSize;
+                const fapi::Target & CHIP_TARGET = l_mbTarget;
+                FAPI_SET_HWP_ERROR(l_rc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
+                break;
+            }
+
+            // Find the position of the passed mba on the centuar
+            uint8_t l_mba = 0;
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_mba, l_mba);
+
+            if (l_rc)
+            {
+                FAPI_ERR("getMBvpdSpareDramData: Get MBA position failed ");
+                break;
+            }
+            // Data in the AM Keyword contains information for both MBAs and
+            // is stored in [mba][port][dimm] ([2][2][2]) format, where the
+            // third (dimm) dimension contains a byte where each two bits of
+            // that byte are the spare status for a particular rank.
+            // The caller expects data returned for a particular MBA,
+            // and where the ranks for each dimm are separately indexed,
+            // so conversion to a [port][dimm][rank] ([2][2][4]) format
+            // is necessary.
+            for (uint8_t i = 0; i < DIMM_DQ_MAX_MBA_PORTS; i++)
+            {
+                for (uint8_t j = 0; j < DIMM_DQ_MAX_MBAPORT_DIMMS; j++)
+                {
+                    // Mask to pull of two bits at a time from iv_dimmSpareData
+                    uint8_t l_dimmMask = 0xC0;
+                    // Shift amount decrements each time as l_dimmMask
+                    // is shifted to the right
+                    uint8_t l_rankBitShift = 6;
+                    for (uint8_t k = 0; k < DIMM_DQ_MAX_DIMM_RANKS; k++)
+                    {
+                        o_data[i][j][k] =((l_pAmBuffer->iv_mbaSpareData[l_mba].
                                        iv_portSpareData[i].iv_dimmSpareData[j].
                                        iv_dimmSpareData & l_dimmMask) >>
                                        l_rankBitShift);
-                    l_dimmMask >>= 2;
-                    l_rankBitShift -= 2;
+                        l_dimmMask >>= 2;
+                        l_rankBitShift -= 2;
+                    }
                 }
             }
         }
     }while(0);
-
     delete l_pAmBuffer;
     l_pAmBuffer = NULL;
     return l_rc;

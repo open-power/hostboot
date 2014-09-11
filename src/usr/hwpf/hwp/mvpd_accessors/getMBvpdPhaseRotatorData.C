@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdPhaseRotatorData.C,v 1.8 2014/02/12 22:11:46 mjjones Exp $
+// $Id: getMBvpdPhaseRotatorData.C,v 1.10 2014/10/23 20:59:36 eliner Exp $
 /**
  *  @file getMBvpdPhaseRotatorData.C
  *
@@ -144,11 +146,100 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
         // Read the MR keyword field
         l_pMrBuffer = new mr_keyword;
 
-        l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
-                                     fapi::MBVPD_KEYWORD_MR,
-                                     l_mbTarget,
-                                     reinterpret_cast<uint8_t *>(l_pMrBuffer),
-                                     l_MrBufsize);
+        uint8_t l_customDimm = 0;
+
+        l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM,&i_mbaTarget,
+                        l_customDimm);
+        if(l_fapirc)
+        {
+            FAPI_ERR("getMBvpdPhaseRotatorData: Read of Custom Dimm failed");
+            break;
+        }
+
+        //if custom_dimm = 0, use isdimm
+        if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO == l_customDimm)
+        {
+            const uint8_t l_M0_KEYWORD_SIZE = 32;
+
+            uint8_t l_m0_keyword[l_M0_KEYWORD_SIZE];
+            uint32_t l_M0Bufsize = l_M0_KEYWORD_SIZE;
+
+            l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_SPDX,
+                                         fapi::MBVPD_KEYWORD_M0,
+                                         l_mbTarget,
+                                         (uint8_t *)(&l_m0_keyword),
+                                         l_M0Bufsize);
+            if (l_fapirc)
+            {
+                FAPI_ERR("getMBvpdPhaseRotatorData: Read of M0 keyword failed");
+                break;  //  break out with fapirc
+            }
+
+            uint32_t l_dimmPos = 0;
+            //@todo-RTC:116304
+            l_fapirc = FAPI_ATTR_GET(ATTR_POS,&l_mbTarget,l_dimmPos);
+            if(l_fapirc)
+            {
+                FAPI_ERR("getMBvpdPhaseRotatorData: read of ATTR_POS failed");
+                break;
+            }
+
+            fapi::MBvpdKeyword l_MR_Keyword = fapi::MBVPD_KEYWORD_M1;
+
+            uint8_t l_actualM0Data = l_m0_keyword[l_dimmPos];
+
+            switch (l_actualM0Data)
+            {
+                case 1:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M1;
+                    break;
+                case 2:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M2;
+                    break;
+                case 3:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M3;
+                    break;
+                case 4:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M4;
+                    break;
+                case 5:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M5;
+                    break;
+                case 6:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M6;
+                    break;
+                case 7:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M7;
+                    break;
+                case 8:
+                    l_MR_Keyword = fapi::MBVPD_KEYWORD_M8;
+                    break;
+                default:
+                    FAPI_ERR("Incorrect M0 data : 0x%02x",l_actualM0Data);
+                    const uint8_t & M0_DATA = l_actualM0Data;
+                    FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_M0_DATA);
+                    break;
+            }
+            if(l_fapirc)
+            {
+                FAPI_ERR("getMBvpdPhaseRotatorData: Invalid M0 data");
+                break;
+            }
+
+            l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_SPDX,
+                                 l_MR_Keyword,
+                                 l_mbTarget,
+                                 reinterpret_cast<uint8_t *>(l_pMrBuffer),
+                                 l_MrBufsize);
+        //else custom_dimm is 1 and we need to use the CDIMM
+        }else{
+            l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
+                                 fapi::MBVPD_KEYWORD_MR,
+                                 l_mbTarget,
+                                 reinterpret_cast<uint8_t *>(l_pMrBuffer),
+                                 l_MrBufsize);
+        }
+
         if (l_fapirc)
         {
             FAPI_ERR("getMBvpdPhaseRotatorData: Read of MR keyword failed");

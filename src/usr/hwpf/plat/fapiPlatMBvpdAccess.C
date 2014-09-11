@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -60,6 +62,9 @@ fapi::ReturnCode MBvpdRecordXlate(const fapi::MBvpdRecord i_fapiRecord,
         CVPD::MER0,
         CVPD::VSPD,
         CVPD::VINI,
+        CVPD::OPFR,
+        CVPD::VNDR,
+        CVPD::SPDX,
     };
     const uint8_t NUM_MBVPD_RECORDS =
         sizeof(mbvpdFapiRecordToHbRecord)/sizeof(mbvpdFapiRecordToHbRecord[0]);
@@ -123,6 +128,53 @@ fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
         CVPD::VZ,
         CVPD::pdD,
         CVPD::MX,
+        CVPD::DW,
+        CVPD::PN,
+        CVPD::SN,
+        CVPD::DR,
+        CVPD::CE,
+        CVPD::FN,
+        CVPD::CC,
+        CVPD::HE,
+        CVPD::CT,
+        CVPD::HW,
+        CVPD::VD,
+        CVPD::VN,
+        CVPD::VP,
+        CVPD::SV,
+        CVPD::M0,
+        CVPD::M1,
+        CVPD::M2,
+        CVPD::M3,
+        CVPD::M4,
+        CVPD::M5,
+        CVPD::M6,
+        CVPD::M7,
+        CVPD::M8,
+        CVPD::T1,
+        CVPD::T2,
+        CVPD::T4,
+        CVPD::T5,
+        CVPD::T6,
+        CVPD::T8,
+        CVPD::Q0,
+        CVPD::Q1,
+        CVPD::Q2,
+        CVPD::Q3,
+        CVPD::Q4,
+        CVPD::Q5,
+        CVPD::Q6,
+        CVPD::Q7,
+        CVPD::Q8,
+        CVPD::K0,
+        CVPD::K1,
+        CVPD::K2,
+        CVPD::K3,
+        CVPD::K4,
+        CVPD::K5,
+        CVPD::K6,
+        CVPD::K7,
+        CVPD::K8,
     };
     const uint8_t NUM_MBVPD_KEYWORDS =
      sizeof(mbvpdFapiKeywordToHbKeyword)/sizeof(mbvpdFapiKeywordToHbKeyword[0]);

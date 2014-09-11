@@ -42,7 +42,7 @@ namespace CVPD
         VINI        = 0x04,
         OPFR        = 0x05,
         VNDR        = 0x06,
-        VSPX        = 0x07,
+        SPDX        = 0x07,
         // Last Record
         CVPD_LAST_RECORD,
         CVPD_TEST_RECORD,   // Test purposes ONLY!
