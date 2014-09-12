@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_tod_utils.xml,v 1.9 2014/03/27 03:38:24 jmcgill Exp $ -->
+<!-- $Id: proc_tod_utils.xml,v 1.10 2014/09/09 16:23:44 jklazyns Exp $ -->
 <!-- Error codes for proc_tod_utils (used by setup, init, status) -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -75,6 +77,20 @@
     <deconfigure>
        <target>CHIP_TARGET</target>
     </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_TOD_INIT_M_PATH_0_STEP_CHECK_ERROR</rc>
+    <description>Master Path 0 step check error is active after starting the TOD topology</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOD_ERROR_REG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_TOD_INIT_M_PATH_1_STEP_CHECK_ERROR</rc>
+    <description>Master Path 1 step check error is active after starting the TOD topology</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOD_ERROR_REG</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>

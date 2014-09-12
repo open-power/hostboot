@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_utils.H,v 1.13 2013/03/05 23:21:15 jklazyns Exp $
+// $Id: proc_tod_utils.H,v 1.14 2014/09/09 18:45:59 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -299,12 +299,14 @@ const uint32_t PB_A_MODE_LINK_A2_ROUND_TRIP_DELAY = 56;
 const uint32_t LINK_ROUND_TRIP_DELAY_LEN = 8;
 
 //Bit definitions for TOD_ERROR_REG
-const uint32_t TOD_ERROR_REG_RX_TTYPE_0      = 38;
-const uint32_t TOD_ERROR_REG_RX_TTYPE_1      = 39;
-const uint32_t TOD_ERROR_REG_RX_TTYPE_2      = 40;
-const uint32_t TOD_ERROR_REG_RX_TTYPE_3      = 41;
-const uint32_t TOD_ERROR_REG_RX_TTYPE_4      = 42;
-const uint32_t TOD_ERROR_REG_RX_TTYPE_5      = 43;
+const uint32_t TOD_ERROR_REG_M_PATH_0_STEP_CHECK_ERROR = 14;
+const uint32_t TOD_ERROR_REG_M_PATH_1_STEP_CHECK_ERROR = 15;
+const uint32_t TOD_ERROR_REG_RX_TTYPE_0                = 38;
+const uint32_t TOD_ERROR_REG_RX_TTYPE_1                = 39;
+const uint32_t TOD_ERROR_REG_RX_TTYPE_2                = 40;
+const uint32_t TOD_ERROR_REG_RX_TTYPE_3                = 41;
+const uint32_t TOD_ERROR_REG_RX_TTYPE_4                = 42;
+const uint32_t TOD_ERROR_REG_RX_TTYPE_5                = 43;
 
 //Bit definitions for TFMR
 const uint32_t TFMR_MAX_CYC_BET_STEPS       = 0;

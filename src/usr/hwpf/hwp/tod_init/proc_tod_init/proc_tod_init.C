@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_init.C,v 1.10 2014/07/09 18:20:13 jklazyns Exp $
+// $Id: proc_tod_init.C,v 1.11 2014/09/09 16:23:42 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -69,7 +69,7 @@ fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node)
     {
         if (i_tod_node == NULL)
         {
-            FAPI_ERR("proc_tod_setup: null node passed into function!");
+            FAPI_ERR("proc_tod_init: null node passed into function!");
             FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_NULL_NODE);
             break;
         }
@@ -77,7 +77,7 @@ fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node)
         rc = proc_tod_clear_error_reg(i_tod_node);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_tod_setup: Failure clearing TOD error registers!");
+            FAPI_ERR("proc_tod_init: Failure clearing TOD error registers!");
             break;
         }
 
@@ -85,7 +85,7 @@ fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node)
         rc = init_tod_node(i_tod_node);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_tod_setup: Failure initializing TOD!");
+            FAPI_ERR("proc_tod_init: Failure initializing TOD!");
             break;
         }
 
@@ -341,10 +341,23 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
         }
         if (data.getDoubleWord(0) != 0)
         {
-            FAPI_ERR("init_tod_node: FIR bit active! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
             const fapi::Target & CHIP_TARGET = *target;
             const uint64_t TOD_ERROR_REG = data.getDoubleWord(0);
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_ERROR);
+            if (data.isBitSet(TOD_ERROR_REG_M_PATH_0_STEP_CHECK_ERROR))
+            {
+                FAPI_ERR("init_tod_node: M_PATH_0_STEP_CHECK_ERROR! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_M_PATH_0_STEP_CHECK_ERROR);
+            }
+            else if (data.isBitSet(TOD_ERROR_REG_M_PATH_1_STEP_CHECK_ERROR))
+            {
+                FAPI_ERR("init_tod_node: M_PATH_1_STEP_CHECK_ERROR! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_M_PATH_1_STEP_CHECK_ERROR);
+            }
+            else
+            {
+                FAPI_ERR("init_tod_node: FIR bit active! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_ERROR);
+            }
             break;
         }
 
