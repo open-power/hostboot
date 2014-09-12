@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.C,v 1.20 2014/05/27 16:30:54 jklazyns Exp $
+// $Id: proc_tod_setup.C,v 1.21 2014/09/09 16:13:20 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -245,7 +245,11 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             if (is_mdmt)
             {
                 rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_PRI_M_S_TOD_SEL);
-                if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
+                if (i_osc_sel == TOD_OSC_0_AND_1)
+                {
+                   rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
+                }
+                else if (i_osc_sel == TOD_OSC_0)
                 {
                    rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
                 }
@@ -268,7 +272,11 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             if (is_mdmt)
             {
                 rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_S_TOD_SEL);
-                if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
+                if (i_osc_sel == TOD_OSC_0_AND_1)
+                {
+                   rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
+                }
+                else if (i_osc_sel == TOD_OSC_0)
                 {
                    rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
                 }
@@ -416,13 +424,35 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         uint32_t path_sel = 0;
         if (is_mdmt)
         {
-            if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
+            if (i_tod_sel==TOD_PRIMARY)
             {
-                path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
+                if (i_osc_sel == TOD_OSC_0_AND_1)
+                {
+                    path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
+                }
+                else if (i_osc_sel == TOD_OSC_0)
+                {
+                    path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
+                }
+                else // i_osc_sel == TOD_OSC_1
+                {
+                    path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
+                }
             }
-            else // i_osc_sel == TOD_OSC_1
+            else
             {
-                path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
+                if (i_osc_sel == TOD_OSC_0_AND_1)
+                {
+                    path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
+                }
+                else if (i_osc_sel == TOD_OSC_0)
+                {
+                    path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
+                }
+                else // i_osc_sel == TOD_OSC_1
+                {
+                    path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
+                }
             }
         }
         else // Chip is not master; slave path selected
