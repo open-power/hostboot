@@ -197,6 +197,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 {
     #define PRDF_FUNC "[ErrDataService::GenerateSrcPfa] "
 
+    o_initiateHwudump = false;
+    o_dumpTrgt        = NULL;
+    o_dumpErrl        = NULL;
+    o_dumpErrlActions = 0;
+
 #ifdef __HOSTBOOT_MODULE
     using namespace ERRORLOG;
     using namespace HWAS;
@@ -715,19 +720,15 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //**************************************************************
 
     PfaData pfaData;
-    TargetHandle_t dumpTrgt = NULL;
 
     initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
-                 prdGardErrType, pfaData, dumpTrgt );
-
-    // set returned dump target
-    o_dumpTrgt = dumpTrgt;
+                 prdGardErrType, pfaData, o_dumpTrgt );
 
     //**************************************************************
     // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
 
-    ForceTerminate = checkForceTerm( sdc, dumpTrgt, pfaData );
+    ForceTerminate = checkForceTerm( sdc, o_dumpTrgt, pfaData );
 
     //*************************************************************
     // Check for Manufacturing Mode terminate here and then do
@@ -808,7 +809,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // deconfiguration, dump/FFDC collection, etc.
         if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
         {
-            handleUnitCS( dumpTrgt, o_initiateHwudump );
+            handleUnitCS( o_dumpTrgt, o_initiateHwudump );
         }
 
         // Commit the Error log
@@ -913,9 +914,11 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
 
     hwTableContent dumpContent;
     i_sdc.GetDumpRequest( dumpContent, o_dumpTrgt );
-    o_pfa.msDumpInfo.content = dumpContent;
 
-    o_pfa.msDumpInfo.id = getHuid(o_dumpTrgt);
+    checkMpIplEligibility( i_attnType, o_dumpTrgt, dumpContent );
+
+    o_pfa.msDumpInfo.content = dumpContent;
+    o_pfa.msDumpInfo.id      = getHuid(o_dumpTrgt);
 
     // Error log actions and severity
     o_pfa.errlActions  = i_errlAct;

@@ -3165,13 +3165,13 @@ actionclass calloutNxThr5pHr
 
 actionclass combinedResponseError
 {
-    funccall("analyzeMpIPL");
+    dumpSH;
     funccall("combinedResponseCallout");
 };
 
 actionclass forceMpIpl
 {
-    funccall("analyzeMpIPL");
+    dumpSH;
     callout2ndLvlMedThr1NoGard;
 };
 

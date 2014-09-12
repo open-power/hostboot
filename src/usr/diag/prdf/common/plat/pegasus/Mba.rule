@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -544,32 +546,32 @@ group gMbaSecureFir filter singlebit
     /** MBASECUREFIR[0]
      *  MBASIRQ_INVALID_MBA_CAL0Q_ACCESS
      */
-    (MbaSecureFir, bit(0)) ? callout2ndLvlMedThr1dumpSh;
+    (MbaSecureFir, bit(0)) ? secureFirCallout;
 
     /** MBASECUREFIR[1]
      *  MBASIRQ_INVALID_MBA_CAL1Q_ACCESS
      */
-    (MbaSecureFir, bit(1)) ? callout2ndLvlMedThr1dumpSh;
+    (MbaSecureFir, bit(1)) ? secureFirCallout;
 
     /** MBASECUREFIR[2]
      *  MBASIRQ_INVALID_MBA_CAL2Q_ACCESS
      */
-    (MbaSecureFir, bit(2)) ? callout2ndLvlMedThr1dumpSh;
+    (MbaSecureFir, bit(2)) ? secureFirCallout;
 
     /** MBASECUREFIR[3]
      *  MBASIRQ_INVALID_MBA_CAL3Q_ACCESS
      */
-    (MbaSecureFir, bit(3)) ? callout2ndLvlMedThr1dumpSh;
+    (MbaSecureFir, bit(3)) ? secureFirCallout;
 
     /** MBASECUREFIR[4]
      *  MBASIRQ_INVALID_DDR_CONFIG_REG_ACCESS
      */
-    (MbaSecureFir, bit(4)) ? callout2ndLvlMedThr1dumpSh;
+    (MbaSecureFir, bit(4)) ? secureFirCallout;
 
     /** MBASECUREFIR[5]
      *  MBASIRQ_INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
      */
-    (MbaSecureFir, bit(5)) ? callout2ndLvlMedThr1dumpSh;
+    (MbaSecureFir, bit(5)) ? secureFirCallout;
 };
 
 ################################################################################
@@ -908,3 +910,12 @@ actionclass CalloutMbaAndDimmOnPort1
     funccall("CalloutMbaAndDimmOnPort1");
     threshold1;
 };
+
+/** Callouts specific to MBASECUREFIR attentions. */
+actionclass secureFirCallout
+{
+    callout2ndLvlMed;
+    calloutSelfLow;
+    threshold1;
+};
+

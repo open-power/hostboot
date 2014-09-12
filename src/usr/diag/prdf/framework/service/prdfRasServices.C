@@ -98,7 +98,16 @@ void ErrDataService::createInitialErrl( ATTENTION_TYPE i_attnType )
                         PRDF_GET_UINT64_FROM_UINT32( 0, 0 ) );
 }
 
-//--------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void ErrDataService::checkMpIplEligibility( ATTENTION_TYPE i_attnType,
+                                            TargetHandle_t i_dumpTrgt,
+                                            hwTableContent & io_dumpContent )
+{
+    // no-op for Hostboot
+}
+
+//------------------------------------------------------------------------------
 
 bool ErrDataService::checkForceTerm( ServiceDataCollector & i_sdc,
                                      TargetHandle_t i_dumpTrgt,

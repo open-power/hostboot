@@ -246,6 +246,18 @@ class ErrDataService
     void deallocateDimms( SDC_MRU_LIST & i_mruList );
 
     /**
+     * @brief Must check for MP-IPL eligibility before requesting SW or SH
+     *        dumps. Otherwise, the dump content will need to be changed to
+     *        HWPROC.
+     * @param i_attnType     Primary attention type.
+     * @param i_dumpTrgt     Dump target.
+     * @param io_dumpContent Dump content.
+     */
+    void checkMpIplEligibility( ATTENTION_TYPE i_attnType,
+                                TARGETING::TargetHandle_t i_dumpTrgt,
+                                hwTableContent & io_dumpContent );
+
+    /**
      * @brief Checks for terminate conditions during non mnfg conditions.
      * @param i_sdc       The service data collector.
      * @param i_dumpTrgt  Dump Target.

@@ -582,7 +582,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[2]
      *  MBS_FIR_REG_INVALID_ADDRESS_ERROR
      */
-    (MbsFir, bit(2)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsFir, bit(2)) ? calloutDmiBusTh1;
 
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
@@ -1210,32 +1210,32 @@ group gMbsSecureFir filter singlebit
     /** MBSSECUREFIR[0]
      *  MBSSIRQ_INVALID_MBSXCR_ACCESS
      */
-    (MbsSecureFir, bit(0)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsSecureFir, bit(0)) ? secureFirCallout;
 
     /** MBSSECUREFIR[1]
      *  MBSSIRQ_INVALID_MBAXCR01_ACCESS
      */
-    (MbsSecureFir, bit(1)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsSecureFir, bit(1)) ? secureFirCallout;
 
     /** MBSSECUREFIR[2]
      *  MBSSIRQ_INVALID_MBAXCR23_ACCESS
      */
-    (MbsSecureFir, bit(2)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsSecureFir, bit(2)) ? secureFirCallout;
 
     /** MBSSECUREFIR[3]
      *  MBSSIRQ_INVALID_MBAXCRMS_ACCRESS
      */
-    (MbsSecureFir, bit(3)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsSecureFir, bit(3)) ? secureFirCallout;
 
     /** MBSSECUREFIR[4]
      *  MBSSIRQ_SPARE (Spare)
      */
-    (MbsSecureFir, bit(4)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsSecureFir, bit(4)) ? secureFirCallout;
 
     /** MBSSECUREFIR[5]
      *  MBSSIRQ_INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
      */
-    (MbsSecureFir, bit(5)) ? callout2ndLvlMedThr1dumpSh;
+    (MbsSecureFir, bit(5)) ? secureFirCallout;
 };
 
 ################################################################################
@@ -1475,3 +1475,12 @@ actionclass mbsfirBit30
     threshold32pday;
     try( funccall("mbsfirBit30_dd1"), L4CalloutMedThr1UE);
 };
+
+/** Callouts specific to MBSSECUREFIR attentions. */
+actionclass secureFirCallout
+{
+    callout2ndLvlMed;
+    calloutSelfLow;
+    threshold1;
+};
+
