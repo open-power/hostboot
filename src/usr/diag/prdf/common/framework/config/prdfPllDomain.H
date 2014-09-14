@@ -155,6 +155,12 @@ protected:
   virtual void Order(ATTENTION_TYPE attentionType);
 
 private:  // functions
+
+  /**
+   * @brief initialize pll chip plugin function names
+   */
+  virtual void InitChipPluginFuncs();
+
 private:  // Data
 
   enum { CONTAINER_SIZE = 8 };
@@ -167,6 +173,13 @@ private:  // Data
 #ifndef __HOSTBOOT_MODULE
     hwTableContent iv_dumpContent;
 #endif
+
+  const char * QueryPllFunc;
+  const char * CapturePllFunc;
+  const char * CalloutPllFunc;
+  const char * MaskPllFunc;
+  const char * ClearPllFunc;
+  const char * PostAnalysisPllFunc;
 
 };
 
@@ -184,7 +197,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) )
-{}
+{
+    InitChipPluginFuncs();
+}
 
 inline
 PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
@@ -197,7 +212,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) )
-{}
+{
+    InitChipPluginFuncs();
+}
 
 #else // not __HOSTBOOT_MODULE
 
@@ -213,7 +230,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) ),
     iv_dumpContent(i_hwdc)
-{}
+{
+    InitChipPluginFuncs();
+}
 
 inline
 PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
@@ -228,7 +247,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) ),
     iv_dumpContent(i_hwdc)
-{}
+{
+    InitChipPluginFuncs();
+}
 
 #endif // not __HOSTBOOT_MODULE
 

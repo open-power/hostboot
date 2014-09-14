@@ -50,6 +50,30 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
+void PllDomain::InitChipPluginFuncs()
+{
+    if ( CLOCK_DOMAIN_IO == GetId() )
+    {
+        QueryPllFunc = "QueryPllIo";
+        CapturePllFunc = "capturePllFfdcIo";
+        CalloutPllFunc = "CalloutPllIo";
+        MaskPllFunc = "MaskPllIo";
+        ClearPllFunc = "ClearPllIo";
+        PostAnalysisPllFunc = "PllPostAnalysisIo";
+    }
+    else
+    {
+        QueryPllFunc = "QueryPll";
+        CapturePllFunc = "capturePllFfdc";
+        CalloutPllFunc = "CalloutPll";
+        MaskPllFunc = "MaskPll";
+        ClearPllFunc = "ClearPll";
+        PostAnalysisPllFunc = "PllPostAnalysis";
+    }
+}
+
+//------------------------------------------------------------------------------
+
 int32_t PllDomain::Initialize(void)
 {
 
@@ -94,7 +118,7 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
             {
                 ExtensibleChip * l_chip = LookUp(index);
                 ExtensibleChipFunction * l_query =
-                                    l_chip->getExtensibleFunction("QueryPll");
+                                    l_chip->getExtensibleFunction(QueryPllFunc);
                 int32_t rc = (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
                 // if rc then scom read failed - Error log has already been generated
                 if( PRD_POWER_FAULT == rc )
@@ -122,8 +146,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]());
     int count = 0;
     int32_t rc = SUCCESS;
-    bool calloutProcOsc = false;
-    bool calloutPciOsc = false;
 
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from their
@@ -135,30 +157,14 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     for(unsigned int index = 0; index < GetSize(); ++index)
     {
         ExtensibleChip * l_chip = LookUp(index);
-        bool atProcAttn = false;
-        bool atPciAttn = false;
+        bool atAttn = false;
 
-        if( CLOCK_DOMAIN_FAB == GetId() )
-        {
-            ExtensibleChipFunction * queryProc =
-                l_chip->getExtensibleFunction("QueryProcPll");
-            rc |= (*queryProc)(l_chip,PluginDef::bindParm<bool &>(atProcAttn));
-            ExtensibleChipFunction * queryPci =
-                l_chip->getExtensibleFunction("QueryPciPll");
-            rc |= (*queryPci)(l_chip,PluginDef::bindParm<bool &>(atPciAttn));
-        }
-        else
-        {
-            ExtensibleChipFunction * l_query =
-                   l_chip->getExtensibleFunction("QueryPll");
-            rc |= (*l_query)(l_chip,PluginDef::bindParm<bool &>(atProcAttn));
-        }
+        ExtensibleChipFunction * l_query =
+            l_chip->getExtensibleFunction(QueryPllFunc);
+        rc |= (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
 
-        if(atProcAttn || atPciAttn)
+        if ( atAttn )
         {
-            if( atProcAttn ) calloutProcOsc = true;
-            if( atPciAttn )  calloutPciOsc = true;
-
             chip()[count] = LookUp(index);
             ++count;
             l_chip->CaptureErrorData(
@@ -170,7 +176,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
             // Call this chip's capturePllFfdc plugin if it exists.
             ExtensibleChipFunction * l_captureFfdc =
-                l_chip->getExtensibleFunction("capturePllFfdc", true);
+                l_chip->getExtensibleFunction(CapturePllFunc, true);
             if ( NULL != l_captureFfdc )
             {
                 (*l_captureFfdc)( l_chip,
@@ -191,11 +197,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
 
     // always suspect the clock source
-    if( calloutPciOsc )
-    {
-        closeClockSource.Resolve(serviceData);
-    }
-    if( calloutProcOsc )
+    closeClockSource.Resolve(serviceData);
+    if(&closeClockSource != &farClockSource)
     {
         farClockSource.Resolve(serviceData);
     }
@@ -207,7 +210,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         // Call this chip's CalloutPll plugin if it exists.
         ExtensibleChipFunction * l_callout =
-                chip()[0]->getExtensibleFunction( "CalloutPll", true );
+                chip()[0]->getExtensibleFunction( CalloutPllFunc, true );
         if ( NULL != l_callout )
         {
             (*l_callout)( chip()[0],
@@ -250,7 +253,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         ExtensibleChip * l_chip = chip()[i];
         // Send any special messages indicating there was a PLL error.
         ExtensibleChipFunction * l_pllPostAnalysis =
-                        l_chip->getExtensibleFunction("PllPostAnalysis", true);
+                l_chip->getExtensibleFunction(PostAnalysisPllFunc, true);
         (*l_pllPostAnalysis)(l_chip,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
     }
@@ -272,12 +275,18 @@ int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
+    const char * clearPllFuncName = "ClearPll";
+    if ( CLOCK_DOMAIN_IO == l_domain->GetId() )
+    {
+        clearPllFuncName = "ClearPllIo";
+    }
+
     // Clear children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
     {
         ExtensibleChip * l_chip = l_domain->LookUp(i);
         ExtensibleChipFunction * l_clear =
-                                    l_chip->getExtensibleFunction("ClearPll");
+                        l_chip->getExtensibleFunction(clearPllFuncName);
         (*l_clear)( l_chip,
                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
@@ -305,12 +314,18 @@ int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
+    const char * maskPllFuncName = "MaskPll";
+    if ( CLOCK_DOMAIN_IO == l_domain->GetId() )
+    {
+        maskPllFuncName = "MaskPllIo";
+    }
+
     // Mask children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
     {
         ExtensibleChip * l_chip = l_domain->LookUp(i);
         ExtensibleChipFunction * l_mask =
-                                    l_chip->getExtensibleFunction("MaskPll");
+                            l_chip->getExtensibleFunction(maskPllFuncName);
         (*l_mask)( l_chip,
                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }

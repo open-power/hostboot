@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -44,7 +46,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
         void TestRecoverable(void)
         {
-            PRDS_BEGIN("PLL in MNFG mode");
+            PRDS_BEGIN("PCI PLL");
 
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
 
@@ -121,7 +123,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
         void TestPllAtThreshold(void)
         {
-            PRDS_BEGIN("PLL At Threshold");
+            PRDS_BEGIN("PCI PLL At Threshold");
 
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
 
@@ -195,6 +197,164 @@ class PTPLFIR:public CxxTest::TestSuite
 
             PRDS_END();
         }
+
+
+        // test Proc PLL error -------------------------
+
+        void TestProcPll(void)
+        {
+            PRDS_BEGIN("Proc PLL");
+
+            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",0x00ed0000 );
+
+            //GLOBAL_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x4000000000000000);
+
+            //TP_CHIPLET_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
+
+            //TP_LFIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000100000000000);
+
+            //TP_LFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
+
+            // ############ PLL regs ###########
+
+            // PCI_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x090F001F,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x090F001F,
+            //0x0000000000000001);
+
+            // PCI_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x090F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x090F001E,
+            //0x0008000000000001);
+
+            // PB_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001F,
+                           0x0000006000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x020F001F,
+            //0x0000000000000001);
+
+            // PB_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x020F001E,
+            //0x0008000000000001);
+
+            // ABUS_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x080F001F,
+                           0x0000004000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x080F001F,
+            //0x0000000000000001);
+
+            // ABUS_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x080F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x080F001E,
+            //0x0008000000000001);
+
+            // EX_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
+                           0x0000004000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
+            //0x0000000000000001);
+
+            // EX_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x100F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}:EX{4}", 0x100F001E,
+            //0x0008000000000001);
+
+
+            PRDS_START_SIM();
+
+            PRDS_END();
+        }
+
+        void TestProcPllAtThreshold(void)
+        {
+            PRDS_BEGIN("Proc PLL At Threshold");
+
+            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",0x00ed0000 );
+
+            //GLOBAL_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x4000000000000000);
+
+            //TP_CHIPLET_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
+
+            //TP_LFIR
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000100000000000);
+
+            //TP_LFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
+
+            // ############ PLL regs ###########
+
+            // PCI_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x090F001F,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x090F001F,
+            //0x0000000000000001);
+
+            // PCI_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x090F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x090F001E,
+            //0x0008000000000001);
+
+            // PB_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001F,
+                           0x0000006000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x020F001F,
+            //0x0000000000000001);
+
+            // PB_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x020F001E,
+            //0x0008000000000001);
+
+            // ABUS_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x080F001F,
+                           0x0000004000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x080F001F,
+            //0x0000000000000001);
+
+            // ABUS_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x080F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x080F001E,
+            //0x0008000000000001);
+
+            // EX_ERROR_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
+                           0x0000004000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
+            //0x0000000000000001);
+
+            // EX_CONFIG_REG
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x100F001E,
+                           0x0000000000000001);
+            //PRDS_SCR_EXPECT("NODE{0}:PROC{0}:EX{4}", 0x100F001E,
+            //0x0008000000000001);
+
+
+            PRDS_START_SIM();
+
+            PRDS_END();
+        }
+
 
 };
 #endif

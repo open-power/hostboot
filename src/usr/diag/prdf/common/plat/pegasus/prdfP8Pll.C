@@ -210,63 +210,6 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE( Proc, QueryProcPll );
 
 /**
-  * @brief Query the PLL chip for a PCI PLL error
-  * @param i_chip P8 Pci chip
-  * @param o_result set to true in the presence of PLL error
-  * @returns Failure or Success of query.
-  */
-int32_t QueryPciPll( ExtensibleChip * i_chip,
-                        bool & o_result)
-{
-    #define PRDF_FUNC "[Proc::QueryPciPll] "
-
-    int32_t rc = SUCCESS;
-    o_result = false;
-
-    SCAN_COMM_REGISTER_CLASS * pciErrReg =
-                i_chip->getRegister("PCI_ERROR_REG");
-    SCAN_COMM_REGISTER_CLASS * pciConfigReg =
-                i_chip->getRegister("PCI_CONFIG_REG");
-
-    do
-    {
-        rc = pciErrReg->Read();
-        if (rc != SUCCESS)
-        {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
-                     "for 0x%08x", i_chip->GetId());
-            break;
-        }
-
-        rc = pciConfigReg->Read();
-        if (rc != SUCCESS)
-        {
-            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
-                     "for 0x%08x", i_chip->GetId());
-            break;
-        }
-
-        if(pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
-           !pciConfigReg->IsBitSet(PLL_ERROR_MASK))
-        {
-            o_result = true;
-        }
-
-    } while(0);
-
-    if( rc != SUCCESS )
-    {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
-                 i_chip->GetId());
-    }
-
-    return rc;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( Proc, QueryPciPll );
-
-/**
   * @brief Query the PLL chip for a PLL error on P8
   * @param  i_chip P8 Pci chip
   * @param o_result set to true in the presence of PLL error
@@ -304,15 +247,12 @@ int32_t QueryPll( ExtensibleChip * i_chip,
             break;
         }
 
-        if( ! (TP_LFIR->IsBitSet(PLL_DETECT_P8) &&
-               !TP_LFIRmask->IsBitSet(PLL_DETECT_P8)) )
+        if (( TP_LFIRmask->IsBitSet(PLL_DETECT_P8) ) ||
+            ( ! TP_LFIR->IsBitSet(PLL_DETECT_P8) ))
         {
             // if global pll bit is not set, break out
             break;
         }
-
-        rc = QueryPciPll( i_chip, o_result );
-        if ((rc != SUCCESS) || (true == o_result)) break;
 
         rc = QueryProcPll( i_chip, o_result );
         if ((rc != SUCCESS) || (true == o_result)) break;
@@ -376,24 +316,12 @@ int32_t ClearPll( ExtensibleChip * i_chip,
             }
         }
 
-        // Clear pci osc error reg bit
-        SCAN_COMM_REGISTER_CLASS * pciErrReg =
-                i_chip->getRegister("PCI_ERROR_REG");
-        pciErrReg->ClearBit(PLL_ERROR_BIT);
-        tmpRC = pciErrReg->Write();
-        if (tmpRC != SUCCESS)
-        {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG write failed"
-                     "for chip: 0x%08x", i_chip->GetId());
-            rc |= tmpRC;
-        }
-
         // Clear TP_LFIR
-        SCAN_COMM_REGISTER_CLASS * TP_LFIR =
+        SCAN_COMM_REGISTER_CLASS * TP_LFIRand =
                    i_chip->getRegister("TP_LFIR_AND");
-        TP_LFIR->setAllBits();
-        TP_LFIR->ClearBit(PLL_DETECT_P8);
-        tmpRC = TP_LFIR->Write();
+        TP_LFIRand->setAllBits();
+        TP_LFIRand->ClearBit(PLL_DETECT_P8);
+        tmpRC = TP_LFIRand->Write();
         if (tmpRC != SUCCESS)
         {
             PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
@@ -435,92 +363,42 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     if (CHECK_STOP != i_sc.service_data->GetAttentionType())
     {
-        bool maskProcPllErr = false;
-        bool maskPciPllErr = false;
-        const SDC_MRU_LIST & l_mrus = i_sc.service_data->GetMruList();
         int32_t tmpRC = SUCCESS;
 
-        for ( uint32_t i = 0; i  < l_mrus.size(); i++ )
+        P8DataBundle * procdb = getDataBundle( i_chip );
+        P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+            procdb->getProcPllErrRegList();
+        if( procPllErrRegList.empty() )
         {
-            if((PRDcalloutData::TYPE_PROCCLK ==
-                      l_mrus[i].callout.getType()) ||
-               ((PRDcalloutData::TYPE_TARGET ==
-                      l_mrus[i].callout.getType()) &&
-                (TYPE_OSCREFCLK ==
-                      getTargetType(l_mrus[i].callout.getTarget()))))
+            GetProcPllErrRegList( i_chip, procPllErrRegList );
+        }
+
+        for(P8DataBundle::ProcPllErrRegListIter itr =
+            procPllErrRegList.begin();
+            itr != procPllErrRegList.end(); ++itr)
+        {
+            // Error is already fenced
+            if( (*itr).configReg->IsBitSet(PLL_ERROR_MASK) )
             {
-                maskProcPllErr = true;
+                continue;
             }
-            else if((PRDcalloutData::TYPE_PCICLK ==
-                      l_mrus[i].callout.getType()) ||
-                   ((PRDcalloutData::TYPE_TARGET ==
-                      l_mrus[i].callout.getType()) &&
-                    (TYPE_OSCPCICLK ==
-                      getTargetType(l_mrus[i].callout.getTarget()))))
+
+            (*itr).configReg->SetBit(PLL_ERROR_MASK);
+
+            tmpRC = (*itr).configReg->Write();
+            if (tmpRC != SUCCESS)
             {
-                maskPciPllErr = true;
+                PRDF_ERR(PRDF_FUNC"CONFIG_REG write failed"
+                         "for chip: 0x%08x, type: 0x%08x",
+                         (*itr).chip->GetId(), (*itr).type);
+                rc |= tmpRC;
             }
         }
 
-        // fence off proc osc error reg bits
-        if(true == maskProcPllErr)
-        {
-            P8DataBundle * procdb = getDataBundle( i_chip );
-            P8DataBundle::ProcPllErrRegList & procPllErrRegList =
-                procdb->getProcPllErrRegList();
-            if( procPllErrRegList.empty() )
-            {
-                GetProcPllErrRegList( i_chip, procPllErrRegList );
-            }
-
-            for(P8DataBundle::ProcPllErrRegListIter itr =
-                procPllErrRegList.begin();
-                itr != procPllErrRegList.end(); ++itr)
-            {
-                // Error is already fenced
-                if( (*itr).configReg->IsBitSet(PLL_ERROR_MASK) )
-                {
-                    continue;
-                }
-
-                (*itr).configReg->SetBit(PLL_ERROR_MASK);
-
-                tmpRC = (*itr).configReg->Write();
-                if (tmpRC != SUCCESS)
-                {
-                    PRDF_ERR(PRDF_FUNC"CONFIG_REG write failed"
-                             "for chip: 0x%08x, type: 0x%08x",
-                             (*itr).chip->GetId(), (*itr).type);
-                    rc |= tmpRC;
-                }
-            }
-
-            // Need to clear the PLL Err Reg list so it can
-            // be populated with fresh data on the next analysis
-            // can do this in error case to save some space
-            procPllErrRegList.clear();
-
-        }
-
-        // fence off pci osc error reg bit
-        if(true == maskPciPllErr)
-        {
-            SCAN_COMM_REGISTER_CLASS * pciConfigReg =
-                i_chip->getRegister("PCI_CONFIG_REG");
-
-            if(!pciConfigReg->IsBitSet(PLL_ERROR_MASK))
-            {
-                pciConfigReg->SetBit(PLL_ERROR_MASK);
-                tmpRC = pciConfigReg->Write();
-                if (tmpRC != SUCCESS)
-                {
-                    PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG write failed"
-                             "for chip: 0x%08x",
-                             i_chip->GetId());
-                    rc |= tmpRC;
-                }
-            }
-        }
+        // Need to clear the PLL Err Reg list so it can
+        // be populated with fresh data on the next analysis
+        // can do this in error case to save some space
+        procPllErrRegList.clear();
 
         // Since TP_LFIR bit is the collection of all of the
         // pll error reg bits, we can't mask it or we will not

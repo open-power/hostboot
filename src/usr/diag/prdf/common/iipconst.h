@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -79,6 +81,7 @@ enum DOMAIN_ID
   CLOCK_DOMAIN_FAB      = 0x90,
   CLOCK_DOMAIN_MCS      = 0x91,
   CLOCK_DOMAIN_MEMBUF   = 0x92,
+  CLOCK_DOMAIN_IO       = 0x93,
 
   END_DOMAIN_ID
 };

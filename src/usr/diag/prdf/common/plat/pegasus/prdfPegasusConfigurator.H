@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -80,11 +82,13 @@ class PegasusConfigurator : public Configurator
      * @parm    i_type    The specified target type.
      * @parm    io_domain The associated domain.
      * @parm    io_pllDomains The associated PLL domain (optional for some)
+     * @parm    io_pllDomains2 The associated PLL domain (optional for some)
      * @return  error log handle
      */
     errlHndl_t addDomainChips( TARGETING::TYPE  i_type,
                             RuleChipDomain * io_domain,
-                            PllDomainList  * io_pllDomains = NULL );
+                            PllDomainList  * io_pllDomains = NULL,
+                            PllDomainList  * io_pllDomains2 = NULL);
 
     /**
      *  @brief  Add chip to its Pll Domain.
@@ -106,10 +110,12 @@ class PegasusConfigurator : public Configurator
   /**
    *  @brief Add Pll Domains to the System.
    *  @param i_fabricPllDomains  - List of Fabric Pll Domains
+   *  @param i_pciePllDomains    - List of Pcie Pll Domains
    *  @param i_membPllDomains    - List of Membuf Pll Domains
    */
   void addPllDomainsToSystem(
         PllDomainList  & i_fabricPllDomains,
+        PllDomainList  & i_pciePllDomains,
         PllDomainList  & i_membPllDomains );
 
   private: // data

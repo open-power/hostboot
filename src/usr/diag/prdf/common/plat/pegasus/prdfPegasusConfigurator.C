@@ -120,6 +120,7 @@ errlHndl_t PegasusConfigurator::build()
     uint32_t l_maxNodeCount = _getMaxNumNodes();
     // PLL domains
     PllDomainList l_fabricPllDomains(l_maxNodeCount, NULL);
+    PllDomainList l_pciePllDomains(l_maxNodeCount, NULL);
     PllDomainList l_membPllDomains(  l_maxNodeCount, NULL);
 
     do
@@ -135,7 +136,8 @@ errlHndl_t PegasusConfigurator::build()
         errl = addDomainChips( TYPE_MBA, l_mbaDomain );
         if ( NULL != errl ) break;
 
-        errl = addDomainChips( TYPE_PROC, l_procDomain, &l_fabricPllDomains );
+        errl = addDomainChips( TYPE_PROC, l_procDomain,
+                               &l_fabricPllDomains, &l_pciePllDomains );
         if ( NULL != errl ) break;
 
         errl = addDomainChips( TYPE_EX, l_exDomain );
@@ -155,7 +157,9 @@ errlHndl_t PegasusConfigurator::build()
         // Add domains to domain list. NOTE: Order is important because this is
         // the order the domains will be analyzed.
 
-        addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
+        addPllDomainsToSystem( l_fabricPllDomains,
+                               l_pciePllDomains,
+                               l_membPllDomains );
 
         //MemBuf domain added after PLL domain
         sysDmnLst.push_back( l_membufDomain );
@@ -211,7 +215,8 @@ errlHndl_t PegasusConfigurator::build()
 
 errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
                                           RuleChipDomain * io_domain,
-                                          PllDomainList  * io_pllDomains )
+                                          PllDomainList  * io_pllDomains,
+                                          PllDomainList  * io_pllDomains2)
 {
     using namespace TARGETING;
     int32_t l_rc = SUCCESS;
@@ -259,7 +264,6 @@ errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
             {
                 delete chip;
                 break;
-
             }
             sysChipLst.push_back( chip );
             io_domain->AddChip(   chip );
@@ -270,6 +274,12 @@ errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
                 case TYPE_PROC:
                     addChipsToPllDomain(CLOCK_DOMAIN_FAB,
                                         io_pllDomains,
+                                        chip,
+                                        *itr,
+                                        scanFac,
+                                        resFac);
+                    addChipsToPllDomain(CLOCK_DOMAIN_IO,
+                                        io_pllDomains2,
                                         chip,
                                         *itr,
                                         scanFac,
@@ -319,15 +329,28 @@ void PegasusConfigurator::addChipsToPllDomain(
                     Resolution & procClock = i_resFac.GetClockResolution(
                                                     i_pTarget, TYPE_PROC);
 
+                    #ifdef __HOSTBOOT_MODULE
+                    (*io_pllDomains)[l_node] = new PllDomain(
+                                        i_domainId, procClock,
+                                        ThresholdResolution::cv_mnfgDefault );
+                    #else
+                    (*io_pllDomains)[l_node] = new PllDomain(
+                                        i_domainId, procClock,
+                                        CONTENT_HW,
+                                        ThresholdResolution::cv_mnfgDefault );
+                    #endif
+                }
+                else if(CLOCK_DOMAIN_IO == i_domainId)
+                {
                     Resolution & ioClock = i_resFac.GetClockResolution(
                                                     i_pTarget, TYPE_PCI);
                     #ifdef __HOSTBOOT_MODULE
                     (*io_pllDomains)[l_node] = new PllDomain(
-                                        i_domainId, ioClock, procClock,
+                                        i_domainId, ioClock,
                                         ThresholdResolution::cv_mnfgDefault );
                     #else
                     (*io_pllDomains)[l_node] = new PllDomain(
-                                        i_domainId, ioClock, procClock,
+                                        i_domainId, ioClock,
                                         CONTENT_HW,
                                         ThresholdResolution::cv_mnfgDefault );
                     #endif
@@ -347,7 +370,6 @@ void PegasusConfigurator::addChipsToPllDomain(
                                         ThresholdResolution::cv_mnfgDefault );
                     #endif
                 }
-
                 else
                 {
                     PRDF_ERR( "[addChipsToPllDomain] Unsupported PLL Domain: "
@@ -364,6 +386,7 @@ void PegasusConfigurator::addChipsToPllDomain(
 
 void PegasusConfigurator::addPllDomainsToSystem(
        PllDomainList  & i_fabricPllDomains,
+       PllDomainList  & i_pciePllDomains,
        PllDomainList  & i_membPllDomains)
 {
     uint32_t l_maxNodeCount = _getMaxNumNodes();
@@ -374,6 +397,15 @@ void PegasusConfigurator::addPllDomainsToSystem(
         if(NULL != i_fabricPllDomains[n])
         {
             sysDmnLst.push_back(i_fabricPllDomains[n]);
+        }
+    }
+
+    //Add PCIe Pll Domains to the system.
+    for(uint32_t n = 0; n < l_maxNodeCount; ++n)
+    {
+        if(NULL != i_pciePllDomains[n])
+        {
+            sysDmnLst.push_back(i_pciePllDomains[n]);
         }
     }
 
