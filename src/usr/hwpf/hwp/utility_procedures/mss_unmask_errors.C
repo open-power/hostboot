@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.8 2014/04/08 16:15:56 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.9 2014/08/29 18:19:55 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -64,6 +66,8 @@
 //         |          |         | New DD2: MBAFIR 8 channel checkstop unmasked
 //         |          |         | New DD2: MBACALFIR 20,21,22 recoverable masked
 //   1.8   |08-APR-14 | gollub  | Removed debug trace
+//   1.9   |29-AUG-14 | gollub  | SW275672: Changed MBS_FIR_REG[3][4] from channel checkstop to recoverable
+
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -537,14 +541,14 @@ fapi::ReturnCode mss_unmask_inband_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbs_fir_action1.clearBit(2);
     l_ecmd_rc |= l_mbs_fir_mask_or.setBit(2);
 
-    // 3    external_timeout        channel checkstop   mask (until unmask_fetch_errors)
+    // 3    external_timeout        recoverable         mask (until unmask_fetch_errors)
     l_ecmd_rc |= l_mbs_fir_action0.clearBit(3);            
-    l_ecmd_rc |= l_mbs_fir_action1.clearBit(3);
+    l_ecmd_rc |= l_mbs_fir_action1.setBit(3);
     l_ecmd_rc |= l_mbs_fir_mask_or.setBit(3);
     
-    // 4    internal_timeout        channel checkstop   mask (until unmask_fetch_errors)
+    // 4    internal_timeout        recoverable         mask (until unmask_fetch_errors)
     l_ecmd_rc |= l_mbs_fir_action0.clearBit(4);            
-    l_ecmd_rc |= l_mbs_fir_action1.clearBit(4);
+    l_ecmd_rc |= l_mbs_fir_action1.setBit(4);
     l_ecmd_rc |= l_mbs_fir_mask_or.setBit(4);
 
     // 5    int_buffer_ce           recoverable         unmask
@@ -3011,10 +3015,10 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     // 2    invalid_address_error   channel checkstop   unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(2);
 
-    // 3    external_timeout        channel checkstop   unmask
+    // 3    external_timeout        recoverable         unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(3);
     
-    // 4    internal_timeout        channel checkstop   unmask
+    // 4    internal_timeout        recoverable         unmask
     l_ecmd_rc |= l_mbs_fir_mask_and.clearBit(4);
 
 
