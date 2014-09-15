@@ -52,12 +52,17 @@
         <id>SCOM_IND_MUTEX</id>
     </attribute>
     <attribute><id>SCAN_MUTEX</id></attribute>
-    <!-- new attribute for isteps 15 & 16 -->
     <attribute>
         <id>SLW_IMAGE_ADDR</id>
     </attribute>
     <attribute>
         <id>SLW_IMAGE_SIZE</id>
+    </attribute>
+    <attribute>
+        <id>HOMER_PHYS_ADDR</id>
+    </attribute>
+    <attribute>
+        <id>HOMER_VIRT_ADDR</id>
     </attribute>
 </targetTypeExtension>
 

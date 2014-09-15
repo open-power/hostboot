@@ -210,6 +210,7 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+
 <attribute>
     <id>IBSCOM_MUTEX</id>
     <description>Mutex for Inband SCOM Operations</description>
@@ -222,6 +223,7 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+
 <attribute>
     <id>IBSCOM_ENABLE_OVERRIDE</id>
     <description>Used to force IBSCOM enabled for lab testing</description>
@@ -233,6 +235,7 @@
     <readable/>
     <hbOnly/>
 </attribute>
+
 <attribute>
     <id>HB_EXISTING_IMAGE</id>
     <description>Indicates which logical nodes have a hostboot image.</description>
@@ -248,6 +251,7 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+
 <attribute>
     <id>HB_PM_SPWUP_OHA_FLAG</id>
     <description>Flag storage to break the recursive calling loop for when accessing the OHA address space from the Special Wakeup procedure.</description>
@@ -263,6 +267,7 @@
     </hwpfToHbAttrMap>
     <hbOnly/>
 </attribute>
+
 <attribute>
     <id>GPIO_INFO</id>
     <description>Information needed to address GPIO device</description>
@@ -324,5 +329,35 @@
     </hwpfToHbAttrMap>
     <hbOnly/>
 </attribute>
+
+<attribute>
+    <id>HOMER_PHYS_ADDR</id>
+    <description>
+        Physical address where HOMER image is placed in mainstore.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>HOMER_VIRT_ADDR</id>
+    <description>
+        Virtual address where HOMER memory is mapped into.  If value is zero,
+        memory must be mapped into virtual space.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 
 </attributes>

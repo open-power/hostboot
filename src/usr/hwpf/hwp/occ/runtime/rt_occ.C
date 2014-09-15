@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -121,6 +123,10 @@ namespace RT_OCC
                 rc = EINVAL;
                 break;
             }
+
+            // Remember where we put things
+            proc_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_homer_addr_phys);
+            proc_target->setAttr<ATTR_HOMER_VIRT_ADDR>(i_homer_addr_va);
 
             // Convert to fapi Target
             fapi::Target fapiTarg( fapi::TARGET_TYPE_PROC_CHIP,
@@ -609,6 +615,19 @@ namespace RT_OCC
             rt_intf->loadOCC = &executeLoadOCC;
             rt_intf->startOCCs = &executeStartOCCs;
             rt_intf->stopOCCs = &executeStopOCCs;
+
+            // If we already loaded OCC during the IPL we need to fix up
+            //  the virtual address because we're now not using virtual
+            //  memory
+            TargetHandleList procChips;
+            getAllChips(procChips, TYPE_PROC, true);
+            for (TargetHandleList::iterator itr = procChips.begin();
+                 itr != procChips.end();
+                 ++itr)
+            {
+                uint64_t addr = (*itr)->getAttr<ATTR_HOMER_PHYS_ADDR>();
+                (*itr)->setAttr<ATTR_HOMER_VIRT_ADDR>(addr);
+            }
         }
     };
 

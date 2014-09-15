@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -183,15 +185,22 @@ namespace HBOCC
         do{
             //Figure out OCC image offset for Target
             //OCC image offset = HOMER_SIZE*ProcPosition +
-            //       OCC offset within HOMR (happens to be zero)
+            //       OCC offset within HOMER (happens to be zero)
             uint8_t tmpPos = i_target->getAttr<ATTR_POSITION>();
             tmpOffset = tmpPos*VMM_HOMER_INSTANCE_SIZE +
               HOMER_OFFSET_TO_OCC_IMG;
             targHomer = i_homerPhysAddrBase + tmpOffset;
-            occVirt =
-              reinterpret_cast<void *>
-              (reinterpret_cast<uint64_t>(i_homerVirtAddrBase)
-               + tmpOffset) ;
+            uint64_t occVirt64 =
+              reinterpret_cast<uint64_t>(i_homerVirtAddrBase)
+              + tmpOffset;
+            occVirt = reinterpret_cast<void *>(occVirt64);
+
+            // Remember where we put things
+            if( i_target )
+            {
+                i_target->setAttr<ATTR_HOMER_PHYS_ADDR>(targHomer);
+                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(occVirt64);
+            }
 
             //Figure out OCC Host Data offset for Target
             //OCC host data offset = HOMER_SIZE*ProcPosition +
