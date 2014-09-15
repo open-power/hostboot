@@ -72,6 +72,7 @@ COPY_FILES = \
     src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
     src/build/buildpnor/buildpnor.pl:openpower \
+    src/usr/targeting/common/genHwsvMrwXml.pl:openpower \
     src/usr/targeting/common/xmltohb/mergexml.sh:openpower \
     src/usr/targeting/common/xmltohb/attribute_types.xml:openpower \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \

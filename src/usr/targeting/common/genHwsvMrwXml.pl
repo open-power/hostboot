@@ -238,6 +238,12 @@ my $optMrwPolicies = $sysPolicy->{"optional-policy-settings"};
 use constant MRW_NAME => 'mrw-name';
 
 my %optTargPolicies = ();
+$optTargPolicies{'MIN_FREQ_MHZ'}{MRW_NAME}
+    = "minimum-frequency" ;
+$optTargPolicies{'NOMINAL_FREQ_MHZ'}{MRW_NAME}
+    = "nominal-frequency" ;
+$optTargPolicies{'FREQ_CORE_MAX'}{MRW_NAME}
+    = "maximum-frequency" ;
 $optTargPolicies{'MSS_CENT_AVDD_OFFSET_DISABLE'}{MRW_NAME}
     = "mem_avdd_offset_disable" ;
 $optTargPolicies{'MSS_CENT_VDD_OFFSET_DISABLE'}{MRW_NAME}
@@ -292,7 +298,8 @@ foreach my $policy ( keys %optTargPolicies )
 # Process the pm-settings MRW file
 #------------------------------------------------------------------------------
 my $pm_settings_file = open_mrw_file($mrwdir, "${sysname}-pm-settings.xml");
-my $pmSettings = parse_xml_file($pm_settings_file);
+my $pmSettings = parse_xml_file($pm_settings_file,
+                       forcearray=>['processor-settings']);
 
 my @pmChipAttr; # Repeated [NODE, POS, ATTR, VAL, ATTR, VAL, ATTR, VAL...]
 
@@ -392,7 +399,7 @@ my @SortedPcie = sort byNodePos @procPcie;
 # Process the chip-ids MRW file
 #------------------------------------------------------------------------------
 my $chip_ids_file = open_mrw_file($mrwdir, "${sysname}-chip-ids.xml");
-my $chipIds = parse_xml_file($chip_ids_file);
+my $chipIds = parse_xml_file($chip_ids_file, forcearray=>['chip-id']);
 
 use constant CHIP_ID_NODE => 0;
 use constant CHIP_ID_POS  => 1;
@@ -498,7 +505,7 @@ foreach my $i (@{$powerbus->{'power-bus'}})
 # Process the dmi-busses MRW file
 #------------------------------------------------------------------------------
 my $dmi_busses_file = open_mrw_file($mrwdir, "${sysname}-dmi-busses.xml");
-my $dmibus = parse_xml_file($dmi_busses_file);
+my $dmibus = parse_xml_file($dmi_busses_file, forcearray=>['dmi-bus']);
 
 my @dbus_mcs;
 use constant DBUS_MCS_NODE_INDEX => 0;
@@ -548,7 +555,8 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
 # Process the cent-vrds MRW file
 #------------------------------------------------------------------------------
 my $cent_vrds_file = open_mrw_file($mrwdir, "${sysname}-cent-vrds.xml");
-my $mrwMemVoltageDomains = parse_xml_file($cent_vrds_file);
+my $mrwMemVoltageDomains = parse_xml_file($cent_vrds_file,
+                                 forcearray=>['centaur-vrd-connection']);
 
 our %vrmHash = ();
 my %membufVrmUuidHash = ();
@@ -813,11 +821,19 @@ foreach my $i (@{$eTargets->{target}})
     }
 }
 
+# For open-power there is an MRW change which leads the venice to be called
+# opnpwr_venice. Hostboot doesn't care - it's the same PVR. So, to keep the
+# rest of the tools happy (e.g., those which use target_types.xml) lets map
+# the open-power venice to a regular venice. Note: not just removing the
+# opnpwr_ prefix as I think we want this to be a cannary if other opnpwr_
+# "processors" get created.
+$CHIPNAME =~ s/opnpwr_venice/venice/g;
+
 #------------------------------------------------------------------------------
 # Process the fsi-busses MRW file
 #------------------------------------------------------------------------------
 my $fsi_busses_file = open_mrw_file($mrwdir, "${sysname}-fsi-busses.xml");
-my $fsiBus = parse_xml_file($fsi_busses_file);
+my $fsiBus = parse_xml_file($fsi_busses_file, forcearray=>['fsi-bus']);
 
 # Build all the FSP chip targets / attributes
 my %FSPs = ();
@@ -845,6 +861,9 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
     }
 }
 
+# Keep the knowledge of whether we have FSPs or not.
+my $haveFSPs = keys %FSPs != 0;
+
 # Build up FSI paths
 # Capture all FSI connections into the @Fsis array
 my @Fsis;
@@ -855,6 +874,9 @@ use constant FSI_MASTERNODE_FIELD => 3;
 use constant FSI_MASTERPOS_FIELD => 4;
 use constant FSI_TARGET_TYPE_FIELD  => 5;
 use constant FSI_SLAVE_PORT_FIELD => 6;
+use constant FSI_UNIT_ID_FIELD => 7;
+use constant FSI_MASTER_TYPE_FIELD => 8;
+use constant FSI_INSTANCE_FIELD => 9;
 #Master procs have FSP as their master
 #<fsi-bus>
 #  <master>
@@ -914,7 +936,13 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
       #TARGET_TYPE :: Slave chip type 'pu','memb'
       $fsiBus->{'slave'}->{'target'}->{'name'},
       #SLAVE_PORT :: mproc->'fsi_slave0',altmproc->'fsi_slave1'
-      $fsiBus->{'slave'}->{'unit-id'}
+      $fsiBus->{'slave'}->{'unit-id'},
+      #UNIT_ID :: FSI_CASCADE, MFSI
+      $fsiBus->{'master'}->{'unit-id'},
+      #MASTER_TYPE :: Master chip type 'pu','memb'
+      $fsiBus->{'master'}->{'target'}->{'name'},
+      #INSTANCE_FIELD :: palmetto_board-assembly-0/...
+      $fsiBus->{'master'}->{'instance-path'}
         ];
 
    #print "\nTARGET=$Fsis[$#Fsis][FSI_TARGET_FIELD]\n";
@@ -930,27 +958,34 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
 #------------------------------------------------------------------------------
 # Process the psi-busses MRW file
 #------------------------------------------------------------------------------
-my $psi_busses_file = open_mrw_file($mrwdir, "${sysname}-psi-busses.xml");
-our $psiBus = parse_xml_file($psi_busses_file,
-                      forcearray=>['psi-bus']);
-
-# Capture all PSI connections into the @hbPSIs array
-use constant HB_PSI_MASTER_CHIP_POSITION_FIELD  => 0;
-use constant HB_PSI_MASTER_CHIP_UNIT_FIELD      => 1;
-use constant HB_PSI_PROC_NODE_FIELD             => 2;
-use constant HB_PSI_PROC_POS_FIELD              => 3;
 
 my @hbPSIs;
-foreach my $i (@{$psiBus->{'psi-bus'}})
+my $psiBus;
+
+if ($haveFSPs)
 {
-    push @hbPSIs, [
-                  $i->{fsp}->{'psi-unit'}->{target}->{position},
-                  $i->{fsp}->{'psi-unit'}->{target}->{chipUnit},
-                  $i->{processor}->{target}->{node},
-                  $i->{processor}->{target}->{position},
-                ];
+    my $psi_busses_file = open_mrw_file($mrwdir, "${sysname}-psi-busses.xml");
+    $psiBus = parse_xml_file($psi_busses_file,
+                                 forcearray=>['psi-bus']);
+
+    # Capture all PSI connections into the @hbPSIs array
+    use constant HB_PSI_MASTER_CHIP_POSITION_FIELD  => 0;
+    use constant HB_PSI_MASTER_CHIP_UNIT_FIELD      => 1;
+    use constant HB_PSI_PROC_NODE_FIELD             => 2;
+    use constant HB_PSI_PROC_POS_FIELD              => 3;
+
+    foreach my $i (@{$psiBus->{'psi-bus'}})
+    {
+        push @hbPSIs, [
+            $i->{fsp}->{'psi-unit'}->{target}->{position},
+            $i->{fsp}->{'psi-unit'}->{target}->{chipUnit},
+            $i->{processor}->{target}->{node},
+            $i->{processor}->{target}->{position},
+        ];
+    }
 }
 
+#
 #------------------------------------------------------------------------------
 # Process the memory-busses MRW file
 #------------------------------------------------------------------------------
@@ -983,6 +1018,11 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          $i->{mcs}->{target}->{position}, 0,
          $i->{dimm}->{'instance-path'} ];
 }
+
+# Determine if the DIMMs are CDIMM or JDIMM (IS-DIMM). Check for "not
+# centaur dimm" rather than "is ddr3 dimm" so ddr4 etc will work.
+my $isISDIMM = 1
+   if $memBus->{'drams'}->{'dram'}[0]->{'dram-instance-path'} !~ /centaur_dimm/;
 
 # Sort the memory busses, based on their Node, Pos & instance paths
 my @SMembuses = sort byDimmNodePos @Membuses;
@@ -1157,17 +1197,43 @@ for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 
 $node = $curnode;
 
+my @Mfsis;
+my %Pus;
+
 # find master proc of this node
 for my $i ( 0 .. $#Fsis )
 {
     my $nodeId = lc($Fsis[$i][FSI_TARGET_FIELD]);
     $nodeId =~ s/.*n(.*):.*$/$1/;
-    if ((lc($Fsis[$i][FSI_TYPE_FIELD]) eq "fsp master") &&
-        (($Fsis[$i][FSI_TARGET_TYPE_FIELD]) eq "pu") &&
-        ($nodeId eq $node))
+
+    if ($nodeId eq $node)
     {
-        push @mprocs, $Fsis[$i][FSI_TARGET_FIELD];
-        #print "Mproc = $Fsis[$i][FSI_TARGET_FIELD]\n";
+        # Keep track of MSFI connections
+        push @Mfsis, $Fsis[$i][FSI_TARGET_FIELD]
+            if $Fsis[$i][FSI_UNIT_ID_FIELD] =~ /mfsi/i;
+
+        # Keep track of the of pu's, too.
+        $Pus{$Fsis[$i][FSI_INSTANCE_FIELD]} =
+            "n$Fsis[$i][FSI_MASTERNODE_FIELD]:p$Fsis[$i][FSI_MASTERPOS_FIELD]"
+            if $Fsis[$i][FSI_MASTER_TYPE_FIELD] =~ /pu/;
+
+        # Check for fsp master, if so - we have a master proc.
+        if ((lc($Fsis[$i][FSI_TYPE_FIELD]) eq "fsp master") &&
+            (($Fsis[$i][FSI_TARGET_TYPE_FIELD]) eq "pu"))
+        {
+            push @mprocs, $Fsis[$i][FSI_TARGET_FIELD];
+            #print "Mproc = $Fsis[$i][FSI_TARGET_FIELD]\n";
+        }
+    }
+}
+
+# fsp-less systems won't have an fsp master, so we use an augmented algorithm.
+if ($#mprocs < 0)
+{
+    # If there are no FSPs, no mfsi links and one pu, this is the master proc
+    if ((!$haveFSPs) && ($#Mfsis < 0) && (keys %Pus == 1))
+    {
+        push @mprocs, values %Pus;
     }
 }
 
@@ -1487,44 +1553,9 @@ for my $i ( 0 .. $#STargets )
 
 # Sixth, generate DIMM targets
 
-print "\n<!-- $SYSNAME Centaur DIMMs -->\n";
+generate_is_dimm() if ($isISDIMM);
+generate_centaur_dimm() if (!$isISDIMM);
 
-for my $i ( 0 .. $#SMembuses )
-{
-    if ($SMembuses[$i][BUS_NODE_FIELD] != $node)
-    {
-        next;
-    }
-
-    my $ipath = $SMembuses[$i][DIMM_PATH_FIELD];
-    my $proc = $SMembuses[$i][MCS_TARGET_FIELD];
-    my $mcs = $proc;
-    $proc =~ s/.*:p(.*):.*/$1/;
-    $mcs =~ s/.*mcs(.*)/$1/;
-    my $ctaur = $SMembuses[$i][CENTAUR_TARGET_FIELD];
-    my $mba = $ctaur;
-    $ctaur =~ s/.*:p(.*):mba.*$/$1/;
-    $mba =~ s/.*:mba(.*)$/$1/;
-    my $pos = $SMembuses[$i][DIMM_TARGET_FIELD];
-    $pos =~ s/.*:p(.*)/$1/;
-    my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
-    $dimm =~ s/.*dimm-(.*)/$1/;
-    my $relativeDimmRid = $dimm;
-    my $dimmPos = $SMembuses[$i][DIMM_POS_FIELD];
-    $dimmPos =~ s/.*dimm-(.*)/$1/;
-    my $relativePos = $dimmPos;
-    print "\n<!-- C-DIMM n${node}:p${pos} -->\n";
-    for my $id ( 0 .. 7 )
-    {
-        my $dimmid = $dimm;
-        $dimmid <<= 3;
-        $dimmid |= $id;
-        $dimmid = sprintf ("%d", $dimmid);
-        generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id,
-                             ($SMembuses[$i][BUS_ORDINAL_FIELD]*8)+$id,
-                              $relativeDimmRid, $relativePos, $ipath);
-    }
-}
 
 # call to do pnor attributes
 do_plugin('all_pnors', $node);
@@ -1810,16 +1841,18 @@ sub generate_sys
     addSysAttrs();
     print "    <!-- End System Attributes from MRW -->\n";
 
+    # If we don't have any FSPs (open-power) then we don't need any SP_FUNCTIONS
+    my $HaveSPFunctions = $haveFSPs ? 1 : 0;
     print "
     <attribute>
         <id>SP_FUNCTIONS</id>
         <default>
-            <field><id>baseServices</id><value>1</value></field>
-            <field><id>fsiSlaveInit</id><value>1</value></field>
-            <field><id>mailboxEnabled</id><value>1</value></field>
-            <field><id>fsiMasterInit</id><value>1</value></field>
-            <field><id>hardwareChangeDetection</id><value>1</value></field>
-            <field><id>powerLineDisturbance</id><value>1</value></field>
+            <field><id>baseServices</id><value>$HaveSPFunctions</value></field>
+            <field><id>fsiSlaveInit</id><value>$HaveSPFunctions</value></field>
+            <field><id>mailboxEnabled</id><value>$HaveSPFunctions</value></field>
+            <field><id>fsiMasterInit</id><value>$HaveSPFunctions</value></field>
+            <field><id>hardwareChangeDetection</id><value>$HaveSPFunctions</value></field>
+            <field><id>powerLineDisturbance</id><value>$HaveSPFunctions</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
@@ -1833,7 +1866,15 @@ sub generate_sys
     </attribute>
     <attribute>
         <id>PAYLOAD_KIND</id>
-        <default>PHYP</default>
+        <default>SAPPHIRE</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <default>0x10</default>
     </attribute>";
 
     generate_max_config();
@@ -2096,6 +2137,10 @@ sub generate_proc
     }
 
     my $mruData = get_mruid($ipath);
+
+    # If we don't have an FSP (open-power) then we want to use Xscom
+    my $UseXscom   = $haveFSPs ? 0 : 1;
+    my $UseFsiScom = $haveFSPs ? 1 : 0;
     print "
     <!-- $SYSNAME n${node}p${proc} processor chip -->
 
@@ -2106,8 +2151,8 @@ sub generate_proc
     <attribute><id>POSITION</id><default>${position}</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
-            <field><id>useFsiScom</id><value>1</value></field>
-            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useFsiScom</id><value>$UseFsiScom</value></field>
+            <field><id>useXscom</id><value>$UseXscom</value></field>
             <field><id>useInbandScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
@@ -3201,7 +3246,9 @@ sub generate_centaur
             ($dmi->[DBUS_CENTAUR_MEMBUF_INDEX] eq $ctaur) )
         {
             $lane_swap = $dmi->[DBUS_CENTAUR_UPSTREAM_INDEX];
-            $msb_swap = $dmi->[DBUS_CENTAUR_RX_SWAP_INDEX];
+            # Note: We swap rx/tx when we fill in the array, so there's no
+            # need to use rx here - we already accounted for direction
+            $msb_swap = $dmi->[DBUS_CENTAUR_TX_SWAP_INDEX];
             last;
         }
     }
@@ -3430,6 +3477,151 @@ sub generate_l4
     do_plugin('fsp_centaur_l4', $ctaur, $ordinalId );
 
     print "</targetInstance>";
+}
+
+sub generate_is_dimm
+{
+    # keyed by $mba, keeps track of which dimm on each mba we're working on
+    my $dimmCounter = {};
+
+    # From the i2c busses, grab the information for the DIMMs, if any.
+    my $dimmI2C = {};
+    my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
+    my $i2cSettings = XMLin($i2c_file);
+
+    foreach my $i (@{$i2cSettings->{'i2c-device'}})
+    {
+        $dimmI2C->{$i->{'entry-num'}} = $i if $i->{'part-id'} eq 'DIMM_SPD';
+    }
+
+    print "\n<!-- $SYSNAME JEDEC DIMMs -->\n";
+    for my $i ( 0 .. $#SMembuses )
+    {
+        if ($SMembuses[$i][BUS_NODE_FIELD] != $node)
+        {
+            next;
+        }
+
+        my $ipath = $SMembuses[$i][DIMM_PATH_FIELD];
+        my $proc = $SMembuses[$i][MCS_TARGET_FIELD];
+        my $mcs = $proc;
+        $proc =~ s/.*:p(.*):.*/$1/;
+        $mcs =~ s/.*mcs(.*)/$1/;
+        my $ctaur = $SMembuses[$i][CENTAUR_TARGET_FIELD];
+        my $mba = $ctaur;
+        $ctaur =~ s/.*:p(.*):mba.*$/$1/;
+        $mba =~ s/.*:mba(.*)$/$1/;
+        $dimmCounter->{$mba} = 0 if ($dimmCounter->{$mba} eq undef);
+        my $pos = $SMembuses[$i][DIMM_TARGET_FIELD];
+        $pos =~ s/.*:p(.*)/$1/;
+        my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
+        $dimm =~ s/.*dimm-(.*)/$1/;
+
+        my $dimmPos = $SMembuses[$i][DIMM_POS_FIELD];
+        $dimmPos =~ s/.*dimm-(.*)/$1/;
+
+        my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
+
+        print "\n<!-- DIMM n${node}:p${pos} -->\n";
+        print "
+<targetInstance>
+    <id>sys${sys}node${node}dimm$dimm</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>POSITION</id><default>$pos</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/dimm-$dimm</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur/mba-$mba/dimm-$dimmCounter->{$mba}</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>MBA_DIMM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+        <default>$dimmCounter->{$mba}</default>
+    </attribute>";
+        if ($dimmI2C->{$i+1})
+        {
+            print "
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/membuf-$ctaur</value></field>
+             <field><id>port</id><value>$dimmI2C->{$i+1}->{'i2c-master'}->{'i2c-port'}</value></field>
+             <field><id>devAddr</id><value>0x$dimmI2C->{$i+1}->{'address'}</value></field>
+             <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x01</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x01</value></field>
+             <field><id>writePageSize</id><value>0x00</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
+         </default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>$pos</default>
+    </attribute>";
+        }
+
+        # call to do any fsp per-dimm attributes
+        my $dimmHex = sprintf("0xD0%02X",$dimmPos);
+        do_plugin('fsp_dimm', $proc, $ctaur, $dimm, $dimm, $dimmHex );
+
+        print "\n</targetInstance>\n";
+
+        $dimmCounter->{$mba} += 1;
+    }
+}
+
+sub generate_centaur_dimm
+{
+    print "\n<!-- $SYSNAME Centaur DIMMs -->\n";
+
+    for my $i ( 0 .. $#SMembuses )
+    {
+        if ($SMembuses[$i][BUS_NODE_FIELD] != $node)
+        {
+            next;
+        }
+
+        my $ipath = $SMembuses[$i][DIMM_PATH_FIELD];
+        my $proc = $SMembuses[$i][MCS_TARGET_FIELD];
+        my $mcs = $proc;
+        $proc =~ s/.*:p(.*):.*/$1/;
+        $mcs =~ s/.*mcs(.*)/$1/;
+        my $ctaur = $SMembuses[$i][CENTAUR_TARGET_FIELD];
+        my $mba = $ctaur;
+        $ctaur =~ s/.*:p(.*):mba.*$/$1/;
+        $mba =~ s/.*:mba(.*)$/$1/;
+        my $pos = $SMembuses[$i][DIMM_TARGET_FIELD];
+        $pos =~ s/.*:p(.*)/$1/;
+        my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
+        $dimm =~ s/.*dimm-(.*)/$1/;
+        my $relativeDimmRid = $dimm;
+        my $dimmPos = $SMembuses[$i][DIMM_POS_FIELD];
+        $dimmPos =~ s/.*dimm-(.*)/$1/;
+        my $relativePos = $dimmPos;
+        print "\n<!-- C-DIMM n${node}:p${pos} -->\n";
+        for my $id ( 0 .. 7 )
+        {
+            my $dimmid = $dimm;
+            $dimmid <<= 3;
+            $dimmid |= $id;
+            $dimmid = sprintf ("%d", $dimmid);
+            generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id,
+                           ($SMembuses[$i][BUS_ORDINAL_FIELD]*8)+$id,
+                           $relativeDimmRid, $relativePos, $ipath);
+        }
+    }
 }
 
 # Since each Centaur has only one dimm, it is assumed to be attached to port 0
