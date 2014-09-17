@@ -267,6 +267,9 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         // Set the cause attention type
         i_sc.service_data->SetCauseAttentionType(UNIT_CS);
 
+        // Indicate that cleanup is required.
+        mbdb->iv_doChnlFailCleanup = true;
+
     } while (0);
 
     return o_rc;

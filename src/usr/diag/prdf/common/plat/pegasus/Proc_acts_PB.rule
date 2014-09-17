@@ -1277,7 +1277,7 @@ group gPbCentFir filter singlebit
     (PbCentFir, bit(10)) ? forceMpIpl;
 
     /** PBCENTFIR[11]
-     *  PB_CENT_FIR_SPARE_0
+     *  Programming Error
      */
     (PbCentFir, bit(11)) ? calloutProcLevel2MedThr1;
 

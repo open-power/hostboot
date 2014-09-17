@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,7 +48,7 @@ class CenMembufDataBundle : public DataBundle
     /** @brief Constructor */
     CenMembufDataBundle( ExtensibleChip * i_membChip ) :
         iv_membChip(i_membChip), iv_mcsChip(NULL),
-        iv_analyzeMba1Starvation(false)
+        iv_analyzeMba1Starvation(false), iv_doChnlFailCleanup(false)
     {
         for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
             iv_mbaChips[i] = NULL;
@@ -121,6 +123,13 @@ class CenMembufDataBundle : public DataBundle
 
     // Toggles to solve MBA1 starvation issue
     bool iv_analyzeMba1Starvation;
+
+    /** The channel fail cleanup function is called in both the MCS and MEMBUF
+     *  PostAnalysis() plugins. It is possible in some cases that both plugins
+     *  are called in the same analysis path. In this case the cleanup will be
+     *  called twice. To circumvent this we will use this bool to determine if
+     *  the cleanup has been done or needs to be done. */
+    bool iv_doChnlFailCleanup;
 };
 
 /**

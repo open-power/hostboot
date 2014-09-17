@@ -30,6 +30,7 @@
 #include <prdfCenMemUtils.H>
 #include <prdfExtensibleChip.H>
 #include <prdfCenMbaDataBundle.H>
+#include <prdfP8McsDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfParserUtils.H>
@@ -373,6 +374,17 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
         io_sc.service_data->SetCauseAttentionType(UNIT_CS);
         io_sc.service_data->SetThresholdMaskId(0);
 
+        // Indicate that cleanup is required.
+        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
+        ExtensibleChip * membChip = mcsdb->getMembChip();
+        if ( NULL == membChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMembChip() returned NULL" );
+            o_rc = FAIL; break;
+        }
+        CenMembufDataBundle * mbdb = getMembufDataBundle( membChip );
+        mbdb->iv_doChnlFailCleanup = true;
+
     } while (0);
 
     if ( SUCCESS != o_rc )
@@ -407,10 +419,13 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
               (CHECK_STOP == i_sc.service_data->GetAttentionType()) )
             break;
 
+        CenMembufDataBundle * mbdb = getMembufDataBundle( i_mbChip );
+        if ( !mbdb->iv_doChnlFailCleanup )
+            break; // Cleanup has already been done.
+
         // Set it as SUE generation point.
         i_sc.service_data->SetFlag( ServiceDataCollector::UERE );
 
-        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )
         {
@@ -513,8 +528,14 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                 }
             }
         }
-    }while(0);
+
+        // Clean up complete an is no longer required.
+        mbdb->iv_doChnlFailCleanup = false;
+
+    } while(0);
+
     return o_rc;
+
     #undef PRDF_FUNC
 }
 
