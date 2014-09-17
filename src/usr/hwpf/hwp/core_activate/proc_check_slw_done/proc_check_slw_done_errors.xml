@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_check_slw_done_errors.xml,v 1.2 2014/01/24 19:22:27 stillgs Exp $ -->
+<!-- $Id: proc_check_slw_done_errors.xml,v 1.4 2014/09/12 20:04:39 cmolsen Exp $ -->
 <!-- Error definitions for p8_poreslw procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -47,6 +49,13 @@
       <id>REG_FFDC_PROC_SLW_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <target>EX_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>EX_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

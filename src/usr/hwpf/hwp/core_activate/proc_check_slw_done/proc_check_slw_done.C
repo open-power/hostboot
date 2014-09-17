@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slw_done.C,v 1.7 2014/01/24 19:41:07 stillgs Exp $
+// $Id: proc_check_slw_done.C,v 1.8 2014/09/10 21:49:44 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slw_done.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -246,6 +246,7 @@ proc_check_slw_done(const fapi::Target& i_ex_target)
             const uint64_t& PMERR   = pmerr.getDoubleWord(0);
             const uint64_t& PMHIST  = pmhist.getDoubleWord(0);
             const uint64_t& EX      = l_ex_number;
+            const fapi::Target& EX_IN_ERROR = i_ex_target;
             const fapi::Target& CHIP_IN_ERROR = l_parentTarget;
             FAPI_SET_HWP_ERROR(rc, RC_PMPROC_CHKSLW_NOT_IN_ETR);
             break;
