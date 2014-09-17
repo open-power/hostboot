@@ -890,6 +890,8 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             {
                 case TYPE_PROC:
                 case TYPE_OSC:
+                case TYPE_OSCPCICLK:
+                case TYPE_OSCREFCLK:
                 {
                     uint16_t tmpPos = 0;
                     if ( !i_target->tryGetAttr<ATTR_POSITION>(tmpPos) )
@@ -1300,15 +1302,24 @@ uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
 
 TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
                             i_pGivenTarget,
-                            TARGETING ::TYPE i_connType)
+                            TARGETING ::TYPE i_connType,
+                            uint32_t i_oscPos)
 {
     #define PRDF_FUNC "[PlatServices::getClockId] "
+
     TargetHandleList l_clockCardlist;
     TargetHandle_t l_target = i_pGivenTarget;
     TargetHandle_t o_pClockCardHandle = NULL;
 
     do
     {
+        if ( i_oscPos >= MAX_PCIE_OSC_PER_NODE )
+        {
+            PRDF_ERR(PRDF_FUNC"target: 0x%.8X - invalid "
+                "i_oscPos: %d", getHuid(i_pGivenTarget), i_oscPos);
+            break;
+        }
+
         // If membuf target, use the connected proc target
         if(TYPE_MEMBUF == getTargetType(i_pGivenTarget))
         {
@@ -1344,13 +1355,14 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
             l_itr != l_clockCardlist.end();
             ++l_itr)
         {
-            PRDF_TRAC(PRDF_FUNC"OSC 0x%.8X is connected to proc 0x%.8X",
-                      getHuid(*l_itr), getHuid(l_target));
-        }
+            PRDF_TRAC(PRDF_FUNC"OSC 0x%.8X, pos: %d is connected to "
+             "proc 0x%.8X, inputOscPos: %d", getHuid(*l_itr),
+             getTargetPosition(*l_itr), getHuid(l_target), i_oscPos);
 
-        if( 0 < l_clockCardlist.size())
-        {
-            o_pClockCardHandle = l_clockCardlist[0];
+            if ( i_oscPos == getTargetPosition(*l_itr) )
+            {
+                o_pClockCardHandle = *l_itr;
+            }
         }
 
     } while(0);

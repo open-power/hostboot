@@ -108,6 +108,38 @@ fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
 //##                       Processor specific functions
 //##############################################################################
 
+uint32_t getIoOscPos( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[PlatServices::getIoOscPos] "
+    uint32_t o_oscPos = MAX_PCIE_OSC_PER_NODE;
+
+    do
+    {
+        uint32_t u32Data = 0;
+
+        int32_t tmpRc = getCfam( i_chip, io_sc, 0x2819, u32Data );
+
+        if ( SUCCESS != tmpRc )
+        {
+            PRDF_ERR( PRDF_FUNC"getCfam of 0x2819 returned error for "
+                              "chip 0x%08x", i_chip->GetId() );
+            break;
+        }
+
+        // 2819 [ 16 ] == 1    ( OSC 0 is active )
+        // 2819 [ 16 ] == 0    ( OSC 1 is active )
+        uint32_t tmpData = ( u32Data >> 15 ) & 0x1;
+        o_oscPos = (tmpData == 1 ? 0:1);
+
+    } while(0);
+
+    return o_oscPos;
+
+    #undef PRDF_FUNC
+}
+
+
 //##############################################################################
 //##                       Lane Repair functions
 //##############################################################################

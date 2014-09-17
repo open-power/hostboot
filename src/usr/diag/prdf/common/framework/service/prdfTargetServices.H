@@ -374,13 +374,15 @@ uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
  * @brief   Gets handle of the clock card for the given target.
  * @param   i_pTargetHandle    Handle of a functional unit.
  * @param   i_peerType         Type of peer clock source
+ * @param   i_oscPos           OSC position (0 or 1)
  * @return  Handle_t of clock source.
  * @pre     None.
  * @post    None.
  */
 TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
                              i_pTargetHandle,
-                             TARGETING::TYPE i_peerType);
+                             TARGETING::TYPE i_peerType,
+                             uint32_t i_oscPos);
 
 //##############################################################################
 //##                     MNFG Policy Flag Functions

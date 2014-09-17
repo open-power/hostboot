@@ -142,9 +142,11 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                           ATTENTION_TYPE attentionType)
 {
+    #define PRDF_FUNC "[PllDomain::Analyze] "
     typedef ExtensibleChip * ChipPtr;
     CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]());
     int count = 0;
+    bool oscSource[2] = { false, false };
     int32_t rc = SUCCESS;
 
     // Due to clock issues some chips may be moved to non-functional during
@@ -182,6 +184,25 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 (*l_captureFfdc)( l_chip,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
             }
+
+            // Only continue for pcie domain to get osc pos
+            if ( CLOCK_DOMAIN_IO != GetId() )
+            {
+                break;
+            }
+
+            // Figure out which pcie osc is active for this proc
+            uint32_t oscPos = getIoOscPos(l_chip, serviceData);
+
+            if ( oscPos < MAX_PCIE_OSC_PER_NODE )
+            {
+                oscSource[oscPos] = true;
+            }
+            else
+            {
+                PRDF_ERR(PRDF_FUNC"getOscPos returned error for chip: "
+                         "0x%08x", l_chip->GetId());
+            }
         }
         else if ( !PlatServices::isFunctional(l_chip->GetChipHandle()) )
         {
@@ -203,11 +224,17 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         farClockSource.Resolve(serviceData);
     }
 
-    // If only one detected the error, add it to the callout list.
-    if ( 1 == count )
-    {
-        const uint32_t tmpCount = serviceData.service_data->getMruListSize();
+    const uint32_t tmpCount = serviceData.service_data->getMruListSize();
 
+    // If only one detected the error, add it to the callout list.
+    // Or if multiple chips report errors but no callout for PCIe case.
+    // This could happen for PCIe PLL since pcie clock resolution defer
+    // the osc callout to PllPcie chip plugin.
+    if (( 1 == count ) ||
+        (( 1 < count ) &&
+         ( 0 == tmpCount ) &&
+         ( CLOCK_DOMAIN_IO == GetId() )))
+    {
         // Call this chip's CalloutPll plugin if it exists.
         ExtensibleChipFunction * l_callout =
                 chip()[0]->getExtensibleFunction( CalloutPllFunc, true );
@@ -217,21 +244,88 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
         }
 
-        if ( tmpCount == serviceData.service_data->getMruListSize() )
+        // If CalloutPll plugin does not add anything new to the callout
+        // or for pcie io domain and only 1 proc reports error, then
+        // call it out in addition to the pcie osc already called out in
+        // CalloutPllFunc plugin
+        if (( tmpCount == serviceData.service_data->getMruListSize() ) ||
+            (( CLOCK_DOMAIN_IO == GetId() ) && ( 1 == count )))
         {
             // No additional callouts were made so add this chip to the list.
             serviceData.service_data->SetCallout( chip()[0]->GetChipHandle());
         }
     }
 
-    iv_threshold.Resolve(serviceData);
+    // PCIe domains uses two threshold resolutions one per osc
+    if ( CLOCK_DOMAIN_IO == GetId() )
+    {
+        if ( true == oscSource[0] )
+        {
+            iv_threshold.Resolve(serviceData);
+        }
+
+        if ( true == oscSource[1] )
+        {
+            iv_threshold2.Resolve(serviceData);
+        }
+
+        if (( false == oscSource[0] ) && ( false == oscSource[1] ))
+        {
+            PRDF_ERR(PRDF_FUNC"can't threshold IO domain due to no available "
+                               "pcie osc source - count:%d, chip 0x%08x",
+                               count, chip()[0]->GetId());
+        }
+    }
+    // Proc and mem domains only use one threshold resolution
+    else
+    {
+        iv_threshold.Resolve(serviceData);
+    }
+
     // Test for threshold
     if(serviceData.service_data->IsAtThreshold())
     {
-        // Mask in all chips in domain
-        ExtensibleDomainFunction * l_mask = getExtensibleFunction("MaskPll");
-        (*l_mask)(this,
+        // Only mask chips connected to fault pcie osc
+        if ( CLOCK_DOMAIN_IO == GetId() )
+        {
+            uint32_t oscPos = MAX_PCIE_OSC_PER_NODE;
+            if ( true == oscSource[0] )
+            {
+                // Mask pcie pll error in chips connected to pcie osc-0
+                oscPos = 0;
+                ExtensibleDomainFunction * l_mask =
+                           getExtensibleFunction("MaskPllIo");
+                (*l_mask)(this,
+                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                     (serviceData, oscPos));
+            }
+
+            if ( true == oscSource[1] )
+            {
+                // Mask pcie pll error in chips connected to pcie osc-1
+                oscPos = 1;
+                ExtensibleDomainFunction * l_mask =
+                           getExtensibleFunction("MaskPllIo");
+                (*l_mask)(this,
+                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                     (serviceData, oscPos));
+            }
+
+            if (( false == oscSource[0] ) && ( false == oscSource[1] ))
+            {
+                PRDF_ERR(PRDF_FUNC"can't mask pcie pll error due to no "
+                    "available pcie osc source - count:%d, chip 0x%08x",
+                    count, chip()[0]->GetId());
+            }
+        }
+        else
+        {
+            // Mask in all chips in domain
+            ExtensibleDomainFunction * l_mask =
+                                getExtensibleFunction("MaskPll");
+            (*l_mask)(this,
                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+        }
     }
     // Set Signature
     serviceData.service_data->GetErrorSignature()->setChipId(chip()[0]->GetId());
@@ -259,6 +353,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
 
     return rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -314,18 +410,12 @@ int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
-    const char * maskPllFuncName = "MaskPll";
-    if ( CLOCK_DOMAIN_IO == l_domain->GetId() )
-    {
-        maskPllFuncName = "MaskPllIo";
-    }
-
     // Mask children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
     {
         ExtensibleChip * l_chip = l_domain->LookUp(i);
         ExtensibleChipFunction * l_mask =
-                            l_chip->getExtensibleFunction(maskPllFuncName);
+                            l_chip->getExtensibleFunction("MaskPll");
         (*l_mask)( l_chip,
                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
@@ -344,6 +434,43 @@ int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( PllDomain, MaskPll );
+
+//------------------------------------------------------------------------------
+
+int32_t PllDomain::MaskPllIo( ExtensibleDomain * i_domain,
+                              STEP_CODE_DATA_STRUCT & i_sc,
+                              uint32_t i_oscPos )
+{
+    PllDomain * l_domain = (PllDomain *) i_domain;
+
+    // Mask children chips.
+    for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
+    {
+        ExtensibleChip * l_chip = l_domain->LookUp(i);
+        ExtensibleChipFunction * l_mask =
+                            l_chip->getExtensibleFunction("MaskPllIo");
+
+        // io pcie domain needs osc pos info
+        (*l_mask)( l_chip,
+                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                   (i_sc, i_oscPos) );
+    }
+
+    // Mask children domains - not used in PCIe but leave it here for now
+    // This looks like a recursive call.  It calls other domains of Mask.
+    ParentDomain<ExtensibleDomain>::iterator i;
+    for (i = l_domain->getBeginIterator(); i != l_domain->getEndIterator(); i++)
+    {
+        ExtensibleDomainFunction * l_mask =
+                                (i->second)->getExtensibleFunction("MaskPll");
+        (*l_mask)( i->second,
+                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( PllDomain, MaskPllIo );
+
 
 //------------------------------------------------------------------------------
 

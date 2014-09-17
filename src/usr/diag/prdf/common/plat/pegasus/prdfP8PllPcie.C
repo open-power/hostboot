@@ -199,6 +199,15 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
         int32_t tmpRC = SUCCESS;
         SCAN_COMM_REGISTER_CLASS * pciErrReg =
                 i_chip->getRegister("PCI_ERROR_REG");
+
+        tmpRC = pciErrReg->Read();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
+                     "for chip: 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
+
         pciErrReg->ClearBit(PLL_ERROR_BIT);
         tmpRC = pciErrReg->Write();
         if (tmpRC != SUCCESS)
@@ -238,21 +247,54 @@ PRDF_PLUGIN_DEFINE( Proc, ClearPllIo );
   * @brief Mask the PLL error for P8 Plugin
   * @param  i_chip P8 chip
   * @param  i_sc   The step code data struct
+  * @param  i_oscPos active osc position
   * @returns Failure or Success of query.
   * @note
   */
 int32_t MaskPllIo( ExtensibleChip * i_chip,
-                 STEP_CODE_DATA_STRUCT & i_sc )
+                 STEP_CODE_DATA_STRUCT & i_sc,
+                 uint32_t i_oscPos )
 {
     #define PRDF_FUNC "[Proc::MaskPllIo] "
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    do
     {
+        if (CHECK_STOP == i_sc.service_data->GetAttentionType())
+        {
+            break;
+        }
+
+        if ( i_oscPos >= MAX_PCIE_OSC_PER_NODE )
+        {
+            PRDF_ERR(PRDF_FUNC"invalid oscPos: %d for chip: "
+                     "0x%08x", i_oscPos, i_chip->GetId());
+            rc = FAIL;
+            break;
+        }
+
+        uint32_t oscPos = getIoOscPos( i_chip, i_sc );
+
+        if ( oscPos != i_oscPos )
+        {
+            PRDF_DTRAC(PRDF_FUNC"skip masking for chip: 0x%08x, "
+                      "oscPos: %d, i_oscPos: %d",
+                      i_chip->GetId(), oscPos, i_oscPos);
+            break;
+        }
+
         // fence off pci osc error reg bit
         SCAN_COMM_REGISTER_CLASS * pciConfigReg =
             i_chip->getRegister("PCI_CONFIG_REG");
+
+        rc = pciConfigReg->Read();
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
 
         if(!pciConfigReg->IsBitSet(PLL_ERROR_MASK))
         {
@@ -270,7 +312,7 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
         // pll error reg bits, we can't mask it or we will not
         // see any PLL errors reported from the error regs
 
-    }  // if not checkstop
+    } while(0);
 
     return rc;
 
@@ -285,7 +327,7 @@ PRDF_PLUGIN_DEFINE( Proc, MaskPllIo );
  * @returns Success
  */
 int32_t capturePllFfdcIo( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
+                          STEP_CODE_DATA_STRUCT & io_sc )
 {
     // Add FSI status reg
     captureFsiStatusReg( i_chip, io_sc );
@@ -293,6 +335,61 @@ int32_t capturePllFfdcIo( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Proc, capturePllFfdcIo );
+
+/**
+ * @brief   calling out active pcie osc connected to this proc
+ * @param   i_chip   P8 chip
+ * @param   i_sc     service data collector
+ * @returns Success
+ */
+int32_t CalloutPllIo( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[Proc::CalloutPllIo] "
+
+    int32_t rc = SUCCESS;
+
+    do
+    {
+        uint32_t oscPos = getIoOscPos( i_chip, io_sc );
+
+        // oscPos will be checked inside getClockId and in case
+        // a connected osc is not found, will use the proc target
+        // this is the hostboot path since it's used the proc
+        // target and clock type.
+        TargetHandle_t connectedOsc = getClockId( i_chip->GetChipHandle(),
+                                                  TYPE_OSCPCICLK,
+                                                  oscPos );
+
+        if ( NULL == connectedOsc )
+        {
+            PRDF_ERR(PRDF_FUNC"Failed to get connected PCIe OSC for "
+                 "chip 0x%08x, oscPos: %d",i_chip->GetId(), oscPos );
+            connectedOsc = i_chip->GetChipHandle();
+        }
+
+        PRDF_DTRAC(PRDF_FUNC"PCIe OSC: 0x%08x connected to "
+                 "proc: 0x%08x", getHuid(connectedOsc), i_chip->GetId());
+
+        // callout the clock source
+        // HB does not have the osc target modeled
+        // so we need to use the proc target with
+        // osc clock type to call out
+        #ifndef __HOSTBOOT_MODULE
+        io_sc.service_data->SetCallout(connectedOsc);
+        #else
+        io_sc.service_data->SetCallout(
+                            PRDcallout(connectedOsc,
+                            PRDcalloutData::TYPE_PCICLK));
+        #endif
+
+    } while(0);
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Proc, CalloutPllIo );
 
 } // end namespace Proc
 

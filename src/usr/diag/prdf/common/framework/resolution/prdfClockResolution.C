@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,15 +47,13 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     uint32_t l_rc = SUCCESS;
     // callout clock osc
     if ( (iv_targetType == TYPE_PROC) ||
-         (iv_targetType == TYPE_PCI) ||
          (iv_targetType == TYPE_MEMBUF) )
     {
-        // Get clock card.
-        TYPE oscType = (iv_targetType == TYPE_PCI) ?
-                    TYPE_OSCPCICLK : TYPE_OSCREFCLK;
-
+        // even though we pass in pos=0 for systemref clk,
+        // getActiveRefClk will make sure it returns the active osc.
         TargetHandle_t l_ptargetClock =
-            PlatServices::getClockId(iv_ptargetClock, oscType);
+            PlatServices::getActiveRefClk(iv_ptargetClock,
+                                     TYPE_OSCREFCLK, 0);
 
         // Callout this chip if nothing else.
         if(NULL == l_ptargetClock)
@@ -70,10 +70,15 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
         #else
         serviceData.service_data->SetCallout(
                             PRDcallout(l_ptargetClock,
-                            iv_targetType == TYPE_PCI ?
-                                PRDcalloutData::TYPE_PCICLK :
-                                PRDcalloutData::TYPE_PROCCLK));
+                            PRDcalloutData::TYPE_PROCCLK));
         #endif
+    }
+    else if (iv_targetType == TYPE_PCI)
+    {
+        // The PCIe OSC callout is being done inside
+        // chip plugins (prdfP8PllPcie) since the connected
+        // OSC can dynamically change and requires
+        // reading chip reg to figure out.
     }
     // Get all connected chips for non-CLOCK_CARD types.
     else

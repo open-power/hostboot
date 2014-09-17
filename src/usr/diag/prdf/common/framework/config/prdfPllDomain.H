@@ -144,6 +144,18 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain,
     static int32_t MaskPll( ExtensibleDomain * i_domain,
                             STEP_CODE_DATA_STRUCT & i_sc );
 
+    /**
+     * @brief  Domain level plugin function used to mask PLL attentions in a
+     *         domain and its subdomains.
+     * @param  i_domain The target PLL domain.
+     * @param  i_sc The step code data struct.
+     * @param  i_oscPos osc position (only used by IO pcie domain)
+     * @return SUCCESS
+     */
+    static int32_t MaskPllIo( ExtensibleDomain * i_domain,
+                            STEP_CODE_DATA_STRUCT & i_sc,
+                            uint32_t i_oscPos );
+
 protected:
 
   /**
@@ -169,6 +181,12 @@ private:  // Data
   Resolution & farClockSource;
 
   Resolution & iv_threshold;
+
+  // This resolution is used for the 2nd pcie osc only
+  // since the redundant pcie oscs are at the node
+  // level and can dynamically switch or config
+  // during the IPL
+  Resolution & iv_threshold2;
 
 #ifndef __HOSTBOOT_MODULE
     hwTableContent iv_dumpContent;
@@ -196,6 +214,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
     farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
+                                i_mfgThresh ) ),
+    iv_threshold2( ResolutionFactory::Access().GetThresholdResolution( 1,
+                                ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) )
 {
     InitChipPluginFuncs();
@@ -210,6 +231,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
     closeClockSource(secondClockSource),
     farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
+                                ThresholdResolution::cv_pllDefault,
+                                i_mfgThresh ) ),
+    iv_threshold2( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) )
 {
@@ -229,6 +253,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) ),
+    iv_threshold2( ResolutionFactory::Access().GetThresholdResolution( 1,
+                                ThresholdResolution::cv_pllDefault,
+                                i_mfgThresh ) ),
     iv_dumpContent(i_hwdc)
 {
     InitChipPluginFuncs();
@@ -244,6 +271,9 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
     closeClockSource(secondClockSource),
     farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
+                                ThresholdResolution::cv_pllDefault,
+                                i_mfgThresh ) ),
+    iv_threshold2( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) ),
     iv_dumpContent(i_hwdc)

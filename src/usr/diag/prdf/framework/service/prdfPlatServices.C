@@ -267,10 +267,14 @@ bool isSmpCoherent() { return false; }
 //##                        util functions
 //##############################################################################
 
-void captureFsiStatusReg( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
+int32_t getCfam( ExtensibleChip * i_chip,
+                 STEP_CODE_DATA_STRUCT & io_sc,
+                 const uint32_t i_addr,
+                 uint32_t & o_data)
 {
-    #define PRDF_FUNC "[PlatServices::captureFsiStatusReg] "
+    #define PRDF_FUNC "[PlatServices::getCfam] "
+
+    int32_t rc = SUCCESS;
 
     do
     {
@@ -293,36 +297,83 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
 
         errlHndl_t errH = NULL;
         ecmdDataBufferBase cfamData(32);
-        uint32_t u32Data = 0;
 
         PRD_FAPI_TO_ERRL(errH,
                          fapiGetCfamRegister,
-                         PlatServices::getFapiTarget(i_chip->GetChipHandle()),
-                         0x00001007,
+                         PlatServices::getFapiTarget(l_procTgt),
+                         i_addr,
                          cfamData);
 
-        if(errH)
+        if ( NULL == errH )
         {
-            PRDF_ERR( PRDF_FUNC"chip: 0x%.8X, failed to get "
-                      "CFAM_FSI_STATUS: 0x%X",
-                      i_chip->GetId(), cfamData.getWord( 0 ) );
+            o_data = cfamData.getWord(0);
+        }
+        else
+        {
+            rc = FAIL;
+            PRDF_ERR( PRDF_FUNC"chip: 0x%.8X, failed to get cfam address: "
+                      "0x%X", i_chip->GetId(), i_addr );
             PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
             break;
         }
 
-        u32Data = cfamData.getWord(0);
+
+    } while(0);
+
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+void captureFsiStatusReg( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[PlatServices::captureFsiStatusReg] "
+
+    uint32_t u32Data = 0;
+    int32_t rc = getCfam( i_chip, io_sc, 0x00001007, u32Data );
+
+    if ( SUCCESS == rc )
+    {
         BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &u32Data);
 
         io_sc.service_data->GetCaptureData().Add(
                             i_chip->GetChipHandle(),
                             ( Util::hashString("CFAM_FSI_STATUS") ^
                               i_chip->getSignatureOffset() ),
-                            bs);
-    } while(0);
+                              bs);
+    }
+
+    // only get this for proc chip
+    if ( TYPE_PROC == getTargetType(i_chip->GetChipHandle()) )
+    {
+        rc = getCfam( i_chip, io_sc, 0x00002819, u32Data );
+
+        if ( SUCCESS == rc )
+        {
+            BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &u32Data);
+
+            io_sc.service_data->GetCaptureData().Add(
+                                      i_chip->GetChipHandle(),
+                                      ( Util::hashString("PCIE_OSC_SWITCH") ^
+                                        i_chip->getSignatureOffset() ),
+                                      bs);
+        }
+    }
 
     #undef PRDF_FUNC
 }
 
+TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
+                            i_procTarget,
+                            TARGETING::TYPE i_connType,
+                            uint32_t i_oscPos)
+{
+    return PlatServices::getClockId( i_procTarget,
+                                     i_connType,
+                                     i_oscPos );
+}
 
 } // end namespace PlatServices
 

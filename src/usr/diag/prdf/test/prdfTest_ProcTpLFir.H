@@ -81,7 +81,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
             // PB_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001F,
-                           0x0000006000000001);
+                           0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x020F001F,
             //0x0000000000000001);
 
@@ -93,7 +93,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
             // ABUS_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x080F001F,
-                           0x0000004000000001);
+                           0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x080F001F,
             //0x0000000000000001);
 
@@ -105,7 +105,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
             // EX_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
-                           0x0000004000000001);
+                           0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
             //0x0000000000000001);
 
@@ -158,7 +158,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
             // PB_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001F,
-                           0x0000006000000001);
+                           0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x020F001F,
             //0x0000000000000001);
 
@@ -170,7 +170,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
             // ABUS_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x080F001F,
-                           0x0000004000000001);
+                           0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x080F001F,
             //0x0000000000000001);
 
@@ -182,7 +182,7 @@ class PTPLFIR:public CxxTest::TestSuite
 
             // EX_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
-                           0x0000004000000001);
+                           0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}:EX{4}", 0x100F001F,
             //0x0000000000000001);
 

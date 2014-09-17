@@ -162,6 +162,15 @@ void initiateUnitDump( TARGETING::TargetHandle_t i_target,
  */
 void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
 
+/**
+ * @brief   get the active pcie osc pos for this proc
+ * @param   i_chip   P8 chip
+ * @param   i_sc     service data collector
+ * @return   active osc position
+ */
+uint32_t getIoOscPos( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & io_sc );
+
 //##############################################################################
 //##                       Lane Repair functions
 //##############################################################################
@@ -499,6 +508,31 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
  */
 void captureFsiStatusReg( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
+ * @brief   get cfam data
+ * @param   i_chip   Extensible chip
+ * @param   i_sc     service data collector
+ * @param   i_addr   address
+ * @param   o_data   returned data
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t getCfam( ExtensibleChip * i_chip,
+                 STEP_CODE_DATA_STRUCT & io_sc,
+                 const uint32_t i_addr,
+                 uint32_t & o_data);
+
+/**
+ * @brief   get sysref clk target for the given proc target.
+ * @param   i_procTarget  proc target.
+ * @param   i_peerType    Type of peer clock source
+ * @param   i_oscPos      OSC position (0 or 1)
+ * @return  Handle_t of systemref clock target.
+ */
+TARGETING::TargetHandle_t getActiveRefClk(
+                            TARGETING::TargetHandle_t i_procTarget,
+                            TARGETING::TYPE i_connType,
+                            uint32_t i_oscPos);
 
 } // end namespace PlatServices
 
