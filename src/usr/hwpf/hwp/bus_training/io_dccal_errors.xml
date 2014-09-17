@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: io_dccal_errors.xml,v 1.7 2014/08/13 15:27:24 varkeykv Exp $ -->
+<!-- $Id: io_dccal_errors.xml,v 1.8 2014/09/10 20:35:22 garyp Exp $ -->
 
 <!-- Error definitions for io_dccal HWPS  -->
 <hwpErrors>
@@ -158,10 +158,6 @@
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
-    </callout>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>LOW</priority>
     </callout>
   </hwpError>
  
