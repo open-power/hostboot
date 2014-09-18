@@ -1,8 +1,12 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.15 2014/08/21 15:18:34 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.17 2014/09/12 17:15:24 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.17|baysah  |09/12/14|- SW277283 : MCS FCI Register is not in Murano DD1.x ... Qualify scom 201181c
+#--         |        |        |
+#--     1.16|baysah  |09/03/14|- SW275492 : MCS Command List Timer Needs to be Extended
 #--         |        |        |
 #--     1.15|baysah  |06/21/14|- SW274463 : Shut down mirror on first mirrored memory UE
 #--         |        |        |
@@ -141,7 +145,7 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      47   ,                    0b1              ;              # MCMODE2Q_ENABLE_MIRROR_WR_HANG
      48   ,                    0b1              ;              # MCMODE2Q_ENABLE_AO_HANG
      49   ,                    0b1              ;              # MCMODE2Q_ENABLE_INBAND_HANG
-     50:52,                    0b101            ;              # MCMODE2Q_NONMIRROR_HANG_VALUE
+     50:52,                    0b100            ;              # MCMODE2Q_NONMIRROR_HANG_VALUE
      53:55,                    0b111            ;              # MCMODE2Q_MIRROR_HANG_VALUE
      56   ,                    0b1              ;              # MCMODE2Q_ENABLE_EMER_THROTTLE
      57   ,                    0b0              ;              # MCMODE2Q_DRIVE_SHARED_PRESP_WITH_LOST_CLAIM
@@ -171,7 +175,7 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
  scom 0x000000000201181A              {
      bits ,                    scom_data        ;
       1:3,                     0b111            ;              # DISABLE INTERFACE AND ARBITER BLOCKING DURING INTERNAL MCS CHECKSTOP
-     17:18,                    0b01             ;              # MCMODE4Q_SELECT_RPTHANG_DECODE
+     17:18,                    0b00             ;              # MCMODE4Q_SELECT_RPTHANG_DECODE
      19   ,                    0b1              ;              # MCMODE4Q_LOCAL_TIMEBASE_SELECT
      21   ,                    0b1              ;              # MCMODE4Q_DISABLE_POWERBUS_READ_AND_WRITE_RAMPS_DURING_CHECKSTOP
 }
@@ -194,10 +198,10 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
 #-- MCS Hardware Force Mirror Read (MCHWFM)
 #--******************************************************************************
  scom 0x000000000201181C              {
-     bits ,                    scom_data        ;
-     0    ,                    0b1              ;              # ENABLE FORCED CHANNEL INACTIVE FOR MIRROR UE/SUE FUNCTION
-     4    ,                    0b0              ;              # DON'T SHUT DOWN MIRROR FOR INTERNAL CENTAUR UES, OR PASSED IN SUES
-     5    ,                    0b1              ;              # SHUT DOWN MIRROR FOR MIRRORED MEMORY UE ONLY
+     bits ,                    scom_data     ,     expr                ;
+     0    ,                    0b1           , (ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL == 0)   ;          # ENABLE FORCED CHANNEL INACTIVE FOR MIRROR UE/SUE FUNCTION
+     4    ,                    0b0           , (ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL == 0)   ;          # DON'T SHUT DOWN MIRROR FOR INTERNAL CENTAUR UES, OR PASSED IN SUES
+     5    ,                    0b1           , (ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL == 0)   ;          # SHUT DOWN MIRROR FOR MIRRORED MEMORY UE ONLY
 }
 
 #--******************************************************************************
