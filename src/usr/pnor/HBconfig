@@ -33,3 +33,7 @@ config ALLOW_MACRONIX_PNOR
     help
         Include support for Macronix PNOR chips
 
+config PNOR_IS_32MB
+    default n
+    help
+        Size of the attached flash chip is 32MB, if not set then 64MB is default

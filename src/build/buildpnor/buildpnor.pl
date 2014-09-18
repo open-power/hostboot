@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -165,24 +167,31 @@ if($rc != 0)
 my $sideAOffset =  $pnorLayout{metadata}{sideAOffset};
 my $sideBOffset =  $pnorLayout{metadata}{sideBOffset};
 
-$rc = createPnorImage($tocVersion, $pnorBinName, \%pnorLayout, $sideAOffset);
+$rc = createPnorImg($tocVersion, $pnorBinName, \%pnorLayout, $sideAOffset, 'A');
 if($rc != 0)
 {
-    trace(0, "Error detected from call to createPnorImage() sideAOffset. Exiting");
+    trace(0, "Error detected from createPnorImg() sideAOffset. Exiting");
     exit 1;
 }
 
-$rc = createPnorImage($tocVersion, $pnorBinName, \%pnorLayout, $sideBOffset);
+$rc = createPnorImg($tocVersion, $pnorBinName, \%pnorLayout, $sideBOffset, 'B');
 if($rc != 0)
 {
-    trace(0, "Error detected from call to createPnorImage() sideBOffset. Exiting");
+    trace(0, "Error detected from createPnorImg() sideBOffset. Exiting");
     exit 1;
 }
 
-$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideAOffset);
+$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideAOffset, 'A');
 if($rc != 0)
 {
     trace(0, "Error detected from call to fillPnorImage() sideAOffset. Exiting");
+    exit 1;
+}
+
+$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideBOffset, 'B');
+if($rc != 0)
+{
+    trace(0, "Error detected from call to fillPnorImage() sideBOffset. Exiting");
     exit 1;
 }
 
@@ -270,17 +279,23 @@ sub loadPnorLayout
 }
 
 ################################################################################
-# createPnorImage - Create PNOR image and partitions based on input data.
+# createPnorImg - Create PNOR image and partitions based on input data.
 ################################################################################
-sub createPnorImage
+sub createPnorImg
 {
-    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $offset) = @_;
+    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $offset, $side) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
     my $key;
+    my $other_side = 'B';
     trace(4, "$this_func: >>Enter");
 
-    trace(1, "createPnorImage:: $offset");
+    trace(1, "createPnorImg:: $offset");
+
+    if($side eq 'B')
+    {
+        $other_side = 'A';
+    }
 
     #get Block size
     my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
@@ -322,9 +337,11 @@ sub createPnorImage
 
         # eyecatcher
         my $eyeCatch = $sectionHash{$key}{eyeCatch};
+        my $myside = $sectionHash{$key}{side};
 
-        #don't try to add the eyeCatcher, but need to update user data
-        if( $eyeCatch ne $g_TOCEyeCatch )
+        #don't try to add the TOC, but need to update all other paritions
+        #Add if side matches (or not set) -- so if it isn't equal to other side
+        if(( $eyeCatch ne $g_TOCEyeCatch ) && ( $myside ne $other_side ))
         {
 
             # base/physical offset
@@ -553,10 +570,18 @@ sub checkSpaceConstraints
 ################################################################################
 sub fillPnorImage
 {
-    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles, $offset) = @_;
+    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles, $offset, $side) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
     my $key;
+    my $other_side = 'B';
+
+
+    if($side eq 'B')
+    {
+        $other_side = 'A';
+    }
+
 
     trace(1, "fillPnorImage:: $offset");
 
@@ -580,20 +605,26 @@ sub fillPnorImage
             next;
         }
 
-        trace(5, "$this_func: populating section $eyeCatch, filename=$inputFile");
+        my $myside = $sectionHash{$key}{side};
 
-        #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
-        if ($g_ffsCmd eq "") {
-            my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000`;
-        } else {
-            my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --name $eyeCatch  --write $inputFile`;
-        }
-        $rc = $?;
-        if($rc)
+        #Add if side matches (or not set) -- so if it isn't equal to other side
+        if( $myside ne $other_side )
         {
-            trace(0, "$this_func: Call to fcp adding data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
-            last;
-        }
+            trace(5, "$this_func: populating section $myside:$eyeCatch, filename=$inputFile");
+
+            #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
+            if ($g_ffsCmd eq "") {
+                my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000`;
+            } else {
+                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --name $eyeCatch  --write $inputFile`;
+            }
+            $rc = $?;
+            if($rc)
+            {
+                trace(0, "$this_func: Call to fcp adding data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
+                last;
+            }
+         }
 
     }
 

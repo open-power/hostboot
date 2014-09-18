@@ -135,7 +135,6 @@ class PnorDD
 
         LPC_SFC_CMDREG_OFFSET = 0xF0000C00, /** LPC Offest to SFC Cmd Regs */
         LPC_SFC_CMDBUF_OFFSET = 0xF0000D00, /** LPC Off to SFC Cmd Buf space */
-        LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
         ECCB_STAT_REG = 0x000B0022, /**< ECCB Status Reg (FW) */
 

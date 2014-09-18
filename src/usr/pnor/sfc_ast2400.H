@@ -264,8 +264,16 @@ class SfcAST2400 : public SfcDD
     /** @brief General Constants */
     enum
     {
+        LPC_TOP_OF_FLASH_OFFSET = 0x0FFFFFFF,
+#ifdef CONFIG_PNOR_IS_32MB
+        PNOR_SIZE = 32*MEGABYTE,
+#else //default to 64MB
+        PNOR_SIZE = 64*MEGABYTE,
+#endif
+        //The direct offset value must be equal to <top of flash>-<pnor size>+1
+        // for the SBE to work so we can rely on that same assertion
         /**< Offset to direct read space, from FW base */
-        LPC_SFC_MMIO_OFFSET = 0x0E000000,
+        LPC_SFC_MMIO_OFFSET = LPC_TOP_OF_FLASH_OFFSET-PNOR_SIZE+1,
 
         /**< Offset to SPI Controller Register Space */
         LPC_SFC_CTLR_BASE   = 0x1E789000,
