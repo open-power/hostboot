@@ -291,6 +291,85 @@ PRDF_PLUGIN_DEFINE( Mcs, dd1mcifirBit##BITNUM );
 PLUGIN_MCIFIR_DD1_CHECK( 48 )
 PLUGIN_MCIFIR_DD1_CHECK( 49 )
 
+//------------------------------------------------------------------------------
+
+/**
+ * @brief   Handles a memory mirror action event.
+ * @param   i_mcsChip An MCS chip.
+ * @param   i_sc      The step code data struct
+ * @returns SUCCESS always
+ */
+int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
+                            STEP_CODE_DATA_STRUCT & i_sc )
+{
+    #define PRDF_FUNC "[ClearMbsSecondaryBits] "
+
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        // Get the primary MCS of the mirrored pair.
+        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
+        ExtensibleChip * primcs = mcsdb->getPrimaryMirroredMcs();
+        if ( NULL == primcs )
+        {
+            PRDF_ERR( PRDF_FUNC"getPrimaryMirroredMcs() failed: "
+                      "i_mcsChip=0x%08x", i_mcsChip->GetId() );
+            break;
+        }
+
+        // Manually capture the registers needed from the primary MCS.
+        CaptureData & cd = i_sc.service_data->GetCaptureData();
+        primcs->CaptureErrorData( cd, Util::hashString("MirrorRegs") );
+
+        SCAN_COMM_REGISTER_CLASS * reg = primcs->getRegister("MCHWFM");
+        l_rc = reg->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on MCHWFM: primcs=0x%08x",
+                      primcs->GetId() );
+            break;
+        }
+
+        if ( i_sc.service_data->IsAtThreshold() )
+        {
+            if ( reg->IsBitSet(1) ) // Mirror disabled.
+            {
+                // Error log will be predictive.
+                i_sc.service_data->SetErrorSig( PRDFSIG_MirrorActionTH );
+            }
+            else // Mirror still enabled but getting a flood of attentions.
+            {
+                // Just submit the error log as hidden.
+                i_sc.service_data->Nologging();
+                i_sc.service_data->Gard( GardAction::NoGard );
+            }
+        }
+        else // Under threshold
+        {
+            // Re-enable the mirror.
+            reg->ClearBit(1);
+            reg->ClearBit(2);
+            reg->ClearBit(3);
+
+            l_rc = reg->Write();
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"Write() failed on MCHWFM: primcs=0x%08x",
+                          primcs->GetId() );
+                break;
+            }
+        }
+
+    } while (0);
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Mcs, handleMirrorAction );
+
+
 } // end namespace Mcs
 } // end namespace PRDF
 

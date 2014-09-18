@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,6 +34,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfGlobal.H>
 #include <prdfPlatServices.H>
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
@@ -48,7 +51,7 @@ class P8McsDataBundle : public DataBundle
      * @param i_mcsChip The MCS chip.
      */
     explicit P8McsDataBundle( ExtensibleChip * i_mcsChip ) :
-        iv_mcsChip(i_mcsChip), iv_membChip(NULL)
+        iv_mcsChip(i_mcsChip), iv_membChip(NULL), iv_primMirMcsChip(NULL)
     {}
 
     /**
@@ -74,6 +77,43 @@ class P8McsDataBundle : public DataBundle
         return iv_membChip;
     }
 
+    /** @return The primary MCS of a mirrored MCS pair. */
+    ExtensibleChip * getPrimaryMirroredMcs()
+    {
+        using namespace TARGETING;
+        using namespace PlatServices;
+
+        do
+        {
+            if ( NULL != iv_primMirMcsChip ) break; // nothing to do.
+
+            TargetHandle_t mcs = iv_mcsChip->GetChipHandle();
+            uint32_t pos       = getTargetPosition(mcs);
+
+            if ( MAX_MCS_PER_PROC <= pos ) break; // can't continue, return NULL
+
+            if ( 0 == (pos & 0x1) ) // This is the primary.
+            {
+                iv_primMirMcsChip = iv_mcsChip;
+            }
+            else // The other MCS is the primary.
+            {
+                pos &= ~0x1; // get even position
+
+                TargetHandle_t proc = getConnectedParent( mcs, TYPE_PROC );
+                if ( NULL == proc ) break; // can't continue, return NULL
+
+                TargetHandle_t pmcs = getConnectedChild( proc, TYPE_MCS, pos );
+                if ( NULL == pmcs ) break; // can't continue, return NULL
+
+                iv_primMirMcsChip = (ExtensibleChip *)systemPtr->GetChip(pmcs);
+            }
+
+        } while (0);
+
+        return iv_primMirMcsChip;
+    }
+
   private: // functions
 
     P8McsDataBundle( const P8McsDataBundle & );
@@ -83,6 +123,9 @@ class P8McsDataBundle : public DataBundle
 
     ExtensibleChip * iv_mcsChip;  ///< This MCS chip
     ExtensibleChip * iv_membChip; ///< The connected MEMBUF chip
+
+    /** The primary MCS of a mirrored MCS pair. */
+    ExtensibleChip * iv_primMirMcsChip;
 };
 
 //------------------------------------------------------------------------------

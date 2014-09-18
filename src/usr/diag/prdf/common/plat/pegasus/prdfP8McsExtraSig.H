@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,5 +32,8 @@ PRDR_ERROR_SIGNATURE(MciFir_48_DD1Signature, 0x55550000, "MCIFIR[48]",
                                             "DD1: MCIFIRQ_INTERNAL_SCOM_ERROR");
 PRDR_ERROR_SIGNATURE(MciFir_49_DD1Signature, 0x55550001, "MCIFIR[49]",
                                       "DD1: MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE");
+
+PRDR_ERROR_SIGNATURE(MirrorActionTH, 0x55550010, "MCIFIR[32]",
+                     "Mirror disabled due to too many UEs");
 
 #endif // __prdfP8McsExtraSig_H

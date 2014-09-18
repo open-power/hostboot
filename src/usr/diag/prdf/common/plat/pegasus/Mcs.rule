@@ -154,7 +154,19 @@ chip Mcs
     {
         name        "MC0.MCS0.LEFT.LEFT.MCFGPQ";
         scomaddr    0x02011800;
-        capture     group never;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MCS Hardware Force Mirror Read SUE
+    ############################################################################
+
+    register MCHWFM
+    {
+        name        "MC0.MCS0.LEFT.LEFT.MCHWFMQ";
+        scomaddr    0x0201181C;
+        capture     group MirrorRegs; # Only valid on even MCSs of the mirror.
+                                      # Will have to capture manually.
     };
 
 };
@@ -187,7 +199,8 @@ rule MciFir
 
 group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
       filter priority(  8, 9, 22, 23, 6, 0, 40, # Channel failure
-                       20, 5, 10 )              # Recoverable
+                       20, 5, 10 ),             # Recoverable
+             secondarybits( 32 )
 {
     /** MCIFIR[0]
      *  MCIFIRQ_REPLAY_TIMEOUT
@@ -361,9 +374,9 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     (MciFir, bit(31)) ? defaultMaskedError;
 
     /** MCIFIR[32]
-     *  MCIFIRQ_MIRROR_ACTION_OCCURRED
+     *  Mirror action occurred
      */
-    (MciFir, bit(32)) ? defaultMaskedError;
+    (MciFir, bit(32)) ? handleMirrorAction;
 
     /** MCIFIR[33]
      *  MCIFIRQ_NONFOREIGN_ACCESS_TO_FOREIGN_BAR
@@ -568,3 +581,12 @@ actionclass calloutDmiBusSelfLowConnMed
     calloutDmiBusSymFru;
     threshold1;
 };
+
+/** Handles memory mirror action event */
+actionclass handleMirrorAction
+{
+    calloutSelfMed;
+    threshold( field(33 / 30 min) );
+    funccall( "handleMirrorAction" );
+};
+
