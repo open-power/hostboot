@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vpp_offset.C,v 1.10 2014/07/16 18:16:01 sglancy Exp $
+// $Id: mss_volt_vpp_offset.C,v 1.18 2014/09/12 15:37:51 sglancy Exp $
 /* File mss_volt_vpp_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,14 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.18   | sglancy  | 09/12/14 | Removed references to EFF attributes
+//  1.17   | sglancy  | 09/12/14 | Fixed bugs
+//  1.16   | sglancy  | 09/11/14 | Fixed bugs
+//  1.15   | sglancy  | 09/09/14 | Fixed bug
+//  1.14   | sglancy  | 09/08/14 | Updated to fix FW compile and logic bugs
+//  1.13   | sglancy  | 09/03/14 | Updated to go with a new HWP design
+//  1.12   | sglancy  | 08/27/14 | Changed code to set VPP offset value to 0 if code is unable to read the VPD of all DIMMs, which should disable the VPP plane
+//  1.11   | sglancy  | 08/22/14 | Changed code to make the risky assumption that the box is running DDR3 if code is unable to read the VPD of all DIMMs
 //  1.10   | sglancy  | 07/16/14 | Fixed attribute name bug
 //  1.9    | sglancy  | 07/01/14 | Included updates for DDR4
 //  1.8    | sglancy  | 06/25/14 | Commented out DRAM_GEN checking section of the code and forced it to default DDR3 - WILL UPDATE TO CHECK THE DRAM GENERATIONS FOR FUTURE CODE GENERATIONS
@@ -77,22 +85,17 @@
 fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 {
     //declares variables
-    fapi::ReturnCode l_rc;
+    fapi::ReturnCode l_rc, bad_vpd_rc;
     uint32_t num_chips = 0;
     uint32_t vpp_slope, vpp_intercept;
     uint8_t dram_width, enable, dram_gen;
     uint8_t cur_dram_gen, is_functional; 
     bool dram_gen_found = false;
     uint8_t num_spares[2][2][4];
-    uint8_t rank_config;
+    uint8_t rank_config, num_non_functional;
+    num_non_functional = 0;
     std::vector<fapi::Target>  l_mbaChiplets;
     std::vector<fapi::Target>  l_dimm_targets;
-      
-    //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
-    l_rc=fapiGetChildChiplets(i_targets[0], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
-    if(l_rc) return l_rc;
-    l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,&l_mbaChiplets[0],dram_gen); 
-    if(l_rc) return l_rc;
     
     //checks to make sure that all of the DRAM generation attributes are the same, if not error out
     for(uint32_t i = 0; i < i_targets.size();i++) {
@@ -101,34 +104,46 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
        //found an error
        if(l_rc) return l_rc;
        
+       //found a non-functional DIMM, add it to the count
+       if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
+          num_non_functional++;
+       }
+       
        //loops through all MBA chiplets to compare the DRAM technology generation attribute
        l_mbaChiplets.clear();
        l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
+       if(l_rc) return l_rc;
        for(uint32_t mba=0;mba<l_mbaChiplets.size();mba++) {
           //gets the dimm level target
           l_dimm_targets.clear();
           //gets the number of declared dimms
 	  l_rc = fapiGetAssociatedDimms(l_mbaChiplets[mba], l_dimm_targets);
+	  if(l_rc) return l_rc;
 	  for(uint32_t dimm=0;dimm<l_dimm_targets.size();dimm++) {
 	     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
              l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE,&l_dimm_targets[dimm],cur_dram_gen); 
 	     //found an error reading the VPD
 	     if(l_rc) {
-	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
-	        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
-		   FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
-		   fapi::ReturnCode temp_rc;
+	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then skip this DIMM with a FAPI INF note
+	        if(is_functional == fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
+		   FAPI_ERR("Problem reading VPD on functional DIMM. Logging error and proceding to the next DIMM.");
+		   if(bad_vpd_rc) {
+		      fapiLogError(bad_vpd_rc);
+		   }
+		   
 		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
+		   const fapi::Target & MBA_TARGET = l_mbaChiplets[mba];
 		   const uint32_t MBA_POSITION = mba;
 	    	   const uint32_t TARGET_POSITION = i;
 	    	   const uint32_t DIMM_POSITION = dimm;
 		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_DRAM_DEVICE_TYPE;
-	    	   FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
-	           fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+	    	   FAPI_SET_HWP_ERROR(bad_vpd_rc, RC_VPP_FUNCTIONAL_DIMM_VPD_READ_ERROR);
 		   continue;
 		}
-		//otherwise, just return the error code
-		return l_rc;
+		else {
+		   FAPI_INF("Problem reading VPD on non-functional DIMM. Skipping current DIMM and proceding to the next DIMM.");
+		   continue;
+		}
 	     }
 	     //if this is the first DIMM that has a valid DRAM Technology level, then set the level and continue
 	     //otherwise throw an error and exit
@@ -140,7 +155,6 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 	        //values are not equal -> set the fapi RC and exit out
     	  	if(cur_dram_gen != dram_gen){
     	  	   // this just needs to be deconfiged at the dimm level
-    	  	   const fapi::Target & CHIP_TARGET = i_targets[i];
     	  	   const uint8_t &DRAM_GEN_MISCOMPARE = cur_dram_gen;
     	  	   const uint8_t &DRAM_GEN_START = dram_gen;
     	  	   const uint32_t &CEN_MBA_NUM = mba;
@@ -154,10 +168,23 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
        }//end for
     }//end for
     
-    //checks to make sure that the code actually found a dimm with a value for it's dram generation. if not throw an error and exit out
+    //found a bad VPD
+    if(bad_vpd_rc) {
+       FAPI_ERR("Bad VPD found on a functional DIMM");
+       return bad_vpd_rc;
+    } 
+    
+    //did not find a valid DRAM generation 
+    if(num_non_functional >= i_targets.size()) {
+       FAPI_ERR("No functional centaurs found!  Exiting....");
+       FAPI_SET_HWP_ERROR(l_rc, RC_VOLT_VPP_FUNCTIONAL_CENTAUR_NOT_FOUND);
+       return l_rc;
+    } 
+    
+    //checks to make sure that the code actually found a dimm with a value for its dram generation. if not, exit out
     if(!dram_gen_found) {
+       FAPI_ERR("No DRAM generation found!  Exiting....");
        FAPI_SET_HWP_ERROR(l_rc, RC_VOLT_VPP_DRAM_GEN_NOT_FOUND);
-       FAPI_ERR("Could not find a DIMM with a valid DRAM Generation.\nExiting....");
        return l_rc;
     }
     
@@ -204,6 +231,7 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
        //resets the number of ranks and spares
        l_mbaChiplets.clear();
        l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
+       if(l_rc) return l_rc;
        //loops through the each MBA chiplet to get the number of ranks and the number of spares
        for(uint32_t mba = 0;mba<l_mbaChiplets.size();mba++) {
 	  //gets the dimm level target
@@ -212,15 +240,7 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 	  if(l_rc) {
 	     //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
 	     if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
-	     	FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
-	     	fapi::ReturnCode temp_rc;
-	     	const fapi::Target & TARGET_DIMM_ERROR = l_mbaChiplets[mba];
-	     	const uint32_t MBA_POSITION = mba;
-	     	const uint32_t TARGET_POSITION = i;
-	     	const uint32_t DIMM_POSITION = 0xff;
-	     	const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_VPD_DIMM_SPARE;
-	     	FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
-	  	fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+	     	FAPI_INF("Problem reading VPD on non-functional DIMM. Using default values for the number of spares");
 	     	//uses assumed value
 		for(uint32_t port=0;port<2;port++) {
 		   for(uint32_t dimm=0;dimm<2;dimm++) {
@@ -231,12 +251,26 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 		}
 	     }
 	     //otherwise, just return the error code
-	     else return l_rc;
+	     else {
+	        FAPI_ERR("Problem reading VPD on functional DIMM. Logging error and proceding to the next DIMM.");
+		if(bad_vpd_rc) {
+		   fapiLogError(bad_vpd_rc);
+		}
+		
+		const fapi::Target & TARGET_CEN_ERROR = i_targets[i];
+		const fapi::Target & MBA_TARGET = l_mbaChiplets[mba];
+		const uint32_t MBA_POSITION = mba;
+	    	const uint32_t TARGET_POSITION = i;
+		const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_VPD_DIMM_SPARE;
+	    	FAPI_SET_HWP_ERROR(bad_vpd_rc, RC_VPP_FUNCTIONAL_CENTAUR_VPD_READ_ERROR);
+		continue;
+	     }
 	  }
 	  
           l_dimm_targets.clear();
           //gets the number of declared dimms
 	  l_rc = fapiGetAssociatedDimms(l_mbaChiplets[mba], l_dimm_targets);
+	  if(l_rc) return l_rc;
 	  for(uint32_t dimm=0;dimm<l_dimm_targets.size();dimm++) {
 	     //gets if the centaur is a x4 or a x8
              l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_WIDTH,&l_dimm_targets[dimm],dram_width); 
@@ -244,40 +278,51 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 	     if(l_rc) {
 	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
 	        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
-		   FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
-		   fapi::ReturnCode temp_rc;
-		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
-		   const uint32_t MBA_POSITION = mba;
-	    	   const uint32_t TARGET_POSITION = i;
-	    	   const uint32_t DIMM_POSITION = dimm;
-		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_DRAM_WIDTH;
-	    	   FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
-	           fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+		   FAPI_INF("Problem reading VPD on non-functional DIMM. Using default value for DRAM_WIDTH");
 		   //uses assumed value
 		   dram_width = DRAM_WIDTH_DEFAULT;
 		}
-		//otherwise, just return the error code
-		else return l_rc;
+		//otherwise, callout and deconfigure the DIMM
+	     	else {
+	     	   FAPI_ERR("Problem reading VPD on functional DIMM. Logging error and proceding to the next DIMM.");
+	  	   if(bad_vpd_rc) {
+		      fapiLogError(bad_vpd_rc);
+		   }  
+		   
+		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
+	  	   const fapi::Target & MBA_TARGET = l_mbaChiplets[mba];
+	  	   const uint32_t MBA_POSITION = mba;
+	     	   const uint32_t TARGET_POSITION = i;
+	     	   const uint32_t DIMM_POSITION = dimm;
+		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_DRAM_WIDTH;
+	     	   FAPI_SET_HWP_ERROR(bad_vpd_rc, RC_VPP_FUNCTIONAL_DIMM_VPD_READ_ERROR);
+	  	   continue;
+	     	}
 	     }
              l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,&l_dimm_targets[dimm],rank_config); 
              //found an error reading the VPD
 	     if(l_rc) {
 	        //if the dimm is non-functional, assume that it's bad VPD was the reason that it crashed, then log an error and exit out
 	        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
-		   FAPI_ERR("Problem reading VPD on non-functional DIMM. Logging error and proceding to the next DIMM");
-		   fapi::ReturnCode temp_rc;
-		   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
-		   const uint32_t MBA_POSITION = mba;
-	    	   const uint32_t TARGET_POSITION = i;
-	    	   const uint32_t DIMM_POSITION = dimm;
-		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_NUM_RANKS;
-	    	   FAPI_SET_HWP_ERROR(temp_rc, RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR);
-	           fapiLogError(temp_rc, fapi::FAPI_ERRL_SEV_RECOVERED); 
+		   FAPI_INF("Problem reading VPD on non-functional DIMM. Using default value for DRAM_WIDTH");
 		   //uses assumed value
 		   rank_config = NUM_RANKS_PER_DIMM_DEFAULT;
 		}
-		//otherwise, just return the error code
-		else return l_rc;
+		//otherwise, callout and deconfigure the DIMM
+	     	else {
+	     	   FAPI_ERR("Problem reading VPD on functional DIMM. Logging error and proceding to the next DIMM.");
+	  	   if(bad_vpd_rc) {
+		      fapiLogError(bad_vpd_rc);
+		   }
+	  	   const fapi::Target & TARGET_DIMM_ERROR = l_dimm_targets[dimm];
+	  	   const fapi::Target & MBA_TARGET = l_mbaChiplets[mba];
+	  	   const uint32_t MBA_POSITION = mba;
+	     	   const uint32_t TARGET_POSITION = i;
+	     	   const uint32_t DIMM_POSITION = dimm;
+		   const uint32_t FAILING_ATTRIBUTE = fapi::ATTR_SPD_NUM_RANKS;
+	     	   FAPI_SET_HWP_ERROR(bad_vpd_rc, RC_VPP_FUNCTIONAL_DIMM_VPD_READ_ERROR);
+	  	   continue;
+	     	}
 	     }
 	     //adjusts the number of ranks so it's the actual number of ranks on the DIMM
 	     rank_config++;
@@ -312,7 +357,13 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 	  }
        }
     }
-
+    
+    //found a bad VPD
+    if(bad_vpd_rc) {
+       FAPI_ERR("Bad VPD found on a functional DIMM or centaur");
+       return bad_vpd_rc;
+    } 
+    
     FAPI_INF("vpp_slope: %d uV/DRAM chip vpp_intercept: %d mV num_chips: %d DRAM chips\n",vpp_slope,vpp_intercept,num_chips);
 
     //does the final computation

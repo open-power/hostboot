@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vpp_offset.H,v 1.5 2014/07/09 15:24:55 sglancy Exp $
+// $Id: mss_volt_vpp_offset.H,v 1.6 2014/09/10 15:48:07 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.6    | sglancy  | 09/10/14 | Updated default attribute values
 //  1.5    | sglancy  | 07/09/14 | Added Default attribute values
 //  1.4    | sglancy  | 06/16/14 | Updated to fix formatting
 //  1.3    | sglancy  | 06/04/14 | Updated to account for output attribute
@@ -53,8 +54,9 @@
 
 #include <fapi.H>
 
+//assumes 128GB values except for spare byte -> uses a full spare byte in the case of x8 DRAM with good DRAM width but bad spare byte values
 #define DRAM_WIDTH_DEFAULT fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4
-#define NUM_RANKS_PER_DIMM_DEFAULT fapi::ENUM_ATTR_SPD_NUM_RANKS_R1 
+#define NUM_RANKS_PER_DIMM_DEFAULT fapi::ENUM_ATTR_SPD_NUM_RANKS_R4
 #define DIMM_SPARE_DEFAULT fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE
 
 typedef fapi::ReturnCode (*mss_volt_vpp_offset_FP_t)(std::vector<fapi::Target> &);

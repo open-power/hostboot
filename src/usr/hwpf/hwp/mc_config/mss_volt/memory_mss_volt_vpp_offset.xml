@@ -24,13 +24,23 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
-<!-- $Id: memory_mss_volt_vpp_offset.xml,v 1.4 2014/07/16 18:15:25 sglancy Exp $ -->
+<!-- $Id: memory_mss_volt_vpp_offset.xml,v 1.6 2014/09/08 20:53:44 sglancy Exp $ -->
 <!-- For file ../../ipl/fapi/mss_volt_vpp_offset.C -->
 <!-- // *! OWNER NAME :   Stephen Glancy (sglancy@us.ibm.com) -->
 <!-- // *! BACKUP NAME :  Jacob Sloat (jdsloat@us.ibm.com) -->
 
 
 <!-- Original Source for RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION memory_errors.xml -->
+  
+  <hwpError>
+    <rc>RC_VOLT_VPP_FUNCTIONAL_CENTAUR_NOT_FOUND</rc>
+    <description>Code did not find a functional centaur.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  
   <hwpError>
     <rc>RC_MSS_VOLT_VPP_OFFSET_DRAM_GEN_MISCOMPARE</rc>
     <description>One or more DIMMs has a different generation of DRAM technology level.</description>
@@ -38,14 +48,10 @@
     <ffdc>DRAM_GEN_START</ffdc>
     <ffdc>CEN_MBA_NUM</ffdc>
     <ffdc>CEN_TARGET_NUM</ffdc>
- <!-- Deconfigure DIMM or Centaur -->
-    <deconfigure>
-      <target>CHIP_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
-    <rc>RC_VPP_NONFUNCTIONAL_DIMM_VPD_READ_ERROR</rc>
+    <rc>RC_VPP_FUNCTIONAL_DIMM_VPD_READ_ERROR</rc>
     <description>Unable to read the VPD from a non-functional dimm.</description>
     <ffdc>TARGET_POSITION</ffdc>
     <ffdc>MBA_POSITION</ffdc>
@@ -53,12 +59,26 @@
     <ffdc>FAILING_ATTRIBUTE</ffdc>
     <callout>
       <target>TARGET_DIMM_ERROR</target>
-      <priority>LOW</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>MBA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  
+  <hwpError>
+    <rc>RC_VPP_FUNCTIONAL_CENTAUR_VPD_READ_ERROR</rc>
+    <description>Unable to read the VPD from a non-functional dimm.</description>
+    <ffdc>TARGET_POSITION</ffdc>
+    <ffdc>MBA_POSITION</ffdc>
+    <ffdc>FAILING_ATTRIBUTE</ffdc>
+    <callout>
+      <target>TARGET_CEN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MBA_TARGET</target>
+    </deconfigure>
   </hwpError>
   
   <hwpError>

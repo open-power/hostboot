@@ -24,7 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
-<!-- $Id: memory_mss_volt_vddr_offset.xml,v 1.4 2014/07/16 18:15:16 sglancy Exp $ -->
+<!-- $Id: memory_mss_volt_vddr_offset.xml,v 1.5 2014/09/04 16:14:43 sglancy Exp $ -->
 <!-- For file ../../ipl/fapi/mss_volt_vddr_offset.C -->
 <!-- // *! OWNER NAME :   Stephen Glancy (sglancy@us.ibm.com) -->
 <!-- // *! BACKUP NAME :  Jacob Sloat (jdsloat@us.ibm.com) -->
@@ -38,22 +38,27 @@
     <ffdc>DRAM_GEN_START</ffdc>
     <ffdc>CEN_MBA_NUM</ffdc>
     <ffdc>CEN_TARGET_NUM</ffdc>
- <!-- Deconfigure DIMM or Centaur -->
-    <deconfigure>
-      <target>CHIP_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
-    <rc>RC_VDDR_NONFUNCTIONAL_DIMM_VPD_READ_ERROR</rc>
+    <rc>RC_VDDR_FUNCTIONAL_DIMM_VPD_READ_ERROR</rc>
     <description>Unable to read the VPD from a non-functional dimm.</description>
     <ffdc>TARGET_POSITION</ffdc>
     <ffdc>MBA_POSITION</ffdc>
     <ffdc>DIMM_POSITION</ffdc>
     <callout>
       <target>TARGET_DIMM_ERROR</target>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
+    
+    <deconfigure>
+      <target>MBA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  
+  <hwpError>
+    <rc>RC_VOLT_VDDR_FUNCTIONAL_CENTAUR_NOT_FOUND</rc>
+    <description>Code did not find a functional centaur.</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
