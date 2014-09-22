@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +27,14 @@ MODULE = testhwpf
 
 include hwpftest.mk
 
-TESTS = *.H
+TESTS += fapiattrtest.H
+TESTS += fapirctest.H
+TESTS += fapitargettest.H
+TESTS += hwpftest.H
+TESTS += hwpisteperrortest.H
+TESTS += hwpMBvpdAccessorTest.H
+TESTS += hwpMvpdAccessorTest.H
+TESTS += $(if $(CONFIG_HTMGT),occAccessTest.H)
 SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

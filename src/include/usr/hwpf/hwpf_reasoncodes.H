@@ -71,6 +71,8 @@ namespace fapi
         MOD_ATTR_OVERRIDE                          = 0x1D,
         MOD_PLAT_SPECIAL_WAKEUP                    = 0x1E,
         MOD_PLAT_EN_VDDR                           = 0x1F,
+        MOD_GET_OCC_CHIP_TARGET                    = 0x20,
+        MOD_ACCESS_OCB_INDIRECT_CHANNEL            = 0x21,
 
     };
 
@@ -107,25 +109,22 @@ namespace fapi
         RC_NO_SINGLE_MCS              = HWPF_COMP_ID | 0x21,
         RC_NO_SINGLE_MEMBUFF          = HWPF_COMP_ID | 0x22,
         RC_STATE_MISMATCH             = HWPF_COMP_ID | 0x23,
-
-        // OCC Errors
         RC_MM_UNMAP_ERR               = HWPF_COMP_ID | 0x24,
-
-        // VDDR Errors
         RC_VDDR_EMPTY_MSG             = HWPF_COMP_ID | 0x25,
         RC_VDDR_ERROR_MSG             = HWPF_COMP_ID | 0x26,
         RC_VDDR_POWR_ERR              = HWPF_COMP_ID | 0x27,
         RC_INCORRECT_MSG_TYPE         = HWPF_COMP_ID | 0x28,
-
         RC_NO_SINGLE_MBA              = HWPF_COMP_ID | 0x29,
         RC_HOST_TIMER_EXPIRED         = HWPF_COMP_ID | 0x2A,
         RC_HOST_TIMER_THREAD_FAIL     = HWPF_COMP_ID | 0x2B,
         RC_NULL_POINTER               = HWPF_COMP_ID | 0x2C,
-
         RC_RT_WAKEUP_FAILED           = HWPF_COMP_ID | 0x2D,
         RC_NO_MIRRORED_MEMORY         = HWPF_COMP_ID | 0x2E,
         RC_VDDR_INVALID_VOLTAGE       = HWPF_COMP_ID | 0x2F,
         RC_TIMEOUT_EN_VDDR            = HWPF_COMP_ID | 0x30,
+        RC_TARGET_UNSUPPORTED         = HWPF_COMP_ID | 0x31,
+        RC_INVALID_DATA_BUFFER_LENGTH = HWPF_COMP_ID | 0x32,
+
     };
 
     /**
