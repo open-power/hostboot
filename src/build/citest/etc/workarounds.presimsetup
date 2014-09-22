@@ -76,4 +76,3 @@ mkdir -p $sb/mrw/tools
 cp $BACKING_BUILD/src/mrw/tools/genHwsvMrwXml_fsp.pm  $sb/mrw/tools
 patch $sb/mrw/tools/genHwsvMrwXml_fsp.pm \
       ${HOSTBOOTROOT}/src/build/citest/etc/patches/genHwsvMrwXml.patch
-

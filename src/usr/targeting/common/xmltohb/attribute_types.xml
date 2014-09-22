@@ -14385,5 +14385,24 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PROC_PCIE_LANE_EQUALIZATION</id>
+    <description>PCIE Lane Equalization values for each PHB
+        creator: MRW
+        consumer: HDAT
+        firmware notes:
+        PCIE Lane Equalization values for each PHB
+        Array index: PHBs (0:3)
+                     Lane Settings (0:31)
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>4,32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
 

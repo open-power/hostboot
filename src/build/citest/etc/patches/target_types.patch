@@ -20,3 +20,7 @@
 < </targetType>
 < 
 < <targetType>
+627,629d626
+<         <id>PROC_PCIE_LANE_EQUALIZATION</id>
+<     </attribute>
+<     <attribute>

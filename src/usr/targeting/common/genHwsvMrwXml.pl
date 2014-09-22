@@ -353,53 +353,195 @@ if ((scalar @SortedPmChipAttr) == 0)
 #------------------------------------------------------------------------------
 my $proc_pcie_settings_file = open_mrw_file($mrwdir,
                                            "${sysname}-proc-pcie-settings.xml");
-my $ProcPcie = parse_xml_file($proc_pcie_settings_file);
+my $ProcPcie = parse_xml_file($proc_pcie_settings_file,
+                    forcearray=>['processor-settings']);
+
+my %procPcieTargetList = ();
+my $pcieInit = 0;
+
+# MAX Phb values Per PROC is 4 and is hard coded here
+use constant MAX_NUM_PHB_PER_PROC => 4;
+
+# MAX lane settings value is 32 bytes per phb and is hard coded here
+use constant MAX_LANE_SETTINGS_PER_PHB => 32;
+
+# Determine values of proc pcie attributes
+# Currently
+#   PROC_PCIE_LANE_EQUALIZATION PROC_PCIE_IOP_CONFIG PROC_PCIE_PHB_ACTIVE
+sub pcie_init ($)
+{
+    my $proc = $_[0];
+
+    # Used for handling shifting operations of hex values read from mrw
+    # done in scope to not affect sort functions
+    use bigint;
+
+    my $procPcieKey = "";
+    my @phb_value = ();
+    my $procPcieIopConfig = 0;
+    my $procPciePhbActive = 0;
+    $procPcieKey = sprintf("n%dp%d\,", $proc->{'target'}->{'node'},
+                            $proc->{'target'}->{'position'});
+
+    if(!(exists($procPcieTargetList{$procPcieKey})))
+    {
+        # Loop through each PHB which each contain 32 Bytes of EQ
+        foreach my $Phb (@{$proc->{'phb-settings'}})
+        {
+            my $phb_number = 0;
+            # Each PHB has 16 lanes (Each lane containing 2 total bytes of EQ)
+            foreach my $Lane (@{$Phb->{'lane-settings'}})
+            {
+                my $lane_number = 0;
+                foreach my $Equ (@{$Lane->{'equalization-setting'}})
+                {
+                    if(exists($Phb->{'phb-number'}))
+                    {
+                        $phb_number = $Phb->{'phb-number'};
+                    }
+                    else
+                    {
+                        die "ERROR: phb-number does not exist for
+                              proc:$procPcieKey\n";
+                    }
+                    if(exists($Lane->{'lane-number'}))
+                    {
+                        $lane_number = $Lane->{'lane-number'};
+                    }
+                    else
+                    {
+                        die "ERROR: lane-number does not exist for
+                              proc:$procPcieKey\n";
+                    }
+
+                    # Accumulate all values for each of the lanes from the MRW
+                    # (2 Bytes)
+                    # First Byte:
+                    #       - Nibble 1: up_rx_hint (bit 0 reserved)
+                    #       - Nibble 2: up_tx_preset
+                    # Second Byte:
+                    #       - Nibble 1: dn_rx_hint (bit 0 reserved)
+                    #       - Nibble 2: dn_tx_preset
+                    if($Equ->{'type'} eq 'up_rx_hint')
+                    {
+                        $phb_value[$phb_number][$lane_number*2] =
+                                   $phb_value[$phb_number][$lane_number*2] |
+                                    (($Equ->{value} & 0x07) << 4);
+                        if($Equ->{value} > 0x7)
+                        {
+                            die "ERROR: Attempting to modify the
+                                 reserved bit\n";
+                        }
+                    }
+                    if($Equ->{'type'} eq 'up_tx_preset')
+                    {
+                        $phb_value[$phb_number][$lane_number*2] =
+                                   $phb_value[$phb_number][$lane_number*2] |
+                                    ($Equ->{value} & 0x0F);
+                    }
+                    if($Equ->{'type'} eq 'dn_rx_hint')
+                    {
+                        $phb_value[$phb_number][($lane_number*2)+1] =
+                               $phb_value[$phb_number][($lane_number*2)+1] |
+                               (($Equ->{value} & 0x07) << 4);
+                        if($Equ->{value} > 0x7)
+                        {
+                            die "ERROR: Attempting to modify the
+                                 reserved bit\n";
+                        }
+                    }
+                    if($Equ->{'type'} eq 'dn_tx_preset')
+                    {
+                        $phb_value[$phb_number][($lane_number*2)+1] =
+                               $phb_value[$phb_number][($lane_number*2)+1] |
+                                ($Equ->{value} & 0x0F);
+                    }
+                }
+            }
+        }
+
+        # Produce a 32 byte output hex value per PHB
+        my $phbvalue = "";
+        for (my $phbnumber = 0; $phbnumber < MAX_NUM_PHB_PER_PROC;
+             ++$phbnumber)
+        {
+            for(my $lane_settings_count = 0;
+                $lane_settings_count < MAX_LANE_SETTINGS_PER_PHB;
+                ++$lane_settings_count)
+            {
+                $phbvalue = sprintf("%s0x%02X\,", $phbvalue,
+                              $phb_value[$phbnumber][$lane_settings_count]);
+            }
+        }
+
+        if ( exists($proc->{proc_pcie_iop_config}) )
+        {
+            $procPcieIopConfig = $proc->{proc_pcie_iop_config};
+        }
+        if ( exists($proc->{proc_pcie_phb_active}) )
+        {
+            $procPciePhbActive = $proc->{proc_pcie_phb_active};
+        }
+
+        $procPcieTargetList{$procPcieKey} = {
+            'procName' => $proc->{'target'}->{'name'},
+            'procPosition' => $proc->{'target'}->{'position'},
+            'nodePosition' => $proc->{'target'}->{'node'},
+            'phbValue'  => substr($phbvalue, 0, -1),
+            'phbActive' => $procPciePhbActive,
+            'iopConfig' => $procPcieIopConfig,
+        };
+    }
+}
 
 # Repeated [NODE, POS, ATTR, IOP0-VAL, IOP1-VAL, ATTR, IOP0-VAL, IOP1-VAL]
 my @procPcie;
-foreach my $i (@{$ProcPcie->{'processor-settings'}})
+foreach my $proc (@{$ProcPcie->{'processor-settings'}})
 {
-    push @procPcie, [$i->{target}->{node},
-                     $i->{target}->{position},
+    # determine values of proc pcie attributes
+    pcie_init($proc);
+
+    push @procPcie, [$proc->{target}->{node},
+                     $proc->{target}->{position},
                      "PROC_PCIE_IOP_G2_PLL_CONTROL0",
-                     $i->{proc_pcie_iop_g2_pll_control0_iop0},
-                     $i->{proc_pcie_iop_g2_pll_control0_iop1},
+                     $proc->{proc_pcie_iop_g2_pll_control0_iop0},
+                     $proc->{proc_pcie_iop_g2_pll_control0_iop1},
                      "PROC_PCIE_IOP_G3_PLL_CONTROL0",
-                     $i->{proc_pcie_iop_g3_pll_control0_iop0},
-                     $i->{proc_pcie_iop_g3_pll_control0_iop1},
+                     $proc->{proc_pcie_iop_g3_pll_control0_iop0},
+                     $proc->{proc_pcie_iop_g3_pll_control0_iop1},
                      "PROC_PCIE_IOP_PCS_CONTROL0",
-                     $i->{proc_pcie_iop_pcs_control0_iop0},
-                     $i->{proc_pcie_iop_pcs_control0_iop1},
+                     $proc->{proc_pcie_iop_pcs_control0_iop0},
+                     $proc->{proc_pcie_iop_pcs_control0_iop1},
                      "PROC_PCIE_IOP_PCS_CONTROL1",
-                     $i->{proc_pcie_iop_pcs_control1_iop0},
-                     $i->{proc_pcie_iop_pcs_control1_iop1},
+                     $proc->{proc_pcie_iop_pcs_control1_iop0},
+                     $proc->{proc_pcie_iop_pcs_control1_iop1},
                      "PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0",
-                     $i->{proc_pcie_iop_pll_global_control0_iop0},
-                     $i->{proc_pcie_iop_pll_global_control0_iop1},
+                     $proc->{proc_pcie_iop_pll_global_control0_iop0},
+                     $proc->{proc_pcie_iop_pll_global_control0_iop1},
                      "PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1",
-                     $i->{proc_pcie_iop_pll_global_control1_iop0},
-                     $i->{proc_pcie_iop_pll_global_control1_iop1},
+                     $proc->{proc_pcie_iop_pll_global_control1_iop0},
+                     $proc->{proc_pcie_iop_pll_global_control1_iop1},
                      "PROC_PCIE_IOP_RX_PEAK",
-                     $i->{proc_pcie_iop_rx_peak_iop0},
-                     $i->{proc_pcie_iop_rx_peak_iop1},
+                     $proc->{proc_pcie_iop_rx_peak_iop0},
+                     $proc->{proc_pcie_iop_rx_peak_iop1},
                      "PROC_PCIE_IOP_RX_SDL",
-                     $i->{proc_pcie_iop_rx_sdl_iop0},
-                     $i->{proc_pcie_iop_rx_sdl_iop1},
+                     $proc->{proc_pcie_iop_rx_sdl_iop0},
+                     $proc->{proc_pcie_iop_rx_sdl_iop1},
                      "PROC_PCIE_IOP_RX_VGA_CONTROL2",
-                     $i->{proc_pcie_iop_rx_vga_control2_iop0},
-                     $i->{proc_pcie_iop_rx_vga_control2_iop1},
+                     $proc->{proc_pcie_iop_rx_vga_control2_iop0},
+                     $proc->{proc_pcie_iop_rx_vga_control2_iop1},
                      "PROC_PCIE_IOP_TX_BWLOSS1",
-                     $i->{proc_pcie_iop_tx_bwloss1_iop0},
-                     $i->{proc_pcie_iop_tx_bwloss1_iop1},
+                     $proc->{proc_pcie_iop_tx_bwloss1_iop0},
+                     $proc->{proc_pcie_iop_tx_bwloss1_iop1},
                      "PROC_PCIE_IOP_TX_FIFO_OFFSET",
-                     $i->{proc_pcie_iop_tx_fifo_offset_iop0},
-                     $i->{proc_pcie_iop_tx_fifo_offset_iop1},
+                     $proc->{proc_pcie_iop_tx_fifo_offset_iop0},
+                     $proc->{proc_pcie_iop_tx_fifo_offset_iop1},
                      "PROC_PCIE_IOP_TX_RCVRDETCNTL",
-                     $i->{proc_pcie_iop_tx_rcvrdetcntl_iop0},
-                     $i->{proc_pcie_iop_tx_rcvrdetcntl_iop1},
+                     $proc->{proc_pcie_iop_tx_rcvrdetcntl_iop0},
+                     $proc->{proc_pcie_iop_tx_rcvrdetcntl_iop1},
                      "PROC_PCIE_IOP_ZCAL_CONTROL",
-                     $i->{proc_pcie_iop_zcal_control_iop0},
-                     $i->{proc_pcie_iop_zcal_control_iop1}];
+                     $proc->{proc_pcie_iop_zcal_control_iop0},
+                     $proc->{proc_pcie_iop_zcal_control_iop1}];
 }
 
 my @SortedPcie = sort byNodePos @procPcie;
@@ -2434,25 +2576,13 @@ sub generate_proc
 
     print "    <!-- PROC_PCIE_ attributes -->\n";
     addProcPcieAttrs( $proc, $node );
-    print "    <!-- End PROC_PCIE_ attributes -->\n";
-
-    print "
-    <!-- The default value of the following three attributes are written by -->
-    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->
-    <attribute>
-        <id>PROC_PCIE_IOP_CONFIG</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
+    print "    <attribute>
         <id>PROC_PCIE_IOP_SWAP</id>
         <default>$pcie_list{$ipath}{0}{0}{'lane-swap'},
                  $pcie_list{$ipath}{1}{0}{'lane-swap'}
         </default>
     </attribute>
-    <attribute>
-        <id>PROC_PCIE_PHB_ACTIVE</id>
-        <default>0</default>
-    </attribute>\n";
+    <!-- End PROC_PCIE_ attributes -->\n";
 
     if ((scalar @SortedPmChipAttr) == 0)
     {
@@ -3958,7 +4088,7 @@ sub addProcPmAttrs
     for my $i (0 .. $#SortedPmChipAttr)
     {
         if (($SortedPmChipAttr[$i][CHIP_POS_INDEX] == $position) &&
-            ($SortedPmChipAttr[$i][CHIP_NODE_INDEX] == $node) )
+            ($SortedPmChipAttr[$i][CHIP_NODE_INDEX] == $nodeId) )
         {
             #found the corresponding proc and node
             my $j =0;
@@ -3983,7 +4113,7 @@ sub addProcPcieAttrs
     for my $i (0 .. $#SortedPcie)
     {
         if (($SortedPcie[$i][CHIP_POS_INDEX] == $position) &&
-            ($SortedPcie[$i][CHIP_NODE_INDEX] == $node) )
+            ($SortedPcie[$i][CHIP_NODE_INDEX] == $nodeId) )
         {
             #found the corresponding proc and node
             my $j =0;
@@ -4002,6 +4132,31 @@ sub addProcPcieAttrs
                 print "    </attribute>\n";
                 $j++;
             }
+        }
+    }
+
+    foreach my $pcie ( keys %procPcieTargetList )
+    {
+        if( $procPcieTargetList{$pcie}{nodePosition} eq $nodeId &&
+            $procPcieTargetList{$pcie}{procPosition} eq $position)
+        {
+            my $procPcieRef = (\%procPcieTargetList)->{$pcie};
+            print "    <attribute>\n";
+            print "        <id>PROC_PCIE_LANE_EQUALIZATION</id>\n";
+            print "        <default>$procPcieRef->{phbValue}\n";
+            print "        </default>\n";
+            print "    </attribute>\n";
+            print "    <!-- The default value of the following three attributes are written by -->\n";
+            print "    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->\n";
+            print "    <attribute>\n";
+            print "        <id>PROC_PCIE_IOP_CONFIG</id>\n";
+            print "        <default>$procPcieRef->{iopConfig}</default>\n";
+            print "    </attribute>\n";
+            print "    <attribute>\n";
+            print "        <id>PROC_PCIE_PHB_ACTIVE</id>\n";
+            print "        <default>$procPcieRef->{phbActive}</default>\n";
+            print "    </attribute>\n";
+            last;
         }
     }
 }
