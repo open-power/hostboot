@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,7 @@
 #include <errl/errlmanager.H>
 #include <mbox/mbox_reasoncodes.H>
 #include <intr/interrupt.H>
+#include <initservice/initserviceif.H>
 
 namespace START_PAYLOAD
 {
@@ -117,7 +120,10 @@ void IpcSp::msgHandler()
 
                 if (err)
                 {
+                    TRACFCOMP( g_trac_ipc, "In ipcSp: populate_node_attribute errored - must shutdown now!!!");
+                    uint32_t l_errPlid = err->plid();
                     errlCommit(err, IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
                 }
 
                 if(mod_loaded)
@@ -135,9 +141,10 @@ void IpcSp::msgHandler()
                 err = MBOX::send(MBOX::HB_POP_ATTR_MSGQ, msg, msg->data[1] );
                 if (err)
                 {
+                    uint32_t l_errPlid = err->plid();
                     errlCommit(err,IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
                 }
-                
                 break;
 
             case IPC_TEST_CONNECTION:
@@ -188,7 +195,9 @@ void IpcSp::msgHandler()
 
                 if(err)
                 {
+                    uint32_t l_errPlid = err->plid();
                     errlCommit(err, IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
                 }
 
                 if(mod_loaded)
