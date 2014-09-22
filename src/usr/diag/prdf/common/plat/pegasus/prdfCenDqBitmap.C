@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -212,18 +214,24 @@ int32_t CenDqBitmap::isChipMark( const CenSymbol & i_symbol, bool & o_cm )
             break;
         }
 
-        uint8_t pins   = 0xff;
+        // When PRD marks a DRAM as 'bad', it will set all bits on the DRAM in
+        // VPD. Due to a bug in DRAM init training, the training procedure will
+        // change the VPD to 0xee (x8) or 0xe (x4). Therefore, PRD will need to
+        // compare against the value the procedure sets in order to confirm a
+        // chip mark has been verified on this DRAM.
+
+        uint8_t pinMsk = 0xee;
         uint8_t cmData = iv_data[portSlct][byteIdx];
 
         if ( iv_x4Dram )
         {
-            pins = 0xf; // limit to 4 bits
+            pinMsk = 0xe; // limit to 4 bits
             uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
             shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
             cmData = (cmData >> shift) & 0xf;
         }
 
-        o_cm = ( cmData == pins );
+        o_cm = ( (cmData & pinMsk) == pinMsk );
 
     } while (0);
 
