@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.185 2014/09/01 20:16:49 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.186 2014/09/17 13:58:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1927,6 +1927,8 @@ CONST_UINT64_T( EX_GP3_0x100F0012                     , ULL(0x100F0012) );
 CONST_UINT64_T( EX_GP3_AND_0x100F0013                 , ULL(0x100F0013) );
 CONST_UINT64_T( EX_GP3_OR_0x100F0014                  , ULL(0x100F0014) );
 
+CONST_UINT64_T( EX_CLK_ADJ_SET_0x100F0016             , ULL(0x100F0016) );
+
 //Slave Configuration Register
 CONST_UINT64_T( EX_SLAVE_CONFIG_0x100F001E            , ULL(0x100F001E) );
 
@@ -2134,6 +2136,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.186  2014/09/17 13:58:45  jmcgill
+add EX clk adjust register definition (SW278630)
+
 Revision 1.185  2014/09/01 20:16:49  jmcgill
 add support for CAPI directory dump
 
