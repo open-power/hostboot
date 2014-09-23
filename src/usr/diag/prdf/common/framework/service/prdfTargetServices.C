@@ -418,6 +418,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
     {
         // This table must be sorted based on the < operator of struct conn_t.
         { TYPE_SYS,    TYPE_NODE,   TargetService::CHILD_BY_AFFINITY },
+        { TYPE_SYS,    TYPE_OSC,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_SYS,    TargetService::PARENT_BY_AFFINITY },
         { TYPE_NODE,   TYPE_OSC,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_PROC,   TargetService::CHILD_BY_AFFINITY },
@@ -433,6 +434,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_NODE,   TYPE_MBA,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY },
 
+        { TYPE_OSC,    TYPE_SYS,    TargetService::PARENT_BY_AFFINITY },
         { TYPE_OSC,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
 
         { TYPE_PROC,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
