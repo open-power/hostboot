@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -571,7 +573,15 @@ void addScomFailFFDC( errlHndl_t i_err,
     // Read some error regs from scom
     ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
     bool addit = false;
-    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+    TARGETING::TYPE l_type = TARGETING::TYPE_NA;
+    if( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
+    {
+        l_type = TARGETING::TYPE_PROC;
+    }
+    else
+    {
+        l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+    }
 
     //PBA scoms on the processor
     if( ((i_addr & 0xFFFFF000) == 0x00064000)
