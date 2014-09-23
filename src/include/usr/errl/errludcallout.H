@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -82,6 +84,28 @@ private:
                        const HWAS::callOutPriority i_priority,
                        const HWAS::DeconfigEnum i_deconfigState,
                        const HWAS::GARD_ErrorType i_gardErrorType);
+    /**
+     *  @brief Construct a part callout user detail
+     *
+     *  @param[in]  i_pTargetData   The hardware target data
+     *  @param[in]  i_targetDataLength    length of i_pTargetData
+     *  @param[in]  i_partType     part type Enum
+     *  @param[in]  i_priority      Priority of the callout
+     *  @param[in]  i_deconfigState Enum indicating whether the failing part
+     *                              should be deconfigured.
+     *  @param[in]  i_gardErrorType To indicate what type of failure occured
+     *
+     *  @return void
+     */
+    ErrlUserDetailsCallout(
+                       const void *i_pTargetData,
+                       uint32_t i_targetDataLength,
+                       const HWAS::partTypeEnum i_partType,
+                       const HWAS::callOutPriority i_priority,
+                       const HWAS::DeconfigEnum i_deconfigState,
+                       const HWAS::GARD_ErrorType i_gardErrorType);
+
+
     /**
      *  @brief Construct a bus callout user detail
      *

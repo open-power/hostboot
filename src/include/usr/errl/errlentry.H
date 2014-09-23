@@ -506,6 +506,28 @@ public:
                                    i_deconfigState = HWAS::NO_DECONFIG,
                        const HWAS::GARD_ErrorType
                                    i_gardErrorType = HWAS::GARD_NULL);
+    /**
+     *  @brief Add a part callout.
+     *  The i_target is used to identify the associated target. This target
+     *  may not be a FRU
+     *
+     *  @param[in]  i_target        The hardware target that owns this part
+     *  @param[in]  i_partType      The hardware part type
+     *  @param[in]  i_priority      Priority of the callout
+     *  @param[in]  i_deconfigState Enum indicating whether the failing part
+     *                              should be deconfigured.
+     *  @param[in]  i_gardErrorType To indicate what type of failure occured
+     *
+     *  @return void
+     */
+    void addPartCallout(const TARGETING::Target *i_target,
+                       const HWAS::partTypeEnum i_partType,
+                       const HWAS::callOutPriority i_priority,
+                       const HWAS::DeconfigEnum
+                                   i_deconfigState = HWAS::NO_DECONFIG,
+                       const HWAS::GARD_ErrorType
+                                   i_gardErrorType = HWAS::GARD_NULL);
+
 
     /**
      *  @brief Add a bus callout
@@ -604,6 +626,16 @@ private:
      *  @return     subsystem ID
      */
     epubSubSystem_t getSubSystem( HWAS::clockTypeEnum i_clockType ) const;
+
+    /**
+     *  @brief maps a part type to a subsystem ID
+     *
+     *  @param[in]  i_partType   Bus Type.
+     *
+     *  @return     subsystem ID
+     */
+    epubSubSystem_t getSubSystem( HWAS::partTypeEnum i_partType ) const;
+
 
     /**
      * @brief The ErrlManager will call here to ask the

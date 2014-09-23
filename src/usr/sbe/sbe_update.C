@@ -1729,10 +1729,13 @@ namespace SBE
                                                              sbeInfoSize_ECC));
 
                     err->collectTrace(SBE_COMP_NAME);
-                    err->addHwCallout( io_sbeState.target,
-                                       HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::NO_DECONFIG,
-                                       HWAS::GARD_NULL );
+
+                    err->addPartCallout(
+                                         io_sbeState.target,
+                                         HWAS::SBE_SEEPROM_PART_TYPE,
+                                         HWAS::SRCI_PRIORITY_HIGH,
+                                         HWAS::NO_DECONFIG,
+                                         HWAS::GARD_NULL );
 
 
                     ErrlUserDetailsTarget(io_sbeState.target).addToLog(err);
@@ -3342,7 +3345,10 @@ namespace SBE
                                             mP);
 
                         err->collectTrace(SBE_COMP_NAME);
-                        err->addHwCallout( io_sbeStates_v[i].target,
+
+                        err->addPartCallout(
+                                           io_sbeStates_v[i].target,
+                                           HWAS::SBE_SEEPROM_PART_TYPE,
                                            HWAS::SRCI_PRIORITY_HIGH,
                                            HWAS::NO_DECONFIG,
                                            HWAS::GARD_NULL );
@@ -3546,9 +3552,11 @@ namespace SBE
                 {
                     // Add FFDC and Commit the error log created here
                     err->collectTrace(SBE_COMP_NAME);
-                    err->addHwCallout( io_sbeStates_v[i].target,
+                    err->addPartCallout(
+                                       io_sbeStates_v[i].target,
+                                       HWAS::SBE_SEEPROM_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::DECONFIG,
+                                       HWAS::NO_DECONFIG,
                                        HWAS::GARD_NULL );
 
                     ErrlUserDetailsTarget(io_sbeStates_v[mP].target,

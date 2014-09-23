@@ -135,6 +135,25 @@ static const epubClockTypeToSub_t CLOCK_TO_SUBSYS_TABLE[] =
     { HWAS::OSCPCICLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
 };
 
+struct epubPartTypeToSub_t
+{
+    HWAS::partTypeEnum  xType;
+    epubSubSystem_t     xSubSys;
+};
+
+// PART type to subsystem table
+static const epubPartTypeToSub_t PART_TO_SUBSYS_TABLE[] =
+{
+    { HWAS::FLASH_CONTROLLER_PART_TYPE      , EPUB_CEC_HDW_SUBSYS   },
+    { HWAS::PNOR_PART_TYPE                  , EPUB_CEC_HDW_SUBSYS   },
+    { HWAS::SBE_SEEPROM_PART_TYPE           , EPUB_PROCESSOR_SUBSYS },
+    { HWAS::BOARD_VPD_PART_TYPE             , EPUB_CEC_HDW_SUBSYS   },
+    { HWAS::LPC_SLAVE_PART_TYPE             , EPUB_CEC_HDW_SUBSYS   },
+    { HWAS::CENTAUR_GPIO_EXPANDER_PART_TYPE , EPUB_MEMORY_SUBSYS    },
+    { HWAS::VOLTAGE_REGULATOR_PART_TYPE     , EPUB_POWER_SUBSYS   },
+};
+
+
 namespace ERRORLOG
 {
 
@@ -393,6 +412,50 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
 
 } // addClockCallout
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
+                        const HWAS::partTypeEnum i_partType,
+                        const HWAS::callOutPriority i_priority,
+                        const HWAS::DeconfigEnum i_deconfigState,
+                        const HWAS::GARD_ErrorType i_gardErrorType)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addPartCallout(%p, %d, 0x%x)",
+                i_target, i_partType, i_priority);
+
+    TARGETING::EntityPath ep;
+    const void *pData;
+    uint32_t size;
+
+    if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        size = sizeof(HWAS::TARGET_IS_SENTINEL);
+        pData = &HWAS::TARGET_IS_SENTINEL;
+    }
+    else
+    {   // we got a non MASTER_SENTINEL target, therefore the targeting
+        // module is loaded, therefore we can make this call.
+        ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        // size is total EntityPath size minus unused path elements
+        size = sizeof(ep) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
+        pData = &ep;
+    }
+
+    ErrlUserDetailsCallout( pData, size, i_partType,
+            i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+
+    if (i_gardErrorType != GARD_NULL)
+    {
+        setGardBit();
+    }
+    if (i_deconfigState != NO_DECONFIG)
+    {
+        setDeconfigBit();
+    }
+
+} // addPartCallout
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -930,6 +993,38 @@ epubSubSystem_t ErrlEntry::getSubSystem( HWAS::clockTypeEnum i_clockType ) const
     TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem() ssid 0x%x", subsystem);
     return subsystem;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Map a Part type to a subsystem ID
+epubSubSystem_t ErrlEntry::getSubSystem( HWAS::partTypeEnum i_partType ) const
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem() from part type 0x%x",
+              i_partType);
+
+    epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
+
+    const uint32_t PART_TO_SUBSYS_TABLE_ENTRIES =
+        sizeof(PART_TO_SUBSYS_TABLE)/sizeof(PART_TO_SUBSYS_TABLE[0]);
+
+    for (uint32_t i = 0; i < PART_TO_SUBSYS_TABLE_ENTRIES; i++)
+    {
+        if (PART_TO_SUBSYS_TABLE[i].xType == i_partType)
+        {
+            subsystem = PART_TO_SUBSYS_TABLE[i].xSubSys;
+            break;
+        }
+    }
+
+    if(subsystem == EPUB_MISC_UNKNOWN)
+    {
+        TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for part type 0x%x",
+                  i_partType);
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem() ssid 0x%x", subsystem);
+    return subsystem;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager

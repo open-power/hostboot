@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -125,6 +127,62 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                 printEntityPath(l_ptr, i_parser, "Target");
 
                 break; // CLOCK_CALLOUT
+            }
+            case HWAS::PART_CALLOUT:
+            {
+                switch (ntohl(pData->partType))
+                {
+#define case_PART_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "Part Type", #_type); break;
+                    case_PART_TYPE(FLASH_CONTROLLER_PART_TYPE)
+                    case_PART_TYPE(PNOR_PART_TYPE)
+                    case_PART_TYPE(SBE_SEEPROM_PART_TYPE)
+                    case_PART_TYPE(BOARD_VPD_PART_TYPE)
+                    case_PART_TYPE(LPC_SLAVE_PART_TYPE)
+                    case_PART_TYPE(CENTAUR_GPIO_EXPANDER_PART_TYPE)
+                    case_PART_TYPE(VOLTAGE_REGULATOR_PART_TYPE)
+                    default:
+                        i_parser.PrintNumber( "Part Type", "UNKNOWN: 0x%X",
+                                        ntohl(pData->partType) );
+                } // switch partType
+#undef case_PART_TYPE
+                switch (ntohl(pData->partDeconfigState))
+                {
+#define case_DECONFIG_STATE(_type) \
+case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
+                    case_DECONFIG_STATE(NO_DECONFIG)
+                    case_DECONFIG_STATE(DECONFIG)
+                    case_DECONFIG_STATE(DELAYED_DECONFIG)
+                    default:
+                        i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
+                                        ntohl(pData->partDeconfigState) );
+                        break;
+                } // switch partDeconfigState
+#undef case_DECONFIG_STATE
+                switch (ntohl(pData->partGardErrorType))
+                {
+#define case_GARD_ERROR_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
+                    case_GARD_ERROR_TYPE(GARD_NULL)
+                    case_GARD_ERROR_TYPE(GARD_User_Manual)
+                    case_GARD_ERROR_TYPE(GARD_Unrecoverable)
+                    case_GARD_ERROR_TYPE(GARD_Fatal)
+                    case_GARD_ERROR_TYPE(GARD_Predictive)
+                    case_GARD_ERROR_TYPE(GARD_Power)
+                    case_GARD_ERROR_TYPE(GARD_PHYP)
+                    case_GARD_ERROR_TYPE(GARD_Void)
+                    default:
+                        i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
+                                        ntohl(pData->partGardErrorType) );
+                        break;
+                } // switch partGardErrorType
+#undef case_GARD_ERROR_TYPE
+                // what follows the pData structure is one entity path
+                // print it out
+                uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
+                printEntityPath(l_ptr, i_parser, "Target");
+
+                break; // PART_CALLOUT
             }
             case HWAS::BUS_CALLOUT:
             {

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -68,6 +70,39 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     TRACDCOMP(g_trac_errl, "ClockCallout exit; pDataLength %d", pDataLength);
 
 } // Clock callout
+
+//------------------------------------------------------------------------------
+// Part callout
+ErrlUserDetailsCallout::ErrlUserDetailsCallout(
+        const void *i_pTargetData,
+        uint32_t i_targetDataLength,
+        const HWAS::partTypeEnum i_partType,
+        const HWAS::callOutPriority i_priority,
+        const HWAS::DeconfigEnum i_deconfigState,
+        const HWAS::GARD_ErrorType i_gardErrorType)
+{
+    TRACDCOMP(g_trac_errl, "PartCallout entry");
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = ERRL_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = ERRL_UDT_CALLOUT;
+
+    uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targetDataLength;
+    HWAS::callout_ud_t *pData;
+    pData = reinterpret_cast<HWAS::callout_ud_t *>
+                (reallocUsrBuf(pDataLength));
+    pData->type = HWAS::PART_CALLOUT;
+    pData->partType = i_partType;
+    pData->priority = i_priority;
+    pData->partDeconfigState = i_deconfigState;
+    pData->partGardErrorType = i_gardErrorType;
+    memcpy(pData + 1, i_pTargetData, i_targetDataLength);
+
+    TRACDCOMP(g_trac_errl, "PartCallout exit; pDataLength %d", pDataLength);
+
+} // Part callout
+
 
 //------------------------------------------------------------------------------
 // Bus callout

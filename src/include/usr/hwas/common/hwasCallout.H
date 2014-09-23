@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -117,11 +119,23 @@ enum clockTypeEnum
     OSCPCICLK_TYPE  = 4,
 };
 
+enum partTypeEnum
+{
+    FLASH_CONTROLLER_PART_TYPE      = 1,
+    PNOR_PART_TYPE                  = 2,
+    SBE_SEEPROM_PART_TYPE           = 3,
+    BOARD_VPD_PART_TYPE             = 4,
+    LPC_SLAVE_PART_TYPE             = 5,
+    CENTAUR_GPIO_EXPANDER_PART_TYPE = 6,
+    VOLTAGE_REGULATOR_PART_TYPE     = 7,
+};
+
 //
 const uint8_t HW_CALLOUT        = 0x01;
 const uint8_t PROCEDURE_CALLOUT = 0x02;
 const uint8_t BUS_CALLOUT       = 0x03;
 const uint8_t CLOCK_CALLOUT     = 0x04;
+const uint8_t PART_CALLOUT      = 0x05;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
@@ -148,6 +162,12 @@ typedef struct callout_ud
             clockTypeEnum   clockType;      // uint32_t
             DeconfigEnum    clkDeconfigState;  // uint32_t
             GARD_ErrorType  clkGardErrorType;  // uint32_t
+            // one Target will follow
+        };
+        struct {    // type == PART_CALLOUT
+            partTypeEnum   partType;      // uint32_t
+            DeconfigEnum    partDeconfigState;  // uint32_t
+            GARD_ErrorType  partGardErrorType;  // uint32_t
             // one Target will follow
         };
     };
@@ -251,7 +271,32 @@ errlHndl_t platHandleClockCallout(
         DeconfigEnum    i_deconfigState = DECONFIG,
         GARD_ErrorType  i_gardErrorType = GARD_Fatal);
 
+/**
+ * @brief platform specific code to handle a part callout that has been
+ *  found in an errlog
+ *
+ * @param[in]  i_pTarget        associated target
+ * @param[in]  i_partType       Enum indicating which type of part
+ * @param[in]  i_priority       Enum indicating the priority of the callout
+ * @param[in]  io_errl          reference to errlHnld for this errlog
+ * @param[in]  i_deconfigState  Enum indicating whether to deconfig or not
+ * @param[in]  i_gardErrType    Enum indicating the type of failure
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error,
+ *                          NULL if no errors;
+ */
+errlHndl_t platHandlePartCallout(
+        TARGETING::Target *i_pTarget,
+        partTypeEnum i_partType,
+        callOutPriority i_priority,
+        errlHndl_t &io_errl,
+        DeconfigEnum    i_deconfigState = DECONFIG,
+        GARD_ErrorType  i_gardErrorType = GARD_Fatal);
+
+
 #endif // not PARSER
+
+
 
 };   // end namespace
 

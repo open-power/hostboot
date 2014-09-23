@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -454,6 +456,7 @@ public:
             deconfigCount++;
 
             errlCommit(errl, CXXTEST_COMP_ID);
+
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     ERRORLOG::ERRL_TEST_MOD_ID,
@@ -464,6 +467,8 @@ public:
                     HWAS::SRCI_PRIORITY_HIGH);
 
             errlCommit(errl, CXXTEST_COMP_ID);
+
+
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     ERRORLOG::ERRL_TEST_MOD_ID,
@@ -481,6 +486,15 @@ public:
                 HWAS::SRCI_PRIORITY_HIGH,
                 HWAS::NO_DECONFIG,
                 HWAS::GARD_NULL);
+
+            // Part callout using deconfig/GARD parameters
+            errl->addPartCallout(
+                pExList[0],
+                HWAS::PNOR_PART_TYPE,
+                HWAS::SRCI_PRIORITY_HIGH,
+                HWAS::NO_DECONFIG,
+                HWAS::GARD_NULL);
+
 
             if (pExList.size() > 1)
             {

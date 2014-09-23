@@ -210,6 +210,30 @@ void processCallout(errlHndl_t &io_errl,
             }
             break;
         } // CLOCK_CALLOUT
+        case (PART_CALLOUT):
+        {
+            TARGETING::Target *pTarget = NULL;
+            uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
+            bool l_err = retrieveTarget(l_uData, pTarget, io_errl);
+
+            if (!l_err)
+            {
+                errlHndl_t errl = platHandlePartCallout(
+                                        pTarget,
+                                        pCalloutUD->partType,
+                                        pCalloutUD->priority,
+                                        io_errl,
+                                        pCalloutUD->deconfigState,
+                                        pCalloutUD->gardErrorType);
+                if (errl)
+                {
+                    HWAS_ERR("processCallout: error platHandlePartCallout");
+                    errlCommit(errl, HWAS_COMP_ID);
+                }
+            }
+            break;
+        } // PART_CALLOUT
+
         default:
         {
             HWAS_ERR("bad data in Callout UD %x", pCalloutUD->type);
