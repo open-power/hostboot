@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 
 HOSTBOOT_RUNTIME = 1
+
 ROOTPATH = ../../../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag

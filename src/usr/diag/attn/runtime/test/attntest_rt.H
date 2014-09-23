@@ -34,9 +34,9 @@ class AttnTestRT: public CxxTest::TestSuite
 {
     public:
 
-    void testAttnIntf()
+    void testAttnRtIntf()
     {
-        ATTN_SLOW("runtime testAttnIntf");
+        ATTN_SLOW(ENTER_MRK"AttnTestRT::testAttnRtIntf");
 
         runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
         if (NULL == rt_intf)
@@ -44,6 +44,39 @@ class AttnTestRT: public CxxTest::TestSuite
             TS_FAIL("AttnTestRT: runtimeIntfaces not set");
             return;
         }
+
+        if (NULL == rt_intf->enable_attns)
+        {
+            TS_FAIL("AttnTestRT: enable_attns not set");
+        }
+        else
+        {
+            int rc = rt_intf->enable_attns();
+            ATTN_SLOW("enable_attns returned rc: %d", rc);
+        }
+
+        if (NULL == rt_intf->disable_attns)
+        {
+            TS_FAIL("AttnTestRT: disable_attns not set");
+        }
+        else
+        {
+            int rc = rt_intf->disable_attns();
+            ATTN_SLOW("disable_attns returned rc: %d", rc);
+        }
+
+        if (NULL == rt_intf->handle_attns)
+        {
+            TS_FAIL("AttnTestRT: handle_attns not set");
+        }
+        else
+        {
+            // just pass in some params for now
+            int rc = rt_intf->handle_attns(NULL, 0, 0);
+            ATTN_SLOW("handle_attns returned rc: %d", rc);
+        }
+
+        ATTN_SLOW(EXIT_MRK"AttnTestRT::testAttnRtIntf");
     }
 
     private:

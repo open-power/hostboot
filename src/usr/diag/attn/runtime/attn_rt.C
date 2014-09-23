@@ -39,15 +39,73 @@ using namespace ATTN;
 
 namespace ATTN_RT
 {
-    // enableAttns() and handleAttns()
-    // will be added later on.
+    /** Enable chip attentions
+     *
+     *  @return 0 on success else return code
+     */
+    int enableAttns(void)
+    {
+        #define ATTN_FUNC "ATTN_RT::enableAttns() "
+        int rc = 0;
 
-    // will be used to register runtimeInterfaces
+        ATTN_ERR(ATTN_FUNC"not implemented yet!");
+
+        return rc;
+
+        #undef ATTN_FUNC
+    }
+
+    /** Disable chip attentions
+     *
+     *  @return 0 on success else return code
+     */
+    int disableAttns(void)
+    {
+        #define ATTN_FUNC "ATTN_RT::disableAttns() "
+        int rc = 0;
+
+        ATTN_ERR(ATTN_FUNC"not implemented yet!");
+
+        return rc;
+
+        #undef ATTN_FUNC
+    }
+
+    /** brief handle chip attentions
+     *
+     *  @param[in] i_proc - processor chip id at attention
+     *                      XSCOM chip id based on devtree defn
+     *  @param[in] i_ipollStatus - processor chip Ipoll status
+     *  @param[in] i_ipollMask   - processor chip Ipoll mask
+     *  @return 0 on success else return code
+     */
+    int handleAttns(uint64_t i_proc,
+                    uint64_t i_ipollStatus,
+                    uint64_t i_ipollMask)
+    {
+        #define ATTN_FUNC "ATTN_RT::handleAttns() "
+        int rc = 0;
+
+        ATTN_ERR(ATTN_FUNC"not implemented yet!");
+
+        return rc;
+
+        #undef ATTN_FUNC
+    }
+
+    // register runtime interfaces
     struct registerAttn
     {
         registerAttn()
         {
-            ATTN_FAST("registerAttn");
+            runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
+            if (NULL == rt_intf)
+            {
+                return;
+            }
+            rt_intf->enable_attns  = &enableAttns;
+            rt_intf->disable_attns = &disableAttns;
+            rt_intf->handle_attns  = &handleAttns;
         }
     };
 

@@ -24,3 +24,4 @@
 # IBM_PROLOG_END_TAG
 
 ATTN_RT_OBJS += attn_rt.o
+ATTN_RT_OBJS += attntrace.o

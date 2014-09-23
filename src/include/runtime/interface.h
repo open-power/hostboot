@@ -210,6 +210,30 @@ typedef struct runtimeInterfaces
      */
     void (*occ_error) (uint64_t i_chipId);
 
+    /** Enable chip attentions
+     *
+     *  @return 0 on success else return code
+     */
+    int (*enable_attns)(void);
+
+    /** Disable chip attentions
+     *
+     *  @return 0 on success else return code
+     */
+    int (*disable_attns)(void);
+
+    /** brief handle chip attentions
+     *
+     *  @param[in] i_proc - processor chip id at attention
+     *                      XSCOM chip id based on devtree defn
+     *  @param[in] i_ipollStatus - processor chip Ipoll status
+     *  @param[in] i_ipollMask   - processor chip Ipoll mask
+     *  @return 0 on success else return code
+     */
+    int (*handle_attns)(uint64_t i_proc,
+                        uint64_t i_ipollStatus,
+                        uint64_t i_ipollMask);
+
     // Reserve some space for future growth.
     void (*reserved[32])(void);
 
