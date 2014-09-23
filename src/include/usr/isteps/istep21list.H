@@ -90,12 +90,7 @@ const DepModInfo  g_istep21Dependancies = {
 #ifdef CONFIG_SET_NOMINAL_PSTATE
         DEP_LIB(libpstates.so),
 #endif
-/*
- *      This library is loaded dynamically when needed in start_payload.
- *      Adding statement here to make listdeps.pl happy.
-
         DEP_LIB(libocc.so),
-*/
         NULL
     }
 };

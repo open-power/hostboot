@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -174,7 +176,7 @@ typedef struct runtimeInterfaces
      * @param[in] i_chip - XSCOM chip id of processor based on devtree defn
      * @return 0 on success else return code
      */
-    int(*loadOCC)(uint64_t i_homer_addr_phys,
+    int(*occ_load)(uint64_t i_homer_addr_phys,
                   uint64_t i_homer_addr_va,
                   uint64_t i_common_addr_phys,
                   uint64_t i_common_addr_va,
@@ -188,7 +190,7 @@ typedef struct runtimeInterfaces
      *  @param[in] i_num_chips - Number of chips in the array
      *  @return 0 on success else return code
      */
-    int (*startOCCs)(uint64_t* i_chip,
+    int (*occ_start)(uint64_t* i_chip,
                      size_t i_num_chips);
 
     /** Stop OCC hold OCCs in reset
@@ -199,9 +201,14 @@ typedef struct runtimeInterfaces
      *  @param[in] i_num_chips - Number of chips in the array
      *  @return 0 on success else return code
      */
-    int (*stopOCCs)(uint64_t* i_chip,
+    int (*occ_stop)(uint64_t* i_chip,
                     size_t i_num_chips);
 
+    /** Reset OCC upon failure
+     *  @param [in]: i_chipId: Id of processor with failing OCC
+     *  @return NONE
+     */
+    void (*occ_error) (uint64_t i_chipId);
 
     // Reserve some space for future growth.
     void (*reserved[32])(void);

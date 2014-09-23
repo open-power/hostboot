@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include    <stdint.h>
+#include    <config.h>
 
 #include    <occ/occ.H>
 #include    <initservice/taskargs.H>
@@ -490,7 +491,7 @@ namespace HBOCC
 
 
     ////////////////////////////////////////////////
-    errlHndl_t loadnStartAllOccs()
+    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget)
     {
         errlHndl_t  l_errl  =   NULL;
         void* homerVirtAddrBase = NULL;
@@ -573,11 +574,16 @@ namespace HBOCC
                                             homerPhysAddrBase);
                     if(l_errl)
                     {
-                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: loadnStartOcc failed!" );
+                        o_failedOccTarget = *itr;
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK
+                         "loadnStartAllOccs:loadnStartOcc failed");
                         break;
                     }
                 }
-
+                if (l_errl)
+                {
+                    break;
+                }
 
             }
             else
@@ -625,15 +631,24 @@ namespace HBOCC
                                             homerPhysAddrBase);
                     if(l_errl)
                     {
-                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: loadnStartOcc failed!" );
+                        o_failedOccTarget = *itr;
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK
+                        "loadnStartAllOccs:loadnStartOcc failed");
                         break;
                     }
+                }
+                if (l_errl)
+                {
+                    break;
                 }
             }
 
         } while(0);
 
         errlHndl_t  l_tmpErrl  =   NULL;
+//Unless HTMGT is in use, there are no further accesses to HOMER memory
+//required during the IPL
+#ifndef CONFIG_HTMGT
         if(homerVirtAddrBase)
         {
             int rc = 0;
@@ -671,7 +686,7 @@ namespace HBOCC
                 }
             }
         }
-
+#endif
         //make sure we always unload the module
         if (winkle_loaded)
         {
@@ -693,6 +708,36 @@ namespace HBOCC
         TRACUCOMP( g_fapiTd,
                    EXIT_MRK"loadnStartAllOccs" );
 
+        return l_errl;
+    }
+
+    errlHndl_t activateOCC ()
+    {
+        errlHndl_t l_errl    = NULL;
+        TARGETING::Target* l_failedOccTarget = NULL;
+        //uint8_t l_errStatus = 0;
+
+        l_errl = loadnStartAllOccs (l_failedOccTarget);
+        if (l_errl)
+        {
+            errlCommit (l_errl, HWPF_COMP_ID);
+            //l_errStatus = 1;
+        }
+
+        //TODO RTC:116027
+        //HB configures/enables the occ buffers
+
+        //TODO RTC:115636
+        //HB enables the scon-via-i2c logic on the OCCs
+#ifdef CONFIG_HTMGT
+        //TODO RTC:115585
+        //HTMGT::htmgtOccLoadStartStatus
+        //           (l_errStatus,l_failedOccTarget);
+        if (l_errl)
+        {
+            errlCommit (l_errl, HWPF_COMP_ID);
+        }
+#endif
         return l_errl;
     }
 

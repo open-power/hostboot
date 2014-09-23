@@ -86,7 +86,6 @@
 #include    <sys/mm.h>
 #include    <algorithm>
 #include    <config.h>
-
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
 
@@ -313,58 +312,18 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             break;
         }
 
-        //Start OCC in AVP
-        if( is_avp_load() )
+        bool l_activateOCC = is_avp_load();
+
+#ifdef CONFIG_START_OCC_DURING_BOOT
+        l_activateOCC = true;
+#endif
+        if(l_activateOCC)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Starting OCC" );
-
-            //Load modules needed by OCC
-            bool occ_loaded = false;
-
-            if (  !VFS::module_is_loaded( "libocc.so" ) )
-            {
-                l_err = VFS::module_load( "libocc.so" );
-
-                if ( l_err )
-                {
-                    //  load module returned with errl set
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "Could not load occ module" );
-                    // break from do loop if error occured
-                    break;
-                }
-                occ_loaded = true;
-            }
-
-            l_err = HBOCC::loadnStartAllOccs();
-            if(l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadnStartAllOccs failed" );
-            }
-
-            //make sure we always unload the module
-            if (occ_loaded)
-            {
-                errlHndl_t  l_tmpErrl  =   NULL;
-                l_tmpErrl = VFS::module_unload( "libocc.so" );
-                if ( l_tmpErrl )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               ERR_MRK"Error unloading libocc module" );
-                    if(l_err)
-                    {
-                        errlCommit( l_tmpErrl, HWPF_COMP_ID );
-                    }
-                    else
-                    {
-                        l_err = l_tmpErrl;
-                    }
-                }
-            }
-
+            l_err = HBOCC::activateOCC();
             if (l_err)
             {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "activateOCC failed");
                 break;
             }
         }

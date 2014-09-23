@@ -54,17 +54,17 @@ class OccTest: public CxxTest::TestSuite
             TS_FAIL("runtimeInterfaces->get_lid_list not set");
         }
 
-        if( rt_intf->loadOCC == NULL )
+        if( rt_intf->occ_load == NULL )
         {
             TS_FAIL("runtimeInterfaces->loadOCC not set");
         }
 
-        if( rt_intf->startOCCs == NULL )
+        if( rt_intf->occ_start == NULL )
         {
             TS_FAIL("runtimeInterfaces->startOCCs not set");
         }
 
-        if( rt_intf->stopOCCs == NULL )
+        if( rt_intf->occ_stop == NULL )
         {
             TS_FAIL("runtimeInterfaces->stopOCCs not set");
         }

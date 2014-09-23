@@ -52,10 +52,19 @@ namespace HBOCC {
      * @brief Starts OCCs on all Processors in the node
      *        This is intended to be used for AVP testing.
      *
+     * @param[out] o_failedOccTarget: Pointer to the target failing
+     *                       loadnStartAllOccs
      * @return errlHndl_t  Error log if OCC load failed
      */
-    errlHndl_t loadnStartAllOccs();
+    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget);
 
+    /**
+     * @brief Starts OCCs on all Processors in the node
+     *        This is intended to be used for Open Power.
+     *
+     * @return errlHndl_t  Error log if OCC load failed
+     */
+    errlHndl_t activateOCC ();
 } //end OCC namespace
 
 #endif

@@ -70,6 +70,24 @@ namespace RT_OCC
 
     //------------------------------------------------------------------------
 
+    void occ_error (uint64_t i_chipId)
+    {
+        do
+        {
+            TARGETING::Target* l_failedOccTarget = NULL;
+            errlHndl_t l_errl =RT_TARG::getHbTarget(i_chipId,l_failedOccTarget);
+            if (l_errl)
+            {
+                TRACFCOMP (g_fapiTd, "occ_error: getHbTarget failed at %d chipId", i_chipId);
+                errlCommit (l_errl, HWPF_COMP_ID);
+                break;
+            }
+            //TODO RTC: 114906
+            //HTMGT::htmgtProcessOccError(l_failedOccTarget);
+        } while (0);
+    }
+
+    //---------------------------------------------------------------------
     errlHndl_t addHostData(uint64_t i_hostdata_addr)
     {
         errlHndl_t err = NULL;
@@ -612,9 +630,10 @@ namespace RT_OCC
         {
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
             rt_intf->get_lid_list = &UtilLidMgr::getLidList;
-            rt_intf->loadOCC = &executeLoadOCC;
-            rt_intf->startOCCs = &executeStartOCCs;
-            rt_intf->stopOCCs = &executeStopOCCs;
+            rt_intf->occ_load = &executeLoadOCC;
+            rt_intf->occ_start = &executeStartOCCs;
+            rt_intf->occ_stop = &executeStopOCCs;
+            rt_intf->occ_error  = &occ_error;
 
             // If we already loaded OCC during the IPL we need to fix up
             //  the virtual address because we're now not using virtual
