@@ -199,6 +199,7 @@ TESTCASE_MODULES += testsecureboot
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testsbe
+TESTCASE_MODULES += testlpc
 
 RUNTIME_OBJECTS += rt_start.o
 RUNTIME_OBJECTS += rt_main.o

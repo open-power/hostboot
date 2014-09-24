@@ -1,12 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/lpc/makefile $
+# $Source: src/usr/lpc/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2014
-# [+] Google Inc.
 # [+] International Business Machines Corp.
 #
 #
@@ -23,11 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = lpc
+ROOTPATH = ../../../..
 
-OBJS = lpcdd.o
-
-SUBDIRS = test.d
+MODULE = testlpc
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

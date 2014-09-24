@@ -249,25 +249,6 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        TARGETING::TYPE_PROC,
                        lpcWrite );
 
-/**
- * STATIC
- * @brief Initialize driver and hardware to ready state
- */
-static void init( errlHndl_t& io_rtaskRetErrl )
-{
-    TRACFCOMP(g_trac_lpc, "LPC::init> " );
-    errlHndl_t l_errl = NULL;
-
-    // Initialize the hardware
-    l_errl = Singleton<LpcDD>::instance().hwReset(LpcDD::RESET_INIT);
-    if( l_errl )
-    {
-        TRACFCOMP( g_trac_lpc, "Errors initializing LPC logic... Beware! PLID=%.8X", l_errl->plid() );
-    }
-
-    io_rtaskRetErrl = l_errl;
-}
-
 
 /**
  * @brief Create/delete software objects to support non-master access
@@ -385,11 +366,6 @@ errlHndl_t create_altmaster_objects( bool i_create,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief   set up _start() task entry procedure
- */
-TASK_ENTRY_MACRO( LPC::init );
-
 mutex_t LpcDD::cv_mutex = MUTEX_INITIALIZER;
 
 LpcDD::LpcDD( TARGETING::Target* i_proc )
@@ -400,6 +376,8 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
 ,iv_errorRecoveryFailed(false)
 ,iv_resetActive(false)
 {
+    TRACFCOMP(g_trac_lpc, "LpcDD::LpcDD> " );
+
     mutex_init( &iv_mutex );
 
     if( i_proc == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
@@ -408,27 +386,23 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
     }
     else
     {
-        // Check if processor is MASTER
-        TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
-          iv_proc->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
-        if ( type_enum == TARGETING::PROC_MASTER_TYPE_ACTING_MASTER )
-        {
-            // Master target needs global mutex to avoid collisions with
-            // default singleton object used for ddRead/ddWrite with
-            // TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-            ivp_mutex = &cv_mutex;
-            // IMPORTANT :: cv_mutex can never be held while accessing any
-            //  code outside of the base image or this could lead to deadlocks
-            //  accessing PNOR
-        }
-        else
-        {
-            // Just use the local mutex
-            ivp_mutex = &iv_mutex;
-        }
+        // Master target could collide and cause deadlocks with singleton
+        // used for ddRead/ddWrite with MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+        TARGETING::Target* master = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle( master );
+        assert( i_proc != master );
+
+        // Just use the local mutex
+        ivp_mutex = &iv_mutex;
     }
 
-
+    // Initialize the hardware
+    errlHndl_t l_errl = hwReset(LpcDD::RESET_INIT);
+    if( l_errl )
+    {
+        TRACFCOMP( g_trac_lpc, "Errors initializing LPC logic... Beware! PLID=%.8X", l_errl->plid() );
+        errlCommit(l_errl, LPC_COMP_ID);
+    }
 }
 
 LpcDD::~LpcDD()
@@ -490,10 +464,10 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
 
                         // First read OPB_MASTER_LS_CONTROL_REG
                         uint32_t lpc_data = 0x0;
-                        l_err = readLPC( LPC::TRANS_REG,
-                                         OPB_MASTER_LS_CONTROL_REG,
-                                         &lpc_data,
-                                         opsize );
+                        l_err = _readLPC( LPC::TRANS_REG,
+                                          OPB_MASTER_LS_CONTROL_REG,
+                                          &lpc_data,
+                                          opsize );
 
                         if (l_err) { break; }
 
@@ -501,10 +475,10 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                         // - set bit 29 to 0b1
                         lpc_data |= 0x00000004;
 
-                        l_err = writeLPC( LPC::TRANS_REG,
-                                          OPB_MASTER_LS_CONTROL_REG,
-                                          &lpc_data,
-                                          opsize );
+                        l_err = _writeLPC( LPC::TRANS_REG,
+                                           OPB_MASTER_LS_CONTROL_REG,
+                                           &lpc_data,
+                                           opsize );
                         if (l_err) { break; }
 
 
@@ -512,10 +486,10 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                         // No wait-time needed
                         lpc_data &= 0xFFFFFFFB;
 
-                        l_err = writeLPC( LPC::TRANS_REG,
-                                          OPB_MASTER_LS_CONTROL_REG,
-                                          &lpc_data,
-                                          opsize );
+                        l_err = _writeLPC( LPC::TRANS_REG,
+                                           OPB_MASTER_LS_CONTROL_REG,
+                                           &lpc_data,
+                                           opsize );
 
                         if (l_err) { break; }
 
@@ -538,10 +512,10 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
 
                         size_t opsize = sizeof(uint32_t);
                         uint32_t lpc_data = 0x0;
-                        l_err = writeLPC( LPC::TRANS_REG,
-                                          LPCHC_RESET_REG,
-                                          &lpc_data,
-                                          opsize );
+                        l_err = _writeLPC( LPC::TRANS_REG,
+                                           LPCHC_RESET_REG,
+                                           &lpc_data,
+                                           opsize );
                         if (l_err) { break; }
 
                         // sleep 1ms for LPCHC to execute internal
@@ -600,7 +574,10 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
             else
             {
                 // Successful, so increment recovery count
-                iv_errorHandledCount++;
+                if( i_resetLevel != RESET_CLEAR )
+                {
+                    iv_errorHandledCount++;
+                }
 
                 TRACFCOMP( g_trac_lpc,INFO_MRK"LpcDD::hwReset> Successful LPC reset at level 0x%X (recovery count=%d)", i_resetLevel, iv_errorHandledCount);
             }
@@ -691,24 +668,20 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
 }
 
 /**
- * @brief Read an address from LPC space
+ * @brief Read an address from LPC space, assumes lock is already held
  */
-errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
-                          uint32_t i_addr,
-                          void* o_buffer,
-                          size_t& io_buflen)
+errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
+                           uint32_t i_addr,
+                           void* o_buffer,
+                           size_t& io_buflen)
 {
     errlHndl_t l_err = NULL;
     uint32_t l_addr = 0;
-    bool need_unlock = false;
 
     do {
         // Generate the full absolute LPC address
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
-
-        mutex_lock(ivp_mutex);
-        need_unlock = true;
 
         // Execute command.
         ControlReg_t eccb_cmd;
@@ -737,9 +710,6 @@ errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
         }
         else
         {
-            mutex_unlock(ivp_mutex);
-            need_unlock = false;
-
             TRACFCOMP( g_trac_lpc, "readLPC> Unsupported buffer size : %d", io_buflen );
             /*@
              * @errortype
@@ -748,7 +718,7 @@ errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
              * @userdata1[0:31]   LPC Address
              * @userdata1[32:63]  LPC Transaction Type
              * @userdata2    Requested buffer size
-             * @devdesc      LpcDD::readLPC> Invalid buffer size requested
+             * @devdesc      LpcDD::_readLPC> Invalid buffer size requested
              *               (>4 bytes)
              * @custdesc     Firmware error accessing internal bus during IPL
              */
@@ -764,23 +734,21 @@ errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
 
     } while(0);
 
-    if( need_unlock ) { mutex_unlock(ivp_mutex); };
-
     LPC_TRACFCOMP( g_trac_lpc, "readLPC> %08X[%d] = %08X", l_addr, io_buflen, *reinterpret_cast<uint32_t*>( o_buffer )  >> (8 * (4 - io_buflen)) );
 
     return l_err;
 }
 
 /**
- * @brief Write an address from LPC space
+ * @brief Write an address from LPC space, assumes lock is already held
  */
-errlHndl_t LpcDD::writeLPC(LPC::TransType i_type, uint32_t i_addr,
-                           const void* i_buffer,
-                           size_t& io_buflen)
+errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
+                            uint32_t i_addr,
+                            const void* i_buffer,
+                            size_t& io_buflen)
 {
     errlHndl_t l_err = NULL;
     uint32_t l_addr = 0;
-    bool need_unlock = false;
 
     do {
         // Generate the full absolute LPC address
@@ -812,9 +780,6 @@ errlHndl_t LpcDD::writeLPC(LPC::TransType i_type, uint32_t i_addr,
         LPC_TRACFCOMP(g_trac_lpc, "writeLPC> %08X[%d] = %08X", l_addr, io_buflen,
                       eccb_data >> (32 + 8 * (4 - io_buflen)));
 
-        mutex_lock(ivp_mutex);
-        need_unlock = true;
-
         // Write data out
         size_t scom_size = sizeof(uint64_t);
         l_err = deviceOp( DeviceFW::WRITE,
@@ -843,8 +808,6 @@ errlHndl_t LpcDD::writeLPC(LPC::TransType i_type, uint32_t i_addr,
         if( l_err ) { break; }
 
     } while(0);
-
-    if( need_unlock ) { mutex_unlock(ivp_mutex); }
 
     return l_err;
 }
@@ -1180,3 +1143,32 @@ errlHndl_t LpcDD::checkForOpbErrors( ResetLevels &o_resetLevel )
 }
 
 
+/**
+ * @brief Read an address from LPC space
+ */
+errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
+                          uint32_t i_addr,
+                          void* o_buffer,
+                          size_t& io_buflen)
+{
+    // Grab the lock and call the internal function
+    mutex_lock(ivp_mutex);
+    errlHndl_t l_err = _readLPC( i_type, i_addr, o_buffer, io_buflen );
+    mutex_unlock(ivp_mutex);
+    return l_err;
+}
+
+/**
+ * @brief Write an address to LPC space
+ */
+errlHndl_t LpcDD::writeLPC(LPC::TransType i_type,
+                           uint32_t i_addr,
+                           const void* i_buffer,
+                           size_t& io_buflen)
+{
+    // Grab the lock and call the internal function
+    mutex_lock(ivp_mutex);
+    errlHndl_t l_err = _writeLPC( i_type, i_addr, i_buffer, io_buflen );
+    mutex_unlock(ivp_mutex);
+    return l_err;
+}

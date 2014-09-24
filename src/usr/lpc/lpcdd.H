@@ -289,6 +289,38 @@ class LpcDD
      */
     void addFFDC(errlHndl_t& io_errl);
 
+    /**
+     * @brief Performs a LPC Read Operation, assumes lock is already held
+     *
+     * @param i_trans    LPC transaction type
+     * @param i_address  LPC address
+     * @param o_buffer   Buffer to read data into
+     * @param io_buflen  Input: Number of bytes to read,
+     *       Output: Number of bytes actually read
+     *
+     * @return Error from operation
+     */
+    errlHndl_t _readLPC(LPC::TransType i_type,
+                        uint32_t i_address,
+                        void* o_buffer,
+                        size_t& io_buflen);
+
+    /**
+     * @brief Performs a LPC Write Operation, assumes lock is already held
+     *
+     * @param i_trans    LPC transaction type
+     * @param i_address  LPC address
+     * @param i_buffer  Buffer to write data from
+     * @param io_buflen  Input: Number of bytes to write,
+     *       Output: Number of bytes actually written
+     *
+     * @return Error from operation
+     */
+    errlHndl_t _writeLPC(LPC::TransType i_type,
+                         uint32_t i_address,
+                         const void* i_buffer,
+                         size_t& io_buflen);
+
   private:
     /**
      * @brief Mutex to prevent concurrent LPC accesses to the master
