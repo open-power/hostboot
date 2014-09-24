@@ -409,7 +409,7 @@ void*    call_mss_scominit( void *io_pArgs )
                            "SUCCESS :  mss_scominit HWP( )" );
             }
         }
-        if (l_stepError.getErrorHandle())
+        if (!l_stepError.isNull())
         {
             break;
         }

@@ -447,7 +447,6 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                                  "SLW is in clean state");
                     }
                 }
-
                 // Create error log
                 if (0 != rc)
                 {
@@ -558,7 +557,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         }
     }
 
-    if( !l_stepError.getErrorHandle() )
+    if( l_stepError.isNull() )
     {
         // Call proc_post_winkle
         TARGETING::TargetHandleList l_procTargetList;
