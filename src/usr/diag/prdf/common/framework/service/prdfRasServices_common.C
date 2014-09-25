@@ -754,7 +754,11 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
     hwTableContent dumpContent;
     i_sdc.GetDumpRequest( dumpContent, o_dumpTrgt );
 
-    checkMpIplEligibility( i_attnType, o_dumpTrgt, dumpContent );
+    // TODO: RTC 116213 proc_mpipl_check_eligibility() is completely broken so
+    //       reverting this bug fix to the original 810 and 820 behavior (per
+    //       request from Kevin) until proc_mpipl_check_eligibility() is fixed
+    //       in FW830.
+    //checkMpIplEligibility( i_attnType, o_dumpTrgt, dumpContent );
 
     o_pfa.msDumpInfo.content = dumpContent;
     o_pfa.msDumpInfo.id      = getHuid(o_dumpTrgt);

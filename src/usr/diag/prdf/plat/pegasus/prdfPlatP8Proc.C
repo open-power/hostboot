@@ -42,6 +42,27 @@ namespace PRDF
 namespace Proc
 {
 
+// TODO: RTC 116213 proc_mpipl_check_eligibility() is completely broken so
+//       reverting this bug fix to the original 810 and 820 behavior (per
+//       request from Kevin) until proc_mpipl_check_eligibility() is fixed
+//       in FW830.
+/**
+ * @brief Call  HWP and set the right dump type
+ * @param  i_chip P8 chip
+ * @param  i_sc   The step code data struct
+ * @returns Failure or Success
+ * @note
+ */
+int32_t analyzeMpIPL( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & i_sc )
+{
+    PRDF_ERR( "analyzeMpIPL functionality not supported during hostboot: "
+               "PROC = 0x%08x", i_chip->GetId() );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
+
 /**
  * @brief Handle SLW Malfunction alert
  * @param i_chip P8 chip

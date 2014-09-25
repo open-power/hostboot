@@ -3165,13 +3165,23 @@ actionclass calloutNxThr5pHr
 
 actionclass combinedResponseError
 {
-    dumpSH;
+    # TODO: RTC 116213 proc_mpipl_check_eligibility() is completely broken so
+    #       reverting this bug fix to the original 810 and 820 behavior (per
+    #       request from Kevin) until proc_mpipl_check_eligibility() is fixed
+    #       in FW830.
+    funccall("analyzeMpIPL");
+    #dumpSH;
     funccall("combinedResponseCallout");
 };
 
 actionclass forceMpIpl
 {
-    dumpSH;
+    # TODO: RTC 116213 proc_mpipl_check_eligibility() is completely broken so
+    #       reverting this bug fix to the original 810 and 820 behavior (per
+    #       request from Kevin) until proc_mpipl_check_eligibility() is fixed
+    #       in FW830.
+    funccall("analyzeMpIPL");
+    #dumpSH;
     callout2ndLvlMedThr1NoGard;
 };
 
