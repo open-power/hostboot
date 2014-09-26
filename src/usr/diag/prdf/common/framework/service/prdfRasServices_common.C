@@ -485,7 +485,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // a cause as well.
     //**********************************************************
 
-    if ( isSapphireRunning() && sappSwNoGardReq && sappHwNoGardReq )
+    if( isSapphireRunning() && sappSwNoGardReq && sappHwNoGardReq )
     {
         // It is a Sapphire based system.
         // Hardware callout is of low priority but SW callout priority
@@ -494,23 +494,78 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         prdGardErrType = GardAction::NoGard;
     }
 
+    bool noGardForTodErr = false;
+    for( SDC_MRU_LIST::const_iterator it = mruList.begin();
+         it < mruList.end(); ++it )
+    {
+        if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() &&
+            TYPE_OSC == getTargetType(thiscallout.getTarget()) )
+        {
+            // FIXME Below is a part of workaround due to design limitation
+            // of hwsv in fips820. It shall be removed once RTC 103773,
+            // RTC 116192 and RTC 116134 gets integrated in to fips830.
+
+            // We shall not gard TOD OSC or MDMT due to master path errors.
+            // There are problems associated with garding of TOD clock end
+            // points on proc and OSC side. Garding entire Proc or TOD OSC for
+            // a mere bad pin doesn't look appropriate. So, we callout FRUs
+            // on both ends of TOD OSC connection but don't gard it.
+
+            noGardForTodErr = true;
+            break;
+        }
+    }
+
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
           it < mruList.end(); ++it )
     {
         thispriority = it->priority;
         thiscallout = it->callout;
 
-        if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
+        if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
+            // FIXME Below is a part of workaround due to design limitation
+            // of hwsv in fips820. It shall be removed once RTC 103773,
+            // RTC 116192 and RTC 116134 gets integrated in to fips830.
+
+            // We shall not gard TOD OSC or MDMT due to master path errors.
+            // There are problems associated with garding of TOD clock end
+            // points on proc and OSC side. Garding entire Proc or TOD OSC for
+            // a mere bad pin doesn't look appropriate. So, we callout FRUs
+            // on both ends of TOD OSC connection but don't gard it.
+
+            HWAS::GARD_ErrorType tmpGard = gardErrType;
+            HWAS::DeconfigEnum tmpDeconfig = deconfigState;
+
+            if( true == noGardForTodErr )
+            {
+                TYPE targetType = getTargetType( thiscallout.getTarget());
+
+                //Due to design limitation in fips820, TOD OSC and MDMT should
+                //not be garded in case of error in master path. For an error in
+                //master path, we callout TOD OSC with high priority and MDMT
+                //with low  priority. For an error in slave or internal path,
+                //a processor callout is done with medium level priority. TOD
+                //OSC is not blamed of those category of errors.
+                //So, in the code below, we try to find out if it is a case of
+                //an error in master path by looking at callout target type
+                //and priority.
+
+                if(( TYPE_OSC == targetType ) ||
+                   ( TYPE_PROC == targetType && MRU_LOW == thispriority ))
+                {
+                    tmpGard = HWAS::GARD_NULL;
+                    tmpDeconfig = HWAS::NO_DECONFIG;
+                }
+            }
 
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
-                                deconfigState,
+                                tmpDeconfig,
                                 iv_errl,
-                                gardErrType,
+                                tmpGard,
                                 severityParm,
                                 l_diagUpdate);
-
         }
         else if(PRDcalloutData::TYPE_PROCCLK == thiscallout.getType() ||
                 PRDcalloutData::TYPE_PCICLK  == thiscallout.getType())
@@ -1109,6 +1164,7 @@ errlHndl_t RasServices::getErrl() const
       * @devdesc CEC hardware failure detected.
       * @procedure  EPUB_PRC_ALL_PROCS
       * @procedure  EPUB_PRC_REBOOT
+      * @procedure  EPUB_PRC_TOD_CLOCK_ERR
       */
 
     /*@
@@ -1148,6 +1204,7 @@ errlHndl_t RasServices::getErrl() const
       * @procedure  EPUB_PRC_LVL_SUPP
       * @procedure  EPUB_PRC_ALL_PROCS
       * @procedure  EPUB_PRC_REBOOT
+      * @procedure  EPUB_PRC_TOD_CLOCK_ERR
       */
 
     /*@
@@ -1186,6 +1243,7 @@ errlHndl_t RasServices::getErrl() const
       * @procedure  EPUB_PRC_LVL_SUPP
       * @procedure  EPUB_PRC_ALL_PROCS
       * @procedure  EPUB_PRC_REBOOT
+      * @procedure  EPUB_PRC_TOD_CLOCK_ERR
       */
 
     /*@
@@ -1207,5 +1265,6 @@ errlHndl_t RasServices::getErrl() const
       * @procedure  EPUB_PRC_LVL_SUPP
       * @procedure  EPUB_PRC_ALL_PROCS
       * @procedure  EPUB_PRC_REBOOT
+      * @procedure  EPUB_PRC_TOD_CLOCK_ERR
       */
 

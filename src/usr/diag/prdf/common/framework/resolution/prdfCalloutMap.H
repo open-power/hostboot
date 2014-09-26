@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -82,6 +84,7 @@ PRDF_SYM_CALLOUT_ALIAS( MEMBUS_ERROR_ENUM,            EPUB_PRC_MEMBUS_ERROR   )
 PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OnNode_ENUM,    EPUB_PRC_PROC_XYZ_BUS   )
 PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OffNode_ENUM,   EPUB_PRC_PROC_AB_BUS    )
 PRDF_SYM_CALLOUT_ALIAS( ErrorCausedByMemUE_ENUM,      EPUB_PRC_MEMORY_UE      )
+PRDF_SYM_CALLOUT_ALIAS( TODProcInterface_Enum,        EPUB_PRC_TOD_CLOCK_ERR  )
 
 PRDF_SYM_CALLOUT_MAP_END
 
