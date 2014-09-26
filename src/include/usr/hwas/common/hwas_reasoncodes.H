@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -47,6 +49,7 @@ namespace HWAS
         RC_SYSAVAIL_NO_MEMORY_FUNC          = HWAS_COMP_ID | 0x06,
         RC_SYSAVAIL_NO_PROCS_FUNC           = HWAS_COMP_ID | 0x07,
         RC_SYSAVAIL_NO_NODES_FUNC           = HWAS_COMP_ID | 0x08,
+        RC_SYSAVAIL_NO_MEMBUFS_FUNC         = HWAS_COMP_ID | 0x09,
     };
 };
 
