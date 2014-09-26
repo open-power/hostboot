@@ -30,7 +30,7 @@
 #include <errl/errlmanager.H>
 #include <vfs/vfs.H>
 #include <runtime/interface.h>
-#include <hwpf/hwp/occ/occ.H>
+#include <hwpf/hwp/occ/occ_common.H>
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     iv_isPnor(false), iv_lidBuffer(NULL), iv_lidSize(0)

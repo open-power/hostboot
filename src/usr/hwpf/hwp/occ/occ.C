@@ -26,7 +26,9 @@
 #include    <stdint.h>
 #include    <config.h>
 
-#include    <occ/occ.H>
+#include    <hwpf/hwp/occ/occ.H>
+#include    <hwpf/hwp/occ/occ_common.H>
+
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
@@ -58,6 +60,7 @@
 #include <p8_pm_init.H>
 #include <p8_pm_firinit.H>
 
+#include <config.h>
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -68,272 +71,10 @@ using namespace TARGETING;
 
 namespace HBOCC
 {
-
-    /**
-     * @brief Fetches OCC image from FSP and writes to
-     *        specified offset.
+   /**
+     * @brief Setup homer addresses and load OCC for a specified processor
      *
-     * @param[in] i_occVirtAddr Virtual
-     *                       address where OCC image
-     *                       should be loaded.
-     *
-     * @return errlHndl_t  Error log image load failed
-     */
-    errlHndl_t loadOCCImageToHomer(void* i_occVirtAddr)
-    {
-        TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"loadOCCImageToHomer(%p)",
-                   i_occVirtAddr);
-
-        errlHndl_t  l_errl  =   NULL;
-        size_t lidSize = 0;
-        do {
-            UtilLidMgr lidMgr(Util::OCC_LIDID);
-
-            l_errl = lidMgr.getLidSize(lidSize);
-            if(l_errl)
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"loadOCCImageToHomer: Error getting lid size.  lidId=0x%.8x",
-                           Util::OCC_LIDID);
-                break;
-            }
-
-            l_errl = lidMgr.getLid(i_occVirtAddr, lidSize);
-            if(l_errl)
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"loadOCCImageToHomer: Error getting lid..  lidId=0x%.8x",
-                           Util::OCC_LIDID);
-                break;
-            }
-
-        }while(0);
-
-        TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"loadOCCImageToHomer");
-
-        return l_errl;
-    }
-
-    /**
-     * @brief Sets up OCC Host data
-     *
-     * @param[in] i_occHostDataVirtAddr Virtual
-     *                       address of current
-     *                       proc's Host data area.
-     *
-     * @return errlHndl_t  Error log Host data setup failed
-     */
-    errlHndl_t loadHostDataToHomer(void* i_occHostDataVirtAddr)
-    {
-        TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"loadHostDataToHomer(%p)",
-                   i_occHostDataVirtAddr);
-
-        errlHndl_t  l_errl  =   NULL;
-
-        //Treat virtual address as starting pointer
-        //for config struct
-        HBOCC::occHostConfigDataArea_t * config_data =
-          reinterpret_cast<HBOCC::occHostConfigDataArea_t *>
-          (i_occHostDataVirtAddr);
-
-        // Get top level system target
-        TARGETING::TargetService & tS = TARGETING::targetService();
-        TARGETING::Target * sysTarget = NULL;
-        tS.getTopLevelTarget( sysTarget );
-        assert( sysTarget != NULL );
-
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
-
-        config_data->version = HBOCC::OccHostDataVersion;
-        config_data->nestFrequency = nestFreq;
-
-        TRACUCOMP( g_fapiTd,
-                   EXIT_MRK"loadHostDataToHomer");
-
-        return l_errl;
-    }
-
-    /**
-     * @brief Execute procedures and steps necessary
-     *        to load OCC data in specified processor
-     *
-     * @param[in] i_target   Target proc to load
-     * @param[in] i_homerVirtAddrBase Virtual
-     *                       address of current
-     *                       proc's HOMER
-     * @param[in] i_homerPhysAddrBase Physical
-     *                       address of current
-     *                       proc's HOMER
-     *
-     * @return errlHndl_t  Error log image load failed
-     */
-    errlHndl_t load(Target* i_target,
-                    void* i_homerVirtAddrBase,
-                    uint64_t i_homerPhysAddrBase)
-    {
-        errlHndl_t  l_errl  =   NULL;
-        uint64_t targHomer = 0;
-        uint64_t tmpOffset = 0;
-        void* occVirt = 0;
-        void* occHostVirt = 0;
-
-        TRACFCOMP( g_fapiTd,
-                   ENTER_MRK"HBOCC:load()" );
-
-        do{
-            //Figure out OCC image offset for Target
-            //OCC image offset = HOMER_SIZE*ProcPosition +
-            //       OCC offset within HOMER (happens to be zero)
-            uint8_t tmpPos = i_target->getAttr<ATTR_POSITION>();
-            tmpOffset = tmpPos*VMM_HOMER_INSTANCE_SIZE +
-              HOMER_OFFSET_TO_OCC_IMG;
-            targHomer = i_homerPhysAddrBase + tmpOffset;
-            uint64_t occVirt64 =
-              reinterpret_cast<uint64_t>(i_homerVirtAddrBase)
-              + tmpOffset;
-            occVirt = reinterpret_cast<void *>(occVirt64);
-
-            // Remember where we put things
-            if( i_target )
-            {
-                i_target->setAttr<ATTR_HOMER_PHYS_ADDR>(targHomer);
-                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(occVirt64);
-            }
-
-            //Figure out OCC Host Data offset for Target
-            //OCC host data offset = HOMER_SIZE*ProcPosition +
-            //                       OCC data within HOMR
-            tmpOffset = tmpPos*VMM_HOMER_INSTANCE_SIZE +
-              HOMER_OFFSET_TO_OCC_HOST_DATA;
-            occHostVirt =
-              reinterpret_cast<void *>
-              (reinterpret_cast<uint64_t>(i_homerVirtAddrBase)
-               + tmpOffset) ;
-
-
-            // cast OUR type of target to a FAPI type of target.
-            const fapi::Target
-              l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
-                         (const_cast<Target*>(i_target)));
-
-            //==============================
-            //Setup for OCC Load
-            //==============================
-
-            // BAR0 is the Entire HOMER (start of HOMER contains OCC base Image)
-            // Bar size is in MB, obtained value of 4MB from Greg Still
-            const uint64_t bar0_size_MB = VMM_HOMER_INSTANCE_SIZE_IN_MB;
-            TRACUCOMP( g_fapiImpTd,
-                       INFO_MRK"OCC Address: 0x%.8X, size=0x%.8X",
-                       targHomer, bar0_size_MB  );
-
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_pba_bar_config,
-                             l_fapiTarg,
-                             0, targHomer, bar0_size_MB,
-                             PBA_CMD_SCOPE_NODAL );
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"Bar0 config failed!" );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            // BAR1 is what OCC uses to talk to the Centaur
-            // Bar size is in MB
-            uint64_t centaur_addr =
-              i_target->getAttr<ATTR_IBSCOM_PROC_BASE_ADDR>();
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_pba_bar_config,
-                             l_fapiTarg,
-                             1,  //i_index
-                             centaur_addr,  //i_pba_bar_addr
-                             (uint64_t)OCC_IBSCOM_RANGE_IN_MB, //i_pba_bar_size
-                             PBA_CMD_SCOPE_NODAL ); //i_pba_cmd_scope
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"Bar1 config failed!" );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-           // BAR3 is the OCC Common Area
-            // Bar size is in MB, obtained value of 8MB from Tim Hallett
-            const uint64_t bar3_size_MB = VMM_OCC_COMMON_SIZE_IN_MB;
-            const uint64_t occ_common_addr = i_homerPhysAddrBase
-              + VMM_HOMER_REGION_SIZE;
-
-            TRACUCOMP( g_fapiImpTd,
-                       INFO_MRK"OCC Common Address: 0x%.8X, size=0x%.8X",
-                       occ_common_addr, bar3_size_MB );
-
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_pba_bar_config,
-                             l_fapiTarg,
-                             3, occ_common_addr,
-                             bar3_size_MB,
-                             PBA_CMD_SCOPE_NODAL );
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"Bar3 config failed!" );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            //==============================
-            //Load the OCC HOMER image
-            //==============================
-            l_errl = loadOCCImageToHomer( occVirt );
-            if( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd, ERR_MRK"loading image failed!" );
-                break;
-            }
-
-            //==============================
-            //Setup host data area of HOMER;
-            //==============================
-            l_errl = loadHostDataToHomer(occHostVirt);
-            if( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
-                break;
-            }
-
-        }while(0);
-
-        TRACFCOMP( g_fapiTd,
-                   EXIT_MRK"HBOCC:load()" );
-
-        return l_errl;
-
-    }
-
-    /**
-     * @brief Load and Start OCC for specified DCM
-     *        pair of processors.  If 2nd input target
-     *        is NULL, OCC will be setup on just the
-     *        one target.
-     *
-     * @param[in] i_target0  Target of first proc in
-     *                       DCM pair
-     * @param[in] i_target1  Target of second proc in
-     *                       DCM pair
+     * @param[in] i_target0  Target proc to load
      * @param[in] i_homerVirtAddrBase Base Virtual
      *                       address of all HOMER
      *                       images
@@ -341,156 +82,70 @@ namespace HBOCC
      *                       address of all HOMER
      *                       images
      *
-     * @return errlHndl_t  Error log image load failed
+     *  @return errlHndl_t  Error log
      */
-    errlHndl_t loadnStartOcc(Target* i_target0,
-                             Target* i_target1,
-                             void* i_homerVirtAddrBase,
-                             uint64_t i_homerPhysAddrBase)
-    {
-        errlHndl_t  l_errl  =   NULL;
 
-        TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"loadnStartOcc" );
+     errlHndl_t Setupnload (Target* i_target,
+                            void* i_homerVirtAddrBase,
+                            uint64_t i_homerPhysAddrBase)
+     {
+         errlHndl_t  l_errl  =   NULL;
+
+         TRACUCOMP( g_fapiTd,
+                   ENTER_MRK"Setupnload" );
 
 
         do {
-            // cast OUR type of target to a FAPI type of target.
-            // figure out homer offsets
-            const fapi::Target
-              l_fapiTarg0(fapi::TARGET_TYPE_PROC_CHIP,
-                         (const_cast<Target*>(i_target0)));
+            //==============================
+            //Setup Addresses
+            //==============================
+            uint8_t  tmpPos    = i_target->getAttr<ATTR_POSITION>();
+            uint64_t tmpOffset = (tmpPos * VMM_HOMER_INSTANCE_SIZE) +
+                                 HOMER_OFFSET_TO_OCC_IMG;
 
-            fapi::Target l_fapiTarg1;
-            if(i_target1)
-            {
-                l_fapiTarg1.setType(fapi::TARGET_TYPE_PROC_CHIP);
-                l_fapiTarg1.set(const_cast<Target*>(i_target1));
+            uint64_t i_homerPhysAddr  = i_homerPhysAddrBase + tmpOffset;
+            uint64_t i_homerVirtAddr  = reinterpret_cast<uint64_t>
+                                        (i_homerVirtAddrBase) + tmpOffset;
 
-            }
-            else
-            {
-                l_fapiTarg1.setType(fapi::TARGET_TYPE_NONE);
-            }
+            uint64_t i_commonPhysAddr = i_homerPhysAddrBase +
+                                        VMM_HOMER_REGION_SIZE;
 
             //==============================
-            //Setup and load oCC
+            // Load OCC
             //==============================
-
-            l_errl = load(i_target0,
-                          i_homerVirtAddrBase,
-                          i_homerPhysAddrBase);
+            l_errl=  HBOCC::loadOCC(i_target,
+                                        i_homerPhysAddr,
+                                        i_homerVirtAddr,
+                                        i_commonPhysAddr);
             if(l_errl != NULL)
             {
-                TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartOcc: load failed for target 0" );
-                break;
-            }
-
-            if(i_target1 != NULL)
-            {
-                l_errl = load(i_target1,
-                              i_homerVirtAddrBase,
-                              i_homerPhysAddrBase);
-                if(l_errl != NULL)
-                {
-                    TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartOcc: load failed for target 1" );
-                    break;
-                }
-            }
-            //==============================
-            // Initialize the logic
-            //==============================
-
-            // Config path
-            // p8_pm_init.C enum: PM_CONFIG
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_pm_init,
-                             l_fapiTarg0,
-                             l_fapiTarg1,
-                             PM_CONFIG );
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"p8_pm_init, config failed!" );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            // Init path
-            // p8_pm_init.C enum: PM_INIT
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_pm_init,
-                             l_fapiTarg0,
-                             l_fapiTarg1,
-                             PM_INIT );
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"p8_pm_init, init failed!" );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-            TRACFCOMP( g_fapiImpTd,
-                       INFO_MRK"OCC Finished: p8_pm_init.C enum: PM_INIT" );
-
-
-            //==============================
-            //Start the OCC on primary chip of DCM
-            //==============================
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_occ_control,
-                             l_fapiTarg0,
-                             PPC405_RESET_OFF,
-                             PPC405_BOOT_MEM );
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"occ_control failed!" );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
+                TRACFCOMP( g_fapiImpTd, ERR_MRK"Setupnload: loadOCC failed" );
                 break;
             }
 
             //==============================
-            // Start the OCC on slave chip of DCM
+            //Setup host data area of HOMER;
             //==============================
-            if ( l_fapiTarg1.getType() != fapi::TARGET_TYPE_NONE )
+            void* occHostVirt = reinterpret_cast<void *>(i_homerVirtAddr);
+            l_errl = HBOCC::loadHostDataToHomer(occHostVirt);
+            if( l_errl != NULL )
             {
-                FAPI_INVOKE_HWP( l_errl,
-                                 p8_occ_control,
-                                 l_fapiTarg1,
-                                 PPC405_RESET_OFF,
-                                 PPC405_BOOT_MEM );
-
-                if ( l_errl != NULL )
-                {
-                    TRACFCOMP( g_fapiImpTd,
-                               ERR_MRK"occ_control failed!" );
-                    l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                    l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                    break;
-                }
+                TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
+                break;
             }
-
-        } while(0);
-
-        TRACUCOMP( g_fapiTd,
-                   EXIT_MRK"loadnStartOcc" );
+        } while (0);
 
         return l_errl;
-    }
+     }
 
-
-    ////////////////////////////////////////////////
+    /**
+     * @brief Starts OCCs on all Processors in the node
+     *        This is intended to be used for AVP testing.
+     *
+     * @param[out] o_failedOccTarget: Pointer to the target failing
+     *                       loadnStartAllOccs
+     * @return errlHndl_t  Error log if OCC load failed
+     */
     errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget)
     {
         errlHndl_t  l_errl  =   NULL;
@@ -564,12 +219,15 @@ namespace HBOCC
             if(0 ==
                (*itr1)->getAttr<ATTR_PROC_DCM_INSTALLED>())
             {
+                TRACUCOMP( g_fapiTd,
+                       INFO_MRK"loadnStartAllOccs: non-dcm path entered");
+
                 for (TargetHandleList::iterator itr = procChips.begin();
                      itr != procChips.end();
                      ++itr)
                 {
-                    l_errl =  loadnStartOcc(*itr,
-                                            NULL,
+                    /******* SETUP AND LOAD **************/
+                    l_errl =  Setupnload   (*itr,
                                             homerVirtAddrBase,
                                             homerPhysAddrBase);
                     if(l_errl)
@@ -577,6 +235,14 @@ namespace HBOCC
                         o_failedOccTarget = *itr;
                         TRACFCOMP( g_fapiImpTd, ERR_MRK
                          "loadnStartAllOccs:loadnStartOcc failed");
+                        break;
+                    }
+
+                    /********* START OCC *************/
+                    l_errl = HBOCC::startOCC (*itr, NULL, o_failedOccTarget);
+                    if (l_errl)
+                    {
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOcc: start failed");
                         break;
                     }
                 }
@@ -624,16 +290,36 @@ namespace HBOCC
                             targ1 = *itr;
                         }
                     }
-                    TRACUCOMP( g_fapiImpTd, INFO_MRK"loadnStartAllOccs: calling loadnStartOcc." );
-                    l_errl =  loadnStartOcc(targ0,
-                                            targ1,
+
+                    /********** Setup and load targ0 ***********/
+                    l_errl =  Setupnload   (targ0,
                                             homerVirtAddrBase,
                                             homerPhysAddrBase);
                     if(l_errl)
                     {
-                        o_failedOccTarget = *itr;
+                        o_failedOccTarget = targ0;
                         TRACFCOMP( g_fapiImpTd, ERR_MRK
-                        "loadnStartAllOccs:loadnStartOcc failed");
+                        "loadnStartAllOccs: Setupnload failed on targ0");
+                        break;
+                    }
+
+                    /*********** Setup and load targ1 **********/
+                    l_errl =  Setupnload   (targ1,
+                                            homerVirtAddrBase,
+                                            homerPhysAddrBase);
+                    if(l_errl)
+                    {
+                        o_failedOccTarget = targ1;
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK
+                        "loadnStartAllOccs:Setupnload failed on targ1");
+                        break;
+                    }
+
+                    /*********** Start OCC *******************/
+                    l_errl = HBOCC::startOCC (targ0, targ1, o_failedOccTarget);
+                    if (l_errl)
+                    {
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: start failed");
                         break;
                     }
                 }
@@ -711,8 +397,15 @@ namespace HBOCC
         return l_errl;
     }
 
+    /**
+     * @brief Starts OCCs on all Processors in the node
+     *        This is intended to be used for Open Power.
+     *
+     * @return errlHndl_t  Error log if OCC load failed
+     */
     errlHndl_t activateOCC ()
     {
+        TRACUCOMP( g_fapiTd,ENTER_MRK"activateOCC" );
         errlHndl_t l_errl    = NULL;
         TARGETING::Target* l_failedOccTarget = NULL;
         //uint8_t l_errStatus = 0;
@@ -738,9 +431,7 @@ namespace HBOCC
             errlCommit (l_errl, HWPF_COMP_ID);
         }
 #endif
+        TRACUCOMP( g_fapiTd,EXIT_MRK"activateOCC" );
         return l_errl;
     }
-
-
-
 }  //end OCC namespace

@@ -24,7 +24,9 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <runtime/interface.h>
 #include <kernel/console.H>
-#include <hwpf/hwp/occ/occ.H>
+
+#include <hwpf/hwp/occ/occ_common.H>
+
 #include <vmmconst.h>
 #include <sys/misc.h>
 #include <errno.h>
@@ -39,8 +41,6 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/util.H>
 #include    <runtime/rt_targeting.H>
-
-#include <runtime/interface.h>
 
 //  fapi support
 #include    <fapi.H>
@@ -58,11 +58,6 @@ using namespace TARGETING;
 // Trace
 
 extern trace_desc_t* g_fapiTd; // defined in rt_fapiPlatUtil.C
-
-// @TODO RTC 98547
-// There is potential to share more code with src/hwpf/hwp/occ/occ.C,
-// but would require refactoring the HB occ code and modifying the order and
-// sequence of some events.
 
 namespace RT_OCC
 {
@@ -85,30 +80,6 @@ namespace RT_OCC
             //TODO RTC: 114906
             //HTMGT::htmgtProcessOccError(l_failedOccTarget);
         } while (0);
-    }
-
-    //---------------------------------------------------------------------
-    errlHndl_t addHostData(uint64_t i_hostdata_addr)
-    {
-        errlHndl_t err = NULL;
-        //Treat virtual address as starting pointer
-        //for config struct
-        HBOCC::occHostConfigDataArea_t * config_data =
-            reinterpret_cast<HBOCC::occHostConfigDataArea_t *>
-            (i_hostdata_addr);
-
-        // Get top level system target
-        TARGETING::TargetService & tS = TARGETING::targetService();
-        TARGETING::Target * sysTarget = NULL;
-        tS.getTopLevelTarget( sysTarget );
-        assert( sysTarget != NULL );
-
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
-
-        config_data->version = HBOCC::OccHostDataVersion;
-        config_data->nestFrequency = nestFreq;
-
-        return err;
     }
 
     //------------------------------------------------------------------------
@@ -141,106 +112,21 @@ namespace RT_OCC
                 rc = EINVAL;
                 break;
             }
-
-            // Remember where we put things
-            proc_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_homer_addr_phys);
-            proc_target->setAttr<ATTR_HOMER_VIRT_ADDR>(i_homer_addr_va);
-
-            // Convert to fapi Target
-            fapi::Target fapiTarg( fapi::TARGET_TYPE_PROC_CHIP,
-                                   (const_cast<TARGETING::Target*>(proc_target)
-                                   ));
-
-            TRACFCOMP( g_fapiTd, "FapiTarget: %s",fapiTarg.toEcmdString());
-
-            // BAR0 is the Entire HOMER, Bar size is in MB
-            FAPI_INVOKE_HWP( err,
-                             p8_pba_bar_config,
-                             fapiTarg,
-                             0,                  //BAR0
-                             i_homer_addr_phys,
-                             VMM_HOMER_INSTANCE_SIZE_IN_MB,
-                             PBA_CMD_SCOPE_NODAL );
-
-            if ( err )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"Bar0 config failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            // BAR1 is what OCC uses to talk to the Centaur. Bar size is in MB
-            uint64_t centaur_addr =
-                proc_target->getAttr<ATTR_IBSCOM_PROC_BASE_ADDR>();
-
-            FAPI_INVOKE_HWP( err,
-                             p8_pba_bar_config,
-                             fapiTarg,
-                             1,             //BAR1
-                             centaur_addr,  //i_pba_bar_addr
-                             //i_pba_bar_size
-                             (uint64_t)HBOCC::OCC_IBSCOM_RANGE_IN_MB,
-                             PBA_CMD_SCOPE_NODAL ); //i_pba_cmd_scope
-
-            if ( err != NULL )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"Bar1 config failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            // BAR3 is the OCC Common Area
-            // Bar size is in MB, obtained value of 8MB from Tim Hallett
-            FAPI_INVOKE_HWP( err,
-                             p8_pba_bar_config,
-                             fapiTarg,
-                             3,             //BAR3
-                             i_common_addr_phys,
-                             VMM_OCC_COMMON_SIZE_IN_MB,
-                             PBA_CMD_SCOPE_NODAL );
-
-            if ( err )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"Bar3 config failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            // Load HOMER image
-            UtilLidMgr lidmgr(Util::OCC_LIDID);
-
-            size_t lidSize = 0;
-            err = lidmgr.getLidSize(lidSize);
+            err = HBOCC::loadOCC(proc_target,
+                                        i_homer_addr_phys,
+                                        i_homer_addr_va,
+                                        i_common_addr_phys);
             if( err )
             {
                 break;
             }
 
-            err = lidmgr.getLid(reinterpret_cast<void*>(i_homer_addr_va),
-                                lidSize);
-            if( err )
+            void* occHostVirt = reinterpret_cast <void *> (i_homer_addr_va +
+                                HOMER_OFFSET_TO_OCC_HOST_DATA);
+            err = HBOCC::loadHostDataToHomer(occHostVirt);
+            if( err != NULL )
             {
-                break;
-            }
-
-            TRACFCOMP( g_fapiTd,
-                       "OCC lid loaded. ID:%x size:%d",
-                       Util::OCC_LIDID,
-                       lidSize);
-
-            // Setup Host Data area of HOMER
-            err = addHostData(i_homer_addr_va+HOMER_OFFSET_TO_OCC_HOST_DATA);
-            if( err )
-            {
+                TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
                 break;
             }
 
@@ -269,164 +155,13 @@ namespace RT_OCC
 
     //------------------------------------------------------------------------
 
-    errlHndl_t start_occ(TARGETING::Target * i_target0,
-                         TARGETING::Target * i_target1)
-    {
-        errlHndl_t err = NULL;
-        do
-        {
-            const fapi::Target
-                l_fapiTarg0(fapi::TARGET_TYPE_PROC_CHIP,
-                            (const_cast<TARGETING::Target*>(i_target0)));
-
-            fapi::Target l_fapiTarg1;
-            if(i_target1)
-            {
-                l_fapiTarg1.setType(fapi::TARGET_TYPE_PROC_CHIP);
-                l_fapiTarg1.set(const_cast<TARGETING::Target*>(i_target1));
-
-            }
-            else
-            {
-                l_fapiTarg1.setType(fapi::TARGET_TYPE_NONE);
-            }
-
-            FAPI_INVOKE_HWP( err,
-                             p8_pm_init,
-                             l_fapiTarg0,
-                             l_fapiTarg1,
-                             PM_CONFIG );
-
-            if ( err != NULL )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"p8_pm_init, config failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            // Init path
-            // p8_pm_init.C enum: PM_INIT
-            FAPI_INVOKE_HWP( err,
-                             p8_pm_init,
-                             l_fapiTarg0,
-                             l_fapiTarg1,
-                             PM_INIT );
-
-            if ( err != NULL )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"p8_pm_init, init failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-            TRACFCOMP( g_fapiTd,
-                       INFO_MRK"OCC Finished: p8_pm_init.C enum: PM_INIT" );
-
-
-            //==============================
-            //Start the OCC on primary chip of DCM
-            //==============================
-            FAPI_INVOKE_HWP( err,
-                             p8_occ_control,
-                             l_fapiTarg0,
-                             PPC405_RESET_OFF,
-                             PPC405_BOOT_MEM );
-
-            if ( err != NULL )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"occ_control failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-            //==============================
-            // Start the OCC on slave chip of DCM
-            //==============================
-            if ( l_fapiTarg1.getType() != fapi::TARGET_TYPE_NONE )
-            {
-                FAPI_INVOKE_HWP( err,
-                                 p8_occ_control,
-                                 l_fapiTarg1,
-                                 PPC405_RESET_OFF,
-                                 PPC405_BOOT_MEM );
-
-                if ( err != NULL )
-                {
-                    TRACFCOMP( g_fapiTd,
-                               ERR_MRK"occ_control failed!" );
-                    err->collectTrace(FAPI_TRACE_NAME,256);
-                    err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                    break;
-                }
-            }
-        } while(0);
-
-        return err;
-    }
-
-    //------------------------------------------------------------------------
-
-    errlHndl_t stop_occ(TARGETING::Target * i_target0,
-                        TARGETING::Target * i_target1)
-    {
-        errlHndl_t err = NULL;
-        do
-        {
-            const fapi::Target
-                l_fapiTarg0(fapi::TARGET_TYPE_PROC_CHIP,
-                            (const_cast<TARGETING::Target*>(i_target0)));
-
-            fapi::Target l_fapiTarg1;
-            if(i_target1)
-            {
-                l_fapiTarg1.setType(fapi::TARGET_TYPE_PROC_CHIP);
-                l_fapiTarg1.set(const_cast<TARGETING::Target*>(i_target1));
-
-            }
-            else
-            {
-                l_fapiTarg1.setType(fapi::TARGET_TYPE_NONE);
-            }
-
-            FAPI_INVOKE_HWP( err,
-                             p8_pm_prep_for_reset,
-                             l_fapiTarg0,
-                             l_fapiTarg1,
-                             PM_RESET );
-
-            if ( err != NULL )
-            {
-                TRACFCOMP( g_fapiTd,
-                           ERR_MRK"p8_pm_prep_for_reset failed!" );
-                err->collectTrace(FAPI_TRACE_NAME,256);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                break;
-            }
-
-        } while(0);
-
-        return err;
-    }
-
-    //------------------------------------------------------------------------
-
     int executeOnDcms(HBOCC::occAction_t i_action,
                       uint64_t * i_proc_chip,
                       size_t i_num_chips)
     {
         errlHndl_t err = NULL;
         int rc = 0;
-
+        TARGETING::Target* l_failedTarget = NULL;
         TRACFCOMP( g_fapiTd,
                    "Action=%d, number of procs = %d ",
                    i_action,
@@ -475,11 +210,11 @@ namespace RT_OCC
                 {
                     if(i_action == HBOCC::OCC_START)
                     {
-                        err = start_occ(*itarg, NULL);
+                        err = HBOCC::startOCC(*itarg, NULL, l_failedTarget);
                     }
                     else if(i_action == HBOCC::OCC_STOP)
                     {
-                        err = stop_occ(*itarg, NULL);
+                        err = HBOCC::stopOCC(*itarg, NULL);
                     }
 
                     if( err )
@@ -536,11 +271,11 @@ namespace RT_OCC
                 }
                 if(i_action == HBOCC::OCC_START)
                 {
-                    err = start_occ(t0,t1);
+                    err = HBOCC::startOCC(t0,t1, l_failedTarget);
                 }
                 else if(i_action == HBOCC::OCC_STOP)
                 {
-                    err = stop_occ(t0,t1);
+                    err = HBOCC::stopOCC(t0,t1);
                 }
 
                 if( err )

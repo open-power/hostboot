@@ -25,29 +25,10 @@
 #ifndef OCC_H_
 #define OCC_H_
 
-#include <limits.h>
-#include <errl/errlentry.H>
+#include    <limits.h>
+#include    <errl/errlentry.H>
 
 namespace HBOCC {
-
-    struct occHostConfigDataArea_t
-    {
-        uint32_t version;
-        uint32_t nestFrequency;
-    };
-
-    enum
-    {
-        OccHostDataVersion = 1,
-        OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
-    };
-
-    enum occAction_t
-    {
-        OCC_START,
-        OCC_STOP,
-    };
-
     /**
      * @brief Starts OCCs on all Processors in the node
      *        This is intended to be used for AVP testing.

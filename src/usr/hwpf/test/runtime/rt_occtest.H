@@ -27,7 +27,7 @@
 
 #include <cxxtest/TestSuite.H>
 #include <runtime/interface.h>
-#include <hwpf/hwp/occ/occ.H>
+#include <hwpf/hwp/occ/occ_common.H>
 #include <fapi.H>
 #include <targeting/common/commontargeting.H>
 #include <vmmconst.h>

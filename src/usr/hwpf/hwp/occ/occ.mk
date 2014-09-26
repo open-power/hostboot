@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2014
+# Contributors Listed Below - COPYRIGHT 2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,6 +71,8 @@ OBJS += p8_pmc_force_vsafe.o
 OBJS += p8_ocb_indir_access.o
 OBJS += p8_ocb_indir_setup_linear.o
 
+#common occ functions between ipl and runtime
+OBJS += occ_common.o
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/occ/<HWP_dir>

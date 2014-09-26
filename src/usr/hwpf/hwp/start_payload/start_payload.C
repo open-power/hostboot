@@ -327,7 +327,6 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
-
 #ifdef CONFIG_SET_NOMINAL_PSTATE
         // Speed up processors.
         l_err = setMaxPstate();
