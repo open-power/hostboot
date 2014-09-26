@@ -116,21 +116,29 @@ uint32_t getIoOscPos( ExtensibleChip * i_chip,
 
     do
     {
-        uint32_t u32Data = 0;
+        int32_t rc = SUCCESS;
 
-        int32_t tmpRc = getCfam( i_chip, io_sc, 0x2819, u32Data );
+        SCAN_COMM_REGISTER_CLASS * pcieOscSwitchReg =
+                i_chip->getRegister("PCIE_OSC_SWITCH");
 
-        if ( SUCCESS != tmpRc )
+        rc = pcieOscSwitchReg->Read();
+        if (rc != SUCCESS)
         {
-            PRDF_ERR( PRDF_FUNC"getCfam of 0x2819 returned error for "
-                              "chip 0x%08x", i_chip->GetId() );
+            PRDF_ERR(PRDF_FUNC"PCIE_OSC_SWITCH read failed"
+                     "for 0x%08x", i_chip->GetId());
             break;
         }
 
-        // 2819 [ 16 ] == 1    ( OSC 0 is active )
-        // 2819 [ 16 ] == 0    ( OSC 1 is active )
-        uint32_t tmpData = ( u32Data >> 15 ) & 0x1;
-        o_oscPos = (tmpData == 1 ? 0:1);
+        // [ 16 ] == 1    ( OSC 0 is active )
+        // [ 16 ] == 0    ( OSC 1 is active )
+        if(pcieOscSwitchReg->IsBitSet(16))
+        {
+            o_oscPos = 0;
+        }
+        else
+        {
+            o_oscPos = 1;
+        }
 
     } while(0);
 

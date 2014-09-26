@@ -345,23 +345,6 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
                               bs);
     }
 
-    // only get this for proc chip
-    if ( TYPE_PROC == getTargetType(i_chip->GetChipHandle()) )
-    {
-        rc = getCfam( i_chip, io_sc, 0x00002819, u32Data );
-
-        if ( SUCCESS == rc )
-        {
-            BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &u32Data);
-
-            io_sc.service_data->GetCaptureData().Add(
-                                      i_chip->GetChipHandle(),
-                                      ( Util::hashString("PCIE_OSC_SWITCH") ^
-                                        i_chip->getSignatureOffset() ),
-                                      bs);
-        }
-    }
-
     #undef PRDF_FUNC
 }
 

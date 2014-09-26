@@ -79,6 +79,10 @@ class PTPLFIR:public CxxTest::TestSuite
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x090F001E,
             //0x0008000000000001);
 
+            // PCIE_OSC_SWITCH [16] : active osc-0
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x00050019,
+                           0x000080000000000);
+
             // PB_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001F,
                            0x0000000000000001);
@@ -155,6 +159,10 @@ class PTPLFIR:public CxxTest::TestSuite
                            0x0000000000000001);
             //PRDS_SCR_EXPECT("NODE{0}:PROC{0}", 0x090F001E,
             //0x0008000000000001);
+
+            // PCIE_OSC_SWITCH [16] : active osc-0
+            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x00050019,
+                           0x000080000000000);
 
             // PB_ERROR_REG
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x020F001F,

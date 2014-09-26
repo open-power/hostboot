@@ -165,8 +165,8 @@ chip Proc
     register PCIE_OSC_SWITCH
     {
         name        "TPC.FSI.FSI_MAILBOX.FSXCOMP.FSXLOG.SNS1LTH";
-        scomaddr    0x00002819;
-        capture     group never;
+        scomaddr    0x00050019;
+        capture     group PllFIRs;
     };
 
 };
