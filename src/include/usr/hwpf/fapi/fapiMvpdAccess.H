@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -124,6 +126,43 @@ namespace fapi
         MVPD_KEYWORD_PB  = 0x21,
         MVPD_KEYWORD_CH  = 0x22,
     };
+
+    typedef struct voltageBucketData
+    {
+        // bucket Id
+        uint8_t bucketId;
+        // Nominal
+        uint16_t nomFreq;
+        uint16_t VnestNomVltg;
+        uint16_t InestNomCurr;
+        uint16_t VcsNomVltg;
+        uint16_t IcsNomCurr;
+        // PowerSave
+        uint16_t PSFreq;
+        uint16_t VnestPSVltg;
+        uint16_t InestPSCurr;
+        uint16_t VcsPSVltg;
+        uint16_t IcsPSCurr;
+        // Turbo
+        uint16_t turboFreq;
+        uint16_t VnestTurboVltg;
+        uint16_t InestTurboCurr;
+        uint16_t VcsTurboVltg;
+        uint16_t IcsTurboCurr;
+        //Fvmin
+        uint16_t fvminFreq;
+        uint16_t VnestFvminVltg;
+        uint16_t InestFvminCurr;
+        uint16_t VcsFvminVltg;
+        uint16_t IcsFvminCurr;
+        //Lab
+        uint16_t labFreq;
+        uint16_t VnestLabVltg;
+        uint16_t InestLabCurr;
+        uint16_t VcsLabVltg;
+        uint16_t IcsLabCurr;
+    }voltageBucketData_t;
+
 }
 
 extern "C"
@@ -131,9 +170,9 @@ extern "C"
 
 /**
  *  @brief Get Module VPD field.
- *  
+ *
  *  A Module VPD field is specified using a record and keyword enumerator
- *  
+ *
  *  Suggested way to call this routine is to call it once with a NULL buffer
  *  pointer to to retrieve the size of the record, then allocate the proper
  *  size of the buffer and call again.
@@ -172,6 +211,26 @@ fapi::ReturnCode fapiSetMvpdField(const fapi::MvpdRecord i_record,
                                   const fapi::Target &i_procTarget,
                                   const uint8_t * const i_pBuffer,
                                   const uint32_t i_fieldSize);
+
+/**
+ * @brief Get #V bucket data from VPD
+ *
+ * @par Detailed Description:
+ *     This function reads PR keyword from the VPD, parses PR keyword
+ *     to get voltage bucket id, reads #V keyword (Voltage data) from VPD,
+ *     parses #V keyword to get voltage data corresponding to the bucket id
+ *     indicated by the PR keyword and returns data to the caller.
+ *
+ * @param[in] i_pTarget  Pointer to proc chip target.
+ * @param[in] i_record   VPD record number to read #V bucket data
+ * @param[out] o_data    On success, structure with #V bucket data from VPD
+ *
+ * @return fapi::ReturnCode. FAPI_RC_SUCCESS, or failure value.
+ */
+fapi::ReturnCode fapiGetPoundVBucketData(const TARGETING::Target *i_pChipTarget,
+                                         const uint32_t i_record,
+                                         fapi::voltageBucketData_t & o_data);
+
 }
 
 #endif

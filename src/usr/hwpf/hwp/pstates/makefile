@@ -54,6 +54,7 @@ OBJS += p8_build_pstate_datablock.o
 OBJS += proc_get_voltage.o
 OBJS += pstates.o
 OBJS += pstate_tables.o
+OBJS += $(if $(CONFIG_SET_NOMINAL_PSTATE)$(CONFIG_HTMGT),freqVoltageSvc.o)
 
 OBJS += proc_set_max_pstate.o
 

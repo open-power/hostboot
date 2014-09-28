@@ -158,6 +158,9 @@ const DepModInfo  g_istep06Dependancies = {
       DEP_LIB(libslave_sbe.so),
       DEP_LIB(libsbe.so),
       DEP_LIB(libporeve.so),
+#ifdef CONFIG_HTMGT
+      DEP_LIB(libpstates.so),
+#endif
       NULL
     }
 };

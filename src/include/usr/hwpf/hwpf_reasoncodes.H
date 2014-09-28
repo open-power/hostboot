@@ -74,6 +74,10 @@ namespace fapi
         MOD_GET_OCC_CHIP_TARGET                    = 0x20,
         MOD_ACCESS_OCB_INDIRECT_CHANNEL            = 0x21,
         MOD_GET_RCD_CNTL_WORD                      = 0x22,
+        MOD_GET_SYS_FREQ                           = 0x23,
+        MOD_GET_POUNDV_BUCKET_DATA                 = 0x24,
+        MOD_GET_VER_ONE_VOLTAGE_BUCKET_DATA        = 0x25,
+        MOD_PLAT_MVPD_GET_VLTG_BUCKET_ATTR         = 0x26,
 
     };
 
@@ -126,6 +130,12 @@ namespace fapi
         RC_TARGET_UNSUPPORTED         = HWPF_COMP_ID | 0x31,
         RC_INVALID_DATA_BUFFER_LENGTH = HWPF_COMP_ID | 0x32,
         RC_INVALID_DIMM_TYPE          = HWPF_COMP_ID | 0x33,
+        RC_INVALID_DATA               = HWPF_COMP_ID | 0x34,
+        RC_INVALID_SIZE               = HWPF_COMP_ID | 0x35,
+        RC_INVALID_FREQ               = HWPF_COMP_ID | 0x36,
+        RC_INVALID_PARAM              = HWPF_COMP_ID | 0x37,
+        RC_DATA_MISMATCH              = HWPF_COMP_ID | 0x38,
+        RC_DATA_NOT_SUPPORTED         = HWPF_COMP_ID | 0x39,
     };
 
     /**

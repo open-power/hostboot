@@ -1,0 +1,332 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/pstate_attributes.xml $                      -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_NOM_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword Nominal Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_NEST_NOM_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-nest nominal voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_NEST_NOM_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-nest nominal current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_CS_NOM_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-cs nominal voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_CS_NOM_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-cs nominal current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_PS_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword PowerSave Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_NEST_PS_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-nest PowerSave voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_NEST_PS_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-nest PowerSave current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_CS_PS_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-cs PowerSave voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_CS_PS_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-cs PowerSave current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_TURBO_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword turbo Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_NEST_TURBO_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-nest turbo voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_NEST_TURBO_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-nest turbo current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_CS_TURBO_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-cs turbo voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_CS_TURBO_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-cs turbo current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_FVMIN_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword fvmin Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_NEST_FVMIN_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-nest fvmin voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_NEST_FVMIN_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-nest fvmin current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_CS_FVMIN_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-cs fvmin voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_CS_FVMIN_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-cs fvmin current
+consumer: p8_build_pstate_datablock, others
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_LAB_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword lab Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_NEST_LAB_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-nest lab voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-nest lab current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword V-cs lab voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_OVERRIDE_MVPD_I_CS_LAB_CURRENT</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Module VPD #V keyword I-cs lab current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used for over writing attributes in lab/debug
+    </description>
+    <valueType>uint32</valueType>
+    <readable/>
+    <writeable/>
+</attribute>
+</attributes>
+

@@ -45,6 +45,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_spless_sbe_startWA
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_tp_collect_dbg_data
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/model/
 

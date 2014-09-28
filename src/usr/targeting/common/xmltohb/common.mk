@@ -87,6 +87,7 @@ FAPI_ATTR_SOURCES += erepair_thresholds.xml
 FAPI_ATTR_SOURCES += dram_training/mem_pll_setup/memb_pll_ring_attributes.xml
 FAPI_ATTR_SOURCES += runtime_attributes/memory_occ_attributes.xml
 FAPI_ATTR_SOURCES += proc_abus_dmi_xbus_scominit_attributes.xml
+FAPI_ATTR_SOURCES += pstate_attributes.xml
 
 XMLTOHB_GENERIC_XML     += generic.xml
 XMLTOHB_FAPI_XML        += fapiattrs.xml

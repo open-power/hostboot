@@ -65,6 +65,7 @@
 #include "proc_getecid.H"
 #include "proc_spless_sbe_startWA.H"
 #include <sbe/sbeif.H>
+#include <freqVoltageSvc.H>
 
 const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
 const uint64_t MS_TO_WAIT_OTHERS= 100; //(100 ms)
@@ -142,6 +143,19 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
     // execute proc_read_nest_freq.C
     // execute proc_setup_sbe_config.C
+
+#ifdef CONFIG_HTMGT
+    // Set system frequency attributes
+    errlHndl_t l_errl = FREQVOLTSVC::setSysFreq();
+    if (l_errl )
+    {
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
+
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+#endif // CONFIG_HTMGT
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config exit" );
