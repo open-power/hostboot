@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +38,8 @@ namespace VPD
             {
                 registerParser<VPD::UdParserVpdParms>
                   (VPD_UDT_PARAMETERS);
+                registerParser<VPD::UdParserConfigParms>
+                  (VPD_UDT_CONFIG_PARMS);
             }
 
         private:

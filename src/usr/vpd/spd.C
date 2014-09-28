@@ -531,7 +531,25 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 
     do
     {
-        if( likely( g_usePNOR ) )
+#ifdef CONFIG_DJVPD_WRITE_TO_HW
+        if( i_location != VPD::PNOR )
+        {
+            // Write directly to target's EEPROM.
+            err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                      i_target,
+                                      i_data,
+                                      i_numBytes,
+                                      DEVICE_EEPROM_ADDRESS(
+                                          EEPROM::VPD_PRIMARY,
+                                          i_offset ) );
+            if( err )
+            {
+                break;
+            }
+        }
+#endif
+#ifdef CONFIG_DJVPD_WRITE_TO_PNOR
+        if( i_location != VPD::SEEPROM )
         {
             // Setup info needed to write from PNOR
             VPD::pnorInformation info;
@@ -545,40 +563,12 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
                                   info,
                                   g_spdPnorAddr,
                                   &g_spdMutex );
-
             if( err )
             {
                 break;
             }
         }
-        else
-        {
-            TRACFCOMP( g_trac_spd, ERR_MRK"spdWriteData: "
-                       "There is no way to write SPD when not using PNOR!" );
-
-            /*@
-             * @errortype
-             * @reasoncode       VPD::VPD_INVALID_WRITE_METHOD
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         VPD::VPD_SPD_WRITE_DATA
-             * @userdata1        Write Offset
-             * @userdata2        Number of Bytes to Write
-             * @devdesc          g_usePNOR is false, but there isn't an
-             *                   alternate way to write PNOR.
-             * @custdesc         A problem occurred during the IPL
-             *                   of the system.
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           VPD::VPD_SPD_WRITE_DATA,
-                                           VPD::VPD_INVALID_WRITE_METHOD,
-                                           i_offset,
-                                           i_numBytes,
-                                           true /*Add HB SW Callout*/ );
-
-            err->collectTrace( "SPD", 256);
-
-            break;
-        }
+#endif
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
@@ -889,6 +879,13 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
             break;
         }
 
+        // Don't send mbox msg for seeprom
+        if ( i_location == VPD::SEEPROM )
+        {
+            break;
+        }
+
+#ifndef CONFIG_DJVPD_WRITE_TO_HW
         // Send mbox message with new data to Fsp
         VPD::VpdWriteMsg_t msgdata;
         msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
@@ -900,11 +897,11 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
                                      i_target,
                                      VPD::VPD_WRITE_DIMM,
                                      msgdata );
-
         if( err )
         {
             break;
         }
+#endif
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,

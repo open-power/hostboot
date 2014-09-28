@@ -34,7 +34,6 @@ config MVPD_READ_FROM_HW
 
 config MVPD_WRITE_TO_PNOR
     default y if MVPD_READ_FROM_PNOR
-    depends on MVPD_READ_FROM_PNOR
     help
         Write Module VPD data to PNOR cache
 
@@ -56,7 +55,6 @@ config DJVPD_READ_FROM_HW
 
 config DJVPD_WRITE_TO_PNOR
     default y if DJVPD_READ_FROM_PNOR
-    depends on DJVPD_READ_FROM_PNOR
     help
         Write Dimm JEDEC VPD/SPD data to PNOR cache
 

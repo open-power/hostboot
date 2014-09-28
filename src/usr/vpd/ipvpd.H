@@ -314,6 +314,12 @@ class IpVpdFacade
      *
      * @param[out] o_offset - The offset where the record is located.
      *
+     * @param[in] i_rwPnorEnabled - Config value specifying
+     *      whether PNOR reads/writes are enabled for this VPD type
+     *
+     * @param[in] i_rwHwEnabled - Config value specifying
+     *      whether SEEPROM reads/writes are enabled for this VPD type
+     *
      * @param[in] i_target - The target to retrieve the data for.
      *
      * @param[in] i_args - The input arguments.
@@ -323,6 +329,8 @@ class IpVpdFacade
      */
     errlHndl_t findRecordOffset ( const char * i_record,
                                   uint16_t & o_offset,
+                                  bool i_rwPnorEnabled,
+                                  bool i_rwHwEnabled,
                                   TARGETING::Target * i_target,
                                   input_args_t i_args );
 

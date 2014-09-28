@@ -359,8 +359,8 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 // resolveVpdSource
 // ------------------------------------------------------------------
 bool resolveVpdSource( TARGETING::Target * i_target,
-                       bool i_readFromPnorEnabled,
-                       bool i_readFromHwEnabled,
+                       bool i_rwPnorEnabled,
+                       bool i_rwHwEnabled,
                        vpdCmdTarget i_vpdCmdTarget,
                        vpdCmdTarget& o_vpdSource )
 {
@@ -369,32 +369,32 @@ bool resolveVpdSource( TARGETING::Target * i_target,
 
     if( i_vpdCmdTarget == VPD::PNOR )
     {
-        if( i_readFromPnorEnabled )
+        if( i_rwPnorEnabled )
         {
             o_vpdSource = VPD::PNOR;
         }
         else
         {
             badConfig = true;
-            TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=PNOR but READ_FROM_PNOR is disabled");
+            TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=PNOR but READ/WRITE PNOR CONFIG is disabled");
         }
     }
     else if( i_vpdCmdTarget == VPD::SEEPROM )
     {
-        if( i_readFromHwEnabled )
+        if( i_rwHwEnabled )
         {
             o_vpdSource = VPD::SEEPROM;
         }
         else
         {
             badConfig = true;
-            TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=SEEPROM but READ_FROM_HW is disabled");
+            TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=SEEPROM but READ/WRITE HW CONFIG is disabled");
         }
     }
     else  // i_vpdCmdTarget == VPD::AUTOSELECT
     {
-        if( i_readFromPnorEnabled &&
-            i_readFromHwEnabled )
+        if( i_rwPnorEnabled &&
+            i_rwHwEnabled )
         {
             // PNOR needs to be loaded before we can use it
             TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
@@ -408,18 +408,18 @@ bool resolveVpdSource( TARGETING::Target * i_target,
                 o_vpdSource = VPD::SEEPROM;
             }
         }
-        else if( i_readFromPnorEnabled )
+        else if( i_rwPnorEnabled )
         {
             o_vpdSource = VPD::PNOR;
         }
-        else if( i_readFromHwEnabled )
+        else if( i_rwHwEnabled )
         {
             o_vpdSource = VPD::SEEPROM;
         }
         else
         {
             badConfig = true;
-            TRACFCOMP(g_trac_vpd,"resolveVpdSource: READ_FROM_PNOR and READ_FROM_HW disabled");
+            TRACFCOMP(g_trac_vpd,"resolveVpdSource: READ/WRITE PNOR CONFIG and READ/WRITE HW CONFIG disabled");
         }
     }
 

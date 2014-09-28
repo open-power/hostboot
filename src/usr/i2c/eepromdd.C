@@ -1065,6 +1065,12 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.devSize_KB    = eepromData.maxMemorySizeKB;
         o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
 
+        // @todo RTC:119764 remove when correct data is in the MRW
+        if( o_i2cInfo.writePageSize == 0 )
+        {
+            o_i2cInfo.writePageSize = 256;
+        }
+
         // @todo RTC:116428 - forcing the attribute data for now
         //                    until we can pull it from the MRW
         if( TARGETING::TYPE_MEMBUF ==

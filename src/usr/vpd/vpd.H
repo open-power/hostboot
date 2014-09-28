@@ -199,11 +199,11 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
  *
  * @param[in] i_target - Target device.
  *
- * @param[in] i_readFromPnorEnabled - Config value specifying
- *      whether PNOR reads are enabled for this VPD type
+ * @param[in] i_rwPnorEnabled - Config value specifying
+ *      whether PNOR reads/writes are enabled for this VPD type
  *
- * @param[in] i_readFromHwEnabled - Config value specifying
- *      whether SEEPROM reads are enabled for this VPD type
+ * @param[in] i_rwHwEnabled - Config value specifying
+ *      whether SEEPROM reads/writes are enabled for this VPD type
  *
  * @param[in] i_location - The requested VPD source location
  *      (PNOR/SEEPROM) from the caller
@@ -214,8 +214,8 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
  *      error log.
  */
 bool resolveVpdSource( TARGETING::Target * i_target,
-                       bool i_readFromPnorEnabled,
-                       bool i_readFromHwEnabled,
+                       bool i_rwPnorEnabled,
+                       bool i_rwHwEnabled,
                        vpdCmdTarget i_vpdCmdTarget,
                        vpdCmdTarget& o_vpdSource );
 

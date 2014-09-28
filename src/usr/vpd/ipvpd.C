@@ -139,6 +139,8 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
         // Get the offset of the record requested
         err = findRecordOffset( recordName,
                                 recordOffset,
+                                iv_configInfo.vpdReadPNOR,
+                                iv_configInfo.vpdReadHW,
                                 i_target,
                                 i_args );
         if( err )
@@ -208,7 +210,6 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
 
         err = translateKeyword( i_args.keyword,
                                 keywordName );
-
         if( err )
         {
             break;
@@ -218,31 +219,70 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
                    INFO_MRK"IpVpdFacade::Write: Record (%s) and Keyword (%s)",
                    recordName, keywordName );
 
-        // Get the offset of the record requested
-        err = findRecordOffset( recordName,
+        // If writes to PNOR and SEEPROM are both enabled and
+        //   the write location is not specified, then call
+        //   write() recursively for each location
+        if ( iv_configInfo.vpdWritePNOR &&
+             iv_configInfo.vpdWriteHW &&
+             i_args.location == VPD::AUTOSELECT )
+        {
+            input_args_t l_args;
+            l_args.record = i_args.record;
+            l_args.keyword = i_args.keyword;
+
+            l_args.location = VPD::SEEPROM;
+            err = write( i_target,
+                         io_buffer,
+                         io_buflen,
+                         l_args );
+            if( err )
+            {
+                break;
+            }
+
+            // PNOR needs to be loaded before we can write it
+            TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
+                    i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+            if( vpdSwitches.pnorLoaded )
+            {
+                l_args.location = VPD::PNOR;
+                err = write( i_target,
+                             io_buffer,
+                             io_buflen,
+                             l_args );
+                if( err )
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Get the offset of the record requested
+            err = findRecordOffset( recordName,
+                                    recordOffset,
+                                    iv_configInfo.vpdWritePNOR,
+                                    iv_configInfo.vpdWriteHW,
+                                    i_target,
+                                    i_args );
+            if( err )
+            {
+                break;
+            }
+
+            // Use record offset to find/write the keyword
+            err = writeKeyword( keywordName,
+                                recordName,
                                 recordOffset,
                                 i_target,
+                                io_buffer,
+                                io_buflen,
                                 i_args );
-
-        if( err )
-        {
-            break;
+            if( err )
+            {
+                break;
+            }
         }
-
-        // use record offset to find/write the keyword
-        err = writeKeyword( keywordName,
-                            recordName,
-                            recordOffset,
-                            i_target,
-                            io_buffer,
-                            io_buflen,
-                            i_args );
-
-        if( err )
-        {
-            break;
-        }
-
     } while( 0 );
 
     // If there is an error, add parameter info to log
@@ -707,6 +747,8 @@ errlHndl_t IpVpdFacade::translateKeyword ( VPD::vpdKeyword i_keyword,
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                            uint16_t & o_offset,
+                                           bool i_rwPnorEnabled,
+                                           bool i_rwHwEnabled,
                                            TARGETING::Target * i_target,
                                            input_args_t i_args )
 {
@@ -716,8 +758,8 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
     VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
     bool configError = false;
     configError = VPD::resolveVpdSource( i_target,
-                                         iv_configInfo.vpdReadPNOR,
-                                         iv_configInfo.vpdReadHW,
+                                         i_rwPnorEnabled,
+                                         i_rwHwEnabled,
                                          i_args.location,
                                          vpdSource );
     // Get the record offset
@@ -751,8 +793,8 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
          * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
          * @userdata1[0:31]  Target HUID
          * @userdata1[32:63] Requested VPD Source Location
-         * @userdata2[0:31]  CONFIG_<vpd>_READ_FROM_PNOR
-         * @userdata2[32:63] CONFIG_<vpd>_READ_FROM_HW
+         * @userdata2[0:31]  CONFIG_<vpd>_READ_WRITE_CONFIG_PNOR
+         * @userdata2[32:63] CONFIG_<vpd>_READ_WRITE_CONFIG_HW
          * @devdesc          Unable to resolve the VPD
          *                   source (PNOR or SEEPROM)
          */
@@ -763,9 +805,18 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                             TARGETING::get_huid(i_target),
                                             i_args.location ),
                                        TWO_UINT32_TO_UINT64(
-                                            iv_configInfo.vpdReadPNOR,
-                                            iv_configInfo.vpdReadHW ),
+                                            i_rwPnorEnabled,
+                                            i_rwHwEnabled ),
                                        true /*Add HB SW Callout*/ );
+        VPD::UdConfigParms( i_target,
+                            i_args.record,
+                            i_args.keyword,
+                            i_args.location,
+                            iv_configInfo.vpdReadPNOR,
+                            iv_configInfo.vpdReadHW,
+                            iv_configInfo.vpdWritePNOR,
+                            iv_configInfo.vpdWriteHW
+                          ).addToLog(err);
         err->collectTrace( "VPD", 256 );
     }
 
@@ -1620,17 +1671,25 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         {
             break;
         }
-        if ( iv_configInfo.vpdWriteHW )
+
+        // Determine the VPD destination (PNOR/SEEPROM)
+        VPD::vpdCmdTarget vpdDest = VPD::AUTOSELECT;
+        bool configError = false;
+        configError = VPD::resolveVpdSource( i_target,
+                                             iv_configInfo.vpdWritePNOR,
+                                             iv_configInfo.vpdWriteHW,
+                                             i_args.location,
+                                             vpdDest );
+
+        // Write the data
+        if ( vpdDest == VPD::PNOR )
         {
-            // @todo RTC 106884 - Need to handle vpd write to HW
-        }
-        if ( iv_configInfo.vpdWritePNOR )
-        {
-            // Setup info needed to write from PNOR
+            // Setup info needed to write to PNOR
             VPD::pnorInformation info;
             info.segmentSize = iv_vpdSectionSize;
             info.maxSegments = iv_vpdMaxSections;
             info.pnorSection = iv_pnorSection;
+
             err = VPD::writePNOR( i_offset+byteAddr,
                                   keywordSize,
                                   i_buffer,
@@ -1639,6 +1698,12 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                   iv_cachePnorAddr,
                                   &iv_mutex );
             if( err )
+            {
+                break;
+            }
+
+            // If we are writing both we don't have an FSP, skip the mbox msg
+            if ( iv_configInfo.vpdWriteHW )
             {
                 break;
             }
@@ -1659,7 +1724,21 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                          i_target,
                                          iv_vpdMsgType,
                                          msgdata );
-
+            if( err )
+            {
+                break;
+            }
+        }
+        else if ( vpdDest == VPD::SEEPROM )
+        {
+            // Write directly to target's EEPROM.
+            err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                      i_target,
+                                      i_buffer,
+                                      keywordSize,
+                                      DEVICE_EEPROM_ADDRESS(
+                                          EEPROM::VPD_PRIMARY,
+                                          i_offset+byteAddr ) );
             if( err )
             {
                 break;
@@ -1667,10 +1746,37 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         }
         else
         {
-            // No PNOR, just eat the write attempt.
-            TRACFCOMP(g_trac_vpd, "VPD record %s:%s - write ignored",
-                      i_keywordName, i_recordName);
-            break;
+            configError = true;
+        }
+
+        if( configError )
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::fetchData: "
+                       "Error resolving VPD source (PNOR/SEEPROM)");
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_WRITE_DEST_UNRESOLVED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
+             * @userdata1[0:31]  Target HUID
+             * @userdata1[32:63] Requested VPD Destination
+             * @userdata2[0:31]  CONFIG_<vpd>_WRITE_TO_PNOR
+             * @userdata2[32:63] CONFIG_<vpd>_WRITE_TO_HW
+             * @devdesc          Unable to resolve the VPD
+             *                   destination (PNOR or SEEPROM)
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_IPVPD_WRITE_KEYWORD,
+                                           VPD::VPD_WRITE_DEST_UNRESOLVED,
+                                           TWO_UINT32_TO_UINT64(
+                                                TARGETING::get_huid(i_target),
+                                                i_args.location ),
+                                           TWO_UINT32_TO_UINT64(
+                                                iv_configInfo.vpdWritePNOR,
+                                                iv_configInfo.vpdWriteHW ),
+                                           true /*Add HB SW Callout*/ );
+            err->collectTrace( "VPD", 256 );
         }
     } while(0);
 

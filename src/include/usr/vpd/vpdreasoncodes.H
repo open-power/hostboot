@@ -57,6 +57,7 @@ enum vpdModuleId
     VPD_IPVPD_CHECK_BUFFER_SIZE             = 0x24,
     VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM    = 0x30,
     VPD_IPVPD_FETCH_DATA                    = 0x31,
+    VPD_IPVPD_WRITE_KEYWORD                 = 0x32,
 
 
     // DIMM SPD
@@ -127,6 +128,7 @@ enum vpdReasonCode
     VPD_READ_SOURCE_UNRESOLVED          = VPD_COMP_ID | 0x31,
     VPD_REMOVE_PAGES_FAIL               = VPD_COMP_ID | 0x32,
     VPD_UNEXPECTED_TARGET_TYPE          = VPD_COMP_ID | 0x33,
+    VPD_WRITE_DEST_UNRESOLVED           = VPD_COMP_ID | 0x34,
 };
 
 
@@ -141,6 +143,7 @@ enum UserDetailsTypes
 {
     VPD_UDT_NO_FORMAT       = 0x0,
     VPD_UDT_PARAMETERS      = 0x1,
+    VPD_UDT_CONFIG_PARMS    = 0x2,
 };
 
 };  // end MVPD

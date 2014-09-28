@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -115,6 +117,76 @@ private:
     // Disabled
     UdParserVpdParms(const UdParserVpdParms&);
     UdParserVpdParms & operator=(const UdParserVpdParms&);
+};
+
+
+/**
+ * @class UdParserConfigParms
+ *
+ * Parses UdParserConfigParms
+ */
+class UdParserConfigParms : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserConfigParms() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserConfigParms() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        i_parser.PrintHeading("VPD Config Parameters");
+
+        //***** Memory Layout *****
+        // 4 bytes  : Target HUID
+        // 8 bytes  : Record
+        // 8 bytes  : Keyword
+        // 8 bytes  : Location
+        // 8 bytes  : Read PNOR Config
+        // 8 bytes  : Read HW Config
+        // 8 bytes  : Write PNOR Config
+        // 8 bytes  : Write HW Config
+
+        i_parser.PrintNumber("Target","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Record","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Keyword","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Location","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Read PNOR Config","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Read HW Config","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Write PNOR Config","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Write HW Config","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+
+    }
+
+private:
+    // Disabled
+    UdParserConfigParms(const UdParserConfigParms&);
+    UdParserConfigParms & operator=(const UdParserConfigParms&);
 };
 
 
