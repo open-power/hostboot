@@ -1,0 +1,248 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/utility_procedures/proc_mpipl_force_winkle_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_mpipl_force_winkle_errors.xml,v 1.18 2014/06/26 14:43:51 cmolsen Exp $ -->
+<!-- Error codes for proc_mpipl_force_winkle -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_MPIPL_FORCE_WINKLE_TARGET_TYPE_ERR</rc>
+    <description>Invalid target type passed to proc_mpipl_force_winkle HWP</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>HIGH</priority>
+    </callout>   
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_MPIPL_FORCE_WINKLE_CANNOT_UNLOCK_IPMS_STATE</rc>
+    <description>Chiplet is in a Winkle entry/exit state that cannot be unlocked</description>
+    <ffdc>IPMS_STATE</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>   
+  </hwpError>
+  <hwpError>
+    <rc>RC_EX_CHIPLET_AISS_WA_L2_PURGE_TIMEOUT</rc>
+    <description>EX chiplet timed out waiting for L2 purge to complete</description> 
+    <ffdc>OHAMODEADDR</ffdc> 
+    <ffdc>OHAMODEREG</ffdc>
+    <ffdc>OHAROADDR</ffdc>
+    <ffdc>OHAROREG</ffdc>
+    <ffdc>OHAAISSIOADDR</ffdc>
+    <ffdc>OHAAISSIOREG</ffdc>
+    <callout>
+      <target>EX_TARGET</target>     
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>LOW</priority>
+    </callout>   
+    <gard> 
+      <target>EX_TARGET</target>
+    </gard>
+  </hwpError>
+  <hwpError>
+    <rc>RC_EX_CHIPLET_AISS_WA_L3_PURGE_TIMEOUT</rc>
+    <description>EX chiplet timed out waiting for L3 purge to complete</description>
+    <ffdc>OHAMODEADDR</ffdc> 
+    <ffdc>OHAMODEREG</ffdc>
+    <ffdc>OHAROADDR</ffdc>
+    <ffdc>OHAROREG</ffdc>
+    <ffdc>OHAAISSIOADDR</ffdc>
+    <ffdc>OHAAISSIOREG</ffdc>
+    <callout>
+      <target>EX_TARGET</target>     
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>LOW</priority>
+    </callout>   
+    <gard> 
+      <target>EX_TARGET</target>
+    </gard>
+  </hwpError>
+  <hwpError>
+    <rc>RC_EX_CHIPLET_AISS_WA_PB_PURGE_TIMEOUT</rc>
+    <description>EX chiplet timed out waiting for PB purge to complete</description>
+    <ffdc>OHAMODEADDR</ffdc> 
+    <ffdc>OHAMODEREG</ffdc>
+    <ffdc>OHAROADDR</ffdc>
+    <ffdc>OHAROREG</ffdc>
+    <ffdc>OHAAISSIOADDR</ffdc>
+    <ffdc>OHAAISSIOREG</ffdc>
+    <callout>
+      <target>EX_TARGET</target>     
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>LOW</priority>
+    </callout>   
+    <gard> 
+      <target>EX_TARGET</target>
+    </gard>
+  </hwpError>
+  <hwpError>
+    <rc>RC_EX_CHIPLET_AISS_WA_INACCESSIBLE</rc>
+    <description>EX chiplet PCB Fence is up</description>
+    <ffdc>GP3ADDR</ffdc> 
+    <ffdc>GP3REG</ffdc> 
+    <ffdc>PMGP0ADDR</ffdc> 
+    <ffdc>PMGP0REG</ffdc> 
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>HIGH</priority>
+    </callout> 
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_EXNUMBER_CODE_BUG</rc>
+    <description>Impossible value for ex_number</description>
+    <ffdc>EX_NUMBER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>HIGH</priority>
+    </callout>   
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_PMHIST_CODE_BUG</rc>
+    <description>Impossible value for pmhist_state</description>
+    <ffdc>PMHIST_STATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>HIGH</priority>
+    </callout>   
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_PIRRX_NO_QUEUE_REQUEST</rc>
+    <description>There is not an idle request in the PMC queue for this chiplet</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_PIRRX_CODE_BUG</rc>
+    <description>Impossible value for pmc_queue_state</description>
+    <ffdc>PCBS_FSM</ffdc>
+    <ffdc>PMC_QUEUE_STATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>     
+      <priority>HIGH</priority>
+    </callout>   
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_UNSUPPORTED_SV_VALUE</rc>
+    <description>trans_sv has an unsupported value</description>
+    <ffdc>PCBS_FSM</ffdc>
+    <ffdc>PMHIST_STATE</ffdc>
+    <ffdc>PMC_QUEUE_STATE</ffdc>
+    <ffdc>TRANS_SV</ffdc>
+    <ffdc>TRANS_SV_ETR</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_SUSPICIOUS_PCBS_FSM</rc>
+    <description>Value of PCB-slave FSM suggest a problem in the core PM section</description>
+    <ffdc>PCBS_FSM</ffdc>
+    <ffdc>PMHIST_STATE</ffdc>
+    <ffdc>PMC_QUEUE_STATE</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_PIRRX_UNSUPPORTED_IDLE_REQUEST</rc>
+    <description>There is an unsupported idle request on the PMC queue.</description>
+    <ffdc>PMC_QUEUE_STATE</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_STATE_NOT_FOUND_BUG</rc>
+    <description>An IPMS state was NOT found. This should never happen. Code bug.</description>
+    <ffdc>PORRR0_REG</ffdc>
+    <ffdc>PORRR1_REG</ffdc>
+    <ffdc>ETR_REG</ffdc>
+    <ffdc>PCBS_FSM_PREV</ffdc>
+    <ffdc>PCBS_FSM</ffdc>
+    <ffdc>PMHIST_STATE</ffdc>
+    <ffdc>PMC_QUEUE_STATE</ffdc>
+    <ffdc>IPMS_STATE</ffdc>
+    <ffdc>PIRR0_REG</ffdc>
+    <ffdc>PIRR1_REG</ffdc>
+    <ffdc>PIRR2_REG</ffdc>
+    <ffdc>PIRR3_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_IPMS_CONFLICTING_IDLE_STATES</rc>
+    <description>Conflicting values between PM state registers</description>
+    <ffdc>PORRR0_REG</ffdc>
+    <ffdc>PORRR1_REG</ffdc>
+    <ffdc>ETR_REG</ffdc>
+    <ffdc>PCBS_FSM_PREV</ffdc>
+    <ffdc>PCBS_FSM</ffdc>
+    <ffdc>PMHIST_STATE</ffdc>
+    <ffdc>PMC_QUEUE_STATE</ffdc>
+    <ffdc>IPMS_STATE</ffdc>
+    <ffdc>PIRR0_REG</ffdc>
+    <ffdc>PIRR1_REG</ffdc>
+    <ffdc>PIRR2_REG</ffdc>
+    <ffdc>PIRR3_REG</ffdc>
+    <callout>
+      <procedure>LVL_SUPPORT</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>

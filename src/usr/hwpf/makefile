@@ -98,6 +98,8 @@ HWP_ERROR_XML_FILES += hwp/pstates/pstates/proc_get_voltage_errors.xml
 HWP_ERROR_XML_FILES += hwp/proc_cfam_registers.xml
 HWP_ERROR_XML_FILES += hwp/p8_slw_registers.xml
 HWP_ERROR_XML_FILES += hwp/utility_procedures/memory_mss_maint_cmds.xml
+HWP_ERROR_XML_FILES += hwp/utility_procedures/proc_mpipl_force_winkle_errors.xml
+
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_avdd_offset.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_volt/memory_mss_volt_vdd_offset.xml

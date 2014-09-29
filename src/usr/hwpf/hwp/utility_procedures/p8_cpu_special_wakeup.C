@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_cpu_special_wakeup.C,v 1.21 2014/07/10 21:47:19 cmolsen Exp $
+// $Id: p8_cpu_special_wakeup.C,v 1.22 2014/09/19 16:57:22 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!
-// *! To build - buildfapiprcd -e "../../xml/error_info/proc_cpu_special_wakeup_errors.xml,../../xml/error_info/p8_slw_registers.xml" p8_cpu_special_wakeup.C
+// *! To build - buildfapiprcd -C "p8_inst_pm_state.C" -e "../../xml/error_info/proc_cpu_special_wakeup_errors.xml,../../xml/error_info/p8_slw_registers.xml,../../xml/error_info/proc_mpipl_force_winkle_errors.xml" p8_cpu_special_wakeup.C
 // *!
 /// \file p8_cpu_special_wakeup.C
 /// \brief Put targeted EX chiplets into special wake-up
@@ -88,7 +88,8 @@
 #include "p8_pm.H"
 #include "p8_cpu_special_wakeup.H"
 #include "p8_pcb_scom_errors.H"
-
+//#include "../../../../../include/usr/hwpf/hwp/utility_procedures/p8_inst_pm_state.H"
+#include "p8_inst_pm_state.H"
 extern "C" {
 
 using namespace fapi;
@@ -160,7 +161,7 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
     bool                xstop_flag = false;
     bool                bSpwuSetOnEntry = false;
 
-    uint32_t            idle_state;
+    uint8_t             inst_pm_state = INST_PM_STATE_UNDEFINED;
 
     //--------------------------------------------------------------------------
     // Read the counts of different ENTITY (FSP,OCC,PHYP) from the Attributes
@@ -395,7 +396,6 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
                 else
                     bSpwuSetOnEntry = false;  // Just goodness..
                     
-
                 e_rc  = data.flushTo0();
                 e_rc |= data.setBit(0);
                 E_RC_CHECK(e_rc, rc);
@@ -405,48 +405,28 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
                 // Determine whether to poll for completion of Special wake-up.
                 // Running and Nap - can alsways be polled as these are not
                 //      dependent on an xstop condition.
-                // Sleep and Winkle - poll oonly if not in an xstop condition
+                // Sleep and Winkle - poll only if not in an xstop condition
 
-                // read PM History
-                GETSCOM(rc, i_ex_target, EX_PMSTATEHISTPERF_REG_0x100F0113, data );
-
-                e_rc |= data.extractToRight(&idle_state,  0, 3);
-                E_RC_CHECK(e_rc, rc);
-
-                // 0b000: Run
-                // 0b001: Special Wakeup
-                // 0b010: Nap
-                // 0b011: Legacy Sleep
-                // 0b100: Fast Sleep
-                // 0b101: Deep Sleep
-                // 0b110: Fast Winkle
-                // 0b111: Deep Winkle
-                switch(idle_state)
+                // Get the IPMS state
+                rc = ex_determine_inst_pm_state(i_ex_target, 10000, 1, inst_pm_state);
+                if (!rc.ok() && inst_pm_state!=INST_PM_STATE_UNRESOLVED)
                 {
+                    FAPI_ERR("ex_determine_inst_pm_state() failed w/rc=0x%x", (uint32_t)rc);
+                    break;
+                }
+                FAPI_DBG("IPMS State = 0x%x", inst_pm_state);
 
-                    case      0x0   :       // Running                                           
-                    case      0x2   :       // Nap
+                switch(inst_pm_state)
+                {
+                    case  INST_PM_STATE_RUN :           // Running
+                    case  INST_PM_STATE_RUN_OHA_ENTRY : // OHA purging idle entry                                           
+                    case  INST_PM_STATE_NAP_STATIC :    // Nap
                         poll_during_xstop_flag = true;
                         break;
 
-                    case      0x1   :       // Special Wakeup
-                    case      0x4   :       // Fast Sleep
-                    case      0x5   :       // Deep Sleep
-                    case      0x6   :       // Fast Winkle
-                    case      0x7   :       // Fast Winkle
+                    default   :                         // Any other IPMS state
                         poll_during_xstop_flag = false;
                         break;
-
-                    default
-                           :
-                        FAPI_ERR("Invalid Idle State in PMHISTORY: 0x%X ", idle_state);
-                        const fapi::Target & EX_IN_ERROR = i_ex_target;
-                        const uint64_t & PMHIST = data.getDoubleWord(0);
-                        FAPI_SET_HWP_ERROR(rc, RC_PROCPM_SPCWKUP_INVALID_PMHISTORY);
-                }
-                if (!rc.ok())
-                {
-                    break;
                 }
 
                 // Poll for completion if conditions are right
