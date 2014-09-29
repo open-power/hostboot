@@ -13618,6 +13618,36 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+<!-- For reconfig loop testing -->
+<attribute>
+  <id>RECONFIG_LOOP_TESTS</id>
+  <description> System attribute array that defines the reconfig loop test cases
+      consumer: istep dispatcher reconfigLoopTestRunner function
+      This array is loaded with data via attribute override. The attribute is
+      then read  and then overlayed onto a test case structure.
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>5</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
+<attribute>
+    <id>RECONFIG_LOOP_TESTS_ENABLE</id>
+    <description>
+        Indicates whether reconfigure loop tests are enabled.
+        This attribute is set via attribute override
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 <attribute>
     <id>MEM_VDD_OFFSET_MILLIVOLTS</id>

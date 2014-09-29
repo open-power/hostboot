@@ -63,6 +63,7 @@
 #include <hwas/hwasPlat.H>
 #include <targeting/attrPlatOverride.H>
 #include <console/consoleif.H>
+#include <hwpisteperror.H>
 
 namespace ISTEPS_TRACE
 {
@@ -592,6 +593,21 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from checkForIplAttentions");
             }
         }
+
+#ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+        // Read ATTR_RECONFIG_LOOP_TESTS_ENABLE attribute
+        TARGETING::ATTR_RECONFIG_LOOP_TESTS_ENABLE_type l_reconfigAttrTestsEn =
+            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIG_LOOP_TESTS_ENABLE>();
+
+        // If ATTR_RECONFIG_LOOP_TESTS_ENABLE is non-zero and if there is no
+        // previous error then call the reconfig loop test runner
+        if ((l_reconfigAttrTestsEn) && (!err))
+        {
+            TRACFCOMP(g_trac_initsvc, INFO_MRK"doIstep: "
+                    "Reconfig Loop Tests Enabled");
+            reconfigLoopTestRunner(i_istep, i_substep, err);
+        }
+#endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 
         // now that HWP and PRD have run, check for deferred deconfig work.
 
@@ -1843,5 +1859,131 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
                              HWAS::SRCI_PRIORITY_HIGH);
     return err;
 }
+
+#ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+// ----------------------------------------------------------------------------
+// IStepDispatcher::reconfigLoopTestRunner()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::reconfigLoopTestRunner(   uint8_t i_step,
+                                                uint8_t i_substep,
+                                                errlHndl_t & o_err )
+{
+    // Acquire top level handle
+    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+
+    // Local target pointer
+    TARGETING::Target* l_pTarget = NULL;
+
+    // Method for checking whether a target is functional
+    TARGETING::PredicateIsFunctional l_functional;
+
+    // Read reconfig loop (RL) tests attribute data and only run tests
+    // if ATTR_RECONFIG_LOOP_TESTS is read successfully otherwise
+    // print an error message and return
+    TARGETING::ATTR_RECONFIG_LOOP_TESTS_type l_RLTests = {0};
+    if(l_pTopLevel->tryGetAttr<TARGETING::ATTR_RECONFIG_LOOP_TESTS>(l_RLTests))
+    {
+
+        // Create pointer to reconfig loop tests data and point to data obtained
+        // from test attribute
+        reconfigLoopTests_t *l_p_reconfigLoopTests =
+            reinterpret_cast<reconfigLoopTests_t *>(&l_RLTests);
+
+        // Loop through all the tests until we find a valid matching test
+        for (uint64_t i = 0 ; i < MAX_RCL_TESTS ; i++)
+        {
+            if ( (l_p_reconfigLoopTests->test[i].majorStep == i_step) &&
+                 (l_p_reconfigLoopTests->test[i].minorStep == i_substep) )
+            {
+                // Acquire target handle for requested HUID
+                l_pTarget = l_pTopLevel->getTargetFromHuid(
+                         l_p_reconfigLoopTests->test[i].deconfigTargetHuid);
+
+                // If the target associated with the test is functional
+                // then induce the reconfig loop otherwise skip since the target
+                // may have been deconfigured by a previous test.
+                // This way we don't run the same test again.
+                if(l_functional(l_pTarget))
+                {
+                    reconfigLoopInduce (l_pTarget, o_err);
+                    TRACFCOMP(g_trac_initsvc, INFO_MRK"reconfigLoopTestRunner: "
+                        "Inducing Reconfig Loop. Step: %d.%d, HUID: 0x%08X",
+                        i_step, i_substep,
+                        l_p_reconfigLoopTests->test[i].deconfigTargetHuid);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_initsvc, INFO_MRK"reconfigLoopTestRunner: "
+                        "Step: %d.%d, "
+                        "Target HUID: 0x%08X not functional, skipping test.",
+                        i_step, i_substep,
+                        l_p_reconfigLoopTests->test[i].deconfigTargetHuid);
+                }
+
+                // Stop looking for another test and return to istepdispatcher
+                // code
+                break;
+            }
+
+            // Stop looking for tests if the last test is found
+            if (l_p_reconfigLoopTests->test[i].lastTest)
+            {
+                break;
+            }
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"reconfigLoopTestRunner: "
+                "Failed to read ATTR_RECONFIG_LOOP_TESTS attribute data. "
+                "SKIPPING TEST!");
+    }
+
+    return;
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::reconfigLoopInduce()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::reconfigLoopInduce(TARGETING::Target* i_pDeconfigTarget,
+                                         errlHndl_t & o_err)
+{
+
+    // Create an error log to induce reconfig loop
+    ISTEP_ERROR::IStepError l_StepError;
+
+    /*@
+     * @errortype
+     * @reasoncode       RECONFIG_LOOP_TEST_RC
+     * @severity         ERRL_SEV_UNRECOVERABLE
+     * @moduleid         RECONFIG_LOOP_TEST_ID
+     * @devdesc          This error log was intentionally created in order to
+     *                   induce a reconfigure loop for testing purposes.
+     * @custdesc         A reconfigure loop is being induced for testing
+     *                   purposes.
+     */
+    errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           RECONFIG_LOOP_TEST_ID,
+                           RECONFIG_LOOP_TEST_RC);
+
+    // Using DELAYED_DECONFIG in the HW callout allows registering the target
+    // for deferred deconfiguration.  The actual deconfiguration must be
+    // handled externally, specifically by IStepDispatcher::doIstep().
+    l_err->addHwCallout(i_pDeconfigTarget,
+            HWAS::SRCI_PRIORITY_LOW,
+            HWAS::DELAYED_DECONFIG,
+            HWAS::GARD_Fatal);
+    l_StepError.addErrorDetails(l_err);
+    errlCommit(l_err, ISTEP_COMP_ID);
+    o_err = l_StepError.getErrorHandle();
+
+    TRACFCOMP(g_trac_initsvc, INFO_MRK"reconfigLoopInduce: "
+           "Created reconfig loop induce errorlog");
+
+    return;
+}
+#endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 
 } // namespace

@@ -49,6 +49,7 @@ enum    InitServiceModuleID
     EXT_INITSVC_MOD_ID                  =   0x02,
     ISTEP_INITSVC_MOD_ID                =   0x03,
     CXXTEST_MOD_ID                      =   0x04,
+    RECONFIG_LOOP_TEST_ID               =   0x05,
 
 };
 
@@ -72,6 +73,7 @@ enum    InitServiceReasonCode
     ISTEP_NON_MASTER_NODE_MSG    =   INITSVC_COMP_ID | 0x0d,
     //termination_rc
     SBE_EXTRACT_RC_REQUEST_REIPL =   INITSVC_COMP_ID | 0x0e,
+    RECONFIG_LOOP_TEST_RC        =   INITSVC_COMP_ID | 0x0f,
 };
 
 enum InitServiceUserDetailDataSubSection

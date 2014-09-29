@@ -280,6 +280,8 @@
     <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
     <attribute><id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id></attribute>
     <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
+    <attribute><id>RECONFIG_LOOP_TESTS</id></attribute>
+    <attribute><id>RECONFIG_LOOP_TESTS_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

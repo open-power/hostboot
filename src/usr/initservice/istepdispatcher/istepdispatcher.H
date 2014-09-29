@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,6 +43,7 @@
 #include <initservice/taskargs.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/initsvcstructs.H>
+#include <config.h>
 #include "../baseinitsvc/initservice.H"
 #include "splesscommon.H"
 #include "istep_mbox_msgs.H"
@@ -58,6 +61,16 @@ namespace   INITSERVICE
  *      is a good choice because it is sufficiently less than 15.
  */
 const uint64_t MAX_WAIT_TIME_SEC = 10;
+
+#ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+/**
+ * @brief The Maximum number of elements in the ATTR_RECONFIG_LOOP_TESTS
+ *      attribute array.  This number MUST be the same as the length of
+ *      the ATTR_RECONFIG_LOOP_TESTS attritute array defined in the
+ *      attribute_types.xml file.
+ */
+const uint64_t MAX_RCL_TESTS = 5;
+#endif //CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 
 /******************************************************************************/
 // Typedef/Enumerations
@@ -398,8 +411,54 @@ private:
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;
-};
 
+#ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+    // Reconfigure Loop Test data structure for accessing the
+    // ATTR_RECONFIG_LOOP_TESTS attribute array elements (64-bit elements)
+    typedef struct
+    {
+        struct
+        {
+            uint8_t reserved;  // Reserved for future use
+            uint8_t majorStep; // Major step that corresponds to the test
+            uint8_t minorStep; // Sub step that corresponds to the test
+            uint8_t lastTest;  // Indicates that this is the last test in the
+                               // array. This allows the tester to run n number
+                               // of tests where n can be less than
+                               // MAX_RCL_TESTS
+            uint32_t deconfigTargetHuid; // The HUID of the target that will be
+                                         // deconfigured as part of the test in
+                                         // order to induce a reconfig loop
+        } test[MAX_RCL_TESTS];
+    } reconfigLoopTests_t;
+
+    /**
+     * @brief Decodes and executes the tests in the ATTR_RECONFIG_LOOP_TESTS
+     * test attribute.  The data in ATTR_RECONFIG_LOOP_TESTS is populated
+     * via attribute overrides.  If no data is present or if the attribute is
+     * missing the tests will be not be executed.
+     *
+     * @param[i] i_step - Current istep
+     * @param[i] i_substep - Current substep
+     * @param[o] o_err - Returned error handle
+     */
+    void reconfigLoopTestRunner(uint8_t i_step,
+                                uint8_t i_substep,
+                                errlHndl_t & o_err);
+
+    /**
+     * @brief Induces a Reconfig loop by generating an error log.
+     * The error log contains a HW callout with a pointer to a target handle
+     * that is to be deconfigured.
+     *
+     * @param[i] i_pDeconfigTarget - Pointer to handle of target that is to be
+     *                               deconfigured
+     * @param[o] o_err - Returned error handle
+     */
+    void reconfigLoopInduce(TARGETING::Target* i_pDeconfigTarget,
+                            errlHndl_t & o_err);
+#endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+};
 } // namespace
 
 #endif

@@ -3,3 +3,7 @@ config CONSOLE_OUTPUT_PROGRESS
     depends on CONSOLE
     help
         Display boot progress to console.
+config RECONFIG_LOOP_TESTS_ENABLE
+    default y
+    help
+        Include functions for enabling reconfig loop testing.
