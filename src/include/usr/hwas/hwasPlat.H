@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,6 +25,8 @@
 #ifndef __HWAS_PLAT_H
 #define __HWAS_PLAT_H
 
+#include <config.h>
+
 /**
  *  @file hwas/hwasPlat.H
  *  @brief hostboot platform specific HWAS functions
@@ -30,19 +34,6 @@
 
 namespace HWAS
 {
-
-/**
- * @brief   hwasChangeDetection   hostboot function
- *
- *  This routine will do 'what is needed' to see if any hardware has
- *      changed (ie, look at ECID or serial numbers..)
- *
- * @param  none
- *
- * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          NULL if no errors;
- */
-errlHndl_t hwasChangeDetection();
 
 /**
  * @brief   hwasPLDDetection   hostboot function
@@ -56,6 +47,22 @@ errlHndl_t hwasChangeDetection();
  */
 bool hwasPLDDetection();
 
-}
+/**
+ * @brief Wrapper function that updates the bit mask to let consumers
+ * know that a piece of hardware, and its possible children, have changed.
+ *
+ * @param[in]  i_target Target of the changed Hardware
+ */
+#ifndef CONFIG_HOST_HCDB_SUPPORT
+inline
+#endif
+void markTargetChanged(TARGETING::TargetHandle_t i_target)
+#ifdef CONFIG_HOST_HCDB_SUPPORT
+    ;
+#else
+    {};
+#endif
+
+} // namespace HWAS
 
 #endif // __HWAS_PLAT_H

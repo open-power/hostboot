@@ -47,6 +47,7 @@
 #include <targeting/common/utilFilter.H>
 #include <fsi/fsiif.H>
 #include <config.h>
+#include <targeting/common/targetservice.H>
 
 namespace HWAS
 {
@@ -477,19 +478,34 @@ bool hwasPLDDetection()
     return rc;
 } // hwasPLDDetection
 
-
 //******************************************************************************
-// hwasChangeDetection function
+// markTargetChanged function
 //******************************************************************************
-errlHndl_t hwasChangeDetection()
+#ifdef CONFIG_HOST_HCDB_SUPPORT
+void markTargetChanged(TARGETING::TargetHandle_t i_target)
 {
-    errlHndl_t errl = NULL;
+    TargetHandleList l_pChildList;
 
-    // TODO: RTC: 70460
-    HWAS_DBG("hwasChangeDetection");
+    HWAS_INF("Marking target and all children as changed for parent HUID %.8X",
+                TARGETING::get_huid(i_target) );
 
-    return errl;
-} // hwasChangeDetection
+    //Call update mask on the target
+    update_hwas_changed_mask(i_target);
+
+    //Get all children under this target, and set them into the list
+    targetService().getAssociated(l_pChildList, i_target,
+           TargetService::CHILD, TargetService::ALL);
+
+    //Iterate through the child list that was populated, and update mask
+    for (TargetHandleList::iterator l_pChild_it = l_pChildList.begin();
+            l_pChild_it != l_pChildList.end(); ++l_pChild_it)
+    {
+        TargetHandle_t l_pChild = *l_pChild_it;
+        update_hwas_changed_mask(l_pChild);
+    }
+
+} // markTargetChanged
+#endif
 
 //******************************************************************************
 //  platCheckMinimumHardware()

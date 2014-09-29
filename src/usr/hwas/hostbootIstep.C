@@ -128,17 +128,6 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
 
         errl = discoverTargets();
-
-        // also if SP doesn't support change detection, call
-        // function to do it here.
-        if (!errl &&
-            !l_pTopLevel->getAttr<ATTR_SP_FUNCTIONS>()
-                .hardwareChangeDetection)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "calling hwasChangeDetection");
-            errl = hwasChangeDetection();
-        }
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
