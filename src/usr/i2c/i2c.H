@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,6 +40,16 @@
 
 namespace I2C
 {
+
+/**
+ * @brief Different Reset level to perform an i2c reset
+ */
+enum i2c_reset_level
+{
+    BASIC_RESET,
+    FORCE_UNLOCK_RESET,
+};
+
 
 /**
  * @brief FIFO size (width) in bytes.  This dictates how many bytes
@@ -162,6 +174,11 @@ struct i2c_addrs_t
     uint64_t interrupt;
     uint64_t status;
     uint64_t reset;
+    uint64_t set_scl;
+    uint32_t reset_scl;
+    uint32_t set_sda;
+    uint32_t reset_sda;
+
 };
 
 /**
@@ -620,11 +637,14 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
  * @param[in] i_args - Structure containing arguments needed for a command
  *      transaction.
  *
+ * @param[in] i_reset_level - level of reset to use.
+ *
  * @return errHndl_t - NULL if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t i2cReset ( TARGETING::Target * i_target,
-                      misc_args_t & i_args );
+                      misc_args_t & i_args,
+                      i2c_reset_level i_reset_level = BASIC_RESET );
 
 /**
  * @brief This function will send the Stop command to the slave device

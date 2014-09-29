@@ -912,6 +912,92 @@ class I2CTest: public CxxTest::TestSuite
                        fails, num_ops );
         }
 
+        void testI2cForceReset(void)
+        {
+
+
+            errlHndl_t err = NULL;
+
+            do
+            {
+                I2C::misc_args_t io_args;
+
+                uint64_t data = 0x0;
+
+                // Get the Proc Target
+                TARGETING::TargetService& tS = TARGETING::targetService();
+                TARGETING::Target* procTarget = NULL;
+                tS.masterProcChipTargetHandle( procTarget );
+                assert( procTarget != NULL );
+
+                // reset the target and then try a read
+                if(procTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               " testI2cForceReset- functional good path" );
+                    io_args.engine = 0x0;
+                    io_args.port = 0x0;
+                    //get engine lock attr for engine 0
+                    //prevents sbe update test fails
+
+                    mutex_t * engineLock = NULL;
+                    engineLock =
+                    procTarget->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
+
+                    (void)mutex_lock( engineLock );
+
+                    //force reset
+                    err = I2C::i2cReset(procTarget,
+                                        io_args,
+                                        I2C::FORCE_UNLOCK_RESET);
+
+                    (void) mutex_unlock( engineLock );
+
+                    //if there was an error for a reason commit it
+                    if(err)
+                    {
+                        errlCommit( err,I2C_COMP_ID );
+                        delete err; err = NULL;
+                    }
+
+                    nanosleep( 0, 100);
+
+                    //read
+                    size_t data_size = 8;
+                    err = deviceOp( DeviceFW::READ,
+                                    procTarget,
+                                    &data,
+                                    data_size,
+                                    DEVICE_I2C_ADDRESS( 0,
+                                                        0,
+                                                        0xAC ) );
+
+                }
+
+
+
+
+                if(err)
+                {
+                    TS_FAIL("testI2cForceReset failed err detected");
+                    errlCommit( err,I2C_COMP_ID );
+                    delete err; err = NULL;
+                    break;
+                }
+
+                if(data == 0)
+                {
+                    //there should be some data
+                    TS_FAIL("testI2cForceReset failed data read is 0");
+                    break;
+                }
+
+
+            }while(0);
+
+
+        }
+
 };
 
 #endif

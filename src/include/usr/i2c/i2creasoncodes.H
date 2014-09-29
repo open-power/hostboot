@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -78,6 +80,7 @@ enum i2cReasonCode
     I2C_NO_PROC_FOUND                   = I2C_COMP_ID | 0x09,   // No Processor chip found
     I2C_INVALID_BUS_SPEED_MODE          = I2C_COMP_ID | 0x0A,   // Invalid Bus Speed Mode
     I2C_NACK_ONLY_FOUND                 = I2C_COMP_ID | 0x0B,   // Only NACK found in status register
+    I2C_ARBITRATION_LOST_ONLY_FOUND     = I2C_COMP_ID | 0x0C,   // Bus Arbi lost found in status reg
 };
 
 

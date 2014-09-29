@@ -94,6 +94,10 @@ static i2c_addrs_t masterAddrs[] =
         I2C_MASTER0_ADDR | 0xA,         // Interrupt Register
         I2C_MASTER0_ADDR | 0xB,         // Status Register (Read)
         I2C_MASTER0_ADDR | 0xB,         // Reset (Write)
+        I2C_MASTER0_ADDR | 0xD,         // Set SCL Register (write)
+        I2C_MASTER0_ADDR | 0xF,         // Reset SCL Register (write)
+        I2C_MASTER0_ADDR | 0x10,        // Set SDA Register (write)
+        I2C_MASTER0_ADDR | 0x11,        // Reset SDA Register (write)
     },
     { /* Master 1 */
         I2C_MASTER1_ADDR | 0x4,         // FIFO
@@ -103,6 +107,10 @@ static i2c_addrs_t masterAddrs[] =
         I2C_MASTER1_ADDR | 0xA,         // Interrupt Register
         I2C_MASTER1_ADDR | 0xB,         // Status Register (Read)
         I2C_MASTER1_ADDR | 0xB,         // Reset (Write)
+        I2C_MASTER1_ADDR | 0xD,         // Set SCL Register (write)
+        I2C_MASTER1_ADDR | 0xF,         // Reset SCL Register (write)
+        I2C_MASTER1_ADDR | 0x10,        // Set SDA Register (write)
+        I2C_MASTER1_ADDR | 0x11,        // Reset SDA Register (write)
     },
     { /* Master 2 */
         I2C_MASTER2_ADDR | 0x4,         // FIFO
@@ -112,6 +120,10 @@ static i2c_addrs_t masterAddrs[] =
         I2C_MASTER2_ADDR | 0xA,         // Interrupt Register
         I2C_MASTER2_ADDR | 0xB,         // Status Register (Read)
         I2C_MASTER2_ADDR | 0xB,         // Reset (Write)
+        I2C_MASTER2_ADDR | 0xD,         // Set SCL Register (write)
+        I2C_MASTER2_ADDR | 0xF,         // Reset SCL Register (write)
+        I2C_MASTER2_ADDR | 0x10,        // Set SDA Register (write)
+        I2C_MASTER2_ADDR | 0x11,        // Reset SDA Register (write)
     }
 };
 
@@ -402,9 +414,20 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         // Handle Error from I2C Operation
         if( err )
         {
+
+            // if it was a bus arbition lost error set the
+            // the reset level so a force unlock reset can be performed
+            i2c_reset_level l_reset_level = BASIC_RESET;
+
+            if ( err->reasonCode() == I2C_ARBITRATION_LOST_ONLY_FOUND )
+            {
+                l_reset_level = FORCE_UNLOCK_RESET;
+            }
+
             // Reset the I2C Master
             err_reset = i2cReset( i_target,
-                                  args );
+                                  args,
+                                  l_reset_level);
 
             if( err_reset )
             {
@@ -992,6 +1015,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
     bool errorFound = false;
     bool nackFound  = false;
+    bool busArbiLostFound = false;
     uint64_t intRegVal = 0x0;
 
     TRACDCOMP( g_trac_i2c,
@@ -1033,7 +1057,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
         if( 1 == i_statusVal.arbitration_lost_error )
         {
-            errorFound = true;
+            busArbiLostFound = true;
             TRACFCOMP( g_trac_i2c,
                        ERR_MRK"I2C Arbitration Lost! - status reg: %016llx",
                        i_statusVal.value );
@@ -1132,14 +1156,56 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
              * @moduleid       I2C_CHECK_FOR_ERRORS
              * @userdata1      Status Register Value
              * @userdata2      Interrupt Register Value
-             * @devdesc        Error was found in I2C status register.  Check
-             *                 userdata1 to determine what the error was.
+             * @devdesc        a NACK Error was found in the I2C status
+             *                 register.
              * @custdesc       A problem occurred during the IPL of the system:
-             *                 An error was found in the I2C status register.
+             *                 A NACK error was found in the I2C Status
+             *                 register.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,
                                            I2C_NACK_ONLY_FOUND,
+                                           i_statusVal.value,
+                                           intRegVal );
+
+            // For now limited in what we can call out:
+            // Could be an issue with Processor or its bus
+            // -- both on the same FRU
+            // @todo RTC 94872 - update this callout
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "I2C" );
+
+            break;
+        }
+        else if( busArbiLostFound )
+        {
+            TRACFCOMP( g_trac_i2c,
+            ERR_MRK"i2cCheckForErrors() - Bus Arbitration Lost (only error)");
+
+            /*@
+             * @errortype
+             * @reasoncode     I2C_ARBITRATION_LOST_ONLY_FOUND
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       I2C_CHECK_FOR_ERRORS
+             * @userdata1      Status Register Value
+             * @userdata2      Interrupt Register Value
+             * @devdesc        Bus Arbitration Lost Error was found in
+             *                 the I2C status register.
+             * @custdesc       A problem occurred during the IPL of the system:
+             *                 A Bus Arbitration Lost error was found
+             *                 in the I2C status register.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_CHECK_FOR_ERRORS,
+                                           I2C_ARBITRATION_LOST_ONLY_FOUND,
                                            i_statusVal.value,
                                            intRegVal );
 
@@ -1276,12 +1342,239 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
     return err;
 } // end i2cWaitForFifoSpace
 
+// ------------------------------------------------------------------
+// i2cSendStopSignal
+// ------------------------------------------------------------------
+errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
+                                misc_args_t & i_args)
+{
+
+    errlHndl_t err = NULL;
+    size_t size = sizeof(uint64_t);
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cSendStopSignal" );
+
+    do
+    {
+        residual_length_reg_t clkdataline;
+        clkdataline.value = 0x0;
+
+        //manually send stop signal
+        // set clock low: write 0 to immediate reset scl register
+
+        TRACUCOMP(g_trac_i2c,"i2cSendStopSignal"
+                  "clock line 0x%016llx",
+                  clkdataline.value );
+
+        err = deviceWrite( i_target,
+                   &clkdataline.value,
+                   size,
+                   DEVICE_SCOM_ADDRESS(
+                       masterAddrs[i_args.engine].reset_scl ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C reset SCL register Failed!!" );
+            break;
+        }
+
+        //set data low: write 0 to immediate reset sda register
+        err = deviceWrite( i_target,
+                   &clkdataline.value,
+                   size,
+                   DEVICE_SCOM_ADDRESS(
+                       masterAddrs[i_args.engine].reset_sda ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C reset SDA register Failed!!" );
+            break;
+        }
+
+        // set clock high: write 0 to immediate set scl register
+        err = deviceWrite( i_target,
+                   &clkdataline.value,
+                   size,
+                   DEVICE_SCOM_ADDRESS(
+                       masterAddrs[i_args.engine].set_scl ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C set SCL register Failed!!" );
+            break;
+        }
+
+        //set data high: write 0 to immediate set sda register
+        err = deviceWrite( i_target,
+                   &clkdataline.value,
+                   size,
+                   DEVICE_SCOM_ADDRESS(
+                       masterAddrs[i_args.engine].set_sda ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C set SDA register Failed!!" );
+            break;
+        }
+    }while(0);
+
+    return err;
+}//end i2cSendStopSignal
+
+
+// ------------------------------------------------------------------
+// i2cToggleClockLine
+// ------------------------------------------------------------------
+errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
+                                misc_args_t & i_args)
+{
+
+    errlHndl_t err = NULL;
+    size_t size = sizeof(uint64_t);
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cToggleClockLine()" );
+
+    do
+    {
+        residual_length_reg_t clkline;
+        clkline.value = 0x0;
+
+        //toggle clock line
+        // set clock low: write 0 to immediate reset scl register
+
+        TRACUCOMP(g_trac_i2c,"i2cToggleClockLine()"
+                  "clock line 0x%016llx",
+                  clkline.value );
+
+        err = deviceWrite( i_target,
+                   &clkline.value,
+                   size,
+                   DEVICE_SCOM_ADDRESS(
+                       masterAddrs[i_args.engine].reset_scl ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C reset SCL register Failed!!" );
+            break;
+        }
+
+        // set clock high: write 0 to immediate set scl register
+        err = deviceWrite( i_target,
+                   &clkline.value,
+                   size,
+                   DEVICE_SCOM_ADDRESS(
+                       masterAddrs[i_args.engine].set_scl ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C set SCL register Failed!!" );
+            break;
+        }
+
+    }while(0);
+
+    return err;
+}//end i2cToggleClockLine
+
+
+// ------------------------------------------------------------------
+// i2cForceResetAndUnlock
+// ------------------------------------------------------------------
+errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
+                                    misc_args_t & i_args)
+{
+
+    errlHndl_t err = NULL;
+    size_t size = sizeof(uint64_t);
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cForceResetAndUnlock()" );
+
+
+    do
+    {
+
+        TRACUCOMP(g_trac_i2c,"i2cForceResetAndUnlock()"
+                  "reset[0x%lx]",
+                  masterAddrs[i_args.engine].reset );
+
+
+        // enable diagnostic mode
+        // set bit in mode register
+        mode_reg_t diagnostic;
+
+        diagnostic.diag_mode = 0x1;
+
+        err = deviceWrite( i_target,
+                           &diagnostic.value,
+                           size,
+                           DEVICE_SCOM_ADDRESS(
+                               masterAddrs[i_args.engine].mode ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C Enable Diagnostic mode Failed!!" );
+            break;
+        }
+
+
+
+        //toggle clock line
+        err = i2cToggleClockLine( i_target,
+                                  i_args );
+
+        if( err )
+        {
+            break;
+        }
+
+        //manually send stop signal
+        err = i2cSendStopSignal( i_target,
+                                  i_args );
+
+        if( err )
+        {
+            break;
+        }
+
+        //disable diagnostic mode
+        //set bit in mode register
+        diagnostic.diag_mode = 0x0;
+
+        err = deviceWrite( i_target,
+                           &diagnostic.value,
+                           size,
+                           DEVICE_SCOM_ADDRESS(
+                               masterAddrs[i_args.engine].mode ) );
+
+        if( err )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"I2C disable Diagnostic mode Failed!!" );
+            break;
+        }
+
+
+    }while(0);
+
+    return err;
+}// end i2cForceResetAndUnlock
 
 // ------------------------------------------------------------------
 // i2cReset
 // ------------------------------------------------------------------
 errlHndl_t i2cReset ( TARGETING::Target * i_target,
-                      misc_args_t & i_args)
+                      misc_args_t & i_args,
+                      i2c_reset_level i_reset_level)
 {
     errlHndl_t err = NULL;
     size_t size = sizeof(uint64_t);
@@ -1313,6 +1606,21 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
             TRACFCOMP( g_trac_i2c,
                        ERR_MRK"I2C Reset Failed!!" );
             break;
+        }
+
+        //if the reset is a force unlock then we need to enable
+        //diagnostic mode and toggle the clock and data lines
+        //to manually reset the bus
+        if( i_reset_level == FORCE_UNLOCK_RESET )
+        {
+            err = i2cForceResetAndUnlock( i_target,
+                                          i_args );
+
+            if( err )
+            {
+                //error trying to force a reset break
+                break;
+            }
         }
 
         // Part of doing the I2C Master reset is also sending a stop
