@@ -356,6 +356,14 @@ const compId_t HTMGT_COMP_ID = 0x2600;
 const char HTMGT_COMP_NAME[] = "htmgt";
 //@}
 
+// OCCC id 2A00 matches OCCC id on FSP
+/** @name OCCC
+ * OCC Thermal Managment Device
+ */
+const compId_t OCCC_COMP_ID = 0x2A00;
+const char OCCC_COMP_NAME[] = "occc";
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of

@@ -31,6 +31,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
+EXTRAINCDIR += ${ROOTPATH}/src/usr/htmgt
 
 MODULE = testhtmgt
 TESTS = *.H

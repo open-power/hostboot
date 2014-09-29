@@ -620,6 +620,19 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
+<attribute>
+    <id>OCC_CONTROL_DATA</id>
+    <description>OCC operational data
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>256</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 <!-- end HTMGT attributes -->
 
 <attribute>

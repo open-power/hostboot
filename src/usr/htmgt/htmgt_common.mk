@@ -23,4 +23,14 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects between hostboot and hbrt
+OBJS += htmgt.o
+OBJS += htmgt_occ.o
+OBJS += htmgt_activate.o
+OBJS += htmgt_occcmd.o
+OBJS += htmgt_poll.o
 OBJS += htmgt_utility.o
+
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
