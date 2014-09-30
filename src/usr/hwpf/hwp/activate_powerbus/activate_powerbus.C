@@ -54,6 +54,7 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/target.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -370,14 +371,28 @@ void * call_host_slave_sbe_update( void * io_pArgs )
         }
 
         // Call to Validate any Alternative Master's connection to PNOR
+        // Only call this in MNFG mode
         // Any error returned should not fail istep
-        l_errl = PNOR::validateAltMaster();
-        if (l_errl)
+
+        // Get target service and the system target
+        TargetService& tS = targetService();
+        TARGETING::Target* sys = NULL;
+        (void) tS.getTopLevelTarget( sys );
+        assert(sys, "call_host_slave_sbe_update() system target is NULL");
+
+        TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags;
+        mnfg_flags = sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+        if ( mnfg_flags & MNFG_FLAG_THRESHOLDS )
         {
-            // Commit error
-            errlCommit( l_errl, HWPF_COMP_ID );
-            break;
+            l_errl = PNOR::validateAltMaster();
+            if (l_errl)
+            {
+                // Commit error
+                errlCommit( l_errl, HWPF_COMP_ID );
+                break;
+            }
         }
+
    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
