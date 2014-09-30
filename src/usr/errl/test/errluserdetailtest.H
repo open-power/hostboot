@@ -32,6 +32,7 @@
  *
  */
 
+#include <stdio.h>
 #include <cxxtest/TestSuite.H>
 #include <errl/errlentry.H>
 #include <errl/errluserdetails.H>
@@ -92,6 +93,18 @@ public:
 
         ErrlUserDetailsString stringUD("String test - string 3");
         stringUD.addToLog(errl);
+
+        // Add a little test for making strings on the fly
+        {
+            const int test_data = 0xfeedface;
+            const char* format = "msg_respond() i/o error (transmit) 0x%x";
+            const size_t output_size = strlen(format) + (sizeof(int) * 2) + 1;
+            char output[output_size];
+            snprintf(output, output_size, format, test_data);
+
+            // Add msg_respond rc
+            ERRORLOG::ErrlUserDetailsString(output).addToLog(errl);
+        }
 
         // shove a lot of traces here, so that we test the truncate in the
         // write to PNOR
@@ -469,4 +482,3 @@ public:
 };
 
 #endif
-

@@ -201,6 +201,3 @@ void* vfs_start_entrypoint(VfsSystemModule * i_module)
     }
     return ptr;
 }
-
-
-

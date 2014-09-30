@@ -63,5 +63,6 @@ SUBDIRS += gpio.d
 SUBDIRS += lpc.d
 SUBDIRS += console.d
 SUBDIRS += errldisplay.d
+SUBDIRS += ipmi.d
 
 include ${ROOTPATH}/config.mk

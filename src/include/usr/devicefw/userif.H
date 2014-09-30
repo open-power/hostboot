@@ -60,6 +60,7 @@ namespace DeviceFW
         EEPROM,
         GPIO,
         LPC,
+        IPMIBT,    // As opposed to other phy's
 
         LAST_ACCESS_TYPE,
     };
@@ -166,10 +167,10 @@ namespace DeviceFW
 
     /**
      * Construct the device addressing parameters for the SCAN device ops.
-     * @param[in] i_ring - The ring address to scan 
+     * @param[in] i_ring - The ring address to scan
      * @param[in] i_ringlen - The length of the ring to scan in bits
      *                 NOTE: This value is the scanring length must
-     *                       match the scandef file value. 
+     *                       match the scandef file value.
      * @param[in] i_flag - Specific requests on the scan such as
      *             check the header, or set pulse option.
      *     Flag options are located in: src/include/usr/scan/scanif.H

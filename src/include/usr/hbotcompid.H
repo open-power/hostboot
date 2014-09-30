@@ -340,6 +340,14 @@ const compId_t LPC_COMP_ID = 0x2400;
 const char LPC_COMP_NAME[] = "lpc";
 //@}
 
+/** @name IPMI
+ * IPMI
+ */
+//@{
+const compId_t IPMI_COMP_ID = 0x2500;
+const char IPMI_COMP_NAME[] = "ipmi";
+//@}
+
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
