@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -132,9 +134,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
             case fapi::ATTR_PROC_AB_BNDY_PLL_DATA:
             case fapi::ATTR_PROC_AB_BNDY_PLL_FLUSH:
             case fapi::ATTR_PROC_AB_BNDY_PLL_LENGTH:
-            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
-//            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_FLUSH:
-            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
                 // Set entry size
                 l_numKeys = 1;
                 l_arrayEntryLength = sizeof(PLL_RING_ATTR_WITH_1_KEYS);
@@ -153,9 +152,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA:
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FLUSH:
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_LENGTH:
-            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
-//            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
-            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
                 // Set entry size
                 l_numKeys = 1;
                 l_arrayEntryLength = sizeof(PLL_RING_ATTR_WITH_1_KEYS);
@@ -219,32 +215,21 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
             case fapi::ATTR_MEMB_TP_BNDY_PLL_DATA:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_LENGTH:
-            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
-            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH:
                 // Set entry size
                 l_numKeys = 2;
@@ -336,60 +321,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     }
                 }
                 break;
-            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
-            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
-                if (l_chipType == ENUM_ATTR_NAME_MURANO)
-                {
-                    if (l_attrDdLevel == 0x10)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &S1_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x13)
-                    {
-                        l_pllArrayPtr =
-                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                                &S1_13_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_13_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x20)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
-                            &S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x21)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
-                            &S1_21_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_21_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                }
-                else if (l_chipType == ENUM_ATTR_NAME_VENICE)
-                {
-                    if (l_attrDdLevel == 0x10)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x20)
-                    {
-                        l_pllArrayPtr =
-                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
-                            (&P8_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize =
-                      sizeof(P8_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                }
-                break;
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA:
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FLUSH:
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_LENGTH:
@@ -452,72 +383,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                             &N1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
                         l_arySize =
                             sizeof(N1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                }
-                break;
-            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
-//            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
-            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
-                if (l_chipType == ENUM_ATTR_NAME_MURANO)
-                {
-                    if (l_attrDdLevel == 0x10)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &S1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x13)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &S1_13_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_13_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x20)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
-                            &S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x21)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
-                            &S1_21_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(S1_21_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                }
-                else if (l_chipType == ENUM_ATTR_NAME_VENICE)
-                {
-                    if (l_attrDdLevel == 0x10)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x20)
-                    {
-                        l_pllArrayPtr =
-                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
-                        ( &P8_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize =
-                   sizeof(P8_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                }
-                else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
-                {
-                    if (l_attrDdLevel == 0x10)
-                    {
-                        l_pllArrayPtr =
-                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(
-                            &N1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
-                        l_arySize =
-                            sizeof(N1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }
@@ -682,36 +547,7 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     }
                 }
                 break;
-            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
-            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH:
-                if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
-                {
-                    if (l_attrDdLevel == 0x10)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &Centaur_10_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x20)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &Centaur_20_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                    else if (l_attrDdLevel == 0x21)
-                    {
-                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
-                            &Centaur_21_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
-                        l_arySize = sizeof(Centaur_21_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array) /
-                            l_arrayEntryLength;
-                    }
-                }
-                break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -739,7 +575,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -767,7 +602,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -795,7 +629,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -823,7 +656,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -851,7 +683,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -879,7 +710,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -907,7 +737,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                 }
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH:
                 if (l_chipType == ENUM_ATTR_NAME_CENTAUR)
                 {
@@ -994,9 +823,9 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
             switch (i_attrId)
             {
                 case fapi::ATTR_PROC_AB_BNDY_PLL_DATA:
-                case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
+                //case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
                 case fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA:
-                case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
+                // case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
                 case fapi::ATTR_PROC_PCI_BNDY_PLL_DATA:
                     // Copy ring data
                     for (uint16_t i = 0;
@@ -1007,9 +836,7 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     }
                     break;
                 case fapi::ATTR_PROC_AB_BNDY_PLL_FLUSH:
-//                case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_FLUSH:
                 case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FLUSH:
-//                case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
                 case fapi::ATTR_PROC_PCI_BNDY_PLL_FLUSH:
                     // Copy flush data
                     for (uint16_t i = 0;
@@ -1020,9 +847,7 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     }
                     break;
                 case fapi::ATTR_PROC_AB_BNDY_PLL_LENGTH:
-                case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
                 case fapi::ATTR_PROC_PB_BNDY_DMIPLL_LENGTH:
-                case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
                 case fapi::ATTR_PROC_PCI_BNDY_PLL_LENGTH:
                     // Set length
                     o_ringBitLength = l_1KeyPllArrayPtr -> l_ATTR_PLL_RING_BIT_LENGTH;
@@ -1050,7 +875,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     o_ringBitLength = l_pllArrayPtr -> l_ATTR_PLL_RING_BIT_LENGTH;
                     break;
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_DATA:
-                case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA:
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA:
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA:
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA:
@@ -1068,15 +892,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     }
                     break;
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
-//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
                     // Copy flush data
                     for (uint16_t i = 0;
                          i < (l_2KeyPllArrayPtr->l_ATTR_PLL_RING_BYTE_LENGTH);
@@ -1086,7 +901,6 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                     }
                     break;
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_LENGTH:
-                case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH:
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH:
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH:
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH:

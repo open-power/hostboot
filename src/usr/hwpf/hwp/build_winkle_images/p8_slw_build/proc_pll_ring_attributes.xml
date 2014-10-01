@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_pll_ring_attributes.xml,v 1.14 2014/02/10 19:48:00 jmcgill Exp $ -->
+<!-- $Id: proc_pll_ring_attributes.xml,v 1.15 2014/09/23 21:54:58 jmcgill Exp $ -->
 <!-- proc_pll_ring_attributes.xml -->
 <attributes>
   <attribute>
@@ -50,35 +52,9 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Ring image for pb_bndy_dmipll ring for DC cal
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint8</valueType>
-    <array>231</array>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_PROC_AB_BNDY_PLL_DATA</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Ring image for ab_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint8</valueType>
-    <array>80</array>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Ring image for ab_bndy_pll ring for DC cal
       creator: platform
       firmware notes:
     </description>
@@ -126,33 +102,9 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Length of data in ring image for pb_bndy_dmipll ring for DC cal
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_PROC_AB_BNDY_PLL_LENGTH</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Length of data in ring image for ab_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Length of data in ring image for ab_bndy_pll ring for DC cal
       creator: platform
       firmware notes:
     </description>

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.59 2014/03/13 15:59:48 varkeykv Exp $
+// $Id: io_run_training.C,v 1.62 2014/09/24 14:48:22 jmcgill Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -66,10 +66,6 @@ extern "C" {
         uint32_t proc_dmi_cupll_pfd360_offset[8];
         uint32_t memb_dmi_cupll_pfd360_offset;
         uint32_t proc_abus_cupll_pfd360_offset[3];
-        // REFCLK SEL offsets 
-        //uint32_t proc_dmi_cupll_refclksel_offset[8];
-        // uint32_t memb_dmi_cupll_refclksel_offset;
-        //uint32_t proc_abus_cupll_refclksel_offset[3];
 
         ecmdDataBufferBase ring_data;
         fapi::Target parent_target;
@@ -105,34 +101,27 @@ extern "C" {
                 return(rc);
             }
 
-            // install PLL config for dccal operation
+            // install PLL config
             rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
             if (rc)
             {
                 FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_LENGTH)");
                 return(rc);
             }
-            //	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_dmipll_FOR_RUNTIME_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
             rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
             if (rc)
             {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA)");
+                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_DATA)");
                 return(rc);
             }
 
             // Now we need the partial offset data also . First let us get PFD360 offsets
-            rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_PFD360_OFFSET, &parent_target, proc_dmi_cupll_pfd360_offset);	// -- get length of scan ring
+            rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_PFD360_OFFSET, &parent_target, proc_dmi_cupll_pfd360_offset);
             if (rc)
             {
                 FAPI_ERR("Error fetching PFD360 offsets on MCS");
                 return(rc);
             }
-            //rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET, &parent_target, proc_dmi_cupll_refclksel_offset);	// -- get length of scan ring
-            //if (rc)
-            //{
-            //    FAPI_ERR("Error fetching REFCLKSEL offsets on MCS");
-            //    return(rc);
-            //}
 
             rc_ecmd |= ring_data.setBitLength(ring_length);
             if (rc_ecmd)
@@ -172,37 +161,29 @@ extern "C" {
         {
             FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
 
-            // install PLL config for dccal operation
+            // install PLL config
             rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_LENGTH, &target, ring_length);	// -- get length of scan ring
             if (rc)
             {
                 FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_LENGTH)");
                 return(rc);
             }
-            //  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
             rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
             if (rc)
             {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA)");
+                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_DATA)");
                 return(rc);
             }
 
             // Now we need the partial offset data also . First let us get PFD360 offsets
-            rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET, &target, memb_dmi_cupll_pfd360_offset);	// -- get length of scan ring
+            rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET, &target, memb_dmi_cupll_pfd360_offset);
             if (rc)
             {
                 FAPI_ERR("Error fetching PFD360 offsets on Centaur");
                 return(rc);
             }
-            //rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET, &target, memb_dmi_cupll_refclksel_offset);	// -- get length of scan ring
-            //if (rc)
-            //{
-            //    FAPI_ERR("Error fetching REFCLKSEL offsets on Centaur");
-            //    return(rc);
-            //}
 
             FAPI_DBG("Centaur PFD offset = %d",memb_dmi_cupll_pfd360_offset);
-            // FAPI_DBG("Centaur REFCLKSEL offset = %d",memb_dmi_cupll_refclksel_offset);
 
             FAPI_DBG("Ring length is %d",ring_length);
             rc_ecmd |= ring_data.setBitLength(ring_length);
@@ -270,35 +251,29 @@ extern "C" {
                 return(rc);
             }
 
-            // install PLL config for dccal operation
+            // install PLL config
             rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
             if (rc)
             {
                 FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_LENGTH)");
                 return(rc);
             }
-            //	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_FOR_RUNTIME_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
             rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
             if (rc)
             {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA)");
+                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_DATA)");
                 return(rc);
             }
 
 
             // Now we need the partial offset data also . First let us get PFD360 offsets
-            rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET, &parent_target, proc_abus_cupll_pfd360_offset);	// -- get length of scan ring
+            rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET, &parent_target, proc_abus_cupll_pfd360_offset);
             if (rc)
             {
                 FAPI_ERR("Error fetching PFD360 offsets on Abus");
                 return(rc);
             }
-            //rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET, &parent_target, proc_abus_cupll_refclksel_offset);	// -- get length of scan ring
-            //if (rc)
-            //{
-            //    FAPI_ERR("Error fetching REFCLKSEL offsets on Abus");
-            //    return(rc);
-            //}
+
             rc_ecmd |= ring_data.setBitLength(ring_length);
             if (rc_ecmd)
             {

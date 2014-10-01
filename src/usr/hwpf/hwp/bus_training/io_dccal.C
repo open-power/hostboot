@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.35 2014/03/20 08:37:35 varkeykv Exp $
+// $Id: io_dccal.C,v 1.36 2014/09/23 20:43:46 jmcgill Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -795,12 +795,13 @@ const fapi::Target& TARGET = target;
             FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_LENGTH)");
             return(rc);
         }
-	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
+	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
         if (rc)
         {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA)");
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_DATA)");
             return(rc);
         }
+
 	    rc_ecmd |= ring_data.setBitLength(ring_length);
 	    rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
         if (rc_ecmd)
@@ -808,6 +809,31 @@ const fapi::Target& TARGET = target;
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
+
+        uint8_t mcs_pos;
+        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &target, mcs_pos);
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            return(rc);
+        }
+
+        uint32_t refclksel_offsets[8];
+        rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET, &parent_target, refclksel_offsets);
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET)");
+            return(rc);
+        }
+
+        rc_ecmd |= ring_data.setBit(refclksel_offsets[mcs_pos]);
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+
+        // update PLL
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
                                             NEST_CHIPLET_0x02000000,
                                             PB_BNDY_DMIPLL_RING_ADDR,
@@ -872,10 +898,10 @@ const fapi::Target& TARGET = target;
             FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_LENGTH)");
             return(rc);
         }
-  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
+  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
         if (rc)
         {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA)");
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_DATA)");
             return(rc);
         }
 	    rc_ecmd |= ring_data.setBitLength(ring_length);
@@ -885,6 +911,23 @@ const fapi::Target& TARGET = target;
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
+
+        uint32_t refclksel_offset;
+        rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET, &target, refclksel_offset);
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET)");
+            return(rc);
+        }
+
+        rc_ecmd |= ring_data.setBit(refclksel_offset);
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+
+        // update PLL
         rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
                                             TP_CHIPLET_0x01000000,
                                             MEMB_TP_BNDY_PLL_RING_ADDR,
@@ -964,10 +1007,10 @@ const fapi::Target& TARGET = target;
             FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_LENGTH)");
             return(rc);
         }
-	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
+	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
         if (rc)
         {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA)");
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_DATA)");
             return(rc);
         }
 	    rc_ecmd |= ring_data.setBitLength(ring_length);
@@ -977,6 +1020,31 @@ const fapi::Target& TARGET = target;
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
+
+        uint8_t abus;
+        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &target, abus);
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            return(rc);
+        }
+
+        uint32_t refclksel_offsets[3];
+        rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET, &parent_target, refclksel_offsets);
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET)");
+            return(rc);
+        }
+
+        rc_ecmd |= ring_data.setBit(refclksel_offsets[abus]);
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+
+        // update PLL
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
                                             A_BUS_CHIPLET_0x08000000,
                                             AB_BNDY_PLL_RING_ADDR,

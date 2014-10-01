@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.12 2014/02/04 21:08:46 mfred Exp $
+// $Id: cen_mem_pll_initf.C,v 1.13 2014/09/23 21:53:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -478,6 +478,16 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             break;
         }
 
+        // set DMI PFD360 bit for runtime
+        uint32_t memb_dmi_cupll_pfd360_bit_offset;
+        rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET, &i_target, memb_dmi_cupll_pfd360_bit_offset);
+        if (rc)
+        {
+            FAPI_ERR("Failed to get DMI PFD360 offset attribute");
+            break;
+        }
+        FAPI_DBG("DMI PLL PFD360 offset is set to : %d.", memb_dmi_cupll_pfd360_bit_offset);
+
         rc = FAPI_ATTR_GET(ATTR_MEMB_MEM_PLL_CFG_UPDATE_OFFSET, &i_target, mem_pll_update_bit_offset);
         if (rc)
         {
@@ -503,7 +513,10 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             // Put the ring data from the attribute into the buffer
             rc_ecmd |= ring_data.insert(attrRingData, 0, ring_length, 0);
 
-            // force desired value of PLLCTR1(44)
+            // clamp PFD360 bit to 0 for runtime
+            rc_ecmd |= ring_data.clearBit(memb_dmi_cupll_pfd360_bit_offset);
+
+            // force desired value of MEM PLLCTR1(44)
             if (scan_num % 2) {
                 rc_ecmd |= ring_data.setBit(mem_pll_update_bit_offset);
             }
@@ -544,6 +557,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.13  2014/09/23 21:53:45  jmcgill
+add explicit clear for DMI PFD360 bit, based on change in base attribute values (SW279708)
+
 Revision 1.12  2014/02/04 21:08:46  mfred
 Change to leave TP FIR bit 3 masked out.  SW245030.
 

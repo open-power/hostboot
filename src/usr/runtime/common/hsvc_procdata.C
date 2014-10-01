@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -223,8 +225,6 @@ HSVC_LOAD_ATTR( ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_CHIPLET_ID );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_DATA );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FLUSH );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT );
 HSVC_LOAD_ATTR( ATTR_PROC_DMI_CUPLL_PFD360_OFFSET );
@@ -232,8 +232,6 @@ HSVC_LOAD_ATTR( ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_CHIPLET_ID );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_DATA );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FLUSH );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT );
 HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID );

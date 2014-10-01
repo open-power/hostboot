@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -22,7 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
   <!-- ********************************************************************* -->
-  <!-- $Id: memb_pll_ring_attributes.xml,v 1.12 2014/01/14 16:13:30 jmcgill Exp $ -->
+  <!-- $Id: memb_pll_ring_attributes.xml,v 1.13 2014/09/23 21:55:16 jmcgill Exp $ -->
   <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -65,31 +67,6 @@
     <id>ATTR_MEMB_TP_BNDY_PLL_SCAN_SELECT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Scan select for ring image for Centaur tp_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Ring image for Centaur tp_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint8</valueType>
-    <array>80</array>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Length of data in ring image for Centaur tp_bndy_pll ring
       creator: platform
       firmware notes:
     </description>
@@ -288,31 +265,6 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Length of data in ring image for Centaur tp_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_DATA</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Ring image for Centaur tp_bndy_pll ring for run time and pll cleanup
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint8</valueType>
-    <array>80</array>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_LENGTH</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Length of data in ring image for Centaur tp_bndy_pll ring
       creator: platform
