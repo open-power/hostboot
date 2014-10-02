@@ -38,28 +38,28 @@
     <attribute><id>IBSCOM_ENABLE_OVERRIDE</id></attribute>
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>HB_EXISTING_IMAGE</id></attribute>
-    <attribute><id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id></attribute>
-    <attribute><id>N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
-    <attribute><id>N_BULK_POWER_LIMIT_WATTS</id></attribute>
-    <attribute><id>N_MAX_MEM_POWER_WATTS</id></attribute>
-    <attribute><id>REGULATOR_EFFICIENCY_FACTOR</id></attribute>
-    <attribute><id>MIN_POWER_CAP_WATTS</id></attribute>
-    <attribute><id>MIN_MEM_UTILIZATION_THROTTLING</id></attribute>
-    <attribute><id>PROC_DVFS_TEMP_DEG_C</id></attribute>
-    <attribute><id>PROC_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>PROC_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>MEMCTRL_THROTTLE_TEMP_DEG_C</id></attribute>
-    <attribute><id>MEMCTRL_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>MEMCTRL_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>DIMM_THROTTLE_TEMP_DEG_C</id></attribute>
-    <attribute><id>DIMM_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>DIMM_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>ADC_CHANNEL_FUNC_IDS</id></attribute>
     <attribute><id>ADC_CHANNEL_GNDS</id></attribute>
     <attribute><id>ADC_CHANNEL_GAINS</id></attribute>
     <attribute><id>ADC_CHANNEL_OFFSETS</id></attribute>
     <attribute><id>APSS_GPIO_PORT_MODES</id></attribute>
     <attribute><id>APSS_GPIO_PORT_PINS</id></attribute>
+    <attribute><id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id></attribute>
+    <attribute><id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id></attribute>
+    <attribute><id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id></attribute>
+    <attribute><id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id></attribute>
+    <attribute><id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id></attribute>
+    <attribute><id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id></attribute>
+    <attribute><id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id></attribute>
+    <attribute><id>OPEN_POWER_MIN_POWER_CAP_WATTS</id></attribute>
+    <attribute><id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id></attribute>
+    <attribute><id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

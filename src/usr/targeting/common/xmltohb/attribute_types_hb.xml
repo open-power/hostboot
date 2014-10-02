@@ -358,238 +358,182 @@
     <writeable/>
     <hbOnly/>
 </attribute>
-
-<!-- TODO RTC 115386
-Final values for the following HTMG attributes will come from the MRW -->
 <attribute>
-    <id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
     <description>
-        System power cap with redundant power.
+        DIMM temperature threshold where throttling will
+        occur in degrees C
     </description>
     <simpleType>
-        <uint16_t>
-            <default>2400</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+    <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
     <description>
-        The amount of N+1 Bulk Power to allocate to memory. The value will be
-        used to calculate memory throttles to cap memory to this value.
+        DIMM temperature where an error will be generated
+        in degrees C
     </description>
     <simpleType>
-        <uint16_t>
-            <default>500</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>N_BULK_POWER_LIMIT_WATTS</id>
+    <id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
     <description>
-        System power cap in oversubscription.
+         Memory controller temperature threshold
+         where throttling will occur in degrees C
     </description>
     <simpleType>
-        <uint16_t>
-            <default>1200</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>N_MAX_MEM_POWER_WATTS</id>
+    <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
     <description>
-        The amount of N bulk power to allocate to memory.  This value will be
-        used to calculate memory throttles to cap memroy to this value and
-        used when system is in oversubscription.
+        Processor temperature where DVFS will occur in degrees C
     </description>
     <simpleType>
-        <uint16_t>
-            <default>500</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>REGULATOR_EFFICIENCY_FACTOR</id>
+    <id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id>
     <description>
-        Percentage to lower N+1 maximum memory power and N maximum memory
-        power to account for regulator loss.
+        Memory controller temperature where an error will occur
+        in degrees C
     </description>
     <simpleType>
-        <uint8_t>
-            <default>85</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>MIN_POWER_CAP_WATTS</id>
+    <id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id>
     <description>
-        Lowest power cap that a user may set and the OCC can guarantee to hold
-        via processor DVFS under all conditions.
+        N mode bulk power supply limit in Watts
     </description>
     <simpleType>
-        <uint16_t>
-            <default>2100</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>MIN_MEM_UTILIZATION_THROTTLING</id>
+    <id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id>
     <description>
-        Gives the OCCs a lower limit on how far they throttle
-        memory due to a memory over temp condtion.
+        Maximum power allocated to DIMMs in Watts
     </description>
     <simpleType>
-        <uint8_t>
-            <default>5</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>PROC_DVFS_TEMP_DEG_C</id>
+    <id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id>
     <description>
-        Processor temperature to invoke DVFS.
+        Memory controller read timeout in seconds
     </description>
     <simpleType>
-        <uint8_t>
-            <default>85</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>PROC_ERROR_TEMP_DEG_C</id>
+    <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
     <description>
-        Processor temperature to log on error calling out the processor.
+        DIMM read timeout in seconds
     </description>
     <simpleType>
-        <uint8_t>
-            <default>95</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>PROC_READ_TIMEOUT_SEC</id>
+    <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
     <description>
-        Maximum time allowed without having a new processor temperature
-        reading before DVFS will occur.
+        Processor temperature error threshold in degrees C
     </description>
     <simpleType>
-        <uint16_t>
-            <default>5</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    <id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id>
     <description>
-        Memory controller temperature to invoke memory throttling.
+        Minimum memory utilization for memory throttling
     </description>
     <simpleType>
-        <uint8_t>
-            <default>89</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>MEMCTRL_ERROR_TEMP_DEG_C</id>
+    <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
     <description>
-        Memory controller temperature to log an error calling out the memory
-        controller.
+        Processor read timeout in seconds
     </description>
     <simpleType>
-        <uint8_t>
-            <default>99</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>MEMCTRL_READ_TIMEOUT_SEC</id>
+    <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
     <description>
-        Maximum time allowed without having a new temperature reading from the
-        memory controller before throttling will occur.
+        Regulator efficiency factor
     </description>
     <simpleType>
-        <uint16_t>
-            <default>30</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>DIMM_THROTTLE_TEMP_DEG_C</id>
+    <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
     <description>
-        DIMM temperature to invoke memory throttling.
+        Minimum power cap in Watts
     </description>
     <simpleType>
-        <uint8_t>
-            <default>79</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>DIMM_ERROR_TEMP_DEG_C</id>
+    <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
     <description>
-        DIMM termperature to log na error calling out the DIMM.
+        N+1 bulk power limit in Watts
     </description>
     <simpleType>
-        <uint8_t>
-            <default>96</default>
-        </uint8_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
-    <id>DIMM_READ_TIMEOUT_SEC</id>
+    <id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
     <description>
-        Maximum time allowed without having a new Temperature reading from a
-        DIMM before throttling will occur.
+        N+1 max memory power in Watts
     </description>
     <simpleType>
-        <uint16_t>
-            <default>30</default>
-        </uint16_t>
+        <uint64_t></uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

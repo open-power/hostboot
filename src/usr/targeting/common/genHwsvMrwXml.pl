@@ -51,6 +51,8 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 
+
+
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
 # bugs that result in XML parse errors that can be fixed by adjusting white-
@@ -318,6 +320,14 @@ foreach my $policy ( keys %optTargPolicies )
           $optMrwPolicies->{$optTargPolicies{$policy}{MRW_NAME}}];
     }
 }
+#OpenPOWER policies
+foreach my $policy (keys %{$optMrwPolicies->{"open_power"}})
+{
+        push(@systemAttr,[ uc($policy),
+            $optMrwPolicies->{"open_power"}->{$policy} ] );
+}
+
+
 
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
