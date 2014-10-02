@@ -498,8 +498,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     for( SDC_MRU_LIST::const_iterator it = mruList.begin();
          it < mruList.end(); ++it )
     {
-        if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() &&
-            TYPE_OSC == getTargetType(thiscallout.getTarget()) )
+        if( PRDcalloutData::TYPE_TARGET == it->callout.getType() &&
+            TYPE_OSC == getTargetType( it->callout.getTarget() ))
         {
             // FIXME Below is a part of workaround due to design limitation
             // of hwsv in fips820. It shall be removed once RTC 103773,
