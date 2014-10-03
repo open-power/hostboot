@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_init.C,v 1.11 2014/09/09 16:23:42 jklazyns Exp $
+// $Id: proc_tod_init.C,v 1.12 2014/10/03 18:44:41 thi Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "proc_tod_utils.H"
 #include "proc_tod_init.H"
 #include "p8_scom_addresses.H"
 
@@ -55,12 +56,20 @@ extern "C"
 //------------------------------------------------------------------------------
 // function: proc_tod_init
 //
-// parameters: i_tod_node  Reference to TOD topology (FAPI targets included within)
+// parameters: 
+//         i_tod_node  Reference to TOD topology (FAPI targets included within)
+//
+//         i_failingTodProc, Porinter to the fapi target, the memory location
+//         addressed by this parameter will be populated with processor target
+//         which is not able to recieve proper singals from OSC.
+//         Caller needs to look at this parameter only when proc_tod_init fails 
+//         and reason code indicates OSC failure. It is defaulted to NULL.
 //
 // returns: FAPI_RC_SUCCESS if TOD topology is successfully initialized
 //          else FAPI or ECMD error is sent through
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node)
+fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node,
+                 fapi::Target* i_failingTodProc )
 {
     fapi::ReturnCode rc;
 
@@ -82,7 +91,7 @@ fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node)
         }
 
         //Start configuring each node; (init_tod_node will recurse on each child)
-        rc = init_tod_node(i_tod_node);
+        rc = init_tod_node(i_tod_node,i_failingTodProc);
         if (!rc.ok())
         {
             FAPI_ERR("proc_tod_init: Failure initializing TOD!");
@@ -160,12 +169,20 @@ fapi::ReturnCode proc_tod_clear_error_reg(const tod_topology_node* i_tod_node)
 //------------------------------------------------------------------------------
 // function: init_tod_node
 //
-// parameters: i_tod_node  Reference to TOD topology (FAPI targets included within)
+// parameters: 
+//          i_tod_node  Reference to TOD topology (FAPI targets included within)
+//
+//          i_failingTodProc, Porinter to the fapi target, the memory location
+//          addressed by this parameter will be populated with processor target
+//          which is not able to recieve proper singals from OSC.
+//          Caller needs to look at this parameter only when proc_tod_init fails 
+//          and reason code indicates OSC failure. It is defaulted to NULL.
 //
 // returns: FAPI_RC_SUCCESS if TOD topology is successfully initialized
 //          else FAPI or ECMD error is sent through
 //------------------------------------------------------------------------------
-fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
+fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
+        fapi::Target* i_failingTodProc)
 {
     fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
@@ -173,7 +190,7 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
     uint32_t tod_init_pending_count = 0; // Timeout counter for bits that are cleared by hardware
     fapi::Target* target = i_tod_node->i_target;
 
-    FAPI_INF("configure_tod_node: Start: Configuring %s", target->toEcmdString());
+    FAPI_INF("init_tod_node: Start: Configuring %s", target->toEcmdString());
 
     do
     {
@@ -347,11 +364,13 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
             {
                 FAPI_ERR("init_tod_node: M_PATH_0_STEP_CHECK_ERROR! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_M_PATH_0_STEP_CHECK_ERROR);
+                *i_failingTodProc = *target;
             }
             else if (data.isBitSet(TOD_ERROR_REG_M_PATH_1_STEP_CHECK_ERROR))
             {
                 FAPI_ERR("init_tod_node: M_PATH_1_STEP_CHECK_ERROR! (TOD_ERROR_REG = 0x%016llX)",data.getDoubleWord(0));
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_INIT_M_PATH_1_STEP_CHECK_ERROR);
+                *i_failingTodProc = *target;
             }
             else
             {
@@ -383,7 +402,7 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node)
              ++child)
         {
             tod_topology_node* tod_node = *child;
-            rc = init_tod_node(tod_node);
+            rc = init_tod_node(tod_node,i_failingTodProc);
             if (!rc.ok())
             {
                 FAPI_ERR("init_tod_node: Failure configuring downstream node!");

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_init.H,v 1.4 2013/03/05 23:21:08 jklazyns Exp $
+// $Id: proc_tod_init.H,v 1.5 2014/10/03 18:44:52 thi Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -58,8 +58,8 @@
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode
-(*proc_tod_init_FP_t) (const tod_topology_node*);
+typedef fapi::ReturnCode (*proc_tod_init_FP_t) (const tod_topology_node*,
+        fapi::Target* );
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -73,10 +73,17 @@ extern "C"
  *
  * @param[in] i_tod_node  Reference to TOD topology (FAPI targets included within)
  *
+ * @param[in] i_failingTodProc, Pointer to the fapi target, the memory location
+ *         addressed by this parameter will be populated with processor target
+ *         which is not able to recieve proper singals from OSC.
+ *         Caller needs to look at this parameter only when proc_tod_init fails 
+ *         and reason code indicates OSC failure. It is defaulted to NULL.
+ *
  * @return FAPI_RC_SUCCESS if TOD topology is successfully initialized
  *         else FAPI or ECMD error is sent through
  */
-fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node);
+fapi::ReturnCode proc_tod_init(const tod_topology_node* i_tod_node,
+            fapi::Target* i_failingTodProc = NULL );
 
 /**
  * @brief Clears TOD error register
@@ -93,10 +100,17 @@ fapi::ReturnCode proc_tod_clear_error_reg(const tod_topology_node* i_tod_node);
  *
  * @param[in] i_tod_node  Reference to TOD topology (FAPI targets included within)
  *
+ * @param[in] i_failingTodProc, Pointer to the fapi target, the memory location
+ *         addressed by this parameter will be populated with processor target
+ *         which is not able to recieve proper singals from OSC.
+ *         Caller needs to look at this parameter only when proc_tod_init fails 
+ *         and reason code indicates OSC failure. It is defaulted to NULL.
+ *
  * @return FAPI_RC_SUCCESS if TOD topology is successfully initialized
  *         else FAPI or ECMD error is sent through
  */
-fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node);
+fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
+        fapi::Target* i_failingTodProc = NULL);
 
 } // extern "C"
 
