@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.90 2014/07/29 19:35:40 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.91 2014/09/24 22:18:24 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.91   | jdsloat  |24-SEP-14| Disabling spare CKE bit modify for SW275629.  This bit will be modified via initfile. 
 //  1.90   | jdsloat  |29-JUL-14| disable for delay reset call moved to system level
 //  1.89   | jdsloat  |29-JUL-14| Added a disable for delay reset call 
 //  1.88   | jdsloat  |14-JUL-14| Fixed delay reset call 
@@ -175,8 +176,6 @@
 #ifdef FAPI_LRDIMM
 #include <mss_lrdimm_ddr4_funcs.H>
 #endif
-
-#include <config.h>
 
 #ifndef FAPI_LRDIMM
 using namespace fapi;
@@ -443,6 +442,8 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     if(rc) return rc;
     rc_num = rc_num | cal_steps_8.insert(cal_steps, 0, 8, 0);
 
+    /*
+    Disabling spare CKE bit modify for SW275629.  This bit will be modified via initfile. 
 
     //Setup SPARE CKE enable bit
     rc = fapiGetScom(i_target, MBA01_MBARPC0Q_0x03010434, data_buffer_64);
@@ -450,6 +451,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc_num = rc_num | data_buffer_64.setBit(42);
     rc = fapiPutScom(i_target, MBA01_MBARPC0Q_0x03010434, data_buffer_64);
     if(rc) return rc;
+    */
 
     //Set up CCS Mode Reg for Init cal
     rc = fapiGetScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
@@ -491,8 +493,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
 
-
-#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
             // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
 	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
                  (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
@@ -502,8 +502,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		 rc = mss_mxd_training(i_target,port,0);
 		 if(rc) return rc;
             }
-#endif
-
 	}
 
         if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) && 
@@ -734,7 +732,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			       if(rc) return rc;
                             }
 			}
-#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
                         // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
                         else if ( (group == 0) && (cur_cal_step == 1)
                                   && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
@@ -743,7 +740,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
                            rc = mss_dram_write_leveling(i_target, port);
                            if(rc) return rc;
                         }
-#endif
+
 		        //Set the config register
 			if(port == 0)
 			{

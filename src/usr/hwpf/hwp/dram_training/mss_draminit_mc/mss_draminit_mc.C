@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.46 2014/04/07 19:02:27 gollub Exp $
+// $Id: mss_draminit_mc.C,v 1.47 2014/09/24 14:48:18 dcadiga Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -46,6 +46,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.47   | dcadiga  |09-SEP-14| Removed SPARE cke disable step
 //  1.46   | gollub   |07-APR-14| Removed call to mss_unmask_inband_errors (moved it to proc_cen_framelock)
 //  1.45   | dcadiga  |14-FEB-14| Periodic Cal Fix for DD2
 //  1.44   | bellows  |12-FEB-14| Workaround for ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
@@ -165,18 +166,19 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
 
 
 
-    // Step Zero: Turn Off Spare CKE - This needs to be off before IML complete
-    FAPI_INF("+++ Disabling Spare CKE FIX +++");
-    for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
-    {
-       rc = mss_spare_cke_disable(l_mbaChiplets[i]);
-       if(rc)
-       {
-          FAPI_ERR("---Error During Spare CKE Disable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
-          return rc;
-       }
+    // Step Zero: Turn Off Spare CKE - This needs to be off before IML complete 
+    // STEP COMMENTED FOR SW275629
+    FAPI_INF("+++ Disabling Spare CKE FIX DISABLED +++");
+    //for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
+    //{
+    //   rc = mss_spare_cke_disable(l_mbaChiplets[i]);
+    //   if(rc)
+    //   {
+    //      FAPI_ERR("---Error During Spare CKE Disable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+    //      return rc;
+    //   }
 
-    }
+    //}
 
 
     // Step One: Set IML COMPLETE

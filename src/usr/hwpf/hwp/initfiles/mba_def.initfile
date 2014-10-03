@@ -1,9 +1,10 @@
 
-#-- $Id: mba_def.initfile,v 1.68 2014/04/04 16:46:15 jdsloat Exp $
+#-- $Id: mba_def.initfile,v 1.69 2014/09/24 14:44:15 asaetow Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.69|asaetow | 9/24/14| Force SpareCKE sync. Spare DRAM workaround.
 #--     1.68|jdsloat | 4/04/14| Turned off Power controls for GA1 concerns - Turn back on at a later date
 #--     1.67|tschang | 4/01/14| Adjusted the PUP Avail and SEPD/FEPD time.
 #--     1.66|tschang | 3/28/14| Removed Performance enhancement for rdtag with DMI freq
@@ -2041,6 +2042,7 @@ scom 0x03010434    {
     16:20   ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly6 == 1); # MBARPC0Q_cfg_pup_pdn       38
     22      ,   0b0         ,           1            ,   any; # cfg_min_domain_reduction_enable set to 1 to enable power controls
     23:32   ,   0b0000000011,           1            ,   any; # Set min doman reduction time to 30.7 us (10.245us * 3)
+    42      ,   0b1         ,           1            ,   any; # Force SpareCKE sync
     43      ,   0b0         ,           1            ,   any; # Use 1 in 8k 2:1 cycle pulses for min domain reduction time interval
 }
 
