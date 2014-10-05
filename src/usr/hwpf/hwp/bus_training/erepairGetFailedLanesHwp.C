@@ -47,7 +47,7 @@ extern "C"
 
 /**
  * @brief Function called by the FW Team HWP that reads the data from Field VPD.
- *        This function makes the actual calls to read the VPD 
+ *        This function makes the actual calls to read the VPD
  *        It determines the size of the buffer to be read, allocates memory
  *        of the determined size, calls fapiGetMvpdField to read the eRepair
  *        records. This buffer is further passed to another routine for
@@ -329,8 +329,34 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
 
     do
     {
-        // Read the header and count information
+        l_tgtType = i_tgtHandle.getType();
 
+        // Get the parent chip target
+        fapi::Target l_chipTarget = i_tgtHandle;
+        if((l_tgtType == fapi::TARGET_TYPE_XBUS_ENDPOINT) ||
+           (l_tgtType == fapi::TARGET_TYPE_ABUS_ENDPOINT) ||
+           (l_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET))
+        {
+            l_rc = fapiGetParentChip(i_tgtHandle, l_chipTarget);
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x) from fapiGetParentChip",
+                         static_cast<uint32_t>(l_rc));
+                break;
+            }
+        }
+
+        // Get the chip position
+        uint32_t l_chipPosition;
+        l_rc = FAPI_ATTR_GET(ATTR_POS, &l_chipTarget, l_chipPosition);
+        if(l_rc)
+        {
+            FAPI_ERR("Error (0x%x), from FAPI_ATTR_GET",
+                    static_cast<uint32_t>(l_rc));
+            break;
+        }
+
+        // Read the header and count information
         l_vpdPtr = i_buf; // point to the start of header data
         l_vpdHeadPtr = reinterpret_cast<eRepairHeader *> (l_vpdPtr);
 
@@ -338,8 +364,6 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
 
         l_bytesParsed = sizeof(eRepairHeader); // we've read the header data
         l_vpdPtr += sizeof(eRepairHeader); // point to the start of repair data
-
-        l_tgtType = i_tgtHandle.getType();
 
         // Parse for Power bus data
         if((l_tgtType == fapi::TARGET_TYPE_XBUS_ENDPOINT) ||
@@ -369,10 +393,12 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                 l_fabricBus->type = (l_temp >> 4);
                 l_fabricBus->interface = (l_temp & 0x0F);
 #endif
+
                 // Check if we have the correct Processor ID
-                // Get the MRU ID of the passed processor target and
-                // match with l_fabricBus.device.processor_id.
-                // Note: This is currently not required.
+                if(l_chipPosition != l_fabricBus->device.processor_id)
+                {
+                    continue;
+                }
 
                 // Check if we have the matching the Fabric Bus types
                 if((l_tgtType == fapi::TARGET_TYPE_ABUS_ENDPOINT) &&
@@ -465,10 +491,11 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                 l_memBus->interface = (l_temp & 0x0F);
 #endif
 
-                // Check if we have the correct Processor ID
-                // Get the MRU ID of the passed processor target and
-                // match with l_memBus.device.processor_id
-                // Note: This is currently not required.
+                // Check if we have the correct Processor/Centaur ID
+                if(l_chipPosition != l_memBus->device.proc_centaur_id)
+                {
+                    continue;
+                }
 
                 // Check if we have the matching the Memory Bus types
                 if(l_memBus->type != EREPAIR::MEMORY_EDI)
@@ -524,7 +551,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
 
     }while(0);
 
-    FAPI_INF("<< No.of Fail Lanes: tx: %zd, rx: %zd",
+    FAPI_INF("<< No.of Fail Lanes: tx: %d, rx: %d",
               o_txFailLanes.size(), o_rxFailLanes.size());
 
     return(l_rc);

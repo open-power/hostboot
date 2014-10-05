@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -219,7 +221,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
-            // Retrieve the Field eRepair data from the Centaur FRU VPD
+            // Retrieve the eRepair data from the Centaur FRU VPD
             l_rc = fapiGetMBvpdField(l_vpdRecord,
                                      MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
@@ -247,7 +249,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
-            /*** Write the updated eRepair buffer back to Centaru FRU VPD ***/
+            /*** Write the updated eRepair buffer back to Centaur FRU VPD ***/
             l_rc = fapiSetMBvpdField(l_vpdRecord,
                                      MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
@@ -313,7 +315,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
-            // Retrieve the Field eRepair data from the MVPD
+            // Retrieve the eRepair data from the MVPD
             l_rc = fapiGetMvpdField(l_vpdRecord,
                                     MVPD_KEYWORD_PDI,
                                     l_procTarget,
@@ -480,10 +482,40 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
         l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_tgtHandle, l_busNum);
         if(l_rc)
         {
-            FAPI_ERR("Error (0x%x), from FAPI_ATTR_GET",
+            FAPI_ERR("Error (0x%x), from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)",
                      static_cast<uint32_t>(l_rc));
             break;
         }
+
+        // Get the chip target
+        Target l_chipTarget = i_tgtHandle;
+        if((l_tgtType == TARGET_TYPE_XBUS_ENDPOINT) ||
+           (l_tgtType == TARGET_TYPE_ABUS_ENDPOINT) ||
+           (l_tgtType == TARGET_TYPE_MCS_CHIPLET))
+        {
+            l_rc = fapiGetParentChip(i_tgtHandle, l_chipTarget);
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x) from fapiGetParentChip",
+                        static_cast<uint32_t>(l_rc));
+                break;
+            }
+        }
+
+        // Get the chip number
+        uint32_t l_chipPosition;
+        l_rc = FAPI_ATTR_GET(ATTR_POS, &l_chipTarget, l_chipPosition);
+        if(l_rc)
+        {
+            FAPI_ERR("Error (0x%x), from FAPI_ATTR_GET(ATTR_POS)",
+                     static_cast<uint32_t>(l_rc));
+            break;
+        }
+
+        // This is needed because we can only store and compare a uint8_t
+        // value. For our purpose the value in l_chipPosition (Proc Position and
+        // Centaur Position) will always be within the range of uint8_t
+        uint8_t l_chipNum = l_chipPosition;
 
         /*** Lets update the fail lane vector to the Buffer ***/
 
@@ -510,7 +542,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // fabBus
                         { // device
-                            0,        // processor_id
+                            l_chipNum,// processor_id
                             l_busNum, // fabricBus
                         },
                         PROCESSOR_EI4, // type
@@ -524,7 +556,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // fabBus
                         { // device
-                            0,        // processor_id
+                            l_chipNum,// processor_id
                             l_busNum, // fabricBus
                         },
                         PROCESSOR_EDI, // type
@@ -538,7 +570,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // fabBus
                         { // device
-                            0,        // processor_id
+                            l_chipNum,// processor_id
                             l_busNum, // fabricBus
                         },
                         PROCESSOR_EI4, // type
@@ -552,7 +584,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // fabBus
                         { // device
-                            0,        // processor_id
+                            l_chipNum,// processor_id
                             l_busNum, // fabricBus
                         },
                         PROCESSOR_EDI, // type
@@ -566,7 +598,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // fabBus
                         { // device
-                            0,        // proc_centaur_id
+                            l_chipNum,// proc_centaur_id
                             l_busNum, // memChannel
                         },
                         MEMORY_EDI,   // type
@@ -580,7 +612,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // memBus
                         { // device
-                            0,        // proc_centaur_id
+                            l_chipNum,// proc_centaur_id
                             l_busNum, // memChannel
                         },
                         MEMORY_EDI,      // type
@@ -594,7 +626,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // memBus
                         { // device
-                            0,        // proc_centaur_id
+                            l_chipNum,// proc_centaur_id
                             l_busNum, // memChannel
                         },
                         MEMORY_EDI,      // type
@@ -608,7 +640,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                 { // repairData
                     { // memBus
                         { // device
-                            0,        // proc_centaur_id
+                            l_chipNum,// proc_centaur_id
                             l_busNum, // memChannel
                         },
                         MEMORY_EDI,         // type
@@ -646,6 +678,8 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     {
                         if((i_interface == l_repairMatch[l_loop].intType)    &&
                            (l_tgtType   == l_repairMatch[l_loop].tgtType)    &&
+                           ((l_overWritePtr->device).processor_id ==
+                        l_repairMatch[l_loop].bus.fabBus.device.processor_id)&&
                            (l_overWritePtr->type ==
                                 l_repairMatch[l_loop].bus.fabBus.type)       &&
                            (l_overWritePtr->interface ==
@@ -670,6 +704,8 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     {
                         if((i_interface == l_repairMatch[l_loop].intType)    &&
                            (l_tgtType   == l_repairMatch[l_loop].tgtType)    &&
+                           ((l_overWritePtr->device).processor_id ==
+                     l_repairMatch[l_loop].bus.memBus.device.proc_centaur_id)&&
                            (l_overWritePtr->type ==
                                 l_repairMatch[l_loop].bus.memBus.type)       &&
                            (l_overWritePtr->interface ==
@@ -744,10 +780,10 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                         break;
                     }
 
-                    eRepairPowerBus *l_fabricBus = 
+                    eRepairPowerBus *l_fabricBus =
                              reinterpret_cast<eRepairPowerBus *>(l_vpdWritePtr);
 
-                    l_fabricBus->device.processor_id = 0;
+                    l_fabricBus->device.processor_id = l_chipNum;
                     l_fabricBus->device.fabricBus    = l_busNum;
                     l_fabricBus->failBit             = l_repairLane;
 
@@ -795,7 +831,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     eRepairMemBus *l_memBus =
                                reinterpret_cast<eRepairMemBus *>(l_vpdWritePtr);
 
-                    l_memBus->device.proc_centaur_id = 0;
+                    l_memBus->device.proc_centaur_id = l_chipNum;
                     l_memBus->device.memChannel      = l_busNum;
                     l_memBus->type                   = MEMORY_EDI;
                     l_memBus->failBit                = l_repairLane;
@@ -833,7 +869,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
 
                     l_vpdWritePtr[2] = ((l_vpdWritePtr[2] >> 4) |
                                        (l_vpdWritePtr[2] << 4));
-#endif 
+#endif
                 }
             } // end of if(l_overWrite == false)
         } // end of for(failLanes)
