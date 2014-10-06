@@ -177,6 +177,8 @@
 #include <mss_lrdimm_ddr4_funcs.H>
 #endif
 
+#include <config.h>
+
 #ifndef FAPI_LRDIMM
 using namespace fapi;
 fapi::ReturnCode mss_execute_lrdimm_mb_dram_training(Target& i_target)
@@ -493,6 +495,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
 
+#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
             // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
 	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
                  (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
@@ -502,7 +505,8 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		 rc = mss_mxd_training(i_target,port,0);
 		 if(rc) return rc;
             }
-	}
+#endif
+        }
 
         if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) && 
 				(dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
@@ -732,6 +736,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			       if(rc) return rc;
                             }
 			}
+#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
                         // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
                         else if ( (group == 0) && (cur_cal_step == 1)
                                   && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
@@ -740,7 +745,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
                            rc = mss_dram_write_leveling(i_target, port);
                            if(rc) return rc;
                         }
-
+#endif
 		        //Set the config register
 			if(port == 0)
 			{
