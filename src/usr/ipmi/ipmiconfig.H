@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/ipmi/ipmi_reasoncodes.H $                     */
+/* $Source: src/usr/ipmi/ipmiconfig.H $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,27 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __IPMI_REASONCODES_H
-#define __IPMI_REASONCODES_H
 
-#include <hbotcompid.H>
+#ifndef __IPMI_IPMICONFIG_H
+#define __IPMI_IMPICONFIG_H
+
+/**
+ * @file ipmiconfig.H
+ * @brief IPMI service provider defaults and constants
+ */
 
 namespace IPMI
 {
-    enum IPMIModuleId
-    {
-        MOD_IPMISRV_SEND        = 0x01, // IPMI::send/IPMI::sendrecv
-        MOD_IPMISRV_REPLY       = 0x02, // IPMI::respond
-    };
+    //
+    // Information contained in the Get Interface Capabilities command
+    //
+    // Request to response time default, in seconds
+    extern const uint8_t g_bmc_timeout;
 
-    enum IPMIReasonCode
-    {
-        RC_INVALID_QRESPONSE         = IPMI_COMP_ID | 0x01,
-        RC_INVALID_SENDRECV          = IPMI_COMP_ID | 0x02,
-        RC_INVALID_SEND              = IPMI_COMP_ID | 0x03,
-        RC_WAITER_NOT_FOUND          = IPMI_COMP_ID | 0x04,
-        RC_ASYNC_BAD_CC              = IPMI_COMP_ID | 0x05,
-    };
+    // Number of allowed outstanding requests default
+    extern const uint8_t g_outstanding_req;
+
+    // The size of the BMC input buffer default (our write)
+    extern const uint8_t g_xmit_buffer_size;
+
+    // The size of the BMC transmit buffer default (our read)
+    extern const uint8_t g_recv_buffer_size;
+
+    // How many times we should retry a message if the BMC timesout default
+    extern const uint8_t g_retries;
 };
 
 #endif

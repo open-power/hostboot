@@ -25,6 +25,7 @@
 #ifndef __IPMI_IPMIMSG_H
 #define __IPMI_IPMIMSG_H
 
+#include <time.h>
 #include <map>
 #include <list>
 #include <sys/msg.h>
@@ -41,6 +42,7 @@ namespace IPMI
     };
 
     typedef std::list<msg_t*> send_q_t;
+    typedef std::list<msg_t*> timeout_q_t;
     typedef std::map<uint8_t,msg_t*> respond_q_t;
 
     // IPMI message base class. A thing which expects to be sent down a
@@ -51,24 +53,25 @@ namespace IPMI
     public:
         ///
         /// @brief static factory
-        /// @param[in] i_netfun, the network function
-        /// @param[in] i_cmd, the network command
-        /// @param[in] i_data, the data for the command
+        /// @param[in] i_cmd, the network functon & command
         /// @param[in] i_len, the length of the data
         /// @param[in] i_data, the data (allocated space)
         /// @param[in] i_type, synchronous or async
         ///
-        static Message* factory(const network_function i_netfun = NETFUN_NONE,
-                                const uint8_t i_cmd = 0,
+        /// @return a pointer to a new'd Message object
+        ///
+        static Message* factory(const command_t& i_cmd = no_command(),
                                 const uint8_t i_len = 0,
                                 uint8_t* i_data = NULL,
                                 const message_type i_type = TYPE_SYNC);
 
         ///
         /// @brief Message ctor
+        /// @param[in] i_cmd, the network functon & command
+        /// @param[in] i_len, the length of the data
+        /// @param[in] i_data, the data (allocated space)
         ///
-        Message(const network_function i_netfun = NETFUN_NONE,
-                const uint8_t i_cmd = 0,
+        Message(const command_t& i_cmd = no_command(),
                 const uint8_t i_len = 0,
                 uint8_t* i_data = NULL);
 
@@ -77,22 +80,30 @@ namespace IPMI
         ///
         virtual ~Message(void)
             {
+                // Do NOT delete[] iv_data here. For synchronous messages
+                // the caller wants this data and expects to delete[] it
+                // itself. For async messages it is deleted in the dtor
                 msg_free(iv_msg);
             }
 
         ///
-        /// @brief the maximum buffer size of the underlying transport
+        /// @brief the header size of a message for the underlying transport
         /// @param void
-        /// @return size_t, the max buffer size
+        /// @return size_t, the header size
         ///
-        virtual size_t max_buffer(void) = 0;
+        virtual size_t header_size(void) = 0;
 
         ///
         /// @brief transmit a message.
-        /// @param[in] i_respondq, a map: iv_key->msg_t
         /// @return true iff there was no transmission error
         ///
-        virtual bool xmit(respond_q_t& i_respondq) = 0;
+        virtual bool xmit(void) = 0;
+
+        ///
+        /// @brief complete the processing when a response arrives
+        /// @return void
+        ///
+        virtual void response(msg_q_t i_msgQ) = 0;
 
         ///
         /// @brief receive a message.
@@ -114,6 +125,7 @@ namespace IPMI
         uint8_t    iv_state;   // Driver things, like EAGAIN
         errlHndl_t iv_errl;    // Pointer to the errlHandl_t if needed
         uint8_t*   iv_data;    // Pointer to the message data
+        timespec_t iv_timeout; // Absolute time of when I timeout
 
     private:
         // Disallow copying this class. Should suffice for disabling copy for

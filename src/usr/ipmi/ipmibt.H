@@ -27,14 +27,8 @@
 
 #include "ipmimsg.H"
 
-// How many bytes are in the IPMI BT message header
+/// So, IPMI_BT_MAX_DATA == BMC receive size - IPMI_BT_HEADER_SIZE;
 #define IPMI_BT_HEADER_SIZE 3
-
-// Per BMC Firmware Specification v3.6 James, et al the ASPEED
-// is limited to a 64 byte IPMI message buffer.
-#define IPMI_BT_MAX_MESSAGE_SIZE 64
-
-#define IPMI_BT_MAX_DATA (IPMI_BT_MAX_MESSAGE_SIZE - IPMI_BT_HEADER_SIZE)
 
 namespace IPMI
 {
@@ -44,33 +38,33 @@ namespace IPMI
     public:
         ///
         /// @brief msg ctor
-        /// @param[in] i_netfun, the network function
-        /// @param[in] i_cmd, the network command
+        /// @param[in] i_cmd, the network function & command
         /// @param[in] i_data, the data for the command
         /// @param[in] i_len, the length of the data
         /// @param[in] i_data, the data (new'd space)
         ///
-        BTMessage(const network_function i_netfun = NETFUN_NONE,
-                  const uint8_t i_cmd = 0,
+        BTMessage(const command_t& i_cmd = no_command(),
                   const uint8_t i_len = 0,
                   uint8_t* i_data = NULL);
+
+        virtual ~BTMessage(void)
+            {}
 
         ///
         /// @brief transmit a message.
         /// @return Error from operation
         ///
-        errlHndl_t xmit(void);
+        errlHndl_t phy_xmit(void);
 
         ///
         /// @brief transmit a message.
-        /// @param[in] i_respondq, a map sequence->msg_t
         /// @return true iff there was no transmission error
         ///
         /// @note we're not pure abstract as we want to be able to
         /// instantiate an object of BTMessage for reading.
         ///
-        virtual bool xmit(respond_q_t& i_respondq)
-            {return true;};
+        virtual bool xmit(void)
+            {return true;}
 
         ///
         /// @brief receive a message.
@@ -78,13 +72,22 @@ namespace IPMI
         errlHndl_t recv(void);
 
         ///
-        /// @brief the maximum buffer size of the underlying transport
-        /// @param void
-        /// @return size_t, the max buffer size
+        /// @brief complete the processing when a response arrives
+        /// @return void
+        /// @note we're not pure abstract as we want to be able to
+        /// instantiate an object of BTMessage for reading.
         ///
-        size_t max_buffer(void)
-            { return IPMI_BT_MAX_DATA; }
+        virtual void response(msg_q_t i_msgQ)
+            {return;}
 
+        ///
+        /// @brief the size of the BT header
+        /// @param void
+        /// @return size_t, the header size
+        /// @note IPMI_BT_MAX_DATA == BMC receive size - IPMI_BT_HEADER_SIZE;
+        ///
+        size_t header_size(void)
+            { return IPMI_BT_HEADER_SIZE; }
     };
 
     // IPMI BT synchronous message
@@ -93,22 +96,26 @@ namespace IPMI
     public:
         ///
         /// @brief BTSyncMessage ctor
-        /// @param[in] i_netfun, the network function
-        /// @param[in] i_cmd, the network command
-        /// @param[in] i_data, the data for the command
+        /// @param[in] i_cmd, the network function & command
         /// @param[in] i_len, the length of the data
         /// @param[in] i_data, the data (new'd space)
         ///
-        BTSyncMessage(const network_function i_netfun, const uint8_t i_cmd,
+        BTSyncMessage(const command_t& i_cmd,
                       const uint8_t i_len, uint8_t* i_data);
 
         ///
         /// @brief transmit a message.
-        /// @param[in] i_respondq, a map sequence->msg_t
         ///
         /// @return true iff there was no transmission error
         ///
-        bool xmit(respond_q_t& i_respondq);
+        bool xmit(void);
+
+        ///
+        /// @brief complete the processing when a response arrives
+        /// @return void
+        ///
+        void response(msg_q_t i_msgQ);
+
     };
 
     // IPMI BT asynchronous message
@@ -117,22 +124,31 @@ namespace IPMI
     public:
         ///
         /// @brief BTSyncMessage ctor
-        /// @param[in] i_netfun, the network function
-        /// @param[in] i_cmd, the network command
-        /// @param[in] i_data, the data for the command
+        /// @param[in] i_cmd, the network function & command
         /// @param[in] i_len, the length of the data
         /// @param[in] i_data, the data (new'd space)
         ///
-        BTAsyncMessage(const network_function i_netfun, const uint8_t i_cmd,
+        BTAsyncMessage(const command_t& i_cmd,
                        const uint8_t i_len, uint8_t* i_data);
 
         ///
+        /// @brief BTSyncMessage dtor
+        ///
+        ~BTAsyncMessage(void)
+            { delete[] iv_data; }
+
+        ///
         /// @brief transmit a message.
-        /// @param[in] respond_q_t unused
         ///
         /// @return true iff there was no transmission error
         ///
-        bool xmit(respond_q_t&);
+        bool xmit(void);
+
+        ///
+        /// @brief complete the processing when a response arrives
+        /// @return void
+        ///
+        void response(msg_q_t i_msgQ);
     };
 
 }; // end namespace IPMI

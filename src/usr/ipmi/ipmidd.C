@@ -232,7 +232,6 @@ void IpmiDD::pollCtrl(void)
             errlCommit(err, IPMI_COMP_ID);
             break;
         }
-
         else
         {
             // If we're idle, tell the resoure provider to check for any
@@ -284,16 +283,19 @@ inline errlHndl_t IpmiDD::reset(void)
     IPMI::BTMessage msg;
 
     errlHndl_t err = readLPC(REG_CONTROL, ctrl);
+    IPMI_TRAC("reset: control register %x", ctrl);
     while ((ctrl & (CTRL_B2H_ATN | CTRL_SMS_ATN)) && (err == NULL))
     {
         // There should only be one, if any - but we'll log each one we find.
         IPMI_TRAC(INFO_MRK "found a waiting message during reset");
         err = receive(&msg);
+        IPMI_TRAC("reset: received %x:%x", msg.iv_netfun, msg.iv_cmd);
         delete[] msg.iv_data;
 
         if (err) {break;}
 
         err = readLPC(REG_CONTROL, ctrl);
+        IPMI_TRAC("reset: control register %x", ctrl);
     }
 
     // Commit this log. We're about to reset the PHY anyway, so maybe
@@ -435,7 +437,7 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
         if (err) { break; }
 
         // I don't think SMS messages have a completion code.
-        if (CTRL_B2H_ATN)
+        if (ctrl & CTRL_B2H_ATN)
         {
             err = readLPC(REG_HOSTBMC, o_msg->iv_cc);
             if (err) { continue; }

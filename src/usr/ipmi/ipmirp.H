@@ -66,6 +66,19 @@ class IpmiRP
     static void* start(void* unused);
 
     /**
+     * Thread start routine for the timeout thread
+     * @param[in] void*, unused
+     */
+    static void* timeout_thread(void* unused);
+
+    /**
+     * Thread start routine for a little task which
+     * waits for the BMC to give us the interface capabilties
+     * @param[in] void*, unused
+     */
+    static void* get_capabilities(void* unused);
+
+    /**
      * Default constructor
      */
     IpmiRP(void);
@@ -93,12 +106,23 @@ class IpmiRP
     msg_q_t msgQueue(void)
         { return iv_msgQ; }
 
+    /**
+     * @brief Queue a message on to the response queue
+     * @param[in] i_msg, the message to queue
+     */
+    void queueForResponse(IPMI::Message& i_msg);
+
   private:
 
     /**
      * Entry point for the resource provider
      */
     void execute(void);
+
+    /**
+     * Entry point for the timeout thread
+     */
+    void timeoutThread(void);
 
     /**
      * @brief Transmit a message over the IPMI interface
@@ -140,15 +164,60 @@ class IpmiRP
     void response(void);
 
     /**
+     * @brief Respond to an existing message.
+     * @note This is used as the "base" response handler
+     * @param[in] i_msg, the message to respond to
+     */
+    void response(IPMI::Message* i_msg);
+
+    /**
+     * @brief Respond to a message we're changing
+     * @note This is used when we have a timeout and need to
+     * respond to the caller.
+     * @param[in] i_msg, the message to respond to
+     * @param[in] i_cc, the complettion code
+     */
+    void response(IPMI::Message* i_msg, IPMI::completion_code i_cc);
+
+    /**
      * @brief Handle an indication from the interface indicating the
      * BMC interface has an event/sms message ready to read
      * @param[in] void
      */
     void event(void);
 
+    /**
+     * @brief Query the BMC for interface capabilities
+     * @param[in] void
+     * @note this fills in iv_bmc_timeout, etc.
+     */
+    void getInterfaceCapabilities(void);
+
     msg_q_t           iv_msgQ;        //!< ipmi mesage queue
     IPMI::send_q_t    iv_sendq;       //!< msg to send queue
+    IPMI::timeout_q_t iv_timeoutq;    //!< msgs waiting for a timeout
     IPMI::respond_q_t iv_respondq;    //!< msg respond pending list
+
+    // Protect the queues from the message loop and the timeout thread
+    mutex_t     iv_mutex;
+    sync_cond_t iv_cv;
+
+    // The time, in seconds, the BMC told us is the max request/response
+    // time interval.
+    uint8_t     iv_bmc_timeout;
+
+    // How many outstanding requests the BMC can handle
+    uint8_t     iv_outstanding_req;
+
+    // Size of the xmit buffer (max we can send)
+    uint8_t     iv_xmit_buffer_size;
+
+    // Size of the recv buffer (max BMC will send)
+    uint8_t     iv_recv_buffer_size;
+
+    // Recomended number of retries
+    uint8_t     iv_retries;
+
 
     // Disallow copying this class.
     IpmiRP& operator=(const IpmiRP&);

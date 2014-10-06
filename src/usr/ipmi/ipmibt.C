@@ -48,16 +48,13 @@ namespace IPMI
 {
     ///
     /// @brief msg ctor
-    /// @param[in] i_netfun, the network function
-    /// @param[in] i_cmd, the network command
-    /// @param[in] i_data, the data for the command
+    /// @param[in] i_cmd, the network function & command
     /// @param[in] i_len, the length of the data
     /// @param[in] i_data, the data (new'd space)
     ///
-    BTMessage::BTMessage(const network_function i_netfun,
-                         const uint8_t i_cmd, const uint8_t i_len,
+    BTMessage::BTMessage(const command_t& i_cmd, const uint8_t i_len,
                          uint8_t* i_data):
-        Message(i_netfun, i_cmd, i_len, i_data)
+        Message(i_cmd, i_len, i_data)
     {
         // Sometimes we need to get back to this IPMI msg from the msg_t,
         // and sometimes we need to get the msg_t from the IPMI msg. So they
@@ -69,7 +66,7 @@ namespace IPMI
     ///
     /// @brief  Transimit - send the data out the device interface
     ///
-    errlHndl_t BTMessage::xmit(void)
+    errlHndl_t BTMessage::phy_xmit(void)
     {
         // When a uint8_t is constructed, it's initialied to 0. So,
         // this initializes the sequence counter to 0.
@@ -93,11 +90,31 @@ namespace IPMI
                               unused_size,
                               DeviceFW::IPMIBT);
 
-        // If we're not going to remain on the i_sendq, we need to
-        // delete the data.
+        // If we're not going to remain on the i_sendq, we need to delete
+        // the data.
         if ((err) || (iv_state != EAGAIN))
         {
             delete[] iv_data;
+            iv_data = NULL;
+        }
+
+        if (!err)
+        {
+            // If there wasn't an error, and we don't see EAGAIN, we need to
+            // queue up for a response. Note we queue up both synchronus and
+            // asynchronous messages, and let the subclasses handle what
+            // happens when the response arrives (because it will.)
+            if (iv_state != EAGAIN)
+            {
+                Singleton<IpmiRP>::instance().queueForResponse(*this);
+            }
+
+            // Otherwise we had no error, but were told EAGAIN, which means the
+            // interface was busy.
+            else
+            {
+                IPMI_TRAC(INFO_MRK "busy, queue head %x:%x", iv_netfun, iv_cmd);
+            }
         }
 
         return err;
@@ -138,40 +155,36 @@ namespace IPMI
 
     ///
     /// @brief BTSyncMessage ctor
-    /// @param[in] i_netfun, the network function
-    /// @param[in] i_cmd, the network command
-    /// @param[in] i_data, the data for the command
+    /// @param[in] i_cmd, the network function & command
     /// @param[in] i_len, the length of the data
     /// @param[in] i_data, the data (new'd space)
     ///
-    BTSyncMessage::BTSyncMessage(const network_function i_netfun,
-                                 const uint8_t i_cmd, const uint8_t i_len,
+    BTSyncMessage::BTSyncMessage(const command_t& i_cmd,
+                                 const uint8_t i_len,
                                  uint8_t* i_data):
-        BTMessage(i_netfun, i_cmd, i_len, i_data)
+        BTMessage(i_cmd, i_len, i_data)
     {
     }
 
     ///
     /// @brief BTSyncMessage ctor
-    /// @param[in] i_netfun, the network function
-    /// @param[in] i_cmd, the network command
-    /// @param[in] i_data, the data for the command
+    /// @param[in] i_cmd, the network function & command
     /// @param[in] i_len, the length of the data
     /// @param[in] i_data, the data (new'd space)
     ///
-    BTAsyncMessage::BTAsyncMessage(const network_function i_netfun,
-                                   const uint8_t i_cmd, const uint8_t i_len,
+    BTAsyncMessage::BTAsyncMessage(const command_t& i_cmd,
+                                   const uint8_t i_len,
                                    uint8_t* i_data):
-        BTMessage(i_netfun, i_cmd, i_len, i_data)
+        BTMessage(i_cmd, i_len, i_data)
     {
     }
 
     ///
     /// @brief sync msg transmit
     ///
-    bool BTSyncMessage::xmit(respond_q_t& i_respondq)
+    bool BTSyncMessage::xmit(void)
     {
-        errlHndl_t err = BTMessage::xmit();
+        errlHndl_t err = BTMessage::phy_xmit();
 
         if (err)
         {
@@ -192,17 +205,6 @@ namespace IPMI
             }
         }
 
-        // Otherwise, we either were transmitted ok or we were told EAGAIN.
-        // We can tell this by iv_state - if it's not EAGAIN, we need to go hang
-        // out on the response queue.
-        else if (iv_state != EAGAIN)
-        {
-            i_respondq[iv_seq] = iv_msg;
-        }
-        else {
-            IPMI_TRAC(INFO_MRK "busy, queue head %x:%x", iv_netfun, iv_cmd);
-        }
-
         // If we had an i/o error we want the idle loop to stop
         // If we got EAGAIN we want the idle loop to stop as we just
         // put a message on the queue which couldn't be sent.
@@ -212,10 +214,9 @@ namespace IPMI
     ///
     /// @brief async msg transmit
     ///
-    bool BTAsyncMessage::xmit(respond_q_t&)
+    bool BTAsyncMessage::xmit(void)
     {
-        errlHndl_t err = BTMessage::xmit();
-        bool io_error = (iv_state != 0);
+        errlHndl_t err = BTMessage::phy_xmit();
 
         if (err)
         {
@@ -224,23 +225,88 @@ namespace IPMI
             errlCommit(err, IPMI_COMP_ID);
         }
 
-        // If we didn't have an error but we got back an EAGAIN
-        // we've been queued up for a retry. Otherwise, we're free
-        // to commit suicide.
-        else if (iv_state != EAGAIN)
-        {
-            // Yes, this is OK - there is no further reference to this object.
-            delete this;
-        }
-        else {
-            IPMI_TRAC(INFO_MRK "busy, queue head %x:%x", iv_netfun, iv_cmd);
-        }
-
         // If we had an i/o error we want the idle loop to stop.
         // If we got EAGAIN we want the idle loop to stop as we just
         // put a message on the queue which couldn't be sent. Note
         // we need to use this mechanism rather than letting the caller
         // check iv_state as we may have just deleted ourselves.
-        return io_error;
+        return (iv_state != 0);
     }
+
+    ///
+    /// @brief sync handle response
+    ///
+    void BTSyncMessage::response(msg_q_t i_msgQ)
+    {
+        // Send the response to the original caller of sendrecv()
+        int rc = msg_respond(i_msgQ, iv_msg);
+        if (rc)
+        {
+            // Not much we're going to do here, so lets commit an error and
+            // the original request will timeout.
+            IPMI_TRAC(ERR_MRK "msg_respond() i/o error (response) %d", rc);
+
+            /* @errorlog tag
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        IPMI::MOD_IPMISRV_REPLY
+             * @reasoncode      IPMI::RC_INVALID_QRESPONSE
+             * @userdata1       rc from msg_respond()
+             * @devdesc         msg_respond() failed
+             * @custdesc        Firmware error during system boot
+             */
+            errlHndl_t err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                IPMI::MOD_IPMISRV_REPLY,
+                IPMI::RC_INVALID_QRESPONSE,
+                rc,
+                0,
+                true);
+
+            err->collectTrace(IPMI_COMP_NAME);
+            errlCommit(err, IPMI_COMP_ID);
+
+            // Frotz the response data
+            delete[] iv_data;
+            iv_data = NULL;
+        }
+    }
+
+    ///
+    /// @brief async msg transmit
+    ///
+    void BTAsyncMessage::response(msg_q_t)
+    {
+        // If our completion code isn't CC_OK, lets log that fact. There's
+        // not much we can do, but at least this might give a hint that
+        // something is awry.
+        if (iv_cc != IPMI::CC_OK)
+        {
+            IPMI_TRAC(ERR_MRK "async message (%x:%x seq %d) completion code %x",
+                      iv_netfun, iv_cmd, iv_seq, iv_cc);
+
+            /* @errorlog tag
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        IPMI::MOD_IPMISRV_REPLY
+             * @reasoncode      IPMI::RC_ASYNC_BAD_CC
+             * @userdata1       command of message
+             * @userdata2       completion code
+             * @devdesc         an async message completion code was not CC_OK
+             * @custdesc        Unexpected IPMI completion code from the BMC
+             */
+            errlHndl_t err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                IPMI::MOD_IPMISRV_REPLY,
+                IPMI::RC_ASYNC_BAD_CC,
+                iv_cmd,
+                iv_cc,
+                true);
+
+            err->collectTrace(IPMI_COMP_NAME);
+            errlCommit(err, IPMI_COMP_ID);
+        }
+
+        // Yes, this is OK - there is no further reference to this object.
+        delete this;
+    }
+
 };

@@ -46,39 +46,38 @@ namespace IPMI
 {
     ///
     /// @brief msg ctor
-    /// @param[in] i_netfun, the network function
-    /// @param[in] i_cmd, the network command
-    /// @param[in] i_data, the data for the command
+    /// @param[in] i_cmd, the network function & command
     /// @param[in] i_len, the length of the data
     /// @param[in] i_data, the data (new'd space)
     ///
-    Message::Message(const network_function i_netfun,
-                     const uint8_t i_cmd, const uint8_t i_len,
+    Message::Message(const command_t& i_cmd,
+                     const uint8_t i_len,
                      uint8_t* i_data):
         iv_msg(msg_allocate()),
         iv_key(0),
         iv_len(i_len),
-        iv_netfun(i_netfun),
+        iv_netfun(i_cmd.first),
         iv_seq(iv_key),
-        iv_cmd(i_cmd),
+        iv_cmd(i_cmd.second),
         iv_cc(0),
         iv_state(0),
         iv_errl(NULL),
         iv_data(i_data)
     {
+        iv_timeout.tv_sec = 0;
+        iv_timeout.tv_nsec = 0;
     }
 
     ///
     /// @brief static factory
-    /// @param[in] i_netfun, the network function
-    /// @param[in] i_cmd, the network command
-    /// @param[in] i_data, the data for the command
+    /// @param[in] i_cmd, the network function & command
     /// @param[in] i_len, the length of the data
     /// @param[in] i_data, the data (allocated space)
     /// @param[in] i_type, synchronous or async
     ///
-    Message* Message::factory(const network_function i_netfun,
-                              const uint8_t i_cmd, const uint8_t i_len,
+    /// @return a pointer to a new'd Message object
+    ///
+    Message* Message::factory(const command_t& i_cmd, const uint8_t i_len,
                               uint8_t* i_data, const message_type i_type)
     {
         Message* new_message = NULL;
@@ -87,10 +86,10 @@ namespace IPMI
         switch(i_type)
         {
         case TYPE_SYNC:
-            new_message = new BTSyncMessage(i_netfun, i_cmd, i_len, i_data);
+            new_message = new BTSyncMessage(i_cmd, i_len, i_data);
             break;
         case TYPE_ASYNC:
-            new_message = new BTAsyncMessage(i_netfun, i_cmd, i_len, i_data);
+            new_message = new BTAsyncMessage(i_cmd, i_len, i_data);
             break;
         default:
             // We have ourselves a bug
