@@ -156,6 +156,7 @@ simics.tar_CONTENTS = \
     src/build/simics/startup.simics \
     src/build/simics/standalone.simics \
     src/build/simics/combined.simics \
+    src/build/simics/ipmi_bt_responder.py \
     src/build/simics/hb-simdebug.py \
     src/build/debug/hb-dump-debug \
     src/build/debug/ecmd-debug-framework.pl \

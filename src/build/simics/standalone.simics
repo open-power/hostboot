@@ -61,3 +61,12 @@ foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
     #model behavior
     ($pnor).fsi_local_lbus_map.write 0xC40 0x00006E00
 }
+
+###################################
+#Enable the IPMI Responder
+###################################
+echo "Enable IPMI Responder"
+try {
+      run-python-file (lookup-file hbfw/ipmi_bt_responder.py)
+} except { echo "ERROR: Failed to load IPMIresponder." }
+
