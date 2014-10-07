@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.61 2014/07/23 20:08:36 jmcgill Exp $
+// $Id: p8_image_help.C,v 1.65 2014/09/11 21:41:26 aalugore Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -124,7 +124,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
                             uint8_t  i_flushOptimization,   // flush optimize or not
                             uint32_t i_scanMaxRotate,       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
                             uint32_t i_waitsScanDelay,      // Temporary debug support.
-                            uint32_t i_ddLevel)             // DD level.
+                            uint8_t i_usePollingProt)             // Use Polling Protocol( s1, p8>=20, n1>=10)
 {
   uint32_t rc=0;
   uint32_t i=0;
@@ -250,8 +250,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
       if (rotateLen > 0)  {
 
-				if (i_ddLevel>=0x20)  {   // Use polling protocol.
-
+              if (i_usePollingProt!=0x00)  {   // Use polling protocol.
+                      MY_DBG("create_wiggle_flip: using polling protocol\n");                              
           PoreInlineLocation  srcp1=0,tgtp1=0;
 
           pore_imm64b = uint64_t(rotateLen)<<32;
@@ -272,7 +272,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
           }
         }
         else  {                   // Do not use polling protocol.
-
+              MY_DBG("create_wiggle_flip: not using polling protocol\n");  
           scanRing_poreAddr = scanRing_baseAddr | rotateLen;
           pore_LD(&ctx, D0, scanRing_poreAddr, P1);
           if (ctx.error > 0)  {
@@ -359,15 +359,15 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
       else
         rotateLen = rotateLen + remainingBits;
 
-			if (i_ddLevel>=0x20)  {    // Use polling protocol.
-
-        PoreInlineLocation  srcp2=0,tgtp2=0;
+      if (i_usePollingProt!=0x00)  {    // Use polling protocol.
+          MY_DBG("create_wiggle_flip: using polling protocol\n");
+          PoreInlineLocation  srcp2=0,tgtp2=0;
 
         // Max rotate length is 2^20-1, i.e., data BITS(12-31)=>0x000FFFFF
-  			if (rotateLen>=SCAN_MAX_ROTATE_LONG)  {
-			    MY_INF("Scanning should never be here since max possible ring length is\n");
-          MY_INF("480,000 bits but MAX_LONG_ROTATE=0x%0x and rotateLen=0x%0x\n",
-                   SCAN_MAX_ROTATE_LONG, rotateLen);
+          if (rotateLen>=SCAN_MAX_ROTATE_LONG)  {
+                  MY_INF("Scanning should never be here since max possible ring length is\n");
+                  MY_INF("480,000 bits but MAX_LONG_ROTATE=0x%0x and rotateLen=0x%0x\n",
+                         SCAN_MAX_ROTATE_LONG, rotateLen);
           pore_imm64b = uint64_t(SCAN_MAX_ROTATE_LONG)<<32;
 				  pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
 	        if (ctx.error > 0)  {
@@ -392,7 +392,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
       }
       else  {                   // Do not use polling protocol.
-
+              MY_DBG("create_wiggle_flip: not using polling protocol\n");
         if (rotateLen>i_scanMaxRotate)  {
           scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
           pore_LD(&ctx, D0, scanRing_poreAddr, P1);
@@ -417,10 +417,11 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   // If the scan ring has not been rotated to the original position
   // shift the ring by remaining shift bit length.
   if (rotateLen>0)  {
-    if (i_ddLevel>=0x20)  {   // Use polling protocol.
+    if (i_usePollingProt!=0x00)  {   // Use polling protocol.
 
-  		PoreInlineLocation  srcp3=0,tgtp3=0;
-
+      PoreInlineLocation  srcp3=0,tgtp3=0;
+      MY_DBG("create_wiggle_flip: using polling protocol\n");
+      
       pore_imm64b = uint64_t(rotateLen)<<32;
 		  pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
 
@@ -441,6 +442,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
     }
     else  {                   // Do not use polling protocol.
+      MY_DBG("create_wiggle_flip: not using polling protocol\n");
 
       scanRing_poreAddr=scanRing_baseAddr | rotateLen;
       pore_LD(&ctx, D0, scanRing_poreAddr, P1);
@@ -800,6 +802,7 @@ int write_wiggle_flip_to_image( void *io_imageOut,
   deltaLC = (uint32_t)myRev64(i_ringLayout->entryOffset) - bufLC;
   if (deltaLC<0 || deltaLC>=8)  {
 	  MY_ERR("Ring layout mess. Check code or delta_scan(). deltaLC=%i",deltaLC);
+      if(ringsBuffer) free(ringsBuffer);
 	  return IMGBUILD_ERR_CHECK_CODE;
 	}
   if (deltaLC>0)  {
@@ -998,7 +1001,7 @@ int initialize_slw_section( void      *io_image,
   if (rc)
     return rc;
   if (sizeSectionChk!=FIXED_SLW_SECTION_SIZE)  {
-    MY_ERR("Section size of .slw (=%i) not equal to requested size (=%i).\n",
+    MY_ERR("Section size of .slw (=%i) not equal to requested size (=%zi).\n",
       sizeSectionChk, FIXED_SLW_SECTION_SIZE);
     return IMGBUILD_ERR_SECTION_SIZING;
   }
@@ -1143,7 +1146,7 @@ int create_and_initialize_fixed_image( void      *io_image)
     MY_ERR("Size of .fit section (=%i) can not be negative.\n",sizeSectionFit);
     MY_ERR("Size of fixed image   = %i\n",FIXED_SLW_IMAGE_SIZE);
     MY_ERR("Size of input image   = %i\n",sizeImageIn);
-    MY_ERR("Size of .slw section  = %i\n",FIXED_SLW_SECTION_SIZE);
+    MY_ERR("Size of .slw section  = %zi\n",FIXED_SLW_SECTION_SIZE);
     MY_ERR("Size of .ffdc section = %i\n",FIXED_FFDC_SECTION_SIZE);
     return IMGBUILD_ERR_SECTION_SIZING;
   }
@@ -1585,13 +1588,14 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 // Notes:
 int write_vpd_ring_to_slw_image(void			*io_image,
                                 uint32_t  &io_sizeImageOut,
-														  	CompressedScanData *i_bufRs4Ring, // HB buf1. BE format.
-															  uint32_t  i_ddLevel,
-															  uint8_t   i_sysPhase,
-															  char 			*i_ringName,
-															  void      *i_bufTmp,              // HB buf2
-															  uint32_t  i_sizeBufTmp,
-																uint8_t 	i_bWcSpace)
+                                CompressedScanData *i_bufRs4Ring, // HB buf1. BE format.
+                                uint32_t  i_ddLevel,
+                                uint8_t   i_usePollingProt,
+                                uint8_t   i_sysPhase,
+                                char 			*i_ringName,
+                                void      *i_bufTmp,              // HB buf2
+                                uint32_t  i_sizeBufTmp,
+                                uint8_t 	i_bWcSpace)
 {
 	uint32_t rc=0, bufLC;
 	uint8_t  chipletId, idxVector=0;
@@ -1662,6 +1666,8 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 
 	wfInline = (uint32_t*)i_bufRs4Ring;  // Reuse this buffer (HB buf1) for wiggle-flip prg.
 	wfInlineLenInWords = i_sizeBufTmp/4; // Assuming same size of both HB buf1 and buf2.
+        
+        
 	rc = create_wiggle_flip_prg((uint32_t*)i_bufTmp,
 	                            sizeRingRaw,
 	                            myRev32(i_bufRs4Ring->iv_scanSelect),
@@ -1671,7 +1677,7 @@ int write_vpd_ring_to_slw_image(void			*io_image,
                               i_bufRs4Ring->iv_flushOptimization,
 	                            (uint32_t)scanMaxRotate,
                               (uint32_t)waitsScanDelay,
-                              i_ddLevel );
+                              i_usePollingProt );
 	if (rc)  {
 	  MY_ERR("create_wiggle_flip_prg() failed w/rc=%i; ",rc);
 	  return IMGBUILD_ERR_WF_CREATE;

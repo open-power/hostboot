@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.52 2014/09/01 20:00:09 jmcgill Exp $
+// $Id: p8_delta_scan_rw.h,v 1.53 2014/09/11 19:01:13 szhong Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -261,7 +261,7 @@ int  create_wiggle_flip_prg(
               uint8_t    i_flushOptimization,
 							uint32_t   i_scanMaxRotate,
               uint32_t   i_waitsScanDelay,
-              uint32_t   i_ddLevel);
+              uint8_t   i_usePollingProt);
 
 uint64_t calc_ring_layout_entry_offset(
 							uint8_t  i_typeRingLayout,
@@ -337,6 +337,7 @@ int write_vpd_ring_to_slw_image(
 							uint32_t   &io_sizeImageOut,
 							CompressedScanData *i_bufRs4Ring,
 							uint32_t   i_ddLevel,
+              uint8_t i_usePollingProt,
 							uint8_t    i_sysPhase,
               char       *i_ringName,
 							void       *i_bufTmp,

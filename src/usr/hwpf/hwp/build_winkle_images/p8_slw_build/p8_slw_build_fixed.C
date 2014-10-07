@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build_fixed.C,v 1.20 2014/07/25 19:42:24 jmcgill Exp $
+// $Id: p8_slw_build_fixed.C,v 1.23 2014/09/11 22:47:00 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build_fixed                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -102,8 +102,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   uint64_t  ptrTmp1, ptrTmp2;
   uint32_t  bufLC;
   uint8_t   ffdc_temp;
-
-	// Sanity checks on buffers and image.
+ 	// Sanity checks on buffers and image.
   // - validate image.
 	// - do pre-allocated buffers exist?
 	// - are pre-allocated buffers the correct size?
@@ -368,7 +367,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
     FAPI_DBG("--> bSleepEnable = 0x%x ",bSleepEnable);
 	// Obtain ring name and ring's vector location from image.
     if (bSleepEnable) {
-      uint8_t chipType;
+        uint8_t chipType;
       rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_target, chipType);
       if (rc)  {
         FAPI_ERR("FAPI_ATTR_GET_PRIVILEGED() failed w/rc=%i and  chipType=0x%02x",(uint32_t)rc,chipType);
@@ -631,7 +630,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 	  // Create Wiggle-Flip Programs (but first resolve max rotate status.)
 	  // ==========================================================================
 	  FAPI_DBG("--> Creating Wiggle-Flip Program.");
-
+ 
 	  rcLoc = sbe_xip_get_scalar( (void*)i_imageIn, SCAN_MAX_ROTATE_38XXX_NAME, &scanMaxRotate);
 	  if (rcLoc)  {
 	    FAPI_INF("WARNING: sbe_xip_get_scalar() failed...but we might wing it.");
@@ -668,16 +667,25 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 	
 		wfInline = (uint32_t*)i_buf1;
 		wfInlineLenInWords = i_sizeBuf1/4;
+                //WSZ query ec feature for poolling protocol for Murano/Venice >=20, Naples >=10
+                uint8_t usePollingProt = 0x00; //true 0x01 false 0x00
+                rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT, &i_target,usePollingProt);
+                if (rc) {
+                        FAPI_ERR("p8_slw_build: fapiGetAttribute error (ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT)");
+                        return rc;
+                }
+                FAPI_DBG("p8_slw_build_fixed use PollingProt = 0x%02X (true=0x01, false=0x00)", usePollingProt);
+
 	  rcLoc = create_wiggle_flip_prg( (uint32_t*)i_buf2,  // Input buffer, buf2
 	                                  ringBitLen,
 	                                  myRev32(deltaRingRS4->iv_scanSelect),
 	                                  (uint32_t)deltaRingRS4->iv_chipletId,
 	                                  &wfInline,          // Output buffer, buf1
 	                                  &wfInlineLenInWords,
-                                    deltaRingRS4->iv_flushOptimization,
-																		(uint32_t)scanMaxRotate,
+                                          deltaRingRS4->iv_flushOptimization,
+                                          (uint32_t)scanMaxRotate,
 	                                  (uint32_t)waitsScanDelay,
-                                    ddLevel );
+                                          usePollingProt);
 	  if (rcLoc)  {
 	    FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
 			uint32_t & RC_LOCAL=rcLoc;
@@ -768,11 +776,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 
 	  FAPI_DBG("\tUpdating image w/WF prg + ring header was successful.");
 	  
-	  // Update some variables for debugging and error reporting.
-#ifdef IMGBUILD_PPD_IGNORE_XIPC
-	  uint32_t sizeImageOld = sizeImageTmp;
-#endif
 	  countWF++;
+
 	
 	}  // End of if (rcSearch!=DSLWB_RING_SEARCH_NO_MATCH)
 	
@@ -809,6 +814,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 		}
     FAPI_INF("Xip customization done.");
 #else
+	  uint32_t sizeImageOld;
 		//
 		// Initialize .slw section, just in case we ignore xip_customize in a build.
 		//
@@ -849,6 +855,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 		// - Do not append .ffdc.
 		// --------------------------------------------------------------------
 		case P8_SLW_MODEBUILD_SRAM:  // SRAM mode.
+	    sizeImageOld = sizeImageTmp;
 			sizeImageTmp = sizeImageOutMax;
     	rcLoc = initialize_slw_section( i_imageOut,
     	                                &sizeImageTmp);

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_xip_customize.C,v 1.14 2014/05/28 21:17:25 thi Exp $
+// $Id: cen_xip_customize.C,v 1.15 2014/09/12 21:29:23 mklight Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : cen_xip_customize.C                                               */
 /* *! DESCRIPTION : Customizes Centaur images from a Centaur reference image.   */
@@ -233,7 +235,7 @@ ReturnCode cen_xip_customize(const fapi::Target &i_target,
                               1,  // Always do flush optimization.
 	                            (uint32_t)scanMaxRotate,
                               0,  // No need to use waits for Centaur.
-                              0x00000010); // Centaur doesn't support scan polling.
+                              0); // Centaur doesn't support scan polling.
 	if (rcLoc)  {
 	  FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
 	  uint32_t &RC_LOCAL=rcLoc;

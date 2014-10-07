@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.72 2014/07/03 19:52:55 jmcgill Exp $
+// $Id: p8_xip_customize.C,v 1.74 2014/09/11 19:10:16 szhong Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -330,11 +330,22 @@ ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
             }
             else  {
               // Add VPD ring to --->>> SLW <<<--- image
+             //WSZ query ec feature for poolling protocol for Murano/Venice >=20, Naples >=10
+             uint8_t usePollingProt = 0x00; //true 0x01 false 0x00
+             rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT, &i_target,usePollingProt);
+             if (rc) {
+                     FAPI_ERR("p8_xip_customize: fapiGetAttribute error (ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT)");
+                     return rc;
+             }
+             FAPI_DBG("p8_xip_customize  usePollingProt = 0x%02X (true=0x01, false=0x00)", usePollingProt);
+                    
+
               rcLoc = write_vpd_ring_to_slw_image(
                                                   o_imageOut,
                                                   sizeImageOut,
                                                   (CompressedScanData*)bufVpdRing, //HB buf1
                                                   ddLevel,
+                                                  usePollingProt,
                                                   i_sysPhase,
                                                   (char*)(ring_id_list+iRing)->ringNameImg,
                                                   (void*)i_buf2,                   //HB buf2
@@ -346,6 +357,7 @@ ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_WRITE_VPD_RING_TO_SLW_IMAGE_ERROR);
                 return rc;
               }
+
             }
           } //no buffer overflow
         } //ring found in VPD
