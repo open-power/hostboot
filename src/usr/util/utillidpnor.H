@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/test/runtime/rt_occtest.H $                      */
+/* $Source: src/usr/util/utillidpnor.H $                                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,77 +22,49 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __RT_OCCTEST_H
-#define __RT_OCCTEST_H
+#ifndef _UTILLIDPNOR_H
+#define _UTILLIDPNOR_H
 
-#include <cxxtest/TestSuite.H>
-#include <runtime/interface.h>
-#include <hwpf/hwp/occ/occ.H>
-#include <fapi.H>
-#include <targeting/common/commontargeting.H>
-#include <vmmconst.h>
-#include <sys/mm.h>
+/**
+ * @file lidpnor.H
+ *
+ * @brief brief Provides the lid to pnor mapping currently used in the lidmgr
+ *              In its own file to limit number of duplicate definitions for
+ *              every user compared to being defined in utillidmgr
+ *
+ */
+
 #include <util/utillidmgr.H>
+#include <utility>
 
-class OccTest: public CxxTest::TestSuite
+namespace Util
 {
-    public:
 
-    void testOccIntf()
+/**
+ *  @brief Simple compare function for lidToPnor elements
+ */
+bool cmpLidToPnor (const std::pair<uint32_t, PNOR::SectionId> p1,
+                   const std::pair<uint32_t, PNOR::SectionId> p2)
+{
+    return (p1.first < p2.first);
+}
+
+/**
+ *  @brief Array containing lid to pnor mappings
+ *         When adding maintain order by uint32_t (lidID)
+ *         There is a test case to confirm this is sorted
+ */
+const std::pair<uint32_t, PNOR::SectionId>
+    lidToPnor[] =
     {
-        FAPI_INF("testOccIntf");
+        std::make_pair(Util::TEST_LIDID, PNOR::TEST), // TEST_LIDID = 0x00000111
+        std::make_pair(Util::OCC_LIDID, PNOR::OCC)    // OCC_LIDID  = 0x81e00430
+    };
 
-        runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
-        if(rt_intf == NULL)
-        {
-            TS_FAIL("runtimeIntfaces not set");
-            return;
-        }
+// Size of lidToPnor[]
+const size_t NUM_LID_TO_PNOR = ( sizeof(lidToPnor) /
+                                 sizeof(std::pair<uint32_t, PNOR::SectionId>));
 
-        if( rt_intf->get_lid_list == NULL )
-        {
-            TS_FAIL("runtimeInterfaces->get_lid_list not set");
-        }
-
-        if( rt_intf->loadOCC == NULL )
-        {
-            TS_FAIL("runtimeInterfaces->loadOCC not set");
-        }
-
-        if( rt_intf->startOCCs == NULL )
-        {
-            TS_FAIL("runtimeInterfaces->startOCCs not set");
-        }
-
-        if( rt_intf->stopOCCs == NULL )
-        {
-            TS_FAIL("runtimeInterfaces->stopOCCs not set");
-        }
-    }
-
-    void testGetLidList()
-    {
-        FAPI_INF("testGetLidList");
-        runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
-        if(rt_intf && rt_intf->get_lid_list)
-        {
-            size_t size = 0;
-            const uint32_t * list = rt_intf->get_lid_list(&size);
-            if(size > 1)
-            {
-                TS_FAIL("runtimeInterfaces->get_lid_list empty list");
-            }
-            else if (list[0] != Util::OCC_LIDID)
-            {
-                TS_FAIL("runtimeInterface->get_lid_list missing OCCLID");
-            }
-        }
-
-    }
-
-
-    private:
-
-};
+}
 
 #endif

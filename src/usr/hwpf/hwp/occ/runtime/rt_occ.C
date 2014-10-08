@@ -198,7 +198,7 @@ namespace RT_OCC
             }
 
             // Load HOMER image
-            UtilLidMgr lidmgr(HBOCC::OCC_LIDID);
+            UtilLidMgr lidmgr(Util::OCC_LIDID);
 
             size_t lidSize = 0;
             err = lidmgr.getLidSize(lidSize);
@@ -216,7 +216,7 @@ namespace RT_OCC
 
             TRACFCOMP( g_fapiTd,
                        "OCC lid loaded. ID:%x size:%d",
-                       HBOCC::OCC_LIDID,
+                       Util::OCC_LIDID,
                        lidSize);
 
             // Setup Host Data area of HOMER

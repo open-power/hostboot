@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/util/runtime/test/testlidmgr.H $                      */
+/* $Source: src/usr/util/runtime/test/testlidmgr_rt.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -22,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <util/utillidmgr.H>
 
-class LidMgrTest : public CxxTest::TestSuite
+class LidMgrRtTest : public CxxTest::TestSuite
 {
     public:
         void testMissingLid()
@@ -32,13 +34,14 @@ class LidMgrTest : public CxxTest::TestSuite
             size_t l_size = 0;
             errlHndl_t l_errl = lidmgr.getLidSize(l_size);
 
-            if (NULL == l_errl)
+            if (l_size != 0)
             {
                 TS_FAIL("Found missing lid -1.");
             }
             else
             {
                 delete l_errl;
+                l_errl = NULL;
             }
         }
 };

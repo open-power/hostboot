@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,8 +37,18 @@
 #include <mbox/mboxif.H>
 #include <errl/errlentry.H>
 #include <sys/msg.h>
+#include <pnor/pnorif.H>
 
+namespace Util
+{
+// Lid id's
+enum LidId
+{
+    TEST_LIDID = 0x00000111,
+    OCC_LIDID = 0x81e00430,
+};
 
+}
 
 class UtilLidMgr
 {
@@ -305,6 +317,19 @@ class UtilLidMgr
      * @brief Pointer to message queue
      */
     msg_q_t iv_HbMsgQ;
+
+    /**
+     *  @brief search lidToPnor array for the pnor section for the given lid
+     *         lidToPnor array does not includes the ext img section
+     *
+     *  @param[in] i_lidId          - provide lid id to search for
+     *  @param[out] o_lidPnorInfo   - pnor section that the lid is in
+     *
+     *  @return bool - True if lid is in a section, false otherwise
+    */
+    bool getLidPnorSection(uint32_t i_lidId,
+                           PNOR::SectionInfo_t &o_lidPnorInfo);
+
 #else // __HOSTBOOT_RUNTIME
 
     /**
@@ -339,6 +364,27 @@ class UtilLidMgr
      */
     size_t iv_lidSize;
 
+    /**
+     * @brief pnor section (other than ext img) current lid is in
+     *        PNOR::INVALID_SECTION if not in other sections
+     */
+    PNOR::SectionInfo_t iv_lidPnorInfo;
+
+    /**
+     * @brief value indicating if lid is in its own pnor partition
+     *
+     */
+    bool iv_isLidInPnor;
+
+    /**
+     * @brief value indicating if a fsp exists
+     */
+    bool iv_spBaseServicesEnabled;
+
+    /**
+     * @brief value indicating if lid is in extended image
+     */
+    bool iv_isLidInVFS;
 
 };
 

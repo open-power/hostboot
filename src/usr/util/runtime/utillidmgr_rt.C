@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -82,6 +84,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 
 errlHndl_t UtilLidMgr::loadLid()
 {
+    //@TODO RTC:108836 - figure out how to read lid from pnor with OPAL
     // Check if it is already loaded.
     if (NULL != iv_lidBuffer) return NULL;
 
@@ -150,7 +153,7 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 {
         static uint32_t lidlist[] =
         {
-            HBOCC::OCC_LIDID
+            Util::OCC_LIDID
                 // add SLW lids if ever needed
         };
         *o_num = sizeof(lidlist)/sizeof(lidlist[0]);

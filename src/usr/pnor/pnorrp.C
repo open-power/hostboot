@@ -73,7 +73,8 @@ const char* cv_EYECATCHER[] = {
     "CVPD",     /**< PNOR::CENTAUR_VPD    : Centaur VPD */
     "ATTROVER", /**< PNOR::ATTR_OVER      : Attribute Override */
     "NVRAM",    /**< PNOR::NVRAM         : OPAL Storage */
-    "TEST",     /**< PNOR::TEST          : Test space for PNOR*/
+    "OCC",      /**< PNOR::OCC            : OCC LID */
+    "TEST",     /**< PNOR::TEST           : Test space for PNOR*/
 
     //Not currently used
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */

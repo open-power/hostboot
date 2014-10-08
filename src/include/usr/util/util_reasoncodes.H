@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,13 +42,14 @@ namespace Util
 
     enum ReasonCode
     {
-        UTIL_ERC_NONE           = UTIL_COMP_ID | 0x01,
-        UTIL_ERC_BAD_PTR        = UTIL_COMP_ID | 0x02,
-        UTIL_ERC_EOF            = UTIL_COMP_ID | 0x03,
-        UTIL_LIDMGR_RC_FAIL     = UTIL_COMP_ID | 0x04,
-        UTIL_LIDMGR_INVAL_DATA  = UTIL_COMP_ID | 0x05,
-        UTIL_LIDMGR_INVAL_SIZE  = UTIL_COMP_ID | 0x06,
-        UTIL_LIDMGR_UNSUP_MSG   = UTIL_COMP_ID | 0x07,
+        UTIL_ERC_NONE                = UTIL_COMP_ID | 0x01,
+        UTIL_ERC_BAD_PTR             = UTIL_COMP_ID | 0x02,
+        UTIL_ERC_EOF                 = UTIL_COMP_ID | 0x03,
+        UTIL_LIDMGR_RC_FAIL          = UTIL_COMP_ID | 0x04,
+        UTIL_LIDMGR_INVAL_DATA       = UTIL_COMP_ID | 0x05,
+        UTIL_LIDMGR_INVAL_SIZE       = UTIL_COMP_ID | 0x06,
+        UTIL_LIDMGR_UNSUP_MSG        = UTIL_COMP_ID | 0x07,
+        UTIL_LIDMGR_INVAL_SIZE_PNOR  = UTIL_COMP_ID | 0x08,
     };
 };
 

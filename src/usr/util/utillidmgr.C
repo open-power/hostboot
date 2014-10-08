@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,10 +32,11 @@
 #include <errl/errlmanager.H>
 #include "utillidmgrdefs.H"
 #include "utilbase.H"
+#include <initservice/initserviceif.H>
+#include "utillidpnor.H"
 
 using namespace ERRORLOG;
 mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
-
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
@@ -44,6 +47,7 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 ,iv_lidSize(0)
 {
     updateLid(i_lidId);
+    iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
 }
 
 ///////////////////////////////////////////////////////////
@@ -91,60 +95,63 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
 
         // allocate message buffer
         // buffer will be initialized to zero by msg_allocate()
-        msg_t * l_pMsg = msg_allocate();
-
-        l_pMsg->type = UTILLID::GET_INFO;
-
-        UTILLID_ADD_LID_ID( iv_lidId, l_pMsg->data[0] );
-        UTILLID_ADD_HEADER_FLAG( 0 , l_pMsg->data[0] );
-
-        errl = sendMboxMessage( SYNCHRONOUS, l_pMsg );
-        if(errl)
+        if (iv_spBaseServicesEnabled)
         {
-            UTIL_FT(ERR_MRK"getLidSize: Error when calling sendMboxMessage(SYNCHRONOUS)");
-            break;
-        }
+            msg_t * l_pMsg = msg_allocate();
 
-        // see if there was an error on the other end
-        UTILLID::UTILLID_RC return_code = UTILLID_GET_RC( l_pMsg->data[0] );
+            l_pMsg->type = UTILLID::GET_INFO;
 
-        if ( return_code )
-        {
-            UTIL_FT(ERR_MRK"getLidSize: rc 0x%x received from FSP for Sync to HB request",
-                    return_code );
+            UTILLID_ADD_LID_ID( iv_lidId, l_pMsg->data[0] );
+            UTILLID_ADD_HEADER_FLAG( 0 , l_pMsg->data[0] );
 
-            /*@
-             *   @errortype
-             *   @moduleid      Util::UTIL_LIDMGR_GETLIDSIZE
-             *   @reasoncode    Util::UTIL_LIDMGR_RC_FAIL
-             *   @userdata1     return code from FSP
-             *   @userdata2     LID ID
-             *   @devdesc       The LID transfer code on the FSP side was
-             *                  unable to fulfill the LID GET_INFO request.
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 Util::UTIL_LIDMGR_GETLIDSIZE,
-                                 Util::UTIL_LIDMGR_RC_FAIL,
-                                 return_code,
-                                 iv_lidId);
-            errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_MED);
+            errl = sendMboxMessage( SYNCHRONOUS, l_pMsg );
+            if(errl)
+            {
+                UTIL_FT(ERR_MRK"getLidSize: Error when calling sendMboxMessage(SYNCHRONOUS)");
+                break;
+            }
+
+            // see if there was an error on the other end
+            UTILLID::UTILLID_RC return_code = UTILLID_GET_RC(l_pMsg->data[0]);
+
+            if ( return_code )
+            {
+                UTIL_FT(ERR_MRK"getLidSize: rc 0x%x received from FSP for Sync to HB request",
+                        return_code );
+
+                /*@
+                 *   @errortype
+                 *   @moduleid      Util::UTIL_LIDMGR_GETLIDSIZE
+                 *   @reasoncode    Util::UTIL_LIDMGR_RC_FAIL
+                 *   @userdata1     return code from FSP
+                 *   @userdata2     LID ID
+                 *   @devdesc       The LID transfer code on the FSP side was
+                 *                  unable to fulfill the LID GET_INFO request.
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     Util::UTIL_LIDMGR_GETLIDSIZE,
+                                     Util::UTIL_LIDMGR_RC_FAIL,
+                                     return_code,
+                                     iv_lidId);
+                errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_MED);
+                // for a syncronous message we need to free the message
+                msg_free( l_pMsg );
+                l_pMsg = NULL;
+                break;
+            }
+
+            // Get the LID Size
+            iv_lidSize = UTILLID_GET_SIZE( l_pMsg->data[0] );
+
+            o_lidSize = iv_lidSize;
+
             // for a syncronous message we need to free the message
             msg_free( l_pMsg );
             l_pMsg = NULL;
-            break;
         }
-
-        // Get the LID Size
-        iv_lidSize = UTILLID_GET_SIZE( l_pMsg->data[0] );
-
-        o_lidSize = iv_lidSize;
-
-        // for a syncronous message we need to free the message
-        msg_free( l_pMsg );
-        l_pMsg = NULL;
 
     }while(0);
 
@@ -162,31 +169,36 @@ errlHndl_t UtilLidMgr::getLidSizePnor(size_t& o_lidSize, bool& o_imgInPnor)
     o_imgInPnor = false;
 
     do{
-
-        if(!VFS::module_exists(iv_lidFileName))
+        if (iv_isLidInPnor)
         {
-            //Lid not in extended image
-            break;
+            o_lidSize = iv_lidPnorInfo.size;
         }
-
-        // Load the file
-        UTIL_DT(INFO_MRK"getLidSizePnor: Try to load %s.", iv_lidFileName);
-        errl = VFS::module_load( iv_lidFileName );
-        if ( errl )
+        else if (iv_isLidInVFS)
         {
-            //Lid not in extended image
-            delete errl;
-            errl = NULL;
-            break;
+            // Load the file
+            UTIL_DT(INFO_MRK"getLidSizePnor: Try to load %s.", iv_lidFileName);
+            errl = VFS::module_load( iv_lidFileName );
+            if ( errl )
+            {
+                //Lid not in extended image
+                delete errl;
+                errl = NULL;
+                break;
+            }
+
+            errl = VFS::module_address( iv_lidFileName,
+                                        lidAddr,
+                                        o_lidSize );
+            if ( errl )
+            {
+                UTIL_FT(ERR_MRK"getLidSizePnor: getting address of file : %s",
+                        iv_lidFileName );
+                break;
+            }
         }
-
-        errl = VFS::module_address( iv_lidFileName,
-                                    lidAddr,
-                                    o_lidSize );
-        if ( errl )
+        else
         {
-            UTIL_FT(ERR_MRK"getLidSizePnor: getting address of file : %s",
-                    iv_lidFileName );
+            // Lid is not in extended image or other pnor sections
             break;
         }
         o_imgInPnor = true;
@@ -207,63 +219,98 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
     o_imgInPnor = false; //assume not found to start.
 
     do{
-        if(!VFS::module_exists(iv_lidFileName))
+        if(iv_isLidInPnor)
         {
-            //Lid not in extended image
-            break;
+            lidSize = iv_lidPnorInfo.size;
+            lidAddr = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
         }
-
-        if(!VFS::module_is_loaded(iv_lidFileName))
+        else if (iv_isLidInVFS)
         {
-            // Load the file
-            UTIL_DT(INFO_MRK"getLidPnor: Try to load %s.", iv_lidFileName);
+            if(!VFS::module_is_loaded(iv_lidFileName))
+            {
+                // Load the file
+                UTIL_DT(INFO_MRK"getLidPnor: Try to load %s.", iv_lidFileName);
 
-            errl = VFS::module_load( iv_lidFileName );
+                errl = VFS::module_load( iv_lidFileName );
+                if ( errl )
+                {
+                    //Lid not in extended image
+                    delete errl;
+                    errl = NULL;
+                    break;
+                }
+            }
+
+            errl = VFS::module_address( iv_lidFileName,
+                                        lidAddr,
+                                        lidSize );
             if ( errl )
             {
-                //Lid not in extended image
-                delete errl;
-                errl = NULL;
+                UTIL_FT(ERR_MRK"getLidPnor: getting address of file : %s",
+                        iv_lidFileName );
                 break;
             }
         }
-
-        errl = VFS::module_address( iv_lidFileName,
-                                    lidAddr,
-                                    lidSize );
-        if ( errl )
+        else
         {
-            UTIL_FT(ERR_MRK"getLidPnor: getting address of file : %s",
-                    iv_lidFileName );
+            // Lid is not in extended image or other pnor sections
             break;
         }
+
         o_imgInPnor = true;
 
         if(lidSize > i_destSize)
         {
-            UTIL_FT(ERR_MRK"getLidPnor: lid=%s found in Ext image has size=0x%.8X, which does not fit in provided space=0x%.8X",
-                    iv_lidFileName, lidSize, i_destSize);
+            if (iv_isLidInPnor)
+            {
+                UTIL_FT(ERR_MRK"getLidPnor: lid=%s in PNOR::%s has size=0x%.8X, which does not fit in provided space=0x%.8X",
+                        iv_lidFileName, iv_lidPnorInfo.name, lidSize,
+                        i_destSize);
 
-            /*@
-             *   @errortype
-             *   @moduleid      Util::UTIL_LIDMGR_GETLIDPNOR
-             *   @reasoncode    Util::UTIL_LIDMGR_INVAL_SIZE
-             *   @userdata1[0:31]     LID size found in Ext Img
-             *   @userdata1[32:63]    Reserved space provided
-             *   @userdata2     LID ID
-             *   @devdesc       Insufficient space provided for LID by calling
-             *                 function.
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 Util::UTIL_LIDMGR_GETLIDPNOR,
-                                 Util::UTIL_LIDMGR_INVAL_SIZE,
-                                 TWO_UINT32_TO_UINT64(lidSize,
-                                                      i_destSize),
-                                 iv_lidId,
-                                 true /*Add HB Software Callout*/);
-            break;
+                /*@
+                 *   @errortype
+                 *   @moduleid      Util::UTIL_LIDMGR_GETLIDPNOR
+                 *   @reasoncode    Util::UTIL_LIDMGR_INVAL_SIZE_PNOR
+                 *   @userdata1[0:31]     LID size found in pnor
+                 *   @userdata1[32:63]    Reserved space provided
+                 *   @userdata2     LID ID
+                 *   @devdesc       Insufficient space provided for LID by calling
+                 *                  function.
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     Util::UTIL_LIDMGR_GETLIDPNOR,
+                                     Util::UTIL_LIDMGR_INVAL_SIZE_PNOR,
+                                     TWO_UINT32_TO_UINT64(lidSize,
+                                                          i_destSize),
+                                     iv_lidId,
+                                     true /*Add HB Software Callout*/);
+                break;
+            }
+            else
+            {
+                UTIL_FT(ERR_MRK"getLidPnor: lid=%s found in Ext image has size=0x%.8X, which does not fit in provided space=0x%.8X",
+                        iv_lidFileName, lidSize, i_destSize);
+
+                /*@
+                 *   @errortype
+                 *   @moduleid      Util::UTIL_LIDMGR_GETLIDPNOR
+                 *   @reasoncode    Util::UTIL_LIDMGR_INVAL_SIZE
+                 *   @userdata1[0:31]     LID size found in Ext Img
+                 *   @userdata1[32:63]    Reserved space provided
+                 *   @userdata2     LID ID
+                 *   @devdesc       Insufficient space provided for LID by calling
+                 *                 function.
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     Util::UTIL_LIDMGR_GETLIDPNOR,
+                                     Util::UTIL_LIDMGR_INVAL_SIZE,
+                                     TWO_UINT32_TO_UINT64(lidSize,
+                                                          i_destSize),
+                                     iv_lidId,
+                                     true /*Add HB Software Callout*/);
+                break;
+            }
         }
-
         //Copy file to indicated offset.
         memcpy(i_dest, lidAddr, lidSize);
 
@@ -298,196 +345,197 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
         }
 
         //Image not in PNOR, request from FSP.
-
-        errl = createMsgQueue();
-        if(errl)
+        if(iv_spBaseServicesEnabled)
         {
-            UTIL_FT(ERR_MRK"getLid: Error while creating message queue.");
-            break;
-        }
-
-        //Send message to FSP requesting the DMA up the LID in chunks
-
-        // allocate message buffer
-        // buffer will be initialized to zero by msg_allocate()
-        msg_t * l_pMsg = msg_allocate();
-
-        l_pMsg->type = UTILLID::SEND_TO_HB;
-
-        UTILLID_ADD_LID_ID( iv_lidId, l_pMsg->data[0] );
-        UTILLID_ADD_HEADER_FLAG( 0 , l_pMsg->data[0] );
-        //change to use TCE Window for improved performance.  RTC: 68295
-        UTILLID_ADD_TCE_TOKEN( 0 ,  l_pMsg->data[1] );
-
-        errl = sendMboxMessage( SYNCHRONOUS, l_pMsg );
-        if(errl)
-        {
-            UTIL_FT(ERR_MRK"getLid: Error when calling sendMboxMessage(SYNCHRONOUS)");
-            break;
-        }
-
-        // see if there was an error on the other end
-        UTILLID::UTILLID_RC return_code = UTILLID_GET_RC( l_pMsg->data[0] );
-
-        if ( return_code )
-        {
-            UTIL_FT(ERR_MRK"getLid: rc 0x%x received from FSP for Sync to HB request",
-                    return_code );
-
-            /*@
-             *   @errortype
-             *   @moduleid      Util::UTIL_LIDMGR_GETLID
-             *   @reasoncode    Util::UTIL_LIDMGR_RC_FAIL
-             *   @userdata1     return code from FSP
-             *   @userdata2     LID ID
-             *   @devdesc       The LID transfer code on the FSP side was
-             *                  unable to fulfill the LID SEND_TO_HB request.
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 Util::UTIL_LIDMGR_GETLID,
-                                 Util::UTIL_LIDMGR_RC_FAIL,
-                                 return_code,
-                                 iv_lidId);
-            errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_MED);
-
-            // for a syncronous message we need to free the message
-            msg_free( l_pMsg );
-            l_pMsg = NULL;
-            break;
-        }
-
-
-        //Now wait for FSP to send the LID page-by-page.
-        do{
-            //Wait for a message
-            msg_t * l_pMsg = msg_wait(iv_HbMsgQ);
-
-            //process received message
-            if(  UTILLID::PAGE_TO_HB == l_pMsg->type )
+            errl = createMsgQueue();
+            if(errl)
             {
-                UTIL_DT("getLid: received a page of data");
+                UTIL_FT(ERR_MRK"getLid: Error while creating message queue.");
+                break;
+            }
 
-                curLid = UTILLID_GET_LID_ID(l_pMsg->data[0]);
-                pageNumber = UTILLID_GET_PAGE_COUNT(l_pMsg->data[0]);
-                dataSize = UTILLID_GET_SIZE(l_pMsg->data[1]);
-                dataPtr = reinterpret_cast<uint8_t *> (l_pMsg->extra_data);
+            //Send message to FSP requesting the DMA up the LID in chunks
+            // allocate message buffer
+            // buffer will be initialized to zero by msg_allocate()
+            msg_t * l_pMsg = msg_allocate();
 
-                if((curLid != iv_lidId) ||
-                   (NULL == dataPtr))
-                {
-                    UTIL_FT(ERR_MRK"getLid: rc 0x%x received from FSP for Sync to HB request",
-                            return_code );
+            l_pMsg->type = UTILLID::SEND_TO_HB;
 
-                    /*@
-                     *   @errortype
-                     *   @moduleid      Util::UTIL_LIDMGR_GETLID
-                     *   @reasoncode    Util::UTIL_LIDMGR_INVAL_DATA
-                     *   @userdata1[0:31]     received LID ID
-                     *   @userdata1[32:63]    expected LID ID
-                     *   @userdata2[0:31]     pointer to extra data
-                     *   @devdesc       DMA message contains data for wrong LID.
-                     */
-                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                         Util::UTIL_LIDMGR_GETLID,
-                                         Util::UTIL_LIDMGR_INVAL_DATA,
-                                         TWO_UINT32_TO_UINT64(curLid,
-                                                              iv_lidId),
-                                         TWO_UINT32_TO_UINT64(
-                                            NULL != dataPtr ? *(dataPtr) : 0,
-                                                              0)
-                                         );
+            UTILLID_ADD_LID_ID( iv_lidId, l_pMsg->data[0] );
+            UTILLID_ADD_HEADER_FLAG( 0 , l_pMsg->data[0] );
+            //change to use TCE Window for improved performance.  RTC: 68295
+            UTILLID_ADD_TCE_TOKEN( 0 ,  l_pMsg->data[1] );
 
-                    errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                              HWAS::SRCI_PRIORITY_HIGH);
-
-                    free(l_pMsg->extra_data);
-                    l_pMsg->extra_data = NULL;
-                    break;
-                }
-
-
-                 //confirm that the data fits in the allocated space
-                uint32_t needed_size = ((static_cast<uint32_t>(pageNumber))*
-                                        (4*KILOBYTE)) + dataSize;
-                if( needed_size > i_destSize )
-                {
-                    UTIL_FT(ERR_MRK"getLid: rc 0x%x received from FSP for Sync to HB request",
-                            return_code );
-
-                    /*@
-                     *   @errortype
-                     *   @moduleid      Util::UTIL_LIDMGR_GETLID
-                     *   @reasoncode    Util::UTIL_LIDMGR_INVAL_SIZE
-                     *   @userdata1[0:31]     Allocated Size
-                     *   @userdata1[32:63]    Size needed for current data page
-                     *   @userdata2[32:63]    Lid ID
-                     *   @devdesc       Insufficient space provided for LID by
-                     *                  calling function.
-                     */
-                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                         Util::UTIL_LIDMGR_GETLID,
-                                         Util::UTIL_LIDMGR_INVAL_SIZE,
-                                         TWO_UINT32_TO_UINT64(i_destSize,
-                                                              needed_size),
-                                         iv_lidId,
-                                         true /*Add HB Software Callout*/
-                                         );
-
-                    free(l_pMsg->extra_data);
-                    l_pMsg->extra_data = NULL;
-                    break;
-
-                }
-                //copy the page into memory
-                copyOffset = (reinterpret_cast<uint8_t *>(i_dest)) + (pageNumber*PAGESIZE);
-
-                memcpy(copyOffset, dataPtr, dataSize);
-
-                transferred_data+=dataSize;
-
-                free(l_pMsg->extra_data);
-                l_pMsg->extra_data = NULL;
-
-
-            } //if UTILLID::PAGE_TO_HB
-            else
+            errl = sendMboxMessage( SYNCHRONOUS, l_pMsg );
+            if(errl)
             {
-                UTIL_FT(ERR_MRK"getLid: Invalid Message type (0x%x) received from FSP.",
-                        l_pMsg->type );
+                UTIL_FT(ERR_MRK"getLid: Error when calling sendMboxMessage(SYNCHRONOUS)");
+                break;
+            }
+
+            // see if there was an error on the other end
+            UTILLID::UTILLID_RC return_code = UTILLID_GET_RC( l_pMsg->data[0] );
+
+            if ( return_code )
+            {
+                UTIL_FT(ERR_MRK"getLid: rc 0x%x received from FSP for Sync to HB request",
+                        return_code );
 
                 /*@
                  *   @errortype
                  *   @moduleid      Util::UTIL_LIDMGR_GETLID
-                 *   @reasoncode    Util::UTIL_LIDMGR_UNSUP_MSG
-                 *   @userdata1     LID ID
-                 *   @userdata2     Message Type
-                 *   @devdesc       Invalid Message type received from FSP when
-                 *                  transferring LID pages.
+                 *   @reasoncode    Util::UTIL_LIDMGR_RC_FAIL
+                 *   @userdata1     return code from FSP
+                 *   @userdata2     LID ID
+                 *   @devdesc       The LID transfer code on the FSP side was
+                 *                  unable to fulfill the LID SEND_TO_HB request.
                  */
                 errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                      Util::UTIL_LIDMGR_GETLID,
-                                     Util::UTIL_LIDMGR_UNSUP_MSG,
-                                     iv_lidId,
-                                     l_pMsg->type);
-
+                                     Util::UTIL_LIDMGR_RC_FAIL,
+                                     return_code,
+                                     iv_lidId);
                 errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_MED);
+
+                // for a syncronous message we need to free the message
+                msg_free( l_pMsg );
+                l_pMsg = NULL;
+                break;
             }
 
-        }while(transferred_data < iv_lidSize);
 
+            //Now wait for FSP to send the LID page-by-page.
+            do{
+                //Wait for a message
+                msg_t * l_pMsg = msg_wait(iv_HbMsgQ);
+
+                //process received message
+                if(  UTILLID::PAGE_TO_HB == l_pMsg->type )
+                {
+                    UTIL_DT("getLid: received a page of data");
+
+                    curLid = UTILLID_GET_LID_ID(l_pMsg->data[0]);
+                    pageNumber = UTILLID_GET_PAGE_COUNT(l_pMsg->data[0]);
+                    dataSize = UTILLID_GET_SIZE(l_pMsg->data[1]);
+                    dataPtr = reinterpret_cast<uint8_t *> (l_pMsg->extra_data);
+
+                    if((curLid != iv_lidId) ||
+                       (NULL == dataPtr))
+                    {
+                        UTIL_FT(ERR_MRK"getLid: rc 0x%x received from FSP for Sync to HB request",
+                                return_code );
+
+                        /*@
+                         *   @errortype
+                         *   @moduleid      Util::UTIL_LIDMGR_GETLID
+                         *   @reasoncode    Util::UTIL_LIDMGR_INVAL_DATA
+                         *   @userdata1[0:31]     received LID ID
+                         *   @userdata1[32:63]    expected LID ID
+                         *   @userdata2[0:31]     pointer to extra data
+                         *   @devdesc       DMA message contains data for wrong LID.
+                         */
+                        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                             Util::UTIL_LIDMGR_GETLID,
+                                             Util::UTIL_LIDMGR_INVAL_DATA,
+                                             TWO_UINT32_TO_UINT64(curLid,
+                                                                  iv_lidId),
+                                             TWO_UINT32_TO_UINT64(
+                                                NULL != dataPtr ? *(dataPtr) : 0,
+                                                                  0)
+                                             );
+
+                        errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                                  HWAS::SRCI_PRIORITY_HIGH);
+
+                        free(l_pMsg->extra_data);
+                        l_pMsg->extra_data = NULL;
+                        break;
+                    }
+
+
+                     //confirm that the data fits in the allocated space
+                    uint32_t needed_size = ((static_cast<uint32_t>(pageNumber))*
+                                            (4*KILOBYTE)) + dataSize;
+                    if( needed_size > i_destSize )
+                    {
+                        UTIL_FT(ERR_MRK"getLid: lid=%s has size=0x%.8X, which does not fit in provided space=0x%.8X",
+                            iv_lidFileName, i_destSize, needed_size);
+
+                        /*@
+                         *   @errortype
+                         *   @moduleid      Util::UTIL_LIDMGR_GETLID
+                         *   @reasoncode    Util::UTIL_LIDMGR_INVAL_SIZE
+                         *   @userdata1[0:31]     Allocated Size
+                         *   @userdata1[32:63]    Size needed for current data page
+                         *   @userdata2[32:63]    Lid ID
+                         *   @devdesc       Insufficient space provided for LID by
+                         *                  calling function.
+                         */
+                        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                             Util::UTIL_LIDMGR_GETLID,
+                                             Util::UTIL_LIDMGR_INVAL_SIZE,
+                                             TWO_UINT32_TO_UINT64(i_destSize,
+                                                                  needed_size),
+                                             iv_lidId,
+                                             true /*Add HB Software Callout*/
+                                             );
+
+                        free(l_pMsg->extra_data);
+                        l_pMsg->extra_data = NULL;
+                        break;
+
+                    }
+                    //copy the page into memory
+                    copyOffset = (reinterpret_cast<uint8_t *>(i_dest)) + (pageNumber*PAGESIZE);
+
+                    memcpy(copyOffset, dataPtr, dataSize);
+
+                    transferred_data+=dataSize;
+
+                    free(l_pMsg->extra_data);
+                    l_pMsg->extra_data = NULL;
+
+
+                } //if UTILLID::PAGE_TO_HB
+                else
+                {
+                    UTIL_FT(ERR_MRK"getLid: Invalid Message type (0x%x) received from FSP.",
+                            l_pMsg->type );
+
+                    /*@
+                     *   @errortype
+                     *   @moduleid      Util::UTIL_LIDMGR_GETLID
+                     *   @reasoncode    Util::UTIL_LIDMGR_UNSUP_MSG
+                     *   @userdata1     LID ID
+                     *   @userdata2     Message Type
+                     *   @devdesc       Invalid Message type received from FSP when
+                     *                  transferring LID pages.
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                         Util::UTIL_LIDMGR_GETLID,
+                                         Util::UTIL_LIDMGR_UNSUP_MSG,
+                                         iv_lidId,
+                                         l_pMsg->type);
+
+                    errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                              HWAS::SRCI_PRIORITY_HIGH);
+                }
+
+            }while(transferred_data < iv_lidSize);
+        }
         if(errl)
         {
             break;
         }
-
-
     }while(0);
 
-    unregisterMsgQueue();
+    if (iv_spBaseServicesEnabled)
+    {
+        unregisterMsgQueue();
+    }
 
     return errl;
 }
@@ -627,6 +675,48 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
     //if it's in PNOR, it's not technically lid, so use a slightly
     //different extension.
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
+    iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
+    UTIL_FT(INFO_MRK "UtilLidMgr: LID 0x%.8X in pnor: %d",
+              iv_lidId ,iv_isLidInPnor);
+    iv_isLidInVFS = VFS::module_exists(iv_lidFileName);
 
     return;
+}
+
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+bool UtilLidMgr::getLidPnorSection(uint32_t i_lidId,
+                                   PNOR::SectionInfo_t &o_lidPnorInfo)
+{
+    errlHndl_t l_err = NULL;
+    bool l_lidInPnor = false;
+
+    const std::pair<uint32_t, PNOR::SectionId> l_lid(i_lidId,
+                                                     PNOR::INVALID_SECTION);
+
+    const std::pair<uint32_t, PNOR::SectionId>* l_result =
+                            std::lower_bound (Util::lidToPnor,
+                                        Util::lidToPnor + Util::NUM_LID_TO_PNOR,
+                                        l_lid,
+                                        Util::cmpLidToPnor);
+
+    if (l_result != (Util::lidToPnor + Util::NUM_LID_TO_PNOR) &&
+        l_result->first == l_lid.first &&
+        l_result->second != PNOR::INVALID_SECTION)
+    {
+        l_err = PNOR::getSectionInfo(l_result->second, o_lidPnorInfo);
+        // Section is optional or lid is not in PNOR, so just delete error
+        if (l_err)
+        {
+            o_lidPnorInfo.id = PNOR::INVALID_SECTION;
+            l_lidInPnor = false;
+            delete l_err;
+            l_err = NULL;
+        }
+        else
+        {
+            l_lidInPnor = true;
+        }
+    }
+    return l_lidInPnor;
 }

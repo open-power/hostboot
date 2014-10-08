@@ -87,14 +87,14 @@ namespace HBOCC
         errlHndl_t  l_errl  =   NULL;
         size_t lidSize = 0;
         do {
-            UtilLidMgr lidMgr(OCC_LIDID);
+            UtilLidMgr lidMgr(Util::OCC_LIDID);
 
             l_errl = lidMgr.getLidSize(lidSize);
             if(l_errl)
             {
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageToHomer: Error getting lid size.  lidId=0x%.8x",
-                           OCC_LIDID);
+                           Util::OCC_LIDID);
                 break;
             }
 
@@ -103,7 +103,7 @@ namespace HBOCC
             {
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageToHomer: Error getting lid..  lidId=0x%.8x",
-                           OCC_LIDID);
+                           Util::OCC_LIDID);
                 break;
             }
 

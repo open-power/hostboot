@@ -56,6 +56,7 @@ enum SectionId
     CENTAUR_VPD,    /**< Centaur VPD */
     ATTR_OVER,      /**< Attribute Override */
     NVRAM,          /**< Opal NVRAM */
+    OCC,            /**< OCC lid */
     TEST,           /**< Scratch space for PNOR test cases */
 
     NUM_SECTIONS,   /**< Number of defined sections */
