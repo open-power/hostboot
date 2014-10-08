@@ -185,9 +185,33 @@ namespace MVPD
 // ---------------------------------------------------------
 bool VPD::mvpdPresent( TARGETING::Target * i_target )
 {
+#ifdef CONFIG_MVPD_READ_FROM_HW
+    //@todo - Fix this the right way with RTC:117048
+    IpVpdFacade::input_args_t args;
+    args.record = MVPD::CP00;
+    args.keyword = MVPD::VD;
+    size_t kwlen = 0;
+    errlHndl_t l_errl = Singleton<MvpdFacade>::instance().read(
+                                   i_target,
+                                   NULL,
+                                   kwlen,
+                                   args );
+    if( l_errl )
+    {
+        delete l_errl;
+        return false;
+    }
+    if( kwlen == 0 )
+    {
+        return false;
+    }
+    return true;
+
+#else
     return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
                                                             MVPD::CP00,
                                                             MVPD::VD );
+#endif
 }
 
 
