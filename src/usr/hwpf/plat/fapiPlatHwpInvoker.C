@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,54 @@ HWAS::clockTypeEnum xlateClockHwCallout(
     return l_clock;
 }
 
+/**
+ * @brief Translates a FAPI Part HW callout to an HWAS part callout
+ *
+ * @param[i] i_fapiPart FAPI part HW callout
+ *
+ * @return HWAS part HW callout
+ */
+HWAS::partTypeEnum xlatePartHwCallout(
+    const fapi::HwCallouts::HwCallout i_fapiPart)
+{
+    // Use the HwCallout enum value as an index
+    HWAS::partTypeEnum l_part;
+
+    // clock xlate function above assumes indexes match
+    // between 2 enums.  seems better to do it explicitly
+
+    switch (i_fapiPart)
+    {
+         case HwCallouts::FLASH_CONTROLLER_PART:
+               l_part = HWAS::FLASH_CONTROLLER_PART_TYPE;
+               break;
+         case HwCallouts::PNOR_PART:
+               l_part = HWAS::PNOR_PART_TYPE;
+               break;
+         case HwCallouts::SBE_SEEPROM_PART:
+               l_part = HWAS::SBE_SEEPROM_PART_TYPE;
+               break;
+         case HwCallouts::VPD_PART:
+               l_part = HWAS::VPD_PART_TYPE;
+               break;
+         case HwCallouts::LPC_SLAVE_PART:
+               l_part = HWAS::LPC_SLAVE_PART_TYPE;
+               break;
+         case HwCallouts::GPIO_EXPANDER_PART:
+               l_part = HWAS::GPIO_EXPANDER_PART_TYPE;
+               break;
+         case HwCallouts::SPIVID_SLAVE_PART:
+               l_part = HWAS::SPIVID_SLAVE_PART_TYPE;
+               break;
+
+         default:
+               FAPI_ERR("fapi::xlatePartHwCallout: Unknown part",
+                 i_fapiPart);
+               l_part = HWAS::NO_PART_TYPE;
+    }
+
+    return l_part;
+}
 /**
  * @brief Translates a FAPI procedure callout to an HWAS procedure callout
  *
@@ -265,9 +313,28 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
                      l_clock, l_priority);
             io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
         }
+        else if ( (l_hw == HwCallouts::FLASH_CONTROLLER_PART) ||
+                  (l_hw == HwCallouts::PNOR_PART) ||
+                  (l_hw == HwCallouts::SBE_SEEPROM_PART) ||
+                  (l_hw == HwCallouts::VPD_PART) ||
+                  (l_hw == HwCallouts::LPC_SLAVE_PART) ||
+                  (l_hw == HwCallouts::GPIO_EXPANDER_PART) ||
+                  (l_hw == HwCallouts::SPIVID_SLAVE_PART) )
+        {
+            HWAS::partTypeEnum l_part =
+                xlatePartHwCallout((*l_itr)->iv_hw);
+
+            FAPI_ERR("processEIHwCallouts: Adding part-callout"
+                     " (part:%d, pri:%d)",
+                     l_part, l_priority);
+            io_pError->addPartCallout(l_pRefTarget, l_part, l_priority);
+        }
         else
         {
             FAPI_ERR("processEIHwCallouts: Unsupported HW callout (%d)", l_hw);
+            io_pError->addPartCallout(l_pRefTarget, HWAS::NO_PART_TYPE,
+                     l_priority);
+            io_pError->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE, l_priority);
         }
     }
 }

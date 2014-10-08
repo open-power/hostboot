@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiRcTest.C,v 1.10 2014/10/27 17:55:42 baiocchi Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapiTest/fapiRcTest.C,v $
+// $Id: fapiRcTest.C,v 1.15 2015-02-02 19:14:33 dcrowell Exp $
 /**
  *  @file fapiTargetTest.C
  *
@@ -41,9 +40,14 @@
  *                          mjjones     08/14/2012  Use new ErrorInfo structures
  *                          mjjones     03/28/2013  Added proc-callout tests
  *                          mjjones     03/28/2013  Added children-cdg tests
+ *                          sangeet2    29/01/2015  Added testcase rcTest18
  */
 
 #include <fapi.H>
+#include <fapiPlatHwpInvoker.H>
+#ifdef fips
+#include <srcisrc.H>
+#endif
 
 namespace fapi
 {
@@ -623,7 +627,7 @@ uint32_t rcTest12()
     // Add error information to the ReturnCode, the data is the same as that
     // produced by the fapiParseErrorInfo.pl script in fapiHwpErrorInfo.H
     const void * l_objects[] = {&l_ffdc, &l_target, &l_target2};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[6];
+    fapi::ReturnCode::ErrorInfoEntry l_entries[7];
     l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
     l_entries[0].ffdc.iv_ffdcObjIndex = 0;
     l_entries[0].ffdc.iv_ffdcId = 0x22334455;
@@ -656,7 +660,12 @@ uint32_t rcTest12()
     l_entries[5].hw_callout.iv_hw = fapi::HwCallouts::MEM_REF_CLOCK;
     l_entries[5].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
     l_entries[5].hw_callout.iv_refObjIndex = 0xff;
-    l_rc.addErrorInfo(l_objects, l_entries, 6);
+    l_entries[6].iv_type = fapi::ReturnCode::EI_TYPE_HW_CALLOUT;
+    l_entries[6].hw_callout.iv_hw = fapi::HwCallouts::FLASH_CONTROLLER_PART;
+    l_entries[6].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+    l_entries[6].hw_callout.iv_refObjIndex = 0xff;
+
+    l_rc.addErrorInfo(l_objects, l_entries, 7);
 
     do
     {
@@ -874,7 +883,7 @@ uint32_t rcTest12()
             break;
         }
 
-        if (l_pErrInfo->iv_hwCallouts.size() != 1)
+        if (l_pErrInfo->iv_hwCallouts.size() != 2)
         {
             FAPI_ERR("rcTest12. %d hw-callouts",
                      l_pErrInfo->iv_hwCallouts.size());
@@ -1614,5 +1623,129 @@ uint32_t rcTest17()
 
     return l_result;
 }
+
+#ifdef fips
+uint32_t rcTest18()
+{
+    uint32_t l_result = 0;
+
+    // Create a FAPI  ReturnCode
+    ReturnCode l_rc(FAPI_RC_INVALID_ATTR_GET);
+
+    // Create Target of functional processor chip
+    TARGETING::Target *l_proc = NULL;
+
+    //  Use PredicateIsFunctional (formerly HwasPredicate) to filter
+    //  only functional chips
+    TARGETING::PredicateIsFunctional l_isFunctional;
+    do
+    {
+
+        //  filter for functional Proc Chips
+        TARGETING::PredicateCTM l_procChipFilter(TARGETING::CLASS_CHIP,
+                TARGETING::TYPE_PROC );
+
+        // declare a postfix expression
+        TARGETING::PredicatePostfixExpr l_functionalAndProcChipFilter;
+
+        // is-a-proc-chip is-functional AND
+        l_functionalAndProcChipFilter.push(&l_procChipFilter).
+            push(&l_isFunctional).And();
+
+        // loop through all the targets, applying the filter,
+        // and put the results in l_pFuncProc
+        TARGETING::TargetRangeFilter  l_pFuncProcFilter(
+                TARGETING::targetService().begin(),
+                TARGETING::targetService().end(),
+                &l_functionalAndProcChipFilter);
+
+        // Get a pointer to that first function proc
+        if(!l_pFuncProcFilter)
+        {
+            l_result = 1;
+            FAPI_ERR("rcTest18:No functional processors found");
+            break;
+        }
+
+        l_proc = *l_pFuncProcFilter;
+        TARGETING::Target* l_pConstTarget =
+            const_cast<TARGETING::Target*>(l_proc);
+
+        fapi::Target l_fapiTarget(fapi::TARGET_TYPE_PROC_CHIP,
+                     reinterpret_cast<void*>(l_pConstTarget));
+
+        const void * l_objects[] = { &l_fapiTarget};
+        fapi::ReturnCode::ErrorInfoEntry l_entries[1];
+        l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+        l_entries[0].target_cdg.iv_targetObjIndex = 0;
+        l_entries[0].target_cdg.iv_callout = 0;
+        l_entries[0].target_cdg.iv_deconfigure = 0;
+        l_entries[0].target_cdg.iv_gard = 1;
+        l_entries[0].target_cdg.iv_calloutPriority =
+            fapi::CalloutPriorities::LOW;
+
+
+        // Add the error info
+        l_rc.addErrorInfo(l_objects, l_entries, 1);
+
+        // Check that the Error Info can be retrieved
+        const ErrorInfo * l_pErrInfo = NULL;
+        l_pErrInfo = l_rc.getErrorInfo();
+
+        if (l_pErrInfo == NULL)
+        {
+            FAPI_ERR("rcTest18:getErrorInfo returned NULL");
+            l_result = 2;
+            break;
+        }
+
+        // Check the callout/deconfigure/GARD error information
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_fapiTarget)
+        {
+            FAPI_ERR("rcTest18:CDG[0] target mismatch");
+            l_result = 3;
+            break;
+        }
+
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard == false)
+        {
+            FAPI_ERR("rcTest18:CDG[0] gard not set");
+            l_result = 4;
+            break;
+        }
+
+        // fapiRcToErrl is implicitly calling processEICDGs
+        errlHndl_t pError = fapiRcToErrl(l_rc);
+        if(pError == NULL)
+        {
+            FAPI_ERR("rcTest18:fapiRcToErrl returnd No Errorlog handle");
+            l_result = 5;
+            break;
+        }
+
+        srciIdx_t l_calloutCnt = 0;
+        const SrciSrc* pSRC = pError->getSRC();
+        pSRC->Callouts(l_calloutCnt);
+        if(l_calloutCnt < 1)
+        {
+            l_result = 6;
+            FAPI_ERR("Error. No Callout from  fapiRcToErrl");
+            break;
+        }
+
+        // TODO RTC 79353
+        // Garded Target must be UnGard here.
+
+        FAPI_INF("rcTest18:Deconfig/Gard HWP callout TC success");
+        if(pError != NULL)
+        {
+            delete pError;
+            pError = NULL;
+        }
+
+    }while(0);
+    return l_result;
+}
+#endif //fips
 
 }

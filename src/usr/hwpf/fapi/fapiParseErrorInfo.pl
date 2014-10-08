@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -23,7 +23,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseErrorInfo.pl,v 1.30 2014/07/25 00:36:41 jmcgill Exp $
+
+# $Id: fapiParseErrorInfo.pl,v 1.32 2015-02-02 18:57:30 dcrowell Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -565,7 +566,14 @@ foreach my $argnum (1 .. $#ARGV)
                 if (($callout->{hw}->{hwid} eq "TOD_CLOCK") ||
                     ($callout->{hw}->{hwid} eq "MEM_REF_CLOCK") ||
                     ($callout->{hw}->{hwid} eq "PROC_REF_CLOCK") ||
-                    ($callout->{hw}->{hwid} eq "PCI_REF_CLOCK"))
+                    ($callout->{hw}->{hwid} eq "PCI_REF_CLOCK") ||
+                    ($callout->{hw}->{hwid} eq "FLASH_CONTROLLER_PART") ||
+                    ($callout->{hw}->{hwid} eq "PNOR_PART") ||
+                    ($callout->{hw}->{hwid} eq "SBE_SEEPROM_PART") ||
+                    ($callout->{hw}->{hwid} eq "VPD_PART") ||
+                    ($callout->{hw}->{hwid} eq "LPC_SLAVE_PART") ||
+                    ($callout->{hw}->{hwid} eq "GPIO_EXPANDER_PART") ||
+                    ($callout->{hw}->{hwid} eq "SPIVID_SLAVE_PART"))
                 {
                     if (! exists $callout->{hw}->{refTarget})
                     {

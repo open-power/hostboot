@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.H,v 1.15 2014/10/27 16:36:24 baiocchi Exp $
+// $Id: fapiErrorInfo.H,v 1.17 2015-02-02 18:31:53 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.H,v $
 
 /**
@@ -84,6 +84,13 @@ enum HwCallout
     MEM_REF_CLOCK         = 1, // Include membuf-chip ref (or child chiplet)
     PROC_REF_CLOCK        = 2, // Include proc-chip ref (or child chiplet)
     PCI_REF_CLOCK         = 3, // Include proc-chip ref (or child chiplet)
+    FLASH_CONTROLLER_PART      = 4,
+    PNOR_PART                  = 5,
+    SBE_SEEPROM_PART           = 6,
+    VPD_PART                   = 7,
+    LPC_SLAVE_PART             = 8,
+    GPIO_EXPANDER_PART         = 9,
+    SPIVID_SLAVE_PART          = 10,
 };
 }
 

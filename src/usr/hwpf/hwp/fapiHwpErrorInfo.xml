@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2011,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: fapiHwpErrorInfo.xml,v 1.16 2014/03/20 20:19:37 mjjones Exp $ -->
+<!-- $Id: fapiHwpErrorInfo.xml,v 1.17 2015-02-02 18:40:42 dcrowell Exp $ -->
 <!-- XML file specifying Test HW Procedure generated errors. -->
 
 <hwpErrors>
@@ -177,7 +179,14 @@
             </hw>
             <priority>MEDIUM</priority>
         </callout>
- -->
+        <callout>
+             <hw>
+                <hwid>PNOR_PART</hwid>
+                <refTarget>UNIT_TEST_CHIP_TARGET</refTarget>
+            </hw>
+            <priority>MEDIUM</priority>
+        </callout>
+-->
  </hwpError>
 
  <hwpError>

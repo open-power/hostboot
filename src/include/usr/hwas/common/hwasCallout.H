@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,15 +119,17 @@ enum clockTypeEnum
     OSCPCICLK_TYPE  = 4,
 };
 
+
 enum partTypeEnum
 {
+    NO_PART_TYPE                    = 0,
     FLASH_CONTROLLER_PART_TYPE      = 1,
     PNOR_PART_TYPE                  = 2,
     SBE_SEEPROM_PART_TYPE           = 3,
-    BOARD_VPD_PART_TYPE             = 4,
+    VPD_PART_TYPE                   = 4,
     LPC_SLAVE_PART_TYPE             = 5,
-    CENTAUR_GPIO_EXPANDER_PART_TYPE = 6,
-    VOLTAGE_REGULATOR_PART_TYPE     = 7,
+    GPIO_EXPANDER_PART_TYPE         = 6,
+    SPIVID_SLAVE_PART_TYPE          = 7,
 };
 
 //

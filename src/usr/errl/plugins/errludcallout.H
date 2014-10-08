@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,10 +137,11 @@ case HWAS::_type: i_parser.PrintString( "Part Type", #_type); break;
                     case_PART_TYPE(FLASH_CONTROLLER_PART_TYPE)
                     case_PART_TYPE(PNOR_PART_TYPE)
                     case_PART_TYPE(SBE_SEEPROM_PART_TYPE)
-                    case_PART_TYPE(BOARD_VPD_PART_TYPE)
+                    case_PART_TYPE(VPD_PART_TYPE)
                     case_PART_TYPE(LPC_SLAVE_PART_TYPE)
-                    case_PART_TYPE(CENTAUR_GPIO_EXPANDER_PART_TYPE)
-                    case_PART_TYPE(VOLTAGE_REGULATOR_PART_TYPE)
+                    case_PART_TYPE(GPIO_EXPANDER_PART_TYPE)
+                    case_PART_TYPE(SPIVID_SLAVE_PART_TYPE)
+
                     default:
                         i_parser.PrintNumber( "Part Type", "UNKNOWN: 0x%X",
                                         ntohl(pData->partType) );
