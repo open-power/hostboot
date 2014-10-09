@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_scominit.C,v 1.18 2013/11/18 21:49:25 mwuu Exp $
+// $Id: mss_scominit.C,v 1.19 2014/08/05 15:06:52 kahnevan Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -124,7 +124,7 @@ ReturnCode mss_scominit(const Target & i_target) {
 	}
 	else if (vector_targets.size() != 2)
 	{
-		FAPI_ERR("fapiGetChildChiplets returned %d present MBAs, expected 2",
+		FAPI_ERR("fapiGetChildChiplets returned %zd present MBAs, expected 2",
                  vector_targets.size());
         uint32_t NUM_MBAS = vector_targets.size();
 		FAPI_SET_HWP_ERROR(rc, RC_MSS_SCOMINIT_NUM_MBA_ERROR);
@@ -149,7 +149,7 @@ ReturnCode mss_scominit(const Target & i_target) {
 		
 		if (vector_l4_targets.size() != 1)
 		{
-			FAPI_ERR("fapiGetChildChiplets returned %d present L4s, expected 1",
+			FAPI_ERR("fapiGetChildChiplets returned %zd present L4s, expected 1",
                      vector_l4_targets.size());
             uint32_t NUM_L4S = vector_l4_targets.size();
             FAPI_SET_HWP_ERROR(rc, RC_MSS_SCOMINIT_NUM_L4_ERROR);
@@ -193,7 +193,7 @@ ReturnCode mss_scominit(const Target & i_target) {
 	{
 		uint8_t l_unitPos = 0;
 
-		FAPI_INF("Found %i functional MBA chiplets", vector_targets.size());
+		FAPI_INF("Found %zi functional MBA chiplets", vector_targets.size());
 
 		// Iterate through the returned chiplets
 		for (uint32_t i = 0; i < vector_targets.size(); i++)

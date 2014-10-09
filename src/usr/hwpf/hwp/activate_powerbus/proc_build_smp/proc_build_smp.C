@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.16 2014/03/27 03:35:53 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.17 2014/08/05 15:13:27 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1240,7 +1240,7 @@ fapi::ReturnCode proc_build_smp_process_chips(
                             break;
                         }
 
-                        FAPI_DBG("proc_build_smp_process_chips: n%d:p%d X%d -> n%d:p%d",
+                        FAPI_DBG("proc_build_smp_process_chips: n%d:p%d X%zd -> n%d:p%d",
                                  n_iter->first, p_iter->first, (l - x_link_targets.begin()),
                                  dest_node_id, dest_chip_id);
                     }
@@ -1284,7 +1284,7 @@ fapi::ReturnCode proc_build_smp_process_chips(
                             break;
                         }
 
-                        FAPI_DBG("proc_build_smp_process_chips: n%d:p%d A%d -> n%d:p%d",
+                        FAPI_DBG("proc_build_smp_process_chips: n%d:p%d A%zd -> n%d:p%d",
                                  n_iter->first, p_iter->first, (l - a_link_targets.begin()),
                                  dest_node_id, dest_chip_id);
                     }

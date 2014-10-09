@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.26 2014/06/27 17:23:36 stillgs Exp $
+// $Id: p8_poreslw_init.C,v 1.27 2014/08/05 15:17:12 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -549,7 +549,7 @@ poreslw_ex_setup(const Target& i_target)
             break;
         }
 
-        FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
+        FAPI_DBG("\tChiplet vector size  => %zu ", l_exChiplets.size());
 
 
         // Iterate through the returned chiplets

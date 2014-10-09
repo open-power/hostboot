@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.23 2014/02/24 17:47:37 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.24 2014/08/05 20:43:38 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -42,6 +42,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <proc_setup_bars.H>
+#include <proc_setup_bars_defs.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions

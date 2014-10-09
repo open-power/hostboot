@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.9 2013/10/28 03:57:12 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.10 2014/08/05 15:15:13 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -120,11 +120,11 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
         }
         for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_IOP) && rc.ok(); i++)
         {
-            FAPI_DBG("proc_pcie_scominit_iop_init: ATTR_PROC_PCIE_IOP_SWAP[%d]= %02X",
+            FAPI_DBG("proc_pcie_scominit_iop_init: ATTR_PROC_PCIE_IOP_SWAP[%zd]= %02X",
                      i, iop_swap[i]);
             if (iop_swap[i] > PCIE_GP4_IOP_SWAP_MAX)
             {
-                FAPI_ERR("proc_pcie_scominit_iop_init: Invalid IOP%d swap attribute value 0x%02X",
+                FAPI_ERR("proc_pcie_scominit_iop_init: Invalid IOP%zd swap attribute value 0x%02X",
                          i, iop_swap[i]);
                 const fapi::Target & TARGET = i_target;
                 const uint8_t& IOP_DATA = i;
@@ -355,7 +355,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
                                       mask);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScomUnderMask (PCIE_IOP%d_PLL_GLOBAL_CONTROL2_0x%016llX)",
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScomUnderMask (PCIE_IOP%zd_PLL_GLOBAL_CONTROL2_0x%016llX)",
                          i, PROC_PCIE_SCOMINIT_PLL_GLOBAL_CONTROL2[i]);
                 break;
             }
@@ -383,7 +383,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
                              data);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%d_PLL_FIR_0x%08X)",
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%zd_PLL_FIR_0x%08X)",
                          i, PROC_PCIE_SCOMINIT_PLL_FIR[i]);
                 break;
             }
@@ -394,7 +394,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
                              data);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%d_PLL_FIR_WOF_0x%08X)",
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%zd_PLL_FIR_WOF_0x%08X)",
                          i, PROC_PCIE_SCOMINIT_PLL_FIR_WOF[i]);
                 break;
             }
@@ -414,7 +414,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
                              data);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%d_PLL_FIR_MASK_0x%08X)",
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%zd_PLL_FIR_MASK_0x%08X)",
                          i, PROC_PCIE_SCOMINIT_PLL_FIR_MASK[i]);
                 break;
             }

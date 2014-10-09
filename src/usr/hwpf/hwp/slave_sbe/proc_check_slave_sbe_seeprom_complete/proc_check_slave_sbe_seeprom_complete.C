@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.15 2014/07/23 19:30:59 jmcgill Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.16 2014/08/05 15:16:19 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -279,14 +279,14 @@ extern "C"
                 break;
             }
 
-            FAPI_INF("SBE is running [%d], wait time in ms[%d]",
+            FAPI_INF("SBE is running [%d], wait time in ms[%zd]",
                      still_running, loop_time);
 
             //Give up if we're still running
             if( still_running )
             {
                 FAPI_ERR(
-                        "SBE still running after waiting (%dns, %lld cycles)",
+                        "SBE still running after waiting (%zdns, %lld cycles)",
                         loop_time,
                         loop_time/MS_TO_FINISH*SIM_CYCLES_TO_FINISH );
 

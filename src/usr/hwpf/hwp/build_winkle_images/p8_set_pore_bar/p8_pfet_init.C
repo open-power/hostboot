@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.C,v 1.14 2014/02/17 02:56:59 stillgs Exp $
+// $Id: p8_pfet_init.C,v 1.15 2014/08/05 15:17:49 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -459,7 +459,7 @@ pfet_init(const Target& i_target, uint32_t i_mode)
             break;
         }
 
-        FAPI_DBG("\tNumber of EX chiplets present => %u", l_exChiplets.size());
+        FAPI_DBG("\tNumber of EX chiplets present => %zu", l_exChiplets.size());
 
         // Iterate through the returned chiplets
         for (uint8_t j=0; j < l_exChiplets.size(); j++)

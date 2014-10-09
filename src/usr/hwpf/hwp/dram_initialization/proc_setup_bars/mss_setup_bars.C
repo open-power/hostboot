@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.42 2014/05/21 13:43:45 gpaulraj Exp $
+// $Id: mss_setup_bars.C,v 1.43 2014/08/05 15:06:53 kahnevan Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -613,7 +613,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
                {
                     if(mcs_sz !=  sizeInfo.MCS_size[group_data[i][j]])
                     {
-                          FAPI_INF(" Group %d will not be configured as MCS %d is not valid grouped size is %d , present MCS size is %d \n",i,group_data[i][j],mcs_sz, sizeInfo.MCS_size[group_data[i][j]]);
+                          FAPI_INF(" Group %zd will not be configured as MCS %d is not valid grouped size is %d , present MCS size is %d \n",i,group_data[i][j],mcs_sz, sizeInfo.MCS_size[group_data[i][j]]);
                           for(uint8_t k; k<32;k++) { group_data[i][k]=0; }
                      }
                }
@@ -723,14 +723,14 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
 
                  uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
                  if( mcs_in_group > 1)
-                 {
+                 { 
                 	for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
                     	 (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group);
                     	 j++)
-                    {
-                           if (mcs_pos == group_data[i-8][j])
-                           {
-                            if (m_bar_valid)
+                	{
+                    	   if (mcs_pos == group_data[i-8][j])
+                    	   {
+                        	if (m_bar_valid)
                         	{
                             	const uint8_t& MCS_POS = mcs_pos;
                             	const uint8_t& GROUP_INDEX_A = m_bar_group_index;

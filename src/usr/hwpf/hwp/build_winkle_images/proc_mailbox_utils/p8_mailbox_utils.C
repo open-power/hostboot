@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: p8_mailbox_utils.C,v 1.4 2014/04/01 21:52:25 jmcgill Exp $
+// $Id: p8_mailbox_utils.C,v 1.5 2014/08/05 15:14:03 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -384,7 +384,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint3
         }
         FAPI_INF(   "ATTR_BOOT_FREQ_MHZ = 0x%08x => %dMHz",
                         l_boot_freq, l_boot_freq);
-
+                        
         uint32_t l_refclk_freq =   0;
         l_fapirc =  FAPI_ATTR_GET(  ATTR_FREQ_PROC_REFCLOCK, NULL, l_refclk_freq );
         if  (l_fapirc )
@@ -422,7 +422,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint3
         uint64_t l_result = (((uint64_t)l_dpll_divider)*l_boot_freq)/l_refclk_freq;
         if( l_result >> BOOT_FREQ_BIT_LENGTH )
         {
-            FAPI_ERR("DPLL multiplier (%lld) won't fit in the bit field (%i bits max)",
+            FAPI_ERR("DPLL multiplier (%lld) won't fit in the bit field (%i bits max)", 
                      l_result, BOOT_FREQ_BIT_LENGTH);
             uint32_t & BOOT_FREQ = l_boot_freq;
             uint32_t & REF_FREQ  = l_refclk_freq;
@@ -455,7 +455,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint3
             break;
         }
 
-        FAPI_INF( "Found %d EX cores",
+        FAPI_INF( "Found %zd EX cores",
                   l_fapiCores.size()    );
 
         //  Note: Functional chips are marked with a 0 bit; NOT a one bit.
@@ -584,7 +584,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox2( const fapi::Target &i_target, uint3
 
 
         //For normal IPLs set initial SBE I2C freq to ref clock
-        //For MPIPL set initial SBE I2C freq to nest clock
+        //For MPIPL set initial SBE I2C freq to nest clock 
         if ( !l_isMpIpl )
         {
             o_set_data |= l_pib_i2c_refclock << (sizeof(o_set_data)*8 -
@@ -770,7 +770,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
             FAPI_INF(   "ATTR_MNFG_FLAGS => %016llX", l_mnfg_flags);
 
             // get chip type
-            // TODO RTC 102992
+            // TODO RTC 102992 
             fapi::ATTR_NAME_Type l_chip_type;
             l_fapirc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_target, l_chip_type);
             if (l_fapirc)

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_deconfig_setup.C,v 1.10 2013/10/22 03:21:48 stillgs Exp $
+// $Id: p8_pmc_deconfig_setup.C,v 1.11 2014/08/05 15:18:24 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_deconfig_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -103,7 +103,7 @@ p8_pmc_deconfig_setup(const Target& i_target)
             break;
         }
 
-        FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
+        FAPI_DBG("\tChiplet vector size  => %zu ", l_exChiplets.size());
 
         // Set the buffer to assume that all chiplets are deconfigured.  Validly configured
         // chiplets will then turn off this deconfiguration.

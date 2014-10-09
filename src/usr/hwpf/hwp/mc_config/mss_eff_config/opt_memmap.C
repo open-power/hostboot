@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.C,v 1.19 2014/06/20 20:23:44 jmcgill Exp $
+// $Id: opt_memmap.C,v 1.20 2014/08/05 15:11:50 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.C,v $
 
 
@@ -125,7 +125,7 @@
 //------------------------------------------------------------------------------
 
 #include <opt_memmap.H>
-
+#include <algorithm>
 
 //------------------------------------------------------------------------------
 //  Constant definitions
