@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: p8_pm_pmc_firinit.C,v 1.24 2014/07/09 14:49:32 daviddu Exp $
+// $Id: p8_pm_pmc_firinit.C,v 1.25 2014/08/06 20:01:27 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -316,6 +316,7 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             SET_FIR_MASKED(OCI_SLAVE_ERR                        ); // 35  oci_slave_err
             SET_MALF_ALERT(IF_COMP_PARITY_ERR                   ); // 36  if_comp_parity_err
             SET_RECOV_ATTN(IDLE_RECOVERY_NOTIFY_PRD             ); // 37  idle_recovery_notify_prd
+            SET_MALF_ALERT(PTS_ERR_NOTIFY_PHYP                  ); // 38  pts_err_notify_phyp
             SET_FIR_MASKED(FIR_PARITY_ERR_DUP                   ); // 47  fir_parity_err_dup
             SET_FIR_MASKED(FIR_PARITY_ERR                       ); // 48  fir_parity_err
 
@@ -442,7 +443,8 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             e_rc |= pmc_ocb_mask_lo.setBit(O2P_FSM_ERR - 32                     ); // 34  o2p_fsm_err
             e_rc |= pmc_ocb_mask_lo.setBit(OCI_SLAVE_ERR - 32                   ); // 35  oci_slave_err
 //                                        (IF_COMP_PARITY_ERR                   ); // 36  if_comp_parity_err
-//                                        IDLE_RECOVERY_NOTIFY_PRD              ); // 37  idle_recovery_notify_prd
+//                                        (IDLE_RECOVERY_NOTIFY_PRD             ); // 37  idle_recovery_notify_prd
+//                                        (PTS_ERR_NOTIFY_PHYP                  ); // 38  pts_error_notify_phyp
 //          Left 0                        (FIR_PARITY_ERR_DUP                   ); // 47  fir_parity_err_dup
 //          Left 0                        (FIR_PARITY_ERR                       ); // 48  fir_parity_err
             

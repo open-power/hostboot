@@ -22,9 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: p8_pm_pmc_firinit.H,v 1.7 2014/01/14 17:13:34 stillgs Exp $
-// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.H,v $
+// $Id: p8_pm_pmc_firinit.H,v 1.8 2014/08/06 19:45:08 cmolsen Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -91,6 +90,7 @@ enum PMC_FIRS
     OCI_SLAVE_ERR                               = 35,
     IF_COMP_PARITY_ERR                          = 36,
     IDLE_RECOVERY_NOTIFY_PRD                    = 37,
+    PTS_ERR_NOTIFY_PHYP                         = 38,
     FIR_PARITY_ERR_DUP                          = 47,
     FIR_PARITY_ERR                              = 48
 };
