@@ -417,7 +417,6 @@ sub update( $$ )
 
         if ( $opt_debug )   { print STDERR __LINE__, ": fill in new copyright block...\n"; }
         fillinEmptyCopyrightBlock( $filename, $filetype );
-
     }
 
     ##  return OK by default.
@@ -656,7 +655,8 @@ sub checkCopyrightBlock( $$ )
 
     ##  split into lines and check for specific things
     ##      $Source: src/usr/initservice/istepdispatcher/istepdispatcher.H $
-    my  %blockFileContributors = ();
+    my %blockFileContributorsHash = ();
+    my $numBlockEntries = 0;
     for ( split /^/, $block )
     {
         chomp( $_ );
@@ -706,7 +706,8 @@ sub checkCopyrightBlock( $$ )
             # remove trailing and leading whitespace
             $_ =~ s/^\s+|\s+$//g;
             # add contributor to hash
-            $blockFileContributors{$_} = 1;
+            $blockFileContributorsHash{$_} = 1;
+            $numBlockEntries++;
         }
     }   ## endfor
 
@@ -716,7 +717,7 @@ sub checkCopyrightBlock( $$ )
     # Make sure no extra or missing contributors by checking if the current
     # contributor block matches the git log history
     if ( (scalar keys %fileContributors) !=
-         (scalar keys %blockFileContributors) )
+         ($numBlockEntries) )
     {
         print STDOUT  "WARNING:  Extra or missing file contributors\n";
         return RC_BAD_CONTRIBUTORS_BLOCK;
@@ -726,7 +727,7 @@ sub checkCopyrightBlock( $$ )
     while ( my ($key, $value) = each(%fileContributors) )
     {
         # Block does not match file contributors
-        if ( !exists($blockFileContributors{$key}) )
+        if ( !exists($blockFileContributorsHash{$key}) )
         {
             print STDOUT  "WARNING:  File contributors section not correct\n";
             return RC_BAD_CONTRIBUTORS_BLOCK;
@@ -1075,7 +1076,7 @@ sub fillinEmptyCopyrightBlock( $$ )
     # Get copyright contributors based on hash so no duplicates
     my  %fileContributors = getFileContributors( $filename );
     my $copyright_Contributors = "";
-    while ( my ($key, $value) = each(%fileContributors) )
+    foreach my $key (sort keys %fileContributors)
     {
         $copyright_Contributors .= "[+] ".$key."\n";
     }
@@ -1185,6 +1186,7 @@ EOF
         unlink( $savedbgfile ) or die " $? can't delete $savedbgfile: $!";
     }
 }
+
 
 #######################################
 ##  Gets file contirbutors based on git log of a file
