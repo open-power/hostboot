@@ -50,12 +50,6 @@ grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
 echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
     $sb/simu/configs/P8_VENICE.config
 
-echo "+++ Patching attrPredicate.patch for BMC Attr Override."
-mkdir -p $sb/hbfw/fsp/targeting
-cp $BACKING_BUILD/src/hbfw/fsp/targeting/makefile $sb/hbfw/fsp/targeting
-patch $sb/hbfw/fsp/targeting/makefile \
-      ${HOSTBOOTROOT}/src/build/citest/etc/patches/attrPredicate.patch
-
 echo "+++ Patching attribute_types_fsp.xml for HTMGT attribute support."
 mkdir -p $sb/hbfw/fsp/targeting/xmltohb
 
