@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pcbs_init_errors.xml,v 1.8 2014/07/22 15:42:46 cmolsen Exp $ -->
+<!-- $Id: p8_pcbs_init_errors.xml,v 1.9 2014/10/10 02:01:53 cmolsen Exp $ -->
 <!-- Error definitions for proc_pcbs_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -33,9 +33,12 @@
     <ffdc>PMSR</ffdc>
     <ffdc>PCBSPM_MON1</ffdc>
     <ffdc>PCBSPM_MON2</ffdc>
+    <ffdc>PMGP0</ffdc>
     <ffdc>PMGP1</ffdc>
+    <ffdc>PMERR</ffdc>
     <ffdc>IVRM_CTRL</ffdc>
     <ffdc>IVRM_VAL</ffdc>
+    <ffdc>PCBSMODE</ffdc>
     <callout><target>PROC_CHIP</target><priority>HIGH</priority></callout>
   </hwpError>
   <!-- *********************************************************************** -->
