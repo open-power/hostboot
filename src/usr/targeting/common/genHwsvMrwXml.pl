@@ -1162,6 +1162,8 @@ use constant BUS_NODE_FIELD       => 4;
 use constant BUS_POS_FIELD        => 5;
 use constant BUS_ORDINAL_FIELD    => 6;
 use constant DIMM_POS_FIELD       => 7;
+use constant MBA_SLOT_FIELD       => 8;
+use constant MBA_PORT_FIELD       => 9;
 
 use constant CDIMM_RID_NODE_MULTIPLIER => 32;
 
@@ -1177,7 +1179,9 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          $i->{dimm}->{'instance-path'},
          $i->{mcs}->{target}->{node},
          $i->{mcs}->{target}->{position}, 0,
-         $i->{dimm}->{'instance-path'} ];
+         $i->{dimm}->{'instance-path'},
+         $i->{mba}->{'mba-slot'},
+         $i->{mba}->{'mba-port'}];
 }
 
 # Determine if the DIMMs are CDIMM or JDIMM (IS-DIMM). Check for "not
@@ -3916,11 +3920,11 @@ sub generate_is_dimm
     </compileAttribute>
     <attribute>
         <id>MBA_DIMM</id>
-        <default>0</default>
+        <default>$SMembuses[$i][MBA_SLOT_FIELD]</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
-        <default>$dimmCounter->{$mba}</default>
+        <default>$SMembuses[$i][MBA_PORT_FIELD]</default>
     </attribute>";
         if ($dimmI2C->{$i+1})
         {
