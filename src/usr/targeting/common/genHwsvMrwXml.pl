@@ -960,7 +960,7 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
 #------------------------------------------------------------------------------
 
 my @hbPSIs;
-my $psiBus;
+our $psiBus;
 
 if ($haveFSPs)
 {
