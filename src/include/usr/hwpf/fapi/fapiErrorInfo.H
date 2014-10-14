@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.H,v 1.13 2014/03/12 00:47:58 whs Exp $
+// $Id: fapiErrorInfo.H,v 1.15 2014/10/27 16:36:24 baiocchi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.H,v $
 
 /**
@@ -102,6 +104,7 @@ enum ProcedureCallout
     CODE                  = 0, // Code problem
     LVL_SUPPORT           = 1, // Call next level of support
     MEMORY_PLUGGING_ERROR = 2, // DIMM Plugging error
+    BUS_CALLOUT           = 3, // Bus Called Out
 };
 }
 

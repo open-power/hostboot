@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -48,7 +50,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc1. Fail");
+            TS_FAIL("testRc1. Fail l_res=%d", l_res);
         }
     }
 
@@ -62,7 +64,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc2. Fail");
+            TS_FAIL("testRc2. Fail l_res=%d", l_res);
         }
     }
 
@@ -75,7 +77,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc3. Fail");
+            TS_FAIL("testRc3. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -89,7 +91,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc4. Fail");
+            TS_FAIL("testRc4. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -103,7 +105,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc5. Fail");
+            TS_FAIL("testRc5. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -117,7 +119,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc6. Fail");
+            TS_FAIL("testRc6. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -131,7 +133,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc7. Fail");
+            TS_FAIL("testRc7. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -145,7 +147,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc8. Fail");
+            TS_FAIL("testRc8. Fail l_res=%d", l_res);
         }
     }
 
@@ -158,7 +160,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc9. Fail");
+            TS_FAIL("testRc9. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -172,7 +174,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc10. Fail");
+            TS_FAIL("testRc10. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -186,7 +188,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc11. Fail");
+            TS_FAIL("testRc11. Fail l_res=%d", l_res);
         }
     }
 
@@ -200,7 +202,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc12. Fail");
+            TS_FAIL("testRc12. Fail l_res=%d", l_res);
         }
     }
 
@@ -213,7 +215,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc13. Fail");
+            TS_FAIL("testRc13. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -227,7 +229,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc14. Fail");
+            TS_FAIL("testRc14. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -241,7 +243,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc15. Fail");
+            TS_FAIL("testRc15. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -255,7 +257,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc16. Fail");
+            TS_FAIL("testRc16. Fail l_res=%d", l_res);
         }
         return;
     }
@@ -269,7 +271,7 @@ public:
 
         if (l_res != 0)
         {
-            TS_FAIL("testRc17. Fail");
+            TS_FAIL("testRc17. Fail l_res=%d", l_res);
         }
         return;
     }

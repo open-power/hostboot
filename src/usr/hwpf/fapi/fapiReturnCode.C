@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCode.C,v 1.20 2014/07/23 16:20:32 whs Exp $
+// $Id: fapiReturnCode.C,v 1.21 2014/10/27 15:38:22 baiocchi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.C,v $
 
 /**
@@ -342,7 +342,27 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
             const Target * l_pTarget2 = static_cast<const Target *>(
                 i_pObjects[l_ep2Index]);
 
-            // Add the ErrorInfo
+            // Add Procedure ErrorInfo section first
+            ProcedureCallouts::ProcedureCallout l_proc =
+                ProcedureCallouts::BUS_CALLOUT;
+            FAPI_DBG("addErrorInfo: Bus Callout: Adding procedure "
+                     "proc: %d, pri: %d",
+                     l_proc, l_pri);
+            addEIProcedureCallout(l_proc, l_pri);
+
+            // Update priority for bus callout (with targets):
+            // use priority 1 level down of initial callout priority
+            if (l_pri == CalloutPriorities::HIGH)
+            {
+                l_pri = CalloutPriorities::MEDIUM;
+            }
+            else
+            {
+                // Medium or low, so set to low
+                l_pri = CalloutPriorities::LOW;
+            }
+
+            // Add the Bus Callout ErrorInfo section next with updated priority
             FAPI_DBG("addErrorInfo: Adding bus callout, pri: %d", l_pri);
             addEIBusCallout(*l_pTarget1, *l_pTarget2, l_pri);
         }

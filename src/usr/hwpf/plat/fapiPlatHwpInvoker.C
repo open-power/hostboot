@@ -121,7 +121,8 @@ HWAS::epubProcedureID xlateProcedureCallout(
     const HWAS::epubProcedureID HWAS_PROC[] = {
         HWAS::EPUB_PRC_HB_CODE,
         HWAS::EPUB_PRC_LVL_SUPP,
-        HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR};
+        HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+        HWAS::EPUB_PRC_EIBUS_ERROR};
 
     if (l_index < (sizeof(HWAS_PROC)/sizeof(HWAS::epubProcedureID)))
     {
