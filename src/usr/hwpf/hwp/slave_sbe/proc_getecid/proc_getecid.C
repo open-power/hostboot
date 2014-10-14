@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_getecid.C,v 1.9 2013/11/09 18:39:29 jmcgill Exp $
+// $Id: proc_getecid.C,v 1.10 2014/10/03 21:56:44 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_getecid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -43,6 +43,18 @@
 //------------------------------------------------------------------------------
 #include <proc_getecid.H>
 
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+// Security Switch register field/bit definitions
+const uint32_t OTPC_M_SECURITY_SWITCH_TRUSTED_BOOT_BIT = 1;
+
+// OTPROM mode register field/bit definitions
+const uint32_t OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT = 1;
+
+
 extern "C" {
 
 //------------------------------------------------------------------------------
@@ -59,127 +71,149 @@ fapi::ReturnCode proc_getecid(
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
     uint64_t attr_data[2];
+    bool secure_mode = false;
 
     // mark HWP entry
     FAPI_DBG("proc_getecid: Start");
 
+    // data buffers
     io_fuseString.setBitLength(112); // sets size and zeros out buffer
+    ecmdDataBufferBase security_switch_data(64);
     ecmdDataBufferBase otprom_mode_data(64);
     ecmdDataBufferBase ecid_data(64);
 
     do
     {
+        //
+        // determine if security is enabled
+        //
 
-      //
-      // clear ECC enable before reading ECID data (read-modify-write OTPROM Mode register)
-      //
+        rc = fapiGetScom(i_target, OTPC_M_SECURITY_SWITCH_0x00010005, security_switch_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_getecid: fapiGetScom error (OTPC_M_SECURITY_SWITCH_0x00010005) for %s",
+                     i_target.toEcmdString());
+            break;
+        }
 
-      rc = fapiGetScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
-      if (!rc.ok())
-      {
-          FAPI_ERR("proc_getecid: fapiGetScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
-                   i_target.toEcmdString());
-          break;
-      }
+        secure_mode = security_switch_data.isBitSet(OTPC_M_SECURITY_SWITCH_TRUSTED_BOOT_BIT);
 
-      rc_ecmd |= otprom_mode_data.clearBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
-      if (rc_ecmd)
-      {
-          FAPI_ERR("proc_getecid: Error 0x%X setting up OTPROM Mode register data buffer",
-                   rc_ecmd);
-          rc.setEcmdError(rc_ecmd);
-          break;
-      }
+        //
+        // clear ECC enable before reading ECID data (read-modify-write OTPROM Mode register), insecure mode only
+        //
 
-      rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
-      if (!rc.ok())
-      {
-          FAPI_ERR("proc_getecid: fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
-                   i_target.toEcmdString());
-          break;
-      }
+        if (!secure_mode)
+        {
+            
+            rc = fapiGetScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_getecid: fapiGetScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
+                         i_target.toEcmdString());
+                break;
+            }
+            
+            rc_ecmd |= otprom_mode_data.clearBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_getecid: Error 0x%X setting up OTPROM Mode register data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            
+            rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_getecid: fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
+                         i_target.toEcmdString());
+                break;
+            }
+        }
 
+        //
+        // extract and manipulate ECID data
+        //
+        
+        rc = fapiGetScom(i_target, ECID_PART_0_0x00018000, ecid_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_getecid: fapiGetScom error (ECID_PART_0_0x00018000) for %s",
+                     i_target.toEcmdString());
+            break;
+        }
+        
+        // 0:63 become 63:0
+        rc_ecmd |= ecid_data.reverse();
+        // copy bits 0:63 from the scom into 0:63 of the fuseString/attribute data
+        rc_ecmd |= io_fuseString.insert(ecid_data,  0, 64);
+        attr_data[0] = ecid_data.getDoubleWord(0);
+        
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 0) data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+        
+        rc = fapiGetScom(i_target, ECID_PART_1_0x00018001, ecid_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_getecid: fapiGetScom error (ECID_PART_1_0x00018001) for %s",
+                     i_target.toEcmdString());
+            break;
+        }
+        
+        // 0:63 become 63:0
+        rc_ecmd |= ecid_data.reverse();
+        // copy bits 0:47 from the scom into 64:111 of the fuseString
+        // all bits into attribute data
+        rc_ecmd |= io_fuseString.insert(ecid_data, 64, 48);
+        attr_data[1] = ecid_data.getDoubleWord(0);
+        
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 1) data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+        
+        // push fuse string into attribute
+        rc = FAPI_ATTR_SET(ATTR_ECID,
+                           &i_target,
+                           attr_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_getecid: Error from FAPI_ATTR_SET (ATTR_ECID) for %s (attr_data[0] = %016llX, attr_data[1] = %016llX",
+                     i_target.toEcmdString(), attr_data[0], attr_data[1]);
+            break;
+        }
 
-      //
-      // extract and manipulate ECID data
-      //
+        //
+        // restore ECC enable setting (insecure mode only)
+        //
 
-      rc = fapiGetScom(i_target, ECID_PART_0_0x00018000, ecid_data);
-      if (!rc.ok())
-      {
-          FAPI_ERR("proc_getecid: fapiGetScom error (ECID_PART_0_0x00018000) for %s",
-                   i_target.toEcmdString());
-          break;
-      }
-
-      // 0:63 become 63:0
-      rc_ecmd |= ecid_data.reverse();
-      // copy bits 0:63 from the scom into 0:63 of the fuseString/attribute data
-      rc_ecmd |= io_fuseString.insert(ecid_data,  0, 64);
-      attr_data[0] = ecid_data.getDoubleWord(0);
-
-      if (rc_ecmd)
-      {
-          FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 0) data buffer",
-                   rc_ecmd);
-          rc.setEcmdError(rc_ecmd);
-          break;
-      }
-
-      rc = fapiGetScom(i_target, ECID_PART_1_0x00018001, ecid_data);
-      if (!rc.ok())
-      {
-          FAPI_ERR("proc_getecid: fapiGetScom error (ECID_PART_1_0x00018001) for %s",
-                   i_target.toEcmdString());
-          break;
-      }
-
-      // 0:63 become 63:0
-      rc_ecmd |= ecid_data.reverse();
-      // copy bits 0:47 from the scom into 64:111 of the fuseString
-      // all bits into attribute data
-      rc_ecmd |= io_fuseString.insert(ecid_data, 64, 48);
-      attr_data[1] = ecid_data.getDoubleWord(0);
-
-      if (rc_ecmd)
-      {
-          FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 1) data buffer",
-                   rc_ecmd);
-          rc.setEcmdError(rc_ecmd);
-          break;
-      }
-
-      // push fuse string into attribute
-      rc = FAPI_ATTR_SET(ATTR_ECID,
-                         &i_target,
-                         attr_data);
-      if (!rc.ok())
-      {
-          FAPI_ERR("proc_getecid: Error from FAPI_ATTR_SET (ATTR_ECID) for %s (attr_data[0] = %016llX, attr_data[1] = %016llX",
-                   i_target.toEcmdString(), attr_data[0], attr_data[1]);
-          break;
-      }
-
-      //
-      // restore ECC enable setting
-      //
-
-      rc_ecmd |= otprom_mode_data.setBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
-      if (rc_ecmd)
-      {
-          FAPI_ERR("proc_getecid: Error 0x%X setting up OTPROM Mode register data buffer",
-                   rc_ecmd);
-          rc.setEcmdError(rc_ecmd);
-          break;
-      }
-
-      rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
-      if (!rc.ok())
-      {
-          FAPI_ERR("proc_getecid: fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
-                   i_target.toEcmdString());
-          break;
-      }
+        if (!secure_mode)
+        {
+            rc_ecmd |= otprom_mode_data.setBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_getecid: Error 0x%X setting up OTPROM Mode register data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            
+            rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_getecid: fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
+                         i_target.toEcmdString());
+                break;
+            }
+        }
 
     } while(0);
 

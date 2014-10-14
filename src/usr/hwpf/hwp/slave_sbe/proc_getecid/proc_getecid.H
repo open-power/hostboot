@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_getecid.H,v 1.7 2013/03/28 17:21:10 jmcgill Exp $
+// $Id: proc_getecid.H,v 1.8 2014/10/03 21:56:49 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_getecid.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,15 +57,6 @@
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
 (*proc_getecid_FP_t)(const fapi::Target&, ecmdDataBufferBase& fuseString);
-
-
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-
-// OTPROM mode register field/bit definitions
-const uint32_t OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT = 1;
-
 
 //------------------------------------------------------------------------------
 // Function prototypes
