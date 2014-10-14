@@ -56,6 +56,8 @@ enum istepModuleId
     ISTEP_HOST_ACTIVATE_MASTER                          = 0x06,
     ISTEP_SBE_CENTAUR_INIT                              = 0x07,
     ISTEP_ENABLE_CORE_CHECKSTOPS                        = 0x08,
+    ISTEP_DECONFIG_PHBS_BASED_ON_PCI_STATE              = 0x09,
+    ISTEP_COMPUTE_PCIE_CONFIG_ATTRS                     = 0x0A,
 };
 
 /**
@@ -76,6 +78,9 @@ enum istepReasonCode
     ISTEP_REPAIR_LOADER_RETRY_OCCURED           = ISTEP_COMP_ID | 0x07,
     ISTEP_MM_MAP_ERR                            = ISTEP_COMP_ID | 0x08,
     ISTEP_INCORRECT_TARGET_COUNT                = ISTEP_COMP_ID | 0x09,
+    ISTEP_INVALID_TARGET_TYPE                   = ISTEP_COMP_ID | 0x0A,
+    ISTEP_INVALID_ATTR_VALUE                    = ISTEP_COMP_ID | 0x0B,
+    ISTEP_INVALID_CONFIGURATION                 = ISTEP_COMP_ID | 0x0C,
 };  // end ISTEP
 
 }

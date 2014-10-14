@@ -501,6 +501,7 @@
         </default>
     </attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>
@@ -536,6 +537,20 @@
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
     <attribute><id>PROC_PCIE_IOP_SWAP</id></attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
+
+    <attribute><id>IOP_LANES_PER_PROC</id></attribute>
+    <attribute><id>PROC_PCIE_LANE_MASK</id></attribute>
+    <attribute><id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id></attribute>
+    <attribute><id>PROC_PCIE_LANE_MASK_BIFURCATED</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_SWAP_NON_BIFURCATED</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_SWAP_BIFURCATED</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_REVERSAL</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_REVERSAL_BIFURCATED</id></attribute>
+    <attribute><id>PROC_PCIE_DSMP_CAPABLE</id></attribute>
+    <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
+    <attribute><id>PROC_PCIE_IS_SLOT</id></attribute>
+
     <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id></attribute>
     <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id></attribute>
     <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id></attribute>
@@ -581,8 +596,6 @@
 
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
-
-
 </targetType>
 
 <targetType>
@@ -594,6 +607,10 @@
     </attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
+    <attribute>
+        <id>IOP_LANES_PER_PROC</id>
+        <default>32</default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -603,6 +620,10 @@
         <id>MODEL</id>
         <default>MURANO</default>
     </attribute>
+   <attribute>
+        <id>IOP_LANES_PER_PROC</id>
+        <default>24</default>
+   </attribute>
 </targetType>
 
 <targetType>
@@ -612,6 +633,10 @@
         <id>MODEL</id>
         <default>NAPLES</default>
     </attribute>
+   <attribute>
+        <id>IOP_LANES_PER_PROC</id>
+        <default>32</default>
+   </attribute>
 </targetType>
 
 <targetType>
@@ -682,6 +707,7 @@
     <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
     <attribute><id>PM_SPWUP_IGNORE_XSTOP_FLAG</id></attribute>
     <attribute><id>FREQ_CORE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
 </targetType>
 
 <targetType>
@@ -710,7 +736,6 @@
         <default>NAPLES</default>
     </attribute>
 </targetType>
-
 
 <targetType>
     <id>unit-core-power8</id>
@@ -752,7 +777,6 @@
     </attribute>
 </targetType>
 
-
 <targetType>
     <id>unit-pci-power8</id>
     <parent>unit</parent>
@@ -764,6 +788,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default> <!--GARD -->
     </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
 </targetType>
 
 <targetType>
@@ -793,7 +818,6 @@
     </attribute>
 </targetType>
 
-
 <targetType>
     <id>enc-node-power8</id>
     <parent>base</parent>
@@ -814,6 +838,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000009</default> <!-- HOSTSVC_HBEL and GARD -->
     </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
 </targetType>
 
 <targetType>
@@ -833,6 +858,7 @@
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
     <attribute><id>IS_INTER_ENCLOSURE_BUS</id></attribute>
     <attribute><id>PEER_PATH</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>
@@ -875,6 +901,7 @@
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>
@@ -917,6 +944,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default> <!--GARD -->
     </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <targetType>
@@ -1200,6 +1228,7 @@
     <attribute><id>MSS_DATABUS_UTIL_PER_MBA</id></attribute>
     <attribute><id>MSS_UTIL_N_PER_MBA</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <targetType>
@@ -1218,6 +1247,7 @@
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
     <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <targetType>
@@ -1374,6 +1404,7 @@
     <attribute><id>VPD_ISDIMMTOC4DQ</id></attribute>
     <attribute><id>VPD_ISDIMMTOC4DQS</id></attribute>
     <attribute><id>MSS_POWER_CONTROL_REQUESTED</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <!-- Centaur L4 -->
@@ -1446,6 +1477,7 @@
 
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>DIMM</default></attribute>
 </targetType>
 
 <targetType>
@@ -1482,6 +1514,7 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>
@@ -1531,6 +1564,7 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>

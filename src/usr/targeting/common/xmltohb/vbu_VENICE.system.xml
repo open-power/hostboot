@@ -579,6 +579,10 @@
         <default>0</default>
     </attribute>
     <!-- End PM_ attributes -->
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 EX units -->
@@ -1680,6 +1684,10 @@
         <default>0</default>
     </attribute>
     <!-- End PM_ attributes -->
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p1 EX units -->

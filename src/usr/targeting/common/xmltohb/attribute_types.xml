@@ -14386,14 +14386,236 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>IOP_LANES_PER_PROC</id>
+    <description>Number of PCIE lanes per processor
+        Creator: Targeting definition
+        Purpose: Determines which IOP configuration table is used to build the
+            PE lane config value and PHB active masks for the HWPs
+        Data format: value of 24 or 32 (lanes per processor)
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_LANE_MASK</id>
+    <description>Effective PCIE Lane Mask
+        Creator: Firmware
+        Purpose: Holds the effective PCIE lane mask after taking into account
+            any IOP bifurcations.  If no IOP bifurcations present, this is just
+            the value of the PROC_PCIE_LANE_MASK_NON_BIFURCATED attribute
+        Data Format: 2x2 array of uint16_t values.  The first two uint16_t
+            values are lane set 0/1 masks for IOP0, the remaining two uint16_t
+            values are lane set 0/1 masks for IOP1.  A lane set mask indicates
+            which groups of lanes are assigned to an IOP.  For instance, lane
+            set 0 value of 0xFFFF and lane set 1 value of 0x0000 for IOP0 means
+            IOP0 is a x16. Lane set 0 value of 0xFF00 and lane set 1 value of
+            0x00FF for IOP0, means the IOP is bifurcated into two x8s.
+            Each index in the array that is non-0 will require a dedicated PHB.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_DSMP_CAPABLE</id>
+    <description>Whether DSMP is enabled for a lane set or not
+        Creator: MRW
+        Purpose: Indicates whether a given IOP / lane set is dedicated to dSMP
+            traffic or not
+        Data Format: 2x2 array of uint8_t values.  The first two uint8_t
+            values are for lane sets 0/1 of IOP0, the remaining two uint8_t
+            values are fpr lane sets 0/1 of IOP1.  If the value at a given
+            array index is 1, that IOP/lane set routes dSMP traffic.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+        </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_IOP_REVERSAL</id>
+    <description>Effective PCIE IOP reversal configuration
+        Creator: Firmware
+        Purpose: Holds the effective PCIE IOP reversal value after taking into
+            account any IOP bifurcations.  If no IOP bifurcations present, this
+            is just the value of the PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED
+            attribute.
+        Data Format: 2x2 array of uint8_t values.  The first two uint8_t
+            values are for lane sets 0/1 of IOP0, the remaining two uint8_t
+            values are for lane sets 0/1 of IOP1.  The given index in the array
+            is a mask which specifies which bit to invert in the lane swap
+            settings for the given IOP/lane set.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED</id>
+    <description>Base PCIE IOP reversal configuration
+        Creator: Firmware
+        Purpose: Holds the base PCIE IOP reversal value without considering IOP
+            bifurcation.
+        Data Format: 2x2 array of uint8_t values.  The first two uint8_t
+            values are for lane sets 0/1 of IOP0, the remaining two uint8_t
+            values are for lane sets 0/1 of IOP1.  The given index in the array
+            is a mask which specifies which bit to invert in the lane swap
+            settings for the given IOP/lane set
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_IOP_SWAP_NON_BIFURCATED</id>
+    <description>Base PCIE IOP swap configuration value
+        Creator: MRW
+        Purpose: Holds the base IOP swap configuration value without considering
+            IOP bifurcation.  The swap value controls how PCIE lanes are
+            recordered when the leave the IOP, to provide lane routing
+            flexibility.
+        Data Format: 2x2 array of uint8_t values.  The first two uint8_t
+            values are for lane sets 0/1 of IOP0, the remaining two uint8_t
+            values are for lane sets 0/1 of IOP1.  The given index in the array
+            is a value for the hardware which specifies how to swap the PCIE
+            lanes for the given IOP/lane set.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+    <description>PCIE Lane Mask base configuration
+        Creator: MRW
+        Purpose: Holds the base PCIE lane mask assuming no dynamic IOP
+            bifurcations.
+        Data Format: 2x2 array of uint16_t values.  The first two uint16_t
+            values are for lane set 0/1 masks of IOP0, the remaining two
+            values are for lane set 0/1 masks of IOP1.  A lane set mask
+            indicates which groups of lanes are assigned to an IOP.  For
+            instance, lane set 0 value of 0xFFFF and lane set 1 value of 0x0000
+            for IOP0 means IOP0 is a x16. Lane set 0 value of 0xFF00 and lane
+            set 1 value of 0x00FF for IOP0, means the IOP is split into two x8s.
+            Each array index with non-0 value implies a dedicated PHB.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_IOP_REVERSAL_BIFURCATED</id>
+    <description>Base PCIE IOP reversal configuration
+        Creator: Firmware
+        Purpose: Holds the PCIE IOP reversal value for cases where the IOP
+            is bifurcated
+        Data Format: 2x2 array of uint8_t values.  The first two uint8_t
+            values are for lane sets 0/1 of IOP0, the remaining two uint8_t
+            values are for lane sets 0/1 of IOP1.  The given index in the array
+            is a mask which specifies which bit to invert in the lane swap
+            settings for the given IOP / lane set
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_IOP_SWAP_BIFURCATED</id>
+    <description>Bifurcated PCIE IOP swap configuration value
+        Creator: MRW
+        Purpose: Holds the base IOP swap configuration value for the IOPs in the
+            case where they are bifurcated.  The swap value controls how PCIE
+            lanes are recordered when the leave the IOP, to provide lane routing
+            flexibility.
+        Data Format: 2x2 array of uint8_t values.  The first two uint8_t
+            values are for lane sets 0/1 of IOP0, the remaining two uint8_t
+            values are for lane sets 0/1 pf IOP1.  The given index in the array
+            is a value for the hardware which specifies how to swap the PCIE
+            lanes for the given IOP/lane set.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_LANE_MASK_BIFURCATED</id>
+    <description>PCIE Lane Mask bifurcated configuration
+        Creator: MRW
+        Purpose: Holds the PCIE lane mask assuming IOPs are bifurcated.
+        Data Format: 2x2 array of uint16_t values.  The first two uint16_t
+            values are for lane set 0/1 masks of IOP0, the remaining two
+            values are for lane set 0/1 masks of IOP1.  A lane set mask
+            indicates which groups of lanes are assigned to an IOP.  For
+            instance, lane set 0 value of 0xFF00 and lane set 1 value of 0x00FF
+            for IOP0, means the IOP is bifurcated into two x8s.
+            Each non-0 array value implies a dedicated PHB.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>PROC_PCIE_LANE_EQUALIZATION</id>
     <description>PCIE Lane Equalization values for each PHB
-        creator: MRW
-        consumer: HDAT
-        firmware notes:
-        PCIE Lane Equalization values for each PHB
-        Array index: PHBs (0:3)
-                     Lane Settings (0:31)
+        Creator: MRW
+        Purpose: Holds settings which are loaded into the HW to optimize the
+            PCIE lane signal eye between the chips + PCIE endpoints
+        Data Format: 4 PHBs x 32 bytes of EQ data per PHB.  Each PHB has an EQ
+            value for each of its 16 lanes.  Each value is a uint16 formatted as
+            follows:
+                Bit 0:3   - up_rx_hint (bit 0 reserved)
+                Bit 4:7   - up_tx_preset
+                Bit 8:11  - dn_rx_hint (bit 0 reserved)
+                Bit 12:15 - dn_tx_preset
     </description>
     <simpleType>
         <uint8_t>
@@ -14402,6 +14624,97 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_IS_SLOT</id>
+    <description>Indicates whether PCIE lanes terminate at a pluggable slot
+        Creator: MRW
+        Purpose: Used by FW to know whether the given PCIE lanes terminate at a
+            pluggable slot or not.  If this is the case, and the platform
+            supports bifurcation, the card's VPD should be interrogated to
+            determine whether to bifurcate the IOP or not.
+        Data Format: 2x2 array of uint8_t values.  The first two values indicate
+            whether lane set 0/1 of IOP0 terminates at a pluggable slot.  The
+            next two values indicate the same for IOP1.  A value of 1 at a given
+            array index indicates the lanes terminate at a pluggable slot, 0
+            otherwise.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<enumerationType>
+    <id>CDM_DOMAIN</id>
+    <description>
+        Enumeration specifying a target's CEC degraded mode domain
+    </description>
+    <enumerator>
+        <name>NONE</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>CPU</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>DIMM</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>FABRIC</name>
+        <value>3</value>
+    </enumerator>
+    <enumerator>
+        <name>MEM</name>
+        <value>4</value>
+    </enumerator>
+    <enumerator>
+        <name>IO</name>
+        <value>5</value>
+    </enumerator>
+    <enumerator>
+        <name>NODE</name>
+        <value>6</value>
+    </enumerator>
+    <enumerator>
+        <name>CLOCK</name>
+        <value>7</value>
+    </enumerator>
+    <enumerator>
+        <name>PSI</name>
+        <value>8</value>
+    </enumerator>
+    <enumerator>
+        <name>FSP</name>
+        <value>9</value>
+    </enumerator>
+    <enumerator>
+        <name>ALL</name>
+        <value>10</value>
+    </enumerator>
+    <default>NONE</default>
+</enumerationType>
+
+<attribute>
+    <id>CDM_DOMAIN</id>
+    <description>
+        Specifies a target's CEC degraded mode domain.  For example, all
+        DIMMs are part of the DIMM CEC degraded mode domain.
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>CDM_DOMAIN</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
 </attribute>
 
 </attributes>

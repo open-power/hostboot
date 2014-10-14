@@ -79,6 +79,11 @@ namespace ERRORLOG { class ErrlEntry; };
         ( (TO_UINT64(TWO_UINT16_TO_UINT32(mostleft_16, left_16)) << 32) | \
           (TO_UINT64(TWO_UINT16_TO_UINT32(right_16, mostright_16))) )
 
+// uint32_t val = 8bit:8bit:8bit:8bit
+#define FOUR_UINT8_TO_UINT32(mostleft_8, left_8, right_8, mostright_8) \
+        ( (TO_UINT32(TWO_UINT8_TO_UINT16(mostleft_8, left_8)) << 16) | \
+          (TO_UINT32(TWO_UINT8_TO_UINT16(right_8, mostright_8))) )
+
 namespace ERRORLOG
 {
 

@@ -516,6 +516,10 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Naples n0p0 EX units
@@ -962,6 +966,10 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40001000</default>
     </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Naples n0p1 EX units
@@ -1385,6 +1393,10 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40002000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
     </attribute>
 </targetInstance>
 
@@ -1810,6 +1822,10 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40003000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
     </attribute>
 </targetInstance>
 

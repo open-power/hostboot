@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -104,6 +106,105 @@
 
 namespace   NEST_CHIPLETS
 {
+
+/**
+ *  @brief # of bits in a byte for computation purposes
+ */
+static const size_t BITS_PER_BYTE = 8;
+
+/**
+ *  @brief Container for holding IOPs to bifurcate
+ */
+typedef std::list<uint32_t> BifurcatedIopsContainer;
+
+/**
+ *  @brief Enum indicating number of usable IOP lanes for a proc
+ */
+enum IopLanesPerProc
+{
+    IOP_LANES_PER_PROC_24X = 24,// 24 Lanes per proc
+    IOP_LANES_PER_PROC_32X = 32 // 32 Lanes per proc
+};
+
+/**
+ *  @brief Struct for PCIE lane properties within IOP configuration table
+ */
+struct LaneSet
+{
+    uint8_t width; // Width of each PCIE lane set (0, 8, or 16)
+    uint8_t dsmp;  // Whether dSMP is enabled (0=disabled, 1=enabled)
+};
+
+/**
+ *  @brief Max possible IOPs per processor; invarient across all POWER8
+ *      processors
+ */
+static const size_t MAX_IOPS_PER_PROC = 2;
+
+/**
+ *  @brief Lane groups per IOP; invarient across all POWER8 processors
+ */
+static const size_t MAX_LANE_GROUPS_PER_IOP = 2;
+
+/**
+ *  @brief Struct for each row in PCIE IOP configuration table.
+ *      Used by code to compute the IOP config and PHBs active mask.
+ */
+struct laneConfigRow
+{
+    // Grouping of lanes under one IOP
+    LaneSet laneSet[MAX_IOPS_PER_PROC][MAX_LANE_GROUPS_PER_IOP];
+
+    // IOP config value from PCIE IOP configuration table
+    uint8_t laneConfig;
+
+    // PHB active mask (see PhbActiveMask enum)
+    // PHB0 = 0x80
+    // PHB1 = 0x40
+    // PHB1 = 0x20
+    uint8_t phbActive;
+};
+
+/**
+ *  @brief Enum indicating lane width (units = "number of lanes")
+ */
+enum LaneWidth
+{
+    LANE_WIDTH_NC  = 0,
+    LANE_WIDTH_8X  = 8,
+    LANE_WIDTH_16X = 16
+};
+
+/**
+ *  @brief Enum indicating whether lane set has DSMP Capability
+ */
+enum DsmpCapability
+{
+    DSMP_DISABLE = 0,
+    DSMP_ENABLE  = 1
+};
+
+/**
+ *  @brief Enumeration of lane mask values
+ */
+enum LaneMask
+{
+    LANE_MASK_X16     = 0xFFFF,
+    LANE_MASK_X8_GRP0 = 0xFF00,
+    LANE_MASK_X8_GRP1 = 0x00FF,
+};
+
+/**
+ *  @brief Enum giving bitmask values for enabled PHBs
+ */
+enum PhbActiveMask
+{
+    PHB_MASK_NA = 0x00, ///< Sentinel mask (loop terminations)
+    PHB0_MASK   = 0x80, ///< PHB0 enabled
+    PHB1_MASK   = 0x40, ///< PHB1 enabled
+    PHB2_MASK   = 0x20, ///< PHB2 enabled
+};
+
 /**
  *  @brief  call_proc_attr_update
  *

@@ -676,6 +676,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 EX units -->
@@ -1907,6 +1911,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p1 EX units -->
@@ -3137,6 +3145,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p2 EX units -->
@@ -4367,6 +4379,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p3 EX units -->
@@ -5597,6 +5613,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p4 EX units -->
@@ -6796,6 +6816,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p5 EX units -->
@@ -7993,6 +8017,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p6 EX units -->
@@ -9190,6 +9218,10 @@
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
+        <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p7 EX units -->
