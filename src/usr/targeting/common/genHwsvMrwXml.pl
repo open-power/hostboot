@@ -2018,7 +2018,19 @@ sub generate_sys
         </default>
     </attribute>
     <attribute>
-        <id>PAYLOAD_KIND</id>
+        <id>PAYLOAD_KIND</id>\n";
+
+    # If we have FSPs, we setup the default as PHYP, and the FSP
+    # will set this up correctly. We can't just add the SAPPHIRE as a
+    # default because the FSP assumes the PAYLOAD_BASE comes via
+    # attribute_types.xml
+    if ($haveFSPs)
+    {
+        print "        <default>PHYP</default>\n";
+    }
+    else
+    {
+        print "
         <default>SAPPHIRE</default>
     </attribute>
     <attribute>
@@ -2027,8 +2039,9 @@ sub generate_sys
     </attribute>
     <attribute>
         <id>PAYLOAD_ENTRY</id>
-        <default>0x10</default>
-    </attribute>";
+        <default>0x10</default>\n";
+    }
+    print "    </attribute>";
 
     generate_max_config();
 
