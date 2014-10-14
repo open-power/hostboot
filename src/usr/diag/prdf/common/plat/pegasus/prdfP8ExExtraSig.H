@@ -38,6 +38,8 @@ PRDR_ERROR_SIGNATURE( P8EX_L2_ARRAY_REPAIR_FAILURE, 0x0fff0003, "L2FIR[0]",
                       "L2 Array Repair Failure");
 PRDR_ERROR_SIGNATURE( P8EX_L2_ARRAY_REPAIR_OUT_OF, 0x0fff0004, "L2FIR[0]",
                       "No L2 Array Repairs Left");
+PRDR_ERROR_SIGNATURE( P8EX_L2_ARRAY_REPAIR_HW_OUT_OF, 0x0fff000a, "L2FIR[0]",
+                      "No L2 Array Repairs Left in HW");
 
 PRDR_ERROR_SIGNATURE( P8EX_L3CE_LD_ISSUED, 0x0fff0005, "L3FIR[4]",
                       "L3 Cache Read CE, Line Delete Issued");
@@ -49,5 +51,7 @@ PRDR_ERROR_SIGNATURE( P8EX_L3_ARRAY_REPAIR_FAILURE, 0x0fff0008, "L3FIR[4]",
                       "L3 Array Repair Failure");
 PRDR_ERROR_SIGNATURE( P8EX_L3_ARRAY_REPAIR_OUT_OF, 0x0fff0009, "L3FIR[4]",
                       "No L3 Array Repairs Left");
+PRDR_ERROR_SIGNATURE( P8EX_L3_ARRAY_REPAIR_HW_OUT_OF, 0x0fff000b, "L3FIR[4]",
+                      "No L3 Array Repairs Left in HW");
 
 #endif // __prdfP8ExExtraSig_H
