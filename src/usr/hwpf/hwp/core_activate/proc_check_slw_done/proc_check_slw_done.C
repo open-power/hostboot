@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slw_done.C,v 1.8 2014/09/10 21:49:44 cmolsen Exp $
+// $Id: proc_check_slw_done.C,v 1.9 2014/10/09 23:00:47 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slw_done.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -239,7 +239,7 @@ proc_check_slw_done(const fapi::Target& i_ex_target)
         // If chiplet not in ETR, collected FFDC and return
         if (!ex_test_bit)
         {
-            FAPI_ERR("EX %d is not in current SLW EXE Trigger 0x%016llX", l_ex_number, data.getDoubleWord(0));
+            FAPI_ERR("EX %d is not in current SLW EXE Trigger 0x%016llX", l_ex_number, etr.getDoubleWord(0));
             const uint64_t& GP3     = gp3.getDoubleWord(0);
             const uint64_t& PMGP0   = pmgp0.getDoubleWord(0);
             const uint64_t& PMGP1   = pmgp1.getDoubleWord(0);
