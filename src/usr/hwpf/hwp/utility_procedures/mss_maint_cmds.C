@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 820.1 2014/08/08 13:53:16 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.37 2014/10/13 21:31:53 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -105,6 +105,9 @@
 //         |          |         |     FAST_MAX_BW_IMPACT
 //   1.36  |07-AUG-14 | gollub  | SW272428: Change delay from 250mSec to 2 Sec in mss_do_steering
 //         |          |         | to account for extra time needed with 128G DIMMs
+//   1.37  |13-OCT-14 | gollub  | SW273790: Change delay from 2 Sec back to 250mSec in mss_do_steering.
+//         |          |         | The added delay did not help the steer problem, and added too much 
+//         |          |         | IPL time to the mnfg IPL when all spares are deployed.
 //------------------------------------------------------------------------------
 //    Includes
 //------------------------------------------------------------------------------
@@ -5255,8 +5258,8 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 // Wait for a periodic cal.
 //------------------------------------------------------
 
-//      const uint64_t  HW_MODE_DELAY = 250000000; // 250mSec delay
-      const uint64_t  HW_MODE_DELAY =  2000000000; // 2 Sec delay
+      const uint64_t  HW_MODE_DELAY = 250000000; // 250mSec delay
+//    const uint64_t  HW_MODE_DELAY = 2000000000; // 2 Sec delay
 
 
 // 200000 sim cycle delay for SIM mode
