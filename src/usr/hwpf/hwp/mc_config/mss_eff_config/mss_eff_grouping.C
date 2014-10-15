@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.32 2014/06/26 06:52:16 gpaulraj Exp $
+// $Id: mss_eff_grouping.C,v 1.34 2014/09/29 16:25:38 gpaulraj Exp $
 // Mike Jones - modified version from 1.28 to 1.00 because it is a sandbox version
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -41,6 +41,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.34   |gpaulraj  | 09-23-14| fixed last check in issue
+//  1.33   |gpaulraj  | 09-23-14| fixed 2 MCS/group issue on starting with odd MCS grouping
 //  1.32   |gpaulraj  | 06-26-14| support MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER for Brazos
 //  1.31   | thi      | 05-23-14| Support MEM_MIRROR_PLACEMENT_POLICY_DRAWER for Brazos
 //  1.30   | jdsloat  | 04-10-14| Mike Jones's rewrite.
@@ -223,7 +225,7 @@ struct EffGroupingProcAttrs
                              iv_occSandboxSize(0) {}
     /**
      * @brief Gets attributes
-     * 
+     *
      * @param[in] i_proc Reference to Processor Chip Target
      */
     fapi::ReturnCode getAttrs(const fapi::Target & i_proc);
@@ -245,14 +247,14 @@ struct EffGroupingMembufAttrs
 {
     /**
      * @brief Default Constructor. Initializes attributes
-     * 
+     *
      * @param[in] i_procTarget Reference to Processor Chip Target
      */
     EffGroupingMembufAttrs() : iv_pos(0), iv_mcsPos(0) {}
 
     /**
      * @brief Gets attributes
-     * 
+     *
      * @param[in] i_membuf Reference to membuf Chip Target
      */
     fapi::ReturnCode getAttrs(const fapi::Target & i_membuf);
@@ -270,14 +272,14 @@ struct EffGroupingMbaAttrs
 {
     /**
      * @brief Default Constructor. Initializes attributes
-     * 
+     *
      * @param[in] i_procTarget Reference to Processor Chip Target
      */
     EffGroupingMbaAttrs();
 
     /**
      * @brief Gets attributes
-     * 
+     *
      * @param[in] i_mba Reference to MBA chiplet Target
      */
     fapi::ReturnCode getAttrs(const fapi::Target & i_mba);
@@ -993,11 +995,11 @@ void grouping_group2McsPerGroup(const EffGroupingMemInfo & i_memInfo,
                                 EffGroupingData & o_groupData)
 {
     // 2 adjacent MCSs are grouped if they have the same size
-    // 0/1, 1/2, 2/3, 3/4, 4/5, 5/6, 6/7
+    // 0/1, 2/3, 4/5, 6/7
     FAPI_INF("mss_eff_grouping: Attempting to group 2 MCSs per group");
     uint8_t & g = o_groupData.iv_numGroups;
 
-    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC - 1; pos++)
+    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC - 1; pos = pos+2)
     {
         if ((!o_groupData.iv_mcsGrouped[pos]) &&
             (!o_groupData.iv_mcsGrouped[pos + 1]) &&
@@ -1028,7 +1030,7 @@ void grouping_group2McsPerGroup(const EffGroupingMemInfo & i_memInfo,
             // Record which MCSs were grouped
             o_groupData.iv_mcsGrouped[pos] = true;
             o_groupData.iv_mcsGrouped[pos + 1] = true;
-            pos++;
+           
         }
     }
 }
@@ -1121,7 +1123,7 @@ fapi::ReturnCode grouping_findUngroupedMCSs(
  * @brief Calculates the number of 1s in a memory size
  *
  * @param[i] i_size Memory Size
- * 
+ *
  * @return Number of 1s
  */
 uint8_t grouping_num1sInSize(uint32_t i_size)
@@ -1426,7 +1428,7 @@ void grouping_traceData(const EffGroupingSysAttrs & i_sysAttrs,
     for (uint8_t i = 0; i < i_groupData.iv_numGroups; i++)
     {
         FAPI_INF("mss_eff_grouping: Group %u, MCS Size %u GB, "
-                 "Num MCSs %u, GroupSize %u GB", i, 
+                 "Num MCSs %u, GroupSize %u GB", i,
                  i_groupData.iv_data[i][MCS_SIZE],
                  i_groupData.iv_data[i][MCS_IN_GROUP],
                  i_groupData.iv_data[i][GROUP_SIZE]);
@@ -1652,7 +1654,7 @@ fapi::ReturnCode grouping_setBaseSizeAttrs(
                 {
                     if (i_groupData.iv_data[i][MCS_IN_GROUP] > 1)
                     {
-                        l_mirror_sizes[i] = 
+                        l_mirror_sizes[i] =
                             (i_groupData.iv_data[i][MCS_SIZE] *
                              i_groupData.iv_data[0][MCS_IN_GROUP]) / 2;
                     }
