@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/functional $                                      */
+/* $Source: src/include/functional.C $                                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,6 +75,40 @@ namespace std
             { return x > y; }
     };
 
+// --------------- ptr_fun templates --------------- //
+    template<typename A1, typename Result>
+        struct pointer_to_unary_function : public unary_function<A1, Result>
+    {
+        explicit pointer_to_unary_function(Result (*f)(A1)) : func(f) {}
+        Result operator()(A1 a1) const { return (*func)(a1); }
+
+        protected:
+            Result (*func)(A1);
+    };
+
+    template <typename A1, typename Result>
+        pointer_to_unary_function<A1, Result> ptr_fun(Result (*f)(A1))
+    {
+        return pointer_to_unary_function<A1, Result>(f);
+    }
+
+    template<typename A1, typename A2, typename Result>
+        struct pointer_to_binary_function :
+            public binary_function<A1, A2, Result>
+    {
+        explicit pointer_to_binary_function(Result (*f)(A1, A2)) : func(f) {}
+        Result operator()(A1 a1, A2 a2) const { return (*func)(a1,a2); }
+
+        protected:
+            Result (*func)(A1,A2);
+    };
+
+    template <typename A1, typename A2, typename Result>
+        pointer_to_binary_function<A1, A2, Result> ptr_fun(Result (*f)(A1,A2))
+    {
+        return pointer_to_binary_function<A1, A2, Result>(f);
+    }
+
 // --------------- mem_fun templates --------------- //
 
     template<typename Result, typename X>
@@ -81,7 +117,7 @@ namespace std
         explicit mem_fun_t(Result (X::*f)()) : func(f) {}
         Result operator()(X* x) const { return (x->*func)(); }
 
-        private:
+        protected:
             Result (X::*func)();
     };
 
@@ -91,7 +127,7 @@ namespace std
         explicit const_mem_fun_t(Result (X::*f)() const) : func(f) {}
         Result operator()(const X* x) const { return (x->*func)(); }
 
-        private:
+        protected:
             Result (X::*func)() const;
     };
         
@@ -115,7 +151,7 @@ namespace std
         explicit mem_fun1_t(Result (X::*f)(Arg)) : func(f) {}
         Result operator()(X* x, Arg a) const { return (x->*func)(a); }
 
-        private:
+        protected:
             Result (X::*func)(Arg);
     };
 
@@ -125,7 +161,7 @@ namespace std
         explicit const_mem_fun1_t(Result (X::*f)(Arg) const) : func(f) {}
         Result operator()(const X* x, Arg a) const { return (x->*func)(a); }
 
-        private:
+        protected:
             Result (X::*func)(Arg) const;
     };
 
@@ -149,7 +185,7 @@ namespace std
         explicit mem_fun_ref_t(Result (X::*f)()) : func(f) {}
         Result operator()(X& x) const { return (x.*func)(); }
 
-        private:
+        protected:
             Result (X::*func)();
     };
 
@@ -159,7 +195,7 @@ namespace std
         explicit const_mem_fun_ref_t(Result (X::*f)() const) : func(f) {}
         Result operator()(const X& x) const { return (x.*func)(); }
 
-        private:
+        protected:
             Result (X::*func)() const;
     };
         
@@ -183,7 +219,7 @@ namespace std
         explicit mem_fun1_ref_t(Result (X::*f)(Arg)) : func(f) {}
         Result operator()(X& x, Arg a) const { return (x.*func)(a); }
 
-        private:
+        protected:
             Result (X::*func)(Arg);
     };
 
@@ -193,7 +229,7 @@ namespace std
         explicit const_mem_fun1_ref_t(Result (X::*f)(Arg) const) : func(f) {}
         Result operator()(const X& x, Arg a) const { return (x.*func)(a); }
 
-        private:
+        protected:
             Result (X::*func)(Arg) const;
     };
 
@@ -229,7 +265,7 @@ namespace std
             return func(arg, x);
         }
 
-        private:
+        protected:
             AdaptableBinaryFunction func;
             typename AdaptableBinaryFunction::first_argument_type arg;
     };
@@ -263,7 +299,7 @@ namespace std
             return func(x, arg);
         }
 
-        private:
+        protected:
             AdaptableBinaryFunction func;
             typename AdaptableBinaryFunction::second_argument_type arg;
     };
