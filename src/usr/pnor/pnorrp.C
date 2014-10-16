@@ -890,13 +890,6 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
 
     do
     {
-#ifdef CONFIG_SFC_IS_AST2400
-        //@todo RTC:106881 -- Add full write/erase support
-        TRACFCOMP(g_trac_pnor, "PnorRP::writeToDevice> Skipping all writes in BMC for now" );
-        break;
-#endif
-
-
         TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
         // assume a single page to write

@@ -492,7 +492,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         if(need_write == false)
         {
             //No write actually needed, break out here
-            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock>  NO Write Needed! Exiting Function");
+            TRACDCOMP(g_trac_pnor,"compareAndWriteBlock>  NO Write Needed! Exiting Function");
             break;
         }
 
@@ -500,7 +500,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         //  rest of the Erase block
         if(need_erase)
         {
-            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock> Need to perform Erase");
+            TRACDCOMP(g_trac_pnor,"compareAndWriteBlock> Need to perform Erase");
             //Get data before write section
             if(i_writeStart > i_blockStart)
             {
@@ -581,7 +581,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         else //
         {
             //STEP 4 ALT: No erase needed, only write the parts that changed.
-            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock> No erase, just writing");
+            TRACDCOMP(g_trac_pnor,"compareAndWriteBlock> No erase, just writing");
 
             for(uint32_t cword = 0; cword < wordsToWrite; cword++)
             {
@@ -619,7 +619,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
 errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
 {
     errlHndl_t l_err = NULL;
-    TRACFCOMP(g_trac_pnor, ">>PnorDD::eraseFlash> Block 0x%.8X", i_address );
+    TRACDCOMP(g_trac_pnor, ">>PnorDD::eraseFlash> Block 0x%.8X", i_address );
 
     do {
         if( findEraseBlock(i_address) != i_address )

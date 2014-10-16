@@ -102,9 +102,11 @@ class Ast2400Uart : public Uart
                 l_errl = _writeReg( 0x2f, 0x01 ); // write enable
                 if (l_errl) { break; }
 
+                //@fixme-RTC:115576 - Leaving SIO unlocked for now to allow
+                //   PNOR write/erase to work
                 // Lock the SIO registers
-                l_errl = _writeReg( 0x2e, 0xAA );
-                if (l_errl) { break; }
+                //l_errl = _writeReg( 0x2e, 0xAA );
+                //if (l_errl) { break; }
 
             } while(0);
 

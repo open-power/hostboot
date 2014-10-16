@@ -94,6 +94,15 @@ enum SpiConfigInfo
 };
 
 /**
+ * @brief General Constants related to flash
+ */
+enum NorConstants
+{
+    PAGE_PROGRAM_BYTES = 256, //**< 256 bytes per PP command
+};
+
+
+/**
  * Common format of Status Register
  */
 union NorStatusReg_t

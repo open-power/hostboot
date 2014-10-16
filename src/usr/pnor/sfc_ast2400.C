@@ -135,18 +135,37 @@ errlHndl_t SfcAST2400::writeFlash( uint32_t i_addr,
 {
     TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::writeFlash> i_addr=0x%.8x, i_size=0x%.8x", i_addr, i_size );
     errlHndl_t l_err = NULL;
+    size_t l_bytes_left = i_size;
+    size_t l_bytes_to_write = 0;
+    uint32_t l_addr_to_write = i_addr;
 
     do {
         // Enable write mode
         l_err = enableWriteMode();
         if( l_err ) { break; }
 
+        // Page Program (PP) command only supports 256 bytes at a time
+        if( l_bytes_left <= PNOR::PAGE_PROGRAM_BYTES )
+        {
+            l_bytes_to_write = l_bytes_left;
+            l_bytes_left = 0;
+        }
+        else
+        {
+            l_bytes_to_write = PNOR::PAGE_PROGRAM_BYTES;
+            l_bytes_left -= PNOR::PAGE_PROGRAM_BYTES;
+        }
+
         // Send in the Page Program command with the data to write
         uint8_t opcode = PNOR::SPI_JEDEC_PAGE_PROGRAM;
-        l_err = sendSpiCmd( opcode, i_addr,
-                            i_size, reinterpret_cast<uint8_t*>(i_data),
+        l_err = sendSpiCmd( opcode, l_addr_to_write,
+                            l_bytes_to_write,
+                            reinterpret_cast<uint8_t*>(i_data),
                             0, NULL );
         if( l_err ) { break; }
+
+        // Move to the next chunk
+        l_addr_to_write += l_bytes_to_write;
 
         // Wait for idle
         l_err = pollOpComplete();
@@ -161,7 +180,7 @@ errlHndl_t SfcAST2400::writeFlash( uint32_t i_addr,
         }
 #endif
 
-    } while(0);
+    } while(l_bytes_left);
 
     TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::writeFlash> err=%.8X", ERRL_GETEID_SAFE(l_err) );
     return l_err;
@@ -173,7 +192,7 @@ errlHndl_t SfcAST2400::writeFlash( uint32_t i_addr,
  */
 errlHndl_t SfcAST2400::eraseFlash( uint32_t i_addr )
 {
-    TRACFCOMP(g_trac_pnor, ">>SfcAST2400::eraseFlash> Block 0x%.8X", i_addr );
+    TRACDCOMP(g_trac_pnor, ">>SfcAST2400::eraseFlash> Block 0x%.8X", i_addr );
     errlHndl_t l_err = NULL;
 
     do {
