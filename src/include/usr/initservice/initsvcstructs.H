@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,7 +40,7 @@
 #include <initservice/initsvcreasoncodes.H>
 
 // This constant has a corresponding entry in src/build/tools/listdeps.pl.
-#define MAX_DEPENDENT_MODULES   7
+#define MAX_DEPENDENT_MODULES   8
 
 
 namespace   INITSERVICE
