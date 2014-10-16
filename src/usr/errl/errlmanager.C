@@ -51,6 +51,7 @@
 #include <console/consoleif.H>
 #include <config.h>
 #include <functional>
+#include <util/lockfree/counter.H>
 
 namespace ERRORLOG
 {
@@ -120,7 +121,8 @@ ErrlManager::ErrlManager() :
     iv_maxErrlInPnor(0),
     iv_pnorOpenSlot(0),
     iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldn't
-    iv_isMboxEnabled(false),    // but mbox isn't ready yet..
+    iv_isMboxEnabled(false),    // assume mbox isn't ready yet..
+    iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false)
 {
@@ -271,13 +273,14 @@ void ErrlManager::errlogMsgHndlr ()
                     {
                         iv_isSpBaseServices = false;
 
-                        // if there are queued msgs, delete the errors that
-                        // have been fully processed
+                        // if there are queued errors, clear the Mbox flag
+                        // since they will never be sent, which will delete
+                        // the errors that have been fully processed
                         ErrlListItr_t it = iv_errlList.begin();
                         while(it != iv_errlList.end())
                         {
                             // Mark MBOX processing complete
-                            _clearMboxFlag(*it);
+                            _clearFlag(*it, MBOX_FLAG);
                             _updateErrlListIter(it);
                         }
                     }
@@ -324,17 +327,18 @@ void ErrlManager::errlogMsgHndlr ()
                             assert(0);
                         }
 
-                        // if error(s) came in before MBOX was ready,
-                        // the msg(s) would be on this list. send it now.
+                        // if errors came in before MBOX was ready,
+                        // the errors would be on this list. send them now.
                         ErrlListItr_t it = iv_errlList.begin();
                         while(it != iv_errlList.end())
                         {
                             // Check if MBOX processing is needed
-                            if (_isMboxFlagSet(*it))
+                            if (_isFlagSet(*it, MBOX_FLAG))
                             {
+                                // send errlog
+                                sendErrLogToFSP(it->first);
                                 // Mark MBOX processing complete
-                                sendErrLogToMbox(it->first);
-                                _clearMboxFlag(*it);
+                                _clearFlag(*it, MBOX_FLAG);
                             }
                             _updateErrlListIter(it);
                         }
@@ -346,10 +350,40 @@ void ErrlManager::errlogMsgHndlr ()
                         while(it != iv_errlList.end())
                         {
                             // Mark MBOX processing complete
-                            _clearMboxFlag(*it);
+                            _clearFlag(*it, MBOX_FLAG);
                             _updateErrlListIter(it);
                         }
                     }
+
+                    //We are done with the msg
+                    msg_free(theMsg);
+
+                    // go back and wait for a next msg
+                    break;
+                }
+            case ERRLOG_ACCESS_IPMI_TYPE:
+                {
+#ifdef CONFIG_BMC_IPMI
+                    // IPMI is up and running now.
+                    iv_isIpmiEnabled = true;
+
+                    // if we can now send msgs, do it.
+                    // if errors came in before IPMI was ready,
+                    // the errors would be on this list. send them now.
+                    ErrlListItr_t it = iv_errlList.begin();
+                    while(it != iv_errlList.end())
+                    {
+                        // Check if IPMI processing is needed
+                        if (_isFlagSet(*it, IPMI_FLAG))
+                        {
+                            // send errorlog
+                            sendErrLogToBmc(it->first);
+                            // Mark IPMI processing complete
+                            _clearFlag(*it, IPMI_FLAG);
+                        }
+                        _updateErrlListIter(it);
+                    }
+#endif
 
                     //We are done with the msg
                     msg_free(theMsg);
@@ -371,13 +405,13 @@ void ErrlManager::errlogMsgHndlr ()
                     while(it != iv_errlList.end())
                     {
                         // Check if ERRLDISP processing is needed
-                        if (_isErrlDispFlagSet(*it))
+                        if (_isFlagSet(*it, ERRLDISP_FLAG))
                         {
                             ERRORLOGDISPLAY::errLogDisplay().msgDisplay
                                         (it->first,
                                         ((it->first->reasonCode()) & 0xFF00));
                             // Mark ERRLDISP processing complete
-                            _clearErrlDispFlag(*it);
+                            _clearFlag(*it, ERRLDISP_FLAG);
                         }
                         _updateErrlListIter(it);
                     }
@@ -390,25 +424,24 @@ void ErrlManager::errlogMsgHndlr ()
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
                 {
                     // Extract error log handle from the message. We need the
-                    // error log handle to pass along to saveErrLogEntry and
-                    // sendErrLogToMbox
+                    // error log handle to pass along
                     errlHndl_t l_err = (errlHndl_t) theMsg->extra_data;
 
-                    //Ask the ErrlEntry to assign commit component, commit time
+                    // Ask the ErrlEntry to assign commit component, commit time
                     l_err->commit( (compId_t) theMsg->data[0] );
 
                     // Pair with all flags set to add to the errlList
-                    std::pair<errlHndl_t, uint8_t> l_pair(l_err, ALL_FLAGS);
+                    ErrlFlagPair_t l_pair(l_err, ALL_FLAGS);
 
-                    // Display errl to errldisplay
 #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
+                    // Display errl to errldisplay
                     if (iv_isErrlDisplayEnabled)
                     {
                         ERRORLOGDISPLAY::errLogDisplay().msgDisplay
                                             (l_err,
                                             ( (l_err->reasonCode()) & 0xFF00));
                         // Mark ERRLDISP processing complete on this error
-                        _clearErrlDispFlag(l_pair);
+                        _clearFlag(l_pair, ERRLDISP_FLAG);
                     }
 #endif
                     //Save the error log to PNOR
@@ -418,7 +451,7 @@ void ErrlManager::errlogMsgHndlr ()
                     if (l_savedToPnor)
                     {
                         // Mark PNOR processing complete on this error
-                        _clearPnorFlag(l_pair);
+                        _clearFlag(l_pair, PNOR_FLAG);
                     }
 
 #ifdef STORE_ERRL_IN_L3
@@ -427,18 +460,30 @@ void ErrlManager::errlogMsgHndlr ()
                     saveErrLogEntry ( l_err );
 #endif
 
-                    // Try to send the error log if someone is there to receive
+                    //Try to send the error log if someone is there to receive
                     if (!iv_isSpBaseServices)
                     {
                         // Mark MBOX processing complete on this error
-                        _clearMboxFlag(l_pair);
+                        _clearFlag(l_pair, MBOX_FLAG);
                     }
                     else if (iv_isSpBaseServices && iv_isMboxEnabled)
                     {
-                        sendErrLogToMbox(l_err);
+                        sendErrLogToFSP(l_err);
+
                         // Mark MBOX processing complete on this error
-                        _clearMboxFlag(l_pair);
+                        _clearFlag(l_pair, MBOX_FLAG);
                     }
+
+#ifdef CONFIG_BMC_IPMI
+                    if (iv_isIpmiEnabled)
+                    {
+                        // convert to SEL/eSEL and send to BMC over IPMI
+                        sendErrLogToBmc(l_err);
+
+                        // Mark IPMI processing complete on this error
+                        _clearFlag(l_pair, IPMI_FLAG);
+                    }
+#endif
 
                     //Ask the ErrlEntry to process any callouts
                     l_err->processCallout();
@@ -495,7 +540,7 @@ void ErrlManager::errlogMsgHndlr ()
                         {
                             // We found the errlog
                             // Mark PNOR processing complete
-                            _clearPnorFlag(*it);
+                            _clearFlag(*it, PNOR_FLAG);
                             _updateErrlListIter(it);
                         }
                     }
@@ -505,8 +550,9 @@ void ErrlManager::errlogMsgHndlr ()
                     // We didn't have room before in PNOR to save an
                     // error log, so try now since we just ACKed one.
                     ErrlListItr_t it = std::find_if(iv_errlList.begin(),
-                                                    iv_errlList.end(),
-                                             _isPnorFlagSet);
+                                        iv_errlList.end(),
+                                        bind2nd(ptr_fun(_isFlagSet),
+                                        PNOR_FLAG));
 
                     // Check if such errl was found
                     if (it != iv_errlList.end())
@@ -517,7 +563,7 @@ void ErrlManager::errlogMsgHndlr ()
                         if (l_savedToPnor)
                         {
                             // Mark PNOR processing complete
-                            _clearPnorFlag(*it);
+                            _clearFlag(*it, PNOR_FLAG);
                             _updateErrlListIter(it);
                         }
                         // else, still couldn't save it (for some reason) so
@@ -556,13 +602,13 @@ void ErrlManager::errlogMsgHndlr ()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::sendErrLogToMbox()
+// ErrlManager::sendErrLogToFSP()
 ///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
+void ErrlManager::sendErrLogToFSP ( errlHndl_t& io_err )
 {
     msg_t *msg = NULL;
 
-    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendErrLogToMbox" );
+    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendErrLogToFSP" );
     do
     {
         //Create a mailbox message to send to FSP
@@ -605,8 +651,8 @@ void ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
         }
     } while (0);
 
-    TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::sendErrLogToMbox" );
-} // sendErrLogToMbox
+    TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::sendErrLogToFSP" );
+} // sendErrLogToFSP
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Handling commit error log.
@@ -750,6 +796,9 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
         case MBOX:
             msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_MBOX_TYPE;
             break;
+        case IPMI:
+            msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_IPMI_TYPE;
+            break;
         case ERRLDISP:
             msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_ERRLDISP_TYPE;
             break;
@@ -822,7 +871,7 @@ void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err,
     } while (0);
     TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::sendErrlogToMessageQueue" );
     return;
-}
+} // sendErrlogToMessageQueue
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::errlogShutdown()
@@ -834,11 +883,11 @@ void ErrlManager::errlogShutdown()
     while (!iv_errlList.empty())
     {
         // Get errl and its flags
-        std::pair<errlHndl_t, uint8_t> l_pair = iv_errlList.front();
+        ErrlFlagPair_t l_pair = iv_errlList.front();
         // If still true that means it was not processed
 
         TRACFCOMP(g_trac_errl, INFO_MRK "Failed to fully process Errl(eid %.8x) - Errl Flags Bitfield = 0x%X",
-                    l_pair.second);
+                    l_pair.first->eid(), l_pair.second);
 
         delete l_pair.first;
         l_pair.first = NULL;
@@ -991,7 +1040,7 @@ void ErrlManager::setupPnorInfo()
         while(it != iv_errlList.end())
         {
             // Check if PNOR processing is needed
-            if (_isPnorFlagSet(*it))
+            if (_isFlagSet(*it, PNOR_FLAG))
             {
                 //ACK it if no one is there to receive
                 bool l_savedToPnor = saveErrLogToPnor(it->first);
@@ -1000,7 +1049,7 @@ void ErrlManager::setupPnorInfo()
                 if (l_savedToPnor)
                 {
                     // Mark PNOR processing complete
-                    _clearPnorFlag(*it);
+                    _clearFlag(*it, PNOR_FLAG);
                     _updateErrlListIter(it);
                 }
                 else
@@ -1233,5 +1282,119 @@ bool ErrlManager::_updateErrlListIter(ErrlListItr_t & io_it)
     }
     return l_removed;
 }
+
+#ifdef CONFIG_BMC_IPMI
+void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK
+                "sendErrLogToBmc errlogId 0x%.8x", io_err->eid());
+
+    do {
+
+        // if it's an INFORMATIONAL log, we don't want to waste the cycles
+        if (io_err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        {
+            TRACFCOMP( g_trac_errl, INFO_MRK
+                    "sendErrLogToBmc: INFORMATIONAL log, skipping");
+            break;
+        }
+
+        // TODO: RTC 117526
+        // look through the error log and determine what callouts there are,
+        // and what the corresponding sensors are. if there aren't any, then
+        // break;
+
+        // flatten into bufffer, truncate to 2K
+        uint32_t l_plidSize = io_err->flattenedSize();
+        if (l_plidSize > (ESEL_MAX_SIZE - sizeof(selRecord)))
+        {
+            TRACFCOMP( g_trac_errl, INFO_MRK
+                    "sendErrLogToBmc: msg size %d > 2K, truncating.",
+                    l_plidSize);
+            l_plidSize = ESEL_MAX_SIZE - sizeof(selRecord);
+        }
+
+        uint8_t *l_plidData = new uint8_t[l_plidSize];
+        uint32_t l_errSize = io_err->flatten (l_plidData,
+                                    l_plidSize, true /* truncate */);
+
+        if (l_errSize ==0)
+        {
+            // flatten didn't work
+            TRACFCOMP( g_trac_errl, ERR_MRK
+                    "sendErrLogToBmc: could not flatten data - not sending");
+            delete [] l_plidData;
+            break;
+        }
+
+        static uint16_t cv_recordID = 0;
+
+        // 0x0000 and 0xffff are reserved; handle wrap
+        uint16_t l_nextRecordID = cv_recordID++;
+        if (l_nextRecordID == 0xffff)
+        {
+            // force a wrap
+            TRACFCOMP( g_trac_errl, ERR_MRK
+                    "sendErrLogToBmc: wrapping on recordID!");
+            cv_recordID = 1;
+            l_nextRecordID = cv_recordID;
+        }
+        selRecord *l_sel = new selRecord();
+        l_sel->recordID = l_nextRecordID;
+        uint16_t eSelRecordID = cv_recordID++;
+
+        l_sel->record_type = SEL_RECORD_TYPE; // per AMI spec - SEL
+        l_sel->timestamp = io_err->iv_Private.iv_committed;
+        l_sel->generator_id = SEL_GENERATOR_ID;
+        l_sel->evm_format_version = SEL_FORMAT_VERSION;
+        // TODO: RTC 117526 - sensor data
+        l_sel->sensor_type = 1;
+        l_sel->sensor_number = 1;
+        l_sel->event_dir_type = 1;
+        l_sel->event_data1 = ESEL_EVENT_DATA_1; // per AMI spec
+        l_sel->event_data2 = ((eSelRecordID & 0xFF00) >> 8);
+        l_sel->event_data3 =  (eSelRecordID & 0x00FF);
+
+
+        // first part is a selRecord
+        selRecord *l_esel = new selRecord();
+        l_esel->recordID = eSelRecordID;
+        l_esel->record_type = ESEL_RECORD_TYPE; // per AMI spec - eSEL
+        l_esel->timestamp = io_err->iv_Private.iv_committed;
+        l_esel->generator_id = SEL_GENERATOR_ID;
+        l_esel->evm_format_version = SEL_FORMAT_VERSION;
+        l_esel->sensor_type = 1; // per AMI spec
+        l_esel->sensor_number = 1; // per AMI spec
+        l_esel->event_dir_type = 1; // per AMI spec
+        l_esel->event_data1 = ESEL_EVENT_DATA_1; // per AMI spec
+        l_esel->event_data2 = 0; // per AMI spec
+        l_esel->event_data3 = 0; // per AMI spec
+
+        // send it to the BMC over IPMI
+        TRACFCOMP(g_trac_errl, INFO_MRK "sendErrLogToBmc: sent SEL %d, eSEL %d",
+            l_sel->recordID, l_esel->recordID);
+
+        // TODO: RTC 117454 call IPMI send_sel i/f when it's ready
+#if 0
+        errlHndl_t l_err = sendSel(&l_sel, &l_esel, &l_plidData, l_plidSize);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_errl, ERR_MRK "sendSel(%d,%d,%d) returned error",
+                l_sel->recordID, l_esel->recordID, l_plidSize);
+            errlCommit(l_err, IPMI_COMP_ID);
+        }
+#else
+        // free the buffers
+        delete l_sel;
+        delete l_esel;
+        delete [] l_plidData;
+#endif
+
+
+    } while(0);
+
+    TRACFCOMP(g_trac_errl, EXIT_MRK "sendErrLogToBmc");
+} // sendErrLogToBmc
+#endif
 
 } // End namespace
