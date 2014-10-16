@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.H,v 1.8 2014/01/19 17:35:55 jmcgill Exp $
+// $Id: proc_adu_utils.H,v 1.9 2014/09/11 21:57:13 aalugore Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -275,6 +275,16 @@ struct proc_adu_utils_fbc_op_hp_ctl {
     uint32_t pre_init_delay;     // cycle delay to pause after programmed
                                  // command (clean cresp) before issuing
                                  // post-init command
+
+//Constructor
+    proc_adu_utils_fbc_op_hp_ctl() {
+        do_tm_quiesce = false;
+        do_pre_quiesce = false;
+        do_post_init = false;
+        post_quiesce_delay = 0;
+        pre_init_delay = 0;
+    }
+
 };
 
 // ADU status structure
