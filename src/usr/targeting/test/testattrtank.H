@@ -1149,30 +1149,39 @@ public:
 
     /**
      * @brief Test BMC Attr Override function
-     *        Set attributes into 3 different tanks for attribute override and
-     *        serialize the data of each tank. Then call getAttrOverrides to
-     *        deserialize each sections data and check that the data is correct
+     *        Set attributes into 3 different tanks. Then place overrides in
+     *        both correct/incorrect simulated pnor sections. Finally call
+     *        getAttrOverrides to deserialize each sections data and verify
+     *        that it did not apply incorrect overrides and applied correct ones
      *
      */
     void testBMCAttrOverride(void)
     {
+        errlHndl_t l_errhdl = NULL;
+        const uint64_t l_chunkSize = 4096;
+
+        // Simulate Pnor ATTR_TMP and ATTR_PERM sections in memory
+        PNOR::SectionInfo_t l_attrTmpSec;
+        l_attrTmpSec.id = PNOR::ATTR_TMP;
+        l_attrTmpSec.name = "Test Attr Tmp";
+        l_attrTmpSec.vaddr = reinterpret_cast<uint64_t>(malloc(3*l_chunkSize));
+
+        PNOR::SectionInfo_t l_attrPermSec;
+        l_attrPermSec.id = PNOR::ATTR_PERM;
+        l_attrPermSec.name = "Test Attr Perm";
+        l_attrPermSec.vaddr = reinterpret_cast<uint64_t>(malloc(3*l_chunkSize));
+
         do
         {
-            errlHndl_t errhdl = NULL;
-            // Use the TEST partition as scratch space
-            PNOR::SectionInfo_t info;
-            errhdl = PNOR::getSectionInfo( PNOR::TEST, info );
-            if (errhdl)
-            {
-                TS_FAIL("testattrtank::testBMCAttrOverride could not get PNOR test section info");
-                break;
-            }
-
             // Create local AttributeTanks
             AttributeTank l_FapiTank;
             AttributeTank l_TargetTank;
             AttributeTank l_PermTank;
 
+            // Create local array of those tanks
+            AttributeTank* l_tanks[AttributeTank::TANK_LAYER_LAST];
+
+            // Create Attr Overrides
             // Add ATTR_SCRATCH_UINT64_1 to the Fapi tank
             uint64_t l_val = 4;
             l_FapiTank.setAttribute(ATTR_SCRATCH_UINT64_1,
@@ -1197,107 +1206,157 @@ public:
                                     AttributeTank::ATTR_NODE_NA,
                                     0, sizeof(l_val), &l_val);
 
-            ////////////////////////////////////////////////////////////////////
-            // Fapi
 
-            // Serialize all attributes from each tank
+            ////////////////////////////////////////////////////////////////////
+            // Fill in simulated pnor sections
+            // Add a fapi, targ, and perm overrides to both sections to test
+            // catching incorrect ones and applying the correct ones
+
+            uint32_t l_permIndex = 0;
+            uint32_t l_tmpIndex = 0;
+            AttrOverrideSection * l_pAttrOverSec = NULL;
+            AttributeTank::AttributeSerializedChunk l_chunk;
+
+            // Fapi - Serialize all attributes from each tank
             AttributeTank::AttributeSerializedChunks_t l_attributes;
             l_FapiTank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
-                    4096, l_attributes);
+                    l_chunkSize, l_attributes);
 
-            // Copy Fapi Override chunk to PNOR
-            uint32_t l_index = PNOR::pnorTestSec_BMCAttrOverride_offset;
+            // Copy Fapi Overrides to test tmp and perm sections
             for (AttributeTank::AttributeSerializedChunks_t::iterator
                     chunkIter = l_attributes.begin();
                     chunkIter != l_attributes.end();
                     ++chunkIter)
             {
-                AttrOverrideSection * l_pAttrOverSec =
-                    reinterpret_cast<AttrOverrideSection *>
-                        (info.vaddr + l_index);
-                AttributeTank::AttributeSerializedChunk l_chunk = *chunkIter;
+                l_chunk = *chunkIter;
+
+                // handle tmp section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_attrTmpSec.vaddr + l_tmpIndex);
                 l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_FAPI;
                 l_pAttrOverSec->iv_size = l_chunk.iv_size;
                 memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
                         l_chunk.iv_size);
-                l_index += sizeof(AttrOverrideSection)+l_pAttrOverSec->iv_size;
+                l_tmpIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
+
+                // handle perm section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_attrPermSec.vaddr + l_permIndex);
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_FAPI;
+                l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                l_permIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
             }
 
-            ////////////////////////////////////////////////////////////////////
-            // Targeting
-
-            // Serialize all attributes from each tank
+            // Targeting - Serialize all attributes from tank
             l_attributes.clear();
             l_TargetTank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
-                    4096, l_attributes);
+                    l_chunkSize, l_attributes);
 
-            // Copy Target Override chunk to PNOR
+            // Copy Target Override chunk to test tmp and perm sections
             for (AttributeTank::AttributeSerializedChunks_t::iterator
                     chunkIter = l_attributes.begin();
                     chunkIter != l_attributes.end();
                     ++chunkIter)
             {
-                AttrOverrideSection * l_pAttrOverSec =
-                    reinterpret_cast<AttrOverrideSection *>
-                        (info.vaddr + l_index);
-                AttributeTank::AttributeSerializedChunk l_chunk = *chunkIter;
+                l_chunk = *chunkIter;
+
+                // handle tmp section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_attrTmpSec.vaddr + l_tmpIndex);
                 l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TARG;
                 l_pAttrOverSec->iv_size = l_chunk.iv_size;
                 memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
                         l_chunk.iv_size);
-                l_index += sizeof(AttrOverrideSection)+l_pAttrOverSec->iv_size;
+                l_tmpIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
 
+                // handle perm section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_attrPermSec.vaddr + l_permIndex);
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TARG;
+                l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                l_permIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
             }
 
-            ////////////////////////////////////////////////////////////////////
-            // Permanent
-
-            // Serialize all attributes from each tank
+            // Permanent - Serialize all attributes from tank
             l_attributes.clear();
             l_PermTank.serializeAttributes(AttributeTank::ALLOC_TYPE_NEW,
-                    4096, l_attributes);
+                    l_chunkSize, l_attributes);
 
-            // Copy Target Override chunk to PNOR
+            // Copy Perm Override chunk to test tmp and perm sections
             for (AttributeTank::AttributeSerializedChunks_t::iterator
                     chunkIter = l_attributes.begin();
                     chunkIter != l_attributes.end();
                     ++chunkIter)
             {
-                AttrOverrideSection * l_pAttrOverSec =
-                    reinterpret_cast<AttrOverrideSection *>
-                        (info.vaddr + l_index);
-                AttributeTank::AttributeSerializedChunk l_chunk = *chunkIter;
+                l_chunk = *chunkIter;
+
+                // handle tmp section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_attrTmpSec.vaddr + l_tmpIndex);
                 l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_PERM;
                 l_pAttrOverSec->iv_size = l_chunk.iv_size;
                 memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
                         l_chunk.iv_size);
-                l_index += sizeof(AttrOverrideSection)+l_pAttrOverSec->iv_size;
+                l_tmpIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
 
+                // handle perm section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_attrPermSec.vaddr + l_permIndex);
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_PERM;
+                l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                l_permIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
             }
 
             // Add termination section
-            AttrOverrideSection * l_pAttrOverSecTerm =
-                    reinterpret_cast<AttrOverrideSection *>
-                        (info.vaddr + l_index);
-            l_pAttrOverSecTerm->iv_layer = AttributeTank::TANK_LAYER_NONE;
-            l_pAttrOverSecTerm->iv_size = 0;
 
-            // Clear tanks
+            // handle tmp section
+            l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                    (l_attrTmpSec.vaddr + l_tmpIndex);
+            l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TERM;
+            l_pAttrOverSec->iv_size = 0;
+            l_tmpIndex += sizeof(AttrOverrideSection);
+
+            // handle perm section
+            l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                    (l_attrPermSec.vaddr + l_permIndex);
+            l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TERM;
+            l_pAttrOverSec->iv_size = 0;
+            l_permIndex += sizeof(AttrOverrideSection);
+
+            // Update final size of created section
+            l_attrTmpSec.size = l_tmpIndex;
+            l_attrPermSec.size = l_permIndex;
+
+            ////////////////////////////////////////////////////////////////////
+            // Test simulated pnor sections attr overrides
+
+            // Test Attr Tmp - should only include Fapi and Targ overrides
             l_FapiTank.clearAllAttributes();
             l_TargetTank.clearAllAttributes();
             l_PermTank.clearAllAttributes();
 
-            // Call function that actually reads in attribute overrides
-            AttributeTank* l_tanks[AttributeTank::TANK_LAYER_LAST];
             l_tanks[AttributeTank::TANK_LAYER_FAPI-1] = &l_FapiTank;
             l_tanks[AttributeTank::TANK_LAYER_TARG-1] = &l_TargetTank;
             l_tanks[AttributeTank::TANK_LAYER_PERM-1] = &l_PermTank;
-            errhdl = getAttrOverrides(PNOR::TEST,
-                             l_tanks,
-                             PNOR::pnorTestSec_BMCAttrOverride_offset);
-            if (errhdl)
+
+            // Call function that actually reads in attribute overrides
+            l_errhdl = getAttrOverrides(l_attrTmpSec, l_tanks);
+
+            if (l_errhdl)
             {
-                errlCommit(errhdl, TARG_COMP_ID);
+                errlCommit(l_errhdl, TARG_COMP_ID);
                 TS_FAIL("testattrtank::testBMCAttrOverride getAttrOverrides() failed");
                 break;
             }
@@ -1341,6 +1400,21 @@ public:
                 break;
             }
 
+            // Check to make sure no Permanent overrides were applied
+            if (l_PermTank.size() > 0)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. A permanent override was found and applied in the PNOR::TMP section");
+                break;
+            }
+
+            // Test Attr Perm - should only include Perm overrides
+            l_tanks[AttributeTank::TANK_LAYER_FAPI-1]->clearAllAttributes();
+            l_tanks[AttributeTank::TANK_LAYER_TARG-1]->clearAllAttributes();
+            l_tanks[AttributeTank::TANK_LAYER_PERM-1]->clearAllAttributes();
+
+            // Call function that actually reads in attribute overrides
+            l_errhdl = getAttrOverrides(l_attrPermSec, l_tanks);
+
             // Check the first attribute made it back into the Perm tank
             l_val = 0;
             if (!(l_PermTank.getAttribute(ATTR_SCRATCH_UINT64_1,
@@ -1359,8 +1433,39 @@ public:
                         l_val);
                 break;
             }
+            // Check to make sure no Fapi overrides were applied
+            if (l_FapiTank.size() > 0)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. A fapi override was found and applied in the PNOR::PERM section");
+                break;
+            }
+            // Check to make sure no Targ overrides were applied
+            if (l_TargetTank.size() > 0)
+            {
+                TS_FAIL("testattrtank::testBMCAttrOverride: Error. A targ override was found and applied in the PNOR::PERM section");
+                break;
+            }
+
         } while(0);
-        TRACFCOMP(g_trac_targeting, "testattrtank::testBMCAttrOverride: Success steve");
+
+        // Free memory
+        free (reinterpret_cast<char *>(l_attrTmpSec.vaddr));
+        free (reinterpret_cast<char *>(l_attrPermSec.vaddr));
+    }
+
+    /**
+     * @brief Test to check if the const array tankLayerToPnor is sorted
+     *        which also indicates in enum order
+     */
+    void testLidToPnorSorted(void)
+    {
+        for (size_t i = 0; i < (AttributeTank::TANK_LAYER_LAST - 1); ++i)
+        {
+            if (tankLayerToPnor[i].first > tankLayerToPnor[i+1].first)
+            {
+                TS_FAIL("testattrtank::testTankLayerToPnorSorted: attrPlatOverride.H tankLayerToPnor[] is not sorted");
+            }
+        }
     }
 };
 

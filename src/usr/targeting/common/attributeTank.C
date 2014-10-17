@@ -597,4 +597,10 @@ errlHndl_t AttributeTank::writePermAttributes()
     return l_err;
 }
 
+//******************************************************************************
+size_t AttributeTank::size() const
+{
+    return iv_attributes.size();
+}
+
 }

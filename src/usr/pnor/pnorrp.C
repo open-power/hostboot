@@ -71,10 +71,11 @@ const char* cv_EYECATCHER[] = {
     "DJVPD",    /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
     "MVPD",     /**< PNOR::MODULE_VPD     : Module VPD */
     "CVPD",     /**< PNOR::CENTAUR_VPD    : Centaur VPD */
-    "ATTROVER", /**< PNOR::ATTR_OVER      : Attribute Override */
     "NVRAM",    /**< PNOR::NVRAM          : OPAL Storage */
     "OCC",      /**< PNOR::OCC            : OCC LID */
     "FIRDATA",  /**< PNOR::FIRDATA        : FIRDATA */
+    "ATTR_TMP",  /**< PNOR::ATTR_TMP       : Temporary Attribute Overrides */
+    "ATTR_PERM", /**< PNOR::ATTR_PERM      : Permanent Attribute Overrides */
     "TEST",     /**< PNOR::TEST           : Test space for PNOR*/
 
     //Not currently used

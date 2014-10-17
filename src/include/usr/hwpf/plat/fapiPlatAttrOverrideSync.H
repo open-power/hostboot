@@ -47,9 +47,8 @@
 //******************************************************************************
 namespace TARGETING
 {
-    errlHndl_t getAttrOverrides(PNOR::SectionId section,
-                          AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST],
-                          uint32_t i_pnorSecOffset);
+    errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
+                      AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST]);
 }
 
 namespace fapi
@@ -89,9 +88,10 @@ public:
     /**
      * @brief Allow a attribute override to directly access the override tank
      */
-    friend errlHndl_t TARGETING::getAttrOverrides(PNOR::SectionId section,
-            TARGETING::AttributeTank* io_tanks[TARGETING::AttributeTank::TANK_LAYER_LAST],
-            uint32_t i_pnorSecOffset);
+    friend errlHndl_t TARGETING::getAttrOverrides(
+                    PNOR::SectionInfo_t &i_sectionInfo,
+                    TARGETING::AttributeTank*
+                        io_tanks[TARGETING::AttributeTank::TANK_LAYER_LAST]);
 
     /**
      * @brief Maximum size of a direct attribute override

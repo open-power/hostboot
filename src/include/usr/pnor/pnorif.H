@@ -54,10 +54,11 @@ enum SectionId
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
     CENTAUR_VPD,    /**< Centaur VPD */
-    ATTR_OVER,      /**< Attribute Override */
     NVRAM,          /**< Opal NVRAM */
     OCC,            /**< OCC lid */
     FIRDATA,        /**< FIRDATA */
+    ATTR_TMP,       /**< Temporary Attribute Override */
+    ATTR_PERM,      /**< Permanent Attribute Override */
     TEST,           /**< Scratch space for PNOR test cases */
 
     NUM_SECTIONS,   /**< Number of defined sections */
@@ -116,7 +117,6 @@ errlHndl_t validateAltMaster( void );
  */
 const uint32_t pnorTestSec_readwrite_offset = 0x100;
 const uint32_t pnorTestSec_smartwrite_offset = 0x120;
-const uint32_t pnorTestSec_BMCAttrOverride_offset = 0x200;
 
 }
 

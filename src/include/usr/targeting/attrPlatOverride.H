@@ -27,6 +27,7 @@
 
 #include <targeting/common/attributeTank.H>
 #include <pnor/pnorif.H>
+#include <utility>
 
 namespace TARGETING
 {
@@ -45,6 +46,21 @@ struct AttrOverrideSection
 };
 
 /**
+ * @brief Array containing AttributeTank layers to Pnor Override Sections
+ *
+ *        The pair is used just to maintain order of AttributeTank::TankLayer
+ *        enums and make it obvious which layers map to what PNOR section.
+ *        Currrently the pair is only used in a test case to keep it in order
+ */
+const std::pair<AttributeTank::TankLayer, PNOR::SectionId>
+    tankLayerToPnor[AttributeTank::TANK_LAYER_LAST] =
+    {
+        std::make_pair(AttributeTank::TANK_LAYER_FAPI, PNOR::ATTR_TMP),
+        std::make_pair(AttributeTank::TANK_LAYER_TARG, PNOR::ATTR_TMP),
+        std::make_pair(AttributeTank::TANK_LAYER_PERM, PNOR::ATTR_PERM)
+    };
+
+/**
  * @brief This function gets any Attribute Overrides in PNOR
  *
  * This function reads attribute overrides in from PNOR and places them in
@@ -52,19 +68,14 @@ struct AttrOverrideSection
  * permanent attribute overrides. Currently there are 3 attribute tanks,
  * FAPI, Targeting, and Permanent.
  *
- * @param[in] i_section       PNOR::SectionId to look for overrides default
- *                            ATTR_OVER
+ * @param[in] i_sectionInfo   PNOR::SectionInfo_t to look for overrides
  * @param[in] io_tanks        Array of pointers to Attribute tanks, used for
  *                            test cases, default set to NULL
- * @param[in] i_pnorSecOffset Offset within section to read, used for test cases
- *                            default set to 0
  *
  * @return errlHndl_t         Error log handle.
  */
-errlHndl_t getAttrOverrides(PNOR::SectionId i_section = PNOR::ATTR_OVER,
-              AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST] = NULL,
-              uint32_t i_pnorSecOffset = 0);
-//errlCommit( err, TARG_COMP_ID);
+errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
+              AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST] = NULL);
 
 } // end of namespace
 

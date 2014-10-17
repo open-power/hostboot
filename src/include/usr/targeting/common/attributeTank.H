@@ -86,6 +86,7 @@ public:
         TANK_LAYER_TARG,
         TANK_LAYER_PERM,
         TANK_LAYER_LAST = TANK_LAYER_PERM,
+        TANK_LAYER_TERM = 0xFFFFFFFF,
     };
 
     /**
@@ -353,6 +354,13 @@ public:
      * @return errlHndl_t Error log handle.
      */
     errlHndl_t writePermAttributes();
+
+    /**
+     * @brief This retuns the number of attributes overrides in an attr tank
+     *
+     * @return size_t Number of overrides in attr tank
+     */
+    size_t size() const;
 
 private:
     // Copy constructor and assignment operator disabled

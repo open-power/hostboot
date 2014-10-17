@@ -64,6 +64,7 @@
 #include <targeting/attrPlatOverride.H>
 #include <console/consoleif.H>
 #include <hwpisteperror.H>
+#include <pnor/pnorif.H>
 
 namespace ISTEPS_TRACE
 {
@@ -246,15 +247,42 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             // Get Attribute overrides from PNOR
             else
             {
-                err = TARGETING::getAttrOverrides();
+                PNOR::SectionInfo_t l_sectionInfo;
+                // Get temporary attribute overrides from pnor
+                err = PNOR::getSectionInfo(PNOR::ATTR_TMP, l_sectionInfo);
+                // Attr override sections are optional so just delete error
                 if (err)
                 {
-                    TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides");
-                    break;
+                    delete err;
+                    err = NULL;
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_initsvc,"Success getAttrOverrides");
+                    TRACFCOMP(g_trac_initsvc,"init: processing temporary overrides");
+                    err = TARGETING::getAttrOverrides(l_sectionInfo);
+                    if (err)
+                    {
+                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: getting temporary overrides");
+                        break;
+                    }
+                }
+                // Get permanent attribute overrides from pnor
+                err = PNOR::getSectionInfo(PNOR::ATTR_PERM, l_sectionInfo);
+                // Attr override sections are optional so just delete error
+                if (err)
+                {
+                    delete err;
+                    err = NULL;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_initsvc,"init: processing permanent overrides");
+                    err = TARGETING::getAttrOverrides(l_sectionInfo);
+                    if (err)
+                    {
+                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: getting permanent overrides");
+                        break;
+                    }
                 }
             }
 
