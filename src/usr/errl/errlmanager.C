@@ -384,6 +384,8 @@ void ErrlManager::errlogMsgHndlr ()
 #endif
                     //We are done with the msg
                     msg_free(theMsg);
+
+                    break;
                 }
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
                 {
