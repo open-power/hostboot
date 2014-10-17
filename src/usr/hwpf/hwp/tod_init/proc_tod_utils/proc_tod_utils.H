@@ -22,11 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_utils.H,v 1.14 2014/09/09 18:45:59 jklazyns Exp $
+// $Id: proc_tod_utils.H,v 1.15 2014/10/14 15:07:54 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 // *!
 // *! TITLE : proc_tod_utils.H
 // *!
@@ -285,6 +284,10 @@ const uint32_t TOD_PORT_CTRL_REG_S_PATH_1 = 0x1;
 const uint32_t TOD_PORT_CTRL_REG_M_PATH_0 = 0x2;
 const uint32_t TOD_PORT_CTRL_REG_M_PATH_1 = 0x3;
 
+//Bit definitions for TOD_PSS_MSS_STATUS_REG
+const uint32_t TOD_PSS_MSS_STATUS_REG_M_PATH_0_STEP_CHECK_VALID = 6;
+const uint32_t TOD_PSS_MSS_STATUS_REG_M_PATH_1_STEP_CHECK_VALID = 7;
+
 //Bit definitions for PB_X_MODE_0x04010C0A
 const uint32_t PB_X_MODE_LINK_X0_ROUND_TRIP_DELAY = 24;
 const uint32_t PB_X_MODE_LINK_X1_ROUND_TRIP_DELAY = 32;
@@ -307,6 +310,10 @@ const uint32_t TOD_ERROR_REG_RX_TTYPE_2                = 40;
 const uint32_t TOD_ERROR_REG_RX_TTYPE_3                = 41;
 const uint32_t TOD_ERROR_REG_RX_TTYPE_4                = 42;
 const uint32_t TOD_ERROR_REG_RX_TTYPE_5                = 43;
+
+//Bit definitions for TOD_ERROR_MASK_REG
+const uint32_t TOD_ERROR_MASK_REG_M_PATH_0_STEP_CHECK_ERROR = 14;
+const uint32_t TOD_ERROR_MASK_REG_M_PATH_1_STEP_CHECK_ERROR = 15;
 
 //Bit definitions for TFMR
 const uint32_t TFMR_MAX_CYC_BET_STEPS       = 0;
@@ -382,7 +389,8 @@ enum tod_action
 {
     TOD_SETUP,
     TOD_INIT,
-    TOD_STATUS
+    TOD_STATUS,
+    TOD_CLEANUP
 };
 
 // Input which determines the topology being configured
