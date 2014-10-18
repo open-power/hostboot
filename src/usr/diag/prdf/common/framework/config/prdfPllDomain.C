@@ -40,12 +40,14 @@
 #include <iipSystem.h>
 #include <UtilHash.H>
 #include <prdfP8ProcMbCommonExtraSig.H>
+#include <prdfPllUtils.H>
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
+using namespace PLL;
 using namespace PlatServices;
 
 //------------------------------------------------------------------------------

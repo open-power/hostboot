@@ -30,10 +30,13 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
+#include <prdfPllUtils.H>
+#include <prdfFsiCapUtil.H>
 
 namespace PRDF
 {
 
+using namespace PLL;
 using namespace PlatServices;
 
 namespace Membuf

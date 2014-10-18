@@ -39,12 +39,15 @@
 #include <prdfGlobal_common.H>
 #include <prdfP8DataBundle.H>
 #include <UtilHash.H>
+#include <prdfPllUtils.H>
+#include <prdfFsiCapUtil.H>
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
+using namespace PLL;
 using namespace PlatServices;
 
 namespace Proc
@@ -229,6 +232,27 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
                      "for chip: 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
+
+        SCAN_COMM_REGISTER_CLASS * oscCerrReg =
+                i_chip->getRegister("OSCERR");
+
+        tmpRC = oscCerrReg->Read();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"OSCERR read failed"
+                     "for 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
+        oscCerrReg->ClearBit(4);
+        oscCerrReg->ClearBit(5);
+        tmpRC = oscCerrReg->Write();
+        if (tmpRC != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"oscCerrReg write failed"
+                     "for chip: 0x%08x", i_chip->GetId());
+            rc |= tmpRC;
+        }
+
     }
 
     if( rc != SUCCESS )
@@ -329,7 +353,7 @@ PRDF_PLUGIN_DEFINE( Proc, MaskPllIo );
 int32_t capturePllFfdcIo( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
-    // Add FSI status reg
+    // Add FSI Osc reg
     captureFsiStatusReg( i_chip, io_sc );
 
     return SUCCESS;

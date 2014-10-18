@@ -44,6 +44,8 @@ PRDF_RULE_PLUGINS_PEGASUS_WSIM += prdfP8SystemSpecific.o
 # PEGASUS specific objects, not rule related.
 prd_pegasus_specific += prdfCalloutUtil.o
 prd_pegasus_specific += prdfPhbUtils.o
+prd_pegasus_specific += prdfPllUtils.o
+prd_pegasus_specific += prdfFsiCapUtil.o
 prd_pegasus_specific += prdfCenAddress.o
 prd_pegasus_specific += prdfCenDqBitmap.o
 prd_pegasus_specific += prdfCenMbaCaptureData.o

@@ -38,13 +38,17 @@
 #include <iipSystem.h>
 #include <prdfGlobal_common.H>
 #include <prdfP8DataBundle.H>
+#include <prdfPllUtils.H>
+#include <prdfFsiCapUtil.H>
 #include <UtilHash.H>
+
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
+using namespace PLL;
 using namespace PlatServices;
 
 namespace Proc

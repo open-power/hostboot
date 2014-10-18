@@ -105,50 +105,6 @@ fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
 
 
 //##############################################################################
-//##                       Processor specific functions
-//##############################################################################
-
-uint32_t getIoOscPos( ExtensibleChip * i_chip,
-                      STEP_CODE_DATA_STRUCT & io_sc)
-{
-    #define PRDF_FUNC "[PlatServices::getIoOscPos] "
-    uint32_t o_oscPos = MAX_PCIE_OSC_PER_NODE;
-
-    do
-    {
-        int32_t rc = SUCCESS;
-
-        SCAN_COMM_REGISTER_CLASS * pcieOscSwitchReg =
-                i_chip->getRegister("PCIE_OSC_SWITCH");
-
-        rc = pcieOscSwitchReg->Read();
-        if (rc != SUCCESS)
-        {
-            PRDF_ERR(PRDF_FUNC"PCIE_OSC_SWITCH read failed"
-                     "for 0x%08x", i_chip->GetId());
-            break;
-        }
-
-        // [ 16 ] == 1    ( OSC 0 is active )
-        // [ 16 ] == 0    ( OSC 1 is active )
-        if(pcieOscSwitchReg->IsBitSet(16))
-        {
-            o_oscPos = 0;
-        }
-        else
-        {
-            o_oscPos = 1;
-        }
-
-    } while(0);
-
-    return o_oscPos;
-
-    #undef PRDF_FUNC
-}
-
-
-//##############################################################################
 //##                       Lane Repair functions
 //##############################################################################
 

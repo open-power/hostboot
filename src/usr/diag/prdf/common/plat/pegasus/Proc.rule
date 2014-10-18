@@ -162,10 +162,24 @@ chip Proc
         capture     group never;
     };
 
+    register CFAM_FSI_GP7
+    {
+        name        "TPC.FSI.FSI_MAILBOX.FSXCOMP.FSXLOG.FSIGP7";
+        scomaddr    0x00002816;
+        capture     group never;
+    };
+
     register PCIE_OSC_SWITCH
     {
         name        "TPC.FSI.FSI_MAILBOX.FSXCOMP.FSXLOG.SNS1LTH";
         scomaddr    0x00050019;
+        capture     group PllFIRs;
+    };
+
+    register OSCERR
+    {
+        name        "EH.TPCHIP.TPC.ITR.OSCERR.OSCERR_HOLD";
+        scomaddr    0x01020019;
         capture     group PllFIRs;
     };
 

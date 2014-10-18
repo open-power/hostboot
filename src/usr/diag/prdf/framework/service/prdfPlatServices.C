@@ -326,27 +326,6 @@ int32_t getCfam( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-void captureFsiStatusReg( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[PlatServices::captureFsiStatusReg] "
-
-    uint32_t u32Data = 0;
-    int32_t rc = getCfam( i_chip, io_sc, 0x00001007, u32Data );
-
-    if ( SUCCESS == rc )
-    {
-        BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &u32Data);
-
-        io_sc.service_data->GetCaptureData().Add(
-                            i_chip->GetChipHandle(),
-                            ( Util::hashString("CFAM_FSI_STATUS") ^
-                              i_chip->getSignatureOffset() ),
-                              bs);
-    }
-
-    #undef PRDF_FUNC
-}
 
 TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
                             i_procTarget,

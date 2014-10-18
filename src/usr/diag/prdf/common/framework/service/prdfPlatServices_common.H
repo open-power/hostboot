@@ -162,14 +162,6 @@ void initiateUnitDump( TARGETING::TargetHandle_t i_target,
  */
 void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
 
-/**
- * @brief   get the active pcie osc pos for this proc
- * @param   i_chip   P8 chip
- * @param   i_sc     service data collector
- * @return   active osc position
- */
-uint32_t getIoOscPos( ExtensibleChip * i_chip,
-                      STEP_CODE_DATA_STRUCT & io_sc );
 
 //##############################################################################
 //##                       Lane Repair functions
@@ -501,13 +493,6 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 //##                        util functions
 //##############################################################################
 
-/**
- * @brief   capture FSI Status Reg for FFDC
- * @param   i_chip   Extensible chip
- * @param   i_sc     service data collector
- */
-void captureFsiStatusReg( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief   get cfam data
