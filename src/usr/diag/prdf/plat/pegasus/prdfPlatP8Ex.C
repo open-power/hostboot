@@ -143,18 +143,6 @@ int32_t L2CE( ExtensibleChip * i_chip,
 } PRDF_PLUGIN_DEFINE(Ex, L2CE);
 
 /**
- * @brief Check if we're running in hostboot
- * @param i_chip Ex chip.
- * @param i_stepcode Step Code data struct
- * @return SUCCESS because this is the Hostboot file
- */
-int32_t InHostboot( ExtensibleChip * i_chip,
-                    STEP_CODE_DATA_STRUCT & i_stepcode )
-{
-    return SUCCESS;
-} PRDF_PLUGIN_DEFINE(Ex, InHostboot);
-
-/**
  * @brief check if both core CS and RE are on at the same time
  *        and core recoverable is set in COREFIRWOF
  * @param i_chip Ex chip.
