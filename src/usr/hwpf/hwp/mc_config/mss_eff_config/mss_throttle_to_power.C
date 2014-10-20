@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_throttle_to_power.C,v 1.15 2014/08/28 21:56:28 pardeik Exp $
+// $Id: mss_throttle_to_power.C,v 1.17 2014/10/16 13:42:02 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_throttle_to_power.C,v $
 //------------------------------------------------------------------------------
@@ -49,6 +49,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.17  | pardeik  |16-OCT-14| removed l_dimm_power_array_integer to fix
+//         |          |         |  cronus 64bit compile error
+//   1.16  | pardeik  |15-OCT-14| remove attr writing for ATTR_MSS_DIMM_MAXPOWER
 //   1.15  | pardeik  |27-AUG-14| use new power curve uplift attribute for idle 
 //   1.14  | pardeik  |21-MAY-14| Fixed power calculations
 //   1.13  | jdsloat  |10-MAR-14| Edited comments
@@ -216,7 +219,6 @@ extern "C" {
 	uint8_t l_port;
 	uint8_t l_dimm;
 	float l_dimm_power_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
-	uint32_t l_dimm_power_array_integer[MAX_NUM_PORTS][MAX_NUM_DIMMS];
 	float l_utilization;
 	float l_channel_power_array[MAX_NUM_PORTS];
 	uint32_t l_channel_power_array_integer[MAX_NUM_PORTS];
@@ -334,7 +336,6 @@ extern "C" {
 	    {
 // default dimm power is zero (used for dimms that are not physically present)
 		l_dimm_power_array[l_port][l_dimm] = 0;
-		l_dimm_power_array_integer[l_port][l_dimm] = 0;
 		l_utilization = 0;
 // See if there are any ranks present on the dimm (configured or deconfigured)
 		if (l_dimm_ranks_array[l_port][l_dimm] > 0)
@@ -430,8 +431,6 @@ extern "C" {
 		    l_dimm_power_array[l_port][l_dimm] =
 		      l_dimm_power_array[l_port][l_dimm]
 		      * (1 + l_uplift / 100);
-		    l_dimm_power_array_integer[l_port][l_dimm] =
-		      (int)l_dimm_power_array[l_port][l_dimm] + 1;
 		}
 // calculate channel power by adding up the power of each dimm
 		l_channel_power_array[l_port] = l_channel_power_array[l_port] +
@@ -460,12 +459,9 @@ extern "C" {
 	}
 //------------------------------------------------------------------------------
 // Update output attributes
-	rc = FAPI_ATTR_SET(ATTR_MSS_DIMM_MAXPOWER,
-			   &i_target_mba, l_dimm_power_array_integer);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_DIMM_MAXPOWER");
-	    return rc;
-	}
+
+// Removed updating ATTR_MSS_DIMM_MAXPOWER for SW282712
+
 	rc = FAPI_ATTR_SET(ATTR_MSS_CHANNEL_PAIR_MAXPOWER,
 			   &i_target_mba, l_channel_pair_power_integer);
 	if (rc) {
