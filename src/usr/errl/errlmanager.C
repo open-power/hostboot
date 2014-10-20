@@ -364,7 +364,7 @@ void ErrlManager::errlogMsgHndlr ()
                     iv_isErrlDisplayEnabled = true;
 
                     CONSOLE::displayf("ERRL",
-                        "Dumping errors reported prior to registration\n");
+                        "Dumping errors reported prior to registration");
 
                     // Display errlogs to errldisplay
                     ErrlListItr_t it = iv_errlList.begin();

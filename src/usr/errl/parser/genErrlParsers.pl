@@ -127,6 +127,7 @@ if ($DEBUG)
 # Process the compIdFile, recording all of the component ID values
 #------------------------------------------------------------------------------
 my %compIdToValueHash;
+my %compIdToHexValueHash;
 
 open(COMP_ID_FILE, $compIdFile) or die("Cannot open: $compIdFile: $!");
 
@@ -145,6 +146,8 @@ while (my $line = <COMP_ID_FILE>)
         if ($compId ne "PRDF_COMP_ID")
         {
             $compIdToValueHash{$compId} = $compValue;
+            # Need the integer value for compId sorting purposes
+            $compIdToHexValueHash{$compId} = hex $compValue;
         }
     }
 }
@@ -1076,12 +1079,20 @@ foreach my $modID (sort keys %displayDataEntries)
     }
 }
 
+#------------------------------------------------------------------------------
+# Helper function for sort method, sorts by ascending values
+#------------------------------------------------------------------------------
+sub hashValueAsc
+{
+   $compIdToHexValueHash{$a} <=> $compIdToHexValueHash{$b};
+}
+
 print OFILE "};\n";
 print OFILE "uint16_t ErrLogDisplay::errorInfoTableSize = sizeof(errorInfo) / sizeof(errorInfo[0]);\n\n";
 print OFILE "\n\n// Component Id Table\n";
 print OFILE "#include <hbotcompid.H>\n";
 print OFILE "ErrLogDisplay::compTableInfo ErrLogDisplay::compTable [] = {\n";
-foreach my $key (sort keys %compIdToValueHash)
+foreach my $key (sort hashValueAsc (keys(%compIdToHexValueHash)))
 {
     $key = substr($key,0,length($key)-3);
     print OFILE "    {" . $key . "_ID, " . $key . "_NAME},\n";
