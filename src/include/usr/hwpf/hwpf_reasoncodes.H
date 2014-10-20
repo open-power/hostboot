@@ -73,6 +73,7 @@ namespace fapi
         MOD_PLAT_EN_VDDR                           = 0x1F,
         MOD_GET_OCC_CHIP_TARGET                    = 0x20,
         MOD_ACCESS_OCB_INDIRECT_CHANNEL            = 0x21,
+        MOD_GET_RCD_CNTL_WORD                      = 0x22,
 
     };
 
@@ -124,7 +125,7 @@ namespace fapi
         RC_TIMEOUT_EN_VDDR            = HWPF_COMP_ID | 0x30,
         RC_TARGET_UNSUPPORTED         = HWPF_COMP_ID | 0x31,
         RC_INVALID_DATA_BUFFER_LENGTH = HWPF_COMP_ID | 0x32,
-
+        RC_INVALID_DIMM_TYPE          = HWPF_COMP_ID | 0x33,
     };
 
     /**

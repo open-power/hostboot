@@ -59,7 +59,7 @@
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <hwpf/hwp/winkle_ring_accessors/getL3DeltaDataAttr.H>
-
+#include <fapiAttributeIds.H>
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
 // supported HWPF attributes lists attributes handled by Hostboot
@@ -1583,6 +1583,94 @@ fapi::ReturnCode fapiPlatGetControlCapable(const fapi::Target * i_pTarget,
     return l_rc;
 }
 
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetRCDCntlWord015(const fapi::Target * i_pFapiTarget,
+                uint64_t  & o_val)
+{
+    fapi::ReturnCode l_rc;
+    errlHndl_t l_err = NULL;
+    o_val = 0;
+    size_t  l_nibbleSize = 4;
+    const uint8_t  l_keywordSize = 16;
+    const uint16_t l_keywords [l_keywordSize] = { SPD::RMM_RC0,
+                                                  SPD::RMM_RC1,
+                                                  SPD::RMM_RC2,
+                                                  SPD::RMM_RC3,
+                                                  SPD::RMM_RC4,
+                                                  SPD::RMM_RC5,
+                                                  SPD::RMM_RC6,
+                                                  SPD::RMM_RC7,
+                                                  SPD::RMM_RC8,
+                                                  SPD::RMM_RC9,
+                                                  SPD::RMM_RC10,
+                                                  SPD::RMM_RC11,
+                                                  SPD::RMM_RC12,
+                                                  SPD::RMM_RC13,
+                                                  SPD::RMM_RC14,
+                                                  SPD::RMM_RC15 };
+    do
+    {
+        uint8_t l_dimmType =0;
+        l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE, i_pFapiTarget,l_dimmType);
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetRCDCntlWord015: Error getting ATTR_SPD_MODULE_TYPE");
+            break;
+        }
+
+
+        if (l_dimmType == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)
+        {
+            TARGETING::Target* l_pTarget = NULL;
+            l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget, TARGETING::TYPE_DIMM);
+            if (l_rc)
+            {
+                FAPI_ERR("fapiPlatGetRCDCntlWord015: Error from getTargetingTarget");
+                break;
+            }
+
+            uint8_t l_nibbleRead;
+
+            for (int i = 0; i < l_keywordSize; i++)
+            {
+                l_nibbleRead = 0;
+                l_err = deviceRead(l_pTarget, &l_nibbleRead, l_nibbleSize,
+                           DEVICE_SPD_ADDRESS(l_keywords[i]));
+                if (l_err)
+                {
+                    FAPI_ERR("fapiPlatGetRCDCntlWord015:Error from deviceRead");
+                    l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+                    break;
+                }
+                o_val = (o_val << 4) | (l_nibbleRead & 0x0F);
+            }
+        }
+        else if ((l_dimmType == ENUM_ATTR_SPD_MODULE_TYPE_UDIMM) ||
+                 (l_dimmType == ENUM_ATTR_SPD_MODULE_TYPE_CDIMM))
+        {
+            o_val = 0;
+            break;
+        }
+        else
+        {
+            /*@
+             * @errortype
+             * @moduleid   MOD_GET_RCD_CNTL_WORD
+             * @reasoncode RC_INVALID_DIMM_TYPE
+             * @userdata1  DIMM TYPE
+             * @devdesc    Failed due to wrong DIMM type
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            MOD_GET_RCD_CNTL_WORD,
+                                            RC_INVALID_DIMM_TYPE,
+                                            l_dimmType, 0, true);
+            FAPI_ERR("fapiPlatGetRCDCntlWord015:Wrong dimm type");
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
+        }
+    } while (0);
+    return l_rc;
+}
 
 fapi::ReturnCode getIsDimmToC4DQ
                             (const fapi::Target * i_pTarget,

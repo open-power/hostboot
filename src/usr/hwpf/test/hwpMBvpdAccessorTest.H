@@ -508,6 +508,63 @@ public:
         TS_TRACE( "testGetControlCapableData exit" );
 
     }
+
+    /**
+     * @brief call getRCDCntlWord015 to ensure that it's getting the MR
+     *        keyword correctly, and getting the right data
+     *
+     */
+    void testGetRCDCntlWord015()
+    {
+        FAPI_IMP( "testGetRCDCntlWord015 entry" );
+        fapi::ReturnCode l_fapirc;
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+#if HWPMBVPDACCESSORTEST_UT0
+        uint8_t l_mbNum = 0; //check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for(; l_mbNum < l_memBufList.size(); l_mbNum++)
+        {
+            TARGETING::TargetHandleList l_mbaList;
+            getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                                    CLASS_UNIT,TYPE_MBA,false);
+
+            for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaList.size(); l_mbaNum++ )
+            {
+                TARGETING::TargetHandleList l_dimmList;
+                getChildAffinityTargets(l_dimmList,l_mbaList[l_mbaNum],
+                               CLASS_LOGICAL_CARD,TYPE_DIMM,false);
+
+                for ( uint8_t l_dimmNum=0; l_dimmNum < l_dimmList.size(); l_dimmNum++ )
+                {
+                    // make a local copy of the dimm target
+                    TARGETING::Target* l_dimm_target = l_dimmList[l_dimmNum];
+
+                    //cast our type of target to a fapi target
+                    fapi::Target l_fapi_dimm_target( TARGET_TYPE_DIMM,
+                          (const_cast<TARGETING::Target*>(l_dimm_target)));
+
+                    //Get FAPI ATTR
+                    uint64_t l_val = 0;
+                    l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15,
+                             (const_cast<fapi::Target*>(&l_fapi_dimm_target)),l_val);
+
+                    if (l_fapirc)
+                    {
+                        TS_FAIL( "testGetRCDCntlWord015: FAPI_ATTR_GET fail rc=0x%x",
+                            static_cast<uint32_t>(l_fapirc) );
+                        fapiLogError(l_fapirc);
+                    }
+                    FAPI_IMP("testGetRCDCntlWord015: attr value: 0x%X", l_val);
+                }
+            }
+        }
+        FAPI_IMP( "testGetRCDCntlWord015 exit" );
+    }
     /**
      * @brief call getMBvpdSlopeInterceptData to fetch power slope and intercept
      *        attributes from the MW and MV keywords
