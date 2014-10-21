@@ -30,6 +30,7 @@
 #include <targeting/common/targetservice.H>
 #include <errl/errlentry.H>
 #include "sfcdd.H"
+#include <config.h>
 
 /** @file sfc_ast2400.H
  *  @brief Provides the logic to access and configure the
