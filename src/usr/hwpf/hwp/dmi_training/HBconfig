@@ -1,5 +1,4 @@
 config NO_DMI_EREPAIR
-    default y if !HAVE_MBVPD
+    default n
     help
         Do not apply erepair information on the DMI bus during boot
-

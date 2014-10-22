@@ -196,6 +196,7 @@ bool VPD::cvpdPresent( TARGETING::Target * i_target )
     IpVpdFacade::input_args_t args;
     args.record = CVPD::VEIR;
     args.keyword = CVPD::PF ;
+    args.location = VPD::AUTOSELECT;
     size_t kwlen = 0;
     errlHndl_t l_errl = Singleton<CvpdFacade>::instance().read(
                                    i_target,

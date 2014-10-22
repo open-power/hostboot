@@ -1001,6 +1001,25 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.devSize_KB    = eepromData.maxMemorySizeKB;
         o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
 
+        // @todo RTC:116428 - forcing the attribute data for now
+        //                    until we can pull it from the MRW
+        if( TARGETING::TYPE_MEMBUF ==
+                    i_target->getAttr<TARGETING::ATTR_TYPE>() )
+        {
+            o_i2cInfo.port          = 2;
+            o_i2cInfo.devAddr       = 0xA0;
+            o_i2cInfo.engine        = 1;
+            TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+            epath.addLast(TARGETING::TYPE_SYS,0);
+            epath.addLast(TARGETING::TYPE_NODE,0);
+            epath.addLast(TARGETING::TYPE_PROC,0);
+            o_i2cInfo.i2cMasterPath = epath;
+            o_i2cInfo.writePageSize = 32;
+            o_i2cInfo.devSize_KB    = 0x40;
+            o_i2cInfo.writeCycleTime = 20;
+            eepromData.byteAddrOffset = 2;
+        }
+
         // Convert attribute info to eeprom_addr_size_t enum
         if ( eepromData.byteAddrOffset == 0x2 )
         {
@@ -1094,24 +1113,47 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                        ERR_MRK"eepromGetI2CMasterTarget() - "
                        "i2cMasterPath attribute path doesn't exist!" );
 
+            // Compress the entity path
+            uint64_t l_epCompressed = 0;
+            for( uint32_t i = 0; i < i_i2cInfo.i2cMasterPath.size(); i++ )
+            {
+                // Path element: type:8 instance:8
+                l_epCompressed |=
+                    i_i2cInfo.i2cMasterPath[i].type << (16*(3-i));
+                l_epCompressed |=
+                    i_i2cInfo.i2cMasterPath[i].instance << ((16*(3-i))-8);
+
+                // Can only fit 4 path elements into 64 bits
+                if ( i == 3 )
+                {
+                    break;
+                }
+            }
+
             /*@
              * @errortype
-             * @reasoncode       EEPROM_DIMM_I2C_MASTER_PATH_ERROR
+             * @reasoncode       EEPROM_I2C_MASTER_PATH_ERROR
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         EEPROM_GETI2CMASTERTARGET
-             * @userdata1        Attribute Chip Type Enum
-             * @userdata2        HUID of target
-             * @devdesc          DIMM I2C master entity path doesn't exist.
+             * @userdata1[00:31] Attribute Chip Type Enum
+             * @userdata1[32:63] HUID of target
+             * @userdata2        Compressed Entity Path
+             * @devdesc          I2C master entity path doesn't exist.
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 EEPROM_GETI2CMASTERTARGET,
-                                EEPROM_DIMM_I2C_MASTER_PATH_ERROR,
-                                i_i2cInfo.chip,
-                                TARGETING::get_huid(i_target),
+                                EEPROM_I2C_MASTER_PATH_ERROR,
+                                TWO_UINT32_TO_UINT64(
+                                    i_i2cInfo.chip,
+                                    TARGETING::get_huid(i_target) ),
+                                l_epCompressed,
                                 true /*Add HB SW Callout*/ );
 
             err->collectTrace( EEPROM_COMP_NAME );
+
+            ERRORLOG::ErrlUserDetailsString(
+                i_i2cInfo.i2cMasterPath.toString()).addToLog(err);
 
             break;
         }
@@ -1125,23 +1167,46 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                        ERR_MRK"eepromGetI2CMasterTarget() - I2C Master "
                               "Path target was NULL!" );
 
+            // Compress the entity path
+            uint64_t l_epCompressed = 0;
+            for( uint32_t i = 0; i < i_i2cInfo.i2cMasterPath.size(); i++ )
+            {
+                // Path element: type:8 instance:8
+                l_epCompressed |=
+                    i_i2cInfo.i2cMasterPath[i].type << (16*(3-i));
+                l_epCompressed |=
+                    i_i2cInfo.i2cMasterPath[i].instance << ((16*(3-i))-8);
+
+                // Can only fit 4 path elements into 64 bits
+                if ( i == 3 )
+                {
+                    break;
+                }
+            }
+
             /*@
              * @errortype
              * @reasoncode       EEPROM_TARGET_NULL
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         EEPROM_GETI2CMASTERTARGET
-             * @userdata1        Attribute Chip Type Enum
-             * @userdata2        HUID of target
+             * @userdata1[00:31] Attribute Chip Type Enum
+             * @userdata1[32:63] HUID of target
+             * @userdata2        Compressed Entity Path
              * @devdesc          I2C master path target is null.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_GETI2CMASTERTARGET,
                                            EEPROM_TARGET_NULL,
-                                           i_i2cInfo.chip,
-                                           TARGETING::get_huid(i_target),
+                                           TWO_UINT32_TO_UINT64(
+                                               i_i2cInfo.chip,
+                                               TARGETING::get_huid(i_target) ),
+                                           l_epCompressed,
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( EEPROM_COMP_NAME );
+
+            ERRORLOG::ErrlUserDetailsString(
+                i_i2cInfo.i2cMasterPath.toString()).addToLog(err);
 
             break;
         }

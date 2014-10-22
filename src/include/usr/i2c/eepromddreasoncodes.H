@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -67,7 +69,7 @@ enum eepromReasonCode
     EEPROM_INVALID_DEVICE_TYPE              = EEPROM_COMP_ID | 0x02,
     EEPROM_ATTR_INFO_NOT_FOUND              = EEPROM_COMP_ID | 0x03,
     EEPROM_INVALID_CHIP                     = EEPROM_COMP_ID | 0x04,
-    EEPROM_DIMM_I2C_MASTER_PATH_ERROR       = EEPROM_COMP_ID | 0x05,
+    EEPROM_I2C_MASTER_PATH_ERROR            = EEPROM_COMP_ID | 0x05,
     EEPROM_TARGET_NULL                      = EEPROM_COMP_ID | 0x06,
     EEPROM_INVALID_ADDR_OFFSET_SIZE         = EEPROM_COMP_ID | 0x07,
     EEPROM_OVERFLOW_ERROR                   = EEPROM_COMP_ID | 0x08,

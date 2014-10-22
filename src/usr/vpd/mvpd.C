@@ -192,6 +192,7 @@ bool VPD::mvpdPresent( TARGETING::Target * i_target )
     IpVpdFacade::input_args_t args;
     args.record = MVPD::CP00;
     args.keyword = MVPD::VD;
+    args.location = VPD::AUTOSELECT;
     size_t kwlen = 0;
     errlHndl_t l_errl = Singleton<MvpdFacade>::instance().read(
                                    i_target,

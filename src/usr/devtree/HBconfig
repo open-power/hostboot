@@ -1,6 +1,7 @@
 
 config DISABLE_HOSTBOOT_RUNTIME
-    default y if !HAVE_MBVPD
+    default n
     help
         Disable the Hostboot Runtime (HBRT)
-
+# Was default y if !HAVE_MBVPD
+# Story 116907 Enable HBRT for OpenPower
