@@ -153,4 +153,20 @@
     <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
+<targetTypeExtension>
+    <id>occ</id>
+    <attribute>
+        <id>PSTATE_TABLE</id>
+    </attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>unit-mba-power8</id>
+    <attribute><id>OT_MIN_N_PER_MBA</id></attribute>
+    <attribute><id>N_PLUS_ONE_N_PER_MBA</id></attribute>
+    <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
+    <attribute><id>OVERSUB_N_PER_MBA</id></attribute>
+    <attribute><id>OVERSUB_N_PER_CHIP</id></attribute>
+</targetTypeExtension>
+
 </attributes>

@@ -25,11 +25,18 @@
 ROOTPATH = ../../..
 MODULE = htmgt
 
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
+
 # objects common to hostboot and hbrt
 include htmgt_common.mk
 
 # objects unique to hostboot (none yet)
-#OBJS +=
+OBJS += htmgt_memthrottles.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

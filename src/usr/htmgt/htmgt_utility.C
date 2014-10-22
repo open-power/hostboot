@@ -23,7 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include "htmgt_utility.H"
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/attributes.H>
 
+using namespace TARGETING;
 
 namespace HTMGT
 {
@@ -115,6 +118,30 @@ namespace HTMGT
         return L_cmd_string[l_idx].str_data;
     } // end command_string()
 
+
+
+    uint8_t getOCCDIMMPos(const TargetHandle_t i_mba,
+                          const TargetHandle_t i_dimm)
+    {
+        //To make the OCC DIMM # 0 - 7: 0bABC
+        //  A: MBA  ATTR_CHIP_UNIT: 0 or 1
+        //  B: DIMM ATTR_MBA_PORT:  0 or 1
+        //  C: DIMM ATTR_MBA_DIMM:  0 or 1
+
+        //Note: No CDIMM systems in plan.  May need to revisit
+        //this if there are any as OCC may not care about logical DIMMs.
+
+        const uint8_t mbaUnit = i_mba->getAttr<ATTR_CHIP_UNIT>();
+        const uint8_t mbaPort = i_dimm->getAttr<ATTR_MBA_PORT>();
+        const uint8_t mbaDIMM = i_dimm->getAttr<ATTR_MBA_DIMM>();
+
+        TMGT_DBG("DIMM 0x%X unit %d port %d pos %d = %d",
+                 i_dimm->getAttr<ATTR_HUID>(),
+                 mbaUnit, mbaPort, mbaDIMM,
+                 ((mbaUnit << 2) | (mbaPort << 1) | mbaDIMM));
+
+        return ((mbaUnit << 2) | (mbaPort << 1) | mbaDIMM);
+    }
 
 
 } // end namespace

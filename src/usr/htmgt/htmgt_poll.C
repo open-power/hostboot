@@ -29,7 +29,7 @@
 #include "htmgt_activate.H"
 #include "htmgt_poll.H"
 #include "htmgt_occcmd.H"
-#include "htmgt_config.H"
+#include "htmgt_cfgdata.H"
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>

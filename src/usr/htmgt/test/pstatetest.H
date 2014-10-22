@@ -44,6 +44,7 @@
 #include <mss_bulk_pwr_throttles.H>
 #include <mss_util_to_throttle.H>
 #include <mss_throttle_to_power.H>
+#include <mss_eff_config_thermal.H>
 
 using namespace TARGETING;
 
@@ -146,6 +147,17 @@ class pstateTest: public CxxTest::TestSuite
                 const fapi::Target l_fapi_mba_target
                     (fapi::TARGET_TYPE_MBA_CHIPLET,
                      (const_cast<TARGETING::Target*>(l_mba_target)));
+
+                // mss_eff_config_thermal sets up the attributes needed by
+                // the hw procedures that follow it.
+                FAPI_INVOKE_HWP( l_errl,
+                                 mss_eff_config_thermal,
+                                 l_fapi_mba_target);
+                if( l_errl )
+                {
+                    errlCommit(l_errl, HTMGT_COMP_ID);
+                    TS_FAIL("Call to mss_eff_config_thermal failed");
+                }
 
                 FAPI_INVOKE_HWP( l_errl,
                                  mss_bulk_pwr_throttles,

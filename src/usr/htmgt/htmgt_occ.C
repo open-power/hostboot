@@ -27,7 +27,7 @@
 #include <htmgt/htmgt_reasoncodes.H>
 #include "htmgt_utility.H"
 #include "htmgt_occcmd.H"
-#include "htmgt_config.H"
+#include "htmgt_cfgdata.H"
 #include "htmgt_occ.H"
 
 //  Targeting support

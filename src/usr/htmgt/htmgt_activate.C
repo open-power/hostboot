@@ -28,7 +28,7 @@
 #include "htmgt_utility.H"
 #include "htmgt_activate.H"
 #include "htmgt_occcmd.H"
-#include "htmgt_config.H"
+#include "htmgt_cfgdata.H"
 #include "htmgt_poll.H"
 
 //  Targeting support

@@ -149,5 +149,17 @@ namespace HTMGT
     const char *command_string(const uint8_t i_cmd);
 
 
+    /**
+     * Helper function to return the DIMM number as the OCC sees it.
+     * There can be 8 DIMMs per Centaur.
+     *
+     * @param i_mba - the MBA the DIMM is on
+     * @param i_dimm - the DIMM
+     * @return - a number 0-7
+     */
+    uint8_t getOCCDIMMPos(const TARGETING::TargetHandle_t i_mba,
+                          const TARGETING::TargetHandle_t i_dimm);
+
+
 } // end namespace
 #endif

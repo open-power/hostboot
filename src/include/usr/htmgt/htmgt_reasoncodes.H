@@ -34,6 +34,7 @@ namespace HTMGT
         HTMGT_MOD_LOAD_START_STATUS     = 0x00,
         HTMGT_MOD_WAIT_FOR_OCC_ACTIVE   = 0x01,
         HTMGT_MOD_WAIT_FOR_OCC_READY    = 0x02,
+        HTMGT_MOD_MEMTHROTTLE           = 0x03,
         HTMGT_MOD_OCC_POLL              = 0x76,
         HTMGT_MOD_READ_OCC_SRAM         = 0x85,
         HTMGT_MOD_SEND_OCC_CMD          = 0x90,
@@ -46,6 +47,9 @@ namespace HTMGT
     enum htmgtReasonCode
     {
         HTMGT_RC_INTERNAL_ERROR        = HTMGT_COMP_ID | 0x01,
+        HTMGT_RC_THROTTLE_UTIL_ERROR   = HTMGT_COMP_ID | 0x02,
+        HTMGT_RC_THROTTLE_INVALID_N    = HTMGT_COMP_ID | 0x03,
+        HTMGT_RC_OT_THROTTLE_INVALID_N = HTMGT_COMP_ID | 0x04,
         HTMGT_RC_NO_SUPPORT            = HTMGT_COMP_ID | 0x0F,
         HTMGT_RC_OCC_RESET             = HTMGT_COMP_ID | 0x15,
         HTMGT_RC_OCC_CRIT_FAILURE      = HTMGT_COMP_ID | 0x16,

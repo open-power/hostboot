@@ -622,6 +622,18 @@
 </attribute>
 
 <attribute>
+    <id>PSTATE_TABLE</id>
+    <description>HTMGT PSTATE data</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>1904</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>OCC_CONTROL_DATA</id>
     <description>OCC operational data
     </description>
@@ -633,6 +645,88 @@
     <readable/>
     <writeable/>
 </attribute>
+
+<attribute>
+    <id>OT_MIN_N_PER_MBA</id>
+    <description>
+        Lowest per MBA numerator ever allowed when OCC is
+        throttling due to OT.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>N_PLUS_ONE_N_PER_MBA</id>
+    <description>
+        Static per MBA numerator setting when not in
+        oversubscription.  Calculated based on MRW memory
+        power with redundant power. Lowest per MBA numerator
+        ever allowed when OCC is throttling due to OT.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>N_PLUS_ONE_N_PER_CHIP</id>
+    <description>
+        Static per chip numerator setting when not in oversubscription.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>OVERSUB_N_PER_MBA</id>
+    <description>
+        Static per MBA numerator setting when in oversubscription.
+        Calculated based on MRW oversubscription memory power.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>OVERSUB_N_PER_CHIP</id>
+    <description>
+        Static per chip numerator setting when in oversubscription.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+
 <!-- end HTMGT attributes -->
 
 <attribute>

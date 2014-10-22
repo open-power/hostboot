@@ -75,5 +75,10 @@ namespace HTMGT
      */
     errlHndl_t setOccActiveSensors();
 
+    /**
+     * @brief send all occ configuration messages to the OCCs
+     */
+    void sendOccConfigData();
+
 } // end namespace
 #endif

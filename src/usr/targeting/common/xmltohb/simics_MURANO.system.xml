@@ -166,6 +166,22 @@
         <default>5000</default>
     </attribute>
     <attribute>
+        <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
+        <default>85</default>
+    </attribute>
+    <attribute>
+        <id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id>
+        <default>5</default>
+    </attribute>
+     <attribute>
+        <id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+        <default>500</default>
+    </attribute>
+    <attribute>
+        <id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id>
+        <default>500</default>
+    </attribute>
+    <attribute>
         <id>PM_EXTERNAL_VRM_STEPSIZE</id>
         <default>0xc4</default>
     </attribute>

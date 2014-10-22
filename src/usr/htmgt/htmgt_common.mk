@@ -29,6 +29,7 @@ OBJS += htmgt_activate.o
 OBJS += htmgt_occcmd.o
 OBJS += htmgt_poll.o
 OBJS += htmgt_utility.o
+OBJS += htmgt_cfgdata.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi

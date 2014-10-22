@@ -53,10 +53,10 @@ namespace HTMGT
 
     enum occRole
     {
-        OCC_ROLE_SLAVE          = 0,
-        OCC_ROLE_MASTER         = 1,
-        OCC_ROLE_BACKUP_MASTER  = 2,
-        OCC_ROLE_FIR_MASTER     = 3
+        OCC_ROLE_SLAVE          = 0x00,
+        OCC_ROLE_MASTER         = 0x01,
+        OCC_ROLE_BACKUP_MASTER  = 0x02,
+        OCC_ROLE_FIR_MASTER     = 0x80
     };
 
 
