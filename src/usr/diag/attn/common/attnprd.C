@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/attn.C $                           */
+/* $Source: src/usr/diag/attn/common/attnprd.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,9 +24,9 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /**
- * @file attn.C
+ * @file attnprd.C
  *
- * @brief HBATTN utility function definitions.
+ * @brief HBATTN PRD wrapper class definitions.
  */
 
 #include "ipl/attnsvc.H"
@@ -48,41 +48,99 @@ using namespace Util;
 namespace ATTN
 {
 
-errlHndl_t startService()
+void PrdImpl::installPrd()
 {
-    return Singleton<Service>::instance().start();
+    getPrdWrapper().setImpl(*this);
 }
 
-errlHndl_t stopService()
+errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
 {
-    return Singleton<Service>::instance().stop();
-}
+    // forward call to the real PRD
 
-errlHndl_t checkForIplAttentions()
-{
     errlHndl_t err = NULL;
 
-    assert(!Singleton<Service>::instance().running());
+    // convert attention list to PRD type
 
-    TargetHandleList list;
+    AttnList attnList;
 
-    getTargetService().getAllChips(list, TYPE_PROC);
+    i_attentions.getAttnList(attnList);
 
-    TargetHandleList::iterator tit = list.begin();
-
-    while(tit != list.end())
+    if(!attnList.empty())
     {
-        err = Singleton<Service>::instance().handleAttentions(*tit);
+        // AttentionLists keep themselves sorted by attention type
+        // with higher priority attentions
+        // appearing before those with lower priority, where the
+        // priority is defined by the ATTENTION_VALUE_TYPE enum.
+        //
+        // When an AttentionList is converted to an AttnList
+        // the order is preserved.  In this way, the PRD
+        // requirement that the highest priority attention
+        // appear first in the argument list is satisfied.
 
-        if(err)
-        {
-            errlCommit(err, ATTN_COMP_ID);
-        }
+        err = PRDF::main(attnList.front().attnType, attnList);
+    }
 
-        tit = list.erase(tit);
+    return err;
+}
+
+PrdWrapper & getPrdWrapper()
+{
+    // prd wrapper singleton access
+    return Singleton<PrdWrapper>::instance();
+}
+
+PrdWrapper::PrdWrapper()
+    : iv_impl(&Singleton<PrdImpl>::instance())
+{
+    // default call the real PRD
+}
+
+errlHndl_t PrdWrapper::callPrd(const AttentionList & i_attentions)
+{
+    // forward call to the installed PRD implementation.
+
+    ATTN_DBG("call PRD with %d using: %p", i_attentions.size(), iv_impl);
+
+    return iv_impl->callPrd(i_attentions);
+}
+
+ProcOps & getProcOps()
+{
+    return Singleton<ProcOps>::instance();
+}
+
+MemOps & getMemOps()
+{
+    return Singleton<MemOps>::instance();
+}
+
+int64_t Attention::compare(const Attention & i_rhs) const
+{
+    return ATTN::compare(iv_data, i_rhs.iv_data);
+}
+
+int64_t compare(const AttnData & i_l, const AttnData & i_r)
+{
+    if(i_l.attnType < i_r.attnType)
+    {
+        return -1;
+    }
+
+    if(i_r.attnType < i_l.attnType)
+    {
+        return 1;
+    }
+
+    if(i_l.targetHndl < i_r.targetHndl)
+    {
+        return -1;
+    }
+
+    if(i_r.targetHndl < i_l.targetHndl)
+    {
+        return 1;
     }
 
     return 0;
 }
-
 }

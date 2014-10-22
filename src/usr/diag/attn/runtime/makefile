@@ -33,12 +33,15 @@ CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
 MODULE = attn_rt
 
 include attn_rt.mk
+include ../common/attn_common.mk
 
 OBJS += ${ATTN_RT_OBJS}
+OBJS += ${ATTN_COMMON_OBJS}
 
 SUBDIRS += test.d
 
 VPATH += ..
+VPATH += ../..
 VPATH += ../common
 
 include ${ROOTPATH}/config.mk

@@ -23,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include "runtime/attnsvc.H"
 #include "common/attntrace.H"
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
@@ -45,14 +46,20 @@ namespace ATTN_RT
      */
     int enableAttns(void)
     {
-        #define ATTN_FUNC "ATTN_RT::enableAttns() "
-        int rc = 0;
+        ATTN_SLOW(ENTER_MRK"ATTN_RT::enableAttns");
 
-        ATTN_ERR(ATTN_FUNC"not implemented yet!");
+        int rc = 0;
+        errlHndl_t err = NULL;
+        err = Singleton<Service>::instance().enableAttns();
+        if(err)
+        {
+            errlCommit(err, ATTN_COMP_ID);
+            rc = -1;
+        }
+
+        ATTN_SLOW(EXIT_MRK"ATTN_RT::enableAttns rc: %d", rc);
 
         return rc;
-
-        #undef ATTN_FUNC
     }
 
     /** Disable chip attentions
@@ -61,14 +68,20 @@ namespace ATTN_RT
      */
     int disableAttns(void)
     {
-        #define ATTN_FUNC "ATTN_RT::disableAttns() "
-        int rc = 0;
+        ATTN_SLOW(ENTER_MRK"ATTN_RT::disableAttns");
 
-        ATTN_ERR(ATTN_FUNC"not implemented yet!");
+        int rc = 0;
+        errlHndl_t err = NULL;
+        err = Singleton<Service>::instance().disableAttns();
+        if(err)
+        {
+            errlCommit(err, ATTN_COMP_ID);
+            rc = -1;
+        }
+
+        ATTN_SLOW(EXIT_MRK"ATTN_RT::disableAttns rc: %d", rc);
 
         return rc;
-
-        #undef ATTN_FUNC
     }
 
     /** brief handle chip attentions
@@ -83,17 +96,50 @@ namespace ATTN_RT
                     uint64_t i_ipollStatus,
                     uint64_t i_ipollMask)
     {
-        #define ATTN_FUNC "ATTN_RT::handleAttns() "
-        int rc = 0;
+        ATTN_SLOW(ENTER_MRK"ATTN_RT::handleAttns RtProc: %llx"
+                  ", ipollMask: %llx, ipollStatus: %llx",
+                  i_proc, i_ipollMask, i_ipollStatus);
 
-        ATTN_ERR(ATTN_FUNC"not implemented yet!");
+        int rc = 0;
+        errlHndl_t err = NULL;
+
+        do
+        {
+            // Convert chipIds to HB targets
+            TargetHandle_t proc = NULL;
+            err = RT_TARG::getHbTarget(i_proc, proc);
+            if(err)
+            {
+                ATTN_ERR("ATTN_RT::handleAttns getHbTarget "
+                   "returned error for RtProc: %llx", i_proc);
+                rc = EINVAL;
+                break;
+            }
+
+            err = Singleton<Service>::instance().handleAttentions(proc);
+            if(err)
+            {
+                ATTN_ERR("ATTN_RT::handleAttns service::handleAttentions "
+                   "returned error for RtProc: %llx", i_proc);
+                break;
+            }
+        } while(0);
+
+        if(err)
+        {
+            errlCommit( err, ATTN_COMP_ID );
+            if(0 == rc)
+            {
+                rc = -1;
+            }
+        }
+
+        ATTN_SLOW(EXIT_MRK"ATTN_RT::handleAttns rc: %d", rc);
 
         return rc;
-
-        #undef ATTN_FUNC
     }
 
-    // register runtime interfaces
+    // register runtimeInterfaces
     struct registerAttn
     {
         registerAttn()
@@ -103,6 +149,7 @@ namespace ATTN_RT
             {
                 return;
             }
+
             rt_intf->enable_attns  = &enableAttns;
             rt_intf->disable_attns = &disableAttns;
             rt_intf->handle_attns  = &handleAttns;

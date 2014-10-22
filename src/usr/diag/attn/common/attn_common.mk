@@ -30,3 +30,5 @@ ATTN_COMMON_OBJS += attntarget.o
 ATTN_COMMON_OBJS += attnscom.o
 ATTN_COMMON_OBJS += attnproc.o
 ATTN_COMMON_OBJS += attnmem.o
+ATTN_COMMON_OBJS += attnprd.o
+ATTN_COMMON_OBJS += attnsvc_common.o

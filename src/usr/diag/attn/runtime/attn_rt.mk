@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/attn/runtime/attn_common.mk $
+# $Source: src/usr/diag/attn/runtime/attn_rt.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -24,4 +24,4 @@
 # IBM_PROLOG_END_TAG
 
 ATTN_RT_OBJS += attn_rt.o
-ATTN_RT_OBJS += attntrace.o
+ATTN_RT_OBJS += attnsvc.o

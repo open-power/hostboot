@@ -47,6 +47,7 @@
 #include "attnmeminject.H"
 #include <cxxtest/TestSuite.H>
 #include <sys/time.h>
+#include "../../common/attntrace.H"
 
 using namespace ATTN;
 using namespace std;
@@ -64,11 +65,11 @@ class AttnMemTest: public CxxTest::TestSuite
          */
         void testFakeAttentions()
         {
+            ATTN_SLOW(ENTER_MRK "AttnMemTest::testFakeAttentions");
+
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 5;
             static const uint64_t maxAttentionsPerIteration = 5;
-
-            TS_TRACE(ENTER_MRK "testFakeAttentions");
 
             errlHndl_t err = 0;
 
@@ -173,7 +174,7 @@ class AttnMemTest: public CxxTest::TestSuite
                 v.dump();
             }
 
-            TS_TRACE(EXIT_MRK "testFakeAttentions");
+            ATTN_SLOW(EXIT_MRK "AttnMemTest::testFakeAttentions");
         }
 
         /**
@@ -182,10 +183,10 @@ class AttnMemTest: public CxxTest::TestSuite
          */
         void testAttentions(void)
         {
+            ATTN_SLOW(ENTER_MRK "AttnMemTest::testAttentions");
+
             static const uint64_t iterations = 1;
             static const uint64_t maxAttnsPerIteration = 1;
-
-            TS_TRACE(ENTER_MRK "testAttentions");
 
             errlHndl_t err = 0;
 
@@ -244,7 +245,7 @@ class AttnMemTest: public CxxTest::TestSuite
                 delete err;
             }
 
-            TS_TRACE(EXIT_MRK "testAttentions");
+            ATTN_SLOW(EXIT_MRK "AttnMemTest::testAttentions");
         }
 };
 #endif

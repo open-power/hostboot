@@ -33,8 +33,7 @@
 
 #include <sys/task.h>
 #include <sys/sync.h>
-#include "common/attnfwd.H"
-#include "common/attnlist.H"
+#include "common/attnsvc_common.H"
 
 namespace ATTN
 {
@@ -42,7 +41,7 @@ namespace ATTN
 /**
  * @brief Service Host attention handler background service class definition.
  */
-class Service
+class Service : public ServiceCommon
 {
     public:
 
@@ -93,16 +92,6 @@ class Service
         ~Service();
 
     private:
-
-        /**
-         * @brief ConfigureMode
-         *
-         * Up or down for parameter for configure methods.
-         */
-        enum ConfigureMode
-        {
-            UP, DOWN,
-        };
 
         /**
          * @brief configureInterrupts enable or
@@ -227,17 +216,6 @@ class Service
         bool prdTaskWait();
 
         /**
-         * @brief processAttentions process interrupt task wakeup
-         *
-         * call prd to analyze attentions
-         *
-         * @param[i_procs] procs to check for attentions behind
-         *
-         * @post attentions analyzed by prd.  attentions cleared by prd unmasked
-         */
-        void processAttentions(const TARGETING::TargetHandleList & i_procs);
-
-        /**
          * @brief iv_interrupt PRD thread wakeup indicator
          */
         bool iv_interrupt;
@@ -261,11 +239,6 @@ class Service
          * @brief iv_intrTask intr task tid
          */
         tid_t iv_intrTask;
-
-        /**
-         * @brief iv_mutex pendingAttentions protection
-         */
-        mutex_t iv_mutex;
 
         /**
          * @brief iv_cond pendingAttentions and shutdown flag condition

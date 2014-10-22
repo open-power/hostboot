@@ -44,6 +44,7 @@
 #include "attnvalidate.H"
 #include <cxxtest/TestSuite.H>
 #include <sys/time.h>
+#include "../../common/attntrace.H"
 
 using namespace ATTN;
 using namespace PRDF;
@@ -62,10 +63,10 @@ class AttnProcTest: public CxxTest::TestSuite
          */
         void testQuery(void)
         {
+            ATTN_SLOW(ENTER_MRK "AttnProcTest::testQuery");
+
             static const uint64_t iterations = 100;
             static const uint64_t targetPoolSize = 8;
-
-            TS_TRACE(ENTER_MRK "testQuery");
 
             errlHndl_t err = 0;
 
@@ -144,7 +145,7 @@ class AttnProcTest: public CxxTest::TestSuite
                 }
             }
 
-            TS_TRACE(EXIT_MRK "testQuery");
+            ATTN_SLOW(EXIT_MRK "AttnProcTest::testQuery");
         }
 
         /**
@@ -153,11 +154,11 @@ class AttnProcTest: public CxxTest::TestSuite
          */
         void testFakeAttentions()
         {
+            ATTN_SLOW(ENTER_MRK "AttnProcTest::testFakeAttentions");
+
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 5;
             static const uint64_t maxAttnsPerIteration = 5;
-
-            TS_TRACE(ENTER_MRK "testFakeAttentions");
 
             errlHndl_t err = 0;
 
@@ -269,7 +270,7 @@ class AttnProcTest: public CxxTest::TestSuite
                 v.dump();
             }
 
-            TS_TRACE(EXIT_MRK "testFakeAttentions");
+            ATTN_SLOW(EXIT_MRK "AttnProcTest::testFakeAttentions");
         }
 };
 #endif

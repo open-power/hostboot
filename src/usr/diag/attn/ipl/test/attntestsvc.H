@@ -35,6 +35,7 @@
 #include "attnfakesys.H"
 #include "attntest.H"
 #include <cxxtest/TestSuite.H>
+#include "../../common/attntrace.H"
 
 using namespace ATTN;
 using namespace std;
@@ -188,11 +189,11 @@ class AttnSvcTest: public CxxTest::TestSuite
          */
         void testAttentions()
         {
+            ATTN_SLOW(ENTER_MRK "AttnSvcTest:testAttentions");
+
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 5;
             static const uint64_t maxAttnsPerIteration = 5;
-
-            TS_TRACE(ENTER_MRK "testAttentions");
 
             errlHndl_t err = 0;
 
@@ -333,7 +334,7 @@ class AttnSvcTest: public CxxTest::TestSuite
                 v.dump();
             }
 
-            TS_TRACE(EXIT_MRK "testAttentions");
+            ATTN_SLOW(EXIT_MRK "AttnSvcTest:testAttentions");
         }
 };
 #endif

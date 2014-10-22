@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/attn.C $                           */
+/* $Source: src/usr/diag/attn/runtime/attnsvc.C $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,67 +22,60 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 /**
- * @file attn.C
+ * @file attnsvc.C
  *
- * @brief HBATTN utility function definitions.
+ * @brief HBRT ATTN background service class function definitions.
  */
 
-#include "ipl/attnsvc.H"
-#include "common/attnprd.H"
-#include "common/attnops.H"
-#include "common/attnlist.H"
+#include <errl/errlmanager.H>
+#include "runtime/attnsvc.H"
 #include "common/attntrace.H"
-#include "common/attntarget.H"
+#include "common/attnprd.H"
 #include "common/attnproc.H"
 #include "common/attnmem.H"
-#include <util/singleton.H>
-#include <errl/errlmanager.H>
+#include "common/attntarget.H"
 
 using namespace std;
 using namespace PRDF;
 using namespace TARGETING;
-using namespace Util;
+using namespace ERRORLOG;
 
 namespace ATTN
 {
 
-errlHndl_t startService()
+errlHndl_t Service::disableAttns()
 {
-    return Singleton<Service>::instance().start();
+    ATTN_SLOW("Service::disableAttns() enter");
+
+    errlHndl_t err = configureInterrupts(DOWN);
+
+    ATTN_SLOW("Service::disableAttns() exit");
+
+    return err;
 }
 
-errlHndl_t stopService()
+errlHndl_t Service::enableAttns()
 {
-    return Singleton<Service>::instance().stop();
+    ATTN_SLOW("Service::enableAttns() enter");
+
+    errlHndl_t err = configureInterrupts(UP);
+
+    ATTN_SLOW("Service::enableAttns() exit");
+
+    return err;
 }
 
-errlHndl_t checkForIplAttentions()
+Service::~Service()
 {
-    errlHndl_t err = NULL;
+    ATTN_SLOW("Service::~Service() enter");
+    errlHndl_t err = disableAttns();
 
-    assert(!Singleton<Service>::instance().running());
-
-    TargetHandleList list;
-
-    getTargetService().getAllChips(list, TYPE_PROC);
-
-    TargetHandleList::iterator tit = list.begin();
-
-    while(tit != list.end())
+    if(err)
     {
-        err = Singleton<Service>::instance().handleAttentions(*tit);
-
-        if(err)
-        {
-            errlCommit(err, ATTN_COMP_ID);
-        }
-
-        tit = list.erase(tit);
+        errlCommit(err, ATTN_COMP_ID);
     }
-
-    return 0;
+    ATTN_SLOW("Service::~Service() exit");
 }
 
 }

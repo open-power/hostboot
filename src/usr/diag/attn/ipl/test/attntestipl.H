@@ -41,6 +41,7 @@
 #include "attntest.H"
 #include "../../common/attnproc.H"
 #include <cxxtest/TestSuite.H>
+#include "../../common/attntrace.H"
 
 using namespace ATTN;
 using namespace TARGETING;
@@ -59,11 +60,12 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
          */
         void testCheckForIplAttentions(void)
         {
+            ATTN_SLOW(ENTER_MRK "AttnCheckForIplAttentionsTest::"
+                                "testCheckForIplAttentions");
+
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 100;
             static const uint64_t maxAttnsPerIteration = 5;
-
-            TS_TRACE(ENTER_MRK "testCheckForIplAttentions");
 
             errlHndl_t err = 0;
 
@@ -131,7 +133,8 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
                 uint64_t count = system.count();
                 if(count)
                 {
-                    TS_FAIL("%d unexpected attentions present after check for ipl attentions.", count);
+                    TS_FAIL("%d unexpected attentions present after check for "
+                            "ipl attentions.", count);
 
                     system.dump();
                     break;
@@ -139,7 +142,8 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
 
             } while(0);
 
-            TS_TRACE(EXIT_MRK "testCheckForIplAttentions");
+            ATTN_SLOW(EXIT_MRK "AttnCheckForIplAttentionsTest::"
+                               "testCheckForIplAttentions");
         }
 };
 #endif

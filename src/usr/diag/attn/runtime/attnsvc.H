@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/attn.C $                           */
+/* $Source: src/usr/diag/attn/runtime/attnsvc.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,67 +22,74 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __ATTN_ATTNSVC_H
+#define __ATTN_ATTNSVC_H
 
 /**
- * @file attn.C
+ * @file attnsvc.H
  *
- * @brief HBATTN utility function definitions.
+ * @brief HBRT ATTN background service class definition.
  */
 
-#include "ipl/attnsvc.H"
-#include "common/attnprd.H"
-#include "common/attnops.H"
-#include "common/attnlist.H"
-#include "common/attntrace.H"
-#include "common/attntarget.H"
-#include "common/attnproc.H"
-#include "common/attnmem.H"
-#include <util/singleton.H>
-#include <errl/errlmanager.H>
-
-using namespace std;
-using namespace PRDF;
-using namespace TARGETING;
-using namespace Util;
+#include "common/attnsvc_common.H"
 
 namespace ATTN
 {
 
-errlHndl_t startService()
+/**
+ * @brief Service Host attention handler background service class definition.
+ */
+class Service : public ServiceCommon
 {
-    return Singleton<Service>::instance().start();
+    public:
+
+        /**
+         * @brief disable attentions.
+         *
+         * @post attentions are disabled.  All resources reclaimed.
+         *
+         * @return errlHndl_t Error log.
+         *
+         * @retval[0] No error.
+         * @retval[!0] Unexpected error.
+         */
+        errlHndl_t disableAttns();
+
+        /**
+         * @brief enable attentions.
+         *
+         * @post ServiceCommon started.
+         *
+         * @return errlHndl_t Error log.
+         *
+         * @retval[0] no error
+         * @retval[!0] unexpected error
+         */
+        errlHndl_t enableAttns();
+
+        /**
+         * @brief ctor
+         */
+        Service() {};
+
+        /**
+         * @brief dtor
+         */
+        ~Service();
+
+    private:
+
+        /**
+         * @brief copy disabled
+         */
+        Service(const Service &);
+
+        /**
+         * @brief assignment disabled
+         */
+        Service &operator=(const Service &);
+
+};
+
 }
-
-errlHndl_t stopService()
-{
-    return Singleton<Service>::instance().stop();
-}
-
-errlHndl_t checkForIplAttentions()
-{
-    errlHndl_t err = NULL;
-
-    assert(!Singleton<Service>::instance().running());
-
-    TargetHandleList list;
-
-    getTargetService().getAllChips(list, TYPE_PROC);
-
-    TargetHandleList::iterator tit = list.begin();
-
-    while(tit != list.end())
-    {
-        err = Singleton<Service>::instance().handleAttentions(*tit);
-
-        if(err)
-        {
-            errlCommit(err, ATTN_COMP_ID);
-        }
-
-        tit = list.erase(tit);
-    }
-
-    return 0;
-}
-
-}
+#endif
