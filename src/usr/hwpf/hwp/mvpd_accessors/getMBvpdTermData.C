@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.C,v 1.16 2014/10/27 16:12:56 eliner Exp $
+// $Id: getMBvpdTermData.C,v 1.17 2014/11/03 16:52:04 cswenson Exp $
 /**
  *  @file getMBvpdTermData.C
  *
@@ -596,6 +596,8 @@ fapi::ReturnCode getMBvpdTermData(
             case TERM_DATA_CEN_RD_VREF:
             case TERM_DATA_DRAM_WR_VREF:
             {
+                // @fixme - make this only read 8 bits after modifying
+                // the byte offset
                 uint32_t (* l_pVal)[2] = (uint32_t (*)[2])o_pVal;
                 uint32_t l_value = 0;
 
@@ -1054,6 +1056,10 @@ fapi::ReturnCode translate_CEN_RD_VREF (const fapi::MBvpdTermData i_attr,
     const uint8_t RD_VREF_VDD63125 = 0x18;
     const uint8_t RD_VREF_VDD61750 = 0x17;
     const uint8_t RD_VREF_VDD60375 = 0x16;
+
+    // Even though the attribute value is 32 bits, the data in VPD is
+    // only 8 bits wide (the last 8 bits)
+    io_value &= 0x000000FF;
 
     switch(io_value)
     {

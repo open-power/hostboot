@@ -2315,6 +2315,12 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         // Removed call to mss_eff_config_cke_map(), 
         //rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
 
+        // @fixme - this change is in v1.48 of the HWP
+        // @todo - RTC:117484 replace with v1.49 from ekb
+        // Removed call to mss_eff_config_termination() for Palmetto and
+        // Habanero using ifdef "FAPI_MSSLABONLY", moving to liveVPD.
+        // Note: Stradale, KG3, and DDR4 will still need ifdef "FAPI_MSSLABONLY"
+#ifdef FAPI_MSSLABONLY
         // If MSS Lab/Development override, for now everything except DDR3 CDIMMs
         if ((p_l_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO) || (p_l_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)) {
            rc = mss_eff_config_termination(i_target_mba); if(rc) break;
@@ -2324,7 +2330,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
                break;
            }
         }
-
+#endif
         // Removed call to mss_eff_config_thermal(), it is now called externally.
         //rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAddrMirrorData.C,v 1.4 2014/02/12 22:11:32 mjjones Exp $
+// $Id: getMBvpdAddrMirrorData.C,v 1.5 2014/10/23 22:01:31 dcrowell Exp $
 /**
  *  @file getMBvpdAddrMirrorData.C
  *
@@ -72,6 +74,27 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
     FAPI_DBG("getMBvpdAddrMirrorData: entry ");
 
     do {
+        // Determine which VPD format we are using
+        uint8_t l_customDimm = 0;
+        l_fapirc=FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM,&i_mbaTarget,l_customDimm);
+        if(l_fapirc)
+        {
+            FAPI_ERR("getMBvpdAddrMirrorData: Read of Custom Dimm failed");
+            break;
+        }
+
+        //if not a custom_dimm then assume ISDIMM
+        if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO == l_customDimm)
+        {
+            // Planar CVPD (==ISDIMM) has no AM keyword, by default there is
+            // no mirrored data
+            for (uint8_t l_port=0; l_port<NUM_PORTS; l_port++)
+            {
+                o_val[l_port][0] = 0;
+                o_val[l_port][1] = 0;
+            }
+            break;
+        }
 
         // find the position of the passed mba on the centuar
         l_fapirc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,&i_mbaTarget,l_mbaPos);
@@ -133,8 +156,11 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
 
     } while (0);
 
-    delete l_pMaBuffer;
-    l_pMaBuffer = NULL;
+    if( l_pMaBuffer )
+    {
+        delete l_pMaBuffer;
+        l_pMaBuffer = NULL;
+    }
 
     FAPI_DBG("getMBvpdAddrMirrorData: exit rc=0x%08x",
                static_cast<uint32_t>(l_fapirc));

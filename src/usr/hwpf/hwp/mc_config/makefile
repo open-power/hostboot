@@ -26,8 +26,8 @@ ROOTPATH = ../../../../..
 
 MODULE = mc_config
 
-CFLAGS += $(if $(CONFIG_PALMETTO_VDDR), -D FAPI_MSSLABONLY -D FAPI_LRDIMM)
-EXTRAINCDIR += $(if $(CONFIG_PALMETTO_VDDR), ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit)
+CFLAGS += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), -D FAPI_MSSLABONLY -D FAPI_LRDIMM)
+EXTRAINCDIR += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit)
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
