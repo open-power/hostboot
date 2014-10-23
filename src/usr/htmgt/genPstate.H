@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/htmgt/htmgt_activate.H $                              */
+/* $Source: src/usr/htmgt/genPstate.H $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,51 +22,23 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef GENPSTATE_H
+#define GENPSTATE_H
 
-#ifndef HTMGT_ACTIVATE_H
-#define HTMGT_ACTIVATE_H
-
-#include <stdint.h>
-#include "htmgt_occ.H"
-#include <errl/errlmanager.H>
-
-
-// TODO RTC 118875
-//#define SIMICS_TESTING
-
+#include<errl/errlentry.H>
 
 namespace HTMGT
 {
 
-    /**
-     * @brief Set the OCC state
-     *
-     * @param[in] i_state  Desired OCC state
-     *
-     * @return  NULL if success, else error handle
-     */
-    errlHndl_t setOccState(const occStateId i_state);
+/**
+ * @brief Build the pstate tables
+ * @post Sets pstate table data into PSTATE_TABLE attribute for each OCC.
+ * @note Attributes will not be written if the corresponding pstate table
+ *       could not be generated.
+ * @note this function is only available at IPL time
+ * @return error log handle on error, otherwise NULL
+ */
+errlHndl_t genPstateTables();
 
-
-    /**
-     * @brief Wait for all OCCs to go to active state
-     *
-     * @return  NULL if all OCCs reached active state, else error handle
-     */
-    errlHndl_t waitForOccsActive();
-
-
-    /**
-     * @brief Set active sensors for all OCCs so BMC can start communication
-     *
-     * @return  NULL if all sensors were updated, else error handle
-     */
-    errlHndl_t setOccActiveSensors();
-
-    /**
-     * @brief send all occ configuration messages to the OCCs
-     */
-    void sendOccConfigData();
-
-} // end namespace
+};
 #endif

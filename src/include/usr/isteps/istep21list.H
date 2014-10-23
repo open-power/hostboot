@@ -87,7 +87,7 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libstart_payload.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libdevtree.so),
-#ifdef CONFIG_SET_NOMINAL_PSTATE
+#if defined(CONFIG_SET_NOMINAL_PSTATE) || defined(CONFIG_HTMGT)
         DEP_LIB(libpstates.so),
 #endif
         DEP_LIB(libocc.so),

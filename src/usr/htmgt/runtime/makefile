@@ -31,8 +31,8 @@ MODULE = htmgt_rt
 #include common ojects between hostboot and runtime hostboot
 include ../htmgt_common.mk
 
-#include unique object modules - currently none
-# OBJS +=
+#include unique object modules
+#OBJS +=
 
 #SUBDIRS += test.d
 

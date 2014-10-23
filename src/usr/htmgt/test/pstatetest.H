@@ -45,6 +45,7 @@
 #include <mss_util_to_throttle.H>
 #include <mss_throttle_to_power.H>
 #include <mss_eff_config_thermal.H>
+#include "../genPstate.H"
 
 using namespace TARGETING;
 
@@ -52,18 +53,13 @@ class pstateTest: public CxxTest::TestSuite
 {
     public:
 
-        // Test function to build pstate table
-        // TODO RCT 114284 fix testcase
-        // Requires Hostboot functions that are not yet merged. Testcase should
-        // eventually call hb function "runP8BuildPstateDataBlock" declaired in
-        // freqVoltageSvc.H to build pstate table.
-        // p8_build_pstate_datablock reads VPD from all existing cores, not
-        // just functional cores.  The current SIMICS standalone model does
-        // not support MVDP for all existing cores.
+        // TODO RTC: 116310 VPD needs to be fixed in simics before a valid
+        // pstate table can be built in simics.
         void DISABLE_test_verifyPstate( void )
         {
             errlHndl_t l_errl = NULL;
             bool pstateLibLoadedLocally = false;
+            bool htmgtLibLoadedLocally  = false;
 
             if(!VFS::module_is_loaded( "libpstates.so" ) )
             {
@@ -79,37 +75,38 @@ class pstateTest: public CxxTest::TestSuite
                 }
             }
 
-            PstateSuperStructure pstateData;
-            TargetHandleList procChips;
-            getAllChips(procChips, TYPE_PROC, true);
-
-            for (TargetHandleList::iterator itr = procChips.begin();
-                 itr != procChips.end();
-                 ++itr)
+            if(!VFS::module_is_loaded("libhtmgt.so"))
             {
-                // cast OUR type of target to a FAPI type of target.
-                const fapi::Target
-                    fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
-                             (const_cast<Target*>(*itr)));
-
-
-                FAPI_INVOKE_HWP( l_errl,
-                                 p8_build_pstate_datablock,
-                                 fapiTarg,
-                                 &pstateData
-                               );
-
+                l_errl = VFS::module_load("libhtmgt.so");
                 if( l_errl )
                 {
+                    TS_FAIL("Could not load libhtmgt.so module");
                     errlCommit(l_errl,HTMGT_COMP_ID);
-                    TS_FAIL("verifyPstate failed for huid 0x%x",
-                            get_huid(*itr));
+                }
+                else
+                {
+                    htmgtLibLoadedLocally = true;
                 }
             }
+
+            l_errl = genPstateTables();
+
+            if( l_errl )
+            {
+                errlCommit(l_errl,HTMGT_COMP_ID);
+                TS_FAIL("verifyPstate failed");
+            }
+
+            // TODO RTC 116310 check eyecatcher in pstate table
 
             if(pstateLibLoadedLocally)
             {
                 VFS::module_unload( "libpstates.so" );
+            }
+
+            if(htmgtLibLoadedLocally)
+            {
+                VFS::module_unload( "libhtmgt.so" );
             }
 
         }

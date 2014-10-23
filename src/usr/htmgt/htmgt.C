@@ -28,6 +28,9 @@
 #include "htmgt_activate.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
+#ifndef __HOSTBOOT_RUNTIME
+#include "genPstate.H"
+#endif
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
@@ -58,22 +61,34 @@ namespace HTMGT
             // Query functional OCCs
             if (occMgr::instance().buildOccs() > 0)
             {
-                // Build pstate tables
-                // TODO RTC 114284
-
-                // Calc memory throttles
-                // TODO RTC 116306
-
-                // Send ALL config data
-                sendOccConfigData();
-
-                // Wait for all OCCs to go active
-                l_err = waitForOccsActive();
-                if (NULL == l_err)
+                do
+                {
+                    //Pstatetable only built once at boot time.
+#ifndef __HOSTBOOT_RUNTIME
+                    l_err = genPstateTables();
+                    if(l_err)
                     {
-                    // Set active sensors for all OCCs so BMC can start comm
+                        break;
+                    }
+#endif
+
+                    // Calc memory throttles
+                    // TODO RTC 116306
+
+                    // Send ALL config data
+                    sendOccConfigData();
+
+                    // Wait for all OCCs to go active
+                    l_err = waitForOccsActive();
+                    if( l_err )
+                    {
+                        break;
+                    }
+
+                    //Set active sensors for all OCCs so BMC can start comm
                     l_err = setOccActiveSensors();
-                }
+
+                } while(0);
             }
             else
             {
