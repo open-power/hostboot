@@ -1382,7 +1382,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
             {
                FAPI_INF("  !! LRDIMM Detected  -MW");
    
-               ecmdDataBuffer rcd(64);
+               ecmdDataBufferBase rcd(64);
                rcd.flushTo0();
    
                rcd.setDoubleWord(0,eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm]);
@@ -1398,7 +1398,7 @@ fapi::ReturnCode mss_lrdimm_eff_config(const fapi::Target &i_target_mba,
    
                eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm]=rcd.getDoubleWord(0);
    
-               ecmdDataBuffer rcd_1(64);
+               ecmdDataBufferBase rcd_1(64);
                rcd_1.flushTo0();
                     // F[1]RC11,8
                rcd_1.insert(p_l_lr_spd_data->lr_f1rc11_f1rc8[l_cur_mba_port][l_cur_mba_dimm],44,4,0);  //F[1]RC11 -> rcd11
