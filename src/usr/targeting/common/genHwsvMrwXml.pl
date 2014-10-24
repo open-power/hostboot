@@ -541,7 +541,13 @@ foreach my $proc (@{$ProcPcie->{'processor-settings'}})
                      $proc->{proc_pcie_iop_tx_rcvrdetcntl_iop1},
                      "PROC_PCIE_IOP_ZCAL_CONTROL",
                      $proc->{proc_pcie_iop_zcal_control_iop0},
-                     $proc->{proc_pcie_iop_zcal_control_iop1}];
+                     $proc->{proc_pcie_iop_zcal_control_iop1},
+                     "PROC_PCIE_IOP_TX_FFE_GEN1",
+                     $proc->{proc_pcie_iop_tx_ffe_gen1_iop0},
+                     $proc->{proc_pcie_iop_tx_ffe_gen1_iop1},
+                     "PROC_PCIE_IOP_TX_FFE_GEN2",
+                     $proc->{proc_pcie_iop_tx_ffe_gen2_iop0},
+                     $proc->{proc_pcie_iop_tx_ffe_gen2_iop1}];
 }
 
 my @SortedPcie = sort byNodePos @procPcie;
