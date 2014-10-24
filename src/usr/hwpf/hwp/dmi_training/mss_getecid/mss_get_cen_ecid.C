@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.32 2014/05/08 18:52:38 lapietra Exp $
+// $Id: mss_get_cen_ecid.C,v 1.37 2014/11/03 17:40:02 jprispol Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -41,6 +41,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.37  | jprispol |03-NOV-14| Moved bluewaterfall/nwell variable declarations
+//   1.36  | jprispol |28-OCT-14| Updated bluewaterfall/nwell broken attribute name
+//   1.34  | jprispol |24-OCT-14| Replaced privileged fapi attribute call
 //   1.32  | sglancy  |08-MAY-14| Changed location of the setting ATTR_MSS_INIT_STATE to track IPL states
 //   1.31  | sglancy  |25-MAR-14| RAS review updates
 //   1.30  | bellows  |11-NOV-13| Gerrit review updates
@@ -109,20 +112,30 @@ using namespace fapi;
     rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target, l_attr_mss_init_state);
     if(rc) return rc;
 
+    uint8_t l_bluewaterfall_nwell_broken;
+    rc = FAPI_ATTR_GET(ATTR_CENTAUR_BLUEWATERFALL_NWELL_BROKEN_CHECK_FLAG,
+                    &i_target, l_bluewaterfall_nwell_broken);
+    // For certain Centaur DD1.0* subversions, adjustments need to be made to
+    // the bluewaterfall and the transistor misplaced in the nwell.
+    // l_bluewaterfall_nwell_broken will be 1 if needing changes and 0 if not
+    if (!rc.ok()) {
+        FAPI_ERR("mss_get_cen_ecid: could not GET ATTR_CENTAUR_BLUEWATERFALL_NWELL_BROKEN_CHECK_FLAG" );
+        return rc;
+    }
 
     if(ecid_struct.valid) {
 
       rc = mss_parse_ecid(ecid_struct.io_ecid,
                           ecid_struct.i_checkL4CacheEnableUnknown,
                           ecid_struct.i_ecidContainsPortLogicBadIndication,
-                          ecid_struct.io_ec,
+                          l_bluewaterfall_nwell_broken,
                           o_ddr_port_status,
                           o_cache_enable,
                           o_centaur_sub_revision,
                           ecid_struct.o_psro,
                           ecid_struct.o_bluewaterfall_broken,
                           ecid_struct.o_nwell_misplacement );
-			  
+
       // procedure is done.
       return rc;
     }
@@ -191,17 +204,19 @@ using namespace fapi;
       return rc;
     }
 
-    uint8_t l_ec;
-    uint8_t l_nwell_misplacement;
     uint8_t l_bluewaterfall_broken;
-    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, l_ec);
-    if (!rc.ok()) {
-      FAPI_ERR("mss_get_cen_ecid: could not GET PRIVILEGED ATTR_EC" );
-      return rc;
-    }
-    ecid_struct.io_ec=l_ec;
+    uint8_t l_nwell_misplacement;
+    rc = mss_parse_ecid(ecid,
+                        l_checkL4CacheEnableUnknown,
+                        l_ecidContainsPortLogicBadIndication,
+                        l_bluewaterfall_nwell_broken,
+                        o_ddr_port_status,
+                        o_cache_enable,
+                        o_centaur_sub_revision,
+                        l_psro,
+                        l_bluewaterfall_broken,
+                        l_nwell_misplacement );
 
-    rc = mss_parse_ecid(ecid, l_checkL4CacheEnableUnknown, l_ecidContainsPortLogicBadIndication, l_ec, o_ddr_port_status, o_cache_enable, o_centaur_sub_revision, l_psro, l_bluewaterfall_broken, l_nwell_misplacement );
     ecid_struct.o_psro=l_psro;
     ecid_struct.o_bluewaterfall_broken=l_bluewaterfall_broken;
     ecid_struct.o_nwell_misplacement=l_nwell_misplacement;
@@ -241,7 +256,7 @@ using namespace fapi;
   fapi::ReturnCode  mss_parse_ecid(uint64_t ecid[2],
                                    const uint8_t i_checkL4CacheEnableUnknown,
                                    const uint8_t i_ecidContainsPortLogicBadIndication,
-                                   const uint8_t ec,
+                                   const uint8_t i_bluewaterfall_nwell_broken,
                                    uint8_t & o_ddr_port_status,
                                    uint8_t & o_cache_enable,
                                    uint8_t & o_centaur_sub_revision,
@@ -249,7 +264,7 @@ using namespace fapi;
                                    uint8_t & o_bluewaterfall_broken,
                                    uint8_t & o_nwell_misplacement ){
 //get bit128
-    uint8_t bit128=0;
+    uint8_t bit128 = 0;
     uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
     ecmdDataBufferBase scom(64);
@@ -379,7 +394,7 @@ using namespace fapi;
     // The ecid contains the chip's subrevision, changes in the subrevision should not
     // change firmware behavior but for the exceptions, update attributes to indicate
     // those behaviors
-    if ((ec == 0x10) && (o_centaur_sub_revision < 1))
+    if (i_bluewaterfall_nwell_broken && (o_centaur_sub_revision < 1))
     {
   // For DD1.00, the transistor misplaced in the nwell needs some setting adjustments to get it to function
   // after DD1.00, we no longer need to make that adjustment
@@ -396,7 +411,7 @@ using namespace fapi;
     }
 
   // we have to look at both the bluewaterfall and the n-well misplacement to determine the proper values of the n-well
-    if (ec == 0x10) {
+    if (i_bluewaterfall_nwell_broken) {
       if(bit126 == 0)
       {
   // on and after DD1.03, we no longer need to make adjustments due to the bluewaterfall - this is before
@@ -419,7 +434,7 @@ using namespace fapi;
     return mss_parse_ecid(ecid_struct.io_ecid,
                           ecid_struct.i_checkL4CacheEnableUnknown,
                           ecid_struct.i_ecidContainsPortLogicBadIndication,
-                          ecid_struct.io_ec,
+                          ecid_struct.i_bluewaterfall_nwell_broken,
                           o_ddr_port_status,
                           o_cache_enable,
                           o_centaur_sub_revision,

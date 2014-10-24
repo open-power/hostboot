@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/centaur_ec_attributes.xml $                  -->
+<!-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/xml/attribute_info/centaur_ec_attributes.xml,v $                  -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -24,7 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.27 2014/06/11 17:42:04 yctschan Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.30 2014/10/30 14:50:22 jprispol Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -151,6 +151,24 @@
     <description>
       Returns true if the chip needs to fix the fir_mask register in the DDRPHY.  This is for HW217419.
 	True if: Centaur EC 10
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+
+  <attribute>
+    <id>ATTR_CENTAUR_BLUEWATERFALL_NWELL_BROKEN_CHECK_FLAG</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD1.0 (TRUE), otherwise FALSE.  If true, subversion will be checked in mss_get_cen_ecid.C to determine if changes need to be made to the transistor misplaced in the nwell.
     </description>
     <chipEcFeature>
       <chip>
@@ -441,8 +459,5 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
-
-
-
 
 </attributes>

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.H,v 1.12 2014/03/25 21:09:09 uid157495 Exp $
+// $Id: mss_get_cen_ecid.H,v 1.14 2014/10/24 16:44:40 jprispol Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.14  | jprispol |24-OCT-14| Replaced privileged fapi attr call in mss_get_cen_ecid.c
 //   1.11  | sglancy  |25-MAR-14| Minor Review Comments addressed
 //   1.10  | bellows  |02-OCT-13| Minor Review Comments addressed
 //   1.9   | bellows  |17-SEP-13| Allow for external wrapper parsing
@@ -80,6 +81,7 @@ public:
   uint8_t  valid;
   uint8_t  i_checkL4CacheEnableUnknown;
   uint8_t  i_ecidContainsPortLogicBadIndication;
+  uint8_t  i_bluewaterfall_nwell_broken;
   uint8_t  i_user_defined;
   uint8_t  io_ec;
   uint64_t io_ecid[2];
@@ -130,7 +132,7 @@ extern "C"
                                   uint64_t ecid[2], // input ECID in bit order
                                   const uint8_t l_checkL4CacheEnableUnknown, // input L4CacheEnableUnknown is possible
                                   const uint8_t l_ecidContainsPortLogicBadIndication, // input logic can be bad
-                                  const uint8_t ec, // input ec of chip
+                                  const uint8_t l_bluewaterfall_nwell_broken, // adjustments possibly needed for bluewaterfall and transistor misplaced in the nwell
                                   uint8_t & ddr_port, //output ddr ports are non functional
                                   uint8_t & cache_enable_o, // output cache is functional or not
                                   uint8_t & centaur_sub_revision_o, // output sub revsion number
