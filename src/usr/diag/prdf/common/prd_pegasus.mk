@@ -38,9 +38,6 @@ PRDF_RULE_PLUGINS_PEGASUS += prdfCenPll.o
 PRDF_RULE_PLUGINS_PEGASUS += prdfPlatP8Proc.o
 PRDF_RULE_PLUGINS_PEGASUS += prdfPlatCenMemUtils.o
 
-# Object files for PRDF rule plugins, but include sim extensions.
-PRDF_RULE_PLUGINS_PEGASUS_WSIM += prdfP8SystemSpecific.o
-
 # PEGASUS specific objects, not rule related.
 prd_pegasus_specific += prdfCalloutUtil.o
 prd_pegasus_specific += prdfPhbUtils.o

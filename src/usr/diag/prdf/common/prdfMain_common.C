@@ -43,8 +43,9 @@
 #include <prdfRasServices.H>
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
-#include <prdfSystemSpecific.H>
 #include <prdfMfgThresholdMgr.H>
+
+#include <prdfPegasusConfigurator.H>
 
 namespace PRDF
 {
@@ -116,7 +117,7 @@ errlHndl_t noLock_initialize()
         initPlatSpecific();
 
         CcAutoDeletePointer<Configurator> configuratorPtr
-            (SystemSpecific::getConfiguratorPtr());
+                                          ( new PRDF::PegasusConfigurator() );
 
         errlHndl_t l_errBuild = configuratorPtr->build();//build object model
         if( NULL != l_errBuild )
@@ -259,7 +260,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         //delete all the wrapper register objects since these were created
         //just for plugin code
         l_scanFac.ResetPluginRegister();
-        SystemSpecific::postAnalysisWorkarounds(sdc);
         if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
         {
             // We have a bad RC, but no error log - Fill out SDC and have

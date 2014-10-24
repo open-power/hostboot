@@ -110,7 +110,6 @@ OBJS += ${prd_pegasus_specific}
 OBJS += ${prd_object_files_HB}
 OBJS += ${PRDF_RULE_PLUGINS_PEGASUS}
 OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_HB}
-OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_WSIM}
 
 #------------------------------------------------------------------------------
 # Generated Mfg Threshold Header file
