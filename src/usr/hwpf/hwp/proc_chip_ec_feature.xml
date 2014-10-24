@@ -22,14 +22,14 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.55 2014/08/18 19:55:30 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.59 2014/10/23 18:56:33 jklazyns Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      For Venice specific inits. Returns true if Venice.
+      For Venice specific inits. Returns true if Venice and Naples.
     </description>
     <chipEcFeature>
       <chip>
@@ -39,7 +39,7 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
-    </chipEcFeature>
+     </chipEcFeature>
   </attribute>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NAPLES_SPECIFIC</id>
@@ -48,6 +48,39 @@
       For Naples specific inits. Returns true if Naples.
     </description>
     <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip should use wiggle-flip polling protocol. True if:
+      Murano EC 0x20 or greater
+      Venice EC 0x20 or greater
+      Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
@@ -111,7 +144,7 @@
     <id>ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Returns if a chip contains secure iovalid controls for the ABUS.  True if either:
+      Returns if a chip contains secure iovalid controls for the ABUS. Intentionally not applied to Naples True if either:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
     </description>
@@ -172,10 +205,18 @@
     <description>
       Returns if a chip contains 32 lanes of PCIE I/O.  True if:
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -190,6 +231,7 @@
       Returns if a chip contains SCOM configuration for CAPP unit PB hang recovery controls.  True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -203,6 +245,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -215,6 +264,7 @@
       Returns if a chip contains production CAPP logic function
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -228,6 +278,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -240,6 +297,7 @@
       Returns if a chip contains SCOM configuration for NX unit PB hang recovery controls.  True if:
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -256,6 +314,13 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -265,6 +330,7 @@
       Returns if a chip contains separate SCOM configuration for HCA oper/data hang PB hang recovrery controls.  True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -281,6 +347,13 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -290,6 +363,7 @@
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
         Centaur EC 0x20 or greater
     </description>
     <chipEcFeature>
@@ -302,6 +376,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -323,6 +404,7 @@
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
         Centaur EC 0x20 or greater
     </description>
     <chipEcFeature>
@@ -335,6 +417,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -356,6 +445,7 @@
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
         Centaur EC 0x20 or greater
     </description>
     <chipEcFeature>
@@ -368,6 +458,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -507,6 +604,7 @@
       True if:
         Murano EC greater or equal to 0x20
         Venice EC greater or equal to 0x20
+        Naples EC greater or equal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -520,6 +618,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -532,6 +637,7 @@
       True if:
         Murano EC greater than or equal to 0x20
         Venice
+        Naples
     </description>
     <chipEcFeature>
       <chip>
@@ -543,6 +649,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -583,6 +696,7 @@
       True if:
         Murano EC greater than or equal to 0x20
         Venice EC greater than or equal to 0x20
+        Naples EC greater than or equal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -596,6 +710,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -608,6 +729,7 @@
       Specifies layout of C8 serial chain
       True if:
         Murano/Venice EC greater than or equal to 0x20
+        Naples greater than or equal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -621,6 +743,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -676,6 +805,7 @@
     <description>
       True if:
         Venice EC greater than or equal to 0x20
+        Naples EC greater than or equal to 0x10
       False otherwise
     </description>
     <chipEcFeature>
@@ -683,6 +813,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -694,6 +831,7 @@
     <description>
       True if:
         Venice EC greater than or equal to 0x20
+        Naples EC greater than or equal to 0x10
       False otherwise
     </description>
     <chipEcFeature>
@@ -701,6 +839,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -713,6 +858,7 @@
       Specifies layout of C10 serial chain
       True if:
         Murano/Venice EC greater than or equal to 0x20
+        Naples EC greater than or euqal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -726,6 +872,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -764,6 +917,7 @@
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -775,6 +929,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -830,12 +991,38 @@
     </chipEcFeature>
   </attribute>
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_XBUS_RESONANT_CLK_VALID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Venice EC 0x10 or greater
+        Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -849,6 +1036,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -862,6 +1056,7 @@
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -875,6 +1070,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -904,6 +1106,7 @@
       True if:
         Murano EC greater than or equal to 0x20
         Venice
+        Naples
     </description>
     <chipEcFeature>
       <chip>
@@ -920,6 +1123,13 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
     </chipEcFeature>
   </attribute>
   <attribute>
@@ -929,6 +1139,7 @@
       True if:
         Murano EC greater than or equal to 0x20
         Venice
+        Naples
     </description>
     <chipEcFeature>
       <chip>
@@ -940,6 +1151,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -971,6 +1189,7 @@
       True if:
         Murano EC greater than 0x20
         Venice EC greater than or equal to 0x20
+        Naples greater than or equal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -984,6 +1203,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -1006,6 +1232,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -1050,6 +1283,7 @@
     True if chip can support PBA prefetch as HW258436 is fixed
         Murano EC greater than or equal to 0x21
         Venice EC greater than or equal to 0x20
+        Naples EC greater than or equal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -1066,6 +1300,13 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
     </chipEcFeature>
   </attribute>
     <attribute>
@@ -1075,12 +1316,20 @@
     True if chip can support the enablement of L3 purge aborts during Winkle as HW276505 is fixed
         Not fixed on any Murano EC
         Venice EC 0x20 or greater
+        Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -1154,6 +1403,7 @@
         True if chip has HCA BAR SCOM bug
         Causes HCA BAR range data read via SCOM to be shifted relative to HW state
         Venice EC greater than or equal to 0x20
+        Naples EC greater than or equal to 0x10
     </description>
     <chipEcFeature>
       <chip>
@@ -1161,6 +1411,29 @@
         <ec>
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW_BUG_TOD_ERROR_MASK_NOT_WRITABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        HW223230/HW216879 - TOD_ERROR_MASK_STATUS_REG_00040032 is not writable in Murano DD1.x
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>

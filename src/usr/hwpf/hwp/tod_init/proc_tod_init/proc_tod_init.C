@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_init.C,v 1.12 2014/10/03 18:44:41 thi Exp $
+// $Id: proc_tod_init.C,v 1.15 2014/10/23 18:56:17 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -56,13 +56,13 @@ extern "C"
 //------------------------------------------------------------------------------
 // function: proc_tod_init
 //
-// parameters: 
+// parameters:
 //         i_tod_node  Reference to TOD topology (FAPI targets included within)
 //
-//         i_failingTodProc, Porinter to the fapi target, the memory location
+//         i_failingTodProc, Pointer to the fapi target, the memory location
 //         addressed by this parameter will be populated with processor target
 //         which is not able to recieve proper singals from OSC.
-//         Caller needs to look at this parameter only when proc_tod_init fails 
+//         Caller needs to look at this parameter only when proc_tod_init fails
 //         and reason code indicates OSC failure. It is defaulted to NULL.
 //
 // returns: FAPI_RC_SUCCESS if TOD topology is successfully initialized
@@ -169,13 +169,13 @@ fapi::ReturnCode proc_tod_clear_error_reg(const tod_topology_node* i_tod_node)
 //------------------------------------------------------------------------------
 // function: init_tod_node
 //
-// parameters: 
+// parameters:
 //          i_tod_node  Reference to TOD topology (FAPI targets included within)
 //
-//          i_failingTodProc, Porinter to the fapi target, the memory location
+//          i_failingTodProc, Pointer to the fapi target, the memory location
 //          addressed by this parameter will be populated with processor target
 //          which is not able to recieve proper singals from OSC.
-//          Caller needs to look at this parameter only when proc_tod_init fails 
+//          Caller needs to look at this parameter only when proc_tod_init fails
 //          and reason code indicates OSC failure. It is defaulted to NULL.
 //
 // returns: FAPI_RC_SUCCESS if TOD topology is successfully initialized
@@ -190,7 +190,7 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
     uint32_t tod_init_pending_count = 0; // Timeout counter for bits that are cleared by hardware
     fapi::Target* target = i_tod_node->i_target;
 
-    FAPI_INF("init_tod_node: Start: Configuring %s", target->toEcmdString());
+    FAPI_INF("init_tod_node: Start: Initializing %s", target->toEcmdString());
 
     do
     {
@@ -244,7 +244,7 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
                 FAPI_ERR("init_tod_node: Master: Could not write TOD_TX_TTYPE_5_REG_00040016");
                 break;
             }
-   
+
             FAPI_INF("init_tod_node: Master: Chip TOD load value (move TB to TOD)");
             rc_ecmd |= data.flushTo0();
             rc_ecmd |= data.setWord(0,0x00000000);
@@ -299,7 +299,7 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
         while (tod_init_pending_count < PROC_TOD_UTIL_TIMEOUT_COUNT)
         {
             FAPI_DBG("init_tod_node: Waiting for TOD to assert TOD_FSM_REG_TOD_IS_RUNNING...");
-   
+
             rc = fapiDelay(PROC_TOD_UTILS_HW_NS_DELAY,
                            PROC_TOD_UTILS_SIM_CYCLE_DELAY);
             if (!rc.ok())
@@ -332,10 +332,11 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
                 break;
         }
 
-        FAPI_INF("init_tod_node: clear TTYPE#2 and TTYPE#4 status");
+        FAPI_INF("init_tod_node: clear TTYPE#2, TTYPE#4, and TTYPE#5 status");
         rc_ecmd |= data.flushTo0();
         rc_ecmd |= data.setBit(TOD_ERROR_REG_RX_TTYPE_2);
         rc_ecmd |= data.setBit(TOD_ERROR_REG_RX_TTYPE_4);
+        rc_ecmd |= data.setBit(TOD_ERROR_REG_RX_TTYPE_5);
         if (rc_ecmd)
         {
             FAPI_ERR("init_tod_node: Error 0x%08X in ecmdDataBuffer setup for TOD_ERROR_REG_00040030.",  rc_ecmd);
@@ -380,20 +381,35 @@ fapi::ReturnCode init_tod_node(const tod_topology_node* i_tod_node,
             break;
         }
 
-        FAPI_INF("init_tod_node: set error mask to runtime configuration");
-        rc_ecmd |= data.flushTo0();
-        rc_ecmd |= data.setWord(1,0x03F00000); // Mask TTYPE received informational bits 38:43
-        if (rc_ecmd)
+        // TOD_ERROR_MASK_STATUS_REG_00040032 is not writable on some chips
+        uint8_t chipHasTodErrorMaskBug = 0;
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_HW_BUG_TOD_ERROR_MASK_NOT_WRITABLE, target, chipHasTodErrorMaskBug);
+        if(rc)
         {
-            FAPI_ERR("init_tod_node: Error 0x%08X in ecmdDataBuffer setup for TOD_ERROR_MASK_STATUS_REG_00040032 SCOM.",  rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
+            FAPI_ERR("init_tod_node: Error querying Chip EC feature: ATTR_CHIP_EC_FEATURE_HW_BUG_TOD_ERROR_MASK_NOT_WRITABLE");
             break;
         }
-        rc = fapiPutScom(*target, TOD_ERROR_MASK_STATUS_REG_00040032, data);
-        if (!rc.ok())
+        if(!chipHasTodErrorMaskBug)
         {
-            FAPI_ERR("init_tod_node: Could not write TOD_ERROR_MASK_STATUS_REG_00040032");
-            break;
+            FAPI_INF("init_tod_node: set error mask to runtime configuration");
+            rc_ecmd |= data.flushTo0();
+            rc_ecmd |= data.setWord(1,0x03F00000); // Mask TTYPE received informational bits 38:43
+            if (rc_ecmd)
+            {
+                FAPI_ERR("init_tod_node: Error 0x%08X in ecmdDataBuffer setup for TOD_ERROR_MASK_STATUS_REG_00040032 SCOM.",  rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom(*target, TOD_ERROR_MASK_STATUS_REG_00040032, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("init_tod_node: Could not write TOD_ERROR_MASK_STATUS_REG_00040032");
+                break;
+            }
+        }
+        else
+        {
+            FAPI_INF("init_tod_node: Skipping TOD error mask setup because of chip limitation.");
         }
 
         // Finish configuring downstream nodes

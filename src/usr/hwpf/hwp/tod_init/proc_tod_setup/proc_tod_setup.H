@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.H,v 1.8 2014/05/27 16:31:03 jklazyns Exp $
+// $Id: proc_tod_setup.H,v 1.9 2014/10/22 17:11:13 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -107,12 +107,15 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
  *
  * @param[in] i_tod_node  Reference to TOD topology (FAPI targets included within)
  *            i_tod_sel   Specifies the topology to clear
+ *            i_is_mpipl  if this IPL is an MPIPL, additional setup is needed; 
+ *                        determined via an attribute
  *
  * @return FAPI_RC_SUCCESS if TOD topology is successfully cleared
  *         else FAPI or ECMD error is sent through
  */
-fapi::ReturnCode clear_tod_node(tod_topology_node*           i_tod_node,
-                                const proc_tod_setup_tod_sel i_tod_sel);
+fapi::ReturnCode clear_tod_node(tod_topology_node*             i_tod_node,
+                                const proc_tod_setup_tod_sel   i_tod_sel,
+                                const fapi::ATTR_IS_MPIPL_Type i_is_mpipl);
 
 /**
  * @brief Calculates TOD_CHIP_CTRL_REG_00040010 value; will be called

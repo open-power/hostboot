@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.C,v 1.21 2014/09/09 16:13:20 jklazyns Exp $
+// $Id: proc_tod_setup.C,v 1.22 2014/10/22 17:11:05 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -79,6 +79,7 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
                                 const proc_tod_setup_osc_sel i_osc_sel)
 {
     fapi::ReturnCode rc;
+    fapi::ATTR_IS_MPIPL_Type is_mpipl = 0x00;
 
     // Mark HWP entry
     FAPI_INF("proc_tod_setup: Start");
@@ -112,8 +113,15 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
         }
         display_tod_nodes(i_tod_node,0);
 
+        rc =  FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, is_mpipl);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_tod_setup: fapiGetAttribute of ATTR_IS_MPIPL failed!");
+            break;
+        }
+
         // If there is a previous topology, it needs to be cleared
-        rc = clear_tod_node(i_tod_node,i_tod_sel);
+        rc = clear_tod_node(i_tod_node, i_tod_sel, is_mpipl);
         if (!rc.ok())
         {
             FAPI_ERR("proc_tod_setup: Failure clearing previous TOD configuration!");
@@ -139,14 +147,18 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
 //
 // parameters: i_tod_node  Reference to TOD topology (FAPI targets included within)
 //             i_tod_sel   Specifies the topology to clear
+//             i_is_mpipl  if this IPL is an MPIPL, additional setup is needed; 
+//                         determined via an attribute
 //
 // returns: FAPI_RC_SUCCESS if TOD topology is successfully cleared
 //          else FAPI or ECMD error is sent through
 //------------------------------------------------------------------------------
-fapi::ReturnCode clear_tod_node(tod_topology_node*           i_tod_node,
-                                const proc_tod_setup_tod_sel i_tod_sel)
+fapi::ReturnCode clear_tod_node(tod_topology_node*             i_tod_node,
+                                const proc_tod_setup_tod_sel   i_tod_sel,
+                                const fapi::ATTR_IS_MPIPL_Type i_is_mpipl)
 {
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
     ecmdDataBufferBase data(64);
     fapi::Target* target = i_tod_node->i_target;
     uint32_t port_ctrl_reg = 0;
@@ -169,7 +181,6 @@ fapi::ReturnCode clear_tod_node(tod_topology_node*           i_tod_node,
             port_ctrl_reg = TOD_SEC_PORT_1_CTRL_REG_00040004;
             port_ctrl_check_reg = TOD_PRI_PORT_1_CTRL_REG_00040002;
         }
-
         rc = fapiPutScom(*target,port_ctrl_reg,data);
         if (!rc.ok())
         {
@@ -182,14 +193,37 @@ fapi::ReturnCode clear_tod_node(tod_topology_node*           i_tod_node,
             FAPI_ERR("clear_tod_node: fapiPutScom error for port_ctrl_check_reg SCOM.");
             break;
         }
- 
+
+        if (i_is_mpipl)
+        {
+            FAPI_INF("clear_tod_node: MPIPL: switch TOD to 'Not Set' state");
+            rc_ecmd |= data.flushTo0();
+            rc_ecmd |= data.setBit(0);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("clear_tod_node: Error 0x%08X in ecmdDataBuffer setup for TOD_TX_TTYPE_5_REG_00040016 SCOM.",  rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom(*target, TOD_TX_TTYPE_5_REG_00040016, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("clear_tod_node: Could not write TOD_TX_TTYPE_5_REG_00040016");
+                break;
+            }
+        }
+        else
+        {
+            FAPI_INF("clear_tod_node: Normal IPL: Bypass TTYPE#5");
+        }
+
         // TOD is cleared for this node; if it has children, start clearing their registers
         for (std::list<tod_topology_node*>::iterator child = (i_tod_node->i_children).begin();
              child != (i_tod_node->i_children).end();
              ++child)
         {
             tod_topology_node* tod_node = *child;
-            rc = clear_tod_node(tod_node,i_tod_sel);
+            rc = clear_tod_node(tod_node,i_tod_sel,i_is_mpipl);
             if (!rc.ok())
             {
                 FAPI_ERR("clear_tod_node: Failure clearing downstream TOD node!");
