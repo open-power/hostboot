@@ -466,7 +466,7 @@ sub getCentaurConfig
         for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {
             debugMsg( "Mcs: $mcs" );
-            if( $machine eq "MURANO" )
+            if( $machine eq "MURANO" || $machine eq "NO_SP")
             {
                 # Plugging order is:
                 #   Processor 0 - 3
