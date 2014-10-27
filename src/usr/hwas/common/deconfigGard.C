@@ -39,6 +39,10 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
+#include <ipmi/ipmisensor.H>
+#include <config.h>
+
+
 // Trace definition
 #define __COMP_TD__ g_trac_deconf
 
@@ -1415,7 +1419,27 @@ void DeconfigGard::_deconfigureTarget(
 //******************************************************************************
 void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
+
     // Placeholder for any necessary deconfigure actions
+
+
+#ifdef CONFIG_BMC_IPMI
+    // set the BMC status for this target
+    SENSOR::StatusSensor l_sensor( &i_target );
+
+    // can assume the presence sensor is in the correct state, just
+    // assert that it is now non functional.
+    errlHndl_t err = l_sensor.setStatus( SENSOR::StatusSensor::NON_FUNCTIONAL );
+
+    if(err)
+    {
+        HWAS_ERR("Error returned from call to set sensor status for HUID 0x%x",
+                 TARGETING::get_huid( &i_target) );
+        err->collectTrace(HWAS_COMP_NAME, 512);
+        errlCommit(err, HWAS_COMP_ID);
+    }
+#endif
+
 }
 
 //******************************************************************************

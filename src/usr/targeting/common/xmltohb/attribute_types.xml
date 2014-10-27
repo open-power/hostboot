@@ -455,6 +455,10 @@
         <name>SYSTEM_FIRMWARE_PROGRESS</name>
         <value>0x0F</value>
     </enumerator>
+     <enumerator>
+        <name>REBOOT_COUNT</name>
+        <value>0xC0</value>
+    </enumerator>
 </enumerationType>
 
 <attribute>

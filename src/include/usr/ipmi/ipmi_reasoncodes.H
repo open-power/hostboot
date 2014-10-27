@@ -33,6 +33,7 @@ namespace IPMI
     {
         MOD_IPMISRV_SEND        = 0x01, // IPMI::send/IPMI::sendrecv
         MOD_IPMISRV_REPLY       = 0x02, // IPMI::respond
+        MOD_IPMISENSOR          = 0x03, // IPMI::sensor
     };
 
     enum IPMIReasonCode
@@ -42,6 +43,12 @@ namespace IPMI
         RC_INVALID_SEND              = IPMI_COMP_ID | 0x03,
         RC_WAITER_NOT_FOUND          = IPMI_COMP_ID | 0x04,
         RC_ASYNC_BAD_CC              = IPMI_COMP_ID | 0x05,
+        RC_INVALID_SENSOR_CMD        = IPMI_COMP_ID | 0x06,
+        RC_SENSOR_NOT_SETTABLE       = IPMI_COMP_ID | 0x07,
+        RC_EVENT_DATA_NOT_SETTABLE   = IPMI_COMP_ID | 0x08,
+        RC_SENSOR_NOT_PRESENT        = IPMI_COMP_ID | 0x09,
+        RC_SET_SENSOR_FAILURE        = IPMI_COMP_ID | 0x0a,
+
     };
 };
 

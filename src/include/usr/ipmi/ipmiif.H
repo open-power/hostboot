@@ -79,6 +79,8 @@ namespace IPMI
     enum completion_code
     {
         CC_OK        = 0x00,
+        CC_CMDSPC1   = 0x80, // command specific completion code
+        CC_CMDSPC2   = 0x81, // command specific completion code
         CC_BUSY      = 0xc0,
         CC_INVALID   = 0xc1,
         CC_CMDLUN    = 0xc2,
@@ -121,16 +123,21 @@ namespace IPMI
     inline const command_t get_capabilities(void)
     { return std::make_pair(NETFUN_APP, 0x36); }
 
-
     // Storage messages
     inline const command_t set_sel_time(void)
     { return std::make_pair(NETFUN_STORAGE, 0x49); }
 
-
-    // Sensor messages
+    // event messages
     inline const command_t platform_event(void)
     { return std::make_pair(NETFUN_SENSOR, 0x02); }
 
+    // sensor messages
+    inline const command_t set_sensor_reading(void)
+    { return std::make_pair(NETFUN_SENSOR, 0x30); }
+
+    // sensor messages
+    inline const command_t get_sensor_reading(void)
+    { return std::make_pair(NETFUN_SENSOR, 0x2D); }
 
     // Some helper messages
     // Used to create an empty message for reception
@@ -199,6 +206,7 @@ namespace IPMI
      * (max message for the transport - the header size)
      */
     inline size_t max_buffer(void);
+
 
 }; // end namespace IPMI
 

@@ -62,6 +62,10 @@
 
 #include <proc_enable_reconfig.H>
 
+
+#include <ipmi/ipmisensor.H>
+#include <config.h>
+
 namespace HWAS
 {
 
@@ -93,8 +97,6 @@ void* host_set_ipl_parms( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms entry" );
     errlHndl_t errl = NULL;
-
-    // stub -- nothing here currently
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms exit" );
 
@@ -130,8 +132,13 @@ void* host_discover_targets( void *io_pArgs )
         errl = discoverTargets();
     }
 
+#ifdef CONFIG_BMC_IPMI
+    // send DIMM/CORE/PROC sensor status to the BMC
+    SENSOR::updateBMCSensorStatus();
+#endif
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_discover_targets exit" );
+            "host_discover_targets exit" );
 
     return errl;
 }
