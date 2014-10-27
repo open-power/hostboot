@@ -438,12 +438,6 @@ void*    call_host_build_winkle( void    *io_pArgs )
             assert (l_memBase != 0,
                     "host_build_winkle: Top of memory was 0!");
             l_memBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
-            // Also, enable sleep mode
-            TARGETING::Target* l_sys = NULL;
-            TARGETING::targetService().getTopLevelTarget(l_sys);
-            assert( l_sys != NULL );
-            uint8_t l_sleepEnable = 1;
-            l_sys->setAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>(l_sleepEnable);
         }
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "HOMER base = %x", l_memBase);

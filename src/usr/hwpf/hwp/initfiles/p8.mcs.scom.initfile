@@ -1,8 +1,14 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.17 2014/09/12 17:15:24 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.19 2014/10/22 21:21:12 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.19|baysah  |10/22/14|- SW281364 : Remove ATTR_PM_SLEEP_ENABLE condition so MCS workaround for L4-CAPI Deadlock is for all systems types
+#--         |        |        |- per Kevin Reick
+#--         |        |        |
+#--     1.18|baysah  |10/20/14|- SW281364 : Use ATTR_PM_SLEEP_ENABLE to enable MCS workaround for L4-CAPI Deadlock for Saphire systems
+#--         |        |        |-            The workaround disables speculation for dma_pr_w, pte_updt, ci_pr_w and reserves 1 CL machine for reads.
 #--         |        |        |
 #--     1.17|baysah  |09/12/14|- SW277283 : MCS FCI Register is not in Murano DD1.x ... Qualify scom 201181c
 #--         |        |        |
@@ -51,6 +57,7 @@ SyntaxVersion = 1
 define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0) && (SYS.ATTR_RISK_LEVEL == ENUM_ATTR_RISK_LEVEL_RL0));
 
 
+
 #--******************************************************************************
 #-- MCS Mode0 Register
 #--******************************************************************************
@@ -61,7 +68,9 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      2    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_NS_RD_AO_SFU_FOR_DCBZ
      3    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_CENTAUR_LOCAL_CHECKSTOP_COMMAND
      4:7  ,                    0xF           ,     any                 ;              # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
-     8:11 ,                    0x0           ,     any                 ;              # MCMODE0Q_Number_of_CL_Entries_Reserved_for_Read
+ #   8:11 ,                    0x0           ,     any                 ;              # MCMODE0Q_Number_of_CL_Entries_Reserved_for_Read
+ #   8:11 ,                    0x1           , (SYS.ATTR_PM_SLEEP_ENABLE == 1) ;      # CAPI Deadlock workaround
+     8:11 ,                    0x1           ,     any                 ;              # CAPI Deadlock workaround
      12:15,                    0x1           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_MIRRORED_OPS
      16:19,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_WRITES
      20:23,                    0x1           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_CP_WRITES
@@ -102,7 +111,18 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      18:26,                    0b000000000         ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS_BY_SOURCE_AND_OR_SCOPE
      27:30,                    0b0000              ,     any              ;    # MCMODE1Q_DISABLE_PREFETCH
      31   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_ALL_SPEC_OPS
-     32:48,                    0b00000000000000000 ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+#    32:48,                    0b00000000000000000 ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+     32:40,                    0b000000000         ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+#    41   ,                    0b1                 , (SYS.ATTR_PM_SLEEP_ENABLE == 1) ; #CAPI Deadlock workaround
+     41   ,                    0b1                 ,     any              ;    #CAPI Deadlock workaround
+     42   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+#    43   ,                    0b1                 , (SYS.ATTR_PM_SLEEP_ENABLE == 1) ; #CAPI Deadlock workaround
+     43   ,                    0b1                 ,     any              ;    #CAPI Deadlock workaround
+     44   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+     45   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+#    46   ,                    0b1                 , (SYS.ATTR_PM_SLEEP_ENABLE == 1) ; #CAPI Deadlock workaround
+     46   ,                    0b1                 ,     any              ;    #CAPI Deadlock workaround
+     47:48,                    0b00                ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
      49   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_OP_SOURCE_AND_SCOPE
      50:51,                    0b00                ,     any              ;    # MCMODE1Q_DISABLE_CACHE_INHIBITED
      52   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_ALL_MCS_COMMAND_BYPASS

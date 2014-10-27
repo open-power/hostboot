@@ -544,6 +544,17 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 
     do
     {
+        // If running Sapphire, set sleep enable attribute here so
+        // initfile can be run correctly
+        if(is_sapphire_load())
+        {
+            TARGETING::Target* l_sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(l_sys);
+            assert( l_sys != NULL );
+            uint8_t l_sleepEnable = 1;
+            l_sys->setAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>(l_sleepEnable);
+        }
+
         // ----------------------------------------------
         // Execute PROC_CHIPLET_SCOMINIT_FBC_IF initfile
         // ----------------------------------------------
