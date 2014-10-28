@@ -58,5 +58,4 @@ prd_pegasus_specific += prdfLaneRepair.o
 prd_pegasus_specific += prdfLineDelete.o
 prd_pegasus_specific += prdfMemoryMru.o
 prd_pegasus_specific += prdfPegasusConfigurator.o
-prd_pegasus_specific += prdfRegisterData.o
 prd_pegasus_specific += prdfParserUtils.o
