@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -25,7 +25,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNOR_PNORRP_H
 #define __PNOR_PNORRP_H
-
 #include <pnor/pnorif.H>
 #include <sys/msg.h>
 #include <stdint.h>
@@ -33,25 +32,7 @@
 #include <errl/errlentry.H>
 #include <vmmconst.h>
 #include <map>
-
-namespace PNOR
-{
-
-    /**
-      * @brief Creates a 4-byte Cyclic Redundancy Check (CRC) on the data
-      *        provided. The last iteration of the for-loop includes the ffs
-      *        checksum itself. Therefore if the 4-byte CRC created matches
-      *        the ffs checksum, the resulting CRC will be 0
-      *
-      * @param[in] ptr          Pointer to the data
-      *
-      * @param[in] size         Size of the data
-      *
-      * @return uint32_t        return 4-byte CRC, 0 if checksums match
-      */
-    uint32_t pnor_ffs_checksum(void* data, size_t size);
-
-}; //namespace PNOR
+#include "pnor_common.H"
 
 /**
  * PNOR Resource Provider
@@ -90,45 +71,16 @@ class PnorRP
 
 
   private:
-    /**
-     * PNOR Constants
-     */
-    static const uint32_t NUM_TOCS = 2;
-    static const uint64_t TOC_0_OFFSET = 0;
-    static const uint64_t TOC_1_OFFSET = 0x8000;
-
     enum
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
         TOTAL_SIZE = 64*MEGABYTE, /**< Allocate 64 MB (0x4000000)*/
-
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
-
-        /** Real number of bytes required to read 1 logical page */
-        PAGESIZE_PLUS_ECC = ((PAGESIZE * 9)/8),  // 8B data + 1B of ECC
-
-        SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
-        FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
     };
-
     /**
      * Which TOC (0 or 1) is used after verifying both.
      */
     uint32_t iv_TOC_used;
-
-    /**
-     * Internal information to deal with the sections of PNOR
-     */
-    struct SectionData_t {
-        PNOR::SectionId id;  /**< Identifier for this section */
-        uint64_t virtAddr;  /**< Virtual address for the start of the section */
-        uint32_t flashAddr;  /**< Address in flash */
-        uint32_t size;  /**< Actual size of content in bytes (not including ECC) */
-        uint8_t chip;  /**< Chip Select */
-        uint8_t version; /**< Version Checking */
-        uint16_t integrity; /**< Data Integrity */
-        uint8_t misc; /**< Misc Flags */
-    } PACKED;
 
     /**
      * Flash statistics
@@ -141,7 +93,7 @@ class PnorRP
     /**
      * Cached copy of section data
      */
-    SectionData_t iv_TOC[PNOR::NUM_SECTIONS+1];
+    PNOR::SectionData_t iv_TOC[PNOR::NUM_SECTIONS+1];
 
     /**
      * Pointer to the message queue where we receive messages
@@ -263,7 +215,6 @@ class PnorRP
     friend class PnorDdTest;
     friend class SfcIBMTest;
     friend class SfcAST2400Test;
-
     // allow this function to use constant(s)
     friend errlHndl_t PNOR::validateAltMaster( void );
 

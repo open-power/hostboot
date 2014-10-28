@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -518,17 +518,17 @@ class PnorRpTest : public CxxTest::TestSuite
         uint8_t* corruptBuffer = new uint8_t[PAGESIZE];
 
         // Corrupt both ffs header and first entry for each TOC
-        for (uint32_t cur_TOC = 0; cur_TOC < PnorRP::NUM_TOCS; ++cur_TOC)
+        for (uint32_t cur_TOC = 0; cur_TOC < PNOR::NUM_TOCS; ++cur_TOC)
         {
             uint32_t TOC_used = cur_TOC;
 
             if (cur_TOC == 0)
             {
-              offset =  PnorRP::TOC_0_OFFSET;
+              offset =  PNOR::TOC_0_OFFSET;
             }
             else
             {
-              offset =  PnorRP::TOC_1_OFFSET;
+              offset =  PNOR::TOC_1_OFFSET;
             }
 
             // Read cur_TOC header data

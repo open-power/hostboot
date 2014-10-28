@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -45,43 +45,19 @@
 #include <util/align.H>
 #include <config.h>
 
-// Trace definition
-trace_desc_t* g_trac_pnor = NULL;
-TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //2K
+
+extern trace_desc_t* g_trac_pnor;
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
+using namespace PNOR;
+
 /**
  * Eyecatcher strings for PNOR TOC entries
  */
-const char* cv_EYECATCHER[] = {
-    "part",     /**< PNOR::TOC            : Table of Contents */
-    "HBI",      /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
-    "GLOBAL",   /**< PNOR::GLOBAL_DATA    : Global Data */
-    "HBB",      /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
-    "SBEC",     /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
-    "SBE",      /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
-    "WINK",     /**< PNOR::WINK           : Sleep Winkle Reference image */
-    "PAYLOAD",  /**< PNOR::PAYLOAD        : HAL/OPAL */
-    "HBRT",     /**< PNOR::HB_RUNTIME     : Hostboot Runtime (for Sapphire) */
-    "HBD",      /**< PNOR::HB_DATA        : Hostboot Data */
-    "GUARD",    /**< PNOR::GUARD_DATA     : Hostboot Data */
-    "HBEL",     /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
-    "DJVPD",    /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
-    "MVPD",     /**< PNOR::MODULE_VPD     : Module VPD */
-    "CVPD",     /**< PNOR::CENTAUR_VPD    : Centaur VPD */
-    "NVRAM",    /**< PNOR::NVRAM          : OPAL Storage */
-    "OCC",      /**< PNOR::OCC            : OCC LID */
-    "FIRDATA",  /**< PNOR::FIRDATA        : FIRDATA */
-    "ATTR_TMP",  /**< PNOR::ATTR_TMP       : Temporary Attribute Overrides */
-    "ATTR_PERM", /**< PNOR::ATTR_PERM      : Permanent Attribute Overrides */
-    "TEST",     /**< PNOR::TEST           : Test space for PNOR*/
-
-    //Not currently used
-//    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
-};
+extern const char* cv_EYECATCHER[];
 
 /**
  * @brief   set up _start() task entry procedure for PNOR daemon
@@ -102,28 +78,44 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
     return Singleton<PnorRP>::instance().getSectionInfo(i_section,o_info);
 }
 
-namespace PNOR
-{
-
 /**
- * @brief calculates the checksum on data(ffs header/entry) and will return
- *    0 if the checksums match
+ * @brief  Write the data for a given sectino into PNOR
  */
-uint32_t pnor_ffs_checksum(void* data, size_t size)
+errlHndl_t PNOR::flush( PNOR::SectionId i_section)
 {
-    uint32_t checksum = 0;
-
-    for (size_t i = 0; i < (size/4); i++)
-    {
-        checksum ^= ((uint32_t*)data)[i];
-    }
-
-    checksum = htobe32(checksum);
-    return checksum;
+    errlHndl_t l_err = NULL;
+    do {
+        PNOR::SectionInfo_t l_info;
+        l_err = getSectionInfo(i_section, l_info);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_pnor, "PNOR::flush: getSectionInfo errored,"
+                    " secId: %d", (int)i_section);
+            break;
+        }
+        int l_rc = mm_remove_pages (RELEASE,
+                reinterpret_cast<void*>(l_info.vaddr), l_info.size);
+        if (l_rc)
+        {
+            TRACFCOMP(g_trac_pnor, "PNOR::flush: mm_remove_pages errored,"
+                    " secId: %d, rc: %d", (int)i_section, l_rc);
+            /*@
+             *  @errortype
+             *  @moduleid       PNOR::MOD_PNORRP_FLUSH
+             *  @reasoncode     PNOR::RC_MM_REMOVE_PAGES_FAILED
+             *  @userdata1      section Id
+             *  @userdata2      RC
+             *  @devdesc        mm_remove_pages failed
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        PNOR::MOD_PNORRP_FLUSH,
+                                        PNOR::RC_MM_REMOVE_PAGES_FAILED,
+                                        i_section, l_rc, true);
+            break;
+        }
+    } while (0);
+    return l_err;
 }
-
-};
-
 /**
  * STATIC
  * @brief Static Initializer
@@ -147,7 +139,7 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
          * @custdesc    A problem occurred while accessing the boot flash.
          */
         l_errl = new ERRORLOG::ErrlEntry(
-                                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                 PNOR::MOD_PNORRP_DIDSTARTUPFAIL,
                                 PNOR::RC_BAD_STARTUP_RC,
                                 rc,
@@ -363,6 +355,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.id = iv_TOC[id].id;
         o_info.name = cv_EYECATCHER[id];
         o_info.vaddr = iv_TOC[id].virtAddr;
+        o_info.flashAddr = iv_TOC[id].flashAddr;
         o_info.size = iv_TOC[id].size;
         o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
                                 != 0) ? true : false;
@@ -383,267 +376,45 @@ errlHndl_t PnorRP::readTOC()
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
     errlHndl_t l_errhdl = NULL;
-    uint8_t* tocBuffer = NULL;
+    uint8_t* toc0Buffer = new uint8_t[PAGESIZE];
+    uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
     uint64_t fatal_error = 0;
-    bool TOC_0_failed = false;
-
-    do{
-        iv_TOC_used = 0;
-
-        for (uint32_t cur_TOC = 0; cur_TOC < NUM_TOCS; ++cur_TOC)
+    do {
+        l_errhdl = readFromDevice( TOC_0_OFFSET, 0, false,
+                                toc0Buffer, fatal_error );
+        if (l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor, "PnorRP::readTOC verifying TOC: %d",cur_TOC);
-            uint64_t nextVAddr = BASE_VADDR;
-
-            // Zero out my table
-            for( size_t id = PNOR::FIRST_SECTION;
-                 id <= PNOR::NUM_SECTIONS; //include extra entry for error paths
-                 ++id )
-            {
-                iv_TOC[id].id = (PNOR::SectionId)id;
-                //everything else should default to zero
-            }
-
-            // Read TOC information from TOC 0 and then TOC 1
-            tocBuffer = new uint8_t[PAGESIZE];
-            if (cur_TOC == 0)
-            {
-                l_errhdl = readFromDevice( TOC_0_OFFSET, 0, false,
-                                           tocBuffer, fatal_error );
-            }
-            else if (cur_TOC == 1)
-            {
-                l_errhdl = readFromDevice( TOC_1_OFFSET, 0, false,
-                                           tocBuffer, fatal_error );
-            }
-
-            if( l_errhdl )
-            {
-                TRACFCOMP(g_trac_pnor, "PnorRP::readTOC readFromDevice Failed.");
-                break;
-            }
-
-            ffs_hdr* l_ffs_hdr = (ffs_hdr*) tocBuffer;
-
-            // ffs entry check, 0 if checksums match
-            if( PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) != 0)
-            {
-                //@TODO - RTC:90780 - May need to handle this differently in SP-less config
-                TRACFCOMP(g_trac_pnor, "PnorRP::readTOC pnor_ffs_checksum header checksums do not match.");
-                if (cur_TOC == 0)
-                {
-                    TRACFCOMP(g_trac_pnor, "PnorRP::readTOC TOC 0 failed header checksum");
-                    TOC_0_failed = true;
-                    iv_TOC_used = 1;
-                    continue;
-                }
-                else if (cur_TOC == 1 && TOC_0_failed)
-                {
-                    // Both TOC's failed
-                    TRACFCOMP(g_trac_pnor, "PnorRP::readTOC both TOC's are corrupted");
-                    INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
-                }
-                else
-                {
-                    // TOC 1 failed
-                    TRACFCOMP(g_trac_pnor, "PnorRP::readTOC TOC 1 failed header checksum");
-                    break;
-                }
-            }
-
-            // Only check header if on first TOC or the first TOC failed
-            if (cur_TOC == 0 || TOC_0_failed)
-            {
-                TRACFCOMP(g_trac_pnor, "PnorRP::readTOC:  FFS Block size = 0x%.8X, Partition Table Size = 0x%.8x, entry_count=%d",
-                          l_ffs_hdr->block_size, l_ffs_hdr->size, l_ffs_hdr->entry_count);
-
-                uint64_t spaceUsed = (sizeof(ffs_entry))*l_ffs_hdr->entry_count;
-
-                /* Checking FFS Header to make sure it looks valid */
-                bool header_good = true;
-                if(l_ffs_hdr->magic != FFS_MAGIC)
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  Invalid magic number in FFS header: 0x%.4X",
-                              l_ffs_hdr->magic);
-                    header_good = false;
-                }
-                else if(l_ffs_hdr->version != SUPPORTED_FFS_VERSION)
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  Unsupported FFS Header version: 0x%.4X",
-                              l_ffs_hdr->version);
-                    header_good = false;
-                }
-                else if(l_ffs_hdr->entry_size != sizeof(ffs_entry))
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  Unexpected entry_size(0x%.8x) in FFS header: 0x%.4X", l_ffs_hdr->entry_size);
-                    header_good = false;
-                }
-                else if(l_ffs_hdr->entries == NULL)
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  FFS Header pointer to entries is NULL.");
-                    header_good = false;
-                }
-                else if(l_ffs_hdr->block_size != PAGESIZE)
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  Unsupported Block Size(0x%.4X). PNOR Blocks must be 4k",
-                              l_ffs_hdr->block_size);
-                    header_good = false;
-                }
-                else if(l_ffs_hdr->block_count == 0)
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  Unsupported BLock COunt(0x%.4X). Device cannot be zero blocks in length.",
-                              l_ffs_hdr->block_count);
-                    header_good = false;
-                }
-                //Make sure all the entries fit in specified partition table size.
-                else if(spaceUsed >
-                        ((l_ffs_hdr->block_size * l_ffs_hdr->size) - sizeof(ffs_hdr)))
-                {
-                    TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  FFS Entries (0x%.16X) go past end of FFS Table.",
-                              spaceUsed);
-                    header_good = false;
-                }
-
-                if(!header_good)
-                {
-                    //Shutdown if we detected a partition table issue for any reason
-                    if (TOC_0_failed)
-                    {
-                        INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
-                    }
-                    else
-                    {
-                        TOC_0_failed = true;
-                    }
-                    //Try TOC1
-                    continue;
-                }
-            }
-
-            ffs_hb_user_t* ffsUserData = NULL;
-
-            //Walk through all the entries in the table and parse the data.
-            for(uint32_t i=0; i<l_ffs_hdr->entry_count; i++)
-            {
-                ffs_entry* cur_entry = (&l_ffs_hdr->entries[i]);
-
-                TRACUCOMP(g_trac_pnor, "PnorRP::readTOC:  Entry %d, name=%s, pointer=0x%X", i, cur_entry->name, (uint64_t)cur_entry);
-
-                uint32_t secId = PNOR::INVALID_SECTION;
-
-                // ffs entry check, 0 if checksums match
-                if( PNOR::pnor_ffs_checksum(cur_entry, FFS_ENTRY_SIZE) != 0)
-                {
-                    //@TODO - RTC:90780 - May need to handle this differently in SP-less config
-                    TRACFCOMP(g_trac_pnor, "PnorRP::readTOC pnor_ffs_checksum entry checksums do not match.");
-                    if (cur_TOC == 0)
-                    {
-                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC TOC 0 entry checksum failed");
-                        TOC_0_failed = true;
-                        iv_TOC_used = 1;
-                        break;
-                    }
-                    else if (cur_TOC == 1 && TOC_0_failed)
-                    {
-                        // Both TOC's failed
-                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC both TOC's are corrupted");
-                        INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
-                    }
-                    else
-                    {
-                        // TOC 1 failed
-                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC TOC 1 entry checksum failed");
-                        break;
-                    }
-                }
-
-                // Only set data if on first TOC or the first TOC failed
-                if (cur_TOC == 0 || TOC_0_failed)
-                {
-                    //Figure out section enum
-                    for(uint32_t eyeIndex=PNOR::TOC; eyeIndex < PNOR::NUM_SECTIONS; eyeIndex++)
-                    {
-                        if(strcmp(cv_EYECATCHER[eyeIndex], cur_entry->name) == 0)
-                        {
-                            secId = eyeIndex;
-                            TRACUCOMP(g_trac_pnor, "PnorRP::readTOC: sectionId=%d", secId);
-                            break;
-                        }
-                    }
-
-                    if(secId == PNOR::INVALID_SECTION)
-                    {
-                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC:  Unrecognized Section name(%s), skipping", cur_entry->name);
-                        continue;
-                    }
-
-                    ffsUserData = (ffs_hb_user_t*)&(cur_entry->user);
-
-                    //size
-                    iv_TOC[secId].size = ((uint64_t)cur_entry->size)*PAGESIZE;
-
-                    //virtAddr
-                    iv_TOC[secId].virtAddr = nextVAddr;
-                    nextVAddr += iv_TOC[secId].size;
-
-                    //flashAddr
-                    iv_TOC[secId].flashAddr = ((uint64_t)cur_entry->base)*PAGESIZE;
-
-                    //chipSelect
-                    iv_TOC[secId].chip = ffsUserData->chip;
-
-                    //user data
-                    iv_TOC[secId].integrity = ffsUserData->dataInteg;
-                    iv_TOC[secId].version = ffsUserData->verCheck;
-                    iv_TOC[secId].misc = ffsUserData->miscFlags;
-
-                    TRACFCOMP(g_trac_pnor, "PnorRp::readTOC: User Data %s", cur_entry->name);
-
-                    if (iv_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
-                    {
-                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC: ECC enabled for %s", cur_entry->name);
-                        iv_TOC[secId].size = ALIGN_PAGE_DOWN((iv_TOC[secId].size * 8 ) / 9);
-                    }
-
-                    // TODO RTC:96009 handle version header w/secureboot
-                    if (iv_TOC[secId].version == FFS_VERS_SHA512)
-                    {
-                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC: Incrementing Flash Address for SHA Header");
-                        if (iv_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
-                        {
-                            iv_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC;
-                        }
-                        else
-                        {
-                            iv_TOC[secId].flashAddr += PAGESIZE;
-                        }
-                    }
-
-                    if((iv_TOC[secId].flashAddr + iv_TOC[secId].size) > (l_ffs_hdr->block_count*PAGESIZE))
-                    {
-                        TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC:  Partition(%s) at base address (0x%.8x) extends past end of flash device",
-                                  cur_entry->name, iv_TOC[secId].flashAddr);
-                        INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
-                    }
-                }
-            }
-
-            //keep these traces here until PNOR is rock-solid
-            for(PNOR::SectionId tmpId = PNOR::FIRST_SECTION;
-                tmpId < PNOR::NUM_SECTIONS;
-                tmpId = (PNOR::SectionId) (tmpId + 1) )
-            {
-                TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", cv_EYECATCHER[tmpId], iv_TOC[tmpId].size, iv_TOC[tmpId].flashAddr, iv_TOC[tmpId].virtAddr );
-            }
+            TRACFCOMP(g_trac_pnor, "readTOC: readFromDevice failed for TOC0");
+            break;
         }
-    }while(0);
 
-    if(tocBuffer != NULL)
+        l_errhdl = readFromDevice( TOC_1_OFFSET, 0, false,
+                                   toc1Buffer, fatal_error );
+        if (l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "readTOC: readFromDevice failed for TOC1");
+            break;
+        }
+
+        l_errhdl = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC,
+                   BASE_VADDR);
+        if (l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "readTOC: parseTOC failed");
+            errlCommit(l_errhdl, PNOR_COMP_ID);
+            INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_INVALID);
+        }
+    } while (0);
+
+    if(toc0Buffer != NULL)
     {
-        TRACUCOMP(g_trac_pnor, "Deleting tocBuffer");
-        delete[] tocBuffer;
+        delete[] toc0Buffer;
     }
 
+    if(toc1Buffer != NULL)
+    {
+        delete[] toc1Buffer;
+    }
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
     return l_errhdl;
 }

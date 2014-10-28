@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -102,7 +102,7 @@ errlHndl_t validateAltMaster( void )
     // When reading PNOR TOC assume a single page and no ECC
     uint8_t* tocBuffer = new uint8_t[PAGESIZE];
     size_t read_size = PAGESIZE;
-    const uint64_t toc0_offset = PnorRP::TOC_0_OFFSET;
+    const uint64_t toc0_offset = PNOR::TOC_0_OFFSET;
 
     do{
 
@@ -177,7 +177,7 @@ errlHndl_t validateAltMaster( void )
 
             // Read Flash
             l_err = pnordd->readFlash(tocBuffer, read_size,
-                                      PnorRP::TOC_0_OFFSET);
+                                      PNOR::TOC_0_OFFSET);
             if ( l_err )
             {
                 // Commit Error Log, but continue the test

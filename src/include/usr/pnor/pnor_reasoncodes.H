@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -42,6 +42,7 @@ namespace PNOR
         MOD_PNORRP_READFROMDEVICE       = 0x07, /**< PnorRP::readFromDevice */
         MOD_PNORRP_WRITETODEVICE        = 0x08, /**< PnorRP::writeToDevice */
         MOD_PNORRP_DIDSTARTUPFAIL       = 0x09, /**< didStartupFail(rc) */
+        MOD_PNORRP_FLUSH                = 0x0A, /**< mm_remove_pages */
 
         // pnorvalid.C
         MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
@@ -81,6 +82,15 @@ namespace PNOR
 
         // nor_micron.C
         MOD_NORMICRON_MICRONFLAGSTATUS  = 0xA0, /**< micronFlagStatus */
+
+        //rt_pnor.C
+        MOD_RTPNOR_GETSECTIONINFO       = 0xB0, /**< RtPnor::getSectionInfo*/
+        MOD_RTPNOR_FLUSH                = 0xB1, /**< RtPnor::flush */
+        MOD_RTPNOR_READFROMDEVICE       = 0xB2, /**< RtPnor::readFromDevice */
+        MOD_RTPNOR_WRITETODEVICE        = 0xB3, /**< RtPnor::writeToDevice */
+
+        //pnor_common.C
+        MOD_PNORCOMMON_PARSETOC        = 0xC0, /**< PNOR::parseTOC */
     };
 
     enum PNORReasonCode
@@ -113,6 +123,17 @@ namespace PNOR
         RC_PNOR_INIT_FAILURE         = PNOR_COMP_ID | 0x13,
         RC_CANNOT_ENABLE_WRITES      = PNOR_COMP_ID | 0x14,
         RC_SFC_TIMEOUT               = PNOR_COMP_ID | 0x15,
+        RC_PNOR_READ_FAILED          = PNOR_COMP_ID | 0x16,
+        RC_PNOR_WRITE_FAILED         = PNOR_COMP_ID | 0x17,
+        RC_CORRUPTED_TOCS            = PNOR_COMP_ID | 0x18,
+        RC_BAD_TOC_HEADER            = PNOR_COMP_ID | 0x19,
+        RC_SECTION_SIZE_IS_BIG       = PNOR_COMP_ID | 0x1A,
+        RC_RTPNOR_INVALID_SECTION    = PNOR_COMP_ID | 0x1B,
+        RC_UNCORRECTABLE_ECC         = PNOR_COMP_ID | 0x1C,
+        RC_SECTION_SIZE_IS_ZERO      = PNOR_COMP_ID | 0x1D,
+        RC_MM_REMOVE_PAGES_FAILED    = PNOR_COMP_ID | 0x1E,
+        RC_PNOR_READ_NOT_SUPPORTED   = PNOR_COMP_ID | 0x1F,
+        RC_PNOR_WRITE_NOT_SUPPORTED  = PNOR_COMP_ID | 0x20,
     };
 
     enum UserDetailsTypes

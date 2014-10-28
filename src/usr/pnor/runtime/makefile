@@ -1,12 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/pnor/makefile $
+# $Source: src/usr/pnor/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
-# [+] Google Inc.
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -23,26 +22,15 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = pnor
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
+MODULE = pnor_rt
 
-OBJS += pnorrp.o
-OBJS += pnordd.o
+OBJS += rt_pnor.o
 OBJS += pnor_common.o
-OBJS += pnorvalid.o
 OBJS += ecc.o
-OBJS += sfcdd.o
-
-#SFC Implementations
-OBJS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibm.o)
-OBJS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400.o)
-OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
-
-#NOR Implementations
-OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
-
 
 SUBDIRS += test.d
-SUBDIRS += runtime.d
 
-include ${ROOTPATH}/config.mk
+VPATH += ../
+include $(ROOTPATH)/config.mk

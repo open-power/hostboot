@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,7 +25,6 @@
 #ifndef __TESTCORE_RTLOADER_LOADER_H
 #define __TESTCORE_RTLOADER_LOADER_H
 
-#include <pnor/pnorif.H>
 #include <util/align.H>
 #include <sys/mm.h>
 #include <targeting/common/targetservice.H>
@@ -36,10 +37,14 @@
 #include <sys/time.h>
 #include <runtime/interface.h>
 #include <vpd/vpd_if.H>
-
+#include <pnor/pnorif.H>
+#include <string.h>
+#include <devicefw/userif.H>
+#include <pnor/ecc.H>
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
 
+extern const char* cv_EYECATCHER[];
 
 class RuntimeLoaderTest : public CxxTest::TestSuite
 {
@@ -115,6 +120,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->lid_load = rt_lid_load;
                 intf->lid_unload = rt_lid_unload;
                 intf->get_reserved_mem = rt_get_reserved_mem;
+                intf->pnor_read = rt_pnor_read;
+                intf->pnor_write= rt_pnor_write;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -308,6 +315,154 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 return rt_get_targ();
             else
                 return 0;
+        }
+
+
+        static PNOR::SectionId find_sectionId (const char* i_partitionName)
+        {
+            PNOR::SectionId l_id = PNOR::INVALID_SECTION;
+            for (size_t i=PNOR::FIRST_SECTION; i<=PNOR::NUM_SECTIONS;
+                    ++i)
+            {
+                if (0 == strcmp(cv_EYECATCHER[i], i_partitionName))
+                {
+                    l_id = (PNOR::SectionId)i;
+                    break;
+                }
+            }
+            return l_id;
+        }
+
+        static int rt_pnor_read (uint32_t i_proc, const char* i_partitionName,
+                   uint64_t i_offset, void* o_data, size_t i_sizeBytes)
+        {
+            TRACFCOMP(g_trac_hbrt, ENTER_MRK"rt_pnor_read: proc:%d, part:%s,"
+                    " offset:0x%X, dataPtr:0x%X, size:0x%X",i_proc,
+                    i_partitionName, i_offset, o_data, i_sizeBytes);
+
+            PNOR::SectionId l_id = PNOR::INVALID_SECTION;
+            PNOR::SectionInfo_t l_info;
+            errlHndl_t l_err = NULL;
+            uint32_t l_plid = 0;
+
+            do
+            {
+                TARGETING::Target* pnor_target =
+                    TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+                //search cv_EYECATHCER for partitionname
+                l_id = find_sectionId(i_partitionName);
+                if (l_id == PNOR::INVALID_SECTION)
+                {
+                    TRACFCOMP(g_trac_hbrt, "rt_pnor_read: Invalid Section");
+                    break;
+                }
+
+                //getSectionInfo -- this is PnorRP::getSectionInfo
+                l_err = PNOR::getSectionInfo(l_id, l_info);
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_hbrt, "rt_pnor_read: getSectionInfo errored");
+                    break;
+                }
+
+                // read far enough in the section so it doesn't collide
+                // with other test cases
+                if (l_id == PNOR::TEST)
+                {
+                    //adjust the size of data if we are reading the entire sec
+                    i_sizeBytes = (i_offset == 0)? (((l_info.size -
+                             PNOR::pnorTestSec_rt_readwrite_offset)*9)/8) :
+                             i_sizeBytes;
+                    i_offset = ((PNOR::pnorTestSec_rt_readwrite_offset*9)/8);
+                }
+
+                uint32_t l_flashAddr= l_info.flashAddr + i_offset;
+
+                TRACFCOMP(g_trac_hbrt,"rt_pnor_read: calling"
+                        " deviceRead: offset:0x%X, flashAddr:0x%X, size:0x%X",
+                        i_offset, l_flashAddr, i_sizeBytes);
+
+                l_err = DeviceFW::deviceRead (pnor_target, o_data, i_sizeBytes,
+                                     DEVICE_PNOR_ADDRESS(i_proc, l_flashAddr));
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_hbrt, "rt_pnor_read: deviceRead errored");
+                    break;
+                }
+            } while (0);
+
+            //commit the error
+            if (l_err)
+            {
+                l_plid = l_err -> plid();
+                errlCommit(l_err,CXXTEST_COMP_ID);
+            }
+            TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_pnor_read");
+            return l_plid;
+        }
+
+
+        static int rt_pnor_write(uint32_t i_proc, const char* i_partitionName,
+                   uint64_t i_offset, void* i_data, size_t i_sizeBytes)
+        {
+            TRACFCOMP(g_trac_hbrt, ENTER_MRK"rt_pnor_write: proc:%d, part:%s,"
+                    " offset:0x%X, dataPtr:0x%X, size:0x%X",i_proc,
+                    i_partitionName, i_offset, i_data, i_sizeBytes);
+
+            PNOR::SectionId     l_id = PNOR::INVALID_SECTION;
+            PNOR::SectionInfo_t l_info;
+            errlHndl_t          l_err = NULL;
+            uint32_t            l_plid = 0;
+            do {
+
+                TARGETING::Target* pnor_target =
+                    TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+                //search cv_EYECATHCER for partitionname
+                l_id = find_sectionId(i_partitionName);
+                if (l_id == PNOR::INVALID_SECTION)
+                {
+                    TRACFCOMP(g_trac_hbrt, "rt_pnor_write: Invalid section");
+                    break;
+                }
+
+                //getSectionInfo - this is PnorRP::getSectionInfo
+                l_err = PNOR::getSectionInfo(l_id, l_info);
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_hbrt, "rt_pnor_write: getSectionInfo errored");
+                    break;
+                }
+
+                //fix the offset for the TEST section so that the testcases
+                //don't collide
+                i_offset = (PNOR::TEST) ? (i_offset+
+                       ((PNOR::pnorTestSec_rt_readwrite_offset*9)/8)):i_offset;
+
+                uint32_t l_flashAddr = l_info.flashAddr + i_offset;
+
+                TRACFCOMP(g_trac_hbrt,"rt_pnor_write: calling"
+                        " deviceWrite: offset:0x%X, flashAddr:0x%X, size:0x%X",
+                        i_offset, l_flashAddr, i_sizeBytes);
+
+                l_err = DeviceFW::deviceWrite (pnor_target, i_data, i_sizeBytes,
+                                      DEVICE_PNOR_ADDRESS(i_proc, l_flashAddr));
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_hbrt, "rt_pnor_write: deviceWrite errored");
+                    break;
+                }
+            } while (0);
+
+            //commit the error
+            if (l_err)
+            {
+                l_plid = l_err -> plid();
+                errlCommit (l_err, CXXTEST_COMP_ID);
+            }
+            TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_pnor_write");
+            return l_plid;
         }
 
         //--------------------------------------------------------------------

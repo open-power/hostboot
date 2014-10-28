@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,30 @@ typedef struct hostInterfaces
      *
      */
     int (*clock_gettime)(clockid_t i_clkId, timespec_t* o_tp);
+
+    /**
+     * @brief Read Pnor
+     * @param[in] i_proc: processor Id
+     * @param[in] i_partitionName: name of the partition to read
+     * @param[in] i_offset: offset within the partition
+     * @param[out] o_data: pointer to the data read
+     * @param[in] i_sizeBytes: size of data to read
+     * @retval rc - non-zero on error
+     */
+    int (*pnor_read) (uint32_t i_proc, const char* i_partitionName,
+                   uint64_t i_offset, void* o_data, size_t i_sizeBytes);
+
+    /**
+     * @brief Write to Pnor
+     * @param[in] i_proc: processor Id
+     * @param[in] i_partitionName: name of the partition to write
+     * @param[in] i_offset: offset withing the partition
+     * @param[in] i_data: pointer to the data to write
+     * @param[in] i_sizeBytes: size of data to write
+     * @retval rc - non-zero on error
+     */
+    int (*pnor_write) (uint32_t i_proc, const char* i_partitionName,
+                   uint64_t i_offset, void* i_data, size_t i_sizeBytes);
 
     // Reserve some space for future growth.
     void (*reserved[32])(void);

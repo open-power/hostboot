@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -74,13 +74,14 @@ enum SectionId
     // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
-    SectionId id;  /**< Identifier for this section */
-    const char* name;  /**< Name of the section */
-    uint64_t vaddr;  /**< Virtual address for the start of the section */
-    uint64_t size;  /**< Size of partition in bytes */
+    SectionId id;       /**< Identifier for this section */
+    const char* name;   /**< Name of the section */
+    uint64_t vaddr;     /**< Virtual address of the start of the section */
+    uint32_t flashAddr; /**< Flash address of the start of the section*/
+    uint64_t size;      /**< Size of partition in bytes */
     bool eccProtected;  /**< Section is ECC protected */
     bool sha512Version; /**< Version Checking */
-    bool sha512perEC; /**< Version Checking perEC */
+    bool sha512perEC;   /**< Version Checking perEC */
 };
 
 /**
@@ -93,7 +94,15 @@ struct SectionInfo_t
  */
 errlHndl_t getSectionInfo( SectionId i_section,
                            SectionInfo_t& o_info );
-
+/**
+ * @brief  Write the data back from hostboot memory to PNOR of a given section
+ *         of PNOR
+ *
+ * @param[in] i_section  PNOR section
+ *
+ * @return errlHndl_t  Error log if request was invalid
+ */
+errlHndl_t flush (SectionId i_section);
 /**
  * @brief Informs caller if PNORDD is using
  *        L3 Cache for fake PNOR or not.
@@ -115,8 +124,11 @@ errlHndl_t validateAltMaster( void );
 /** @brief PNOR::TEST section offsets for test cases to prevent
  *         concurrency problems
  */
-const uint32_t pnorTestSec_readwrite_offset = 0x100;
-const uint32_t pnorTestSec_smartwrite_offset = 0x120;
+enum TestSectionOffset{
+    pnorTestSec_readwrite_offset = 0x100,
+    pnorTestSec_smartwrite_offset = 0x120,
+    pnorTestSec_rt_readwrite_offset = 0x6000,
+};
 
 }
 
