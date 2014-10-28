@@ -202,10 +202,10 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
 
     /*PCIE*/
     uint8_t l_phbActive =
-      i_pProc->getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();
-    //TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_type l_laneEq =
-    //  l_pProc->getAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION>();
-    uint32_t l_laneEq[] = {0,0,0,0};
+        i_pProc->getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();
+    TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_type l_laneEq = {{0}};
+    assert(i_pProc->tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION>(
+        l_laneEq));
 
     TRACFCOMP( g_trac_devtree, "Chip %X PHB Active mask %X",
                i_chipid, l_phbActive);
@@ -232,7 +232,9 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
         i_dt->addPropertyCells32(pcieNode, "reg", pcie_prop, 6);
         i_dt->addPropertyCell32(pcieNode, "ibm,phb-index", l_phb);
         i_dt->addProperty(pcieNode, "ibm,use-ab-detect");
-        i_dt->addPropertyCell32(pcieNode, "ibm,lane-eq", l_laneEq[l_phb]);
+        i_dt->addPropertyCells32(pcieNode, "ibm,lane-eq",
+            reinterpret_cast<uint32_t*>(l_laneEq[l_phb]),
+            (sizeof(l_laneEq[l_phb])/sizeof(uint32_t)));
     }
 }
 
