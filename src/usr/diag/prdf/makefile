@@ -99,15 +99,12 @@ endif
 #------------------------------------------------------------------------------
 
 include common/prd_ruletable.mk
-include common/prd_pegasus.mk
 include prdf_hb_only.mk
 
 OBJS += ${prd_object_files}
 OBJS += ${prd_object_files_no_sim}
 OBJS += ${prd_ruletable}
-OBJS += ${prd_pegasus_specific}
 OBJS += ${prd_object_files_HB}
-OBJS += ${PRDF_RULE_PLUGINS_PEGASUS}
 OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_HB}
 
 include common/prdf_common_fsp_and_hb.mk
@@ -115,6 +112,7 @@ include prdf_common_hb_only.mk
 
 OBJS += ${prd_obj}
 OBJS += ${prd_obj_no_sim}
+OBJS += ${prd_rule_plugin}
 
 #------------------------------------------------------------------------------
 # Generated Mfg Threshold Header file
