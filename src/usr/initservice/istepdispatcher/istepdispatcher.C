@@ -65,6 +65,8 @@
 #include <console/consoleif.H>
 #include <hwpisteperror.H>
 #include <pnor/pnorif.H>
+#include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
+#include <config.h>
 
 namespace ISTEPS_TRACE
 {
@@ -215,6 +217,22 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         }
         else
         {
+
+#ifdef CONFIG_BMC_IPMI
+            //run the ipmi watchdog in non istep mode only
+            errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
+                                  IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN);
+
+            if(err_ipmi)
+            {
+               TRACFCOMP(g_trac_initsvc,
+                              "init: ERROR: Set IPMI watchdog Failed");
+                err_ipmi->collectTrace("INITSVC", 1024);
+                errlCommit(err_ipmi, INITSVC_COMP_ID );
+
+            }
+#endif
+
             // Non-IStep mode (run all isteps automatically)
             if(iv_spBaseServicesEnabled)
             {
@@ -1626,6 +1644,20 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
     CONSOLE::displayf(NULL, "ISTEP %2d.%2d", iv_curIStep, iv_curSubStep);
     CONSOLE::flush();
+#endif
+
+#ifdef CONFIG_BMC_IPMI
+    //Reset the watchdog before every istep
+    errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
+
+    if(err_ipmi)
+    {
+       TRACFCOMP(g_trac_initsvc,
+                      "init: ERROR: reset IPMI watchdog Failed");
+        err_ipmi->collectTrace("INITSVC", 1024);
+        errlCommit(err_ipmi, INITSVC_COMP_ID );
+
+    }
 #endif
 
     msg_t * myMsg = msg_allocate();

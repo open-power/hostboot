@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,12 @@
 //******************************************************************************
 // Macros
 //******************************************************************************
+
+
+/**
+ *  @brief number of milliseconds per second
+ */
+#define MS_PER_SEC (1000)
 
 /**
  *  @brief Number of nanoseconds per second

@@ -120,6 +120,9 @@ namespace IPMI
     inline const command_t set_watchdog(void)
     { return std::make_pair(NETFUN_APP, 0x24); }
 
+    inline const command_t reset_watchdog(void)
+    { return std::make_pair(NETFUN_APP, 0x22); }
+
     inline const command_t get_capabilities(void)
     { return std::make_pair(NETFUN_APP, 0x36); }
 

@@ -31,6 +31,7 @@ OBJS += ipmirp.o
 OBJS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmidd.o)
 OBJS += ipmiconfig.o
 OBJS += ipmisensor.o
+OBJS += ipmiwatchdog.o
 
 #SUBDIRS += test.d
 

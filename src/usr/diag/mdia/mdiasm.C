@@ -43,6 +43,8 @@
 #include <targeting/common/utilFilter.H>
 #include <errl/errludlogregister.H>
 #include <initservice/istepdispatcherif.H>
+#include <ipmi/ipmiwatchdog.H>
+#include <config.h>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -1117,10 +1119,22 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
             eventType = SKIP_MBA;
         }
 
-        switch(eventType)
-        {
-            case COMMAND_COMPLETE:
+#ifdef CONFIG_BMC_IPMI
+        // Reset the watchdog timer after running each pattern
+        errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
 
+        if(err_ipmi)
+        {
+            MDIA_FAST("sm executeWorkitem: IPMI reset watchdog failed");
+            err_ipmi->collectTrace("MDIA_FAST",1024);
+            errlCommit(err_ipmi, MDIA_COMP_ID );
+
+        }
+#endif
+
+        switch(eventType)
+            case COMMAND_COMPLETE:
+            {
                 // command stopped or complete at end of last rank
 
                 wfp.restartCommand = false;
@@ -1129,13 +1143,13 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 ++wfp.workItem;
 
+
                 // done with this maint command
 
                 flags = DELETE_CMD | START_NEXT_CMD;
                 wfp.data = NULL;
 
                 break;
-
             case COMMAND_STOPPED:
 
                 // command stopped at end of some other rank
