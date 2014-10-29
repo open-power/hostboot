@@ -252,7 +252,7 @@ hbicore_MODULES += ${BASE_MODULES}
 hbicore_EXTENDED_MODULES += ${EXTENDED_MODULES}
 
 # for PRDR_RULE_TABLE_TARGETS
-include ${ROOTPATH}/src/usr/diag/prdf/common/prd_ruletable.mk
+include ${ROOTPATH}/src/usr/diag/prdf/common/framework/rule/prdf_rule.mk
 
 hbicore_DATA_MODULES += sample.if
 hbicore_DATA_MODULES += p8.dmi.scom.if
@@ -263,7 +263,7 @@ hbicore_DATA_MODULES += mba_def.if
 hbicore_DATA_MODULES += cen_ddrphy.if
 hbicore_DATA_MODULES += p8.pe.phase1.scom.if
 hbicore_DATA_MODULES += p8.pe.phase2.scom.if
-hbicore_DATA_MODULES += ${PRDR_RULE_TABLE_TARGETS}
+hbicore_DATA_MODULES += ${prd_rule_prf_targets}
 hbicore_DATA_MODULES += p8.abus.scom.if
 hbicore_DATA_MODULES += p8.xbus.scom.if
 hbicore_DATA_MODULES += p8.mcs.scom.if

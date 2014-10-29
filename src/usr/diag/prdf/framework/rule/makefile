@@ -42,6 +42,8 @@ OBJ_RULE_LINK_DIR = ${OBJ_PLUG_LINK_PATH}/${OBJ_RULE}
 
 VPATH = ${SRC_USR_DIR}/common/framework/rule
 
+include ../../common/framework/rule/prdf_rule.mk
+
 #------------------------------------------------------------------------------
 # Generated files
 #------------------------------------------------------------------------------
@@ -69,15 +71,9 @@ PRDR_CMP_YACC_H_PATH = ${OBJ_RULE_DIR}/${PRDR_CMP_YACC_H}
 PRDR_CMP_FLEX_o_PATH = ${OBJ_RULE_DIR}/${PRDR_CMP_FLEX_o}
 PRDR_CMP_FLEX_C_PATH = ${OBJ_RULE_DIR}/${PRDR_CMP_FLEX_C}
 
-include ../../common/prd_ruletable.mk # for PRDR_RULE_TABLE_TARGETS
-
-ERR_PLUGIN_TARGETS = ${PRDR_RULE_TABLE_FILES:.rule=.prf.err.C}
-REG_PLUGIN_TARGETS = ${PRDR_RULE_TABLE_FILES:.rule=.prf.reg.C}
-HTML_PLUGIN_TARGETS = ${PRDR_RULE_TABLE_FILES:.rule=.prf.html}
-
-PRF_IMG_PATHS    = $(addprefix ${IMGDIR}/,       ${PRDR_RULE_TABLE_TARGETS})
-ERR_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${ERR_PLUGIN_TARGETS})
-REG_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${REG_PLUGIN_TARGETS})
+PRF_IMG_PATHS    = $(addprefix ${IMGDIR}/,       ${prd_rule_prf_targets})
+ERR_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${prd_rule_err_targets})
+REG_PLUGIN_PATHS = $(addprefix ${OBJ_PLUG_DIR}/, ${prd_rule_reg_targets})
 
 #-------------------------------------------------------------------------------
 # Files linked to the error log plugins directory
@@ -88,6 +84,7 @@ SOURCE_PLUGIN_DIRS += ${SRC_USR}/common/plugins
 SOURCE_PLUGIN_DIRS += ${SRC_USR}/plugins
 
 # Individual source files to link.
+SOURCE_PLUGIN_FILES += ${SRC_USR}/common/framework/rule/prdf_rule.mk
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/framework/rule/tables.mk
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/UtilHash.H
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/plat/pegasus/prdfCenConst.H
@@ -114,10 +111,10 @@ CLEAN_TARGETS += ${PRDR_CMP_YACC_C_PATH}
 CLEAN_TARGETS += ${PRDR_CMP_YACC_H_PATH}
 CLEAN_TARGETS += ${PRDR_CMP_FLEX_o_PATH}
 CLEAN_TARGETS += ${PRDR_CMP_FLEX_C_PATH}
-CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${PRDR_RULE_TABLE_TARGETS})
-CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${ERR_PLUGIN_TARGETS})
-CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${REG_PLUGIN_TARGETS})
-CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${HTML_PLUGIN_TARGETS})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_prf_targets})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_err_targets})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_reg_targets})
+CLEAN_TARGETS += $(addprefix ${OBJ_RULE_DIR}/, ${prd_rule_html_targets})
 CLEAN_TARGETS += ${PRF_IMG_PATHS}
 CLEAN_TARGETS += ${ERR_PLUGIN_PATHS}
 CLEAN_TARGETS += ${REG_PLUGIN_PATHS}

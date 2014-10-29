@@ -98,10 +98,8 @@ endif
 # objects
 #------------------------------------------------------------------------------
 
-include common/prd_ruletable.mk
 include prdf_hb_only.mk
 
-OBJS += ${prd_ruletable}
 OBJS += ${prd_object_files_HB}
 OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_HB}
 

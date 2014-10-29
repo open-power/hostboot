@@ -1,11 +1,13 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/prd_ruletable.mk $
+# $Source: src/usr/diag/prdf/common/framework/rule/prdf_rule.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2005,2014
+# Contributors Listed Below - COPYRIGHT 2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,19 +23,14 @@
 #
 # IBM_PROLOG_END_TAG
 
-PRDR_RULE_TABLE_FILES += Proc.rule
-PRDR_RULE_TABLE_FILES += Ex.rule
-PRDR_RULE_TABLE_FILES += Mcs.rule
-PRDR_RULE_TABLE_FILES += Membuf.rule
-PRDR_RULE_TABLE_FILES += Mba.rule
+prd_rule_files += Proc.rule
+prd_rule_files += Ex.rule
+prd_rule_files += Mcs.rule
+prd_rule_files += Membuf.rule
+prd_rule_files += Mba.rule
 
-PRDR_RULE_TABLE_TARGETS = ${PRDR_RULE_TABLE_FILES:.rule=.prf}
-
-prd_ruletable += prdrLoadChip.o
-prd_ruletable += prdrLoadChipCache.o
-prd_ruletable += prdfRuleMetaData.o
-prd_ruletable += prdfRuleChip.o
-prd_ruletable += prdfGroup.o
-prd_ruletable += prdfPluginMap.o
-prd_ruletable += prdfRuleFiles.o
+prd_rule_prf_targets  = ${prd_rule_files:.rule=.prf}
+prd_rule_err_targets  = ${prd_rule_files:.rule=.prf.err.C}
+prd_rule_reg_targets  = ${prd_rule_files:.rule=.prf.reg.C}
+prd_rule_html_targets = ${prd_rule_files:.rule=.prf.html}
 

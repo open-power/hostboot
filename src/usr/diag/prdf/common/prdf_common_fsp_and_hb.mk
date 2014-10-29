@@ -67,6 +67,13 @@ prd_obj += xspprdGardResolution.o
 
 # common/framework/rule/
 prd_obj += iipTemplates.o
+prd_obj += prdfGroup.o
+prd_obj += prdfPluginMap.o
+prd_obj += prdfRuleChip.o
+prd_obj += prdfRuleFiles.o
+prd_obj += prdfRuleMetaData.o
+prd_obj += prdrLoadChip.o
+prd_obj += prdrLoadChipCache.o
 
 # common/framework/service/
 prd_obj_no_sim += prdfPlatServices_common.o
