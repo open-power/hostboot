@@ -14223,6 +14223,24 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MRW_DDR3_VDDR_MAX_LIMIT</id>
+    <description>Maximum voltage limit for the dynamic VID DDR3 VDDR
+        voltage setpoint. In mV.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_DDR3_VDDR_MAX_LIMIT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MSS_VOLT_DDR4_VDDR_SLOPE</id>
     <description>Units: 1/Amps
     </description>
@@ -14252,6 +14270,24 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_DDR4_VDDR_INTERCEPT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_DDR4_VDDR_MAX_LIMIT</id>
+    <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage
+        setpoint. In mV.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_DDR4_VDDR_MAX_LIMIT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -14303,25 +14339,49 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>MRW_POWER_CONTROL_REQUESTED</id>
+    <description>
+        Enumeration defining the type of power control requested
+    </description>
+    <enumerator>
+        <name>NONE</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>SLOWEXIT</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>FASTEXIT</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>FASTEXIT_AND_SLOWEXIT</name>
+        <value>3</value>
+    </enumerator>
+    <default>NONE</default>
+</enumerationType>
+
 <attribute>
-    <id>MSS_POWER_CONTROL_REQUESTED</id>
+    <id>MRW_POWER_CONTROL_REQUESTED</id>
     <description>
         Type of memory power control requested
 
-        0x00 = Off
+        0x00 = NONE
         0x01 = SLOWEXIT
         0x02 = FASTEXIT
+        0x03 = FASTEXIT_AND_SLOWEXIT
     </description>
     <simpleType>
         <uint8_t>
             <default>0x00</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MSS_POWER_CONTROL_REQUESTED</id>
+        <id>ATTR_MRW_POWER_CONTROL_REQUESTED</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

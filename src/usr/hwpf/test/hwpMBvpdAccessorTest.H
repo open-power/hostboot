@@ -489,14 +489,6 @@ public:
                                           TARGET_TYPE_MEMBUF_CHIP,
                    (const_cast<TARGETING::Target*>(l_mb_target)) );
 
-
-            uint8_t l_val = 5;
-            l_fapirc = FAPI_ATTR_GET(ATTR_MSS_POWER_CONTROL_CAPABLE,
-                                &l_fapi_mb_target,l_val);
-
-            if(l_fapirc) break;
-               TS_TRACE( "Power Control Capable Accessor "
-                         "POWER_CONTROL_CAPABLE=0x%02x", l_val);
         }
         if (l_fapirc)
         {

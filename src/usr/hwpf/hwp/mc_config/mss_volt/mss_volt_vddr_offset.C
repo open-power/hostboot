@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vddr_offset.C,v 1.19 2014/09/12 15:38:08 sglancy Exp $
+// $Id: mss_volt_vddr_offset.C,v 1.20 2014/10/06 15:56:56 sglancy Exp $
 /* File mss_volt_vddr_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.20   | sglancy  | 10/06/14 | Added in checks for going over voltage limits
 //  1.19   | sglancy  | 09/12/14 | Removed references to EFF attributes
 //  1.18   | sglancy  | 09/11/14 | Fixed bugs and fixed typos
 //  1.17   | sglancy  | 09/10/14 | Added additional checks for bad master power values
@@ -100,6 +101,7 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     uint8_t enable, is_functional;
     uint8_t num_non_functional = 0;
     uint8_t percent_uplift,percent_uplift_idle;
+    uint32_t vddr_max_limit_mv;
     std::vector<fapi::Target>  l_mbaChiplets;
     std::vector<fapi::Target>  l_dimm_targets;
     
@@ -208,12 +210,16 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
        if(l_rc) return l_rc;
        l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR3_VDDR_INTERCEPT,NULL,volt_intercept); 
        if(l_rc) return l_rc;
+       l_rc = FAPI_ATTR_GET(ATTR_MRW_DDR3_VDDR_MAX_LIMIT,NULL,vddr_max_limit_mv); 
+       if(l_rc) return l_rc;
     }
     //ddr4
     else {
        l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR4_VDDR_SLOPE,NULL,volt_slope); 
        if(l_rc) return l_rc;
        l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR4_VDDR_INTERCEPT,NULL,volt_intercept); 
+       if(l_rc) return l_rc;
+       l_rc = FAPI_ATTR_GET(ATTR_MRW_DDR4_VDDR_MAX_LIMIT,NULL,vddr_max_limit_mv); 
        if(l_rc) return l_rc;
     }
     
@@ -338,6 +344,12 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     //computes and converts the voltage offset into mV
     uint32_t param_vddr_voltage_mv = (500 + var_power_on_vddr*volt_slope/100) / 1000 + volt_intercept;
     FAPI_INF("param_vddr_voltage_mv: %d mV",param_vddr_voltage_mv);
+    //found that the VDDR voltage is over the maximum limit
+    if(param_vddr_voltage_mv > vddr_max_limit_mv) {
+       FAPI_INF("param_vddr_voltage_mv, %d mV, is over vddr_max_limit_mv of %d mV.",param_vddr_voltage_mv,vddr_max_limit_mv);
+       FAPI_INF("Setting param_vddr_voltage_mv to vddr_max_limit_mv");
+       param_vddr_voltage_mv = vddr_max_limit_mv;
+    }
     //prints a debug statement
     FAPI_INF("ATTR_MSS_VDDR_OFFSET: %d mV",param_vddr_voltage_mv);
     

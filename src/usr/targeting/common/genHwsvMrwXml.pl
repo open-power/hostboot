@@ -240,6 +240,7 @@ push @systemAttr,
     "MNFG_XBUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-xbus-min-eye-width'},
     "REDUNDANT_CLOCKS", $reqPol->{'redundant-clocks'},
     "MSS_DRAMINIT_RESET_DISABLE", $reqPol->{'mss_draminit_reset_disable'},
+    "MRW_POWER_CONTROL_REQUESTED", (uc $reqPol->{'mem_power_control_usage'}),
 ];
 
 if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')
@@ -311,6 +312,11 @@ $optTargPolicies{'MSS_VOLT_DDR4_VDDR_SLOPE'}{MRW_NAME}
     = "mem_ddr4_vddr_slope" ;
 $optTargPolicies{'MSS_VOLT_DDR4_VDDR_INTERCEPT'}{MRW_NAME}
     = "mem_ddr4_vddr_intercept" ;
+$optTargPolicies{'MRW_DDR3_VDDR_MAX_LIMIT'}{MRW_NAME}
+    = "mem_ddr3_vddr_max_limit" ;
+$optTargPolicies{'MRW_DDR4_VDDR_MAX_LIMIT'}{MRW_NAME}
+    = "mem_ddr4_vddr_max_limit" ;
+
 
 foreach my $policy ( keys %optTargPolicies )
 {
