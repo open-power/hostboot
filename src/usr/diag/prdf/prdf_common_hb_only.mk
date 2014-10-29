@@ -38,15 +38,24 @@ prd_obj += prdfDumpResolution.o
 
 # framework/service/
 prd_obj_no_sim += prdfPlatServices.o
+prd_obj += prdfRasServices.o
+
+# mnfgtools/
+prd_obj += prdfMfgSync.o
+prd_obj += prdfMfgThresholdFile.o
 
 # plat/pegasus/ (non-rule plugin related)
+prd_obj += prdfCenMbaIplCeStats.o
 prd_obj += prdfCenMbaTdCtlr.o
+prd_obj += prdfDramRepairs.o
+prd_obj += prdfPlatCalloutUtil.o
 prd_obj += prdfPllUtils.o
 
 # plat/pegasus/ (rule plugin related)
 prd_rule_plugin += prdfP8TodPlugins.o
 prd_rule_plugin += prdfPlatCenMba.o
 prd_rule_plugin += prdfPlatCenMemUtils.o
+prd_rule_plugin += prdfPlatCenPll.o
 prd_rule_plugin += prdfPlatP8Ex.o
 prd_rule_plugin += prdfPlatP8Proc.o
 

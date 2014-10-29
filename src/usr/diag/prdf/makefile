@@ -98,11 +98,6 @@ endif
 # objects
 #------------------------------------------------------------------------------
 
-include prdf_hb_only.mk
-
-OBJS += ${prd_object_files_HB}
-OBJS += ${PRDF_RULE_PLUGINS_PEGASUS_HB}
-
 include common/prdf_common_fsp_and_hb.mk
 include prdf_common_hb_only.mk
 
