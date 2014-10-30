@@ -29,6 +29,7 @@
 
 #include "ipmirp.H"
 #include "ipmiconfig.H"
+#include "ipmidd.H"
 #include <ipmi/ipmi_reasoncodes.H>
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
@@ -69,7 +70,9 @@ IpmiRP::IpmiRP(void):
     iv_outstanding_req(IPMI::g_outstanding_req),
     iv_xmit_buffer_size(IPMI::g_xmit_buffer_size),
     iv_recv_buffer_size(IPMI::g_recv_buffer_size),
-    iv_retries(IPMI::g_retries)
+    iv_retries(IPMI::g_retries),
+    iv_shutdown_msg(NULL),
+    iv_shutdown_now(false)
 {
     mutex_init(&iv_mutex);
     sync_cond_init(&iv_cv);
@@ -152,6 +155,8 @@ void IpmiRP::timeoutThread(void)
     // Mark as an independent daemon so if it crashes we terminate.
     task_detach();
 
+    IPMI_TRAC(ENTER_MRK "time out thread");
+
     // If there's something on the queue we want to grab it's timeout time
     // and wait. Note the response queue is "sorted" as we send messages in
     // order. So, the first message on the queue is the one who's timeout
@@ -159,9 +164,15 @@ void IpmiRP::timeoutThread(void)
     while (true)
     {
         mutex_lock(&iv_mutex);
-        while (iv_timeoutq.size() == 0)
+        while ((iv_timeoutq.size() == 0) && !iv_shutdown_now)
         {
             sync_cond_wait(&iv_cv, &iv_mutex);
+        }
+
+        // shutting down...
+        if (iv_shutdown_now)
+        {
+            break; // return and terminate thread
         }
 
         msg_t*& msq_msg = iv_timeoutq.front();
@@ -186,6 +197,12 @@ void IpmiRP::timeoutThread(void)
             // Get him off the responseq, and reply back to the waiter that
             // there was a timeout
             response(msg, IPMI::CC_TIMEOUT);
+
+            // Tell the resource provider to check for any pending messages
+            msg_t* msg_idleMsg = msg_allocate();
+            msg_idleMsg->type = IPMI::MSG_STATE_IDLE;
+            msg_send(iv_msgQ, msg_idleMsg);
+
             mutex_unlock(&iv_mutex);
         }
         else
@@ -194,6 +211,7 @@ void IpmiRP::timeoutThread(void)
             nanosleep( 0, timeout - now );
         }
     }
+    IPMI_TRAC(EXIT_MRK "time out thread");
 
     return;
 }
@@ -266,7 +284,7 @@ void IpmiRP::getInterfaceCapabilities(void)
  */
 void IpmiRP::execute(void)
 {
-    bool shutdown_pending = false;
+    bool l_shutdown_pending = false;
 
     // Mark as an independent daemon so if it crashes we terminate.
     task_detach();
@@ -307,7 +325,19 @@ void IpmiRP::execute(void)
             // bottom of this loop will start the transmit process.
             // Be sure to push_back to ensure ordering of transmission.
         case IPMI::MSG_STATE_SEND:
-            iv_sendq.push_back(msg);
+            if (!l_shutdown_pending)
+            {
+                iv_sendq.push_back(msg);
+            }
+            // shutting down, do not accept new messages
+            else
+            {
+                IPMI_TRAC(WARN_MRK "IPMI shutdown pending. Message dropped");
+                IPMI::Message* ipmi_msg =
+                            static_cast<IPMI::Message*>(msg->extra_data);
+                response(ipmi_msg, IPMI::CC_BADSTATE);
+                msg_free(msg);
+            }
             break;
 
             // State changes from the IPMI hardware. These are async
@@ -333,8 +363,9 @@ void IpmiRP::execute(void)
             // Accept no more messages. Anything in the sendq is sent and
             // we wait for the reply from the BMC.
         case IPMI::MSG_STATE_SHUTDOWN:
-            IPMI_TRAC(INFO_MRK "ipmi shutting down");
-            shutdown_pending = true;
+            IPMI_TRAC(INFO_MRK "ipmi begin shutdown");
+            l_shutdown_pending = true;    // Stop incoming new messages
+            iv_shutdown_msg = msg;        // Reply to this message
             break;
         };
 
@@ -350,12 +381,11 @@ void IpmiRP::execute(void)
             idle();
         }
 
-        // TODO: RTC 106887 Hold off transmitters, drain queues.
-        // Patrick suggests handling this like mailboxes.
-        if (shutdown_pending && iv_respondq.empty() && iv_sendq.empty())
+        // Once quiesced, shutdown and reply to shutdown msg
+        if (l_shutdown_pending && iv_respondq.empty() && iv_sendq.empty())
         {
-            msg_respond(iv_msgQ, msg);
-            break;
+            shutdownNow();
+            break; // exit loop and terminate task
         }
     }
 
@@ -557,6 +587,32 @@ void IpmiRP::queueForResponse(IPMI::Message& i_msg)
 
     mutex_unlock(&iv_mutex);
     return;
+}
+
+///
+/// @brief handle shutdown.
+/// Queued messages to send have been sent and all responses complete.
+/// Now that we are quiesced, deallocate resources and respond to the
+/// shutdown message
+///
+void IpmiRP::shutdownNow(void)
+{
+    IPMI_TRAC(INFO_MRK "ipmi shut down now");
+
+    mutex_lock(&iv_mutex);
+    iv_shutdown_now = true; // Shutdown underway
+
+    // Wake up Time out thread to terminate.
+    sync_cond_signal(&iv_cv);
+    mutex_unlock(&iv_mutex);
+
+    // TODO: RTC 116600 unRegisterMsgQ for interrupts
+
+    // Shut down device driver
+    Singleton<IpmiDD>::instance().handleShutdown();
+
+    // reply back to shutdown requester that we are shutdown
+    msg_respond(iv_msgQ, iv_shutdown_msg);
 }
 
 

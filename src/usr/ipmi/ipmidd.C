@@ -208,6 +208,8 @@ static void* poll_control_register( void* /* unused */ )
  */
 void IpmiDD::pollCtrl(void)
 {
+    IPMI_TRAC(ENTER_MRK "poll_control_register" );
+
     // Mark as an independent daemon so if it crashes we terminate.
     task_detach();
 
@@ -222,12 +224,14 @@ void IpmiDD::pollCtrl(void)
     while(1)
     {
         mutex_lock(&iv_mutex);
+
         errlHndl_t err = readLPC(REG_CONTROL, ctrl);
 
         // Not sure there's much we can do here but commit the log
         // and let this thread fail.
         if (err)
         {
+            mutex_unlock(&iv_mutex);
             IPMI_TRAC(ERR_MRK "polling loop encountered an error, exiting");
             errlCommit(err, IPMI_COMP_ID);
             break;
@@ -238,14 +242,22 @@ void IpmiDD::pollCtrl(void)
             // pending messages which were delayed due to contention. But don't
             // send a message everytime we see idle, only if there we suspect
             // we sent EAGAINs.
-            if (((ctrl & IDLE_STATE) == 0) && iv_eagains)
+            if ((ctrl & IDLE_STATE) == 0)
             {
-                msg = msg_allocate();
-                msg->type = IPMI::MSG_STATE_IDLE;
-                msg_send(mq, msg);
-                iv_eagains = false;
+                if (iv_eagains)
+                {
+                    msg = msg_allocate();
+                    msg->type = IPMI::MSG_STATE_IDLE;
+                    msg_send(mq, msg);
+                    iv_eagains = false;
+                }
+                // Check on shutdown if idle
+                else if (iv_shutdown_now)
+                {
+                    mutex_unlock(&iv_mutex);
+                    break;  // exit loop and terminate task
+                }
             }
-
             // If we see the B2H_ATN, there's a response waiting
             else if (ctrl & CTRL_B2H_ATN)
             {
@@ -264,8 +276,10 @@ void IpmiDD::pollCtrl(void)
             }
         }
         mutex_unlock(&iv_mutex);
+
         nanosleep(0, WAIT_TIME);
     }
+    IPMI_TRAC(EXIT_MRK "poll_control_register" );
 }
 
 /**
@@ -473,9 +487,25 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
 }
 
 /**
+ * @brief shutdown the device driver
+ */
+void IpmiDD::handleShutdown(void)
+{
+    IPMI_TRAC(ENTER_MRK "handle Shutdown" );
+    mutex_lock(&iv_mutex);
+    iv_shutdown_now = true; // signal  poll controller to terminate
+
+    // TODO: RTC 116600 mask interrupts
+
+    mutex_unlock(&iv_mutex);
+    IPMI_TRAC(EXIT_MRK "handle Shutdown" );
+}
+
+/**
  * @brief  Constructor
  */
 IpmiDD::IpmiDD(void):
+    iv_shutdown_now(false),
     iv_eagains(false)
 {
     mutex_init(&iv_mutex);

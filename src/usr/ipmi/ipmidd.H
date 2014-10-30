@@ -76,6 +76,11 @@ class IpmiDD
     errlHndl_t reset(void);
 
     /**
+     * @brief shutdown the device driver
+     */
+    void handleShutdown(void);
+
+    /**
      * @brief Constructor
      *
      * @parm void
@@ -109,6 +114,11 @@ class IpmiDD
      * @brief Mutex used to protect internal state
      */
     mutex_t iv_mutex;
+
+    /**
+     * @brief Shut down resources
+     */
+    bool iv_shutdown_now;
 
     /**
      * @brief True if we told the RP to try a write again

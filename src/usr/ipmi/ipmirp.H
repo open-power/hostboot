@@ -193,6 +193,12 @@ class IpmiRP
      */
     void getInterfaceCapabilities(void);
 
+    /**
+     * @brief Clean up resources and reply to shutdown msg
+     * @param[in] void
+     */
+    void shutdownNow(void);
+
     msg_q_t           iv_msgQ;        //!< ipmi mesage queue
     IPMI::send_q_t    iv_sendq;       //!< msg to send queue
     IPMI::timeout_q_t iv_timeoutq;    //!< msgs waiting for a timeout
@@ -218,6 +224,9 @@ class IpmiRP
     // Recomended number of retries
     uint8_t     iv_retries;
 
+    // Shutdown
+    msg_t *     iv_shutdown_msg;     //!< shutdown msg to respond to
+    bool        iv_shutdown_now;     //!< shutdown now
 
     // Disallow copying this class.
     IpmiRP& operator=(const IpmiRP&);

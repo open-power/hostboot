@@ -102,7 +102,7 @@ namespace IPMI
         CC_BMCINIT   = 0xd2,
         CC_BADDEST   = 0xd3,
         CC_NOPERM    = 0xd4,
-        CC_NOTSUP    = 0xd5,
+        CC_BADSTATE  = 0xd5,
         CC_ILLPARAM  = 0xd6,
         CC_UNKBAD    = 0xff
     };
