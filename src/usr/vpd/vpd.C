@@ -29,6 +29,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <devicefw/driverif.H>
+#include <hwas/hwasPlat.H>
 #include <sys/mm.h>
 #include "vpd.H"
 #include "mvpd.H"
@@ -539,7 +540,9 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         {
             TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN != SEEPROM_PN/SN, Loading PNOR from SEEPROM");
 
-            // @todo RTC 116553 - Need HCDB update call here
+            //Set the targets as changed since the p/n's don't match
+            HWAS::markTargetChanged(i_target);
+
             // Load the PNOR data from the SEEPROM
             if( ( l_type == TARGETING::TYPE_PROC   ) ||
                 ( l_type == TARGETING::TYPE_MEMBUF ) )
