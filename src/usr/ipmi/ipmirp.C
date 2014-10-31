@@ -140,7 +140,8 @@ inline size_t IpmiRP::maxBuffer(void)
     // iv_xmit_buffer_size can change - it'll be one thing for
     // the default when the RP is created, and possibly another
     // when the get-capabilities command returns.
-    size_t mbs = iv_xmit_buffer_size - xport_header_size;
+    // an additional 1 is subtracted based on issues seen with AMI
+    size_t mbs = iv_xmit_buffer_size - xport_header_size - 1;
 
     mutex_unlock(&iv_mutex);
 
@@ -727,7 +728,7 @@ namespace IPMI
     ///
     /// @brief  Maximum buffer for data (max xport - header)
     ///
-    inline size_t max_buffer(void)
+    size_t max_buffer(void)
     {
         return Singleton<IpmiRP>::instance().maxBuffer();
     }

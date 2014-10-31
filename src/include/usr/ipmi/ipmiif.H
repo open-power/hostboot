@@ -126,21 +126,25 @@ namespace IPMI
     inline const command_t get_capabilities(void)
     { return std::make_pair(NETFUN_APP, 0x36); }
 
+
     // Storage messages
     inline const command_t set_sel_time(void)
     { return std::make_pair(NETFUN_STORAGE, 0x49); }
 
-    // event messages
+    inline const command_t write_fru_data(void)
+    { return std::make_pair(NETFUN_STORAGE, 0x12); }
+
+
+    // Sensor messages
     inline const command_t platform_event(void)
     { return std::make_pair(NETFUN_SENSOR, 0x02); }
 
-    // sensor messages
     inline const command_t set_sensor_reading(void)
     { return std::make_pair(NETFUN_SENSOR, 0x30); }
 
-    // sensor messages
     inline const command_t get_sensor_reading(void)
     { return std::make_pair(NETFUN_SENSOR, 0x2D); }
+
 
     // Some helper messages
     // Used to create an empty message for reception
@@ -208,7 +212,7 @@ namespace IPMI
      * @return the maximum space allowed for data, per message
      * (max message for the transport - the header size)
      */
-    inline size_t max_buffer(void);
+    size_t max_buffer(void);
 
 
 }; // end namespace IPMI
