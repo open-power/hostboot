@@ -1623,14 +1623,8 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cForceResetAndUnlock()" );
 
-
     do
     {
-
-        TRACUCOMP(g_trac_i2c,"i2cForceResetAndUnlock()"
-                  "reset[0x%lx]",
-                  masterAddrs[i_args.engine].reset );
-
 
         // enable diagnostic mode
         // set bit in mode register
@@ -1650,7 +1644,6 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                        ERR_MRK"I2C Enable Diagnostic mode Failed!!" );
             break;
         }
-
 
 
         //toggle clock line
@@ -1953,6 +1946,8 @@ errlHndl_t i2cSetupMasters ( void )
                  engine < CENTAUR_MASTER_ENGINES;
                  engine++ )
             {
+                args.engine = engine;
+
                 // Write Mode Register:
                 mode.value = 0x0ull;
 
