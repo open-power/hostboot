@@ -683,53 +683,55 @@ class I2CTest: public CxxTest::TestSuite
             tS.masterProcChipTargetHandle( procTarget );
 
             /****************************************************/
-            /* Test i2cSetBusVariables() with different i_modes */
+            /* Test i2cSetBusVariables() with different i_speed */
             /****************************************************/
             struct
             {
-                I2C::i2c_bus_setting_mode_t i_mode;
+                uint64_t i_speed;
                 uint64_t o_bus_speed;
             } testData[] =
             {
                 // 1MHz
-                { I2C::SET_I2C_BUS_1MHZ, 1000 },
+                { I2C_BUS_SPEED_1MHZ, 1000 },
 
                 // 400KHz
-                { I2C::SET_I2C_BUS_400KHZ, 400 },
+                { I2C_BUS_SPEED_400KHZ, 400 },
 
-                // READ_I2C_BUS_ATTRIBUTES should default to 1MHz
+                // I2C_BUS_SPEED_FROM_MRW (==0) should default to 1MHz
                 // with a processor target using Host I2C
-                { I2C::READ_I2C_BUS_ATTRIBUTES, 1000 },
+                { I2C_BUS_SPEED_FROM_MRW, 1000 },
             };
 
             uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
 
-            // set Processor Target to Host I2C mode
+            // set Processor Target to Host I2C mode and default engine/port
             io_args.switches.useHostI2C = 1;
             io_args.switches.useFsiI2C = 0;
+            io_args.engine = 0;
+            io_args.port = 0;
 
             for ( uint32_t i = 0; i < NUM_CMDS; i++ )
             {
                 cmds++;
 
                 err = I2C::i2cSetBusVariables(procTarget,
-                                              testData[i].i_mode,
+                                              testData[i].i_speed,
                                               io_args);
 
                 if( err )
                 {
                     TS_FAIL( "testI2cSetBusVariables - Error returned from "
-                             "i2cSetBusVariables: i_mode=0x%d, i=%d",
-                             testData[i].i_mode, i);
+                             "i2cSetBusVariables: i_speed=%d, i=%d",
+                             testData[i].i_speed, i);
                     fails++;
                     delete err;
                 }
                 else if ( io_args.bus_speed != testData[i].o_bus_speed )
                 {
                     TS_FAIL( "testI2cSetBusVariables - i2cSetBusVariables "
-                             "returned bad data: i_mode=0x%d, i=%d "
+                             "returned bad data: i_speed=%d, i=%d "
                              "o_bus_speed=%d, io_args.bus_speed=%d",
-                             testData[i].i_mode, i,
+                             testData[i].i_speed, i,
                              testData[i].o_bus_speed, io_args.bus_speed);
                     fails++;
                 }
@@ -806,7 +808,7 @@ class I2CTest: public CxxTest::TestSuite
             I2C::g_I2C_NEST_FREQ_MHZ = I2C::i2cGetNestFreq();
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2CSetBusVariables - End: %d/%d fails",
+                       "testI2cSetBusVariables - End: %d/%d fails",
                        fails, cmds );
         }
 

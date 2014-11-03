@@ -123,23 +123,12 @@ ALWAYS_INLINE inline uint64_t i2cGetPollingInterval(uint64_t i_bus_speed_khz )
 #define I2C_MAX_WAIT_TIME_NS 5 * NS_PER_MSEC
 #define I2C_TIMEOUT_COUNT(i_interval_ns) (I2C_MAX_WAIT_TIME_NS / i_interval_ns)
 
-
-/**
- * @brief Different ways of setting the I2C Bus Speed
- */
-enum i2c_bus_setting_mode_t
-{
-    READ_I2C_BUS_ATTRIBUTES,
-    SET_I2C_BUS_400KHZ,
-    SET_I2C_BUS_1MHZ,
-    LAST_BUS_SETTING_MODE_TYPE,
-};
-
 /**
  * @brief Only hard-coded bus speed defines (in KBits/sec)
  */
-#define I2C_BUS_SPEED_400KHZ 400
-#define I2C_BUS_SPEED_1MHZ   1000
+#define I2C_BUS_SPEED_FROM_MRW   0
+#define I2C_BUS_SPEED_400KHZ     400
+#define I2C_BUS_SPEED_1MHZ       1000
 
 
 // -----------------------------------------------------------------------
@@ -781,7 +770,13 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
  *
  * @param[in] i_target - The I2C master target.
  *
- * @param[in] i_mode - States how bus setting will be determined
+ * @param[in] i_speed -  Speed for the I2C Bus (in KBits/sec)
+ *                       NOTE: A value of 0 means that the speed will be
+ *                       determined by I2C attributes set via the MRW
+ *                       Useful Defines:
+ *                       -- I2C_BUS_SPEED_FROM MRW   0
+ *                       -- I2C_BUS_SPEED_400KHZ     400
+ *                       -- I2C_BUS_SPEED_1MHZ       1000
  *
  * @param[in/out] io_args - Structure containing arguments needed for a command
  *      transaction. Clock arguments set in this function.
@@ -790,7 +785,7 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
-                                i2c_bus_setting_mode_t i_mode,
+                                uint64_t i_speed,
                                 misc_args_t & io_args );
 
 /**

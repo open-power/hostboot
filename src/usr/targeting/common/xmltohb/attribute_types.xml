@@ -14904,6 +14904,27 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <hasStringConversion/>
 </attribute>
 
+<attribute>
+    <id>I2C_BUS_SPEED_ARRAY</id>
+    <description>Designates the speed at which a given I2C bus should run.
+        Creator: MRW
+        Purpose: Used by FW to know the fastest possible bus speed that all of
+            the devices on a given bus are able to use.
+        Data Format: 2x3 array of uint16_t values.  The first two values
+            indicate the engine number of the bus.  The next 3 vaules indicate
+            the port number of the bus.  The value in the array is the I2C bus
+            speed used for that engine/port combination in KHz.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0,0,0,0,0,0</default>
+        </uint16_t>
+        <array>2,3</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
 
 

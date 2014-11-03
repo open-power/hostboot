@@ -45,7 +45,7 @@
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 #include <i2c/i2cif.H>
-
+#include <attributetraits.H>
 #include "i2c.H"
 #include "errlud_i2c.H"
 
@@ -57,7 +57,7 @@
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_i2c = NULL;
-TRAC_INIT( & g_trac_i2c, "I2C", KILOBYTE );
+TRAC_INIT( & g_trac_i2c, I2C_COMP_NAME, KILOBYTE );
 
 trace_desc_t* g_trac_i2cr = NULL;
 TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
@@ -72,10 +72,16 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 // Defines
 // ----------------------------------------------
 #define I2C_RESET_DELAY_NS (5 * NS_PER_MSEC)  // Sleep for 5 ms after reset
-#define MAX_I2C_ENGINES 3           // Maximum of 3 engines per I2C Master
 #define P8_MASTER_ENGINES 2         // Number of Engines used in P8
-#define P8_MASTER_PORTS 2           // Number of Ports used in P8
+#define P8_MASTER_PORTS 3           // Number of Ports used in P8
 #define CENTAUR_MASTER_ENGINES 1    // Number of Engines in a Centaur
+
+// Derived from ATTR_I2C_BUS_SPEED_ARRAY[engine][port] attribute
+const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type  var = {{NULL}};
+#define I2C_BUS_ATTR_MAX_ENGINE sizeof(var)/sizeof(var[0])
+#define I2C_BUS_ATTR_MAX_PORT   sizeof(var[0])/sizeof(var[0][0])
+
+
 // ----------------------------------------------
 
 namespace I2C
@@ -334,7 +340,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                                            0x0,
                                            true /*Add HB SW Callout*/ );
 
-            err->collectTrace( "I2C", 256);
+            err->collectTrace( I2C_COMP_NAME, 256);
 
             break;
         }
@@ -388,7 +394,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 
 
         // Calculate variables related to I2C Bus Speed in 'args' struct
-        err =  i2cSetBusVariables( i_target, READ_I2C_BUS_ATTRIBUTES, i_args);
+        err =  i2cSetBusVariables( i_target, I2C_BUS_SPEED_FROM_MRW, i_args);
 
         if( err )
         {
@@ -536,7 +542,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                                            userdata2,
                                            true /*Add HB SW Callout*/ );
 
-            err->collectTrace( "I2C", 256);
+            err->collectTrace( I2C_COMP_NAME, 256);
 
             // No Operation performed, so can break and skip the section
             // that handles operation errors
@@ -731,7 +737,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                     err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                              HWAS::SRCI_PRIORITY_LOW);
 
-                    err->collectTrace( "I2C", 256);
+                    err->collectTrace( I2C_COMP_NAME, 256);
 
                     break;
                 }
@@ -1065,7 +1071,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                          HWAS::SRCI_PRIORITY_LOW);
 
-                err->collectTrace( "I2C", 256);
+                err->collectTrace( I2C_COMP_NAME, 256);
 
                 break;
             }
@@ -1267,7 +1273,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                      HWAS::SRCI_PRIORITY_LOW);
 
-            err->collectTrace( "I2C" );
+            err->collectTrace( I2C_COMP_NAME );
 
             break;
         }
@@ -1309,7 +1315,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                      HWAS::SRCI_PRIORITY_LOW);
 
-            err->collectTrace( "I2C" );
+            err->collectTrace( I2C_COMP_NAME );
 
             break;
         }
@@ -1350,7 +1356,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                      HWAS::SRCI_PRIORITY_LOW);
 
-            err->collectTrace( "I2C" );
+            err->collectTrace( I2C_COMP_NAME );
 
             break;
         }
@@ -1452,7 +1458,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                          HWAS::SRCI_PRIORITY_LOW);
 
-                err->collectTrace( "I2C", 256);
+                err->collectTrace( I2C_COMP_NAME, 256);
 
                 break;
             }
@@ -1764,13 +1770,48 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
     // Master Registers
     mode_reg_t mode;
     command_reg_t cmd;
+    uint64_t l_speed = I2C_BUS_SPEED_FROM_MRW;
 
+    // I2C Bus Speed Array
+    TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cSendSlaveStop()" );
 
     do
     {
-        // Need to send slave stop to all ports on the engine
+
+        // Get I2C Bus Speed Array attribute.  It will be used to determine
+        // which engine/port combinations have devices on them
+        if (  !( i_target->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
+                                          (speed_array) ) )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"i2cSendSlaveStop() - Cannot find "
+                       "ATTR_I2C_BUS_SPEED_ARRAY needed for operation");
+
+            /*@
+             * @errortype
+             * @reasoncode     I2C_ATTRIBUTE_NOT_FOUND
+             * @severity       ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid       I2C_SEND_SLAVE_STOP
+             * @userdata1      Target for the attribute
+             * @userdata2      <UNUSED>
+             * @devdesc        ATTR_I2C_BUS_SPEED_ARRAY not found
+             * @custdesc       I2C configuration data missing
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_SEND_SLAVE_STOP,
+                                           I2C_ATTRIBUTE_NOT_FOUND,
+                                           TARGETING::get_huid(i_target),
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( I2C_COMP_NAME, 256);
+
+            break;
+        }
+
+        // Need to send slave stop to all ports with a device on the engine
         for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
         {
             // Only do port 0 for FSI I2C
@@ -1780,10 +1821,27 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                 break;
             }
 
+            // Only send stop to a port if there are devices on it
+            l_speed = speed_array[i_args.engine][port];
+            if ( l_speed == 0 )
+            {
+                continue;
+            }
+
             mode.value = 0x0ull;
 
             mode.port_num = port;
             mode.enhanced_mode = 1;
+
+            // Need this to set bit_rate_divisor
+            err = i2cSetBusVariables ( i_target,
+                                       l_speed,
+                                       i_args );
+            if( err )
+            {
+                break;
+            }
+
             mode.bit_rate_div = i_args.bit_rate_divisor;
 
             TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
@@ -1953,7 +2011,7 @@ errlHndl_t i2cSetupMasters ( void )
 
                 // Hardcode to 400KHz for PHYP
                 err = i2cSetBusVariables ( centList[centaur],
-                                           SET_I2C_BUS_400KHZ,
+                                           I2C_BUS_SPEED_400KHZ,
                                            args );
 
                 if( err )
@@ -2049,7 +2107,7 @@ errlHndl_t i2cSetupMasters ( void )
 
                 // Hardcode to 400KHz for PHYP
                 err = i2cSetBusVariables ( procList[proc],
-                                           SET_I2C_BUS_400KHZ,
+                                           I2C_BUS_SPEED_400KHZ,
                                            args );
 
                 if( err )
@@ -2113,75 +2171,51 @@ errlHndl_t i2cSetupMasters ( void )
 //  i2cSetBusVariables
 // ------------------------------------------------------------------
 errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
-                                i2c_bus_setting_mode_t i_mode,
+                                uint64_t i_speed,
                                 misc_args_t & io_args)
 {
     errlHndl_t err = NULL;
 
     TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cSetBusVariables(): i_mode=%d",
-               i_mode );
+               ENTER_MRK"i2cSetBusVariables(): i_speed=%d",
+               i_speed );
 
     do
     {
-        if ( i_mode == SET_I2C_BUS_400KHZ )
+        if ( i_speed == I2C_BUS_SPEED_FROM_MRW )
         {
-            io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
-        }
+            // Read data from attributes set by MRW
+            TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
 
-        else if ( i_mode == SET_I2C_BUS_1MHZ )
-        {
-            io_args.bus_speed = I2C_BUS_SPEED_1MHZ;
-        }
-
-
-        // @todo RTC:80614 - sync up reading attributes with MRW
-        // MRW does not have Host-based processor set at 1MHz
-        // Otherwise, default everything to 400KHZ
-        else if (i_mode == READ_I2C_BUS_ATTRIBUTES)
-        {
-            // @todo RTC 117430 - Remove when MRWs are updated to have
-            // hostboot SBE Seeproms use 1MHZ speed
-            // Look for Processor and Host I2C mode
-            if ( ( io_args.switches.useHostI2C == 1 ) &&
-                 ( i_target->getAttr<TARGETING::ATTR_TYPE>() ==
-                   TARGETING::TYPE_PROC )
+            if (
+                ( !( i_target->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
+                                          (speed_array) ) )   ||
+                ( io_args.engine >= I2C_BUS_ATTR_MAX_ENGINE ) ||
+                ( io_args.port   >= I2C_BUS_ATTR_MAX_PORT )
                )
             {
-                io_args.bus_speed = I2C_BUS_SPEED_1MHZ;
+                // Default to 400KHz
+                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cSetBusVariables: "
+                           "unable to get TARGETING::ATTR_I2C_BUS_SPEED_ARRAY "
+                           "or invalid engine(%d)/port(%d) combo. "
+                           "Defaulting to 400KHz.",
+                           io_args.engine, io_args.port);
+                io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
             }
             else
             {
-                io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
+                io_args.bus_speed = speed_array[io_args.engine][io_args.port];
+
+                assert(io_args.bus_speed,
+                       "i2cSetBusVariables: bus_speed array[%d][%d] for "
+                       "tgt 0x%X is 0",
+                       io_args.engine, io_args.port,
+                       TARGETING::get_huid(i_target));
             }
         }
-
         else
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cSetBusVariables: "
-                       "Invalid Bus Speed Mode Input!" );
-
-            /*@
-             * @errortype
-             * @reasoncode       I2C_INVALID_BUS_SPEED_MODE
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         I2C_SET_BUS_VARIABLES
-             * @userdata1        I2C Bus Setting Mode Enum
-             * @userdata2        <UNUSED>
-             * @frucallout       <NONE>
-             * @devdesc          Invalid I2C bus speed mode input
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           I2C_SET_BUS_VARIABLES,
-                                           I2C_INVALID_BUS_SPEED_MODE,
-                                           i_mode,
-                                           0x0,
-                                           true /*Add HB SW Callout*/ );
-
-            err->collectTrace( "I2C", 256);
-
-            break;
-
+            io_args.bus_speed = i_speed;
         }
 
         // Set other variables based off of io_args.bus_speed
@@ -2210,10 +2244,10 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACUCOMP(g_trac_i2c,"i2cSetBusVariables(): tgt=0x%X, e/p/dA=%d/%d/0x%X: "
-              "mode=%d: b_sp=%d, b_r_d=0x%x, p_i=%d, to_c = %d",
+              "speed=%d: b_sp=%d, b_r_d=0x%x, p_i=%d, to_c = %d",
               TARGETING::get_huid(i_target),
               io_args.engine, io_args.port, io_args.devAddr,
-              i_mode, io_args.bus_speed, io_args.bit_rate_divisor,
+              i_speed, io_args.bus_speed, io_args.bit_rate_divisor,
               io_args.polling_interval_ns, io_args.timeout_count);
 
     TRACDCOMP( g_trac_i2c,
@@ -2225,7 +2259,7 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 /**
  * @brief This function will handle everything required to reset each I2C master
  *        engine based on the input argement
- *        @todo RTC 115832 - additional enums will be added. Currently just
+ *        @todo RTC 115834 - additional enums will be added. Currently just
  *                           supporting I2C_RESET_PROC_HOST
  */
 errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
@@ -2266,7 +2300,7 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
         for( uint32_t proc = 0; proc < procList.size(); proc++ )
         {
 
-            // @todo RTC 115832 - look at supporting all engines, but for now
+            // @todo RTC 115834 - look at supporting all engines, but for now
             // just reseting engine 0 since that's what SBE Update uses
             for( uint32_t engine = 0; engine < 1; engine++ )
             {
@@ -2319,9 +2353,8 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
                 io_args.switches.useHostI2C = 1;
                 io_args.switches.useFsiI2C  = 0;
 
-                // Hardcode to 400KHz - should be a safe speed
                 err = i2cSetBusVariables ( procList[proc],
-                                           SET_I2C_BUS_400KHZ,
+                                           I2C_BUS_SPEED_FROM_MRW,
                                            io_args );
 
                 if( err )

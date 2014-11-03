@@ -519,6 +519,10 @@
     <attribute><id>EEPROM_VPD_BACKUP_INFO</id></attribute>
     <attribute><id>EEPROM_SBE_PRIMARY_INFO</id></attribute>
     <attribute><id>EEPROM_SBE_BACKUP_INFO</id></attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>1000,1000,0,0,0,0</default>
+    </attribute>
 
     <!-- From PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id></attribute>
@@ -1351,6 +1355,10 @@
         </default>
     </attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>400,0,0,0,0,0</default>
+    </attribute>
     <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>VPP_BASE</id></attribute>
     <attribute><id>MEM_VDDR_OFFSET_MILLIVOLTS</id></attribute>
@@ -1481,6 +1489,10 @@
     </attribute>
 
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>400,0,0,0,0,0</default>
+    </attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
@@ -1495,7 +1507,6 @@
     <parent>lcard-dimm</parent>
     <attribute><id>MODEL</id><default>JEDEC</default></attribute>
     <attribute><id>CEN_DQ_TO_DIMM_CONN_DQ</id></attribute>
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 </targetType>
 
 <targetType>
