@@ -716,12 +716,14 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
 
         CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
 
-        CenAddr addr;
-        if ( i_isRceError )
-            l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_RCE_ADDR, addr );
-        else
-            l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
+        // WORKAROUND: Since an RCE starts as a UE, it's address is trapped in
+        // MBUER (note: UE fir bit not set at this point). But since multiple
+        // addresses are retried (not just the failing address), MBRCER will
+        // contain the last address retried, and not necessarily the address
+        // that started out with the UE.
 
+        CenAddr addr;
+        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
