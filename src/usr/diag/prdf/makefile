@@ -24,37 +24,25 @@
 # IBM_PROLOG_END_TAG
 
 ROOTPATH = ../../../..
-GENDIR = ${ROOTPATH}/obj/genfiles
-
-SUBDIRS = framework.d test.d
-
 MODULE = prdf
+
+SUBDIRS += framework.d
+SUBDIRS += test.d
+
+################################################################################
+
+# ROOTPATH must be defined before including this file.
+include prdf_common_hb_only.mk # Will define PRD_SRC_PATH
+
+# PRD_SRC_PATH must be defined before including this file.
+include common/prdf_common_fsp_and_hb.mk
+
+VPATH += ${prd_vpath}
 
 #------------------------------------------------------------------------------
 # paths
 #------------------------------------------------------------------------------
 PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
-
-VPATH += common
-VPATH += common/util
-VPATH += common/plat
-VPATH += common/plat/pegasus
-VPATH += common/framework
-VPATH += common/framework/resolution
-VPATH += common/framework/register
-VPATH += common/framework/service
-VPATH += common/framework/config
-VPATH += common/framework/rule
-VPATH += common/mnfgtools
-VPATH += mnfgtools
-VPATH += framework
-VPATH += framework/config
-VPATH += framework/rule
-VPATH += framework/service
-VPATH += framework/resolution
-VPATH += plat
-VPATH += plat/pegasus
-VPATH += common/plugins
 
 #FIXME: we can remove most of these as well if we have them include correctly
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
@@ -98,9 +86,6 @@ endif
 # objects
 #------------------------------------------------------------------------------
 
-include common/prdf_common_fsp_and_hb.mk
-include prdf_common_hb_only.mk
-
 OBJS += ${prd_obj}
 OBJS += ${prd_obj_no_sim}
 OBJS += ${prd_rule_plugin}
@@ -108,6 +93,9 @@ OBJS += ${prd_rule_plugin}
 #------------------------------------------------------------------------------
 # Generated Mfg Threshold Header file
 #------------------------------------------------------------------------------
+
+GENDIR = ${ROOTPATH}/obj/genfiles
+
 MFG_THRES	    = prdfMfgThresholds
 MFG_THRES_H	    = ${MFG_THRES}.H
 MFG_THRES_PL    = ${PRD_USR_PATH}/common/mnfgtools/${MFG_THRES}.pl

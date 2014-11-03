@@ -23,6 +23,24 @@
 #
 # IBM_PROLOG_END_TAG
 
+# NOTE: ROOTPATH must be defined before including this file and PRD_SRC_PATH
+#       must be defined in this file.
+
+PRD_SRC_PATH = ${ROOTPATH}/src/usr/diag/prdf
+PRD_INC_PATH = ${ROOTPATH}/src/include/usr/diag/prdf
+
+################################################################################
+# Paths common to both IPL and runtime
+################################################################################
+
+prd_vpath += ${PRD_SRC_PATH}
+prd_vpath += ${PRD_SRC_PATH}/framework/config
+prd_vpath += ${PRD_SRC_PATH}/framework/resolution
+prd_vpath += ${PRD_SRC_PATH}/framework/service
+prd_vpath += ${PRD_SRC_PATH}/mnfgtools
+prd_vpath += ${PRD_SRC_PATH}/plat
+prd_vpath += ${PRD_SRC_PATH}/plat/pegasus
+
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
 ################################################################################

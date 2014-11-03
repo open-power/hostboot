@@ -23,6 +23,25 @@
 #
 # IBM_PROLOG_END_TAG
 
+# NOTE: PRD_SRC_PATH must be defined before including this file.
+
+################################################################################
+# Paths common to both FSP and Hostboot
+################################################################################
+
+prd_vpath += ${PRD_SRC_PATH}/common
+prd_vpath += ${PRD_SRC_PATH}/common/include
+prd_vpath += ${PRD_SRC_PATH}/common/framework/config
+prd_vpath += ${PRD_SRC_PATH}/common/framework/register
+prd_vpath += ${PRD_SRC_PATH}/common/framework/resolution
+prd_vpath += ${PRD_SRC_PATH}/common/framework/rule
+prd_vpath += ${PRD_SRC_PATH}/common/framework/service
+prd_vpath += ${PRD_SRC_PATH}/common/mnfgtools
+prd_vpath += ${PRD_SRC_PATH}/common/plat
+prd_vpath += ${PRD_SRC_PATH}/common/plat/pegasus
+prd_vpath += ${PRD_SRC_PATH}/common/plugins
+prd_vpath += ${PRD_SRC_PATH}/common/util
+
 ################################################################################
 # Object files common to both FSP and Hostboot
 ################################################################################
