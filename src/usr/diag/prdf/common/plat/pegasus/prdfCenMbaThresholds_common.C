@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -152,6 +154,10 @@ int32_t getScrubCeThreshold( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         o_rc = getMnfgMemCeTh( i_mbaChip, i_rank, o_thr, junk1, junk2 );
         if ( SUCCESS != o_rc )
             PRDF_ERR( PRDF_FUNC"getMnfgMemCeTh() failed" );
+
+        // getMnfgMemCeTh() returns the number of CEs allowed. Will need to add
+        // one to get the real threshold.
+        o_thr++;
     }
 
     return o_rc;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -57,7 +59,7 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 ThresholdResolution::ThresholdPolicy getRceThreshold();
 
 /**
- * @brief  Returns scrub soft/intermittent CEs during runtime.
+ * @brief  Returns scrub soft/intermittent CEs threshold during runtime.
  * @param  i_mbaChip MBA chip.
  * @param  i_rank    The rank for which the threshold is needed.
  * @param  o_thr     Scrub soft/intermittent CE threshold.
