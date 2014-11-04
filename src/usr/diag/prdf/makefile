@@ -39,77 +39,12 @@ include common/prdf_common_fsp_and_hb.mk
 
 VPATH += ${prd_vpath}
 
-#------------------------------------------------------------------------------
-# paths
-#------------------------------------------------------------------------------
-PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
-
-#FIXME: we can remove most of these as well if we have them include correctly
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ibscom
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
-
-#FIXME: once we fix the PRD includes, we can move most of the prd subdirs below
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf/common
-EXTRAINCDIR += ${PRD_USR_PATH}
-EXTRAINCDIR += ${PRD_USR_PATH}/common
-EXTRAINCDIR += ${PRD_USR_PATH}/common/plugins
-EXTRAINCDIR += ${PRD_USR_PATH}/common/util
-EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/service
-EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/register
-EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/resolution
-EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
-EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
-EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
-EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
-EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
-EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/config
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/resolution
-EXTRAINCDIR += ${PRD_USR_PATH}/plat/pegasus
-
-# Conditionally enables profiling of flyweight register and resolution object
-ifeq ($(PRD_PROFILER),1)
-CUSTOMFLAGS += -DFLYWEIGHT_PROFILING
-endif
-
-#------------------------------------------------------------------------------
-# objects
-#------------------------------------------------------------------------------
+EXTRAINCDIR += ${prd_incpath}
 
 OBJS += ${prd_obj}
 OBJS += ${prd_obj_no_sim}
 OBJS += ${prd_rule_plugin}
 
-#------------------------------------------------------------------------------
-# Generated Mfg Threshold Header file
-#------------------------------------------------------------------------------
-
-GENDIR = ${ROOTPATH}/obj/genfiles
-
-MFG_THRES	    = prdfMfgThresholds
-MFG_THRES_H	    = ${MFG_THRES}.H
-MFG_THRES_PL    = ${PRD_USR_PATH}/common/mnfgtools/${MFG_THRES}.pl
-MFG_THRES_LIST	= ${PRD_USR_PATH}/common/mnfgtools/${MFG_THRES}.lst
-RULEOBJDIR      = ${ROOTPATH}/obj/modules/prdf/rule
-MFG_THRES_PATH	= ${GENDIR}/${MFG_THRES_H}
-
-GENFILES       = ${MFG_THRES_H}
-
-${MFG_THRES_PATH} : ${MFG_THRES_LIST}
-	${MFG_THRES_PL} $^ > $@
-
-EXTRA_CLEAN    = ${MFG_THRES_PATH}
-
-#------------------------------------------------------------------------------
+################################################################################
 
 include ${ROOTPATH}/config.mk

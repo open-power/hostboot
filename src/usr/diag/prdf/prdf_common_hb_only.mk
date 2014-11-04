@@ -41,6 +41,28 @@ prd_vpath += ${PRD_SRC_PATH}/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/plat
 prd_vpath += ${PRD_SRC_PATH}/plat/pegasus
 
+# Internal PRD header paths
+prd_incpath += ${PRD_INC_PATH}        # Stored differently in FSP
+prd_incpath += ${PRD_INC_PATH}/common # Stored differently in FSP
+prd_incpath += ${PRD_SRC_PATH}
+prd_incpath += ${PRD_SRC_PATH}/framework/config
+prd_incpath += ${PRD_SRC_PATH}/framework/resolution
+prd_incpath += ${PRD_SRC_PATH}/framework/service
+prd_incpath += ${PRD_SRC_PATH}/mnfgtools
+prd_incpath += ${PRD_SRC_PATH}/plat/pegasus
+
+# External header paths
+prd_incpath += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+prd_incpath += ${ROOTPATH}/src/include/usr/errl
+prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/fapi
+prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/hwp
+prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/plat
+prd_incpath += ${ROOTPATH}/src/include/usr/ibscom
+prd_incpath += ${ROOTPATH}/src/include/usr/util
+prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
+prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/include
+prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
+
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
 ################################################################################
@@ -76,4 +98,30 @@ prd_rule_plugin += prdfPlatCenMemUtils.o
 prd_rule_plugin += prdfPlatCenPll.o
 prd_rule_plugin += prdfPlatP8Ex.o
 prd_rule_plugin += prdfPlatP8Proc.o
+
+################################################################################
+# Conditional compile flag to enable profiling of flyweight register and
+# resolution object
+################################################################################
+
+ifeq ($(PRD_PROFILER),1)
+CUSTOMFLAGS += -DFLYWEIGHT_PROFILING
+endif
+
+################################################################################
+# Rule for generated MNFG threshold header file
+################################################################################
+
+MFG_THRES	    = prdfMfgThresholds
+MFG_THRES_H	    = ${MFG_THRES}.H
+MFG_THRES_PL    = ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.pl
+MFG_THRES_LIST	= ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.lst
+MFG_THRES_PATH	= ${ROOTPATH}/obj/genfiles/${MFG_THRES_H}
+
+GENFILES += ${MFG_THRES_H}
+
+${MFG_THRES_PATH} : ${MFG_THRES_LIST}
+	${MFG_THRES_PL} $^ > $@
+
+EXTRA_CLEAN += ${MFG_THRES_PATH}
 

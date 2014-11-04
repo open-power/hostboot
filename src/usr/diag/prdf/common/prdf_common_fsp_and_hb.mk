@@ -42,6 +42,18 @@ prd_vpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_vpath += ${PRD_SRC_PATH}/common/plugins
 prd_vpath += ${PRD_SRC_PATH}/common/util
 
+prd_incpath += ${PRD_SRC_PATH}/common
+prd_incpath += ${PRD_SRC_PATH}/common/framework/config
+prd_incpath += ${PRD_SRC_PATH}/common/framework/register
+prd_incpath += ${PRD_SRC_PATH}/common/framework/resolution
+prd_incpath += ${PRD_SRC_PATH}/common/framework/rule
+prd_incpath += ${PRD_SRC_PATH}/common/framework/service
+prd_incpath += ${PRD_SRC_PATH}/common/mnfgtools
+prd_incpath += ${PRD_SRC_PATH}/common/plat
+prd_incpath += ${PRD_SRC_PATH}/common/plat/pegasus
+prd_incpath += ${PRD_SRC_PATH}/common/plugins
+prd_incpath += ${PRD_SRC_PATH}/common/util
+
 ################################################################################
 # Object files common to both FSP and Hostboot
 ################################################################################
