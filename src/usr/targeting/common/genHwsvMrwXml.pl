@@ -31,6 +31,8 @@
 #                  [--build=hb] [--outfile=XmlFilename]
 #        --system=systemname
 #              Specify which system MRW XML to be generated
+#        --systemnodes=systemnodesinbrazos
+#              Specify number of nodes for brazos system, by default it is 4
 #        --mrwdir=pathname
 #              Specify the complete dir pathname of the MRW. Colon-delimited
 #              list accepted to specify multiple directories to search.
@@ -84,6 +86,7 @@ use constant SPI_APSS_RID_FIELD => 6;
 
 our $mrwdir = "";
 my $sysname = "";
+my $sysnodes = "";
 my $usage = 0;
 my $DEBUG = 0;
 my $outFile = "";
@@ -93,6 +96,7 @@ my $build = "fsp";
 use Getopt::Long;
 GetOptions( "mrwdir:s"  => \$mrwdir,
             "system:s"  => \$sysname,
+            "systemnodes:s"  => \$sysnodes,
             "outfile:s" => \$outFile,
             "build:s"   => \$build,
             "DEBUG"     => \$DEBUG,
@@ -127,6 +131,15 @@ if ($sysname =~ /brazos/)
     $MAXNODE = 4;
 }
 
+my $NODECONF = "";
+if( ($sysnodes) && ($sysnodes =~ /2/) )
+{
+    $NODECONF = "2-node";
+}
+else
+{
+    $NODECONF = "3-and-4-node";
+}
 
 my $mru_ids_file = open_mrw_file($mrwdir, "${sysname}-mru-ids.xml");
 my $mruAttr = parse_xml_file($mru_ids_file);
@@ -305,7 +318,6 @@ foreach my $policy ( keys %optTargPolicies )
           $optMrwPolicies->{$optTargPolicies{$policy}{MRW_NAME}}];
     }
 }
-
 
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
@@ -645,12 +657,12 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     my $endpoint2_ipath = $i->{'endpoint'}[1]->{'instance-path'};
     #print STDOUT "powerbus: $endp1, $endp2, $dwnstrm_swap, $upstrm_swap\n";
 
-    # Brazos: Populate power bus list only for "2-node" & "all" configuration
-    #         for ABUS. Populate all entries for other bus type.
+    # Brazos: Populate power bus list only for "2-node", 3-and-4-node  & "all"
+    #         configuration for ABUS. Populate all entries for other bus type.
 
     # Other targets(tuleta, alphine..etc) : nodeconfig will be "all".
 
-    if ( (lc($bustype) ne "a") || ($nodeconfig eq "2-node") ||
+    if ( (lc($bustype) ne "a") || ($nodeconfig eq $NODECONF) ||
          ($nodeconfig eq "all") )
     {
         push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap,
@@ -3252,11 +3264,12 @@ sub generate_ax_buses
 
             if ( $type eq "a" )
             {
-                # Brazos : Generate ABUS peer info only for "2-node" and "all"
-                # configuration.
+                # Brazos : Generate ABUS peer info only for "2-node",
+                # "3-and-4-node" and "all" configuration.
                 # All other targets(tuleta,alphine..etc) will have "all"
                 # configuration.
-                if( ($node_config eq "2-node") || ($node_config eq "all") )
+
+                if( ($node_config eq $NODECONF) || ($node_config eq "all") )
                 {
                     print "
     <attribute>
@@ -4653,10 +4666,12 @@ sub display_help
 Usage:
 
     $scriptname --help
-    $scriptname --system=sysname --mrwdir=pathname
+    $scriptname --system=sysname --systemnodes=2 --mrwdir=pathname
                      [--build=hb] [--outfile=XmlFilename]
         --system=systemname
               Specify which system MRW XML to be generated
+        --systemnodes=systemnodesinbrazos
+              Specify number of nodes for brazos system, by default it is 4
         --mrwdir=pathname
               Specify the complete dir pathname of the MRW. Colon-delimited
               list accepted to specify multiple directories to search.

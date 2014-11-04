@@ -332,7 +332,8 @@ void AttributeTank::serializeAttributes(
                     // requested chunk size, this should not happen, if it does,
                     // just move to the next attribute
                     TRACFCOMP(g_trac_targeting,
-                        "serializeAttributes: Error, attr too big to serialize (0x%x)",
+                        "serializeAttributes: Error, attr too big to serialize "
+                        "(0x%x)",
                         (*l_itr)->iv_hdr.iv_valSize);
                     l_itr++;
                 }
@@ -432,8 +433,9 @@ void AttributeTank::deserializeAttributes(
         {
             // Remaining chunk smaller than attribute header, quit
             TRACFCOMP(g_trac_targeting,
-                      "deserializeAttributes: Error, header too big for chunk (0x%x)",
-                        (i_attributes.iv_size - l_index));
+                      "deserializeAttributes: Error, header too big for chunk "
+                      "(0x%x)",
+                      (i_attributes.iv_size - l_index));
             break;
         }
 
@@ -443,7 +445,8 @@ void AttributeTank::deserializeAttributes(
         {
             // Remaining chunk smaller than attribute value, quit
             TRACFCOMP(g_trac_targeting,
-                      "deserializeAttributes: Error, attr too big for chunk (0x%x:0x%x)",
+                      "deserializeAttributes: Error, attr too big for chunk "
+                      "(0x%x:0x%x)",
                       l_pAttrHdr->iv_valSize, (i_attributes.iv_size - l_index));
             break;
         }
@@ -516,7 +519,9 @@ errlHndl_t AttributeTank::writePermAttributes()
 
             if (l_success)
             {
-                TRACFCOMP(g_trac_targeting, "writePermAttributes: Successful permanent override of Attr ID:0x%X Value:0x%lX applied to target 0x%X",
+                TRACFCOMP(g_trac_targeting, "writePermAttributes: Successful "
+                    "permanent override of Attr ID:0x%X Value:0x%llX applied "
+                    "to target 0x%X",
                     l_attrHdr.iv_attrId,
                     *reinterpret_cast<uint64_t *>(l_attr->iv_pVal),
                     (*l_permTargetList)->getAttr<ATTR_HUID>() );
@@ -531,7 +536,10 @@ errlHndl_t AttributeTank::writePermAttributes()
 
                 if (l_found)
                 {
-                    TRACFCOMP(g_trac_targeting, "writePermAttributes: Value NOT applied to target, override failed for Attr ID:0x%X Value:0x%lX on target 0x%X - current value 0x%lX",
+                    TRACFCOMP(g_trac_targeting, "writePermAttributes: Value "
+                        "NOT applied to target, override failed for Attr "
+                        "ID:0x%X Value:0x%llX on target 0x%X - current value "
+                        "0x%llX",
                         l_attrHdr.iv_attrId,
                         *reinterpret_cast<uint64_t *>(l_attr->iv_pVal),
                         (*l_permTargetList)->getAttr<ATTR_HUID>(),
@@ -556,7 +564,9 @@ errlHndl_t AttributeTank::writePermAttributes()
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_targeting, "writePermAttributes: Target does not have attribute, override NOT applied for Attr ID:0x%X on target 0x%X",
+                    TRACFCOMP(g_trac_targeting, "writePermAttributes: Target "
+                        "does not have attribute, override NOT applied for "
+                        "Attr ID:0x%X on target 0x%X",
                         l_attrHdr.iv_attrId,
                         (*l_permTargetList)->getAttr<ATTR_HUID>() );
                     /*@

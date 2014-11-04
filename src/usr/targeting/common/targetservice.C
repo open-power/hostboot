@@ -69,12 +69,7 @@ namespace TARGETING
 // It is defined here to limit the scope
 #define MAX_NODE_ID  iv_nodeInfo.size()
 
-#ifdef MULTINODE_TARGETING
 #define MAX_ENABLED_NODE_ID iv_nodeInfo.size()
-#else
-#define MAX_ENABLED_NODE_ID 2
-#endif
-
 
 //******************************************************************************
 // targetService

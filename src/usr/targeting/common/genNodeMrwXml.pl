@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,13 +26,15 @@
 #
 # Usage:
 #
-# genNodeMrwXml.pl --system=systemname --mrwdir=pathname
+# genNodeMrwXml.pl --system=systemname --systemnodes=2 --mrwdir=pathname
 #                  --build=hb/fsp --nodeCount=nodeCount
 #                  [--help]
 #                  
 #        --system=systemname
 #              Specify which system MRW XML to be generated. 
 #              The file name will be set as uppercase 
+#        --systemnodes=systemnodesinbrazos
+#              Specify number of nodes for brazos system, by default it is 4
 #        --mrwdir=pathname
 #              Specify the complete dir pathname of the MRW. Colon-delimited
 #              list accepted to specify multiple directories to search.
@@ -66,6 +70,7 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 ################################################################################
 my $mrwdir = "";
 my $sysname = "";
+my $sysnodes = "";
 my $usage = 0;
 my $nodeCount = 0;
 my $outFileDir = "";
@@ -74,6 +79,7 @@ use Getopt::Long;
 
 GetOptions( "mrwdir:s"  => \$mrwdir,
             "system:s"  => \$sysname,
+            "systemnodes:s"  => \$sysnodes,
             "nodeCount:i" => \$nodeCount,
             "outfileDir:s" => \$outFileDir,
             "build:s"   => \$build,
@@ -113,15 +119,22 @@ else
     die "ERROR: $build is not valid. Valid values are fsp or hb\n";
 }
 
+my $nodeSuffix = "";
+if( ($sysnodes) && ($sysnodes =~ /2/) )
+{
+    $nodeSuffix = "2N_"
+}
 
 #create files
-my $mrw_file = open_mrw_file($mrwdir, "${SYSNAME}_${fileSuffix}.mrw.xml");
+my $mrw_file =
+    open_mrw_file($mrwdir, "${SYSNAME}_${nodeSuffix}${fileSuffix}.mrw.xml");
 $sysInfo = XMLin($mrw_file,
                 ForceArray=>1);
 #print Dumper($sysInfo);
 for my $j(0..($nodeCount))
 {
-    $outFile = "$outFileDir/${SYSNAME}_node_$j"."_${fileSuffix}.mrw.xml";
+    $outFile =
+        "$outFileDir/${SYSNAME}_${nodeSuffix}node_$j"."_${fileSuffix}.mrw.xml";
     push @nodeOutFiles, [$outFile];
 }
 
@@ -235,11 +248,13 @@ Usage:
              displays usage
 
 
-    $scriptname --system=sysname --mrwdir=pathname
+    $scriptname --system=sysname --systemnodes=2 --mrwdir=pathname
                      --build=hb --nodeCount=nodeCount
         --system=systemname
               Specify which system MRW XML to be generated
                The system name will be set as uppercase
+        --systemnodes=systemnodesinbrazos
+              Specify number of nodes for brazos system, by default it is 4
         --mrwdir=pathname
               Specify the complete dir pathname of the MRW. Colon-delimited
               list accepted to specify multiple directories to search.
