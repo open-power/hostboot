@@ -57,6 +57,7 @@ enum SectionId
     ATTR_OVER,      /**< Attribute Override */
     NVRAM,          /**< Opal NVRAM */
     OCC,            /**< OCC lid */
+    FIRDATA,        /**< FIRDATA */
     TEST,           /**< Scratch space for PNOR test cases */
 
     NUM_SECTIONS,   /**< Number of defined sections */
