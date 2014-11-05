@@ -1602,9 +1602,21 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             }
         } // STEP 1
 
-        // If no master proc found, abort
-        HWAS_ASSERT(l_pMasterProcInfo, "HWAS _deconfigureAssocProc:"
-                                       "Master proc not found");
+        // If no master proc found, mark all proc as deconfigured
+        if (l_pMasterProcInfo == NULL)
+        {
+            HWAS_INF("deconfigureAssocProc: Master proc not found");
+            // Iterate through procs, and mark deconfigured all proc
+            for (ProcInfoVector::iterator
+                     l_procInfoIter = io_procInfo.begin();
+                     l_procInfoIter != io_procInfo.end();
+                     ++l_procInfoIter)
+            {
+                (*l_procInfoIter).iv_deconfigured = true;
+            }
+            // break now since all of the rest of the processing is moot.
+            break;
+        }
 
         // STEP 2:
         // Iterate through procs, and mark deconfigured any
