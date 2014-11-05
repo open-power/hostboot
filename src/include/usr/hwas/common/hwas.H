@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -165,11 +167,11 @@ void invokePresentByAssoc();
  * These checks are needed because of scenarios where targets are non-present
  * and their related targets are not marked as deconfigured
  *
- * @param[in/out] o_funcTargets    A vector of functional MCS, MEMBUFS, DIMMS
- * @param[in/out] o_targToDeconfig A vector of targets to deconfigure, done
- *                                 this way to allow unit tests
+ * @param[in/out] io_funcTargets    A vector of functional MCS, MEMBUFS, DIMMS
+ * @param[out]    o_targToDeconfig  A vector of targets to deconfigure, done
+ *                                  this way to allow unit tests
  */
-void presentByAssoc(TargetInfoVector& o_funcTargets,
+void presentByAssoc(TargetInfoVector& io_funcTargets,
                     TargetInfoVector& o_targToDeconfig);
 
 };   // end namespace
