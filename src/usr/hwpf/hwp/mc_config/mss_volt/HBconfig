@@ -1,0 +1,4 @@
+config KINGSTON_1_35_VOLT
+    default n
+    help
+        Set ATTR_MSS_VOLT_OVERRIDE to be the 1.35V required for Kingston DIMMs

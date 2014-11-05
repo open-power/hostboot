@@ -617,6 +617,30 @@ void* call_mss_volt( void *io_pArgs )
         TARGETING::ATTR_VMEM_ID_type l_VmemID =
                             (*l_membuf_iter)->getAttr<ATTR_VMEM_ID>();
         l_VmemList.push_back(l_VmemID);
+
+#ifdef CONFIG_KINGSTON_1_35_VOLT
+        // TODO via RTC: 108833 and 117599
+        // This is a temporary fix to support Kingston dimms until we've
+        // provided a mechanism for MFG and/or the customer to set the
+        // appropriate override for their dimms via the above mentioned
+        // stories
+
+        TARGETING::ATTR_MSS_VOLT_OVERRIDE_type l_volt_override =
+            (*l_membuf_iter)->getAttr<TARGETING::ATTR_MSS_VOLT_OVERRIDE>();
+
+        if(l_volt_override == ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE)
+        {
+            l_volt_override = ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_135;
+            (*l_membuf_iter)->setAttr<TARGETING::ATTR_MSS_VOLT_OVERRIDE>
+                (l_volt_override);
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running CONFIG_KINGSTON_1_35_VOLT workaround "
+                "for target HUID 0x%.8X",
+                TARGETING::get_huid(*l_membuf_iter));
+        }
+#endif
+
     }
 
     std::sort(l_VmemList.begin(), l_VmemList.end());
