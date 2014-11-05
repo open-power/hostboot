@@ -1,0 +1,4 @@
+config HBRT_PRD
+    default n
+    help
+        Enable HBRT PRD.
