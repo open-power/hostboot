@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt.C,v 1.15 2014/06/19 18:44:00 jdsloat Exp $
+// $Id: mss_volt.C,v 1.16 2014/11/05 16:16:10 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -58,6 +58,7 @@
 //  1.12   | jdsloat  | 03/05/14 | RAS review Edits -- Error HW callouts
 //  1.13   | jdsloat  | 06/05/14 | Added ATTR_MSS_VOLT_VPP being set, as well as ATTR_MSS_VOLT_OVERRIDE
 //  1.14   | jdsloat  | 06/19/14 | Added error checking associated ATTR_MSS_VOLT_OVERRIDE
+//  1.15   | jdsloat  | 11/05/14 | Fixed a if to else if in error checking of ATTR_MSS_VOLT_OVERRIDE
 
 // This procedure takes a vector of Centaurs behind a voltage domain,
 // reads in supported DIMM voltages from SPD and determines optimal
@@ -254,7 +255,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
 		FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.35V");
 		FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
 	    }
-	    if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_120)
+	    else if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_120)
 	    {
 	        l_tolerated_dram_voltage = 1200;
 		FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.20V");
