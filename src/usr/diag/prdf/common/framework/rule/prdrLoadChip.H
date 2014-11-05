@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,7 +151,7 @@ namespace Prdr
             union value { uint32_t i; Expr * p; };
 
                     /** Maximum number of entries a expression can have. */
-            static const uint32_t MAX_VALUES = 6;
+            static const uint32_t MAX_VALUES = 7;
 
             unsigned char cv_op;        /** Type of expr this is. */
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,7 +124,8 @@ inline TARGETING::TargetHandle_t buffer_getTarget( const uint8_t *&ptr )
 //------------------------------------------------------------------------------
 
 void ServiceDataCollector::SetCallout( PRDcallout mru,
-                                       PRDpriority priority )
+                                       PRDpriority priority,
+                                       GARD_POLICY i_gardState )
 {
     bool found = false;
 
@@ -149,12 +150,17 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
             {
                 i->priority = priority;
             }
+
+            if( i_gardState >  i->gardState )
+            {
+                i->gardState = i_gardState;
+            }
         }
     }
 
     if ( found == false )
     {
-        xMruList.push_back( SdcCallout(mru, priority) );
+        xMruList.push_back( SdcCallout(mru, priority, i_gardState) );
     }
 }
 
@@ -259,6 +265,7 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
             buffer_append( current_ptr, (uint32_t)i->callout.getType() );
             buffer_append( current_ptr, i->callout.flatten()           );
             buffer_append( current_ptr, (uint32_t)i->priority          );
+            buffer_append( current_ptr, (uint32_t)i->gardState         );
         }
 
         buffer_append(current_ptr, iv_SignatureList.size());
@@ -331,9 +338,10 @@ ServiceDataCollector & ServiceDataCollector::operator=(
         MruType mt           = (MruType) buffer_get32(i_flatdata);
         uint32_t mru         = buffer_get32(i_flatdata);
         PRDpriority priority = (PRDpriority) buffer_get32(i_flatdata);
+        GARD_POLICY gardState   = (GARD_POLICY) buffer_get32(i_flatdata);
 
         PRDcallout callout( mru, mt );
-        xMruList.push_back( SdcCallout(callout, priority) );
+        xMruList.push_back( SdcCallout(callout, priority, gardState) );
     }
 
     ClearSignatureList();

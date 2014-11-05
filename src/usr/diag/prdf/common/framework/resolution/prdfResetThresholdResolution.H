@@ -57,7 +57,6 @@
  @code
    enum { thresholdValue = 32, MaskId = 05 };
    ResetThresholdResolution rtr(thresholdValue,MaskId);
-   Resolution & fr = ResolutionFactory::Access().GetCalloutResolution(HOM_IOHUBCHIP0,MRU_HIGH);
    ResolutionMap rm(...);    // see ResolutionMap
    rm.Add(BIT_LIST_STRING_05,&rtr,&ftr);   // Resolution invoked when bit 5
   //                                          is on - callsout callout and

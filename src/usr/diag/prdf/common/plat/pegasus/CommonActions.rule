@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -151,6 +151,10 @@ actionclass callout2ndLvlLow
 actionclass calloutDmiBusSymFru
 { callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW); };
 
+/** Callout self with  medium priority but don't gard it */
+actionclass calloutSelfMedNoGard
+{ callout(MRU_MED, NO_GARD); };
+
 ################################################################################
 #                           Callouts with thresholds                           #
 ################################################################################
@@ -163,7 +167,7 @@ actionclass calloutParentProcMedThr1
 
 actionclass calloutParentProcHighThr1
 {
-    callout(connected(TYPE_PROC),MRU_HIGH);
+    callout(connected(TYPE_PROC),MRU_HIGH );
     threshold1;
 };
 
@@ -176,6 +180,12 @@ actionclass callout2ndLvlMedThr1
 actionclass SelfMedThr1
 {
     calloutSelfMed;
+    threshold1;
+};
+
+actionclass SelfMedThr1NoGard
+{
+    calloutSelfMedNoGard;
     threshold1;
 };
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -860,24 +862,19 @@ class ExprAct_Callout : public Expr
 
         Expr * cv_alt;
 
-        enum Callout_type
-        {
-            CALLOUT_SELF = 's',
-            CALLOUT_CHIP = 'c',
-            CALLOUT_PROC = 'p',
-            CALLOUT_PEER = 'r',
-        };
-
-        Callout_type cv_type;
+        Prdr::Callout_type cv_type;
+        std::string * cv_4;
 
         ExprAct_Callout(std::string * i_1,
                         std::string * i_2 = NULL,
-                        Callout_type  i_t = CALLOUT_SELF,
+                        Prdr::Callout_type  i_t = Prdr::CALLOUT_GARD_SELF,
                         uint32_t      i_3 = 0xffffffff,
-                        Expr        * i_alt = NULL):
+                        Expr        * i_alt = NULL,
+                        std::string * i_4 = NULL ):
                                             cv_1(i_1), cv_2(i_2),
                                             cv_3(i_3), cv_alt(i_alt),
-                                            cv_type(i_t)
+                                            cv_type(i_t),
+                                            cv_4( i_4 )
         {}
 
         int output(FILE * i_file)
@@ -893,7 +890,7 @@ class ExprAct_Callout : public Expr
             uint32_t l_priority = htonl(prdrActionArgMap(*cv_1));
             PRDR_FWRITE(&l_priority, sizeof(l_priority), 1, i_file);
 
-            if (CALLOUT_SELF != cv_type)
+            if ( Prdr::CALLOUT_GARD_SELF != cv_type )
             {
                 uint32_t l_arg = htonl(prdrActionArgMap(*cv_2));
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
@@ -909,15 +906,28 @@ class ExprAct_Callout : public Expr
                     cv_alt->output(i_file);
 
                 // Write peer connection type
-                if(CALLOUT_PEER == cv_type)
+                if(Prdr::CALLOUT_GARD_PEER == cv_type)
                     l_arg = htonl(prdrActionArgMap(*cv_2));
                 else
                     l_arg = htonl(prdrActionArgMap("TYPE_NA"));
 
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
             }
+            // Write gard state
+            if( NULL == cv_4 )
+            {
+                // if no policy for gard has been specified, assume it to be
+                // GARD.
+                l_op = prdrActionArgMap("GARD");
+            }
+            else
+            {
+                l_op = prdrActionArgMap(*cv_4);
+            }
 
+            PRDR_FWRITE(&l_op, 1, 1, i_file);
             return 0;
+
         };
 
         void generateDoxygen(std::ostream & o_stream,
@@ -925,17 +935,24 @@ class ExprAct_Callout : public Expr
                              std::ostream & o_errFile = std::cerr)
         {
             o_stream << "callout ( ";
-            if (CALLOUT_SELF == cv_type)
+            std::string tmpGard("GARD");
+            if( NULL != cv_4 )
             {
-                o_stream << "SELF, " << *cv_1 << " )";
+                tmpGard.assign( *cv_4 );
             }
-            else if (CALLOUT_PROC == cv_type)
+
+            if ( Prdr::CALLOUT_GARD_SELF == cv_type )
             {
-                o_stream << "procedure ( " << *cv_2 << " ), " << *cv_1 << " ) ";
+                o_stream << "SELF, " << *cv_1 << tmpGard << " )";
+            }
+            else if ( Prdr::CALLOUT_PROC == cv_type )
+            {
+                o_stream << "procedure ( " << *cv_2 << " ), " << *cv_1
+                         << "NO GARD" << " ) ";
             }
             else
             {
-                if(CALLOUT_PEER == cv_type)
+                if(Prdr::CALLOUT_GARD_PEER == cv_type)
                 {
                     o_stream << "connected_peer ( " << *cv_2 ;
                 }
@@ -946,10 +963,9 @@ class ExprAct_Callout : public Expr
                 if ( 0xffffffff != cv_3 )
                     o_stream << ", " << cv_3;
 
-                o_stream << " ), " << *cv_1 << " ) ";
+                o_stream << " ), " << *cv_1 <<  tmpGard << " ) ";
             }
         }
-
 };
 
 class ExprAct_Funccall : public Expr

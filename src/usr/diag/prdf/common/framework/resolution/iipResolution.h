@@ -65,7 +65,6 @@ namespace PRDF
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
-class CalloutResolution;    //dg00
 
 
 class Resolution
@@ -95,8 +94,7 @@ public:
   // Parameters:   Reference to the Step code data structure
   // Returns:      return code
   // Requirements: None
-  // Promises:     if rc = SUCCESS then data filled with appropriate service
-  //               data
+  // Promises:     if rc = SUCCESS then data filled with apropriate service data
   // Exceptions:   None
   // Concurrency:  synchronous
   // Notes:        if rc != SUCCESS then state of service data is unpredictable
@@ -122,9 +120,6 @@ public:
    */
   virtual bool operator==(const Resolution & r) const
   { return false; }  // default
-  virtual bool operator==(const CalloutResolution & r) const
-  { return false; }
-  // dg00 end
 
 protected:
 

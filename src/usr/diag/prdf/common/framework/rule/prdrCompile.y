@@ -156,8 +156,8 @@ using namespace PRDR_COMPILER;
 %token PRDR_TIME_MIN
 %token PRDR_TIME_HOUR
 %token PRDR_TIME_DAY
-
 %token PRDR_FILTER
+
 %token PRDR_FILTER_SINGLE_BIT
 %token PRDR_FILTER_PRIORITY
 %token PRDR_FILTER_SECONDARY
@@ -946,23 +946,40 @@ action_callout: PRDR_ACT_CALLOUT '(' PRDR_ID ')'
     }
         | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  action_callout_alt ')' ',' PRDR_ID ')'
     {
-        $$ = new ExprAct_Callout($9, $5, ExprAct_Callout::CALLOUT_CHIP, 0xffffffff, $6);
+        $$ = new ExprAct_Callout($9, $5, Prdr::CALLOUT_GARD_CHIP, 0xffffffff, $6 );
     }
         | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  ',' PRDR_INTEGER action_callout_alt ')' ',' PRDR_ID ')'
     {
-        $$ = new ExprAct_Callout($11, $5, ExprAct_Callout::CALLOUT_CHIP, $7, $8);
+        $$ = new ExprAct_Callout($11, $5, Prdr::CALLOUT_GARD_CHIP, $7, $8);
     }
-
 
         | PRDR_ACT_CALLOUT '(' PRDR_PROCEDURE '(' PRDR_ID ')' ',' PRDR_ID ')'
     {
-        $$ = new ExprAct_Callout($8, $5, ExprAct_Callout::CALLOUT_PROC);
+        $$ = new ExprAct_Callout($8, $5, Prdr::CALLOUT_PROC );
     }
-        | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED_PEER '(' PRDR_ID  ',' PRDR_INTEGER action_callout_alt ')' ',' PRDR_ID ')'
+        | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED_PEER '(' PRDR_ID  ',' PRDR_INTEGER  action_callout_alt ')' ',' PRDR_ID ')'
     {
-        $$ = new ExprAct_Callout($11, $5, ExprAct_Callout::CALLOUT_PEER, $7, $8);
+        $$ = new ExprAct_Callout($11, $5, Prdr::CALLOUT_GARD_PEER, $7, $8 );
+    }
+        | PRDR_ACT_CALLOUT '(' PRDR_ID ',' PRDR_ID ')'
+    {
+        $$ = new ExprAct_Callout($3, NULL, Prdr::CALLOUT_GARD_SELF, 0xffffffff, NULL, $5);
     }
 
+        | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  action_callout_alt')' ',' PRDR_ID ',' PRDR_ID ')'
+    {
+        $$ = new ExprAct_Callout($9, $5, Prdr::CALLOUT_GARD_CHIP, 0xffffffff, $6, $11 );
+    }
+
+        | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  ',' PRDR_INTEGER action_callout_alt ')' ',' PRDR_ID ',' PRDR_ID  ')'
+    {
+        $$ = new ExprAct_Callout($11, $5, Prdr::CALLOUT_GARD_CHIP, $7, $8, $13 );
+    }
+
+        | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED_PEER '(' PRDR_ID  ',' PRDR_INTEGER  action_callout_alt ')' ',' PRDR_ID ',' PRDR_ID ')'
+    {
+        $$ = new ExprAct_Callout($11, $5, Prdr::CALLOUT_GARD_PEER, $7, $8, $13 );
+    }
 ;
 
 action_callout_alt:

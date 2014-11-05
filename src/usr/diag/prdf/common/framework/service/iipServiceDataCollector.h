@@ -44,6 +44,30 @@
         };
 #endif
 
+#ifndef PRDF_GARD_POLICY_MAP_ONLY
+    #define PRDF_GARD_POLICY_MAP \
+        enum GARD_POLICY {
+    #define PRDF_GARD_POLICY(name, value) \
+            name = value,
+    #define PRDF_GARD_POLICY_MAP_END \
+        };
+    #define NOT_FROM_RULE_CODE
+#endif
+
+#ifdef NOT_FROM_RULE_CODE
+namespace PRDF
+{
+#endif
+
+PRDF_GARD_POLICY_MAP
+  PRDF_GARD_POLICY(NO_GARD, 0x00000001 )
+  PRDF_GARD_POLICY(GARD,    0x00000002 )
+PRDF_GARD_POLICY_MAP_END
+
+#ifdef NOT_FROM_RULE_CODE
+}
+#endif
+
 #ifndef PRDF_SDC_FLAGS_MAP_ONLY
 
 #include <prdfErrorSignature.H>
@@ -76,13 +100,20 @@ namespace PRDF
 struct SdcCallout {
   PRDcallout callout;
   PRDpriority priority;
+  GARD_POLICY gardState;
+
   //bool gard;
-  SdcCallout() : callout(NULL), priority(MRU_LOW) {}
-  SdcCallout(PRDcallout & mru, PRDpriority p)
-    : callout(mru), priority(p)
+  SdcCallout() :
+    callout(NULL), priority(MRU_LOW), gardState( NO_GARD )
   {}
-  SdcCallout(TARGETING::TargetHandle_t i_pcalloutHandle , PRDpriority p)
-    : callout(i_pcalloutHandle), priority(p)
+
+  SdcCallout(PRDcallout & mru, PRDpriority p, GARD_POLICY i_gardState )
+    : callout(mru), priority(p), gardState( i_gardState )
+  {}
+
+  SdcCallout( TARGETING::TargetHandle_t i_calloutTgt,
+              PRDpriority p, GARD_POLICY i_gardState )
+    : callout( i_calloutTgt ), priority( p ), gardState( i_gardState )
   {}
 };
 
@@ -234,7 +265,8 @@ public:
    <br><b>Notes:       </b> No implementation for Apache or Northstar
    </ul><br>
    */
-  void SetCallout( PRDcallout mru, PRDpriority priority = MRU_MED );
+  void SetCallout( PRDcallout mru, PRDpriority priority = MRU_MED,
+                   GARD_POLICY i_gardState = GARD );
 
   /**
    Add a change to the prd signature List

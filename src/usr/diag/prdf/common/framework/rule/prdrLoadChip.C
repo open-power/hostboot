@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -437,7 +437,8 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
             i_stream >> l_tmpChar;
             o_expr.cv_value[0].i = l_tmpChar;
             i_stream >> o_expr.cv_value[1].i;
-            if ('s' != o_expr.cv_value[0].i)
+
+            if( Prdr::CALLOUT_GARD_SELF != o_expr.cv_value[0].i )
             {
                 i_stream >> o_expr.cv_value[2].i;
                 i_stream >> o_expr.cv_value[3].i;
@@ -456,6 +457,11 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
                 // Read peer connection type
                 i_stream >> o_expr.cv_value[5].i;
             }
+            //Read gard state associated with callout
+            i_stream >> l_tmp8;
+            o_expr.cv_value[6].i = l_tmp8;
+
+
             break;
 
         case ACT_DUMP: //@ecdf

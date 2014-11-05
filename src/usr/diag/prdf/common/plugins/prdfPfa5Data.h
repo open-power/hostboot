@@ -98,18 +98,23 @@ struct PfaMruListStruct
     uint32_t callout;  // 32-bit representation of HUID, MemoryMru, symbolic FRU
     uint8_t  type;     // See enum PRDcallout::MruType
     uint8_t  priority; // See enum srciPriority (in srci/fsp/srci.H)
+    uint8_t  gardState;
 
     friend UtilStream& operator<<( UtilStream& i_left,
                                    PfaMruListStruct& i_right )
     {
-        i_left << i_right.callout << i_right.type << i_right.priority;
+        i_left << i_right.callout << i_right.type << i_right.priority
+               << i_right.gardState;
+
         return i_left;
     };
 
     friend UtilStream& operator>>( UtilStream& i_left,
                                    PfaMruListStruct& i_right )
     {
-        i_left >> i_right.callout >> i_right.type >> i_right.priority;
+        i_left >> i_right.callout >> i_right.type >> i_right.priority
+               >> i_right.gardState;
+
         return i_left;
     };
 };

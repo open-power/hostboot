@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -2947,9 +2947,8 @@ actionclass calloutConnPci0Th1NoGard
 /** Callout the connected PCI 1 controller, threshold 1, no garding */
 actionclass calloutConnPci1Th1NoGard
 {
-    calloutConnPci1;
+    callout(connected(TYPE_PCI,1), MRU_MED, NO_GARD);
     threshold1;
-    gard(NoGard);
 };
 
 /** Callout the connected PCI 2 controller, threshold 1, no garding */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,14 @@ namespace Prdr
         ACT_CAPT  = 'C',
     };
 
+    enum Callout_type
+    {
+        CALLOUT_PROC        =  0x00000001,  // for procedure callout
+        CALLOUT_GARD_SELF   =  0x00000002,  // for self callout and gard
+        CALLOUT_GARD_CHIP   =  0x00000003,  // for connected callout and gard
+        CALLOUT_GARD_PEER   =  0x00000004,  // for callout and gard of connected
+                                            // peer
+    };
     class SignatureOp
     {
       public:

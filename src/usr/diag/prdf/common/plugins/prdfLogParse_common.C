@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -537,32 +537,38 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                 snprintf( header, 25, " #%d %s", i+1, tmpStr );
 
                 snprintf( data, 50, "0x%08x ", pfa.mruList[i].callout );
+                tmpStr = GardAction::ToString( pfa.mruList[i].gardState );
 
                 switch ( pfa.mruList[i].type )
                 {
                     case PRDcalloutData::TYPE_MEMMRU:
-                        strcat( data, "(MemoryMru)" );
+                        strcat( data, "(MemoryMru) " );
+                        strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         parseMemMruData( i_parser, pfa.mruList[i].callout );
                         break;
 
                     case PRDcalloutData::TYPE_SYMFRU:
-                        strcat( data, "(SymbolicFru)" );
+                        strcat( data, "(SymbolicFru) " );
+                        strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         break;
 
                     case PRDcalloutData::TYPE_TARGET:
-                        strcat( data, "(HUID)" );
+                        strcat( data, "(HUID) " );
+                        strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         break;
 
                     case PRDcalloutData::TYPE_PROCCLK:
-                        strcat( data, "(PROCCLK)" );
+                        strcat( data, "(PROCCLK) " );
+                        strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         break;
 
                     case PRDcalloutData::TYPE_PCICLK:
-                        strcat( data, "(PCICLK)" );
+                        strcat( data, "(PCICLK) " );
+                        strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         break;
 

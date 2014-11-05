@@ -493,70 +493,25 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         prdGardErrType = GardAction::NoGard;
     }
 
-    bool noGardForTodErr = false;
-    for( SDC_MRU_LIST::const_iterator it = mruList.begin();
-         it < mruList.end(); ++it )
-    {
-        if( PRDcalloutData::TYPE_TARGET == it->callout.getType() &&
-            TYPE_OSC == getTargetType( it->callout.getTarget() ))
-        {
-            // FIXME Below is a part of workaround due to design limitation
-            // of hwsv in fips820. It shall be removed once RTC 103773,
-            // RTC 116192 and RTC 116134 gets integrated in to fips830.
-
-            // We shall not gard TOD OSC or MDMT due to master path errors.
-            // There are problems associated with garding of TOD clock end
-            // points on proc and OSC side. Garding entire Proc or TOD OSC for
-            // a mere bad pin doesn't look appropriate. So, we callout FRUs
-            // on both ends of TOD OSC connection but don't gard it.
-
-            noGardForTodErr = true;
-            break;
-        }
-    }
-
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
           it < mruList.end(); ++it )
     {
         thispriority = it->priority;
         thiscallout = it->callout;
+        HWAS::GARD_ErrorType tmpGard = gardErrType;
+        HWAS::DeconfigEnum tmpDeconfig = deconfigState;
+
+        if( HWAS::GARD_NULL != gardErrType )
+        {
+            if( NO_GARD == it->gardState )
+            {
+                tmpGard = HWAS::GARD_NULL;
+                tmpDeconfig = HWAS::NO_DECONFIG;
+            }
+        }
 
         if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
-            // FIXME Below is a part of workaround due to design limitation
-            // of hwsv in fips820. It shall be removed once RTC 103773,
-            // RTC 116192 and RTC 116134 gets integrated in to fips830.
-
-            // We shall not gard TOD OSC or MDMT due to master path errors.
-            // There are problems associated with garding of TOD clock end
-            // points on proc and OSC side. Garding entire Proc or TOD OSC for
-            // a mere bad pin doesn't look appropriate. So, we callout FRUs
-            // on both ends of TOD OSC connection but don't gard it.
-
-            HWAS::GARD_ErrorType tmpGard = gardErrType;
-            HWAS::DeconfigEnum tmpDeconfig = deconfigState;
-
-            if( true == noGardForTodErr )
-            {
-                TYPE targetType = getTargetType( thiscallout.getTarget());
-
-                //Due to design limitation in fips820, TOD OSC and MDMT should
-                //not be garded in case of error in master path. For an error in
-                //master path, we callout TOD OSC with high priority and MDMT
-                //with low  priority. For an error in slave or internal path,
-                //a processor callout is done with medium level priority. TOD
-                //OSC is not blamed of those category of errors.
-                //So, in the code below, we try to find out if it is a case of
-                //an error in master path by looking at callout target type
-                //and priority.
-
-                if(( TYPE_OSC == targetType ) ||
-                   ( TYPE_PROC == targetType && MRU_LOW == thispriority ))
-                {
-                    tmpGard = HWAS::GARD_NULL;
-                    tmpDeconfig = HWAS::NO_DECONFIG;
-                }
-            }
 
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
@@ -573,8 +528,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                    thiscallout.getTarget(),
                                    thiscallout.getType(),
                                    thispriority,
-                                   deconfigState,
-                                   gardErrType);
+                                   tmpDeconfig,
+                                   tmpGard);
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
@@ -586,9 +541,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             {
                 PRDF_HW_ADD_CALLOUT( *it,
                                      thispriority,
-                                     deconfigState,
+                                     tmpDeconfig,
                                      iv_errl,
-                                     gardErrType,
+                                     tmpGard,
                                      severityParm,
                                      l_diagUpdate );
             }
@@ -857,6 +812,15 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
         o_pfa.mruList[i].callout  = mruList[i].callout.flatten();
         o_pfa.mruList[i].type     = mruList[i].callout.getType();
         o_pfa.mruList[i].priority = (uint8_t)mruList[i].priority;
+
+        if( NO_GARD == mruList[i].gardState )
+        {
+            o_pfa.mruList[i].gardState = GardAction::NoGard;
+        }
+        else
+        {
+            o_pfa.mruList[i].gardState = i_prdGardType;
+        }
     }
     o_pfa.mruListCount = i;
 

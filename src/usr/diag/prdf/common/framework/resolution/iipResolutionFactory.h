@@ -41,7 +41,6 @@
 //  Usage:
 //
 //    ResolutionFactory & resolutionPool = ResolutionFactory::Access();
-//    FinalResolution & fr = resolutionPool.GetCalloutResolution(EAGLE0_HIGH);
 //
 //
 // End Class Description *********************************************
@@ -56,9 +55,7 @@
 #include <prdfGlobal.H>
 #include <prdfFlyWeight.H>
 #include <prdfFlyWeightS.H>
-#include <iipCalloutResolution.h>
 #include <prdfThresholdResolutions.H>
-#include <prdfCalloutConnected.H>
 #include <prdfAnalyzeConnected.H>
 #include <prdfPluginCallResolution.H>
 #include <iipEregResolution.h>
@@ -68,6 +65,8 @@
 #include <xspprdGardResolution.h>
 #include <prdfCaptureResolution.H>
 #include <prdfClockResolution.H>
+#include <prdfCalloutGard.H>
+#include <prdfCalloutConnectedGard.H>
 
 namespace PRDF
 {
@@ -105,18 +104,18 @@ public:
    *                resolution list
    */
   void Reset();
-  // dg03a end
 
   /**
-   * @brief         Get a resolution that makes a callout
-   * @param [in]    PRDcallout  (see prdfCallouts.H)
-   * @param [in]    PRDpriority (see prdfCallouts.H)
+   * @brief         Returns resolution that callouts target. But it may or
+                    may not gard it.
+   * @param         PRDcallout  (see prdfCallouts.H)
+   * @param         PRDpriority (see prdfCallouts.H)
+   * @param         gard policy associated with target.
    * @return        Resolution &
-   * @note          Regatta CSP use only. Do not call this method from a static
-   *                object.
    */
-  Resolution & GetCalloutResolution( PRDcallout callout,
-                                     PRDpriority p = PRDF::MRU_MED);
+  Resolution & getCalloutGardResol( PRDcallout callout,
+                                    PRDpriority p = PRDF::MRU_MED,
+                                    GARD_POLICY i_gard = GARD );
 
   /**
    * @brief         Get a threshold Resolution
@@ -140,28 +139,30 @@ public:
   MaskResolution & GetThresholdResolution(uint32_t maskId,
                             const ThresholdResolution::ThresholdPolicy* policy);
 
-  // dg04a - start
   /**
-   * @brief          GetConnectedCalloutResolution
-   * @param[in]      i_targetType Type of target  connected to i_source
-   * @param[in]      idx          index in GetConnected list to use
-   * @param[in]      i_priority   @see prdfCallouts.H
-   * @param[in]      i_altResolution resolution for failure scenarios
-   * @param[in]      i_peerConnType Type of target which connects to peer
-                                    of i_targetType
-   * @return         reference to a resolution
-   * @note           Don't use this to callout clocks - use prdfClockResolution
-   */
-  Resolution & GetConnectedCalloutResolution(
-                                        TARGETING::TYPE i_targetType,
-                                        uint32_t i_idx = 0,
-                                        PRDpriority i_priority = MRU_MED,
-                                        Resolution * i_altResolution = NULL,
-                                        TARGETING::TYPE i_peerConnType
-                                                       = TARGETING::TYPE_NA );
-  // dg04a - end
+   * @brief     Returns an instance of CalloutConnectedGard.
+   * @param     i_targetType    Type of target  connected to i_source
+   * @param     idx             index in GetConnected list to use
+   * @param     i_priority      @see prdfCallouts.H
+   * @param     i_altResolution resolution for failure scenarios
+   * @param     i_peerConnType  Type of target which connects to peer
+                                of i_targetType
+   * @param     i_gardState     gard policy associated with callout target
+   * @return    reference to a resolution
+   * @note      This resolution callouts a connected target. There is an option
+   *            to specify the gard policy for the callout target. Don't use
+   *            this to callout clocks - use prdfClockResolution
 
-  // dg05a - start
+   */
+  Resolution & getConnCalloutGardResol(
+                                    TARGETING::TYPE i_targetType,
+                                    uint32_t i_idx = 0,
+                                    PRDpriority i_priority = MRU_MED,
+                                    Resolution * i_altResolution = NULL,
+                                    TARGETING::TYPE i_peerConnType =
+                                                    TARGETING::TYPE_NA,
+                                    GARD_POLICY i_gardState = GARD );
+
   /**
    * @brief     GetAnalyzeConnectedResoltuion
    * @param[in] i_targetType type of unit that's connected to the source
@@ -373,14 +374,11 @@ public:
 
 private:  // Data
 
-  // dg01 - start
-  typedef FlyWeight< CalloutResolution, 50> CalloutFW;             // dg01a
   typedef FlyWeightS< ResolutionLink, 50> ResolutionLinkFW;        // dg01a
 
   typedef FlyWeight< ThresholdResolution, 50 > ThresholdResolutionList;  // dg02a
   typedef FlyWeight< MaskResolution, 50 > MaskResolutionFW;           // dg02a
 
-  typedef FlyWeight< CalloutConnected, 25 > ConnectedFW;         // dg04a
   typedef FlyWeight< AnalyzeConnected, 20 > AnalyzeCFW;          // dg05a
   typedef FlyWeight< PluginCallResolution, 10 > PluginCallFW;    // dg06a
   typedef FlyWeight< ThresholdSigResolution, 10 > ThresholdSigFW;    // dg06a
@@ -391,14 +389,14 @@ private:  // Data
   typedef FlyWeight< GardResolution, 5 > GardResolutionFW;           // dg06a
   typedef FlyWeight< CaptureResolution, 5> CaptureResolutionFW;  // pw01
   typedef FlyWeight< ClockResolution, 8 > ClockResolutionFW;         // jl01a
+  typedef FlyWeight< CalloutGardResolution, 50 > CalloutGardResolFW;
+  typedef FlyWeight< CalloutConnectedGard, 25> CalloutConnectedGardResolFW;
 
-  CalloutFW iv_Callouts;                            // dg01a
   ResolutionLinkFW iv_Links;                        // dg01a
 
   ThresholdResolutionList iv_thresholdResolutions;  // dg02a
   MaskResolutionFW iv_maskResolutions;            // dg02a
   // dg01 - end
-  ConnectedFW iv_connectedCallouts;            // dg04a
   AnalyzeCFW iv_analyzeConnected;              // dg05a
   PluginCallFW iv_pluginCallFW;                // dg06a
   ThresholdSigFW iv_thresholdSigFW;             // dg06a
@@ -409,6 +407,8 @@ private:  // Data
   GardResolutionFW iv_gardResolutionFW;        // dg06a
   CaptureResolutionFW iv_captureResolutionFW;  // pw01
   ClockResolutionFW iv_clockResolutionFW;      // jl01a
+  CalloutGardResolFW iv_calloutGardFW; ///<  stores CalloutGardResolution
+  CalloutConnectedGardResolFW iv_connCalloutGardFW; ///< CalloutConnectedGard
 
 };
 

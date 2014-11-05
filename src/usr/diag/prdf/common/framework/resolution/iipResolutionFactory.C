@@ -42,6 +42,8 @@
 #include <prdfFlyWeight.C>            // dg01
 #include <prdfFlyWeightS.C>
 #include <prdfPlatServices.H>
+#include <prdfCalloutConnectedGard.H>
+#include <prdfCalloutGard.H>
 
 #undef iipResolutionFactory_C
 //----------------------------------------------------------------------
@@ -102,14 +104,13 @@ ResolutionFactory::~ResolutionFactory()
 
 // ---------------------------------------------------------------------
 
-Resolution & ResolutionFactory::GetCalloutResolution(PRDcallout callout,
-                                                     PRDpriority p)
+Resolution & ResolutionFactory::getCalloutGardResol( PRDcallout callout,
+                                                     PRDpriority p,
+                                                     GARD_POLICY i_gardState )
 {
   // search for existing callout
-  // dg01 start
-  CalloutResolution key(callout,p);
-  return iv_Callouts.get(key);
-  // dg01 end
+  CalloutGardResolution  key(callout, p, i_gardState );
+  return iv_calloutGardFW.get(key);
 }
 
 // ----------------------------------------------------------------------
@@ -185,21 +186,27 @@ MaskResolution & ResolutionFactory::GetThresholdResolution(uint32_t maskId)
   return *r;
 }
 
-Resolution & ResolutionFactory::GetConnectedCalloutResolution(
+// ---------------------------------------------------------------------
+
+Resolution & ResolutionFactory::getConnCalloutGardResol(
                                     TARGETING::TYPE i_targetType,
                                     uint32_t i_idx,
                                     PRDpriority i_priority,
                                     Resolution * i_altResolution,
-                                    TARGETING::TYPE i_peerConnType )
+                                    TARGETING::TYPE i_peerConnType,
+                                    GARD_POLICY i_gardState )
 {
-    CalloutConnected key(   i_targetType,
-                            i_idx,
-                            i_priority,
-                            i_altResolution,
-                            i_peerConnType );
+    CalloutConnectedGard key(  i_targetType,
+                               i_idx,
+                               i_priority,
+                               i_altResolution,
+                               i_peerConnType,
+                               i_gardState );
 
-    return iv_connectedCallouts.get(key);
+    return iv_connCalloutGardFW.get(key);
 }
+
+// ---------------------------------------------------------------------
 
 Resolution & ResolutionFactory::GetAnalyzeConnectedResolution(
                                     TARGETING::TYPE i_targetType,
@@ -277,7 +284,6 @@ void ResolutionFactory::Reset()
   iv_captureResolutionFW.clear();
   /*Clear because the "alt resolution" could have be a link or other cleared
   resolution.*/
-  iv_connectedCallouts.clear();
   iv_clockResolutionFW.clear();
 
 }
@@ -286,16 +292,12 @@ void ResolutionFactory::Reset()
 
 void ResolutionFactory::printStats()
 {
-    PRDF_TRAC("Callout");
-    iv_Callouts.printStats( );
     PRDF_TRAC("Link Resolution");
     iv_Links.printStats( );
     PRDF_TRAC("ThresholdResolutionList");
     iv_thresholdResolutions.printStats( );
     PRDF_TRAC("MaskResolution");
     iv_maskResolutions.printStats( );
-    PRDF_TRAC("ConnectedCallout");
-    iv_connectedCallouts.printStats( );
     PRDF_TRAC("AnalyzeConnectedCallout");
     iv_analyzeConnected.printStats( );
     PRDF_TRAC("pluginCallFW");
@@ -316,6 +318,10 @@ void ResolutionFactory::printStats()
     iv_captureResolutionFW.printStats( );
     PRDF_TRAC("clockResolution");
     iv_clockResolutionFW.printStats( );
+    PRDF_TRAC("CalloutGardResolFW");
+    iv_calloutGardFW.printStats( );
+    PRDF_TRAC("CalloutConnectedGardResolFW");
+    iv_connCalloutGardFW.printStats( );
 
 }
 #endif

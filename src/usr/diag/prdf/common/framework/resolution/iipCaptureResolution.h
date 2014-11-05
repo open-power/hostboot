@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,7 +54,7 @@ class SCAN_COMM_REGISTER_CLASS;
     class SomeChipClass {
     public:
        CaptureResolution iv_captureScr;
-       CalloutResolution calloutSomething;
+       CalloutGardResolution calloutSomething;
        ResolutionMap someResolutionMap;
     // ....
     };

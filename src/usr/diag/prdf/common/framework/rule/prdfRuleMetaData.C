@@ -338,8 +338,8 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
         // initialize all the pointers for the groups, but don't construct their
         // data yet.
         Resolution & l_defaultResolution =
-                        i_reslFactory.GetCalloutResolution( NULL,
-                                                            MRU_MED );
+                        i_reslFactory.getCalloutGardResol( NULL,
+                                                            MRU_MED, GARD );
         for (int i = 0; i < l_chip->cv_groupCount; i++)
         {
             iv_groupList.push_back( new Group( l_defaultResolution ) );
@@ -888,40 +888,46 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
 
         case Prdr::ACT_CALL: // CALLOUT
 
-            switch ((char)i_action->cv_value[0].i)
+            switch (i_action->cv_value[0].i)
             {
-                case 'c': // connected chip.
-                    l_rc = &i_data.cv_reslFactory.GetConnectedCalloutResolution(
-                                (TARGETING::TYPE)       i_action->cv_value[2].i,
-                                                        i_action->cv_value[3].i,
-                                (CalloutPriorityEnum)   i_action->cv_value[1].i,
-                                ( NULL == i_action->cv_value[4].p ? NULL :
-                                    ( this->createResolution(
-                                        i_action->cv_value[4].p, i_data ) ) ) );
-                    break;
-
-                case 'p': // Procedure.
-                    l_rc = &i_data.cv_reslFactory.GetCalloutResolution(
-                                (SymbolicFru)         i_action->cv_value[2].i,
-                                (CalloutPriorityEnum) i_action->cv_value[1].i );
-                    break;
-
-                case 'r': // PEER
-                    l_rc = &i_data.cv_reslFactory.GetConnectedCalloutResolution(
+                case Prdr::CALLOUT_GARD_CHIP: // connected callout with gard
+                    l_rc = &i_data.cv_reslFactory.getConnCalloutGardResol(
                                 (TARGETING::TYPE)       i_action->cv_value[2].i,
                                                         i_action->cv_value[3].i,
                                 (CalloutPriorityEnum)   i_action->cv_value[1].i,
                                 ( NULL == i_action->cv_value[4].p ? NULL :
                                     ( this->createResolution(
                                         i_action->cv_value[4].p, i_data ) ) ),
-                                (TARGETING::TYPE)      i_action->cv_value[5].i);
+                                        TARGETING::TYPE_NA,
+                                        (GARD_POLICY) i_action->cv_value[6].i );
                     break;
 
-                case 's': // SELF
-                default:
-                    l_rc = &i_data.cv_reslFactory.GetCalloutResolution(
-                                NULL ,
+                // connected callout and gard with connection type
+                case Prdr::CALLOUT_GARD_PEER:
+                    l_rc = &i_data.cv_reslFactory.getConnCalloutGardResol(
+                                (TARGETING::TYPE)       i_action->cv_value[2].i,
+                                                        i_action->cv_value[3].i,
+                                (CalloutPriorityEnum)   i_action->cv_value[1].i,
+                                ( NULL == i_action->cv_value[4].p ? NULL :
+                                    ( this->createResolution(
+                                        i_action->cv_value[4].p, i_data ) ) ),
+                                (TARGETING::TYPE)      i_action->cv_value[5].i,
+                                (GARD_POLICY) i_action->cv_value[6].i );
+
+                    break;
+
+                case Prdr::CALLOUT_PROC: // Procedure callout
+                    l_rc = &i_data.cv_reslFactory.getCalloutGardResol(
+                                (SymbolicFru) i_action->cv_value[2].i,
                                 (CalloutPriorityEnum) i_action->cv_value[1].i );
+                    break;
+
+                case Prdr::CALLOUT_GARD_SELF: // self callout with gard option
+                default:
+                    l_rc = &i_data.cv_reslFactory.getCalloutGardResol(
+                                NULL ,
+                                (CalloutPriorityEnum) i_action->cv_value[1].i,
+                                (GARD_POLICY) i_action->cv_value[6].i );
                     break;
 
             };

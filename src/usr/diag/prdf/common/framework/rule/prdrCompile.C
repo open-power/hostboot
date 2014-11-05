@@ -40,6 +40,7 @@
 #include <prdrToken.H>
 #include <UtilHash.H>
 #include <xspprdGardResolution.h>
+#include <prdfEnums.H>
 
 using namespace PRDR_COMPILER;
 
@@ -463,6 +464,12 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         #define PRDF_SDC_FLAG(name, value) \
                 g_ActionArgMap[#name] = value;
         #define PRDF_SDC_FLAGS_MAP_END
+
+        #define PRDF_GARD_POLICY_MAP_ONLY
+        #define PRDF_GARD_POLICY_MAP
+        #define PRDF_GARD_POLICY(name, value) \
+                g_ActionArgMap[#name] = value;
+        #define PRDF_GARD_POLICY_MAP_END
         #undef iipServiceDataCollector_h
         #include <iipServiceDataCollector.h>
 

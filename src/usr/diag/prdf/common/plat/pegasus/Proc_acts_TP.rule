@@ -1272,10 +1272,3 @@ actionclass selfCapThr32TopReConfig
     selfCaptThr32;
     funccall("requestTopologySwitch");
 };
-
-/** callouts Proc on first instance, but doesn't gard */
-actionclass SelfMedThr1NoGard
-{
-    SelfMedThr1;
-    gard(NoGard);
-};

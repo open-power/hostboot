@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,6 @@
 #include <iipSystem.h>
 #include <prdfGlobal.H>
 //#include <iipCalloutMap.h>
-#include <iipCalloutResolution.h>
 #include <iipstep.h>
 #include <iipCaptureData.h>
 #include <iipServiceDataCollector.h>
@@ -52,7 +51,8 @@
 #include <iipAnalyzeChipResolution.h>
 #include <xspprdTryResolution.h>
 #include <iipchip.h>
-#include <prdfCalloutConnected.H>
+#include <prdfCalloutGard.H>
+#include <prdfCalloutConnectedGard.H>
 #include <prdfAnalyzeConnected.H>
 #include <prdfPlatServices.H>
 #undef iipResolution_C
@@ -101,37 +101,37 @@ int32_t EregResolution::Resolve( STEP_CODE_DATA_STRUCT & io_data )
     return rc;
 }
 
-
-//---------------------------------------------------------------------
-// CalloutResolution Member Function Specifications
-// using MruValues (xspiiCallout.h)
-//---------------------------------------------------------------------
-
-int32_t CalloutResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+//--------------------------------------------------------------------
+// CalloutGardResolution Member Functions
+//--------------------------------------------------------------------
+int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     /*
-    This resolution is only needed when we callout self.So during RuleChip
-    creation,we create CalloutResolution passing NULL as target value.In Resolve
-    function when we need to update SDC with target to be called out we get it
-    from Service Data Collector.It is because target currently under analysis is
-    the target that needs to be called out here.By instantiating Callout
-    resolution with just priority info and NULL target , we are able to reduce
-    CalloutResolution objects to one per priority instead of one per target per
-    priority.So,this reduction in number of resolution objects shall eventually
-    reduce memory utilization.
+    This resolution is only needed when we callout self. So, during RuleChip
+    creation, we create CalloutGardResolution passing NULL as target value. In
+    Resolve function when we need to update SDC with target to be called out, we
+    get it from Service Data Collector. It is because target currently under
+    analysis is the target that needs to be called out here. By instantiating
+    Callout resolution with just priority info and NULL target, we are able to
+    reduce CalloutGardResolution objects to one per priority instead of one per
+    target per priority. So, this reduction in number of resolution objects
+    shall eventually reduce memory utilization.
     */
 
-    if ( PRDcalloutData::TYPE_TARGET == xMruCallout.getType() )
+    if ( PRDcalloutData::TYPE_TARGET == iv_callout.getType() )
     {
         PRDcallout l_targetCallout( ServiceDataCollector::getTargetAnalyzed() );
-        io_serviceData.service_data->SetCallout( l_targetCallout, xPriority );
+        io_serviceData.service_data->SetCallout( l_targetCallout,
+                                                 iv_calloutPriority,
+                                                 iv_gardState );
     }
     else
     {
-        io_serviceData.service_data->SetCallout( xMruCallout,xPriority );
+        io_serviceData.service_data->SetCallout( iv_callout, iv_calloutPriority,
+                                                 iv_gardState );
     }
 
-    return(SUCCESS);
+    return SUCCESS;
 }
 
 //--------------------------------------------------------------------
@@ -208,7 +208,10 @@ int32_t TryResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
     return rc;
 }
 
-int32_t CalloutConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+//--------------------------------------------------------------------
+// CalloutConnectedGard Member Functions
+//--------------------------------------------------------------------
+int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     using namespace TARGETING;
 
@@ -248,7 +251,9 @@ int32_t CalloutConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
     }
 
     if ( NULL != connTrgt )
-        io_serviceData.service_data->SetCallout( connTrgt, iv_priority );
+        io_serviceData.service_data->SetCallout( connTrgt,
+                                                 iv_priority,
+                                                 iv_gardState);
     else
     {
         if ( NULL != iv_altResolution )
@@ -259,7 +264,9 @@ int32_t CalloutConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
                       " sourceTrgt=0x%08x, iv_peerConnType=0x%x",
                         getHuid(sourceTrgt), iv_peerConnType);
 
-            io_serviceData.service_data->SetCallout( sourceTrgt );
+            io_serviceData.service_data->SetCallout( sourceTrgt,
+                                                     MRU_MED,
+                                                     iv_gardState );
         }
     }
 
