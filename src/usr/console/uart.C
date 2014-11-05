@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -118,7 +118,7 @@ namespace CONSOLE
             // Wait for transmit FIFO to have space.
             {
                 const uint64_t DELAY_NS = 100;
-                const uint64_t DELAY_LOOPS = 10000;
+                const uint64_t DELAY_LOOPS = 100000000;
 
                 uint8_t data = 0;
                 uint64_t loops = 0;
