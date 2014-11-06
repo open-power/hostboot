@@ -92,14 +92,7 @@ void fapiAssert(bool i_expression)
 fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 {
     FAPI_DBG( INFO_MRK "delay %lld nanosec", i_nanoSeconds );
-#ifndef __HOSTBOOT_RUNTIME
     nanosleep( 0, i_nanoSeconds );
-#else
-    if(g_hostInterfaces && g_hostInterfaces->nanosleep)
-    {
-        g_hostInterfaces->nanosleep(0, i_nanoSeconds);
-    }
-#endif
     return fapi::FAPI_RC_SUCCESS;
 }
 

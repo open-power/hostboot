@@ -211,6 +211,7 @@ RUNTIME_OBJECTS += rt_sync.o
 RUNTIME_OBJECTS += rt_assert.o
 RUNTIME_OBJECTS += rt_vfs.o
 RUNTIME_OBJECTS += rt_task.o
+RUNTIME_OBJECTS += rt_time.o
 
 RUNTIME_MODULES += trace_rt
 RUNTIME_MODULES += errl_rt
