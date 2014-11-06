@@ -27,30 +27,23 @@ ROOTPATH = ../../../../..
 
 MODULE = bus_training
 
+SUBDIRS += runtime.d
+
+# ROOTPATH must be defined before including this file.
+include io_hwp_common_ipl_and_rt.mk
+
 ##      support for Targeting and fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-OBJS += gcr_funcs.o
 OBJS += io_funcs.o
 OBJS += io_run_training.o
 OBJS += pbusLinkSvc.o
 OBJS += io_dccal.o
-OBJS += io_power_down_lanes.o
-OBJS += io_read_erepair.o
-OBJS += io_clear_firs.o
-OBJS += io_fir_isolation.o
 OBJS += io_restore_erepair.o
-OBJS += erepairAccessorHwpFuncs.o
-OBJS += erepairGetFailedLanesHwp.o
-OBJS += erepairSetFailedLanesHwp.o
 OBJS += io_post_trainadv.o
 OBJS += io_pre_trainadv.o
 

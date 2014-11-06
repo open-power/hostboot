@@ -6,7 +6,7 @@
 *.gcno
 *.gcda
 *.gcov
-*.swp
+*.sw*
 customrc
 *.CKP
 *.log

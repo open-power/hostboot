@@ -232,6 +232,7 @@ RUNTIME_MODULES += build_winkle_images_rt
 RUNTIME_MODULES += occ_rt
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt)
+RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),bus_training_rt)
 
 RUNTIME_DATA_MODULES +=
 RUNTIME_TESTCASE_MODULES += cxxtest_rt
