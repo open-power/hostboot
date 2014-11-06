@@ -65,7 +65,6 @@ extern trace_desc_t* g_trac_vpd;
 static const uint64_t IPVPD_TOC_SIZE = 0x100;  //256
 static const uint64_t IPVPD_TOC_ENTRY_SIZE = 8;
 static const uint64_t IPVPD_TOC_INVALID_DATA = 0xFFFFFFFFFFFFFFFF;
-static const uint32_t IPVPD_MAX_ENTRY_SIZE = (64 * 1024);
 
 
 /**
@@ -433,7 +432,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
     }
 
     // Temp data for entire VPD entry
-    uint8_t* tmpVpdPtr = new uint8_t[IPVPD_MAX_ENTRY_SIZE];
+    uint8_t* tmpVpdPtr = new uint8_t[iv_vpdSectionSize];
 
     // Load the temp data with invalid TOC
     uint64_t tocdata = IPVPD_TOC_INVALID_DATA;
@@ -499,6 +498,34 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
             memcpy( (tmpVpdPtr + pTocOffset),
                     &pTocEntry,
                     IPVPD_TOC_ENTRY_SIZE );
+
+            // Make sure we don't exceed our allocated space in PNOR
+            if( (pRecOffset + sRecLength) > iv_vpdSectionSize )
+            {
+                TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor()> The amount of space required (0x%X) for the VPD cache exceeds the available space (0x%X)", pRecOffset + sRecLength, iv_vpdSectionSize );
+                /*@
+                 * @errortype
+                 * @reasoncode       VPD::VPD_CACHE_SIZE_EXCEEDED
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         VPD::VPD_IPVPD_LOAD_PNOR
+                 * @userdata1        HUID of target chip
+                 * @userdata2[00:31] Available size
+                 * @userdata2[32:63] Requested size
+                 * @devdesc          The amount of space required for the VPD
+                 *                   cache exceeds the available space
+                 * @custdesc         Fatal firmware boot error
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               VPD::VPD_IPVPD_LOAD_PNOR,
+                                               VPD::VPD_CACHE_SIZE_EXCEEDED,
+                                               TARGETING::get_huid(i_target),
+                                               TWO_UINT32_TO_UINT64(
+                                                  iv_vpdSectionSize,
+                                                  pRecOffset + sRecLength ),
+                                               true /*Add HB SW Callout*/ );
+                err->collectTrace( "VPD", 256 );
+                break;
+            }
 
             // Read record data from SEEPROM, put it into temp data
             uint8_t* pRecPtr = tmpVpdPtr + pRecOffset;

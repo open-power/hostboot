@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,14 +40,22 @@
 #include <vpd/cvpdenums.H>
 
 #include "ipvpd.H"
+#include <config.h>
 
 namespace CVPD
 {
 
     enum
     {
+#ifdef CONFIG_CDIMM_FORMAT_FOR_CVPD
+        // 4KB x 64
         SECTION_SIZE       = 0x1000,
         MAX_SECTIONS       = 64,
+#else
+        // 8KB x 32
+        SECTION_SIZE       = 0x2000,
+        MAX_SECTIONS       = 32,
+#endif
     };
 
 

@@ -102,7 +102,7 @@ config DJVPD_WRITE
 
 config HAVE_MBVPD
     default y if CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
-    depends on CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
+    depends on (CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW) && !PALMETTO_PASS1
     help
         Have MemBuff/Centaur VPD, PNOR or HW
 
@@ -110,3 +110,8 @@ config PALMETTO_PASS1
     default n
     help
         Palmetto pass1 specific changes
+
+config CDIMM_FORMAT_FOR_CVPD
+    default y
+    help
+        Assume Custom DIMM VPD layout for CVPD

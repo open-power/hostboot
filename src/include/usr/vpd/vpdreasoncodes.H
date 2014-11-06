@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -58,6 +58,7 @@ enum vpdModuleId
     VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM    = 0x30,
     VPD_IPVPD_FETCH_DATA                    = 0x31,
     VPD_IPVPD_WRITE_KEYWORD                 = 0x32,
+    VPD_IPVPD_LOAD_PNOR                     = 0x33,
 
 
     // DIMM SPD
@@ -129,6 +130,7 @@ enum vpdReasonCode
     VPD_REMOVE_PAGES_FAIL               = VPD_COMP_ID | 0x32,
     VPD_UNEXPECTED_TARGET_TYPE          = VPD_COMP_ID | 0x33,
     VPD_WRITE_DEST_UNRESOLVED           = VPD_COMP_ID | 0x34,
+    VPD_CACHE_SIZE_EXCEEDED             = VPD_COMP_ID | 0x35,
 };
 
 
