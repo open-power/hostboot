@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.23 2014/04/21 18:47:07 bgass Exp $
+// $Id: proc_chiplet_scominit.C,v 1.24 2014/10/17 16:41:10 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -271,12 +271,12 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             }
 
             // conditionally enable resonant clocking for XBUS
-            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC,
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_XBUS_RESONANT_CLK_VALID,
                                &i_target,
                                enable_xbus_resonant_clocking);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC on %s",
+                FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_CHIP_EC_FEATURE_XBUS_RESONANT_CLK_VALID on %s",
                          i_target.toEcmdString());
                 break;
             }
