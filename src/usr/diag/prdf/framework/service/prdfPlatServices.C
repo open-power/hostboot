@@ -62,28 +62,6 @@ namespace PlatServices
 //##                      System Level Utility functions
 //##############################################################################
 
-bool isMemoryPreservingIpl()
-{
-    using namespace TARGETING;
-
-    bool l_isMemPreservingIpl = false;
-    TargetHandle_t l_pTarget = getSystemTarget();
-
-    if(l_pTarget && l_pTarget->getAttr<ATTR_IS_MPIPL_HB>())
-    {
-        l_isMemPreservingIpl = true;
-    }
-
-    return l_isMemPreservingIpl;
-}
-
-bool isSapphireRunning( )
-{
-    return false;
-}
-
-//------------------------------------------------------------------------------
-
 void getCurrentTime( Timer & o_timer )
 {
     timespec_t curTime;
@@ -259,10 +237,6 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
-bool isSmpCoherent() { return false; }
-
 //##############################################################################
 //##                        util functions
 //##############################################################################
@@ -326,6 +300,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
 
 TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
                             i_procTarget,

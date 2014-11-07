@@ -73,41 +73,10 @@ namespace PlatServices
 //##############################################################################
 
 /**
- * @brief   Returns if role is mater fsp.
- * @param   None.
- * @return  TRUE if master fsp. FALSE if not master fsp.
- * @pre     None.
- * @post    None.
- */
-bool isMasterFSP();
-
-/**
- * @brief   Checks if we are currently doing a memory preserving IPL.
- * @return  TRUE if this is a memory preserving IPL, FALSE otherwise.
- */
-bool isMemoryPreservingIpl();
-
-/**
- * @brief   Return ECID string for a given target
- * @param   i_target  Any target
- * @param   o_ecidStr buffer for ECID string
- * @return  Returns ECID string for given target
- */
-void getECIDString( TARGETING::TargetHandle_t i_target,
-                    char * o_ecidStr );
-
-/**
  * @brief Get a PRD timer value based on the current time.
  * @param o_timer The returned Timer
  */
 void getCurrentTime( Timer & o_timer );
-
-/**
- * @brief  Sync the file with RMGR
- * @param  i_fileName File name
- * @return Non-SUCCESS if sync is unsuccessful, SUCCESS otherwise.
- */
-int32_t syncFile( const char * i_fileName );
 
 /**
  * @brief Sleep for given time (seconds plus milliseconds).
@@ -370,16 +339,6 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
  */
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
-
-/**
- * @brief   Returns the type of the card the DIMM is plugged into.
- * @param   i_dimmTarget A DIMM target.
- * @return
- */
-
-/* TODO - See .C
-getDimmPlugCardType( TARGETING::TargetHandle_t i_dimmTarget );
-*/
 
 //##############################################################################
 //##                    Maintance Command class wrapper

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,9 +57,25 @@ namespace PlatServices
 // Inline function definitions for Hostboot compiler optimization. See
 // prdfPlatServices_common.H for the function declarations.
 
-inline bool isMasterFSP() { return true; }
-inline int32_t syncFile( const char * i_fileName ) { return SUCCESS; }
-inline bool atRuntime() { return false; }
+inline bool atRuntime()
+{
+    #ifdef __HOSTBOOT_RUNTIME
+    return true;
+    #else
+    return false;
+    #endif
+}
+
+inline bool isSapphireRunning()
+{
+    #ifdef __HOSTBOOT_RUNTIME
+    return true;
+    #else
+    return false;
+    #endif
+}
+
+inline bool isSmpCoherent() { return false; }
 
 //##############################################################################
 //##                       Processor specific functions

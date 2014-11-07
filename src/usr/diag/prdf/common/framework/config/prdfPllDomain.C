@@ -80,25 +80,6 @@ int32_t PllDomain::Initialize(void)
 {
 
   int32_t rc = SUCCESS;
-  if(PlatServices::isMasterFSP())
-  {
-//@jl01 D-START
-//Deleting the call of the ClearPll error.
-//These errors used to have to be cleared before you tried to use the chips.
-//However, the inits from other comps are better are cleaning up the PLL errors.
-//    for (unsigned int i = 0; i < GetSize() && rc == SUCCESS; ++i)
-//    {
-//      ExtensibleChip * l_chip = LookUp(i);
-//      ExtensibleFunction * l_clearPll = l_chip->getExtensibleFunction("ClearPll");
-      // Call ClearPll on this chip  (see prdfPluginDef.H for bindParm defn)
-//      (*l_clearPll)(l_chip,PluginDef::bindParm<void *>(NULL));
-//@jl01 D-END
-
-// Don't unmask   04/20/2006 Review
-//      ExtensibleFunction * l_unmask = l_chip->getExtensibleFunction("UnmaskPll");
-//      (*l_unmask)(l_chip,PluginDef::bindParm<void *>(NULL));
-//    }
-  }
   return(rc);
 }
 
