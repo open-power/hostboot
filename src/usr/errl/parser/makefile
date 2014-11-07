@@ -47,10 +47,10 @@ ERRLPARSE_TARGETS = \
     ${GENDIR}/plugins/makefile
 
 ifndef OPENPOWER_BUILD
-    ERRL_LINK_STATIC = -static
+    ERRL_LINK_STATIC = -m32 -static
 endif
 
-CC=$(HOST_PREFIX)g++ -m32 $(ERRL_LINK_STATIC)
+CC=$(HOST_PREFIX)g++ $(ERRL_LINK_STATIC)
 CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr -I ${GENDIR}
 
 all: GEN_PASS CODE_PASS
