@@ -187,10 +187,13 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
             }
 
-            // Only continue for pcie domain to get osc pos
+            // If error is not from PCIE OSC, there is no need to go further
+            // than this. We shall analyze errors from other chips in the
+            // domain.
+
             if ( CLOCK_DOMAIN_IO != GetId() )
             {
-                break;
+                continue;
             }
 
             // Figure out which pcie osc is active for this proc
