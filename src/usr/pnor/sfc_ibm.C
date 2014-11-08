@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -574,8 +574,13 @@ errlHndl_t SfcIBM::hwInit( )
             { PNOR::UNKNOWN_NOR_ID, SFC_REG_ADRCBF, 0x00000000 },
             //Set the flash size to 64MB
             { PNOR::UNKNOWN_NOR_ID, SFC_REG_ADRCMF, 0x0000000F },
+#ifdef CONFIG_RHESUS
+            //Enable Direct Access Cache, disable large reload
+            { PNOR::UNKNOWN_NOR_ID, SFC_REG_CONF, 0x00000000 },
+#else
             //Enable Direct Access Cache
             { PNOR::UNKNOWN_NOR_ID, SFC_REG_CONF, 0x00000001 },
+#endif
 
 #ifdef CONFIG_ALLOW_MICRON_PNOR
             //*** Micron 512mb chip specific settings.
