@@ -569,8 +569,8 @@ errlHndl_t SfcIBM::hwInit( )
             { PNOR::UNKNOWN_NOR_ID, SFC_REG_ADRCBF, 0x00000000 },
             //Set the flash size to 64MB
             { PNOR::UNKNOWN_NOR_ID, SFC_REG_ADRCMF, 0x0000000F },
-            //Enable Direct Access Cache
-            { PNOR::UNKNOWN_NOR_ID, SFC_REG_CONF, 0x00000001 },
+            //Enable Direct Access Cache, disable large reload
+            { PNOR::UNKNOWN_NOR_ID, SFC_REG_CONF, 0x00000000 },
 
 #ifdef CONFIG_ALLOW_MICRON_PNOR
             //*** Micron 512mb chip specific settings.
