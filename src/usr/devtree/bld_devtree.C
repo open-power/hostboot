@@ -905,6 +905,153 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
     return errhdl;
 }
 
+/* create a node for each IPMI sensor in the system, the sensor unit number
+   corresponds to the BMC assigned sensor number */
+uint32_t bld_sensor_node(devTree * i_dt, const dtOffset_t & i_parentNode,
+                         const uint16_t sensorData[] )
+{
+
+    const uint32_t sensorNumber = sensorData[
+                        TARGETING::IPMI_SENSOR_ARRAY_NUMBER_OFFSET];
+
+    const uint32_t sensorName =
+                        sensorData[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET];
+
+    /* Build sensor node based on sensor number */
+    dtOffset_t sensorNode = i_dt->addNode(i_parentNode, "sensor", sensorNumber);
+
+    i_dt->addPropertyCell32(sensorNode, "reg", sensorNumber);
+
+    // add sensor type
+    i_dt->addPropertyCell32(sensorNode, "ipmi-sensor-type", sensorName);
+
+   // @TODO RTC:113902
+    // get more info from Ben H. regarding what info he needs
+    // add the name of the sensor
+    //i_dt->addPropertyString(sensorNode, "name", sensorToString( sensorName ));
+    //   i_dt->addPropertyCell32(sensorNode, "ipmi-entity-type",
+    //                                          sensorData[ENTITY_TYPE_OFFSET]);
+    //   i_dt->addPropertyCell32(sensorNode, "ipmi-reading-type",
+    //                                         sensorData[READING_TYPE_OFFSET]);
+
+    /* return the phandle for this sensor, might need to add it to the
+    cpus node per Ben H. proposal */
+    return i_dt->getPhandle(sensorNode);
+}
+
+uint32_t bld_sensor_node(devTree * i_dt, const dtOffset_t & i_sensorNode,
+        TARGETING::Target * i_pTarget )
+{
+
+    AttributeTraits<ATTR_IPMI_SENSORS>::Type  l_sensors;
+    uint16_t array_rows = (sizeof(l_sensors)/sizeof(l_sensors[0]));
+
+    /* if there is an IPMI_SENSORS attribute, parse it and create a node
+     * for each sensor */
+    if ( i_pTarget->tryGetAttr<ATTR_IPMI_SENSORS>(l_sensors) )
+    {
+        for(uint16_t i=0; i< array_rows; i++)
+        {
+            /*  if the sensor number is 0xFF move on */
+            if( l_sensors[i][IPMI_SENSOR_ARRAY_NUMBER_OFFSET] != 0xFF )
+            {
+                /* use this row to create the next sensor node - ignoring
+                 * return value for now */
+                bld_sensor_node(i_dt, i_sensorNode, l_sensors[i] );
+            }
+            else
+            {
+                /* move on to the next target */
+                break;
+            }
+        }
+    }
+
+    // return the phandle
+    return i_dt->getPhandle(i_sensorNode);
+}
+
+
+/*
+* The "sensors" node contains sub-nodes for each of the IPMI sensors known to
+* the BMC.
+*/
+errlHndl_t bld_fdt_sensors(devTree * i_dt, const dtOffset_t & i_parentNode,
+                            const bool i_smallTree)
+{
+    errlHndl_t errhdl = NULL;
+
+    /* Nothing to do for small trees currently. */
+    if (i_smallTree) { return NULL; }
+
+    const char* sensorNodeName = "sensors";
+
+    /* add the Sensors node to the BMC node */
+    dtOffset_t sensorNode = i_dt->addNode(i_parentNode, sensorNodeName);
+
+    i_dt->addPropertyString(sensorNode, "name", sensorNodeName );
+
+    /* compatibility strings -- currently only one */
+    const char* compatStr[] = {"ibm,ipmi-sensor", NULL};
+
+    i_dt->addPropertyStrings(sensorNode, "compatible", compatStr);
+
+    /* Add the # address & size cell properties to /sensors node. */
+    i_dt->addPropertyCell32(sensorNode, "#address-cells", 1);
+    i_dt->addPropertyCell32(sensorNode, "#size-cells", 0);
+
+    // pass ALL IPMI_SENSORS to opal
+    // @TODO RTC:113902 - add remaining sensor info and limit sensors
+    // and adjust the sensors passed to opal to match their requirements
+
+    /*  loop through all the targets and get the IPMI sensor data if it
+        exists */
+    for (TargetIterator itr = TARGETING::targetService().begin();
+         itr != TARGETING::targetService().end(); ++itr)
+    {
+        /* create node entries for this targets sensors if they exist
+        *  ignoring return value for now */
+        bld_sensor_node(i_dt, sensorNode, *itr );
+    }
+
+    return errhdl;
+}
+
+
+/* add the BMC node to the device tree, this node will hold any BMC info needed
+   in the device tree */
+errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
+{
+    errlHndl_t errhdl = NULL;
+
+    /* Nothing to do for small trees currently. */
+    if (i_smallTree) { return NULL; }
+
+    /* Find the root node. */
+    dtOffset_t rootNode = i_dt->findNode("/");
+
+    const char* bmcNodeName = "bmc";
+
+    /* add the BMC node under the root node */
+    dtOffset_t bmcNode = i_dt->addNode(rootNode, bmcNodeName);
+
+    /* Add the # address & size cell properties to /bmc node. */
+    i_dt->addPropertyCell32(bmcNode, "#address-cells", 1);
+    i_dt->addPropertyCell32(bmcNode, "#size-cells", 0);
+
+    /* compatibility strings -- currently only one */
+    const char* compatStr[] = {"ibm,ipmi-sensor", NULL};
+
+    i_dt->addPropertyStrings(bmcNode, "compatible", compatStr);
+
+    i_dt->addPropertyString(bmcNode, "name", bmcNodeName );
+
+    /* create a node to hold the sensors */
+    errhdl = bld_fdt_sensors( i_dt, bmcNode, i_smallTree );
+
+    return errhdl;
+}
+
 errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
                               bool i_smallTree )
 {
@@ -952,6 +1099,15 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
         {
             break;
         }
+
+#ifdef CONFIG_BMC_IPMI
+        TRACFCOMP( g_trac_devtree, "---devtree BMC ---" );
+        errhdl = bld_fdt_bmc(dt, i_smallTree);
+        if(errhdl)
+        {
+            break;
+        }
+#endif
 
     }while(0);
 

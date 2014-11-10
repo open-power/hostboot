@@ -533,6 +533,20 @@ ID for the sensor number returned with the elog. -->
     <readable/>
 </attribute>
 
+<enumerationType>
+    <id>IPMI_SENSOR_ARRAY</id>
+    <description>Enumeration defining the offsets into the
+        IPMI_SENSORS array.</description>
+    <enumerator>
+        <name>NAME_OFFSET</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>NUMBER_OFFSET</name>
+        <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
 <attribute>
     <id>SCRATCH_UINT8_1</id>
     <description>Scratch attribute that can be used for dev/test</description>
