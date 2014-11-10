@@ -964,6 +964,22 @@ ID for the sensor number returned with the elog. -->
 </attribute>
 
 <attribute>
+    <id>I2C_SLAVE_ADDRESS</id>
+     <description>I2C Slave Address</description>
+     <simpleType>
+       <uint8_t>
+         <default>0x00</default>
+       </uint8_t>
+     </simpleType>
+     <persistency>non-volatile</persistency>
+     <readable/>
+     <hwpfToHbAttrMap>
+        <id>ATTR_I2C_SLAVE_ADDRESS</id>
+        <macro>DIRECT</macro>
+     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>FSI_SLAVE_CASCADE</id>
     <description>Slave cascade position</description>
     <simpleType>

@@ -70,6 +70,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
     uint8_t master_mcs_pos = 0xFF;
     fapi::Target master_mcs;
     uint8_t enable_xbus_resonant_clocking = 0x0;
+    uint8_t i2c_slave_address = 0x0;
 
     ecmdDataBufferBase data(64);
     ecmdDataBufferBase cfam_data(32);
@@ -270,6 +271,70 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          PROC_CHIPLET_SCOMINIT_NX_IF, PROC_CHIPLET_SCOMINIT_CXA_IF, PROC_CHIPLET_SCOMINIT_AS_IF);
             }
 
+            // conditionally enable I2C Slave
+            rc = FAPI_ATTR_GET(ATTR_I2C_SLAVE_ADDRESS,
+                               &i_target,
+                               i2c_slave_address);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_I2C_SLAVE_ADDRESS on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+            rc = fapiGetScom(i_target,
+                             I2C_SLAVE_CONFIG_REG_0x000D0000,
+                             data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: fapiGetScom error (I2C_SLAVE_CONFIG_REG_0x000D0000) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+            if (i2c_slave_address)
+            {
+                FAPI_DBG("proc_chiplet_scominit: I2C Slave enabled (%s) address = %d",
+                     i_target.toEcmdString(),i2c_slave_address);
+
+                //set I2C address
+                rc_ecmd |= data.insert(i2c_slave_address,0,7);
+
+                // disable error state.  when this is enabled and there
+                // is an error from I2CS it locks up the I2CS and no
+                // more operations are allowed unless cleared
+                // through FSI.  Not good for a FSPless system.
+                rc_ecmd |= data.clearBit(23);
+
+                // enable I2C interface
+                rc_ecmd |= data.setBit(21);
+
+            }
+            else
+            {
+                FAPI_DBG("proc_chiplet_scominit: I2C Slave disabled (%s)",
+                     i_target.toEcmdString());
+
+                // disable I2C interface when attribute = 0x0
+                rc_ecmd |= data.clearBit(21);
+            }
+
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_chiplet_scominit: Error 0x%x setting I2C Slave register data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutScom(i_target,
+                             I2C_SLAVE_CONFIG_REG_0x000D0000,
+                             data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (I2C_SLAVE_CONFIG_REG_0x000D0000) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+
             // conditionally enable resonant clocking for XBUS
             rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_XBUS_RESONANT_CLK_VALID,
                                &i_target,
@@ -280,6 +345,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          i_target.toEcmdString());
                 break;
             }
+
 
             if (enable_xbus_resonant_clocking)
             {
@@ -347,6 +413,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          i_target.toEcmdString());
                 break;
             }
+
 
             // determine set of functional MCS chiplets
             rc = fapiGetChildChiplets(i_target,

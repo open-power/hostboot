@@ -605,6 +605,7 @@
 
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
+    <attribute><id>I2C_SLAVE_ADDRESS</id></attribute>
 </targetType>
 
 <targetType>

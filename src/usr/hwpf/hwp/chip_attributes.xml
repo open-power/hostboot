@@ -220,6 +220,16 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_I2C_SLAVE_ADDRESS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Defines I2C slave address
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_TARGET_SCOMABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP,TARGET_TYPE_EX_CHIPLET,TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_XBUS_ENDPOINT,TARGET_TYPE_ABUS_ENDPOINT,TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>
