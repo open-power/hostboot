@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/prdf_common_hb_only.mk $
+# $Source: src/usr/diag/prdf/prdf_hb_only.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
 # [+] International Business Machines Corp.
 #
 #
@@ -23,8 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-# NOTE: ROOTPATH must be defined before including this file and PRD_SRC_PATH
-#       must be defined in this file.
+# NOTE: ROOTPATH must be defined before including this file and both
+#       PRD_SRC_PATH and PRD_INC_PATH must be defined in this file.
 
 PRD_SRC_PATH = ${ROOTPATH}/src/usr/diag/prdf
 PRD_INC_PATH = ${ROOTPATH}/src/include/usr/diag/prdf
@@ -100,6 +100,17 @@ prd_rule_plugin += prdfPlatP8Ex.o
 prd_rule_plugin += prdfPlatP8Proc.o
 
 ################################################################################
+# Hostboot only object files (IPL only)
+################################################################################
+
+ifneq (${HOSTBOOT_RUNTIME},1)
+
+# ./
+prd_obj += prdfMain_ipl.o
+
+endif
+
+################################################################################
 # Conditional compile flag to enable profiling of flyweight register and
 # resolution object
 ################################################################################
@@ -112,11 +123,11 @@ endif
 # Rule for generated MNFG threshold header file
 ################################################################################
 
-MFG_THRES	    = prdfMfgThresholds
-MFG_THRES_H	    = ${MFG_THRES}.H
+MFG_THRES       = prdfMfgThresholds
+MFG_THRES_H     = ${MFG_THRES}.H
 MFG_THRES_PL    = ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.pl
-MFG_THRES_LIST	= ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.lst
-MFG_THRES_PATH	= ${ROOTPATH}/obj/genfiles/${MFG_THRES_H}
+MFG_THRES_LIST  = ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.lst
+MFG_THRES_PATH  = ${ROOTPATH}/obj/genfiles/${MFG_THRES_H}
 
 GENFILES += ${MFG_THRES_H}
 
