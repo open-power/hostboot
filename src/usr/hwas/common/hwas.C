@@ -861,7 +861,6 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
             } // if no cores
         }
 
-#ifndef CONFIG_DJVPD_READ_FROM_HW
         //  check here for functional dimms
         TargetHandleList l_dimms;
         PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
@@ -976,8 +975,6 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
              errlCommit(l_errl, HWAS_COMP_ID);
              // errl is now NULL
         }
-
-#endif // CONFIG_DJVPD_READ_FROM_HW
 
         //  ------------------------------------------------------------
         //  Check for Mirrored memory -

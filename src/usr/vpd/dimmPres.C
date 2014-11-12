@@ -37,6 +37,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <devicefw/driverif.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/spdenums.H>
@@ -124,21 +125,38 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
         // Is the target present
 #ifdef CONFIG_DJVPD_READ_FROM_HW
-        // Check if the parent MBA is functional.
-        // If it is non-functional then no reason to check the DIMM which
-        // would otherwise generate tons of FSI errors.
-        TARGETING::TargetHandleList membuf_parent;
-        TARGETING::PredicateIsFunctional isFunctional;
+        // Check if the parent MBA/MEMBUF is present.  If it is not then
+        // no reason to check the DIMM which would otherwise generate
+        // tons of FSI errors.  We can't just check if parent MBA
+        // is functional because DIMM presence detect is called before
+        // the parent MBA/MEMBUF is set as present/functional.
+        TARGETING::TargetHandleList membufList;
+        TARGETING::PredicateCTM membufPred( TARGETING::CLASS_CHIP,
+                                            TARGETING::TYPE_MEMBUF );
         TARGETING::targetService().getAssociated(
-            membuf_parent,
+            membufList,
             i_target,
             TARGETING::TargetService::PARENT_BY_AFFINITY,
-            TARGETING::TargetService::IMMEDIATE,
-            &isFunctional);
-        if ( membuf_parent.size() != 1 )
+            TARGETING::TargetService::ALL,
+            &membufPred);
+
+        bool parentPresent = false;
+        const TARGETING::TargetHandle_t membufTarget = *(membufList.begin());
+
+        err = deviceRead(membufTarget, &parentPresent, presentSz,
+                                DEVICE_PRESENT_ADDRESS());
+        if (err)
+        {
+            TRACFCOMP(
+                g_trac_spd,
+                "Error reading parent MEMBUF present: huid 0x%X DIMM huid 0x%X",
+                TARGETING::get_huid(membufTarget),
+                TARGETING::get_huid(i_target) );
+            break;
+        }
+        if (!parentPresent)
         {
             present = false;
-
             // Invalidate the SPD in PNOR
             err = VPD::invalidatePnorCache(i_target);
             if (err)

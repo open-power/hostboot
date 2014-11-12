@@ -402,17 +402,6 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             continue;
         }
 
-        // HW backed by VPD cannot detect DIMMs at this stage of IPL, so will
-        // force all DIMMs on to be present for now and then fix up later
-        // @TODO RTC: 111211 - fix DIMMs later
-#ifdef CONFIG_DJVPD_READ_FROM_HW
-        if ( pTarget->getAttr<ATTR_TYPE>() == TYPE_DIMM )
-        {
-            pTarget_it++;
-            continue;
-        }
-#endif
-
         // call deviceRead() to see if they are present
         bool present = false;
         size_t presentSize = sizeof(present);
