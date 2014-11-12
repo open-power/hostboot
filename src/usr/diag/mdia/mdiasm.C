@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -1077,8 +1079,10 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
     // timeout and we haven't had a chance to stop the
     // command yet, it may end up here.  Ignore it
     // and let the timeout thread do its job.
+    // Also ignore when it is in failed state.
 
-    else if((**wit).status != COMMAND_TIMED_OUT)
+    else if(((**wit).status != COMMAND_TIMED_OUT) &&
+            ((**wit).status != FAILED))
     {
         WorkFlowProperties & wfp = **wit;
 
@@ -1166,7 +1170,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 break;
         }
 
-        if(flags & STOP_CMD)
+        if(cmd && (flags & STOP_CMD))
         {
             MDIA_FAST("sm: stopping command: %p", cmd);
 
@@ -1180,7 +1184,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
             }
         }
 
-        if(flags & CLEANUP_CMD)
+        if(cmd && (flags & CLEANUP_CMD))
         {
             // restore any init settings that
             // may have been changed by the command
@@ -1206,7 +1210,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     mutex_unlock(&iv_mutex);
 
-    if(flags & DELETE_CMD)
+    if(cmd && (flags & DELETE_CMD))
     {
         delete cmd;
     }
