@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfPlatCenMba.C $             */
+/* $Source: src/usr/diag/prdf/plat/pegasus/prdfPlatCenMba_ipl.C $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -88,36 +90,6 @@ int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mba, PostAnalysis );
-
-/**
- * @brief  Plugin to send a SKIP_MBA message for Memory Diagnositics.
- * @note   Does nothing in non-MDIA mode.
- * @note   Will stop any maintenance commands in progress.
- * @param  i_mbaChip A Centaur MBA chip.
- * @param  i_sc      The step code data struct.
- * @return SUCCESS.
- */
-int32_t SkipMbaMsg( ExtensibleChip * i_mbaChip, STEP_CODE_DATA_STRUCT & i_sc )
-{
-    #define PRDF_FUNC "[Mba::SkipMbaMsg] "
-
-    int32_t l_rc = SUCCESS;
-
-    TargetHandle_t mbaTrgt = i_mbaChip->GetChipHandle();
-
-    l_rc = mdiaSendEventMsg( mbaTrgt, MDIA::SKIP_MBA );
-    if ( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(0x%08x, SKIP_MBA) failed",
-                  getHuid(mbaTrgt) );
-        // Keep going.
-    }
-
-    return SUCCESS; // Intentionally return SUCCESS for this plugin
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( Mba, SkipMbaMsg );
 
 } // end namespace Mba
 

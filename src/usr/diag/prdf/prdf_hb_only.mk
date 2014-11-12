@@ -87,7 +87,6 @@ prd_obj += prdfPllUtils.o
 
 # plat/pegasus/ (rule plugin related)
 prd_rule_plugin += prdfP8TodPlugins.o
-prd_rule_plugin += prdfPlatCenMba.o
 prd_rule_plugin += prdfPlatCenMemUtils.o
 prd_rule_plugin += prdfPlatCenPll.o
 prd_rule_plugin += prdfPlatP8Ex.o
@@ -112,6 +111,9 @@ prd_obj += prdfPlatServices_ipl.o
 prd_obj += prdfCenMbaIplCeStats.o
 prd_obj += prdfCenMbaTdCtlr_ipl.o
 prd_obj += prdfDramRepairs.o
+
+# plat/pegasus/ (rule plugin related)
+prd_rule_plugin += prdfPlatCenMba_ipl.o
 
 endif
 
