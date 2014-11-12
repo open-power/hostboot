@@ -2171,6 +2171,11 @@ sub generate_sys
 ";
     }
 
+    if( $haveFSPs == 0 )
+    {
+        generate_apss_adc_config()
+    }
+
     # call to do any fsp per-sys attributes
     do_plugin('fsp_sys', $sys, $sysname, 0);
 
@@ -2268,6 +2273,184 @@ sub generate_max_config
         <id>MAX_MCS_PER_SYSTEM</id>
         <default>$maxMcs_Per_System</default>
     </attribute>";
+}
+
+sub generate_apss_adc_config
+{
+    my $uc_sysname = uc $sysname;
+    my $apss_xml_file = open_mrw_file($::mrwdir,"${uc_sysname}_APSS.xml");
+    my $xmlData = parse_xml_file($apss_xml_file,forcearray=>['id']);
+    my $adc_cfg = $xmlData->{part}
+                          ->{"internal-attributes"}
+                          ->{configurations}
+                          ->{configuration}
+                          ->{'configuration-entries'}
+                          ->{'configuration-entry'};
+
+    my @channel_id;
+    my $gain = {};
+    my $func_id = {};
+    my $offset = {};
+    my $gnd = {};
+
+    my @gpio_mode;
+    my @gpio_pin;
+    my $gpio_fid = {};
+
+    foreach my $i (@{$adc_cfg})
+    {
+        if( $i->{'unit-type'} eq 'adc-unit' )
+        {
+            foreach my $id (@{$i->{'id'}})
+            {
+                if( $id eq "CHANNEL")
+                {
+                    $channel_id[$i->{value}] = $i->{'unit-id'};
+                }
+                if( $id eq "GND")
+                {
+                    if(ref($i->{value}) ne "HASH")
+                    {
+                        $gnd->{$i->{'unit-id'}} = $i->{value};
+                    }
+                    else
+                    {
+                        $gnd->{$i->{'unit-id'}} = 0;
+                    }
+                }
+                if( $id eq "GAIN")
+                {
+                    $gain->{$i->{'unit-id'}} = $i->{value} * 1000;
+                }
+                if( $id eq "OFFSET")
+                {
+                    if(ref($i->{value}) ne "HASH")
+                    {
+                        $offset->{$i->{'unit-id'}} = $i->{value} * 1000;
+                    }
+                    else
+                    {
+                        $offset->{$i->{'unit-id'}} = 0;
+                    }
+                }
+                if( $id eq "FUNCTION_ID" )
+                {
+                    if(ref($i->{value}) ne "HASH")
+                    {
+                        $func_id->{$i->{'unit-id'}} = $i->{value};
+                    }
+                    else
+                    {
+                        $func_id->{$i->{'unit-id'}} = 0;
+                    }
+                }
+            }
+        }
+        if( $i->{'unit-type'} eq 'gpio-global' )
+        {
+            foreach my $id (@{$i->{'id'}})
+            {
+                if( $id eq "GPIO_P0_MODE")
+                {
+                    $gpio_mode[0] = $i->{value};
+                }
+                if( $id eq "GPIO_P1_MODE")
+                {
+                    $gpio_mode[1] = $i->{value};
+                }
+            }
+        }
+        if( $i->{'unit-type'} eq 'gpio-unit' )
+        {
+            my $unit_id = $i->{'unit-id'};
+            if($unit_id =~ /^GPIO/)
+            {
+                foreach my $id (@{$i->{'id'}})
+                {
+                    if( $id eq "FUNCTION_ID")
+                    {
+                        $gpio_fid->{$unit_id} = $i->{value};
+                    }
+                }
+            }
+        }
+    }
+
+    my @func_id_a;
+    my @gain_a;
+    my @offset_a;
+    my @gnd_a;
+
+    foreach my $i (@channel_id)
+    {
+        push @func_id_a, $func_id->{$i};
+        push @gain_a, $gain->{$i};
+        push @offset_a, $offset->{$i};
+        push @gnd_a, $gnd->{$i};
+    }
+
+    foreach my $i (0..15)
+    {
+        my $unit = "GPIO[$i]";
+        if($gpio_fid->{$unit} ne "#N/A")
+        {
+            $gpio_pin[$i] = $gpio_fid->{$unit};
+        }
+        else
+        {
+            $gpio_pin[$i] = 0;
+        }
+    }
+
+    print "
+    <attribute>
+        <id>ADC_CHANNEL_FUNC_IDS</id>
+        <default> ";
+
+    print join(',',@func_id_a);
+
+    print " </default>
+    </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_GNDS</id>
+        <default> ";
+
+    print join(',',@gnd_a);
+
+    print " </default>
+    </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_GAINS</id>
+        <default>\n            ";
+
+    print join(",\n            ",@gain_a);
+
+    print "\n        </default>
+    </attribute>
+    <attribute>
+        <id>ADC_CHANNEL_OFFSETS</id>
+        <default> ";
+
+    print join(',',@offset_a);
+
+    print " </default>
+    </attribute>
+    <attribute>
+        <id>APSS_GPIO_PORT_MODES</id>
+        <default> ";
+
+    print join(',',@gpio_mode);
+
+    print " </default>
+    </attribute>
+    <attribute>
+        <id>APSS_GPIO_PORT_PINS</id>
+        <default> ";
+
+    print join(',',@gpio_pin);
+
+    print " </default>
+    </attribute>\n";
 }
 
 my $computeNodeInit = 0;
