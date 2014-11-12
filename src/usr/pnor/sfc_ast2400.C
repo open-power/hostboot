@@ -138,6 +138,7 @@ errlHndl_t SfcAST2400::writeFlash( uint32_t i_addr,
     size_t l_bytes_left = i_size;
     size_t l_bytes_to_write = 0;
     uint32_t l_addr_to_write = i_addr;
+    uint8_t* l_dataptr = reinterpret_cast<uint8_t*>(i_data);
 
     do {
         // Enable write mode
@@ -160,12 +161,13 @@ errlHndl_t SfcAST2400::writeFlash( uint32_t i_addr,
         uint8_t opcode = PNOR::SPI_JEDEC_PAGE_PROGRAM;
         l_err = sendSpiCmd( opcode, l_addr_to_write,
                             l_bytes_to_write,
-                            reinterpret_cast<uint8_t*>(i_data),
+                            l_dataptr,
                             0, NULL );
         if( l_err ) { break; }
 
         // Move to the next chunk
         l_addr_to_write += l_bytes_to_write;
+        l_dataptr += l_bytes_to_write;
 
         // Wait for idle
         l_err = pollOpComplete();
