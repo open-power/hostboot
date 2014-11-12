@@ -368,27 +368,39 @@ void IpmiRP::execute(void)
 ///
 void IpmiRP::idle(void)
 {
-    // If the interface is idle, we can write anything we need to write.
-    for (IPMI::send_q_t::iterator i = iv_sendq.begin(); i != iv_sendq.end();)
+    // Check to see if we have many outstanding requests. If so, don't send
+    // any more messages. Note the eagain mechanism still works even though
+    // we're not sending messages as eventually we'll get enough responses
+    // to shorten the response queue and since the message loop calls us
+    // to transmit even for the reception of a message, the driver will
+    // eventually reset egagains. If responses timeout, we end up here as
+    // the response queue processing sends an idle message when anything is
+    // removed.
+    if (iv_outstanding_req > iv_respondq.size())
     {
-        // If we have a problem transmitting a message, then we just stop
-        // here and wait for the next time the interface transitions to idle.
-        // Note that there are two failure cases: the first is that there is
-        // a problem transmitting. In this case we told the other end of the
-        // message queue, and so the life of this message is over. The other
-        // case is that the interface turned out to be busy in which case
-        // this message can sit on the queue and it'll be next.
-
-        IPMI::Message* msg = static_cast<IPMI::Message*>((*i)->extra_data);
-
-        // If there was an i/o error, we do nothing - leave this message on
-        // the queue. Don't touch msg after xmit returns. If the message was
-        // sent, and it was async, msg has been destroyed.
-        if (msg->xmit())
+        // If the interface is idle, we can write anything we need to write.
+        for (IPMI::send_q_t::iterator i = iv_sendq.begin();
+             i != iv_sendq.end();)
         {
-            break;
+            // If we have a problem transmitting a message, then we just stop
+            // here and wait for the next time the interface transitions to idle
+            // Note that there are two failure cases: the first is that there is
+            // a problem transmitting. In this case we told the other end of the
+            // message queue, and so the life of this message is over. The other
+            // case is that the interface turned out to be busy in which case
+            // this message can sit on the queue and it'll be next.
+
+            IPMI::Message* msg = static_cast<IPMI::Message*>((*i)->extra_data);
+
+            // If there was an i/o error, we do nothing - leave this message on
+            // the queue. Don't touch msg after xmit returns. If the message was
+            // sent, and it was async, msg has been destroyed.
+            if (msg->xmit())
+            {
+                break;
+            }
+            i  = iv_sendq.erase(i);
         }
-        i  = iv_sendq.erase(i);
     }
     return;
 }
