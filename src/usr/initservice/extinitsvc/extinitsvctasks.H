@@ -57,18 +57,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
-         * @brief   targeting task,
-         */
-        {
-            "libtargeting.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-            }
-        },
-
-        /**
          * @brief console library
          */
 #ifdef CONFIG_CONSOLE
@@ -81,6 +69,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 #endif
+
+        /**
+         * @brief   targeting task,
+         */
+        {
+            "libtargeting.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+
 
         /**
          * @brief   FSI Device Driver
