@@ -58,6 +58,7 @@
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
+#include <config.h>
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/dram_initialization/dram_initialization.H"
@@ -70,6 +71,9 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+
+// Reduce ext img for VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(14,01,"host_startprd_dram"),
                 DRAM_INITIALIZATION::call_host_startprd_dram,
@@ -115,14 +119,17 @@ namespace   INITSERVICE
                 DRAM_INITIALIZATION::call_host_mpipl_service,
                 { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
+#endif
     };
 
 const DepModInfo g_istep14Dependancies = {
     {
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libdram_initialization.so),
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdump.so),
         DEP_LIB(libnest_chiplets.so),
+#endif
         NULL
     }
 };

@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -25,13 +27,14 @@
         <imageSize>0x400000</imageSize>
         <blockSize>0x1000</blockSize>
         <partTableSize>0x1</partTableSize>
+        <sideAOffset>0x0</sideAOffset>
+        <sideBOffset>0x0</sideBOffset>
     </metadata>
     <section>
         <description>Table of Contents (2K)</description>
         <eyeCatch>part</eyeCatch>
         <physicalOffset>0</physicalOffset>
         <physicalRegionSize>0x1000</physicalRegionSize>
-        <ecc>no</ecc>
         <source>Generate</source>
         <sideless>no</sideless>
     </section>
@@ -42,7 +45,6 @@
         <physicalOffset>0x1000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
         <actualRegionSize>0x40000</actualRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>yes</sideless>
     </section>
@@ -53,7 +55,6 @@
         <physicalOffset>0x41000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <actualRegionSize>0x20000</actualRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>yes</sideless>
     </section>
@@ -64,7 +65,6 @@
         <physicalOffset>0x61000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <actualRegionSize>0x20000</actualRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>yes</sideless>
     </section>
@@ -74,7 +74,6 @@
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x81000</physicalOffset>
         <physicalRegionSize>0x300000</physicalRegionSize>
-        <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
     </section>
@@ -85,7 +84,6 @@
         <physicalOffset>0x381000</physicalOffset>
         <physicalRegionSize>0x31000</physicalRegionSize>
         <actualRegionSize>0x30000</actualRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>no</sideless>
     </section>
@@ -96,7 +94,6 @@
         <physicalOffset>0x3B2000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
         <actualRegionSize>0x10000</actualRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>no</sideless>
     </section>
@@ -106,7 +103,6 @@
         <eyeCatch>HBD</eyeCatch>
         <physicalOffset>0x3C2000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
-        <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
    </section>
@@ -115,7 +111,6 @@
         <eyeCatch>GUARD</eyeCatch>
         <physicalOffset>0x3E2000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>no</sideless>
     </section>
@@ -125,7 +120,6 @@
         <eyeCatch>SBEC</eyeCatch>
         <physicalOffset>0x3E6000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
-        <ecc>no</ecc>
         <source>Blank</source>
         <sideless>no</sideless>
    </section>

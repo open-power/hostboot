@@ -59,6 +59,7 @@
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
+#include <config.h>
 
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
@@ -426,6 +427,12 @@ errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget)
             l_chipRegionData[l_chipRegionIndex] =
                 l_chipRegionData[l_chipRegionIndex]<<PG_START_POS;
         }
+
+// VPO uses fake VPD, the chip region to be enabled should be set to 0x0F80000000000000
+// Note: A new H file can be created to be a centralized place to define VPO constant like this one.
+#ifdef CONFIG_VPO_COMPILE
+        l_chipRegionData[2] = 0x0F80000000000000;
+#endif
 
         TRACDBIN(ISTEPS_TRACE::g_trac_isteps_trace,
                  "Binary dump of ATTR_CHIP_REGIONS_TO_ENABLE:",

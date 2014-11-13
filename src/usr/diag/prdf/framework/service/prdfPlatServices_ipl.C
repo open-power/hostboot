@@ -41,6 +41,7 @@
 
 #include <diag/mdia/mdia.H>
 #include <diag/mdia/mdiamevent.H>
+#include <config.h>
 
 using namespace TARGETING;
 
@@ -57,9 +58,9 @@ namespace PlatServices
 bool isInMdiaMode()
 {
     bool o_isInMdiaMode = false;
-
+#ifndef CONFIG_VPO_COMPILE
     MDIA::waitingForMaintCmdEvents(o_isInMdiaMode);
-
+#endif
     return o_isInMdiaMode;
 }
 
@@ -71,6 +72,8 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
     #define PRDF_FUNC "[PlatServices::mdiaSendCmdComplete] "
 
     int32_t o_rc = SUCCESS;
+
+#ifndef CONFIG_VPO_COMPILE
 
     do
     {
@@ -107,6 +110,8 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
         PRDF_ERR( PRDF_FUNC"Failed: i_target=0x%08x i_eventType=%d",
                   getHuid(i_mbaTarget), i_eventType );
     }
+
+#endif
 
     return o_rc;
 

@@ -69,6 +69,8 @@ const   TaskInfo    g_istep12[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+// To reduce extended image size for VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(12,01,"host_collect_dimm_spd"),
                 MC_CONFIG::call_host_collect_dimm_spd,
@@ -94,11 +96,15 @@ const   TaskInfo    g_istep12[]  =   {
                 MC_CONFIG::call_mss_attr_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+#endif
 };
 
 const DepModInfo g_istep12Dependancies = {
     {
+// To reduce extended image size for VPO
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libmc_config.so),
+#endif
         NULL
     }
 };

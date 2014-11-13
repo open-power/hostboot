@@ -71,6 +71,7 @@
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/dram_training/dram_training.H"
+#include <config.h>
 
 namespace   INITSERVICE
 {
@@ -80,6 +81,9 @@ const   TaskInfo    g_istep13[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+
+// Reduce extended image size for VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(13,01,"host_disable_vddr"),
                 DRAM_TRAINING::call_host_disable_vddr,
@@ -140,12 +144,15 @@ const   TaskInfo    g_istep13[]  =   {
                 DRAM_TRAINING::call_mss_dimm_power_test,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+#endif
 };
 
 const DepModInfo g_istep13Dependancies = {
     {
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdram_initialization.so),
+#endif
         NULL
     }
 };

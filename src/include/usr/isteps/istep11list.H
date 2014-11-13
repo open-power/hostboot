@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -69,6 +71,7 @@
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/dmi_training/dmi_training.H"
+#include <config.h>
 
 namespace   INITSERVICE
 {
@@ -79,6 +82,9 @@ const   TaskInfo    g_istep11[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+
+// Reduce extended image size for VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(11,01,"mss_getecid"),
                 DMI_TRAINING::call_mss_getecid,
@@ -144,13 +150,16 @@ const   TaskInfo    g_istep11[]  =   {
                 DMI_TRAINING::call_cen_set_inband_addr,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+#endif
 };
 
 const DepModInfo g_istep11Dependancies = {
     {
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libdmi_training.so),
         DEP_LIB(libedi_ei_initialization.so),
         DEP_LIB(libnest_chiplets.so),
+#endif
         NULL
     }
 };

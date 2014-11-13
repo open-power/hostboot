@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,6 +47,7 @@
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
+#include <config.h>
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/tod_init/tod_init.H"
@@ -118,6 +121,9 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+
+// To reduce extended image size for VPO, don't run these isteps in VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(18,13,"proc_tod_setup"),
                 TOD::call_tod_setup,
@@ -128,11 +134,15 @@ namespace   INITSERVICE
                 TOD::call_tod_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+#endif
+
 };
 
 const DepModInfo g_istep18Dependancies = {
     {
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libtod_init.so),
+#endif
         NULL
     }
 };

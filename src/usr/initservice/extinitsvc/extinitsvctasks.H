@@ -317,6 +317,8 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+// No mdia in VPO
+#ifndef CONFIG_VPO_COMPILE
         /**
          * @brief MDIA code library
          */
@@ -328,6 +330,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
+#endif
 
         /**
          * @brief PRDF code library

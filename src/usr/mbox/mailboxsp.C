@@ -194,11 +194,12 @@ errlHndl_t MailboxSp::_init()
     }
     // else leave iv_disabled as true;
 
+#ifndef CONFIG_VPO_COMPILE
     // Start the the interprocessor communications message handler
     IPC::IpcSp::init(err);
-
     // call ErrlManager function - tell him that MBOX is ready!
     ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::MBOX);
+#endif
 
     return err;
 }

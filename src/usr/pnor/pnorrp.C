@@ -43,6 +43,7 @@
 #include <kernel/console.H>
 #include <endian.h>
 #include <util/align.H>
+#include <config.h>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -277,8 +278,11 @@ void PnorRP::initDaemon()
         errlCommit(l_errhdl,PNOR_COMP_ID);
     }
 
+// Not supporting PNOR error in VPO
+#ifndef CONFIG_VPO_COMPILE
     // call ErrlManager function - tell him that PNOR is ready!
     ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::PNOR);
+#endif
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::initDaemon" );
 }

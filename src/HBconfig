@@ -1,0 +1,5 @@
+# HBconfig file for VPO_COMPILE option
+config VPO_COMPILE
+    default n
+    help
+        Compile and build image for VPO environment

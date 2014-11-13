@@ -49,6 +49,7 @@
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/build_winkle_images/build_winkle_images.H"
+#include <config.h>
 
 namespace   INITSERVICE
 {
@@ -58,6 +59,9 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+
+// To reduce extended image size for VPO, don't run these isteps in VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(15,01,"host_build_winkle"),
                 BUILD_WINKLE_IMAGES::call_host_build_winkle,
@@ -73,13 +77,17 @@ namespace   INITSERVICE
                 BUILD_WINKLE_IMAGES::call_p8_poreslw_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
+#endif        
+
 };
 
 
 const DepModInfo g_istep15Dependancies = {
     {
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libocc.so),
         DEP_LIB(libbuild_winkle_images.so),
+#endif
         NULL
     }
 };

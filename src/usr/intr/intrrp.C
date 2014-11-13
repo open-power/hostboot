@@ -50,6 +50,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <fsi/fsiif.H>
 #include <arch/ppc.H>
+#include <config.h>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -98,6 +99,15 @@ uint64_t get_enabled_threads( void )
     uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
     if( en_threads == 0 )
     {
+
+// Set max thread for VPO, nanosleep() here takes too long in VPO environment
+#ifdef CONFIG_VPO_COMPILE
+       en_threads = 0xFF00000000000000;
+       sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
+       TRACFCOMP( g_trac_intr, "Enabled Threads for VPO = %.16X", en_threads );
+       return en_threads; 
+#endif
+
         // Read the scratch reg that the SBE setup
         //  Enabled threads are listed as a bitstring in bits 16:23
         //  A value of zero means the SBE hasn't set them up yet

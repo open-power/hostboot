@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -49,6 +51,7 @@
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/activate_powerbus/activate_powerbus.H"
+#include <config.h>
 
 namespace   INITSERVICE
 {
@@ -58,6 +61,8 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+// Reduce ext img for VPO
+#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(09,01,"proc_build_smp"),
                 ACTIVATE_POWERBUS::call_proc_build_smp,
@@ -68,14 +73,17 @@ namespace   INITSERVICE
                 ACTIVATE_POWERBUS::call_host_slave_sbe_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+#endif
 };
 
 const DepModInfo  g_istep09Dependancies = {
     {
+#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libactivate_powerbus.so),
         DEP_LIB(libdram_initialization.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libbuild_winkle_images.so),
+#endif
         NULL
     }
 };

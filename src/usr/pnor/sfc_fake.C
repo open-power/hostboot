@@ -277,8 +277,8 @@ errlHndl_t SfcFake::sendSpiCmd( uint8_t i_opCode,
     return new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                    PNOR::MOD_SFCFAKE_SENDSPICMD,
                                    PNOR::RC_UNSUPPORTED_OPERATION,
-                                   TWO_UINT32_TO_UINT64(i_opCode
-                                                        i_addr),
+                                   TWO_UINT32_TO_UINT64(i_opCode,
+                                                        i_address),
                                    0,
                                    true /*Software error*/);
 }

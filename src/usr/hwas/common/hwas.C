@@ -1100,6 +1100,18 @@ void invokePresentByAssoc()
                                l_funcMCSTargetList.begin(),
                                l_funcMCSTargetList.end());
 
+// If VPO, dump targets (MCS) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+    HWAS_INF("invokePresentByAssoc(): MCS targets:");
+    for (TargetHandleList::const_iterator l_MCS_Itr =
+                             l_funcMCSTargetList.begin();
+                             l_MCS_Itr != l_funcMCSTargetList.end();
+                             l_MCS_Itr++)
+    {
+        HWAS_INF("   MCS: HUID %.8x", TARGETING::get_huid(*l_MCS_Itr));
+    }
+#endif
+
     // get the membufs
     TargetHandleList l_funcMembufTargetList;
     getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
@@ -1107,12 +1119,35 @@ void invokePresentByAssoc()
                                l_funcMembufTargetList.begin(),
                                l_funcMembufTargetList.end());
 
+// If VPO, dump targets (MEMBUF) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+       HWAS_INF("invokePresentByAssoc(): MEMBUF targets:");
+       for (TargetHandleList::const_iterator l_MEMBUF_Itr = l_funcMembufTargetList.begin();
+                                     l_MEMBUF_Itr != l_funcMembufTargetList.end();
+                                     l_MEMBUF_Itr++)
+       {
+           HWAS_INF("   MEMBUF: HUID %.8x", TARGETING::get_huid(*l_MEMBUF_Itr));
+       }
+#endif
+
     // get the dimms
     TargetHandleList l_funcDIMMTargetList;
     getAllLogicalCards(l_funcDIMMTargetList, TYPE_DIMM, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
                                l_funcDIMMTargetList.begin(),
                                l_funcDIMMTargetList.end());
+
+
+// If VPO, dump targets (DIMM) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+       HWAS_INF("invokePresentByAssoc(): DIMM targets:");
+       for (TargetHandleList::const_iterator l_DIMM_Itr = l_funcDIMMTargetList.begin();
+                                             l_DIMM_Itr != l_funcDIMMTargetList.end();
+                                             l_DIMM_Itr++)
+       {
+          HWAS_INF("   DIMM: HUID %.8x", TARGETING::get_huid(*l_DIMM_Itr));
+       }
+#endif
 
     // Define vectors of TargetInfo structs to be used in presentByAssoc
     TargetInfoVector l_targInfo;
