@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,8 +41,19 @@ typedef enum
   LAST_CHIP_TYPE
 } eeprom_chip_types_t;
 
+/**
+ * @brief This function tests to see if the VPD_PRIMARY eeprom is present
+ *        for the specific target.
+ *
+ * @param[in] i_target - Target device.
+ *
+ * @return bool - True if the eeprom is present, false otherwise.
+ */
+bool eepromPresence ( TARGETING::Target * i_target );
 
-};  // end namespace I2C
+
+
+};  // end namespace EEPROM
 
 #endif  // end __EEPROMIF_H
 

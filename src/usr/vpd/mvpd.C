@@ -37,6 +37,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/mvpdenums.H>
 #include <vpd/vpd_if.H>
+#include <i2c/eepromif.H>
 #include <config.h>
 
 #include "mvpd.H"
@@ -187,29 +188,10 @@ namespace MVPD
 // ---------------------------------------------------------
 bool VPD::mvpdPresent( TARGETING::Target * i_target )
 {
-#ifdef CONFIG_MVPD_READ_FROM_HW
-    //@todo - Fix this the right way with RTC:117048
-    IpVpdFacade::input_args_t args;
-    args.record = MVPD::CP00;
-    args.keyword = MVPD::VD;
-    args.location = VPD::AUTOSELECT;
-    size_t kwlen = 0;
-    errlHndl_t l_errl = Singleton<MvpdFacade>::instance().read(
-                                   i_target,
-                                   NULL,
-                                   kwlen,
-                                   args );
-    if( l_errl )
-    {
-        delete l_errl;
-        return false;
-    }
-    if( kwlen == 0 )
-    {
-        return false;
-    }
-    return true;
+    TRACSSCOMP(g_trac_vpd, ENTER_MRK"mvpdPresent()");
+#if(defined( CONFIG_MVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
 
+    return EEPROM::eepromPresence( i_target );
 #else
     return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
                                                             MVPD::CP00,

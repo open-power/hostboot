@@ -908,11 +908,15 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
 // ------------------------------------------------------------------
 bool spdPresent ( TARGETING::Target * i_target )
 {
+
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent()" );
+#if(defined( CONFIG_DJVPD_READ_FROM_HW ) && !defined (__HOSTBOOT_RUNTIME ) )
+
+    return EEPROM::eepromPresence( i_target );
+
+#else
     errlHndl_t err = NULL;
     bool pres = false;
-
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"spdPresent()" );
 
     do
     {
@@ -938,9 +942,11 @@ bool spdPresent ( TARGETING::Target * i_target )
         {
             pres = true;
         }
+
     } while( 0 );
 
     return pres;
+#endif
 }
 
 

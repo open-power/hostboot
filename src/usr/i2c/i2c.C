@@ -282,7 +282,27 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
     return err;
 } // end fsi_i2cPerformOp
 
-
+// ------------------------------------------------------------------
+// i2cSetSwitches
+// ------------------------------------------------------------------
+void i2cSetSwitches( TARGETING::Target * i_target,
+                     misc_args_t & io_args )
+{
+    // Set Host vs FSI switches if both values are zero;
+    // Otherwise, caller should have already set them
+    if ( ( io_args.switches.useHostI2C == 0 ) &&
+         ( io_args.switches.useFsiI2C == 0 ) )
+    {
+        if ( !( i_target->tryGetAttr<TARGETING::ATTR_I2C_SWITCHES>
+                                    (io_args.switches) ) )
+        {
+            // Default to Host
+            io_args.switches.useHostI2C = 1;
+            io_args.switches.useFsiI2C  = 0;
+        }
+    }
+    return;
+}
 
 // ------------------------------------------------------------------
 // i2cCommonOp
@@ -296,6 +316,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 {
     errlHndl_t err = NULL;
     errlHndl_t err_reset = NULL;
+    bool mutex_success = false;
 
     mutex_t * engineLock = NULL;
     bool mutex_needs_unlock = false;
@@ -345,42 +366,20 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
             break;
         }
 
-        // Set Host vs FSI switches if both values are zero;
-        // Otherwise, caller should have already set them
-        if ( ( i_args.switches.useHostI2C == 0 ) &&
-             ( i_args.switches.useFsiI2C == 0 ) )
-        {
-            if ( !( i_target->tryGetAttr<TARGETING::ATTR_I2C_SWITCHES>
-                                        (i_args.switches) ) )
-            {
-                // Default to Host
-                i_args.switches.useHostI2C = 1;
-                i_args.switches.useFsiI2C  = 0;
-            }
-        }
+        //Set Host vs Fsi switches if not done already
+        i2cSetSwitches(i_target, i_args);
 
         // Get the mutex for the requested engine
-        switch( i_args.engine )
+        mutex_success = i2cGetEngineMutex( i_target,
+                                       i_args,
+                                       engineLock );
+
+        if( !mutex_success )
         {
-            case 0:
-                engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
-                break;
-
-            case 1:
-                engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_1>();
-                break;
-
-            case 2:
-                engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_2>();
-                break;
-
-            default:
-                TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"Invalid engine for getting Mutex! "
-                           "i_args.engine=%d", i_args.engine  );
-                // @todo RTC:69113 - Create an error here
-                break;
-        };
+            TRACUCOMP( g_trac_i2c,
+                       ERR_MRK"Error in i2cCommonOp::i2cGetEngineMutex()");
+            break;
+        }
 
         // Lock on this engine
         TRACUCOMP( g_trac_i2c,
@@ -616,6 +615,241 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 
     return err;
 } // end i2cCommonOp
+
+
+
+// ------------------------------------------------------------------
+// i2cPresence
+// ------------------------------------------------------------------
+bool i2cPresence( TARGETING::Target * i_target,
+                        uint64_t i_port,
+                        uint64_t i_engine,
+                        uint64_t i_devAddr )
+{
+    TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cPresence()");
+
+    errlHndl_t err = NULL;
+    bool l_mutex_success = false;
+    bool l_present = false;
+    size_t buflen = 1;
+    uint64_t reset_error = 0;
+    misc_args_t args;
+
+    args.port = i_port;
+    args.engine = i_engine;
+    args.devAddr = i_devAddr;
+    args.read_not_write = true;
+    args.with_stop = true;
+    args.skip_mode_setup = false;
+
+    //Registers
+    status_reg_t status;
+    fifo_reg_t fifo;
+
+
+    // Synchronization
+    mutex_t * engineLock = NULL;
+    bool mutex_needs_unlock = false;
+
+    // Use Local Variables (timeoutCount gets decremented);
+    uint64_t l_interval_ns;
+    uint64_t l_timeoutCount;
+
+
+    do
+    {
+
+        // Get the mutex for the requested engine
+        l_mutex_success = i2cGetEngineMutex( i_target,
+                                         args,
+                                         engineLock );
+
+        if( !l_mutex_success )
+        {
+            TRACUCOMP( g_trac_i2c,
+                       ERR_MRK"Error in i2cPresence::i2cGetEngineMutex()");
+            break;
+        }
+
+        // Lock on this engine
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"Obtaining lock for engine: %d",
+                   args.engine );
+
+        (void)mutex_lock( engineLock );
+        mutex_needs_unlock = true;
+
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"Locked on engine: %d",
+                   args.engine );
+
+
+
+        //Set Host vs FSI switches
+        i2cSetSwitches( i_target, args );
+
+        err = i2cSetBusVariables(i_target,
+                                 I2C_BUS_SPEED_400KHZ,
+                                 args);
+
+        if( err )
+        {
+            TRACUCOMP(g_trac_i2c,
+                      ERR_MRK"error in i2cPresence::i2cSetBusVariables()");
+            break;
+        }
+
+        err = i2cSetup( i_target,
+                        buflen,
+                        args );
+
+        if( err )
+        {
+            TRACUCOMP(g_trac_i2c,
+                      ERR_MRK"error in i2cPresence::i2cSetup()");
+            break;
+        }
+
+        l_interval_ns = args.polling_interval_ns;
+        l_timeoutCount = args.timeout_count;
+
+        //Check the Command Complete bit
+        do
+        {
+            nanosleep( 0, l_interval_ns );
+
+            status.value = 0x0ull;
+            err = i2cRegisterOp( DeviceFW::READ,
+                                 i_target,
+                                 &status.value,
+                                 I2C_REG_STATUS,
+                                 args );
+
+            if( err )
+            {
+                TRACUCOMP(g_trac_i2c,
+                          ERR_MRK"i2cPresence::error in i2cRegisterOp()");
+                break;
+            }
+
+            if( 0 == l_timeoutCount-- )
+            {
+                TRACUCOMP(g_trac_i2c,
+                          ERR_MRK"i2cPresence() - Timed out waiting for "
+                                 "Command Complete!");
+                break;
+            }
+
+        }while( 0 == status.command_complete &&
+                0 == status.fifo_entry_count &&
+                0 == status.nack_received &&
+                0 == status.data_request ); /* Command has completed
+                                                   or fifo has data    */
+
+        if( err )
+        {
+            TRACUCOMP(g_trac_i2c,
+                      ERR_MRK"Error when waiting for Command Complete");
+            break;
+        }
+
+
+        if( status.nack_received == 0 )
+        {
+            //The chip was present.
+            TRACUCOMP(g_trac_i2c,
+                      ERR_MRK"chip found! i2cPresence returning true!");
+
+            // No nack received so we check the FIFO register
+            if( status.fifo_entry_count != 0 || status.data_request != 0 )
+            {
+
+                //Read data from FIFO register to complete operation.
+                fifo.value = 0x0ull;
+                err = i2cRegisterOp( DeviceFW::READ,
+                                     i_target,
+                                     &fifo.value,
+                                     I2C_REG_FIFO,
+                                     args );
+
+                TRACUCOMP(g_trac_i2c,
+                          "i2cPresence() - FIFO = 0x%016llx",
+                          fifo.value);
+
+                if( err )
+                {
+                    TRACUCOMP(g_trac_i2c,
+                    ERR_MRK"Error in i2cPresence::i2cRegisterOp()"
+                    " - FIFO register");
+                    break;
+                }
+
+                // -check for command complete
+                err = i2cWaitForCmdComp(i_target,
+                                        args );
+                if( err )
+                {
+                    TRACUCOMP(g_trac_i2c,
+                           ERR_MRK"Error in i2cPresence::i2cWaitForCmdComp()");
+                    break;
+                }
+
+            }
+
+            l_present = true;
+            break;
+        }
+        else
+        {
+            //The chip was not present.
+            TRACUCOMP(g_trac_i2c,
+                      ERR_MRK"The chip was not present!");
+
+            // reset error register
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &reset_error,
+                                 I2C_REG_RESET_ERRORS,
+                                 args );
+
+            if( err )
+            {
+                TRACUCOMP(g_trac_i2c,
+                          ERR_MRK"Error in i2cPresence::i2cRegisterOp()"
+                          " - Error register");
+            }
+            break;
+        }
+
+    } while ( 0 );
+
+    if( err )
+    {
+        TRACFCOMP( g_trac_i2c,
+                   ERR_MRK"i2cPresence() Error!"
+                   "tgt=0x%X",
+                   TARGETING::get_huid(i_target));
+        errlCommit(err,
+                   I2C_COMP_ID);
+
+    }
+
+    // Check if we need to unlock the mutex
+    if ( mutex_needs_unlock == true )
+    {
+        // Unlock
+        (void) mutex_unlock( engineLock );
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"Unlocked engine: %d",
+                   args.engine );
+    }
+
+    TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cPresence()");
+
+    return l_present;
+
+}
+
 
 // ------------------------------------------------------------------
 // i2cRead
@@ -998,6 +1232,50 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
     return err;
 } // end i2cSetup
 
+
+// ------------------------------------------------------------------
+// i2cGetEngineMutex
+// ------------------------------------------------------------------
+bool i2cGetEngineMutex( TARGETING::Target * i_target,
+                        misc_args_t & i_args,
+                        mutex_t *& i_engineLock )
+{
+    bool success = true;
+
+    do
+    {
+        switch( i_args.engine )
+        {
+            case 0:
+                i_engineLock = i_target->
+                           getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
+                break;
+            case 1:
+                i_engineLock = i_target->
+                           getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_1>();
+                break;
+            case 2:
+                i_engineLock = i_target->
+                           getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_2>();
+                break;
+
+            default:
+                TRACFCOMP( g_trac_i2c,
+                           ERR_MRK"Invalid engine for getting Mutex! "
+                           "i_args.engine=%d", i_args.engine );
+                success = false;
+                assert(false, "i2c.C: Invalid engine for getting Mutex!"
+                       "i_args.engine=%d", i_args.engine );
+
+                break;
+        };
+
+    }while( 0 );
+
+    return success;
+}
+
+
 // ------------------------------------------------------------------
 // i2cWaitForCmdComp
 // ------------------------------------------------------------------
@@ -1013,7 +1291,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
     // Define the registers that we'll use
     status_reg_t status;
 
-    // Use Local Variables (timeoutCount gets derecmented)
+    // Use Local Variables (timeoutCount gets decremented)
     uint64_t interval_ns  = i_args.polling_interval_ns;
     uint64_t timeoutCount = i_args.timeout_count;
 
@@ -2176,7 +2454,7 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cSetBusVariables(): i_speed=%d",
                i_speed );
 
@@ -2250,7 +2528,7 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
               i_speed, io_args.bus_speed, io_args.bit_rate_divisor,
               io_args.polling_interval_ns, io_args.timeout_count);
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetBusVariables()" );
 
     return err;

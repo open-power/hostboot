@@ -154,6 +154,7 @@ enum i2c_reg_offset_t
     I2C_REG_INTERRUPT   = 6,
     I2C_REG_STATUS      = 7,
     I2C_REG_RESET       = 7,
+    I2C_REG_RESET_ERRORS= 8,
     I2C_REG_SET_SCL     = 9,
     I2C_REG_RESET_SCL   = 11,
     I2C_REG_SET_SDA     = 12,
@@ -542,6 +543,19 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
                          va_list i_args );
 
 /**
+ * @brief This function sets the Host vs FSI switches if the user has not
+ *  already.
+ *
+ * param[in] i_target - The target device
+ *
+ * @param[in/out] io_args - The argument object to set the switches for
+ *
+ * @return void
+ */
+void i2cSetSwitches( TARGETING::Target * i_target,
+                     misc_args_t & io_args);
+
+/**
 *
 * @brief Performs the actual I2C operation.
 *        NOTE:  This function handles the MUTEX used to avoid deadlocks.
@@ -643,6 +657,23 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
                       size_t & i_buflen,
                       misc_args_t & i_args);
 
+
+/**
+ * @brief This function gets the appropriate engine mutex for a given target.
+ *
+ * @param[in] i_target - The target to get the mutex for.
+ *
+ * @param[in] i_args - Structure containing arguments needed to determine
+ *                     the correct engine mutex.
+ *
+ * @param[in/out] i_engineLock - The mutex.
+ *
+ * @return bool - True if valid mutex is found, False otherwise.
+ */
+bool i2cGetEngineMutex( TARGETING::Target * i_target,
+                        misc_args_t & i_args,
+                        mutex_t *& i_engineLock );
+
 /**
  * @brief This function will wait for the command to be complete or
  *      timeout waiting before returning.
@@ -710,6 +741,20 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
  */
 errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                                  misc_args_t & i_args);
+
+/**
+ * @brief This function manually sends a stop signal
+ *
+ * @param[in] i_target - The i2c Target
+ *
+ * @param[in] i_args - Structure containing argumets needed for a command
+ *          transaction
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to the error
+ *                      log.
+ */
+errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
+                             misc_args_t & i_args);
 
 /**
  * @brief This function will reset the I2C Master engine specified

@@ -282,7 +282,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
             l_saved_plid = l_errl->plid();
             cvpd_present = false;
 
-            TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> Error during ensureCacheIsInSync (CVPD)" );
+            TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::membPresenceDetect> Error during ensureCacheIsInSync (CVPD)" );
             errlCommit( l_errl, FSI_COMP_ID );
         }
     }

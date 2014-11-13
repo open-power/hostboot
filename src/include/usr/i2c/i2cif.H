@@ -67,6 +67,25 @@ enum i2cResetType
  */
 errlHndl_t i2cResetMasters ( i2cResetType i_resetType );
 
+
+/**
+ * @brief This function will determine if a given I2C device is present
+ *
+ * @param[in] i_target - The target device
+ * @param[in] i_port - The device's port
+ * @param[in] i_engine - The device's engine number
+ * @param[in] i_devAddr - The device's address
+ *
+ * @return bool - True if chip is present, False otherwise.
+ */
+bool i2cPresence( TARGETING::Target * i_target,
+                        uint64_t i_port,
+                        uint64_t i_engine,
+                        uint64_t i_devAddr );
+
+
+
+
 };  // end namespace I2C
 
 #endif  // end __I2CIF_H

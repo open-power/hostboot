@@ -37,6 +37,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/cvpdenums.H>
 #include <vpd/vpd_if.H>
+#include <i2c/eepromif.H>
 #include <config.h>
 #include "cvpd.H"
 #include "vpd.H"
@@ -191,28 +192,10 @@ namespace CVPD
 //---------------------------------------------------------
 bool VPD::cvpdPresent( TARGETING::Target * i_target )
 {
-#ifdef CONFIG_CVPD_READ_FROM_HW
-    //@todo - Fix this the right way with RTC:117048
-    IpVpdFacade::input_args_t args;
-    args.record = CVPD::VEIR;
-    args.keyword = CVPD::PF ;
-    args.location = VPD::AUTOSELECT;
-    size_t kwlen = 0;
-    errlHndl_t l_errl = Singleton<CvpdFacade>::instance().read(
-                                   i_target,
-                                   NULL,
-                                   kwlen,
-                                   args );
-    if( l_errl )
-    {
-        delete l_errl;
-        return false;
-    }
-    if( kwlen == 0 )
-    {
-        return false;
-    }
-    return true;
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"cvpdPresent()");
+#if(defined( CONFIG_CVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
+
+    return EEPROM::eepromPresence( i_target );
 
 #else
     return Singleton<CvpdFacade>::instance().hasVpdPresent( i_target,

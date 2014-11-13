@@ -46,6 +46,7 @@
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eepromif.H>
 #include <i2c/i2creasoncodes.H>
+#include <i2c/i2cif.H>
 #include "eepromdd.H"
 #include "errlud_i2c.H"
 
@@ -252,6 +253,69 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
 
     return err;
 } // end eepromPerformOp
+
+//-------------------------------------------------------------------
+//eepromPresence
+//-------------------------------------------------------------------
+bool eepromPresence ( TARGETING::Target * i_target )
+{
+
+    TRACDCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence()");
+
+    errlHndl_t err = NULL;
+    bool l_present = false;
+    TARGETING::Target * theTarget = NULL;
+
+    eeprom_addr_t i2cInfo;
+
+    i2cInfo.chip = EEPROM::VPD_PRIMARY;
+    i2cInfo.offset = 0;
+    do
+    {
+
+        // Read Attributes needed to complete the operation
+        err = eepromReadAttributes( i_target,
+                                    i2cInfo );
+
+        if( err )
+        {
+            TRACFCOMP(g_trac_eeprom,
+                     ERR_MRK"Error in eepromPresence::eepromReadAttributes()");
+            break;
+        }
+
+        // Check to see if we need to find a new target for
+        // the I2C Master
+        err = eepromGetI2CMasterTarget( i_target,
+                                        i2cInfo,
+                                        theTarget );
+
+        if( err )
+        {
+            TRACFCOMP(g_trac_eeprom,
+                     ERR_MRK"Error in eepromPresence::eepromGetI2Cmaster()");
+            break;
+        }
+
+        //Check for the target at the I2C level
+        l_present = I2C::i2cPresence(theTarget,
+                          i2cInfo.port,
+                          i2cInfo.engine,
+                          i2cInfo.devAddr );
+
+        if( !l_present )
+        {
+            TRACDCOMP(g_trac_eeprom,
+                     ERR_MRK"i2cPresence returned false! chip NOT present!");
+            break;
+        }
+
+    } while( 0 );
+
+    TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence()");
+    return l_present;
+}
+
 
 
 // ------------------------------------------------------------------
