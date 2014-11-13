@@ -1690,7 +1690,6 @@ fapi::ReturnCode getIsDimmToC4DQS
     return FAPI_RC_SUCCESS;
 }
 
-
 } // End platAttrSvc namespace
 
 } // End fapi namespace

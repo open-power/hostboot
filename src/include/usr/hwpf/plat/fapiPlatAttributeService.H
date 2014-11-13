@@ -760,7 +760,8 @@ fapi::ReturnCode getIsDimmToC4DQS
                (const fapi::Target * i_pTarget,
                 uint8_t (&o_val) [DIMM_TO_C4_PORTS][DIMM_TO_C4_DQS_ENTRIES]);
 
-/* @brief This function is called by the FAPI_ATTR_GET macro when getting
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * the ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15 attribute.
  * It should not be called directly.
  *
@@ -770,6 +771,7 @@ fapi::ReturnCode getIsDimmToC4DQS
  */
 fapi::ReturnCode fapiPlatGetRCDCntlWord015 (const fapi::Target * i_pTarget,
                                             uint64_t & o_val);
+
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -1890,6 +1892,18 @@ fapi::ReturnCode fapiPlatGetRCDCntlWord015 (const fapi::Target * i_pTarget,
     (checkTermDataType<fapi::TERM_DATA_ODT_WR>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_ODT_WR , VAL, sizeof(VAL)))
+#define ATTR_VPD_DIMM_RCD_IBT_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DIMM_RCD_IBT>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DIMM_RCD_IBT , VAL, sizeof(VAL)))
+#define ATTR_VPD_DIMM_RCD_OUTPUT_TIMING_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DIMM_RCD_OUTPUT_TIMING>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DIMM_RCD_OUTPUT_TIMING , VAL, sizeof(VAL)))
 #define ATTR_VPD_CEN_RD_VREF_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\

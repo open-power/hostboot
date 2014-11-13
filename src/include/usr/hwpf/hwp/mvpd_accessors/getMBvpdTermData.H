@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -64,6 +66,16 @@ const uint16_t TERM_DATA_SPECIAL_MASK = 0x0300;
 // checked for work around.
 const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
 
+// Values for DIMM_RCD_IBT when using custom dimm or when the
+// VPD version is earlier than "13"
+const uint32_t TERM_DATA_IBT_CDIMM = 0x0;
+const uint32_t TERM_DATA_IBT_PRE13 = 0x64;  // IBT_100
+
+// Values for DIMM_RCD_OUTPUT_TIMING when using custom dimm or when the
+// VPD version is earlier than "13"
+const uint8_t TERM_DATA_OUTPUT_TIMING_CDIMM = 0x0;
+const uint8_t TERM_DATA_OUTPUT_TIMING_PRE13 = 0x1;  // 1T
+
 // There are multiple types of output values. The type is shown in the comment.
 //
 // Some values are returned directly from the vpd and some vpd values
@@ -78,7 +90,9 @@ const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
        TERM_DATA_DRAM_RTT_WR =          0x0a,  //uint8_t [2][2][4] <translated>
        TERM_DATA_ODT_RD =                  0x12,  //uint8_t [2][2][4]
        TERM_DATA_ODT_WR =                  0x1a,  //uint8_t [2][2][4]
-       TERM_DATA_CEN_RD_VREF =             0x22,  //uint32_t [2] <translated>
+       TERM_DATA_DIMM_RCD_IBT =            0x22,  //uint32_t [2][2]
+       TERM_DATA_DIMM_RCD_OUTPUT_TIMING =  0x24,  //uint8_t [2][2]
+       TERM_DATA_CEN_RD_VREF =             0x25,  //uint32_t [2] <translated>
        TERM_DATA_DRAM_WR_VREF =            0x26,  //uint32_t [2] <translated>
        TERM_DATA_DRAM_WRDDR4_VREF =        0x2a,  //uint8_t [2]
        TERM_DATA_CEN_RCV_IMP_DQ_DQS =      0x2b,  //uint8_t [2]
@@ -121,6 +135,10 @@ template<>class MBvpdTermDataSize<fapi::TERM_DATA_ODT_RD>
     { public: typedef uint8_t Type[2][2][4]; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_ODT_WR>
     { public: typedef uint8_t Type[2][2][4]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_DIMM_RCD_IBT>
+    { public: typedef uint32_t Type[2][2]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_DIMM_RCD_OUTPUT_TIMING>
+    { public: typedef uint8_t Type[2][2]; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_CEN_RD_VREF>
     { public: typedef uint32_t Type[2]; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_DRAM_WR_VREF>
@@ -236,7 +254,6 @@ fapi::ReturnCode getMBvpdTermData(
                               const fapi::MBvpdTermData i_attr,
                               void  * o_pVal,
                               const uint32_t i_valSize);
-
 }
 
 #endif

@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,11 +22,113 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: memory_mss_eff_config.xml,v 1.2 2014/04/01 17:07:22 asaetow Exp $ -->
+<!-- $Id: memory_mss_eff_config.xml,v 1.3 2014/10/20 22:12:59 asaetow Exp $ -->
 <!-- For file ../../ipl/fapi/mss_eff_config.C -->
 <!-- // *! OWNER NAME  : Anuwat Saetow     Email: asaetow@us.ibm.com -->
 <!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
 <hwpErrors>
+
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MSS_EFF_CONFIG_INVALID_RDIMM_FREQ</rc>
+    <description>Invalid RDIMM ATTR_MSS_FREQ, freq is higher than 1600Mbps</description>
+    <FFDC>TARGET_MBA</FFDC>
+        <ffdc>INVALID_RDIMM_FREQ</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <target>TARGET_MBA</target>
+        <priority>LOW</priority>
+    </callout>
+
+    <deconfigure>
+        <target>TARGET_MBA</target>
+    </deconfigure>
+
+    <gard>
+        <target>TARGET_MBA</target>
+    </gard>
+</hwpError>
+
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MSS_EFF_CONFIG_INVALID_RDIMM_VOLT</rc>
+    <description>Invalid RDIMM ATTR_MSS_VOLT, Volt is less than 1.2V</description>
+    <FFDC>TARGET_MBA</FFDC>
+        <ffdc>INVALID_RDIMM_VOLT</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <target>TARGET_MBA</target>
+        <priority>LOW</priority>
+    </callout>
+
+    <deconfigure>
+        <target>TARGET_MBA</target>
+    </deconfigure>
+
+    <gard>
+        <target>TARGET_MBA</target>
+    </gard>
+</hwpError>
+
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_IBT</rc>
+    <description>Invalid RDIMM_RCD_IBT</description>
+    <FFDC>TARGET_MBA</FFDC>
+        <ffdc>INVALID_RDIMM_RCD_IBT_U32ARRAY_0_0</ffdc>
+        <ffdc>INVALID_RDIMM_RCD_IBT_U32ARRAY_0_1</ffdc>
+        <ffdc>INVALID_RDIMM_RCD_IBT_U32ARRAY_1_0</ffdc>
+        <ffdc>INVALID_RDIMM_RCD_IBT_U32ARRAY_1_1</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <target>TARGET_MBA</target>
+        <priority>LOW</priority>
+    </callout>
+
+    <deconfigure>
+        <target>TARGET_MBA</target>
+    </deconfigure>
+
+    <gard>
+        <target>TARGET_MBA</target>
+    </gard>
+</hwpError>
+
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_OUTPUT_TIMING</rc>
+    <description>Invalid RDIMM_RCD_OUTPUT_TIMING</description>
+    <FFDC>TARGET_MBA</FFDC>
+        <ffdc>INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0</ffdc>
+        <ffdc>INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_1</ffdc>
+        <ffdc>INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_1_0</ffdc>
+        <ffdc>INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_1_1</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <target>TARGET_MBA</target>
+        <priority>LOW</priority>
+    </callout>
+
+    <deconfigure>
+        <target>TARGET_MBA</target>
+    </deconfigure>
+
+    <gard>
+        <target>TARGET_MBA</target>
+    </gard>
+</hwpError>
 
 <!-- *********************************************************************** -->
   <hwpError>
@@ -65,10 +169,10 @@
     <description>Plug rule violation, one position is empty but other are present
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_0</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_1</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_0</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_1</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_0</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_1</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_0</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_1</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>
@@ -94,10 +198,10 @@
     <description>Plug rule violation, sides do not match
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_0</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_1</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_0</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_1</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_0</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_1</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_0</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -125,10 +229,10 @@
     <description>Plug rule violation,  top and bottom do not match
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_0</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_1</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_0</ffdc>
-	<ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_1</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_0</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_0_1</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_0</ffdc>
+    <ffdc>CUR_DIMM_SPD_VALID_U8ARRAY_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -155,10 +259,10 @@
     <description>Incompatable DRAM generation 
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>DRAM_DEVICE_TYPE_0_0</ffdc>
-	<ffdc>DRAM_DEVICE_TYPE_0_1</ffdc>
-	<ffdc>DRAM_DEVICE_TYPE_1_0</ffdc>
-	<ffdc>DRAM_DEVICE_TYPE_1_1</ffdc>
+    <ffdc>DRAM_DEVICE_TYPE_0_0</ffdc>
+    <ffdc>DRAM_DEVICE_TYPE_0_1</ffdc>
+    <ffdc>DRAM_DEVICE_TYPE_1_0</ffdc>
+    <ffdc>DRAM_DEVICE_TYPE_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -185,10 +289,10 @@
     <description>Incompatable DIMM type
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>MODULE_TYPE_0_0</ffdc>
-	<ffdc>MODULE_TYPE_0_1</ffdc>
-	<ffdc>MODULE_TYPE_1_0</ffdc>
-	<ffdc>MODULE_TYPE_1_1</ffdc>
+    <ffdc>MODULE_TYPE_0_0</ffdc>
+    <ffdc>MODULE_TYPE_0_1</ffdc>
+    <ffdc>MODULE_TYPE_1_0</ffdc>
+    <ffdc>MODULE_TYPE_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -215,10 +319,10 @@
     <description>Incompatable DIMM ranks
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>NUM_RANKS_0_0</ffdc>
-	<ffdc>NUM_RANKS_0_1</ffdc>
-	<ffdc>NUM_RANKS_1_0</ffdc>
-	<ffdc>NUM_RANKS_1_1</ffdc>
+    <ffdc>NUM_RANKS_0_0</ffdc>
+    <ffdc>NUM_RANKS_0_1</ffdc>
+    <ffdc>NUM_RANKS_1_0</ffdc>
+    <ffdc>NUM_RANKS_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -245,10 +349,10 @@
     <description>Incompatable DIMM banks
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>SDRAM_BANKS_0_0</ffdc>
-	<ffdc>SDRAM_BANKS_0_1</ffdc>
-	<ffdc>SDRAM_BANKS_1_0</ffdc>
-	<ffdc>SDRAM_BANKS_1_1</ffdc>
+    <ffdc>SDRAM_BANKS_0_0</ffdc>
+    <ffdc>SDRAM_BANKS_0_1</ffdc>
+    <ffdc>SDRAM_BANKS_1_0</ffdc>
+    <ffdc>SDRAM_BANKS_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -275,10 +379,10 @@
     <description>Incompatable DIMM rows
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>SDRAM_ROWS_0_0</ffdc>
-	<ffdc>SDRAM_ROWS_0_1</ffdc>
-	<ffdc>SDRAM_ROWS_1_0</ffdc>
-	<ffdc>SDRAM_ROWS_1_1</ffdc>
+    <ffdc>SDRAM_ROWS_0_0</ffdc>
+    <ffdc>SDRAM_ROWS_0_1</ffdc>
+    <ffdc>SDRAM_ROWS_1_0</ffdc>
+    <ffdc>SDRAM_ROWS_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -305,10 +409,10 @@
     <description>Incompatable DIMM columns
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>SDRAM_COLS_0_0</ffdc>
-	<ffdc>SDRAM_COLS_0_1</ffdc>
-	<ffdc>SDRAM_COLS_1_0</ffdc>
-	<ffdc>SDRAM_COLS_1_1</ffdc>
+    <ffdc>SDRAM_COLS_0_0</ffdc>
+    <ffdc>SDRAM_COLS_0_1</ffdc>
+    <ffdc>SDRAM_COLS_1_0</ffdc>
+    <ffdc>SDRAM_COLS_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -335,10 +439,10 @@
     <description>Incompatable DRAM primary bus width
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>BUS_WIDTH_0_0</ffdc>
-	<ffdc>BUS_WIDTH_0_1</ffdc>
-	<ffdc>BUS_WIDTH_1_0</ffdc>
-	<ffdc>BUS_WIDTH_1_1</ffdc>
+    <ffdc>BUS_WIDTH_0_0</ffdc>
+    <ffdc>BUS_WIDTH_0_1</ffdc>
+    <ffdc>BUS_WIDTH_1_0</ffdc>
+    <ffdc>BUS_WIDTH_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -392,10 +496,10 @@
     <description>Incompatable DRAM width
         </description>
     <FFDC>TARGET_MBA</FFDC>
-	<ffdc>DRAM_WIDTH_0_0</ffdc>
-	<ffdc>DRAM_WIDTH_0_1</ffdc>
-	<ffdc>DRAM_WIDTH_1_0</ffdc>
-	<ffdc>DRAM_WIDTH_1_1</ffdc>
+    <ffdc>DRAM_WIDTH_0_0</ffdc>
+    <ffdc>DRAM_WIDTH_0_1</ffdc>
+    <ffdc>DRAM_WIDTH_1_0</ffdc>
+    <ffdc>DRAM_WIDTH_1_1</ffdc>
 
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>

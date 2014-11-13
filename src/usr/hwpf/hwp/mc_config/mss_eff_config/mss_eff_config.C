@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.45 2014/08/05 14:20:54 sglancy Exp $
+// $Id: mss_eff_config.C,v 1.48 2014/10/13 22:51:53 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,7 +45,19 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.45  | sglancy  |05-AUG-14| Updated comments
+//   1.49  | asaetow  |15-OCT-14| Added RDIMM SPD/VPD support for ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15 to take in SPD bits69:76 thru new VPD attribute ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15.
+//         |          |         | Added ATTR_VPD_DIMM_RCD_IBT and ATTR_VPD_DIMM_RCD_OUTPUT_TIMING merge, per meeting with Ken and Dan P.
+//         |          |         | NOTE: DO NOT pickup w/o getMBvpdTermData.C vX.XX or newer. TBD from Dan.C
+//         |          |         | NOTE: DO NOT pickup w/o dimm_spd_attributes.xml v1.40 or newer.
+//         |          |         | NOTE: DO NOT pickup w/o memory_mss_eff_config.xml v1.3 or newer.
+//         |          |         | Added hardcode for RC0-DA4=0b0 and RC9-DBA1-DBA0-DA4-DA3=0b00X0, per meeting with Ken and Dan P.
+//         |          |         | Changed l_mss_volt to p_l_mss_eff_config_data->mss_volt.
+//   1.48  | asaetow  |13-OCT-14| Removed call to mss_eff_config_termination() for Palmetto and Habanero using ifdef "FAPI_MSSLABONLY", moving to liveVPD.
+//         |          |         | Note: Stradale, Glacier, KG3, and DDR4 will still need ifdef "FAPI_MSSLABONLY".
+//   1.47  | asaetow  |15-SEP-14| Changed ATTR_MSS_POWER_CONTROL_REQUESTED to ATTR_MRW_POWER_CONTROL_REQUESTED.
+//         |          |         | NOTE: Do NOT pickup without memory_attributes.xml v1.135
+//   1.46  | asaetow  |06-AUG-14| Added ATTR_MSS_POWER_CONTROL_REQUESTED to determine ATTR_EFF_DRAM_DLL_PPD. 
+//   1.45  | sglancy  |05-AUG-14| Updated comments.
 //   1.44  | sglancy  |17-JUL-14| Fixed DDR4 ifdef flag - TARGET_MBA error definition
 //   1.43  | jdsloat  |04-APR-14| Fixed DDR4 ifdef flag
 //   1.42  | asaetow  |31-MAR-14| Added ifdef for three #include from Thi and Jake FW Code review.
@@ -256,6 +268,7 @@ struct mss_eff_config_data
     uint8_t allow_single_port;
     uint8_t cur_dram_density;
     uint32_t mss_freq;
+    uint32_t mss_volt;
     uint32_t mtb_in_ps_u32array[PORT_SIZE][DIMM_SIZE];
     uint32_t ftb_in_fs_u32array[PORT_SIZE][DIMM_SIZE];
     //uint8_t dram_taa;
@@ -319,7 +332,13 @@ struct mss_eff_config_spd_data
     uint8_t fine_offset_trpmin[PORT_SIZE][DIMM_SIZE];
     uint8_t fine_offset_trcmin[PORT_SIZE][DIMM_SIZE];
 
+    // ATTR_SPD_MODULE_SPECIFIC_SECTION, Located in DDR3 SPD bytes 60d - 116d
     //uint8_t module_specific_section[PORT_SIZE][DIMM_SIZE][57];         
+    uint64_t rdimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];         
+
+    // Moved from DIMM to MBA[port][dimm] attr per DanC. see dimm_spd_attributes.xml v1.40
+    //uint32_t rdimm_rcd_ibt[PORT_SIZE][DIMM_SIZE];         
+    //uint8_t rdimm_rcd_output_timing[PORT_SIZE][DIMM_SIZE];         
 
     // See "svpdMFGtool --inventory"
     //uint32_t module_id_module_manufacturers_jedec_id_code[PORT_SIZE][DIMM_SIZE];
@@ -345,7 +364,7 @@ struct mss_eff_config_spd_data
 struct mss_eff_config_atts
 {
     uint8_t eff_dimm_ranks_configed[PORT_SIZE][DIMM_SIZE];
-    // AST HERE: Needs SPD byte68:76, deferred to GA2 for full ISDIMM support
+    // Using SPD byte68,69:76, enabled in GA2 for full RDIMM support
     uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_type;
@@ -362,7 +381,7 @@ struct mss_eff_config_atts
     uint8_t eff_dram_cwl;
     uint8_t eff_dram_density;
     uint8_t eff_dram_dll_enable;
-    uint8_t eff_dram_dll_ppd; // Always use fast exit.
+    uint8_t eff_dram_dll_ppd; // Check MRW, ATTR_MRW_POWER_CONTROL_REQUESTED attr
     uint8_t eff_dram_dll_reset; // Always reset DLL at start of IPL.
     uint8_t eff_dram_gen;
     uint8_t eff_dram_output_buffer;
@@ -657,6 +676,23 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
             //&i_target_dimm,
             //p_o_spd_data->module_specific_section[i_port][i_dimm]);
         //if(rc) break;
+
+
+        rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15,                    // Needed for RDIMM.
+            &i_target_dimm,
+            p_o_spd_data->rdimm_rcd_cntl_word_0_15[i_port][i_dimm]);
+        if(rc) break;
+
+        // Moved from DIMM to MBA[port][dimm] attr per DanC. see dimm_spd_attributes.xml v1.40
+        //rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_IBT,                               // Needed for RDIMM.
+        //    &i_target_dimm,
+        //    p_o_spd_data->rdimm_rcd_ibt[i_port][i_dimm]);
+        //if(rc) break;
+        //rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,                     // Needed for RDIMM.
+        //    &i_target_dimm,
+        //    p_o_spd_data->rdimm_rcd_output_timing[i_port][i_dimm]);
+        //if(rc) break;
+
 
         // See "svpdMFGtool --inventory"
         //rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_ID_MODULE_MANUFACTURERS_
@@ -1188,8 +1224,18 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     const fapi::Target& TARGET_MBA = i_target_mba;
 
     // set select atts members to non-zero
-    p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1; // Always use AL = CL - 1. 
-    p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT; // FASTEXIT settings in mba_def.initfile are causing fails.  Workaround to use SLOWEXIT.
+    p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1; // Always use AL = CL - 1.
+
+    // Transfer powerdown request from system attr to DRAM attr
+    uint8_t mss_power_control_requested;
+    rc = FAPI_ATTR_GET(ATTR_MRW_POWER_CONTROL_REQUESTED, NULL, mss_power_control_requested); 
+    if(rc) return rc;
+    if ( mss_power_control_requested == fapi::ENUM_ATTR_MRW_POWER_CONTROL_REQUESTED_FASTEXIT) {
+       p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT;
+    } else {
+       p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT; // if "OFF" default to SLOWEXIT, FASTEXIT settings in mba_def.initfile are causing fails.  Workaround to use SLOWEXIT.
+    }
+
     p_o_atts->eff_dram_dll_reset = fapi::ENUM_ATTR_EFF_DRAM_DLL_RESET_YES; // Always reset DLL at start of IPL.
     p_o_atts->eff_dram_srt = fapi::ENUM_ATTR_EFF_DRAM_SRT_EXTEND; // Always use extended operating temp range.
     p_o_atts->mss_cal_step_enable = 0xFF; // Always run all cal steps
@@ -1254,6 +1300,16 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             uint8_t& MOD_TYPE = p_i_data->module_type[0][0];
             FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MOD_TYPE_ERROR);
             return rc;
+    }
+//------------------------------------------------------------------------------
+    // Moved from DIMM to MBA[port][dimm] attr per DanC. see dimm_spd_attributes.xml v1.40
+    uint32_t l_rdimm_rcd_ibt[PORT_SIZE][DIMM_SIZE];
+    uint8_t l_rdimm_rcd_output_timing[PORT_SIZE][DIMM_SIZE];
+    if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
+       rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_IBT, &i_target_mba, l_rdimm_rcd_ibt);
+       if (rc) return rc;
+       rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_OUTPUT_TIMING, &i_target_mba, l_rdimm_rcd_output_timing);
+       if (rc) return rc;
     }
 //------------------------------------------------------------------------------
     if(p_i_data->custom[0][0] == fapi::ENUM_ATTR_SPD_CUSTOM_YES) {
@@ -1865,6 +1921,86 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     [l_cur_mba_dimm];
             }
 
+            // Populate RCD_CNTL_WORD for RDIMM, add hardcode to RC0-DA4=0b0 RC9-DBA1-DBA0-DA4-DA3=0b00X0, merge in ATTR_VPD_DIMM_RCD_IBT ATTR_VPD_DIMM_RCD_OUTPUT_TIMING, and adjust in RC10 and RC11 for freq/voltage
+            if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) && (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] != 0)) {
+
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_i_data->rdimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm];
+
+               uint64_t l_rcd_hardcode_mask      = 0xDFFFFFFFF2FFFFFFLL;
+               uint64_t l_mss_freq_mask          = 0xFFFFFFFFFF8FFFFFLL;
+               uint64_t l_mss_volt_mask          = 0xFFFFFFFFFFFCFFFFLL;
+               uint64_t l_rcd_ibt_mask           = 0xFFBFFFFF8FFFFFFFLL;
+               uint64_t l_rcd_output_timing_mask = 0xFFDFFFFFFFFFFFFFLL;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_rcd_hardcode_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_mss_freq_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_mss_volt_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_rcd_ibt_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_rcd_output_timing_mask;
+
+               if ( p_i_mss_eff_config_data->mss_freq <= 933 ) {         // 800Mbps
+                  l_mss_freq_mask = 0x0000000000000000LL;
+               } else if ( p_i_mss_eff_config_data->mss_freq <= 1200 ) { // 1066Mbps
+                  l_mss_freq_mask = 0x0000000000100000LL;
+               } else if ( p_i_mss_eff_config_data->mss_freq <= 1466 ) { // 1333Mbps
+                  l_mss_freq_mask = 0x0000000000200000LL;
+               } else if ( p_i_mss_eff_config_data->mss_freq <= 1733 ) { // 1600Mbps
+                  l_mss_freq_mask = 0x0000000000300000LL;
+               } else {                           // 1866Mbps
+                  FAPI_ERR("Invalid RDIMM ATTR_MSS_FREQ = %d on %s!", p_i_mss_eff_config_data->mss_freq, i_target_mba.toEcmdString());
+                  uint32_t& INVALID_RDIMM_FREQ = p_i_mss_eff_config_data->mss_freq;
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_FREQ); return rc;
+               }
+
+               if ( p_i_mss_eff_config_data->mss_volt >= 1420 ) {        // 1.5V
+                  l_mss_volt_mask = 0x0000000000000000LL;
+               } else if ( p_i_mss_eff_config_data->mss_volt >= 1270 ) { // 1.35V
+                  l_mss_volt_mask = 0x0000000000010000LL;
+               } else {                           // 1.2V 
+                  FAPI_ERR("Invalid RDIMM ATTR_MSS_VOLT = %d on %s!", p_i_mss_eff_config_data->mss_volt, i_target_mba.toEcmdString());
+                  uint32_t& INVALID_RDIMM_VOLT = p_i_mss_eff_config_data->mss_volt;
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_VOLT); return rc;
+               }
+
+               if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_IBT_IBT_OFF ) {
+                  l_rcd_ibt_mask = 0x0000000070000000LL;
+               } else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_IBT_IBT_100 ) {
+                  l_rcd_ibt_mask = 0x0000000000000000LL;
+               } else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_IBT_IBT_150 ) {
+                  l_rcd_ibt_mask = 0x0040000000000000LL;
+               } else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_IBT_IBT_200 ) {
+                  l_rcd_ibt_mask = 0x0000000020000000LL;
+               } else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_IBT_IBT_300 ) {
+                  l_rcd_ibt_mask = 0x0000000040000000LL;
+               } else {
+                  FAPI_ERR("Invalid RDIMM_RCD_IBT = %d port %d dimm %d on %s!", l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm], l_cur_mba_port, l_cur_mba_dimm, i_target_mba.toEcmdString());
+                  uint32_t& INVALID_RDIMM_RCD_IBT_U32ARRAY_0_0 = l_rdimm_rcd_ibt[0][0];
+                  uint32_t& INVALID_RDIMM_RCD_IBT_U32ARRAY_0_1 = l_rdimm_rcd_ibt[0][1];
+                  uint32_t& INVALID_RDIMM_RCD_IBT_U32ARRAY_1_0 = l_rdimm_rcd_ibt[1][0];
+                  uint32_t& INVALID_RDIMM_RCD_IBT_U32ARRAY_1_1 = l_rdimm_rcd_ibt[1][1];
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_IBT); return rc;
+               }
+
+               if ( l_rdimm_rcd_output_timing[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_OUTPUT_TIMING_1T ) {
+                  l_rcd_output_timing_mask = 0x0000000000000000LL;
+               } else if ( l_rdimm_rcd_output_timing[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_VPD_DIMM_RCD_OUTPUT_TIMING_3T ) {
+                  l_rcd_output_timing_mask = 0x0020000000000000LL;
+               } else {
+                  FAPI_ERR("Invalid RDIMM_RCD_OUTPUT_TIMING = %d port %d dimm %d on %s!", l_rdimm_rcd_output_timing[l_cur_mba_port][l_cur_mba_dimm], l_cur_mba_port, l_cur_mba_dimm, i_target_mba.toEcmdString());
+                  uint8_t& INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0 = l_rdimm_rcd_output_timing[0][0];
+                  uint8_t& INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_1 = l_rdimm_rcd_output_timing[0][1];
+                  uint8_t& INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_1_0 = l_rdimm_rcd_output_timing[1][0];
+                  uint8_t& INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_1_1 = l_rdimm_rcd_output_timing[1][1];
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_OUTPUT_TIMING); return rc;
+               }
+
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_mss_freq_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_mss_volt_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_rcd_ibt_mask;
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_rcd_output_timing_mask;
+            } else {
+               p_o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = 0x0000000000000000LL;
+            }
+
             // DEBUG HERE:
             //FAPI_INF("size=%d density=%d ranks=%d width=%d on %s",
             // p_o_atts->eff_dimm_size[l_cur_mba_port][l_cur_mba_dimm],
@@ -2174,7 +2310,8 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
     const char * const PROCEDURE_NAME = "mss_eff_config";
     fapi::ReturnCode rc;
     fapi::Target l_target_centaur;
-    uint32_t l_mss_volt;
+    // Changed l_mss_volt to p_l_mss_eff_config_data->mss_volt.
+    //uint32_t l_mss_volt;
     // mss_eff_config_data_variable struct
     mss_eff_config_data *p_l_mss_eff_config_data = new mss_eff_config_data();
     // mss_eff_config_spd_data struct
@@ -2224,7 +2361,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur,
                 p_l_mss_eff_config_data->mss_freq);
         if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_mss_volt);
+        rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, p_l_mss_eff_config_data->mss_volt);
         if(rc) break;
         if (p_l_mss_eff_config_data->mss_freq == 0)
         {
@@ -2239,7 +2376,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
                 p_l_mss_eff_config_data->mss_freq,
                 TWO_MHZ/p_l_mss_eff_config_data->mss_freq,
                 l_target_centaur.toEcmdString());
-        FAPI_INF("mss_volt = %d on %s.", l_mss_volt,
+        FAPI_INF("mss_volt = %d on %s.", p_l_mss_eff_config_data->mss_volt,
                 l_target_centaur.toEcmdString());
 
 //------------------------------------------------------------------------------
@@ -2315,11 +2452,9 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         // Removed call to mss_eff_config_cke_map(), 
         //rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
 
-        // @fixme - this change is in v1.48 of the HWP
-        // @todo - RTC:117484 replace with v1.49 from ekb
-        // Removed call to mss_eff_config_termination() for Palmetto and
-        // Habanero using ifdef "FAPI_MSSLABONLY", moving to liveVPD.
-        // Note: Stradale, KG3, and DDR4 will still need ifdef "FAPI_MSSLABONLY"
+
+// Removed call to mss_eff_config_termination() for Palmetto and Habanero using ifdef "FAPI_MSSLABONLY", moving to liveVPD.
+// Note: Stradale, KG3, and DDR4 will still need ifdef "FAPI_MSSLABONLY"
 #ifdef FAPI_MSSLABONLY
         // If MSS Lab/Development override, for now everything except DDR3 CDIMMs
         if ((p_l_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO) || (p_l_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)) {
@@ -2331,6 +2466,8 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
            }
         }
 #endif
+
+
         // Removed call to mss_eff_config_thermal(), it is now called externally.
         //rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
 

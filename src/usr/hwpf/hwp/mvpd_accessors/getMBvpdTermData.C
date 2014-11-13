@@ -136,6 +136,15 @@ fapi::ReturnCode getMBvpdTermData(
                l_sizeCheck=
                sizeof (MBvpdTermDataSize<TERM_DATA_ODT_WR>::Type);
                break;
+           case TERM_DATA_DIMM_RCD_IBT:
+               l_sizeCheck=
+               sizeof (MBvpdTermDataSize<TERM_DATA_DIMM_RCD_IBT>::Type);
+               break;
+           case TERM_DATA_DIMM_RCD_OUTPUT_TIMING:
+               l_sizeCheck=
+               sizeof
+                   (MBvpdTermDataSize<TERM_DATA_DIMM_RCD_OUTPUT_TIMING>::Type);
+               break;
            case TERM_DATA_CEN_RD_VREF:
                l_sizeCheck=
                sizeof (MBvpdTermDataSize<TERM_DATA_CEN_RD_VREF>::Type);
@@ -329,7 +338,7 @@ fapi::ReturnCode getMBvpdTermData(
         {
             //MT keyword is located in the SPDX record,
             //and found by using ATTR_SPD_NUM_RANKS
-            //T1: one dimm, rank 1  T2: one dimm, rank 2   T3: one dimm, rank 4
+            //T1: one dimm, rank 1  T2: one dimm, rank 2   T4: one dimm, rank 4
             //T5: two dimm, rank 1  T6: two dimm, rank 2   T8: two dimm, rank 4
             fapi::ATTR_SPD_NUM_RANKS_Type l_spd_dimm_ranks[2][2] = {
                 {fapi::ENUM_ATTR_SPD_NUM_RANKS_RX,
@@ -617,30 +626,169 @@ fapi::ReturnCode getMBvpdTermData(
                }
                break;
             }
+            // return the uint32_t [2][2] attributes from the MT keyword
+            case TERM_DATA_DIMM_RCD_IBT:
+            {
+                uint32_t (* l_pVal)[2][2] = (uint32_t (*)[2][2])o_pVal;
+
+                // cdimm
+                if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO != l_customDimm)
+                {
+                    for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+                    {
+                        for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                        {
+                            (*l_pVal)[l_port][l_j] = TERM_DATA_IBT_CDIMM;
+                        }
+                    }
+                }
+                // isdimm
+                else
+                {
+                    // get vpd version (in ascii)
+                    uint32_t l_vpdVersion = 0;
+                    FAPI_EXEC_HWP(l_fapirc,
+                                  getMBvpdVersion,
+                                  i_mbaTarget,
+                                  l_vpdVersion);
+                    if (l_fapirc)
+                    {
+                        FAPI_ERR("getMBvpdTermData: TERM_DATA_DIMM_RCD_IBT - getMBvpdVersion failed");
+                        break;  //  break out with fapirc
+                    }
+
+                    for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+                    {
+                        for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                        {
+                            if (l_vpdVersion < 0x3133)  // ascii "13"
+                            {
+                                (*l_pVal)[l_port][l_j] = TERM_DATA_IBT_PRE13;
+                            }
+                            // else use the VPD value
+                            else
+                            {
+                                (*l_pVal)[l_port][l_j] = l_pMtBuffer->
+    mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset+l_j];
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            // return the uint8_t [2][2] attributes from the MT keyword
+            case TERM_DATA_DIMM_RCD_OUTPUT_TIMING:
+            {
+                uint8_t (* l_pVal)[2][2] = (uint8_t (*)[2][2])o_pVal;
+
+                // cdimm
+                if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO != l_customDimm)
+                {
+                    for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+                    {
+                        for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                        {
+                            (*l_pVal)[l_port][l_j] =
+                                            TERM_DATA_OUTPUT_TIMING_CDIMM;
+                        }
+                    }
+                }
+                // isdimm
+                else
+                {
+                    // get vpd version (in ascii)
+                    uint32_t l_vpdVersion = 0;
+                    FAPI_EXEC_HWP(l_fapirc,
+                                  getMBvpdVersion,
+                                  i_mbaTarget,
+                                  l_vpdVersion);
+                    if (l_fapirc)
+                    {
+                        FAPI_ERR("getMBvpdTermData: TERM_DATA_DIMM_RCD_OUTPUT_TIMING - getMBvpdVersion failed");
+                        break;  //  break out with fapirc
+                    }
+
+                    for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+                    {
+                        for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                        {
+                            if (l_vpdVersion < 0x3133)  // ascii "13"
+                            {
+                                (*l_pVal)[l_port][l_j] =
+                                            TERM_DATA_OUTPUT_TIMING_PRE13;
+                            }
+                            // else use the VPD value
+                            // use the same vpd value for dimm0 and dimm1
+                            else
+                            {
+                                (*l_pVal)[l_port][l_j] = l_pMtBuffer->
+    mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
+                            }
+                        }
+
+                    }
+                }
+                break;
+            }
             // return the uint32_t [2] attributes from the MT keyword buffer
-            // need to consider endian since they are word fields
             // requires translation
             case TERM_DATA_CEN_RD_VREF:
-            case TERM_DATA_DRAM_WR_VREF:
             {
-                // @fixme - make this only read 8 bits after modifying
-                // the byte offset
                 uint32_t (* l_pVal)[2] = (uint32_t (*)[2])o_pVal;
                 uint32_t l_value = 0;
 
                 for (uint8_t l_port=0; l_port<2;l_port++)
                 {
-                    uint32_t * l_pWord =  (uint32_t *)&l_pMtBuffer->
-                       mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
-                    l_value  = FAPI_BE32TOH(* l_pWord);
-                    if (TERM_DATA_CEN_RD_VREF == i_attr)
+                    l_value =  l_pMtBuffer->
+                        mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
+                    l_fapirc = translate_CEN_RD_VREF(i_attr,l_value);
+                    if (l_fapirc)
                     {
-                        l_fapirc=translate_CEN_RD_VREF(i_attr,l_value);
+                        break; // break with error
                     }
+                    (*l_pVal)[l_port] = l_value;
+                }
+                break;
+            }
+            // return the uint32_t [2] attributes from the MT keyword buffer
+            // requires translation
+            case TERM_DATA_DRAM_WR_VREF:
+            {
+                uint32_t (* l_pVal)[2] = (uint32_t (*)[2])o_pVal;
+                uint32_t l_value = 0;
+
+                // get vpd version (in ascii)
+                uint32_t l_vpdVersion = 0;
+                FAPI_EXEC_HWP(l_fapirc,
+                              getMBvpdVersion,
+                              i_mbaTarget,
+                              l_vpdVersion);
+                if (l_fapirc)
+                {
+                    FAPI_ERR("getMBvpdTermData: TERM_DATA_DRAM_WR_VREF - getMBvpdVersion failed");
+                    break;  //  break out with fapirc
+                }
+
+                for (uint8_t l_port=0; l_port<2;l_port++)
+                {
+                    // cdimm or version < "13" ascii
+                    if( (fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO != l_customDimm) ||
+                        (l_vpdVersion < 0x3133) )
+                    {
+                        // data is in the last byte of the uint32
+                        uint32_t * l_pWord =  (uint32_t *)&l_pMtBuffer->
+    mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
+                        l_value  = FAPI_BE32TOH(* l_pWord);
+                    }
+                    // isdimm and version "13" or greater
                     else
                     {
-                        l_fapirc=translate_DRAM_WR_VREF(i_attr,l_value);
+                        // data is in the first byte of the uint32
+                        l_value =  l_pMtBuffer->
+    mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
                     }
+
+                    l_fapirc = translate_DRAM_WR_VREF(i_attr,l_value);
                     if (l_fapirc)
                     {
                         break; // break with error
@@ -1083,10 +1231,6 @@ fapi::ReturnCode translate_CEN_RD_VREF (const fapi::MBvpdTermData i_attr,
     const uint8_t RD_VREF_VDD63125 = 0x18;
     const uint8_t RD_VREF_VDD61750 = 0x17;
     const uint8_t RD_VREF_VDD60375 = 0x16;
-
-    // Even though the attribute value is 32 bits, the data in VPD is
-    // only 8 bits wide (the last 8 bits)
-    io_value &= 0x000000FF;
 
     switch(io_value)
     {

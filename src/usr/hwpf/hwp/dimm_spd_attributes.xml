@@ -606,20 +606,18 @@ The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, foll
     <odmChangeable/>
 </attribute>
 
-<!-- @fixme RTC:117484
 <attribute>
     <id>ATTR_VPD_DIMM_RCD_OUTPUT_TIMING</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RCD Timing. Supplied by VPD, used by mss_eff_config.C. Each dimm will have a value.
-		 consumer: mss_eff_config
-   </description>
+        consumer: mss_eff_config
+    </description>
     <valueType>uint8</valueType>
     <enum>1T = 0x01, 3T = 0x03</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 <!--
 *******************************************************************************
@@ -2534,20 +2532,18 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
  </attribute>
 -->
 
-<!-- @fixme RTC:117484
- <attribute>
-     <id>ATTR_VPD_DIMM_RCD_IBT</id>
-     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+<attribute>
+    <id>ATTR_VPD_DIMM_RCD_IBT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each dimm will have a value.
-creator: mss_eff_cnfg
-consumer: mss_dram_init
-firmware notes: none</description>
+        creator: mss_eff_cnfg
+        consumer: mss_dram_init
+        firmware notes: none</description>
     <valueType>uint32</valueType>
     <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
--->
 
 </attributes>
