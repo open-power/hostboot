@@ -1,0 +1,1700 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mvpd_accessors/getMBvpdAttr.C $              */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: getMBvpdAttr.C,v 1.4 2015/01/09 21:53:07 whs Exp $
+/**
+ *  @file getMBvpdAttr.C
+ *
+ *  @brief get Attribute Data from MBvpd
+ *
+ */
+#include    <stdint.h>
+
+//  fapi support
+#include    <fapi.H>
+#include    <fapiUtil.H>
+#include    <getMBvpdAttr.H>
+#include    <getMBvpdVersion.H>
+
+// Used to ensure attribute enums are equal at compile time
+class Error_ConstantsDoNotMatch;
+template<const bool MATCH> void checkConstantsMatch()
+{
+    Error_ConstantsDoNotMatch();
+}
+template <> inline void checkConstantsMatch<true>() {}
+
+extern "C"
+{
+using   namespace   fapi;
+using   namespace   getAttrData;
+
+// ----------------------------------------------------------------------------
+// local functions
+// ----------------------------------------------------------------------------
+/**
+ *  @brief Find dimm info; parent, type, position
+ */
+fapi::ReturnCode findDimmInfo (const fapi::Target   & i_mbaTarget,
+                                     fapi::Target   & o_mbTarget,
+                                     uint8_t        & o_pos,
+                                     DimmType       & o_dimmType);
+/**
+ *  @brief Find attribute definition in global table
+ */
+fapi::ReturnCode findAttrDef (const fapi::Target    & i_mbaTarget,
+                              const DimmType        & i_dimmType,
+                              const fapi::AttributeId & i_attr,
+                              const MBvpdAttrDef*   & o_pAttrDef);
+/**
+ *  @brief Read the attribute keyword
+ */
+fapi::ReturnCode readKeyword (const fapi::Target   & i_mbTarget,
+                              const fapi::Target   & i_mbaTarget,
+                              const MBvpdAttrDef   * i_pAttrDef,
+                              const DimmType       & i_dimmType,
+                                    attr_keyword   * i_pBuffer,
+                              const uint32_t       & i_bufsize);
+/**
+ *  @brief return default output value
+ */
+fapi::ReturnCode returnDefault (const MBvpdAttrDef    * i_pAttrDef,
+                                        void          * o_pVal,
+                                const size_t          & i_valSize);
+
+/**
+ *  @brief Return the output value
+ */
+fapi::ReturnCode returnValue (const MBvpdAttrDef    * i_pAttrDef,
+                              const uint8_t         & i_pos,
+                                    void            * o_pVal,
+                              const size_t          & i_valSize,
+                                    attr_keyword    * i_pBuffer,
+                              const uint32_t        & i_bufsize);
+
+/**
+ *  @brief Translation functions
+ */
+fapi::ReturnCode xlate_DRAM_RON (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value);
+fapi::ReturnCode xlate_RTT_NOM  (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value);
+fapi::ReturnCode xlate_RTT_WR   (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value);
+fapi::ReturnCode xlate_WR_VREF  (const fapi::AttributeId i_attr,
+                                     uint32_t & io_value);
+fapi::ReturnCode xlate_RD_VREF  (const fapi::AttributeId i_attr,
+                                     uint32_t & io_value);
+fapi::ReturnCode xlate_SLEW_RATE (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value);
+
+/**
+ *  @brief Find the ISDIMM MR keyword
+ */
+fapi::ReturnCode FindMRkeyword (const fapi::Target       & i_mbTarget,
+                                      fapi::MBvpdKeyword & o_keyword);
+/**
+ *  @brief Find the ISDIMM MT keyword
+ */
+fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
+                                const fapi::Target       & i_mbaTarget,
+                                      fapi::MBvpdKeyword & o_keyword);
+// ----------------------------------------------------------------------------
+// HWP accessor to get MBvpd Attribute Data
+// ----------------------------------------------------------------------------
+fapi::ReturnCode getMBvpdAttr(const fapi::Target   &i_mbaTarget,
+                              const fapi::AttributeId i_attr,
+                              void  * o_pVal,
+                              const size_t i_valSize)
+{
+    fapi::ReturnCode l_fapirc;
+    attr_keyword *   l_pBuffer = NULL;
+    const uint32_t   l_bufsize = sizeof(attr_keyword);
+
+    FAPI_DBG("getMBvpdAttr: entry attr=0x%02x, size=%d ",
+             i_attr,i_valSize  );
+
+    do
+    {
+        fapi::Target l_mbTarget;
+        uint8_t  l_pos = NUM_PORTS;     //initialize to out of range value (+1)
+        DimmType l_dimmType = ALL_DIMM;
+        const MBvpdAttrDef * l_pAttrDef = NULL;
+
+        // find DIMM Info; parent, position, dimm type
+        l_fapirc = findDimmInfo (i_mbaTarget, l_mbTarget, l_pos, l_dimmType);
+        if (l_fapirc)
+        {
+            break; // return with error
+        }
+
+        // find Attribute definition
+        l_fapirc = findAttrDef (i_mbaTarget, l_dimmType, i_attr, l_pAttrDef);
+        if (l_fapirc)
+        {
+            break; // return with error
+        }
+
+        // Either just return defaults or read keyword and return vpd data
+        // Mask off the special processing flags from the output type.
+        if (DEFAULT_VALUE ==
+                        ((l_pAttrDef->iv_outputType) & SPECIAL_PROCESSING_MASK))
+        {
+            l_fapirc = returnDefault (l_pAttrDef,
+                                      o_pVal,
+                                      i_valSize);
+            if (l_fapirc) break; // return with error
+
+        }
+        else
+        {
+            l_pBuffer = new attr_keyword;
+            l_fapirc = readKeyword (l_mbTarget,
+                                i_mbaTarget,
+                                l_pAttrDef,
+                                l_dimmType,
+                                l_pBuffer,
+                                l_bufsize);
+            if (l_fapirc) break; // return with error
+
+            // retrun the output value
+            l_fapirc = returnValue (l_pAttrDef,
+                                    l_pos,
+                                    o_pVal,
+                                    i_valSize,
+                                    l_pBuffer,
+                                    l_bufsize);
+            if (l_fapirc) break; // return with error
+        }
+    }
+    while (0);
+
+    delete l_pBuffer;
+    l_pBuffer = NULL;
+
+    FAPI_DBG("getMBvpdAttr: exit rc=0x%08x",
+               static_cast<uint32_t>(l_fapirc));
+
+    return  l_fapirc;
+
+}
+
+// ----------------------------------------------------------------------------
+// local functions
+// ----------------------------------------------------------------------------
+
+
+// find dimm info; parent, type, position
+fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
+                                     fapi::Target & o_mbTarget,
+                                     uint8_t      & o_pos,
+                                     DimmType     & o_dimmType)
+{
+    fapi::ReturnCode l_fapirc;
+
+    do
+    {
+        // find the position of the passed mba on the centuar
+        l_fapirc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,&i_mbaTarget,o_pos);
+        if (l_fapirc)
+        {
+            FAPI_ERR(" getMBvpdAttr: Get MBA position failed ");
+            break;  //  break out with fapirc
+        }
+        FAPI_DBG("getMBvpdAttr: mba %s position=%d",
+             i_mbaTarget.toEcmdString(),
+             o_pos);
+
+        // find the Centaur memmory buffer from the passed MBA
+        l_fapirc = fapiGetParentChip (i_mbaTarget,o_mbTarget);
+        if (l_fapirc)
+        {
+            FAPI_ERR("getMBvpdAttr: Finding the parent mb failed ");
+            break;  //  break out with fapirc
+        }
+        FAPI_DBG("getMBvpdAttr: parent path=%s ",
+             o_mbTarget.toEcmdString()  );
+
+        // Determine if ISDIMM or CDIMM
+        std::vector<fapi::Target> l_target_dimm_array;
+
+        l_fapirc = fapiGetAssociatedDimms(i_mbaTarget, l_target_dimm_array);
+        if(l_fapirc)
+        {
+           FAPI_ERR("getMBvpdAttr: Problem getting DIMMs of MBA");
+           break;   //return error
+        }
+        if(l_target_dimm_array.size() != 0)
+        {
+            uint8_t l_customDimm=0;
+            l_fapirc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM,&l_target_dimm_array[0],
+                          l_customDimm);
+            if(l_fapirc) {
+               FAPI_ERR(" getMBvpdAttr: ATTR_SPD_CUSTOM failed ");
+               break;   //return error
+            }
+
+            if (l_customDimm == fapi::ENUM_ATTR_SPD_CUSTOM_YES)
+            {
+                o_dimmType = CDIMM;
+                FAPI_DBG("getMBvpdAttr: CDIMM TYPE!!!");
+            }
+            else
+            {
+                o_dimmType = ISDIMM;
+                FAPI_DBG("getMBvpdAttr: ISDIMM TYPE!!!");
+            }
+        }
+        else
+        {
+           o_dimmType = ISDIMM;
+           FAPI_DBG("getMBvpdAttr: ISDIMM TYPE (dimm array size = 0)");
+        }
+    }
+    while (0);
+
+    return l_fapirc;
+}
+
+// find attribute definition
+// table rules:
+//     Vesions must be in decreasing order (highest first...)
+//        for a specific Dimm Type. The first match found, searching
+//        from row index 0 to the end, will be used.
+
+fapi::ReturnCode findAttrDef (const fapi::Target    & i_mbaTarget,
+                              const DimmType        & i_dimmType,
+                              const AttributeId     & i_attr,
+                              const MBvpdAttrDef*   & o_pAttrDef)
+{
+    fapi::ReturnCode l_fapirc;
+    o_pAttrDef = NULL;
+
+    // find first row in the attribute defintion table for this attribute
+    uint32_t l_version = ALL_VER; // invalid vpd value
+    uint32_t i=0; //at this scope for the debug message at end
+    for (; i <= g_MBVPD_ATTR_DEF_array_size; i++)
+    {
+        if ( (g_MBVPD_ATTR_DEF_array[i].iv_attrId == i_attr) &&
+             ((i_dimmType == g_MBVPD_ATTR_DEF_array[i].iv_dimmType) ||
+              (ALL_DIMM   == g_MBVPD_ATTR_DEF_array[i].iv_dimmType)) )
+        {
+
+            // most are expected to be the same for all Dimm Types and versions
+            if (ALL_VER  == g_MBVPD_ATTR_DEF_array[i].iv_version)
+            {
+                o_pAttrDef = &g_MBVPD_ATTR_DEF_array[i];
+                break; //use this row
+            }
+            if (ALL_VER == l_version)  // have not read version yet
+            {
+                // get vpd version (only when actually needed)
+                FAPI_EXEC_HWP(l_fapirc,
+                              getMBvpdVersion,
+                              i_mbaTarget,
+                              l_version);
+
+                if (l_fapirc)
+                {
+                    FAPI_ERR("getMBvpdAttr: getMBvpdVersion failed");
+                    break;  //  break out with fapirc
+                }
+                FAPI_DBG("getMBvpdAttr: read vpd version = 0x%04x",
+                          l_version );
+
+            }
+            if ((uint32_t)g_MBVPD_ATTR_DEF_array[i].iv_version <= l_version)
+            {
+                o_pAttrDef = &g_MBVPD_ATTR_DEF_array[i];
+                break; //use this row
+            }
+        }
+    }
+
+    // return an error if definition was not found
+    if (NULL == o_pAttrDef)
+    {
+        if (!l_fapirc) // if no other error found
+        {
+            // Could be due to a table error, which shouldn't happen because
+            // every attribute has an ALL_DIMM ALL_VER entry.
+            // More likely due to an invalid attribute ID being passed.
+            FAPI_ERR("getMBvpdAttr: attr ID not in table 0x%02x dimmType=%d",
+                      i_attr,
+                      i_dimmType);
+            const fapi::AttributeId & ATTR_ID = i_attr;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_ATTRIBUTE_ID);
+        }
+    }
+    else
+    {
+        FAPI_DBG("getMBvpdAttr: use attribute definition row=%d",i );
+    }
+
+    return l_fapirc;
+}
+
+// read the attribute keyword
+// note: i_pAttrDef->iv_dimmType is likely ALL_DIMM were as
+//       l_dimmType will be either CDIMM or ISDIMM
+fapi::ReturnCode readKeyword (const fapi::Target   & i_mbTarget,
+                              const fapi::Target   & i_mbaTarget,
+                              const MBvpdAttrDef   * i_pAttrDef,
+                              const DimmType       & i_dimmType,
+                                    attr_keyword   * i_pBuffer,
+                              const uint32_t       & i_bufsize)
+{
+    fapi::ReturnCode l_fapirc;
+    uint32_t         l_bufsize = i_bufsize;
+    fapi::MBvpdKeyword l_keyword = i_pAttrDef->iv_keyword; //default for CDIMMs
+    fapi::MBvpdRecord  l_record  = MBVPD_RECORD_VSPD;      //default for CDIMMs
+
+    FAPI_DBG("getMBvpdAttr: Read keyword %d ",l_keyword);
+    do
+    {
+        if (CDIMM != i_dimmType)
+        {
+            if (MBVPD_KEYWORD_MT == l_keyword)
+            {
+                l_fapirc = FindMTkeyword (i_mbTarget,
+                                          i_mbaTarget,
+                                          l_keyword);
+                if (l_fapirc) break; //return with error
+            }
+            else if (MBVPD_KEYWORD_MR == l_keyword)
+            {
+                l_fapirc = FindMRkeyword (i_mbTarget,
+                                          l_keyword);
+                if (l_fapirc) break; //return with error
+            }
+            else //table error, shouldn't happen
+            {
+                FAPI_ERR("getMBvpdAttr: invalid keyword %d for dimmType=%d",
+                      l_keyword,
+                      i_dimmType);
+                const fapi::AttributeId & ATTR_ID = i_pAttrDef->iv_attrId;
+                const fapi::MBvpdKeyword & KEYWORD =  l_keyword;
+                FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_UNEXPECTED_ISDIMM_KEYWORD);
+                break; // return error
+            }
+            l_record  = fapi::MBVPD_RECORD_SPDX;      // for ISDIMMs
+        }
+        // Retrieve attribute keyword
+        l_fapirc = fapiGetMBvpdField(l_record,
+                             l_keyword,
+                             i_mbTarget,
+                             reinterpret_cast<uint8_t *>(i_pBuffer),
+                             l_bufsize);
+        if (l_fapirc)
+        {
+            FAPI_ERR("getMBvpdAttr: Read of attr keyword failed");
+            break;  //  break out with fapirc
+        }
+
+        // Check that sufficient keyword was returned.
+        if (l_bufsize < ATTR_KEYWORD_SIZE )
+        {
+            FAPI_ERR("getMBvpdAttr:"
+                     " less keyword returned than expected %d < %d",
+                       i_bufsize, ATTR_KEYWORD_SIZE);
+            const uint32_t & KEYWORD = l_keyword;
+            const uint32_t & RETURNED_SIZE = i_bufsize;
+            const fapi::Target & CHIP_TARGET = i_mbTarget;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
+            break;  //  break out with fapirc
+        }
+    }
+    while (0);
+    return l_fapirc;
+}
+
+// used by returnValue to consolidate setting invalid size error
+fapi::ReturnCode sizeMismatch (const size_t   i_correctSize,
+                               const size_t   i_inputSize,
+                               const fapi::AttributeId i_attr)
+{
+    fapi::ReturnCode l_fapirc;
+    do
+    {
+        FAPI_ERR("getMBvpdAttr:"
+                 " output variable size does not match expected %d != %d"
+                 " for attr id=0x%08x",
+                   i_correctSize, i_inputSize, i_attr);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint32_t & EXPECTED_SIZE = i_correctSize;
+        const uint32_t & PASSED_SIZE = i_inputSize;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE);
+    }
+    while (0);
+    return l_fapirc;
+}
+
+
+// return default output value
+fapi::ReturnCode returnDefault (const MBvpdAttrDef  * i_pAttrDef,
+                                void                * o_pVal,
+                                const size_t        & i_valSize)
+{
+    fapi::ReturnCode l_fapirc;
+    uint16_t  l_outputType = i_pAttrDef->iv_outputType & OUTPUT_TYPE_MASK;
+
+    FAPI_DBG("getMBvpdAttr: default value outputType=0x%04x ",
+              l_outputType);
+
+    // return default according to the attribute varible type
+    switch (l_outputType)
+    {
+        case UINT8_BY2:        // uint8_t [2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint8_t l_value = (uint8_t)i_pAttrDef->iv_defaultValue;
+
+            (*(UINT8_BY2_t*)o_pVal)[0] = l_value;
+            (*(UINT8_BY2_t*)o_pVal)[1] = l_value;
+            break;
+        }
+
+        case  UINT8_BY2_BY2:     // uint8_t  [2][2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_BY2_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_BY2_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint8_t l_value =  (uint8_t)i_pAttrDef->iv_defaultValue;
+            for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+            {
+                for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                {
+                    (*(UINT8_BY2_BY2_t*)o_pVal)[l_port][l_j] = l_value;
+                }
+           }
+           break;
+        }
+
+        case  UINT8_BY2_BY2_BY4: // uint8_t  [2][2][4]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_BY2_BY2_BY4_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_BY2_BY2_BY4_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint8_t l_value = (uint8_t)i_pAttrDef->iv_defaultValue;
+            for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+            {
+                for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                {
+                    for (uint8_t l_k=0; l_k<NUM_RANKS; l_k++)
+                    {
+                        (*(UINT8_BY2_BY2_BY4_t*)o_pVal)[l_port][l_j][l_k] =
+                                                                        l_value;
+                    }
+                }
+           }
+           break;
+        }
+
+        case  UINT32_BY2:        // uint32_t [2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT32_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT32_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint32_t l_value = (uint32_t)i_pAttrDef->iv_defaultValue;
+
+            for (uint8_t l_port=0; l_port<2;l_port++)
+            {
+                (*(UINT32_BY2_t*)o_pVal)[l_port] = l_value;
+            }
+            break;
+        }
+
+        case  UINT32_BY2_BY2:        // uint32_t [2][2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT32_BY2_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT32_BY2_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint32_t l_value = (uint32_t)i_pAttrDef->iv_defaultValue;
+
+            for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+            {
+                for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                {
+                    (*(UINT32_BY2_BY2_t*)o_pVal)[l_port][l_j] = l_value;
+                }
+            }
+            break;
+        }
+
+        case  UINT64:            // uint64_t
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT64_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT64_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint64_t l_value = (uint64_t)i_pAttrDef->iv_defaultValue;
+            (*(UINT64_t*)o_pVal) = l_value;
+            break ;
+        }
+        default: // Hard to do, but needs to be caught
+            FAPI_ERR("getMBvpdAttrData: invalid output type 0x%04x for"
+                       " attribute ID 0x%08x",
+                       i_pAttrDef->iv_outputType,
+                       i_pAttrDef->iv_attrId);
+            const fapi::AttributeId & ATTR_ID = i_pAttrDef->iv_attrId;
+            const DimmType & DIMM_TYPE =  i_pAttrDef->iv_dimmType;
+            const uint16_t & OUTPUT_TYPE = i_pAttrDef->iv_outputType;
+            FAPI_SET_HWP_ERROR(l_fapirc,
+                                       RC_MBVPD_DEFAULT_UNEXPECTED_OUTPUT_TYPE);
+            break;  //  break out with fapirc
+    }
+
+    return l_fapirc;
+}
+
+// used by returnValue to consolidate pulling an uint32_t value from vpd based
+// on the size of the data in the vpd layout (uint8_t, uint16_t, or uint32_t).
+uint32_t getUint32 (const uint16_t & i_dataSpecial,
+                          uint8_t *  i_pBuffer)
+{
+    uint32_t o_val = 0;
+
+    if (UINT8_DATA == i_dataSpecial)
+    {
+        o_val = *i_pBuffer;
+    }
+    else if (UINT16_DATA == i_dataSpecial)
+    {
+        o_val = *(i_pBuffer+1);      // LSB
+        o_val |= ((*i_pBuffer)<<8);  // MSB
+    }
+    else
+    {
+        o_val  = FAPI_BE32TOH(*(uint32_t*) i_pBuffer);
+    }
+
+    return o_val;
+}
+
+// return the output value
+// i_pBuffer will be NULL if the default value is to be used.
+fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
+                              const uint8_t         & i_pos,
+                                    void            * o_pVal,
+                              const size_t          & i_valSize,
+                                    attr_keyword    * i_pBuffer,
+                              const uint32_t        & i_bufsize)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t     l_attrOffset = i_pAttrDef->iv_offset;
+    uint16_t  l_outputType= i_pAttrDef->iv_outputType & OUTPUT_TYPE_MASK;
+    uint16_t  l_special   = i_pAttrDef->iv_outputType & SPECIAL_PROCESSING_MASK;
+
+    FAPI_DBG("getMBvpdAttr: output offset=0%02x pos=%d outputType=0x%04x"
+              " special=0x%04x ",
+              l_attrOffset,i_pos,l_outputType,l_special);
+
+    // return data according to the attribute varible type
+    switch (l_outputType)
+    {
+        case UINT8_BY2:        // uint8_t [2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            // pull data from keyword buffer
+            uint8_t l_port0 = i_pBuffer->
+                    mb_mba[i_pos].mba_port[0].port_attr[l_attrOffset];
+            uint8_t l_port1 = i_pBuffer->
+                    mb_mba[i_pos].mba_port[1].port_attr[l_attrOffset];
+
+            switch (l_special)
+            {
+                case LOW_NIBBLE: // return low nibble
+                    l_port0 = l_port0 & 0x0F;
+                    l_port1 = l_port1 & 0x0F;
+                    break;
+
+                case HIGH_NIBBLE: // return high nibble
+                    l_port0 = ((l_port0 & 0xF0)>>4);
+                    l_port1 = ((l_port1 & 0xF0)>>4);
+                    break;
+
+                case PORT00: // return port 0 for both ports 0 and 1
+                    l_port1=l_port0;
+                    break;
+
+                case PORT11: // return port 1 for both ports 0 and 1
+                    l_port0=l_port1;
+                    break;
+
+                case XLATE_SLEW:
+                    l_fapirc = xlate_SLEW_RATE( i_pAttrDef->iv_attrId,l_port0);
+                    if (l_fapirc) break;
+                    l_fapirc = xlate_SLEW_RATE( i_pAttrDef->iv_attrId,l_port1);
+                    if (l_fapirc) break;
+
+                default:
+                     ;      // use data  directly from  keyword buffer
+            }
+            if (l_fapirc) break;
+
+            (*(UINT8_BY2_t*)o_pVal)[0] = l_port0;
+            (*(UINT8_BY2_t*)o_pVal)[1] = l_port1;
+            break;
+        }
+
+        case  UINT8_BY2_BY2:     // uint8_t  [2][2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_BY2_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_BY2_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+            {
+                uint8_t l_dimm0 = i_pBuffer->
+                         mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset];
+                uint8_t l_dimm1 = 0;
+                if (BOTH_DIMMS == l_special)
+                {
+                    l_dimm1 = l_dimm0; //use vpd value for both DIMMs
+                }
+                else
+                {
+                    l_dimm1 = i_pBuffer->
+                       mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset+1];
+                    switch (l_special)
+                    {
+                        case XLATE_DRAM_RON: // translate
+                            l_fapirc =
+                                  xlate_DRAM_RON(i_pAttrDef->iv_attrId,l_dimm0);
+                            if (l_fapirc) break; //break with error
+                            l_fapirc =
+                                  xlate_DRAM_RON(i_pAttrDef->iv_attrId,l_dimm1);
+                        default:
+                            ;      // use data  directly from  keyword buffer
+                    }
+                }
+                if (l_fapirc)  break; // break with error
+                (*(UINT8_BY2_BY2_t*)o_pVal)[l_port][0] = l_dimm0;
+                (*(UINT8_BY2_BY2_t*)o_pVal)[l_port][1] = l_dimm1;
+           }
+           break;
+        }
+
+        case  UINT8_BY2_BY2_BY4: // uint8_t  [2][2][4]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_BY2_BY2_BY4_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_BY2_BY2_BY4_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint8_t l_value = 0;
+            for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+            {
+                for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                {
+                    for (uint8_t l_k=0; l_k<NUM_RANKS; l_k++)
+                    {
+                        l_value = i_pBuffer->
+     mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset+(l_j)*NUM_RANKS+l_k];
+                        switch (l_special)
+                        {
+                            case XLATE_RTT_NOM: // translate
+                                l_fapirc=xlate_RTT_NOM(i_pAttrDef->iv_attrId,
+                                                                       l_value);
+                                break;
+                            case XLATE_RTT_WR: // translate
+                                l_fapirc=xlate_RTT_WR(i_pAttrDef->iv_attrId,
+                                                                       l_value);
+                            default:
+                                ;     // use data  directly from  keyword buffer
+                        }
+                        if (l_fapirc)  break; // break with error
+                        (*(UINT8_BY2_BY2_BY4_t*)o_pVal)[l_port][l_j][l_k] =
+                                                                        l_value;
+                    }
+                    if (l_fapirc)  break; // break with error
+                }
+                if (l_fapirc) break; // break with error
+           }
+           break;
+
+        }
+        case  UINT32_BY2:        // uint32_t [2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT32_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT32_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint16_t l_xlateSpecial = SPECIAL_XLATE_MASK & l_special;
+            uint16_t l_dataSpecial  = SPECIAL_DATA_MASK  & l_special;
+            for (uint8_t l_port=0; l_port<2;l_port++)
+            {
+                uint32_t l_value = getUint32 (l_dataSpecial, &(i_pBuffer->
+                      mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset]));
+                switch (l_xlateSpecial)
+                {
+                    case XLATE_RD_VREF: // translate
+                        l_fapirc=xlate_RD_VREF(i_pAttrDef->iv_attrId,
+                                                               l_value);
+                        break;
+                    case XLATE_WR_VREF: // translate
+                        l_fapirc=xlate_WR_VREF(i_pAttrDef->iv_attrId,
+                                                               l_value);
+                    default:
+                        ;     // use data  directly from  keyword buffer
+                }
+                if (l_fapirc)  break; // break with error
+                (*(UINT32_BY2_t*)o_pVal)[l_port] = l_value;
+            }
+            break;
+        }
+        case  UINT32_BY2_BY2:        // uint32_t [2][2]
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT32_BY2_BY2_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT32_BY2_BY2_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint16_t l_dataSpecial  = SPECIAL_DATA_MASK  & l_special;
+            for (uint8_t l_port=0; l_port<2;l_port++)
+            {
+                for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
+                {
+                    uint32_t l_value = getUint32 (l_dataSpecial, &(i_pBuffer->
+                      mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset]));
+                    (*(UINT32_BY2_BY2_t*)o_pVal)[l_port][l_j] = l_value;
+                }
+            }
+            break;
+        }
+        case  UINT64:            // uint64_t
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT64_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT64_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            uint64_t l_value = 0;
+            if (MERGE == l_special)
+            {
+                uint32_t l_port0 = getUint32 (UINT32_DATA, &(i_pBuffer->
+                        mb_mba[i_pos].mba_port[0].port_attr[l_attrOffset]));
+                uint32_t l_port1 = getUint32 (UINT32_DATA, &(i_pBuffer->
+                        mb_mba[i_pos].mba_port[1].port_attr[l_attrOffset]));
+                l_value = ( ((static_cast<uint64_t>(l_port0))<<32) |
+                               (static_cast<uint64_t>(l_port1)) );
+            }
+            else
+            {
+                FAPI_ERR("getMBvpdAttrData: invalid output type 0x%04x for"
+                       " attribute ID 0x%08x UINT64_T",
+                       i_pAttrDef->iv_outputType,
+                       i_pAttrDef->iv_attrId);
+                const fapi::AttributeId & ATTR_ID = i_pAttrDef->iv_attrId;
+                const DimmType & DIMM_TYPE =  i_pAttrDef->iv_dimmType;
+                const uint16_t & OUTPUT_TYPE = i_pAttrDef->iv_outputType;
+                FAPI_SET_HWP_ERROR(l_fapirc,
+                                        RC_MBVPD_UINT64_UNEXPECTED_OUTPUT_TYPE);
+                break;  //  break out with fapirc
+            }
+            (*(UINT64_t*)o_pVal) = l_value;
+            break ;
+        }
+        default: // Hard to do, but needs to be caught
+            FAPI_ERR("getMBvpdAttrData: invalid output type 0x%04x for"
+                       " attribute ID 0x%08x",
+                       i_pAttrDef->iv_outputType,
+                       i_pAttrDef->iv_attrId);
+            const fapi::AttributeId & ATTR_ID = i_pAttrDef->iv_attrId;
+            const DimmType & DIMM_TYPE =  i_pAttrDef->iv_dimmType;
+            const uint16_t & OUTPUT_TYPE = i_pAttrDef->iv_outputType;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_UNEXPECTED_OUTPUT_TYPE);
+            break;  //  break out with fapirc
+    }
+    return l_fapirc;
+}
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for ATTR_VPD_DRAM_RON
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_DRAM_RON (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t VPD_DRAM_RON_INVALID = 0x00;
+    const uint8_t VPD_DRAM_RON_OHM34 = 0x07;
+    const uint8_t VPD_DRAM_RON_OHM40 = 0x03;
+
+    switch (io_value)
+    {
+    case VPD_DRAM_RON_INVALID:
+        io_value=fapi::ENUM_ATTR_VPD_DRAM_RON_INVALID;
+        break;
+    case VPD_DRAM_RON_OHM34:
+        io_value=fapi::ENUM_ATTR_VPD_DRAM_RON_OHM34;
+        break;
+    case VPD_DRAM_RON_OHM40:
+        io_value=fapi::ENUM_ATTR_VPD_DRAM_RON_OHM40;
+        break;
+    default:
+        FAPI_ERR("Unsupported VPD encode for ATTR_VPD_DRAM_RON 0x%02x",
+                 io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint8_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for ATTR_VPD_DRAM_RTT_NOM
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_RTT_NOM (const fapi::AttributeId i_attr,
+                                         uint8_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t DRAM_RTT_NOM_DISABLE = 0x00;
+    const uint8_t DRAM_RTT_NOM_OHM20 = 0x04;
+    const uint8_t DRAM_RTT_NOM_OHM30 = 0x05;
+    const uint8_t DRAM_RTT_NOM_OHM34 = 0x07;
+    const uint8_t DRAM_RTT_NOM_OHM40 = 0x03;
+    const uint8_t DRAM_RTT_NOM_OHM48 = 0x85;
+    const uint8_t DRAM_RTT_NOM_OHM60 = 0x01;
+    const uint8_t DRAM_RTT_NOM_OHM80 = 0x06;
+    const uint8_t DRAM_RTT_NOM_OHM120 = 0x02;
+    const uint8_t DRAM_RTT_NOM_OHM240 = 0x84;
+
+    switch(io_value)
+    {
+    case DRAM_RTT_NOM_DISABLE:
+        io_value=fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE;
+        break;
+    case DRAM_RTT_NOM_OHM20:
+        io_value= fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM20;
+        break;
+    case DRAM_RTT_NOM_OHM30:
+        io_value= fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM30;
+        break;
+    case DRAM_RTT_NOM_OHM34:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM34;
+        break;
+    case DRAM_RTT_NOM_OHM40:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM40;
+        break;
+    case DRAM_RTT_NOM_OHM48:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM48;
+        break;
+    case DRAM_RTT_NOM_OHM60:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM60;
+        break;
+    case DRAM_RTT_NOM_OHM80:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM80;
+        break;
+    case DRAM_RTT_NOM_OHM120:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM120;
+        break;
+    case DRAM_RTT_NOM_OHM240:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM240;
+        break;
+    default:
+        FAPI_ERR("Unsupported VPD encode for ATTR_VPD_DRAM_RTT_NOM 0x%02x",
+                    io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint8_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for ATTR_VPD_DRAM_RTT_WR
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_RTT_WR (const fapi::AttributeId i_attr,
+                                        uint8_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t DRAM_RTT_WR_DISABLE = 0x00;
+    const uint8_t DRAM_RTT_WR_OHM60   = 0x01;
+    const uint8_t DRAM_RTT_WR_OHM120  = 0x02;
+
+    switch(io_value)
+    {
+    case DRAM_RTT_WR_DISABLE:
+        io_value=fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_DISABLE;
+        break;
+    case DRAM_RTT_WR_OHM60:
+        io_value= fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_OHM60;
+        break;
+    case DRAM_RTT_WR_OHM120:
+        io_value= fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_OHM120;
+        break;
+    default:
+        FAPI_ERR("Unsupported VPD encode for ATTR_VPD_DRAM_RTT_WR 0x%02x",
+                    io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint8_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for ATTR_VPD_DRAM_WR_VREF
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_WR_VREF (const fapi::AttributeId i_attr,
+                                         uint32_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    // The following intentionally skips 0x0a..0x0f, 0x1a..0x1f, and 0x2a..0x2f
+    const uint8_t WR_VREF_VDD420 = 0x00;
+    const uint8_t WR_VREF_VDD425 = 0x01;
+    const uint8_t WR_VREF_VDD430 = 0x02;
+    const uint8_t WR_VREF_VDD435 = 0x03;
+    const uint8_t WR_VREF_VDD440 = 0x04;
+    const uint8_t WR_VREF_VDD445 = 0x05;
+    const uint8_t WR_VREF_VDD450 = 0x06;
+    const uint8_t WR_VREF_VDD455 = 0x07;
+    const uint8_t WR_VREF_VDD460 = 0x08;
+    const uint8_t WR_VREF_VDD465 = 0x09;
+    const uint8_t WR_VREF_VDD470 = 0x10;
+    const uint8_t WR_VREF_VDD475 = 0x11;
+    const uint8_t WR_VREF_VDD480 = 0x12;
+    const uint8_t WR_VREF_VDD485 = 0x13;
+    const uint8_t WR_VREF_VDD490 = 0x14;
+    const uint8_t WR_VREF_VDD495 = 0x15;
+    const uint8_t WR_VREF_VDD500 = 0x16;
+    const uint8_t WR_VREF_VDD505 = 0x17;
+    const uint8_t WR_VREF_VDD510 = 0x18;
+    const uint8_t WR_VREF_VDD515 = 0x19;
+    const uint8_t WR_VREF_VDD520 = 0x20;
+    const uint8_t WR_VREF_VDD525 = 0x21;
+    const uint8_t WR_VREF_VDD530 = 0x22;
+    const uint8_t WR_VREF_VDD535 = 0x23;
+    const uint8_t WR_VREF_VDD540 = 0x24;
+    const uint8_t WR_VREF_VDD545 = 0x25;
+    const uint8_t WR_VREF_VDD550 = 0x26;
+    const uint8_t WR_VREF_VDD555 = 0x27;
+    const uint8_t WR_VREF_VDD560 = 0x28;
+    const uint8_t WR_VREF_VDD565 = 0x29;
+    const uint8_t WR_VREF_VDD570 = 0x30;
+    const uint8_t WR_VREF_VDD575 = 0x31;
+
+    switch(io_value)
+    {
+    case WR_VREF_VDD420:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD420;
+        break;
+    case WR_VREF_VDD425:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD425;
+        break;
+    case WR_VREF_VDD430:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD430;
+        break;
+    case WR_VREF_VDD435:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD435;
+        break;
+    case WR_VREF_VDD440:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD440;
+        break;
+    case WR_VREF_VDD445:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD445;
+        break;
+    case WR_VREF_VDD450:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD450;
+        break;
+    case WR_VREF_VDD455:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD455;
+        break;
+    case WR_VREF_VDD460:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD460;
+        break;
+    case WR_VREF_VDD465:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD465;
+        break;
+    case WR_VREF_VDD470:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD470;
+        break;
+    case WR_VREF_VDD475:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD475;
+        break;
+    case WR_VREF_VDD480:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD480;
+        break;
+    case WR_VREF_VDD485:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD485;
+        break;
+    case WR_VREF_VDD490:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD490;
+        break;
+    case WR_VREF_VDD495:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD495;
+        break;
+    case WR_VREF_VDD500:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD500;
+        break;
+    case WR_VREF_VDD505:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD505;
+        break;
+    case WR_VREF_VDD510:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD510;
+        break;
+    case WR_VREF_VDD515:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD515;
+        break;
+    case WR_VREF_VDD520:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD520;
+        break;
+    case WR_VREF_VDD525:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD525;
+        break;
+    case WR_VREF_VDD530:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD530;
+        break;
+    case WR_VREF_VDD535:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD535;
+        break;
+    case WR_VREF_VDD540:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD540;
+        break;
+    case WR_VREF_VDD545:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD545;
+        break;
+    case WR_VREF_VDD550:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD550;
+        break;
+    case WR_VREF_VDD555:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD555;
+        break;
+    case WR_VREF_VDD560:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD560;
+        break;
+    case WR_VREF_VDD565:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD565;
+        break;
+    case WR_VREF_VDD570:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD570;
+        break;
+    case WR_VREF_VDD575:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_WR_VREF_VDD575;
+        break;
+    default:
+        FAPI_ERR("Unsupported VPD encode for ATTR_VPD_DRAM_WR_VREF 0x%08x",
+                    io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint32_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for ATTR_VPD_CEN_RD_VREF
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_RD_VREF (const fapi::AttributeId i_attr,
+                                        uint32_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t RD_VREF_VDD61000 = 0x15;
+    const uint8_t RD_VREF_VDD59625 = 0x14;
+    const uint8_t RD_VREF_VDD58250 = 0x13;
+    const uint8_t RD_VREF_VDD56875 = 0x12;
+    const uint8_t RD_VREF_VDD55500 = 0x11;
+    const uint8_t RD_VREF_VDD54125 = 0x10;
+    const uint8_t RD_VREF_VDD52750 = 0x09;
+    const uint8_t RD_VREF_VDD51375 = 0x08;
+    const uint8_t RD_VREF_VDD50000 = 0x07;
+    const uint8_t RD_VREF_VDD48625 = 0x06;
+    const uint8_t RD_VREF_VDD47250 = 0x05;
+    const uint8_t RD_VREF_VDD45875 = 0x04;
+    const uint8_t RD_VREF_VDD44500 = 0x03;
+    const uint8_t RD_VREF_VDD43125 = 0x02;
+    const uint8_t RD_VREF_VDD41750 = 0x01;
+    const uint8_t RD_VREF_VDD40375 = 0x00;
+    const uint8_t RD_VREF_VDD81000 = 0x31;
+    const uint8_t RD_VREF_VDD79625 = 0x30;
+    const uint8_t RD_VREF_VDD78250 = 0x29;
+    const uint8_t RD_VREF_VDD76875 = 0x28;
+    const uint8_t RD_VREF_VDD75500 = 0x27;
+    const uint8_t RD_VREF_VDD74125 = 0x26;
+    const uint8_t RD_VREF_VDD72750 = 0x25;
+    const uint8_t RD_VREF_VDD71375 = 0x24;
+    const uint8_t RD_VREF_VDD70000 = 0x23;
+    const uint8_t RD_VREF_VDD68625 = 0x22;
+    const uint8_t RD_VREF_VDD67250 = 0x21;
+    const uint8_t RD_VREF_VDD65875 = 0x20;
+    const uint8_t RD_VREF_VDD64500 = 0x19;
+    const uint8_t RD_VREF_VDD63125 = 0x18;
+    const uint8_t RD_VREF_VDD61750 = 0x17;
+    const uint8_t RD_VREF_VDD60375 = 0x16;
+
+    switch(io_value)
+    {
+    case RD_VREF_VDD61000:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD61000;
+        break;
+    case RD_VREF_VDD59625:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD59625;
+        break;
+    case RD_VREF_VDD58250:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD58250;
+        break;
+    case RD_VREF_VDD56875:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD56875;
+        break;
+    case RD_VREF_VDD55500:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD55500;
+        break;
+    case RD_VREF_VDD54125:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD54125;
+        break;
+    case RD_VREF_VDD52750:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD52750;
+        break;
+    case RD_VREF_VDD51375:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD51375;
+        break;
+    case RD_VREF_VDD50000:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD50000;
+        break;
+    case RD_VREF_VDD48625:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD48625;
+        break;
+    case RD_VREF_VDD47250:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD47250;
+        break;
+    case RD_VREF_VDD45875:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD45875;
+        break;
+    case RD_VREF_VDD44500:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD44500;
+        break;
+    case RD_VREF_VDD43125:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD43125;
+        break;
+    case RD_VREF_VDD41750:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD41750;
+        break;
+    case RD_VREF_VDD40375:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD40375;
+        break;
+    case RD_VREF_VDD81000:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD81000;
+        break;
+    case RD_VREF_VDD79625:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD79625;
+        break;
+    case RD_VREF_VDD78250:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD78250;
+        break;
+    case RD_VREF_VDD76875:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD76875;
+        break;
+    case RD_VREF_VDD75500:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD75500;
+        break;
+    case RD_VREF_VDD74125:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD74125;
+        break;
+    case RD_VREF_VDD72750:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD72750;
+        break;
+    case RD_VREF_VDD71375:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD71375;
+        break;
+    case RD_VREF_VDD70000:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD70000;
+        break;
+    case RD_VREF_VDD68625:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD68625;
+        break;
+    case RD_VREF_VDD67250:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD67250;
+        break;
+    case RD_VREF_VDD65875:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD65875;
+        break;
+    case RD_VREF_VDD64500:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD64500;
+        break;
+    case RD_VREF_VDD63125:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD63125;
+        break;
+    case RD_VREF_VDD61750:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD61750;
+        break;
+    case RD_VREF_VDD60375:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_RD_VREF_VDD60375;
+        break;
+    default:
+        FAPI_ERR("Unsupported VPD encode for ATTR_VPD_CEN_RD_VREF 0x%08x",
+                    io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint32_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for
+//   ATTR_VPD_CEN_SLEW_RATE_DQ_DQS
+//   ATTR_VPD_CEN_SLEW_RATE_ADDR
+//   ATTR_VPD_CEN_SLEW_RATE_CLK
+//   ATTR_VPD_CEN_SLEW_RATE_SPCKE
+//   ATTR_VPD_CEN_SLEW_RATE_CNTL
+// They all have the same mapping and can share a translation procedure
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_SLEW_RATE (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t SLEW_RATE_3V_NS = 0x03;
+    const uint8_t SLEW_RATE_4V_NS = 0x04;
+    const uint8_t SLEW_RATE_5V_NS = 0x05;
+    const uint8_t SLEW_RATE_6V_NS = 0x06;
+    const uint8_t SLEW_RATE_MAXV_NS = 0x0F;
+
+//  Ensure that the enums are equal so that one routine can be shared
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_3V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_ADDR_SLEW_3V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_3V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CLK_SLEW_3V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_3V_NS==
+                       (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_SPCKE_SLEW_3V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_3V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CNTL_SLEW_3V_NS>();
+
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_4V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_ADDR_SLEW_4V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_4V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CLK_SLEW_4V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_4V_NS==
+                       (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_SPCKE_SLEW_4V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_4V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CNTL_SLEW_4V_NS>();
+
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_5V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_ADDR_SLEW_5V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_5V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CLK_SLEW_5V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_5V_NS==
+                       (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_SPCKE_SLEW_5V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_5V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CNTL_SLEW_5V_NS>();
+
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_6V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_ADDR_SLEW_6V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_6V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CLK_SLEW_6V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_6V_NS==
+                       (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_SPCKE_SLEW_6V_NS>();
+    checkConstantsMatch<(uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_6V_NS==
+                        (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CNTL_SLEW_6V_NS>();
+
+    checkConstantsMatch<
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_MAXV_NS==
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_ADDR_SLEW_MAXV_NS>();
+    checkConstantsMatch<
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_MAXV_NS==
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CLK_SLEW_MAXV_NS>();
+    checkConstantsMatch<
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_MAXV_NS==
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_SPCKE_SLEW_MAXV_NS>();
+    checkConstantsMatch<
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_MAXV_NS==
+                     (uint8_t)ENUM_ATTR_VPD_CEN_SLEW_RATE_CNTL_SLEW_MAXV_NS>();
+
+    switch(io_value)
+    {
+    case SLEW_RATE_3V_NS:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_3V_NS;
+        break;
+    case SLEW_RATE_4V_NS:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_4V_NS;
+        break;
+    case SLEW_RATE_5V_NS:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_5V_NS;
+        break;
+    case SLEW_RATE_6V_NS:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_6V_NS;
+        break;
+    case SLEW_RATE_MAXV_NS:
+        io_value = fapi::ENUM_ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_SLEW_MAXV_NS;
+        break;
+    default:
+         FAPI_ERR("Unsupported VPD encode for ATTR_VPD_CEN_SLEW_RATE 0x%02x",
+                    io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint8_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
+// Determine ISDMM MR keyword to use
+fapi::ReturnCode FindMRkeyword (const fapi::Target       & i_mbTarget,
+                                      fapi::MBvpdKeyword & o_keyword)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t l_M0_KEYWORD_SIZE = 32;
+    uint8_t l_m0_keyword[l_M0_KEYWORD_SIZE];
+    uint32_t l_M0Bufsize = l_M0_KEYWORD_SIZE;
+
+    do
+    {
+
+        l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_SPDX,
+                                     fapi::MBVPD_KEYWORD_M0,
+                                     i_mbTarget,
+                                     (uint8_t *)(&l_m0_keyword),
+                                     l_M0Bufsize);
+        if (l_fapirc)
+        {
+            FAPI_ERR("getMBvpdAttrData: Read of M0 keyword failed");
+            break;  //  break out with fapirc
+        }
+        if (l_M0_KEYWORD_SIZE > l_M0Bufsize)
+        {
+            FAPI_ERR("getMBvpdAttr:"
+                     " less M0 keyword returned than expected %d < %d",
+                       l_M0Bufsize, l_M0_KEYWORD_SIZE);
+            const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_M0;
+            const uint32_t & RETURNED_SIZE = l_M0Bufsize;
+            const fapi::Target & CHIP_TARGET = i_mbTarget;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
+            break;  //  break out with fapirc
+        }
+
+        uint8_t l_index = 0;
+        l_fapirc = FAPI_ATTR_GET(ATTR_ISDIMM_MBVPD_INDEX,&i_mbTarget,
+                                    l_index);
+        if(l_fapirc)
+        {
+            FAPI_ERR("getMBvpdAttrData: read of ISDIMM MBVPD Index failed");
+            break;
+        }
+        if (l_M0_KEYWORD_SIZE < l_index)
+        {
+            FAPI_ERR("unsupported MBVPD index : 0x%02x",l_index);
+            const uint8_t & M0_DATA = l_index;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_M0_DATA);
+            break;
+        }
+
+        o_keyword = fapi::MBVPD_KEYWORD_M1;
+
+        uint8_t l_actualM0Data = l_m0_keyword[l_index];
+
+        switch (l_actualM0Data)
+        {
+            case 1:
+                o_keyword = fapi::MBVPD_KEYWORD_M1;
+                break;
+            case 2:
+                o_keyword = fapi::MBVPD_KEYWORD_M2;
+                break;
+            case 3:
+                o_keyword = fapi::MBVPD_KEYWORD_M3;
+                break;
+            case 4:
+                o_keyword = fapi::MBVPD_KEYWORD_M4;
+                break;
+            case 5:
+                o_keyword = fapi::MBVPD_KEYWORD_M5;
+                break;
+            case 6:
+                o_keyword = fapi::MBVPD_KEYWORD_M6;
+                break;
+            case 7:
+                o_keyword = fapi::MBVPD_KEYWORD_M7;
+                break;
+            case 8:
+                o_keyword = fapi::MBVPD_KEYWORD_M8;
+                break;
+            default:
+                FAPI_ERR("Incorrect M0 data : 0x%02x",l_actualM0Data);
+                const uint8_t & M0_DATA = l_actualM0Data;
+                FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_M0_DATA);
+                break;
+        }
+
+    }
+    while (0);
+    if (!l_fapirc)
+    {
+        FAPI_DBG ("getMBvpdAttr: use MR keyword %d",o_keyword);
+    }
+
+    return  l_fapirc;
+}
+
+// Determine ISDMM MT keyword to use
+fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
+                                const fapi::Target       & i_mbaTarget,
+                                      fapi::MBvpdKeyword & o_keyword)
+{
+    fapi::ReturnCode l_fapirc;
+    do
+    {
+        //MT keyword is located in the SPDX record,
+        //and found by using ATTR_SPD_NUM_RANKS
+        //T1: one dimm, rank 1  T2: one dimm, rank 2   T3: one dimm, rank 4
+        //T5: two dimm, rank 1  T6: two dimm, rank 2   T8: two dimm, rank 4
+        fapi::ATTR_SPD_NUM_RANKS_Type l_spd_dimm_ranks[2][2] = {
+                {fapi::ENUM_ATTR_SPD_NUM_RANKS_RX,
+                fapi::ENUM_ATTR_SPD_NUM_RANKS_RX},
+                {fapi::ENUM_ATTR_SPD_NUM_RANKS_RX,
+                fapi::ENUM_ATTR_SPD_NUM_RANKS_RX}
+        };
+        uint8_t l_mba_port;
+        uint8_t l_mba_dimm;
+
+        std::vector<fapi::Target> l_target_dimm_array;
+        l_fapirc = fapiGetAssociatedDimms(i_mbaTarget, l_target_dimm_array,
+                                              fapi::TARGET_STATE_PRESENT);
+        if(l_fapirc)
+        {
+            FAPI_ERR("getMBvpdAttr: read of Associated Dimms failed");
+            break;
+        }
+
+        for(uint8_t l_dimm_index=0; l_dimm_index<l_target_dimm_array.size();
+                    l_dimm_index+=1)
+        {
+            l_fapirc = FAPI_ATTR_GET(ATTR_MBA_PORT,
+                            &l_target_dimm_array[l_dimm_index],
+                            l_mba_port);
+            if(l_fapirc)
+            {
+                FAPI_ERR("getMBvpdAttr: read of ATTR_MBA_PORT failed");
+                break;
+            }
+            l_fapirc = FAPI_ATTR_GET(ATTR_MBA_DIMM,
+                            &l_target_dimm_array[l_dimm_index],
+                            l_mba_dimm);
+            if(l_fapirc)
+            {
+                FAPI_ERR("getMBvpdAttr: read of ATTR_MBA_DIMM failed");
+                break;
+            }
+
+            l_fapirc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,
+                            &l_target_dimm_array[l_dimm_index],
+                            l_spd_dimm_ranks[l_mba_port][l_mba_dimm]);
+            if(l_fapirc)
+            {
+                FAPI_ERR("getMBvpdAttr: read of ATTR_SPD_NUM_RANKS failed");
+                break;
+            }
+        }
+        if(l_fapirc)
+        {
+            break;
+        }
+
+        fapi::ATTR_SPD_NUM_RANKS_Type l_rankCopy =
+          fapi::ENUM_ATTR_SPD_NUM_RANKS_RX;
+        uint8_t l_dimmInvalid = 0;
+        bool l_double_drop = false;
+        /* Mismatched rank numbers between the paired ports is an error
+         * that should deconfigure the parent MBA so the data for that
+         * MBA should never be fetched. The same is for mismatched slot 1
+         * and slot 0 on the same port
+         */
+
+        //single or double drop
+        if( (l_spd_dimm_ranks[0][1] == fapi::ENUM_ATTR_SPD_NUM_RANKS_RX)
+          && (l_spd_dimm_ranks[1][1] == fapi::ENUM_ATTR_SPD_NUM_RANKS_RX) )
+        {
+            //if the two match, it's a valid case.
+            if(l_spd_dimm_ranks[0][0] == l_spd_dimm_ranks[1][0])
+            {
+                //0000, set to 1
+                if(l_spd_dimm_ranks[0][0]
+                   == fapi::ENUM_ATTR_SPD_NUM_RANKS_RX)
+                {
+                    l_rankCopy = 1;
+                    //throwing error for all empty
+                    FAPI_ERR("No dimm's found");
+                    const uint8_t DIMM_P0S0 = l_spd_dimm_ranks[0][0];
+                    const uint8_t DIMM_P0S1 = l_spd_dimm_ranks[0][1];
+                    const uint8_t DIMM_P1S0 = l_spd_dimm_ranks[1][0];
+                    const uint8_t DIMM_P1S1 = l_spd_dimm_ranks[1][1];
+                    FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_DIMMS_NOT_FOUND);
+                    break;
+
+                //either 0101,0202,0404.
+                }
+                else
+                {
+                    l_rankCopy = l_spd_dimm_ranks[0][0];
+                }
+            }
+            else
+            {
+                //throwing error for invalid dimm combination
+                l_dimmInvalid = 1;
+            }
+        //if all 4 are the same, its double ranked
+        } else if(l_spd_dimm_ranks[0][1] == l_spd_dimm_ranks[0][0] &&
+                    l_spd_dimm_ranks[1][1] == l_spd_dimm_ranks[1][0] &&
+                    l_spd_dimm_ranks[0][1] == l_spd_dimm_ranks[1][1])
+        {
+            //either 1111,2222,4444
+            l_rankCopy = l_spd_dimm_ranks[0][0];
+            l_double_drop = true;
+        }
+        else
+        {
+            //throwing error for invalid dimm combination
+            l_dimmInvalid = 1;
+        }
+
+        if(l_dimmInvalid)
+        {
+            FAPI_ERR("There is an invalid combination of dimm's found");
+            const uint8_t INVALID_DIMM_P0S0 = l_spd_dimm_ranks[0][0];
+            const uint8_t INVALID_DIMM_P0S1 = l_spd_dimm_ranks[0][1];
+            const uint8_t INVALID_DIMM_P1S0 = l_spd_dimm_ranks[1][0];
+            const uint8_t INVALID_DIMM_P1S1 = l_spd_dimm_ranks[1][1];
+            const fapi::Target & MBA = i_mbaTarget;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_DIMM_FOUND);
+            break;
+        }
+
+        switch (l_rankCopy)
+        {
+            case fapi::ENUM_ATTR_SPD_NUM_RANKS_R1:
+                if( l_double_drop ) {
+                    o_keyword = fapi::MBVPD_KEYWORD_T5;
+                } else {
+                    o_keyword = fapi::MBVPD_KEYWORD_T1;
+                }
+                break;
+            case fapi::ENUM_ATTR_SPD_NUM_RANKS_R2:
+                if( l_double_drop ) {
+                    o_keyword = fapi::MBVPD_KEYWORD_T6;
+                } else {
+                    o_keyword = fapi::MBVPD_KEYWORD_T2;
+                }
+                break;
+            case fapi::ENUM_ATTR_SPD_NUM_RANKS_R4:
+                if( l_double_drop ) {
+                    o_keyword = fapi::MBVPD_KEYWORD_T8;
+                } else {
+                    o_keyword = fapi::MBVPD_KEYWORD_T4;
+                }
+                break;
+            default:
+                FAPI_ERR("Invalid dimm rank : 0x%02x",l_rankCopy);
+                const uint8_t & RANK_NUM = l_rankCopy;
+                FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_MT_DATA);
+                break;
+        }
+
+    }
+    while (0);
+    if (!l_fapirc)
+    {
+        FAPI_DBG ("getMBvpdAttr: use MT keyword %d",o_keyword);
+    }
+
+    return  l_fapirc;
+}
+
+}   // extern "C"

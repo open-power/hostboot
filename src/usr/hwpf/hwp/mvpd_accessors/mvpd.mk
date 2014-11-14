@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -34,9 +34,7 @@ OBJS += getMBvpdRing.o
 OBJS += setMvpdRing.o
 OBJS += mvpdRingFuncs.o
 OBJS += getMvpdExL2SingleMemberEnable.o
-OBJS += getMBvpdPhaseRotatorData.o
 OBJS += getMBvpdAddrMirrorData.o
-OBJS += getMBvpdTermData.o
 OBJS += getMBvpdSlopeInterceptData.o
 OBJS += getMBvpdSpareDramData.o
 OBJS += getMBvpdVersion.o
@@ -47,3 +45,6 @@ OBJS += accessMBvpdL4BankDelete.o
 OBJS += getDecompressedISDIMMAttrs.o
 OBJS += getISDIMMTOC4DAttrs.o
 OBJS += DQCompressionLib.o
+OBJS += getMBvpdAttr.o
+OBJS += getMBvpdAttrData.o
+

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.21 2014/11/03 17:56:17 eliner Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.22 2014/12/11 13:30:47 whs Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -126,6 +126,7 @@
     <description>
         Output variable size must match size of expected output type.
     </description>
+    <ffdc>ATTR_ID</ffdc>
     <ffdc>EXPECTED_SIZE</ffdc>
     <ffdc>PASSED_SIZE</ffdc>
     <callout>
@@ -330,4 +331,60 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_UNEXPECTED_ISDIMM_KEYWORD</rc>
+    <description>
+         ISDIMM Attribute definition has unexpected keyword value.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>KEYWORD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_DEFAULT_UNEXPECTED_OUTPUT_TYPE</rc>
+    <description>
+         Default attribute definition has unexpected output type.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>OUTPUT_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_UINT64_UNEXPECTED_OUTPUT_TYPE</rc>
+    <description>
+         Uint64_t attribute definition has unexpected output type.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>OUTPUT_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_UNEXPECTED_OUTPUT_TYPE</rc>
+    <description>
+         Attribute definition has unexpected output type.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>OUTPUT_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

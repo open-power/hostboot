@@ -44,14 +44,12 @@
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <hwpf/hwp/mvpd_accessors/getMvpdExL2SingleMemberEnable.H>
-#include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
-#include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
-#include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdAttr.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include <hwpf/hwp/chip_accessors/getPciOscswitchConfig.H>
 #include <hwpf/hwp/chip_accessors/getOscswitchCtlAttr.H>
@@ -1032,17 +1030,6 @@ fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
     return l_rc;
 }
 
-fapi::ReturnCode fapiPlatGetPhaseRotatorData (
-             const fapi::Target * i_pTarget,
-             const fapi::MBvpdPhaseRotatorData i_attr,
-             uint8_t    (&o_val) [2] )
-{
-    // Call a VPD Accessor HWP to get the data
-    fapi::ReturnCode l_rc;
-    FAPI_EXEC_HWP(l_rc, getMBvpdPhaseRotatorData, *i_pTarget, i_attr, o_val);
-    return l_rc;
-}
-
 fapi::ReturnCode fapiPlatGetAddrMirrorData (
              const fapi::Target * i_pTarget,
              uint8_t   (& o_val) [2][2] )
@@ -1053,15 +1040,15 @@ fapi::ReturnCode fapiPlatGetAddrMirrorData (
     return l_rc;
 }
 
-fapi::ReturnCode fapiPlatGetTermData (
+fapi::ReturnCode fapiPlatGetAttrData (
              const fapi::Target * i_pTarget,
-             const fapi::MBvpdTermData i_attr,
+             const fapi::AttributeId i_attr,
              void  * o_pVal,
-             const uint32_t i_valSize)
+             const size_t i_valSize)
 {
     // Call a VPD Accessor HWP to get the data
     fapi::ReturnCode l_rc;
-    FAPI_EXEC_HWP(l_rc, getMBvpdTermData,
+    FAPI_EXEC_HWP(l_rc, getMBvpdAttr,
                         *i_pTarget, i_attr, o_pVal, i_valSize);
     return l_rc;
 }

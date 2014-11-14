@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,9 +51,7 @@
 #include    <targeting/common/utilFilter.H>
 
 #include    <setMvpdRing.H>
-#include    <mvpd_accessors/getMBvpdPhaseRotatorData.H>
 #include    <mvpd_accessors/getMBvpdAddrMirrorData.H>
-#include    <mvpd_accessors/getMBvpdTermData.H>
 #include    <mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include    <mvpd_accessors/getMBvpdVersion.H>
 #include    <mvpd_accessors/getMBvpdDram2NModeEnabled.H>
@@ -61,6 +59,7 @@
 #include    <mvpd_accessors/getControlCapableData.H>
 #include    <mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include    <mvpd_accessors/getDecompressedISDIMMAttrs.H>
+#include    <mvpd_accessors/getMBvpdAttr.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -1121,34 +1120,69 @@ public:
     }
 
     /**
-     * @brief call getMBvpdTermData to fetch memory buffer MT attributes
+     * @brief call getMBvpdAttr to fetch memory buffer MT attributes
      *
      */
     void    testGetTermData()
     {
         fapi::ReturnCode    l_fapirc;
         uint8_t val1[2][2] = {{0xFF,0xFF},{0xFF,0xFF}};
+        uint32_t val3[2] = {0xFFFFFFFF,0xFFFFFFFF};
+        uint32_t val7[2][2] = {{0xFFFFFFFF,0xFFFFFFFF},
+                              {0xFFFFFFFF,0xFFFFFFFF}};
 #if HWPMBVPDACCESSORTEST_UT4
         uint8_t val2[2][2][4]={
                               {{0xFF,0xFF,0xFF,0xFF},{0xFF,0xFF,0xFF,0xFF}},
                               {{0xFF,0xFF,0xFF,0xFF},{0xFF,0xFF,0xFF,0xFF}}};
         uint8_t l_errorChk = 1; //do error checks just once
         uint8_t  val4[2] = {0xFF,0xFF};
-        uint32_t val3[2] = {0xFFFFFFFF,0xFFFFFFFF};
         uint8_t  val5[2] = {0xFF,0xFF};
 #endif
         uint64_t val6    = 0xFFFFFFFFFFFFFFFF;
 
 #if HWPMBVPDACCESSORTEST_UT4
-        getMBvpdTermData_FP_t (l_getMBvpdTermData)
-                              = &getMBvpdTermData;
+        getMBvpdAttr_FP_t (l_getMBvpdAttr)
+                              = &getMBvpdAttr;
 #endif
         TS_TRACE( "testGetTermData entry" );
+
+        // ensure attribute look up table is in proper version order
+        for (uint32_t i=0;
+                      i <= fapi::getAttrData::g_MBVPD_ATTR_DEF_array_size; i++)
+        {
+            fapi::AttributeId l_attrId  =
+                       fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_attrId;
+            fapi::getAttrData::DimmType l_dimmType =
+                       fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_dimmType;
+            fapi::getAttrData::VpdVersion l_version =
+                       fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_version;
+            // from this piont to the end of the table, for this attribute
+            // dimm type pair, the version should be less in value.
+            // Otherwise, an intended match will not be found
+            for (uint32_t j=i;
+                       j <= fapi::getAttrData::g_MBVPD_ATTR_DEF_array_size; j++)
+            {
+                if ( (l_attrId ==
+                    fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_attrId) &&
+                     (l_dimmType ==
+                    fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_dimmType) &&
+                     (l_version   <
+                    fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version))
+                {
+                    TS_FAIL( "testGetTermData table error: "
+                      " attr 0x%08x dimm %d row %d version 0x%04x <"
+                      " row %d version 0x%04x",
+                      l_attrId,l_dimmType,i,l_version,
+                      j,
+                      fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version);
+                }
+            }
+        }
 
         TARGETING::TargetHandleList l_memBufList;
         getAllChips(l_memBufList, TYPE_MEMBUF);
 
-        TS_TRACE( "testGetTermData l_memBufList.size()=%d",
+        TS_TRACE( "testGetTermData l_memBufList.size()=%ld",
                                       l_memBufList.size() );
 
         // loop thru memory buffers
@@ -1163,7 +1197,7 @@ public:
             getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
                             CLASS_UNIT,TYPE_MBA,false);
 
-            TS_TRACE( "testGetTermData l_mbaBufList.size()=%d",
+            TS_TRACE( "testGetTermData l_mbaBufList.size()=%ld",
                     l_mbaList.size());
 
             // loop thru all the mbas (should be 2)
@@ -1188,8 +1222,8 @@ public:
             // check for interface errors being caught. Just once.
             if (l_errorChk) {
                // check size matches type for each of the 4 types
-               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
-                           fapi::TERM_DATA_DRAM_RON,
+               l_fapirc = (*l_getMBvpdAttr)(l_fapi_mba_target,
+                           fapi::ATTR_VPD_DRAM_RON,
                            &val1, sizeof(val1)+1); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
@@ -1198,8 +1232,8 @@ public:
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
                }
-               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
-                           fapi::TERM_DATA_DRAM_RTT_NOM,
+               l_fapirc = (*l_getMBvpdAttr)(l_fapi_mba_target,
+                           fapi::ATTR_VPD_DRAM_RTT_NOM,
                            &val2, sizeof(val2)-1); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
@@ -1208,8 +1242,8 @@ public:
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
                }
-               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
-                           fapi::TERM_DATA_CEN_RD_VREF,
+               l_fapirc = (*l_getMBvpdAttr)(l_fapi_mba_target,
+                           fapi::ATTR_VPD_CEN_RD_VREF,
                            &val3, sizeof(val3)+2); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
@@ -1218,8 +1252,8 @@ public:
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
                }
-               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
-                           fapi::TERM_DATA_DRAM_WRDDR4_VREF,
+               l_fapirc = (*l_getMBvpdAttr)(l_fapi_mba_target,
+                           fapi::ATTR_VPD_DRAM_WRDDR4_VREF,
                            &val4, 0); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
@@ -1229,8 +1263,8 @@ public:
                          static_cast<uint32_t>(l_fapirc));
                }
                // check for catching an invalid ID
-               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
-                           (fapi::MBvpdTermData)99, //invalid ID
+               l_fapirc = (*l_getMBvpdAttr)(l_fapi_mba_target,
+                           (fapi::AttributeId)99, //invalid ID
                            &val1, sizeof(val1));
                if (l_fapirc != fapi::RC_MBVPD_INVALID_ATTRIBUTE_ID)
                {
@@ -1311,6 +1345,22 @@ public:
                    val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
                TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
                    val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+#endif
+           // ATTR_VPD_DIMM_RCD_OUTPUT_TIMING
+               l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,
+                   &l_fapi_mba_target, val1);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+              "ATTR_VPD_DIMM_RCD_OUTPUT_TIMING=(0x%02x,0x%02x),(0x%02x,0x%02x)",
+                   val1[0][0], val1[0][1], val1[1][0], val1[1][1]);
+
+           // ATTR_VPD_DIMM_RCD_IBT
+               l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DIMM_RCD_IBT,
+                   &l_fapi_mba_target, val7);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+              "ATTR_VPD_DIMM_RCD_IBT=(0x%08x,0x%08x),(0x%08x,0x%08x)",
+                   val7[0][0], val7[0][1], val7[1][0], val7[1][1]);
 
            // TERM_DATA_CEN_RD_VREF
                l_fapirc = FAPI_ATTR_GET(ATTR_VPD_CEN_RD_VREF,
@@ -1320,6 +1370,7 @@ public:
                    "TERM_DATA_CEN_RD_VREF=0x%08x,0x%08x",
                    val3[0], val3[1]);
 
+#if HWPMBVPDACCESSORTEST_UT4
            // TERM_DATA_DRAM_WR_VREF
                l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DRAM_WR_VREF,
                    &l_fapi_mba_target, val3);
@@ -1484,7 +1535,7 @@ public:
 
 
     /**
-     * @brief call getMBvpdPhaseRotData to fetch memory buffer MR attributes
+     * @brief call getMBvpdAttr to fetch memory buffer MR attributes
      *
      */
     void    testGetPhaseRotatorData()
@@ -1498,7 +1549,7 @@ public:
         TARGETING::TargetHandleList l_memBufList;
         getAllChips(l_memBufList, TYPE_MEMBUF);
 
-        TS_TRACE( "testGetPhaseRotatorData l_memBufList.size()=%d",
+        TS_TRACE( "testGetPhaseRotatorData l_memBufList.size()=%ld",
                                       l_memBufList.size() );
 
         // loop thru memory buffers
@@ -1513,7 +1564,7 @@ public:
             getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
                             CLASS_UNIT,TYPE_MBA,false);
 
-            TS_TRACE( "testGetPhaseRotatorData l_mbaBufList.size()=%d",
+            TS_TRACE( "testGetPhaseRotatorData l_mbaBufList.size()=%ld",
                     l_mbaList.size());
 
             // loop thru all the mbas (should be 2)

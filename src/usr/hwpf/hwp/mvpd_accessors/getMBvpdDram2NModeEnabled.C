@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdDram2NModeEnabled.C,v 1.3 2014/02/12 22:11:39 mjjones Exp $
+// $Id: getMBvpdDram2NModeEnabled.C,v 1.4 2014/12/11 13:35:35 whs Exp $
 /**
  *  @file getMBvpdDram2NModeEnabled.C
  *
@@ -35,7 +37,7 @@
 #include    <fapi.H>
 #include    <fapiUtil.H>
 #include    <getMBvpdDram2NModeEnabled.H>
-#include    <getMBvpdPhaseRotatorData.H>
+#include    <getMBvpdAttr.H>
 
 extern "C"
 {
@@ -53,10 +55,11 @@ fapi::ReturnCode getMBvpdDram2NModeEnabled(
     do {
         // Retrieve the Dram 2N Mode from the MR keyword
         FAPI_EXEC_HWP(l_fapirc,
-                      getMBvpdPhaseRotatorData,
+                      getMBvpdAttr,
                       i_mbaTarget,
-                      fapi::PHASE_ROT_DRAM_2N_MODE,
-                      l_dram2NMode);
+                      fapi::ATTR_VPD_DRAM_2N_MODE_ENABLED,
+                      &l_dram2NMode,
+                      sizeof(l_dram2NMode));
         if (l_fapirc)
         {
             FAPI_ERR("getMBvpdDram2NModeEnabled: Read of VZ keyword failed");
