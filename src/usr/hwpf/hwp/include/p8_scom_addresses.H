@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.186 2014/09/17 13:58:45 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.187 2014/09/30 13:59:57 gweber Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1357,11 +1357,13 @@ CONST_UINT64_T( A_GP2_0x08000002                      , ULL(0x08000002) );
 CONST_UINT64_T( A_SCOM_0x08010000                     , ULL(0x08010000) );
 
 //------------------------------------------------------------------------------
-//      A-BUS TRACE
+//      A-BUS TRACE[0,1]
 //------------------------------------------------------------------------------
 CONST_UINT64_T( A_TRACE_STATUS_0x08010004             , ULL(0x08010004) );
 CONST_UINT64_T( A_TRACE_DATA_HI_0x08010400            , ULL(0x08010400) );
 CONST_UINT64_T( A_TRACE_DATA_LO_0x08010401            , ULL(0x08010401) );
+CONST_UINT64_T( A_TRACE_DATA_HI_0x08010440            , ULL(0x08010440) );
+CONST_UINT64_T( A_TRACE_DATA_LO_0x08010441            , ULL(0x08010441) );
 
 //------------------------------------------------------------------------------
 //      A-BUS CLOCK CONTROL
@@ -2136,6 +2138,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.187  2014/09/30 13:59:57  gweber
+added A_TRA1 support for Naples
+
 Revision 1.186  2014/09/17 13:58:45  jmcgill
 add EX clk adjust register definition (SW278630)
 
