@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.38000999 2014/10/16 21:35:22 jdsloat Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.42 2014-11-14 20:00:37 dcrowell Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -158,7 +158,8 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 12, bits 5-3.
     </description>
     <valueType>uint8</valueType>
-    <enum>R1 = 0x00, R2 = 0x01, R3 = 0x02, R4 = 0x03</enum>
+    <!-- RX means an invalid value, only used to init vars -->
+    <enum>R1 = 0x00, R2 = 0x01, R4 = 0x03, RX = 0xFF</enum>
     <platInit/>
 </attribute>
 
@@ -608,7 +609,7 @@ The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, foll
 <!-- @fixme RTC:117484
 <attribute>
     <id>ATTR_VPD_DIMM_RCD_OUTPUT_TIMING</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RCD Timing. Supplied by VPD, used by mss_eff_config.C. Each dimm will have a value.
 		 consumer: mss_eff_config
    </description>
@@ -616,6 +617,7 @@ The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, foll
     <enum>1T = 0x01, 3T = 0x03</enum>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2 2</array>
 </attribute>
 -->
 
@@ -2519,6 +2521,7 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     </enum>
     <platInit/>
 </attribute>
+
 <!--@fixme RTC: 112608
  <attribute>
      <id>ATTR_VPD_POWER_CONTROL_CAPABLE</id>
@@ -2529,6 +2532,22 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
      <platInit/>
      <odmVisable/>
  </attribute>
- -->
+-->
+
+<!-- @fixme RTC:117484
+ <attribute>
+     <id>ATTR_VPD_DIMM_RCD_IBT</id>
+     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each dimm will have a value.
+creator: mss_eff_cnfg
+consumer: mss_dram_init
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+</attribute>
+-->
 
 </attributes>

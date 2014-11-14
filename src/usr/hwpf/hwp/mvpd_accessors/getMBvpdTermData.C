@@ -329,9 +329,14 @@ fapi::ReturnCode getMBvpdTermData(
         {
             //MT keyword is located in the SPDX record,
             //and found by using ATTR_SPD_NUM_RANKS
-            //T1: one dimm, rank 1  T2: one dimm, rank 2    T3: one dimm, rank 4
-            //T5: two dimm, rank 1  T6: two dimm, rank 2    T8: two dimm, rank 4
-            uint8_t l_spd_dimm_ranks[2][2] = {{0,0},{0,0}};
+            //T1: one dimm, rank 1  T2: one dimm, rank 2   T3: one dimm, rank 4
+            //T5: two dimm, rank 1  T6: two dimm, rank 2   T8: two dimm, rank 4
+            fapi::ATTR_SPD_NUM_RANKS_Type l_spd_dimm_ranks[2][2] = {
+                {fapi::ENUM_ATTR_SPD_NUM_RANKS_RX,
+                fapi::ENUM_ATTR_SPD_NUM_RANKS_RX},
+                {fapi::ENUM_ATTR_SPD_NUM_RANKS_RX,
+                fapi::ENUM_ATTR_SPD_NUM_RANKS_RX}
+            };
             uint8_t l_mba_port;
             uint8_t l_mba_dimm;
 
@@ -367,29 +372,37 @@ fapi::ReturnCode getMBvpdTermData(
                 l_fapirc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,
                                 &l_target_dimm_array[l_dimm_index],
                                 l_spd_dimm_ranks[l_mba_port][l_mba_dimm]);
+                if(l_fapirc)
+                {
+                    FAPI_ERR("getMBvpdTermData: read of ATTR_SPD_NUM_RANKS failed");
+                    break;
+                }
             }
             if(l_fapirc)
             {
-                FAPI_ERR("getMBvpdTermData: read of ATTR_SPD_NUM_RANKS failed");
                 break;
             }
 
-            uint8_t l_rankCopy = 0;
+            fapi::ATTR_SPD_NUM_RANKS_Type l_rankCopy =
+              fapi::ENUM_ATTR_SPD_NUM_RANKS_RX;
             uint8_t l_dimmInvalid = 0;
-            /* Mismatched rank numbers between the paired ports is an error that
-             * should deconfigure the parent MBA so the data for that MBA should
-             * never be fetched. The same is for mismatched slot 1 and slot 0
-             * on the same port
+            bool l_double_drop = false;
+            /* Mismatched rank numbers between the paired ports is an error
+             * that should deconfigure the parent MBA so the data for that
+             * MBA should never be fetched. The same is for mismatched slot 1
+             * and slot 0 on the same port
              */
 
             //single or double drop
-            if(l_spd_dimm_ranks[0][1] == 0 && l_spd_dimm_ranks[1][1] == 0)
+            if( (l_spd_dimm_ranks[0][1] == fapi::ENUM_ATTR_SPD_NUM_RANKS_RX)
+              && (l_spd_dimm_ranks[1][1] == fapi::ENUM_ATTR_SPD_NUM_RANKS_RX) )
             {
                 //if the two match, it's a valid case.
                 if(l_spd_dimm_ranks[0][0] == l_spd_dimm_ranks[1][0])
                 {
                     //0000, set to 1
-                    if(l_spd_dimm_ranks[0][0] == 0)
+                    if(l_spd_dimm_ranks[0][0]
+                       == fapi::ENUM_ATTR_SPD_NUM_RANKS_RX)
                     {
                         l_rankCopy = 1;
                         //throwing error for all empty
@@ -399,10 +412,14 @@ fapi::ReturnCode getMBvpdTermData(
                         const uint8_t DIMM_P1S0 = l_spd_dimm_ranks[1][0];
                         const uint8_t DIMM_P1S1 = l_spd_dimm_ranks[1][1];
                         FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_DIMMS_NOT_FOUND);
+                        break;
 
                     //either 0101,0202,0404.
-                    }else
+                    }
+                    else
+                    {
                         l_rankCopy = l_spd_dimm_ranks[0][0];
+                    }
                 }else
                 {
                     //throwing error for invalid dimm combination
@@ -414,7 +431,8 @@ fapi::ReturnCode getMBvpdTermData(
                         l_spd_dimm_ranks[0][1] == l_spd_dimm_ranks[1][1])
             {
                 //either 1111,2222,4444
-                l_rankCopy = l_spd_dimm_ranks[0][0] + 4;
+                l_rankCopy = l_spd_dimm_ranks[0][0];
+                l_double_drop = true;
             }else
             {
                 //throwing error for invalid dimm combination
@@ -436,33 +454,35 @@ fapi::ReturnCode getMBvpdTermData(
             fapi::MBvpdKeyword l_MT_Keyword = fapi::MBVPD_KEYWORD_T1;
             switch (l_rankCopy)
             {
-                case 1:
-                    l_MT_Keyword = fapi::MBVPD_KEYWORD_T1;
+                case fapi::ENUM_ATTR_SPD_NUM_RANKS_R1:
+                    if( l_double_drop ) {
+                        l_MT_Keyword = fapi::MBVPD_KEYWORD_T5;
+                    } else {
+                        l_MT_Keyword = fapi::MBVPD_KEYWORD_T1;
+                    }
                     break;
-                case 2:
-                    l_MT_Keyword = fapi::MBVPD_KEYWORD_T2;
+                case fapi::ENUM_ATTR_SPD_NUM_RANKS_R2:
+                    if( l_double_drop ) {
+                        l_MT_Keyword = fapi::MBVPD_KEYWORD_T6;
+                    } else {
+                        l_MT_Keyword = fapi::MBVPD_KEYWORD_T2;
+                    }
                     break;
-                case 4:
-                    l_MT_Keyword = fapi::MBVPD_KEYWORD_T4;
-                    break;
-                case 5:
-                    l_MT_Keyword = fapi::MBVPD_KEYWORD_T5;
-                    break;
-                case 6:
-                    l_MT_Keyword = fapi::MBVPD_KEYWORD_T6;
-                    break;
-                case 8:
-                    l_MT_Keyword = fapi::MBVPD_KEYWORD_T8;
+                case fapi::ENUM_ATTR_SPD_NUM_RANKS_R4:
+                    if( l_double_drop ) {
+                        l_MT_Keyword = fapi::MBVPD_KEYWORD_T8;
+                    } else {
+                        l_MT_Keyword = fapi::MBVPD_KEYWORD_T4;
+                    }
                     break;
                 default:
-                    FAPI_ERR("Incorrect data from dimm ranks : 0x%02x",l_rankCopy);
+                    FAPI_ERR("Invalid dimm rank : 0x%02x",l_rankCopy);
                     const uint8_t & RANK_NUM = l_rankCopy;
                     FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_MT_DATA);
                     break;
             }
             if(l_fapirc)
             {
-                FAPI_ERR("getMBvpdTermData: Invalid rank 0x%02x",l_rankCopy);
                 break;
             }
 
@@ -471,20 +491,27 @@ fapi::ReturnCode getMBvpdTermData(
                                      l_mbTarget,
                                      reinterpret_cast<uint8_t *>(l_pMtBuffer),
                                      l_MtBufsize);
+            if (l_fapirc)
+            {
+                FAPI_ERR("getMBvpdTermData: Read of Tx (%d) keyword failed",l_MT_Keyword);
+                break;  //  break out with fapirc
+            }
         //else custom_dimm is 1 and we need to use the CDIMM
-        }else{
+        }
+        else
+        {
             l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
                                      fapi::MBVPD_KEYWORD_MT,
                                      l_mbTarget,
                                      reinterpret_cast<uint8_t *>(l_pMtBuffer),
                                      l_MtBufsize);
+            if (l_fapirc)
+            {
+                FAPI_ERR("getMBvpdTermData: Read of MT keyword failed");
+                break;  //  break out with fapirc
+            }
         }
 
-        if (l_fapirc)
-        {
-            FAPI_ERR("getMBvpdTermData: Read of MT keyword failed");
-            break;  //  break out with fapirc
-        }
 
         // Check that sufficient MT was returned.
         if (l_MtBufsize < MT_KEYWORD_SIZE )
