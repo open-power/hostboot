@@ -297,7 +297,7 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 }
 /*******Protected Methods**************/
 RtPnor::RtPnor()
-:iv_TOC_used(0)
+:iv_TOC_used(PNOR::TOC_0)
 {
     errlHndl_t l_err = readTOC();
     if (l_err)
@@ -588,7 +588,10 @@ errlHndl_t RtPnor::readTOC ()
             break;
         }
 
-        l_err = readFromDevice (l_procId, PNOR::TOC, PNOR::TOC_0_OFFSET,
+        // @TODO RTC:120733
+        // RT code needs a way to get the active side tocs vs just defaulting
+        // to SIDE_A
+        l_err = readFromDevice (l_procId, PNOR::TOC, PNOR::SIDE_A_TOC_0_OFFSET,
                 PAGESIZE,false,toc0Buffer);
         if (l_err)
         {
@@ -596,7 +599,7 @@ errlHndl_t RtPnor::readTOC ()
                       " for TOC0");
             break;
         }
-        l_err = readFromDevice (l_procId, PNOR::TOC, PNOR::TOC_1_OFFSET,
+        l_err = readFromDevice (l_procId, PNOR::TOC, PNOR::SIDE_A_TOC_1_OFFSET,
                 PAGESIZE, false,toc1Buffer);
         if (l_err)
         {
@@ -605,7 +608,7 @@ errlHndl_t RtPnor::readTOC ()
             break;
         }
 
-        l_err = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC,0);
+        l_err = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC, 0);
         if (l_err)
         {
             TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");

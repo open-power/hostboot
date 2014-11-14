@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -52,6 +52,15 @@ using namespace HWAS::COMMON;
 using namespace TARGETING;
 
 const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
+/**
+ * @brief Guard PNOR section info, obtained once for efficiency
+ */
+static PNOR::SectionInfo_t g_GardSectionInfo;
+
+/**
+ * @brief Flag indicating if getGardSectionInfo() was called previously
+ */
+static bool getGardSectionInfoCalled;
 
 void _flush(void *i_addr);
 errlHndl_t _GardRecordIdSetup(void *&io_platDeconfigGard);
@@ -90,7 +99,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
 
     HWAS_MUTEX_LOCK(iv_mutex);
     l_pErr = _GardRecordIdSetup(iv_platDeconfigGard);
-    if (!l_pErr)
+    if (!l_pErr && iv_platDeconfigGard)
     {
         uint32_t l_gardRecordsCleared = 0;
         HBDeconfigGard *l_hbDeconfigGard =
@@ -127,10 +136,6 @@ errlHndl_t DeconfigGard::platClearGardRecords(
 
         HWAS_INF("GARD Records Cleared: %d", l_gardRecordsCleared);
     }
-    else
-    {
-        HWAS_ERR("Error from _GardRecordIdSetup");
-    }
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
 #endif // CONFIG_NO_GARD_SUPPORT
@@ -153,7 +158,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
 
     HWAS_MUTEX_LOCK(iv_mutex);
     l_pErr = _GardRecordIdSetup(iv_platDeconfigGard);
-    if (!l_pErr)
+    if (!l_pErr && iv_platDeconfigGard)
     {
         HBDeconfigGard *l_hbDeconfigGard =
                 (HBDeconfigGard *)iv_platDeconfigGard;
@@ -182,10 +187,6 @@ errlHndl_t DeconfigGard::platGetGardRecords(
                 }
             }
         } // for
-    }
-    else
-    {
-        HWAS_ERR("Error from _GardRecordIdSetup");
     }
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -269,9 +270,8 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         }
 
         l_pErr = _GardRecordIdSetup(iv_platDeconfigGard);
-        if (l_pErr)
+        if (l_pErr && iv_platDeconfigGard)
         {
-            HWAS_ERR("Error from _GardRecordIdSetup");
             break;
         }
 
@@ -394,20 +394,27 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             break;
         }
 
+        // Get the PNOR Guard information
+        PNOR::SectionInfo_t l_section;
+        l_pErr = getGardSectionInfo(l_section);
+        if (l_pErr)
+        {
+            HWAS_ERR("_GardRecordIdSetup: getGardSectionInfo failed!!!");
+            // no support for GARD in this configuration.
+            break;
+        }
+        // Check if guard section exists, as certain configs ignore the above
+        // error (e.g. golden side has no GARD section)
+        if (l_section.size == 0)
+        {
+            HWAS_ERR("_GardRecordIdSetup: No guard section skipping function");
+            break;
+        }
+
         // allocate our memory and set things up
         io_platDeconfigGard = malloc(sizeof(HBDeconfigGard));
         HBDeconfigGard *l_hbDeconfigGard =
                 (HBDeconfigGard *)io_platDeconfigGard;
-
-        // get the PNOR address.
-        PNOR::SectionInfo_t l_section;
-        l_pErr = PNOR::getSectionInfo(PNOR::GUARD_DATA, l_section);
-        if (l_pErr)
-        {
-            HWAS_ERR("PNOR::getSectionInfo failed!!!");
-            // no support for GARD in this configuration.
-            break;
-        }
 
         l_hbDeconfigGard->iv_pGardRecords =
             reinterpret_cast<DeconfigGard::GardRecord *> (l_section.vaddr);
@@ -464,6 +471,46 @@ void _flush(void *i_addr)
         HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d",
                 i_addr, sizeof(DeconfigGard::GardRecord),l_rc);
     }
+}
+
+errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
+{
+    errlHndl_t l_errl = NULL;
+    do
+    {
+        // getSectionInfo has already been called for GUARD_DATA
+        if(getGardSectionInfoCalled)
+        {
+            o_sectionInfo = g_GardSectionInfo;
+            break;
+        }
+
+        // Get Guard Section Info and set gardSectionInfo
+        l_errl = PNOR::getSectionInfo(PNOR::GUARD_DATA, g_GardSectionInfo);
+        if (l_errl)
+        {
+            g_GardSectionInfo.size = 0;
+// @TODO RTC: 120061 - replace config flag with a pnor interface call to say if
+//                     there is a guard section on the current (active) side
+//                     of pnor
+#ifdef CONFIG_TWO_SIDE_SUPPORT
+            HWAS_INF("getGardSectionInfo: No guard section disabling guard support");
+            l_errl = NULL;
+#else
+            HWAS_ERR("getGardSectionInfo:getSectionInfo failed");
+#endif
+        }
+        else
+        {
+            HWAS_INF("getGardSectionInfo: Section %s found, size %d",
+                      g_GardSectionInfo.name, g_GardSectionInfo.size);
+        }
+
+        o_sectionInfo = g_GardSectionInfo;
+        getGardSectionInfoCalled = true;
+    } while(0);
+
+    return l_errl;
 }
 
 } // namespace HWAS

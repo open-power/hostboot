@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -62,16 +62,20 @@ my $g_trace = 1;
 my $programName = File::Basename::basename $0;
 my %pnorLayout;
 my %binFiles;
-
-
 my $pnorLayoutFile;
 my $pnorBinName = "";
 my $tocVersion = 0x1;
 my $g_TOCEyeCatch = "part";
 my $emitTestSections = 0;
-my $g_ffsCmd = "";
 my $g_fpartCmd = "";
 my $g_fcpCmd = "";
+my %sidelessSecFilled = ();
+
+my %SideOptions = (
+        A => "A",
+        B => "B",
+        sideless => "sideless",
+    );
 
 if ($#ARGV < 0) {
     usage();
@@ -102,9 +106,6 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
         my $argVal = $ARGV[++$i];
         saveInputFile("--binFile", $argName, $argVal, \%binFiles);
     }
-    elsif($ARGV[$i] =~ /--ffsCmd/) {
-        $g_ffsCmd = $ARGV[++$i];
-    }
     elsif($ARGV[$i] =~ /--fpartCmd/) {
         $g_fpartCmd = $ARGV[++$i];
     }
@@ -121,12 +122,14 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     }
 }
 
-#Extract ffs version number from help text.
-#Use to trigger using proper input parms..
-#my $ffsParms = 0;
-#my $ffsVersion = `$g_ffsCmd 2>&1  | grep "Partition Tool" `;
-#$ffsVersion =~ s/.*(v[0-9\.]*).*/\1/;
-#$ffsVersion = $1;
+############################## Begin Actions ##################################
+
+#Delete File (pnorBinName) if exists to prevent errors when making layout
+#changes
+if (-e $pnorBinName)
+{
+    unlink $pnorBinName or warn "Could not unlink $pnorBinName: $!";
+}
 
 #Load PNOR Layout XML file
 my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout);
@@ -135,9 +138,6 @@ if($rc != 0)
     trace(0, "Error detected from call to loadPnorLayout().  Exiting");
     exit 1;
 }
-
-#trace(1, Dumper(%pnorLayout->{1576960}));
-#trace(1, Dumper(%binFiles));
 
 #Verify all the section files exist
 my $rc = verifyFilesExist(\%pnorLayout, \%binFiles);
@@ -161,41 +161,47 @@ if($rc != 0)
     trace(0, "Error detected from call to checkSpaceConstraints().  Exiting");
     exit 1;
 }
+trace(1, "Done checkSpaceConstraints");
 
-#create the PNOR image
-#two copies of TOC created at different offsets
-my $sideAOffset =  $pnorLayout{metadata}{sideAOffset};
-my $sideBOffset =  $pnorLayout{metadata}{sideBOffset};
-
-$rc = createPnorImg($tocVersion, $pnorBinName, \%pnorLayout, $sideAOffset, 'A');
-if($rc != 0)
+# @TODO RTC: 120062 - Determine which side is Golden, possibly handle a new
+#                    xml tag
+# Create all Partition Tables at each TOC offset
+# Each side has 2 TOC's created at different offsets for backup purposes.
+# Loop all side sections
+foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
 {
-    trace(0, "Error detected from createPnorImg() sideAOffset. Exiting");
-    exit 1;
+    # Loop all tocs (primary and backup)
+    foreach my $toc ( keys %{$pnorLayout{metadata}{sides}{$sideId}{toc}})
+    {
+        my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{$toc};
+
+        $rc = createPnorPartition($tocVersion, $pnorBinName, \%pnorLayout,
+                                  $sideId, $tocOffset);
+        if($rc != 0)
+        {
+            trace(0, "Error detected from createPnorPartition() $tocOffset Exiting");
+            exit 1;
+        }
+    }
 }
 
-$rc = createPnorImg($tocVersion, $pnorBinName, \%pnorLayout, $sideBOffset, 'B');
-if($rc != 0)
+# Fill all sides
+foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
 {
-    trace(0, "Error detected from createPnorImg() sideBOffset. Exiting");
-    exit 1;
-}
+    my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{primary};
 
-$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideAOffset, 'A');
-if($rc != 0)
-{
-    trace(0, "Error detected from call to fillPnorImage() sideAOffset. Exiting");
-    exit 1;
-}
-
-$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideBOffset, 'B');
-if($rc != 0)
-{
-    trace(0, "Error detected from call to fillPnorImage() sideBOffset. Exiting");
-    exit 1;
+    $rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId,
+                        $tocOffset);
+    if($rc != 0)
+    {
+        trace(0, "Error detected from call to fillPnorImage() sideATocOffset. Exiting");
+        exit 1;
+    }
 }
 
 exit 0;
+
+#########################  Begin Utility Subroutines ###########################
 
 ################################################################################
 # loadPnorLayout
@@ -215,33 +221,52 @@ sub loadPnorLayout
     my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
     my $xml = $xs->XMLin($i_pnorFile);
 
-    #trace(1, "pnorLayoutXML \n ".Dumper($xml));
-
     #Save the meatadata - imageSize, blockSize, etc.
+    # @TODO RTC:120062 enhance metadata section, fix metadataE1 to match xml
+    # and change TOC names accordingly
     foreach my $metadataEl (@{$xml->{metadata}})
     {
+        # Get meta data
         my $imageSize = $metadataEl->{imageSize}[0];
         my $blockSize = $metadataEl->{blockSize}[0];
-        my $sideAOffset = $metadataEl->{sideAOffset}[0];
-        my $sideBOffset = $metadataEl->{sideBOffset}[0];
-
-        trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideAOffset=$sideAOffset, sideBOffset=$sideBOffset");
-
         $imageSize = getNumber($imageSize);
         $blockSize = getNumber($blockSize);
-        $sideAOffset = getNumber($sideAOffset);
-        $sideBOffset = getNumber($sideBOffset);
-
         $$i_pnorLayoutRef{metadata}{imageSize} = $imageSize;
         $$i_pnorLayoutRef{metadata}{blockSize} = $blockSize;
-        $$i_pnorLayoutRef{metadata}{sideAOffset} = $sideAOffset;
-        $$i_pnorLayoutRef{metadata}{sideBOffset} = $sideBOffset;
+
+        # Get Side A
+        my $sideATocOffset = $metadataEl->{sideATocOffset}[0];
+        my $sideATocBackupOffset = $metadataEl->{sideATocBackupOffset}[0];
+        $sideATocOffset = getNumber($sideATocOffset);
+        $sideATocBackupOffset = getNumber($sideATocBackupOffset);
+        # @TODO RTC: 120062 change pnorLayoutRef hash to match new xml
+        $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{A}}{toc}{primary} = $sideATocOffset;
+        $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{A}}{toc}{backup} = $sideATocBackupOffset;
+
+        # Get side B info (if it exists)
+        if (exists $metadataEl->{sideBTocOffset}[0])
+        {
+            trace(1, "Adding Side B information ....");
+            my $sideBTocOffset = $metadataEl->{sideBTocOffset}[0];
+            my $sideBTocBackupOffset = $metadataEl->{sideBTocBackupOffset}[0];
+            $sideBTocOffset = getNumber($sideBTocOffset);
+            $sideBTocBackupOffset = getNumber($sideBTocBackupOffset);
+            # @TODO RTC: 120062 change pnorLayoutRef hash to match new xml
+            $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{B}}{toc}{primary} = $sideBTocOffset;
+            $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{B}}{toc}{backup} = $sideBTocBackupOffset;
+
+            trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideATocOffset=$sideATocOffset, sideATocBackupOffset=$sideATocBackupOffset, sideBTocOffset=$sideBTocOffset, sideBTocBackupOffset=$sideBTocBackupOffset");
+        }
+        else
+        {
+           trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideATocOffset=$sideATocOffset, sideATocBackupOffset=$sideATocBackupOffset");
+        }
+
     }
 
     #Iterate over the <section> elements.
     foreach my $sectionEl (@{$xml->{section}})
     {
-        #trace(1, "current Element: \n ".Dumper($sectionEl));
         my $description = $sectionEl->{description}[0];
         my $eyeCatch = $sectionEl->{eyeCatch}[0];
         my $physicalOffset = $sectionEl->{physicalOffset}[0];
@@ -251,7 +276,9 @@ sub loadPnorLayout
         my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
         my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
         my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
-
+        my $sideless = (exists $sectionEl->{sideless} ? "yes" : "no");
+        my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
+        my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
         if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
             next;
@@ -262,8 +289,6 @@ sub loadPnorLayout
         $physicalOffset = getNumber($physicalOffset);
         $physicalRegionSize = getNumber($physicalRegionSize);
 
-        # trace(4, "$this_func: physicalOffset=$physicalOffset, physicalRegionSize=$physicalRegionSize");
-
         $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
@@ -272,6 +297,9 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{sideless} = $sideless;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
 
     }
 
@@ -279,23 +307,16 @@ sub loadPnorLayout
 }
 
 ################################################################################
-# createPnorImg - Create PNOR image and partitions based on input data.
+# createPnorImg - Create PNOR image based on input data.
 ################################################################################
 sub createPnorImg
 {
-    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $offset, $side) = @_;
+    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $i_offset) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
-    my $key;
-    my $other_side = 'B';
     trace(4, "$this_func: >>Enter");
 
-    trace(1, "createPnorImg:: $offset");
-
-    if($side eq 'B')
-    {
-        $other_side = 'A';
-    }
+    trace(1, "createPnorImg:: $i_offset");
 
     #get Block size
     my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
@@ -303,154 +324,212 @@ sub createPnorImg
     #Get size of image in blocks
     my $imageSize = $$i_pnorLayoutRef{metadata}{imageSize};
     my $blockCount = $imageSize/$blockSize;
-    if ($blockCount != int($blockCount))
-    {
-        trace(0, "$this_func: Image size ($imageSize) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
-        $rc = 1;
-        return $rc;
-    }
-
-    #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
-    if ($g_ffsCmd eq "") {
-        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --create --size $imageSize --block $blockSize --force`;
-    } else {
-        my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --create --size $imageSize --block $blockSize --force`;
-    }
-    $rc = $?;
-    if($rc)
-    {
-        trace(0, "$this_func: Call to creating image failed.  rc=$rc.  Aborting!");
-        return $rc;
-    }
-
-    #key into hash data is the physical offset of section.  Need to sort the keys
-    #so we put things in the correct order in toc.
-    #Generally speaking, this loop is populating the FFS Header with records based on the
-    #section data specified in the XML + actual sizes of the input binary files.
-    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-
-    for $key ( sort {$a<=> $b} keys %sectionHash)
-    {
-        my $eyeCatch = "UNDEF";
-        my $physicalOffset = 0xFFFFFFFF;
-        my $physicalRegionSize = 0xFFFFFFFF;
-
-        # eyecatcher
-        my $eyeCatch = $sectionHash{$key}{eyeCatch};
-        my $myside = $sectionHash{$key}{side};
-
-        #don't try to add the TOC, but need to update all other paritions
-        #Add if side matches (or not set) -- so if it isn't equal to other side
-        if(( $eyeCatch ne $g_TOCEyeCatch ) && ( $myside ne $other_side ))
+    do{
+        if ($blockCount != int($blockCount))
         {
-
-            # base/physical offset
-            my $physicalOffset = $sectionHash{$key}{physicalOffset};
-            #make sure offset is on a block boundary
-            my $val = $physicalOffset/$blockSize;
-            if ($val != int($val))
-            {
-                trace(0, "$this_func: Partition offset ($val) is does not fall on an erase block ($blockSize) boundary.  This is not supported.  Aborting!");
-                $rc = -1;
-                last;
-            }
-
-            #physical size
-            my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
-            $val = $physicalRegionSize/$blockSize;
-            if($val != int($val))
-            {
-                trace(0, "$this_func: Partition size ($val) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
-                exit 1;
-            }
-
-            #Add Partition
-            #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
-            if ($g_ffsCmd eq "") {
-                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
-            } else {
-                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
-            }
-            $rc = $?;
-            if($rc)
-            {
-                trace(0, "$this_func: Call to add partition $eyeCatch failed.  rc=$rc.  Aborting!");
-                last;
-            }
-
-            # User data Flags
-            my $chip = 0;
-            my $compress = 0;
-            my $ecc = 0;
-            my $version = 0;
-
-            if( ($sectionHash{$key}{ecc} eq "yes") )
-            {
-                $ecc = 0x8000;
-            }
-            if( ($sectionHash{$key}{sha512Version} eq "yes") )
-            {
-                $version = 0x80;
-            }
-            elsif( ($sectionHash{$key}{sha512perEC} eq "yes") )
-            {
-                $version = 0x40;
-            }
-
-            #First User Data Word
-            #[1:chip][1:compression][2:ecc]
-            my $userflags0 = ($chip << 24)
-              | ($compress << 16)
-              | $ecc;
-
-            #Second User Data Word
-            #[1:sha512Version/sha512perEC]
-            my $userflags1 = ($version << 24);
-
-            trace(1,"userflags0 = $userflags0");
-            trace(1,"userflags1 = $userflags1");
-            if ($g_ffsCmd eq "") {
-                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 0 --name $eyeCatch --value $userflags0");
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 0 --name $eyeCatch --value $userflags0`;
-                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 1 --name $eyeCatch --value $userflags1");
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 1 --name $eyeCatch --value $userflags1`;
-            }
-            $rc = $?;
-            if($rc)
-            {
-                trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
-                last;
-            }
-
-            #Trunc Partition
-            #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc
-            if ($g_ffsCmd eq "") {
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch`;
-            } else {
-                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch`;
-            }
-            $rc = $?;
-            if($rc)
-            {
-                trace(0, "$this_func: Call to trunc partition $eyeCatch failed.  rc=$rc.  Aborting!");
-                last;
-            }
+            trace(0, "$this_func: Image size ($imageSize) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
+            $rc = 1;
+            last;
         }
 
-        #Disable usewords for now.  Will get re-enabled and fixed up as
-        #we add support for underlying functions
+        #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
+        trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
+        $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force`;
+        if($rc)
+        {
+            trace(0, "$this_func: Call to creating image failed.  rc=$rc.  Aborting!");
+            last;
+        }
+    }while(0);
 
-#        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset
-#        		--user 0 --name $eyeCatch --value $actualRegionSize`;
-#        $rc = $?;
-#        if($rc)
-#        {
-#            trace(0, "$this_func: Call to fpart setting user 0 for partition $eyeCatch failed.  rc=$rc.  Aborting!");
-#            last;
-#        }
+    return $rc;
+}
 
+################################################################################
+# addUserData - Add partition user data.
+################################################################################
+sub addUserData
+{
+    my $i_pnorBinName = shift;
+    my $i_offset = shift;
+    my $i_key = shift;
+    my %i_sectionHash = @_;
+
+    my $this_func = (caller(0))[3];
+    my $rc = 0;
+    trace(4, "$this_func: >>Enter");
+
+    my $eyeCatch = $i_sectionHash{$i_key}{eyeCatch};
+
+    # User data Flags based on FFS entry user data (ffs_hb_user_t)
+    my $chip = 0;
+    my $compressType = 0;
+    my $dataInteg = 0;
+    my $verCheck = 0;
+    my $miscFlags = 0;
+
+    # DataInteg flag
+    if( ($i_sectionHash{$i_key}{ecc} eq "yes") )
+    {
+        $dataInteg = 0x8000;
     }
+
+    # VerCheck Flag
+    if( ($i_sectionHash{$i_key}{sha512Version} eq "yes") )
+    {
+        $verCheck = 0x80;
+    }
+    elsif( ($i_sectionHash{$i_key}{sha512perEC} eq "yes") )
+    {
+        $verCheck = 0x40;
+    }
+
+    # Misc Flags
+    if( ($i_sectionHash{$i_key}{preserved} eq "yes") )
+    {
+        $miscFlags |= 0x80;
+    }
+    if( ($i_sectionHash{$i_key}{readOnly} eq "yes") )
+    {
+        $miscFlags |= 0x40;
+    }
+
+
+    #First User Data Word
+    #[1:chip][1:compressType][2:dataInteg]
+    my $userflags0 = ($chip << 24)
+      | ($compressType << 16)
+      | $dataInteg;
+
+    #Second User Data Word
+    #[1:sha512Version/sha512perEC][1:miscFlags]
+    my $userflags1 = ($verCheck << 24)
+        | ($miscFlags << 16);
+
+    do{
+        trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value userflags0=$userflags0");
+        $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value $userflags0`;
+        if($rc)
+        {
+            trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
+            last;
+        }
+        trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value userflags1=$userflags1");
+        $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value $userflags1`;
+        if($rc)
+        {
+            trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
+            last;
+        }
+    }while(0);
+
+    return $rc;
+}
+
+################################################################################
+# createPnorPartition - Create PNOR partitions based on input data.
+################################################################################
+sub createPnorPartition
+{
+    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $side, $offset) = @_;
+    my $this_func = (caller(0))[3];
+    my $rc = 0;
+    my $key;
+    my $other_side = getOtherSide($side);
+
+    trace(4, "$this_func: >>Enter");
+
+    trace(1, "createPnorPartition:: $offset");
+
+    do{
+        # Create pnor image at partition offset
+        $rc = createPnorImg($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef,
+                            $offset);
+        if($rc)
+        {
+            last;
+        }
+
+        #get Block size
+        my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
+
+        # key into hash data is the physical offset of section.  Need to sort the
+        # keys so we put things in the correct order in toc. Generally speaking,
+        # this loop is populating the FFS Header with records based on the section
+        # data specified in the XML + actual sizes of the input binary files.
+        my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+
+        for $key ( sort {$a<=> $b} keys %sectionHash)
+        {
+            my $eyeCatch = "UNDEF";
+            my $physicalOffset = 0xFFFFFFFF;
+            my $physicalRegionSize = 0xFFFFFFFF;
+
+            # eyecatcher
+            my $eyeCatch = $sectionHash{$key}{eyeCatch};
+
+            my $sideInfo = getSideInfo($key, %sectionHash);
+
+            #don't try to add the TOC, but need to update all other paritions
+            #Add if side matches (or not set) -- so if it isn't equal to other side
+            #Also add if sideless
+            if( ($eyeCatch ne $g_TOCEyeCatch ) &&
+                ($sideInfo ne $other_side ))
+            {
+                # base/physical offset
+                my $physicalOffset = $sectionHash{$key}{physicalOffset};
+                #make sure offset is on a block boundary
+                my $val = $physicalOffset/$blockSize;
+                if ($val != int($val))
+                {
+                    trace(0, "$this_func: Partition offset ($val) does not fall on an erase block ($blockSize) boundary.  This is not supported.  Aborting!");
+                    $rc = -1;
+                    last;
+                }
+
+                #physical size
+                my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
+                $val = $physicalRegionSize/$blockSize;
+                if($val != int($val))
+                {
+                    trace(0, "$this_func: Partition size ($val) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
+                    exit 1;
+                }
+
+                #Add Partition
+                #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
+                trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
+                $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
+                if($rc)
+                {
+                    trace(0, "$this_func: Call to add partition $eyeCatch failed.  rc=$rc.  Aborting!");
+                    last;
+                }
+
+                # Add User Partition data
+                $rc = addUserData($i_pnorBinName, $offset, $key, %sectionHash);
+                if($rc)
+                {
+                    trace(0, "$this_func: Call to add user data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
+                    last;
+                }
+
+                #Trunc Partition
+                #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc
+                $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch`;
+                if($rc)
+                {
+                    trace(0, "$this_func: Call to trunc partition $eyeCatch failed.  rc=$rc.  Aborting!");
+                    last;
+                }
+            }
+        }
+        # Added in case more functionality added before while ends
+        if ($rc)
+        {
+            last;
+        }
+    }while(0);
 
     return $rc;
 }
@@ -570,21 +649,13 @@ sub checkSpaceConstraints
 ################################################################################
 sub fillPnorImage
 {
-    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles, $offset, $side) = @_;
+    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles, $side, $offset) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
     my $key;
-    my $other_side = 'B';
-
-
-    if($side eq 'B')
-    {
-        $other_side = 'A';
-    }
-
+    my $other_side = getOtherSide($side);
 
     trace(1, "fillPnorImage:: $offset");
-
     #key is the physical offset into the file, however don't need to sort
     #since FFS allows populating partitions in any order
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
@@ -605,27 +676,26 @@ sub fillPnorImage
             next;
         }
 
-        my $myside = $sectionHash{$key}{side};
+        my $sideInfo = getSideInfo($key, %sectionHash);
 
-        #Add if side matches (or not set) -- so if it isn't equal to other side
-        if( $myside ne $other_side )
+        # Add if side matches (or not set) -- so if it isn't equal to other side
+        # Only fill sideless sections once
+        if( ($sideInfo ne $other_side) &&
+            (!exists($sidelessSecFilled{$eyeCatch})))
         {
-            trace(5, "$this_func: populating section $myside:$eyeCatch, filename=$inputFile");
-
-            #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
-            if ($g_ffsCmd eq "") {
-                my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000`;
-            } else {
-                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --name $eyeCatch  --write $inputFile`;
+            if($sideInfo eq $SideOptions{sideless})
+            {
+                $sidelessSecFilled{$eyeCatch} = 1;
             }
-            $rc = $?;
+            trace(5, "$this_func: populating section $sideInfo:$eyeCatch, filename=$inputFile");
+            #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
+            $rc = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000`;
             if($rc)
             {
                 trace(0, "$this_func: Call to fcp adding data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
                 last;
             }
          }
-
     }
 
     return $rc;
@@ -650,28 +720,6 @@ sub saveInputFile
     trace(10, "$this_func:           $$i_binFiles{$eyeCatcher}");
 
     #no return code expected
-}
-
-#################################################
-# getFFSEntrySize: Returns number of bytes in an ffs_entry based on specified version
-#################################################
-sub getFFSEntrySize
-{
-    my($i_tocVersion, $i_pnorLayoutRef) = @_;
-    my $this_func = (caller(0))[3];
-    my $ffsEntrySize = 0;
-
-    if($i_tocVersion == 0x1)
-    {
-        #16 char name + 12 fixed words + 16 user data words
-        $ffsEntrySize = 16+(12*4)+(16*4);
-    }
-    else
-    {
-        trace(0, "$this_func:  Layout Version Unsupported!  i_tocVersion=$i_tocVersion");
-        exit 1;
-    }
-    return $ffsEntrySize;
 }
 
 #################################################
@@ -732,6 +780,70 @@ sub trace
     }
 }
 
+################################################################################
+# getSideInfo - return side info of certain sections and determine if value is
+#               a supported value
+################################################################################
+sub getSideInfo
+{
+    my $i_key = shift;
+    my %i_sectionHash = @_;
+
+    my $side = "";
+    my $eyeCatch = $i_sectionHash{$i_key}{eyeCatch};
+
+
+    if($i_sectionHash{$i_key}{sideless} eq "yes")
+    {
+        return $SideOptions{sideless};
+    }
+    else
+    {
+        $side = $i_sectionHash{$i_key}{side};
+    }
+
+    # Error paths
+    if ($side eq "")
+    {
+        trace(0, "Error detected from call to getSideInfo() - $eyeCatch has no side info specified Exiting");
+        exit 1;
+    }
+    elsif (!exists($SideOptions{$side}))
+    {
+        trace(0, "Error detected from call to getSideInfo() - $eyeCatch has sideInfo = $side which is not supported Exiting");
+        exit 1;
+    }
+
+    return $side;
+}
+
+################################################################################
+# getOtherSide - return other side of the given side
+#                does not default to main side in case more sides are added
+################################################################################
+sub getOtherSide
+{
+    my $i_side = shift;
+    my $other_side = "";
+
+    if($i_side eq $SideOptions{A})
+    {
+        $other_side = $SideOptions{B};
+    }
+    elsif($i_side eq $SideOptions{B})
+    {
+        $other_side = $SideOptions{A};
+    }
+
+    # Error paths
+    if ($other_side eq "")
+    {
+        trace(0, "Error detected from call to getOtherSide() - Could not get other side of side = $i_side Exiting");
+        exit 1;
+    }
+
+    return $other_side;
+}
 
 
 ################################################################################

@@ -41,11 +41,22 @@ namespace PNOR {
         uint8_t misc; /**< Misc Flags */
     } PACKED;
 
+    // Simple enum of TOC's per PNOR side
+    enum TOCS
+    {
+        TOC_0 = 0,
+        TOC_1 = 1,
+        NUM_TOCS,
+    };
+
     enum
     {
-        NUM_TOCS = 2,
-        TOC_0_OFFSET = 0,
-        TOC_1_OFFSET = 0x8000,
+        // @TODO RTC: 120061 - Determine TOC locations
+        // TOC offsets based on pnor layout
+        SIDE_A_TOC_0_OFFSET = 0,
+        SIDE_A_TOC_1_OFFSET = 0x8000,
+        SIDE_B_TOC_0_OFFSET = 0x2000000,
+        SIDE_B_TOC_1_OFFSET = 0x2008000,
 
         /** Real number of bytes required to read 1 logical page */
         PAGESIZE_PLUS_ECC = ((PAGESIZE * 9)/8),  // 8B data + 1B of ECC
@@ -79,7 +90,7 @@ namespace PNOR {
      * @return Error
      */
     errlHndl_t parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
-           uint32_t & o_TOC_used, SectionData_t * o_TOC, uint64_t i_baseVAddr);
+           TOCS & o_TOC_used, SectionData_t * o_TOC, uint64_t i_baseVAddr);
 }
 
 #endif

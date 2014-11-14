@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <errl/errlentry.H>
+#include <utility>
 
 namespace PNOR
 {
@@ -61,6 +62,7 @@ enum SectionId
     ATTR_PERM,      /**< Permanent Attribute Override */
     CAPP,           /**< CAPP lid */
     TEST,           /**< Scratch space for PNOR test cases */
+    TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
 
     NUM_SECTIONS,   /**< Number of defined sections */
 
@@ -82,7 +84,8 @@ struct SectionInfo_t
     uint64_t size;      /**< Size of partition in bytes */
     bool eccProtected;  /**< Section is ECC protected */
     bool sha512Version; /**< Version Checking */
-    bool sha512perEC;   /**< Version Checking perEC */
+    bool sha512perEC; /**< Version Checking perEC */
+    bool readOnly; /**< Section is read only */
 };
 
 /**
@@ -121,6 +124,7 @@ errlHndl_t fixECC (SectionId i_section);
  *         true = PNOR DD is using L3 Cache for fake PNOR
  *         false = PNOR DD not using L3 Cache for fake PNOR
  */
+ bool usingL3Cache();
 
 /**
  * @brief  Clears the specified PNOR section with all FF's (w/ good ECC)
@@ -131,8 +135,6 @@ errlHndl_t fixECC (SectionId i_section);
  */
 errlHndl_t clearSection(PNOR::SectionId i_section);
 
-bool usingL3Cache();
-
 /**
  * @brief Validate the Alternative Master Processor's LPC
  *        Connection to PNOR
@@ -140,6 +142,14 @@ bool usingL3Cache();
  * @return errlHndl_t  Error log if validation failed
  */
 errlHndl_t validateAltMaster( void );
+
+//@ TODO RTC: 120061 add golden info
+//@ TODO RTC: 109703 make golden changes for informing OPAL
+struct TocInfo_t
+{
+    std::pair<uint64_t, uint64_t> activeTocOffsets;
+    std::pair<uint64_t, uint64_t> altTocOffsets;
+};
 
 /** @brief PNOR::TEST section offsets for test cases to prevent
  *         concurrency problems
@@ -149,6 +159,29 @@ enum TestSectionOffset{
     pnorTestSec_smartwrite_offset = 0x120,
     pnorTestSec_rt_readwrite_offset = 0x6000,
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// SBE functionality that lives in PNOR
+
+// Used to keep track of perm/temp, and cur/alt
+enum sbeSeepromSide_t
+{
+    SBE_SEEPROM0         = 0x00,   // corresponds to EEPROM::SBE_PRIMARY
+    SBE_SEEPROM1         = 0x01,   // corresponts to EEPROM::SBE_BACKUP
+    SBE_SEEPROM_INVALID  = 0xFF,
+};
+
+/**
+ * @brief Determines which Seeprom was used to boot the SBE
+ *
+ * @param[in] i_target      Target processor to customize
+ *
+ * @param[out] o_bootSide   The Seeprom the SBE booted from
+ *
+ * @return errlHndl_t       Error log handle on failure.
+ */
+errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
+                             sbeSeepromSide_t& o_bootSide);
 
 }
 

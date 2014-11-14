@@ -76,9 +76,18 @@ class PnorRP
      */
     errlHndl_t fixECC(PNOR::SectionId i_section);
 
+    /**
+     * @brief  Get TOC offset of specified TOC on active side
+     *
+     * @param[in] i_toc     TOC offset desired on active side
+     *
+     * @return uint64_t     TOC offset
+     */
+    uint64_t getTocOffset(PNOR::TOCS i_toc) const;
+
   protected:
     /**
-     * @brief  Constructor
+     * @brief  Constructor, default TOC offsets to side A
      */
     PnorRP();
 
@@ -89,16 +98,23 @@ class PnorRP
 
 
   private:
+
+    // TOC 0 and 1 offsets of both PNOR sides. The active PNOR side determined
+    // by the Seeprom the SBE booted from
+    std::pair<uint64_t, uint64_t> iv_activeTocOffsets;
+    std::pair<uint64_t, uint64_t> iv_altTocOffsets;
+
     enum
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
         TOTAL_SIZE = 64*MEGABYTE, /**< Allocate 64 MB (0x4000000)*/
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
     };
+
     /**
      * Which TOC (0 or 1) is used after verifying both.
      */
-    uint32_t iv_TOC_used;
+    PNOR::TOCS iv_TOC_used;
 
     /**
      * Flash statistics
@@ -138,7 +154,8 @@ class PnorRP
 
     /**
      * @brief Verify both TOC's and store section information from one of the
-     *        verified TOC's
+     *        verified TOC's. Additionally set each section permissions
+     *        (e.g. readOnly)
      *
      * @return Error from device
      */
@@ -224,7 +241,6 @@ class PnorRP
         return false;
     };
 
-
     // allow local helper function to call private methods
     friend void* wait_for_message( void* unused );
 
@@ -237,7 +253,7 @@ class PnorRP
     friend errlHndl_t PNOR::validateAltMaster( void );
 
     /**
-     * @brief Static instance function for testcase only
+     * @brief Static instance function
      */
     static PnorRP& getInstance();
 };

@@ -1214,49 +1214,6 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                                 sbeSeepromSide_t& o_bootSide)
-    {
-        TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"getSbeBootSeeprom()" );
-
-        errlHndl_t err = NULL;
-        uint64_t scomData = 0x0;
-
-        o_bootSide = SBE_SEEPROM0;
-
-        do{
-
-            size_t op_size = sizeof(scomData);
-            err = deviceRead( i_target,
-                              &scomData,
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(SBE_VITAL_REG_0x0005001C) );
-            if( err )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() -Error "
-                           "reading SBE VITAL REG (0x%.8X) from Target :"
-                           "HUID=0x%.8X",
-                           SBE_VITAL_REG_0x0005001C,
-                           TARGETING::get_huid(i_target));
-                break;
-            }
-            if(scomData & SBE_BOOT_SELECT_MASK)
-            {
-                o_bootSide = SBE_SEEPROM1;
-            }
-
-        }while(0);
-
-        TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"getSbeBootSeeprom(): o_bootSide=0x%X (reg=0x%X)",
-                   o_bootSide, scomData );
-
-        return err;
-    }
-
-
-/////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
 
@@ -1351,11 +1308,11 @@ namespace SBE
             if(SEEPROM_0_PERMANENT_VALUE ==
                (io_sbeState.mvpdSbKeyword.flags & PERMANENT_FLAG_MASK))
             {
-                io_sbeState.permanent_seeprom_side = SBE_SEEPROM0;
+                io_sbeState.permanent_seeprom_side = PNOR::SBE_SEEPROM0;
             }
             else // Side 1 must be permanent
             {
-                io_sbeState.permanent_seeprom_side = SBE_SEEPROM1;
+                io_sbeState.permanent_seeprom_side = PNOR::SBE_SEEPROM1;
             }
 
 
@@ -1404,21 +1361,21 @@ namespace SBE
             /*  Determine which SEEPROM System Booted On   */
             /***********************************************/
             //Get Current (boot) Side
-            sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
-            err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
+            PNOR::sbeSeepromSide_t tmp_cur_side = PNOR::SBE_SEEPROM_INVALID;
+            err = PNOR::getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error returned from getSbeBootSeeprom()");
                 break;
             }
             io_sbeState.cur_seeprom_side = tmp_cur_side;
-            if (io_sbeState.cur_seeprom_side == SBE_SEEPROM0)
+            if (io_sbeState.cur_seeprom_side == PNOR::SBE_SEEPROM0)
             {
-                io_sbeState.alt_seeprom_side = SBE_SEEPROM1;
+                io_sbeState.alt_seeprom_side = PNOR::SBE_SEEPROM1;
             }
-            else if ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1)
+            else if ( io_sbeState.cur_seeprom_side == PNOR::SBE_SEEPROM1)
             {
-                io_sbeState.alt_seeprom_side = SBE_SEEPROM0;
+                io_sbeState.alt_seeprom_side = PNOR::SBE_SEEPROM0;
             }
             else
             {
@@ -2055,7 +2012,7 @@ namespace SBE
             /*  Determine what side to update                             */
             /**************************************************************/
             // Set cur and alt isDirty values
-            if( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 )
+            if( io_sbeState.cur_seeprom_side == PNOR::SBE_SEEPROM0 )
             {
                 current_side_isDirty = seeprom_0_isDirty;
                 alt_side_isDirty     = seeprom_1_isDirty;
@@ -2222,14 +2179,14 @@ namespace SBE
                     io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
 
                     // Update MVPD PERMANENT flag: make cur=perm
-                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
+                    ( io_sbeState.cur_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 0
                          io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
                          : //set bit 0
                          io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
 
                     // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
-                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                    ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 1
                          io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
                          : //set bit 1
@@ -2295,18 +2252,18 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                     // Update MVPD PERMANENT flag: make cur=perm
-                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
+                    ( io_sbeState.cur_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 0
                          io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
                          : //set bit 0
                          io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
 
                     // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
-                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                    ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 1
                          io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
                          : //set bit 1
@@ -2341,13 +2298,13 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
 
                     // MVPD flag Update
                     // Update MVPD flag make cur=perm
-                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
+                    ( io_sbeState.cur_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 0
                          io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
                          : // set bit 0
@@ -2401,11 +2358,11 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                     // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
-                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                    ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 1
                          io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
                          : // set bit 1
@@ -2416,7 +2373,7 @@ namespace SBE
                     if ( g_istep_mode )
                     {
                         // Update MVPD PERMANENT flag: make alt=perm
-                        (io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                        (io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                          // clear bit 0
                          io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
                          : //set bit 0
@@ -2498,11 +2455,11 @@ namespace SBE
 
                         // Set Update side to alt
                         io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                         // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
-                        ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                        ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 ) ?
                           // clear bit 1
                           io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
                           : // set bit 1
@@ -2534,7 +2491,7 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
@@ -3244,12 +3201,12 @@ namespace SBE
 
                     // Compare against 'current' Master side in case there is
                     // an issue with the other side
-                    if (io_sbeStates_v[i].cur_seeprom_side == SBE_SEEPROM0)
+                    if (io_sbeStates_v[i].cur_seeprom_side == PNOR::SBE_SEEPROM0)
                     {
                         ver_ptr =
                             &(io_sbeStates_v[i].seeprom_0_ver.image_version);
                     }
-                    else // SBE_SEEPROM1
+                    else // PNOR::SBE_SEEPROM1
                     {
                         ver_ptr =
                             &(io_sbeStates_v[i].seeprom_1_ver.image_version);
@@ -3389,12 +3346,12 @@ namespace SBE
                 else
                 {
                     // Not Master, so get 'current' version
-                    if (io_sbeStates_v[i].cur_seeprom_side == SBE_SEEPROM0)
+                    if (io_sbeStates_v[i].cur_seeprom_side == PNOR::SBE_SEEPROM0)
                     {
                         ver_ptr =
                             &(io_sbeStates_v[i].seeprom_0_ver.image_version);
                     }
-                    else // SBE_SEEPROM1
+                    else // PNOR::SBE_SEEPROM1
                     {
                         ver_ptr =
                             &(io_sbeStates_v[i].seeprom_1_ver.image_version);

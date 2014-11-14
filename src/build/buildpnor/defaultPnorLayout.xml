@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -22,48 +24,50 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!--
 Layout Description
-<metadata> Element -> Contains high-level information about
-   the PNOR layout.
-    <imageSize> -> Size of PNOR image in bytes.
-    <blockSize> -> size of erase blocks in bytes.
-    <sideAOffset> -> Location of Side A Partition Table
-    <sideBOffset> -> Location of Side B Partition Table
-<section> -> Contains information about a PNOR Partition
-    <description> -> Text description of the partition.
-                     Does not have to be machine readable.
-    <eyeCatch> -> Name of the Partition
-    <physicalOffset> -> Offset of the Partition in PNOR
-                        in bytes.
-    <physicalSize> -> Size of the Partition in bytes.
-    <side> -> Side the partition should be associated with.
-              This determines if the partition should be
-              added to the partition table at <sideAOffset>
-              or <sideBOffset>
-    <testonly/> Indicates partition is used for internal
-                testing only.  Partition should be skipped
-                 in production environments.
-    <ecc/>  Indicates Partition should be ECC protected
-    <sha512Version/> Indicates Partition uses SHA512 for
-                     version information.
-    <sha512perEC/> Indicates SHA512 is used to indicate
-                   version for each EC-specific image
-                   within the Partition.
-    <preserved/>   Indicates Partition is preserved
-                   across code updates.
+<metadata> Element -> Contains high-level information about the PNOR layout.
+    <imageSize>           -> Size of PNOR image in bytes.
+    <blockSize>           -> size of erase blocks in bytes.
+    <sideATocOffset>      -> Location of Side A Partition Table
+    <sideATocBackupOffset>-> Location of Side A Backup Partition Table
+    <sideBTocOffset>      -> Location of Side B Partition Table
+    <sideBTocBackupOffset>-> Location of Side B Backup Partition Table
+</metadata>
+<section> Element -> Contains information about a PNOR Partition
+    <description>   -> Text description of the partition.
+                       Does not have to be machine readable.
+    <eyeCatch>      -> Name of the Partition
+    <physicalOffset>-> Offset of the Partition in PNOR
+                       in bytes.
+    <physicalSize>  -> Size of the Partition in bytes.
+    <side>          -> Side the Partition should be associated with. This
+                       determines if the partition should be added to the
+                       partition table at <sideATocOffset> or <sideBTocOffset>
+    <sideless/>     -> Indicates partition will be in both TOCs but only one
+                       copy of the partition should be created
+    <testonly/>     -> Indicates partition is used for internal testing only.
+                       Partition should be skipped in production environments.
+    <ecc/>          -> Indicates Partition should be ECC protected
+    <sha512Version/>-> Indicates Partition uses SHA512 for version information.
+    <sha512perEC/>  -> Indicates SHA512 is used to indicate version for each
+                       EC-specific image within the Partition.
+    <preserved/>    -> Indicates Partition is preserved across code updates.
+</section>
 -->
 
 <pnor>
     <metadata>
         <imageSize>0x4000000</imageSize>
         <blockSize>0x1000</blockSize>
-        <sideAOffset>0x0</sideAOffset>
-        <sideBOffset>0x8000</sideBOffset>
+        <!-- @TODO RTC: 120062 - Enhance meta info -->
+        <sideATocOffset>0x0</sideATocOffset>
+        <sideATocBackupOffset>0x8000</sideATocBackupOffset>
     </metadata>
     <section>
         <description>Hostboot Error Logs (144K)</description>
         <eyeCatch>HBEL</eyeCatch>
         <physicalOffset>0x10000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -71,6 +75,7 @@ Layout Description
         <eyeCatch>GUARD</eyeCatch>
         <physicalOffset>0x58000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -78,6 +83,7 @@ Layout Description
         <eyeCatch>HBD</eyeCatch>
         <physicalOffset>0x5D000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -86,6 +92,7 @@ Layout Description
         <!--NOTE: MUST update standalone.simics if offset changes -->
          <physicalOffset>0x17D000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -94,6 +101,7 @@ Layout Description
         <!--NOTE: MUST update standalone.simics if offset changes -->
         <physicalOffset>0x1C5000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -102,6 +110,7 @@ Layout Description
         <!--NOTE: MUST update standalone.simics if offset changes -->
         <physicalOffset>0x255000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -110,6 +119,7 @@ Layout Description
         <physicalOffset>0x29D000</physicalOffset>
         <physicalRegionSize>0x5A0000</physicalRegionSize>
         <sha512Version/>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -118,6 +128,7 @@ Layout Description
         <physicalOffset>0x83D000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
         <sha512perEC/>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -126,6 +137,7 @@ Layout Description
         <physicalOffset>0x8CD000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
         <sha512perEC/>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -134,6 +146,7 @@ Layout Description
         <physicalOffset>0x915000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -142,6 +155,7 @@ Layout Description
         <physicalOffset>0xA35000</physicalOffset>
         <physicalRegionSize>0x240000</physicalRegionSize>
         <sha512Version/>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -149,6 +163,7 @@ Layout Description
         <eyeCatch>PAYLOAD</eyeCatch>
         <physicalOffset>0xC75000</physicalOffset>
         <physicalRegionSize>0x1680000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -157,6 +172,18 @@ Layout Description
         <physicalOffset>0x3590000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
+        <sideless/>
+        <ecc/>
+    </section>
+    <section>
+        <description>Special PNOR Test Space (36K)</description>
+        <eyeCatch>TESTRO</eyeCatch>
+        <physicalOffset>0x3599000</physicalOffset>
+        <physicalRegionSize>0x9000</physicalRegionSize>
+        <testonly/>
+        <sideless/>
+        <preserved/>
+        <readOnly/>
         <ecc/>
     </section>
     <section>
@@ -166,6 +193,7 @@ Layout Description
         <physicalOffset>0x3F67000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
         <sha512Version/>
+        <sideless/>
         <ecc/>
     </section>
     <section>
@@ -173,6 +201,7 @@ Layout Description
         <eyeCatch>GLOBAL</eyeCatch>
         <physicalOffset>0x3FF7000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
+        <sideless/>
         <ecc/>
     </section>
 </pnor>

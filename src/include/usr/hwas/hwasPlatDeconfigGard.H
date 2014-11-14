@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,8 @@
 
 #ifndef HWASPLATDECONFIGGARD_H_
 #define HWASPLATDECONFIGGARD_H_
+
+#include <pnor/pnorif.H>
 
 /**
  *  @brief Adapt common singleton declaration to specific platform
@@ -63,6 +67,19 @@ struct HBDeconfigGard
     uint32_t iv_maxGardRecords;     // Maximum number of GARD Records
     void *iv_pGardRecords;          // Pointer to the GARD Records in PNOR
 };
+
+/**
+ *  @brief Gets iv_gardSectionInfo and sets it if first time called.
+ *         Sets o_sectionInfo based on iv_gardSectionInfo for the caller
+ *
+ *  @param[out] Guard PNOR section info
+ *
+ *  @return errlHndl_t Error log handle, depending on config options will
+ *          ignore error because no Guard section exists in PNOR
+ *          (e.g. CONFIG_GOLDEN_PNOR_SIDE_SUPPORT)
+ *
+ */
+errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo);
 
 } // namespace HWAS
 

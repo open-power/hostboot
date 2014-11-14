@@ -517,22 +517,30 @@ class PnorRpTest : public CxxTest::TestSuite
         uint8_t* corruptBuffer = new uint8_t[PAGESIZE];
 
         // Corrupt both ffs header and first entry for each TOC
-        for (uint32_t cur_TOC = 0; cur_TOC < PNOR::NUM_TOCS; ++cur_TOC)
+        for (PNOR::TOCS cur_TOC = PNOR::TOC_0; cur_TOC < PNOR::NUM_TOCS;
+             cur_TOC = (PNOR::TOCS)(cur_TOC+1))
         {
-            uint32_t TOC_used = cur_TOC;
+            PNOR::TOCS TOC_used = cur_TOC;
 
             if (cur_TOC == 0)
             {
-              offset =  PNOR::TOC_0_OFFSET;
+              offset =  PnorRP::getInstance().getTocOffset(PNOR::TOC_0);
             }
             else
             {
-              offset =  PNOR::TOC_1_OFFSET;
+              offset =  PnorRP::getInstance().getTocOffset(PNOR::TOC_1);
             }
 
             // Read cur_TOC header data
-            PnorRP::getInstance().readFromDevice( offset, 0, false, tocHeader,
-                                                  fatal_error );
+            PnorRP::getInstance().readFromDevice( offset, 0, false,
+                                                  tocHeader, fatal_error );
+            if (fatal_error)
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : Could not read TOC header data at offset 0x%X RC=%X",
+                          offset, fatal_error);
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : Could not read TOC header data at offset 0x%X RC=%X",
+                          offset, fatal_error);
+            }
 
             // Corrupt cur_TOC header data
             memcpy(corruptBuffer, tocHeader, PAGESIZE);
@@ -559,6 +567,13 @@ class PnorRpTest : public CxxTest::TestSuite
             PnorRP::getInstance().readFromDevice( offset + FFS_HDR_SIZE, 0,
                                                   false, tocEntry,
                                                   fatal_error );
+            if (fatal_error)
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : Could not read first TOC entry data at offset 0x%X RC=%X",
+                          offset, fatal_error);
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : Could not read first TOC entry data at offset 0x%X RC=%X",
+                          offset, fatal_error);
+            }
 
             // Corrupt cur_TOC header data
             memcpy(corruptBuffer, tocEntry, PAGESIZE);
@@ -590,6 +605,83 @@ class PnorRpTest : public CxxTest::TestSuite
 
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC End");
     }
+
+    /**
+     * @brief PNOR RP test - ReadOnlyTag
+     *        Tests if readOnly tag on a section is being processed correctly
+     *
+     */
+    void test_ReadOnlyTag(void)
+    {
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag Start" );
+        PNOR::SectionInfo_t l_info;
+        errlHndl_t l_errhdl = NULL;
+        uint64_t chip_select = 0xF;
+        bool needs_ecc = false;
+
+        l_errhdl = PNOR::getSectionInfo(PNOR::TESTRO, l_info);
+        if( l_errhdl )
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : getSectionInfo returned error for %d : RC=%X",
+                      PNOR::TESTRO, l_errhdl->reasonCode());
+            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
+            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : could not read pnor section %d", PNOR::TESTRO);
+        }
+
+        // Write some data
+        const uint64_t l_writeData = 0x1122334455667788;
+        uint64_t* l_dataptr = reinterpret_cast<uint64_t*> (l_info.vaddr);
+        l_dataptr[0] = l_writeData;
+
+        // Flush the page to make sure it gets out to the device
+        // Due to ReadOnly permissions set on TESTRO should be a no-op
+        int rc = mm_remove_pages( RELEASE, l_dataptr, PAGESIZE );
+        if( rc )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : error on RELEASE : rc=%X", rc );
+            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : error on RELEASE" );
+        }
+
+        // Get physical address of pnor section
+        uint64_t l_address = 0;
+        l_errhdl = PnorRP::getInstance().computeDeviceAddr((void*)l_info.vaddr,
+                                                        l_address,
+                                                        chip_select,
+                                                        needs_ecc);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : computeDeviceAddr vaddr = 0x%X",l_info.vaddr);
+            errlCommit(l_errhdl,PNOR_COMP_ID);
+            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : computeDeviceAddr vaddr = 0x%X",l_info.vaddr);
+        }
+
+        // Read pnor section and check if write did not occur
+        uint64_t l_readData = 0;
+        size_t l_size = sizeof(uint64_t);
+        l_errhdl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                              &l_readData,
+                              l_size,
+                              DEVICE_PNOR_ADDRESS(0, l_address));
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> Read Data = 0x%X",l_readData);
+        if(l_errhdl)
+        {
+            TS_FAIL("PnorRpTest::test_ReadOnlyTag: deviceRead() failed! Error committed.");
+            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
+        }
+        if(l_readData == l_writeData)
+        {
+            TS_FAIL("PnorRpTest::test_ReadOnlyTag: Data was written to readOnly section = %s",
+                     l_info.name);
+        }
+        if(l_size != sizeof(uint64_t))
+        {
+            TS_FAIL("PnorRpTest::test_ReadOnlyTag: deviceRead() Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d",
+                    l_address, sizeof(uint64_t), l_size);
+        }
+
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag End");
+    }
+
 
     //@todo - import config data from build and compare to section info
 

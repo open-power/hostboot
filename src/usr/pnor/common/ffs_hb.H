@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,7 @@
 
 /*
  * FSP Destination: src/hbfw/fsp/pnor/common/ffs_hb.H
- * 
+ *
  * NOTE: Do NOT modify this file in CMVC directly!  It comes from the Hostboot
  *      repository and will be overwritten.
 */
@@ -63,6 +65,7 @@ enum
 
     /* Miscellaneous Bits : 1 byte */
     FFS_MISC_PRESERVED     = 0x80,    /**< Preserved across code updates */
+    FFS_MISC_READ_ONLY     = 0x40,    /**< Read only section */
     FFS_MISC_UNUSED        = 0x1F,    /**< Unused MISC Flags */
 };
 

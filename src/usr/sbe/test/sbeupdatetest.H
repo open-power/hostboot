@@ -580,7 +580,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
         {
             // Inputs
             uint8_t                      i_situation;
-            sbeSeepromSide_t             i_cur;     // current_seeprom_side
+            PNOR::sbeSeepromSide_t       i_cur;     // current_seeprom_side
             uint8_t                      i_flags;   // mvpdSbKeyword.flags
 
             // Expected Output
@@ -596,7 +596,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - update alt=1
             // - make cur=perm
             // - re-IPL
-            { 0xE0, SBE_SEEPROM0, 0x80,
+            { 0xE0, PNOR::SBE_SEEPROM0, 0x80,
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x40 },
@@ -606,7 +606,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - update alt=0
             // - make cur=perm
             // - re-IPL
-            { 0xC0, SBE_SEEPROM1, 0x00,
+            { 0xC0, PNOR::SBE_SEEPROM1, 0x00,
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
@@ -616,7 +616,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - update alt=0
             // - make cur=perm
             // - Continue IPL
-            { 0xA0, SBE_SEEPROM1, 0x00,
+            { 0xA0, PNOR::SBE_SEEPROM1, 0x00,
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
@@ -625,7 +625,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // Arbitrarily set cur side to 1 (therefore perm set to 0)
             // - No updates
             // - Continue IPL
-            { 0x80, SBE_SEEPROM1, 0x00,
+            { 0x80, PNOR::SBE_SEEPROM1, 0x00,
               static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS),
               EEPROM::LAST_CHIP_TYPE, 0x00 },
 
@@ -633,7 +633,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // Arbitrarily set cur side to 0 (therefore perm set to 0)
             // - update alt=1
             // - re-IPL
-            { 0x60, SBE_SEEPROM0, 0x00,
+            { 0x60, PNOR::SBE_SEEPROM0, 0x00,
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x40 },
@@ -644,14 +644,14 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // Arbitrarily set cur side to 1 (therefore perm set to 1)
             // - update alt=0
             // - re-IPL
-            { 0x40, SBE_SEEPROM1, 0x80,
+            { 0x40, PNOR::SBE_SEEPROM1, 0x80,
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
 
             // Repeat previous case to make sure global variables are used
             // correctly to save MBOX value
-            { 0x40, SBE_SEEPROM1, 0x80,
+            { 0x40, PNOR::SBE_SEEPROM1, 0x80,
               static_cast<sbeUpdateActions_t>
                      (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
@@ -660,7 +660,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // Arbitrarily set cur side to 0 (therefore perm set to 0)
             // - update alt=1
             // - Continue IPL
-            { 0x20, SBE_SEEPROM0, 0x00,
+            { 0x20, PNOR::SBE_SEEPROM0, 0x00,
               static_cast<sbeUpdateActions_t>(DO_UPDATE|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x00 },
 
@@ -670,7 +670,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - Continue IPL
             // NOTE: this will test that right-most-bit is ignored:
             //  so techincally case 0x01, which should be = case 0x00
-            { 0x01, SBE_SEEPROM0, 0x00,
+            { 0x01, PNOR::SBE_SEEPROM0, 0x00,
               static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS),
               EEPROM::LAST_CHIP_TYPE, 0x00 },
 #endif // SBE_UPDATE_SEQUENTIAL
@@ -708,8 +708,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 sbeState.cur_seeprom_side = testData[i].i_cur;
 
                 sbeState.alt_seeprom_side =
-                             ( ( testData[i].i_cur == SBE_SEEPROM0 )
-                               ? SBE_SEEPROM1 : SBE_SEEPROM0 );
+                             ( ( testData[i].i_cur == PNOR::SBE_SEEPROM0 )
+                               ? PNOR::SBE_SEEPROM1 : PNOR::SBE_SEEPROM0 );
 
                 sbeState.mvpdSbKeyword.flags = testData[i].i_flags;
 

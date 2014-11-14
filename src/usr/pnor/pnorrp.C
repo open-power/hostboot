@@ -44,6 +44,7 @@
 #include <endian.h>
 #include <util/align.H>
 #include <config.h>
+#include "pnor_common.H"
 
 
 extern trace_desc_t* g_trac_pnor;
@@ -192,7 +193,9 @@ void* wait_for_message( void* unused )
  * @brief  Constructor
  */
 PnorRP::PnorRP()
-: iv_TOC_used(0)
+: iv_activeTocOffsets(SIDE_A_TOC_0_OFFSET,SIDE_A_TOC_1_OFFSET)
+,iv_altTocOffsets(SIDE_B_TOC_0_OFFSET,SIDE_B_TOC_1_OFFSET)
+,iv_TOC_used(TOC_0)
 ,iv_msgQ(NULL)
 ,iv_startupRC(0)
 {
@@ -231,12 +234,28 @@ void PnorRP::initDaemon()
 
     do
     {
-        // read the TOC in the PNOR to compute the sections
-        l_errhdl = readTOC();
-        if( l_errhdl )
+        // @TODO RTC: 120062 - Determine which side is Golden
+        // Default TOC offsets set to side A. If two side support is enabled,
+        // check which SEEPROM hostboot booted from
+#ifdef CONFIG_TWO_SIDE_SUPPORT
+        TARGETING::Target* pnor_target = TARGETING::
+                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        // Get correct TOC
+        PNOR::sbeSeepromSide_t l_bootSide;
+        PNOR::getSbeBootSeeprom(pnor_target, l_bootSide);
+        if (l_bootSide == PNOR::SBE_SEEPROM1)
         {
-            break;
+            TRACFCOMP( g_trac_pnor, "PnorRP::initDaemon> Booting from Side B");
+            iv_activeTocOffsets.first = SIDE_B_TOC_0_OFFSET;
+            iv_activeTocOffsets.second = SIDE_B_TOC_1_OFFSET;
+            iv_altTocOffsets.first = SIDE_A_TOC_0_OFFSET;
+            iv_altTocOffsets.second = SIDE_A_TOC_0_OFFSET;
         }
+        else
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::initDaemon> Booting from Side A");
+        }
+#endif
 
         // create a message queue
         iv_msgQ = msg_q_create();
@@ -253,7 +272,7 @@ void PnorRP::initDaemon()
              * @userdata1    Requested Address
              * @userdata2    rc from mm_alloc_block
              * @devdesc      PnorRP::initDaemon> Error from mm_alloc_block
-             * @custdesc    A problem occurred while accessing the boot flash.
+             * @custdesc     A problem occurred while accessing the boot flash.
              */
             l_errhdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -270,9 +289,14 @@ void PnorRP::initDaemon()
         INITSERVICE::registerBlock(reinterpret_cast<void*>(BASE_VADDR),
                                    TOTAL_SIZE,PNOR_PRIORITY);
 
-        // Need to set permissions to R/W
-        rc = mm_set_permission((void*) BASE_VADDR,TOTAL_SIZE,
-                               WRITABLE | WRITE_TRACKED);
+        // Read the TOC in the PNOR to compute the sections and set their
+        // correct permissions
+        l_errhdl = readTOC();
+        if( l_errhdl )
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to readTOC");
+            break;
+        }
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
@@ -319,7 +343,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
              * @userdata1    Requested Section
              * @userdata2    Startup RC
              * @devdesc      PnorRP::getSectionInfo> RP not properly initialized
-             * @custdesc    A problem occurred while accessing the boot flash.
+             * @custdesc     A problem occurred while accessing the boot flash.
              */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
@@ -346,7 +370,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
              * @userdata1    Requested Section
              * @userdata2    TOC used
              * @devdesc      PnorRP::getSectionInfo> Invalid Address for read/write
-             * @custdesc    A problem occurred while accessing the boot flash.
+             * @custdesc     A problem occurred while accessing the boot flash.
             */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
@@ -378,11 +402,12 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                  != 0) ? true : false;
         o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
                                != 0) ? true : false;
+        o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
+                               != 0) ? true : false;
     }
 
     return l_errhdl;
 }
-
 
 /**
  * @brief Read the TOC and store section information
@@ -395,7 +420,7 @@ errlHndl_t PnorRP::readTOC()
     uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
     uint64_t fatal_error = 0;
     do {
-        l_errhdl = readFromDevice( TOC_0_OFFSET, 0, false,
+        l_errhdl = readFromDevice( iv_activeTocOffsets.first, 0, false,
                                 toc0Buffer, fatal_error );
         if (l_errhdl)
         {
@@ -403,7 +428,7 @@ errlHndl_t PnorRP::readTOC()
             break;
         }
 
-        l_errhdl = readFromDevice( TOC_1_OFFSET, 0, false,
+        l_errhdl = readFromDevice( iv_activeTocOffsets.second, 0, false,
                                    toc1Buffer, fatal_error );
         if (l_errhdl)
         {
@@ -412,7 +437,7 @@ errlHndl_t PnorRP::readTOC()
         }
 
         l_errhdl = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC,
-                   BASE_VADDR);
+                                  BASE_VADDR);
         if (l_errhdl)
         {
             TRACFCOMP(g_trac_pnor, "readTOC: parseTOC failed");
@@ -737,59 +762,63 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
     o_chip = 99;
     uint64_t l_vaddr = (uint64_t)i_vaddr;
 
-    // make sure this is one of our addresses
-    if( !((l_vaddr >= BASE_VADDR)
-          && (l_vaddr < LAST_VADDR)) )
+    do
     {
-        TRACFCOMP( g_trac_pnor, "PnorRP::computeDeviceAddr> Virtual Address outside known PNOR range : i_vaddr=%p", i_vaddr );
-        /*@
-         * @errortype
-         * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
-         * @reasoncode   PNOR::RC_INVALID_ADDRESS
-         * @userdata1    Virtual Address
-         * @userdata2    Base PNOR Address
-         * @devdesc      PnorRP::computeDeviceAddr> Virtual Address outside
-         *               known PNOR range
-         * @custdesc    A problem occurred while accessing the boot flash.
-         */
-        l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        PNOR::MOD_PNORRP_COMPUTEDEVICEADDR,
-                                        PNOR::RC_INVALID_ADDRESS,
-                                        l_vaddr,
-                                        BASE_VADDR,
-                                        true /*Add HB SW Callout*/);
-        l_errhdl->collectTrace(PNOR_COMP_NAME);
-        return l_errhdl;
-    }
+        // make sure this is one of our addresses
+        if( !((l_vaddr >= BASE_VADDR)
+              && (l_vaddr < LAST_VADDR)) )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::computeDeviceAddr> Virtual Address outside known PNOR range : i_vaddr=%p", i_vaddr );
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
+             * @reasoncode   PNOR::RC_INVALID_ADDRESS
+             * @userdata1    Virtual Address
+             * @userdata2    Base PNOR Address
+             * @devdesc      PnorRP::computeDeviceAddr> Virtual Address outside
+             *               known PNOR range
+             * @custdesc    A problem occurred while accessing the boot flash.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORRP_COMPUTEDEVICEADDR,
+                                            PNOR::RC_INVALID_ADDRESS,
+                                            l_vaddr,
+                                            BASE_VADDR,
+                                            true /*Add HB SW Callout*/);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
+            break;
+        }
 
-    // find the matching section
-    PNOR::SectionId id = PNOR::INVALID_SECTION;
-    l_errhdl = computeSection( l_vaddr, id );
-    if( l_errhdl )
-    {
-        return l_errhdl;
-    }
+        // find the matching section
+        PNOR::SectionId id = PNOR::INVALID_SECTION;
+        l_errhdl = computeSection( l_vaddr, id );
+        if( l_errhdl )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::computeDeviceAddr> Virtual address does not match any pnor sections : i_vaddr=%p", i_vaddr );
+            break;
+        }
 
-    // pull out the information we need to return from our global copy
-    o_chip = iv_TOC[id].chip;
-    o_ecc = (bool)(iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT);
-    o_offset = l_vaddr - iv_TOC[id].virtAddr; //offset into section
+        // pull out the information we need to return from our global copy
+        o_chip = iv_TOC[id].chip;
+        o_ecc = (bool)(iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT);
+        o_offset = l_vaddr - iv_TOC[id].virtAddr; //offset into section
 
-    // for ECC we need to figure out where the ECC-enhanced offset is
-    //  before tacking on the offset to the section
-    if( o_ecc )
-    {
-        o_offset = (o_offset * 9) / 8;
-    }
-    // add on the offset of the section itself
-    o_offset += iv_TOC[id].flashAddr;
+        // for ECC we need to figure out where the ECC-enhanced offset is
+        //  before tacking on the offset to the section
+        if( o_ecc )
+        {
+            o_offset = (o_offset * 9) / 8;
+        }
+        // add on the offset of the section itself
+        o_offset += iv_TOC[id].flashAddr;
+    } while(0);
 
     TRACUCOMP( g_trac_pnor, "< PnorRP::computeDeviceAddr: i_vaddr=%X, o_offset=0x%X, o_chip=%d", l_vaddr, o_offset, o_chip );
     return l_errhdl;
 }
 
 /**
- * @brief Static instance function for testcase only
+ * @brief Static instance function
  */
 PnorRP& PnorRP::getInstance()
 {
@@ -986,4 +1015,11 @@ errlHndl_t PnorRP::fixECC (PNOR::SectionId i_section)
     delete [] l_buffer;
     TRACFCOMP(g_trac_pnor, EXIT_MRK"PnorRP::fixECC");
     return l_err;
+}
+
+uint64_t PnorRP::getTocOffset(TOCS i_toc) const
+{
+    // Can use a ternary operator because there are only 2 TOCs per side
+    return (i_toc == TOC_0) ? iv_activeTocOffsets.first :
+                              iv_activeTocOffsets.second;
 }

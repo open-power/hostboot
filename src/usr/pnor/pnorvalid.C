@@ -102,7 +102,7 @@ errlHndl_t validateAltMaster( void )
     // When reading PNOR TOC assume a single page and no ECC
     uint8_t* tocBuffer = new uint8_t[PAGESIZE];
     size_t read_size = PAGESIZE;
-    const uint64_t toc0_offset = PNOR::TOC_0_OFFSET;
+    const uint64_t toc0_offset = PnorRP::getInstance().getTocOffset(TOC_0);
 
     do{
 
@@ -176,8 +176,7 @@ errlHndl_t validateAltMaster( void )
             pnordd = new PnorDD(procList[i]);
 
             // Read Flash
-            l_err = pnordd->readFlash(tocBuffer, read_size,
-                                      PNOR::TOC_0_OFFSET);
+            l_err = pnordd->readFlash(tocBuffer, read_size, toc0_offset);
             if ( l_err )
             {
                 // Commit Error Log, but continue the test

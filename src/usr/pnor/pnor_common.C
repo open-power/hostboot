@@ -24,14 +24,15 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include "pnor_common.H"
-#include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 
 #include "ffs.h"           //Common header file with BuildingBlock.
 #include "common/ffs_hb.H" //Hostboot def of user data in ffs_entry struct
+#include <sys/mm.h>
 
 #include <initservice/initserviceif.H>
 #include <util/align.H>
+#include <errl/errlmanager.H>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -45,28 +46,29 @@ TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //4K
  * Eyecatcher strings for PNOR TOC entries
  */
 const char* cv_EYECATCHER[] = {
-    "part",     /**< PNOR::TOC            : Table of Contents */
-    "HBI",      /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
-    "GLOBAL",   /**< PNOR::GLOBAL_DATA    : Global Data */
-    "HBB",      /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
-    "SBEC",     /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
-    "SBE",      /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
-    "WINK",     /**< PNOR::WINK           : Sleep Winkle Reference image */
-    "PAYLOAD",  /**< PNOR::PAYLOAD        : HAL/OPAL */
-    "HBRT",     /**< PNOR::HB_RUNTIME     : Hostboot Runtime (for Sapphire) */
-    "HBD",      /**< PNOR::HB_DATA        : Hostboot Data */
-    "GUARD",    /**< PNOR::GUARD_DATA     : Hostboot Data */
-    "HBEL",     /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
-    "DJVPD",    /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
-    "MVPD",     /**< PNOR::MODULE_VPD     : Module VPD */
-    "CVPD",     /**< PNOR::CENTAUR_VPD    : Centaur VPD */
-    "NVRAM",    /**< PNOR::NVRAM          : OPAL Storage */
-    "OCC",      /**< PNOR::OCC            : OCC LID */
-    "FIRDATA",  /**< PNOR::FIRDATA        : FIRDATA */
+    "part",      /**< PNOR::TOC            : Table of Contents */
+    "HBI",       /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
+    "GLOBAL",    /**< PNOR::GLOBAL_DATA    : Global Data */
+    "HBB",       /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
+    "SBEC",      /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
+    "SBE",       /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
+    "WINK",      /**< PNOR::WINK           : Sleep Winkle Reference image */
+    "PAYLOAD",   /**< PNOR::PAYLOAD        : HAL/OPAL */
+    "HBRT",      /**< PNOR::HB_RUNTIME     : Hostboot Runtime (for Sapphire) */
+    "HBD",       /**< PNOR::HB_DATA        : Hostboot Data */
+    "GUARD",     /**< PNOR::GUARD_DATA     : Hostboot Data */
+    "HBEL",      /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
+    "DJVPD",     /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
+    "MVPD",      /**< PNOR::MODULE_VPD     : Module VPD */
+    "CVPD",      /**< PNOR::CENTAUR_VPD    : Centaur VPD */
+    "NVRAM",     /**< PNOR::NVRAM          : OPAL Storage */
+    "OCC",       /**< PNOR::OCC            : OCC LID */
+    "FIRDATA",   /**< PNOR::FIRDATA        : FIRDATA */
     "ATTR_TMP",  /**< PNOR::ATTR_TMP       : Temporary Attribute Overrides */
     "ATTR_PERM", /**< PNOR::ATTR_PERM      : Permanent Attribute Overrides */
-    "CAPP",     /**< PNOR::CAPP           : CAPP LID */
-    "TEST",     /**< PNOR::TEST           : Test space for PNOR*/
+    "CAPP",      /**< PNOR::CAPP            : CAPP LID */
+    "TEST",      /**< PNOR::TEST           : Test space for PNOR*/
+    "TESTRO",    /**< PNOR::TESTRO         : ReadOnly Test space for PNOR */
     //Not currently used
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
 };
@@ -89,7 +91,7 @@ uint32_t PNOR::pnor_ffs_checksum(void* data, size_t size)
 }
 
 errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
-           uint32_t & o_TOC_used, SectionData_t * o_TOC, uint64_t i_baseVAddr)
+           TOCS & o_TOC_used, SectionData_t * o_TOC, uint64_t i_baseVAddr)
 {
     TRACUCOMP(g_trac_pnor,"PNOR::parseTOC>");
     errlHndl_t l_errhdl = NULL;
@@ -97,9 +99,10 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
     bool TOC_0_failed = false;
 
     do{
-        o_TOC_used = 0;
+        o_TOC_used = TOC_0;
 
-        for (uint32_t cur_TOC = 0; cur_TOC < NUM_TOCS; ++cur_TOC)
+        for (TOCS cur_TOC = TOC_0; cur_TOC < NUM_TOCS;
+            cur_TOC = (TOCS)(cur_TOC+1))
         {
             TRACFCOMP(g_trac_pnor, "PNOR::parseTOC verifying TOC: %d",cur_TOC);
             uint64_t nextVAddr = i_baseVAddr;
@@ -134,10 +137,10 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                 {
                     TRACFCOMP(g_trac_pnor, "PNOR::parseTOC TOC 0 failed header checksum");
                     TOC_0_failed = true;
-                    o_TOC_used = 1;
+                    o_TOC_used = TOC_1;
                     continue;
                 }
-                else if (cur_TOC == 1 && TOC_0_failed)
+                else if (cur_TOC == TOC_1 && TOC_0_failed)
                 {
                     // Both TOC's failed
                     TRACFCOMP(g_trac_pnor, "PNOR::parseTOC both TOCs are corrupted");
@@ -164,7 +167,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
             }
 
             // Only check header if on first TOC or the first TOC failed
-            if (cur_TOC == 0 || TOC_0_failed)
+            if (cur_TOC == TOC_0 || TOC_0_failed)
             {
                 TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: FFS Block size=0x%.8X,"
                  " Partition Table Size = 0x%.8x, entry_count=%d",
@@ -270,15 +273,15 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     // in SP-less config
                     TRACFCOMP(g_trac_pnor, "PNOR::parseTOC pnor_ffs_checksum"
                             " entry checksums do not match");
-                    if (cur_TOC == 0)
+                    if (cur_TOC == TOC_0)
                     {
                         TRACFCOMP(g_trac_pnor,"PNOR::parseTOC TOC 0 entry"
                                 " checksum failed");
                         TOC_0_failed = true;
-                        o_TOC_used = 1;
+                        o_TOC_used = TOC_1;
                         break;
                     }
-                    else if (cur_TOC == 1 && TOC_0_failed)
+                    else if (cur_TOC == TOC_1 && TOC_0_failed)
                     {
                         // Both TOC's failed
                         TRACFCOMP(g_trac_pnor, "PNOR::parseTOC both TOC's are"
@@ -306,7 +309,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                 }
 
                 // Only set data if on first TOC or the first TOC failed
-                if (cur_TOC == 0 || TOC_0_failed)
+                if (cur_TOC == TOC_0 || TOC_0_failed)
                 {
                     //Figure out section enum
                     for(uint32_t eyeIndex=PNOR::TOC;eyeIndex<PNOR::NUM_SECTIONS;
@@ -393,24 +396,119 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                               0, 0, true);
                         break;
                     }
+
+# ifndef __HOSTBOOT_RUNTIME
+                    // Handle section permissions
+                    if (o_TOC[secId].misc & FFS_MISC_READ_ONLY)
+                    {
+                        // Need to set permissions to allow writing to virtual
+                        // addresses, but prevents the kernel from ejecting
+                        // dirty pages (no WRITE_TRACKED).
+                        int rc = mm_set_permission(
+                                                (void*)o_TOC[secId].virtAddr,
+                                                o_TOC[secId].size,
+                                                WRITABLE);
+                        if (rc)
+                        {
+                            TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE for section %s.",
+                                      cv_EYECATCHER[secId]);
+                            /*@
+                            * @errortype
+                            * @moduleid PNOR::MOD_PNORRP_READTOC
+                            * @reasoncode PNOR::RC_WRITABLE_PERM_FAIL
+                            * @userdata1 PNOR section id
+                            * @userdata2 PNOR section vaddr
+                            * @devdesc Could not set permissions of the
+                            * given PNOR section to WRITABLE
+                            * @custdesc A problem occurred while reading PNOR partition table
+                            */
+                            l_errhdl = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORRP_READTOC,
+                                            PNOR::RC_WRITABLE_PERM_FAIL,
+                                            secId,
+                                            o_TOC[secId].virtAddr,
+                                            true /*Add HB SW Callout*/);
+                            l_errhdl->collectTrace(PNOR_COMP_NAME);
+                        }
+                    }
+                    else
+                    {
+                        // Need to set permissions to R/W
+                        int rc = mm_set_permission(
+                                            (void*)o_TOC[secId].virtAddr,
+                                            o_TOC[secId].size,
+                                            WRITABLE | WRITE_TRACKED);
+                        if (rc)
+                        {
+                            TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE/WRITE_TRACKED for section %s.",
+                                      cv_EYECATCHER[secId]);
+                            /*@
+                            * @errortype
+                            * @moduleid PNOR::MOD_PNORRP_READTOC
+                            * @reasoncode PNOR::RC_WRITE_TRACKED_PERM_FAIL
+                            * @userdata1 PNOR section id
+                            * @userdata2 PNOR section vaddr
+                            * @devdesc Could not set permissions of the
+                            * given PNOR section to
+                            * WRITABLE/WRITE_TRACKED
+                            * @custdesc A problem occurred while reading
+                            * PNOR partition table
+                            */
+                            l_errhdl = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORRP_READTOC,
+                                            PNOR::RC_WRITE_TRACKED_PERM_FAIL,
+                                            secId,
+                                            o_TOC[secId].virtAddr,
+                                            true /*Add HB SW Callout*/);
+                            l_errhdl->collectTrace(PNOR_COMP_NAME);
+                        }
+                    }
+#endif
+                    if( l_errhdl )
+                    {
+                        // If both toc0 and toc1 fail break and return the error
+                        if ( (cur_TOC == TOC_1) && (TOC_0_failed) )
+                        {
+                            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC readFromDevice Failed on both TOCs");
+                            break;
+                        }
+
+                        // Toc 1 has not been read yet or Toc 0 was read
+                        // successfully
+                        // Commit error and break to continue checking the next
+                        // TOC
+                        else
+                        {
+                            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC readFromDevice Failed on TOC %d, commit error",
+                                      cur_TOC);
+                            errlCommit(l_errhdl,PNOR_COMP_ID);
+                            l_errhdl = NULL;
+                            break;
+                        }
+                    }
                 }
-            }
+            } // For TOC Entries
             if (l_errhdl)
             {
-                TRACFCOMP(g_trac_pnor, ERR_MRK"PNOR::parseTOC: error parsing");
                 break;
             }
-
-            for(PNOR::SectionId tmpId = PNOR::FIRST_SECTION;
-                tmpId < PNOR::NUM_SECTIONS;
-                tmpId = (PNOR::SectionId) (tmpId + 1) )
-            {
-                TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X  "
-                       "virt=0x%.16X", cv_EYECATCHER[tmpId], o_TOC[tmpId].size,
-                       o_TOC[tmpId].flashAddr, o_TOC[tmpId].virtAddr );
-            }
+        } // For TOC's
+        if (l_errhdl)
+        {
+            break;
         }
     } while(0);
+
+    for(PNOR::SectionId tmpId = PNOR::FIRST_SECTION;
+        tmpId < PNOR::NUM_SECTIONS;
+        tmpId = (PNOR::SectionId) (tmpId + 1) )
+    {
+        TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X  "
+               "virt=0x%.16X", cv_EYECATCHER[tmpId], o_TOC[tmpId].size,
+               o_TOC[tmpId].flashAddr, o_TOC[tmpId].virtAddr );
+    }
 
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
     return l_errhdl;
