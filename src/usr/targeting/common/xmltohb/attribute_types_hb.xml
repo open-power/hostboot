@@ -538,6 +538,19 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+<attribute>
+    <id>OPEN_POWER_TURBO_MODE_SUPPORTED</id>
+    <description>
+        If this system supports Turbo frequency mode.
+            0x00 = no
+            0x01 = yes
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
 
 <attribute>
     <id>ADC_CHANNEL_FUNC_IDS</id>
