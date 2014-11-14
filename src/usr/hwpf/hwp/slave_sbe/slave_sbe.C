@@ -44,6 +44,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <sys/time.h>
 #include <devicefw/userif.H>
+#include <i2c/i2cif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -440,6 +441,14 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
         }
     }   // endfor
+
+    l_errl = I2C::i2cResetMasters(I2C::I2C_RESET_PROC_ALL);
+
+    if (l_errl)
+    {
+        // Commit error
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_proc_check_slave_sbe_seeprom_complete exit");

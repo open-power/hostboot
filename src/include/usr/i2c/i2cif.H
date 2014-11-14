@@ -39,18 +39,21 @@ namespace I2C
  */
 errlHndl_t i2cSetupMasters ( void );
 
-
 /**
-* @enum i2cResetType
-*
-* @brief I2C Reset Type specifies what is reset when i2cResetMasters() is called
-*        @todo RTC 115832 - additional enums will be added
-*
-*/
+ * @enum i2cResetType
+ *
+ * @brief I2C Reset Type specifies what is reset when i2cResetMasters() is called
+ */
 enum i2cResetType
 {
-    I2C_RESET_INVALID                   = 0x00,
-    I2C_RESET_PROC_HOST                 = 0x01, // Only Host (not FSI)
+    I2C_RESET_INVALID,
+    I2C_RESET_ALL,
+    I2C_RESET_PROC_ALL,
+    I2C_RESET_PROC_FSI,
+    I2C_RESET_PROC_HOST,
+    I2C_RESET_MEMBUF_ALL,
+    I2C_RESET_MEMBUF_FSI,
+    I2c_RESET_MEMBUF_HOST
 };
 
 /**

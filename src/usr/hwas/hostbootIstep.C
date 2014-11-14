@@ -47,6 +47,8 @@
 #include <intr/interrupt.H>
 #include <ibscom/ibscomif.H>
 
+#include <i2c/i2cif.H>
+
 #include <sbe/sbeif.H>
 #include <sbe_update.H>
 
@@ -81,13 +83,31 @@ using namespace ISTEP_ERROR;
 //******************************************************************************
 void* host_init_fsi( void *io_pArgs )
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi entry" );
+    errlHndl_t l_errl = NULL;
 
-    errlHndl_t errl = FSI::initializeHardware( );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi entry" );
+    do
+    {
+        l_errl = FSI::initializeHardware( );
+        if (l_errl)
+        {
+            break;
+        }
+
+
+        //@TODO RTC:116439
+        /*
+        l_errl = I2C::i2cResetMasters(I2C::I2C_RESET_PROC_ALL);
+        if (l_errl)
+        {
+            break;
+        }
+        */
+
+    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi exit" );
-
-    return errl;
+    return l_errl;
 }
 
 //******************************************************************************

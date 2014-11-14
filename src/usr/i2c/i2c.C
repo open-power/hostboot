@@ -2378,9 +2378,8 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
                 // Now reset the engine/bus
                 if ( error_found == false )
                 {
-                    err = i2cReset ( procList[proc],
-                                     io_args);
-
+                    err = i2cReset ( procList[proc], io_args,
+                                    FORCE_UNLOCK_RESET);
                     if( err )
                     {
                         TRACFCOMP( g_trac_i2c,
@@ -2419,8 +2418,6 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
 
     return err;
 }
-
-
 
 // ------------------------------------------------------------------
 //  i2cRegisterOp
