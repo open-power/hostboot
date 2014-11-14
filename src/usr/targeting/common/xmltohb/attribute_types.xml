@@ -10957,20 +10957,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
-    <description>Machine Readable Workbook safe mode throttle value for denominator cfg_nm_m</description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
     <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_chip</description>
     <simpleType>

@@ -140,10 +140,6 @@
         <default>96</default>
     </attribute>
     <attribute>
-        <id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
-        <default>512</default>
-    </attribute>
-    <attribute>
         <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
         <default>32</default>
     </attribute>
