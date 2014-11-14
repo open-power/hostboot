@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.62 2014/09/24 14:48:22 jmcgill Exp $
+// $Id: io_run_training.C,v 1.65 2014/12/04 02:01:55 thi Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -60,7 +60,9 @@ extern "C" {
 
     ReturnCode io_training_set_pll_post_wiretest(const Target& target){
         ReturnCode rc;
-        uint8_t pb_bndy_dmipll_data[231]={0},ab_bndy_pll_data[80]={0},tp_bndy_pll_data[80]={0};
+        fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA_Type pb_bndy_dmipll_data={0};
+        fapi::ATTR_PROC_AB_BNDY_PLL_DATA_Type ab_bndy_pll_data={0};
+        fapi::ATTR_MEMB_TP_BNDY_PLL_DATA_Type tp_bndy_pll_data={0};
 
         // For the PLL Partial updation logic we need PFD360 offsets into the Ring now 
         uint32_t proc_dmi_cupll_pfd360_offset[8];

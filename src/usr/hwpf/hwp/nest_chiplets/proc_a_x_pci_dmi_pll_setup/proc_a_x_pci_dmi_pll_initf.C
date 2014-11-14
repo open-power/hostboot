@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.16 2014/01/07 14:43:23 mfred Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.19 2014/12/02 00:17:23 szhong Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -87,10 +87,9 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
     uint8_t is_simulation;
     uint8_t lctank_pll_vco_workaround = 0;
     uint32_t ring_length     = 0;
-    uint8_t attrABRingData[80]  ={0};  // Set to 80 bytes to match length in XML file, not actual scan ring length.
-    uint8_t attrDMIRingData[231]={0};  // Set to 231 bytes to match length in XML file, not actual scan ring length.
-    uint8_t attrPCIRingData[80] ={0};  // Set to 80 bytes to match length in XML file, not actual scan ring length.
-
+    fapi::ATTR_PROC_AB_BNDY_PLL_DATA_Type attrABRingData={0};
+    fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA_Type attrDMIRingData={0};
+    fapi::ATTR_PROC_PCI_BNDY_PLL_DATA_Type attrPCIRingData={0};
     // return codes
     uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
@@ -419,6 +418,15 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_initf.C,v $
+Revision 1.19  2014/12/02 00:17:23  szhong
+remove hardcoded bndy pll length in code
+
+Revision 1.18  2014/11/13 20:17:22  szhong
+adjust pb_bndy_dmi_pll length to 240
+
+Revision 1.17  2014/11/11 22:10:35  szhong
+increased attribute data length to support Naples
+
 Revision 1.16  2014/01/07 14:43:23  mfred
 Checking in updates from Andrea Ma:  Include statements fixed and one fapi dbg statement changed.
 

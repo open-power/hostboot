@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingAttr.C,v 1.6 2014/04/16 19:23:11 thi Exp $
+// $Id: getPllRingAttr.C,v 1.9 2014/12/08 18:48:21 thi Exp $
 /**
  *  @file getPllRingAttr.C
  *
@@ -38,8 +38,11 @@
 
 #include <stdint.h>
 
-// Undefine HW for VBU
+// FAPI_SIMULATION is controlled by makefile
+#ifndef FAPI_SIMULATION
 #define HW
+#endif
+
 //  fapi support
 #include <fapiPllRingAttr.H>
 #include <getPllRingAttr.H>
@@ -262,6 +265,14 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
            break;
         }
 
+// Freqs are set as 0 in ring attribute files for SIM environment
+#ifdef FAPI_SIMULATION
+            for (uint8_t ii = 0; ii <  MAX_FREQ_KEYS; ii++)
+            {
+                 l_freqKeys[ii] = 0;    
+            }
+#endif
+
         // Case statement for each PLL ring
         //   1. Set pointer to first array element
         //   2. Set array size (# of elements)
@@ -317,6 +328,16 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                             ( &P8_20_ATTR_PROC_AB_BNDY_PLL_DATA_array);
                         l_arySize =
                             sizeof(P8_20_ATTR_PROC_AB_BNDY_PLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                }
+                else if (l_chipType == ENUM_ATTR_NAME_NAPLES)
+                {
+                    if (l_attrDdLevel == 0x10)
+                    {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
+                            &N1_10_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                        l_arySize = sizeof(N1_10_ATTR_PROC_AB_BNDY_PLL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }

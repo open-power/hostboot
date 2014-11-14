@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.36 2014/09/23 20:43:46 jmcgill Exp $
+// $Id: io_dccal.C,v 1.39 2014/12/02 00:17:33 szhong Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -765,11 +765,15 @@ ReturnCode io_dccal(const Target& target){
     ReturnCode rc;
     io_interface_t master_interface=CP_IOMC0_P0;
     uint32_t master_group=0;
-	uint8_t pb_bndy_dmipll_data[231]={0},ab_bndy_pll_data[80]={0},tp_bndy_pll_data[80]={0};
+
+    fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA_Type pb_bndy_dmipll_data={0};
+    fapi::ATTR_PROC_AB_BNDY_PLL_DATA_Type    ab_bndy_pll_data={0};
+    fapi::ATTR_MEMB_TP_BNDY_PLL_DATA_Type    tp_bndy_pll_data={0};
     ecmdDataBufferBase ring_data;
     fapi::Target parent_target;
 	uint32_t ring_length=0;
 	uint32_t rc_ecmd=0;
+
 const fapi::Target& TARGET = target;
     FAPI_DBG("Running IO DCCAL PROCEDURE");
 

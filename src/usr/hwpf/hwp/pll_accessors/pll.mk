@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +25,7 @@
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/pll_accessors
 
 VPATH += ${HWPPATH}/pll_accessors
-
+CFLAGS += $(if $(CONFIG_VPO_COMPILE),-DFAPI_SIMULATION,)
 OBJS += getPllRingAttr.o
 OBJS += getPllRingInfoAttr.o
 
