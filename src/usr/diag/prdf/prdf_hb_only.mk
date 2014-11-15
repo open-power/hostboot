@@ -70,9 +70,6 @@ prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seepr
 # ./
 prd_obj += prdfMain.o
 
-# framework/config/
-prd_obj += prdfMbaDomain.o
-
 # framework/resolution/
 prd_obj += prdfDumpResolution.o
 
@@ -107,6 +104,9 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 
 # ./
 prd_obj += prdfMain_ipl.o
+
+# framework/config/
+prd_obj += prdfMbaDomain.o
 
 endif
 
