@@ -74,7 +74,7 @@ prd_obj += prdfMain.o
 prd_obj += prdfDumpResolution.o
 
 # framework/service/
-prd_obj_no_sim += prdfPlatServices.o
+prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
 # mnfgtools/
@@ -107,6 +107,9 @@ prd_obj += prdfMain_ipl.o
 
 # framework/config/
 prd_obj += prdfMbaDomain.o
+
+# framework/service/
+prd_obj += prdfPlatServices_ipl.o
 
 endif
 

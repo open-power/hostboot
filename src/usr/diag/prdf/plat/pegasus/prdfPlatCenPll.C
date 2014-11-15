@@ -60,7 +60,6 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t cenTrgt = i_cenChip->GetChipHandle();
 
     do
     {
@@ -79,6 +78,9 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
             break; // nothing to do
         }
 
+        #ifndef __HOSTBOOT_RUNTIME
+
+        TargetHandle_t cenTrgt = i_cenChip->GetChipHandle();
         TargetHandleList list = getConnected( cenTrgt, TYPE_MBA );
         if ( 0 == list.size() )
         {
@@ -100,6 +102,8 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
                 continue; // keep going
             }
         }
+
+        #endif
 
     } while(0);
 

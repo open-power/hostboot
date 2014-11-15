@@ -506,7 +506,8 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                 TargetHandle_t mba = mbaChip->GetChipHandle();
                 if ( NULL != mba )
                 {
-                    #ifdef __HOSTBOOT_MODULE
+                    #if  defined(__HOSTBOOT_MODULE) && \
+                        !defined(__HOSTBOOT_RUNTIME)
                     // This is very small platform specific code. So not
                     // creating a separate file for this.
                     int32_t l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/framework/service/prdfPlatServices.H $      */
+/* $Source: src/usr/diag/prdf/framework/service/prdfPlatServices_ipl.H $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,28 +23,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDFPLATSERVICES_H
-#define PRDFPLATSERVICES_H
+#ifndef __prdfPlatServices_ipl_H
+#define __prdfPlatServices_ipl_H
 
 /**
- * @file  prdfPlatServices.H
- * @brief Wrapper code for external interfaces used by PRD.
+ * @file  prdfPlatServices_ipl.H
+ * @brief Wrapper code for external interfaces used by PRD (IPL only).
  *
  * This file contains code that is strictly specific to Hostboot. All code that
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
-#include <utility_procedures/mss_maint_cmds.H>
-
-// This must be included after all Hostboot specific includes. This will take
-// care of cases where a file must be included in the common code, but the
-// include paths are different between FSP and Hostboot.
-#include <prdfPlatServices_common.H>
-
-// Must be included after including the common PlatServices code.
-#ifndef __HOSTBOOT_RUNTIME
-  #include <prdfPlatServices_ipl.H>
-#endif
+#include <diag/mdia/mdia.H>
 
 //------------------------------------------------------------------------------
 
@@ -55,35 +45,50 @@ namespace PlatServices
 {
 
 //##############################################################################
-//##                      System Level Utility functions
+//##                        Memory specific functions
 //##############################################################################
 
-// Inline function definitions for Hostboot compiler optimization. See
-// prdfPlatServices_common.H for the function declarations.
+/**
+ * @brief  Checks if we are running in MDIA mode.
+ * @return TRUE if in MDIA mode, FALSE otherwise.
+ */
+bool isInMdiaMode();
 
-inline bool atRuntime()
-{
-    #ifdef __HOSTBOOT_RUNTIME
-    return true;
-    #else
-    return false;
-    #endif
-}
+/**
+ * @brief  Sends a maintenance command message to MDIA.
+ * @param  i_mbaTarget An MBA target.
+ * @param  i_eventType MDIA event type
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_mbaTarget,
+                          MDIA::MaintCommandEventType i_eventType );
 
-inline bool isSapphireRunning()
-{
-    #ifdef __HOSTBOOT_RUNTIME
-    return true;
-    #else
-    return false;
-    #endif
-}
+/**
+ * @brief  Invokes the restore DRAM repairs hardware procedure.
+ * @param  i_mbaTarget
+ * @param  o_repairedRankMask An encoded bitmask of repaired ranks.
+ * @param  o_badDimm An encoded bitmask of bad DIMMs.
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+int32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_mbaTarget,
+                               uint8_t & o_repairedRankMask,
+                               uint8_t & o_badDimmMask );
 
-inline bool isSmpCoherent() { return false; }
+/**
+ * @brief  Invokes the mss_IPL_UE_isolation hardware procedure.
+ *         This function will identify the bits that caused the UE.
+ * @param  i_mba    Target MBA.
+ * @param  i_rank   Target rank.
+ * @param  o_bitmap DQ bitmap container.
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+int32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
+                           const CenRank & i_rank,
+                           CenDqBitmap & o_bitmap );
 
 } // end namespace PlatServices
 
 } // end namespace PRDF
 
-#endif // PRDFPLATSERVICES_H
+#endif // __prdfPlatServices_ipl_H
 

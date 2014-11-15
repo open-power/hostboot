@@ -421,7 +421,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Check for IPL Diag Mode and set up for Deferred Deconfig
     //--------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
+    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
 
     iplDiagMode = PlatServices::isInMdiaMode();
 
@@ -433,8 +433,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         deconfigState = HWAS::DECONFIG;
     }
 
-#endif
-
+    #endif
 
     //**************************************************************
     // Update Error Log with SRC
