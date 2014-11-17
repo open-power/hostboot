@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/framework/service/prdfPlatServices.H $      */
+/* $Source: src/usr/diag/prdf/common/runtime/prdfPlatServices_rt.H $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,32 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDFPLATSERVICES_H
-#define PRDFPLATSERVICES_H
-
-/**
- * @file  prdfPlatServices.H
- * @brief Wrapper code for external interfaces used by PRD.
- *
- * This file contains code that is strictly specific to Hostboot. All code that
- * is common between FSP and Hostboot should be in the respective common file.
- */
-
-#include <utility_procedures/mss_maint_cmds.H>
-
-// This must be included after all Hostboot specific includes. This will take
-// care of cases where a file must be included in the common code, but the
-// include paths are different between FSP and Hostboot.
-#include <prdfPlatServices_common.H>
-
-// Must be included after including the common PlatServices code.
-#ifdef __HOSTBOOT_RUNTIME
-  #include <prdfPlatServices_rt.H>
-#else
-  #include <prdfPlatServices_ipl.H>
-#endif
-
-//------------------------------------------------------------------------------
+#ifndef __prdfPlatServices_rt_H
+#define __prdfPlatServices_rt_H
 
 namespace PRDF
 {
@@ -57,35 +33,34 @@ namespace PlatServices
 {
 
 //##############################################################################
-//##                      System Level Utility functions
+//##                        Memory specific functions
 //##############################################################################
 
-// Inline function definitions for Hostboot compiler optimization. See
-// prdfPlatServices_common.H for the function declarations.
+/**
+ * @brief Communicates a page gard request to the hypervisor.
+ * @param i_systemAddress Any address in the target page.
+ */
+void sendPageGardRequest( uint64_t i_systemAddress );
 
-inline bool atRuntime()
-{
-    #ifdef __HOSTBOOT_RUNTIME
-    return true;
-    #else
-    return false;
-    #endif
-}
+/**
+ * @brief Communicates an LMB gard request to the hypervisor.
+ * @param i_systemAddress Any address in the target LMB.
+ * @param i_isFetchUE     True if cause attention is a fetch UE. False if cause
+ *                        attention is a scrub UE (only applicable to FSP code).
+ */
+void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE );
 
-inline bool isSapphireRunning()
-{
-    #ifdef __HOSTBOOT_RUNTIME
-    return true;
-    #else
-    return false;
-    #endif
-}
-
-inline bool isSmpCoherent() { return false; }
+/**
+ * @brief Communicates to the hypervisor a range of address to remove from the
+ *        available memory space.
+ * @param i_startAddr First address in the range.
+ * @param i_endAddr   Last address in the range.
+ */
+void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
 
 } // end namespace PlatServices
 
 } // end namespace PRDF
 
-#endif // PRDFPLATSERVICES_H
+#endif // __prdfPlatServices_rt_H
 

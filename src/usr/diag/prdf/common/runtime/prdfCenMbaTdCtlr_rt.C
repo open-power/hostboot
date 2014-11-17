@@ -42,7 +42,7 @@
 #include <prdfCalloutUtil.H>
 #include <prdfCenMemUtils.H>
 #include <prdfCenMbaThresholds.H>
-#include <prdfCenMbaDynMemDealloc.H>
+#include <prdfCenMbaDynMemDealloc_rt.H>
 
 using namespace TARGETING;
 

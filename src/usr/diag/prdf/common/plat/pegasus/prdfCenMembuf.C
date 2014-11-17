@@ -49,7 +49,7 @@
 #include <prdfLaneRepair.H>
 #include <prdfCenMemUtils.H>
 #ifndef __HOSTBOOT_MODULE
-#include <prdfCenMbaDynMemDealloc.H> // For dynamic memory deallocation support
+  #include <prdfCenMbaDynMemDealloc_rt.H>
 #endif
 
 using namespace TARGETING;

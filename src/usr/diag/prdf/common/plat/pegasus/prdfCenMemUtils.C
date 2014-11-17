@@ -34,8 +34,9 @@
 #include <prdfPlatServices.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfParserUtils.H>
-#ifndef __HOSTBOOT_MODULE
-#include <prdfCenMbaDynMemDealloc.H> // For dynamic memory deallocation support
+
+#if defined(__HOSTBOOT_RUNTIME) || !defined(__HOSTBOOT_MODULE)
+  #include <prdfCenMbaDynMemDealloc_rt.H>
 #endif
 
 using namespace TARGETING;

@@ -123,7 +123,11 @@ endif
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 
+# runtime/
+prd_obj += prdfPlatServices_rt.o
+
 # common/runtime/
+prd_obj += prdfCenMbaDynMemDealloc_rt.o
 prd_obj += prdfCenMbaTdCtlr_rt.o
 prd_obj += prdfCenMbaTdRankData.o
 
