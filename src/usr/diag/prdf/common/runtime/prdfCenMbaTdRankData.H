@@ -160,7 +160,7 @@ class TdRankList
      *         iv_list.end() if the rank is not found.
      */
     ListItr findRank( const CenRank & i_rank )
-    { return find_if( iv_list.begin(), iv_list.end(), MatchRank(i_rank) ); }
+    { return std::find_if(iv_list.begin(), iv_list.end(), MatchRank(i_rank)); }
 
   private: // instance variables
 

@@ -987,6 +987,21 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
     return o_cmd;
 }
 
+//------------------------------------------------------------------------------
+
+mss_MaintCmdWrapper * createIncAddrMssCmd( TargetHandle_t i_mba )
+{
+    mss_MaintCmdWrapper * o_cmd = NULL;
+
+    mss_MaintCmd * cmd = new mss_IncrementAddress( getFapiTarget(i_mba) );
+
+    o_cmd = new mss_MaintCmdWrapper( cmd );
+
+    return o_cmd;
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace PlatServices
 
 } // end namespace PRDF

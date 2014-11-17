@@ -87,8 +87,9 @@ class TdQueue
      */
     bool exists( const CenRank & i_rank )
     {
-        return ( iv_queue.end() != find_if( iv_queue.begin(), iv_queue.end(),
-                                            MatchRank(i_rank) ) );
+        return ( iv_queue.end() != std::find_if( iv_queue.begin(),
+                                                 iv_queue.end(),
+                                                 MatchRank(i_rank) ) );
     }
 
     /**

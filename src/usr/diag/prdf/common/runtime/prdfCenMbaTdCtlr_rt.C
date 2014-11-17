@@ -31,8 +31,11 @@
 #include <prdfTrace.H>
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
-#include <prdfSdcFileControl.H>
 #include <UtilHash.H>
+
+#ifndef __HOSTBOOT_RUNTIME
+  #include <prdfSdcFileControl.H>
+#endif
 
 // Pegasus includes
 #include <prdfCenAddress.H>
@@ -1828,7 +1831,9 @@ int32_t CenMbaTdCtlr::removeTdQueueEntry()
 
 int32_t CenMbaTdCtlr::cleanupPrevCmd( STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #ifndef __HOSTBOOT_RUNTIME
     ForceSyncAnalysis(*io_sc.service_data);
+    #endif
     return CenMbaTdCtlrCommon::cleanupPrevCmd();
 }
 
@@ -1837,7 +1842,9 @@ int32_t CenMbaTdCtlr::cleanupPrevCmd( STEP_CODE_DATA_STRUCT & io_sc )
 int32_t CenMbaTdCtlr::prepareNextCmd( STEP_CODE_DATA_STRUCT & io_sc,
                                       bool i_clearStats  )
 {
+    #ifndef __HOSTBOOT_RUNTIME
     ForceSyncAnalysis(*io_sc.service_data);
+    #endif
     return CenMbaTdCtlrCommon::prepareNextCmd( i_clearStats );
 }
 

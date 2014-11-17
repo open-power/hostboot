@@ -448,6 +448,15 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                             uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS,
                             const CenAddr * i_sAddrOverride = NULL );
 
+/**
+ * @brief  Create an IncrementAddress maintenance command object.
+ * @param  i_mba An MBA target.
+ * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
+ * @note   This function allocates memory on heap for mss_MaintCmdWrapper
+ *         object. It is the caller's responsibilty to delete this object.
+ */
+mss_MaintCmdWrapper * createIncAddrMssCmd( TARGETING::TargetHandle_t i_mba );
+
 //##############################################################################
 //##                        util functions
 //##############################################################################

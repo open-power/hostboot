@@ -32,6 +32,8 @@
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 
+#include <initservice/initserviceif.H>
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -45,8 +47,13 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
                                 const PfaData & i_pfaData )
 {
     #define PRDF_FUNC "[ErrDataService::MnfgTrace] "
+
     do
     {
+        // This is for Hostboot IPL and FSP machines only.
+        #ifndef __HOSTBOOT_RUNTIME
+        if ( !INITSERVICE::spBaseServicesEnabled() ) break;
+
         errlHndl_t errl = NULL;
         errl = getMfgSync().syncMfgTraceToFsp(i_esig, i_pfaData);
         if (errl)
@@ -55,7 +62,10 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
             PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
             break;
         }
-    }while(0);
+        #endif
+
+    } while(0);
+
     #undef PRDF_FUNC
 }
 
