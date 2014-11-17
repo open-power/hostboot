@@ -77,10 +77,6 @@ prd_obj += prdfDumpResolution.o
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
-# mnfgtools/
-prd_obj += prdfMfgSync.o
-prd_obj += prdfMfgThresholdFile.o
-
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfPllUtils.o
 
@@ -105,6 +101,10 @@ prd_obj += prdfMbaDomain.o
 
 # framework/service/
 prd_obj += prdfPlatServices_ipl.o
+
+# mnfgtools/
+prd_obj += prdfMfgSync.o          # TODO: RTC 118150 Will be refactored.
+prd_obj += prdfMfgThresholdFile.o # TODO: RTC 118150 Will be refactored.
 
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfCenMbaIplCeStats.o

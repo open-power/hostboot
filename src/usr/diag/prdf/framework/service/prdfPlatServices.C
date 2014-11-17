@@ -64,6 +64,8 @@ namespace PlatServices
 
 void getCurrentTime( Timer & o_timer )
 {
+// TODO: RTC 119024 remove after clock_gettime() is supported in HBRT
+#ifndef __HOSTBOOT_RUNTIME
     timespec_t curTime;
     PRDF_ASSERT(0 == clock_gettime(CLOCK_MONOTONIC, &curTime))
 
@@ -72,6 +74,7 @@ void getCurrentTime( Timer & o_timer )
 
     // Since Hostboot doesn't have any system checkstop, we don't have to worry
     // about the detailed time struct for system checkstop timestamp.
+#endif
 }
 
 //------------------------------------------------------------------------------

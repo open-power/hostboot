@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -120,8 +122,11 @@ void MfgThresholdMgr::setupFile()
 {
     if(NULL == iv_file)
     {
+// TODO: RTC 118150 Will be refactored.
+#ifndef __HOSTBOOT_RUNTIME
         iv_file = new MfgThresholdFile();
         iv_file->setup();
+#endif
     }
 }
 

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/makefile $
+# $Source: src/usr/diag/prdf/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2014
 # [+] International Business Machines Corp.
 #
 #
@@ -23,25 +23,19 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../../..
-MODULE = prdf
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../../..
+MODULE = prdf_rt
 
-SUBDIRS += framework.d  # This will eventually compile the rule code. This only
-                        # needs to be done once and not for both IPL and RT
-						# compiles. This is because compiling the rule code only
-						# generates .prf files, which are compiler independent,
-						# and a few .C files needed for the error log parser,
-						# which is compiled elsewhere.
-SUBDIRS += runtime.d
 SUBDIRS += test.d
 
 ################################################################################
 
 # ROOTPATH must be defined before including this file.
-include prdf_hb_only.mk # Will define PRD_SRC_PATH and PRD_INC_PATH
+include ../prdf_hb_only.mk  # Will define PRD_SRC_PATH and PRD_INC_PATH
 
 # PRD_SRC_PATH and PRD_INC_PATH must be defined before including this file.
-include common/prdf_common_fsp_and_hb.mk
+include ../common/prdf_common_fsp_and_hb.mk
 
 VPATH += ${prd_vpath}
 
@@ -53,4 +47,5 @@ OBJS += ${prd_rule_plugin}
 
 ################################################################################
 
-include ${ROOTPATH}/config.mk
+include $(ROOTPATH)/config.mk
+
