@@ -28,6 +28,10 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
+CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
+
+OBJS += attnfakeprd.o
+OBJS += attnfakereg.o
 
 MODULE = testattn_rt
 

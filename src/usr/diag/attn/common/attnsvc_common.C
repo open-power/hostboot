@@ -371,6 +371,8 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
 
        if(err)
        {
+           ATTN_ERR("procOps.resolve() returned error.HUID:0X%08X ",
+                     get_huid( i_proc ));
            break;
        }
 
@@ -380,6 +382,8 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
 
        if(err)
        {
+           ATTN_ERR("memOps.resolve() returned error.HUID:0X%08X ",
+                     get_huid( i_proc ));
            break;
        }
 
@@ -390,6 +394,7 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
 
        if(err)
        {
+           ATTN_ERR("callPrd() returned error." )
            break;
        }
        #ifdef __HOSTBOOT_RUNTIME
