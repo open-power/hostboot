@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfCenMbaTdCtlr.C $           */
+/* $Source: src/usr/diag/prdf/plat/pegasus/prdfCenMbaTdCtlr_ipl.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 // $Id: mss_scrub.H,v 1.4 2013/12/02 15:00:03 bellows Exp $
 // $Id: mss_scrub.C,v 1.10 2014/03/11 19:06:19 gollub Exp $
 
-#include <prdfCenMbaTdCtlr.H>
+#include <prdfCenMbaTdCtlr_ipl.H>
 
 // Framework includes
 #include <iipconst.h>

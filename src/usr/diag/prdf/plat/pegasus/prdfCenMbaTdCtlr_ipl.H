@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfCenMbaTdCtlr.H $           */
+/* $Source: src/usr/diag/prdf/plat/pegasus/prdfCenMbaTdCtlr_ipl.H $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfCenMbaTdCtlr.H
+/** @file  prdfCenMbaTdCtlr_ipl.H
  *  @brief The Hostboot implementation of the MBA TD Controller.
  */
 
-#ifndef __prdfCenMbaTdCtlr_H
-#define __prdfCenMbaTdCtlr_H
+#ifndef __prdfCenMbaTdCtlr_ipl_H
+#define __prdfCenMbaTdCtlr_ipl_H
 
 #include <prdfCenMbaTdCtlr_common.H>
 
@@ -167,5 +167,5 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
 
 } // end namespace PRDF
 
-#endif // __prdfCenMbaTdCtlr_H
+#endif // __prdfCenMbaTdCtlr_ipl_H
 

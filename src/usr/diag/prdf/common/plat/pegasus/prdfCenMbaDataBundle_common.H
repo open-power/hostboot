@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,10 +37,15 @@
 #include <prdfPlatServices.H>
 
 // Pegasus includes
-#include <prdfCenMbaTdCtlr.H>
 #include <prdfCenMbaUeTable.H>
 #include <prdfCenMbaCeTable.H>
 #include <prdfCenMbaRceTable.H>
+
+#if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+  #include <prdfCenMbaTdCtlr_ipl.H>
+#else
+  #include <prdfCenMbaTdCtlr_rt.H>
+#endif
 
 namespace PRDF
 {

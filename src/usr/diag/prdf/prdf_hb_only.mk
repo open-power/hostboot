@@ -82,7 +82,6 @@ prd_obj += prdfMfgSync.o
 prd_obj += prdfMfgThresholdFile.o
 
 # plat/pegasus/ (non-rule plugin related)
-prd_obj += prdfCenMbaTdCtlr.o
 prd_obj += prdfPlatCalloutUtil.o
 prd_obj += prdfPllUtils.o
 
@@ -111,7 +110,20 @@ prd_obj += prdfPlatServices_ipl.o
 
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfCenMbaIplCeStats.o
+prd_obj += prdfCenMbaTdCtlr_ipl.o
 prd_obj += prdfDramRepairs.o
+
+endif
+
+################################################################################
+# Hostboot only object files (runtime only)
+################################################################################
+
+ifeq (${HOSTBOOT_RUNTIME},1)
+
+# common/runtime/
+prd_obj += prdfCenMbaTdCtlr_rt.o
+prd_obj += prdfCenMbaTdRankData.o
 
 endif
 
