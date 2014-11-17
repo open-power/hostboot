@@ -82,9 +82,7 @@ prd_obj += prdfMfgSync.o
 prd_obj += prdfMfgThresholdFile.o
 
 # plat/pegasus/ (non-rule plugin related)
-prd_obj += prdfCenMbaIplCeStats.o
 prd_obj += prdfCenMbaTdCtlr.o
-prd_obj += prdfDramRepairs.o
 prd_obj += prdfPlatCalloutUtil.o
 prd_obj += prdfPllUtils.o
 
@@ -110,6 +108,10 @@ prd_obj += prdfMbaDomain.o
 
 # framework/service/
 prd_obj += prdfPlatServices_ipl.o
+
+# plat/pegasus/ (non-rule plugin related)
+prd_obj += prdfCenMbaIplCeStats.o
+prd_obj += prdfDramRepairs.o
 
 endif
 

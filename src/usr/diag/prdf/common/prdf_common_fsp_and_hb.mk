@@ -40,6 +40,7 @@ prd_vpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/common/plat
 prd_vpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_vpath += ${PRD_SRC_PATH}/common/plugins
+prd_vpath += ${PRD_SRC_PATH}/common/runtime
 prd_vpath += ${PRD_SRC_PATH}/common/util
 
 prd_incpath += ${PRD_SRC_PATH}/common
@@ -52,6 +53,7 @@ prd_incpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/common/plat
 prd_incpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_incpath += ${PRD_SRC_PATH}/common/plugins
+prd_incpath += ${PRD_SRC_PATH}/common/runtime
 prd_incpath += ${PRD_SRC_PATH}/common/util
 
 ################################################################################
