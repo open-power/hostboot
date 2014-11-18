@@ -37,13 +37,18 @@ namespace HBOCC
     {
         uint32_t version;
         uint32_t nestFrequency;
+        uint32_t interruptType;
     };
 
     enum
     {
-        OccHostDataVersion = 1,
+        OccHostDataVersion = 2,
         OCC_LIDID = 0x81e00430,
         OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
+
+        // Interrupt Types
+        USE_FSI2HOST_MAILBOX = 0x00000000,
+        USE_PSIHB_COMPLEX    = 0x00000001
     };
 
     enum occAction_t

@@ -50,6 +50,7 @@
 
 #include    <vfs/vfs.H>
 #include    <util/utillidmgr.H>
+#include    <initservice/initserviceif.H>
 
 // Procedures
 #include <p8_pba_init.H>
@@ -149,6 +150,16 @@ namespace HBOCC
 
         config_data->version = HBOCC::OccHostDataVersion;
         config_data->nestFrequency = nestFreq;
+
+        // Figure out the interrupt type
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            config_data->interruptType = USE_FSI2HOST_MAILBOX;
+        }
+        else
+        {
+            config_data->interruptType = USE_PSIHB_COMPLEX;
+        }
 
         TRACUCOMP( g_fapiTd,
                    EXIT_MRK"loadHostDataToHomer");
