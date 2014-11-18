@@ -1209,6 +1209,24 @@ int32_t CaptureL4CacheErr( ExtensibleChip * i_mbChip,
         // NOTE: FW should write on MBCELOG so that HW can capture
         // address for next L4 CE error.
 
+        // NOTE: Line delete feature for L4 cache may not be available during
+        // P8. But if it is incorporated in P8, we need to make sure following
+        // should be the order of events:
+        // 1. Capture group of registers associated with group L4CacheErr
+        // 2. do L4 line delete.
+        // 3. clear register MBCELOG
+
+        // If we clear register MBCELOG before doing line delete, it is possible
+        // that hardware procedures shall run into erroneous scenarios. One
+        // probable order of events from PRDF's perspective which can cause
+        // this is below:
+        // 1. Receives an attention due to failure at cache address X.
+        // 2. captures all relevant register including MBCELOG.
+        // 3. cleares MBCELOG - i.e. failed address info is lost. HW populates
+        //    this register with another L4 CE address say Y.
+        // 4. requestes HWP for line delete operation on address X but it
+        //    actually  deletes Y. It's because MBCELOG now contains address Y.
+
         SCAN_COMM_REGISTER_CLASS * mbcelogReg =
                                 i_mbChip->getRegister("MBCELOG");
         mbcelogReg->clearAllBits();
