@@ -136,7 +136,6 @@ namespace Prdr
         ACT_ANALY = 'y',
         ACT_TRY   = '{',
         ACT_DUMP  = 'd',
-        ACT_GARD  = '-',
         ACT_CALL  = 'c',
         ACT_FUNC  = 'f',
         ACT_FLAG  = 'F',

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -820,7 +820,7 @@ int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
         }
         else if ( NULL != phbATrgt )
         {
-            io_sc.service_data->SetCallout( phbATrgt );
+            io_sc.service_data->SetCallout( phbATrgt, MRU_MED, PRDF::NO_GARD );
         }
     }
 
@@ -835,13 +835,14 @@ int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
         }
         else if ( (NULL != phbBTrgt) && (phbATrgt != phbBTrgt) )
         {
-            io_sc.service_data->SetCallout( phbBTrgt );
+            io_sc.service_data->SetCallout( phbBTrgt, MRU_MED, PRDF::NO_GARD );
         }
     }
 
     // If no PHBs called out, callout 2nd level support.
     if ( (SUCCESS != l_rc) || (0 == io_sc.service_data->getMruListSize()) )
-        io_sc.service_data->SetCallout( NextLevelSupport_ENUM );
+        io_sc.service_data->SetCallout( NextLevelSupport_ENUM,
+                                        MRU_MED, NO_GARD );
 
     return SUCCESS; // Intentionally returns SUCCESS so rule code does not get
                     // confused by undefined error code.

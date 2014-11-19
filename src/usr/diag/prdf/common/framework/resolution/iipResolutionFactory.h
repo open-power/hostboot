@@ -62,7 +62,6 @@
 #include <xspprdTryResolution.h>
 #include <xspprdFlagResolution.h>
 #include <prdDumpResolution.H>
-#include <xspprdGardResolution.h>
 #include <prdfCaptureResolution.H>
 #include <prdfClockResolution.H>
 #include <prdfCalloutGard.H>
@@ -386,7 +385,6 @@ private:  // Data
   typedef FlyWeight< TryResolution, 20 > TryResolutionFW;            // dg06a
   typedef FlyWeight< FlagResolution, 5 > FlagResolutionFW;           // dg06a
   typedef FlyWeight< DumpResolution, 5 > DumpResolutionFW;           // dg06a
-  typedef FlyWeight< GardResolution, 5 > GardResolutionFW;           // dg06a
   typedef FlyWeight< CaptureResolution, 5> CaptureResolutionFW;  // pw01
   typedef FlyWeight< ClockResolution, 8 > ClockResolutionFW;         // jl01a
   typedef FlyWeight< CalloutGardResolution, 50 > CalloutGardResolFW;
@@ -404,7 +402,6 @@ private:  // Data
   TryResolutionFW iv_tryResolutionFW;          // dg06a
   FlagResolutionFW iv_flagResolutionFW;        // dg06a
   DumpResolutionFW iv_dumpResolutionFW;        // dg06a
-  GardResolutionFW iv_gardResolutionFW;        // dg06a
   CaptureResolutionFW iv_captureResolutionFW;  // pw01
   ClockResolutionFW iv_clockResolutionFW;      // jl01a
   CalloutGardResolFW iv_calloutGardFW; ///<  stores CalloutGardResolution

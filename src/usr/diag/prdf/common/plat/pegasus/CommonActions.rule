@@ -155,6 +155,10 @@ actionclass calloutDmiBusSymFru
 actionclass calloutSelfMedNoGard
 { callout(MRU_MED, NO_GARD); };
 
+/** Callout self with  low priority but don't gard it */
+actionclass calloutSelfLowNoGard
+{ callout(MRU_LOW, NO_GARD); };
+
 ################################################################################
 #                           Callouts with thresholds                           #
 ################################################################################
@@ -246,33 +250,31 @@ actionclass calloutSelfAndLevel2MedThr1
 };
 
 
-/** Callout 2nd level support of afer 32 events per day, no gard */
-actionclass callout2ndLvlMedThr32NoGard
+/** Callout 2nd level support of afer 32 events per day */
+actionclass callout2ndLvlMedThr32
 {
     callout2ndLvlMed;
     threshold32pday;
-    gard(NoGard);
 };
 
-/** Callout 2nd Level support on first occurrence, no gard */
-actionclass callout2ndLvlMedThr1NoGard
+/** Callout 2nd Level support on first occurrence */
+actionclass callout2ndLvlMedThr1
 {
     callout2ndLvlMed;
     threshold1;
-    gard(NoGard);
 };
 
-/** Callout 2nd Level Medium,  set SUE generation point, no gard */
-actionclass callout2ndLvlMedThr1UE_NoGard
+/** Callout 2nd Level Medium,  set SUE generation point*/
+actionclass callout2ndLvlMedThr1UE
 {
-    callout2ndLvlMedThr1NoGard;
+    callout2ndLvlMedThr1;
     SUEGenerationPoint;
 };
 
 /** Callout 2nd Level Medium, initiate SH dump */
 actionclass callout2ndLvlMedThr1dumpSh
 {
-    callout2ndLvlMedThr1NoGard;
+    callout2ndLvlMedThr1;
     dumpSH;
 };
 ################################################################################
@@ -296,16 +298,16 @@ actionclass dumpSW
 ################################################################################
 
 /** callout second lvl on first instance, initiaite SH dump */
-actionclass callout2ndLvlDumpShNoGard
+actionclass callout2ndLvlDumpSh
 {
-    callout2ndLvlMedThr1NoGard;
+    callout2ndLvlMedThr1;
     dumpSH;
 };
 
-/** Callout 2nd Level and dump SW , no garding*/
-actionclass callout2ndLvlDumpSwNoGard
+/** Callout 2nd Level and dump SW */
+actionclass callout2ndLvlDumpSw
 {
-    callout2ndLvlMedThr1NoGard;
+    callout2ndLvlMedThr1;
     dumpSW;
 };
 ################################################################################

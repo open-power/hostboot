@@ -96,7 +96,6 @@ prd_obj += prdfClockResolution.o
 prd_obj += prdfResolutionMap.o
 prd_obj += prdfThresholdResolutions.o
 prd_obj += xspprdFlagResolution.o
-prd_obj += xspprdGardResolution.o
 
 # common/framework/rule/
 prd_obj += iipTemplates.o

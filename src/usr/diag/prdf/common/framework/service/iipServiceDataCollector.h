@@ -79,7 +79,6 @@ PRDF_GARD_POLICY_MAP_END
 #if !defined(PRDFTIMER_H)
 #include <prdfTimer.H>
 #endif
-#include <xspprdGardResolution.h>     // for ErrorType
 #include <prdfAssert.h>
 #if( !defined(CONTEXT_x86_nfp) && !defined(_NFP) ) //only for ppc context (@54)
 #include <prdfPlatServices.H>
@@ -93,6 +92,8 @@ PRDF_GARD_POLICY_MAP_END
 #endif
 #include <list>
 #include <prdfExtensibleChip.H>
+#include <prdfGardType.H>
+#include <iipstep.h>
 
 namespace PRDF
 {
@@ -614,16 +615,15 @@ public:
     void clearPrimaryPass() { analysisFlags &= ~PASS_PRIMARY; }
 
   /**
-   Set ErrorType for Gard
-   <ul>
-   <br><b>Parameter    </b> GardAction::ErrorType
-   <br><b>Returns:     </b> None.
-   <br><b>Requirements:</b> None
-   <br><b>Promises     </b> QueryRepeatGard() == et
-   <br><b>Notes:       </b>
-   </ul><br>
+   * @brief set gard policy associated with target to given policy.
    */
-  void Gard(GardAction::ErrorType et) { errorType = et; }
+  void Gard( GardAction::ErrorType i_et );
+
+  /**
+   * @brief  queries if we atleast one target is to be garded in callout list.
+   * @return true if there is a target to be garded else false.
+   */
+  bool isGardRequested();
 
   /**
    Query for RepeatGard ErrorType

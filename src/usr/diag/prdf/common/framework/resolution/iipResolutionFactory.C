@@ -252,11 +252,6 @@ Resolution & ResolutionFactory::GetDumpResolution(
     return iv_dumpResolutionFW.get(DumpResolution( iDumpRequestContent ) );
 }
 
-Resolution & ResolutionFactory::GetGardResolution(GardAction::ErrorType et)
-{
-    return iv_gardResolutionFW.get(GardResolution(et));
-}
-
 Resolution & ResolutionFactory::GetCaptureResolution( int32_t i_group )
 {
     return iv_captureResolutionFW.get( CaptureResolution( i_group ) );

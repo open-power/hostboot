@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,15 +54,11 @@ ServiceDataCollector::ServiceDataCollector() :
 inline
 void ServiceDataCollector::SetAttentionType( ATTENTION_TYPE attention )
 {
-  attentionType = attention;
-  if(attention == MACHINE_CHECK)
-  {
-      flags |= SERVICE_CALL;
-      errorType = GardAction::Fatal;
-  } else
-  {
-      errorType = GardAction::Predictive;
-  }
+    attentionType = attention;
+    if( MACHINE_CHECK == attention )
+    {
+        flags |= SERVICE_CALL;
+    }
 }
 
 // ---------------------------------------------------------------
@@ -102,11 +98,21 @@ inline void ServiceDataCollector::SetTerminate(void)
 inline
 GardAction::ErrorType ServiceDataCollector::QueryGard(void)
 {
-  if (IsServiceCall())
-  {
-    return errorType;
-  }
-  return GardAction::NoGard;
+    GardAction::ErrorType gardType = GardAction::NoGard;
+
+    if( IsServiceCall() )
+    {
+        if( attentionType == MACHINE_CHECK )
+        {
+            gardType = GardAction::Fatal;
+        }
+        else
+        {
+            gardType = GardAction::Predictive;
+        }
+    }
+
+    return gardType;
 }
 
 // dg12a -moved here from *.C --------------------------------------

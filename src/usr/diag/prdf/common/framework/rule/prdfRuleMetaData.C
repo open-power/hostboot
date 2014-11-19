@@ -875,11 +875,6 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                                 (hwTableContent)    i_action->cv_value[0].i );
             break;
 
-        case Prdr::ACT_GARD: // GARD
-            l_rc = &i_data.cv_reslFactory.GetGardResolution(
-                    (GardAction::ErrorType) i_action->cv_value[0].i);
-            break;
-
         case Prdr::ACT_ANALY: // ANALYZE
             l_rc = &i_data.cv_reslFactory.GetAnalyzeConnectedResolution(
                             (TARGETING::TYPE)        i_action->cv_value[0].i,
@@ -919,7 +914,8 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                 case Prdr::CALLOUT_PROC: // Procedure callout
                     l_rc = &i_data.cv_reslFactory.getCalloutGardResol(
                                 (SymbolicFru) i_action->cv_value[2].i,
-                                (CalloutPriorityEnum) i_action->cv_value[1].i );
+                                (CalloutPriorityEnum) i_action->cv_value[1].i,
+                                (GARD_POLICY) i_action->cv_value[6].i );
                     break;
 
                 case Prdr::CALLOUT_GARD_SELF: // self callout with gard option

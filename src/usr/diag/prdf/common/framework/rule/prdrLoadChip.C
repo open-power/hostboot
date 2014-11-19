@@ -355,7 +355,6 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
             break;
 
         case INTEGER:
-        case ACT_GARD:
         case ACT_FLAG:
             i_stream >> o_expr.cv_value[0].i;
             break;

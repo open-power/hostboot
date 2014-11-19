@@ -184,8 +184,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     // This is a checkstop attention so some values will need
                     // to be overridden.
 
-                    io_sdc.Gard( origSdc.QueryGard() );
-
                     io_sdc.SetAttentionType( origSdc.GetAttentionType() );
 
                     if ( origSdc.Terminate() )
@@ -210,8 +208,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
                     // This is a checkstop attention so some values will need
                     // to be overridden.
-
-                    io_sdc.Gard( origSdc.QueryGard() );
 
                     io_sdc.SetAttentionType( origSdc.GetAttentionType() );
 
@@ -512,7 +508,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
-
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
                                 tmpDeconfig,

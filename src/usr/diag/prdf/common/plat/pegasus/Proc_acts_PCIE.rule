@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,7 +104,7 @@ group gPcieLFir filter singlebit
     /** PCIE_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (PcieLFir, bit(3)) ? callout2ndLvlMedThr32NoGard;
+    (PcieLFir, bit(3)) ? callout2ndLvlMedThr32;
 
     /** PCIE_LFIR[4]
      *  Local errors from PSC (PCB error)
@@ -286,7 +288,6 @@ actionclass calloutPhbClkA_0_noGard
 {
     funccall("calloutPhbClkA_0");
     threshold1;
-    gard(NoGard);
 };
 
 /**callout PHB associated with IOPCIFIR0 clkB, no garding */
@@ -294,7 +295,6 @@ actionclass calloutPhbClkB_0_noGard
 {
     funccall("calloutPhbClkB_0");
     threshold1;
-    gard(NoGard);
 };
 
 /**callout PHB associated with IOPCIFIR1 clkA, no garding */
@@ -302,7 +302,6 @@ actionclass calloutPhbClkA_1_noGard
 {
     funccall("calloutPhbClkA_1");
     threshold1;
-    gard(NoGard);
 };
 
 /**callout PHB associated with IOPCIFIR1 clkB, no garding */
@@ -310,7 +309,6 @@ actionclass calloutPhbClkB_1_noGard
 {
     funccall("calloutPhbClkB_1");
     threshold1;
-    gard(NoGard);
 };
 
 /** callout all PHB associated with IOPCIFIR0, no garding */
@@ -318,7 +316,6 @@ actionclass calloutPhbBothClks_0
 {
     funccall("calloutPhbBothClks_0");
     threshold1;
-    gard(NoGard);
 };
 
 /** callout all PHB associated with IOPCIFIR1, no garding */
@@ -326,6 +323,5 @@ actionclass calloutPhbBothClks_1
 {
     funccall("calloutPhbBothClks_1");
     threshold1;
-    gard(NoGard);
 };
 

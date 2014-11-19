@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,7 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
 
         // Check to make sure we are at threshold and have something garded.
         if ( !i_sc.service_data->IsAtThreshold() ||
-             (GardAction::NoGard == i_sc.service_data->QueryGard()) )
+             ( !i_sc.service_data->isGardRequested() ) )
         {
             break; // nothing to do
         }

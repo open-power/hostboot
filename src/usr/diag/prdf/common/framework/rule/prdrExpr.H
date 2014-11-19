@@ -788,35 +788,6 @@ class ExprAct_Dump : public Expr  //@ecdf
 
 };
 
-class ExprAct_Gard : public Expr
-{
-    public:
-        std::string * cv_1;
-
-        ExprAct_Gard(std::string * i_1) : cv_1(i_1) {};
-
-        int output(FILE * i_file)
-            {
-                char l_op;
-
-                l_op = Prdr::ACT_GARD;
-                PRDR_FWRITE(&l_op, 1, 1, i_file);
-
-                uint32_t l_gType = htonl(prdrActionArgMap(*cv_1));
-                PRDR_FWRITE(&l_gType, sizeof(l_gType), 1, i_file);
-
-                return 0;
-            };
-
-        void generateDoxygen(std::ostream & o_stream,
-                             std::string & o_trailing,
-                             std::ostream & o_errFile = std::cerr)
-        {
-            o_stream << "gard( " << *cv_1 << " ) ";
-        };
-
-};
-
 class ExprAct_Analyse : public Expr
 {
     public:
@@ -916,9 +887,18 @@ class ExprAct_Callout : public Expr
             // Write gard state
             if( NULL == cv_4 )
             {
-                // if no policy for gard has been specified, assume it to be
-                // GARD.
-                l_op = prdrActionArgMap("GARD");
+                // if no policy for gard has been specified explicitly, assume
+                // it to be NO GARD for procedure callout. But for self or
+                // connected callout, assume it to be GARD.
+
+                if( Prdr::CALLOUT_PROC == cv_type ) // is it a procedure callout
+                {
+                    l_op = prdrActionArgMap("NO_GARD");
+                }
+                else
+                {
+                    l_op = prdrActionArgMap("GARD");
+                }
             }
             else
             {
@@ -947,8 +927,7 @@ class ExprAct_Callout : public Expr
             }
             else if ( Prdr::CALLOUT_PROC == cv_type )
             {
-                o_stream << "procedure ( " << *cv_2 << " ), " << *cv_1
-                         << "NO GARD" << " ) ";
+                o_stream << "procedure ( " << *cv_2 << " ), " << *cv_1 << " ) ";
             }
             else
             {

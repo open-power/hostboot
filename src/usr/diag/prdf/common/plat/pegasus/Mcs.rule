@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -343,7 +343,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[26]
      *  MCIFIRQ_POWERBUS_PROTOCOL_ERROR
      */
-    (MciFir, bit(26)) ? callout2ndLvlDumpSwNoGard;
+    (MciFir, bit(26)) ? callout2ndLvlDumpSw;
 
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
@@ -381,7 +381,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[33]
      *  MCIFIRQ_NONFOREIGN_ACCESS_TO_FOREIGN_BAR
      */
-    (MciFir, bit(33)) ? callout2ndLvlDumpSwNoGard;
+    (MciFir, bit(33)) ? callout2ndLvlDumpSw;
 
     /** MCIFIR[34]
      *  MCIFIRQ_CENTAUR_SYNC_COMMAND_DETECTED
@@ -406,12 +406,12 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[38]
      *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
      */
-    (MciFir, bit(38)) ? callout2ndLvlDumpSwNoGard;
+    (MciFir, bit(38)) ? callout2ndLvlDumpSw;
 
     /** MCIFIR[39]
      *  MCIFIRQ_HA_ILLEGAL_PRODUCER_ACCESS_ERROR
      */
-    (MciFir, bit(39)) ? callout2ndLvlDumpSwNoGard;
+    (MciFir, bit(39)) ? callout2ndLvlDumpSw;
 
     /** MCIFIR[40]
      *  CHANNEL TIMEOUT ERROR

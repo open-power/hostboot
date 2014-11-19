@@ -39,7 +39,6 @@
 #include <prdrCommon.H>
 #include <prdrToken.H>
 #include <UtilHash.H>
-#include <xspprdGardResolution.h>
 #include <prdfEnums.H>
 
 using namespace PRDR_COMPILER;
@@ -473,18 +472,6 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         #undef iipServiceDataCollector_h
         #include <iipServiceDataCollector.h>
 
-        // Initialize Gard values.
-        GardAction::ErrorType errType = GardAction::NoGard;
-        string tmpStr = string(GardAction::ToString(errType));
-        g_ActionArgMap[tmpStr] = errType;
-
-        errType = GardAction::Predictive;
-        tmpStr = string(GardAction::ToString(errType));
-        g_ActionArgMap[tmpStr] = errType;
-
-        errType = GardAction::Fatal;
-        tmpStr = string(GardAction::ToString(errType));
-        g_ActionArgMap[tmpStr] = errType;
 
 #ifdef __HOSTBOOT_MODULE
         //Note: Hostboot does not support dump.So,defining dump type here

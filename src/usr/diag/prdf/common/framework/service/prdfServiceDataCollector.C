@@ -166,6 +166,43 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
 
 //------------------------------------------------------------------------------
 
+void ServiceDataCollector::Gard( GardAction::ErrorType i_et )
+{
+    GARD_POLICY gardPolicy = GARD;
+
+    if( GardAction::NoGard == i_et )
+    {
+        gardPolicy = NO_GARD;
+    }
+
+    for ( SDC_MRU_LIST::iterator i = xMruList.begin();
+          i != xMruList.end(); ++i )
+    {
+        i->gardState = gardPolicy;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+bool ServiceDataCollector::isGardRequested()
+{
+    bool gardRecordExit = false;
+
+    for ( SDC_MRU_LIST::iterator i = xMruList.begin();
+          i != xMruList.end(); ++i )
+    {
+        if( GARD == i->gardState )
+        {
+            gardRecordExit = true;
+            break;
+        }
+    }
+
+    return gardRecordExit;
+}
+
+//------------------------------------------------------------------------------
+
 void ServiceDataCollector::AddSignatureList( TargetHandle_t i_target,
                                              uint32_t i_signature )
 {

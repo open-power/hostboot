@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,7 +124,6 @@ analyze     { return PRDR_ACT_ANALYSE; }
 try         { return PRDR_ACT_TRY; }
 dump        { return PRDR_ACT_DUMP; }
 funccall    { return PRDR_ACT_FUNCCALL; }
-gard        { return PRDR_ACT_GARD; }
 callout     { return PRDR_ACT_CALLOUT; }
 flag        { return PRDR_ACT_FLAG; }
 capture     { return PRDR_ACT_CAPTURE; }

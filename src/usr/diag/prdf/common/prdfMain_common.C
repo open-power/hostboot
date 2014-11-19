@@ -44,6 +44,7 @@
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
 #include <prdfMfgThresholdMgr.H>
+#include <prdfGardType.H>
 
 #include <prdfPegasusConfigurator.H>
 

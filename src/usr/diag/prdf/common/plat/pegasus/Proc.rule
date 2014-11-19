@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -450,9 +450,9 @@ actionclass calloutProcLevel2MedThr1
  *  and dump type SH, garding not done */
 actionclass calloutProcLevel2MedThr1dumpShNoGard
 {
-    calloutProcLevel2MedThr1;
+    calloutSelfLowNoGard;
+    callout2ndLvlMedThr1;
     dumpSH;
-    gard(NoGard);
 };
 
 /** callout Proc with low priority ,Sec level Med priority, Thr 32per day
@@ -463,7 +463,6 @@ actionclass calloutProcLevel2MedThr32dumpShNoGard
     callout2ndLvlMed;
     threshold32pday;
     dumpSH;
-    gard(NoGard);
 };
 
 actionclass calloutProcHighThr1SUE

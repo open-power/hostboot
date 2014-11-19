@@ -135,7 +135,6 @@ using namespace PRDR_COMPILER;
 %token PRDR_ACT_TRY
 %token PRDR_ACT_DUMP
 %token PRDR_ACT_FUNCCALL
-%token PRDR_ACT_GARD
 %token PRDR_ACT_CALLOUT
 %token PRDR_ACT_FLAG
 %token PRDR_ACT_CAPTURE
@@ -179,7 +178,7 @@ using namespace PRDR_COMPILER;
 %type <expr> actionline
 %type <expr> action_threshold action_shared_threshold action_analyse
 %type <expr> action_analyse_conn action_try action_capture
-%type <expr> action_dump action_gard action_callout action_funccall action_flag
+%type <expr> action_dump action_callout action_funccall action_flag
 %type <expr> action_callout_alt
 
 %type <strlist> grpattns grpattns_item
@@ -829,7 +828,6 @@ actionline:
         | action_analyse_conn       { $$ = $1; }
         | action_try                { $$ = $1; }
         | action_dump               { $$ = $1; }
-        | action_gard               { $$ = $1; }
         | action_callout            { $$ = $1; }
         | action_funccall           { $$ = $1; }
         | action_flag               { $$ = $1; }
@@ -931,12 +929,6 @@ action_try: PRDR_ACT_TRY '(' actionline ',' actionline ')'
 action_dump: PRDR_ACT_DUMP '(' PRDR_ID ')'
     {
         $$ = new ExprAct_Dump($3);
-    }
-;
-
-action_gard: PRDR_ACT_GARD '(' PRDR_ID ')'
-    {
-        $$ = new ExprAct_Gard($3);
     }
 ;
 

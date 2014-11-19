@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -1193,7 +1193,7 @@ group gCoreFir filter singlebit
     /** COREFIR[26]
      *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
      */
-    (CoreFir, bit(26)) ? callout2ndLvlMedThr1NoGard;
+    (CoreFir, bit(26)) ? callout2ndLvlMedThr1;
 
     /** COREFIR[27]
      *  DU_LOG_REC_ERR: logic recoverable error
@@ -1449,12 +1449,12 @@ group gL2Fir filter singlebit
     /** L2FIR[12]
      *  RC_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(12)) ? callout2ndLvlMedThr1NoGard;
+    (L2Fir, bit(12)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[13]
      *  NCU_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(13)) ? callout2ndLvlMedThr1NoGard;
+    (L2Fir, bit(13)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[14]
      *  HW_CONTROL_ERROR
@@ -2034,10 +2034,9 @@ actionclass calloutParentProcLow
  *  garding not required */
 actionclass SelfAndLevel2MedThr5PerHrNoGard
 {
-    calloutSelfMed;
+    calloutSelfMedNoGard;
     callout2ndLvlMed;
     threshold5phour;
-    gard(NoGard);
 };
 
 /** callouts Proc on first instance. Calls for second level support as well */
@@ -2053,8 +2052,8 @@ actionclass calloutProcLow2ndLvlMedThr1
  *  Set SUE flag, garding not done */
 actionclass calloutProcLow2ndLvlMedThr1SUE_NoGard
 {
-    calloutParentProcLow;
-    callout2ndLvlMedThr1NoGard;
+    callout(connected(TYPE_PROC),MRU_LOW, NO_GARD);
+    callout2ndLvlMedThr1;
     flag(SUE);
 };
 
