@@ -158,7 +158,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 12, bits 5-3.
     </description>
     <valueType>uint8</valueType>
-    <enum>R1 = 0x00, R2 = 0x01, R3 = 0x02, R4 = 0x03</enum>
+    <enum>R1 = 0x00, R2 = 0x01, R4 = 0x03, RX = 0xFF</enum>
     <platInit/>
 </attribute>
 
