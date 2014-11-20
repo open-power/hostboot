@@ -100,12 +100,13 @@ namespace HBOCC
             //Setup Addresses
             //==============================
             uint8_t  tmpPos    = i_target->getAttr<ATTR_POSITION>();
-            uint64_t tmpOffset = (tmpPos * VMM_HOMER_INSTANCE_SIZE) +
-                                 HOMER_OFFSET_TO_OCC_IMG;
+            uint64_t tmpOffset = (tmpPos * VMM_HOMER_INSTANCE_SIZE);
 
-            uint64_t i_homerPhysAddr  = i_homerPhysAddrBase + tmpOffset;
+            uint64_t i_homerPhysAddr  = i_homerPhysAddrBase + tmpOffset +
+                                        HOMER_OFFSET_TO_OCC_IMG;
             uint64_t i_homerVirtAddr  = reinterpret_cast<uint64_t>
-                                        (i_homerVirtAddrBase) + tmpOffset;
+                                        (i_homerVirtAddrBase) + tmpOffset +
+                                        HOMER_OFFSET_TO_OCC_IMG;;
 
             uint64_t i_commonPhysAddr = i_homerPhysAddrBase +
                                         VMM_HOMER_REGION_SIZE;
@@ -126,7 +127,10 @@ namespace HBOCC
             //==============================
             //Setup host data area of HOMER;
             //==============================
-            void* occHostVirt = reinterpret_cast<void *>(i_homerVirtAddr);
+            uint64_t i_homerHostVirtAddr = reinterpret_cast<uint64_t>
+                                           (i_homerVirtAddrBase) +
+                                tmpOffset + HOMER_OFFSET_TO_OCC_HOST_DATA;
+            void* occHostVirt = reinterpret_cast<void*>(i_homerHostVirtAddr);
             l_errl = HBOCC::loadHostDataToHomer(occHostVirt);
             if( l_errl != NULL )
             {
