@@ -15106,4 +15106,247 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- === Manufacturing threshold Attributes of PRD === -->
+
+<attribute>
+    <id>MNFG_TH_P8EX_L2_CACHE_CES</id>
+    <description>
+      This attribute represents the Maximum number of L2 Cache CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L2_DIR_CES</id>
+    <description>
+      This attribute represents the Maximum number of L2 Directory CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L3_CACHE_CES</id>
+    <description>
+      This attribute represents the Maximum number of L3 Cache CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L3_DIR_CES</id>
+    <description>
+      This attribute represents the Maximum number of L3 Directory CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FIELD_TH_P8EX_L2_LINE_DELETES</id>
+    <description>
+      This attribute represents the Maximum number of L2 Line Deletes allowed
+      in the Field.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FIELD_TH_P8EX_L3_LINE_DELETES</id>
+    <description>
+      This attribute represents the Maximum number of L3 Line Deletes allowed
+      in the Field.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FIELD_TH_P8EX_L2_COL_REPAIRS</id>
+    <description>
+      This attribute represents the Maximum number of L2 Column Repairs allowed
+      in the Field.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FIELD_TH_P8EX_L3_COL_REPAIRS</id>
+    <description>
+      This attribute represents the Maximum number of L3 Column Repairs allowed
+      in the Field.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L2_LINE_DELETES</id>
+    <description>
+      This attribute represents the Maximum number of L2 Line Deletes allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L3_LINE_DELETES</id>
+    <description>
+      This attribute represents the Maximum number of L3 Line Deletes allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L2_COL_REPAIRS</id>
+    <description>
+      This attribute represents the Maximum number of L2 Column Repairs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_P8EX_L3_COL_REPAIRS</id>
+    <description>
+      This attribute represents the Maximum number of L3 Column Repairs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO</id>
+    <description>
+      This attribute represents the Base threshold (for 2GB DRAM ) of
+      Memory CEs allowed during runtime.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_CEN_MBA_IPL_SOFT_CE_TH_ALGO</id>
+    <description>
+      This attribute represents the Base threshold (for 2GB DRAM ) of
+      Memory CEs allowed during IPL.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_CEN_MBA_RT_RCE_PER_RANK</id>
+    <description>
+      This attribute represents the maximum number of Memory RCEs
+      allowed per Rank during runtime.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MNFG_TH_CEN_L4_CACHE_CES</id>
+    <description>
+      This attribute represents the maximum number of L4 Cache CEs allowed.
+      creator: platform (generated based on MRW data)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<!-- === Manufacturing threshold Attributes of PRD === -->
+
 </attributes>

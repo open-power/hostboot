@@ -287,6 +287,23 @@
     <attribute><id>ISTEP_PAUSE_CONFIG</id></attribute>
     <!-- IPMI Sensor numbers for reporting system status and info to the BMC -->
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <!-- Manufacturing threshold Attributes of PRD -->
+    <attribute><id>MNFG_TH_P8EX_L2_CACHE_CES</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L2_DIR_CES</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L3_CACHE_CES</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L3_DIR_CES</id></attribute>
+    <attribute><id>FIELD_TH_P8EX_L2_LINE_DELETES</id></attribute>
+    <attribute><id>FIELD_TH_P8EX_L2_COL_REPAIRS</id></attribute>
+    <attribute><id>FIELD_TH_P8EX_L3_LINE_DELETES</id></attribute>
+    <attribute><id>FIELD_TH_P8EX_L3_COL_REPAIRS</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L2_LINE_DELETES</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L2_COL_REPAIRS</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L3_LINE_DELETES</id></attribute>
+    <attribute><id>MNFG_TH_P8EX_L3_COL_REPAIRS</id></attribute>
+    <attribute><id>MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO</id></attribute>
+    <attribute><id>MNFG_TH_CEN_MBA_IPL_SOFT_CE_TH_ALGO</id></attribute>
+    <attribute><id>MNFG_TH_CEN_MBA_RT_RCE_PER_RANK</id></attribute>
+    <attribute><id>MNFG_TH_CEN_L4_CACHE_CES</id></attribute>
 </targetType>
 
 <targetType>
