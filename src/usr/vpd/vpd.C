@@ -433,7 +433,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"ensureCacheIsInSync() " );
 
-    IpVpdFacade& l_ipvpd = Singleton<MvpdFacade>::instance();
+    IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
 
     vpdRecord  l_record    = 0;
     vpdKeyword l_keywordPN = 0;
@@ -449,7 +449,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
     }
     else if( l_type == TARGETING::TYPE_MEMBUF )
     {
-        l_ipvpd     = Singleton<CvpdFacade>::instance();
+        l_ipvpd     = &(Singleton<CvpdFacade>::instance());
         l_record    = CVPD::VINI;
         l_keywordPN = CVPD::PN;
         l_keywordSN = CVPD::SN;
@@ -489,10 +489,10 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         if( ( l_type == TARGETING::TYPE_PROC   ) ||
             ( l_type == TARGETING::TYPE_MEMBUF ) )
         {
-            l_err = l_ipvpd.cmpPnorToSeeprom( i_target,
-                                              l_record,
-                                              l_keywordPN,
-                                              l_matchPN );
+            l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
+                                               l_record,
+                                               l_keywordPN,
+                                               l_matchPN );
         }
         else if( l_type == TARGETING::TYPE_DIMM )
         {
@@ -511,10 +511,10 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         if( ( l_type == TARGETING::TYPE_PROC   ) ||
             ( l_type == TARGETING::TYPE_MEMBUF ) )
         {
-            l_err = l_ipvpd.cmpPnorToSeeprom( i_target,
-                                              l_record,
-                                              l_keywordSN,
-                                              l_matchSN );
+            l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
+                                               l_record,
+                                               l_keywordSN,
+                                               l_matchSN );
         }
         else if( l_type == TARGETING::TYPE_DIMM )
         {
@@ -531,11 +531,11 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         // If we did not match, we need to load SEEPROM VPD data into PNOR
         if( l_matchPN && l_matchSN )
         {
-            TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN = SEEPROM_PN/SN");
+            TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN = SEEPROM_PN/SN for target %.8X",TARGETING::get_huid(i_target));
         }
         else
         {
-            TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN != SEEPROM_PN/SN, Loading PNOR from SEEPROM");
+            TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN != SEEPROM_PN/SN, Loading PNOR from SEEPROM for target %.8X",TARGETING::get_huid(i_target));
 
             //Set the targets as changed since the p/n's don't match
             HWAS::markTargetChanged(i_target);
@@ -544,7 +544,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             if( ( l_type == TARGETING::TYPE_PROC   ) ||
                 ( l_type == TARGETING::TYPE_MEMBUF ) )
             {
-                l_err = l_ipvpd.loadPnor( i_target );
+                l_err = l_ipvpd->loadPnor( i_target );
             }
             else if( l_type == TARGETING::TYPE_DIMM )
             {

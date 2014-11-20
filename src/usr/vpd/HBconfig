@@ -1,12 +1,11 @@
 config CVPD_READ_FROM_PNOR
     default y
-    depends on !CVPD_READ_FROM_HW
     help
         Read Centaur VPD data from PNOR cache
 
 config CVPD_READ_FROM_HW
-    default y if !CVPD_READ_FROM_PNOR
-    depends on !PALMETTO_PASS1 && !CVPD_READ_FROM_PNOR
+    default n
+    depends on !PALMETTO_PASS1
     help
         Read Centaur VPD data from HW resources
 
