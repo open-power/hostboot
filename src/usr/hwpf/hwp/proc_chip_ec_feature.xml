@@ -22,14 +22,14 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.59 2014/10/23 18:56:33 jklazyns Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.60 2014/10/29 21:33:52 szhong Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      For Venice specific inits. Returns true if Venice and Naples.
+      For Venice specific inits. Returns true if Venice.
     </description>
     <chipEcFeature>
       <chip>
@@ -230,7 +230,7 @@
     <description>
       Returns if a chip contains SCOM configuration for CAPP unit PB hang recovery controls.  True if:
         Murano EC 0x20 or greater
-        Venice EC 0x10 or greater
+        Venice EC 0x20 or greater
         Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
@@ -1219,7 +1219,13 @@
     <id>ATTR_PROC_EC_MSS_RECONFIG_POSSIBLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    </description>
+      Reset some DMI channels when re-ipl
+      Consumed by proc_enable_reconfig
+      True if:
+      Murano EC greater than or equal to 0x20
+      Venice EC greater than or equal to 0x20
+      Naples EC greater than or equal to 0x10
+     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_MURANO</name>
