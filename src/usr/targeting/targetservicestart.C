@@ -214,6 +214,16 @@ static void initializeAttributes(TargetService& i_targetService)
             l_switches.useFsiScom = 0;
             l_pMasterProcChip->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
 
+
+            // Master can only use Host I2C so needs to be set before
+            // doing any I2C accesses
+            I2cSwitches l_i2c_switches =
+              l_pMasterProcChip->getAttr<ATTR_I2C_SWITCHES>();
+            l_i2c_switches.useHostI2C = 1;
+            l_i2c_switches.useFsiI2C  = 0;
+            l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
+
+
             errlHndl_t l_errl = NULL;
             size_t l_size = sizeof(uint64_t);
             uint64_t l_data;

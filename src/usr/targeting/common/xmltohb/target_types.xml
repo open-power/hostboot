@@ -497,8 +497,8 @@
     <attribute>
         <id>I2C_SWITCHES</id>
         <default>
-            <field><id>useFsiI2C</id><value>0</value></field>
-            <field><id>useHostI2C</id><value>1</value></field>
+            <field><id>useFsiI2C</id><value>1</value></field>
+            <field><id>useHostI2C</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

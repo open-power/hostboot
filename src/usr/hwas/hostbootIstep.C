@@ -92,18 +92,17 @@ void* host_init_fsi( void *io_pArgs )
         l_errl = FSI::initializeHardware( );
         if (l_errl)
         {
+            // This error should get returned
             break;
         }
 
-
-        //@TODO RTC:116439
-        /*
         l_errl = I2C::i2cResetMasters(I2C::I2C_RESET_PROC_ALL);
         if (l_errl)
         {
+            // Commit this error
+            errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
-        */
 
     } while (0);
 

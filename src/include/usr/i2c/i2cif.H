@@ -84,6 +84,28 @@ bool i2cPresence( TARGETING::Target * i_target,
                         uint64_t i_devAddr );
 
 
+/**
+* @enum i2cSetAccessModeType
+*
+* @brief I2C Set Access Mode Type specifies what targets will be set to
+*        a specific I2C Access Mode (Host or FSI)
+*
+*/
+enum i2cSetAccessModeType
+{
+    I2C_SET_ACCESS_MODE_INVALID                   = 0x00,
+    I2C_SET_ACCESS_MODE_PROC_HOST                 = 0x01
+};
+
+
+/**
+ * @brief This function will set the I2C_SWITCH attribute for certain
+ *        targets to a specific mode (Host or FSI) based on the input.
+ *
+ * @param i2cSetModeType  - Specifies which targets to be set and which
+ *                          mode to set them to
+ */
+void i2cSetAccessMode( i2cSetAccessModeType i_setModeType );
 
 
 };  // end namespace I2C

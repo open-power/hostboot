@@ -2698,6 +2698,113 @@ errlHndl_t i2cResetMasters ( i2cResetType i_resetType )
 }
 
 // ------------------------------------------------------------------
+//  i2cSetAccessMode
+//   NOTE: currently just supporting I2C_SET_MODE_PROC_HOST
+// ------------------------------------------------------------------
+void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
+{
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cSetAccessMode(): %d", i_setModeType );
+
+    TARGETING::I2cSwitches switches;
+
+    bool mutex_success = false;
+    mutex_t * engineLock = NULL;
+    misc_args_t args;
+
+
+    do
+    {
+        // Get list of targets
+        TARGETING::TargetHandleList tgtList;
+
+        // Support for I2C_SET_MODE_PROC_HOST
+        TARGETING::getAllChips(tgtList,
+                               TARGETING::TYPE_PROC,
+                               true); // true: return functional targets
+
+        if( 0 == tgtList.size() )
+        {
+            TRACFCOMP(g_trac_i2c,
+                      INFO_MRK"i2cSetAccessMode: No Targets found!");
+            break;
+        }
+
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"i2cSetAccessMode: Targets: %d",
+                   tgtList.size() );
+
+        // Check and set each target
+        for( uint32_t i = 0; i < tgtList.size(); i++ )
+        {
+            TARGETING::Target* tgt = tgtList[i];
+
+            // Get the mutex for engine 0
+            args.engine = 0;
+            mutex_success = i2cGetEngineMutex( tgt,
+                                               args,
+                                               engineLock );
+
+            if( !mutex_success )
+            {
+                TRACFCOMP( g_trac_i2c,ERR_MRK"i2cSetAccessMode: Error from "
+                           "i2cGetEngineMutex() getting engine 0 lock for "
+                           "tgt=0x%X", TARGETING::get_huid(tgt));
+                continue;
+            }
+
+            // Lock on this engine
+            TRACUCOMP( g_trac_i2c,
+                       INFO_MRK"Obtaining lock for engine: %d",
+                       args.engine );
+
+            (void)mutex_lock( engineLock );
+
+            TRACUCOMP( g_trac_i2c,
+                       INFO_MRK"Locked on engine: %d",
+                       args.engine );
+
+
+            switches = tgt->getAttr<TARGETING::ATTR_I2C_SWITCHES>();
+
+            TRACUCOMP( g_trac_i2c,"i2cSetAccessMode: tgt=0x%X switches: "
+                       "host=%d, fsi=%d",
+                       TARGETING::get_huid(tgt), switches.useHostI2C,
+                       switches.useFsiI2C);
+
+             // Support for I2C_SET_MODE_PROC_HOST
+             if ((switches.useHostI2C != 1) ||
+                 (switches.useFsiI2C  != 0)   )
+             {
+                 switches.useHostI2C = 1;
+                 switches.useFsiI2C  = 0;
+
+                 tgt->setAttr<TARGETING::ATTR_I2C_SWITCHES>(switches);
+
+                 TRACFCOMP( g_trac_i2c,"i2cSetAccessMode: tgt=0x%X "
+                            "I2C_SWITCHES updated: host=%d, fsi=%d",
+                            TARGETING::get_huid(tgt), switches.useHostI2C,
+                            switches.useFsiI2C);
+             }
+
+             // Unlock
+             (void) mutex_unlock( engineLock );
+             TRACUCOMP( g_trac_i2c,
+                        INFO_MRK"Unlocked engine: %d",
+                        args.engine );
+
+        } // end of target for loop
+
+    } while( 0 );
+
+    TRACDCOMP( g_trac_i2c,
+               EXIT_MRK"i2cSetAccessMode");
+
+    return;
+}
+
+
+// ------------------------------------------------------------------
 //  i2cRegisterOp
 // ------------------------------------------------------------------
 errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
