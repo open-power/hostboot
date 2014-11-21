@@ -39,8 +39,13 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
-#include <ipmi/ipmisensor.H>
+#ifdef __HOSTBOOT_MODULE
 #include <config.h>
+#endif
+
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmisensor.H>
+#endif
 
 
 // Trace definition
