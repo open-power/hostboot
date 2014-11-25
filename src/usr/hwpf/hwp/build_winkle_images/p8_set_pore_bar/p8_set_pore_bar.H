@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_set_pore_bar.H,v 1.1 2012/08/23 04:58:53 stillgs Exp $
+// $Id: p8_set_pore_bar.H,v 1.2 2014/11/07 18:27:55 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -86,7 +86,7 @@ enum PORE_PBA_BAR {
         PBA_BAR3    = 0x3
         };
         
-enum PORE__BA_SLAVE {
+enum PORE_PBA_SLAVE {
         PBA_SLAVE0    = 0x0,
         PBA_SLAVE1    = 0x1,
         PBA_SLAVE2    = 0x2,

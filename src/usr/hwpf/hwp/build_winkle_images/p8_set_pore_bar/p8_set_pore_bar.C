@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_set_pore_bar.C,v 1.9 2014/03/07 14:38:52 stillgs Exp $
+// $Id: p8_set_pore_bar.C,v 1.10 2014/11/07 18:26:34 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -30,6 +30,13 @@
 // *! ***  ***
 //-------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
+// *!
+// *! *** IMPORTANT *** 
+// *! For P9, this proc should be changed to setup HOMER in PBABAR0 and then setup
+// *! SLW in PBABAR2 by calculating BAR2 = BAR0 + HOMER_SLW_IMAGE_OFFSET_ADDR.
+// *! *** IMPORTANT ***
+// *!
+// *! To build -  buildfapiprcd -e ../../xml/error_info/p8_set_pore_bar_errors.xml p8_set_pore_bar.C
 // *!
 /// \file p8_set_pore_bar.C
 /// \brief Set up the Sleep/Winkle (SLW) PORE Memory Relocation (MRR) and
@@ -97,6 +104,7 @@
 #include "p8_pba_bar_config.H"
 #include "pgp_pba.h"
 #include "sbe_xip_image.h"
+#include "p8_homer_map.h"
 
 
 extern "C" {
@@ -106,9 +114,6 @@ using namespace fapi;
 // ------------------------------------------------------------------------------
 // Constant definitions
 // ------------------------------------------------------------------------------
-
-const uint32_t  SLW_PBA_BAR = 2;
-const uint32_t  SLW_PBA_SLAVE = 2;
 
 // ------------------------------------------------------------------------------
 // Global variables
@@ -172,8 +177,13 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     const uint32_t      pba_bar_slw = PBA_SLW_BAR2;
     const uint32_t      pba_slave = PBA_SLAVE2;
 
-    const uint64_t      slw_pba_cmd_scope = 0x2;   // Set to system
+    const uint64_t      slw_pba_cmd_scope = 0x2;   // Set to SYSTEM
     
+    const uint32_t      occ_pba_bar = PBA_BAR0;
+    uint64_t            occ_mem_bar = 0x0;         // Set later when sure SLW in MS/L3.
+    const uint64_t      occ_mem_size = 0x4;
+    const uint64_t      occ_pba_cmd_scope = 0x0;   // Set to NODAL
+
     SbeXipItem          slw_control_vector_info;
     uint32_t            slw_control_vector_offset;
     
@@ -457,18 +467,6 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             }
 
 
-            // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
-            // enabled to be passed from the OCI addresses.  Inverting this mask
-            // indicates which address bits are going to come from the PBA BAR value.
-            // The image address (the starting address) must match these post mask bits
-            // to be resident in the range.
-            //
-            // Starting bit number: 64 bit Big Endian
-            //                                          12223344
-            //                                          60482604
-            // region_inverted_mask = i_mem_mask ^ BAR_MASK_LIMIT;  // XOR
-
-
             // Check that the image address passed is within the memory region that
             // is also passed.
             //
@@ -585,7 +583,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             // reprogram this slave for IMA writes using special code sequences that
             // restore normal DMA writes after each IMA sequence.
 
-            rc = bar_pba_slave_reset(i_target, SLW_PBA_SLAVE);
+            rc = bar_pba_slave_reset(i_target, PBA_SLAVE2);
             if (rc)
             {
                 FAPI_ERR("PBA Slave Reset failed");
@@ -622,6 +620,27 @@ p8_set_pore_bar(      const fapi::Target& i_target,
                 FAPI_ERR("Put SCOM error for PBA Slave Control");
                 return rc;
             }
+
+            // While here, also setup of OCC PBABAR0 to indicate the location and size
+            //   of HOMER. This is to support PTS/24x7 launch before OCC startup.
+            // The address to use is 2MB below the SLW image location. This offset is
+            //   represented by HOMER_SLW_IMAGE_OFFSET_ADDR.
+            // The memory size is 4MB.
+            occ_mem_bar = i_mem_bar - HOMER_SLW_IMAGE_OFFSET_ADDR;
+            FAPI_DBG("Calling pba_bar_config to BAR %x Addr: 0x%16llX  Size: 0x%16llX",
+                        occ_pba_bar, occ_mem_bar, occ_mem_size);
+
+            // Set the PBA BAR for the OCC region
+            FAPI_EXEC_HWP(rc, p8_pba_bar_config, i_target,
+                                                 occ_pba_bar,
+                                                 occ_mem_bar,
+                                                 occ_mem_size,
+                                                 occ_pba_cmd_scope);
+            if(rc)
+            {
+                break;
+            }
+
         } // PBA setup for Memory or L3
     } while (0);
     return rc;

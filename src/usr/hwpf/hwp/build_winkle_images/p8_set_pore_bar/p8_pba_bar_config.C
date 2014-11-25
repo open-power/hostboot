@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_bar_config.C,v 1.4 2014/03/03 23:44:49 stillgs Exp $
+// $Id: p8_pba_bar_config.C,v 1.5 2014/11/07 17:53:36 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_bar_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -31,6 +31,8 @@
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Klaus P. Gungl         Email: kgungl@de.ibm.com
 // *!
+// *!
+// *! To build  -  buildfapiprcd -e ../../xml/error_info/p8_pba_bar_config_errors.xml p8_pba_bar_config.C
 // *!
 /// \file p8_pba_bar_config.C
 /// \brief Initialize PAB and PAB_MSK of PBA
@@ -172,24 +174,13 @@ p8_pba_bar_config (const Target&  i_target,
 
     // Check if the size is 0 but the BAR is not zero.  If so, return error.
     // The combination of both the size and BAR being zero is legal.
-    if ( (i_pba_bar_size == 0x0ull) && (i_pba_bar_size != 0x0ull) )
+    if ( (i_pba_bar_size == 0x0ull) && (i_index != 0) )
     {
-        FAPI_ERR("ERROR: Size must be 1MB or greater : i_pba_bar_size=%08llX", i_pba_bar_size);
+        FAPI_ERR("ERROR: Bar size must be >=1MB for PBABAR%d but i_pba_bar_size=0x%08llx",
+                    i_index, i_pba_bar_size);
         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_BAR_SIZE_INVALID);
         return l_rc;
     }
-
-    // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
-    // enabled to be passed from the OCI addresses.  Inverting this mask
-    // indicates which address bits are going to come from the PBA BAR value.
-    // The image address (the starting address) must match these post mask bits
-    // to be resident in the range.
-    //
-    // Starting bit number: 64 bit Big Endian
-    //                                          12223344
-    //                                          60482604
-    // region_inverted_mask = i_mem_mask ^ BAR_MASK_LIMIT;  // XOR
-
 
     // Check that the image address passed is within the memory region that
     // is also passed.
@@ -247,11 +238,22 @@ p8_pba_bar_config (const Target&  i_target,
     // Compute and write the mask based on passed region size.
 
     // If the size is already a power of 2, then set the mask to that value - 1.
-    // If the is not a power of 2, then set the mask the rounded up power of 2
-    // value minus 1.
+    // If the size is not a power of 2, then set the maskto  the rounded up power of 2
+    // value - 1.
+    // If the size is zero, then treat as if equal to 1 and then do the round up check.
 
-    work_size = PowerOf2Roundedup(i_pba_bar_size);
-    FAPI_DBG("\ti_pba_bar_size: 0x%llX work_size: 0x%llX", i_pba_bar_size, work_size);
+    if (i_pba_bar_size!=0)
+    {
+        work_size = PowerOf2Roundedup(i_pba_bar_size);
+        FAPI_INF("\ti_pba_bar_size: 0x%llX.  Final work_size: 0x%llX", 
+                    i_pba_bar_size, work_size);
+    }
+    else
+    { // If bar_size==0, treat as if ==1. Otherwize, range will max out to 2TB.
+        work_size = PowerOf2Roundedup(1ull);
+        FAPI_INF("\ti_pba_bar_size: 0x%llX but treated as if bar_size=1. Final work_size: 0x%llX", 
+                    i_pba_bar_size, work_size);
+    }
 
     barmask.value=0;
     barmask.fields.mask = work_size-1;
