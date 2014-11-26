@@ -851,6 +851,7 @@
         <default>0x00000009</default> <!-- HOSTSVC_HBEL and GARD -->
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>
 
 <targetType>

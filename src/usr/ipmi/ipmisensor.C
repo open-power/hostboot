@@ -48,6 +48,8 @@ namespace SENSOR
                              TARGETING::Target * i_target)
         :iv_name(i_name) ,iv_target(i_target)
     {
+        assert(i_target != NULL);
+
         // allocate a new message structure to use with our sensors
         // this will be the payload for the IPMI send/sendrecv sensor message.
         iv_msg = new setSensorReadingRequest;
@@ -321,6 +323,78 @@ namespace SENSOR
         return  a[0] < key;
     };
 
+    /**
+     *  @brief Returns major type of input sensor name
+     *
+     *  @param[in] i_sensorName
+     *      Name of the sensor
+     *
+     *  @return Major type of input sensor name
+     */
+    static inline uint16_t getMajorType(
+        const uint16_t i_sensorName)
+    {
+        return (i_sensorName & SENSOR_NAME_MAJOR_MASK);
+    }
+
+    /**
+     *  @brief Returns minor type of input sensor name
+     *
+     *  @param[in] i_sensorName
+     *      Name of the sensor
+     *
+     *  @return Minor type of input sensor name
+     */
+    static inline uint16_t getMinorType(
+        const uint16_t i_sensorName)
+    {
+        return (i_sensorName & SENSOR_NAME_MINOR_MASK);
+    }
+
+    /**
+     *  @brief Returns whether the supplied sensor record's major type is less
+     *      than the major type of the supplied sensor name
+     *
+     *  @param[in] i_sensorRecord
+     *      Sensor record to compare
+     *
+     *  @param[in] i_sensorName
+     *      Name of the sensor to compare
+     *
+     *  @retval true  Major type of sensor record is less than major type of
+     *      sensor name
+     *  @retval false Major type of sensor record is not less than major type of
+     *      sensor name
+     */
+    static inline bool compare_major(
+        const uint16_t (&i_sensorRecord)[2],
+        const uint16_t i_sensorName)
+    {
+        return getMajorType(i_sensorRecord[0]) < getMajorType(i_sensorName);
+    }
+
+    /**
+     *  @brief Returns whether the supplied sensor record's major type equals
+     *      the major type of the supplied sensor name
+     *
+     *  @param[in] i_sensorRecord
+     *      Sensor record to compare
+     *
+     *  @param[in] i_sensorName
+     *      Name of the sensor to compare
+     *
+     *  @retval true  Major type of sensor record equals major type of
+     *      sensor name
+     *  @retval false Major type of sensor record does not equal major type of
+     *      sensor name
+     */
+    static inline bool equals_major(
+        const uint16_t (&i_sensorRecord)[2],
+        const uint16_t i_sensorName)
+    {
+        return getMajorType(i_sensorRecord[0]) == getMajorType(i_sensorName);
+    }
+
     //
     // Helper function to search the sensor data for the correct sensor number
     // based on the sensor name.
@@ -551,6 +625,72 @@ namespace SENSOR
 
     };
 
+    //**************************************************************************
+    // FaultSensor constructor
+    //**************************************************************************
+
+    FaultSensor::FaultSensor(
+        TARGETING::Target* i_pTarget)
+      : SensorBase(TARGETING::SENSOR_NAME_FAULT, i_pTarget)
+    {
+    }
+
+    //**************************************************************************
+    // FaultSensor constructor for associated targets
+    //**************************************************************************
+
+    FaultSensor::FaultSensor(
+        TARGETING::Target* i_pTarget,
+        const TARGETING::TYPE i_associatedType)
+      : SensorBase(
+            static_cast<TARGETING::SENSOR_NAME>(
+                TARGETING::SENSOR_NAME_FAULT | i_associatedType),
+            i_pTarget)
+    {
+    }
+
+    //**************************************************************************
+    // FaultSensor destructor
+    //**************************************************************************
+
+    FaultSensor::~FaultSensor()
+    {
+    }
+
+    //**************************************************************************
+    // FaultSensor::setStatus
+    //**************************************************************************
+
+    errlHndl_t FaultSensor::setStatus(
+        const FAULT_STATE i_faultState)
+    {
+        errlHndl_t pError = NULL;
+
+        switch(i_faultState)
+        {
+            case FAULT_STATE_ASSERTED:
+                iv_msg->iv_deassertion_mask = setMask(FAULT_DEASSERTED_OFFSET);
+                iv_msg->iv_assertion_mask = setMask(FAULT_ASSERTED_OFFSET);
+                break;
+            case FAULT_STATE_DEASSERTED:
+                iv_msg->iv_deassertion_mask = setMask(FAULT_ASSERTED_OFFSET);
+                iv_msg->iv_assertion_mask = setMask(FAULT_DEASSERTED_OFFSET);
+                break;
+            default:
+                assert(0,"Caller passed unsupported fault state of 0x%X",
+                    i_faultState);
+        }
+
+        pError = writeSensorData();
+        if(pError)
+        {
+            TRACFCOMP(g_trac_ipmi, ERR_MRK " "
+                "Failed to write sensor data for sensor name 0x%X",
+                    iv_name);
+        }
+
+        return pError;
+    }
 
     //
     // HostStausSensor constructor - uses system target
@@ -652,6 +792,76 @@ namespace SENSOR
 
     }
 
+    void updateBMCFaultSensorStatus(void)
+    {
+        TARGETING::ATTR_IPMI_SENSORS_type noSensors = {{0}};
+
+        // No sensor attribute is all 0's; therefore if a sensor attribute is
+        // found and is not all zeros (using the predicate value inversion
+        // feature) then the sensor attribute has potential
+        // sensors to iterate through
+        TARGETING::PredicateAttrVal<TARGETING::ATTR_IPMI_SENSORS>
+            hasSensors(noSensors,true);
+        TARGETING::TargetRangeFilter targetsWithSensorsItr(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &hasSensors);
+        for (; targetsWithSensorsItr; ++targetsWithSensorsItr)
+        {
+            // Cache the target for ease of reading/usage
+            TARGETING::TargetHandle_t pTarget = *targetsWithSensorsItr;
+
+            TARGETING::ATTR_IPMI_SENSORS_type sensors = {{0}};
+            assert(pTarget->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(sensors));
+
+            // Derive number of sensor records by dividing attribute size by
+            // size of each sensor record
+            uint16_t sensorRows = (sizeof(sensors)/sizeof(sensors[0]));
+
+            // Ceate an iterator pointing to the first element of the array
+            uint16_t (*begin)[2] = &sensors[0];
+
+            // Using the number entries as the index into the array will set the
+            // end iterator to the correct position (one entry past the last
+            // element of the array)
+            uint16_t (*end)[2] = &sensors[sensorRows];
+
+            // Locate the first record that could possibly match the criteria
+            uint16_t (*ptr)[2] =
+                std::lower_bound(begin, end,
+                    TARGETING::SENSOR_NAME_FAULT, &compare_major);
+
+            // Process any match, and all remaining matches after that, until
+            // there is no additional match.  Here we are matching the major
+            // sensor type only
+            while(   (ptr != end)
+                  && (   getMajorType((*ptr)[0])
+                      == TARGETING::SENSOR_NAME_FAULT ))
+            {
+                TRACFCOMP(g_trac_ipmi, INFO_MRK " "
+                    "Found fault sensor name 0x%X and ID 0x%X for HUID 0x%X",
+                    (*ptr)[0], (*ptr)[1], TARGETING::get_huid(pTarget));
+
+                FaultSensor faultSensor(pTarget,
+                    static_cast<TARGETING::TYPE>(
+                        (*ptr)[0]));
+
+                errlHndl_t pError = faultSensor.setStatus(
+                    FaultSensor::FAULT_STATE_DEASSERTED);
+                if(pError)
+                {
+                    TRACFCOMP(g_trac_ipmi, ERR_MRK " "
+                        "Failed setting fault sensor name 0x%X and ID 0x%X for "
+                        "HUID 0x%X",
+                        (*ptr)[0], (*ptr)[1], TARGETING::get_huid(pTarget));
+                    errlCommit(pError, IPMI_COMP_ID);
+                }
+
+                ++ptr;
+            }
+        }
+    }
+
     void updateBMCSensorStatus()
     {
         // send status of all DIMM targets
@@ -662,6 +872,8 @@ namespace SENSOR
 
         updateBMCSensorStatus(TARGETING::TYPE_CORE);
 
+        // Send status for all simple fault sensors in the system
+        updateBMCFaultSensorStatus();
     };
 
 }; // end name space

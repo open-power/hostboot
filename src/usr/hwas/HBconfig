@@ -13,3 +13,9 @@ config HOST_HCDB_SUPPORT
    depends on CVPD_READ_FROM_HW || MVPD_READ_FROM_HW || DJVPD_READ_FROM_HW
    help
        Hostboot will detect hardware changes
+
+config CLOCK_DECONFIGS_FATAL
+    default n
+    help
+        Hostboot will terminate the boot on any clock error
+

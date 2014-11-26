@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,6 +39,7 @@
 //******************************************************************************
 
 // STD
+#include <string.h>
 
 // Other Host Boot Components
 
@@ -88,8 +91,9 @@ class PredicateAttrVal : public PredicateBase
         PredicateAttrVal(
             const typename AttributeTraits<A>::Type& i_value,
             const bool i_invertSearch = false)
-            : iv_value(i_value), iv_invertSearch(i_invertSearch)
+            : iv_invertSearch(i_invertSearch)
         {
+            memcpy(&iv_value,&i_value,sizeof(iv_value));
         }
 
         /**

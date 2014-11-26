@@ -317,6 +317,10 @@
         <value>0x03</value>
     </enumerator>
     <enumerator>
+        <name>SYSTEM_BOARD</name>
+        <value>0x07</value>
+    </enumerator>
+    <enumerator>
         <name>POWER_UNIT</name>
         <value>0x13</value>
     </enumerator>
@@ -343,66 +347,84 @@
     <description>Enumeration indicating the IPMI sensor name, which will
         be used by hostboot when determining the sensor number to return.
         The name is unique per hostboot sensor type, actual IPMI sensor
-        types have been overloaded to map our needs.</description>
+        types have been overloaded to map our needs.  The sensor name consists
+        of one byte of sensor type plus one byte of sub-type, to differentiate
+        similar sensors under the same target</description>
     <enumerator>
         <name>TEMPERATURE</name>
-        <value>0x01</value>
+        <value>0x0100</value>
     </enumerator>
     <enumerator>
         <name>VOLTAGE</name>
-        <value>0x02</value>
+        <value>0x0200</value>
     </enumerator>
     <enumerator>
         <name>CURRENT</name>
-        <value>0x03</value>
+        <value>0x0300</value>
     </enumerator>
     <enumerator>
         <name>INTRUSION</name>
-        <value>0x04</value>
+        <value>0x0400</value>
     </enumerator>
     <enumerator>
         <name>STATE</name>
-        <value>0x05</value>
+        <value>0x0500</value>
     </enumerator>
     <enumerator>
         <name>POWER_UNIT</name>
-        <value>0x06</value>
+        <value>0x0600</value>
     </enumerator>
     <enumerator>
         <name>OS_BOOT</name>
-        <value>0x07</value>
+        <value>0x0700</value>
     </enumerator>
     <enumerator>
         <name>HOST_STATUS</name>
-        <value>0x08</value>
+        <value>0x0800</value>
     </enumerator>
     <enumerator>
         <name>FW_BOOT_PROGRESS</name>
-        <value>0x09</value>
+        <value>0x0900</value>
     </enumerator>
     <enumerator>
         <name>OCC_ACTIVE</name>
-        <value>0x0A</value>
+        <value>0x0A00</value>
     </enumerator>
     <enumerator>
         <name>SYSTEM_POWER_CAP</name>
-        <value>0x0b</value>
+        <value>0x0b00</value>
     </enumerator>
     <enumerator>
         <name>PCI_ACTIVE</name>
-        <value>0x0c</value>
+        <value>0x0c00</value>
     </enumerator>
     <enumerator>
         <name>BOOT_WATCHDOG</name>
-        <value>0x0d</value>
+        <value>0x0d00</value>
     </enumerator>
     <enumerator>
         <name>REBOOT_COUNT</name>
-        <value>0x0e</value>
+        <value>0x0e00</value>
     </enumerator>
     <enumerator>
         <name>POWER</name>
-        <value>0x0f</value>
+        <value>0x0f00</value>
+    </enumerator>
+    <enumerator>
+        <name>FAULT</name>
+        <value>0x1000</value>
+    </enumerator>
+    <enumerator>
+        <name>TOD_CLOCK_FAULT</name>
+        <value>0x1017</value>
+    </enumerator>
+    <enumerator>
+        <name>REF_CLOCK_FAULT</name>
+        <value>0x101A</value>
+    </enumerator>
+    <enumerator>
+        <name>PCI_CLOCK_FAULT</name>
+        <value>0x101B</value>
     </enumerator>
 </enumerationType>
 
@@ -524,7 +546,8 @@ ID for the sensor number returned with the elog. -->
 <attribute>
     <id>IPMI_SENSORS</id>
     <description>Attribute to hold 16 pairs of sensor name, sensor number
-        pairs.</description>
+        pairs. A sensor name consists of one byte of general sensor type
+        and one byte of sub-type</description>
     <simpleType>
         <uint16_t></uint16_t>
         <array>16,2</array>

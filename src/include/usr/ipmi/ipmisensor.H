@@ -58,9 +58,14 @@ namespace SENSOR
     // Status command" for
     // details on this byte.
 
-
     // sensors have the range 0x0-0xFE - 0xFF is reserved for invalid sensor
     static const uint16_t INVALID_SENSOR = 0xFF;
+
+    // Mask which preserves major type of the sensor
+    static const uint16_t SENSOR_NAME_MAJOR_MASK = 0xFF00;
+
+    // Mask which preserves minor type of the sensor
+    static const uint16_t SENSOR_NAME_MINOR_MASK = 0x00FF;
 
     /**
      *   @struct set_sensor_reading_request
@@ -528,6 +533,108 @@ namespace SENSOR
             uint8_t iv_functionalOffset;
 
     };
+
+    /**
+     *  @class FaultSensor
+     *
+     *  @brief Specialized class implementing a simple fault sensor
+     *
+     *  @par Detailed Description:
+     *      Provides the functionality needed to assert or deassert a fault
+     *      condition for a given target.  These are typically used for
+     *      things that have failed which may not have a full targeting
+     *      implementation.  Implemented using a 0x03 'digital' discrete
+     *      generic sensor profile.
+     */
+    class FaultSensor : public SensorBase
+    {
+        public:
+
+            /**
+             *  @enum FAULT_SENSOR_OFFSET
+             *
+             *  Indicates the correct sensor offset to use for sensor fault
+             *  assertions/deassertions.
+             */
+            enum FAULT_SENSOR_OFFSET
+            {
+                FAULT_DEASSERTED_OFFSET = 0x00,
+                FAULT_ASSERTED_OFFSET   = 0x01,
+            };
+
+            /**
+             *  @enum FAULT_STATE
+             *
+             *  Enum indicating whether the fault sensor is asserted or not
+             */
+            enum FAULT_STATE
+            {
+                FAULT_STATE_DEASSERTED = 0x00,
+                FAULT_STATE_ASSERTED   = 0x01,
+            };
+
+            /**
+             *  @brief Constructor for a fault sensor
+             *
+             *  @param[in] i_pTarget
+             *      Target associated with the fault sensor.  Must not be NULL.
+             */
+            FaultSensor(TARGETING::Target* i_pTarget);
+
+            /**
+             *  @brief Constructor for a fault sensor, used to differentiate
+             *      multiple sensors of similar type on same target
+             *
+             *  @param[in] i_pTarget
+             *      Target associated with the fault sensor.  Must not be NULL.
+             *
+             *  @param[in] i_associatedType
+             *      Type of non-instantiated target linked to the main target
+             *      for which this sensor provides readings.
+             */
+            FaultSensor(TARGETING::Target* i_pTarget,
+                TARGETING::TYPE i_associatedType = TARGETING::TYPE_NA);
+
+            /**
+             *  @brief Destructor for a fault sensor
+             *
+             */
+            ~FaultSensor();
+
+            /**
+             *  @brief Set the fault sensor to faulted or non-faulted
+             *
+             *  @param[in] i_faultState
+             *      Whether sensor is faulted or not
+             *
+             *  @return Error log handle
+             *  @retval NULL  Status set successfully
+             *  @retval !NULL Failed to set status
+             */
+            errlHndl_t setStatus(FAULT_STATE i_faultState);
+
+        private:
+
+            // Disable the default constructor
+            FaultSensor();
+
+            // Disable assignment operator
+            FaultSensor& operator=(const FaultSensor& i_rhs);
+
+            // Disable copy constructor
+            FaultSensor(const FaultSensor& i_rhs);
+    };
+
+    /**
+     *  @brief Updates initial state of Hostboot relevant fault sensors on the
+     *      BMC
+     *
+     *  @par Detailed Description:
+     *      Updates initial state of Hostboot relevant fault sensors on the
+     *      BMC to "not faulted" for all applicable fault sensors detected in
+     *      the system.  All errors will be internally committed.
+     */
+    void updateBMCFaultSensorStatus(void);
 
     /**
      *   @brief Update DIMM/CORE/Processor status sensors on the BMC.
