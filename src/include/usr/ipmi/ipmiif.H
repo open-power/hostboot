@@ -206,6 +206,20 @@ namespace IPMI
 
 
     // Sensor messages
+    inline const command_t get_sel_info(void)
+    { return std::make_pair(NETFUN_STORAGE, 0x40); }
+
+    inline const command_t reserve_sel(void)
+    { return std::make_pair(NETFUN_STORAGE, 0x42); }
+
+    inline const command_t add_sel(void)
+    { return std::make_pair(NETFUN_STORAGE, 0x44); }
+
+    //AMI-specific storage messages
+    inline const command_t partial_add_esel(void)
+    { return std::make_pair(NETFUN_STORAGE, 0x32); }
+
+    // event messages
     inline const command_t platform_event(void)
     { return std::make_pair(NETFUN_SENSOR, 0x02); }
 

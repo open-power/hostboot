@@ -28,6 +28,7 @@ MODULE = ipmi
 OBJS += ipmimsg.o
 OBJS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmibt.o)
 OBJS += ipmirp.o
+OBJS += ipmisel.o
 OBJS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmidd.o)
 OBJS += ipmifru.o
 OBJS += ipmiconfig.o
