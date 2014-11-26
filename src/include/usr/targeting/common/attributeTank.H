@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,11 +34,12 @@
 #include <stdint.h>
 #include <list>
 #include <vector>
+#ifndef STANDALONE_COMPILE
 #include <targeting/adapters/mutexadapter.H>
 #include <targeting/common/error.H>
-
 namespace TARGETING
 {
+
 
 /**
  * @class AttributeTank
@@ -48,6 +49,10 @@ namespace TARGETING
 class AttributeTank
 {
 public:
+#else
+namespace AttributeTank
+{
+#endif
     /**
      * @brief Allocation types
      *
@@ -58,7 +63,6 @@ public:
         ALLOC_TYPE_MALLOC = 1,
         ALLOC_TYPE_NEW = 2,
     };
-
     /**
      * @enum AttributeFlags
      *
@@ -73,7 +77,6 @@ public:
         // NEXT         = 0x04,
         // NEXT         = 0x08,
     };
-
     /**
      * @enum TankLayer
      *
@@ -88,7 +91,6 @@ public:
         TANK_LAYER_LAST = TANK_LAYER_PERM,
         TANK_LAYER_TERM = 0xFFFFFFFF,
     };
-
     /**
      * @brief Enumeration of node filter values
      *
@@ -101,12 +103,10 @@ public:
         NODE_FILTER_SPECIFIC_NODE_AND_ALL,
         NODE_FILTER_SPECIFIC_NODE,
     };
-
     // Constants for various fields in AttributeHeader
     static const uint16_t ATTR_POS_NA = 0xffff;      // iv_pos N/A
     static const uint8_t  ATTR_UNIT_POS_NA = 0xff;   // iv_unitPos N/A
     static const uint8_t  ATTR_NODE_NA = 0xf;        // iv_node N/A
-
     /**
      * @struct AttributeHeader
      *
@@ -122,7 +122,7 @@ public:
          * @brief Constructor
          */
         AttributeHeader();
-
+#if __BYTE_ORDER == __BIG_ENDIAN
         // Public data
         uint32_t iv_attrId;     // Attribute ID
         uint32_t iv_targetType; // Target Type attribute is for
@@ -132,7 +132,18 @@ public:
         uint8_t  iv_node  : 4;  // Target Node number
         uint8_t  iv_flags : 4;  // AttributeFlags enum value(s)
         uint32_t iv_valSize;    // Size of the attribute value in bytes
+#else
+        uint32_t iv_attrId;     // Attribute ID
+        uint32_t iv_targetType; // Target Type attribute is for
+        uint16_t iv_pos;        // For chips/dimms the position
+                                // For chiplets the parent chip position
+        uint8_t  iv_unitPos;    // For chiplets the position
+        uint8_t  iv_flags : 4;  // AttributeFlags enum value(s)
+        uint8_t  iv_node  : 4;  // Target Node number
+        uint32_t iv_valSize;    // Size of the attribute value in bytes
+#endif
     };
+#ifndef STANDALONE_COMPILE
 
     /**
      * @struct AttributeSerializedChunk
@@ -401,6 +412,9 @@ private:
     mutable TARG_MUTEX_TYPE iv_mutex;
 };
 
-} // namespace TARGETING
+
+#endif //STANDALONE_COMPILE
+
+} // namespace TARGETING/AttributeTank
 
 #endif

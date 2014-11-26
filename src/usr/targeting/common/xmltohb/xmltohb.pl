@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -183,6 +185,15 @@ else
 # Open the output files and write them
 if( !($cfgSrcOutputDir =~ "none") )
 {
+
+    open(ATTR_TARG_MAP_FILE,">$cfgSrcOutputDir"."targAttrOverrideData.H")
+      or fatal("Target Attribute data file: \"$cfgSrcOutputDir"
+        . "getTargAttrData.C\" could not be opened.");
+    my $targAttrFile = *ATTR_TARG_MAP_FILE;
+    writeTargAttrMap($attributes, $targAttrFile);
+    close $targAttrFile;
+
+
     open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H")
       or fatal ("Trait file: \"$cfgSrcOutputDir"
         . "attributetraits.H\" could not be opened.");
@@ -1525,6 +1536,8 @@ sub writeEnumFileAttrEnums {
     }
 }
 
+
+
 ################################################################################
 # Writes the enum file footer
 ################################################################################
@@ -1538,6 +1551,88 @@ print $outFile <<VERBATIM;
 #endif // TARG_ATTRIBUTEENUMS_H
 
 VERBATIM
+}
+
+###############################################################################
+# Writes code to populate Attribute Data Map
+###############################################################################
+sub writeTargAttrMap {
+    my($attributes,$outFile) = @_;
+
+
+    my $attributeIdEnum = getAttributeIdEnumeration($attributes);
+
+    print $outFile "const AttributeData g_TargAttrs[] = {\n";
+
+    # loop through every attribute
+    foreach my $attribute
+        (sort { $a->{id} cmp $b->{id} } @{$attributes->{attribute}})
+    {
+
+
+        # Only (initially) support attributes with simple integer types
+        if ((exists $attribute->{simpleType}) &&
+            ((exists $attribute->{simpleType}->{uint8_t}) ||
+             (exists $attribute->{simpleType}->{uint16_t}) ||
+             (exists $attribute->{simpleType}->{uint32_t}) ||
+             (exists $attribute->{simpleType}->{uint64_t})))
+        {
+
+
+            foreach my $enum (@{$attributeIdEnum->{enumerator}})
+            {
+                if($enum->{name} eq $attribute->{id})
+                {
+                        # struct AttributeData
+                    print $outFile "\t{\n";
+                        # iv_name
+                    print $outFile "\t\t\"ATTR_$attribute->{id}\",\n";
+                        # iv_attrId
+                    print $outFile "\t\t$enum->{value},\n";
+                        # iv_attrElemSizeBytes
+                    my @sizes = ( "uint8_t", "uint16_t",
+                                  "uint32_t", "uint64_t" );
+
+                    foreach my $size (@sizes)
+                    {
+                        if (exists $attribute->{simpleType}->{$size})
+                        {
+                            print $outFile "\t\tsizeof($size),\n";
+                            last;
+                        }
+                    }
+
+                        # iv_dims
+                    my @dims = ();
+                    if (exists $attribute->{simpleType}->{array})
+                    {
+                        # Remove leading whitespace
+                        my $dimText = $attribute->{simpleType}->{array};
+                        $dimText =~ s/^\s+//;
+
+                        # Split on commas or whitespace
+                        @dims = split(/\s*,\s*|\s+/, $dimText);
+                    }
+                    until ($#dims == 3)
+                    {
+                        push @dims, 1;
+                    }
+                    print $outFile "\t\t{ ".join(", ",@dims)." } \n";
+
+                        # end AttributeData
+                    print $outFile "\t},\n";
+
+                }
+
+
+            }
+
+        }
+
+
+    }
+
+    print $outFile "};\n";
 }
 
 ################################################################################

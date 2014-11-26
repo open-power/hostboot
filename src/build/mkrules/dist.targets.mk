@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -79,6 +79,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
+    src/usr/targeting/attroverride/attributeOverride:tools,openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
 
 #

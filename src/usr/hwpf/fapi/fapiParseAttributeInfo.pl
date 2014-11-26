@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +42,7 @@
 #                  mjjones   06/10/11  Added "use strict;"
 #                  mjjones   06/23/11  Parse more info
 #                  mjjones   07/05/11  Take output dir as parameter
-#                  mjjones   09/06/11  Remove string/defaultVal support 
+#                  mjjones   09/06/11  Remove string/defaultVal support
 #                  mjjones   10/07/11  Create fapiAttributeService.C
 #                  mjjones   10/17/11  Support enums with values
 #                  mjjones   10/18/11  Support multiple attr files and
@@ -143,6 +145,17 @@ my $etFile = $ARGV[0];
 $etFile .= "/";
 $etFile .= "fapiAttrEnumInfo.csv";
 open(ETFILE, ">", $etFile);
+
+my $fmFile = $ARGV[0];
+$fmFile .= "/";
+$fmFile .= "fapiAttrOverrideData.H";
+open(FMFILE, ">", $fmFile);
+
+my $feFile = $ARGV[0];
+$feFile .= "/";
+$feFile .= "fapiAttrOverrideEnums.H";
+open(FEFILE, ">", $feFile);
+
 
 #------------------------------------------------------------------------------
 # Print Start of file information to fapiAttributeIds.H
@@ -251,6 +264,18 @@ print ETFILE "# used to process FAPI Attribute text files (overrides/syncs)\n";
 print ETFILE "# Format:\n";
 print ETFILE "# <ENUM-STR>,<ENUM-VAL>\n";
 
+#-------------------------------------------------------------------------------
+# Print header of getFapiAttrData.C
+# ------------------------------------------------------------------------------
+print FMFILE "const AttributeData g_FapiAttrs[] = {\n";
+my %attrOverrideData = ();
+
+#-------------------------------------------------------------------------------
+# Print header of getFapiAttrEnumData.C
+# ------------------------------------------------------------------------------
+print FEFILE "const AttributeEnum g_FapiEnums[] = {\n";
+my @attrOverrideEnums = ();
+
 my %attrIdHash;  # Records which Attribute IDs have been used
 my %attrValHash; # Records which Attribute values have been used
 
@@ -344,8 +369,10 @@ foreach my $argnum (1 .. $#ARGV)
     #--------------------------------------------------------------------------
     # For each Attribute
     #--------------------------------------------------------------------------
-    foreach my $attr (@{$attributes->{attribute}})
+    foreach my $attr
+        (@{$attributes->{attribute}})
     {
+        my $attrOverride = "";
         #----------------------------------------------------------------------
         # Print a comment with the attribute ID fapiAttributeIds.H
         #----------------------------------------------------------------------
@@ -366,10 +393,16 @@ foreach my $argnum (1 .. $#ARGV)
         print ASFILE "</tr>\n";
 
         #----------------------------------------------------------------------
+        # Print the assignment of each attribute to the local l_name
+        #----------------------------------------------------------------------
+        $attrOverride .= "\t{\n";
+        $attrOverride .= "\t\t\"$attr->{id}\",\n";
+
+        #----------------------------------------------------------------------
         # Figure out the attribute array dimensions (if array)
         #----------------------------------------------------------------------
         my $arrayDimensions = "";
-        my $numArrayDimensions = 0;
+        my @arrayDims = ();
         if ($attr->{array})
         {
             # Remove leading whitespace
@@ -377,14 +410,19 @@ foreach my $argnum (1 .. $#ARGV)
             $dimText =~ s/^\s+//;
 
             # Split on commas or whitespace
-            my @vals = split(/\s*,\s*|\s+/, $dimText);
+            @arrayDims = split(/\s*,\s*|\s+/, $dimText);
 
-            foreach my $val (@vals)
+
+            foreach my $val (@arrayDims)
             {
                 $arrayDimensions .= "[${val}]";
-                $numArrayDimensions++;
             }
         }
+        until ($#arrayDims == 3)
+        {
+            push @arrayDims, 1;
+        }
+        my $arrayDimString = join(", ", @arrayDims);
 
         #----------------------------------------------------------------------
         # Print the typedef for each attribute's val type to fapiAttributeIds.H
@@ -394,7 +432,12 @@ foreach my $argnum (1 .. $#ARGV)
         {
             # The value type of chip EC feature attributes is uint8_t
             print AIFILE "typedef uint8_t $attr->{id}_Type;\n";
-            print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},u8\n"
+            print ITFILE "$attr->{id},$attr->{id},";
+            print ITFILE "0x$attrIdHash{$attr->{id}},u8\n";
+            $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
+            $attrOverride .= "\t\tsizeof(uint8_t),\n";
+            $attrOverride .= "\t\t{ $arrayDimString }\n";
+            $attrOverride .= "\t},\n";
         }
         else
         {
@@ -404,23 +447,24 @@ foreach my $argnum (1 .. $#ARGV)
                 exit(1);
             }
 
-            if ($attr->{valueType} eq 'uint8')
+            my @sizes = ( 'uint8', 'uint32', 'uint64' );
+            my $actualSize = '';
+            foreach my $size (@sizes)
             {
-                print AIFILE "typedef uint8_t $attr->{id}_Type$arrayDimensions;\n";
+                if ($attr->{valueType} eq $size)
+                {
+                    $actualSize = $size;
+                    last;
+                }
+            }
+            if ($actualSize ne '')
+            {
+
+                print AIFILE "typedef ${actualSize}_t $attr->{id}_Type$arrayDimensions;\n";
                 print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},u8" .
                              "$arrayDimensions\n";
-            }
-            elsif ($attr->{valueType} eq 'uint32')
-            {
-                print AIFILE "typedef uint32_t $attr->{id}_Type$arrayDimensions;\n";
-                print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},u32" .
-                             "$arrayDimensions\n";
-            }
-            elsif ($attr->{valueType} eq 'uint64')
-            {
-                print AIFILE "typedef uint64_t $attr->{id}_Type$arrayDimensions;\n";
-                print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},u64" .
-                             "$arrayDimensions\n";
+                $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
+                $attrOverride .= "\t\tsizeof(${actualSize}_t),\n";
             }
             else
             {
@@ -428,6 +472,8 @@ foreach my $argnum (1 .. $#ARGV)
                 print $attr->{valueType}, "\n";
                 exit(1);
             }
+            $attrOverride .= "\t\t{ $arrayDimString }\n";
+            $attrOverride .= "\t},\n";
         }
 
         #----------------------------------------------------------------------
@@ -504,13 +550,29 @@ foreach my $argnum (1 .. $#ARGV)
                 $val =~ s/^\s+//;
                 $val =~ s/\s+$//;
 
+                my @values = split('=', ${val});
+                # Remove newlines and leading/trailing whitespace
+
+                foreach my $value (@values)
+                {
+                    $value =~ s/\n//;
+                    $value =~ s/^\s+//;
+                    $value =~ s/\s+$//;
+                }
+
+                push @attrOverrideEnums,
+                    "\t{ \"$attr->{id}_$values[0]\", $values[1] },\n";
+
                 # Print the attribute enum to fapiAttributeIds.H
                 print AIFILE "    ENUM_$attr->{id}_${val}";
 
                 # Print the attribute enum to fapiAttrEnumInfo.csv
                 my $attrEnumTxt = "$attr->{id}_${val}\n";
+
+
                 $attrEnumTxt =~ s/ = /,/;
                 print ETFILE $attrEnumTxt;
+
 
                 if ($attr->{valueType} eq 'uint64')
                 {
@@ -649,6 +711,11 @@ foreach my $argnum (1 .. $#ARGV)
         # Print newline between each attribute's info to fapiAttributeIds.H
         #----------------------------------------------------------------------
         print AIFILE "\n";
+
+        #----------------------------------------------------------------------
+        # Add attribute override string to map.
+        #----------------------------------------------------------------------
+        $attrOverrideData{$attr->{id}} = $attrOverride;
     };
 }
 
@@ -699,6 +766,26 @@ print ASFILE "</body>\n";
 print ASFILE "</html>\n";
 
 #------------------------------------------------------------------------------
+# Print content for getFapiAttrData.C
+#------------------------------------------------------------------------------
+foreach my $override (sort keys %attrOverrideData)
+{
+    print FMFILE $attrOverrideData{$override};
+}
+print FMFILE "};\n";
+
+#------------------------------------------------------------------------------
+# Print footer for getFapiAttrEnumData.C
+#------------------------------------------------------------------------------
+foreach my $override (sort @attrOverrideEnums)
+{
+    print FEFILE $override;
+}
+print FEFILE "};\n";
+
+
+
+#------------------------------------------------------------------------------
 # Close output files
 #------------------------------------------------------------------------------
 close(AIFILE);
@@ -707,4 +794,6 @@ close(ACFILE);
 close(ASFILE);
 close(ITFILE);
 close(ETFILE);
+close(FMFILE);
+close(FEFILE);
 
