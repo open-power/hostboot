@@ -33,3 +33,12 @@ void nanosleep(uint64_t sec, uint64_t nsec)
     }
 }
 
+int clock_gettime(clockid_t i_clkId, timespec_t* o_tp)
+{
+    int l_rc = -1;
+    if (g_hostInterfaces && g_hostInterfaces->clock_gettime)
+    {
+        l_rc = g_hostInterfaces->clock_gettime(i_clkId, o_tp);
+    }
+    return l_rc;
+}

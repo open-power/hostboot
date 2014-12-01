@@ -40,7 +40,7 @@
 #ifndef __HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY
 
 #include <stdint.h>
-
+#include <time.h>
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
  *
@@ -141,6 +141,19 @@ typedef struct hostInterfaces
      * @param[in] Identifier that specifies the failing part
      */
     void (*report_failure)( uint64_t i_status, uint64_t i_partId );
+
+    /**
+     *  @brief Reads the clock value from a POSIX clock.
+     *  @param[in]  i_clkId - The clock ID to read.
+     *  @param[out] o_tp - The timespec struct to store the clock value in.
+     *
+     *  @return 0 or -(errno).
+     *  @retval 0 - SUCCESS.
+     *  @retval -EINVAL - Invalid clock requested.
+     *  @retval -EFAULT - NULL ptr given for timespec struct.
+     *
+     */
+    int (*clock_gettime)(clockid_t i_clkId, timespec_t* o_tp);
 
     // Reserve some space for future growth.
     void (*reserved[32])(void);
