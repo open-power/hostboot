@@ -115,7 +115,7 @@ namespace CVPD
         { VD,  "VD" },
         { VN,  "VN" },
         { VP,  "VP" },
-        { SV,  "SV" },
+        { VS,  "VS" },
         { M0,  "M0" },
         { M1,  "M1" },
         { M2,  "M2" },

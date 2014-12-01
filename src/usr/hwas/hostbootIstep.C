@@ -66,6 +66,7 @@
 
 
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmifruinv.H>
 #include <config.h>
 
 namespace HWAS
@@ -155,6 +156,12 @@ void* host_discover_targets( void *io_pArgs )
 #ifdef CONFIG_BMC_IPMI
     // send DIMM/CORE/PROC sensor status to the BMC
     SENSOR::updateBMCSensorStatus();
+
+    if (errl == NULL)
+    {
+        // Gather + Send the IPMI Fru Inventory data to the BMC
+        errl = IPMIFRUINV::setData();
+    }
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

@@ -736,7 +736,9 @@ class SPDTest: public CxxTest::TestSuite
 
                 // Test on first DIMM only.
                 theTarget = dimmList[0];
-                uint8_t * theData = NULL;
+                //If theData is NULL, deviceRead will return the size
+                // need to give this an arbitrary size so test is still valid`
+                uint8_t * theData = static_cast<uint8_t*>(malloc( 0x1 ));
                 size_t theSize = 0x0;   // Invalid size of 0x0
 
                 cmds++;
@@ -745,6 +747,12 @@ class SPDTest: public CxxTest::TestSuite
                                   theSize,
                                   DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_NORM_KEYWORD ) );
 
+                // clean up the data
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
+                }
                 if( NULL == err )
                 {
                     fails++;

@@ -82,7 +82,7 @@ namespace CVPD
         VD          = 0x17,
         VN          = 0x18,
         VP          = 0x19,
-        SV          = 0x1a,
+        VS          = 0x1a,
         M0          = 0x1b,
         M1          = 0x1c,
         M2          = 0x1d,

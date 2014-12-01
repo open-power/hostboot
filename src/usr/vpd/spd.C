@@ -213,7 +213,10 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
             if( BASIC_MEMORY_TYPE == keyword )
             {
                 io_buflen = MEM_TYPE_SZ;
-                memcpy( io_buffer, &memType, io_buflen );
+                if (io_buffer != NULL)
+                {
+                    memcpy( io_buffer, &memType, io_buflen );
+                }
                 break;
             }
 
@@ -655,6 +658,13 @@ errlHndl_t spdGetValue ( VPD::vpdKeyword i_keyword,
 
         if( err )
         {
+            break;
+        }
+
+        // Support passing in NULL buffer to return VPD field size
+        if ( NULL == io_buffer )
+        {
+            io_buflen = (*entry).length;
             break;
         }
 

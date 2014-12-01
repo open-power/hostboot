@@ -93,7 +93,7 @@ my $usage = 0;
 my $DEBUG = 0;
 my $outFile = "";
 my $build = "fsp";
-
+my $ipmiFruid = 0;
 
 use Getopt::Long;
 GetOptions( "mrwdir:s"  => \$mrwdir,
@@ -4254,6 +4254,23 @@ sub generate_is_dimm
         }
 
         print "
+    </attribute>
+     <attribute>
+        <id>EEPROM_VPD_FRU_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/membuf-$ctaur</value></field>
+             <field><id>port</id><value>$dimmI2C->{$i+1}->{'i2c-master'}->{'i2c-port'}</value></field>
+             <field><id>devAddr</id><value>0x$dimmI2C->{$i+1}->{'address'}</value></field>
+             <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x01</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x01</value></field>
+             <field><id>writePageSize</id><value>0x00</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
+             <field><id>fruId</id><value>$ipmiFruid++</value></field>
+         </default>
+    </attribute>";
+
+       print"
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>$pos</default>
@@ -4958,6 +4975,24 @@ sub addEepromsCentaur
                           "</value></field>\n";
         print "        </default>\n";
         print "    </attribute>\n";
+
+        if ($id_name eq "EEPROM_VPD_PRIMARY_INFO")
+        {
+            print "    <attribute>\n";
+            print "        <id>EEPROM_VPD_FRU_INFO</id>\n";
+            print "        <default>\n";
+            print "            <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/proc-$proc</value></field>\n";
+            print "             <field><id>port</id><value>$port</value></field>\n";
+            print "             <field><id>devAddr</id><value>$devAddr_hex</value></field>\n";
+            print "             <field><id>engine</id><value>0</value></field>\n";
+            print "             <field><id>byteAddrOffset</id><value>0x02</value></field>\n";
+            print "             <field><id>maxMemorySizeKB</id><value>0x40</value></field>\n";
+            print "             <field><id>writePageSize</id><value>0x80</value></field>\n";
+            print "             <field><id>writeCycleTime</id><value>0x05</value></field>\n";
+            print "             <field><id>fruId</id><value>$ipmiFruid++</value></field>\n";
+            print "        </default>\n";
+            print "    </attribute>\n";
+        }
 
     }
 }

@@ -1391,6 +1391,85 @@ ID for the sensor number returned with the elog. -->
 </attribute>
 
 <attribute>
+    <id>EEPROM_VPD_FRU_INFO</id>
+    <description>Information needed to address the EEPROM slaves for
+                 IPMI Fru Inventory Purposes</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C
+                     slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x02</default>
+        </field>
+        <field>
+            <name>maxMemorySizeKB</name>
+            <description>The number of kilobytes a device can hold.  'Zero'
+                         value possible for some devices.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writePageSize</name>
+            <description>The maximum number of bytes that can be written to
+                         a device at one time. 'Zero' value means no maximum
+                         value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writeCycleTime</name>
+            <description>The amount of time in milliseconds a device requires
+                         on the completion of a write command to update its
+                         internal memory.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>fruId</name>
+            <description>The IPMI Fru Inventory ID number. This must be a
+                         unique number for every individual FRU within a
+                         system.</description>
+            <type>uint8_t</type>
+            <default>0x0</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+<attribute>
     <id>EEPROM_VPD_BACKUP_INFO</id>
     <description>Information needed to address the EERPROM slaves</description>
     <complexType>

@@ -516,6 +516,7 @@
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
     <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
     <attribute><id>EEPROM_VPD_BACKUP_INFO</id></attribute>
     <attribute><id>EEPROM_SBE_PRIMARY_INFO</id></attribute>
     <attribute><id>EEPROM_SBE_BACKUP_INFO</id></attribute>
@@ -852,6 +853,7 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
 </targetType>
 
 <targetType>
@@ -1357,6 +1359,7 @@
         </default>
     </attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>400,0,0,0,0,0</default>
@@ -1491,6 +1494,7 @@
     </attribute>
 
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>

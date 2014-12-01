@@ -33,6 +33,7 @@ OBJS += ipmifru.o
 OBJS += ipmiconfig.o
 OBJS += ipmisensor.o
 OBJS += ipmiwatchdog.o
+OBJS += ipmifruinv.o
 
 #SUBDIRS += test.d
 
