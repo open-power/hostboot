@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,6 +48,7 @@ my $toolHelp = 0;
 my $forceHRMOR = DEFAULT_HRMOR;
 my $node = 0;  # -nX parm to ecmd
 my $proc = 0;  # -pX parm to ecmd
+my $memMode = "check";
 
 my $imgPath = "";
 my $hbDir = $ENV{'HB_IMGDIR'};
@@ -71,6 +74,7 @@ GetOptions("tool:s" => \$tool,
            "force-hrmor:o" => \$forceHRMOR,
            "node:i" => \$node,
            "proc:i" => \$proc,
+           "memmode:s" => \$memMode,
            "man" => \$cfgMan) || pod2usage(-verbose => 0);
 pod2usage(-verbose => 1) if $cfgHelp;
 pod2usage(-verbose => 2) if $cfgMan;
@@ -84,6 +88,9 @@ else
 {
     # Determine the full image path.
     $imgPath = determineImagePath($imgPath);
+
+    # Figure out the correct memory access method
+    determineMemMode();
 
     # Parse tool options and call module.
     parseToolOpts($toolOptions);
@@ -162,7 +169,10 @@ sub readData
 
     my (undef, $debugfile) = tempfile(OPEN => 0);
     my (undef, $filename) = tempfile(OPEN => 0);
-    my $command = sprintf("cipgetmempba -n%d -p%d -fb %s %x %d -quiet > %s",
+    my $getmemcmd = "cipgetmempba";
+    if( $memMode =~ /adu/ ) { $getmemcmd = "getmemproc"; }
+    my $command = sprintf("%s -n%d -p%d -fb %s %x %d -quiet > %s",
+                          $getmemcmd,
                           $node,
                           $proc,
                           $filename,
@@ -177,7 +187,7 @@ sub readData
 
     my $result;
     open FILE, $filename or die
-        "ERROR: $filename not found attempting getmempba";
+        "ERROR: $filename not found attempting '$command'";
     binmode FILE;
     read FILE, $result, $size;
     close FILE;
@@ -208,7 +218,11 @@ sub writeData
     print $file $value;
     close $file;
 
-    my $command = sprintf("cipputmempba -n%d -p%d -cft -fb %s %x -quiet -mode inj > %s",
+    my $putmemcmd = "cipputmempba";
+    if( $memMode =~ /adu/ ) { $putmemcmd = "putmemproc"; }
+    my $command = sprintf(
+          "$putmemcmd -n%d -p%d -cft -fb %s %x -quiet -mode inj > %s",
+                          $putmemcmd,
                           $node,
                           $proc,
                           $filename,
@@ -354,6 +368,38 @@ sub checkContTrace
 
 }
 
+# @sub determinMemMode
+#
+# Determine the appropriate method to access memory
+#
+sub determineMemMode
+{
+    if( $memMode =~ /check/ )
+    {
+        # Cannot use pba access if the OCC is active
+        $bar0 = readScom( 0x02013F00, 64 ); #PBABAR0
+        if( $bar0 == 0 )
+        {
+            # BAR0 is zero so OCC is not in use
+            $memMode = "pba"; #use the PBA
+        }
+        else
+        {
+            $memMode = "adu"; #use the ADU
+        }
+    }
+    elsif( $memMode =~ /proc/ )
+    {
+        $memMode = "adu";
+    }
+    elsif( !($memMode =~ /pba/) && !($memMode =~ /adu/) )
+    {
+        ::userDisplay( "Unknown memmode parm - $memMode\n" );
+        exit 1;
+    }
+}
+
+
 
 __END__
 
@@ -367,7 +413,7 @@ ecmd-debug-framework.pl [options] --tool=<module>
 
 =head1 OPTIONS
 
-=over 8
+=over 9
 
 =item B<--tool>=MODULE
 
@@ -402,6 +448,13 @@ Print a brief help message and exits.
 =item B<--man>
 
 Prints the manual page and exits.
+
+=item B<--memmode>=adu/pba
+
+Force a specific memory access method.
+  adu = getmemproc/putmemproc
+  pba = cipgetmemba/cipputmempba
+  Default action will use PBABAR0 to decide
 
 =back
 
