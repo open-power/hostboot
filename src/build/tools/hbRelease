@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +33,8 @@ use List::Util 'max';
 use Term::ReadKey;
 use File::Temp qw/tempfile/;
 
+use Data::Dumper;
+
 my $debug = 0;
 my $help = 0;
 
@@ -52,6 +56,8 @@ my %commands = ( "define" => \&execute_define,
                  "release" => \&execute_release,
                  "publish-cq" => \&execute_publish_cq,
                  "build-name" => \&execute_build_name,
+                 "fsp-ci" => \&execute_fsp_ci,
+                 "gerrit-commit" => \&execute_gerrit_commit,
                  "help" => \&execute_help,
                );
 
@@ -94,7 +100,7 @@ sub execute_define
     die "Missing baseline name" if ($level{base} eq "");
     die "Missing released level name" if ($level{released} eq "");
 
-    print "New level: ".$level{name}.":".$level{base}.":".$level{released}."\n" 
+    print "New level: ".$level{name}.":".$level{base}.":".$level{released}."\n"
         if $debug;
 
     $level{base} = git_resolve_ref($level{base});
@@ -108,7 +114,7 @@ sub execute_undef
     my $level = shift @ARGV;
 
     die "Level to undefine not given" if ($level eq "");
-    
+
     my $levels = config_list_levels();
     die "Level $level does not exist" if (not defined $levels->{$level});
 
@@ -166,7 +172,7 @@ sub execute_git_query
 sub execute_level_query
 {
     my $level = "";
-    
+
     GetOptions("name:s" => \$level,
                "level:s" => \$level);
 
@@ -235,7 +241,7 @@ sub execute_add_forcedep
 sub execute_verify_patches
 {
     my $level = "";
-    
+
     GetOptions("name:s" => \$level,
                "level:s" => \$level);
 
@@ -246,46 +252,7 @@ sub execute_verify_patches
 
     $patches = gerrit_resolve_patches($patches);
 
-    foreach my $patch (@{$patches})
-    {
-        print "Deps for $patch\n" if $debug;
-        my $displayed_header = 0;
-
-        my $deps = git_commit_deps($level_info->{base},$patch);
-
-        foreach my $dep (@{$deps})
-        {
-            unless (grep {$_ eq $dep} @{$patches})
-            {
-                unless ($displayed_header)
-                {
-                    print "-------------------------------------------------\n";
-                    print "Potential missing dependency for:\n";
-                    print wrap("    ","    ",git_get_subject($patch)."\n");
-                    print "\t$patch\n\n";
-                    $displayed_header = 1;
-                }
-
-                print wrap("    ", "    ", git_get_subject($dep)."\n");
-                print "\t$dep\n";
-
-                my $files = array_intersect(git_commit_files($patch),
-                                            git_commit_files($dep));
-
-                foreach my $file (@{$files})
-                {
-                    print "\t$file\n";
-                }
-
-                print "\n";
-            }
-        }
-
-        if ($displayed_header)
-        {
-            print "-------------------------------------------------\n";
-        }
-    }
+    config_verify_patches($level_info->{base}, $patches);
 }
 
 sub execute_release
@@ -299,41 +266,7 @@ sub execute_release
 
     my $level_info = config_get_level($level);
 
-    print "Creating release branch...\n";
-    git_create_branch($level, $level_info->{base});
-
-    my $patches = $level_info->{patches};
-
-    print "Resolving and ordering patches...\n";
-    $patches = gerrit_resolve_patches($level_info->{patches});
-    $patches = git_order_commits($patches, $level_info);
-
-    if ($debug)
-    {
-        print "Determined patch order as:\n";
-        foreach my $patch (@{$patches})
-        {
-            print "\t$patch\n";
-        }
-    }
-    
-    print "Applying patches...\n";
-    foreach my $patch (@{$patches})
-    {
-        print "Applying $patch.\n" if ($debug);
-        unless (git_cherry_pick($patch))
-        {
-            system("git reset HEAD --hard");
-            die "Cherry-pick of $patch failed";
-        }
-    }
-
-    print "Generating release notes...\n";
-    create_release_notes($level, $level_info);
-
-    print "Creating tag...\n";
-    git_create_tag($level, $level_info);
-
+    config_release($level_info);
 }
 
 sub execute_publish_cq
@@ -372,13 +305,76 @@ sub execute_publish_cq
 
 sub execute_build_name
 {
-    my $release = "820";
+    my $release = "840";
     my $build_letter = "a";
 
     GetOptions("release:s" => \$release,
                "letter:s" => \$build_letter);
 
     system ("date +hb%m%d".$build_letter."_%g%V.$release");
+}
+
+sub execute_fsp_ci
+{
+
+    my $patches = "";
+    my $discover = 0;
+    my %level = ();
+    my $branch = $globals{"branch"};
+    my $basestr = "";
+
+    GetOptions("level:s" => \$level{name},
+               "patches:s" => \$patches,
+               "discover" => \$discover,
+               "basestr:s" => \$level{base});
+
+    die "Missing level name" if ($level{name} eq "");
+    die "Missing patches" if ($patches eq "");
+
+    print "Creating Hostboot CI release...\n" if !$discover;
+
+    # Parse out csv list of patches
+    my @patches = split(/,+/, $patches);
+
+    print ">>>Patches\n" if $debug;
+    print Dumper @patches if $debug;
+    print "<<<End of Patches\n" if $debug;
+
+    # Define release
+    print "Basestr: " if $debug;
+    $level{base} = git_resolve_ref($level{base});
+    $level{released} = $level{base};
+    config_add_level(\%level);
+
+    # Resolve level dependencies
+    config_resolve_level_dep($level{name}, $level{base}, @patches);
+
+    if(!$discover)
+    {
+        # Create hb release
+        my $level_info = config_get_level($level{name});
+        config_release($level_info);
+    }
+}
+
+sub execute_gerrit_commit
+{
+    my $patches = "";
+
+    GetOptions("patches:s" => \$patches);
+
+    die "Missing patches" if ($patches eq "");
+
+    # Parse out csv list of patches
+    my @patches = split(/,+/, $patches);
+
+    my $commits = gerrit_resolve_patchset(\@patches);
+    foreach my $commit (@$commits)
+    {
+        print $commit;
+        print "," if( \$commit != \$commits->[-1] )
+    }
+    print "\n";
 }
 
 sub execute_help
@@ -402,6 +398,7 @@ sub execute_help
         print "    Global options:\n";
         print "        --debug     Enable debug mode.\n";
         print "        --help      Display help on a specific tool.\n";
+        print "        --branch    Branch to use for release.\n";
         print "\n";
         print "    Note: Generally a <commit> can be any git or gerrit\n";
         print "          reference.  A git commit number, tag, branch, or\n";
@@ -413,8 +410,8 @@ sub execute_help
     }
     else
     {
-        my %help = ( 
-            "define" => 
+        my %help = (
+            "define" =>
 q(
         Define a new level for release.
 
@@ -509,7 +506,23 @@ q(
 
     Options:
         --release=<id>          Release name [default=810].
-        --letter=[a-z]          Build letter [default=a].         
+        --letter=[a-z]          Build letter [default=a].
+),
+            "fsp-ci" =>
+q(
+        Creates a hb release based on a list of patches
+
+    Options:
+        --level=<name>          The level to create [required].
+        --patches=<csv>         CSV of patches to add [required].
+        --branch=[a-z]          Branch to use for release [default=master].
+),
+            "gerrit-commit" =>
+q(
+        Get commit number of gerrit change-id, patch-set pairs
+
+    Options:
+        --patches=<change-id:patchset>  CSV of change-id:patchset [required].
 ),
         );
 
@@ -587,7 +600,7 @@ STYLESHEET
         my $rtc_hyper = "";
         my $cq = cq_workitem_num($commit);
         my $cq_hyper = "";
-        
+
         if ($rtc ne "")
         {
             $rtc_hyper = rtc_hyperlink($rtc);
@@ -607,7 +620,7 @@ STYLESHEET
         print RELNOTE "    <tr>\n";
         print RELNOTE "        <td>$rtc_hyper $cq_hyper</td>\n";
         print RELNOTE "        <td>$subject</td>\n";
-        print RELNOTE "        <td>$commit</td>\n";        
+        print RELNOTE "        <td>$commit</td>\n";
         print RELNOTE "    </tr>\n";
     }
     print RELNOTE "</table>\n";
@@ -637,8 +650,7 @@ sub git_resolve_ref
 
     if (gerrit_is_patch($ref))
     {
-        my $gerrit = gerrit_resolve_patches(\[$ref]);
-
+        my $gerrit = gerrit_resolve_patches([$ref]);
         $resolve = @{$gerrit}[0];
     }
     else
@@ -703,6 +715,28 @@ sub git_commit_history
     close COMMAND;
 
     return \@commits;
+}
+
+# sub git_log_changeId
+#
+# Determines if a changeId exists in the current branches git log
+#
+# @param[in] changeId
+#
+# @return bool - True if in commit history, False otherwise.
+#
+sub git_log_changeId
+{
+    my $changeId = shift;
+    my $exists = 0;
+    open COMMAND, "git log --pretty=\"%b\" --grep=\'Change-Id: $changeId\' |";
+    if(<COMMAND> ne "")
+    {
+        $exists = 1;
+    }
+    close COMMAND;
+
+    return $exists;
 }
 
 # sub git_name_rev
@@ -779,7 +813,7 @@ sub git_commit_files
 }
 
 # sub git_get_subject
-# 
+#
 # Get the subject of the commit message associated with a commit.
 # See git log --oneline.
 #
@@ -903,7 +937,7 @@ sub git_order_commits
     my $forceDeps = $level_info->{forceDeps};
 
     # Create patch -> { distance -> 0, deps -> [] } hash.
-    my %patch_hash = 
+    my %patch_hash =
         map { $_ => \{ distance => 0, deps => [] }} @{$patches};
 
     # Determine dependencies and distance for each patch.
@@ -914,11 +948,11 @@ sub git_order_commits
         push @{${$patch_hash{$patch}}->{deps}}, @{$deps};
 
         # Determine the distance from previous release for each patch.
-        ${$patch_hash{$patch}}->{distance} = 
+        ${$patch_hash{$patch}}->{distance} =
             scalar @{git_commit_history($patch, $level_info->{released})};
     }
 
-    # Determine forced dependencies for each patch. 
+    # Determine forced dependencies for each patch.
     foreach my $patch (keys %{$forceDeps})
     {
         my $resolve_from = @{gerrit_resolve_patches([$patch])}[0];
@@ -938,7 +972,7 @@ sub git_order_commits
         foreach my $patch (@{$patches})
         {
             my $distance = 1 + max( map
-                    { ${$patch_hash{$_}}->{distance}} 
+                    { ${$patch_hash{$_}}->{distance}}
                     @{${$patch_hash{$patch}}->{deps}});
 
             if ($distance > ${$patch_hash{$patch}}->{distance})
@@ -951,8 +985,8 @@ sub git_order_commits
 
     # Sort the patches based on shortest distance from previous release
     # (after Dijkstra).
-    my @commit_order = 
-        sort { ${$patch_hash{$a}}->{distance} <=> 
+    my @commit_order =
+        sort { ${$patch_hash{$a}}->{distance} <=>
                     ${$patch_hash{$b}}->{distance} }
         @{$patches};
 
@@ -980,7 +1014,7 @@ sub config_init
     {
         open COMMAND, "git config --get remote.gerrit.url |";
         my $url = <COMMAND>;
-        close COMMAND;        
+        close COMMAND;
         chomp $url;
 
         die "Undefined git-remote 'gerrit'" if ($url eq "");
@@ -1016,7 +1050,7 @@ sub config_init
 #
 sub config_list_levels
 {
-    return $globals{config_list_levels} 
+    return $globals{config_list_levels}
         if (defined $globals{config_list_levels});
 
     config_init();
@@ -1152,7 +1186,7 @@ sub config_add_dep
 #
 # @param level - The level to read.
 #
-# @return hash - { name => level, base => base release, 
+# @return hash - { name => level, base => base release,
 #                  released => previous release,
 #                  patches => array of patches,
 #                  forceDep => hash of { from => to } pairs }.
@@ -1284,6 +1318,202 @@ sub config_project
     return $project;
 }
 
+# sub config_resolve_level_dep
+#
+# Resolves dependencies for patches by parsing the commit messages for the
+# depends-on tag. If a patch is dependent on a patch not already in the level,
+# the patch is added.
+#
+# @param[in] - level name
+# @param[in] - Array of patches to process.
+#
+# @TODO RTC:125235 - improve this to support cross project dependencies
+sub config_resolve_level_dep
+{
+    print "Resolving level dependencies...\n";
+    my $level = shift;
+    my $base = shift;
+    my @patches = @_;
+    my %level_patches = ();
+    # Token used by git-CI-tool @execute_discover, update there too
+    my $token = "!@#%^";
+
+    while (@patches)
+    {
+        my $patchPair = shift @patches;
+        my ($patch,$patchSet) = split (":", $patchPair);
+
+        # Check if patch has already been added to level
+        if ($level_patches{$patch})
+        {
+            print "Skipping - already added patch = $patch to level\n" if $debug;
+            next;
+        }
+        # Check if patch already exists in release base
+        if (git_log_changeId($patch))
+        {
+            print "Skipping - patch = $patch already exists in release base = $base\n" if $debug;
+            next;
+        }
+
+        # Mark patch as processed
+        $level_patches{$patch} = 1;
+
+        print "\n===========\nFirst time seeing patch = $patch\n" if $debug;
+
+        # Force use of changeId's
+        if (!gerrit_is_patch($patch))
+        {
+            die "Added patch: $patch is not of type changeId\n";
+        }
+
+        # Add patch to level with resolved git commit.
+        print "Adding patch - $patchPair\n" if $debug;
+        my $commits = gerrit_resolve_patchset([$patchPair]);
+        config_add_patch($level, $commits->[0]);
+
+        # Get commit message
+        my $patchInfo = gerrit_query_commit($patch);
+        my @commitMsgArray = split(/\\n/,$patchInfo->{commitMessage});
+        print Dumper @commitMsgArray if $debug;
+
+        # Search commit message for dependencies
+        foreach my $line (@commitMsgArray)
+        {
+            # Check for forced dependencies
+            if ($line =~ m/depends-on:/i)
+            {
+                $line =~ s/([^:]*):\s*//;
+                chomp($line);
+
+                # Add dependency if dependency is not already in base release
+                if(!git_log_changeId($line))
+                {
+                    print "Adding forced dependency $patch:$line\n" if $debug;
+                    config_add_dep($level, $patch, $line);
+                }
+
+                # Add dependent patch if not already added to level
+                if (!exists($level_patches{$line}) )
+                {
+                    push @patches, $line;
+                }
+            }
+            # Print out CMVC dependencies
+            if ($line =~ m/cmvc-([a-zA-Z]+):/i)
+            {
+                print "$token Need ".$line."\n";
+            }
+        }
+    }
+}
+
+# sub config_verify_patches
+#
+# Verify patch-list to ensure all dependencies are met
+#
+# @param[in] - level base patch
+# @param[in] - Array of patches to verify.
+#
+sub config_verify_patches
+{
+    print "Verifying patches...\n";
+
+    config_init();
+
+    my $base = shift;
+    my $patches = shift;
+
+    foreach my $patch (@{$patches})
+    {
+        print "Deps for $patch\n" if $debug;
+        my $displayed_header = 0;
+
+        my $deps = git_commit_deps($base, $patch);
+
+        foreach my $dep (@{$deps})
+        {
+            unless (grep {$_ eq $dep} @{$patches})
+            {
+                unless ($displayed_header)
+                {
+                    print "-------------------------------------------------\n";
+                    print "Potential missing dependency for:\n";
+                    print wrap("    ","    ",git_get_subject($patch)."\n");
+                    print "\t$patch\n\n";
+                    $displayed_header = 1;
+                }
+
+                print wrap("    ", "    ", git_get_subject($dep)."\n");
+                print "\t$dep\n";
+
+                my $files = array_intersect(git_commit_files($patch),
+                                            git_commit_files($dep));
+
+                foreach my $file (@{$files})
+                {
+                    print "\t$file\n";
+                }
+
+                print "\n";
+            }
+        }
+
+        if ($displayed_header)
+        {
+            print "-------------------------------------------------\n";
+        }
+    }
+
+}
+
+# sub config_release
+#
+# Create a branch / tag based on the definition of a release.
+#
+# @param[in] - level info
+#
+sub config_release
+{
+    my $level_info = shift;
+
+    print "Creating release branch...\n";
+    git_create_branch($level_info->{name}, $level_info->{base});
+
+    my $patches = $level_info->{patches};
+
+    print "Resolving and ordering patches...\n";
+    print Dumper $level_info->{patches} if $debug;
+    $patches = gerrit_resolve_patches($level_info->{patches});
+    $patches = git_order_commits($patches, $level_info);
+
+    if ($debug)
+    {
+        print "Determined patch order as:\n";
+        foreach my $patch (@{$patches})
+        {
+            print "\t$patch\n";
+        }
+    }
+
+    print "Applying patches...\n";
+    foreach my $patch (@{$patches})
+    {
+        print "Applying $patch.\n" if ($debug);
+        unless (git_cherry_pick($patch))
+        {
+            system("git reset HEAD --hard");
+            die "Cherry-pick of $patch failed";
+        }
+    }
+
+    print "Generating release notes...\n";
+    create_release_notes($level_info->{name}, $level_info);
+
+    print "Creating tag...\n";
+    git_create_tag($level_info->{name}, $level_info);
+}
+
 # sub gerrit_ssh_command
 #
 # Creates a properly formed ssh command based on the server address.
@@ -1292,7 +1522,7 @@ sub config_project
 #
 sub gerrit_ssh_command
 {
-    return $globals{gerrit_ssh_command} 
+    return $globals{gerrit_ssh_command}
         if (defined $globals{gerrit_ssh_command});
 
     my $server = config_server();
@@ -1320,7 +1550,7 @@ sub gerrit_ssh_command
 #
 # @param[in] query - The query to perform.
 #
-# @return array - A list of items from the JSON query.  Each item is a 
+# @return array - A list of items from the JSON query.  Each item is a
 #                 hash (key-value pair) for the item attributes.
 #
 sub gerrit_query
@@ -1330,7 +1560,8 @@ sub gerrit_query
     my @items = ();
 
     open COMMAND, gerrit_ssh_command()." query $query --current-patch-set".
-                  " --format=JSON |";
+                  " --patch-sets  --format=JSON |";
+
     while (my $line = <COMMAND>)
     {
         chomp $line;
@@ -1353,7 +1584,7 @@ sub gerrit_query_commit
     my $commit = shift;
 
     my $project = config_project();
-    
+
     my $query_result = gerrit_query("$commit project:$project ".
                                     "branch:".$globals{"branch"});
     foreach my $result (@{$query_result})
@@ -1364,7 +1595,7 @@ sub gerrit_query_commit
         }
     }
 
-    die "Cannot find $commit in Gerrit";
+    die "Cannot find $commit in $project/$globals{\"branch\"}";
 }
 
 # sub gerrit_is_patch
@@ -1378,7 +1609,6 @@ sub gerrit_query_commit
 sub gerrit_is_patch
 {
     my $patch = shift;
-
     return 1 if ($patch =~ m/I[0-9a-f]+/);
     return 0;
 }
@@ -1391,7 +1621,6 @@ sub gerrit_is_patch
 # Any git commit number is left unchanged.
 #
 # @param[in] patches - An array of patches.
-#
 # @return array - An array of git commit numbers.
 #
 sub gerrit_resolve_patches
@@ -1410,6 +1639,45 @@ sub gerrit_resolve_patches
         else
         {
             push @result, $patch;
+        }
+    }
+
+    return \@result;
+}
+
+# sub gerrit_resolve_patchset
+#
+# Resolves an array of gerrit change-id and patch-set pairs to git commit
+# numbers and and ensures the git commits are fetched from the gerrit server.
+#
+# @param[in] patches - An array of change-id, patch-set pairs.
+# @return array - An array of git commit numbers.
+#
+sub gerrit_resolve_patchset
+{
+    my $patches = shift;
+
+    my @result = ();
+    foreach my $patchPair (@{$patches})
+    {
+        my ($changeId,$patchSet) = split(":",$patchPair);
+
+        if (gerrit_is_patch($changeId))
+        {
+            my $patch_info = gerrit_query_commit($changeId);
+            # Fail if patchset DNE
+            if ($patchSet > $patch_info->{currentPatchSet}->{number})
+            {
+                die "$patchSet does not have patch number $patchSet";
+            }
+            # JSON creates array of patchSets in number order
+            my $index = $patchSet - 1;
+            gerrit_fetch($patch_info->{patchSets}[$index]->{ref});
+            push @result, $patch_info->{patchSets}[$index]->{revision};
+        }
+        else
+        {
+            die "Requires gerrit change-id and patch-set";
         }
     }
 
@@ -1463,7 +1731,7 @@ sub rtc_workitem_num
 #
 sub cq_workitem_num
 {
-    my $commit = shift;    
+    my $commit = shift;
     my $message = git_commit_msg($commit);
 
     if ($message =~ m/CQ:\s*([A-Z][A-Z][0-9]+)/)
@@ -1534,7 +1802,7 @@ sub cq_hyperlink
 # Parse a line of JSON into an hash-object.
 #
 # @param[in] line - The JSON content.
-# 
+#
 # @return hash - The parsed object.
 #
 # @note There are perl modules for doing this but they are not installed on
@@ -1557,13 +1825,13 @@ sub json_parse
         my $value;
 
         ($key, $line) = json_get_string($line);
-        $key =~ s/^"(.*)"$/$1/;        
-        
+        $key =~ s/^"(.*)"$/$1/;
+
         $line =~ s/^://;
         if ($line =~ m/^"/)
         {
             ($value, $line) = json_get_string($line);
-            $value =~ s/^"(.*)"$/$1/;            
+            $value =~ s/^"(.*)"$/$1/;
         }
         elsif ($line =~ m/^{/)
         {
@@ -1608,7 +1876,7 @@ sub json_parse_array
         if ($line =~ m/^"/)
         {
             ($value, $line) = json_get_string($line);
-            $value =~ s/^"(.*)"$/$1/;            
+            $value =~ s/^"(.*)"$/$1/;
         }
         elsif ($line =~ m/^\{/)
         {
@@ -1644,7 +1912,7 @@ sub json_get_string
 
     $line =~ /("[^"]*")(.*)/;
     my $first = $1;
-    my $second = $2; 
+    my $second = $2;
 
     if ($first =~ m/\\"$/)
     {
@@ -1699,7 +1967,7 @@ sub json_get_object
         }
         else
         {
-            $line =~ s/([^,]*)//;
+            $line =~ s/([^,}]*)//;
             $frag = $1;
             $object = $object.$frag;
         }
