@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -1351,6 +1351,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         {
             // some section was too big and didn't get flatten - update the
             // section count in the PH section and re-flatten it.
+            // count is the PH, UH, PS, and the optionals.
             iv_Private.iv_sctns = 3 + l_sectionCount;
             l_cb = iv_Private.flatten( pPHBuffer, l_sizeRemaining );
             if( 0 == l_cb )

@@ -932,13 +932,48 @@ void ErrlManager::setupPnorInfo()
                     // save will increment correctly
                     iv_pnorOpenSlot = i;
                 }
-                // also check if it's ACKed or not. and ACK it.
-                // for FSP system, this shouldn't ever happen.
-                // for non-FSP systems, this clears out all 'last IPL' logs
+                // also check if it's ACKed or not
                 if (!isSlotACKed(i))
                 {
-                    TRACFCOMP( g_trac_errl, INFO_MRK"setupPnorInfo slot %d eid %.8X was not ACKed.",
+                    TRACFCOMP( g_trac_errl,
+                        INFO_MRK"setupPnorInfo slot %d eid %.8X was not ACKed.",
                         i, l_id);
+
+#ifdef CONFIG_BMC_IPMI
+                    // for IPMI systems, unflatten to send down to the BMC
+                    err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE, 0,0);
+                    char *l_errlAddr = iv_pnorAddr + (PNOR_ERROR_LENGTH * i);
+                    uint64_t rc = err->unflatten(l_errlAddr, PNOR_ERROR_LENGTH);
+                    if (rc != 0)
+                    {
+                        // unflatten didn't work, nothing we can do
+                        TRACFCOMP( g_trac_errl,
+                            ERR_MRK"setupPnorInfo unflatten failed on slot %d eid %.8X.",
+                            i, l_id);
+                    }
+                    else
+                    {
+                        if (iv_isIpmiEnabled)
+                        {
+                            // convert to SEL/eSEL and send to BMC over IPMI
+                            sendErrLogToBmc(err);
+                            delete err;
+                        }
+                        else
+                        {
+                            TRACFCOMP( g_trac_errl,
+                                INFO_MRK"setupPnorInfo pushing slot %d eid %.8X to iv_errList.",
+                                i, l_id);
+                            // Pair with IPMI flag to add to the errlList
+                            // so that it'll get sent down when IPMI is up
+                            ErrlFlagPair_t l_pair(err, IPMI_FLAG);
+                            iv_errlList.push_back(l_pair);
+                        }
+                    }
+#else
+                    // for FSP system, this shouldn't ever happen.
+#endif
                     setACKInFlattened(i);
                 } // not ACKed
             } // not empty
