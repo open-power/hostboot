@@ -396,6 +396,19 @@ use constant MAX_NUM_PHB_PER_PROC => 4;
 # MAX lane settings value is 32 bytes per phb and is hard coded here
 use constant MAX_LANE_SETTINGS_PER_PHB => 32;
 
+################################################################################
+# If value is hex, convert to regular number
+###############################################################################
+
+sub unhexify {
+    my($val) = @_;
+    if($val =~ m/^0[xX][01234567890A-Fa-f]+$/)
+    {
+        $val = hex($val);
+    }
+    return $val;
+}
+
 # Determine values of proc pcie attributes
 # Currently
 #   PROC_PCIE_LANE_EQUALIZATION PROC_PCIE_IOP_CONFIG PROC_PCIE_PHB_ACTIVE
@@ -1231,6 +1244,67 @@ for my $i ( 0 .. $#SMembuses )
 for my $i ( 0 .. $#SMembuses )
 {
     $SMembuses[$i][DIMM_PATH_FIELD] =~ s/[0-9]*$/$i/;
+}
+
+#------------------------------------------------------------------------------
+# Process VDDR GPIO enables
+#------------------------------------------------------------------------------
+
+my %vddrEnableHash = ();
+my $useGpioToEnableVddr = 0;
+
+if(!$haveFSPs)
+{
+    $useGpioToEnableVddr = 1;
+}
+
+if($useGpioToEnableVddr)
+{
+    my $vddrEnablesFile = open_mrw_file($mrwdir, "${sysname}-vddr.xml");
+    my $vddrEnables = parse_xml_file(
+        $vddrEnablesFile,
+        forcearray=>['vddr-enable']);
+
+    foreach my $vddrEnable (@{$vddrEnables->{'vddr-enable'}})
+    {
+        # Get dependent Centaur info
+        my $centaurNode = $vddrEnable->{'centaur-target'}->{node};
+        my $centaurPosition = $vddrEnable->{'centaur-target'}->{position};
+
+        # Get I2C master which drives the GPIO for this Centaur
+        my $i2cMasterNode     = $vddrEnable->{i2c}->{'master-target'}->{node};
+        my $i2cMasterPosition
+            = $vddrEnable->{i2c}->{'master-target'}->{position};
+        my $i2cMasterPort     = $vddrEnable->{i2c}->{port};
+        my $i2cMasterEngine   = $vddrEnable->{i2c}->{engine};
+
+        # Get GPIO expander info.  For now these are pca9535 specific
+        # Targeting requires real i2c address to be shifted left one bit
+        my $i2cAddress        = unhexify( $vddrEnable->{i2c}->{address} ) << 1;
+        my $i2cAddressHexStr  = sprintf("0x%X",$i2cAddress);
+        my $vddrPort          = $vddrEnable->{'io-expander'}->{port};
+        my $vddrPortPin       = $vddrEnable->{'io-expander'}->{pin};
+        my $vddrPin           = $vddrPort * 8 + $vddrPortPin;
+
+        # Build foreign keys to the Centaur targets
+        my $vddrKey = "n" . $centaurNode . "p" . $centaurPosition;
+        my $i2cMasterKey = "n" . $i2cMasterNode . "p" . $i2cMasterPosition;
+        my $i2cMasterEntityPath =
+            "physical:sys-0/node-$i2cMasterNode/membuf-$i2cMasterPosition";
+
+        # Populate the key => value pairs for a given Centaur
+        $vddrEnableHash{$vddrKey} = {
+            'i2cMasterKey'        => $i2cMasterKey,
+            'i2cMasterEntityPath' => $i2cMasterEntityPath,
+            'i2cMasterNode'       => $i2cMasterNode,
+            'i2cMasterPosition'   => $i2cMasterPosition,
+            'i2cMasterPort'       => $i2cMasterPort,
+            'i2cMasterEngine'     => $i2cMasterEngine,
+            'i2cAddress'          => $i2cAddress,
+            'i2cAddressHexStr'    => $i2cAddressHexStr,
+            'vddrPin'             => $vddrPin,
+        };
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -4054,6 +4128,51 @@ sub generate_centaur
 
         # add I2C_BUS_SPEED_ARRAY attribute
         addI2cBusSpeedArray($sys, $node, $ctaur, "memb");
+    }
+
+    if($useGpioToEnableVddr)
+    {
+        my $vddrKey = "n" . $node . "p" . $ctaur;
+        if(!exists $vddrEnableHash{$vddrKey})
+        {
+            die   "FATAL! Cannot find required GPIO info for memory buffer "
+                . "$vddrKey VDDR enable.\n"
+        }
+        elsif(!exists $vddrEnableHash{$vddrEnableHash{$vddrKey}{i2cMasterKey}})
+        {
+            die   "FATAL! Must reference real membuf as I2C master for VDDR "
+                . "enable.  Membuf $vddrEnableHash{$vddrKey}{i2cMasterKey} "
+                . "requested.\n";
+        }
+        else
+        {
+            print
+"\n    <attribute>
+        <id>GPIO_INFO</id>
+        <default>
+            <field>
+                <id>i2cMasterPath</id>
+                <value>$vddrEnableHash{$vddrKey}{i2cMasterEntityPath}</value>
+            </field>
+            <field>
+                <id>port</id>
+                <value>$vddrEnableHash{$vddrKey}{i2cMasterPort}</value>
+            </field>
+            <field>
+                <id>devAddr</id>
+                <value>$vddrEnableHash{$vddrKey}{i2cAddressHexStr}</value>
+            </field>
+            <field>
+                <id>engine</id>
+                <value>$vddrEnableHash{$vddrKey}{i2cMasterEngine}</value>
+            </field>
+            <field>
+                <id>vddrPin</id>
+                <value>$vddrEnableHash{$vddrKey}{vddrPin}</value>
+            </field>
+        </default>
+    </attribute>\n";
+        }
     }
 
     print "\n</targetInstance>\n";

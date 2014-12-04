@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -308,10 +308,7 @@ errlHndl_t gpioReadAttributes ( TARGETING::Target * i_target,
 
     if( !err )
     {
-        //TODO - RTC 109570 until the the Palmetto attribute file is setup
-        io_gpioInfo.i2cMasterPath =
-            i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        //io_gpioInfo.i2cMasterPath = gpioData.i2cMasterPath;
+        io_gpioInfo.i2cMasterPath = gpioData.i2cMasterPath;
         io_gpioInfo.engine        = gpioData.engine;
         io_gpioInfo.i2cPort       = gpioData.port;
         io_gpioInfo.i2cDeviceAddr = gpioData.devAddr;

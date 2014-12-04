@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -29,6 +29,8 @@
 
 #include "platform_vddr.H"
 
+#include <string.h>
+
 #include <hwpf/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -47,17 +49,6 @@ using namespace DeviceFW;
 
 trace_desc_t* g_trac_vddr = NULL;
 TRAC_INIT(&g_trac_vddr, "HB_VDDR",  KILOBYTE);
-
-/**
- * PCA95X GPIO function assignements
- */
-enum
-{
-    // Output GPIO to enable VDDR. (GPIO pin 0)
-    GPIO_P1V35_EN = 0,
-
-    // No other GPIO pins are implemented on the Palmetto board
-};
 
 // PCA95X internal register addresses
 enum
@@ -80,14 +71,101 @@ enum
 
 // Helper function to call provided function pointer on each functional
 // centaur Target.
-static errlHndl_t for_each_centaur(errlHndl_t (*func)(Target *))
+
+//******************************************************************************
+// compareTargetsGpioInfos
+//******************************************************************************
+
+bool compareTargetsGpioInfos(
+   TARGETING::TargetHandle_t i_pLhs,
+   TARGETING::TargetHandle_t i_pRhs)
 {
-    // Get all Centaur targets
+
+    TARGETING::ATTR_GPIO_INFO_type lhsGpioInfo =
+        i_pLhs->getAttr<TARGETING::ATTR_GPIO_INFO>();
+    TARGETING::ATTR_GPIO_INFO_type rhsGpioInfo =
+        i_pRhs->getAttr<TARGETING::ATTR_GPIO_INFO>();
+
+    // Code logically compares left hand side (lhs) target to right hand side
+    // (rhs) target with respect to GPIO info and returns true if the left hand
+    // side is logically before the right hand side.  To make the computation,
+    // compare first GPIO info field for each object.  If values are not
+    // logically equal, return whether the left hand side value was less than
+    // the right hand side value.  Otherwise break the tie by comparing the
+    // next GPIO field in similar fashion.  Continue breaking ties until the
+    // last field, in which case a tie returns false.
+    bool lhsLogicallyBeforeRhs =
+        lhsGpioInfo.i2cMasterPath < rhsGpioInfo.i2cMasterPath;
+    if(lhsGpioInfo.i2cMasterPath == rhsGpioInfo.i2cMasterPath)
+    {
+        lhsLogicallyBeforeRhs = lhsGpioInfo.port < rhsGpioInfo.port;
+        if(lhsGpioInfo.port == rhsGpioInfo.port)
+        {
+            lhsLogicallyBeforeRhs = lhsGpioInfo.engine < rhsGpioInfo.engine;
+            if(lhsGpioInfo.engine == rhsGpioInfo.engine)
+            {
+                lhsLogicallyBeforeRhs
+                    = lhsGpioInfo.devAddr < rhsGpioInfo.devAddr;
+                if(lhsGpioInfo.devAddr == rhsGpioInfo.devAddr)
+                {
+                    lhsLogicallyBeforeRhs =
+                        lhsGpioInfo.vddrPin < rhsGpioInfo.vddrPin;
+                }
+            }
+        }
+    }
+
+    return lhsLogicallyBeforeRhs;
+}
+
+//******************************************************************************
+// areTargetsGpioInfoEqual
+//******************************************************************************
+
+bool areTargetsGpioInfoEqual(
+   TARGETING::TargetHandle_t i_pLhs,
+   TARGETING::TargetHandle_t i_pRhs)
+{
+
+    TARGETING::ATTR_GPIO_INFO_type lhsGpioInfo =
+        i_pLhs->getAttr<TARGETING::ATTR_GPIO_INFO>();
+    TARGETING::ATTR_GPIO_INFO_type rhsGpioInfo =
+        i_pRhs->getAttr<TARGETING::ATTR_GPIO_INFO>();
+
+    return(   (   lhsGpioInfo.i2cMasterPath
+               == rhsGpioInfo.i2cMasterPath)
+           && (   lhsGpioInfo.port
+               == rhsGpioInfo.port)
+           && (   lhsGpioInfo.engine
+               == rhsGpioInfo.engine)
+           && (   lhsGpioInfo.devAddr
+               == rhsGpioInfo.devAddr)
+           && (   lhsGpioInfo.vddrPin
+               == rhsGpioInfo.vddrPin) );
+}
+
+static errlHndl_t for_each_vddr_domain_with_functional_memory(
+    errlHndl_t (*func)(Target *))
+{
+    // Get all functional Centaur targets
     TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
     errlHndl_t l_err = NULL;
 
+    // Sort chips in order of GPIO info
+    std::sort(l_membufTargetList.begin(), l_membufTargetList.end(),
+        compareTargetsGpioInfos);
+
+    // Prune out targets with non-unique GPIO info
+    std::vector<TARGETING::TargetHandle_t>::iterator
+        pInvalidEntries = std::unique(
+            l_membufTargetList.begin(),
+            l_membufTargetList.end(),
+            areTargetsGpioInfoEqual);
+    l_membufTargetList.erase(pInvalidEntries,l_membufTargetList.end());
+
+    // Invoke callback for one Centaur per unique VDDR domain
     for (TargetHandleList::iterator
             l_membuf_iter = l_membufTargetList.begin();
             l_membuf_iter != l_membufTargetList.end();
@@ -196,19 +274,66 @@ static errlHndl_t pca95xGpioWriteBit(TARGETING::Target * i_target,
     return err;
 }
 
-static errlHndl_t palmetto_centaur_enable_vddr(Target *centaur)
+static errlHndl_t enableVddrViaGpioPinStrategy(Target *centaur)
 {
     errlHndl_t l_err = NULL;
 
-    // Enable the DIMM power.
-    l_err = pca95xGpioWriteBit(centaur, GPIO_P1V35_EN, true);
+    do
+    {
+        // Enable the DIMM power.
+        TARGETING::ATTR_GPIO_INFO_type gpioInfo =
+            centaur->getAttr<TARGETING::ATTR_GPIO_INFO>();
+
+        l_err = pca95xGpioWriteBit(centaur, gpioInfo.vddrPin, true);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_vddr,ERR_MRK " "
+                "Failed to assert pca95x GPIO for Centaur HUID = 0x%08x "
+                "and pin %d.",
+                TARGETING::get_huid(centaur),gpioInfo.vddrPin);
+            break;
+        }
+
+        TRACFCOMP(g_trac_vddr,INFO_MRK " "
+            "Enabled VDDR for Centaur HUID = 0x%08x (asserted pca95x GPIO "
+            "pin %d).",
+            TARGETING::get_huid(centaur),
+            gpioInfo.vddrPin);
+
+    } while(0);
 
     return l_err;
 }
 
-static errlHndl_t palmetto_centaur_disable_vddr(Target *centaur)
+static errlHndl_t disableVddrViaGpioPinStrategy(Target *centaur)
 {
-    return pca95xGpioWriteBit(centaur, GPIO_P1V35_EN, false);
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        // Disable the DIMM power.
+        TARGETING::ATTR_GPIO_INFO_type gpioInfo =
+            centaur->getAttr<TARGETING::ATTR_GPIO_INFO>();
+
+        l_err = pca95xGpioWriteBit(centaur,gpioInfo.vddrPin, false);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_vddr,ERR_MRK " "
+                "Failed to deassert pca95x GPIO for Centaur HUID = 0x%08x "
+                "and pin %d.",
+                TARGETING::get_huid(centaur),gpioInfo.vddrPin);
+            break;
+        }
+
+        TRACFCOMP(g_trac_vddr,INFO_MRK " "
+            "Disabled VDDR for Centaur HUID = 0x%08x (deasserted pca95x GPIO "
+            "pin %d).",
+            TARGETING::get_huid(centaur),
+            gpioInfo.vddrPin);
+
+    } while(0);
+
+    return l_err;
 }
 
 // External interfaces
@@ -222,10 +347,12 @@ errlHndl_t platform_enable_vspd()
 
 errlHndl_t platform_enable_vddr()
 {
-    return for_each_centaur(palmetto_centaur_enable_vddr);
+    return for_each_vddr_domain_with_functional_memory(
+        enableVddrViaGpioPinStrategy);
 }
 
 errlHndl_t platform_disable_vddr()
 {
-    return for_each_centaur(palmetto_centaur_disable_vddr);
+    return for_each_vddr_domain_with_functional_memory(
+        disableVddrViaGpioPinStrategy);
 }
