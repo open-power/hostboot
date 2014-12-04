@@ -4590,22 +4590,28 @@ sub addEeproms
         print "    <attribute>\n";
         print "        <id>$id_name</id>\n";
         print "        <default>\n";
-        print "            <field><id>i2cMasterPath</id><value>physical:"
-                           "sys-$sys/node-$node/proc-$proc</value></field>\n";
-        print "             <field><id>port</id><value>"
-                           "$I2Cdevices[$i][I2C_PORT_FIELD]</value></field>\n";
-        print "             <field><id>devAddr</id><value>0x$I2Cdevices[$i]"
-                           "[I2C_DEVADDR_FIELD]</value></field>\n";
-        print "             <field><id>engine</id><value>$I2Cdevices[$i]"
-                           "[I2C_ENGINE_FIELD]</value></field>\n";
-        print "             <field><id>byteAddrOffset</id><value>$I2Cdevices"
-                           "[$i][I2C_BYTE_ADDR_OFFSET_FIELD]</value></field>\n";
-        print "             <field><id>maxMemorySizeKB</id><value>$I2Cdevices"
-                           "[$i][I2C_MAX_MEM_SIZE_FIELD]</value></field>\n";
-        print "             <field><id>writePageSize</id><value>$I2Cdevices"
-                           "[$i][I2C_WRITE_PAGE_SIZE_FIELD]</value></field>\n";
-        print "             <field><id>writeCycleTime</id><value>$I2Cdevices"
-                           "[$i][I2C_WRITE_CYCLE_TIME_FIELD]</value></field>\n";
+        print "            <field><id>i2cMasterPath</id><value>physical:",
+                          "sys-$sys/node-$node/proc-$proc</value></field>\n";
+        print "            <field><id>port</id><value>",
+                          "$I2Cdevices[$i][I2C_PORT_FIELD]</value></field>\n";
+        print "            <field><id>devAddr</id><value>0x",
+                          "$I2Cdevices[$i][I2C_DEVADDR_FIELD]",
+                          "</value></field>\n";
+        print "            <field><id>engine</id><value>",
+                          "$I2Cdevices[$i][I2C_ENGINE_FIELD]",
+                          "</value></field>\n";
+        print "            <field><id>byteAddrOffset</id><value>",
+                          "$I2Cdevices[$i][I2C_BYTE_ADDR_OFFSET_FIELD]",
+                          "</value></field>\n";
+        print "            <field><id>maxMemorySizeKB</id><value>",
+                          "$I2Cdevices[$i][I2C_MAX_MEM_SIZE_FIELD]",
+                          "</value></field>\n";
+        print "            <field><id>writePageSize</id><value>",
+                          "$I2Cdevices[$i][I2C_WRITE_PAGE_SIZE_FIELD]",
+                          "</value></field>\n";
+        print "            <field><id>writeCycleTime</id><value>",
+                          "$I2Cdevices[$i][I2C_WRITE_CYCLE_TIME_FIELD]",
+                          "</value></field>\n";
         print "        </default>\n";
         print "    </attribute>\n";
 
