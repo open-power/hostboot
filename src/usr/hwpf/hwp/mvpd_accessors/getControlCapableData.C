@@ -26,7 +26,7 @@
 /**
  *  @file getControlCapable.C
  *
- *  @brief MBvpd accessor for the ATTR_MSS_POWER_CONTROL_CAPABLE attributes
+ *  @brief MBvpd accessor for the ATTR_VPD_POWER_CONTROL_CAPABLE attributes
  */
 
 #include    <stdint.h>

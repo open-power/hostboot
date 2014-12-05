@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.42 2014-11-14 20:00:37 dcrowell Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.45 2014/12/10 14:03:53 rjknight Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -611,7 +611,7 @@ The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, foll
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RCD Timing. Supplied by VPD, used by mss_eff_config.C. Each dimm will have a value.
         consumer: mss_eff_config
-    </description>
+   </description>
     <valueType>uint8</valueType>
     <enum>1T = 0x01, 3T = 0x03</enum>
     <odmVisable/>
@@ -2520,7 +2520,6 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
 </attribute>
 
-<!--@fixme RTC: 112608
  <attribute>
      <id>ATTR_VPD_POWER_CONTROL_CAPABLE</id>
      <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2530,15 +2529,15 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
      <platInit/>
      <odmVisable/>
  </attribute>
--->
 
-<attribute>
-    <id>ATTR_VPD_DIMM_RCD_IBT</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+
+ <attribute>
+     <id>ATTR_VPD_DIMM_RCD_IBT</id>
+     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each dimm will have a value.
-        creator: mss_eff_cnfg
-        consumer: mss_dram_init
-        firmware notes: none</description>
+creator: mss_eff_cnfg
+consumer: mss_dram_init
+firmware notes: none</description>
     <valueType>uint32</valueType>
     <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
     <odmVisable/>

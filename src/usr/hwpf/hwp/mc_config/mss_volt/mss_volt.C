@@ -25,6 +25,11 @@
 // $Id: mss_volt.C,v 1.17 2014/11/19 16:29:07 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
+//------------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2007
+// *! All Rights Reserved -- Property of IBM
+// *! ***  ***
+//------------------------------------------------------------------------------
 // *! TITLE : mss_volt.C
 // *! DESCRIPTION : Tools for centaur procedures
 // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com)
@@ -105,18 +110,18 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             if (l_rc) break;
 
 
-        l_rc = FAPI_ATTR_GET(ATTR_MSS_VOLT_OVERRIDE, &i_targets_memb[i], l_volt_override);
-        if (l_rc) break;
+	    l_rc = FAPI_ATTR_GET(ATTR_MSS_VOLT_OVERRIDE, &i_targets_memb[i], l_volt_override);
+	    if (l_rc) break;
 
-        // Note if there is an overrride being applied on the domain
-        if ( (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE) && (l_volt_override_domain == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE) )
-        {
-            l_volt_override_domain = l_volt_override;
-        }
+	    // Note if there is an overrride being applied on the domain
+	    if ( (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE) && (l_volt_override_domain == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE) )
+	    {
+	    	l_volt_override_domain = l_volt_override;
+	    }
 
-        // Error if our overides are not the same across the domain
-        if (l_volt_override_domain != l_volt_override)
-        {
+	    // Error if our overides are not the same across the domain
+	    if (l_volt_override_domain != l_volt_override)
+	    {
                         // this just needs to callout the mismatching memb.
                         const uint8_t &OVERRIDE_TYPE = l_volt_override;
                         const uint8_t &OVERRIDE_DOMAIN_TYPE = l_volt_override_domain;
@@ -124,7 +129,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
                         FAPI_ERR("Mismatch volt override request.  Domain: 0x%x  Current Target Requests: 0x%x", l_volt_override_domain, l_volt_override);
                         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_OVERIDE_MIXING);
                         fapiLogError(l_rc);
-        }
+	    }
 
             // Loop through the 2 MBA's
             for (uint32_t j=0; j < l_mbaChiplets.size(); j++)
@@ -243,33 +248,33 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
         }
 
 
-    if (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE)
-    {
-        if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_135)
-        {
-        l_selected_dram_voltage = 1350;
-        FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.35V");
-        FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
-        }
-        else if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_120)
-        {
-            l_selected_dram_voltage = 1200;
-        FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.20V");
-        FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
-        }
-        else
-        {
+	if (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE)
+	{
+	    if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_135)
+	    {
+		l_selected_dram_voltage = 1350;
+		FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.35V");
+		FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
+	    }
+	    else if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_120)
+	    {
+	        l_selected_dram_voltage = 1200;
+		FAPI_INF( "mss_volt_overide being applied.  MSS_VOLT_OVERRIDE: 1.20V");
+		FAPI_INF( "NOTE: Still checking for violations of tolerated voltage.  If DIMMs cannot tolerate, the override will not be applied.");
+	    }
+	    else
+	    {
                 const uint8_t &OVERRIDE_TYPE = l_volt_override;
                 FAPI_ERR("Unknown volt override request.  Override Request: 0x%x", l_volt_override);
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_OVERIDE_UKNOWN);
                 fapiLogError(l_rc);
-        }
+	    }
 
-    }
+	}
         else if (l_dram_ddr3_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35))
         {
             l_selected_dram_voltage=1350;
-        l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
+	    l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
         }
         else if (l_dram_ddr4_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X))
         {
@@ -279,7 +284,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
         else if ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5)
         {
             l_selected_dram_voltage=1500;
-        l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
+	    l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
         }
         else
         {
@@ -427,7 +432,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             FAPI_INF( "mss_volt calculation complete.  MSS_VOLT: %d", l_selected_dram_voltage);
             if (l_rc) break;
 
-        l_rc = FAPI_ATTR_SET(ATTR_MSS_VOLT_VPP, &i_targets_memb[i], l_selected_dram_voltage_vpp);
+	    l_rc = FAPI_ATTR_SET(ATTR_MSS_VOLT_VPP, &i_targets_memb[i], l_selected_dram_voltage_vpp);
             FAPI_INF( "mss_volt calculation complete.  MSS_VOLT_VPP: %d", l_selected_dram_voltage_vpp);
             if (l_rc) break;
 

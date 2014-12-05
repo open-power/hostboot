@@ -725,7 +725,7 @@ fapi::ReturnCode fapiPlatGetOscswitchCtl
 
 /**
  * @brief This function supports a new memory attribute. Called by the
- * FAPI_ATTR_GET macro when getting the ATTR_MSS_POWER_CONTROL_CAPABLE
+ * FAPI_ATTR_GET macro when getting the ATTR_VPD_POWER_CONTROL_CAPABLE
  * attribute.
  * It should not be called directly.
  *
@@ -820,7 +820,7 @@ fapi::ReturnCode fapiPlatGetRCDCntlWord015 (const fapi::Target * i_pTarget,
 //------------------------------------------------------------------------------
 // MACRO to support the power control capable memory attribute
 //------------------------------------------------------------------------------
-#define ATTR_MSS_POWER_CONTROL_CAPABLE_GETMACRO(ID, PTARGET, VAL) \
+#define ATTR_VPD_POWER_CONTROL_CAPABLE_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetControlCapable(PTARGET,VAL)
 

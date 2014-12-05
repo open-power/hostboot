@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.C,v 1.17 2014/11/03 16:52:04 cswenson Exp $
+// $Id: getMBvpdTermData.C,v 1.18 2014/11/24 15:47:48 cswenson Exp $
 /**
  *  @file getMBvpdTermData.C
  *
@@ -1441,3 +1441,4 @@ fapi::ReturnCode translate_SLEW_RATE (const fapi::MBvpdTermData i_attr,
 }
 
 }   // extern "C"
+

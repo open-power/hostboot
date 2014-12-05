@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.H,v 1.5 2014/02/08 11:36:19 whs Exp $
+// $Id: getMBvpdTermData.H,v 1.6 2014/11/24 15:47:50 cswenson Exp $
 
 /**
  *  @file getMBvpdTermData.H
@@ -257,3 +257,4 @@ fapi::ReturnCode getMBvpdTermData(
 }
 
 #endif
+

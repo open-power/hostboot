@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.48 2014/10/13 22:51:53 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.49 2014/12/01 18:52:15 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,10 +45,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.49  | asaetow  |15-OCT-14| Added RDIMM SPD/VPD support for ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15 to take in SPD bits69:76 thru new VPD attribute ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15.
+//   1.49  | asaetow  |01-DEC-14| Added RDIMM SPD/VPD support for ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15 to take in SPD bits69:76 thru new VPD attribute ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15.
 //         |          |         | Added ATTR_VPD_DIMM_RCD_IBT and ATTR_VPD_DIMM_RCD_OUTPUT_TIMING merge, per meeting with Ken and Dan P.
-//         |          |         | NOTE: DO NOT pickup w/o getMBvpdTermData.C vX.XX or newer. TBD from Dan.C
-//         |          |         | NOTE: DO NOT pickup w/o dimm_spd_attributes.xml v1.40 or newer.
+//         |          |         | NOTE: DO NOT pickup w/o getMBvpdTermData.C v1.18 or newer from Dan.C and Corey.
+//         |          |         | NOTE: DO NOT pickup w/o getMBvpdTermData.H v1.6 or newer from Dan.C and Corey.
+//         |          |         | NOTE: DO NOT pickup w/o dimm_spd_attributes.xml v1.44 or newer.
 //         |          |         | NOTE: DO NOT pickup w/o memory_mss_eff_config.xml v1.3 or newer.
 //         |          |         | Added hardcode for RC0-DA4=0b0 and RC9-DBA1-DBA0-DA4-DA3=0b00X0, per meeting with Ken and Dan P.
 //         |          |         | Changed l_mss_volt to p_l_mss_eff_config_data->mss_volt.

@@ -26,7 +26,7 @@
 /**
  *  @file getControlCapable.H
  *
- *  @brief MBvpd accessor for the ATTR_MSS_POWER_CONTROL_CAPABLE attributes
+ *  @brief MBvpd accessor for the ATTR_VPD_POWER_CONTROL_CAPABLE attributes
  */
 
 #ifndef _HWP_MVPDCONTROLCAPABLEDATA_
@@ -35,7 +35,7 @@
 extern "C"
 {
 /**
- * @brief MBvpd accessor for the ATTR_MSS_POWER_CONTROL_CAPABLE attribute
+ * @brief MBvpd accessor for the ATTR_VPD_POWER_CONTROL_CAPABLE attribute
  *
  * Access Power control capable value in MBvpd record VSPD keyword MR
  *
