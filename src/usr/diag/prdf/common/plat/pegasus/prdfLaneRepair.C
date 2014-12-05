@@ -36,7 +36,6 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <UtilHash.H>
-#include <config.h>
 
 // Pegasus includes
 #include <prdfCalloutUtil.H>
@@ -63,10 +62,8 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
     int32_t l_rc = SUCCESS;
     TargetHandle_t rxBusTgt = NULL;
-#ifdef CONFIG_HAVE_MBVPD
     TargetHandle_t txBusTgt = NULL;
     bool thrExceeded = true;
-#endif // CONFIG_HAVE_MBVPD
     std::vector<uint8_t> rx_lanes;
     std::vector<uint8_t> rx_vpdLanes;
     std::vector<uint8_t> tx_vpdLanes;
@@ -139,7 +136,6 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap64to127);
 
-#ifdef CONFIG_HAVE_MBVPD
         if (!mfgMode()) // Don't read/write VPD in mfg mode
         {
             // Read Failed Lanes from VPD
@@ -245,8 +241,6 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             // Make predictive
             i_sc.service_data->SetServiceCall();
         }
-
-#endif  // CONFIG_HAVE_MBVPD
     } while (0);
 
     // Clear FIRs
