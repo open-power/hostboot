@@ -37,6 +37,7 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
 
+#include <sys/time.h>
 
 namespace HTMGT
 {
@@ -47,54 +48,72 @@ namespace HTMGT
 #endif
 
 
-    // Send all config data to the OCCs
-    // (see ToifNode::toif_manager_config() in src/tmgt/fsp/tmgt_toifnode.C)
-    void sendOccConfigData()
-    {
-        TMGT_INF("sendOccConfigData: STUB");
-        // TODO RTC 109066
-    }
-
-
-
     // Wait for all OCCs to reach active ready state
-    // (see ToifNode::wait_for_occ_ready() in tmgt_toifnode.C)
     errlHndl_t waitForOccReady()
     {
         errlHndl_t l_err = NULL;
 
-        l_err = sendOccPoll();
+        const uint8_t OCC_NONE = 0xFF;
+        uint8_t waitingForInstance = OCC_NONE;
+        const size_t MAX_POLL = 40;
+        const size_t MSEC_BETWEEN_POLLS = 250;
+        size_t numPolls = 0;
+        std::vector<Occ*> occList = occMgr::instance().getOccArray();
 
-        // TODO RTC 109066
-        if (NULL == l_err)
+        do
         {
-            TMGT_ERR("waitForOccReady: Stub forcing failure");
+            // Poll all OCCs
+            l_err = sendOccPoll();
+            ++numPolls;
+            if (NULL != l_err)
+            {
+                TMGT_ERR("waitForOccReady: Poll #%d failed w/rc=0x%04X",
+                         numPolls, l_err->reasonCode());
+                break;
+            }
+
+            // Check each OCC for ready state
+            waitingForInstance = OCC_NONE;
+            for (std::vector<Occ*>::iterator itr = occList.begin();
+                 (itr < occList.end());
+                 ++itr)
+            {
+                Occ * occ = (*itr);
+                if (false == occ->statusBitSet(OCC_STATUS_ACTIVE_READY))
+                {
+                    waitingForInstance = occ->getInstance();
+                    break;
+                }
+            }
+
+            if ((OCC_NONE != waitingForInstance) && (numPolls < MAX_POLL))
+            {
+                // Still waiting for at least one OCC, delay and try again
+                nanosleep(0,  NS_PER_MSEC * MSEC_BETWEEN_POLLS);
+            }
+        } while ((OCC_NONE != waitingForInstance) && (numPolls < MAX_POLL));
+
+        if ((OCC_NONE != waitingForInstance) && (NULL == l_err))
+        {
+            TMGT_ERR("waitForOccReady: OCC%d is not in ready state",
+                     waitingForInstance);
             /*@
              * @errortype
-             * @reasoncode      HTMGT_RC_OCC_UNAVAILABLE
-             * @moduleid        HTMGT_MOD_WAIT_FOR_OCC_READY
-             * @devdesc         OCCs did not reach active ready state
+             * @reasoncode HTMGT_RC_OCC_NOT_READY
+             * @moduleid HTMGT_MOD_WAIT_FOR_OCC_READY
+             * @userdata1[0-15] OCC instance
+             * @userdata1[16-31] poll attempts
+             * @devdesc OCC not ready for active state
              */
             bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_OCC_READY,
-                      HTMGT_RC_OCC_UNAVAILABLE,
-                      0, 0, 0, 0,
+                      HTMGT_RC_OCC_NOT_READY,
+                      waitingForInstance, numPolls, 0, 0,
                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
         }
 
         return l_err;
-    }
 
-
-
-    errlHndl_t setOccState(const occStateId i_state)
-    {
-        errlHndl_t l_err = NULL;
-
-        TMGT_INF("setOccState: STUB");
-        // TODO RTC 109066
-
-        return l_err;
-    }
+    } // end waitForOccReady()
 
 
 
@@ -105,14 +124,12 @@ namespace HTMGT
 
         TMGT_INF("wait_for_occs_active called");
 
-        // Wait for attns - not needed?
-
         // Wait for all OCCs to be ready for active state
         l_err = waitForOccReady();
         if (NULL == l_err)
         {
             // Send Set State (ACTIVE) to master
-            l_err = setOccState(OCC_STATE_ACTIVE);
+            l_err = occMgr::instance().setOccState(OCC_STATE_ACTIVE);
             if (NULL == l_err)
             {
                 TMGT_INF("waitForOccsActive: OCCs are all active");
@@ -135,7 +152,7 @@ namespace HTMGT
         errlHndl_t l_err = NULL;
 
         TMGT_INF("setOccActiveSensors: STUB");
-        // TODO RTC 109066
+        // TODO RTC 119073
 
         return l_err;
     }

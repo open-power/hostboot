@@ -30,8 +30,10 @@ OBJS += htmgt_occcmd.o
 OBJS += htmgt_poll.o
 OBJS += htmgt_utility.o
 OBJS += htmgt_cfgdata.o
+OBJS += occError.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config

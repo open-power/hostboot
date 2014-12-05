@@ -40,7 +40,7 @@
 #include <initservice/initsvcreasoncodes.H>
 
 // This constant has a corresponding entry in src/build/tools/listdeps.pl.
-#define MAX_DEPENDENT_MODULES   8
+#define MAX_DEPENDENT_MODULES   9
 
 
 namespace   INITSERVICE

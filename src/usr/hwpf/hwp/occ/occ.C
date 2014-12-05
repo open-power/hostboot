@@ -53,6 +53,8 @@
 #include    <vfs/vfs.H>
 #include    <util/utillidmgr.H>
 
+#include    <htmgt/htmgt.H>
+
 // Procedures
 #include <p8_pba_init.H>
 #include <p8_occ_control.H>
@@ -106,7 +108,7 @@ namespace HBOCC
                                         HOMER_OFFSET_TO_OCC_IMG;
             uint64_t i_homerVirtAddr  = reinterpret_cast<uint64_t>
                                         (i_homerVirtAddrBase) + tmpOffset +
-                                        HOMER_OFFSET_TO_OCC_IMG;;
+                                        HOMER_OFFSET_TO_OCC_IMG;
 
             uint64_t i_commonPhysAddr = i_homerPhysAddrBase +
                                         VMM_HOMER_REGION_SIZE;
@@ -412,13 +414,17 @@ namespace HBOCC
         TRACUCOMP( g_fapiTd,ENTER_MRK"activateOCC" );
         errlHndl_t l_errl    = NULL;
         TARGETING::Target* l_failedOccTarget = NULL;
-        //uint8_t l_errStatus = 0;
+#ifdef CONFIG_HTMGT
+        bool occStartSuccess = true;
+#endif
 
         l_errl = loadnStartAllOccs (l_failedOccTarget);
         if (l_errl)
         {
             errlCommit (l_errl, HWPF_COMP_ID);
-            //l_errStatus = 1;
+#ifdef CONFIG_HTMGT
+            occStartSuccess = false;
+#endif
         }
 
         //TODO RTC:116027
@@ -426,14 +432,10 @@ namespace HBOCC
 
         //TODO RTC:115636
         //HB enables the scon-via-i2c logic on the OCCs
+
 #ifdef CONFIG_HTMGT
-        //TODO RTC:115585
-        //HTMGT::htmgtOccLoadStartStatus
-        //           (l_errStatus,l_failedOccTarget);
-        if (l_errl)
-        {
-            errlCommit (l_errl, HWPF_COMP_ID);
-        }
+        // Report OCC status to HTMGT
+        HTMGT::processOccStartStatus(occStartSuccess,l_failedOccTarget);
 #endif
         TRACUCOMP( g_fapiTd,EXIT_MRK"activateOCC" );
         return l_errl;

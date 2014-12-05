@@ -27,6 +27,7 @@
 #include <targeting/common/utilFilter.H>
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
+#include "htmgt_poll.H"
 
 
 using namespace TARGETING;
@@ -38,6 +39,191 @@ using namespace TARGETING;
 
 namespace HTMGT
 {
+    // Send config format data to all OCCs
+    void sendOccConfigData(const occCfgDataFormat i_requestedFormat)
+    {
+        if (G_debug_trace & DEBUG_TRACE_VERBOSE)
+        {
+            TMGT_INF("sendOccConfigData called");
+        }
+
+        uint8_t cmdData[OCC_MAX_DATA_LENGTH] = {0};
+        uint64_t cmdDataLen = OCC_MAX_DATA_LENGTH;
+
+        const occCfgDataTable_t* start = &occCfgDataTable[0];
+        const occCfgDataTable_t* end =
+            &occCfgDataTable[OCC_CONFIG_TABLE_SIZE];
+        bool validFormat = true;
+        if (OCC_CFGDATA_CLEAR_ALL != i_requestedFormat)
+        {
+            const occCfgDataTable_t * target =
+                std::find(start, end, i_requestedFormat);
+            if (target != end)
+            {
+                // only need to send a single packet
+                start = target;
+                end = start+1;
+            }
+            else
+            {
+                TMGT_ERR("sendOccConfigData: Invalid cfg format supplied %d",
+                         i_requestedFormat);
+                validFormat = false;
+            }
+        }
+
+        if (validFormat)
+        {
+            // Loop through all functional OCCs
+            std::vector<Occ*> occList = occMgr::instance().getOccArray();
+            for (std::vector<Occ*>::iterator itr = occList.begin();
+                 itr < occList.end();
+                 itr++)
+            {
+                Occ * occ = (*itr);
+                const uint8_t occInstance = occ->getInstance();
+                const occRole role = occ->getRole();
+
+                // Loop through all config data types
+                for (const occCfgDataTable_t *itr = start; itr < end; ++itr)
+                {
+                    const occCfgDataFormat format = itr->format;
+                    bool sendData = true;
+
+                    // Make sure format is supported by this OCC
+                    if (TARGET_MASTER == itr->targets)
+                    {
+                        if (OCC_ROLE_MASTER != role)
+                        {
+                            sendData = false;
+                        }
+                    }
+
+                    // Make sure data is supported in the current state
+                    const occStateId state = occ->getState();
+                    if (CFGSTATE_STANDBY == itr->supportedStates)
+                    {
+                        if (OCC_STATE_STANDBY != state)
+                        {
+                            sendData = false;
+                        }
+                    }
+                    else if (CFGSTATE_SBYOBS == itr->supportedStates)
+                    {
+                        if ((OCC_STATE_STANDBY != state) &&
+                            (OCC_STATE_OBSERVATION != state))
+                        {
+                            sendData = false;
+                        }
+                    }
+
+                    if (sendData)
+                    {
+                        cmdDataLen = OCC_MAX_DATA_LENGTH;
+                        switch(format)
+                        {
+                            case OCC_CFGDATA_PSTATE_SSTRUCT:
+                                getPstateTableMessageData(occ->getTarget(),
+                                                          cmdData,
+                                                          cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_FREQ_POINT:
+                                getFrequencyPointMessageData(cmdData,
+                                                             cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_OCC_ROLE:
+                                getOCCRoleMessageData(OCC_ROLE_MASTER ==
+                                                      occ->getRole(),
+                                                      OCC_ROLE_FIR_MASTER ==
+                                                      occ->getRole(),
+                                                      cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_APSS_CONFIG:
+                                getApssMessageData(cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_MEM_CONFIG:
+                                getMemConfigMessageData(occ->getTarget(), true,
+                                                        cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_FIR_SCOMS:
+                                TMGT_ERR("NO FIR SCOMS AVAILABLE YET");
+                                cmdDataLen = 0;
+                                break;
+
+                            case OCC_CFGDATA_PCAP_CONFIG:
+                                getPowerCapMessageData(cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_SYS_CONFIG:
+                                getSystemConfigMessageData(cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_MEM_THROTTLE:
+                                getMemThrottleMessageData(occ->getTarget(),
+                                                          cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_TCT_CONFIG:
+                                getThermalControlMessageData(cmdData,
+                                                             cmdDataLen);
+                                break;
+
+                            default:
+                                TMGT_ERR("send_occ_config_data: Unsupported"
+                                         " format type 0x%02X",
+                                         format);
+                                cmdDataLen = 0;
+                        }
+
+                        if (cmdDataLen > 0)
+                        {
+                            TMGT_INF("send_occ_config_data: Sending config"
+                                     " 0x%02X to OCC%d",
+                                     format, occInstance);
+                            OccCmd cmd(occ, OCC_CMD_SETUP_CFG_DATA,
+                                       cmdDataLen, cmdData);
+                            errlHndl_t l_err = cmd.sendOccCmd();
+                            if (l_err != NULL)
+                            {
+                                TMGT_ERR("send_occ_config_data: OCC%d cfg "
+                                         "format 0x%02X failed with rc=0x%04X",
+                                         occInstance, format,
+                                         l_err->reasonCode());
+                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            }
+                            else
+                            {
+                                if (OCC_RC_SUCCESS != cmd.getRspStatus())
+                                {
+                                    TMGT_ERR("send_occ_config_data: OCC%d cfg "
+                                             "format 0x%02X had bad rsp status"
+                                             " 0x%02X for sysConfig",
+                                             occInstance, format,
+                                             cmd.getRspStatus());
+                                }
+                            }
+
+                            // Send poll between config packets to flush errors
+                            l_err = sendOccPoll();
+                            if (l_err)
+                            {
+                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            }
+                        }
+                    } // if (sendData)
+
+                } // for each config format
+
+            } // for each OCC
+        }
+
+    } // end send_occ_config_data()
+
 
 /** OCC configuration data message versions */
 enum occCfgDataVersion

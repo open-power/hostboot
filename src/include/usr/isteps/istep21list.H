@@ -91,6 +91,10 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libpstates.so),
 #endif
         DEP_LIB(libocc.so),
+#if defined(CONFIG_HTMGT)
+        DEP_LIB(libhtmgt.so),
+        DEP_LIB(libmc_config.so),
+#endif
         NULL
     }
 };

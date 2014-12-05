@@ -36,44 +36,12 @@
 #include <targeting/common/targetservice.H>
 
 #include <ecmdDataBufferBase.H>
+#include <hwpf/hwp/occ/occAccess.H>
 
 #include <sys/time.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <stdio.h>
-
-// TODO RTC 115922
-#ifdef __HOSTBOOT_RUNTIME
-#include <runtime/interface.h>
-#endif
-
-
-
-// TODO: RTC 115922
-#if 0
-#include <hwpf/hwp/occ/occAccess.H>
-#else
-namespace HBOCC
-{
-
-    /**
-     * @brief Write OCC Circular Buffer
-     *
-     * @param[in]     i_pTarget   PROC or OCC target pointer
-     * @param[in]     i_dataBuf   Reference to data buffer
-     * @return errlHndl_t   Error log if operation failed
-     */
-    errlHndl_t writeCircularBuffer(const TARGETING::Target*i_pTarget,
-                                        ecmdDataBufferBase & i_dataBuf)
-    {
-        errlHndl_t l_err = NULL;
-        TRACFCOMP( HTMGT::g_trac_htmgt, "writeCircularBuffer(STUB): "
-                   "setting status to 0xFF");
-        return l_err;
-    } // end writeCircularBuffer()
-
-} //end OCC namespace
-#endif
 
 
 
@@ -81,6 +49,8 @@ namespace HTMGT
 {
     uint8_t g_cmd = 0;
     uint8_t g_seq = 0;
+
+    const uint16_t MAX_FFDC = 512;
 
     struct occCircBufferCmd_t
     {
@@ -92,7 +62,6 @@ namespace HTMGT
 
     // Note: Read length must be 8 byte aligned (for SRAM reads)
     const uint16_t RD_MAX = (OCC_MAX_DATA_LENGTH - 8);
-    const uint16_t TO_20SEC = 20 * 1000;
     const occCommandTable_t OccCmd::cv_occCommandTable[] =
     {
         // Command                   Support  RspCheck
@@ -131,7 +100,7 @@ namespace HTMGT
     {
         uint8_t l_index = 0;
 
-        // TODO RTC 109066 - convert to use lower_bound
+        // TODO RTC 109224 - convert to use lower_bound
         //= find(&cv_occCommandTable[0],
         //       &cv_occCommandTable[OCC_CMDTABLE_SIZE-1],
         //       i_cmd);
@@ -183,7 +152,7 @@ namespace HTMGT
         };
 
         uint8_t l_idx = 0;
-        // TODO RTC 109066
+        // TODO RTC 109224
         for (l_idx=0; l_idx < STATUS_STRING_COUNT; l_idx++)
         {
             if (i_status == L_status_string[l_idx].str_num)
@@ -241,7 +210,7 @@ namespace HTMGT
     bool OccCmd::traceCommand()
     {
         bool o_cmdWasTraced = true;
-        const uint8_t l_instance = iv_Occ->instance;
+        const uint8_t l_instance = iv_Occ->iv_instance;
 
         const uint8_t l_cmd_index = getCmdIndex(iv_OccCmd.cmdType);
         if (OCC_CMD_END_OF_TABLE != cv_occCommandTable[l_cmd_index].cmdType)
@@ -313,7 +282,7 @@ namespace HTMGT
     void OccCmd::traceResponse()
     {
         char l_rsp_status_string[64] = "";
-        const uint8_t l_instance = iv_Occ->instance;
+        const uint8_t l_instance = iv_Occ->iv_instance;
 
         if (iv_OccRsp.returnStatus != OCC_RC_SUCCESS)
         {
@@ -337,7 +306,7 @@ namespace HTMGT
     void OccCmd::processOccResponse(errlHndl_t & io_errlHndl,
                                     const bool i_traceRsp)
     {
-        const uint8_t l_instance = iv_Occ->instance;
+        const uint8_t l_instance = iv_Occ->iv_instance;
         const bool alreadyRetriedOnce = iv_RetryCmd;
         iv_RetryCmd = false;
 
@@ -356,12 +325,8 @@ namespace HTMGT
                 if ((alreadyRetriedOnce == false) &&
                     (OCC_RC_PRESENT_STATE_PROHIBITS != iv_OccRsp.returnStatus))
                 {
-                    // A retry has not been sent yet, commit/delete the error
-                    // and retry.  Add OCC command data to user details
-                    // TODO RTC 115922
-                    //io_errlHndl->addUsrDtls(iv_OccCmd.cmdData,
-                    // iv_OccCmd.dataLength, HTMGT_COMP_ID,
-                    // 0/*version*/, TMGT_OCC_CMD_DATA);
+                    // A retry has not been sent yet, commit the error
+                    // and retry.
                     ERRORLOG::errlCommit(io_errlHndl, HTMGT_COMP_ID);
                     iv_RetryCmd = true;
                     // Clear/init the response data structure
@@ -389,9 +354,9 @@ namespace HTMGT
                         TMGT_ERR("processOccResponse: OCC%d response had"
                                  " checksum or internal error,"
                                  " need to RESET OCC", l_instance);
-                        iv_Occ->needsReset = true;
+                        iv_Occ->iv_needsReset = true;
                         // Mark OCC as failed
-                        iv_Occ->failed = true;
+                        iv_Occ->iv_failed = true;
                     }
                 }
             }
@@ -407,9 +372,9 @@ namespace HTMGT
                 // sent... reset OCC
                 TMGT_ERR("Sending OCC%d command failed twice, need to RESET"
                          " OCC", l_instance);
-                iv_Occ->needsReset = true;
+                iv_Occ->iv_needsReset = true;
                 // Unable to communicate with OCC, mark as failed
-                iv_Occ->failed = true;
+                iv_Occ->iv_failed = true;
             }
             else
             {
@@ -418,11 +383,6 @@ namespace HTMGT
                 {
                     // A retry has not been sent yet, commit the error
                     // and retry.
-                    // Add OCC command data to user details
-                    // TODO RTC 115922
-                    //io_errlHndl->addUsrDtls(iv_OccCmd.cmdData,
-                    //iv_OccCmd.dataLength, HTMGT_COMP_ID,
-                    //0/*version*/, TMGT_OCC_CMD_DATA);
                     ERRORLOG::errlCommit(io_errlHndl, HTMGT_COMP_ID);
                     iv_RetryCmd = true;
 
@@ -451,9 +411,9 @@ namespace HTMGT
                         TMGT_ERR("processOccResponse: OCC%d response had"
                                  " checksum or internal error,"
                                  " need to RESET OCC", l_instance);
-                        iv_Occ->needsReset = true;
+                        iv_Occ->iv_needsReset = true;
                         // Unable to communicate with OCC, mark as failed
-                        iv_Occ->failed = true;
+                        iv_Occ->iv_failed = true;
                     }
                 }
             }
@@ -470,13 +430,15 @@ namespace HTMGT
 
         if (iv_Occ != NULL)
         {
-            const occStateId l_occState = iv_Occ->state;
+            const occStateId l_occState = iv_Occ->iv_state;
             l_cmd_index = getCmdIndex(iv_OccCmd.cmdType);
             if (OCC_CMD_END_OF_TABLE!=cv_occCommandTable[l_cmd_index].cmdType)
             {
                 const bool cmdTraced = traceCommand();
 
-                const bool l_commEstablished = iv_Occ->commEstablished;
+                // Only allow commands if comm has been established,
+                // or this is a poll command
+                const bool l_commEstablished = iv_Occ->iv_commEstablished;
                 if ( (true == l_commEstablished) ||
                      ((false == l_commEstablished) &&
                       (OCC_CMD_POLL == iv_OccCmd.cmdType)) )
@@ -553,10 +515,11 @@ namespace HTMGT
         if (l_errlHndl)
         {
             // Add OCC command data to user details
-            // TODO RTC 115922
-            //l_errlHndl->addUsrDtls(iv_OccCmd.cmdData,
-            //                       iv_OccCmd.dataLength, HTMGT_COMP_ID,
-            //                       0/*version*/, TMGT_OCC_CMD_DATA);
+            l_errlHndl->addFFDC(HTMGT_COMP_ID,
+                                iv_OccCmd.cmdData,
+                                std::min(iv_OccCmd.dataLength, MAX_FFDC),
+                                1,  // version
+                                SUBSEC_OCC_CMD_DATA);
         }
 
         return l_errlHndl;
@@ -572,7 +535,7 @@ namespace HTMGT
         static uint8_t L_state = 0;
         static uint8_t L_prior_status = 0x00;
         static uint8_t L_prior_sequence = 0x00;
-        uint8_t * const rspBuffer = iv_Occ->homer + HTMGT_OCC_RSP_ADDR;
+        uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
 
         if (0 == L_state)
         {
@@ -668,7 +631,7 @@ namespace HTMGT
         {
             TMGT_INF("fakeOccResponse: sequence updated to 0x%02X"
                      " (expecting=0x%02X)",
-                     rspBuffer[0], iv_Occ->seqNumber);
+                     rspBuffer[0], iv_Occ->iv_seqNumber);
             L_prior_sequence = rspBuffer[0];
         }
 
@@ -680,7 +643,7 @@ namespace HTMGT
     // Returns true if timeout waiting for response
     bool OccCmd::waitForOccRsp(uint32_t i_timeout)
     {
-        const uint8_t * const rspBuffer = iv_Occ->homer + HTMGT_OCC_RSP_ADDR;
+        const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
         uint16_t rspLength = 0;
         if (G_debug_trace & DEBUG_TRACE_VERBOSE)
         {
@@ -688,9 +651,10 @@ namespace HTMGT
         }
 
         bool l_time_expired = true;
-        const uint32_t OCC_RSP_SAMPLE_TIME = 100; // in milliseconds
-        uint32_t l_msec_remaining = std::max(i_timeout, OCC_RSP_SAMPLE_TIME);
-        while (l_msec_remaining > 0)
+        const int64_t OCC_RSP_SAMPLE_TIME = 100; // in milliseconds
+        int64_t l_msec_remaining =
+            std::max(int64_t(i_timeout * 1000), OCC_RSP_SAMPLE_TIME);
+        while (l_msec_remaining >= 0)
         {
 #ifdef SIMICS_TESTING
             fakeOccResponse();
@@ -704,7 +668,7 @@ namespace HTMGT
             // Note: Need to check the sequence number to be sure we are
             //       processing the expected response
             if ((OCC_COMMAND_IN_PROGRESS != rspBuffer[2]) &&
-                (iv_Occ->seqNumber == rspBuffer[0]))
+                (iv_Occ->iv_seqNumber == rspBuffer[0]))
             {
                 // Need an 'isync' here to ensure that previous instructions
                 // have completed before the code continues on. This is a type
@@ -719,39 +683,68 @@ namespace HTMGT
                 rspLength = OCC_RSP_HDR_LENGTH + rspDataLen;
                 if (G_debug_trace & DEBUG_TRACE_OCCCMD)
                 {
-                    TMGT_INF("waitForOccRsp: OCC%d rsp (huid=0x%08X,"
-                             " rsp length=%d)",
-                             iv_Occ->instance, iv_Occ->huid, rspLength);
-                    TMGT_BIN("waitForOccRsp: OCC rsp data (up to 256 bytes)",
-                             rspBuffer, std::min(rspLength, (uint16_t)256));
+                    TMGT_INF("waitForOccRsp: OCC%d rsp (rsp length=%d)",
+                             iv_Occ->iv_instance, rspLength);
+                    TMGT_BIN("waitForOccRsp: OCC rsp data (up to 300 bytes)",
+                             rspBuffer, std::min(rspLength, (uint16_t)300));
                 }
                 l_time_expired = false;
                 break;
             }
 
-            // delay before next check
-            const uint32_t l_sleep_msec = std::min(l_msec_remaining,
-                                                   OCC_RSP_SAMPLE_TIME);
-
-            // TODO RTC 115922
-#ifndef __HOSTBOOT_RUNTIME
-            nanosleep( 0, NS_PER_MSEC * l_sleep_msec );
-#else
-            if(g_hostInterfaces && g_hostInterfaces->nanosleep)
+            if (l_msec_remaining > 0)
             {
-                g_hostInterfaces->nanosleep(0, NS_PER_MSEC * l_sleep_msec);
+                // delay before next check
+                const int64_t l_sleep_msec = std::min(l_msec_remaining,
+                                                      OCC_RSP_SAMPLE_TIME);
+                nanosleep( 0, NS_PER_MSEC * l_sleep_msec );
+                l_msec_remaining -= l_sleep_msec;
             }
-#endif
-            l_msec_remaining -= l_sleep_msec;
+            else
+            {
+                // time expired
+                l_msec_remaining = -1;
 
-        } // while
+                // Read SRAM response buffer to check for exception
+                // (On exception, data may not be copied to HOMER)
+                const uint16_t l_length = 4*KILOBYTE;
+                uint8_t l_sram_data[l_length];
+                ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
+// HBOCC is only defined for HTMGT
+#ifdef CONFIG_HTMGT
+                errlHndl_t l_err = HBOCC::readSRAM(iv_Occ->getTarget(),
+                                                   OCC_RSP_SRAM_ADDR,
+                                                   l_buffer);
+                if (NULL == l_err)
+#endif
+                {
+                    const uint32_t l_flatSize = l_buffer.flattenSize();
+                    l_buffer.flatten(l_sram_data, l_flatSize);
+                    // Skip 8 byte ecmd header
+                    const uint8_t *sramRspPtr = &l_sram_data[8];
+                    // Check response status for exception
+                    if (0xE0 == (sramRspPtr[2] & 0xE0))
+                    {
+                        TMGT_ERR("waitForOccRsp: OCC%d timeout waiting for"
+                                 " response, and OCC 0x%02X exception found",
+                                 iv_Occ->iv_instance, sramRspPtr[2]);
+                        // Exception found, copy data to rsp buffer
+                        uint8_t * const rspBuffer = iv_Occ->iv_homer +
+                            OCC_RSP_ADDR;
+                        memcpy(rspBuffer, sramRspPtr, l_length);
+                        TMGT_BIN("SRAM Rsp Buffer (32 bytes)", sramRspPtr, 32);
+                    }
+                }
+            }
+
+        } // while(time remaining)
 
         if (l_time_expired)
         {
             // timeout waiting for response
             TMGT_ERR("waitForOccRsp: OCC%d timeout waiting for response"
                      " (%d sec)",
-                     iv_Occ->instance, i_timeout/1000);
+                     iv_Occ->iv_instance, i_timeout/1000);
         }
 
         return l_time_expired;
@@ -770,7 +763,7 @@ namespace HTMGT
 
         TMGT_ERR("handleOccException: OCC%d returned abnormal rsp status of"
                  " 0x%02X, rsp len=%d",
-                 iv_Occ->instance, iv_OccRsp.returnStatus,
+                 iv_Occ->iv_instance, iv_OccRsp.returnStatus,
                  l_exceptionDataLength);
         if (l_exceptionDataLength > 4*KILOBYTE)
         {
@@ -785,23 +778,19 @@ namespace HTMGT
          * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
          * @userdata1[0-15] rsp status
          * @userdata1[16-31] exception data length
-         * @userdata2[0-15] huid
-         * @userdata2[16-31]
          * @devdesc OCC reported exception
          */
         errlHndl_t l_excErr = NULL;
         bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
                   (htmgtReasonCode)(OCCC_COMP_ID | iv_OccRsp.returnStatus),
-                  iv_OccRsp.returnStatus, iv_OccRsp.dataLength,
-                  iv_Occ->huid, 0,
-                  ERRORLOG::ERRL_SEV_INFORMATIONAL //,
-                  //false, // dont skip traces
-                  //            OCCC_COMP_ID);
-                  // TODO RTC 115922
-                  //l_excErr->addUsrDtls(l_excp_buffer, l_excp_length,
-                  //                     OCCC_COMP_ID, 1 /*version*/,
-                  //                     iv_OccRsp.returnStatus/*type*/
-            );
+                  iv_OccRsp.returnStatus, iv_OccRsp.dataLength, 0, 0,
+                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        const uint8_t * const exceptionData = iv_Occ->iv_homer + OCC_RSP_ADDR;
+        l_excErr->addFFDC(OCCC_COMP_ID,
+                          exceptionData,
+                          std::min(l_exceptionDataLength, (uint32_t)MAX_FFDC),
+                          1,  // version
+                          iv_OccRsp.returnStatus); // subsection == exception rc
         ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
 
     } // end OccCmd::handleOccException()
@@ -836,84 +825,95 @@ namespace HTMGT
         {
             TMGT_INF("writeOccCmd: Calling writeCircularBuffer()");
         }
-        l_err = HBOCC::writeCircularBuffer(iv_Occ->target, l_circ_buffer);
+#ifdef CONFIG_HTMGT
+        l_err = HBOCC::writeCircularBuffer(iv_Occ->iv_target, l_circ_buffer);
         if (NULL != l_err)
         {
-            TMGT_ERR("writeOccCmd: Error writing to OCC Circular Buffer");
+            TMGT_ERR("writeOccCmd: Error writing to OCC Circular Buffer,"
+                     " rc=0x%04X", l_err->reasonCode());
         }
-        else
+#endif
+
+        // Continue to try to read response buffer, in case an
+        // exception happened...
+
+        // Wait for response from the OCC
+        const uint8_t l_instance = iv_Occ->iv_instance;
+        const uint8_t l_index = getCmdIndex(iv_OccCmd.cmdType);
+        const uint16_t l_read_timeout = cv_occCommandTable[l_index].timeout;
+
+        // Wait for OCC to process command and send response
+        waitForOccRsp(l_read_timeout);
+
+        // Parse the OCC response (called even on timeout to collect
+        // rsp buffer)
+        l_err = parseOccResponse();
+
+        bool l_timeout = false;
+        if (OCC_COMMAND_IN_PROGRESS != iv_OccRsp.returnStatus)
         {
-            // Wait for response from the OCC
-            const uint8_t l_instance = iv_Occ->instance;
-            const uint8_t l_index = getCmdIndex(iv_OccCmd.cmdType);
-            // l_index should be valid since validation was done in sendOccCmd()
-            const uint16_t l_read_timeout = cv_occCommandTable[l_index].timeout;
-
-            // Wait for OCC to process command and send response
-            waitForOccRsp(l_read_timeout);
-
-            // Parse the OCC response (called even on timeout to collect
-            // rsp buffer)
-            l_err = parseOccResponse();
-
-            bool l_timeout = false;
-            if (OCC_COMMAND_IN_PROGRESS != iv_OccRsp.returnStatus)
+            // Status of 0xE0-EF are reserved for OCC exceptions,
+            // must collect data for these
+            if (0xE0 == (iv_OccRsp.returnStatus & 0xF0))
             {
-                // Status of 0xE0-EF are reserved for OCC exceptions,
-                // must collect data for these
-                if (0xE0 == (iv_OccRsp.returnStatus & 0xF0))
-                {
-                    handleOccException();
-                }
-                else
-                {
-                    if (iv_OccRsp.sequenceNumber !=
-                        iv_OccCmd.sequenceNumber)
-                    {
-                        // Sequence number mismatch
-                        TMGT_ERR("writeOccCmd: OCC%d sequence number mismatch"
-                                 " (from cmd: 0x%02X, rsp: 0x%02X)",
-                                 l_instance, iv_OccCmd.sequenceNumber,
-                                 iv_OccRsp.sequenceNumber);
-                        l_timeout = true;
-                    }
-                }
+                handleOccException();
+                l_timeout = true;
             }
             else
             {
-                // OCC must not have completed processing the command before
-                // timeout
-                l_timeout = true;
+                if (iv_OccRsp.sequenceNumber !=
+                    iv_OccCmd.sequenceNumber)
+                {
+                    // Sequence number mismatch
+                    TMGT_ERR("writeOccCmd: OCC%d sequence number mismatch"
+                             " (from cmd: 0x%02X, rsp: 0x%02X)",
+                             l_instance, iv_OccCmd.sequenceNumber,
+                             iv_OccRsp.sequenceNumber);
+                    l_timeout = true;
+                }
             }
-
-            if (l_timeout)
-            {
-                /*@
-                 * @errortype
-                 * @reasoncode HTMGT_RC_TIMEOUT
-                 * @moduleid HTMGT_MOD_WRITE_OCC_CMD
-                 * @userdata1[0-15] command
-                 * @userdata1[16-31] read timeout
-                 * @userdata2[0-15] response sequence number
-                 * @userdata2[16-31] response status
-                 * @devdesc Timeout waiting for OCC response
-                 */
-                bldErrLog(l_err, HTMGT_MOD_WRITE_OCC_CMD, HTMGT_RC_TIMEOUT,
-                          iv_OccCmd.cmdType, l_read_timeout,
-                          iv_OccRsp.sequenceNumber,
-                          iv_OccRsp.returnStatus,
-                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
-
-                // The response buffer did not contain correct sequence number,
-                // or staus is still in progress save 1K rsp data
-                // TODO RTC 115922
-                //l_err->addUsrDtls(l_err, l_excp_length,
-                //                  OCCC_COMP_ID, 1 /*version*/, 0xF0 /*type*/);
-
-                // timeout waiting for response (no data to return)
-                iv_OccRsp.dataLength = 0;
-            } // end timeout
         }
+        else
+        {
+            // OCC must not have completed processing the command before
+            // timeout
+            l_timeout = true;
+        }
+
+        if (l_timeout)
+        {
+            /*@
+             * @errortype
+             * @refcode LIC_REFCODE
+             * @subsys EPUB_FIRMWARE_SP
+             * @reasoncode HTMGT_RC_TIMEOUT
+             * @moduleid HTMGT_MOD_WRITE_OCC_CMD
+             * @userdata1[0-15] command
+             * @userdata1[16-31] read timeout
+             * @userdata2[0-15] response sequence number
+             * @userdata2[16-31] response status
+             * @devdesc Timeout waiting for OCC response
+             */
+            bldErrLog(l_err, HTMGT_MOD_WRITE_OCC_CMD, HTMGT_RC_TIMEOUT,
+                      iv_OccCmd.cmdType, l_read_timeout,
+                      iv_OccRsp.sequenceNumber,
+                      iv_OccRsp.returnStatus,
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+            // The response buffer did not contain correct sequence number,
+            // or status is still in progress ==> timeout
+            const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
+            const uint16_t rspLen = OCC_RSP_HDR_LENGTH +
+                UINT16_GET(&rspBuffer[3]);
+            l_err->addFFDC(HTMGT_COMP_ID,
+                           rspBuffer,
+                           std::min(rspLen, MAX_FFDC),
+                           1,
+                           SUBSEC_OCC_RSP_DATA);
+
+            // timeout waiting for response (no data to return)
+            iv_OccRsp.dataLength = 0;
+        } // end timeout
 
         return l_err;
 
@@ -924,15 +924,15 @@ namespace HTMGT
     // Copy OCC command into command buffer in HOMER
     uint16_t OccCmd::buildOccCmdBuffer()
     {
-        uint8_t * const cmdBuffer = iv_Occ->homer + HTMGT_OCC_CMD_ADDR;
+        uint8_t * const cmdBuffer = iv_Occ->iv_homer + OCC_CMD_ADDR;
         uint16_t l_send_length = 0;
 
-        if (0 == ++iv_Occ->seqNumber)
+        if (0 == ++iv_Occ->iv_seqNumber)
         {
             // Do not use 0 for sequence number
-            ++iv_Occ->seqNumber;
+            ++iv_Occ->iv_seqNumber;
         }
-        iv_OccCmd.sequenceNumber = iv_Occ->seqNumber;
+        iv_OccCmd.sequenceNumber = iv_Occ->iv_seqNumber;
         cmdBuffer[l_send_length++] = iv_OccCmd.sequenceNumber;
         cmdBuffer[l_send_length++] = iv_OccCmd.cmdType;
         cmdBuffer[l_send_length++] = (iv_OccCmd.dataLength >> 8) & 0xFF;
@@ -982,7 +982,7 @@ namespace HTMGT
     {
         errlHndl_t l_errlHndl = NULL;
         uint16_t l_index = 0;
-        const uint8_t * const rspBuffer = iv_Occ->homer + HTMGT_OCC_RSP_ADDR;
+        const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
         const uint16_t rspLen = OCC_RSP_HDR_LENGTH + UINT16_GET(&rspBuffer[3]);
 
         if ((NULL != rspBuffer) && (rspLen >= OCC_RSP_HDR_LENGTH))
@@ -1046,9 +1046,11 @@ namespace HTMGT
         if (l_errlHndl)
         {
             // Add full OCC response to user details
-            // TODO RTC 115922
-            //l_errlHndl->addUsrDtls(rspBuffer, rspLen, HTMGT_COMP_ID,
-            //                       0/*version*/, TMGT_OCC_RSP_DATA);
+            l_errlHndl->addFFDC(HTMGT_COMP_ID,
+                                rspBuffer,
+                                std::min(rspLen, MAX_FFDC),
+                                1,  // version
+                                SUBSEC_OCC_RSP_DATA);
         }
 
         return l_errlHndl;
@@ -1195,10 +1197,11 @@ namespace HTMGT
         if (l_errlHndl)
         {
             // Add OCC response data to user details
-            // TODO RTC 115922
-            // l_errlHndl->addUsrDtls(iv_OccRsp.rspData,
-            //                        iv_OccRsp.dataLength, HTMGT_COMP_ID,
-            //                        0/*version*/, TMGT_OCC_RSP_DATA);
+            l_errlHndl->addFFDC(HTMGT_COMP_ID,
+                                iv_OccRsp.rspData,
+                                std::min(iv_OccRsp.dataLength,MAX_FFDC),
+                                1,  // version
+                                SUBSEC_OCC_RSP_DATA);
         }
 
         return(l_errlHndl);

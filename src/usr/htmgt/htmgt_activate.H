@@ -39,16 +39,6 @@ namespace HTMGT
 {
 
     /**
-     * @brief Set the OCC state
-     *
-     * @param[in] i_state  Desired OCC state
-     *
-     * @return  NULL if success, else error handle
-     */
-    errlHndl_t setOccState(const occStateId i_state);
-
-
-    /**
      * @brief Wait for all OCCs to go to active state
      *
      * @return  NULL if all OCCs reached active state, else error handle
@@ -63,10 +53,6 @@ namespace HTMGT
      */
     errlHndl_t setOccActiveSensors();
 
-    /**
-     * @brief send all occ configuration messages to the OCCs
-     */
-    void sendOccConfigData();
 
 } // end namespace
 #endif

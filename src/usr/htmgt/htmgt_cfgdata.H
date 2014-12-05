@@ -67,6 +67,58 @@ namespace HTMGT
     };
 
 
+    enum cfgTargets
+    {
+        TARGET_ALL    = 0x00,
+        TARGET_MASTER = 0x01,
+    };
+
+    enum cfgSupStates
+    {
+        CFGSTATE_ALL     = 0x00,
+        CFGSTATE_STANDBY = 0x01,
+        CFGSTATE_SBYOBS  = 0x02
+    };
+
+    const uint32_t TO_20SEC = 20;
+
+    struct occCfgDataTable_t
+    {
+        occCfgDataFormat    format;
+        cfgTargets          targets;
+        uint16_t            timeout; // in seconds
+        cfgSupStates        supportedStates;
+
+        bool operator==(const occCfgDataFormat& i_format) const
+        {
+            return (i_format == format);
+        }
+    };
+
+    const occCfgDataTable_t occCfgDataTable[] =
+    {
+        { OCC_CFGDATA_SYS_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_APSS_CONFIG,    TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_OCC_ROLE,       TARGET_ALL,  TO_20SEC, CFGSTATE_STANDBY },
+        { OCC_CFGDATA_PSTATE_SSTRUCT, TARGET_ALL,  TO_20SEC, CFGSTATE_SBYOBS },
+        { OCC_CFGDATA_FREQ_POINT,     TARGET_MASTER, TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_MEM_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_PCAP_CONFIG,    TARGET_MASTER, TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_MEM_THROTTLE,   TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_TCT_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL }
+    };
+    const size_t OCC_CONFIG_TABLE_SIZE = sizeof(occCfgDataTable) /
+        sizeof(occCfgDataTable_t);
+
+    /**
+     * @brief Send config format data to all OCCs
+     *
+     * @param[in]  config format to send.  Default is to send
+     *             all config formats.
+     */
+    void sendOccConfigData(const occCfgDataFormat i_requestedFormat =
+                           OCC_CFGDATA_CLEAR_ALL);
+
     /**
      * Fills in the Memory Config Configuration Data message buffer,
      * including the format and version numbers.

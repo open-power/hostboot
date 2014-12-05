@@ -93,7 +93,6 @@ namespace HTMGT
     };
     extern uint32_t G_debug_trace;
 
-
     enum tmgtElogSubsecTypes
     {
         // Values selected to be common with FSP from tmgt_elog_parser.H
@@ -102,7 +101,7 @@ namespace HTMGT
         //SUBSEC_ENERGYSCALE_DATA_TYPE  = 0x08,
         //SUBSEC_OCC_ELOG_DATA_TYPE     = 0x0A,
         //SUBSEC_OCC_FFDC_DATA_TYPE     = 0x0B,
-        //SUBSEC_MSG_DATA_TRUNCATED     = 0x0C,
+        SUBSEC_ADDITIONAL_SRC         = 0x0C,
         SUBSEC_OCC_CMD_DATA           = 0x0D,
         SUBSEC_OCC_RSP_DATA           = 0x0E,
         //SUBSEC_ELOG_TYPE_TOIF_RESET   = 0x10,
@@ -159,6 +158,16 @@ namespace HTMGT
      */
     uint8_t getOCCDIMMPos(const TARGETING::TargetHandle_t i_mba,
                           const TARGETING::TargetHandle_t i_dimm);
+
+
+    /**
+     * @brief Internal utility function to convert the OCC state to a string
+     *
+     * @param[in] i_state - OCC state
+     *
+     * @return text string description of state
+     */
+    const char *state_string(const uint8_t i_state);
 
 
 } // end namespace

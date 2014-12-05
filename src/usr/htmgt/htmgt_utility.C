@@ -36,7 +36,7 @@ namespace HTMGT
 
     // Debug flags
     uint32_t G_debug_data = 0;
-    uint32_t G_debug_trace = DEBUG_TRACE_FULL_NONVERBOSE; // TODO RTC 115922
+    uint32_t G_debug_trace = DEBUG_TRACE_FULL_NONVERBOSE; // TODO RTC 117248
 
 
     // Create/Build an Error log and add HTMGT component trace
@@ -70,11 +70,27 @@ namespace HTMGT
         }
         else
         {
+            // TODO RTC 109224:
+            // - collectTrace will not filter dup traces and no way to clear
+            // - no way to add secondary SRC to elog
             io_err->collectTrace("HTMGT");
+
+            uint32_t additionalSrc[] =
+            {
+                uint32_t(HTMGT_COMP_ID | i_rc), uint32_t(i_modid),
+                uint32_t(i_sev), uint32_t(i_addFwCallout?1:0),
+                i_data1, i_data2, i_data3, i_data4
+            };
+            io_err->addFFDC(HTMGT_COMP_ID,
+                            additionalSrc,
+                            sizeof(additionalSrc),
+                            1,  // version
+                            SUBSEC_ADDITIONAL_SRC);
         }
     }
 
 
+    // TODO RTC 109224 - refactor/optimize trace strings
 
     // Internal utility to convert OCC command type to a string
     const char *command_string(const uint8_t i_cmd)
@@ -98,7 +114,7 @@ namespace HTMGT
         const uint8_t l_total =
             sizeof(L_cmd_string) / sizeof(struct string_data_t);
 
-        // TODO RTC 109066
+        // TODO RTC 109224
         uint8_t l_idx = 0;
         for (l_idx=0; l_idx<l_total; l_idx++)
         {
@@ -119,6 +135,24 @@ namespace HTMGT
     } // end command_string()
 
 
+    // Internal utility function to convert the OCC state to a string
+    const char *state_string(const uint8_t i_state)
+    {
+        switch(i_state)
+        {
+            case OCC_STATE_NO_CHANGE:     return("NO CHANGE"); break;
+            case OCC_STATE_STANDBY:       return("STANDBY"); break;
+            case OCC_STATE_OBSERVATION:   return("OBSERVATION"); break;
+            case OCC_STATE_ACTIVE:        return("ACTIVE"); break;
+            case OCC_STATE_SAFE:          return("SAFE"); break;
+            case OCC_STATE_RESET:         return("RESET"); break;
+            case OCC_STATE_IN_TRANSITION: return("IN TRANSITION"); break;
+            case OCC_STATE_LOADING:       return("LOADING"); break;
+            case OCC_STATE_UNKNOWN:       return("UNKNOWN"); break;
+            default:                      break;
+        }
+        return("UNKNOWN");
+    }
 
     uint8_t getOCCDIMMPos(const TargetHandle_t i_mba,
                           const TargetHandle_t i_dimm)

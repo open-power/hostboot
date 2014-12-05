@@ -33,6 +33,20 @@
 
 namespace HTMGT
 {
+
+    // OCC Status bits
+    const uint8_t OCC_STATUS_MASTER         = 0x80;
+    const uint8_t OCC_STATUS_FIR_MASTER     = 0x40;
+    const uint8_t OCC_STATUS_ATTN_ENABLE    = 0x08;
+    const uint8_t OCC_STATUS_OBS_READY      = 0x02;
+    const uint8_t OCC_STATUS_ACTIVE_READY   = 0x01;
+
+    // OCC Extended Status bits
+    const uint8_t OCC_XSTATUS_DVFS_OT       = 0x80;
+    const uint8_t OCC_XSTATUS_DVFS_PWR      = 0x40;
+    const uint8_t OCC_XSTATUS_MEM_THROT_OT  = 0x20;
+    const uint8_t OCC_XSTATUS_N_POWER       = 0x10;
+
     struct occPollRspStruct_t
     {
         uint8_t   status;
@@ -58,21 +72,16 @@ namespace HTMGT
     /**
      * @brief Send a poll command to each OCC
      *
+     * @param[in]  i_flushAllErrors  If set to true, TMGT will send poll cmds
+     *                               to each OCC as long as that OCC continues
+     *                               to report errors.  If false, only one
+     *                               poll will be send to each OCC.
+     *
      * @return NULL on success, else error handle
      */
-    errlHndl_t sendOccPoll();
+    errlHndl_t sendOccPoll(const bool i_flushAllErrors = false);
 
 
-    /**
-     * @brief Handle OCC poll response
-     *
-     * @param[in] i_occ               pointer to the OCC
-     * @param[in] i_pollResponse      pointer to the response
-     * @param[in] i_pollResponseSize  length of the poll response
-     */
-    void poll_rsp_handler(Occ * i_occ,
-                          const uint8_t * i_pollResponse,
-                          const uint16_t i_pollResponseSize);
 
 } // end namespace
 #endif

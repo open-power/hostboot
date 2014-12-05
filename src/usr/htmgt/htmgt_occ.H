@@ -103,15 +103,21 @@ namespace HTMGT
              *
              * @return instance number for this OCC
              */
-            const uint8_t getInstance() { return instance; };
+            uint8_t getInstance() { return iv_instance; };
 
 
             /**
              * @brief Return pointer to the last poll response
              *
-             * @return pointer to last poll response
+             * @param[out] o_pollRspPtr  pointer to last poll rsp data
+             *
+             * @return true if data is valid, else false
              */
-            const uint8_t *getLastPollRsp() { return lastPollResponse; };
+            bool getLastPollRsp(const uint8_t * & o_pollRspPtr)
+            {
+                o_pollRspPtr = iv_lastPollResponse;
+                return iv_lastPollValid;
+            };
 
 
             /**
@@ -119,42 +125,87 @@ namespace HTMGT
              *
              * @return pointer to last poll response
              */
-            TARGETING::TargetHandle_t getTarget() { return target; };
+            TARGETING::TargetHandle_t getTarget() { return iv_target; };
+
+
+            /**
+             * @brief Process an OCC poll response
+             *
+             * @param[in] i_pollResponse      pointer to the response
+             * @param[in] i_pollResponseSize  length of the poll response
+             */
+            void pollRspHandler(const uint8_t * i_pollResponse,
+                                const uint16_t i_pollResponseSize);
+
+
+            /**
+             * @brief Return true if the specified status bit was set in
+             *        the last poll response
+             *
+             * @param[in]  i_statusBit  Bit(s) to check in the poll response
+             *
+             * @return true if the bit(s) are set, else false
+             */
+            bool statusBitSet(const uint8_t i_statusBit);
+
+
+            /**
+             * @brief Set the state of the OCC.
+             *        This is only allowed on the master OCC
+             *
+             * @param[in]  i_state  Desired OCC state
+             *
+             * @return NULL on success, or error handle on failure
+             */
+            errlHndl_t setState(const occStateId i_state);
+
+
+            /**
+             * @brief Return OCC role
+             *
+             * @return role of this OCC
+             */
+            occRole getRole() { return iv_role; };
+
+
+            /**
+             * @brief Return OCC state
+             *
+             * @return state of this OCC
+             */
+            occStateId getState() { return iv_state; };
 
 
         protected:
             // Instance number of this OCC: 0 = first physical OCC
-            uint8_t         instance;
+            uint8_t         iv_instance;
             // true if this OCC is capable of Master role (wired to APSS)
-            bool            masterCapable;
+            bool            iv_masterCapable;
             // Role of this OCC
-            occRole         role;
+            occRole         iv_role;
             // State of this OCC
-            occStateId      state;
+            occStateId      iv_state;
             // true if communication to this OCC has been established
-            bool            commEstablished;
+            bool            iv_commEstablished;
             // true if OCC needs to be reset
-            bool            needsReset;
+            bool            iv_needsReset;
             // true if OCC failed
-            bool            failed;
+            bool            iv_failed;
             // Sequence number of last/current OCC command
-            uint8_t         seqNumber;
+            uint8_t         iv_seqNumber;
             // HOMER base address
-            uint8_t *       homer;
+            uint8_t *       iv_homer;
             // OCC target
-            TARGETING::TargetHandle_t target;
+            TARGETING::TargetHandle_t iv_target;
             // Last poll response (excluding sensor data)
-            uint8_t         lastPollResponse[OCC_POLL_DATA_MIN_SIZE];
+            uint8_t         iv_lastPollResponse[OCC_POLL_DATA_MIN_SIZE];
             // true if lastPollResponse contains valid data
-            bool            lastPollValid;
-
-            // HOM Unit Id of this OCC
-             TARGETING::ATTR_HUID_type  huid;
+            bool            iv_lastPollValid;
 
 
         private:
             // Version of data stored (0 = not written)
-            uint8_t         version;
+            uint8_t         iv_version;
 
     };
 
@@ -174,6 +225,14 @@ namespace HTMGT
         friend class Occ;
 
         public:
+            /**
+             * @brief true if the required config data has been built
+             *        This must be persisted across IPL/RT
+             *        TODO: RTC 115296
+             */
+            bool  iv_configDataBuilt;
+
+
             /**
              * @brief Constructor
              */
@@ -218,6 +277,16 @@ namespace HTMGT
             static Occ * getMasterOcc();
 
 
+            /**
+             * @brief Set the state of the OCCs
+             *
+             * @param[in]  i_state  Desired OCC state
+             *
+             * @return NULL on success, or error handle on failure
+             */
+            errlHndl_t setOccState(const occStateId i_state);
+
+
         private:
             Occ *                   iv_occMaster;
             std::vector<Occ*>       iv_occArray;
@@ -259,6 +328,9 @@ namespace HTMGT
             /* See getMasterOcc() above */
             Occ * _getMasterOcc() { return iv_occMaster; };
 
+
+            /* See setOccState() above */
+            errlHndl_t _setOccState(const occStateId i_state);
 
     };
 

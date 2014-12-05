@@ -73,6 +73,8 @@ OBJS += p8_ocb_indir_setup_linear.o
 
 #common occ functions between ipl and runtime
 OBJS += occ_common.o
+OBJS += $(if $(CONFIG_HTMGT),occAccess.o)
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/occ/<HWP_dir>

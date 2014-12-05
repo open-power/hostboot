@@ -29,15 +29,13 @@
 #include "htmgt_occcmd.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_occ.H"
+#include "htmgt_poll.H"
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
-
-
-using namespace HTMGT;
 
 
 namespace HTMGT
@@ -48,21 +46,19 @@ namespace HTMGT
              uint8_t       * i_homer,
              TARGETING::TargetHandle_t i_target,
              const occRole   i_role)
-        :instance(i_instance),
-        masterCapable(i_masterCapable),
-        role(i_role),
-        state(OCC_STATE_UNKNOWN),
-        commEstablished(false),
-        needsReset(false),
-        failed(false),
-        seqNumber(0),
-        homer(i_homer),
-        target(i_target),
-        lastPollValid(false),
-        version(0x01)
+        :iv_instance(i_instance),
+        iv_masterCapable(i_masterCapable),
+        iv_role(i_role),
+        iv_state(OCC_STATE_UNKNOWN),
+        iv_commEstablished(false),
+        iv_needsReset(false),
+        iv_failed(false),
+        iv_seqNumber(0),
+        iv_homer(i_homer),
+        iv_target(i_target),
+        iv_lastPollValid(false),
+        iv_version(0x01)
     {
-        // Probably not needed...
-        huid = i_target->getAttr<TARGETING::ATTR_HUID>();
     }
 
     Occ::~Occ()
@@ -70,8 +66,99 @@ namespace HTMGT
     }
 
 
+    // Return true if specified status bit is set in last poll response
+    bool Occ::statusBitSet(const uint8_t i_statusBit)
+    {
+        bool isSet = false;
+
+        if (iv_lastPollValid)
+        {
+            const occPollRspStruct_t *lastPoll =
+                (occPollRspStruct_t*)iv_lastPollResponse;
+            isSet = ((lastPoll->status & i_statusBit) == i_statusBit);
+        }
+
+        return isSet;
+    }
+
+
+    // Set state of the OCC
+    errlHndl_t Occ::setState(const occStateId i_state)
+    {
+        errlHndl_t l_err = NULL;
+
+        if (OCC_ROLE_MASTER == iv_role)
+        {
+            const uint8_t l_cmdData[3] =
+            {
+                0x00, // version
+                i_state,
+                0x00 // reserved
+            };
+
+            OccCmd cmd(this, OCC_CMD_SET_STATE,
+                       sizeof(l_cmdData), l_cmdData);
+            l_err = cmd.sendOccCmd();
+            if (l_err != NULL)
+            {
+                TMGT_ERR("setState: Failed to set OCC%d state, rc=0x%04X",
+                         iv_instance, l_err->reasonCode());
+            }
+            else
+            {
+                if (OCC_RC_SUCCESS != cmd.getRspStatus())
+                {
+                    TMGT_ERR("setState: Set OCC%d state failed"
+                             " with OCC status 0x%02X",
+                             iv_instance, cmd.getRspStatus());
+                    /*@
+                     * @errortype
+                     * @moduleid HTMGT_MOD_OCC_SET_STATE
+                     * @reasoncode HTMGT_RC_OCC_CMD_FAIL
+                     * @userdata1[0-15] OCC instance
+                     * @userdata1[16-31] Requested state
+                     * @userdata2[0-15] OCC response status
+                     * @userdata2[16-31] current OCC state
+                     * @devdesc Set of OCC state failed
+                     */
+                    bldErrLog(l_err, HTMGT_MOD_OCC_SET_STATE,
+                              HTMGT_RC_OCC_CMD_FAIL,
+                              iv_instance, i_state,
+                              cmd.getRspStatus(), iv_state,
+                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                }
+            }
+        }
+        else
+        {
+            TMGT_ERR("setState: State only allowed to be set on master OCC");
+            /*@
+             * @errortype
+             * @moduleid HTMGT_MOD_OCC_SET_STATE
+             * @reasoncode HTMGT_RC_INTERNAL_ERROR
+             * @userdata1[0-15] OCC instance
+             * @userdata1[16-31] Requested state
+             * @devdesc Set state only allowed on master OCC
+             */
+            bldErrLog(l_err, HTMGT_MOD_OCC_SET_STATE,
+                      HTMGT_RC_INTERNAL_ERROR,
+                      iv_instance, i_state, 0, 0,
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+
+        return l_err;
+
+    } // end Occ::setState()
+
+
+
+    /////////////////////////////////////////////////////////////////
+
+
+
     OccManager::OccManager()
-        :iv_occMaster(NULL),
+        :iv_configDataBuilt(false),
+        iv_occMaster(NULL),
         iv_state(OCC_STATE_UNKNOWN)
     {
     }
@@ -128,7 +215,10 @@ namespace HTMGT
                 // Get HOMER virtual address
                 uint8_t * homer = (uint8_t*)
                     ((*proc)->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>());
-                TMGT_INF("buildOccs: homer = 0x%08X (from proc 0)", homer);
+                const uint8_t * homerPhys = (uint8_t*)
+                    ((*proc)->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>());
+                TMGT_INF("buildOccs: homer = 0x%08X (virt) / 0x%08X (phys)"
+                         " for Proc%d", homer, homerPhys, instance);
 #ifdef SIMICS_TESTING
                 // Starting of OCCs is not supported in SIMICS, so fake out
                 // HOMER memory area for testing
@@ -140,7 +230,7 @@ namespace HTMGT
                     {
                         // Allocate a fake HOMER area
                         G_simicsHomerBuffer =
-                            new uint8_t [HTMGT_OCC_CMD_ADDR+0x2000];
+                            new uint8_t [OCC_CMD_ADDR+0x2000];
                     }
                     homer = G_simicsHomerBuffer;
                     TMGT_ERR("buildOccs: Using hardcoded HOMER of 0x%08lX",
@@ -183,7 +273,7 @@ namespace HTMGT
 
 
 
-    /* Add a functional OCC to be monitored */
+    // Add a functional OCC to be monitored
     void OccManager::_addOcc(const uint8_t   i_instance,
                              const bool      i_masterCapable,
                              uint8_t       * i_homer,
@@ -224,6 +314,121 @@ namespace HTMGT
     } // end OccManager::_addOcc()
 
 
+    // Set the OCC state
+    errlHndl_t OccManager::_setOccState(const occStateId i_state)
+    {
+        errlHndl_t l_err = NULL;
+
+
+        if ((i_state == OCC_STATE_ACTIVE) ||
+            (i_state == OCC_STATE_OBSERVATION))
+        {
+            if (NULL != iv_occMaster)
+            {
+                TMGT_INF("_setOccState(state=0x%02X)", i_state);
+
+                const uint8_t occInstance = iv_occMaster->getInstance();
+                bool needsRetry = false;
+                do
+                {
+                    l_err = iv_occMaster->setState(i_state);
+                    if (NULL == l_err)
+                    {
+                        needsRetry = false;
+                    }
+                    else
+                    {
+                        TMGT_ERR("_setOccState: Failed to set OCC%d state,"
+                                 " rc=0x%04X",
+                                 occInstance, l_err->reasonCode());
+                        if (false == needsRetry)
+                        {
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            l_err = NULL;
+                            needsRetry = true;
+                        }
+                        else
+                        {
+                            // Only one retry, return error handle
+                            needsRetry = false;
+                        }
+                    }
+                }
+                while (needsRetry);
+            }
+            else
+            {
+                /*@
+                 * @errortype
+                 * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
+                 * @reasoncode HTMGT_RC_INTERNAL_ERROR
+                 * @devdesc Unable to set state of master OCC
+                 */
+                bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
+                          HTMGT_RC_INTERNAL_ERROR,
+                          0, 0, 0, 0,
+                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
+
+            if (NULL == l_err)
+            {
+                // Send poll to query state of all OCCs
+                // and flush any errors reported by the OCCs
+                errlHndl_t l_err = sendOccPoll(true);
+                if (l_err)
+                {
+                    TMGT_ERR("_setOccState: Poll all OCCs failed");
+                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                }
+
+                // Make sure all OCCs went to active state
+                for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+                     pOcc < iv_occArray.end();
+                     pOcc++)
+                {
+                    if (i_state != (*pOcc)->getState())
+                    {
+                        TMGT_ERR("_setOccState: OCC%d is not in 0x%02X state",
+                                 (*pOcc)->getInstance(), i_state);
+                        /*@
+                         * @errortype
+                         * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
+                         * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
+                         * @userdata1[0-15] requested state
+                         * @userdata1[16-31] OCC state
+                         * @userdata2[0-15] OCC instance
+                         * @devdesc OCC did not change to requested state
+                         */
+                        bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
+                                  HTMGT_RC_OCC_UNEXPECTED_STATE,
+                                  i_state, (*pOcc)->getState(),
+                                  (*pOcc)->getInstance(), 0,
+                                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            TMGT_ERR("_setOccState: Invalid state 0x%02X requested", i_state);
+            /*@
+             * @errortype
+             * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
+             * @reasoncode HTMGT_RC_INVALID_DATA
+             * @userdata1[0-15] requested state
+             * @devdesc Invalid OCC state requested
+             */
+            bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
+                      HTMGT_RC_INVALID_DATA,
+                      i_state, 0, 0, 0,
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        }
+
+        return l_err;
+
+    } // end OccManager::_setOccState()
+
 
     uint8_t  OccManager::getNumOccs()
     {
@@ -249,9 +454,14 @@ namespace HTMGT
     }
 
 
+    errlHndl_t OccManager::setOccState(const occStateId i_state)
+    {
+        return Singleton<OccManager>::instance()._setOccState(i_state);
+    }
+
 
 #if 0
-    // TODO: RTC 109066
+    // TODO: RTC 115296
     void update_occ_data()
     {
         if (occMgr::instance().getNumOccs() > 0)

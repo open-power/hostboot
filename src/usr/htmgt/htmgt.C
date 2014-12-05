@@ -31,6 +31,9 @@
 #ifndef __HOSTBOOT_RUNTIME
 #include "genPstate.H"
 #endif
+#include "htmgt_memthrottles.H"
+#include "htmgt_poll.H"
+#include <devicefw/userif.H>
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
@@ -39,8 +42,13 @@
 #include <targeting/common/targetservice.H>
 
 
+#include <sys/time.h>
+
 namespace HTMGT
 {
+
+    const uint32_t HTMGT_DELAY_BEFORE_COMM = 5;
+
 
     // Move the OCCs to active state or log unrecoverable error and
     // stay in safe mode
@@ -48,7 +56,6 @@ namespace HTMGT
                                TARGETING::Target * i_failedOccTarget)
     {
         errlHndl_t l_err = NULL;
-
         uint32_t l_huid = 0;
         if (i_failedOccTarget)
         {
@@ -59,36 +66,81 @@ namespace HTMGT
         if (i_startCompleted)
         {
             // Query functional OCCs
-            if (occMgr::instance().buildOccs() > 0)
+            const uint8_t numOccs = occMgr::instance().buildOccs();
+            if (numOccs > 0)
             {
-                do
+                if (NULL != occMgr::instance().getMasterOcc())
                 {
-                    //Pstatetable only built once at boot time.
-#ifndef __HOSTBOOT_RUNTIME
-                    l_err = genPstateTables();
-                    if(l_err)
+                    do
                     {
-                        break;
-                    }
+                        // Delay before communication with OCCs to make sure
+                        // they are ready (since there is no initial attention)
+                        nanosleep(HTMGT_DELAY_BEFORE_COMM, 0);
+
+#ifndef __HOSTBOOT_RUNTIME
+                        if (false == occMgr::instance().iv_configDataBuilt)
+                        {
+                            // Build pstate tables (once per IPL)
+                            l_err = genPstateTables();
+                            if(l_err)
+                            {
+                                break;
+                            }
+
+                            // Calc memory throttles (once per IPL)
+                            calcMemThrottles();
+
+                            occMgr::instance().iv_configDataBuilt = true;
+                        }
 #endif
 
-                    // Calc memory throttles
-                    // TODO RTC 116306
+                        // Send poll to establish comm
+                        TMGT_INF("Send initial poll to all OCCs to"
+                                 " establish comm");
+                        errlHndl_t l_err = sendOccPoll();
+                        if (l_err)
+                        {
+                            // Continue even if failed (poll will be retried)
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            l_err = NULL;
+                        }
 
-                    // Send ALL config data
-                    sendOccConfigData();
+                        // Send ALL config data
+                        sendOccConfigData();
 
-                    // Wait for all OCCs to go active
-                    l_err = waitForOccsActive();
-                    if( l_err )
-                    {
-                        break;
-                    }
+                        // Wait for all OCCs to go active
+                        l_err = waitForOccsActive();
+                        if ( l_err )
+                        {
+                            break;
+                        }
 
-                    //Set active sensors for all OCCs so BMC can start comm
-                    l_err = setOccActiveSensors();
-
-                } while(0);
+                        // Set active sensors for all OCCs,
+                        // so BMC can start communication with OCCs
+                        l_err = setOccActiveSensors();
+                        if (l_err)
+                        {
+                            // Continue even if failed to update sensor
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            l_err = NULL;
+                        }
+                    } while(0);
+                }
+                else
+                {
+                    TMGT_ERR("Unable to find any Master capable OCCs");
+                    /*@
+                     * @errortype
+                     * @reasoncode      HTMGT_RC_OCC_MASTER_NOT_FOUND
+                     * @moduleid        HTMGT_MOD_LOAD_START_STATUS
+                     * @userdata1[0:7]  number of OCCs
+                     * @devdesc         No OCC master was found
+                     */
+                    bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
+                              HTMGT_RC_OCC_MASTER_NOT_FOUND,
+                              numOccs, 0, 0, 0,
+                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                }
             }
             else
             {
@@ -151,7 +203,6 @@ namespace HTMGT
                                        HWAS::SRCI_PRIORITY_MED);
 
             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-
         }
 
     } // end processOccStartStatus()
@@ -169,7 +220,6 @@ namespace HTMGT
 
 
 
-
     // Notify HTMGT that an OCC has failed and needs to be reset
     void processOccReset(TARGETING::Target * i_failedOccTarget)
     {
@@ -179,6 +229,7 @@ namespace HTMGT
         // TODO RTC 115296
 
     } // end processOccReset()
+
 
 }
 

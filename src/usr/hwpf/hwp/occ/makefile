@@ -30,7 +30,6 @@ SUBDIRS += runtime.d
 
 ## Objects unique to HB IPL
 OBJS += occ.o
-OBJS += $(if $(CONFIG_HTMGT),occAccess.o)
 
 ## Objects common to HB IPL and HBRT
 include occ.mk
