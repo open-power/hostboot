@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,6 +173,9 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
     uint8_t    *l_retBuf = NULL;
     uint32_t   l_bufSize = 0;
     Target     l_procTarget;
+    uint8_t    l_customDimm;
+    std::vector<fapi::Target> l_mbaChiplets;
+    fapi::Target              l_mbaTarget;
 
     FAPI_DBG(">> writeRepairDataToVPD");
 
@@ -202,12 +205,66 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
-            if((l_bufSize == 0) ||
-               ((i_vpdType == EREPAIR_VPD_FIELD) &&
-                (l_bufSize > EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
-               ((i_vpdType == EREPAIR_VPD_MNFG) &&
-                (l_bufSize > EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
+            // Get the connected MBA chiplet and determine whether we have CDIMM
+            l_rc = fapiGetChildChiplets(i_tgtHandle,
+                                        fapi::TARGET_TYPE_MBA_CHIPLET,
+                                        l_mbaChiplets,
+                                        fapi::TARGET_STATE_FUNCTIONAL);
+
+            if(l_rc || (0 == l_mbaChiplets.size()))
             {
+                FAPI_ERR("Error (0x%x) during get child MBA targets",
+                         static_cast<uint32_t> (l_rc));
+                break;
+            }
+
+            l_mbaTarget = l_mbaChiplets[0];
+            std::vector<fapi::Target> l_target_dimm_array;
+
+            l_rc =  fapiGetAssociatedDimms(l_mbaTarget, l_target_dimm_array);
+
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x), from fapiGetAssociatedDimms",
+                          static_cast<uint32_t>(l_rc));
+                break;
+            }
+
+            if(0 != l_target_dimm_array.size())
+            {
+                l_rc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM,
+                                     &l_target_dimm_array[0],
+                                     l_customDimm);
+                if(l_rc)
+                {
+                    FAPI_ERR("Error (0x%x), from FAPI_ATTR_GET",
+                             static_cast<uint32_t>(l_rc));
+                    break;
+                }
+            }
+            else
+            {
+                l_customDimm = fapi::ENUM_ATTR_SPD_CUSTOM_NO;
+            }
+
+            if(l_customDimm == fapi::ENUM_ATTR_SPD_CUSTOM_YES)
+            {
+                if((l_bufSize == 0) ||
+                       ((i_vpdType == EREPAIR_VPD_FIELD) &&
+                        (l_bufSize > EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
+                       ((i_vpdType == EREPAIR_VPD_MNFG) &&
+                        (l_bufSize > EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
+                {
+                    FAPI_SET_HWP_ERROR(l_rc,
+                                       RC_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE);
+                    break;
+                }
+            }
+            else if(l_bufSize == 0)
+            {
+                // TODO RTC: 119531. Add upper bound checking for l_bufSize
+                // This size check will depend on whether the Lane eRepair data
+                // is stored on the Planar VPD or on the Riser card VPD.
                 FAPI_SET_HWP_ERROR(l_rc, RC_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE);
                 break;
             }
@@ -221,7 +278,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
-            // Retrieve the eRepair data from the Centaur FRU VPD
+            // Retrieve the Field eRepair data from the Centaur FRU VPD
             l_rc = fapiGetMBvpdField(l_vpdRecord,
                                      MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
@@ -315,7 +372,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
-            // Retrieve the eRepair data from the MVPD
+            // Retrieve the Field eRepair data from the MVPD
             l_rc = fapiGetMvpdField(l_vpdRecord,
                                     MVPD_KEYWORD_PDI,
                                     l_procTarget,
