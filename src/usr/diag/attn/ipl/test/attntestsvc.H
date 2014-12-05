@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attntestsvc.H $               */
+/* $Source: src/usr/diag/attn/ipl/test/attntestsvc.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,143 +46,6 @@ using namespace std;
 class AttnSvcTest: public CxxTest::TestSuite
 {
     public:
-
-        /**
-         * @brief testStartStop Unit test for the
-         *        start and stop methods.
-         */
-        void testStartStop(void)
-        {
-            return; // FIXME RTC: 67008
-
-            TS_TRACE(ENTER_MRK "testStartStop");
-
-            errlHndl_t err = 0;
-
-            Service svc;
-
-            do {
-
-                err = svc.start();
-
-                if(err)
-                {
-                    TS_FAIL("unexpected error starting service");
-                    break;
-                }
-
-                if(!svc.iv_intrTask)
-                {
-                    TS_FAIL("interrupt task not started");
-                }
-
-                if(!svc.iv_prdTask)
-                {
-                    TS_FAIL("prd task not started");
-                }
-
-                if(svc.iv_shutdownPrdTask)
-                {
-                    TS_FAIL("shutdown variable set");
-                }
-
-                if(!svc.iv_intrTaskQ)
-                {
-                    TS_FAIL("no message q created");
-                }
-
-                // should be able to call start again
-
-                err = svc.start();
-
-                if(err)
-                {
-                    TS_FAIL("unexpected error starting service");
-                    break;
-                }
-
-                if(!svc.iv_intrTask)
-                {
-                    TS_FAIL("interrupt task not started");
-                }
-
-                if(!svc.iv_prdTask)
-                {
-                    TS_FAIL("prd task not started");
-                }
-
-                if(svc.iv_shutdownPrdTask)
-                {
-                    TS_FAIL("shutdown variable set");
-                }
-
-                if(!svc.iv_intrTaskQ)
-                {
-                    TS_FAIL("no message q created");
-                }
-
-                err = svc.stop();
-
-                if(err)
-                {
-                    TS_FAIL("unexpected error stopping service");
-                    break;
-                }
-
-                if(svc.iv_intrTask)
-                {
-                    TS_FAIL("interrupt task not stopped");
-                }
-
-                if(svc.iv_prdTask)
-                {
-                    TS_FAIL("prd task not stopped");
-                }
-
-                if(svc.iv_shutdownPrdTask)
-                {
-                    TS_FAIL("shutdown variable set");
-                }
-
-                if(svc.iv_intrTaskQ)
-                {
-                    TS_FAIL("message q not reclaimed");
-                }
-
-                // should be able to call stop again
-
-                err = svc.stop();
-
-                if(err)
-                {
-                    TS_FAIL("unexpected error stopping service");
-                    break;
-                }
-
-                if(svc.iv_intrTask)
-                {
-                    TS_FAIL("interrupt task not stopped");
-                }
-
-                if(svc.iv_prdTask)
-                {
-                    TS_FAIL("prd task not stopped");
-                }
-
-                if(svc.iv_shutdownPrdTask)
-                {
-                    TS_FAIL("shutdown variable set");
-                }
-
-                if(svc.iv_intrTaskQ)
-                {
-                    TS_FAIL("message q not reclaimed");
-                }
-
-            } while(0);
-
-            TS_TRACE(EXIT_MRK "testStartStop");
-        }
 
         /**
          * @brief testAttentions Unit test for the attnsvc module.
