@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -2075,15 +2075,15 @@ sub generate_sys
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0700,0x07,
-            0x0800,0x04,
-            0x0900,0x05,
-            0x0a00,0x08,
-            0x0b00,0x09,
-            0x0c00,0x06,
-            0x0d00,0x00,
-            0x0e00,0xFF,
-            0x0F00,0xFF,
+            0x0700,0x07,  <!-- OS_Boot -->
+            0x0800,0x04,  <!-- Host_Status -->
+            0x0900,0x05,  <!-- FW_Boot_Progress -->
+            0x0b00,0x09,  <!-- Power_Cap  -->
+            0x0c00,0x06,  <!-- PCI -->
+            0x0d00,0x00,  <!-- Boot_watchdog -->
+            0x0e00,0xFF,  <!-- Reboot_Count -->
+            0x1000,0xFF,  <!-- System_Event -->
+            0x1010,0xFF,  <!-- APSS Fault -->
             0xFFFF,0xFF,
             0xFFFF,0xFF,
             0xFFFF,0xFF,
@@ -2522,10 +2522,10 @@ sub generate_system_node
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x1017,0x14,
-            0x101A,0x15,
-            0x101B,0x16,
-            0xFFFF,0xFF,
+            0x1000,0x80, <!-- Backplane fault sensor -->
+            0x1017,0x14, <!-- TOD clock fault sensor -->
+            0x101A,0x15, <!-- REF clock fault sensor -->
+            0x101B,0x16, <!-- PCI clock fault sensor -->
             0xFFFF,0xFF,
             0xFFFF,0xFF,
             0xFFFF,0xFF,
@@ -3093,8 +3093,8 @@ sub generate_proc
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0x12,
-            0x0500, 0x03,
+            0x0100, 0x12, <!-- Temperature sensor -->
+            0x0500, 0x03, <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -3198,8 +3198,8 @@ sub generate_ex_core
     <attribute>
         <id>IPMI_SENSORS</id>
          <default>
-             0x0100, 0x13,
-             0x0500, 0x02,
+             0x0100, 0x13, <!-- Temperature sensor -->
+             0x0500, 0x02, <!-- State sensor -->
              0xFFFF, 0xFF,
              0xFFFF, 0xFF,
              0xFFFF, 0xFF,
@@ -4012,8 +4012,8 @@ sub generate_centaur
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0xFF,
-            0x0500, 0xFF,
+            0x0100, 0xFF,  <!-- Temperature sensor -->
+            0x0500, 0xFF,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4289,8 +4289,8 @@ sub generate_is_dimm
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0xFF,
-            0x0500, 0x01,
+            0x0100, 0xFF,  <!-- Temperature sensor -->
+            0x0500, 0x01,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4459,8 +4459,8 @@ sub generate_dimm
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0xFF,
-            0x0500, 0x01,
+            0x0100, 0xFF,  <!-- Temperature sensor -->
+            0x0500, 0x01,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4672,8 +4672,38 @@ sub generate_occ
     <attribute>
         <id>OCC_MASTER_CAPABLE</id>
         <default>$mastercapable</default>
-    </attribute>
-</targetInstance>\n";
+    </attribute>\n";
+
+    # $TODO RTC:110399
+    # hardcode for now both palmetto and habenaro are
+    # currently the same - this will change though
+    #
+    if( $haveFSPs == 0 )
+    {
+       print "\n<!-- IPMI sensor numbers -->
+    <attribute>
+        <id>IPMI_SENSORS</id>
+        <default>
+            0x0a00, 0x08, <!-- Occ_active -->
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF,
+            0xFFFF, 0xFF
+       </default>
+    </attribute>\n";
+    }
+print "</targetInstance>\n";
 
 }
 
