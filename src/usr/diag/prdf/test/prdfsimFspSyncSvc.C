@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,15 +54,6 @@ void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
 
     switch(i_msg->type)
     {
-        case MFG_THRES_SYNC_FROM_FSP:
-            pError = sendMfgThresRespMsg(i_msg);
-            if(NULL != pError)
-            {
-                PRDF_ERR(FUNC" sendMfgThresRespMsg returned error");
-                PRDF_COMMIT_ERRL(pError, ERRL_ACTION_REPORT);
-            }
-            break;
-
         case MFG_TRACE_SYNC_TO_FSP:
             pError = processMfgTrace(i_msg);
             if(NULL != pError)
@@ -76,53 +69,6 @@ void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
     }
 
     PRDF_EXIT(FUNC);
-    #undef FUNC
-}
-
-errlHndl_t SimFspSyncSvc::sendMfgThresRespMsg(msg_t * i_msg) const
-{
-    #define FUNC "[SimFspSyncSvc::sendMfgThresRespMsg]"
-    PRDF_ENTER(FUNC);
-    errlHndl_t l_errLog = NULL;
-    uint8_t* l_extraData = NULL;
-
-    do
-    {
-        SimFspMfgThresholdFile l_pMfgThresholdFile;
-
-        // Override Mfg thresholds
-        l_pMfgThresholdFile.overrideThreshold();
-
-        uint32_t l_msgSize = l_pMfgThresholdFile.getThresholdSize();
-
-        PRDF_TRAC("l_msgSize=%d", l_msgSize);
-
-        i_msg->data[0] = 0;
-        i_msg->data[1] = l_msgSize;
-        i_msg->extra_data = NULL;
-
-        if(0 == l_msgSize)
-        {
-            PRDF_TRAC(FUNC" no override MFG thresholds to send back");
-        }
-        else
-        {
-            i_msg->extra_data = malloc( l_msgSize );
-            memset(i_msg->extra_data, 0, l_msgSize);
-
-            l_extraData = static_cast<uint8_t*>(i_msg->extra_data);
-
-            l_pMfgThresholdFile.packThresholdDataIntoBuffer(l_extraData,
-                                                             l_msgSize);
-        }
-
-
-    } while(0);
-
-    PRDF_EXIT(FUNC);
-
-    return l_errLog;
-
     #undef FUNC
 }
 

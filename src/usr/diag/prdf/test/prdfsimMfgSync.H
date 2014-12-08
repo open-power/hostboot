@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -60,13 +62,6 @@ class SimMfgSync : public MfgSync
         *  @brief dtor
         */
         virtual ~SimMfgSync();
-
-        /**
-         *  @brief sync from FSP mfg thresholds
-         *
-         *  @return     errlHndl_t
-         */
-        virtual errlHndl_t  syncMfgThresholdFromFsp();
 
         /**
          *  @brief sync to FSP mfg trace data

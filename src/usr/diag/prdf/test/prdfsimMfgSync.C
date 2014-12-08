@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,31 +48,6 @@ SimMfgSync::~SimMfgSync()
 {
     #define FUNC "[SimMfgSync::~SimMfgSync]"
     PRDF_TRAC( FUNC );
-    #undef FUNC
-}
-
-errlHndl_t SimMfgSync::syncMfgThresholdFromFsp()
-{
-    #define FUNC "[SimMfgSync::syncMfgThresholdFromFsp]"
-    PRDF_ENTER( FUNC );
-
-    errlHndl_t l_err = NULL;
-
-    do
-    {
-        l_err = MfgSync::syncMfgThresholdFromFsp();
-
-        if(NULL != l_err)
-        {
-            PRDF_TRAC( FUNC" syncMfgThresholdFromFsp failed" );
-        }
-
-    } while(0);
-
-
-    PRDF_EXIT( FUNC );
-
-    return l_err;
     #undef FUNC
 }
 

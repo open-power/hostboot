@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -53,42 +55,6 @@ using namespace PRDF;
 class PrdfTest_MfgSync: public CxxTest::TestSuite
 {
     public:
-    void TestMfgThresSync(void)
-    {
-        #define PRDF_FUNC "PrdfTest_MfgThresSync"
-        PRDF_ENTER(PRDF_FUNC);
-
-        // Test 1: Test with mailbox status disabled
-        getSimMfgSync().setMailBoxStatus(false);
-        errlHndl_t l_err = getSimMfgSync().syncMfgThresholdFromFsp();
-        if (l_err)
-        {
-            PRDF_ERR(PRDF_FUNC" MfgThresSync test1 failed to sync from FSP");
-            PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            TS_FAIL(PRDF_FUNC" MfgThresSync test1 failed to sync from FSP");
-        }
-        else
-        {
-            PRDF_TRAC(PRDF_FUNC" MfgThresSync test1 is a success.");
-        }
-
-        // Test 2: Test with mailbox status enabled
-        getSimMfgSync().setMailBoxStatus(true);
-        l_err = getSimMfgSync().syncMfgThresholdFromFsp();
-        if (l_err)
-        {
-            PRDF_ERR(PRDF_FUNC" MfgThresSync test2 failed to sync from FSP");
-            PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            TS_FAIL(PRDF_FUNC" MfgThresSync test2 failed to sync from FSP");
-        }
-        else
-        {
-            PRDF_TRAC(PRDF_FUNC" MfgThresSync test2 is a success.");
-        }
-        PRDF_EXIT(PRDF_FUNC);
-        #undef PRDF_FUNC
-    }
-
     void TestMfgTraceSync(void)
     {
         #define PRDF_FUNC "PrdfTest_MfgTraceSync"

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,23 +44,7 @@ void MfgThresholdFile::syncFromFsp()
     #define FUNC "[MfgThresholdFile::syncFromFsp]"
     PRDF_ENTER(FUNC);
 
-    do
-    {
-        if ( !PlatServices::mfgMode() )
-        {
-            PRDF_TRAC(" no-op since not in MFG mode");
-            break;
-        }
-
-        errlHndl_t l_err = getMfgSync().syncMfgThresholdFromFsp();
-        if (l_err)
-        {
-            PRDF_ERR(FUNC" failed to sync from the FSP");
-            PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            break;
-        }
-
-    } while(0);
+    PRDF_TRAC(FUNC" Threshold sync no longer supported");
 
     PRDF_EXIT(FUNC);
     #undef FUNC

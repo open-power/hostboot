@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,80 +34,6 @@ namespace PRDF
 MfgSync& getMfgSync()
 {
     return PRDF_GET_SINGLETON(theMfgSync);
-}
-
-errlHndl_t MfgSync::syncMfgThresholdFromFsp()
-{
-    #define FUNC "[MfgSync::syncMfgThresholdFromFsp]"
-    PRDF_ENTER( FUNC );
-
-    errlHndl_t l_err = NULL;
-
-    // Only send message to FSP when mailbox is enabled
-    if( isMailboxEnabled() )
-    {
-        msg_t * msg = msg_allocate();
-
-        msg->type = MFG_THRES_SYNC_FROM_FSP;
-        msg->data[0] = 0;
-        msg->data[1] = 0;
-        msg->extra_data = NULL;
-
-        l_err = sendMboxMsg( msg );
-
-        if( NULL != l_err )
-        {
-            PRDF_ERR( FUNC" failed to send mbox msg" );
-        }
-        else
-        {
-            uint32_t l_msgSize = msg->data[1];
-            uint8_t* l_extraData = NULL;
-            l_extraData = static_cast<uint8_t*>(msg->extra_data);
-
-            if(0 == l_msgSize)
-            {
-                PRDF_TRAC( FUNC" No FSP MFG Thresholds to sync" );
-            }
-            else
-            {
-                PRDF_TRAC( "response message:" );
-                PRDF_TRAC( "type:  0x%04x", msg->type );
-                PRDF_TRAC( "data0: 0x%016llx", msg->data[0] );
-                PRDF_TRAC( "data1: 0x%016llx", msg->data[1] );
-                PRDF_TRAC( "extra_data: %p", msg->extra_data );
-
-                // save override thresholds
-                MfgThresholdFile * l_pMfgThresholdFile =
-                    MfgThresholdMgr::getInstance()->getMfgThresholdFile();
-                l_pMfgThresholdFile->unpackThresholdDataFromBuffer(
-                                                l_extraData, l_msgSize);
-            }
-        }
-
-        // free extra data and msg
-        if(NULL != msg)
-        {
-            if(NULL != msg->extra_data)
-            {
-                free( msg->extra_data );
-                msg->extra_data = NULL;
-            }
-
-            msg_free( msg );
-            msg = NULL;
-        }
-    }
-    else
-    {
-        PRDF_TRAC( FUNC" mailbox is not enabled, "
-                       "skipping MFG threshold sync." );
-    }
-
-    PRDF_EXIT( FUNC );
-
-    return l_err;
-    #undef FUNC
 }
 
 errlHndl_t MfgSync::syncMfgTraceToFsp( ErrorSignature *i_esig,
