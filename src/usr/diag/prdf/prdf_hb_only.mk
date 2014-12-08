@@ -37,6 +37,7 @@ prd_vpath += ${PRD_SRC_PATH}
 prd_vpath += ${PRD_SRC_PATH}/framework/config
 prd_vpath += ${PRD_SRC_PATH}/framework/resolution
 prd_vpath += ${PRD_SRC_PATH}/framework/service
+prd_vpath += ${PRD_SRC_PATH}/framework/register
 prd_vpath += ${PRD_SRC_PATH}/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/occ_firdata
 prd_vpath += ${PRD_SRC_PATH}/plat
@@ -48,6 +49,7 @@ prd_incpath += ${PRD_INC_PATH}/common # Stored differently in FSP
 prd_incpath += ${PRD_SRC_PATH}
 prd_incpath += ${PRD_SRC_PATH}/framework/config
 prd_incpath += ${PRD_SRC_PATH}/framework/resolution
+prd_incpath += ${PRD_SRC_PATH}/framework/register
 prd_incpath += ${PRD_SRC_PATH}/framework/service
 prd_incpath += ${PRD_SRC_PATH}/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/occ_firdata
@@ -78,6 +80,9 @@ prd_obj += prdfDumpResolution.o
 # framework/service/
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
+
+# framework/register
+prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfFileRegisterAccess.o)
 
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfPllUtils.o

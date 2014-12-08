@@ -44,6 +44,7 @@
 #include <config.h>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+  #include "ipl/attnfilereg.H"
   #include <diag/prdf/prdfPnorFirDataReader.H>
 #endif
 
@@ -121,7 +122,14 @@ errlHndl_t checkForCSAttentions()
             break;
         }
 
+        // Install File scom implementation
+        FileRegSvc fileRegs;
+        fileRegs.installScomImpl();
+
         // TODO: RTC 119543 Process the checkstop attention
+
+        // Uninstall File scom implementation.
+        Singleton<ScomImpl>::instance().installScomImpl();
 
         // Analysis is complete. Clear the PNOR data.
         errl = firData.clearPnor();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,9 @@
 
 #ifndef __prdfMain_ipl_H
 #define __prdfMain_ipl_H
+
+// Custom compile configs
+#include <config.h>
 
 /**
  * @file  prdfMain_ipl.H
@@ -65,6 +68,24 @@ extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_mba,
  *         the FFDC in the error log for failure details.
  */
 extern errlHndl_t startScrub();
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+/**
+ * @brief  Analyzes system checkstop errors based on information stored in PNOR
+ *         by the OCC.
+ * @param  i_attnType Global attention type.
+ * @param  i_attnList List of chips at attention.
+ * @return Error log for system checkstop analysis.
+ *
+ * @note Before analyzing attention, this function overrides default SCOM
+ *       operations to read from the PNOR data instead of hardware. After
+ *       analysis, it restores default SCOM operation to hardware.
+ */
+extern errlHndl_t analyzeCheckStop( ATTENTION_VALUE_TYPE i_attnType,
+                                    const AttnList & i_attnList );
+
+#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 } // end namespace PRDF
 

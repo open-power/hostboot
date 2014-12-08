@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/attn/hostboot/attn_hb.mk $
+# $Source: src/usr/diag/attn/ipl/attn_hb.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -25,3 +25,4 @@
 
 ATTN_HB_OBJS += attn.o
 ATTN_HB_OBJS += attnsvc.o
+ATTN_HB_OBJS += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), attnfilereg.o)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,13 @@
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfMbaDomain.H>
+
+// Custom compile configs
+#include <config.h>
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+  #include <prdfFileRegisterAccess.H>
+#endif
 
 using namespace TARGETING;
 using namespace HWAS;
@@ -185,5 +192,32 @@ errlHndl_t startScrub()
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+errlHndl_t analyzeCheckStop( ATTENTION_VALUE_TYPE i_attentionType,
+                             const AttnList & i_attnList )
+{
+    PRDF_ENTER( "PRDF::analyzeCheckStop() Global attnType=%04X",
+                i_attentionType );
+
+    // install file Scom Accessor
+    FileScomAccessor * fileScomAccessor = new FileScomAccessor();
+    getScomService().setScomAccessor( *fileScomAccessor);
+
+    // Call main to analyze checkstop
+    errlHndl_t errl = main( i_attentionType, i_attnList );
+
+    // Uninstall file scom. setScomAccessor() will also free up
+    // memory for fileScomAccessor.
+    ScomAccessor * scomAccessor = new ScomAccessor();
+    getScomService().setScomAccessor( *scomAccessor);
+
+    return errl;
+}
+
+#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 } // end namespace PRDF
