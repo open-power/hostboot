@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,7 +107,7 @@ struct ResetAndMaskTransformer
                 break;
 
             default:
-                o.op = NULL; // TODO: ERROR!  Assert...
+                o.op = NULL;
                 break;
         }
 
@@ -969,8 +969,6 @@ void RuleMetaData::createGroup(Group * i_group,
     for (int i = 0; i < i_data.cv_loadChip->cv_groupSize[i_groupId]; i++)
     {
         std::vector<uint8_t> l_bits; // Vector to hold bit string.
-
-        // TODO : handle & transformations.
 
         // Get expression for group's line.
         Prdr::Expr * l_expr = &i_data.cv_loadChip->cv_groups[i_groupId][i];

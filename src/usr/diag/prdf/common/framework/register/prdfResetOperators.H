@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -129,7 +131,6 @@ class OrOperator : public RegisterResetOperator
 
             if (RESETOPERATOR_RESET == Type)
             {
-                // Make sure this register was read.  (TODO: is this needed?)
                 readReg->Read();
 
                 if(readReg != writeReg)  // read different than write, move bits.
@@ -200,7 +201,6 @@ class AndOperator : public RegisterResetOperator
         }
         else // RESETOPERATOR_MASK
         {
-            // Make sure this register was read.  (TODO: is this needed?)
             readReg->Read();
 
             if(readReg != writeReg)  // read different than write, move bits.
@@ -257,7 +257,6 @@ class XorOperator : public RegisterResetOperator
         }
         else // RESETOPERATOR_MASK
         {
-            // Make sure this register was read.  (TODO: is this needed?)
             readReg->Read();
 
             if(readReg != writeReg)  // read different than write, move bits.

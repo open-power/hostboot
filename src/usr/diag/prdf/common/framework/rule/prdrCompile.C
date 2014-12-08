@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -355,8 +355,6 @@ std::list<std::string> prdrParseDoxygen(std::string & i_string)
     }
     l_result.push_back(l_input); // push long desc.
 
-    // TODO : take care of the @tags.
-
     return l_result;
 };
 
@@ -456,9 +454,10 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         }
 
         // Initialize SDC Flags.
-        // FIXME: Not quite happy with the way this is implemented. Would like
-        //        to move the macros to another file like we did with
-        //        prdfCalloutMap.H, but will need to do this later.
+        // FIXME: RTC 119976
+        // Not quite happy with the way this is implemented.
+        // Would like to move the macros to another file like we
+        // did with prdfCalloutMap.H, but will need to do this later.
         #define PRDF_SDC_FLAGS_MAP_ONLY
         #define PRDF_SDC_FLAGS_MAP
         #define PRDF_SDC_FLAG(name, value) \

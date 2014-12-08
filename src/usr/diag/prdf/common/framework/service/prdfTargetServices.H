@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,14 +137,6 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_target );
  *
  */
 void setHWStateChanged(TARGETING::TargetHandle_t i_target);
-
-/**
- * @brief   Get the chip ID (P7, P7+, etc.) of this target.
- * @param   i_target Any chip or unit target.
- * @return  The chip ID or 0 function failed.
- */
-//TODO: See .C
-//uint32_t getChipId( TARGETING::TargetHandle_t i_target );
 
 //##############################################################################
 //##

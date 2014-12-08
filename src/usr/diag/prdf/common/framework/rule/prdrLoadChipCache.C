@@ -79,12 +79,7 @@ namespace Prdr
             {
                 // NOTE: to patch PRF files require rebuilding
                 // entire Hostboot image and put in a special
-                // location on FSP /maint/ mount.
-                // FIXME: if we need to patch prf files directly
-                // on Hostboot, need to discuss with Patrick
-                // about a possibility of creating a new PNOR
-                // partition outside of the cryptographically
-                // signed area just for PRD.
+                // location on FSP /nfs/test/pnor/ mount.
 
                 const char * ext = ".prf";
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -254,8 +256,6 @@ public:
    * @return    reference to a resolution
    * @post      only one instance of this obect with these paramaters will exist
    */
-  // FIXME: Need support for clock targets
-  // FIXME: Need support for clock targets types
   Resolution & GetClockResolution(
                     TARGETING::TargetHandle_t i_pClockHandle = NULL ,
                     TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC );

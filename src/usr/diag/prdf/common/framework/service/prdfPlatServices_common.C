@@ -839,17 +839,6 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
     #undef PRDF_FUNC
 }
 
-
-//------------------------------------------------------------------------------
-
-/* TODO - Get the type of the card a DIMM is plugged into. This is needed for
-          the DRAM site locations for IS DIMMs. Should be able to get this from
-          an attribute but doesn't look like this is available yet.
-getDimmPlugCardType()
-{
-}
-*/
-
 //##############################################################################
 //##                    Maintenance Command class wrapper
 //##############################################################################

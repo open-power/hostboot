@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,8 +242,9 @@ void FabricDomain::SortForXstop()
     }
     else if (0 == l_internalOnlyCount)
     {
-        // TODO : add trace here... continue with analysis to determine
-        // which chip origined though.
+        PRDF_TRAC("[FabricDomain::SortForXstop] continue "
+                  "with analysis to determine which chip "
+                  "sourced the error.");
     }
 
     // --- Do graph reduction ---

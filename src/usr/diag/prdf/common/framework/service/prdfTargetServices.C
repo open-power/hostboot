@@ -61,7 +61,8 @@ namespace PlatServices
 //##
 //##############################################################################
 
-// FIXME: This function is using type PRDF::HUID. I think it should now be using
+// FIXME: RTC 62867
+//        This function is using type PRDF::HUID. I think it should now be using
 //        TARGETING::HUID_ATTR. Also, will need equivalent to
 //        PRDF::INVALID_HUID. I think HWSV has HWSV_INVALID_HUID, but I don't
 //        think that exists in Hostboot. Need a common interface before making
@@ -70,7 +71,8 @@ TARGETING::TargetHandle_t getTarget( HUID i_huid )
 {
     TargetHandle_t o_target = NULL;
 
-    // FIXME: This is an incredibly inefficient linear search. It is recommended
+    // FIXME: RTC 62867
+    //        This is an incredibly inefficient linear search. It is recommended
     //        that the common targeting code provide an interface for us so that
     //        all users can call the potentially optimized function. There is a
     //        function available in HWSV (hwsvTargetUtil.H) but not in Hostboot.
@@ -166,9 +168,6 @@ HUID getHuid( TARGETING::TargetHandle_t i_target )
     {
         if ( NULL == i_target ) break; // return INVALID_HUID
 
-        // TODO: get_huid() (src/include/usr/targeting/common/util.H) can be
-        //       called to fetch HUID however this feature is not yet available
-        //       in FSP yet.
         if ( !i_target->tryGetAttr<ATTR_HUID>(o_huid) )
         {
             PRDF_ERR( "[getHuid] Failed to get ATTR_HUID" );
@@ -328,20 +327,6 @@ void setHWStateChanged(TARGETING::TargetHandle_t i_target)
 
     #undef PRDF_FUNC
 }
-
-//------------------------------------------------------------------------------
-
-/* TODO: getChipId() may be available in an attribute, but this design has not
- *       been solidified. Instead, we may need to query for 'reason' attributes
- *       to determine the reason we need to do the checks. Since we don't have
- *       any immediate need for these functions (no workarounds as of yet), we
- *       will leave them commented out in the code.
-uint8_t getChipId( TARGETING::TargetHandle_t i_target )
-{
-    // Returns chip ID enum (i.e. P7, P7+, etc.)
-    return 0;
-}
-*/
 
 //##############################################################################
 //##
@@ -961,10 +946,8 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
             break;
         }
 
-        // FIXME: While this code works, it is preferred to use the POSITION
-        //        attribute of the node. Currently, this attribute does not
-        //        exist but it will, eventually. (RTC WI expected from Nick
-        //        Bofferding)
+        // FIXME: RTC 120711 will add NODE POSITION keyword
+        //        that we can use instead of ePath instance.
         EntityPath l_path ( EntityPath::PATH_PHYSICAL );
         int32_t l_rc = getEntityPath( node, l_path );
         if ( SUCCESS != l_rc ) break;

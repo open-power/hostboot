@@ -217,7 +217,6 @@ ResetErrorRegister::ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,
  * reset/mask registers.
  *
  * Will do masking if isAtThreshold().
- * Always does resets.  (TODO: Should this be done only on recov?)
  */
 class ResetAndMaskErrorRegister : public ErrorRegisterMask
 {

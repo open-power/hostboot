@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -23,18 +23,11 @@
 #
 # IBM_PROLOG_END_TAG
 
+
 #-------------------------------------------------------------------
-# To add a new chip, modify PRDR_RULE_TABLES line.
+# To add a new chip, modify PRDR_RULE_TABLES line in prdf_rule.mk
 # To change system type, modify VPATH line in rule/Makefile
 #-------------------------------------------------------------------
-
-# Add Rule tables here:
-# FIXME: This is now a duplicate of prd_rule_prf_targets in prdf_rule.mk
-PRDR_RULE_TABLES += Proc.prf
-PRDR_RULE_TABLES += Ex.prf
-PRDR_RULE_TABLES += Mcs.prf
-PRDR_RULE_TABLES += Membuf.prf
-PRDR_RULE_TABLES += Mba.prf
 
 #------------------------------------------------------------------
 # Change nothing below this line unless you know what you're doing!

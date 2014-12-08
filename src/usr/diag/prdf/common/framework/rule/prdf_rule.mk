@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -23,14 +23,15 @@
 #
 # IBM_PROLOG_END_TAG
 
-prd_rule_files += Proc.rule
-prd_rule_files += Ex.rule
-prd_rule_files += Mcs.rule
-prd_rule_files += Membuf.rule
-prd_rule_files += Mba.rule
+# Add Rule tables here:
+PRDR_RULE_TABLES += Proc.prf
+PRDR_RULE_TABLES += Ex.prf
+PRDR_RULE_TABLES += Mcs.prf
+PRDR_RULE_TABLES += Membuf.prf
+PRDR_RULE_TABLES += Mba.prf
 
-prd_rule_prf_targets  = ${prd_rule_files:.rule=.prf}
-prd_rule_err_targets  = ${prd_rule_files:.rule=.prf.err.C}
-prd_rule_reg_targets  = ${prd_rule_files:.rule=.prf.reg.C}
-prd_rule_html_targets = ${prd_rule_files:.rule=.prf.html}
+prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
+prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}
+prd_rule_reg_targets  = ${PRDR_RULE_TABLES:.prf=.prf.reg.C}
+prd_rule_html_targets = ${PRDR_RULE_TABLES:.prf=.prf.html}
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -68,7 +70,6 @@ class RuleChip : public ExtensibleChip
        instantiating ChipScopeLock at the beginning of the function.This is
        encapsulated by PRDF_LOCK_CHIP_SCOPE */
 
-        // TODO : add parameter for parent domains, connected chip classes.
         /**
          * @brief       constructor
          * @param[in]   i_fileName        name of Rule file

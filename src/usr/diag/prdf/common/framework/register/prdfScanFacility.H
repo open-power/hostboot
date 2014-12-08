@@ -93,28 +93,6 @@ public:
                                 SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp );
 
   /**
-   Get a scan ring register
-   * @param i_ptargetHandle        handle to target in targeting
-   * @param pointer to list an array of ScanRingField  see prdfHomRegisterAccess.H
-   * @param pointer to last entry+1 of ScanFingField array
-   * @pre   AliasId's for the scan ring registers MUST exist in the function unit
-          associated with the Id given
-   * @post  Access object and scr created for this register. the bit length of the
-          scr returned will be the sum of all the field lengths provided.
-   * @note  an SCR based on a scan ring register can not be written, and should
-          only be read if the global
-    attention type is CHECK_STOP.
-   */
-
-//FIXME  Need to discuss before deleting the function below
-#if 0
-  SCAN_COMM_REGISTER_CLASS & GetScanRingRegister(
-                                TARGETING::TargetHandle_t i_ptargetHandle,
-                                ScanRingField * start,
-                                ScanRingField * end);
-#endif
-
-  /**
    * @brief  Get a register that bitwise inverts the bitstring of a register
    *         when read or written to
    * @param  SCAN_COMM_REGISTER_CLASS source

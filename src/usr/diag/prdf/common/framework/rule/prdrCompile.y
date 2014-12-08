@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -650,7 +650,6 @@ bitgroup: PRDR_BIT_KW '(' bitandlist ')'        { $$ = $3; }
         | PRDR_BIT_KW '(' bitorlist ')'                { $$ = $3; }
 ;
 
-// TODO: Change to & instead of ,
 bitandlist: bitandlist ',' PRDR_INTEGER
     {
         $$ = new ExprOp2(Prdr::AND,
@@ -677,7 +676,6 @@ bitorlist: bitorlist '|' PRDR_INTEGER
     }
 ;
 
-// TODO: Merge attention types.
 rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE, $4);

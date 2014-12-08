@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,11 +70,8 @@ namespace PRDF
 // Member Function Specifications
 //---------------------------------------------------------------------
 
-// @jl02 a Start
 // This is used with the CHIP_CLASS vectors to remove one that matches a chipID
 // Predicate function for comparing chip IDs.  This is required by remove_if from STL.
-// TODO:FIXME: Add compiler directives or some method to make sure the type handling here
-// is generic enough or correct enough to handle future use of this functionality.
 class prdfCompareChipIds: public std::unary_function<void*&, bool>
 {
   public:
@@ -100,7 +97,6 @@ class prdfCompareChipIds: public std::unary_function<void*&, bool>
     //Private storage for value passed in.
     TARGETING::TargetHandle_t __cid;
 };
-// @jl02 a Stop
 
 template<class T>
 inline
