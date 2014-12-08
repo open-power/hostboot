@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -103,8 +103,7 @@ prd_obj += prdfMbaDomain.o
 prd_obj += prdfPlatServices_ipl.o
 
 # mnfgtools/
-prd_obj += prdfMfgSync.o          # TODO: RTC 118150 Will be refactored.
-prd_obj += prdfMfgThresholdFile.o # TODO: RTC 118150 Will be refactored.
+prd_obj += prdfMfgSync.o
 
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfCenMbaIplCeStats.o
@@ -146,16 +145,14 @@ endif
 # Rule for generated MNFG threshold header file
 ################################################################################
 
-MFG_THRES       = prdfMfgThresholds
+MFG_THRES       = prdfMfgThresholdAttrs
 MFG_THRES_H     = ${MFG_THRES}.H
 MFG_THRES_PL    = ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.pl
-MFG_THRES_LIST  = ${PRD_SRC_PATH}/common/mnfgtools/${MFG_THRES}.lst
+MFG_THRES_ATTR_H  = ${ROOTPATH}/obj/genfiles/attributeenums.H
 MFG_THRES_PATH  = ${ROOTPATH}/obj/genfiles/${MFG_THRES_H}
 
-GENFILES += ${MFG_THRES_H}
+CODE_PASS_PRE += ${MFG_THRES_PATH}
 
-${MFG_THRES_PATH} : ${MFG_THRES_LIST}
+${MFG_THRES_PATH} : ${MFG_THRES_ATTR_H}
 	${MFG_THRES_PL} $^ > $@
-
 EXTRA_CLEAN += ${MFG_THRES_PATH}
-

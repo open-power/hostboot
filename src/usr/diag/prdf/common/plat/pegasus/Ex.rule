@@ -1974,7 +1974,7 @@ actionclass analyzeNcuFir
 actionclass L3DirCE
 {
     calloutSelfHigh;
-    threshold( field(32 / day), mfg_file(P8EX_L3_DIR_CES) );
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_DIR_CES) );
 };
 
 actionclass L3UE
@@ -1989,14 +1989,14 @@ actionclass L3UE
 actionclass L3CE
 {
     calloutSelfHigh;
-    threshold( field(32 / day), mfg_file(P8EX_L3_CACHE_CES) );
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_CACHE_CES) );
     funccall("L3CE"); # This is no-operation for Hostboot
 };
 
 actionclass L2CE
 {
     calloutSelfHigh;
-    threshold( field(32 / day), mfg_file(P8EX_L2_CACHE_CES) );
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_CACHE_CES) );
     funccall("L2CE"); # This is no-operation for Hostboot
 };
 
@@ -2009,7 +2009,7 @@ actionclass L2UE
 actionclass L2DirCE
 {
     calloutSelfHigh;
-    threshold( field(32 / day), mfg_file(P8EX_L2_DIR_CES) );
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_DIR_CES) );
 };
 
 actionclass L2ChipLevel2

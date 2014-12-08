@@ -504,9 +504,9 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         // Initialize MFG thresholds.
         #define PRDF_MFGTHRESHOLD_TABLE_BEGIN
         #define PRDF_MFGTHRESHOLD_TABLE_END
-        #define PRDF_MFGTHRESHOLD_ENTRY(a,b,c) \
+        #define PRDF_MFGTHRESHOLD_ENTRY(a,b) \
             g_ActionArgMap[#a] = b;
-        #include <prdfMfgThresholds.H>
+        #include <prdfMfgThresholdAttrs.H>
 
 
         l_initialized = true;

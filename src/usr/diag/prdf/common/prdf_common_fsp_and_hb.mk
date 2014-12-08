@@ -115,7 +115,7 @@ prd_obj += prdfTargetServices.o
 prd_obj += xspprdsdbug.o
 
 # common/mnfgtools/
-prd_obj += prdfMfgThresholdFile_common.o
+prd_obj += prdfMfgThreshold.o
 prd_obj += prdfMfgThresholdMgr.o
 
 # common/plat/

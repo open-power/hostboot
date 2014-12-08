@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,7 +33,6 @@
 
 #include <prdfCenMbaThresholds_common.H>
 #include <prdfMfgThresholdMgr.H>
-#include <prdfMfgThresholds.H>
 
 namespace PRDF
 {
@@ -44,7 +45,7 @@ class ExtensibleChip;
 inline uint8_t getMnfgCeTh()
 {
     return MfgThresholdMgr::getInstance()->
-                    getThreshold( PRDF_CEN_MBA_IPL_SOFT_CE_TH_ALGO );
+            getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_IPL_SOFT_CE_TH_ALGO );
 
 }
 

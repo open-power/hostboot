@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,19 +30,14 @@ namespace PRDF
 {
 
 MfgThresholdMgr::MfgThresholdMgr() :
-  iv_file(NULL)
+  iv_mfgThres(NULL)
 {
 
 }
 
-
 MfgThresholdMgr::~MfgThresholdMgr()
 {
-    if(NULL != iv_file)
-    {
-        delete iv_file;
-        iv_file = NULL;
-    }
+    reset();
 }
 
 MfgThresholdMgr * MfgThresholdMgr::getInstance()
@@ -53,14 +48,12 @@ MfgThresholdMgr * MfgThresholdMgr::getInstance()
 
 uint8_t MfgThresholdMgr::getThreshold(uint32_t i_thrName)
 {
-    this->setupFile();
+    this->setupThresholds();
 
-    uint8_t l_thr = iv_file->getThreshold(i_thrName);
+    uint8_t l_thr = iv_mfgThres->getThreshold(i_thrName);
 
-    if ((MfgThresholdFileCommon::INFINITE_LIMIT_THR) <= l_thr)
-        return getThresholdDefault(i_thrName);
-    else if (0 == l_thr) // zero is the "infinite" threshold.
-        return (MfgThresholdFileCommon::INFINITE_LIMIT_THR);
+    if (0 == l_thr) // zero is the "infinite" threshold.
+        return (MfgThreshold::INFINITE_LIMIT_THR);
     else
         return l_thr;
 }
@@ -71,7 +64,7 @@ ThresholdResolution::ThresholdPolicy*
     uint8_t threshold = getThreshold(i_thrName);
     uint32_t interval = ThresholdResolution::NONE;
 
-    if( (MfgThresholdFileCommon::INFINITE_LIMIT_THR) <= threshold )
+    if( (MfgThreshold::INFINITE_LIMIT_THR) <= threshold )
     {
         PRDF_TRAC("MfgThresholdMgr::getThresholdP: "
                   "infinite threshold: 0x%x", i_thrName);
@@ -87,46 +80,25 @@ void MfgThresholdMgr::reset()
 {
     iv_thrs.clear();
 
-    if(NULL != iv_file)
+    if(NULL != iv_mfgThres)
     {
-        delete iv_file;
-        iv_file = NULL;
+        delete iv_mfgThres;
+        iv_mfgThres = NULL;
     }
 }
 
-MfgThresholdFile * MfgThresholdMgr::getMfgThresholdFile()
+MfgThreshold * MfgThresholdMgr::getMfgThreshold()
 {
-    setupFile();
-    return iv_file;
+    setupThresholds();
+    return iv_mfgThres;
 }
 
-uint8_t MfgThresholdMgr::getThresholdDefault(uint32_t i_thrName)
+void MfgThresholdMgr::setupThresholds()
 {
-    uint8_t l_value = 0;
-
-#define PRDF_MFGTHRESHOLD_TABLE_BEGIN if
-#define PRDF_MFGTHRESHOLD_TABLE_END \
-        (true) l_value = (MfgThresholdFileCommon::INFINITE_LIMIT_THR);
-#define PRDF_MFGTHRESHOLD_ENTRY(a,b,c) \
-        (i_thrName == b) { l_value = c; } else if
-#include <prdfMfgThresholds.H>
-
-    // zero is a special "infinite limit" value.
-    if (0 == l_value)
-        l_value = (MfgThresholdFileCommon::INFINITE_LIMIT_THR);
-
-    return l_value;
-}
-
-void MfgThresholdMgr::setupFile()
-{
-    if(NULL == iv_file)
+    if(NULL == iv_mfgThres)
     {
-// TODO: RTC 118150 Will be refactored.
-#ifndef __HOSTBOOT_RUNTIME
-        iv_file = new MfgThresholdFile();
-        iv_file->setup();
-#endif
+        iv_mfgThres = new MfgThreshold();
+        iv_mfgThres->setup();
     }
 }
 

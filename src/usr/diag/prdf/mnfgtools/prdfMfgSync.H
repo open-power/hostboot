@@ -27,7 +27,7 @@
 #define __PRDF_MFGSYNC_H
 
 #include <prdfGlobal.H>
-#include <prdfMfgThresholdFile.H>
+#include <prdfMfgThreshold.H>
 #include <prdfErrorSignature.H>
 #include <prdfPfa5Data.h>
 

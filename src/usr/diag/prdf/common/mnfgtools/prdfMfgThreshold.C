@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdFile.C $          */
+/* $Source: src/usr/diag/prdf/common/mnfgtools/prdfMfgThreshold.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,43 +23,71 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfMfgThresholdFile.H>
-#include <prdfGlobal.H>
+#include <prdfMfgThreshold.H>
 #include <prdfAssert.h>
-#include <prdfMfgSync.H>
-#include <prdfErrlUtil.H>
-#include <prdfPlatServices.H>
 #include <prdfTrace.H>
+#include <prdfTargetServices.H>
 
 namespace PRDF
 {
 
-void MfgThresholdFile::setup()
+using namespace TARGETING;
+
+uint8_t MfgThreshold::getThreshold(uint32_t i_thrName)
 {
-    syncFromFsp();
+    if (iv_thresholds.end() == iv_thresholds.find(i_thrName))
+        return INFINITE_LIMIT_THR;
+    else
+        return iv_thresholds[i_thrName];
 }
 
-void MfgThresholdFile::syncFromFsp()
+void MfgThreshold::setThreshold(uint32_t i_thrName, uint8_t i_value)
 {
-    #define FUNC "[MfgThresholdFile::syncFromFsp]"
-    PRDF_ENTER(FUNC);
-
-    PRDF_TRAC(FUNC" Threshold sync no longer supported");
-
-    PRDF_EXIT(FUNC);
-    #undef FUNC
+    iv_thresholds[i_thrName] = i_value;
 }
 
-void MfgThresholdFile::packThresholdDataIntoBuffer(
-                             uint8_t* & o_buffer,
-                             uint32_t i_sizeOfBuf)
+void MfgThreshold::clearThresholds()
 {
-    #define FUNC "[MfgThresholdFile::packThresholdDataIntoBuffer]"
-
-    PRDF_ERR(FUNC" not used in hostboot");
-
-    #undef FUNC
+    iv_thresholds.clear();
 }
 
+void MfgThreshold::setup()
+{
+    #define PRDF_FUNC "[MfgThreshold::setup] "
+    do
+    {
+        // Get top level target
+        TargetHandle_t l_sysTarget = NULL;
+        l_sysTarget = PlatServices::getSystemTarget();
+        if(NULL == l_sysTarget)
+        {
+            PRDF_ERR(PRDF_FUNC"No System target!");
+            break;
+        }
+
+        // Set the thresholds
+        #ifdef __PRDF_PRDFMFGTHRESHOLDS_H
+        #undef __PRDF_PRDFMFGTHRESHOLDS_H
+        #endif
+
+        #ifdef PRDF_MFGTHRESHOLD_ENTRY
+        #undef PRDF_MFGTHRESHOLD_TABLE_BEGIN
+        #undef PRDF_MFGTHRESHOLD_TABLE_END
+        #undef PRDF_MFGTHRESHOLD_ENTRY
+        #endif
+
+        #define PRDF_MFGTHRESHOLD_TABLE_BEGIN
+        #define PRDF_MFGTHRESHOLD_TABLE_END
+        #define PRDF_MFGTHRESHOLD_ENTRY(a,b)                 \
+        {                                                    \
+            uint8_t l_threshold = l_sysTarget->getAttr<a>(); \
+            this->setThreshold(a, l_threshold);              \
+        }
+        #include <prdfMfgThresholdAttrs.H>
+
+    }while(0);
+
+    #undef PRDF_FUNC
+}
 
 } // end namespace PRDF

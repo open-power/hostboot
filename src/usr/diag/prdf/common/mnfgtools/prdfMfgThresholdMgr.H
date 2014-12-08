@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,7 @@
 #define __PRDF_PRDFMFGTHRESHOLDMGR_H
 
 #include <stdint.h>
-#include <prdfMfgThresholdFile.H>
+#include <prdfMfgThreshold.H>
 #include <prdfThresholdResolutions.H>
 #include <prdfFlyWeight.H>
 
@@ -44,7 +46,7 @@ class MfgThresholdMgr
         /**
          *  @brief destructor
         */
-        virtual ~MfgThresholdMgr();
+        ~MfgThresholdMgr();
 
         /**
          * @brief get MfgThresholdMgr singleton
@@ -75,30 +77,22 @@ class MfgThresholdMgr
         void reset();
 
         /**
-         * @brief get MfgThresholdFile
+         * @brief get MfgThreshold
          *
-         * @return MfgThresholdFile pointer
+         * @return MfgThreshold pointer
          */
-        MfgThresholdFile * getMfgThresholdFile();
+        MfgThreshold* getMfgThreshold();
 
     private:
 
         /**
-         * @brief get default threshold value from name
-         * @param[in] i_thrName - threshold name
-         *
-         * @return corresponding threshold value
-         */
-        uint8_t getThresholdDefault(uint32_t i_thrName);
-
-        /**
-         *  @brief set up MfgThresholdFile
+         *  @brief set up MfgThreshold
         */
-        virtual void setupFile();
+        virtual void setupThresholds();
 
         FlyWeight<ThresholdResolution::ThresholdPolicy, 10> iv_thrs;
 
-        MfgThresholdFile * iv_file;
+        MfgThreshold* iv_mfgThres;
 };
 
 } // end namespace PRDF

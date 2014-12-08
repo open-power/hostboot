@@ -93,12 +93,6 @@ actionclass threshold5pday
     threshold( field(5 / day) );
 };
 
-/** Threshold OnNode Bus CE */
-actionclass thresholdOnNode
-{
-    threshold( field(32 / day), mfg_file(P8CHIP_ONNODE_BUS_CES));
-};
-
 ################################################################################
 #                       Threshold and Mask policy
 ################################################################################

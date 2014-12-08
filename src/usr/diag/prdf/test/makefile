@@ -40,7 +40,6 @@ PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
 #------------------------------------------------------------------------------
 OBJS += prdfsimMfgSync.o
 OBJS += prdfsimFspSyncSvc.o
-OBJS += prdfsimFspMfgThresholdFile.o
 
 TESTS += prdfTest_MfgSync.H
 

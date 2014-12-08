@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -1386,7 +1386,7 @@ actionclass analyzeFetchUe1
 actionclass clearSecMbsBitsAndLineDelete
 {
     calloutL4;
-    threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_CEN_L4_CACHE_CES));
     funccall("CaptureL4CacheErr");
     funccall("ClearServiceCallFlag");
     funccall("ClearMbsSecondaryBits");
@@ -1396,7 +1396,7 @@ actionclass clearSecMbsBitsAndLineDelete
 actionclass clearSecMbaCalBitsAndLineDelete
 {
     calloutL4;
-    threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_CEN_L4_CACHE_CES));
     funccall("CaptureL4CacheErr");
     funccall("ClearServiceCallFlag");
     funccall("ClearMbaCalSecondaryBits");

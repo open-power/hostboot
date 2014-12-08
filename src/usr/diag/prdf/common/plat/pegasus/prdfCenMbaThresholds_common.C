@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 
 // Framework includes
 #include <prdfExtensibleChip.H>
-#include <prdfMfgThresholds.H>
 #include <prdfMfgThresholdMgr.H>
 #include <prdfPlatServices.H>
 
@@ -59,7 +58,7 @@ ThresholdResolution::ThresholdPolicy getRceThreshold()
     if ( mfgMode() )
     {
         th = MfgThresholdMgr::getInstance()->
-                                getThreshold( PRDF_CEN_MBA_RT_RCE_PER_RANK );
+                           getThreshold( ATTR_MNFG_TH_CEN_MBA_RT_RCE_PER_RANK );
 
         if( th > MBA_RCE_NON_MNFG_TH ) th = MBA_RCE_NON_MNFG_TH;
     }
@@ -87,7 +86,7 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         if ( 0 == baseTh )
         {
             o_cePerDram = o_cePerHalfRank = o_cePerDimm =
-                                    MfgThresholdFileCommon::INFINITE_LIMIT_THR;
+                                    MfgThreshold::INFINITE_LIMIT_THR;
             break;
         }
 

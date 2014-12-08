@@ -25,7 +25,6 @@
 
 #include <prdfsimFspSyncSvc.H>
 #include <prdfMfgThresholdMgr.H>
-#include <prdfsimFspMfgThresholdFile.H>
 #include <prdfAssert.h>
 #include <prdfEnums.H>
 #include <prdfErrlUtil.H>

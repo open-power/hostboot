@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdFile.H $          */
+/* $Source: usr/diag/prdf/common/mnfgtools/prdfMfgThreshold.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -21,38 +23,68 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDF_PRDFMFGTHRESHOLDFILE_H
-#define __PRDF_PRDFMFGTHRESHOLDFILE_H
+#ifndef __PRDFMFGTHRESHOLD_H
+#define __PRDFMFGTHRESHOLD_H
 
-#include <prdfMfgThresholdFile_common.H>
+#include <stdint.h>
+#include <map>
 
 namespace PRDF
 {
 
-class MfgThresholdFile : public MfgThresholdFileCommon
+class MfgThreshold
 {
     public:
 
         /**
-         *  @brief configure MfgThresholdFile
+         *  @brief threshold map
         */
-        virtual void setup();
+        typedef std::map<uint32_t, uint8_t> Threshold_t;
 
         /**
-         * @brief serialize threshold data into data buffer
-         * @param[in/out] o_buffer - data buffer
-         * @param[in] i_sizeOfBuf - size of buffer
+         * @brief Infinite threshold enum
+        */
+        enum { INFINITE_LIMIT_THR = 0xff };
+
+        /**
+         *  @brief constructor
+        */
+        MfgThreshold() {};
+
+        /**
+         *  @brief destructor
+        */
+        ~MfgThreshold() {};
+
+        /**
+         *  @brief setup the thresholds
+        */
+        void setup();
+
+        /**
+         * @brief get threshold value from name
+         * @param[in] i_thrName - threshold name
+         *
+         * @return corresponding threshold value
          */
-        virtual void packThresholdDataIntoBuffer(
-                                    uint8_t* & o_buffer,
-                                    uint32_t i_sizeOfBuf);
-
-    private:
+        uint8_t getThreshold(uint32_t i_thrName);
 
         /**
-         *  @brief sync MFG thresholds from FSP
-        */
-        void syncFromFsp();
+         * @brief set threshold name/value
+         * @param[in] i_thrName - threshold name
+         * @param[in] i_value - threshold value
+         */
+        void setThreshold(uint32_t i_thrName, uint8_t i_value);
+
+        /**
+         * @brief clear all thresholds
+         *
+         */
+        void clearThresholds();
+
+    protected:
+
+        Threshold_t iv_thresholds;
 
 };
 

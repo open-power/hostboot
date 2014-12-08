@@ -2,11 +2,13 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/mnfgtools/prdfMfgThresholds.pl $
+# $Source: src/usr/diag/prdf/common/mnfgtools/prdfMfgThresholdAttrs.pl $
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2009,2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,42 +26,26 @@
 
 use strict;
 
-sub adler32_sum
-{
-    my $a = 1;
-    my $b = 0;
-    foreach (split //, shift)
-    {
-        $a = $a + ord($_);
-        $b = $a + $b;
-
-        $a = $a % 65521;
-        $b = $b % 65521;
-    }
-
-    return (($b << 16) | $a) & 0x7FFFFFFF;
-}
-
 if (0 != $#ARGV)
 {
-    print "prdfMfgThresholds.pl <threshold list>\n";
+    print "prdfMfgThresholdAttrs.pl <threshold list>\n";
     exit;
 }
 
-if (not -e $ARGV[0])
+unless (-e $ARGV[0])
 {
     die "Couldn't find ".$ARGV[0];
 }
 
-print "#ifndef __PRDF_PRDFMFGTHRESHOLDS_H\n";
-print "#define __PRDF_PRDFMFGTHRESHOLDS_H\n";
+print "#ifndef __PRDF_PRDFMFGTHRESHOLDATTRS_H\n";
+print "#define __PRDF_PRDFMFGTHRESHOLDATTRS_H\n";
 print "#ifndef PRDF_MFGTHRESHOLD_ENTRY\n";
 print "#define PRDF_MFGTHRESHOLD_TABLE_BEGIN \\\n";
-print "\tenum PrdfMfgThresholds {\n";
+print "\tenum PrdfMfgThresholdAttrs {\n";
 print "#define PRDF_MFGTHRESHOLD_TABLE_END \\\n";
 print "\t};\n";
-print "#define PRDF_MFGTHRESHOLD_ENTRY(a,b,c) \\\n";
-print "\tPRDF_##a = b,\n";
+print "#define PRDF_MFGTHRESHOLD_ENTRY(a,b) \\\n";
+print "\ta = b,\n";
 print "#endif\n";
 print "\n";
 print "PRDF_MFGTHRESHOLD_TABLE_BEGIN\n";
@@ -74,12 +60,21 @@ while (my $line = <THRESHOLDS>)
     {
         next;
     }
-    my ($name, $value) = split ' ',$line;
-    $value =~ s/unlimited/0/i;
 
-    my $hash_value = adler32_sum($name);
+    if (($line !~ "ATTR_MNFG_TH_") and ($line !~ "ATTR_FIELD_TH_"))
+    {
+        next;
+    }
 
-    print "\tPRDF_MFGTHRESHOLD_ENTRY($name, $hash_value, $value)\n";
+    # Remove the blank spaces
+    $line =~ s/ //g;
+
+    # Remove the token ","
+    $line =~ s/,//g;
+
+    my ($name, $value) = split '=',$line;
+
+    print "\tPRDF_MFGTHRESHOLD_ENTRY($name, $value)\n";
 }
 close(THRESHOLDS);
 
