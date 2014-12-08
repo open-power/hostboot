@@ -119,6 +119,7 @@ errlHndl_t checkForCSAttentions()
         if ( !validData )
         {
             // Nothing to do, exit quietly.
+            ATTN_SLOW("No PNOR data found, nothing to analyze.");
             break;
         }
 
@@ -126,7 +127,13 @@ errlHndl_t checkForCSAttentions()
         FileRegSvc fileRegs;
         fileRegs.installScomImpl();
 
-        // TODO: RTC 119543 Process the checkstop attention
+        // Process the checkstop attention
+        errl = Singleton<Service>::instance().processCheckstop();
+        if ( NULL != errl )
+        {
+            firData.addFfdc( errl );
+            errlCommit( errl, ATTN_COMP_ID );
+        }
 
         // Uninstall File scom implementation.
         Singleton<ScomImpl>::instance().installScomImpl();

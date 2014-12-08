@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,13 @@
 #include "common/attnmem.H"
 #include <util/singleton.H>
 #include <errl/errlmanager.H>
+
+// Custom compile configs
+#include <config.h>
+
+#if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_ENABLE_CHECKSTOP_ANALYSIS)
+  #include <prdf/prdfMain_ipl.H>
+#endif
 
 using namespace std;
 using namespace PRDF;
@@ -77,7 +84,19 @@ errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
         // requirement that the highest priority attention
         // appear first in the argument list is satisfied.
 
-        err = PRDF::main(attnList.front().attnType, attnList);
+        // Checkstop can only be handled in next IPL session. Call
+        // separate function to handle CS.
+        #if !defined(__HOSTBOOT_RUNTIME) && \
+            defined(CONFIG_ENABLE_CHECKSTOP_ANALYSIS)
+        if( MACHINE_CHECK == attnList.front().attnType )
+        {
+            err = PRDF::analyzeCheckStop(attnList.front().attnType, attnList);
+        }
+        else
+        #endif
+        {
+            err = PRDF::main(attnList.front().attnType, attnList);
+        }
     }
 
     return err;

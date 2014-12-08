@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/attnsvc.H $                        */
+/* $Source: src/usr/diag/attn/ipl/attnsvc.H $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,9 @@
 #include <sys/task.h>
 #include <sys/sync.h>
 #include "common/attnsvc_common.H"
+
+// Custom compile configs
+#include <config.h>
 
 namespace ATTN
 {
@@ -90,6 +93,18 @@ class Service : public ServiceCommon
          * @brief dtor
          */
         ~Service();
+
+        #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+        /**
+         * @brief Process checlstop attentions.
+         *
+         * @retval[0] no error
+         * @retval[!0] unexpected error
+         */
+        errlHndl_t processCheckstop();
+
+        #endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
     private:
 

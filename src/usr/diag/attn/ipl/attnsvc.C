@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/attnsvc.C $                        */
+/* $Source: src/usr/diag/attn/ipl/attnsvc.C $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,9 @@
 #include "common/attnproc.H"
 #include "common/attnmem.H"
 #include "common/attntarget.H"
+
+// Custom compile configs
+#include <config.h>
 
 using namespace std;
 using namespace PRDF;
@@ -215,6 +218,68 @@ void Service::processIntrQMsg(msg_t & i_msg)
     sync_cond_signal(&iv_cond);
 
 }
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+errlHndl_t Service::processCheckstop()
+{
+    errlHndl_t err = NULL;
+    AttentionList attentions;
+
+    assert(!Singleton<Service>::instance().running());
+    TargetHandleList list;
+
+    MemOps & memOps = getMemOps();
+    ProcOps & procOps = getProcOps();
+    attentions.clear();
+
+    getTargetService().getAllChips(list, TYPE_PROC);
+
+    TargetHandleList::iterator tit = list.begin();
+
+    while(tit != list.end())
+    {
+        // query the proc resolver for active attentions
+
+        err = procOps.resolve( *tit, 0, attentions);
+
+        if(err)
+        {
+            ATTN_ERR("procOps.resolve() returned error.HUID:0X%08X ",
+                      get_huid( *tit ));
+            break;
+        }
+
+        // query the mem resolver for active attentions
+
+        err = memOps.resolve(*tit, attentions);
+
+        if(err)
+        {
+            ATTN_ERR("memOps.resolve() returned error.HUID:0X%08X ",
+                      get_huid( *tit ));
+            break;
+        }
+        ++tit;
+    }
+
+    if( NULL != err )
+    {
+        if(!attentions.empty())
+        {
+            err = getPrdWrapper().callPrd(attentions);
+        }
+
+        if(err)
+        {
+            ATTN_ERR("callPrd() returned error." )
+        }
+    }
+
+    return err;
+}
+
+#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 void* Service::prdTask(void * i_svc)
 {
