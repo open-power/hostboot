@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,6 +181,12 @@ namespace TRACE
      */
     void flushBuffers();
 
+    /**
+     *  @brief Return if debug trace is enabled for input trace descriptor
+     *
+     *  @param [in] i_td Trace descriptor to check for debug enable
+     */
+    bool isDebugEnabled(ComponentDesc * i_td);
 
 };
 

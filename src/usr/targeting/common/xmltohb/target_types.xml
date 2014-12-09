@@ -123,6 +123,7 @@
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
     <attribute><id>MNFG_FLAGS</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
+    <attribute><id>MFG_TRACE_ENABLE</id></attribute>
     <!-- Start memory_attributes.xml -->
     <attribute><id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id></attribute>
     <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>

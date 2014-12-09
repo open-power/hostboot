@@ -15089,9 +15089,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
 </attribute>
+
+<attribute>
+    <id>MFG_TRACE_ENABLE</id>
+    <description>
+        Override this to a non-zero value to have the FAPI manufacturing
+        traces output to the console or go to a fsp trace buffer when
+        console not enabled.
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MFG_TRACE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
-
-
-
-
-

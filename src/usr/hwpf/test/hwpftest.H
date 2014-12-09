@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -181,6 +183,10 @@ public:
         FAPI_DBG("Test DBG Trace. string: %s", l_pStr);
         FAPI_DBG("Test DBG Trace. 0x%x, %s", l_val, l_pStr);
 
+        FAPI_MFG("Test MFG Trace");
+        FAPI_MFG("Test MFG Trace. hex: 0x%x", l_val);
+        FAPI_MFG("Test MFG Trace. string: %s", l_pStr);
+        FAPI_MFG("Test MFG Trace. 0x%x, %s", l_val, l_pStr);
         return;
     }
 

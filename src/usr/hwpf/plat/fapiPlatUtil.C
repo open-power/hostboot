@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@
 trace_desc_t* g_fapiTd;
 trace_desc_t* g_fapiImpTd;
 trace_desc_t* g_fapiScanTd;
+trace_desc_t* g_fapiMfgTd;
 
 //******************************************************************************
 // Global TracInit objects. Construction will initialize the trace buffer
@@ -60,6 +61,7 @@ trace_desc_t* g_fapiScanTd;
 TRAC_INIT(&g_fapiTd, FAPI_TRACE_NAME, 2*KILOBYTE);
 TRAC_INIT(&g_fapiImpTd, FAPI_IMP_TRACE_NAME, 2*KILOBYTE);
 TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4*KILOBYTE);
+TRAC_INIT(&g_fapiMfgTd, FAPI_MFG_TRACE_NAME, 4*KILOBYTE);
 
 extern "C"
 {

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +38,7 @@
 
 #include <stdio.h>
 #include <trace/interface.H>
+#include <config.h>
 
 //******************************************************************************
 // Trace buffer names
@@ -43,6 +46,7 @@
 const char * const FAPI_TRACE_NAME = "FAPI";
 const char * const FAPI_IMP_TRACE_NAME = "FAPI_I";
 const char * const FAPI_SCAN_TRACE_NAME = "SCAN";
+const char * const FAPI_MFG_TRACE_NAME = "FAPI_MFG";
 
 //******************************************************************************
 // Trace descriptors that are defined in a C file
@@ -50,6 +54,7 @@ const char * const FAPI_SCAN_TRACE_NAME = "SCAN";
 extern trace_desc_t* g_fapiTd;
 extern trace_desc_t* g_fapiImpTd;
 extern trace_desc_t* g_fapiScanTd;
+extern trace_desc_t* g_fapiMfgTd;
 
 // Information traces (go into fast trace buffer that can wrap often)
 #define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiTd, TRACE_FILENAME _fmt_, ##_args_ )
@@ -65,5 +70,24 @@ extern trace_desc_t* g_fapiScanTd;
 
 // Scan traces
 #define FAPI_SCAN(_fmt_, _args_...) TRACSCOMP(g_fapiScanTd, _fmt_, ##_args_)
+
+// FAPI Mfg traces
+#if defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME) && \
+                               !defined(CONFIG_CONSOLE_OUTPUT_TRACE)
+#include <console/consoleif.H>
+// Traces will go to console if attr override set for this
+#define FAPI_MFG(_fmt_, _args_...) \
+    { \
+        if(TRACE::isDebugEnabled(g_fapiMfgTd)) \
+        { \
+            CONSOLE::displayf(FAPI_MFG_TRACE_NAME,_fmt_, ##_args_); \
+        } \
+    }
+#else
+    // Just define to standard TRACS buffer
+#define FAPI_MFG(_fmt_, _args_...) \
+    TRACSCOMP(g_fapiMfgTd, _fmt_, ##_args_)
+#endif
+
 
 #endif // PLATTRACE_H_
