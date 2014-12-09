@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -737,7 +737,7 @@ class SPDTest: public CxxTest::TestSuite
                 // Test on first DIMM only.
                 theTarget = dimmList[0];
                 //If theData is NULL, deviceRead will return the size
-                // need to give this an arbitrary size so test is still valid`
+                // need to give this an arbitrary size so test is still valid
                 uint8_t * theData = static_cast<uint8_t*>(malloc( 0x1 ));
                 size_t theSize = 0x0;   // Invalid size of 0x0
 

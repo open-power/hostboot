@@ -40,6 +40,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/vpd_if.H>
 #include <config.h>
+#include <vpd/ipvpdenums.H>
 
 #include "vpd.H"
 #include "ipvpd.H"
@@ -147,15 +148,28 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
             break;
         }
 
-        // use record offset to find/read the keyword
-        err = retrieveKeyword( keywordName,
-                               recordName,
-                               recordOffset,
-                               0,
-                               i_target,
-                               io_buffer,
-                               io_buflen,
-                               i_args );
+        if(IPVPD::FULL_RECORD == i_args.keyword)
+        {
+            // full record
+            err = retrieveRecord(  recordName,
+                                   recordOffset,
+                                   i_target,
+                                   io_buffer,
+                                   io_buflen,
+                                   i_args );
+        }
+        else //specific keyword
+        {
+            // use record offset to find/read the keyword
+            err = retrieveKeyword( keywordName,
+                                   recordName,
+                                   recordOffset,
+                                   0,
+                                   i_target,
+                                   io_buffer,
+                                   io_buflen,
+                                   i_args );
+        }
 
         if( err )
         {
@@ -1376,6 +1390,77 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
 
     TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"IpVpdFacade::retrieveKeyword()" );
+
+    return err;
+}
+
+// ------------------------------------------------------------------
+// IpVpdFacade::retrieveRecord
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
+                                          uint16_t i_offset,
+                                          TARGETING::Target * i_target,
+                                          void * io_buffer,
+                                          size_t & io_buflen,
+                                          input_args_t i_args )
+{
+    errlHndl_t err = NULL;
+    uint16_t l_size = 0x0;
+
+    TRACUCOMP( g_trac_vpd,
+                ENTER_MRK"IpVpdFacade::retrieveRecord()" );
+
+    do
+    {
+        // Get the record size.. it is the first two bytes of the record
+        err = fetchData( i_offset,
+                         sizeof(l_size),
+                         &l_size,
+                         i_target,
+                         i_args.location );
+
+        if( err )
+        {
+            break;
+        }
+
+        //byteswap
+        l_size = le16toh(l_size);
+
+        // If the buffer is NULL, return the keyword size in io_buflen
+        if( NULL == io_buffer )
+        {
+            io_buflen = l_size;
+            break;
+        }
+
+        // check size of usr buffer with io_buflen
+        err = checkBufferSize( io_buflen,
+                               (size_t)l_size,
+                               i_target );
+        if( err )
+        {
+            break;
+        }
+
+        // Read keyword data into io_buffer
+        err = fetchData( i_offset,
+                         l_size,
+                         io_buffer,
+                         i_target,
+                         i_args.location );
+        if( err )
+        {
+            break;
+        }
+
+        // Everything worked
+        io_buflen = l_size;
+
+    } while(0);
+
+    TRACUCOMP( g_trac_vpd,
+                EXIT_MRK"IpVpdFacade::retrieveRecord()" );
 
     return err;
 }

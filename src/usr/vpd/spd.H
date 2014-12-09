@@ -99,7 +99,7 @@ struct KeywordData
 {
     uint16_t keyword;   // SPD keyword this data corresponds to
     uint16_t offset;    // Byte offset in the SPD data
-    uint8_t length;     // Number of bytes to retrieve
+    uint16_t length;     // Number of bytes to retrieve
     uint8_t bitMask;    // Bit mask, if non-zero it is used to mask off bits.
                         // This applies to only byte0 in a non special case
     uint8_t shift;      // Used for fields < 1 byte to right justify all values.

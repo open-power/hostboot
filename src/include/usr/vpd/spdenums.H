@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -315,6 +315,7 @@ enum
 
     // This keyword should be last in the list
     // Invalid Keyword
+    ENTIRE_SPD                          = 0xFFFE,  //read entire SPD
     INVALID_SPD_KEYWORD                 = 0xFFFF,
 };
 

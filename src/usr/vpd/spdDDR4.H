@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -159,6 +161,7 @@ const KeywordData ddr4Data[] =
     { RMM_ADDR_MAPPING,                 0x88,   0x01,   0x01,   0x00, false, false, RMM },
     { RMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, RMM },
     { LRMM_CRC,                         0xff,   0x02,   0x00,   0x00, true,  false, LRMM },
+    { ENTIRE_SPD,                       0x00,  0x200,   0x00,   0x00, false, false,  ALL },
     //---------------------------------------------------------------------------------------
 };
 

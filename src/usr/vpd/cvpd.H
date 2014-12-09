@@ -162,6 +162,9 @@ namespace CVPD
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_KEYWORD, "XX" },
         // -------------------------------------------------------------------
+
+        //Common ipvpd
+        { FULL_RECORD, "FL"},
     };
 
 }; // end CVPD namespace

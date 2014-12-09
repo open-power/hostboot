@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __CVPDENUMS_H
 #define __CVPDENUMS_H
+
+#include <vpd/ipvpdenums.H>
 
 namespace CVPD
 {
@@ -46,7 +48,9 @@ namespace CVPD
         // Last Record
         CVPD_LAST_RECORD,
         CVPD_TEST_RECORD,   // Test purposes ONLY!
-        CVPD_INVALID_RECORD = 0xFFFF,
+
+        //Start common IPVPD enums
+        CVPD_INVALID_RECORD = IPVPD::INVALID_RECORD,
     };
 
     /**
@@ -120,7 +124,10 @@ namespace CVPD
         // Last Keyword
         CVPD_LAST_KEYWORD,
         CVPD_TEST_KEYWORD,  // Test purposes ONLY!
-        CVPD_INVALID_KEYWORD    = 0xFFFF,
+
+        //Start common IPVPD enums
+        FULL_RECORD = IPVPD::FULL_RECORD,
+        CVPD_INVALID_KEYWORD    = IPVPD::INVALID_KEYWORD,
     };
 
 };  // end CVPD

@@ -49,6 +49,9 @@
 #include <i2c/i2cif.H>
 #include <i2c/eepromif.H>
 #include <ipmi/ipmisensor.H>
+#include <fapi.H>
+#include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
+#include <vpd/mvpdenums.H>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -1441,6 +1444,188 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
     return errhdl;
 }
 
+errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
+{
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
+    errlHndl_t errhdl = NULL;
+    size_t vpdSize;
+
+    do
+    {
+        /* Find the / node and add a vpd node under it. */
+        dtOffset_t rootNode = i_dt->findNode("/");
+        dtOffset_t vpdNode = i_dt->addNode(rootNode, "vpd");
+
+        // Grab a system object to work with
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+
+
+        /***************************************************************/
+        /* Add the ibm,vpd for all functional procs                    */
+        /***************************************************************/
+        // Add vpd (VINI record) for all functional procs
+        // and #V for all functional cores
+        TARGETING::TargetHandleList l_cpuTargetList;
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        for ( size_t proc = 0;
+              (!errhdl) && (proc < l_cpuTargetList.size()); proc++ )
+        {
+            TARGETING::Target * l_pProc = l_cpuTargetList[proc];
+
+            uint32_t l_procId = getProcChipId(l_pProc);
+            dtOffset_t procNode = i_dt->addNode(vpdNode, "processor",
+                                               l_procId);
+
+            // Read entire VINI record to stuff in devtree
+            // Note: First read with NULL for o_buffer sets vpdSize to the
+            // correct length
+            errhdl = deviceRead( l_pProc,
+                              NULL,
+                              vpdSize,
+                              DEVICE_MVPD_ADDRESS( MVPD::VINI,
+                                                   MVPD::FULL_RECORD ));
+
+            if(errhdl)
+            {
+                TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't get VINI size for HUID=0x%.8X",
+                          TARGETING::get_huid(l_pProc));
+                break;
+            }
+
+            uint8_t viniBuf[vpdSize];
+
+            errhdl = deviceRead( l_pProc,
+                              reinterpret_cast<void*>( &viniBuf ),
+                              vpdSize,
+                              DEVICE_MVPD_ADDRESS( MVPD::VINI,
+                                                   MVPD::FULL_RECORD ));
+
+            if(errhdl)
+            {
+                TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't read VINI for HUID=0x%.8X",
+                          TARGETING::get_huid(l_pProc));
+                break;
+            }
+
+            //Add the proc chips vpd
+            i_dt->addPropertyBytes(procNode, "ibm,vpd", viniBuf, vpdSize);
+
+            /***************************************************************/
+            /* Add the #V bucket for each functional core                  */
+            /***************************************************************/
+            TARGETING::TargetHandleList l_exlist;
+            getChildChiplets( l_exlist, l_pProc, TYPE_CORE );
+            for (size_t core = 0; core < l_exlist.size(); core++)
+            {
+                const TARGETING::Target * l_ex = l_exlist[core];
+
+                uint32_t l_coreNum = l_ex->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                INTR::PIR_t pir(0);
+                pir.nodeId = CHIPID_EXTRACT_NODE(l_procId);
+                pir.chipId = CHIPID_EXTRACT_PROC(l_procId);
+                pir.coreId = l_coreNum;
+
+                // Get #V bucket data
+                uint32_t l_record = (uint32_t) MVPD::LRP0 + l_coreNum;
+                fapi::voltageBucketData_t l_poundVdata = {0};
+                fapi::ReturnCode l_rc = fapiGetPoundVBucketData(l_pProc,
+                                                                l_record,
+                                                                l_poundVdata);
+                if(l_rc)
+                {
+                    TRACFCOMP( g_trac_devtree,ERR_MRK"Error getting #V data for HUID:"
+                               "0x%08X",
+                               l_pProc->getAttr<TARGETING::ATTR_HUID>());
+
+                    // Convert fapi returnCode to Error handle
+                    errhdl = fapiRcToErrl(l_rc);
+                    break;
+                }
+
+                //Add the attached core
+                dtOffset_t exNode = i_dt->addNode(procNode, "cpu",
+                                                    pir.word);
+
+                i_dt->addPropertyBytes(exNode, "frequency,voltage",
+                                     reinterpret_cast<uint8_t*>( &l_poundVdata),
+                                     sizeof(fapi::voltageBucketData_t));
+            }
+            if(errhdl)
+            {
+                break;
+            }
+        }
+        if(errhdl)
+        {
+            break;
+        }
+
+#if 0   //TODO RTC123250 -- re-enable once fixed
+        /***************************************************************/
+        /* Now loop on all the dimms in the system and add their spd   */
+        /***************************************************************/
+
+        // Get all functional dimm targets
+        TARGETING::TargetHandleList l_dimmList;
+        getAllLogicalCards(l_dimmList, TYPE_DIMM);
+        size_t spdSize;
+
+        for ( size_t dimm = 0;
+              (!errhdl) && (dimm < l_dimmList.size()); dimm++ )
+        {
+            TARGETING::Target * l_pDimm = l_dimmList[dimm];
+            uint32_t l_huid = TARGETING::get_huid(l_pDimm);
+
+            dtOffset_t dimmNode = i_dt->addNode(vpdNode, "dimm",
+                                                l_huid);
+
+            // Read entire SPD record to stuff in devtree
+            // Note: First read with NULL for o_buffer sets spdSize to the
+            // correct length
+            errhdl = deviceRead( l_pDimm,
+                                 NULL,
+                                 spdSize,
+                                 DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
+
+            if(errhdl)
+            {
+                TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't get SPD size for HUID=0x%.8X",
+                          TARGETING::get_huid(l_pDimm));
+                break;
+            }
+
+            uint8_t spdBuf[spdSize];
+
+            errhdl = deviceRead( l_pDimm,
+                                 reinterpret_cast<void*>( &spdBuf ),
+                                 spdSize,
+                                 DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
+
+            if(errhdl)
+            {
+                TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't read SPD for HUID=0x%.8X",
+                          TARGETING::get_huid(l_pDimm));
+                break;
+            }
+
+            //Add the dimm spd
+            i_dt->addPropertyBytes(dimmNode, "spd", spdBuf, spdSize);
+        }
+        if(errhdl)
+        {
+            break;
+        }
+#endif
+
+    }while(0);
+
+    return errhdl;
+}
+
 errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
                               bool i_smallTree )
 {
@@ -1498,6 +1683,12 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
         }
 #endif
 
+        TRACFCOMP( g_trac_devtree, "---devtree vpd ---" );
+        errhdl = bld_fdt_vpd(dt, i_smallTree);
+        if(errhdl)
+        {
+            break;
+        }
     }while(0);
 
     return errhdl;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,10 +141,14 @@ namespace MVPD
         { MK,  "MK" },
         { PB,  "PB" },
         { CH,  "CH" },
+
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { MVPD_TEST_KEYWORD, "XX" },
         // -------------------------------------------------------------------
+
+        //Common ipvpd
+        { FULL_RECORD, "FL"},
     };
 
 } //end namespace MVPD

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -290,6 +292,7 @@ const KeywordData ddr3Data[] =
     { LRMM_PERSONALITY_BYTE12,          0x72,   0x01,   0x00,   0x00, false, false, LRMM },
     { LRMM_PERSONALITY_BYTE13,          0x73,   0x01,   0x00,   0x00, false, false, LRMM },
     { LRMM_PERSONALITY_BYTE14,          0x74,   0x01,   0x00,   0x00, false, false, LRMM },
+    { ENTIRE_SPD,                       0x00,  0x100,   0x00,   0x00, false, false,  ALL },
     //---------------------------------------------------------------------------------------
 };
 

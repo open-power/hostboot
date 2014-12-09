@@ -456,6 +456,35 @@ class IpVpdFacade
                                  input_args_t i_args );
 
     /**
+     * @brief This function will read the required record from the VPD data.
+     *
+     * @param[in] i_recordName - String representation of the record.
+     *
+     * @param[in] i_offset - The offset to start reading.
+     *
+     * @param[in] i_target - The target to retrieve data for.
+     *
+     * @param[out] io_buffer - The buffer to place the data in.
+     *
+     * @param[in/out] io_buflen - Length of the buffer to be read or written
+     *       to/from the target.  This value should indicate the size of the
+     *       io_buffer parameter that has been allocated.  Being returned it
+     *       will indicate the number of valid bytes in the buffer being
+     *       returned.
+     *
+     * @param[in] i_args - The input arguments.
+     *
+     * @return errHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t retrieveRecord ( const char * i_recordName,
+                                 uint16_t i_offset,
+                                 TARGETING::Target * i_target,
+                                 void * io_buffer,
+                                 size_t & io_buflen,
+                                 input_args_t i_args );
+
+    /**
      * @brief This function will write the required keyword into the VPD data.
      *
      * @param[in] i_keywordName - String representation of the keyword.

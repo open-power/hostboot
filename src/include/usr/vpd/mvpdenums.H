@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,9 @@
  */
 #ifndef __MVPDENUMS_H
 #define __MVPDENUMS_H
+
+#include <vpd/ipvpdenums.H>
+
 
 namespace MVPD
 {
@@ -80,7 +83,9 @@ enum mvpdRecord
     // Last Record
     MVPD_LAST_RECORD,
     MVPD_TEST_RECORD,   // Test purposes ONLY!
-    MVPD_INVALID_RECORD = 0xFFFF,
+
+    //Start common IPVPD enums
+    MVPD_INVALID_RECORD = IPVPD::INVALID_RECORD,
 };
 
 /**
@@ -129,7 +134,10 @@ enum mvpdKeyword
     // Last Keyword
     MVPD_LAST_KEYWORD,
     MVPD_TEST_KEYWORD,  // Test purposes ONLY!
-    INVALID_MVPD_KEYWORD    = 0xFFFF,
+
+    //Start common IPVPD enums
+    FULL_RECORD = IPVPD::FULL_RECORD,
+    INVALID_MVPD_KEYWORD    = IPVPD::INVALID_KEYWORD,
 };
 
 };  // end MVPD

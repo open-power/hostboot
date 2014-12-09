@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,6 +218,17 @@ mvpdTestData mvpdData[] =
     { MVPD::MER0, MVPD::pdI },
 };
 
+VPD::vpdRecord mvpdRecordData[] =
+{
+    MVPD::CP00,
+    MVPD::LRP4,
+    MVPD::LRP5,
+    MVPD::VINI,
+    MVPD::VWML,
+    MVPD::MER0,
+};
+
+
 void getProcTargets( TargetHandleList & o_procList )
 {
     // Get top level system target
@@ -384,6 +395,121 @@ class MVPDTest: public CxxTest::TestSuite
                        "testMvpdRead - %d/%d fails",
                        fails, cmds );
         }
+
+        /**
+         * @brief This function will test MVPD reads.
+         */
+        void testMvpdReadRecords ( void )
+        {
+            errlHndl_t err = NULL;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint64_t theRecord = 0x0;
+
+            TRACFCOMP( g_trac_vpd,
+                       ENTER_MRK"testMvpdReadRecords()" );
+
+            do
+            {
+                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                if(theTarget == NULL)
+                {
+                    TS_FAIL("testMvpdReadRecords() - No Functional Targets found!");
+                    break;
+                }
+
+                uint8_t * theData = NULL;
+                size_t theSize = 0;
+                const uint32_t numCmds =
+                              sizeof(mvpdRecordData)/sizeof(mvpdRecordData[0]);
+                for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
+                {
+                    cmds++;
+                    theRecord = (uint64_t)mvpdRecordData[curCmd];
+                    err = deviceRead( theTarget,
+                                      NULL,
+                                      theSize,
+                                      DEVICE_MVPD_ADDRESS( theRecord,
+                                                        MVPD::FULL_RECORD ));
+
+                    if( err )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_vpd,
+                                   ERR_MRK"testMvpdReadRecords() - failure"
+                                   " reading record size!!  rec: 0x%04x",
+                                   theRecord);
+                        TS_FAIL("testMvpdReadRecords() -Failure reading keyword size!");
+                        errlCommit( err,
+                                    VPD_COMP_ID );
+                        continue;
+                    }
+
+                    //Check for zero size, don't have a reliable way to check for too big
+                    if( 0 == theSize  )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_vpd,
+                                   ERR_MRK"testMvpdReadRecords() - failure"
+                                   " reading record 0x%04x had size of zero!",
+                                   theRecord);
+                        TS_FAIL("testMvpdReadRecords() -Failure on keyword size of zero!");
+                        continue;
+                    }
+
+                    theData = static_cast<uint8_t*>(malloc( theSize ));
+
+                    // Read record/keyword pair
+                    err = deviceRead( theTarget,
+                                      theData,
+                                      theSize,
+                                      DEVICE_MVPD_ADDRESS( theRecord,
+                                                        MVPD::FULL_RECORD ));
+
+                    if( err )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_vpd,
+                                   ERR_MRK"testMvpdReadRecords() - Failure on"
+                                   " Record: 0x%04x of size: 0x%04x - test %d",
+                                   theRecord,
+                                   theSize, curCmd );
+                        TS_FAIL( "testMvpdReadRecords() - Failure during MVPD read!" );
+                        errlCommit( err,
+                                    VPD_COMP_ID );
+
+                        // Free the data
+                        if( NULL != theData )
+                        {
+                            free( theData );
+                            theData = NULL;
+                        }
+                        continue;
+                    }
+
+                    TRACDCOMP( g_trac_vpd,
+                               INFO_MRK"testMvpdRead Results:" );
+                    for( uint32_t i = 0; i < theSize; i++ )
+                    {
+                        TRACDCOMP( g_trac_vpd,
+                                   INFO_MRK"   Byte[%d]: 0x%02x",
+                                   i, theData[i] );
+                    }
+
+                    // Free the data
+                    if( NULL != theData )
+                    {
+                        free( theData );
+                        theData = NULL;
+                    }
+                }
+            } while( 0 );
+
+            TRACFCOMP( g_trac_vpd,
+                       "testMvpdReadRecords - %d/%d fails",
+                       fails, cmds );
+        }
+
 
         /**
          * @brief This function will test MVPD writes.
