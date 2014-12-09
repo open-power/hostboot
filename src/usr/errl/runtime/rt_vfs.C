@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -81,4 +83,36 @@ namespace VFS
 
         return l_errl;
     }
+
+    bool module_exists (const char* i_name)
+    {
+        return (NULL != vfs_find_module(VFS_MODULES,i_name));
+    }
+
+    errlHndl_t module_load_unload(const char * i_module, VfsMessages i_msgtype)
+    {
+        //modules are already loaded at the time we start hbrt
+        //Just make sure that module_exists
+
+        errlHndl_t l_err = NULL;
+        if (!(module_exists(i_module)))
+        {
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        VFS_RT_MODULE_ID
+             * @reasoncode      VFS_MODULE_DOES_NOT_EXIST
+             * @userdata1       0
+             * @userdata2       0
+             * @devdesc         Module does not exist
+             */
+            l_err = new ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,       //  severity
+                VFS::VFS_RT_MODULE_ID,                  //  moduleid
+                VFS::VFS_MODULE_DOES_NOT_EXIST,         //  reason Code
+                0, 0);
+            ErrlUserDetailsString(i_module).addToLog(l_err);
+        }
+        return l_err;
+    }
+
 }
