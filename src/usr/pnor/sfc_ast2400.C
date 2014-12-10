@@ -101,7 +101,7 @@ errlHndl_t SfcAST2400::readFlash( uint32_t i_addr,
 
     do{
         uint32_t* word_ptr = static_cast<uint32_t*>(o_data);
-        uint32_t word_size = i_size/4;
+        uint32_t word_size = (ALIGN_4(i_size))/4;
         for( uint32_t words_read = 0;
              words_read < word_size;
              words_read ++ )
