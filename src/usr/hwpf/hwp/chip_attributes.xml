@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: chip_attributes.xml,v 1.16 2014/08/14 16:52:23 thi Exp $ -->
+<!-- $Id: chip_attributes.xml,v 1.17 2014/11/20 17:58:41 jmcgill Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
