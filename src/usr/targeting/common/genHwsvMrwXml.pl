@@ -2081,9 +2081,9 @@ sub generate_sys
             0x0b00,0x09,  <!-- Power_Cap  -->
             0x0c00,0x06,  <!-- PCI -->
             0x0d00,0x00,  <!-- Boot_watchdog -->
-            0x0e00,0xFF,  <!-- Reboot_Count -->
-            0x1000,0xFF,  <!-- System_Event -->
-            0x1010,0xFF,  <!-- APSS Fault -->
+            0x0e00,0x85,  <!-- Reboot_Count -->
+            0x1000,0x82,  <!-- System_Event -->
+            0x1010,0x83,  <!-- APSS Fault -->
             0xFFFF,0xFF,
             0xFFFF,0xFF,
             0xFFFF,0xFF,
@@ -4012,8 +4012,8 @@ sub generate_centaur
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0xFF,  <!-- Temperature sensor -->
-            0x0500, 0xFF,  <!-- State sensor -->
+            0x0100, 0x12,  <!-- Temperature sensor -->
+            0x0500, 0x01,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4289,7 +4289,7 @@ sub generate_is_dimm
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0xFF,  <!-- Temperature sensor -->
+            0x0100, 0x13,  <!-- Temperature sensor -->
             0x0500, 0x01,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4459,7 +4459,7 @@ sub generate_dimm
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0xFF,  <!-- Temperature sensor -->
+            0x0100, 0x13,  <!-- Temperature sensor -->
             0x0500, 0x01,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -5199,9 +5199,10 @@ sub addI2cBusSpeedArray
              ($tmp_speed < $speed_array[$tmp_offset] ) )
         {
             $speed_array[$tmp_offset] = $tmp_speed;
-        }
-    }
 
+        }
+
+    }
     print "     <attribute>\n";
     print "        <id>I2C_BUS_SPEED_ARRAY</id>\n";
     print "        <default>\n";

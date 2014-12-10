@@ -399,10 +399,10 @@ namespace SENSOR
     // Helper function to search the sensor data for the correct sensor number
     // based on the sensor name.
     //
-    uint16_t SensorBase::getSensorNumber()
+    uint8_t SensorBase::getSensorNumber()
     {
 
-        uint16_t l_sensor_number = INVALID_SENSOR;
+        uint8_t l_sensor_number = INVALID_SENSOR;
 
         if( iv_target == NULL )
         {
@@ -930,6 +930,64 @@ namespace SENSOR
         updateBMCFaultSensorStatus();
     };
 
+    // returns a sensor number based on input target type
+    uint8_t getFaultSensorNumber( TARGETING::TargetHandle_t i_pTarget )
+    {
+
+        TARGETING::TYPE l_type = i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+
+        uint8_t l_sensor_number = INVALID_SENSOR;
+
+        switch( l_type )
+        {
+
+            case TARGETING::TYPE_PROC:
+            case TARGETING::TYPE_CORE:
+            case TARGETING::TYPE_DIMM:
+            {
+                l_sensor_number =  StatusSensor(i_pTarget).getSensorNumber();
+
+                break;
+            }
+
+            case TARGETING::TYPE_OSC:
+            case TARGETING::TYPE_OSCREFCLK:
+            case TARGETING::TYPE_OSCPCICLK:
+            {
+                TARGETING::TargetHandleList parentList;
+
+                // The clock fault sensors are associated with the NODE target
+                (void)getParentAffinityTargets (
+                        parentList, i_pTarget, TARGETING::CLASS_ENC,
+                        TARGETING::TYPE_NODE, false);
+
+                assert(parentList.size() == 1 );
+
+                TARGETING::TargetHandle_t l_node = parentList[0];
+
+                l_sensor_number =
+                    SENSOR::FaultSensor( l_node, l_type ).getSensorNumber();
+
+                break;
+            }
+
+            default:
+            {
+                TARGETING::TargetHandle_t l_sys;
+
+                // get the "system error sensor number" associated with the
+                // system target.
+                TARGETING::targetService().getTopLevelTarget(l_sys);
+
+                l_sensor_number = SENSOR::FaultSensor(
+                                 l_sys, TARGETING::TYPE_NA ).getSensorNumber();
+
+                break;
+            }
+
+        }
+
+        return l_sensor_number;
+    }
+
 }; // end name space
-
-

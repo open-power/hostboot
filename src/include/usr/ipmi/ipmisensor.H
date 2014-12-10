@@ -249,6 +249,14 @@ namespace SENSOR
                     setSensorReadingRequest *& io_data,
                     IPMI::completion_code& o_completion_code );
 
+            /**
+             * @brief return the sensor number
+             *
+             * @return sensor_number - sensor number for this sensor
+             *
+             */
+            uint8_t  getSensorNumber();
+
         protected:
 
             /**
@@ -297,10 +305,6 @@ namespace SENSOR
             SensorBase& operator=(const SensorBase& i_right);
 
             SensorBase(const SensorBase& thing );
-
-            // helper function to get sensor number attribute
-            // of passed in target
-            uint16_t  getSensorNumber();
 
     };
 
@@ -714,6 +718,16 @@ namespace SENSOR
             uint8_t iv_functionalOffset;
 
     };
+
+    /*
+     *   @brief Return the fault sensor number for a target
+     *   Will return either the status sensor or Fault sensor number for a
+     *   given target.  If the target passed in does not have either of those
+     *   sensor types, the "System Error" sensor number will be returned.
+     *
+     */
+    uint8_t getFaultSensorNumber(TARGETING::Target * i_pTarget );
+
 
     /**
      *   @brief Update DIMM/CORE/Processor status sensors on the BMC.
