@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,9 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_util_to_throttle.C,v 1.6 2014/02/11 15:52:42 pardeik Exp $
+// $Id: mss_util_to_throttle.C,v 1.7 2014/11/06 21:07:06 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_util_to_throttle.C,v $
+//------------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2011
+// *! All Rights Reserved -- Property of IBM
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_util_to_throttle
 // *! DESCRIPTION : see additional comments below
@@ -46,6 +50,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.7    | pardeik  |06-NOV-14| removed string in trace statement
+//         |          |         | changed FAPI_IMP to FAPI_INF
 //  1.6    | pardeik  |11-FEB-14| RAS review fix:  change %% to percent
 //  1.5    | pardeik  |13-JAN-14| Fixed calculation to not include x2 factor for
 //         |          |         |  other MBA for custom DIMMs
@@ -85,7 +91,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	FAPI_IMP("*** Running mss_util_to_throttle ***");
+	FAPI_INF("*** Running mss_util_to_throttle ***");
 
 	uint32_t throttle_d;
 	uint8_t data_bus_util;
@@ -122,7 +128,7 @@ extern "C" {
 	    return rc;
 	}
 
-	FAPI_IMP("*** mss_util_to_throttle COMPLETE ***");
+	FAPI_INF("*** mss_util_to_throttle COMPLETE ***");
 	return rc;
 
     }

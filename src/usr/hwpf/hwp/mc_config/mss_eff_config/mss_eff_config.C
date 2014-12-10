@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.49 2014/12/01 18:52:15 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.50 2014/12/03 19:55:07 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.50  | asaetow  |03-DEC-14| Removed string data types that are not supported.
 //   1.49  | asaetow  |01-DEC-14| Added RDIMM SPD/VPD support for ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15 to take in SPD bits69:76 thru new VPD attribute ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15.
 //         |          |         | Added ATTR_VPD_DIMM_RCD_IBT and ATTR_VPD_DIMM_RCD_OUTPUT_TIMING merge, per meeting with Ken and Dan P.
 //         |          |         | NOTE: DO NOT pickup w/o getMBvpdTermData.C v1.18 or newer from Dan.C and Corey.
@@ -2308,7 +2309,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 #ifndef FAPI_DDR4
     /* Initialize Variables */
     const fapi::Target& TARGET_MBA = i_target_mba;
-    const char * const PROCEDURE_NAME = "mss_eff_config";
     fapi::ReturnCode rc;
     fapi::Target l_target_centaur;
     // Changed l_mss_volt to p_l_mss_eff_config_data->mss_volt.
@@ -2326,7 +2326,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
     memset( p_l_spd_data, 0, sizeof(mss_eff_config_spd_data) );
     memset( p_l_atts, 0, sizeof(mss_eff_config_atts) );
 
-    FAPI_INF("STARTING %s on %s \n", PROCEDURE_NAME,
+    FAPI_INF("STARTING mss_eff_config on %s \n",
             i_target_mba.toEcmdString());
 
     do
@@ -2476,7 +2476,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 
 
 
-        FAPI_INF("%s on %s COMPLETE\n", PROCEDURE_NAME,
+        FAPI_INF("mss_eff_config on %s COMPLETE\n",
                 i_target_mba.toEcmdString());
 
     } while(0);
