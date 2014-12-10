@@ -103,6 +103,15 @@ errlHndl_t getSectionInfo( SectionId i_section,
  * @return errlHndl_t  Error log if request was invalid
  */
 errlHndl_t flush (SectionId i_section);
+
+/**
+ * @brief checks and fixes correctable ECC errors in the PNOR
+ *
+ * @param[in] i_secion:   PNOR section
+ * @return errlHndl_t:    Error Log
+ */
+errlHndl_t fixECC (SectionId i_section);
+
 /**
  * @brief Informs caller if PNORDD is using
  *        L3 Cache for fake PNOR or not.

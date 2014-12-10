@@ -43,6 +43,7 @@ namespace PNOR
         MOD_PNORRP_WRITETODEVICE        = 0x08, /**< PnorRP::writeToDevice */
         MOD_PNORRP_DIDSTARTUPFAIL       = 0x09, /**< didStartupFail(rc) */
         MOD_PNORRP_FLUSH                = 0x0A, /**< mm_remove_pages */
+        MOD_PNORRP_FIXECC               = 0x0B, /**< fixECC */
 
         // pnorvalid.C
         MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
@@ -134,6 +135,7 @@ namespace PNOR
         RC_MM_REMOVE_PAGES_FAILED    = PNOR_COMP_ID | 0x1E,
         RC_PNOR_READ_NOT_SUPPORTED   = PNOR_COMP_ID | 0x1F,
         RC_PNOR_WRITE_NOT_SUPPORTED  = PNOR_COMP_ID | 0x20,
+        RC_NON_ECC_PROTECTED_SECTION = PNOR_COMP_ID | 0x21,
     };
 
     enum UserDetailsTypes

@@ -43,11 +43,10 @@
 #include <devicefw/userif.H>
 #include <pnor/ecc.H>
 #include "../pnorrp.H"
+#include "../pnor_common.H"
 #include "../ffs.h"
 
 extern trace_desc_t* g_trac_pnor;
-
-
 
 class PnorRpTest : public CxxTest::TestSuite
 {
@@ -594,6 +593,120 @@ class PnorRpTest : public CxxTest::TestSuite
 
     //@todo - import config data from build and compare to section info
 
+    /**
+     * @brief PNOR RP test - fixECC
+     *        Verify that we can detect and correct ECC for a
+     *        given section of PNOR
+     */
+    void test_fixECC(void)
+    {
+        errlHndl_t l_err     = NULL;
+        size_t l_size        = PNOR::PAGESIZE_PLUS_ECC;
+        uint8_t* l_chip_data = new uint8_t[l_size];
+        uint8_t* l_goodData  = new uint8_t [l_size];
+        uint8_t* l_readData  = new uint8_t [l_size];
+        do {
+            TRACFCOMP(g_trac_pnor, ENTER_MRK"test_fixECC...");
+
+            //write ecc good data
+            TRACFCOMP(g_trac_pnor,"test_fixECC: write ecc good data to pnor");
+            l_err  = PnorRP::getInstance().clearSection(PNOR::TEST);
+            if (l_err)
+            {
+                TS_FAIL("PnorRpTest::test_fixECC: clearSection failed");
+                ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            //getSectionInfo
+            PNOR::SectionInfo_t l_info;
+            l_err = PNOR::getSectionInfo(PNOR::TEST, l_info);
+            if (l_err)
+            {
+                TS_FAIL("PnorRpTest::test_fixECC: getSectionInfo errored");
+                ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            // manually read the data from the PNOR device
+            const uint64_t l_flashAddr = l_info.flashAddr + l_size;
+
+            l_err = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            l_chip_data,
+                            l_size,
+                            DEVICE_PNOR_ADDRESS(0, l_flashAddr));
+            if(l_err)
+            {
+                TS_FAIL("PnorRpTest::test_fixECC: PNORDD"
+                    " deviceRead() failed! Error committed.");
+                ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            //save a copy of the good data
+            TRACFCOMP(g_trac_pnor, "test_fixECC: making a copy of good data");
+            memcpy(l_goodData, l_chip_data,l_size);
+
+            // generate data with CEs
+            uint64_t l_data_ecc = 0;
+            uint8_t* l_chip_data_ptr = l_chip_data;
+            for (int i = 0; i < 9; i++)
+            {
+                memcpy( &l_data_ecc, l_chip_data_ptr, sizeof(uint64_t) );
+                uint64_t l_bad_data = l_data_ecc ^ (1ul << (63 - i*5));
+                memcpy( l_chip_data_ptr, &l_bad_data, sizeof(uint64_t) );
+                l_chip_data_ptr += 9;
+            }
+
+            // write the bad data to the chip directly
+            l_err = deviceWrite(
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        l_chip_data,l_size,
+                        DEVICE_PNOR_ADDRESS(0, l_flashAddr));
+            if(l_err)
+            {
+                TS_FAIL("PnorRpTest::test_fixECC: PNORDD"
+                    " deviceWrite() failed! Error committed.");
+                ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            //fixECC of the section
+            l_err = PNOR::fixECC(PNOR::TEST);
+            if (l_err)
+            {
+                TS_FAIL("PnorRpTest::test_fixECC fixECC errored");
+                ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            //call deviceRead to make sure ecc is corrected
+            l_err = deviceRead(
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        l_readData,l_size,
+                        DEVICE_PNOR_ADDRESS(0, l_flashAddr));
+            if(l_err)
+            {
+                TS_FAIL("PnorRpTest::test_fixECC: PNORDD"
+                    " deviceRead() failed! Error committed.");
+                ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            //compare l_readData
+            if (0 != memcmp(l_readData, l_goodData, l_size))
+            {
+                TS_FAIL("PnorRpTest::test_fixECC: fixECC didn't correct CE");
+                break;
+            }
+
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_fixECC finished");
+        } while (0);
+
+        delete [] l_chip_data;
+        delete [] l_goodData;
+        delete [] l_readData;
+    };
 };
 
 

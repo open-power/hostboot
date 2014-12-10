@@ -38,7 +38,7 @@
 #include <initservice/initserviceif.H>
 #include "pnordd.H"
 #include "ffs.h"   //Common header file with BuildingBlock.
-#include "common/ffs_hb.H" //Hostboot definition of user data in ffs_entry struct.
+#include "common/ffs_hb.H"//Hostboot definition of user data in ffs_entry struct
 #include <pnor/ecc.H>
 #include <kernel/console.H>
 #include <endian.h>
@@ -124,6 +124,15 @@ errlHndl_t PNOR::flush( PNOR::SectionId i_section)
     } while (0);
     return l_err;
 }
+
+/**
+ * @brief  check and fix correctable ECC for a given pnor section
+ */
+errlHndl_t PNOR::fixECC(PNOR::SectionId i_section)
+{
+    return Singleton<PnorRP>::instance().fixECC(i_section);
+}
+
 /**
  * STATIC
  * @brief Static Initializer
@@ -922,4 +931,59 @@ errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)
     delete [] l_buf;
 
     return l_errl;
+}
+
+/**
+ * @brief check and fix correctable ECC errors for a given section
+ */
+errlHndl_t PnorRP::fixECC (PNOR::SectionId i_section)
+{
+    errlHndl_t l_err  = NULL;
+    uint8_t* l_buffer = new uint8_t [PAGESIZE] ();
+    do {
+        TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorRP::fixECC");
+
+        //get info from the TOC
+        uint8_t* l_virtAddr = reinterpret_cast<uint8_t*>
+                                (iv_TOC[i_section].virtAddr);
+        uint32_t l_size    = iv_TOC[i_section].size;
+        bool l_ecc         = iv_TOC[i_section].integrity&FFS_INTEG_ECC_PROTECT;
+
+        if (!l_ecc)
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::fixECC: section is not"
+                    " ecc protected");
+            /*@
+             *  @errortype      ERRL_SEV_INFORMATIONAL
+             *  @moduleid       PNOR::MOD_PNORRP_FIXECC
+             *  @reasoncode     PNOR::RC_NON_ECC_PROTECTED_SECTION
+             *  @userdata1      Section ID
+             *  @userdata2      0
+             *
+             *  @devdesc        Non ECC protected section is passed to fixECC
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                    PNOR::MOD_PNORRP_FIXECC,
+                                    PNOR::RC_NON_ECC_PROTECTED_SECTION,
+                                    i_section,
+                                    0,true);
+            break;
+        }
+
+        uint32_t l_numOfPages = (l_size)/PAGESIZE;
+
+        //loop over number of pages in a section
+        for (uint32_t i = 0; i < l_numOfPages; i++)
+        {
+            TRACDCOMP(g_trac_pnor, "PnorRP::fixECC: memcpy virtAddr:0x%X",
+                      l_virtAddr);
+            memcpy(l_buffer, l_virtAddr, PAGESIZE);
+            l_virtAddr += PAGESIZE;
+        }
+    } while (0);
+
+    delete [] l_buffer;
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"PnorRP::fixECC");
+    return l_err;
 }

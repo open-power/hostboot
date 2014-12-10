@@ -67,6 +67,15 @@ class PnorRP
      */
     errlHndl_t clearSection(PNOR::SectionId i_section);
 
+    /**
+     * @brief Checks and fixes correctable ECC for a given PNOR section
+     *
+     * @param[in] i_id  PNOR section to clear
+     *
+     * @return Error if fails
+     */
+    errlHndl_t fixECC(PNOR::SectionId i_section);
+
   protected:
     /**
      * @brief  Constructor
