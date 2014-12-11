@@ -44,6 +44,9 @@
 #include <vfs/vfs.H>
 #include <fsi/fsiif.H>
 #include <config.h>
+#include <devicefw/userif.H>
+#include <vpd/cvpdenums.H>
+
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -603,8 +606,56 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
         i_dt->addPropertyString(rootNode, "compatible", "ibm,powernv");
 
         /* Add system model node */
-        //TODO RTC:88056 - store model type in attributes?
-        i_dt->addPropertyString(rootNode, "model", "palmetto");
+        // Based off of the DR field in the OPFR
+        // TODO RTC 118373 -- update to account for firestone/memory riser
+        TARGETING::TargetHandleList l_membTargetList;
+        getAllChips(l_membTargetList, TYPE_MEMBUF);
+
+        //if can't find a centaur for the CVPD, default to unknown
+        if (l_membTargetList.size())
+        {
+            TARGETING::Target * l_pMem = l_membTargetList[0];
+            size_t vpdSize = 0x0;
+
+            // Note: First read with NULL for o_buffer sets vpdSize to the
+            // correct length
+            errhdl = deviceRead( l_pMem,
+                                 NULL,
+                                 vpdSize,
+                                 DEVICE_CVPD_ADDRESS( CVPD::OPFR,
+                                                      CVPD::DR ));
+
+            if(errhdl)
+            {
+                TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't get DR size for HUID=0x%.8X",
+                          TARGETING::get_huid(l_pMem));
+            }
+            else
+            {
+                char drBuf[vpdSize+1];
+                memset(&drBuf, 0x0, (vpdSize+1)); //ensure null terminated str
+                errhdl = deviceRead( l_pMem,
+                                     reinterpret_cast<void*>( &drBuf ),
+                                     vpdSize,
+                                     DEVICE_CVPD_ADDRESS( CVPD::OPFR,
+                                                          CVPD::DR ));
+
+                if(errhdl)
+                {
+                    TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't read DR for HUID=0x%.8X",
+                              TARGETING::get_huid(l_pMem));
+                }
+                else
+                {
+                    i_dt->addPropertyString(rootNode, "model", drBuf);
+                }
+            }
+        }
+        else //chassis info not found, default to unknown
+        {
+            TRACFCOMP(g_trac_devtree,ERR_MRK" VPD not found, model defaulted to unknown");
+            i_dt->addPropertyString(rootNode, "model", "unknown");
+        }
     }
 
     return errhdl;
