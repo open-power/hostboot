@@ -22,13 +22,9 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.28 2014/04/30 19:32:56 jdsloat Exp $
+// $Id: mss_freq.C,v 1.29 2014/12/10 23:05:37 jdsloat Exp $
 /* File mss_freq.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2007
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : mss_freq.C
 // *! DESCRIPTION : Tools for centaur procedures
@@ -70,6 +66,9 @@
 //  1.26   | jdsloat  | 03/12/14 | Fixed an assignment within a boolean expression.
 //  1.27   | jdsloat  | 03/12/14 | Fixed inf loop bug associated with edit 1.26
 //  1.28   | jdsloat  | 04/30/14 | Fixed a divide by 0 error opened up by RAS review Edits -- Error HW callouts v1.25
+//  1.29   | jdsloat  | 12/10/14 | Fixed 1333 speed limitation for config/ Habenero
+
+// Add continues to logerrors to lines 650, 560.  IN order to avoid possible future problems.
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -110,6 +109,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
     // Define attribute array size
     const uint8_t PORT_SIZE = 2;
     const uint8_t DIMM_SIZE = 2;
+    const uint8_t MBA_SIZE = 2;
 
     fapi::ReturnCode l_rc;
     std::vector<fapi::Target> l_mbaChiplets;
@@ -138,7 +138,8 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
     uint32_t l_cl_mult_tck = 0;
     uint8_t cur_mba_port = 0;
     uint8_t cur_mba_dimm = 0;
-    uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE] = {{0}};
+    uint8_t cur_mba = 0;
+    uint8_t cur_dimm_spd_valid_u8array[MBA_SIZE][PORT_SIZE][DIMM_SIZE] = {{{0}}};
     uint8_t plug_config = 0;
     uint8_t module_type = 0;
     uint8_t module_type_deconfig = 0;
@@ -146,7 +147,8 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
     uint8_t module_type_group_2 = 0;
     uint8_t module_type_group_1_total = 0;
     uint8_t module_type_group_2_total = 0;
-    uint8_t num_ranks = 0;
+    uint8_t num_ranks[MBA_SIZE][PORT_SIZE][DIMM_SIZE] = {{{0}}}; 
+    //uint8_t num_ranks = 0;
     uint8_t num_ranks_total = 0;
     uint32_t  l_freq_override = 0;
     uint8_t l_override_path = 0;
@@ -300,7 +302,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
                 l_rc = FAPI_ATTR_GET(ATTR_SPD_TAAMIN, &l_dimm_targets[j], l_spd_min_taa_MTB);
                 if (l_rc)
                 {
-                    FAPI_ERR("Unable to read SPD Minimum TAA (Min CAS Latency Time).");
+                    FAPI_ERR("Unable to read SPD Minimum TA    std::vector<fapi::Target> l_target_dimm_array;A (Min CAS Latency Time).");
                     break;
                 }
                 l_rc = FAPI_ATTR_GET(ATTR_SPD_CAS_LATENCIES_SUPPORTED, &l_dimm_targets[j], l_spd_cas_lat_supported);
@@ -322,14 +324,22 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
                     FAPI_ERR("Unable to read the DIMM Info in order to determine configuration.");
                     break;
                 }
+		l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_mbaChiplets[i], cur_mba);
+                if (l_rc)
+                {
+                    FAPI_ERR("Unable to read the DIMM Info in order to determine configuration.");
+                    break;
+                }
+
                 l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE,  &l_dimm_targets[j], module_type);
                 if (l_rc)
                 {
                     FAPI_ERR("Unable to read the SPD module type.");
                     break;
                 }
+
                 // from dimm_spd_attributes.xml, R1 = 0x00, R2 = 0x01, R3 = 0x02, R4 = 0x03
-                l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,  &l_dimm_targets[j], num_ranks);
+                l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,  &l_dimm_targets[j], num_ranks[cur_mba][cur_mba_port][cur_mba_dimm]);
                 if (l_rc)
                 {
                     FAPI_ERR("Unable to read the SPD number of ranks");
@@ -348,7 +358,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
                     break;
                 }
 
-                cur_dimm_spd_valid_u8array[cur_mba_port][cur_mba_dimm] = MSS_FREQ_VALID;
+                cur_dimm_spd_valid_u8array[cur_mba][cur_mba_port][cur_mba_dimm] = MSS_FREQ_VALID;
 
                 if ((l_spd_min_tck_MTB == 0)||(l_spd_min_taa_MTB == 0))
                 {
@@ -522,8 +532,6 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
                 l_spd_cas_lat_supported_all = l_spd_cas_lat_supported_all & l_spd_cas_lat_supported;
 
 
-                num_ranks_total = num_ranks_total + num_ranks + 1;
-
                 if ( (module_type_group_1 == module_type) || (module_type_group_1 == 0) ) 
                 {
                     module_type_group_1 = module_type;
@@ -600,13 +608,25 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
         FAPI_INF( "Minimum TAA(ps) amongst DIMMs: %d Minimum TCK(ps) amongst DIMMs: %d", l_spd_min_taa_max, l_spd_min_tck_max);
 
         //Determining the cnfg for imposing any cnfg speed limitations
-        if ((cur_dimm_spd_valid_u8array[0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][1] == MSS_FREQ_VALID))
-        {
-            plug_config = MSS_FREQ_DUAL_DROP;
-        }
-        else if ((cur_dimm_spd_valid_u8array[0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][1] == MSS_FREQ_EMPTY))
+        if (((cur_dimm_spd_valid_u8array[0][0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][0][1] == MSS_FREQ_EMPTY)) || ((cur_dimm_spd_valid_u8array[0][0][1] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][0][0] == MSS_FREQ_EMPTY)))
         {
             plug_config = MSS_FREQ_SINGLE_DROP;
+	    num_ranks_total = num_ranks[0][0][0] + 1;
+        }
+        else if (((cur_dimm_spd_valid_u8array[1][0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[1][0][1] == MSS_FREQ_EMPTY)) || ((cur_dimm_spd_valid_u8array[1][0][1] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[1][0][0] == MSS_FREQ_EMPTY)))
+        {
+            plug_config = MSS_FREQ_SINGLE_DROP;
+	    num_ranks_total = num_ranks[1][0][0] + 1;
+        }
+        else if ((cur_dimm_spd_valid_u8array[0][0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][0][1] == MSS_FREQ_VALID))
+        {
+            plug_config = MSS_FREQ_DUAL_DROP;
+	    num_ranks_total = (num_ranks[0][0][0] + 1) + (num_ranks[0][0][1] + 1);
+        }
+        else if ((cur_dimm_spd_valid_u8array[1][0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[1][0][1] == MSS_FREQ_VALID))
+        {
+            plug_config = MSS_FREQ_DUAL_DROP;
+	    num_ranks_total = (num_ranks[1][0][0] + 1) + (num_ranks[1][0][1] + 1);
         }
         else
         {
@@ -614,44 +634,38 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
         }
 
 
-        FAPI_INF( "PLUG CONFIG(from SPD): %d, Type of Dimm(from SPD): 0x%02X, Num Ranks(from SPD): %d",  plug_config, module_type, num_ranks);
+        FAPI_INF( "PLUG CONFIG(from SPD): %d, Type of Dimm(from SPD): 0x%02X, Num Ranks(from SPD): %d",  plug_config, module_type, num_ranks_total);
 
         // Impose configuration limitations
-        // Single Drop RDIMMs Cnfgs cannot run faster than 1333 unless it only has 1 rank
-        if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(num_ranks_total > 1)&&(l_dimm_freq_min > 1333))
+        // Single Drop RDIMMs Cnfgs cannot run faster than 1333
+        if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(l_dimm_freq_min > 1333))
         {
             l_dimm_freq_min = 1333;
             l_spd_min_tck_max = 1500;
             FAPI_INF( "Single Drop RDIMM with more than 1 Rank Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
         }
-        // Double Drop RDIMMs Cnfgs cannot run faster than 1333 with 4 ranks total
-        else if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(num_ranks_total == 4)&&(l_dimm_freq_min > 1333))
+        // Double Drop RDIMMs Cnfgs cannot run faster than 1333 with less than 8 ranks total per port
+        else if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(num_ranks_total < 8)&&(l_dimm_freq_min > 1333))
         {
             l_dimm_freq_min = 1333;
             l_spd_min_tck_max = 1500;
             FAPI_INF( "Dual Drop RDIMM with more than 4 Rank Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
         }
-        // Double Drop RDIMMs Cnfgs cannot run faster than 1066 with 8 ranks total
+        // Double Drop RDIMMs Cnfgs cannot run faster than 1066 with 8 ranks total per port
         else if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(num_ranks_total == 8)&&(l_dimm_freq_min > 1066))
         {
             l_dimm_freq_min = 1066;
             l_spd_min_tck_max = 1875;
             FAPI_INF( "Dual Drop RDIMM with more than 8 Rank Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
         }
-        // Single Drop LRDIMMs Cnfgs cannot run faster than 1333 with greater than 2 ranks
-        else if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(num_ranks_total > 2)&&(l_dimm_freq_min > 1333))
+        // DDR4 min speed 1600 and Cen no longer supports 1866.
+        else if (l_spd_dram_dev_type == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4)
         {
-            l_dimm_freq_min = 1333;
-            l_spd_min_tck_max = 1500;
-            FAPI_INF( "Single Drop LRDIMM with more than 2 Rank Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
+            l_dimm_freq_min = 1600;
+            l_spd_min_tck_max = 1250;
+            FAPI_INF( "DDR4/Centaur limitation. Centaur no longer handles 1866 and 1600 is min speed of DDR4.  New Freq: %d", l_dimm_freq_min); 
         }
-        // Dual Drop LRDIMMs Cnfgs cannot run faster than 1333
-        else if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(l_dimm_freq_min > 1333))
-        {
-            l_dimm_freq_min = 1333;
-            l_spd_min_tck_max = 1500;
-            FAPI_INF( "Dual Drop LRDIMM Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
-        }
+
 
         if ( l_spd_min_tck_max == 0)
         {
@@ -1001,4 +1015,5 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
     //all done.
     return l_rc;
 }
+
 
