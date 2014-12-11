@@ -10,6 +10,12 @@ config CVPD_READ_FROM_HW
     help
         Read Centaur VPD data from HW resources
 
+config CVPD_READ
+    default y
+    depends on CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
+    help
+        Ensure at least one of the CVPD READs are enabled
+
 config CVPD_WRITE_TO_PNOR
     default y if CVPD_READ_FROM_PNOR
     depends on CVPD_READ_FROM_PNOR
@@ -22,6 +28,12 @@ config CVPD_WRITE_TO_HW
     help
         Write Centaur VPD data to HW resources
 
+config CVPD_WRITE
+    default y
+    depends on CVPD_WRITE_TO_PNOR || CVPD_WRITE_TO_HW
+    help
+        Ensure at least one of the CVPD WRITEs are enabled
+
 config MVPD_READ_FROM_PNOR
     default y
     help
@@ -31,6 +43,12 @@ config MVPD_READ_FROM_HW
     default n
     help
         Read Module VPD data from HW resources
+
+config MVPD_READ
+    default y
+    depends on MVPD_READ_FROM_PNOR || MVPD_READ_FROM_HW
+    help
+        Ensure at least one of the MVPD READs are enabled
 
 config MVPD_WRITE_TO_PNOR
     default y if MVPD_READ_FROM_PNOR
@@ -43,6 +61,12 @@ config MVPD_WRITE_TO_HW
     help
         Write Module VPD data to HW resources
 
+config MVPD_WRITE
+    default y
+    depends on MVPD_WRITE_TO_PNOR || MVPD_WRITE_TO_HW
+    help
+        Ensure at least one of the MVPD WRITEs are enabled
+
 config DJVPD_READ_FROM_PNOR
     default y
     help
@@ -52,6 +76,12 @@ config DJVPD_READ_FROM_HW
     default n
     help
         Read Dimm JEDEC VPD/SPD data from HW resources
+
+config DJVPD_READ
+    default y
+    depends on DJVPD_READ_FROM_PNOR || DJVPD_READ_FROM_HW
+    help
+        Ensure at least one of the DJVPD READs are enabled
 
 config DJVPD_WRITE_TO_PNOR
     default y if DJVPD_READ_FROM_PNOR
@@ -63,6 +93,12 @@ config DJVPD_WRITE_TO_HW
     depends on DJVPD_READ_FROM_HW
     help
         Write Dimm JEDEC VPD/SPD data to HW resources
+
+config DJVPD_WRITE
+    default y
+    depends on DJVPD_WRITE_TO_PNOR || DJVPD_WRITE_TO_HW
+    help
+        Ensure at least one of the DJVPD WRITEs are enabled
 
 config HAVE_MBVPD
     default y if CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
