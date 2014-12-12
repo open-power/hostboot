@@ -42,6 +42,7 @@
 #include <lpc/lpcif.H>
 #include "sfc_ast2400.H"
 #include "norflash.H"
+#include <util/align.H>
 
 
 /*****************************************************************************/
