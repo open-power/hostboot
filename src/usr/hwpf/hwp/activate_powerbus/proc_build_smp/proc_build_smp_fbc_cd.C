@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.C,v 1.16 2014/05/15 21:35:33 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.C,v 1.17 2014/11/16 23:23:37 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -524,7 +524,7 @@ const uint8_t PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD = 0x4;      // cnt_4
 const uint8_t PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD = 0x4;     // cnt_4
 const uint8_t PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD = 0x4;         // cnt_4
 const uint8_t PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD = 0x0;         // cnt_0
-const uint8_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD = 0x0;         // cnt_0
+const uint8_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD = 0x2;         // cnt_2
 const bool    PB_SCONFIG_WE5_PASSTHRU_ENABLE = true;                 // enable
 const uint8_t PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY = 0xFE;             // cnt_7to1
 const uint8_t PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY = 0xFE;             // cnt_7to1
