@@ -333,6 +333,7 @@ foreach my $policy (keys %{$optMrwPolicies->{"open_power"}})
 
 
 
+
 #------------------------------------------------------------------------------
 # Process the pm-settings MRW file
 #------------------------------------------------------------------------------
@@ -1239,43 +1240,27 @@ my $i2c_busses_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
 my $i2cBus = XMLin($i2c_busses_file);
 
 # Capture all i2c buses info into the @I2Cdevices array
-use constant I2C_MASTER_NAME_FIELD        => 0;
-use constant I2C_MASTER_NODE_FIELD        => 1;
-use constant I2C_MASTER_POS_FIELD         => 2;
-use constant I2C_MASTER_UNIT_ID_FIELD     => 3;
-use constant I2C_CONTENT_TYPE_FIELD       => 4;
-use constant I2C_CARD_ID_FIELD            => 5;
-use constant I2C_PORT_FIELD               => 6;
-use constant I2C_DEVADDR_FIELD            => 7;
-use constant I2C_ENGINE_FIELD             => 8;
-use constant I2C_SPEED_FIELD              => 9;
-use constant I2C_SIZE_FIELD               => 10;
-use constant I2C_BYTE_ADDR_OFFSET_FIELD   => 11;
-use constant I2C_MAX_MEM_SIZE_FIELD       => 12;
-use constant I2C_WRITE_PAGE_SIZE_FIELD    => 13;
-use constant I2C_WRITE_CYCLE_TIME_FIELD   => 14;
-
 my @I2Cdevices;
 foreach my $i (@{$i2cBus->{'i2c-device'}})
 {
 
-    push @I2Cdevices, [
-         $i->{'i2c-master'}->{target}->{name},
-         $i->{'i2c-master'}->{target}->{node},
-         $i->{'i2c-master'}->{target}->{position},
-         $i->{'i2c-master'}->{'unit-id'},
-         $i->{'content-type'},
-         $i->{'card-id'},
-         $i->{'i2c-master'}->{'i2c-port'},
-         $i->{address},
-         $i->{'i2c-master'}->{'i2c-engine'},
-         $i->{speed},
-         $i->{size},
+    push @I2Cdevices, {
+         'i2cm_name'=>$i->{'i2c-master'}->{target}->{name},
+         'i2cm_node'=>$i->{'i2c-master'}->{target}->{node},
+         'i2cm_pos' =>$i->{'i2c-master'}->{target}->{position},
+         'i2cm_uid' =>$i->{'i2c-master'}->{'unit-id'},
+         'i2c_content_type'=>$i->{'content-type'},
+         'i2c_card_id'=>$i->{'card-id'},
+         'i2c_port'=>$i->{'i2c-master'}->{'i2c-port'},
+         'i2c_devAddr'=>$i->{'address'},
+         'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
+         'i2c_speed'=>$i->{'speed'},
+         'i2c_size'=>$i->{'size'},
 # @todo RTC 119382 - will eventually read these values from this file
-         "0x02",
-         "0x40",
-         "0x80",
-         "0x05" ];
+         'i2c_byte_addr_offset'=> "0x02",
+         'i2c_max_mem_size' => "0x40",
+         'i2c_write_page_size' =>"0x80",
+         'i2c_write_cycle_time' => "0x05" };
 
 }
 
@@ -2609,8 +2594,11 @@ sub generate_proc
     print "    <!-- End FSI connections -->\n";
     ## End FSI ##
 
-    # add EEPROM attributes and I2C_BUS_SPEED_ARRAY attribute
-    addEeproms($sys, $node, $proc);
+    # add EEPROM attributes
+    addEepromsProc($sys, $node, $proc);
+
+    # add I2C_BUS_SPEED_ARRAY attribute
+    addI2cBusSpeedArray($sys, $node, $proc, "pu");
 
     # fsp-specific proc attributes
     do_plugin('fsp_proc',
@@ -3831,6 +3819,15 @@ sub generate_centaur
 
     }
 
+    # Centaur is only used as an I2C Master in openpower systems
+    if ( $haveFSPs == 0 )
+    {
+        # add EEPROM attributes
+        addEepromsCentaur($sys, $node, $ctaur);
+
+        # add I2C_BUS_SPEED_ARRAY attribute
+        addI2cBusSpeedArray($sys, $node, $ctaur, "memb");
+    }
 
     print "\n</targetInstance>\n";
 
@@ -3934,13 +3931,27 @@ sub generate_is_dimm
     my $dimmCounter = {};
 
     # From the i2c busses, grab the information for the DIMMs, if any.
-    my $dimmI2C = {};
+    my @dimmI2C;
     my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
     my $i2cSettings = XMLin($i2c_file);
 
     foreach my $i (@{$i2cSettings->{'i2c-device'}})
     {
-        $dimmI2C->{$i->{'entry-num'}} = $i if $i->{'part-id'} eq 'DIMM_SPD';
+        if ( $i->{'part-id'} eq 'DIMM_SPD' )
+        {
+            # Adjust instance path to match Membus DIMM instance path
+            my $tmp_ip = $i->{'instance-path'};
+            $tmp_ip =~ s/\/DIMM_SPD-0$//;
+            $tmp_ip =~ s/ddr._dimm_generic/dimm/;
+
+            push @dimmI2C, {
+                'port'=>$i->{'i2c-master'}->{'i2c-port'},
+                'devAddr'=>$i->{'address'},
+            # @todo RTC 119793 - engine 6 is invalid for hostboot
+            #     'engine'=>$i->{'i2c-master'}->{'i2c-engine'},
+                'engine'=>0,
+                'ipath'=>$tmp_ip  };
+        }
     }
 
     print "\n<!-- $SYSNAME JEDEC DIMMs -->\n";
@@ -3999,27 +4010,41 @@ sub generate_is_dimm
         <id>MBA_PORT</id>
         <default>$SMembuses[$i][MBA_PORT_FIELD]</default>
     </attribute>";
-        if ($dimmI2C->{$i+1})
+
+        # Map MemBus DIMM instance path to I2C Busses DIMM instace path
+        #  and then add the correct VPD data
+        for my $j ( 0 .. $#dimmI2C )
         {
+            if ( $ipath eq $dimmI2C[$j]{ipath} )
+            {
+            # @todo RTC 119382 - eventually read the last 4 values from MRW
             print "
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
          <default>
-             <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/membuf-$ctaur</value></field>
-             <field><id>port</id><value>$dimmI2C->{$i+1}->{'i2c-master'}->{'i2c-port'}</value></field>
-             <field><id>devAddr</id><value>0x$dimmI2C->{$i+1}->{'address'}</value></field>
-             <field><id>engine</id><value>0</value></field>
+             <field><id>i2cMasterPath</id><value>physical:sys-$sys/"
+                . "node-$node/membuf-$ctaur</value></field>
+             <field><id>port</id><value>$dimmI2C[$j]{port}</value></field>
+             <field><id>devAddr</id><value>0x$dimmI2C[$j]{devAddr}"
+                . "</value></field>
+             <field><id>engine</id><value>$dimmI2C[$j]{engine}</value></field>
              <field><id>byteAddrOffset</id><value>0x01</value></field>
              <field><id>maxMemorySizeKB</id><value>0x01</value></field>
-             <field><id>writePageSize</id><value>0x00</value></field>
+             <field><id>writePageSize</id><value>0x50</value></field>
              <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
-    </attribute>
+    </attribute>";
+
+               last;
+            }
+        }
+
+        print "
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>$pos</default>
     </attribute>";
-        }
+
 
         # call to do any fsp per-dimm attributes
         my $dimmHex = sprintf("0xD0%02X",$dimmPos);
@@ -4525,7 +4550,7 @@ sub addProcPcieAttrs
     }
 }
 
-sub addEeproms
+sub addEepromsProc
 {
     my ($sys, $node, $proc) = @_;
 
@@ -4536,35 +4561,50 @@ sub addEeproms
     # Loop through all i2c devices
     for my $i ( 0 .. $#I2Cdevices )
     {
-        # Skip I2C devices that we don't care about
-        if( ( !($I2Cdevices[$i][I2C_MASTER_UNIT_ID_FIELD] eq "I2CM_PROC_PROM")
-              &&
-              !($I2Cdevices[$i][I2C_MASTER_UNIT_ID_FIELD] eq "I2CM_PROC_PROM1")
-            ) ||
-            !($I2Cdevices[$i][I2C_MASTER_NODE_FIELD] == $node) )
+        # FSP/Power systems:
+        if ( $haveFSPs == 1 )
         {
-            next;
-        }
 
-        # Position field must match $proc with one exception:
-        # Murano's PRIMARY_MODULE_VPD has a position field one spot behind $proc
-        if ( ($CHIPNAME eq "murano") &&
-             ("$I2Cdevices[$i][I2C_CONTENT_TYPE_FIELD]" eq
-              "PRIMARY_MODULE_VPD") )
-        {
-            if ( ($I2Cdevices[$i][I2C_MASTER_POS_FIELD]+1) != $proc )
+            # Skip I2C devices that we don't care about
+            if( ( !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM")
+                  &&
+                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM1")
+                ) ||
+                !($I2Cdevices[$i]{i2cm_node} == $node) )
+            {
+                next;
+            }
+
+            # Position field must match $proc with one exception:
+            # Murano's PRIMARY_MODULE_VPD has a position field one spot
+            # behind $proc
+            if ( ($CHIPNAME eq "murano") &&
+                 ("$I2Cdevices[$i]{i2c_content_type}" eq
+                  "PRIMARY_MODULE_VPD") )
+            {
+                if ( ($I2Cdevices[$i]{i2cm_pos}+1) != $proc )
+                {
+                    next;
+                }
+            }
+            elsif ( $I2Cdevices[$i]{i2cm_pos} != $proc)
             {
                 next;
             }
         }
-        elsif ( $I2Cdevices[$i][I2C_MASTER_POS_FIELD] != $proc)
+
+        # Openpower
+        else
         {
-            next;
+            if ( ($I2Cdevices[$i]{i2cm_pos} != $proc) ||
+                 ($I2Cdevices[$i]{i2cm_node} != $node) )
+            {
+                next;
+            }
         }
 
-
         # Convert Content Type
-        $tmp_ct = "$I2Cdevices[$i][I2C_CONTENT_TYPE_FIELD]";
+        $tmp_ct = $I2Cdevices[$i]{i2c_content_type};
         if ( $tmp_ct eq "PRIMARY_SBE_VPD")
         {
             $id_name = "EEPROM_SBE_PRIMARY_INFO";
@@ -4582,9 +4622,23 @@ sub addEeproms
         {
             $id_name = "EEPROM_VPD_BACKUP_INFO";
         }
+
+        # Skipping these on openpower systems
+        # @todo RTC 119830 - some of these might eventually be supported
+        elsif ( ( ($tmp_ct eq "PLANAR_VPD") ||
+                  ($tmp_ct eq "PRIMARY_FRU_VPD") ||
+                  ($tmp_ct eq "CENTAUR_VPD") ||
+                  ($tmp_ct eq "ALL_CENTAUR_VPD") )
+                &&
+                ( $haveFSPs == 0 )
+              )
+        {
+            next;
+        }
+
         else
         {
-            die "ERROR: addEeproms: unrecognized Content Type $tmp_ct ($i)\n";
+            die "ERROR: addEepromsProc: unrecognized Content Type $tmp_ct\n";
         }
 
         print "    <attribute>\n";
@@ -4593,46 +4647,244 @@ sub addEeproms
         print "            <field><id>i2cMasterPath</id><value>physical:",
                           "sys-$sys/node-$node/proc-$proc</value></field>\n";
         print "            <field><id>port</id><value>",
-                          "$I2Cdevices[$i][I2C_PORT_FIELD]</value></field>\n";
+                          "$I2Cdevices[$i]{i2c_port}</value></field>\n";
         print "            <field><id>devAddr</id><value>0x",
-                          "$I2Cdevices[$i][I2C_DEVADDR_FIELD]",
+                          "$I2Cdevices[$i]{i2c_devAddr}",
                           "</value></field>\n";
         print "            <field><id>engine</id><value>",
-                          "$I2Cdevices[$i][I2C_ENGINE_FIELD]",
+                          "$I2Cdevices[$i]{i2c_engine}",
                           "</value></field>\n";
         print "            <field><id>byteAddrOffset</id><value>",
-                          "$I2Cdevices[$i][I2C_BYTE_ADDR_OFFSET_FIELD]",
+                          "$I2Cdevices[$i]{i2c_byte_addr_offset}",
                           "</value></field>\n";
         print "            <field><id>maxMemorySizeKB</id><value>",
-                          "$I2Cdevices[$i][I2C_MAX_MEM_SIZE_FIELD]",
+                          "$I2Cdevices[$i]{i2c_max_mem_size}",
                           "</value></field>\n";
         print "            <field><id>writePageSize</id><value>",
-                          "$I2Cdevices[$i][I2C_WRITE_PAGE_SIZE_FIELD]",
+                          "$I2Cdevices[$i]{i2c_write_page_size}",
                           "</value></field>\n";
         print "            <field><id>writeCycleTime</id><value>",
-                          "$I2Cdevices[$i][I2C_WRITE_CYCLE_TIME_FIELD]",
+                          "$I2Cdevices[$i]{i2c_write_cycle_time}",
                           "</value></field>\n";
         print "        </default>\n";
         print "    </attribute>\n";
 
     }
+}
 
-    # @todo RTC 116428 - Support for more than just processor defaults
-    # @todo RTC 117430 - Default procs to use 1MHZ speed until MRWs are updated
+
+sub addEepromsCentaur
+{
+    my ($sys, $node, $ctaur) = @_;
+
+    my $id_name eq "";
+    my $devAddr = 0x00;
+    my $tmp_ct eq "";
+
+    # Loop through all i2c devices
+    for my $i ( 0 .. $#I2Cdevices )
+    {
+        # Convert Content Type
+        $tmp_ct = "$I2Cdevices[$i]{i2c_content_type}";
+        if ( $tmp_ct eq "ALL_CENTAUR_VPD" )
+        {
+            $id_name = "EEPROM_VPD_PRIMARY_INFO";
+        }
+        elsif ( $tmp_ct eq "CENTAUR_VPD" )
+        {
+            if ( ($I2Cdevices[$i]{i2cm_pos} != $ctaur) ||
+                 ($I2Cdevices[$i]{i2cm_node} != $node) )
+            {
+                next;
+            }
+            $id_name = "EEPROM_VPD_PRIMARY_INFO";
+        }
+        else
+        {
+            next;
+        }
+
+        # Since I2C Master might be different than centaur, need to do
+        # some checks
+        if ( $I2Cdevices[$i]{i2cm_name} == "pu" )
+        {
+            $I2Cdevices[$i]{i2cm_name} = "proc";
+        }
+        elsif ( $I2Cdevices[$i]{i2cm_name} == "memb" )
+        {
+            $I2Cdevices[$i]{i2cm_name} = "membuf";
+        }
+
+        print "    <attribute>\n";
+        print "        <id>$id_name</id>\n";
+        print "        <default>\n";
+        print "            <field><id>i2cMasterPath</id><value>physical:",
+                          "sys-$sys/node-$node/",
+                          "$I2Cdevices[$i]{i2cm_name}",
+                          "-$I2Cdevices[$i]{i2cm_pos}</value></field>\n";
+        print "            <field><id>port</id><value>",
+                          "$I2Cdevices[$i]{i2c_port}</value></field>\n";
+        print "            <field><id>devAddr</id><value>0x",
+                          "$I2Cdevices[$i]{i2c_devAddr}",
+                          "</value></field>\n";
+        print "            <field><id>engine</id><value>",
+                          "$I2Cdevices[$i]{i2c_engine}",
+                          "</value></field>\n";
+        print "            <field><id>byteAddrOffset</id><value>",
+                          "$I2Cdevices[$i]{i2c_byte_addr_offset}",
+                          "</value></field>\n";
+        print "            <field><id>maxMemorySizeKB</id><value>",
+                          "$I2Cdevices[$i]{i2c_max_mem_size}",
+                          "</value></field>\n";
+        print "            <field><id>writePageSize</id><value>",
+                          "$I2Cdevices[$i]{i2c_write_page_size}",
+                          "</value></field>\n";
+        print "            <field><id>writeCycleTime</id><value>",
+                          "$I2Cdevices[$i]{i2c_write_cycle_time}",
+                          "</value></field>\n";
+        print "        </default>\n";
+        print "    </attribute>\n";
+
+    }
+}
+
+
+sub addI2cBusSpeedArray
+{
+    my ($sys, $node, $pos, $i2cm_name) = @_;
+
+    my $tmp_speed  = 0x0;
+    my $tmp_engine = 0x0;
+    my $tmp_port   = 0x0;
+    my $tmp_offset = 0x0;
+    my $tmp_ct eq "";
+
+    # bus_speed_arry[engine][port] is 2x3 array
+    my @speed_array = (0, 0, 0, 0, 0, 0);
+
+    # Loop through all i2c devices
+    for my $i ( 0 .. $#I2Cdevices )
+    {
+
+        # -----------------------
+        # Processor is I2C Master
+        if ( $i2cm_name eq "pu" )
+        {
+            # FSP/Power systems:
+            if ( $haveFSPs == 1 )
+            {
+                # Skip I2C devices that we don't care about
+                if( ( !($I2Cdevices[$i]{i2cm_uid}
+                      eq "I2CM_PROC_PROM")
+                      &&
+                      !($I2Cdevices[$i]{i2cm_uid}
+                        eq "I2CM_PROC_PROM1")
+                    ) ||
+                    ($I2Cdevices[$i]{i2cm_node} != $node) ||
+                    ($I2Cdevices[$i]{i2cm_name} != $i2cm_name) )
+                {
+                    next;
+                }
+
+                # Processor position field must match $pos with one exception:
+                # Murano's PRIMARY_MODULE_VPD has a position field one spot
+                # behind $proc
+                if ( ($CHIPNAME eq "murano") &&
+                     ("$I2Cdevices[$i]{i2c_content_type}" eq
+                     "PRIMARY_MODULE_VPD") )
+                {
+                    if ( ($I2Cdevices[$i]{i2cm_pos}+1) != $pos )
+                    {
+                        next;
+                    }
+                }
+                elsif ( $I2Cdevices[$i]{i2cm_pos} != $pos)
+                {
+                    next;
+                }
+
+            }
+            # No FSP
+            else
+            {
+                if ( ($I2Cdevices[$i]{i2cm_pos} != $pos) ||
+                     ($I2Cdevices[$i]{i2cm_node} != $node) ||
+                     !($I2Cdevices[$i]{i2cm_name} eq $i2cm_name) )
+                {
+                    next;
+                }
+            }
+        }
+
+        # -----------------------
+        # Memb is I2C Master
+        elsif ( $i2cm_name eq "memb" )
+        {
+            if ( ($I2Cdevices[$i]{i2cm_pos} != $pos) ||
+                 ($I2Cdevices[$i]{i2cm_node} != $node) ||
+                 !($I2Cdevices[$i]{i2cm_name} eq $i2cm_name) )
+            {
+                next;
+            }
+
+            # @todo RTC 119793 - engine 6 is invalid for hostboot
+            if ( $I2Cdevices[$i]{i2c_engine} == 6 )
+            {
+                $I2Cdevices[$i]{i2c_engine} = 0;
+            }
+        }
+        else
+        {
+            die "ERROR: addI2cBusSpeedArray: unsupported input $i2cm_name\n";
+        }
+
+
+        # update array
+        $tmp_speed  = $I2Cdevices[$i]{i2c_speed};
+        $tmp_engine = $I2Cdevices[$i]{i2c_engine};
+        $tmp_port   = $I2Cdevices[$i]{i2c_port};
+        $tmp_offset = ($tmp_engine * 3) + $tmp_port;
+
+        # @todo RTC 117430 - Default procs to 1MHZ speed until MRWs are updated
+        $tmp_ct = "$I2Cdevices[$i]{i2c_content_type}";
+        if ( ( ($tmp_ct eq "PRIMARY_SBE_VPD") ||
+               ($tmp_ct eq "REDUNDANT_SBE_VPD") ||
+               ($tmp_ct eq "PRIMARY_MODULE_VPD") ||
+               ($tmp_ct eq "PRIMARY_FRU_AND_MODULE_VPD") ||
+               ($tmp_ct eq "REDUNDANT_FRU_AND_MODULE_VPD") )
+             &&
+             ( $I2Cdevices[$i]{i2cm_name} eq "pu" ) )
+        {
+            $tmp_speed  = 1000;
+        }
+        else
+        {
+            $tmp_speed  = $I2Cdevices[$i]{i2c_speed};
+        }
+
+        # use the slower speed if there is a previous entry
+        if ( ($speed_array[$tmp_offset] == 0) ||
+             ($tmp_speed < $speed_array[$tmp_offset] ) )
+        {
+            $speed_array[$tmp_offset] = $tmp_speed;
+        }
+    }
 
     print "     <attribute>\n";
     print "        <id>I2C_BUS_SPEED_ARRAY</id>\n";
     print "        <default>\n";
-    print "            1000,\n";
-    print "            1000,\n";
-    print "            0,\n";
-    print "            0,\n";
-    print "            0,\n";
-    print "            0\n";
+    print "            $speed_array[0],\n";
+    print "            $speed_array[1],\n";
+    print "            $speed_array[2],\n";
+    print "            $speed_array[3],\n";
+    print "            $speed_array[4],\n";
+    print "            $speed_array[5]\n";
     print "        </default>\n";
     print "    </attribute>\n";
 
 }
+
+
 
 sub get_mruid
 {

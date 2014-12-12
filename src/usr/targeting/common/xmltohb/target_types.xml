@@ -1490,10 +1490,6 @@
     </attribute>
 
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-    <attribute>
-        <id>I2C_BUS_SPEED_ARRAY</id>
-        <default>400,0,0,0,0,0</default>
-    </attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
