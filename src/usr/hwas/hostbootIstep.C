@@ -59,6 +59,7 @@
 //  targeting support.
 #include  <targeting/common/utilFilter.H>
 #include  <targeting/common/commontargeting.H>
+#include  <targeting/common/entitypath.H>
 
 #include  <errl/errludtarget.H>
 
@@ -151,6 +152,36 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
 
         errl = discoverTargets();
+    }
+
+    // Put out some helpful messages that show which targets we actually found
+    std::map<TARGETING::TYPE,uint64_t> l_presData;
+    for (TargetIterator target = targetService().begin();
+         target != targetService().end();
+         ++target)
+    {
+        if (!(target->getAttr<ATTR_HWAS_STATE>().present))
+        {
+            continue;
+        }
+        TARGETING::TYPE l_type = target->getAttr<TARGETING::ATTR_TYPE>();
+        TARGETING::ATTR_POSITION_type l_pos = 0;
+        if( target->tryGetAttr<TARGETING::ATTR_POSITION>(l_pos) )
+        {
+            l_presData[l_type] |= (0x8000000000000000 >> l_pos);
+        }
+    }
+    TARGETING::EntityPath l_epath; //use EntityPath's translation functions
+    for( std::map<TARGETING::TYPE,uint64_t>::iterator itr = l_presData.begin();
+         itr != l_presData.end();
+         ++itr )
+    {
+        uint8_t l_type = itr->first;
+        uint64_t l_val = itr->second;
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"PRESENT> %s[%.2X]=%.8X%.8X", l_epath.pathElementTypeAsString(itr->first), l_type, l_val>>32, l_val&0xFFFFFFFF);
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+        CONSOLE::displayf( "PRESENT> %s[%.2X]=%.8X%.8X", l_epath.pathElementTypeAsString(itr->first), l_type, l_val>>32, l_val&0xFFFFFFFF );
+#endif
     }
 
 #ifdef CONFIG_BMC_IPMI
