@@ -128,6 +128,8 @@
     <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT</id></attribute>
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT</id></attribute>
+    <attribute><id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id></attribute>
+
     <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>

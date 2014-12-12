@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.15 2014/02/26 21:19:10 pardeik Exp $
+// $Id: mss_thermal_init.C,v 1.18 2015/01/23 17:54:09 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -49,6 +49,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.17  | pardeik  |19-NOV-14| Use MRW attribute for SC address map for ISDIMMs
+//   1.16  | pardeik  |06-FEB-14| removed string in trace statement
 //   1.15  | pardeik  |24-FEB-14| added support for ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE
 //   1.14  | pardeik  |12-FEB-14| changed CONFIG_INTERVAL_TIMER from 5 to 15 to 
 //   1.13  | pardeik  |30-JAN-14| workaround for SW243504 (enable sensors on master
@@ -120,8 +122,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       fapi::ReturnCode l_rc;
       uint32_t l_ecmd_rc = 0;
 
-      const char *procedure_name = "mss_thermal_init";
-      FAPI_INF("*** Running %s ***", procedure_name);
+      FAPI_INF("*** Running mss_thermal_init ***");
 
       // Constant declaration
       const uint8_t l_NUM_MBAS = 2;                                     // Number of MBAs per Centaur
@@ -150,7 +151,6 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       const uint32_t I2C_SETUP_LOWER_HALF = 0x05000000;
       const uint32_t ACT_MASK_UPPER_HALF = 0x00018000;
       const uint32_t ACT_MASK_LOWER_HALF = 0x00000000;
-      const uint32_t SENSOR_ADDR_MAP_ISDIMM = 0x01234567;
 // OCC polls cacheline every 2 ms (could vary from this, as seen on scope)
 // For I2C bus at 50kHz (9.6 ms max to read 8 sensors), use interval of 15 for margin and to prevent stall errors when 8 sensors are enabled to be read
       const uint32_t CONFIG_INTERVAL_TIMER = 15;
@@ -176,6 +176,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       uint8_t l_sensor_map_mask;
       uint8_t l_master_i2c_temp_sensor_enable;
       uint8_t l_spare_i2c_temp_sensor_enable;
+      uint32_t l_dimm_sensor_cache_addr_map = 0;
 
 //********************************************
 // Centaur internal temperature polling setup 
@@ -237,6 +238,15 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetChildChiplets(i_target, fapi::TARGET_TYPE_MBA_CHIPLET, l_target_mba_array);
       if (l_rc) return l_rc;
 
+      // need to clear out the array since it could be sparsely filled
+      //  in the ISDIMM case
+      for( size_t i = 0;
+           i < (sizeof(l_custom_dimm)/sizeof(l_custom_dimm[0]));
+           i++ )
+      {
+          l_custom_dimm[i] = fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO;
+      }
+
       for (uint8_t mba_index = 0; mba_index < l_target_mba_array.size(); mba_index++){
          l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_target_mba_array[mba_index], l_mba_pos);
 	 if (l_rc) return l_rc;
@@ -262,6 +272,12 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 	  l_rc = FAPI_ATTR_GET(ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE, NULL, l_master_i2c_temp_sensor_enable);
 	  if (l_rc) return l_rc;
 	  l_rc = FAPI_ATTR_GET(ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE, NULL, l_spare_i2c_temp_sensor_enable);
+	  if (l_rc) return l_rc;
+      }
+      else
+      {
+	  // sensor cache address map for non custom dimm temperature sensors (which i2c bus and i2c address they are)
+	  l_rc = FAPI_ATTR_GET(ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP, NULL, l_dimm_sensor_cache_addr_map);
 	  if (l_rc) return l_rc;
       }
 
@@ -492,7 +508,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 	    }
 	    l_iterator++;
 	 }
-	 l_ecmd_rc |= l_data_scac_addrmap.insert(SENSOR_ADDR_MAP_ISDIMM, 0, 32, 0);
+	 l_ecmd_rc |= l_data_scac_addrmap.insert(l_dimm_sensor_cache_addr_map, 0, 32, 0);
 	 if(l_ecmd_rc) {
 	     l_rc.setEcmdError(l_ecmd_rc);
 	     return l_rc;
@@ -619,7 +635,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 	  }
       }
 
-      FAPI_INF("*** %s COMPLETE ***", procedure_name);
+      FAPI_INF("*** mss_thermal_init COMPLETE ***");
       return l_rc;
 
    } //end mss_thermal_init

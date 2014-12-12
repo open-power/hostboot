@@ -11973,6 +11973,27 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
+    <description>Machine Readable Workbook value detailing the wiring of the
+                 8 dimm temperature sensors for non custom dimms, in DIMM A0,
+                 A1,B0,B1,C0,C1,D0,D1 order. One nibble per sensor where
+                 bit0 (MSB) is the i2c bus the sensor is attached to
+                 (0 for master, 1 for spare) and bits 1:3 are for A2,A1,A0
+                 of the sensor i2c address (where A2 is MSB)
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>CDIMM_SENSOR_MAP_PRIMARY</id>
     <description>
         Custom DIMM Sensor Map for Primary I2C Port (1 byte of data):
