@@ -950,12 +950,15 @@ namespace HTMGT
         cmdBuffer[l_send_length++] = (iv_OccCmd.checksum >> 8) & 0xFF;
         cmdBuffer[l_send_length++] = iv_OccCmd.checksum & 0xFF;
 
+        //@fixme-RTC:119833-this hangs HB if traces are sent out to the console
+#ifndef CONFIG_CONSOLE_OUTPUT_TRACE
         if (G_debug_trace & DEBUG_TRACE_OCCCMD)
         {
             // Trace the command
             TMGT_BIN("buildOccCmdBuffer: OCC command",
                      cmdBuffer, l_send_length);
         }
+#endif
 
 #ifdef SIMICS_TESTING
         g_seq = iv_OccCmd.sequenceNumber;
