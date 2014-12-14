@@ -321,11 +321,11 @@ void*    call_host_runtime_setup( void    *io_pArgs )
 #endif
         if(l_activateOCC)
         {
-            l_err = HBOCC::activateOCC();
+            l_err = HBOCC::activateOCCs();
             if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "activateOCC failed");
+                       "activateOCCs failed");
                 break;
             }
         }
