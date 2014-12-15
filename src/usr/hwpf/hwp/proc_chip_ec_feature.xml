@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,14 +22,16 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.60 2014/10/29 21:33:52 szhong Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.61 2014/11/18 17:48:26 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
+  <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC</id>
+    <id>ATTR_CHIP_EC_FEATURE_SET_ABUS_PRBS_TAP_ID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      For Venice specific inits. Returns true if Venice.
+      Returns true if ABUS TX Per-Lane PRBS Tap Selector should be set.  True if:
+      Venice EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -39,13 +41,41 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
-     </chipEcFeature>
+    </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_NAPLES_SPECIFIC</id>
+    <id>ATTR_CHIP_EC_FEATURE_TA_PB_T1_PRESENT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      For Naples specific inits. Returns true if Naples.
+      Returns if a chip contains PB_T1 trace array.  True if:
+      Venice EC 0x10 or greater
+      Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_TA_A_T1_PRESENT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains A_T1 trace array.  True if:
+      Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -57,6 +87,78 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SINGLE_XBUS_PRESENT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns true if a single XBUS is present.  True if: Murano
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_NV_PRESENT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains NV chiplet/link logic.  True if:
+      Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains two CAPP units.  True if:
+      Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SET_LEGACY_NODE_ID_VALID_MBOX_BIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Set legacy node ID valid mailbox indicator bit.  True if:
+      Murano EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -90,6 +192,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_PIBSLVRESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -105,6 +208,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_BOOT_FREQ_LESS_PSAVE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -123,6 +227,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_PLLINIT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -140,6 +245,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -165,6 +271,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NOT_SUPPORT_SBE_CFAM_START</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -182,6 +289,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NOT_SUPPORT_SBE_AUTO_START</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -199,31 +307,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_32_PCIE_LANES</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Returns if a chip contains 32 lanes of PCIE I/O.  True if:
-        Venice EC 0x10 or greater
-        Naples EC 0x10 or greater
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_VENICE</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_NAPLES</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -257,6 +341,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_CAPP_PROD</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -290,6 +375,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -323,6 +409,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HCA_SPLIT_HANG_CONTROL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -356,6 +443,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -397,6 +485,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -438,6 +527,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -479,6 +569,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_LCTANK_PLL_VCO_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -496,6 +587,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_XBUS_DLL_SLOW_MURANO</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -513,6 +605,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_ADU_PBINIT_LAUNCH_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -538,6 +631,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -563,6 +657,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -580,6 +675,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MCS_VENDD1_FIR_CONTROL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -597,6 +693,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MCS_P8_DD2_FIR_CONTROL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -630,6 +727,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_TRACE_CONTROL_ON_SCOM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -663,6 +761,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MPIPL_AISS_WINKLE_ENTRY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -688,6 +787,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_WE5_VER2</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -722,6 +822,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C8_VER3</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -755,6 +856,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C8_VER2</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -773,6 +875,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -799,6 +902,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_LFSR_ON_STARVATION_ELSE_RR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -825,6 +929,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_UX_LOCAL_ARB_RR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -851,6 +956,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C10_VER2</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -884,6 +990,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -910,6 +1017,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -943,6 +1051,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_IO_TRAINING_SLS_WORKAROUND</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -959,6 +1068,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_IO_TRAINING_DLL_WORKAROUND</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -975,6 +1085,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_DCCAL_PLL_WORKAROUND</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -990,6 +1101,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_XBUS_RESONANT_CLK_VALID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1015,6 +1127,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1048,6 +1161,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_AISS_SPECIAL_WAKEUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1082,6 +1196,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OCC_CE_FIR_DISABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1099,6 +1214,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_ENABLE_IVE_PERFORMANCE_ORDERING</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1132,6 +1248,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_ENABLE_PCI_DMAR_OOO</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1165,6 +1282,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_ZCAL_OVERRIDE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1182,6 +1300,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_IVRM_WINKLE_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1215,6 +1334,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_EC_MSS_RECONFIG_POSSIBLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1225,7 +1345,7 @@
       Murano EC greater than or equal to 0x20
       Venice EC greater than or equal to 0x20
       Naples EC greater than or equal to 0x10
-     </description>
+    </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_MURANO</name>
@@ -1250,6 +1370,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CEN_EC_THROTTLE_SYNC_POSSIBLE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -1265,6 +1386,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_EC_CORE_HANG_PULSE_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1282,7 +1404,8 @@
       </chip>
     </chipEcFeature>
   </attribute>
-    <attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PROC_EC_PBA_PREFETCH_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -1315,7 +1438,8 @@
       </chip>
     </chipEcFeature>
   </attribute>
-    <attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PROC_EC_OHA_L3_PURGE_ABORT_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -1341,6 +1465,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_PFET_POWEROFF_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1366,6 +1491,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OCC_DISABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1385,6 +1511,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1402,6 +1529,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HCA_BAR_SCOM_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1428,6 +1556,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_TOD_ERROR_MASK_NOT_WRITABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -1444,4 +1573,5 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars_defs.H,v 1.1 2014/08/05 20:43:46 jmcgill Exp $
+// $Id: proc_setup_bars_defs.H,v 1.2 2014/11/18 17:43:18 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars_defs.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! *** ***
+// *! ***  ***
 // *|
 // *! TITLE       : proc_setup_bars_defs.H
 // *! DESCRIPTION : Structure/constant definitions for proc_setup_bars HWP (FAPI)
@@ -94,7 +94,7 @@ const uint8_t PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES = 8;
 const uint8_t PROC_SETUP_BARS_NUM_MIRRORED_RANGES = 4;
 
 // PCIe unit contstants
-const uint8_t PROC_SETUP_BARS_PCIE_NUM_UNITS = 3;
+const uint8_t PROC_SETUP_BARS_PCIE_NUM_UNITS = 4;
 const uint8_t PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT = 3;
 
 
@@ -242,6 +242,8 @@ struct proc_setup_bars_smp_chip
     // partial good attributes
     bool nx_enabled;
     bool pcie_enabled;
+    // number of valid PCIe PHBs
+    uint8_t num_phb;
     // select for PCIe/DSMP mux (one per link)
     bool pcie_not_f_link[PROC_FAB_SMP_NUM_F_LINKS];
     // real address ranges covered by resources on this chip
@@ -982,28 +984,32 @@ const uint32_t PROC_SETUP_BARS_PCIE_CHIP_NON_MIRRORED_BAR[PROC_SETUP_BARS_PCIE_N
 {
     PCIE0_NODAL_BAR0_0x02012010,
     PCIE1_NODAL_BAR0_0x02012410,
-    PCIE2_NODAL_BAR0_0x02012810
+    PCIE2_NODAL_BAR0_0x02012810,
+    PCIE3_NODAL_BAR0_0x02012C10,
 };
 
 const uint32_t PROC_SETUP_BARS_PCIE_CHIP_MIRRORED_BAR[PROC_SETUP_BARS_PCIE_NUM_UNITS] =
 {
     PCIE0_NODAL_BAR1_0x02012011,
     PCIE1_NODAL_BAR1_0x02012411,
-    PCIE2_NODAL_BAR1_0x02012811
+    PCIE2_NODAL_BAR1_0x02012811,
+    PCIE3_NODAL_BAR1_0x02012C11
 };
 
 const uint32_t PROC_SETUP_BARS_PCIE_NODE_NON_MIRRORED_BAR[PROC_SETUP_BARS_PCIE_NUM_UNITS] =
 {
     PCIE0_GROUP_BAR0_0x02012012,
     PCIE1_GROUP_BAR0_0x02012412,
-    PCIE2_GROUP_BAR0_0x02012812
+    PCIE2_GROUP_BAR0_0x02012812,
+    PCIE3_GROUP_BAR0_0x02012C12
 };
 
 const uint32_t PROC_SETUP_BARS_PCIE_NODE_MIRRORED_BAR[PROC_SETUP_BARS_PCIE_NUM_UNITS] =
 {
     PCIE0_GROUP_BAR1_0x02012013,
     PCIE1_GROUP_BAR1_0x02012413,
-    PCIE2_GROUP_BAR1_0x02012813
+    PCIE2_GROUP_BAR1_0x02012813,
+    PCIE3_GROUP_BAR1_0x02012C13
 };
 
 const uint32_t PROC_SETUP_BARS_PCIE_FOREIGN_NEAR_BAR[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_FAB_SMP_NUM_F_LINKS] =
@@ -1019,6 +1025,10 @@ const uint32_t PROC_SETUP_BARS_PCIE_FOREIGN_NEAR_BAR[PROC_SETUP_BARS_PCIE_NUM_UN
     {
         PCIE2_NEAR_BAR_F0_0x02012814,
         PCIE2_NEAR_BAR_F1_0x02012816
+    },
+    {
+        PCIE3_NEAR_BAR_F0_0x02012C14,
+        PCIE3_NEAR_BAR_F1_0x02012C16
     }
 };
 
@@ -1035,6 +1045,10 @@ const uint32_t PROC_SETUP_BARS_PCIE_FOREIGN_FAR_BAR[PROC_SETUP_BARS_PCIE_NUM_UNI
     {
         PCIE2_FAR_BAR_F0_0x02012815,
         PCIE2_FAR_BAR_F1_0x02012817
+    },
+    {
+        PCIE3_FAR_BAR_F0_0x02012C15,
+        PCIE3_FAR_BAR_F1_0x02012C17
     }
 };
 
@@ -1091,6 +1105,10 @@ const uint32_t PROC_SETUP_BARS_PCIE_BAR_REGS_MMIO[PROC_SETUP_BARS_PCIE_NUM_UNITS
     {
         PCIE2_IO_BAR0_0x02012840,
         PCIE2_IO_BAR1_0x02012841
+    },
+    {
+        PCIE3_IO_BAR0_0x02012C40,
+        PCIE3_IO_BAR1_0x02012C41
     }
 };
 
@@ -1124,6 +1142,10 @@ const uint32_t PROC_SETUP_BARS_PCIE_BAR_MASK_REGS_MMIO[PROC_SETUP_BARS_PCIE_NUM_
     {
         PCIE2_IO_MASK0_0x02012843,
         PCIE2_IO_MASK1_0x02012844
+    },
+    {
+        PCIE3_IO_MASK0_0x02012C43,
+        PCIE3_IO_MASK1_0x02012C44
     }
 };
 
@@ -1165,6 +1187,10 @@ const uint32_t PROC_SETUP_BARS_PCIE_BAR_REGS_PHB[PROC_SETUP_BARS_PCIE_NUM_UNITS]
     {
         PCIE2_IO_BAR2_0x02012842,
         PCIE2_ASB_BAR_0x0901280B
+    },
+    {
+        PCIE3_IO_BAR2_0x02012C42,
+        PCIE3_ASB_BAR_0x09012C0B
     }
 };
 
@@ -1179,7 +1205,8 @@ const uint32_t PROC_SETUP_BARS_PCIE_BAR_EN_REGS[PROC_SETUP_BARS_PCIE_NUM_UNITS] 
 {
     PCIE0_IO_BAR_EN_0x02012045,
     PCIE1_IO_BAR_EN_0x02012445,
-    PCIE2_IO_BAR_EN_0x02012845
+    PCIE2_IO_BAR_EN_0x02012845,
+    PCIE3_IO_BAR_EN_0x02012C45
 };
 
 // ETU Reset register field/bit definitions
@@ -1187,7 +1214,8 @@ const uint32_t PROC_SETUP_BARS_PCIE_ETU_RESET_REGS[PROC_SETUP_BARS_PCIE_NUM_UNIT
 {
     PCIE0_ETU_RESET_0x0901200A,
     PCIE1_ETU_RESET_0x0901240A,
-    PCIE2_ETU_RESET_0x0901280A
+    PCIE2_ETU_RESET_0x0901280A,
+    PCIE3_ETU_RESET_0x09012C0A
 };
 
 

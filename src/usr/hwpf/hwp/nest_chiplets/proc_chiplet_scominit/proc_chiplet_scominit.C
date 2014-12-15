@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.24 2014/10/17 16:41:10 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.26 2014/11/20 18:00:37 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -71,6 +71,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
     fapi::Target master_mcs;
     uint8_t enable_xbus_resonant_clocking = 0x0;
     uint8_t i2c_slave_address = 0x0;
+    uint8_t dual_capp_present = 0x0;
 
     ecmdDataBufferBase data(64);
     ecmdDataBufferBase cfam_data(32);
@@ -249,6 +250,30 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                     break;
                 }
 
+                // get dual CAPP presence attribute
+                FAPI_DBG("proc_chiplet_scominit: Querying dual CAPP feature attribute");
+                rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT,
+                                   &i_target,
+                                   dual_capp_present);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT");
+                    break;
+                }
+                
+                if (dual_capp_present != 0)
+                {
+                    rc = fapiPutScom(i_target,
+                                     CAPP1_APC_MASTER_LCO_TARGET_0x020131A1,
+                                     data);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (CAPP1_APC_MASTER_LCO_TARGET_0x020131A1) on %s",
+                                 i_target.toEcmdString());
+                        break;
+                    }
+                }
+
                 // execute AS SCOM initfile
                 FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
                          PROC_CHIPLET_SCOMINIT_AS_IF, i_target.toEcmdString());
@@ -346,7 +371,6 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                 break;
             }
 
-
             if (enable_xbus_resonant_clocking)
             {
                 FAPI_DBG("proc_chiplet_scominit: Enabling XBUS resonant clocking");
@@ -413,7 +437,6 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          i_target.toEcmdString());
                 break;
             }
-
 
             // determine set of functional MCS chiplets
             rc = fapiGetChildChiplets(i_target,

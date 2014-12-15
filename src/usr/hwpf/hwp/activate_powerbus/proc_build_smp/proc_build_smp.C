@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.17 2014/08/05 15:13:27 kahnevan Exp $
+// $Id: proc_build_smp.C,v 1.19 2014/11/18 17:41:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -658,6 +658,8 @@ fapi::ReturnCode proc_build_smp_process_chip(
 {
     // return code
     fapi::ReturnCode rc;
+    uint8_t nv_present;
+    uint8_t dual_capp_present;
     uint8_t pcie_enabled;
     uint8_t nx_enabled;
     uint8_t x_enabled;
@@ -674,6 +676,41 @@ fapi::ReturnCode proc_build_smp_process_chip(
         // display target information for this chip
         FAPI_DBG("proc_build_smp_process_chip: Target: %s",
                  io_smp_chip.chip->this_chip.toEcmdString());
+
+        // get NV link presence attribute
+        FAPI_DBG("proc_build_smp_process_chip: Querying NV chiplet/link feature attribute");
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NV_PRESENT,
+                           &(io_smp_chip.chip->this_chip),
+                           nv_present);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_CHIP_EC_FEATURE_NV_PRESENT");
+            break;
+        }
+        io_smp_chip.nv_present = (nv_present != 0);
+
+        // get dual CAPP presence attribute
+        FAPI_DBG("proc_build_smp_process_chip: Querying dual CAPP feature attribute");
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT,
+                           &(io_smp_chip.chip->this_chip),
+                           dual_capp_present);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT");
+            break;
+        }
+        io_smp_chip.dual_capp_present = (dual_capp_present != 0);
+
+        // get PCIe PHB configuration
+        FAPI_DBG("proc_build_smp_process_chip: Querying PCIe PHB configuration");
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_NUM_PHB,
+                           &(io_smp_chip.chip->this_chip),
+                           io_smp_chip.num_phb);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_process_chip: Error querying ATTR_PROC_PCIE_NUM_PHB");
+            break;
+        }
 
         // get PCIe/DSMP mux attributes
         FAPI_DBG("proc_build_smp_process_chip: Querying PCIe/DSMP mux attribute");
@@ -751,11 +788,14 @@ fapi::ReturnCode proc_build_smp_process_chip(
         io_smp_chip.x_enabled =
             (x_enabled == fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE);
 
+        // NV link replaces A & F link support
         io_smp_chip.a_enabled =
-            (a_enabled == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE);
+            ((a_enabled == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE) &&
+             !nv_present);
 
         io_smp_chip.pcie_enabled =
-            (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
+            ((pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE) &&
+             !nv_present);
 
     } while(0);
 

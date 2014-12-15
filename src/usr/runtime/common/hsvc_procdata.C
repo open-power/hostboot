@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Wed Jul  9 14:34:55 CDT 2014 by dcrowell from
+// Generated on Wed Feb 18 09:37:26 CST 2015 by cswenson from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_CHIP_HAS_SBE );
@@ -33,6 +33,7 @@ HSVC_LOAD_ATTR( ATTR_EX_L2_SINGLE_MEMBER_ENABLE );
 HSVC_LOAD_ATTR( ATTR_FABRIC_CHIP_ID );
 HSVC_LOAD_ATTR( ATTR_FABRIC_NODE_ID );
 HSVC_LOAD_ATTR( ATTR_FSI_GP_REG_SCOM_ACCESS );
+HSVC_LOAD_ATTR( ATTR_I2C_SLAVE_ADDRESS );
 HSVC_LOAD_ATTR_P( ATTR_NAME );
 HSVC_LOAD_ATTR( ATTR_OSCSWITCH_CTL0 );
 HSVC_LOAD_ATTR( ATTR_OSCSWITCH_CTL1 );
@@ -40,6 +41,7 @@ HSVC_LOAD_ATTR( ATTR_OSCSWITCH_CTL2 );
 HSVC_LOAD_ATTR( ATTR_PCI_OSCSWITCH_CONFIG );
 HSVC_LOAD_ATTR( ATTR_PROC_BOOT_VOLTAGE_VID );
 HSVC_LOAD_ATTR( ATTR_PROC_DCM_INSTALLED );
+HSVC_LOAD_ATTR( ATTR_TARGET_SCOMABLE );
 // -- Input: ../../xml/attribute_info/common_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_FUNCTIONAL );
 HSVC_LOAD_ATTR( ATTR_POS );
@@ -166,13 +168,12 @@ HSVC_LOAD_ATTR( ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES );
 HSVC_LOAD_ATTR( ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS );
 HSVC_LOAD_ATTR( ATTR_SBE_SEEPROM_I2C_PORT );
 // -- Input: ../../xml/attribute_info/proc_chip_ec_feature.xml --
-HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_32_PCIE_LANES );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_ADU_PBINIT_LAUNCH_BUG );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_AISS_SPECIAL_WAKEUP );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_BOOT_FREQ_LESS_PSAVE );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_CAPP_PROD );
-//HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_CFAM_RESET_SBE_START_WA );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_ENABLE_IVE_PERFORMANCE_ORDERING );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_ENABLE_PCI_DMAR_OOO );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C10_VER2 );
@@ -182,10 +183,12 @@ HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_WE5_VER2 );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_UX_LOCAL_ARB_RR );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_LFSR_ON_STARVATION_ELSE_RR );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HCA_BAR_SCOM_BUG );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HCA_SPLIT_HANG_CONTROL );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HW_BUG_PBASLVRESET );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HW_BUG_PIBSLVRESET );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HW_BUG_PLLINIT );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HW_BUG_TOD_ERROR_MASK_NOT_WRITABLE );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_IVRM_WINKLE_BUG );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_LCTANK_PLL_VCO_BUG );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG );
@@ -196,6 +199,7 @@ HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_MCS_VENDD1_FIR_CONTROL );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_MPIPL_AISS_WINKLE_ENTRY );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_NOT_SUPPORT_SBE_AUTO_START );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_NOT_SUPPORT_SBE_CFAM_START );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_NV_PRESENT );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_OCC_CE_FIR_DISABLE );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_OCC_DISABLE );
@@ -205,9 +209,15 @@ HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_SET_ABUS_PRBS_TAP_ID );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_SET_LEGACY_NODE_ID_VALID_MBOX_BIT );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_SINGLE_XBUS_PRESENT );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_TA_A_T1_PRESENT );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_TA_PB_T1_PRESENT );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_TRACE_CONTROL_ON_SCOM );
-HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_USE_POLLING_PROT );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_XBUS_DLL_SLOW_MURANO );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_XBUS_RESONANT_CLK_VALID );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_ZCAL_OVERRIDE );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_PFET_POWEROFF_BUG );
 HSVC_LOAD_ATTR( ATTR_DCCAL_PLL_WORKAROUND );

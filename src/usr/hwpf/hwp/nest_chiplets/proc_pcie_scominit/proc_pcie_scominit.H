@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.H,v 1.6 2013/10/28 03:57:13 jmcgill Exp $
+// $Id: proc_pcie_scominit.H,v 1.7 2014/11/18 17:38:50 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -61,41 +61,46 @@
 const char * const PROC_PCIE_SCOMINIT_PHASE1_IF = "p8.pe.phase1.scom.if";
 
 // PCIe physical constants
-const uint8_t PROC_PCIE_SCOMINIT_NUM_IOP = 2;
-const uint8_t PROC_PCIE_SCOMINIT_NUM_PHB = 3;
+const uint8_t PROC_PCIE_SCOMINIT_NUM_IOP = 3;
+const uint8_t PROC_PCIE_SCOMINIT_NUM_PHB = 4;
 
 // PCIe GP0 register field/bit definitions
 const uint32_t PCIE_GP0_PHB_IOVALID_BIT[PROC_PCIE_SCOMINIT_NUM_PHB] =
 {
     48,
     49,
-    50
+    50,
+    51
 };
 
 const uint32_t PCIE_GP0_PHB_REFCLOCK_DRIVE_EN_BIT[PROC_PCIE_SCOMINIT_NUM_PHB] =
 {
     52,
     53,
-    54
+    54,
+    55
 };
 
 // PCIe GP4 register field/bit definitions
 const uint32_t PCIE_GP4_IOP_RESET_BIT[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     37,
-    38
+    38,
+    39
 };
 const uint32_t PCIE_GP4_IOP_LANE_CFG_START_BIT = 41;
 const uint32_t PCIE_GP4_IOP_LANE_CFG_END_BIT = 44;
 const uint32_t PCIE_GP4_IOP_SWAP_START_BIT[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     47,
-    53
+    53,
+    50
 };
 const uint32_t PCIE_GP4_IOP_SWAP_END_BIT[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     49,
-    55
+    55,
+    52
 };
 
 // Murano/Venice support lane configurations bewtween 0x0 & 0xC,
@@ -108,7 +113,8 @@ const uint8_t PCIE_GP4_IOP_SWAP_MAX = 0x7;
 const uint64_t PROC_PCIE_SCOMINIT_PLL_GLOBAL_CONTROL2[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     PCIE_IOP0_PLL_GLOBAL_CONTROL2_0x8000080A0901143F,
-    PCIE_IOP1_PLL_GLOBAL_CONTROL2_0x8000080A0901187F
+    PCIE_IOP1_PLL_GLOBAL_CONTROL2_0x8000080A0901187F,
+    PCIE_IOP2_PLL_GLOBAL_CONTROL2_0x8000080A09011C7F
 };
 const uint32_t PLL_GLOBAL_CONTROL2_PROG_COMPLETE_BIT = 50;
 
@@ -116,19 +122,22 @@ const uint32_t PLL_GLOBAL_CONTROL2_PROG_COMPLETE_BIT = 50;
 const uint32_t PROC_PCIE_SCOMINIT_PLL_FIR[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     PCIE_IOP0_PLL_FIR_0x09011400,
-    PCIE_IOP1_PLL_FIR_0x09011840
+    PCIE_IOP1_PLL_FIR_0x09011840,
+    PCIE_IOP2_PLL_FIR_0x09011C40
 };
 
 const uint32_t PROC_PCIE_SCOMINIT_PLL_FIR_WOF[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     PCIE_IOP0_PLL_FIR_WOF_0x09011408,
-    PCIE_IOP1_PLL_FIR_WOF_0x09011848
+    PCIE_IOP1_PLL_FIR_WOF_0x09011848,
+    PCIE_IOP2_PLL_FIR_WOF_0x09011C48
 };
 
 const uint32_t PROC_PCIE_SCOMINIT_PLL_FIR_MASK[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     PCIE_IOP0_PLL_FIR_MASK_0x09011403,
-    PCIE_IOP1_PLL_FIR_MASK_0x09011843
+    PCIE_IOP1_PLL_FIR_MASK_0x09011843,
+    PCIE_IOP2_PLL_FIR_MASK_0x09011C43
 };
 
 const uint64_t PCIE_PLL_FIR_MASK_VAL = 0x0080000000000000ULL;

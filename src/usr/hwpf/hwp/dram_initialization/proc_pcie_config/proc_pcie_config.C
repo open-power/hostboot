@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.9 2014/08/27 14:53:48 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.10 2014/11/18 17:41:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -97,12 +97,14 @@ fapi::ReturnCode proc_pcie_config_pbcq(
 //             clear FIR/WOF
 //             initialize FIR action settings
 //             reset FIR masks
-// parameters: i_target => processor chip target
+// parameters: i_target  => processor chip target
+//             i_num_phb => number of PHB units
 // returns: FAPI_RC_SUCCESS if all actions are successful,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_pcie_config_pbcq_fir(
-    const fapi::Target & i_target)
+    const fapi::Target & i_target,
+    uint8_t i_num_phb)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -113,7 +115,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
     FAPI_INF("proc_pcie_config_pbcq_fir: Start");
 
     // loop over all PHBs
-    for (size_t i = 0; i < PROC_PCIE_CONFIG_NUM_PHB; i++)
+    for (size_t i = 0; i < i_num_phb; i++)
     {
         // clear FIR
         rc_ecmd |= data.flushTo0();
@@ -133,7 +135,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR[i]);
             break;
         }
-
+    
         // clear FIR WOF
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[i],
@@ -144,7 +146,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[i]);
             break;
         }
-
+    
         // set action0
         rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL);
         if (rc_ecmd)
@@ -154,7 +156,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-
+    
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i],
                          data);
@@ -164,7 +166,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i]);
             break;
         }
-
+    
         // set action1
         rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL);
         if (rc_ecmd)
@@ -174,7 +176,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-
+    
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i],
                          data);
@@ -184,7 +186,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i]);
             break;
         }
-
+    
         // set mask
         rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK_VAL);
         if (rc_ecmd)
@@ -194,7 +196,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-
+    
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[i],
                          data);
@@ -218,6 +220,7 @@ fapi::ReturnCode proc_pcie_config(
 {
     fapi::ReturnCode rc;
     uint8_t pcie_enabled;
+    uint8_t num_phb;
 
     // mark HWP entry
     FAPI_INF("proc_pcie_config: Start");
@@ -247,6 +250,16 @@ fapi::ReturnCode proc_pcie_config(
         // atttribute is set)
         if (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE)
         {
+            // determine PHB configuration
+            rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_NUM_PHB,
+                               &i_target,
+                               num_phb);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_NUM_PHB)");
+                break;
+            }
+
             rc = proc_pcie_config_pbcq(i_target);
             if (!rc.ok())
             {
@@ -254,7 +267,7 @@ fapi::ReturnCode proc_pcie_config(
                 break;
             }
 
-            rc = proc_pcie_config_pbcq_fir(i_target);
+            rc = proc_pcie_config_pbcq_fir(i_target, num_phb);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq_fir");

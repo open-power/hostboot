@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,9 +22,52 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_pcie_scominit_attributes.xml,v 1.6 2013/12/09 21:52:08 jmcgill Exp $ -->
+<!-- $Id: proc_pcie_scominit_attributes.xml,v 1.7 2014/11/18 17:46:06 jmcgill Exp $ -->
 <!-- proc_pcie_scominit_attributes.xml -->
 <attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_NUM_PHB</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform
+        Number of PCIe PHB units present on target
+        Murano/Venice: 3
+        Naples: 4
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_NUM_IOP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform
+        Number of PCIe IOP units present on target
+        Murano/Venice: 2
+        Naples: 3
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_NUM_LANES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform
+        Number of PCIe I/O lanes supported by target
+        Murano: 24
+        Venice: 32
+        Naples: 40
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_IOP_CONFIG</id>
@@ -46,10 +91,10 @@
       consumer: proc_pcie_scominit
       firmware notes:
         Encoded PCIE IOP swap configuration
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint8</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -62,7 +107,7 @@
       consumer: proc_pcie_scominit
       firmware notes:
         Bit mask defining set of active/valid PHBs
-        bit0=PHB0, bit1=PHB1, bit2=PHB2
+        bit0=PHB0, bit1=PHB1, bit2=PHB2, bit3=PHB3
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -77,7 +122,7 @@
       consumer: proc_pcie_scominit
       firmware notes:
         Bit mask defining state of refclock drive enables
-        bit0=PCI0, bit1=PCI1, bit2=PCI2
+        bit0=PCI0, bit1=PCI1, bit2=PCI2, bit3=PCI3
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -93,10 +138,10 @@
       firmware notes:
         PCIe Gen3 PLL Control Register 0.
         ATUNE/CPISEL.
-        Array index: IOP number(0:1)
+        Array index: IOP number(0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -109,10 +154,10 @@
       notes:
         PCIe Gen2/Gen1 PLL Control Register 0.
         ATUNE/CPISEL.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -125,10 +170,10 @@
       notes:
         PCIe PLL Global Control Register 0.
         REFISRC/REFISINK.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -141,10 +186,10 @@
       notes:
         PCIe PLL Global Control Register 1.
 	ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -158,10 +203,10 @@
         PCIe PCS Control Register 0.
         BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
         STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -175,10 +220,10 @@
         PCIe PCS Control Register 1.
 	RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
         ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -191,11 +236,11 @@
       notes:
         PCIe TX FIFO Offset Register.
 	G3OFFSET/G2OFFSET/G1OFFSET.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -208,11 +253,11 @@
       notes:
         PCIe TX Receiver Detect Control Register.
         VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -225,11 +270,11 @@
       notes:
         PCIe TX Bandwidth Loss Coefficient Register.
         GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -242,11 +287,11 @@
       notes:
         PCIe RX VGA Control Register 2.
         GAIN2/GAIN1.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -259,11 +304,11 @@
       notes:
         PCIe RX Receiver Peaking Value Register.
 	PEAK1/PEAK2/PEAK3.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -276,11 +321,11 @@
       notes:
         PCIe RX Signal Detect Level Register.
         SDLVL3/SDLVL2/SDLVL1.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -292,11 +337,11 @@
       consumer: proc_pcie_scominit
       notes:
         PCIe TX FFE (Gen1)
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -308,11 +353,11 @@
       consumer: proc_pcie_scominit
       notes:
         PCIe TX FFE (Gen2)
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
     <valueType>uint32</valueType>
-    <array>2,16</array>
+    <array>3 16</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -325,10 +370,10 @@
       notes:
         PCIe ZCAL Control Register.
         CMPEVALDLY.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
     </description>
     <valueType>uint32</valueType>
-    <array>2</array>
+    <array>3</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->

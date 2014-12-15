@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Wed Jul  9 14:34:55 CDT 2014 by dcrowell from
+// Generated on Wed Feb 18 09:37:26 CST 2015 by cswenson from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
@@ -70,6 +70,7 @@ HSVC_LOAD_ATTR( ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_SAFE_FREQUENCY );
+HSVC_LOAD_ATTR( ATTR_PM_SLEEP_ENABLE );
 HSVC_LOAD_ATTR( ATTR_PM_SPIPSS_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_SPIVID_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_SYSTEM_IVRMS_ENABLED );
@@ -80,7 +81,6 @@ HSVC_LOAD_ATTR( ATTR_PROC_R_LOADLINE_VCS );
 HSVC_LOAD_ATTR( ATTR_PROC_R_LOADLINE_VDD );
 HSVC_LOAD_ATTR( ATTR_PROC_VRM_VOFFSET_VCS );
 HSVC_LOAD_ATTR( ATTR_PROC_VRM_VOFFSET_VDD );
-HSVC_LOAD_ATTR( ATTR_PM_SLEEP_ENABLE );
 // -- Input: ../../xml/attribute_info/poreve_memory_attributes.xml --
 // No attributes found
 // -- Input: ../../xml/attribute_info/proc_chip_ec_feature.xml --

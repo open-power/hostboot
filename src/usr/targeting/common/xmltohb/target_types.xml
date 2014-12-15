@@ -564,8 +564,6 @@
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
     <attribute><id>PROC_PCIE_IOP_SWAP</id></attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
-
-    <attribute><id>IOP_LANES_PER_PROC</id></attribute>
     <attribute><id>PROC_PCIE_LANE_MASK</id></attribute>
     <attribute><id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id></attribute>
     <attribute><id>PROC_PCIE_LANE_MASK_BIFURCATED</id></attribute>
@@ -620,10 +618,12 @@
     <attribute><id>PROC_BOOT_VOLTAGE_VID</id></attribute>
     <attribute><id>PROC_PBA_UNTRUSTED_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_PBA_UNTRUSTED_BAR_SIZE</id></attribute>
-
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
     <attribute><id>I2C_SLAVE_ADDRESS</id></attribute>
+    <attribute><id>PROC_PCIE_NUM_PHB</id></attribute>
+    <attribute><id>PROC_PCIE_NUM_IOP</id></attribute>
+    <attribute><id>PROC_PCIE_NUM_LANES</id></attribute>
 </targetType>
 
 <targetType>
@@ -636,8 +636,20 @@
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
     <attribute>
-        <id>IOP_LANES_PER_PROC</id>
+        <id>PROC_PCIE_NUM_PHB</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_IOP</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_LANES</id>
         <default>32</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_REFCLOCK_ENABLE</id>
+        <default>0xE0</default>
     </attribute>
 </targetType>
 
@@ -648,10 +660,22 @@
         <id>MODEL</id>
         <default>MURANO</default>
     </attribute>
-   <attribute>
-        <id>IOP_LANES_PER_PROC</id>
+    <attribute>
+        <id>PROC_PCIE_NUM_PHB</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_IOP</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_LANES</id>
         <default>24</default>
-   </attribute>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_REFCLOCK_ENABLE</id>
+        <default>0xE0</default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -661,10 +685,22 @@
         <id>MODEL</id>
         <default>NAPLES</default>
     </attribute>
-   <attribute>
-        <id>IOP_LANES_PER_PROC</id>
-        <default>32</default>
-   </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_PHB</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_IOP</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_LANES</id>
+        <default>40</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_REFCLOCK_ENABLE</id>
+        <default>0xF0</default>
+    </attribute>
 </targetType>
 
 <targetType>

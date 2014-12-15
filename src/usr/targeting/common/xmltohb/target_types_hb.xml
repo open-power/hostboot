@@ -118,10 +118,8 @@
         <id>XSCOM_VIRTUAL_ADDR</id>
     </attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
-
-
-
 
 <!-- Centaur chip/DMI -->
 
@@ -161,6 +159,7 @@
 <targetTypeExtension>
     <id>unit-core-power8</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -168,6 +167,7 @@
     <attribute>
         <id>HB_PM_SPWUP_OHA_FLAG</id>
     </attribute>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -193,6 +193,22 @@
     <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
     <attribute><id>OVERSUB_N_PER_MBA</id></attribute>
     <attribute><id>OVERSUB_N_PER_CHIP</id></attribute>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
+
+<targetTypeExtension>
+    <id>unit-mcs-power8</id>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+</targetTypeExtension>
+
+<targetType>
+    <id>unit-xbus-power8</id>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+</targetType>
+
+<targetType>
+    <id>unit-abus-power8</id>
+    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+</targetType>
 
 </attributes>

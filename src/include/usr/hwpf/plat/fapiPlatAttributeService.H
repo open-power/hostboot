@@ -398,7 +398,7 @@ fapi::ReturnCode fapiPlatGetProcNxMmioBarSize (
  */
 fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
                                     const fapi::Target * i_pTarget,
-                                    uint8_t     (&o_pcieBarEnable) [3][3] );
+                                    uint8_t     (&o_pcieBarEnable) [4][3] );
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_PCIE_BAR_BASE_ADDR_
@@ -412,7 +412,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
  */
 fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
                                     const fapi::Target * i_pTarget,
-                                    uint64_t    (&o_pcieBarBase) [3][3] );
+                                    uint64_t    (&o_pcieBarBase) [4][3] );
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_PCIE_BAR_SIZE
@@ -426,7 +426,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
  */
 fapi::ReturnCode fapiPlatGetProcPcieBarSize (
                                     const fapi::Target * i_pTarget,
-                                    uint64_t    (&o_pcieBarSize) [3][3] );
+                                    uint64_t    (&o_pcieBarSize) [4][3] );
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting

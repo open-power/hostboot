@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.14 2014/02/23 21:41:06 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.16 2014/11/18 17:41:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -129,6 +129,9 @@ struct proc_build_smp_chip
     proc_build_smp_proc_chip* chip;
 
     // chip properties/attributes:
+    bool nv_present;
+    bool dual_capp_present;
+    uint8_t num_phb;
     // fabric chip/node ID
     proc_fab_smp_chip_id chip_id;
     proc_fab_smp_node_id node_id;

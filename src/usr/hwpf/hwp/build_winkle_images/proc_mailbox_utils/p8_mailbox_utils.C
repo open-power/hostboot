@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: p8_mailbox_utils.C,v 1.5 2014/08/05 15:14:03 kahnevan Exp $
+// $Id: p8_mailbox_utils.C,v 1.7 2014/11/18 17:35:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -769,19 +769,18 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
             }
             FAPI_INF(   "ATTR_MNFG_FLAGS => %016llX", l_mnfg_flags);
 
-            // get chip type
-            // TODO RTC 102992 
-            fapi::ATTR_NAME_Type l_chip_type;
-            l_fapirc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_target, l_chip_type);
+            // set legacy node ID valid bit
+            uint8_t set_legacy_node_id_valid = 0;
+            l_fapirc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_SET_LEGACY_NODE_ID_VALID_MBOX_BIT, &i_target, set_legacy_node_id_valid);
             if (l_fapirc)
             {
-                FAPI_ERR("fapiGetAttribute (Privildged) of ATTR_NAME failed");
+                FAPI_ERR("fapiGetAttribute of  ATTR_CHIP_EC_FEATURE_SET_LEGACY_NODE_ID_VALID_MBOX_BIT failed");
                 break;
-            }
+            }  
 
             if (((l_mnfg_flags & fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ==
                  fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ||
-                (l_chip_type == fapi::ENUM_ATTR_NAME_MURANO))
+                (set_legacy_node_id_valid != 0))
             {
                 o_set_data |= 1 << (sizeof(o_set_data)*8 - WRAP_TEST_BIT - 1);
             }

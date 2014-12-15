@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.H,v 1.4 2014/02/03 15:58:53 jmcgill Exp $
+// $Id: proc_pcie_config.H,v 1.5 2014/11/18 17:41:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -57,41 +57,46 @@
 const char * const PROC_PCIE_CONFIG_PHASE2_IF = "p8.pe.phase2.scom.if";
 
 // PCIe physical constants
-const uint8_t PROC_PCIE_CONFIG_NUM_PHB = 3;
+const uint8_t PROC_PCIE_CONFIG_NUM_PHB = 4;
 
 const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR[PROC_PCIE_CONFIG_NUM_PHB] =
 {
     PCIE0_FIR_0x02012000,
     PCIE1_FIR_0x02012400,
-    PCIE2_FIR_0x02012800
+    PCIE2_FIR_0x02012800,
+    PCIE3_FIR_0x02012C00
 };
 
 const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[PROC_PCIE_CONFIG_NUM_PHB] =
 {
     PCIE0_FIR_WOF_0x02012008,
     PCIE1_FIR_WOF_0x02012408,
-    PCIE2_FIR_WOF_0x02012808
+    PCIE2_FIR_WOF_0x02012808,
+    PCIE3_FIR_WOF_0x02012C08
 };
 
 const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[PROC_PCIE_CONFIG_NUM_PHB] =
 {
     PCIE0_FIR_ACTION0_0x02012006,
     PCIE1_FIR_ACTION0_0x02012406,
-    PCIE2_FIR_ACTION0_0x02012806
+    PCIE2_FIR_ACTION0_0x02012806,
+    PCIE3_FIR_ACTION0_0x02012C06
 };
 
 const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[PROC_PCIE_CONFIG_NUM_PHB] =
 {
     PCIE0_FIR_ACTION1_0x02012007,
     PCIE1_FIR_ACTION1_0x02012407,
-    PCIE2_FIR_ACTION1_0x02012807
+    PCIE2_FIR_ACTION1_0x02012807,
+    PCIE3_FIR_ACTION1_0x02012C07
 };
 
 const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[PROC_PCIE_CONFIG_NUM_PHB] =
 {
     PCIE0_FIR_MASK_0x02012003,
     PCIE1_FIR_MASK_0x02012403,
-    PCIE2_FIR_MASK_0x02012803
+    PCIE2_FIR_MASK_0x02012803,
+    PCIE3_FIR_MASK_0x02012C03
 };
 
 const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL = 0x5B0F819000000000ULL;

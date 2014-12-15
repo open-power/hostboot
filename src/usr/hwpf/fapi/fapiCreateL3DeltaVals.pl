@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +23,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiCreateL3DeltaVals.pl,v 1.3 2014/03/20 16:25:04 whs Exp $
+# $Id: fapiCreateL3DeltaVals.pl,v 1.4 2014/12/17 23:43:11 thi Exp $
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiL3DeltaDataAttr.H
@@ -36,6 +38,8 @@
 #  Flag  Track#    Userid    Date      Description
 #  ----  --------  --------  --------  -----------
 #        873826    dpeterso  09/16/13  Based on fapiCreatePllRingAttrVals.pl
+#        920311    whs       03/23/14  PROC_EX_FUNC_L3_LENGTH from
+#                                      mrw to hwp accessor  
 #
 #
 # End Change Log ******************************************************
@@ -144,7 +148,7 @@ foreach $ringAttrFile (@fileList)
     print OUTFILE "*/\n";
 
     while (<FILE>)
-    {
+    {   
         # Each section we are interested in begins with ===BEGIN and ends with ===END
         if (/\===BEGIN/../\===END/) {
             # Keep track of how many instances we have in the file and reset some sub-counters.
@@ -152,7 +156,7 @@ foreach $ringAttrFile (@fileList)
             {
                 $count++;
                 $dataCount = 0;
-            }
+            }       
 
             # Store select value in array
             if ($_ =~ m"^#SELECT=(\d)")
@@ -162,7 +166,7 @@ foreach $ringAttrFile (@fileList)
             if ($_ =~ m"^ATTR_PROC_EX_FUNC_L3_LENGTH u32\s+(\d+)\s+")
             {
                 $lengthVal = $1;
-
+            
                 if ($selectVal != ($count-1))
                 {
                     die "$ProgName ERROR: Select value in file $ringAttrFile does not appear to be sequential.  There may be a script problem or a corrupted ring attribute file.\n";
@@ -205,7 +209,7 @@ foreach $ringAttrFile (@fileList)
                 $dataArrayString = $dataArrayString . $2 . ", ";
                 # If this is the last entry in the array (delta data size = 64
                 if ($dataCount eq 64)
-                {
+                { 
                     print OUTFILE "        $dataArrayString\n";
                     print OUTFILE "   }, // ATTR_PROC_EX_FUNC_L3_DELTA_DATA\n";
                     print OUTFILE "},\n";

@@ -1,4 +1,4 @@
-#-- $Id: p8.fbc.scom.initfile,v 1.17 2014/10/01 14:47:35 szhong Exp $
+#-- $Id: p8.fbc.scom.initfile,v 1.18 2014/11/18 17:24:13 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -28,7 +28,7 @@ define xbus_enabled = (ATTR_PROC_X_ENABLE == ENUM_ATTR_PROC_X_ENABLE_ENABLE);
 define abus_enabled = (ATTR_PROC_A_ENABLE == ENUM_ATTR_PROC_A_ENABLE_ENABLE);
 define pcie_enabled = (ATTR_PROC_PCIE_ENABLE == ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
 define mcd_hang_poll_bug = (ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG != 0);
-define is_naples = (ATTR_CHIP_EC_FEATURE_NAPLES_SPECIFIC !=0);
+define nv_present = (ATTR_CHIP_EC_FEATURE_NV_PRESENT != 0);
 
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
@@ -148,31 +148,31 @@ scom 0x04010C0A {
 #-- PB A Link Mode Register (PB_IOA_MODE / 0x0801080A)
 scom 0x0801080A {
     bits,                       scom_data,          expr;
-    a_avp_mode,                 0b0,                (abus_enabled) && (!is_naples);                       #-- A AVP mode
+    a_avp_mode,                 0b0,                (abus_enabled) && (!nv_present);      #-- A AVP mode
 }
 
 #-- PB A Link Framer Configuration Register (PB_IOA_FMR_CFG / 0x08010813)
 scom 0x08010813 {
     bits,                       scom_data,          expr;
-    a_tod_wait_limit,           0b0001,             (abus_enabled) && (!is_naples);                       #-- A bus TOD wait limit
-    a_prsp_wait_limit,          0b1000,             (abus_enabled) && (!is_naples);                       #-- A bus presp wait limit
-    a_cc_wait_limit,            0b1100,             (abus_enabled) && (!is_naples);                       #-- A bus cresp credit wait limit
-    a0_dc_wait_limit,           0b1100,             (abus_enabled) && (!is_naples);                       #-- A0 bus data credit wait limit
-    a1_dc_wait_limit,           0b1100,             (abus_enabled) && (!is_naples);                       #-- A1 bus data credit wait limit
-    a2_dc_wait_limit,           0b1100,             (abus_enabled) && (!is_naples);                       #-- A2 bus data credit wait limit
-    a_ow_pack,                  0b0,                (abus_enabled) && (!is_naples);                       #-- OW pack disabled
-    a_ow_pack_priority,         0b0,                (abus_enabled) && (!is_naples);                       #-- low priority
+    a_tod_wait_limit,           0b0001,             (abus_enabled) && (!nv_present);      #-- A bus TOD wait limit
+    a_prsp_wait_limit,          0b1000,             (abus_enabled) && (!nv_present);      #-- A bus presp wait limit
+    a_cc_wait_limit,            0b1100,             (abus_enabled) && (!nv_present);      #-- A bus cresp credit wait limit
+    a0_dc_wait_limit,           0b1100,             (abus_enabled) && (!nv_present);      #-- A0 bus data credit wait limit
+    a1_dc_wait_limit,           0b1100,             (abus_enabled) && (!nv_present);      #-- A1 bus data credit wait limit
+    a2_dc_wait_limit,           0b1100,             (abus_enabled) && (!nv_present);      #-- A2 bus data credit wait limit
+    a_ow_pack,                  0b0,                (abus_enabled) && (!nv_present);      #-- OW pack disabled
+    a_ow_pack_priority,         0b0,                (abus_enabled) && (!nv_present);      #-- low priority
 }
 
 #-- PB F Link Mode Register (PB_IOF_MODE / 0x0901080A)
 scom 0x0901080A {
     bits,                       scom_data,          expr;
-    f_avp_mode,                 0b0,                (pcie_enabled) && (!is_naples);                       #-- F AVP mode
+    f_avp_mode,                 0b0,                (pcie_enabled) && (!nv_present);      #-- F AVP mode
 }
 
 #-- PB F Link Framer Configuration Register (PB_IOF_FMR_CFG / 0x09010813)
 scom 0x09010813 {
     bits,                       scom_data,          expr;
-    f_ow_pack,                  0b0,                (pcie_enabled) && (!is_naples);                       #-- OW pack disabled
-    f_ow_pack_priority,         0b0,                (pcie_enabled) && (!is_naples);                       #-- low priority
+    f_ow_pack,                  0b0,                (pcie_enabled) && (!nv_present);      #-- OW pack disabled
+    f_ow_pack_priority,         0b0,                (pcie_enabled) && (!nv_present);      #-- low priority
 }

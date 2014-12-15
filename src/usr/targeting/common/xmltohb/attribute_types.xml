@@ -5504,11 +5504,11 @@ firmware notes: Used as override attribute for pstate procedure
       consumer: proc_pcie_scominit
       firmware notes:
         Encoded PCIE IOP swap configuration
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
   </description>
   <simpleType>
       <uint8_t></uint8_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5526,7 +5526,7 @@ firmware notes: Used as override attribute for pstate procedure
       consumer: proc_pcie_scominit
       firmware notes:
         Bit mask defining set of active/valid PHBs
-        bit0=PHB0, bit1=PHB1, bit2=PHB2
+        bit0=PHB0, bit1=PHB1, bit2=PHB2, bit3=PHB3
   </description>
   <simpleType><uint8_t></uint8_t></simpleType>
   <persistency>non-volatile</persistency>
@@ -5546,11 +5546,11 @@ firmware notes: Used as override attribute for pstate procedure
       firmware notes:
         PCIe Gen3 PLL Control Register 0.
         ATUNE/CPISEL.
-        Array index: IOP number(0:1)
+        Array index: IOP number(0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5568,11 +5568,11 @@ firmware notes: Used as override attribute for pstate procedure
       firmware notes:
         PCIe Gen2/Gen1 PLL Control Register 0.
         ATUNE/CPISEL.
-        Array index: IOP number(0:1)
+        Array index: IOP number(0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5590,11 +5590,11 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe PLL Global Control Register 0.
         REFISRC/REFISINK.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5612,11 +5612,11 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe PLL Global Control Register 1.
     ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5635,11 +5635,11 @@ firmware notes: Used as override attribute for pstate procedure
         PCIe PCS Control Register 0.
         BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
         STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5658,11 +5658,11 @@ firmware notes: Used as override attribute for pstate procedure
         PCIe PCS Control Register 1.
     RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
         ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5680,12 +5680,12 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe TX FIFO Offset Register.
     G3OFFSET/G2OFFSET/G1OFFSET.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5703,12 +5703,12 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe TX Receiver Detect Control Register.
         VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5726,12 +5726,12 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe TX Bandwidth Loss Coefficient Register.
         GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5749,12 +5749,12 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe RX VGA Control Register 2.
         GAIN2/GAIN1.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5772,12 +5772,12 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe RX Receiver Peaking Value Register.
     PEAK1/PEAK2/PEAK3.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5795,12 +5795,12 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe RX Signal Detect Level Register.
         SDLVL3/SDLVL2/SDLVL1.
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -5818,11 +5818,11 @@ firmware notes: Used as override attribute for pstate procedure
       notes:
         PCIe ZCAL Control Register.
         CMPEVALDLY.
-        Array index: IOP number (0:1)
+        Array index: IOP number (0:2)
   </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2</array>
+      <array>3</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -10642,11 +10642,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       consumer: proc_pcie_scominit
       firmware notes:
         Bit mask defining state of refclock drive enables
-        bit0=PCI0, bit1=PCI1, bit2=PCI2
+        bit0=PCI0, bit1=PCI1, bit2=PCI2, bit3=PCI3
     </description>
     <simpleType>
        <uint8_t>
-         <default>0xE0</default>
        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -13098,12 +13097,12 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       consumer: proc_pcie_scominit
       notes:
         PCIe TX FFE (Gen1)
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -13120,12 +13119,12 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       consumer: proc_pcie_scominit
       notes:
         PCIe TX FFE (Gen2)
-        First array index: IOP number (0:1)
+        First array index: IOP number (0:2)
         Second array index: Lane number (0:15)
     </description>
   <simpleType>
       <uint32_t></uint32_t>
-      <array>2,16</array>
+      <array>3,16</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -14503,22 +14502,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>IOP_LANES_PER_PROC</id>
-    <description>Number of PCIE lanes per processor
-        Creator: Targeting definition
-        Purpose: Determines which IOP configuration table is used to build the
-            PE lane config value and PHB active masks for the HWPs
-        Data format: value of 24 or 32 (lanes per processor)
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
     <id>PROC_PCIE_LANE_MASK</id>
     <description>Effective PCIE Lane Mask
         Creator: Firmware
@@ -14914,6 +14897,64 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_MFG_TRACE_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_NUM_PHB</id>
+  <description>
+      creator: platform
+        Number of PCIe PHB units present on target
+        Murano/Venice: 3
+        Naples: 4
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_NUM_PHB</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_NUM_IOP</id>
+  <description>
+      creator: platform
+        Number of PCIe IOP units present on target
+        Murano/Venice: 2
+        Naples: 3
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_NUM_IOP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_NUM_LANES</id>
+  <description>
+      creator: platform
+        Number of PCIe I/O lanes supported by target
+        Murano: 24
+        Venice: 32
+        Naples: 40
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_NUM_LANES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
 </attribute>
 
 <!-- === Manufacturing threshold Attributes of PRD === -->

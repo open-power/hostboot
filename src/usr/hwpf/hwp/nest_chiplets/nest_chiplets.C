@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1011,6 +1011,9 @@ errlHndl_t computeProcPcieConfigAttrs(
         i_pProcChipTarget ?
             i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>() : 0);
 
+    // TODO:
+    // RTC 109249: Update comments for 40 lanes in Naples 
+
     // Currently there are two IOP config tables, one for procs with 24 usable
     // PCIE lanes and one for proces with 32 usable PCIE lanes.  In general, the
     // code accumulates the current configuration of the IOPs from the MRW and
@@ -1270,37 +1273,41 @@ errlHndl_t computeProcPcieConfigAttrs(
         }
 
         // Pick the appropriate IOP configuration table
-        if(   i_pProcChipTarget->getAttr<TARGETING::ATTR_IOP_LANES_PER_PROC>()
+        if(   i_pProcChipTarget->getAttr<TARGETING::ATTR_PROC_PCIE_NUM_LANES>()
            == IOP_LANES_PER_PROC_32X)
         {
             pLaneConfigTableBegin = x32_laneConfigTable;
             pLaneConfigTableEnd = x32_end;
         }
         else if(   i_pProcChipTarget->getAttr<
-                       TARGETING::ATTR_IOP_LANES_PER_PROC>()
+                       TARGETING::ATTR_PROC_PCIE_NUM_LANES>()
                 == IOP_LANES_PER_PROC_24X)
         {
             pLaneConfigTableBegin = x24_laneConfigTable;
             pLaneConfigTableEnd = x24_end;
         }
+
+        // TODO:
+        // RTC 109249: Support Naples with 40 lanes
+
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 ERR_MRK "computeProcPcieConfigAttrs> "
-                "Code bug! Unsupported ATTR_IOP_LANES_PER_PROC attribute for "
+                "Code bug! Unsupported ATTR_PROC_PCIE_NUM_LANES attribute for "
                 "processor with HUID of 0x%08X.  Expected 24 or 32, but read "
                 "value of %d.",
                 i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                 i_pProcChipTarget->getAttr<
-                    TARGETING::ATTR_IOP_LANES_PER_PROC>());
+                    TARGETING::ATTR_PROC_PCIE_NUM_LANES>());
 
             /*@
              * @errortype
              * @moduleid         ISTEP_COMPUTE_PCIE_CONFIG_ATTRS
              * @reasoncode       ISTEP_INVALID_ATTR_VALUE
              * @userdata1[0:31]  Target's HUID
-             * @userdata2[32:63] ATTR_IOP_LANES_PER_PROC attribute value
-             * @devdesc          Illegal ATTR_IOP_LANES_PER_PROC attribute read
+             * @userdata2[32:63] ATTR_PROC_PCIE_NUM_LANES attribute value
+             * @devdesc          Illegal ATTR_PROC_PCIE_NUM_LANES attribute read
              *                   from a processor chip target.
              * @custdesc         A problem isolated to firmware or firmware
              *                   customization occurred during the IPL of the
@@ -1313,7 +1320,7 @@ errlHndl_t computeProcPcieConfigAttrs(
                 TWO_UINT32_TO_UINT64(
                     i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                     i_pProcChipTarget->getAttr<
-                        TARGETING::ATTR_IOP_LANES_PER_PROC>()),
+                        TARGETING::ATTR_PROC_PCIE_NUM_LANES>()),
                 0,
                 true);
             ERRORLOG::ErrlUserDetailsTarget(i_pProcChipTarget).addToLog(pError);

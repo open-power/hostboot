@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.10 2014/08/05 15:15:13 kahnevan Exp $
+// $Id: proc_pcie_scominit.C,v 1.11 2014/11/18 17:38:50 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -54,7 +54,9 @@ extern "C" {
 //             set master IOP lane configuration and IOP swap bits via PCIe GP4
 //             set PHB iovalids via PCIe GP0
 //             remove IOP logic from reset via PCIe GP4
-// parameters: i_target => processor chip target
+// parameters: i_target  => processor chip target
+//             i_num_iop => number of IOP units
+//             i_num_phb => number of PHB units
 // returns: FAPI_RC_SUCCESS if all actions are successful,
 //          RC_PROC_PCIE_SCOMINIT_IOP_CONFIG_ATTR_ERR if invalid IOP lane
 //            configuration attribute value is presented,
@@ -63,7 +65,9 @@ extern "C" {
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_pcie_scominit_iop_init(
-    const fapi::Target & i_target)
+    const fapi::Target & i_target,
+    uint8_t i_num_iop,
+    uint8_t i_num_phb)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -118,7 +122,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
             FAPI_ERR("proc_pcie_scominit_iop_init: Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_IOP_SWAP)");
             break;
         }
-        for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_IOP) && rc.ok(); i++)
+        for (size_t i = 0; (i < i_num_iop) && rc.ok(); i++)
         {
             FAPI_DBG("proc_pcie_scominit_iop_init: ATTR_PROC_PCIE_IOP_SWAP[%zd]= %02X",
                      i, iop_swap[i]);
@@ -145,7 +149,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
             (PCIE_GP4_IOP_LANE_CFG_END_BIT-
              PCIE_GP4_IOP_LANE_CFG_START_BIT+1));
 
-        for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_IOP) && !rc_ecmd; i++)
+        for (size_t i = 0; (i < i_num_iop) && !rc_ecmd; i++)
         {
             rc_ecmd |= gp4_data.insertFromRight(
                 iop_swap[i],
@@ -191,14 +195,14 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
             break;
         }
 
-        for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_PHB); i++)
+        for (size_t i = 0; (i < i_num_phb); i++)
         {
             phb_active[i] = ((phb_active_mask >> (7-i)) & 0x1)?(true):(false);
             refclock_active[i] = ((refclock_active_mask >> (7-i)) & 0x1)?(true):(false);
         }
 
         // set PCIe GP0 mask for PHB iovalid/refclock enable
-        for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_PHB) && !rc_ecmd; i++)
+        for (size_t i = 0; (i < i_num_phb) && !rc_ecmd; i++)
         {
             rc_ecmd |= gp0_data.writeBit(
                 PCIE_GP0_PHB_IOVALID_BIT[i],
@@ -226,7 +230,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
 
         // set PCIe GP4 mask for IOP reset
         rc_ecmd |= gp4_data.flushTo0();
-        for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_IOP) && !rc_ecmd; i++)
+        for (size_t i = 0; (i < i_num_iop) && !rc_ecmd; i++)
         {
             rc_ecmd |= gp4_data.setBit(
                 PCIE_GP4_IOP_RESET_BIT[i]);
@@ -319,12 +323,14 @@ fapi::ReturnCode proc_pcie_scominit_iop_config(
 //------------------------------------------------------------------------------
 // function: mark IOP programming complete (executed after all IOP
 //           customization is complete)
-// parameters: i_target => processor chip target
+// parameters: i_target  => processor chip target
+//             i_num_iop => number of IOP units
 // returns: FAPI_RC_SUCCESS if program complete is successful for all IOPs,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_pcie_scominit_iop_complete(
-    const fapi::Target & i_target)
+    const fapi::Target & i_target,
+    uint8_t i_num_iop)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -347,7 +353,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
         }
 
         // set IOP program complete
-        for (size_t i = 0; i < PROC_PCIE_SCOMINIT_NUM_IOP; i++)
+        for (size_t i = 0; i < i_num_iop; i++)
         {
             rc = fapiPutScomUnderMask(i_target,
                                       PROC_PCIE_SCOMINIT_PLL_GLOBAL_CONTROL2[i],
@@ -366,7 +372,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
         }
 
         // configure IOP FIR
-        for (size_t i = 0; i < PROC_PCIE_SCOMINIT_NUM_IOP; i++)
+        for (size_t i = 0; i < i_num_iop; i++)
         {
             rc_ecmd |= data.flushTo0();
             if (rc_ecmd)
@@ -438,6 +444,8 @@ fapi::ReturnCode proc_pcie_scominit(
 {
     fapi::ReturnCode rc;
     uint8_t pcie_enabled;
+    uint8_t num_phb;
+    uint8_t num_iop;
 
     // mark HWP entry
     FAPI_INF("proc_pcie_scominit: Start");
@@ -463,11 +471,30 @@ fapi::ReturnCode proc_pcie_scominit(
             break;
         }
 
-        // initialize/configure/finalize IOP programming (only if partial good
+        // initialize/configure/finalize PHB & IOP programming (only if partial good
         // attribute is set)
         if (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE)
         {
-            rc = proc_pcie_scominit_iop_init(i_target);
+            // determine PHB/IOP configuration
+            rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_NUM_PHB,
+                               &i_target,
+                               num_phb);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit: Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_NUM_PHB)");
+                break;
+            }
+
+            rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_NUM_IOP,
+                               &i_target,
+                               num_iop);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit: Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_NUM_IOP)");
+                break;
+            }
+
+            rc = proc_pcie_scominit_iop_init(i_target, num_iop, num_phb);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_init");
@@ -481,7 +508,7 @@ fapi::ReturnCode proc_pcie_scominit(
                 break;
             }
 
-            rc = proc_pcie_scominit_iop_complete(i_target);
+            rc = proc_pcie_scominit_iop_complete(i_target, num_iop);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_complete");

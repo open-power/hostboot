@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_ab.C,v 1.11 2014/02/26 18:12:57 jmcgill Exp $
+// $Id: proc_build_smp_fbc_ab.C,v 1.13 2014/11/18 17:41:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_ab.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -75,7 +75,9 @@ const uint32_t PB_HP_MODE_A_CMD_RATE_MAX_VALUE = 0x7F;
 const uint32_t PB_HP_MODE_A_GATHER_ENABLE_BIT = 32;
 const uint32_t PB_HP_MODE_A_GATHER_DLY_CNT_START_BIT = 33;
 const uint32_t PB_HP_MODE_A_GATHER_DLY_CNT_END_BIT = 37;
-const uint32_t PB_HP_MODE_GATHER_ENABLE_BIT = 40;
+const uint32_t PB_HP_MODE_PCIE3_NOT_DSMP_BIT = 40;
+const uint32_t PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_PRESENT = 41;
+const uint32_t PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_NOT_PRESENT = 40;
 const uint32_t PB_HP_MODE_F_AGGREGATE_BIT = 55;
 const uint32_t PB_HP_MODE_F_CMD_RATE_START_BIT = 56;
 const uint32_t PB_HP_MODE_F_CMD_RATE_END_BIT = 63;
@@ -112,6 +114,7 @@ const uint32_t PB_HPX_MODE_X_GATHER_ENABLE_BIT = 32;
 const uint32_t PB_HPX_MODE_X_GATHER_DLY_CNT_START_BIT = 33;
 const uint32_t PB_HPX_MODE_X_GATHER_DLY_CNT_END_BIT = 37;
 const uint32_t PB_HPX_MODE_X_ONNODE_12QUEUES_BIT = 38;
+const uint32_t PB_HPX_MODE_GROUP_EQ_CHIP_BIT = 39;
 const uint32_t PB_HPX_MODE_X_CMD_RATE_START_BIT = 56;
 const uint32_t PB_HPX_MODE_X_CMD_RATE_END_BIT = 63;
 const uint32_t PB_HPX_MODE_X_CMD_RATE_MIN_VALUE = 1;
@@ -1466,9 +1469,21 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
             (PB_HP_MODE_A_GATHER_DLY_CNT_END_BIT-
              PB_HP_MODE_A_GATHER_DLY_CNT_START_BIT+1));
 
-        // pb_cfg_gather_enable
-        rc_ecmd |= data.writeBit(PB_HP_MODE_GATHER_ENABLE_BIT,
-                                 PB_HP_MODE_GATHER_ENABLE?1:0);
+        if (i_smp_chip.num_phb > 3)
+        {
+            // pb_cfg_p3_x8tok
+            rc_ecmd |= data.setBit(PB_HP_MODE_PCIE3_NOT_DSMP_BIT);
+
+            // pb_cfg_gather_enable
+            rc_ecmd |= data.writeBit(PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_PRESENT,
+                                     PB_HP_MODE_GATHER_ENABLE?1:0);
+        }
+        else
+        {
+            // pb_cfg_gather_enable
+            rc_ecmd |= data.writeBit(PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_NOT_PRESENT,
+                                     PB_HP_MODE_GATHER_ENABLE?1:0);
+        }
 
         // pb_cfg_f_aggregate
         rc_ecmd |= data.writeBit(PB_HP_MODE_F_AGGREGATE_BIT,
@@ -1674,6 +1689,10 @@ fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
         // pb_cfg_x_onnode_12queues
         rc_ecmd |= data.writeBit(PB_HPX_MODE_X_ONNODE_12QUEUES_BIT,
                                  PB_HPX_MODE_X_ONNODE_12QUEUES?1:0);
+
+        // pb_cfg_group_eq_chip
+        rc_ecmd |= data.writeBit(PB_HPX_MODE_GROUP_EQ_CHIP_BIT,
+                                 i_smp_chip.nv_present?1:0);
 
         // pb_cfg_x_cmd_rate
         rc_ecmd |= data.insertFromRight(

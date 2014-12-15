@@ -922,7 +922,7 @@ fapi::ReturnCode fapiPlatGetProcNxMmioBarSize (
 
 fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
                                     const fapi::Target * i_pTarget,
-                                    uint8_t     (&o_pcieBarEnable) [3][3] )
+                                    uint8_t     (&o_pcieBarEnable) [4][3] )
 {
     fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
@@ -973,7 +973,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
 
 fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
                                     const fapi::Target * i_pTarget,
-                                    uint64_t    (&o_pcieBarBase) [3][3] )
+                                    uint64_t    (&o_pcieBarBase) [4][3] )
 {
     fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
@@ -1058,7 +1058,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
 
 fapi::ReturnCode fapiPlatGetProcPcieBarSize (
                                     const fapi::Target * i_pTarget,
-                                    uint64_t    (&o_pcieBarSize) [3][3] )
+                                    uint64_t    (&o_pcieBarSize) [4][3] )
 {
     fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;

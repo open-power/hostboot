@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_mmio_attributes.xml,v 1.4 2013/05/23 19:42:28 jmcgill Exp $ -->
+<!-- $Id: proc_setup_bars_mmio_attributes.xml,v 1.5 2014/11/18 17:44:22 jmcgill Exp $ -->
 <!-- proc_setup_bars_mmio_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -267,12 +269,12 @@
       creator: platform
       consumer: proc_setup_bars
       firmware notes:
-        first dimension: PCIE unit number (0:2)
+        first dimension: PCIE unit number (0:3)
         second dimension: BAR number (0:2)
     </description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
-    <array>3,3</array>
+    <array>4 3</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -285,13 +287,13 @@
       consumer: proc_setup_bars
       firmware notes:
         64-bit address representing BAR RA
-        first dimension: PCIE unit number (0:2)
+        first dimension: PCIE unit number (0:3)
         second dimension: BAR number (0:2)
         NOTE: BAR0/1 registers cover RA 14:47
         NOTE: BAR2 registers covers RA 14:51
     </description>
     <valueType>uint64</valueType>
-    <array>3,3</array>
+    <array>4 3</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -303,7 +305,7 @@
       creator: platform
       consumer: proc_setup_bars
       firmware notes:
-        first dimension: PCIE unit number (0:2)
+        first dimension: PCIE unit number (0:3)
         second dimension: BAR number (0:2)
         NOTE: supported BAR0/1 sizes are from 64KB-1PB
         NOTE: only supported BAR2 size is 4KB
@@ -347,7 +349,7 @@
        64_KB = 0x0000000000010000,
         4_KB = 0x0000000000001000
     </enum>
-    <array>3,3</array>
+    <array>4 3</array>
     <platInit/>
     <persistRuntime/>
   </attribute>

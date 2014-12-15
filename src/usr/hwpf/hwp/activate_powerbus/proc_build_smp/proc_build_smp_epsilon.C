@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.11 2014/03/06 17:42:24 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.12 2014/11/18 17:41:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1001,8 +1001,9 @@ fapi::ReturnCode proc_build_smp_set_epsilons_hca(
 
 //------------------------------------------------------------------------------
 // function: set CAPP unit epsilon registers
-// parameters: i_target  => chip target
-//             i_eps_cfg => system epsilon configuration structure
+// parameters: i_target            => chip target
+//             i_dual_capp_present => indicate presence of 2nd CAPP unit
+//             i_eps_cfg           => system epsilon configuration structure
 // returns: ECMD_SUCCESS if all settings are programmed correctly,
 //          RC_PROC_BUILD_SMP_EPSILON_RANGE_ERR if any target value is out of
 //              range given underlying HW storage,
@@ -1010,6 +1011,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons_hca(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_set_epsilons_capp(
     fapi::Target & i_target,
+    const bool i_dual_capp_present,
     const proc_build_smp_eps_cfg & i_eps_cfg)
 {
     fapi::ReturnCode rc;
@@ -1114,6 +1116,21 @@ fapi::ReturnCode proc_build_smp_set_epsilons_capp(
             break;
         }
 
+        if (i_dual_capp_present)
+        {
+            rc = fapiPutScomUnderMask(i_target,
+                                      CAPP1_APC_MASTER_PB_CTL_0x02013198,
+                                      data,
+                                      mask);
+            
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_epsilons_capp: fapiPutScomUnderMask error (CAPP1_APC_MASTER_PB_CTL_0x02013198)");
+                break;
+            }
+        }
+
+
         // program read epsilon register based on unit implementation
         rc_ecmd = data.flushTo0();
         rc_ecmd |= mask.flushTo0();
@@ -1182,6 +1199,20 @@ fapi::ReturnCode proc_build_smp_set_epsilons_capp(
         {
             FAPI_ERR("proc_build_smp_set_epsilons_capp: fapiPutScomUnderMask error (CAPP_CXA_SNOOP_CTL_0x0201301B)");
             break;
+        }
+
+        if (i_dual_capp_present)
+        {
+            rc = fapiPutScomUnderMask(i_target,
+                                      CAPP1_CXA_SNOOP_CTL_0x0201319B,
+                                      data,
+                                      mask);
+            
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_epsilons_capp: fapiPutScomUnderMask error (CAPP1_CXA_SNOOP_CTL_0x0201319B)");
+                break;
+            }
         }
 
     } while(0);
@@ -1547,7 +1578,7 @@ fapi::ReturnCode proc_build_smp_set_epsilons(
                     }
 
                     // CAPP
-                    rc = proc_build_smp_set_epsilons_capp(target, i_smp.eps_cfg);
+                    rc = proc_build_smp_set_epsilons_capp(target, p_iter->second.dual_capp_present, i_smp.eps_cfg);
                     if (!rc.ok())
                     {
                         FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_capp");

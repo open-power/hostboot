@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.9 2014/02/23 21:41:06 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.11 2014/11/18 17:41:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -425,6 +425,7 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
             std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
             std::map<proc_fab_smp_chip_id, proc_build_smp_chip>::iterator p_iter;
             std::vector<fapi::Target*> targets_to_collect;
+            std::vector<bool> nv_present;
             ecmdDataBufferBase scom_data(64);
             ecmdDataBufferBase chip_ids;
             ecmdDataBufferBase ffdc_reg_data[PROC_BUILD_SMP_FFDC_NUM_REGS];
@@ -442,6 +443,7 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
                     if (i_dump_all_targets ||
                         (p_iter->second.chip->this_chip == i_target))
                     {
+                        nv_present.push_back(p_iter->second.nv_present);
                         targets_to_collect.push_back(&(p_iter->second.chip->this_chip));
                     }
                 }
@@ -455,9 +457,10 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
             }
 
             // extract FFDC data
+            std::vector<bool>::iterator n = nv_present.begin();
             for (std::vector<fapi::Target*>::iterator t = targets_to_collect.begin();
                  t != targets_to_collect.end();
-                 t++)
+                 t++, n++)
             {
                 // log node/chip ID
                 for (n_iter = i_smp.nodes.begin();
@@ -481,11 +484,23 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
                 // collect SCOM data
                 for (uint8_t i = 0; i < PROC_BUILD_SMP_FFDC_NUM_REGS; i++)
                 {
-                    rc = fapiGetScom(*(*t), PROC_BUILD_SMP_FFDC_REGS[i], scom_data);
-                    if (!rc.ok())
+                    // skip A / F link registers if NV link logic is present
+                    if ((*n) &&
+                        ((i == static_cast<uint8_t>(A_GP0_DATA_INDEX)) ||
+                         (i == static_cast<uint8_t>(ADU_IOS_LINK_EN_DATA_INDEX)) ||
+                         (i == static_cast<uint8_t>(PB_A_MODE_DATA_INDEX))))
                     {
-                        ffdc_scom_error = true;
+                        rc_ecmd |= scom_data.flushTo1();
                     }
+                    else
+                    {
+                        rc = fapiGetScom(*(*t), PROC_BUILD_SMP_FFDC_REGS[i], scom_data);
+                        if (!rc.ok())
+                        {
+                            ffdc_scom_error = true;
+                        }
+                    }
+
                     rc_ecmd |= scom_data.extractPreserve(
                         ffdc_reg_data[i],
                         0, 64,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.24 2014/08/05 20:43:38 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.25 2014/11/18 17:43:18 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -948,6 +948,17 @@ fapi::ReturnCode proc_setup_bars_process_chip(
         FAPI_DBG("proc_setup_bars_process_chip: Target: %s",
                  io_smp_chip.chip->this_chip.toEcmdString());
 
+        // determine number of PHBs
+        FAPI_DBG("proc_setup_bars_process_chip: Querying PHB configuration");
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_NUM_PHB,
+                           &(io_smp_chip.chip->this_chip),
+                           io_smp_chip.num_phb);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_PCIE_NUM_PHB");
+            break;
+        }
+
         // get PCIe/DSMP mux attributes
         FAPI_DBG("proc_setup_bars_process_chip: Querying PCIe/DSMP mux attribute");
         rc = proc_fab_smp_get_pcie_dsmp_mux_attrs(&(io_smp_chip.chip->this_chip),
@@ -1469,6 +1480,7 @@ fapi::ReturnCode proc_setup_bars_l3_write_local_chip_memory_bar_attr(
 // function: wrapper function to write PCIe BARs specific to enabled local
 //           chip non-mirrored/mirrored memory ranges
 // parameters: i_target             => chip target
+//             i_num_phb            => number of PHBs
 //             i_non_mirrored_range => structure representing chip non-mirrored
 //                                     address range
 //             i_mirrored_range     => structure representing chip mirrored
@@ -1478,6 +1490,7 @@ fapi::ReturnCode proc_setup_bars_l3_write_local_chip_memory_bar_attr(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_pcie_write_local_chip_memory_bars(
     const fapi::Target& i_target,
+    const uint8_t i_num_phb,
     const proc_setup_bars_addr_range& i_non_mirrored_range,
     const proc_setup_bars_addr_range& i_mirrored_range)
 {
@@ -1487,7 +1500,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_local_chip_memory_bars(
     FAPI_DBG("proc_setup_bars_pcie_write_local_chip_memory_bars: Start");
     // loop over all units
     for (uint8_t u = 0;
-         u < PROC_SETUP_BARS_PCIE_NUM_UNITS;
+         u < i_num_phb;
          u++)
     {
         if (i_non_mirrored_range.enabled)
@@ -1677,6 +1690,7 @@ fapi::ReturnCode proc_setup_bars_l3_write_local_node_memory_bar_attr(
 // function: wrapper function to write PCIe BARs specific to enabled local
 //           node non-mirrored/mirrored memory ranges
 // parameters: i_target             => chip target
+//             i_num_phb            => number of PHBs
 //             i_non_mirrored_range => structure representing node non-mirrored
 //                                     address range
 //             i_mirrored_range     => structure representing node mirrored
@@ -1686,6 +1700,7 @@ fapi::ReturnCode proc_setup_bars_l3_write_local_node_memory_bar_attr(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_pcie_write_local_node_memory_bars(
     const fapi::Target& i_target,
+    const uint8_t i_num_phb,
     const proc_setup_bars_addr_range& i_non_mirrored_range,
     const proc_setup_bars_addr_range& i_mirrored_range)
 {
@@ -1695,7 +1710,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_local_node_memory_bars(
     FAPI_DBG("proc_setup_bars_pcie_write_local_node_memory_bars: Start");
     // loop over all units
     for (uint8_t u = 0;
-         u < PROC_SETUP_BARS_PCIE_NUM_UNITS;
+         u < i_num_phb;
          u++)
     {
         if (i_non_mirrored_range.enabled)
@@ -1740,6 +1755,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_local_node_memory_bars(
 //           chip near/far foreign memory ranges
 //           NOTE: only links which are marked for processing will be acted on
 // parameters: i_target              => chip target
+//             i_num_phb             => number of PHBs
 //             i_process_links       => array of boolean values dictating which
 //                                      links should be acted on (one per link)
 //             i_foreign_near_ranges => array of structures representing
@@ -1751,6 +1767,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_local_node_memory_bars(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_pcie_write_foreign_memory_bars(
     const fapi::Target& i_target,
+    const uint8_t i_num_phb,
     const bool i_process_links[PROC_FAB_SMP_NUM_F_LINKS],
     const proc_setup_bars_addr_range i_foreign_near_ranges[PROC_FAB_SMP_NUM_F_LINKS],
     const proc_setup_bars_addr_range i_foreign_far_ranges[PROC_FAB_SMP_NUM_F_LINKS])
@@ -1762,7 +1779,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_foreign_memory_bars(
 
     // loop over all units
     for (uint8_t u = 0;
-         (u < PROC_SETUP_BARS_PCIE_NUM_UNITS) && (rc.ok());
+         (u < i_num_phb) && (rc.ok());
          u++)
     {
         // process ranges
@@ -1811,6 +1828,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_foreign_memory_bars(
 //------------------------------------------------------------------------------
 // function: wrapper function to write enabled PCIe IO BARs
 // parameters: i_target       => chip target
+//             i_num_phb      => number of PHBs
 //             io_addr_ranges => 2D array of address range structures
 //                               encapsulating attribute values
 //                               (first dimension = unit, second dimension =
@@ -1821,6 +1839,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_foreign_memory_bars(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_pcie_write_io_bar_regs(
     const fapi::Target& i_target,
+    const uint8_t i_num_phb,
     const proc_setup_bars_addr_range addr_ranges[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT])
 {
     // return code
@@ -1830,7 +1849,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_io_bar_regs(
     FAPI_DBG("proc_setup_bars_pcie_write_io_bar_regs: Start");
     // loop over all units
     for (uint8_t u = 0;
-         u < PROC_SETUP_BARS_PCIE_NUM_UNITS;
+         u < i_num_phb;
          u++)
     {
         // enable bit/mask bit per range
@@ -2039,6 +2058,15 @@ fapi::ReturnCode proc_setup_bars_pcie_write_io_bar_regs(
 //   PCIE2 IO BAR1 Mask                       (PCIE2_IO_MASK1_0x02012844)
 //   PCIE2 IO BAR2                            (PCIE2_IO_BAR2_0x02012842)
 //   PCIE2 IO BAR Enable                      (PCIE2_IO_BAR_EN_0x02012845)
+//
+//   PCIE3 Nodal Non-Mirrored BAR             (PCIE3_NODAL_BAR0_0x02012C10)
+//   PCIE3 Nodal Mirrored BAR                 (PCIE3_NODAL_BAR1_0x02012C11)
+//   PCIE3 IO BAR0                            (PCIE3_IO_BAR0_0x02012C40)
+//   PCIE3 IO BAR0 Mask                       (PCIE3_IO_MASK0_0x02012C43)
+//   PCIE3 IO BAR1                            (PCIE3_IO_BAR1_0x02012C41)
+//   PCIE3 IO BAR1 Mask                       (PCIE3_IO_MASK1_0x02012C44)
+//   PCIE3 IO BAR2                            (PCIE3_IO_BAR2_0x02012C42)
+//   PCIE3 IO BAR Enable                      (PCIE3_IO_BAR_EN_0x02012C45)
 //
 //------------------------------------------------------------------------------
 fapi::ReturnCode
@@ -2346,6 +2374,7 @@ proc_setup_bars_write_local_chip_region_bars(
         {
             rc = proc_setup_bars_pcie_write_local_chip_memory_bars(
                 i_smp_chip.chip->this_chip,
+                i_smp_chip.num_phb,
                 i_smp_chip.non_mirrored_range,
                 i_smp_chip.mirrored_range);
             if (!rc.ok())
@@ -2360,6 +2389,7 @@ proc_setup_bars_write_local_chip_region_bars(
         {
             rc = proc_setup_bars_pcie_write_io_bar_regs(
                 i_smp_chip.chip->this_chip,
+                i_smp_chip.num_phb,
                 i_smp_chip.pcie_ranges);
             if (!rc.ok())
             {
@@ -2404,6 +2434,9 @@ proc_setup_bars_write_local_chip_region_bars(
 //
 //   PCIE2 Group Non-Mirrored BAR             (PCIE2_GROUP_BAR0_0x02012812)
 //   PCIE2 Group Mirrored BAR                 (PCIE2_GROUP_BAR1_0x02012813)
+//
+//   PCIE3 Group Non-Mirrored BAR             (PCIE3_GROUP_BAR0_0x02012C12)
+//   PCIE3 Group Mirrored BAR                 (PCIE3_GROUP_BAR1_0x02012C13)
 //
 //------------------------------------------------------------------------------
 fapi::ReturnCode
@@ -2511,6 +2544,7 @@ proc_setup_bars_write_local_node_region_bars(
         {
             rc = proc_setup_bars_pcie_write_local_node_memory_bars(
                 i_smp_chip.chip->this_chip,
+                i_smp_chip.num_phb,
                 i_smp_node.non_mirrored_range,
                 i_smp_node.mirrored_range);
             if (!rc.ok())
@@ -2718,10 +2752,15 @@ proc_setup_bars_write_remote_node_region_bars(
 //   PCIE1 F1 Near BAR                        (PCIE1_NEAR_BAR_F1_0x02012416)
 //   PCIE1 F1 Far BAR                         (PCIE1_FAR_BAR_F1_0x02012417)
 //
-//   PCIE2 F0 Near BAR                        (PCIE2_NEAR_BAR_F0_0x02012484)
+//   PCIE2 F0 Near BAR                        (PCIE2_NEAR_BAR_F0_0x02012814)
 //   PCIE2 F0 Far BAR                         (PCIE2_FAR_BAR_F0_0x02012815)
 //   PCIE2 F1 Near BAR                        (PCIE2_NEAR_BAR_F1_0x02012816)
 //   PCIE2 F1 Far BAR                         (PCIE2_FAR_BAR_F1_0x02012817)
+//
+//   PCIE3 F0 Near BAR                        (PCIE3_NEAR_BAR_F0_0x02012C14)
+//   PCIE3 F0 Far BAR                         (PCIE3_FAR_BAR_F0_0x02012C15)
+//   PCIE3 F1 Near BAR                        (PCIE3_NEAR_BAR_F1_0x02012C16)
+//   PCIE3 F1 Far BAR                         (PCIE3_FAR_BAR_F1_0x02012C17)
 //
 //------------------------------------------------------------------------------
 fapi::ReturnCode
@@ -2746,6 +2785,7 @@ proc_setup_bars_write_foreign_region_bars(
         {
             rc = proc_setup_bars_pcie_write_foreign_memory_bars(
                 i_smp_chip.chip->this_chip,
+                i_smp_chip.num_phb,
                 process_links,
                 i_smp_chip.foreign_near_ranges,
                 i_smp_chip.foreign_far_ranges);
