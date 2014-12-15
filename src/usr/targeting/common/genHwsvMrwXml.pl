@@ -4249,26 +4249,27 @@ sub generate_is_dimm
          </default>
     </attribute>";
 
-               last;
-            }
-        }
-
-        print "
-    </attribute>
-     <attribute>
+            print "
+    <attribute>
         <id>EEPROM_VPD_FRU_INFO</id>
          <default>
-             <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/membuf-$ctaur</value></field>
-             <field><id>port</id><value>$dimmI2C->{$i+1}->{'i2c-master'}->{'i2c-port'}</value></field>
-             <field><id>devAddr</id><value>0x$dimmI2C->{$i+1}->{'address'}</value></field>
-             <field><id>engine</id><value>0</value></field>
+             <field><id>i2cMasterPath</id><value>physical:sys-$sys/"
+                . "node-$node/membuf-$ctaur</value></field>
+             <field><id>port</id><value>$dimmI2C[$j]{port}</value></field>
+             <field><id>devAddr</id><value>0x$dimmI2C[$j]{devAddr}"
+                . "</value></field>
+             <field><id>engine</id><value>$dimmI2C[$j]{engine}</value></field>
              <field><id>byteAddrOffset</id><value>0x01</value></field>
              <field><id>maxMemorySizeKB</id><value>0x01</value></field>
-             <field><id>writePageSize</id><value>0x00</value></field>
+             <field><id>writePageSize</id><value>0x50</value></field>
              <field><id>writeCycleTime</id><value>0x05</value></field>
              <field><id>fruId</id><value>$ipmiFruid++</value></field>
          </default>
     </attribute>";
+
+               last;
+            }
+        }
 
        print"
     <attribute>
@@ -4900,6 +4901,40 @@ sub addEepromsProc
         print "        </default>\n";
         print "    </attribute>\n";
 
+        if ($id_name eq "EEPROM_VPD_PRIMARY_INFO")
+        {
+            print "    <attribute>\n";
+            print "        <id>EEPROM_VPD_FRU_INFO</id>\n";
+
+            print "        <default>\n";
+            print "            <field><id>i2cMasterPath</id><value>physical:",
+                              "sys-$sys/node-$node/",
+                              "proc-$proc</value></field>\n";
+            print "            <field><id>port</id><value>",
+                              "$I2Cdevices[$i]{i2c_port}</value></field>\n";
+            print "            <field><id>devAddr</id><value>0x",
+                              "$I2Cdevices[$i]{i2c_devAddr}",
+                              "</value></field>\n";
+            print "            <field><id>engine</id><value>",
+                              "$I2Cdevices[$i]{i2c_engine}",
+                              "</value></field>\n";
+            print "            <field><id>byteAddrOffset</id><value>",
+                              "$I2Cdevices[$i]{i2c_byte_addr_offset}",
+                              "</value></field>\n";
+            print "            <field><id>maxMemorySizeKB</id><value>",
+                              "$I2Cdevices[$i]{i2c_max_mem_size}",
+                              "</value></field>\n";
+            print "            <field><id>writePageSize</id><value>",
+                              "$I2Cdevices[$i]{i2c_write_page_size}",
+                              "</value></field>\n";
+            print "            <field><id>writeCycleTime</id><value>",
+                              "$I2Cdevices[$i]{i2c_write_cycle_time}",
+                              "</value></field>\n";
+            print "            <field><id>fruId</id><value>$ipmiFruid++",
+                              "</value></field>\n";
+            print "        </default>\n";
+            print "    </attribute>\n";
+        }
     }
 }
 
@@ -4980,16 +5015,34 @@ sub addEepromsCentaur
         {
             print "    <attribute>\n";
             print "        <id>EEPROM_VPD_FRU_INFO</id>\n";
+
             print "        <default>\n";
-            print "            <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/proc-$proc</value></field>\n";
-            print "             <field><id>port</id><value>$port</value></field>\n";
-            print "             <field><id>devAddr</id><value>$devAddr_hex</value></field>\n";
-            print "             <field><id>engine</id><value>0</value></field>\n";
-            print "             <field><id>byteAddrOffset</id><value>0x02</value></field>\n";
-            print "             <field><id>maxMemorySizeKB</id><value>0x40</value></field>\n";
-            print "             <field><id>writePageSize</id><value>0x80</value></field>\n";
-            print "             <field><id>writeCycleTime</id><value>0x05</value></field>\n";
-            print "             <field><id>fruId</id><value>$ipmiFruid++</value></field>\n";
+            print "            <field><id>i2cMasterPath</id><value>physical:",
+                              "sys-$sys/node-$node/",
+                              "$I2Cdevices[$i]{i2cm_name}",
+                              "-$I2Cdevices[$i]{i2cm_pos}</value></field>\n";
+            print "            <field><id>port</id><value>",
+                              "$I2Cdevices[$i]{i2c_port}</value></field>\n";
+            print "            <field><id>devAddr</id><value>0x",
+                              "$I2Cdevices[$i]{i2c_devAddr}",
+                              "</value></field>\n";
+            print "            <field><id>engine</id><value>",
+                              "$I2Cdevices[$i]{i2c_engine}",
+                              "</value></field>\n";
+            print "            <field><id>byteAddrOffset</id><value>",
+                              "$I2Cdevices[$i]{i2c_byte_addr_offset}",
+                              "</value></field>\n";
+            print "            <field><id>maxMemorySizeKB</id><value>",
+                              "$I2Cdevices[$i]{i2c_max_mem_size}",
+                              "</value></field>\n";
+            print "            <field><id>writePageSize</id><value>",
+                              "$I2Cdevices[$i]{i2c_write_page_size}",
+                              "</value></field>\n";
+            print "            <field><id>writeCycleTime</id><value>",
+                              "$I2Cdevices[$i]{i2c_write_cycle_time}",
+                              "</value></field>\n";
+            print "            <field><id>fruId</id><value>$ipmiFruid++",
+                              "</value></field>\n";
             print "        </default>\n";
             print "    </attribute>\n";
         }
