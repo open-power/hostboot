@@ -111,6 +111,16 @@ errlHndl_t flush (SectionId i_section);
  *         true = PNOR DD is using L3 Cache for fake PNOR
  *         false = PNOR DD not using L3 Cache for fake PNOR
  */
+
+/**
+ * @brief  Clears the specified PNOR section with all FF's (w/ good ECC)
+ *
+ * @param[in] i_section  PNOR section to clear
+ *
+ * @return Error if fails
+ */
+errlHndl_t clearSection(PNOR::SectionId i_section);
+
 bool usingL3Cache();
 
 /**

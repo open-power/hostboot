@@ -79,6 +79,14 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 }
 
 /**
+ * @brief  Clear pnor section
+ */
+errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
+{
+    return Singleton<PnorRP>::instance().clearSection(i_section);
+}
+
+/**
  * @brief  Write the data for a given sectino into PNOR
  */
 errlHndl_t PNOR::flush( PNOR::SectionId i_section)
@@ -256,8 +264,6 @@ void PnorRP::initDaemon()
         // Need to set permissions to R/W
         rc = mm_set_permission((void*) BASE_VADDR,TOTAL_SIZE,
                                WRITABLE | WRITE_TRACKED);
-
-
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
@@ -832,3 +838,88 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
     return errhdl;
 }
 
+errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)
+{
+    TRACFCOMP(g_trac_pnor, "PnorRP::clearSection Section id = %d", i_section);
+    errlHndl_t l_errl = NULL;
+    const uint64_t CLEAR_BYTE = 0xFF;
+    uint8_t* l_buf = new uint8_t[PAGESIZE];
+    uint8_t* l_eccBuf = NULL;
+
+    do
+    {
+        // Flush pages of pnor section we are trying to clear
+        l_errl = flush(i_section);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::clearSection: flush() failed on section",
+                        i_section);
+            break;
+        }
+
+        // Get PNOR section info
+        uint64_t l_address = iv_TOC[i_section].flashAddr;
+        uint64_t l_chipSelect = iv_TOC[i_section].chip;
+        uint32_t l_size = iv_TOC[i_section].size;
+        bool l_ecc = iv_TOC[i_section].integrity & FFS_INTEG_ECC_PROTECT;
+
+        // Number of pages needed to cycle proper ECC
+        // Meaning every 9th page will copy the l_eccBuf at offset 0
+        const uint64_t l_eccCycleNum = 9;
+
+        // Boundaries for properly splitting up an ECC page for 4K writes.
+        // Subtract 1 from l_eccCycleNum because we start writing with offset 0
+        // and add this value 8 times to complete a cycle.
+        const uint64_t l_sizeOfOverlapSection = (PAGESIZE_PLUS_ECC - PAGESIZE) /
+                                                (l_eccCycleNum - 1);
+
+        // Create clear section buffer
+        memset(l_buf, CLEAR_BYTE, PAGESIZE);
+
+        // apply ECC to data if needed
+        if(l_ecc)
+        {
+            l_eccBuf = new uint8_t[PAGESIZE_PLUS_ECC];
+            PNOR::ECC::injectECC( reinterpret_cast<uint8_t*>(l_buf),
+                                  PAGESIZE,
+                                  reinterpret_cast<uint8_t*>(l_eccBuf) );
+            l_size = (l_size*9)/8;
+        }
+
+        // Write clear section page to PNOR
+        for (uint64_t i = 0; i < l_size; i+=PAGESIZE)
+        {
+            if(l_ecc)
+            {
+                // Take (current page) mod (l_eccCycleNum) to get cycle position
+                uint8_t l_bufPos = ( (i/PAGESIZE) % l_eccCycleNum );
+                uint64_t l_bufOffset = l_sizeOfOverlapSection * l_bufPos;
+                memcpy(l_buf, (l_eccBuf + l_bufOffset), PAGESIZE);
+            }
+
+            // Set ecc parameter to false to avoid double writes will only write
+            // 4k at a time, even if the section is ecc protected.
+            l_errl = writeToDevice((l_address + i), l_chipSelect,
+                                   false, l_buf);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::clearSection: writeToDevice fail: eid=0x%X, rc=0x%X",
+                           l_errl->eid(), l_errl->reasonCode());
+                break;
+            }
+        }
+        if (l_errl)
+        {
+            break;
+        }
+    } while(0);
+
+    // Free allocated memory
+    if(l_eccBuf)
+    {
+        delete[] l_eccBuf;
+    }
+    delete [] l_buf;
+
+    return l_errl;
+}

@@ -58,6 +58,15 @@ class PnorRP
     errlHndl_t getSectionInfo( PNOR::SectionId i_section,
                                PNOR::SectionInfo_t& o_info );
 
+    /**
+     * @brief  Clears the specified PNOR section with all FF's (w/ good ECC)
+     *
+     * @param[in] i_id  PNOR section to clear
+     *
+     * @return Error if fails
+     */
+    errlHndl_t clearSection(PNOR::SectionId i_section);
+
   protected:
     /**
      * @brief  Constructor
@@ -222,7 +231,6 @@ class PnorRP
      * @brief Static instance function for testcase only
      */
     static PnorRP& getInstance();
-
 };
 
 
