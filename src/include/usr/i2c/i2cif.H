@@ -30,7 +30,7 @@ namespace I2C
 
 /**
  * @brief This function will handle everything required to setup the master
- *      engines.
+ *      engines on the processor.
  *      Mainly, as of current code, this is being used to write the I2C Bus
  *      Divisor values to the master engines to be used by Phyp.
  *
