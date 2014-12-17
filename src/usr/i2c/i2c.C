@@ -2393,12 +2393,6 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
             {
                 io_args.bus_speed = speed_array[io_args.engine][io_args.port];
 
-                // @todo RTC:119764 remove when I2C_BUS_SPEED_ARRAY attr fixed
-                if (io_args.bus_speed == 0)
-                {
-                    io_args.bus_speed = I2C_BUS_SPEED_400KHZ;
-                }
-
                 assert(io_args.bus_speed,
                        "i2cSetBusVariables: bus_speed array[%d][%d] for "
                        "tgt 0x%X is 0",

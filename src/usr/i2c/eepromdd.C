@@ -1065,31 +1065,6 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.devSize_KB    = eepromData.maxMemorySizeKB;
         o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
 
-        // @todo RTC:119764 remove when correct data is in the MRW
-        if( o_i2cInfo.writePageSize == 0 )
-        {
-            o_i2cInfo.writePageSize = 256;
-        }
-
-        // @todo RTC:116428 - forcing the attribute data for now
-        //                    until we can pull it from the MRW
-        if( TARGETING::TYPE_MEMBUF ==
-                    i_target->getAttr<TARGETING::ATTR_TYPE>() )
-        {
-            o_i2cInfo.port          = 2;
-            o_i2cInfo.devAddr       = 0xA0;
-            o_i2cInfo.engine        = 1;
-            TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-            epath.addLast(TARGETING::TYPE_SYS,0);
-            epath.addLast(TARGETING::TYPE_NODE,0);
-            epath.addLast(TARGETING::TYPE_PROC,0);
-            o_i2cInfo.i2cMasterPath = epath;
-            o_i2cInfo.writePageSize = 32;
-            o_i2cInfo.devSize_KB    = 0x40;
-            o_i2cInfo.writeCycleTime = 20;
-            eepromData.byteAddrOffset = 2;
-        }
-
         // Convert attribute info to eeprom_addr_size_t enum
         if ( eepromData.byteAddrOffset == 0x2 )
         {
