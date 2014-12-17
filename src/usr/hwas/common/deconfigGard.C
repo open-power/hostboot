@@ -428,6 +428,9 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
         {
             const TargetHandle_t pNode = *pNode_it;
 
+            //Clear all FCO based deconfigure before
+            //re-calculating FCO.
+            _clearFCODeconfigure(pNode);
             // Get FCO value
             uint32_t l_fco = 0;
             l_pErr = platGetFCO(pNode, l_fco);
@@ -2079,5 +2082,33 @@ void DeconfigGard::setXABusEndpointDeconfigured(bool deconfig)
     iv_XABusEndpointDeconfigured = deconfig;
 }
 
+//*****************************************************************************
+
+void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
+{
+    HWAS_DBG("Clear all FCO deconfigure");
+
+    //Get all targets in the node present and non-functional.
+    PredicateHwas predNonFunctional;
+    predNonFunctional.present(true).functional(false);
+    TargetHandleList l_targetList;
+    targetService().getAssociated(l_targetList,i_nodeTarget,
+                              TargetService::CHILD, TargetService::ALL,
+                              &predNonFunctional);
+    for (TargetHandleList::const_iterator
+             l_target_it = l_targetList.begin();
+             l_target_it != l_targetList.end();
+             l_target_it++)
+    {
+        TargetHandle_t l_pTarget = *l_target_it;
+        HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+        if(l_state.deconfiguredByEid == DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
+        {
+            l_state.functional = 1;
+            l_state.deconfiguredByEid = 0;
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_state);
+        }
+    }
+}
 } // namespce HWAS
 

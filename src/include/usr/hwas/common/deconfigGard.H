@@ -538,6 +538,22 @@ private:
      */
     static errlHndl_t _symmetryValidation(ProcInfoVector &io_procInfo);
 
+    /**
+     *  @brief Clear all Deconfigure due to Field Core Override
+     *
+     *  Called by processFieldCoreOverride.
+     *  This function clears the deconfiguration based on
+     *  field core override and prepare for applying filed core override
+     *  again.
+     *
+     *  @param[in]  i_nodeTarget Node which FCO to be cleared.
+     *
+     *  @return errlHndl_t. Error log handle.
+     *
+     */
+    static void _clearFCODeconfigure(
+                TARGETING::ConstTargetHandle_t i_nodeTarget);
+
 public:
 
     /**
