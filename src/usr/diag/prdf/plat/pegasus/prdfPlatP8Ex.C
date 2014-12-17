@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,9 @@
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 #include <prdfCalloutUtil.H>
+#include <prdfPlatUtil.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -113,6 +116,9 @@ int32_t L3CE( ExtensibleChip * i_chip,
 {
     // We can get these errors during hostboot, but will wait for runtime
     // to attempt repairs
+
+    PlatUtil::ignoreErrorForSapphire( i_sc );
+
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Ex, L3CE);
 
@@ -139,6 +145,9 @@ int32_t L2CE( ExtensibleChip * i_chip,
 {
     // We can get these errors during hostboot, but will wait for runtime
     // to attempt repairs
+
+    PlatUtil::ignoreErrorForSapphire( i_sc );
+
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Ex, L2CE);
 

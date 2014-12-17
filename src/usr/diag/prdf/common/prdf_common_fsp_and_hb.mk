@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -138,6 +138,7 @@ prd_obj += prdfLaneRepair.o
 prd_obj += prdfMemoryMru.o
 prd_obj += prdfPegasusConfigurator.o
 prd_obj += prdfPhbUtils.o
+prd_obj += prdfPlatUtil.o
 
 # common/plat/pegasus/ (rule plugin related)
 prd_rule_plugin += prdfCenMba.o
