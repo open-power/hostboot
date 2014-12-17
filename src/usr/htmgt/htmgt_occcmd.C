@@ -269,7 +269,7 @@ namespace HTMGT
             }
             if (iv_OccCmd.dataLength > 0)
             {
-                TMGT_BIN("cmd data", iv_OccCmd.cmdData,
+                TMGT_BIN("cmd data (up to 16 bytes)", iv_OccCmd.cmdData,
                          std::min(iv_OccCmd.dataLength,(uint16_t)16));
             }
         }
@@ -296,7 +296,7 @@ namespace HTMGT
                  l_rsp_status_string, iv_OccRsp.dataLength);
         if (iv_OccRsp.dataLength > 0)
         {
-            TMGT_BIN("rsp data:", iv_OccRsp.rspData,
+            TMGT_BIN("rsp data: (up to 16 bytes)", iv_OccRsp.rspData,
                      std::min(iv_OccRsp.dataLength,(uint16_t)16));
         }
     }
@@ -955,8 +955,8 @@ namespace HTMGT
         if (G_debug_trace & DEBUG_TRACE_OCCCMD)
         {
             // Trace the command
-            TMGT_BIN("buildOccCmdBuffer: OCC command",
-                     cmdBuffer, l_send_length);
+            TMGT_BIN("buildOccCmdBuffer: OCC command (up to 256 bytes)",
+                     cmdBuffer, std::min(l_send_length, (uint16_t)256));
         }
 #endif
 

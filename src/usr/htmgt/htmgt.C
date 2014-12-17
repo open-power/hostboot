@@ -34,6 +34,7 @@
 #include "htmgt_memthrottles.H"
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
+#include <config.h>
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
@@ -124,6 +125,24 @@ namespace HTMGT
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                             l_err = NULL;
                         }
+
+                        // @TODO RTC 120059 remove after elog alerts supported
+#ifdef CONFIG_DELAY_AFTER_OCC_ACTIVATION
+                        // Delay to allow the OCC to complete several
+                        // sensor readings and create errors if necessary
+                        TMGT_INF("Delay after OCC activation");
+                        nanosleep(30, 0);
+                        // Poll the OCCs to retrieve any errors that may
+                        // have been created
+                        TMGT_INF("Send final poll to all OCCs");
+                        l_err = sendOccPoll(true);
+                        if (l_err)
+                        {
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            l_err = NULL;
+                        }
+#endif
+
                     } while(0);
                 }
                 else

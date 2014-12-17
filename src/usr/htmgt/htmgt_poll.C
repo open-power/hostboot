@@ -58,6 +58,7 @@ namespace HTMGT
             const uint8_t occInstance = occ->getInstance();
 
             bool continuePolling = false;
+            size_t elogCount = 10;
             do
             {
                 // create 1 byte buffer for poll command data
@@ -83,8 +84,20 @@ namespace HTMGT
                                 (occPollRspStruct_t *) l_poll_rsp;
                             if (currentPollRsp->errorId != 0)
                             {
-                                // An error was returned, keep polling OCC
-                                continuePolling = true;
+                                if (--elogCount > 0)
+                                {
+                                    // An error was returned, keep polling OCC
+                                    continuePolling = true;
+                                }
+                                else
+                                {
+                                    // Limit number of elogs retrieved so
+                                    // we do not get stuck in loop
+                                    TMGT_INF("sendOccPoll: OCC%d still has"
+                                             "more errors to report.",
+                                             occInstance);
+                                    continuePolling = false;
+                                }
                             }
                             else
                             {

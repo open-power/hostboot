@@ -59,7 +59,7 @@ namespace HTMGT
             // Skip 8 byte ecmd header
             const occErrlEntry_t *l_occElog=(occErrlEntry_t *)&l_sram_data[8];
 
-            TMGT_BIN("OCC ELOG", l_occElog, 64);
+            TMGT_BIN("OCC ELOG", l_occElog, 256);
 
             const uint32_t l_occSrc = OCCC_COMP_ID | l_occElog->reasonCode;
             ERRORLOG::errlSeverity_t l_errlSeverity =
