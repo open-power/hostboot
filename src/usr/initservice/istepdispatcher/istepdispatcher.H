@@ -458,6 +458,33 @@ private:
     void reconfigLoopInduce(TARGETING::Target* i_pDeconfigTarget,
                             errlHndl_t & o_err);
 #endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+
+    // istep pause configuration data structure for accessing the settings in
+    // ATTR_ISTEP_PAUSE_CONFIG (64-bit attribute)
+    typedef struct
+    {
+        uint8_t majorStep; // Target istep where pause will be applied
+        uint8_t minorStep;
+        uint8_t pauseLen;  // The number of seconds before IPL resumes from
+                           // pause state
+        uint8_t fullStopEn; // Enable full stop. When set to 0x01 the IPL stops
+                            // indefinately until resumed using an outside
+                            // command
+        uint32_t bpTagInfo; // Tag value passed to the iStepBreakPoint
+                            // function
+    } istepPauseConfig_t;
+
+    /**
+     * @brief Decodes the ATTR_ISTEP_PAUSE_CONFIG attribute and applies either a
+     * pause or full stop *before* the specified istep.
+     * Whether a pause or full stop is applied depends on the settings in
+     * ATTR_ISTEP_PAUSE_CONFIG which are set via attribute override.
+     *
+     * @param[i] i_step - Current istep
+     * @param[i] i_substep - Current substep
+     */
+    void istepPauseSet(uint8_t i_step, uint8_t i_substep);
+
 };
 } // namespace
 

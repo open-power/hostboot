@@ -15057,6 +15057,33 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+    <id>ISTEP_PAUSE_ENABLE</id>
+    <description>
+      Used to enable pause/stop in between isteps. This attribute is set via
+      attribute override.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ISTEP_PAUSE_CONFIG</id>
+    <description>
+      Used to configure the parameters for enabling pause/stop between
+      isteps. This attribute is set via attribute override.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 </attributes>
 
 

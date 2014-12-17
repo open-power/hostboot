@@ -282,6 +282,8 @@
     <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
     <attribute><id>RECONFIG_LOOP_TESTS</id></attribute>
     <attribute><id>RECONFIG_LOOP_TESTS_ENABLE</id></attribute>
+    <attribute><id>ISTEP_PAUSE_ENABLE</id></attribute>
+    <attribute><id>ISTEP_PAUSE_CONFIG</id></attribute>
     <!-- IPMI Sensor numbers for reporting system status and info to the BMC -->
     <attribute><id>IPMI_SENSORS</id></attribute>
 </targetType>

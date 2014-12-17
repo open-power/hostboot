@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -594,6 +594,18 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         TARGETING::Target* l_pTopLevel = NULL;
         TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
         l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(0);
+
+        // Read ATTR_ISTEP_PAUSE_ENABLE attribute
+        TARGETING::ATTR_ISTEP_PAUSE_ENABLE_type l_istepPauseEn =
+            l_pTopLevel->getAttr<TARGETING::ATTR_ISTEP_PAUSE_ENABLE>();
+
+        // If istep pause is enabled then call istepPauseSet
+        if (l_istepPauseEn)
+        {
+            TRACFCOMP(g_trac_initsvc, INFO_MRK"doIstep: Pause before "
+                    "istep is enabled");
+            istepPauseSet(i_istep, i_substep);
+        }
 
         err = InitService::getTheInstance().executeFn(theStep, NULL);
 
@@ -2046,4 +2058,56 @@ void IStepDispatcher::reconfigLoopInduce(TARGETING::Target* i_pDeconfigTarget,
 }
 #endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 
+// ----------------------------------------------------------------------------
+// IStepDispatcher::istepPauseSet()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
+{
+    // Acquire top level handle
+    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+
+    // Read ATTR_ISTEP_PAUSE_CONFIG attribute
+    TARGETING::ATTR_ISTEP_PAUSE_CONFIG_type l_istepPauseCfgAttr =
+        l_pTopLevel->getAttr<TARGETING::ATTR_ISTEP_PAUSE_CONFIG>();
+
+    if(l_istepPauseCfgAttr == 0)
+    {
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"istepPauseSet: "
+                "ATTR_ISTEP_PAUSE_CONFIG not set. Pause will not be applied!");
+    }
+    else
+    {
+        // Overlay ATTR_ISTEP_PAUSE_CONFIG data on top of structure
+        istepPauseConfig_t *l_p_pauseCfg =
+            reinterpret_cast<istepPauseConfig_t *>(&l_istepPauseCfgAttr);
+
+        // Apply pause or full stop if current istep matches requested istep
+        if( (i_step == l_p_pauseCfg->majorStep) &&
+            (i_substep == l_p_pauseCfg->minorStep))
+        {
+            TRACFCOMP(g_trac_initsvc, INFO_MRK"istepPauseSet: "
+                        "Applying pause before step: %d.%d, "
+                        "Pause duration=%d seconds, Full Stop Enable=0x%02X, "
+                        "Breakpoint info tag=0x%08X",
+                        l_p_pauseCfg->majorStep,
+                        l_p_pauseCfg->minorStep,
+                        l_p_pauseCfg->pauseLen,
+                        l_p_pauseCfg->fullStopEn,
+                        l_p_pauseCfg->bpTagInfo
+                        );
+
+            // If full stop is requested then send breakpoint message to FSP
+            // otherwise sleep for the requested number of seconds
+            if(l_p_pauseCfg->fullStopEn)
+            {
+                iStepBreakPoint(l_p_pauseCfg->bpTagInfo);
+            }
+            else
+            {
+                nanosleep(l_p_pauseCfg->pauseLen,0);
+            }
+        }
+    }
+}
 } // namespace
