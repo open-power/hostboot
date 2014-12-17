@@ -36,7 +36,7 @@
 // make VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
 #define VFS_MODULE_MAX 16
 #else
-#define VFS_MODULE_MAX 32
+#define VFS_MODULE_MAX 64
 #endif
 
 // Extended use 4 4k pages

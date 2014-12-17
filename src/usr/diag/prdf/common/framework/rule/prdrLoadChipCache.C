@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,8 +99,6 @@ namespace Prdr
                 strncat( filePath, ext,    sz_ext  );
 
                 #ifdef __HOSTBOOT_MODULE
-                // TODO: RTC 119022 remove after UtilFile is supported in HBRT
-                #ifndef __HOSTBOOT_RUNTIME
 
                 UtilFile l_ruleFile( filePath );
                 if ( !l_ruleFile.exists() )
@@ -113,7 +111,6 @@ namespace Prdr
                     l_ruleFile.Open("r");
                 }
 
-                #endif
                 #else // not __HOSTBOOT_MODULE
 
                 // Read the correct directory path for flash.
@@ -154,11 +151,8 @@ namespace Prdr
 
                 #endif // end __HOSTBOOT_MODULE
 
-                // TODO: RTC 119022 remove after UtilFile is supported in HBRT
-                #ifndef __HOSTBOOT_RUNTIME
                 // Load chip object.
                 l_errl = LoadChip(l_ruleFile, *(*o_chip));
-                #endif
 
             } while (0);
 

@@ -302,6 +302,7 @@ hbirt_OBJECTS += ${RUNTIME_OBJECTS}
 hbirt_OBJECTS += ${BASE_OBJECTS}
 hbirt_MODULES += ${RUNTIME_MODULES}
 hbirt_DATA_MODULES += ${RUNTIME_DATA_MODULES}
+hbirt_DATA_MODULES += ${prd_rule_prf_targets}
 hbirt_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
 
 hbirt_test_OBJECTS += ${hbirt_OBJECTS}
