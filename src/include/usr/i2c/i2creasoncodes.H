@@ -57,6 +57,7 @@ enum i2cModuleId
     I2C_CHECK_FOR_ERRORS                = 0x07,
     I2C_SETUP_MASTERS                   = 0x08,
     I2C_SEND_SLAVE_STOP                 = 0x09,
+    I2C_RESET_MASTERS                   = 0x0A,
 };
 
 

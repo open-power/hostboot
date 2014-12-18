@@ -53,7 +53,7 @@ enum i2cResetType
     I2C_RESET_PROC_HOST,
     I2C_RESET_MEMBUF_ALL,
     I2C_RESET_MEMBUF_FSI,
-    I2c_RESET_MEMBUF_HOST
+    I2C_RESET_MEMBUF_HOST
 };
 
 /**
@@ -62,10 +62,16 @@ enum i2cResetType
  *
  * @param[in] i_resetType - Specfies which I2C master engines to reset
  *
+ * @param[in] i_functional - Specfies if reset is performed on functional or
+ *                           any existing targets that match the i_resetType
+ *                           if true - functional targets
+ *                           if false - existing targets
+ *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t i2cResetMasters ( i2cResetType i_resetType );
+errlHndl_t i2cResetMasters ( i2cResetType i_resetType,
+                             bool i_functional = true );
 
 
 /**
