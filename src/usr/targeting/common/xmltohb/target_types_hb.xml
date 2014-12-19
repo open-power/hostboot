@@ -62,6 +62,7 @@
     <attribute><id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_TURBO_MODE_SUPPORTED</id></attribute>
     <attribute><id>OCC_CONTROL_DATA</id></attribute>
+    <attribute><id>OPAL_MODEL</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

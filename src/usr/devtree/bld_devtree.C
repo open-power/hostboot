@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -601,9 +601,15 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
     // Nothing to do for small trees currently.
     if (!i_smallTree)
     {
+        /* Fetch the MRW-defined compatible model from attributes */
+        ATTR_OPAL_MODEL_type l_model = {0};
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        sys->tryGetAttr<TARGETING::ATTR_OPAL_MODEL>(l_model);
 
         /* Add compatibility node */
-        i_dt->addPropertyString(rootNode, "compatible", "ibm,powernv");
+        const char* l_compats[] = { "ibm,powernv", l_model, NULL };
+        i_dt->addPropertyStrings(rootNode, "compatible", l_compats);
 
         /* Add system model node */
         // Based off of the DR field in the OPFR
@@ -629,6 +635,8 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
             {
                 TRACFCOMP(g_trac_devtree,ERR_MRK" Couldn't get DR size for HUID=0x%.8X",
                           TARGETING::get_huid(l_pMem));
+                i_dt->addPropertyString(rootNode, "model", "unknown");
+                errlCommit(errhdl, DEVTREE_COMP_ID);
             }
             else
             {

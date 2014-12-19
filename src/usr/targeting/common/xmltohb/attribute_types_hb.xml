@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -754,6 +754,23 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>OPAL_MODEL</id>
+    <description>
+        Specifies the compatible model name for Opal to key off of.
+        This is sourced from the MRW and should be of the format
+        'vendor,model', e.g. 'tyan,palmetto'.
+    </description>
+    <simpleType>
+        <string>
+            <default>tyan,palmetto</default><!-- @fixme-RTC:120092 -->
+            <sizeInclNull>32</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 </attributes>
