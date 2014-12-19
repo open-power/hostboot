@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,7 @@ public:
 
             if (l_lidSize != l_lidPnorInfo.size)
             {
-                TS_FAIL("testLidInPnor: lidSize does not match pnor test section size 0x%.8X > 0x%.8X",
+                TS_FAIL("testLidInPnor: lidSize does not match pnor test section size 0x%.8X != 0x%.8X",
                         l_lidSize, l_lidPnorInfo.size);
                 break;
             }
@@ -139,13 +139,14 @@ public:
             {
                 errlCommit(l_errl,UTIL_COMP_ID);
                 TS_FAIL("testLidInPnorOcc: Error getting lidId=0x%.8x",
-                        Util::TEST_LIDID);
+                        Util::OCC_LIDID);
                 break;
             }
 
             if (l_lidSize != l_lidPnorInfo.size)
             {
-                TS_FAIL("testLidInPnorOcc: lidSize does not match pnor OCC section size 0x%.8X > 0x%.8X",
+                TS_FAIL("testLidInPnorOcc: lidSize does not match pnor OCC"
+                        " section size 0x%.8X != 0x%.8X",
                         l_lidSize, l_lidPnorInfo.size);
                 break;
             }

@@ -175,6 +175,11 @@ class UtilLidMgr
     */
    errlHndl_t cleanup();
 
+    /**
+     * @brief value indicating if lid is in its own pnor partition
+     *
+     */
+    bool iv_isLidInPnor;
 #ifndef __HOSTBOOT_RUNTIME
     /**
      *  @brief Get LID Size PNOR
@@ -318,6 +323,21 @@ class UtilLidMgr
      */
     msg_q_t iv_HbMsgQ;
 
+
+#else // __HOSTBOOT_RUNTIME
+
+    /**
+     * @brief Loads the LID using the Host interfaces.
+     */
+    errlHndl_t loadLid();
+
+    /**
+     * @brief Pointer to the buffer containing the LID.
+     */
+    void* iv_lidBuffer;
+
+#endif // __HOSTBOOT_RUNTIME
+
     /**
      *  @brief search lidToPnor array for the pnor section for the given lid
      *         lidToPnor array does not includes the ext img section
@@ -329,26 +349,6 @@ class UtilLidMgr
     */
     bool getLidPnorSection(uint32_t i_lidId,
                            PNOR::SectionInfo_t &o_lidPnorInfo);
-
-#else // __HOSTBOOT_RUNTIME
-
-    /**
-     * @brief Loads the LID using the Host interfaces.
-     */
-    errlHndl_t loadLid();
-
-    /**
-     * @brief Cached value of the LID location.  (Host vs PNOR)
-     */
-    bool iv_isPnor;
-
-    /**
-     * @brief Pointer to the buffer containing the LID.
-     */
-    void* iv_lidBuffer;
-
-#endif // __HOSTBOOT_RUNTIME
-
     /**
      * @brief LID fileName
      */
@@ -369,12 +369,6 @@ class UtilLidMgr
      *        PNOR::INVALID_SECTION if not in other sections
      */
     PNOR::SectionInfo_t iv_lidPnorInfo;
-
-    /**
-     * @brief value indicating if lid is in its own pnor partition
-     *
-     */
-    bool iv_isLidInPnor;
 
     /**
      * @brief value indicating if a fsp exists

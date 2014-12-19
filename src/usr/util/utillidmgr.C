@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,6 @@
 #include "utillidmgrdefs.H"
 #include "utilbase.H"
 #include <initservice/initserviceif.H>
-#include "utillidpnor.H"
 
 using namespace ERRORLOG;
 mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
@@ -683,40 +682,3 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
     return;
 }
 
-///////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////
-bool UtilLidMgr::getLidPnorSection(uint32_t i_lidId,
-                                   PNOR::SectionInfo_t &o_lidPnorInfo)
-{
-    errlHndl_t l_err = NULL;
-    bool l_lidInPnor = false;
-
-    const std::pair<uint32_t, PNOR::SectionId> l_lid(i_lidId,
-                                                     PNOR::INVALID_SECTION);
-
-    const std::pair<uint32_t, PNOR::SectionId>* l_result =
-                            std::lower_bound (Util::lidToPnor,
-                                        Util::lidToPnor + Util::NUM_LID_TO_PNOR,
-                                        l_lid,
-                                        Util::cmpLidToPnor);
-
-    if (l_result != (Util::lidToPnor + Util::NUM_LID_TO_PNOR) &&
-        l_result->first == l_lid.first &&
-        l_result->second != PNOR::INVALID_SECTION)
-    {
-        l_err = PNOR::getSectionInfo(l_result->second, o_lidPnorInfo);
-        // Section is optional or lid is not in PNOR, so just delete error
-        if (l_err)
-        {
-            o_lidPnorInfo.id = PNOR::INVALID_SECTION;
-            l_lidInPnor = false;
-            delete l_err;
-            l_err = NULL;
-        }
-        else
-        {
-            l_lidInPnor = true;
-        }
-    }
-    return l_lidInPnor;
-}

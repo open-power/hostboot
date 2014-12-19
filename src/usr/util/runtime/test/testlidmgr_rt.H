@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <util/utillidmgr.H>
+#include <cxxtest/TestSuite.H>
+#include <errl/errlmanager.H>
+#include <utilbase.H>
 
 class LidMgrRtTest : public CxxTest::TestSuite
 {
@@ -43,5 +46,57 @@ class LidMgrRtTest : public CxxTest::TestSuite
                 delete l_errl;
                 l_errl = NULL;
             }
+        }
+
+        /**
+         *  @brief Test to check if the structure that maps lidID's to pnor
+         *         sections is working correctly
+         */
+        void testLidInPnor(void)
+        {
+            errlHndl_t l_errl = NULL;
+
+            do
+            {
+                size_t l_lidSize = 0;
+
+                UtilLidMgr l_lidMgr(Util::TEST_LIDID);
+
+                PNOR::SectionInfo_t l_lidPnorInfo;
+                l_errl = PNOR::getSectionInfo(PNOR::TEST, l_lidPnorInfo);
+                // Section only present in openPOWER systems
+                if (l_errl)
+                {
+                    delete l_errl;
+                    l_errl = NULL;
+                    break;
+                }
+
+                l_errl = l_lidMgr.getLidSize(l_lidSize);
+                if(l_errl)
+                {
+                    errlCommit(l_errl,UTIL_COMP_ID);
+                    TS_FAIL("testLidInPnor: Error getting lidId=0x%.8x",
+                            Util::TEST_LIDID);
+                    break;
+                }
+
+                if (l_lidSize != l_lidPnorInfo.size)
+                {
+                    TS_FAIL("testLidInPnor: lidSize does not match pnor TEST"
+                            " section size 0x%.8X != 0x%.8X",
+                            l_lidSize, l_lidPnorInfo.size);
+                    break;
+                }
+
+                char * l_ptr = new char[l_lidPnorInfo.size];
+                l_errl = l_lidMgr.getLid(l_ptr, l_lidPnorInfo.size);
+                if(l_errl)
+                {
+                    errlCommit(l_errl, UTIL_COMP_ID);
+                    TS_FAIL("testLidInPnor: failed to get lid from PNOR");
+                }
+                delete[] l_ptr;
+            }while(0);
         }
 };

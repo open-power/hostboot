@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,8 @@
 #include <hwpf/hwp/occ/occ_common.H>
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
-    iv_isPnor(false), iv_lidBuffer(NULL), iv_lidSize(0)
+    iv_isLidInPnor(false), iv_lidBuffer(NULL), iv_lidSize(0),
+    iv_isLidInVFS(false)
 {
     updateLid(i_lidId);
 }
@@ -84,57 +85,65 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 
 errlHndl_t UtilLidMgr::loadLid()
 {
-    //@TODO RTC:108836 - figure out how to read lid from pnor with OPAL
-    // Check if it is already loaded.
     if (NULL != iv_lidBuffer) return NULL;
 
     const char* l_addr = NULL;
     size_t l_size = 0;
-    errlHndl_t l_errl = VFS::module_address(iv_lidFileName, l_addr, l_size);
+    errlHndl_t l_errl = NULL;
 
-    if (l_errl)
+    if(iv_isLidInPnor)
     {
-        delete l_errl;
-        l_errl = NULL;
-        int rc =
-            g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer, &iv_lidSize);
-
-        if (0 != rc)
+        iv_lidSize = iv_lidPnorInfo.size;
+        iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
+    }
+    else if (iv_isLidInVFS)
+    {
+        l_errl = VFS::module_address(iv_lidFileName, l_addr, l_size);
+        if (l_errl)
         {
-            /*@
-             * @errortype       ERRL_SEV_INFORMATIONAL
-             * @moduleid        Util::UTIL_LIDMGR_RT
-             * @reasoncode      Util::UTIL_LIDMGR_RC_FAIL
-             * @userdata1       Return code from lid_load call.
-             * @devdesc         Unable to load LID via host interface.
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                Util::UTIL_LIDMGR_RT,
-                Util::UTIL_LIDMGR_RC_FAIL,
-                rc);
+            delete l_errl;
+            l_errl = NULL;
+            int rc =
+              g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer, &iv_lidSize);
+
+            if (0 != rc)
+            {
+                /*@
+                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @moduleid        Util::UTIL_LIDMGR_RT
+                 * @reasoncode      Util::UTIL_LIDMGR_RC_FAIL
+                 * @userdata1       Return code from lid_load call.
+                 * @devdesc         Unable to load LID via host interface.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    Util::UTIL_LIDMGR_RT,
+                    Util::UTIL_LIDMGR_RC_FAIL,
+                    rc);
+            }
+        }
+
+        else
+        {
+            iv_isLidInVFS = true;
+            iv_lidBuffer = const_cast<void*>(reinterpret_cast<const void*>
+                    (l_addr));
+            iv_lidSize = l_size;
         }
     }
-    else
-    {
-        iv_isPnor = true;
-        iv_lidBuffer = const_cast<void*>(reinterpret_cast<const void*>(l_addr));
-        iv_lidSize = l_size;
-    }
-
     return l_errl;
 }
 
 errlHndl_t UtilLidMgr::cleanup()
 {
-    if ((!iv_isPnor) && (NULL != iv_lidBuffer))
+    if ((iv_isLidInVFS) && (NULL != iv_lidBuffer))
     {
         g_hostInterfaces->lid_unload(iv_lidBuffer);
     }
     iv_lidBuffer = NULL;
 
     iv_lidSize = 0;
-    iv_isPnor = false;
+    iv_isLidInPnor = false;
     return NULL;
 }
 
@@ -145,8 +154,8 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
     //if it's in PNOR, it's not technically lid, so use a slightly
     //different extension.
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
-
-    return;
+    iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
+    iv_isLidInVFS  = VFS::module_exists(iv_lidFileName);
 }
 
 const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
