@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,16 +34,10 @@
 
 namespace IPMI
 {
-    // Used in the factory for creating the proper subclass.
-    enum message_type
-    {
-        TYPE_SYNC = 0,
-        TYPE_ASYNC = 1,
-    };
-
     typedef std::list<msg_t*> send_q_t;
     typedef std::list<msg_t*> timeout_q_t;
-    typedef std::map<uint8_t,msg_t*> respond_q_t;
+    typedef std::map<uint8_t, msg_t*> respond_q_t;
+    typedef std::map<uint8_t, msg_q_t> event_q_t;
 
     // IPMI message base class. A thing which expects to be sent down a
     // msg_q (so has a msg_t) and defines operations performed by a generic

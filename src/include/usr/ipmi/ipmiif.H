@@ -54,6 +54,14 @@ namespace IPMI
         MSG_LAST_TYPE = MSG_STATE_SHUTDOWN,
     };
 
+    // Used in the factory for creating the proper subclass.
+    enum message_type
+    {
+        TYPE_SYNC = 0,
+        TYPE_ASYNC = 1,
+        TYPE_EVENT = 2,
+    };
+
     // IPMI network functions
     enum network_function
     {
@@ -69,6 +77,7 @@ namespace IPMI
         NETFUN_FIRMWARE = (0x08 << 2),
         NETFUN_STORAGE  = (0x0a << 2),
         NETFUN_TRANPORT = (0x0c << 2),
+        NETFUN_IBM =      (0x3a << 2),
 
         // Overload the OEM netfun for a "none" netfun. We use this as a
         // default for objects which will have their netfun filled in
@@ -107,6 +116,61 @@ namespace IPMI
         CC_UNKBAD    = 0xff
     };
 
+    // per IPMI Spec, section 32.2 OEM SEL Event Records
+    struct oemSEL {
+
+        enum Constants
+        {
+            MANUF_LENGTH = 3,
+            CMD_LENGTH = 5,
+            LENGTH = 16,
+        };
+
+        // ID used for SEL Record access. The Record ID values 0000h and FFFFh
+        // have special meaning in the Event Access commands and must not be
+        // used as Record ID values for stored SEL Event Records.
+        uint16_t iv_record;
+
+        // [7:0] - Record Type
+        //  02h     = system event record
+        //  C0h-DFh = OEM timestamped, bytes 8-16 OEM defined
+        //  E0h-FFh = OEM non-timestamped, bytes 4-16 OEM defined
+        uint8_t iv_record_type;
+
+        // Time when event was logged. LS byte first.
+        uint32_t iv_timestamp;
+
+        // 3 bytes for the manuf id
+        uint8_t iv_manufacturer[MANUF_LENGTH];
+
+        // Presently 0x3A for IBM
+        uint8_t iv_netfun;
+
+        // Current command and arguments
+        uint8_t iv_cmd[CMD_LENGTH];
+
+        // @brief Populate a selRecord from the wire representation of an event
+        // @param[in] i_raw_event_data, pointer to the raw data
+        void populateFromEvent(uint8_t const* i_raw_event_data);
+
+        // ctor
+        oemSEL():
+            iv_record(0),
+            iv_record_type(0),
+            iv_timestamp(0),
+            iv_netfun(0)
+            {
+                memset(iv_manufacturer, 0, MANUF_LENGTH);
+                memset(iv_cmd, 0, CMD_LENGTH);
+            };
+
+        // @Brief Create a selRecord from the wire representation of an event
+        // @param[in] i_event_data, pointer to the event data
+        oemSEL( uint8_t const* i_event_data )
+            { populateFromEvent( i_event_data ); }
+
+    };
+
     //
     // Network function, command pairs.
     //
@@ -125,6 +189,9 @@ namespace IPMI
 
     inline const command_t reset_watchdog(void)
     { return std::make_pair(NETFUN_APP, 0x22); }
+
+    inline const command_t read_event(void)
+    { return std::make_pair(NETFUN_APP, 0x35); }
 
     inline const command_t get_capabilities(void)
     { return std::make_pair(NETFUN_APP, 0x36); }
@@ -148,6 +215,12 @@ namespace IPMI
     inline const command_t get_sensor_reading(void)
     { return std::make_pair(NETFUN_SENSOR, 0x2D); }
 
+    // OEM Messages
+    inline const command_t power_off(void)
+    { return std::make_pair(NETFUN_IBM, 0x04); }
+
+    inline const command_t pnor_request(void)
+    { return std::make_pair(NETFUN_IBM, 0x07); }
 
     // Some helper messages
     // Used to create an empty message for reception
@@ -164,6 +237,7 @@ namespace IPMI
      * @param[in] i_cmd, the network function and command
      * @param[in] i_len, the length of the buffer
      * @param[in] i_data, the buffer - must be new'd
+     * @param[in] i_type, the message type EVENT/ASYNC- defaults to ASYNC
      * @example uint8_t* data = new uint8_t[length];
      * @warning do *not* delete data, the resource provider will do that.
      *
@@ -171,7 +245,8 @@ namespace IPMI
      */
     errlHndl_t send(const command_t& i_cmd,
                     const size_t i_len,
-                    uint8_t* i_data);
+                    uint8_t* i_data,
+                    message_type i_type = TYPE_ASYNC);
 
     /**
      * Send message synchronously

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include "ipmiconfig.H"
 #include "ipmidd.H"
 #include <ipmi/ipmi_reasoncodes.H>
+#include <ipmi/ipmiif.H>
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
 
@@ -66,6 +67,8 @@ IpmiRP::IpmiRP(void):
     iv_sendq(),
     iv_timeoutq(),
     iv_respondq(),
+    iv_eventq(),
+    iv_last_chanceq(msg_q_create()),
     iv_bmc_timeout(IPMI::g_bmc_timeout),
     iv_outstanding_req(IPMI::g_outstanding_req),
     iv_xmit_buffer_size(IPMI::g_xmit_buffer_size),
@@ -101,6 +104,12 @@ void* IpmiRP::timeout_thread(void* unused)
 void* IpmiRP::get_capabilities(void* unused)
 {
     Singleton<IpmiRP>::instance().getInterfaceCapabilities();
+    return NULL;
+}
+
+void* IpmiRP::last_chance_event_handler(void* unused)
+{
+    Singleton<IpmiRP>::instance().lastChanceEventHandler();
     return NULL;
 }
 
@@ -281,6 +290,150 @@ void IpmiRP::getInterfaceCapabilities(void)
 }
 
 /**
+ * @brief Tell the resource provider which queue to use for events
+ * @param[in] i_cmd, the command we're looking for
+ * @param[in] i_msgq, the queue we should be notified on
+ */
+void IpmiRP::registerForEvent(const IPMI::command_t& i_cmd,
+                              const msg_q_t& i_msgq)
+{
+    mutex_lock(&iv_mutex);
+
+    // We only need the command internally, but we create the entire
+    // command_t as it's really the true representation of the event type.
+    iv_eventq[i_cmd.second] = i_msgq;
+    mutex_unlock(&iv_mutex);
+    IPMI_TRAC("event registration for %x:%x", i_cmd.first, i_cmd.second);
+}
+
+/**
+ * @brief Give the resource provider a message to put in the eventq
+ * @param[in] i_event, pointer to the new'd event (OEM SEL)
+ */
+void IpmiRP::postEvent(IPMI::oemSEL* i_event)
+{
+    // Called in the context of the RP message loop, mutex locked
+
+    // Check to see if this event has a queue registered
+    IPMI::event_q_t::iterator it = iv_eventq.find(i_event->iv_cmd[0]);
+
+    msg_q_t outq = (it == iv_eventq.end()) ? iv_last_chanceq : it->second;
+
+    // Create a message to send asynchronously to the event handler queue
+    // Assign the event to the message, the caller will delete the message
+    // and the event.
+    msg_t* msg = msg_allocate();
+    msg->type = IPMI::TYPE_EVENT;
+    msg->extra_data = i_event;
+
+    IPMI_TRAC("queuing event %x:%x for handler",
+              i_event->iv_netfun, i_event->iv_cmd[0])
+    int rc = msg_send(outq, msg);
+
+    if (rc)
+    {
+        /* @errorlog tag
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        IPMI::MOD_IPMISRV_SEND
+         * @reasoncode      IPMI::RC_INVALID_SEND
+         * @userdata1       rc from msq_send()
+         * @devdesc         msg_send() failed
+         * @custdesc        Firmware error during IPMI event handling
+         */
+        errlHndl_t err =
+            new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    IPMI::MOD_IPMISRV_SEND,
+                                    IPMI::RC_INVALID_SEND,
+                                    rc,
+                                    0,
+                                    true);
+        err->collectTrace(IPMI_COMP_NAME);
+        errlCommit(err, IPMI_COMP_ID);
+
+        // ... and clean up the memory for the caller
+        delete i_event;
+        msg_free(msg);
+    }
+}
+
+/**
+ * @brief Send a message indicating we're rejecting the pnor handshake request.
+ */
+static void rejectPnorRequest(void)
+{
+    // Per AMI email, send a 0 to reject the pnor request.
+    static const uint8_t reject_request = 0x0;
+
+    uint8_t* data = new uint8_t(reject_request);
+    IPMI_TRAC("rejecting pnor access request %x", *data);
+
+    // TODO: RTC: 120127, check to ensure this works properly on a newer BMC
+
+    uint8_t len = 0;
+    errlHndl_t err = send(IPMI::pnor_request(), len, data);
+    if (err)
+    {
+        err->collectTrace(IPMI_COMP_NAME);
+        errlCommit(err, IPMI_COMP_ID);
+    }
+}
+/**
+ * @brief Wait for events and read them
+ */
+void IpmiRP::lastChanceEventHandler(void)
+{
+    // Mark as an independent daemon so if it crashes we terminate.
+    task_detach();
+
+    // TODO: RTC: 108830, copy the code below to make a handler for power-off
+    //
+    // To create a event handler, all you need to do is create a message
+    // queue (or use one you have) and register for events. I left this
+    // code here as an example.
+    //
+    // Create a message queue and register with the resource provider
+    // msg_q_t queue = msg_q_create();
+    // registerForEvent(IPMI::power_off(), queue);
+
+
+    // We'll handle the pnor request in this context as we just send
+    // an async message which says "no."
+    registerForEvent(IPMI::pnor_request(), iv_last_chanceq);
+
+    do {
+
+        msg_t* msg = msg_wait(iv_last_chanceq);
+
+        IPMI::oemSEL* event = reinterpret_cast<IPMI::oemSEL*>(msg->extra_data);
+
+        if (event->iv_cmd[0] == IPMI::pnor_request().second)
+        {
+            // We'll handle the pnor request in this context as we just send
+            // an async message which says "no."
+            rejectPnorRequest();
+        }
+        else {
+            // TODO: RTC: 120128
+            // The last-chance handler should do more than this - it needs to
+            // respond back to the BMC and tell it whatever it needs to know. If
+            // this response isn't simple for a specific message, then a real
+            // handler should probably be written.
+
+            IPMI_TRAC("last chance handler for event: %x:%x (%x %x %x)",
+                      event->iv_netfun, event->iv_cmd[0],
+                      event->iv_record, event->iv_record_type,
+                      event->iv_timestamp);
+        }
+        // There's no way anyone can post an event synchronously, so we're done.
+        delete event;
+        msg_free(msg);
+
+    } while(true);
+
+    return;
+}
+
+/**
  * @brief  Entry point of the resource provider
  */
 void IpmiRP::execute(void)
@@ -305,6 +458,9 @@ void IpmiRP::execute(void)
 
     // Queue and wait for a message for the interface capabilities
     task_create( &IpmiRP::get_capabilities, NULL);
+
+    // Wait for an event message read it and handle it if no one else does
+    task_create( &IpmiRP::last_chance_event_handler, NULL);
 
     while (true)
     {
@@ -354,11 +510,22 @@ void IpmiRP::execute(void)
             response();
             break;
 
-            // Handle an event (SMS_ATN)
+            // Handle an event (SMS_ATN). The protocol states that when we see
+            // the sms attention bit, we issue a read_event message, which will
+            // come back with the OEM SEL of the event in its payload.
         case IPMI::MSG_STATE_EVNT:
-            IPMI_TRAC(ERR_MRK "msg loop: unexpected ipmi sms");
-            msg_free(msg);
-            // TODO: RTC 116600 Handle SMS messages
+            {
+                msg_free(msg);
+                uint8_t* data = NULL;
+                uint8_t len = 0;
+                errlHndl_t err = send(IPMI::read_event(), len, data,
+                                      IPMI::TYPE_EVENT);
+                if (err)
+                {
+                    err->collectTrace(IPMI_COMP_NAME);
+                    errlCommit(err, IPMI_COMP_ID);
+                }
+            }
             break;
 
             // Accept no more messages. Anything in the sendq is sent and
@@ -616,7 +783,6 @@ void IpmiRP::shutdownNow(void)
     msg_respond(iv_msgQ, iv_shutdown_msg);
 }
 
-
 namespace IPMI
 {
     ///
@@ -683,7 +849,8 @@ namespace IPMI
     /// @brief  Asynchronus message send
     ///
     errlHndl_t send(const IPMI::command_t& i_cmd,
-                    const size_t i_len, uint8_t* i_data)
+                    const size_t i_len, uint8_t* i_data,
+                    IPMI::message_type i_type)
     {
         static msg_q_t mq = Singleton<IpmiRP>::instance().msgQueue();
         errlHndl_t err = NULL;
@@ -691,8 +858,8 @@ namespace IPMI
         // We don't delete this message, the message will self destruct
         // after it's been transmitted. Note it could be placed on the send
         // queue and we are none the wiser - so we can't delete it.
-        IPMI::Message* ipmi_msg = IPMI::Message::factory(i_cmd, i_len, i_data,
-                                                         IPMI::TYPE_ASYNC);
+        IPMI::Message* ipmi_msg = IPMI::Message::factory(i_cmd, i_len,
+                                                         i_data, i_type);
 
         // I think if the buffer is too large this is a programming error.
         assert(i_len <= max_buffer());

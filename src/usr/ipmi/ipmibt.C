@@ -36,6 +36,7 @@
 
 #include "ipmibt.H"
 #include "ipmirp.H"
+#include <ipmi/ipmiif.H>
 #include <errno.h>
 #include <config.h>
 
@@ -167,7 +168,7 @@ namespace IPMI
     }
 
     ///
-    /// @brief BTSyncMessage ctor
+    /// @brief BTAsyncMessage ctor
     /// @param[in] i_cmd, the network function & command
     /// @param[in] i_len, the length of the data
     /// @param[in] i_data, the data (new'd space)
@@ -176,6 +177,19 @@ namespace IPMI
                                    const uint8_t i_len,
                                    uint8_t* i_data):
         BTMessage(i_cmd, i_len, i_data)
+    {
+    }
+
+    ///
+    /// @brief BTAsyncReadEventMessage ctor
+    /// @param[in] i_cmd, the network function & command
+    /// @param[in] i_len, the length of the data
+    /// @param[in] i_data, the data (new'd space)
+    ///
+    BTAsyncReadEventMessage::BTAsyncReadEventMessage(const command_t& i_cmd,
+                                                     const uint8_t i_len,
+                                                     uint8_t* i_data):
+        BTAsyncMessage(i_cmd, i_len, i_data)
     {
     }
 
@@ -227,9 +241,7 @@ namespace IPMI
 
         // If we had an i/o error we want the idle loop to stop.
         // If we got EAGAIN we want the idle loop to stop as we just
-        // put a message on the queue which couldn't be sent. Note
-        // we need to use this mechanism rather than letting the caller
-        // check iv_state as we may have just deleted ourselves.
+        // put a message on the queue which couldn't be sent.
         return (iv_state != 0);
     }
 
@@ -272,7 +284,7 @@ namespace IPMI
     }
 
     ///
-    /// @brief async msg transmit
+    /// @brief async msg response
     ///
     void BTAsyncMessage::response(msg_q_t)
     {
@@ -304,6 +316,53 @@ namespace IPMI
             err->collectTrace(IPMI_COMP_NAME);
             errlCommit(err, IPMI_COMP_ID);
         }
+
+        // Yes, this is OK - there is no further reference to this object.
+        delete this;
+    }
+
+    ///
+    /// @brief handle the read of an event (OEM SEL)
+    ///
+    void BTAsyncReadEventMessage::response(msg_q_t)
+    {
+        do {
+            // If our completion code isn't CC_OK, lets log that fact. There's
+            // not much we can do, but at least this might give a hint that
+            // something is awry.
+            if (iv_cc != IPMI::CC_OK)
+            {
+                IPMI_TRAC(ERR_MRK "read event message (%x:%x seq %d) "
+                          "completion code %x",
+                          iv_netfun, iv_cmd, iv_seq, iv_cc);
+
+                /* @errorlog tag
+                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @moduleid        IPMI::MOD_IPMISRV_REPLY
+                 * @reasoncode      IPMI::RC_READ_EVENT_FAILURE
+                 * @userdata1       command of message
+                 * @userdata2       completion code
+                 * @devdesc         an async completion code was not CC_OK
+                 * @custdesc        Unexpected IPMI completion code from the BMC
+                 */
+                errlHndl_t err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    IPMI::MOD_IPMISRV_REPLY,
+                    IPMI::RC_READ_EVENT_FAILURE,
+                    iv_cmd,
+                    iv_cc,
+                    true);
+
+                err->collectTrace(IPMI_COMP_NAME);
+                errlCommit(err, IPMI_COMP_ID);
+                break;
+            }
+
+            // Before we self destruct, we need to turn the data collected in to
+            // a record we can pass to the waiting event handler.
+            Singleton<IpmiRP>::instance().postEvent(new IPMI::oemSEL(iv_data));
+
+        } while(false);
 
         // Yes, this is OK - there is no further reference to this object.
         delete this;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,7 @@ namespace IPMI
 
         ///
         /// @brief complete the processing when a response arrives
+        /// @param[in] i_msgQ, the resource providers message queue
         /// @return void
         /// @note we're not pure abstract as we want to be able to
         /// instantiate an object of BTMessage for reading.
@@ -112,6 +113,7 @@ namespace IPMI
 
         ///
         /// @brief complete the processing when a response arrives
+        /// @param[in] i_msgQ, the resource providers message queue
         /// @return void
         ///
         void response(msg_q_t i_msgQ);
@@ -134,7 +136,7 @@ namespace IPMI
         ///
         /// @brief BTSyncMessage dtor
         ///
-        ~BTAsyncMessage(void)
+        virtual ~BTAsyncMessage(void)
             { delete[] iv_data; }
 
         ///
@@ -146,6 +148,32 @@ namespace IPMI
 
         ///
         /// @brief complete the processing when a response arrives
+        /// @param[in] i_msgQ, the resource providers message queue
+        /// @return void
+        ///
+        void response(msg_q_t i_msgQ);
+    };
+
+    // IPMI BT asynchronous read event message. Reading events is sort
+    // of an asynch message; we fire the request from the resource
+    // provider thread (so we don't want to wait.) The response is
+    // special in that we don't just delete ourselves, but rather turn
+    // the response (OEM SEL) into a message for an event handler.
+    class BTAsyncReadEventMessage : public BTAsyncMessage
+    {
+    public:
+        ///
+        /// @brief BTASyncReadEventMessage ctor
+        /// @param[in] i_cmd, the network function & command
+        /// @param[in] i_len, the length of the data
+        /// @param[in] i_data, the data (new'd space)
+        ///
+        BTAsyncReadEventMessage(const command_t& i_cmd,
+                                const uint8_t i_len, uint8_t* i_data);
+
+        ///
+        /// @brief complete the processing when a response arrives
+        /// @param[in] i_msgQ, the resource providers message queue
         /// @return void
         ///
         void response(msg_q_t i_msgQ);

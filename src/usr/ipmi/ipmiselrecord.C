@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/ipmi/ipmi_reasoncodes.H $                     */
+/* $Source: src/usr/ipmi/ipmiselrecord.C $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,35 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __IPMI_REASONCODES_H
-#define __IPMI_REASONCODES_H
+/**
+ * @file ipmiselrecord.C
+ * @brief code for the IPMI sel record class
+ */
 
-#include <hbotcompid.H>
+#include <ipmi/ipmiif.H>
 
 namespace IPMI
 {
-    enum IPMIModuleId
+    ///
+    /// @brief populate an OEM SEL record from an event read
+    /// @param[in] i_raw_event_data, pointer to the read event data
+    ///
+    void oemSEL::populateFromEvent(uint8_t const* i_raw_event_data)
     {
-        MOD_IPMISRV_SEND        = 0x01, // IPMI::send/IPMI::sendrecv
-        MOD_IPMISRV_REPLY       = 0x02, // IPMI::respond
-        MOD_IPMISENSOR          = 0x03, // IPMI::sensor
-    };
+        iv_record = i_raw_event_data[0] << 8 | i_raw_event_data[1];
+        iv_record_type = i_raw_event_data[2];
+        iv_timestamp = i_raw_event_data[6] << 24 |
+                       i_raw_event_data[5] << 16 |
+                       i_raw_event_data[4] << 8  |
+                       i_raw_event_data[3];
 
-    enum IPMIReasonCode
-    {
-        RC_INVALID_QRESPONSE         = IPMI_COMP_ID | 0x01,
-        RC_INVALID_SENDRECV          = IPMI_COMP_ID | 0x02,
-        RC_INVALID_SEND              = IPMI_COMP_ID | 0x03,
-        RC_WAITER_NOT_FOUND          = IPMI_COMP_ID | 0x04,
-        RC_ASYNC_BAD_CC              = IPMI_COMP_ID | 0x05,
-        RC_INVALID_SENSOR_CMD        = IPMI_COMP_ID | 0x06,
-        RC_SENSOR_NOT_SETTABLE       = IPMI_COMP_ID | 0x07,
-        RC_EVENT_DATA_NOT_SETTABLE   = IPMI_COMP_ID | 0x08,
-        RC_SENSOR_NOT_PRESENT        = IPMI_COMP_ID | 0x09,
-        RC_SET_SENSOR_FAILURE        = IPMI_COMP_ID | 0x0a,
-        RC_READ_EVENT_FAILURE        = IPMI_COMP_ID | 0x0b,
+        memcpy(iv_manufacturer, &i_raw_event_data[7], MANUF_LENGTH);
+        iv_netfun = i_raw_event_data[10];
+        memcpy(iv_cmd, &i_raw_event_data[11], CMD_LENGTH);
 
-    };
+        return;
+    }
+
 };
-
-#endif

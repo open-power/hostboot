@@ -61,32 +61,36 @@ TRAC_INIT(&g_trac_ipmi, IPMI_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
 #define IPMI_TRAC(printf_string,args...) \
     TRACFCOMP(g_trac_ipmi,"dd: "printf_string,##args)
 
-// Registers. These are fixed for LPC/BT so we can hard-wire them
-#define REG_CONTROL     0xE4
-#define REG_HOSTBMC     0xE5
-#define REG_INTMASK     0xE6
+enum {
+    // Registers. These are fixed for LPC/BT so we can hard-wire them
+    REG_CONTROL = 0xE4,
+    REG_HOSTBMC = 0xE5,
+    REG_INTMASK = 0xE6,
 
-// Control register bits. The control register is interesting in that writing
-// 0's never does anything; all registers are either set to 1 when written
-// with a 1 or toggled (1/0) when written with a one. So, we don't ever need
-// to read-modify-write, we can just write an or'd mask of bits.
-#define CTRL_B_BUSY       (1 << 7)
-#define CTRL_H_BUSY       (1 << 6)
-#define CTRL_OEM0         (1 << 5)
-#define CTRL_SMS_ATN      (1 << 4)
-#define CTRL_B2H_ATN      (1 << 3)
-#define CTRL_H2B_ATN      (1 << 2)
-#define CTRL_CLR_RD_PTR   (1 << 1)
-#define CTRL_CLR_WR_PTR   (1 << 0)
+    // Control register bits. The control register is interesting in that
+    // writing 0's never does anything; all registers are either set to 1
+    // when written with a 1 or toggled (1/0) when written with a one. So,
+    // we don't ever need to read-modify-write, we can just write an or'd
+    // mask of bits.
+    CTRL_B_BUSY        = (1 << 7),
+    CTRL_H_BUSY        = (1 << 6),
+    CTRL_OEM0          = (1 << 5),
+    CTRL_SMS_ATN       = (1 << 4),
+    CTRL_B2H_ATN       = (1 << 3),
+    CTRL_H2B_ATN       = (1 << 2),
+    CTRL_CLR_RD_PTR    = (1 << 1),
+    CTRL_CLR_WR_PTR    = (1 << 0),
 
-#define IDLE_STATE (CTRL_B_BUSY | CTRL_B2H_ATN | CTRL_SMS_ATN | CTRL_H2B_ATN)
+    IDLE_STATE = (CTRL_B_BUSY | CTRL_B2H_ATN |
+                  CTRL_SMS_ATN | CTRL_H2B_ATN),
 
-// Bit in the INMASK register which signals to the BMC
-// to reset it's end of things.
-#define INT_BMC_HWRST     (1 << 7)
+    // Bit in the INMASK register which signals to the BMC
+    // to reset it's end of things.
+    INT_BMC_HWRST      = (1 << 7),
 
-// How long to sychronously wait for the device to change state (in ns)
-#define WAIT_TIME 100000000
+    // How long to sychronously wait for the device to change state (in ns)
+    WAIT_TIME = 100000000,
+};
 
 /**
  * @brief Performs an IPMI Message Read Operation
@@ -269,10 +273,20 @@ void IpmiDD::pollCtrl(void)
             // If we see the SMS_ATN, there's an event waiting
             else if (ctrl & CTRL_SMS_ATN)
             {
-                IPMI_TRAC(ERR_MRK "sending state sms/event, unexpected");
+                IPMI_TRAC(INFO_MRK "sending state sms/event");
                 msg = msg_allocate();
                 msg->type = IPMI::MSG_STATE_EVNT;
                 msg_send(mq, msg);
+
+                // Clear the SMS bit.
+                errlHndl_t err = writeLPC(REG_CONTROL, CTRL_SMS_ATN);
+
+                // Commit this error. There's no one to tell ...
+                if (err)
+                {
+                    err->collectTrace(IPMI_COMP_NAME);
+                    errlCommit(err, IPMI_COMP_ID);
+                }
             }
         }
         mutex_unlock(&iv_mutex);
@@ -287,41 +301,7 @@ void IpmiDD::pollCtrl(void)
  */
 inline errlHndl_t IpmiDD::reset(void)
 {
-    // Reset the BT interface, and flush messages. We eat messages off of
-    // the interface until it goes idle. We assume, since we're resetting,
-    // that there is nothing on the interface we're interested in.
-    mutex_lock(&iv_mutex);
-    IPMI_TRAC(ENTER_MRK "resetting the IPMI BT interface");
-
-    uint8_t ctrl = 0;
-    IPMI::BTMessage msg;
-
-    errlHndl_t err = readLPC(REG_CONTROL, ctrl);
-    IPMI_TRAC("reset: control register %x", ctrl);
-    while ((ctrl & (CTRL_B2H_ATN | CTRL_SMS_ATN)) && (err == NULL))
-    {
-        // There should only be one, if any - but we'll log each one we find.
-        IPMI_TRAC(INFO_MRK "found a waiting message during reset");
-        err = receive(&msg);
-        IPMI_TRAC("reset: received %x:%x", msg.iv_netfun, msg.iv_cmd);
-        delete[] msg.iv_data;
-
-        if (err) {break;}
-
-        err = readLPC(REG_CONTROL, ctrl);
-        IPMI_TRAC("reset: control register %x", ctrl);
-    }
-
-    // Commit this log. We're about to reset the PHY anyway, so maybe
-    // that'll clear this error. If not, we'll report that error.
-    if (err)
-    {
-        errlCommit(err, IPMI_COMP_ID);
-    }
-
-    mutex_unlock(&iv_mutex);
-
-    IPMI_TRAC(EXIT_MRK "resetting the IPMI BT interface");
+    IPMI_TRAC("resetting the IPMI BT interface");
     return writeLPC(REG_INTMASK, INT_BMC_HWRST);
 }
 
@@ -425,8 +405,7 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
         // the host should clear this bit" - not at the same time.
         // This is the hand-shake; H_BUSY gates the BMC which allows
         // us to clear the ATN bits. Don't get fancy.
-        err = writeLPC(REG_CONTROL,
-                         (ctrl & CTRL_B2H_ATN) ? CTRL_B2H_ATN : CTRL_SMS_ATN);
+        err = writeLPC(REG_CONTROL, CTRL_B2H_ATN);
         if (err) {break;}
 
         // Tell the interface we're reading
@@ -437,9 +416,7 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
         err = readLPC(REG_HOSTBMC, o_msg->iv_len);
         if (err) { break; }
 
-        // I don't think SMS messages have a completion code.
-        o_msg->iv_len -= (ctrl & CTRL_B2H_ATN) ?
-            IPMI_BT_HEADER_SIZE + 1 : IPMI_BT_HEADER_SIZE;
+        o_msg->iv_len -= IPMI_BT_HEADER_SIZE + 1;
 
         err = readLPC(REG_HOSTBMC, o_msg->iv_netfun);
         if (err) { break; }
@@ -450,12 +427,8 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
         err = readLPC(REG_HOSTBMC, o_msg->iv_cmd);
         if (err) { break; }
 
-        // I don't think SMS messages have a completion code.
-        if (ctrl & CTRL_B2H_ATN)
-        {
-            err = readLPC(REG_HOSTBMC, o_msg->iv_cc);
-            if (err) { continue; }
-        }
+        err = readLPC(REG_HOSTBMC, o_msg->iv_cc);
+        if (err) { break; }
 
         o_msg->iv_data = new uint8_t[o_msg->iv_len];
 
@@ -477,8 +450,7 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
 
     mutex_unlock(&iv_mutex);
 
-    IPMI_TRAC(INFO_MRK "read %s %s %x:%x seq %x len %x cc %x",
-              (ctrl & CTRL_B2H_ATN) ? "b2h" : "sms",
+    IPMI_TRAC(INFO_MRK "read b2h %s %x:%x seq %x len %x cc %x",
               err ? "err" : "ok",
               o_msg->iv_netfun, o_msg->iv_cmd, o_msg->iv_seq,
               o_msg->iv_len, o_msg->iv_cc);
@@ -509,15 +481,6 @@ IpmiDD::IpmiDD(void):
     iv_eagains(false)
 {
     mutex_init(&iv_mutex);
-
-    // reset the BT interface - no idea what state the BMC thinks things are in
-    errlHndl_t err = reset();
-    if (err)
-    {
-        IPMI_TRAC(ERR_MRK "error resetting the BT interface");
-        err->collectTrace(IPMI_COMP_NAME);
-        errlCommit(err, IPMI_COMP_ID);
-    }
 
     // Start task to poll the control register
     // This is a singleton so this will only be called once, right?
