@@ -729,6 +729,18 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>1,0,1,144,0x6a,1,0,0,1,0,1,144,0x64,1,0,0,
+                 1,0,1,144,0x72,1,0,0,1,0,1,144,0x6c,1,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>1000,1000,0,400,0,0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p0 EX units -->
@@ -1612,6 +1624,13 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p1 EX units -->
@@ -2487,6 +2506,18 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>1,0,1,144,0x74,1,0,2,1,0,1,144,0x72,1,0,2,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>1000,1000,0,400,0,0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p2 EX units -->
@@ -3361,6 +3392,12 @@
     <attribute>
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
+    </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
     </attribute>
 </targetInstance>
 

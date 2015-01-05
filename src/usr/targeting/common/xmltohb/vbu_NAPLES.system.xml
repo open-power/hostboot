@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2014,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -570,6 +570,13 @@
         <default>0</default>
     </attribute>
     <!-- End PM_ attributes -->
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Naples n0p0 EX units: Define only EX3 for now to preserve AWAN memory (model n_2_b n1_e8014_n8_pC_c1000_cen2_cen018_unopt_1 -->
@@ -1081,6 +1088,14 @@
         <default>0</default>
     </attribute>
     <!-- End PM_ attributes -->
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+     </attribute>
+
 </targetInstance>
 
 
@@ -1507,6 +1522,14 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40002000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
+
 </targetInstance>
 
 <!-- Naples n2p0 EX units
@@ -1932,6 +1955,14 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40003000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
+
 </targetInstance>
 
 <!-- Naples n2p1 EX units

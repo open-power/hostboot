@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -520,6 +520,13 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p0 EX units
@@ -964,6 +971,13 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p1 EX units
@@ -1391,6 +1405,13 @@
     <attribute>
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
+    </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
     </attribute>
 </targetInstance>
 
@@ -1820,6 +1841,13 @@
     <attribute>
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFF00,0x0000</default>
+    </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
     </attribute>
 </targetInstance>
 

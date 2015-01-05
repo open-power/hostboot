@@ -686,6 +686,13 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Naples n0p0 EX units -->
@@ -1549,6 +1556,13 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Naples n0p1 EX units -->
@@ -2403,6 +2417,13 @@
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
     </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Naples n0p2 EX units -->
@@ -3256,6 +3277,13 @@
     <attribute>
         <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>0xFFFF,0x0000,0xFFFF,0x0000</default>
+    </attribute>
+    <attribute>
+        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
     </attribute>
 </targetInstance>
 

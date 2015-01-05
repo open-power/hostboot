@@ -14783,6 +14783,59 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
 </attribute>
+<enumerationType>
+    <id>SUPPORTED_HOT_PLUG</id>
+    <description>
+        Enumeration indication which Hot Plug Controllers are supported by
+        the current system.
+    </description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>MAX5961</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>PCA9551</name>
+        <value>0x02</value>
+    </enumerator>
+    <default>NA</default>
+</enumerationType>
+
+<attribute>
+    <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
+    <description>Hot Plug Controller values for a specific processor.
+        Purpose: Holds information about the hot plug controllers so that a
+            Hardware procedure is able to turn them on and off.
+        Data Format: up to 8 Hot Plug Controllers x 5 variables of information
+            This data is at the processor level.
+            The needed information and their individual sizes are as follows:
+            (1) Master engine,uint8_t, (2) Master port, uint8_t. (3) Speed,
+            uint16_t value, (4) Slave address, uint8_t, (5) Device type, enum.
+            0x01: MAX5961, 0x02: PCA9551, (6) driving processor node, uint8_t,
+            (7) driving processor position, uint8_t.
+            Thus, the information will be 8 bytes.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            </default>
+        </uint8_t>
+        <array>8,8</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_HOT_PLUG_POWER_CONTROLLER_INFO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+</attributes>
 
 <attribute>
     <id>ISTEP_PAUSE_CONFIG</id>

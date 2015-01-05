@@ -525,6 +525,7 @@
     </attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+     <attribute><id>HOT_PLUG_POWER_CONTROLLER_INFO</id></attribute>
 </targetType>
 
 <targetType>

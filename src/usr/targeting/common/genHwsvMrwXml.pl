@@ -1337,6 +1337,7 @@ my $i2cBus = XMLin($i2c_busses_file);
 
 # Capture all i2c buses info into the @I2Cdevices array
 my @I2Cdevices;
+my @I2CHotPlug;
 foreach my $i (@{$i2cBus->{'i2c-device'}})
 {
 
@@ -1346,7 +1347,7 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2cm_pos' =>$i->{'i2c-master'}->{target}->{position},
          'i2cm_uid' =>$i->{'i2c-master'}->{'unit-id'},
          'i2c_content_type'=>$i->{'content-type'},
-         'i2c_card_id'=>$i->{'card-id'},
+         'i2c_part_id'=>$i->{'part-id'},
          'i2c_port'=>$i->{'i2c-master'}->{'i2c-port'},
          'i2c_devAddr'=>$i->{'address'},
          'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
@@ -1358,6 +1359,39 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_write_page_size' =>"0x80",
          'i2c_write_cycle_time' => "0x05" };
 
+    if(( ($i->{'part-type'} eq 'hotplug-controller') &&
+             ($i->{'part-id'} eq 'MAX5961')) ||
+       ( ($i->{'part-id'} eq 'PCA9551') &&
+             ($i->{'i2c-master'}->{'host-connected'} eq '1' )))
+    {
+        push @I2CHotPlug, {
+             'i2cm_node'=>$i->{'i2c-master'}->{target}->{node},
+             'i2cm_pos' =>$i->{'i2c-master'}->{target}->{position},
+             'i2c_port'=>$i->{'i2c-master'}->{'i2c-port'},
+             'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
+             'i2c_speed'=>$i->{'speed'},
+             'i2c_part_id'=>$i->{'part-id'},
+             'i2c_slaveAddr'=>$i->{'address'},
+             'i2c_instPath'=>$i->{'instance-path'}};
+     }
+}
+
+my $i2c_host_file = open_mrw_file($mrwdir, "${sysname}-host-i2c.xml");
+my $i2cHost = XMLin($i2c_host_file);
+
+my @I2CHotPlug_Host;
+foreach my $i (@{$i2cHost->{'host-i2c-connection'}})
+{
+    my $instancePath = $i->{'slave-device'}->{'instance-path'};
+
+    if( index($instancePath,'MAX5961') != -1 ||
+        index($instancePath,'PCA9551') != -1 )
+    {
+        push @I2CHotPlug_Host, {
+             'i2c_slave_path'=>$i->{'slave-device'}->{'instance-path'},
+             'i2c_proc_node'=>$i->{'processor'}->{'target'}->{'node'},
+             'i2c_proc_pos'=>$i->{'processor'}->{'target'}->{'position'}};
+    }
 }
 
 # Generate @STargets array from the @Targets array to have the order as shown
@@ -2906,6 +2940,9 @@ sub generate_proc
 
     # add EEPROM attributes
     addEepromsProc($sys, $node, $proc);
+
+    #add Hot Plug attributes
+    addHotPlug($sys,$node,$proc);
 
     # add I2C_BUS_SPEED_ARRAY attribute
     addI2cBusSpeedArray($sys, $node, $proc, "pu");
@@ -5079,6 +5116,108 @@ sub addEepromsProc
     }
 }
 
+sub addHotPlug
+{
+    my ($sys,$node,$proc) = @_;
+
+    #hot plug array is 8x8 array
+    my @hot_plug_array = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+    my $row_count = 8;
+    my $column_count = 8;
+
+    my $hot_count = 0;
+    my $tmp_speed = 0x0;
+
+    for my $i ( 0 .. $#I2CHotPlug )
+    {
+        my $drivingProcNode;
+        my $drivingProcPos;
+        for my $x (0 .. $#I2CHotPlug_Host )
+        {
+            if( $I2CHotPlug_Host[$x]{i2c_slave_path} eq
+                    $I2CHotPlug[$i]{i2c_instPath})
+            {
+                $drivingProcNode = $I2CHotPlug_Host[$i]{i2c_proc_node};
+                $drivingProcPos = $I2CHotPlug_Host[$i]{i2c_proc_pos};
+                last;
+            }
+        }
+
+
+        if(!($I2CHotPlug[$i]{'i2cm_node'} == $node) ||
+                !($I2CHotPlug[$i]{'i2cm_pos'} == $proc))
+        {
+            next;
+        }
+        if($hot_count < $row_count)
+        {
+            #enum for MAX5961 and PCA9551 defined in attribute_types.xml
+            #as SUPPORTED_HOT_PLUG.
+            my $part_id_enum = 0x00;
+            if($I2CHotPlug[$i]{i2c_part_id} eq "MAX5961")
+            {
+                $part_id_enum = 0x01;
+            }
+            else
+            {
+                $part_id_enum = 0x02;
+            }
+
+            #update array
+            $tmp_speed = $I2CHotPlug[$i]{i2c_speed};
+
+            #update array 8 at a time (for up to 8 times)
+            $hot_plug_array[($hot_count*$row_count)]     =
+                $I2CHotPlug[$i]{i2c_engine};
+            $hot_plug_array[($hot_count*$row_count) + 1] =
+                $I2CHotPlug[$i]{i2c_port};
+            $hot_plug_array[($hot_count*$row_count) + 2] =
+                ($tmp_speed & 0xFF00) >> 8;
+            $hot_plug_array[($hot_count*$row_count) + 3] =
+                ($tmp_speed & 0x00FF);
+            $hot_plug_array[($hot_count*$row_count) + 4] =
+                sprintf("0x%x",(hex $I2CHotPlug[$i]{i2c_slaveAddr}) * 2);
+            $hot_plug_array[($hot_count*$row_count) + 5] = $part_id_enum;
+            $hot_plug_array[($hot_count*$row_count) + 6] = $drivingProcNode;
+            $hot_plug_array[($hot_count*$row_count) + 7] = $drivingProcPos;
+
+            $hot_count = $hot_count + 1;
+        }
+        else
+        {
+            #if we have found more than 8 controllers (not supported)
+            die "ERROR: addHotPlug: too many hotPlug's: $hot_count\n";
+        }
+    }
+
+    #and then print attribute here
+    if($hot_count > 0)
+    {
+        print "    <attribute>\n";
+        print "        <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>\n";
+        print "        <default>\n";
+        for my $j (0 .. ($row_count - 1))
+        {
+            print "            ";
+            for my $k (0 .. ($column_count - 1))
+            {
+                if($j == ($row_count -1) && $k == ($column_count - 1))
+                {
+                    #last entry does not have a comma
+                    print "$hot_plug_array[($j*$row_count) + $k]";
+                }else
+                {
+                    print "$hot_plug_array[($j*$row_count) + $k],";
+                }
+            }
+            print "\n";
+        }
+        print "        </default>\n";
+        print "    </attribute>\n";
+    }
+}
 
 sub addEepromsCentaur
 {
@@ -5186,6 +5325,14 @@ sub addI2cBusSpeedArray
                       &&
                       !($I2Cdevices[$i]{i2cm_uid}
                         eq "I2CM_PROC_PROM1")
+                      &&
+                      !( ($I2Cdevices[$i]{i2cm_uid}
+                         eq "I2CM_HOTPLUG") &&
+                         ( ($I2Cdevices[$i]{i2c_part_id}
+                           eq "MAX5961") ||
+                           ($I2Cdevices[$i]{i2c_part_id}
+                           eq "PCA9551") )
+                       )
                     ) ||
                     ($I2Cdevices[$i]{i2cm_node} != $node) ||
                     ($I2Cdevices[$i]{i2cm_name} != $i2cm_name) )
