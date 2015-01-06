@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -320,7 +320,7 @@ Target::Target()
 {
     #define TARG_FN "Target()"
 
-    // Note there is no intialization of a target, since it's mapped to memory
+    // Note there is no initialization of a target, since it's mapped to memory
     // directly.
 
     #undef TARG_FN

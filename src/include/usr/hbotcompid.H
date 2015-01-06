@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -358,7 +358,7 @@ const char HTMGT_COMP_NAME[] = "htmgt";
 
 // OCCC id 2A00 matches OCCC id on FSP
 /** @name OCCC
- * OCC Thermal Managment Device
+ * OCC Thermal Management Device
  */
 const compId_t OCCC_COMP_ID = 0x2A00;
 const char OCCC_COMP_NAME[] = "occc";

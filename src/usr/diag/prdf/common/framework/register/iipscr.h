@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -98,7 +100,7 @@ namespace PRDF
 // bits are used as the value to write.  The current value of this
 // cached bit string can be accessed or modified by other objects via
 // the public interface.  The physical address and bit length of the
-// hardware register are set during intialization and used on all
+// hardware register are set during initialization and used on all
 // acceses.
 //
 // The basic Read() and Write() functions are virtual.  The
@@ -154,11 +156,12 @@ class SCAN_COMM_REGISTER_CLASS
    <br><b>Requirements:</b> None.
    <br><b>Promises:    </b> Internal bit string represents the value of the
                             hardware register (if rc == SUCCESS)
-   <br><b>Sideaffects: </b> Value guarenteed to be read from hardware.
+   <br><b>Sideaffects: </b> Value guaranteed to be read from hardware.
    <br><b>Exceptions:  </b> None.
    <br><b>Notes:       </b> Default is to call Read().  If a child class cannot
-                            guarantee hardware access everytime Read() is called
-                            then the function ForceRead() should be overridden.
+                            guarantee hardware access every time Read() is
+                            called then the function ForceRead() should be
+                            overridden.
    </ul><br>
    */
   virtual uint32_t ForceRead(void) const { return Read(); }
@@ -392,7 +395,7 @@ protected:
   /**
    Get modifiable reference to internal bit string (don't even thing about making this public!!!)
    <ul>
-   <br><b>Paramters:    </b> None.
+   <br><b>Parameters:    </b> None.
    <br><b>Returns       </b> Reference to the internal bit string
    <br><b>Requirments   </b> None.
    <br><b>Promises      </b> None.

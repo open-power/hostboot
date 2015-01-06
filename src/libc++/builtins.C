@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -81,7 +83,7 @@ extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
 
 extern "C" void __cxa_guard_release(volatile uint64_t* gv)
 {
-    // Memory barrier to ensure all preceeding writes have completed before
+    // Memory barrier to ensure all preceding writes have completed before
     // releasing guard.
     lwsync();
 

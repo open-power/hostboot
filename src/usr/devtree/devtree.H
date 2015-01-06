@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,7 +190,7 @@ typedef size_t dtOffset_t;
          * @param[in] i_addrs    Array of addresses to set in reserved memory
          * @param[in] i_sizes    Array of sizes to set in reserved memory
          * @param[in] i_num      Number of elements in the arrays
-         * @return int, zero on sucesses otherwise non zero
+         * @return int, zero on successes otherwise non zero
          */
        int populateReservedMem(uint64_t i_addrs[],
                                uint64_t i_sizes[],

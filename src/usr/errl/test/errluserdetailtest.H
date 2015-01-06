@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -419,7 +419,7 @@ public:
         }
         else
         {   // we expect an error here
-            TS_TRACE( "testLogRegister deviceRead DIDNT return errl!");
+            TS_TRACE( "testLogRegister deviceRead DIDN'T return errl!");
         }
         ErrlUserDetailsLogRegister(c_target, &reg3_data, reg3_size,
                 DEVICE_FSI_ADDRESS(0x01028)).addToLog(errl);

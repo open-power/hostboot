@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ namespace INTR
         public:
 
             /**
-             * Prepare HW and system to recieve external interrupts
+             * Prepare HW and system to receive external interrupts
              * @param[in] ref to errlHndl_t
              */
             static void init( errlHndl_t &io_rtaskRetErrl );
@@ -441,7 +441,7 @@ namespace INTR
             errlHndl_t maskXIVR(TARGETING::Target * i_target);
 
             /*
-             * Disable HW from recieving interrupts
+             * Disable HW from receiving interrupts
              * @param i_proc  The processor chip target to disable
              * @param i_rx_tx [INTR_UPSTREAM | INTR_DOWNSTREAM]
              * @return an error handle on error
@@ -466,7 +466,7 @@ namespace INTR
 
             /**
              * Build a list of "functional" processors.  This needs to be
-             * done without targetting support (just blueprint) since
+             * done without targeting support (just blueprint) since
              * on MPIPL the targeting information is obtained in
              * discover_targets -- much later in the IPL.
              *
@@ -549,7 +549,7 @@ namespace INTR
             errlHndl_t  initializeMpiplSyncArea();
 
             /**
-             * Add the existance of another HB instance to this instance
+             * Add the existence of another HB instance to this instance
              * mpipl sync data area.
              * @param[in] The instance number of the HB instance to add
              * @return error log handle
@@ -564,7 +564,7 @@ namespace INTR
             errlHndl_t  extractHbNodeInfo(void);
 
             /**
-             * Calculate the adress offset for the given cpu
+             * Calculate the address offset for the given cpu
              * @param[in] i_pir PIR value for the presenter
              * @return the offset
              */

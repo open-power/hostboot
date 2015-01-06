@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1524,7 +1524,7 @@ fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
 
     do {
 
-        // Get the Reference Raw Card Extention (0 or 1)
+        // Get the Reference Raw Card Extension (0 or 1)
         l_rc = fapiPlatGetSpdAttr(i_pDimmTarget,
             SPD::MODSPEC_COM_REF_RAW_CARD_EXT,
             &l_cardExt, sizeof(l_cardExt));
@@ -1533,7 +1533,7 @@ fapi::ReturnCode fapiPlatGetSpdModspecComRefRawCard
             break; //break with error
         }
 
-        // Get the Refernce Raw Card (bits 4-0)
+        // Get the References Raw Card (bits 4-0)
         // When Reference Raw Card Extension = 0
         //    Reference raw cards A through AL
         // When Reference Raw Card Extension = 1

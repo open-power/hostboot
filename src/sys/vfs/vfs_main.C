@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,7 +160,7 @@ void* vfs_main(void* i_barrier)
                             emsg->data[1] = (uint64_t) vfsMsgQ;
                             msg_send(e->msg_q, emsg); // send async msg
                         }
-                        else  // Cant find VFS_MSG queue - not started yet
+                        else  // Can't find VFS_MSG queue - not started yet
                         {
                             msg->data[0] = (uint64_t) fnptr;
                             msg_respond(vfsMsgQ, msg);

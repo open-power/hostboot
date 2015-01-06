@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -51,7 +53,7 @@ struct STEP_CODE_DATA_STRUCT;
     @par
       This resolution calls out a connected chip, but waits until the time of
       the error to determine what's connected.  This allows for runtime GARD,
-      dynamic failover and concurrent maintainance - without having to call
+      dynamic failover and concurrent maintenance - without having to call
       PRD to re-build itself.
 */
 class AnalyzeConnected : public Resolution
@@ -76,7 +78,7 @@ public:
   /**
    * @brief     Determine chip object for current connected unit and call its
    *            analyze func.
-   * @param[io] io_service_data Refernce to STEP_CODE_DATA_STRUCT
+   * @param[io] io_service_data References to STEP_CODE_DATA_STRUCT
    * @return    SUCCESS | non-zero if chip not found.
    * @note      if the call to getConnected yields NULL  than the
    *            altResolution is called. If the altResolution is NULL than the

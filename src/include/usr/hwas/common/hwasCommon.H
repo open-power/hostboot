@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -99,7 +101,8 @@ errlHndl_t platReadIDEC(const TARGETING::TargetHandle_t &i_target);
 /**
  * @brief platform specific code to determine the PG vector of the input
  *  target. The platform specific code is responsible for returning the
- *  vector. The caller is reponsible for allocating and de-allocating the space.
+ *  vector. The caller is responsible for allocating and de-allocating the
+ *  space.
  *
  * @param[in]  i_target    target to read the Partial Good keyword from
  * @param[out] o_pgData    pointer to area that will hold the partialGood vector
@@ -152,7 +155,8 @@ const uint32_t VPD_CP00_PG_EX0_GOOD         = 0xF300;
 /**
  * @brief platform specific code to determine the PR vector of the input
  *  target. The platform specific code is responsible for returning the
- *  vector. The caller is reponsible for allocating and de-allocating the space.
+ *  vector. The caller is responsible for allocating and de-allocating the
+ *  space.
  *
  * @param[in]  i_target    target to read the PR keyword from
  * @param[out] o_prData    pointer to area that will hold the PR keyword

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,7 +223,7 @@ private:
      *
      * @param[in]  i_istep      The istep to be executed.
      * @param[in]  i_substep    The substep to be executed.
-     * @param[out] o_doReconfig True if something ocurred that requires a
+     * @param[out] o_doReconfig True if something occurred that requires a
      *                          reconfigure, false otherwise
      */
     errlHndl_t doIstep(uint32_t i_istep,
@@ -332,7 +332,7 @@ private:
      *  @param[out] o_newSubstep new Substep to run, if necessary
      *
      *  @return  bool - True if the reconfigure happened inside the set of
-     *      neccessary isteps and needs to be retried, false otherwise
+     *      necessary isteps and needs to be retried, false otherwise
      */
     static bool checkReconfig(const uint8_t i_curIstep,
                               const uint8_t i_curSubstep,

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -117,7 +119,7 @@ public:
     /**
      *  @brief Reads data from current position of the stream
      *
-     *  Reads data from the current postion of the stream for the
+     *  Reads data from the current position of the stream for the
      *  specified number of bytes.
      *
      */
@@ -129,7 +131,7 @@ public:
     /**
      *  @brief Writes data to current position of the stream
      *
-     *  Writes data to the current postion of the stream for the
+     *  Writes data to the current position of the stream for the
      *  specified number of bytes.
      *
      */

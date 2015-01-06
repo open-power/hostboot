@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,8 +26,8 @@
  * @file linker.C   Linker to generate the host boot binary images
  */
 //  This code has been extended to create the host boot extended binary image.
-//  Most of this code was already in existance and no attempt has been made to make it
-//  completely conformant to PFD coding guidelines.
+//  Most of this code was already in existence and no attempt has been made to
+//  make it completely conformant to PFD coding guidelines.
 //
 #include <stdint.h>
 #include <stdlib.h>

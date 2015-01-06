@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,9 +42,9 @@ struct ipc_data_area_t
 };
 
 /**
- * This stucture maps an IPC data area needed by start_payload that is common
+ * This structure maps an IPC data area needed by start_payload that is common
  * to all HB instances.
- * @note  Don't change the order or size of this stucture
+ * @note  Don't change the order or size of this structure
  * w/o also changing src/kernel/shutdown.S
  */
 struct start_payload_data_area_t

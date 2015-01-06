@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -288,7 +288,7 @@ class UtilLidMgr
      *                    synchronusly the response will be populated
      *                    in an object pointed to by this pointer. If
      *                    the message is asynchronus the object
-     *                    pointed to by this paramter will be sent to
+     *                    pointed to by this parameter will be sent to
      *                    the fsp.
      *
      *  @return     errlHndl_t

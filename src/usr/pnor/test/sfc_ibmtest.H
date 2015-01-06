@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -83,7 +83,7 @@ class SfcIBMTest : public CxxTest::TestSuite
                 TS_FAIL("SfcIBMTest::test_forceFails> writeReg failed! Error committed.");
                 fails++;
 
-                // Unlock mutex for Error Log to be commited
+                // Unlock mutex for Error Log to be committed
                 mutex_unlock(l_mutex);
                 errlCommit(l_err,PNOR_COMP_ID);
 
@@ -125,7 +125,7 @@ class SfcIBMTest : public CxxTest::TestSuite
                 TS_FAIL("SfcIBMTest::test_forceFails> Get Chip Id cmd failed! Error committed.");
                 fails++;
 
-                // Unlock mutex for Error Log to be commited
+                // Unlock mutex for Error Log to be committed
                 mutex_unlock(l_mutex);
                 errlCommit(l_err,PNOR_COMP_ID);
 

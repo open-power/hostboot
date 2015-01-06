@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -612,7 +612,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
               EEPROM::SBE_PRIMARY, 0x80 },
 
             // case 0xA0: cur=temp, cur=clean, alt=dirty
-            // Arbitarily Set cur side to 1 (therefore perm set to 0)
+            // Arbitrarily Set cur side to 1 (therefore perm set to 0)
             // - update alt=0
             // - make cur=perm
             // - Continue IPL

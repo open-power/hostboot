@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ namespace MemUtils
 
 /**
  * @brief Lists all possible sizes for a DRAM.
- * @note  These values must match the defintion of MBAXCR[6:7]. They are
+ * @note  These values must match the definition of MBAXCR[6:7]. They are
  *        important for calculations.
  */
 enum DramSize

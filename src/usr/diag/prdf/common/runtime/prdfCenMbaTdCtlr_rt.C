@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3194,7 +3194,7 @@ void CenMbaTdCtlr::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     static const size_t sz_word = sizeof(CPU_WORD);
     sz_actData = ((sz_actData+sz_word-1) / sz_word) * sz_word;
 
-    // Fix endianess issues with non PPC machines.
+    // Fix endianness issues with non PPC machines.
     for ( uint32_t i = 0; i < (sz_actData/sz_word); i++ )
         ((CPU_WORD*)data)[i] = htonl(((CPU_WORD*)data)[i]);
 

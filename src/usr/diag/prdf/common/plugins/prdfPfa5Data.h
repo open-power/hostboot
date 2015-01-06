@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,7 +167,7 @@ struct PfaData
 
     // Thresholding
     uint32_t errorCount :16, // Number of occurrences of this attention
-             threshold  :16; // Theshold for this attention
+             threshold  :16; // Threshold for this attention
 
     // Attention types and GARD state.
     uint32_t priAttnType    : 8, // primary attention type

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -404,9 +406,9 @@ namespace TRACE
 
         // We just added the newest entry, so update component list.
         //
-        // It is possible that the committer of the preceeding entry was
+        // It is possible that the committer of the preceding entry was
         // "slow", so we need to keep trying to update until the current
-        // compoment "first" points at the preceeding entry and then make
+        // compoment "first" points at the preceding entry and then make
         // it point at this entry.
         //
         while (!__sync_bool_compare_and_swap(&l_comp->iv_first,
@@ -562,7 +564,7 @@ namespace TRACE
         // Get consumer lock.
         _consumerEnter();
 
-        // Primative #1.
+        // Primitive #1.
         if (NULL != i_condAddr)
         {
             if (i_condVal == *i_condAddr)
@@ -578,7 +580,7 @@ namespace TRACE
             }
         }
 
-        // Primative #2.
+        // Primitive #2.
         if (NULL != i_addr)
         {
             *i_addr = i_val;

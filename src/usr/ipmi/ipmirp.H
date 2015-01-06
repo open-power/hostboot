@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/ipmi/ipmirp.H $                                    */
+/* $Source: src/usr/ipmi/ipmirp.H $                                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,7 +221,7 @@ class IpmiRP
     // Size of the recv buffer (max BMC will send)
     uint8_t     iv_recv_buffer_size;
 
-    // Recomended number of retries
+    // Recommended number of retries
     uint8_t     iv_retries;
 
     // Shutdown

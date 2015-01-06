@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,7 +228,7 @@ class BitKey
     void removeBit(void);
 
     /*!
-     Remove the bit positions from this list specified in the paramter list
+     Remove the bit positions from this list specified in the parameter list
      \pre none
      \post bit list may be modified
      */

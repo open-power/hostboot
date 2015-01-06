@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -76,12 +78,12 @@ namespace TRACEDAEMON
             void collectTracePages();
             /** Send continuous trace buffer to SP.
              *
-             *  Ownership of i_buffer is transfered to mailbox.
+             *  Ownership of i_buffer is transferred to mailbox.
              */
             void sendContBuffer(void* i_buffer, size_t i_size);
             /** Send extract trace buffer to SP.
              *
-             *  Ownership of i_buffer is transfered to mailbox.
+             *  Ownership of i_buffer is transferred to mailbox.
              */
             void sendExtractBuffer(void* i_buffer, size_t i_size);
             /** Reduce component trace buffers if exceeded max size. */

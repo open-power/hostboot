@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,7 +113,7 @@ namespace INTR
      * The XISR value is the logical OR of the Interrup Requestor Source
      * Number (IRSN) and the Interrrupt Source Number (ISN).
      * See BookIV PSI chapter.  ISN is defined in the XIVR register and
-     * IRSN is defined in the Interupt Requester Source Compare Register
+     * IRSN is defined in the Interrupt Requester Source Compare Register
      */
     struct XISR_t
     {
@@ -236,7 +236,7 @@ namespace INTR
                          uint8_t i_thread);
 
     /**
-     * Indicate the existance of another HB node in the system
+     * Indicate the existence of another HB node in the system
      * @param[in] The HB instance number (HB node)
      * @return error log handle on error
      */

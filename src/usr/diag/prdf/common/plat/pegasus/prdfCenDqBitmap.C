@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -398,7 +398,7 @@ void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
 
     size_t sz_capData = sz_rank + sizeof(iv_data);
 
-    // Adjust the size for endianess.
+    // Adjust the size for endianness.
     const size_t sz_word = sizeof(CPU_WORD);
     sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
 
@@ -408,7 +408,7 @@ void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
     capData[0] = rank;
     memcpy( &capData[1], iv_data, sizeof(iv_data) );
 
-    // Fix endianess issues with non PPC machines.
+    // Fix endianness issues with non PPC machines.
     for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
         ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
 

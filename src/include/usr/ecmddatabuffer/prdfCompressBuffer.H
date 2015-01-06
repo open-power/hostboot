@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -183,7 +185,7 @@ namespace PrdfCompressBuffer
      *                  compressed buffer.
      *
      * NOTE: The size of the output buffer should be 1 + ((i_size * 9) / 8)
-     *             to guarentee no data is lost (worst case for compression).
+     *             to guarantee no data is lost (worst case for compression).
      */
     void compressBuffer(uint8_t * i_buf, size_t i_size,
                         uint8_t * o_buf, size_t &o_size)
@@ -327,7 +329,7 @@ namespace PrdfCompressBuffer
             return;
         }
 
-        // Initilize output buffer with 0
+        // Initialize output buffer with 0
         memset( o_buf, 0, o_size);
 
         uint8_t * l_lookahead = o_buf;  // Look-behind buffer.

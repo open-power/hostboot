@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -702,7 +704,7 @@ namespace Systemcalls
     };
 
     /**
-     *  Allow a task to request priviledge escalation to execute the 'nap'
+     *  Allow a task to request privilege escalation to execute the 'nap'
      *  instruction.
      *
      *  Verifies the instruction to execute is, in fact, nap and then sets
@@ -713,7 +715,7 @@ namespace Systemcalls
      *  SRESET exception with flags in srr1 to indication that the
      *  decrementer caused the wake-up.  The kernel will then need to
      *  advance the task to the instruction after the nap and remove
-     *  priviledge escalation.
+     *  privilege escalation.
      *
      */
     void CpuNap(task_t *t)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1008,7 +1008,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 
             *((uint8_t*)o_buffer + bytesRead) = fifo.byte_0;
 
-            // Everytime FIFO is read, reset timeout count
+            // Every time FIFO is read, reset timeout count
             timeoutCount = I2C_TIMEOUT_COUNT( interval_ns );
 
             TRACUCOMP( g_trac_i2cr,

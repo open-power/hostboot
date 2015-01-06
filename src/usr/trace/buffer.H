@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -156,10 +158,10 @@ namespace TRACE
              *  because the daemon code is swappable and we cannot block
              *  producers.
              *
-             *  This function gives a set of primatives to the daemon to
+             *  This function gives a set of primitives to the daemon to
              *  manipulate Entry pointers while secured under the consumer lock.
              *
-             *  The primatives that can be done are:
+             *  The primitives that can be done are:
              *     1) if (condAddr == condVal) { condActAddr = condActVal }
              *     2) addr = val
              *
@@ -167,15 +169,15 @@ namespace TRACE
              *  not be performed.  So, just calling consumerOp() has the
              *  side-effect of simply toggling the consumer lock on and off.
              *
-             *  The return value indicates if primative #1 failed.
+             *  The return value indicates if primitive #1 failed.
              *
-             *  @param[in] i_condAddr - The address to read for primative 1.
-             *  @param[in] i_condVal - The value to expect for primative 1.
-             *  @param[in] i_condActAddr - The address to store for primative 1.
-             *  @param[in] i_condActVal - The value to store for primative 1.
+             *  @param[in] i_condAddr - The address to read for primitive 1.
+             *  @param[in] i_condVal - The value to expect for primitive 1.
+             *  @param[in] i_condActAddr - The address to store for primitive 1.
+             *  @param[in] i_condActVal - The value to store for primitive 1.
              *
-             *  @param[in] i_addr - The address to store for primative 2.
-             *  @param[in] i_val - The value to store for primative 2.
+             *  @param[in] i_addr - The address to store for primitive 2.
+             *  @param[in] i_val - The value to store for primitive 2.
              *
              *  @return bool - false if condAddr != condVal, true otherwise.
              */

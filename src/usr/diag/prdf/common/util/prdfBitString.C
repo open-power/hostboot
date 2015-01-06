@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -268,7 +270,7 @@ void BitString::SetBits
 //                 bit string and the pattern.
 //
 // Time Complexity:  O(m) where m is the number of bits to modify
-//                   (paramter l)
+//                   (parameter l)
 //
 //  Examples:  o(0), l(10), pattern(0xA), pattern_bit_length(4)
 //             Old String: 0000000000
@@ -492,15 +494,15 @@ bool BitString::IsZero(void) const
 //
 //  Time Complexity:  O(m) where m is the length
 //
-//  Examples:  Paramter String:  1001
+//  Examples:  Parameter String:  1001
 //             Old String:       1100
 //             New String:       0100
 //
-//             Paramter String:  100111
+//             Parameter String:  100111
 //             Old String:       1100
 //             New String:       0100
 //
-//             Paramter String:  1001
+//             Parameter String:  1001
 //             Old String:       110001
 //             New String:       010001
 //

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1768,7 +1768,7 @@ errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
     do
     {
         //Build a list of "functional" processors.  This needs to be
-        //done without targetting support (just blueprint) since
+        //done without targeting support (just blueprint) since
         //on MPIPL the targeting information is obtained in
         //discover_targets -- much later in the IPL.
 

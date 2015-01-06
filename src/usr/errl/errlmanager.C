@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -119,7 +119,7 @@ ErrlManager::ErrlManager() :
     iv_pnorAddr(NULL),
     iv_maxErrlInPnor(0),
     iv_pnorOpenSlot(0),
-    iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldnt
+    iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldn't
     iv_isMboxEnabled(false),    // but mbox isn't ready yet..
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false)
@@ -447,7 +447,7 @@ void ErrlManager::errlogMsgHndlr ()
                     if( l_err->isTerminateLog() )
                     {
                         TRACFCOMP( g_trac_errl, INFO_MRK
-                                   "Terminating error was commited"
+                                   "Terminating error was committed"
                                    " errlmanager is reqesting a shutdown.");
 
                         INITSERVICE::doShutdown(l_err->plid(), true);

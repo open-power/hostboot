@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -101,7 +103,7 @@ uint32_t get_huid( const Target* i_target )
  *
  *   This will be used by the HCDB service - when the target has
  *   changed, this will get called to tell the appropriate services
- *   that the change has occured.
+ *   that the change has occurred.
  */
 void update_hwas_changed_mask(Target * i_target)
 {

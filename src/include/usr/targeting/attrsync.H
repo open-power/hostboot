@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,7 +54,7 @@ namespace   TARGETING
      *  @brief Targeting attribute sync class
      *
      *  @par Detailed Description:
-     *      Provides all the functionality to synchronize the targetting
+     *      Provides all the functionality to synchronize the targeting
      *      attributes from the Hostboot area down to the FSP
      */
     class AttributeSync
@@ -83,7 +85,7 @@ namespace   TARGETING
              *
              *  @par Detailed Description:
              *          This function will call into the AttRP:: to have the
-             *          correct attribute section paged into accessable memory.
+             *          correct attribute section paged into accessible memory.
              *          this function may be called multiple times with different
              *          section names.
              *
@@ -158,7 +160,7 @@ namespace   TARGETING
              *
              *  @par Detailed Description:
              *      This function will call into the AttRP:: to have the
-             *      correct attribute section paged into accessable memory
+             *      correct attribute section paged into accessible memory
              *
              */
             void        getSectionData();
@@ -195,7 +197,7 @@ namespace   TARGETING
              *                    synchronusly the response will be populated
              *                    in an object pointed to by this pointer. If
              *                    the message is asynchronus the object
-             *                    pointed to by this paramter will be sent to
+             *                    pointed to by this parameter will be sent to
              *                    the fsp.
              *
              *  @return     errlHndl_t

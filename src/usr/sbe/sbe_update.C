@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1163,7 +1163,7 @@ namespace SBE
               sizeof(NONSECURE_VER_EYECATCH);
 
             // Increment pointer sizeof(uint64_t) because eyecatcher
-            // must be 8-byte alligned
+            // must be 8-byte aligned
             for(; tmpPtr<endPtr; tmpPtr+=sizeof(uint64_t))
             {
                 if(*(reinterpret_cast<uint64_t*>(tmpPtr)) ==

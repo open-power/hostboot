@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -331,7 +331,7 @@ enum errlUserDataType_t
 /** @enum  errlUserDataVersion
   *
   * Identifier for the version of user data in an error log.
-  * This value is used in conjuction with the type field to format
+  * This value is used in conjunction with the type field to format
   * of the additional data in an error log.  Versions and type should
   * be unique across subcomponents of the errl component.
 */
@@ -374,7 +374,7 @@ typedef uint8_t errlsubsec_t;
 typedef struct storage_header
 {
     uint32_t    cbStorage;        // count of bytes in buffer
-    uint32_t    cInserted;        // count of logs ever commited
+    uint32_t    cInserted;        // count of logs ever committed
     uint32_t    offsetStart;      // start-of-list marker
     uint32_t    offsetMarker;     // next-insertion marker
 } __attribute__((packed)) storage_header_t;

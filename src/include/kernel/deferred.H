@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,7 +154,7 @@ class DeferredQueue
          *  @param i_onlyIfEmpty - Only insert the object if the queue is
          *                         already empty, otherwise delete.
          *
-         *  Ownership of the work item is transfered to the queue, which is
+         *  Ownership of the work item is transferred to the queue, which is
          *  responsible for delete once the work is complete.
          */
         static void insert(DeferredWork* i_work, bool i_onlyIfEmpty = false);

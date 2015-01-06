@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -61,7 +61,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 {
   public:
       /**
-       *  @brief Test a portion of the debug code wich
+       *  @brief Test a portion of the debug code which
        *  prints out the entity path types
        */
       void testEntityPathElementTypeAsString()

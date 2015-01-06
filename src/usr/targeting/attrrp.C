@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,7 @@ namespace TARGETING
 
         } while (false);
 
-        // If an error occured, post to TaskArgs.
+        // If an error occurred, post to TaskArgs.
         if (l_errl)
         {
             l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);

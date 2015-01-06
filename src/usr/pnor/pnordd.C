@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -356,7 +356,7 @@ PnorDD::PnorDD( TARGETING::Target* i_target )
     // 3) i_target does not correspond to Master processor (ie the
     //    same processor as MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
     // otherwise, use MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-    // NOTE: i_target can only be used when targetting is loaded
+    // NOTE: i_target can only be used when targeting is loaded
     if ( ( i_target != NULL ) &&
          ( i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL ) )
     {

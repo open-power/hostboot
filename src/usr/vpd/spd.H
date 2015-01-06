@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ enum
 };
 
 /**
- * @brief Enumerations for Module Specfic Keywords
+ * @brief Enumerations for Module Specific Keywords
  */
 typedef enum
 {
@@ -366,7 +366,7 @@ bool spdPresent ( TARGETING::Target * i_target );
  *
  * @param[in] i_accessType - DeviceFW::AccessType enum.
  *
- * @param[in] i_args - An arguement for the Device Driver framework.  There
+ * @param[in] i_args - An argument for the Device Driver framework.  There
  *      are no args for this function.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the

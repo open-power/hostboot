@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,7 +86,7 @@ extern tracDesc_t g_etrc; /** Trace Descriptor **/
  #define ECMD_DBUF_SUCCESS                       0x0    ///< DataBuffer returned successfully
  #define ECMD_DBUF_INIT_FAIL                     (ECMD_ERR_ECMD | 0x2001) ///< Initialization of the DataBuffer failed
  #define ECMD_DBUF_BUFFER_OVERFLOW               (ECMD_ERR_ECMD | 0x2011) ///< Attempt to read/write data beyond the length of the DataBuffer
- #define ECMD_DBUF_XSTATE_ERROR                  (ECMD_ERR_ECMD | 0x2021) ///< An 'X' character occured where it was not expected
+ #define ECMD_DBUF_XSTATE_ERROR                  (ECMD_ERR_ECMD | 0x2021) ///< An 'X' character occurred where it was not expected
  #define ECMD_DBUF_UNDEFINED_FUNCTION            (ECMD_ERR_ECMD | 0x2031) ///< Function not included in this version of DataBuffer
  #define ECMD_DBUF_INVALID_ARGS                  (ECMD_ERR_ECMD | 0x2041) ///< Args provided to dataBuffer were invalid
  #define ECMD_DBUF_INVALID_DATA_FORMAT           (ECMD_ERR_ECMD | 0x2043) ///< String data didn't match expected input format
@@ -96,7 +96,7 @@ extern tracDesc_t g_etrc; /** Trace Descriptor **/
  #define ECMD_DBUF_FILE_OPERATION_FAIL           (ECMD_ERR_ECMD | 0x2057) ///< File operation failed
  #define ECMD_DBUF_NOT_OWNER                     (ECMD_ERR_ECMD | 0x2061) ///< Don't own this buffer so can't do this operation
  #define ECMD_DBUF_XSTATE_NOT_ENABLED            (ECMD_ERR_ECMD | 0x2063) ///< Xstate function called on a buffer that doesn't have xstates enabled
- #define ECMD_DBUF_MISMATCH                      (ECMD_ERR_ECMD | 0x2065) ///< There was a mismatch between a comparision operation in the buffer
+ #define ECMD_DBUF_MISMATCH                      (ECMD_ERR_ECMD | 0x2065) ///< There was a mismatch between a comparison operation in the buffer
  #define ECMD_DBUF_NULL_POINTER                  (ECMD_ERR_ECMD | 0x2067) ///< Null pointer passed
 #endif
 
@@ -316,7 +316,7 @@ public:
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    *
-   * NOTE : Capacity will be adjusted to fit new size if neccesary
+   * NOTE : Capacity will be adjusted to fit new size if necessary
    * CAUTION : All data stored in buffer will be lost
    */
   uint32_t  setDoubleWordLength(uint32_t i_newNumDoubleWords);
@@ -329,7 +329,7 @@ public:
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    *
-   * NOTE : Capacity will be adjusted to fit new size if neccesary
+   * NOTE : Capacity will be adjusted to fit new size if necessary
    * CAUTION : All data stored in buffer will be lost
    */
   uint32_t  setWordLength(uint32_t i_newNumWords);
@@ -342,7 +342,7 @@ public:
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    *
-   * NOTE : Capacity will be adjusted to fit new size if neccesary
+   * NOTE : Capacity will be adjusted to fit new size if necessary
    * CAUTION : All data stored in buffer will be lost
    */
   uint32_t  setHalfWordLength(uint32_t i_newNumHalfWords);
@@ -355,7 +355,7 @@ public:
    * @retval ECMD_DBUF_INIT_FAIL failure occurred setting new length
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    *
-   * NOTE : Capacity will be adjusted to fit new size if neccesary
+   * NOTE : Capacity will be adjusted to fit new size if necessary
    * CAUTION : All data stored in buffer will be lost
    */
   uint32_t  setByteLength(uint32_t i_newNumBytes);
@@ -368,7 +368,7 @@ public:
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    * @post Buffer is reinitialized and zero'd out
    *
-   * NOTE : Capacity will be adjusted to fit new size if neccesary
+   * NOTE : Capacity will be adjusted to fit new size if necessary
    * CAUTION : All data stored in buffer will be lost
    */
   uint32_t  setBitLength(uint32_t i_newNumBits);
@@ -399,7 +399,7 @@ public:
    * @retval ECMD_DBUF_SUCCESS on success
    * @post Internal buffer size is reset but data inside is not lost
    *
-   * NOTE : Capacity will be adjusted to fit new size if neccesary
+   * NOTE : Capacity will be adjusted to fit new size if necessary
    */
   uint32_t growBitLength(uint32_t i_newNumBits);
 
@@ -616,7 +616,7 @@ public:
    * @param i_shiftnum Number of bits to shift
    * @param i_offset Offset into the buffer to start the shift from.  Default is bit 0.
    * @post Bits in buffer are shifted to right by specified number of bits
-   * @post Buffer size is resized to accomodate shift
+   * @post Buffer size is resized to accommodate shift
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    */
@@ -626,7 +626,7 @@ public:
    * @brief Shift data to left - resizing buffer
    * @param i_shiftnum Number of bits to shift
    * @post Bits in buffer are shifted to left by specified number of bits - data is shifted off the beginning
-   * @post Buffer size is resized to accomodate shift
+   * @post Buffer size is resized to accommodate shift
    * @retval ECMD_DBUF_SUCCESS on success
    * @retval ECMD_DBUF_NOT_OWNER when called on buffer not owned
    */

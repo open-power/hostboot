@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -399,7 +399,7 @@ void VfsRp::_loadUnload(msg_t * i_msg)
 
     // Find VfsSystemModule
     //  The TOC for the extended image sits at the start of the image and is
-    //  not location dependant, so just use the one pointed to by iv_pnor_vaddr
+    //  not location dependent, so just use the one pointed to by iv_pnor_vaddr
     //  to avoid having to copy it to this block
     VfsSystemModule * module =
         vfs_find_module
@@ -586,7 +586,7 @@ void VfsRp::_exec(msg_t * i_msg)
     msg_t * msg1 = (msg_t *) i_msg->data[0];
 
     //  The TOC for the extended image sits at the start of the image and is
-    //  not location dependant, so just use the one pointed to by iv_pnor_vaddr
+    //  not location dependent, so just use the one pointed to by iv_pnor_vaddr
     //  to avoid having to copy it to this block
     VfsSystemModule * module =
         vfs_find_module((VfsSystemModule *)(iv_pnor_vaddr +

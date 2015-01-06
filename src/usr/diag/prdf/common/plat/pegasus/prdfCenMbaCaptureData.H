@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -61,7 +63,7 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd );
  *        have an SDC (i.e. Restore DRAM Repairs, IPL MNFG CE Isolation).
  * @note  The data will be limited and include things like the DRAM Repairs data
  *        but will not include stuff like the CE/UE tables, because that
- *        information is not relevant during its intented uses.
+ *        information is not relevant during its intended uses.
  * @param i_mbaTrgt An MBA target
  * @param o_errl    Error log.
  */

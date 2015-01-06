@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -48,7 +50,7 @@ namespace MBOX
              * @param[in/out] io_size, size in bytes of space needed,
              *                         0 means get all available buffers
              *                         bit map is returned showing blocks
-             *                         aquired.
+             *                         acquired.
              *
              * @note: There are 64 total buffers in the shared DMA pool. The
              * bit map has one bit for each buffer. The bit map returned will
@@ -180,7 +182,7 @@ namespace MBOX
             void * iv_head;            //!< Start of DMA memory
             uint64_t iv_phys_head;     //!< Physical translation of iv_head
             uint64_t iv_dir;           //!< 1 bit per 1k buffer, 1 = available
-            bool iv_dma_req_sent;      //!< Reqest sent to retrieve all buffers
+            bool iv_dma_req_sent;      //!< Request sent to retrieve all buffers
 
     };
 }; // namespace

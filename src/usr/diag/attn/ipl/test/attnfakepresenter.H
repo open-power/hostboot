@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnfakepresenter.H $         */
+/* $Source: src/usr/diag/attn/ipl/test/attnfakepresenter.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,8 +56,8 @@ class FakePresenter
          * @param[in] i_q The message queue on which to place
          *                interrupt messages.
          *
-         * @retval[true] Started succesfully.
-         * @retval[false] Did not start succesfully.
+         * @retval[true] Started successfully.
+         * @retval[false] Did not start successfully.
          */
         bool start(msg_q_t i_q);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,7 @@ class PredicateAttrTankTargetPos : public PredicateBase
 
     private:
 
-        // Postion info to compare with that of a target
+        // Position info to compare with that of a target
         uint16_t iv_pos;
         uint8_t  iv_unitPos;
         uint8_t  iv_node;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -64,7 +66,7 @@ class MemoryMru
 
     /**
      * @brief Constructor for special callouts.
-     * @param i_mbaTarget      The MBA in which error has occured
+     * @param i_mbaTarget      The MBA in which error has occurred
      * @param i_rank           The rank in which the error occurred.
      * @param i_specialCallout See enum MemoryMruData::Callout.
      */

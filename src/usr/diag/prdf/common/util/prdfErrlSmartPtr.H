@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -142,7 +144,7 @@ class ErrlSmartPtr
          *        Or, to delete the error log:
          *                delete errl.release();
          *
-         *        This prevent the error log from being deleted twice or commited
+         *        This prevent the error log from being deleted twice or committed
          *        by the wrong component.
          */
         errlHndl_t release()
@@ -156,7 +158,7 @@ class ErrlSmartPtr
         errlHndl_t iv_errl;
 
         /* void add_src()
-         *         Add special SRC to error log specifying commited from smart
+         *         Add special SRC to error log specifying committed from smart
          *         pointer.
          */
         void add_src();

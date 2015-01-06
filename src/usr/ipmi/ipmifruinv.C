@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/ipmi/ipmifru.C $                                      */
+/* $Source: src/usr/ipmi/ipmifruinv.C $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -771,7 +771,7 @@ errlHndl_t backplaneIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
                 io_data.push_back(l_vpdSize);
             }
 
-            //Then add on the data returnd from the VPD read
+            //Then add on the data returned from the VPD read
             io_data.insert(io_data.end(),
                                    &l_vDataPtr[0], &l_vDataPtr[l_vpdSize]);
         }

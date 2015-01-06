@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -170,7 +172,7 @@ public:
   /**
    Clear out capture data
    <ul>
-   <br><b>Paramters:None
+   <br><b>Parameters:None
    <br><b>Returns:Nothing
    <br><b>Requirments:None.
    <br><b>Promises: All capture data cleared ( copy(...) == 0 )
@@ -182,10 +184,10 @@ public:
   /**
    Add scr & data to capture log
    <ul>
-   <br><b>Paramter:  chipHandle     target handle of chip object
-   <br><b>Paramter:  scan comm id (unique one btye code representing scan comm address)
-   <br><b>Paramter:  Scan comm register object
-   <br><b>Paramter:  Optional location in capure vector [FRONT | BACK] def = BACK
+   <br><b>Parameter:  chipHandle     target handle of chip object
+   <br><b>Parameter:  scan comm id (unique one btye code representing scan comm address)
+   <br><b>Parameter:  Scan comm register object
+   <br><b>Parameter:  Optional location in capure vector [FRONT | BACK] def = BACK
    <br><b>Returns:   Nothing
    <br><b>Requires:  Nothing
    <br><b>Promises:  scr.Read()
@@ -200,9 +202,9 @@ public:
   /*  REMOVE for FSP
    Add scr & data to capture log
    <ul>
-   <br><b>Paramter:  chipHandle     target handle of chip object
-   <br><b>Paramter:  Scan comm register object
-   <br><b>Paramter:  Optional location in capure vector [FRONT | BACK] def = BACK
+   <br><b>Parameter:  chipHandle     target handle of chip object
+   <br><b>Parameter:  Scan comm register object
+   <br><b>Parameter:  Optional location in capure vector [FRONT | BACK] def = BACK
    <br><b>Returns:   Nothing
    <br><b>Requires:  Nothing
    <br><b>Promises:  scr.Read()
@@ -217,10 +219,10 @@ public:
   /**
    Add scr & data to capture log
    <ul>
-   <br><b>Paramter:  i_pchipHandle Handle of chip object
-   <br><b>Paramter:  scan comm id (unique one btye code representing scan comm address)
-   <br><b>Paramter:  BIT_STRING_CLASS
-   <br><b>Paramter:  Optional location in capure vector [FRONT | BACK] def = BACK
+   <br><b>Parameter:  i_pchipHandle Handle of chip object
+   <br><b>Parameter:  scan comm id (unique one btye code representing scan comm address)
+   <br><b>Parameter:  BIT_STRING_CLASS
+   <br><b>Parameter:  Optional location in capure vector [FRONT | BACK] def = BACK
    <br><b>Returns:   Nothing
    <br><b>Requires:  Nothing
    <br><b>Promises:
@@ -236,7 +238,7 @@ public:
   /**
    Drop scr & data from capture log
    <ul>
-   <br><b>Paramter:  Type of capture vector [PRIMARY | SECONDARY] def = PRIMARY. SECONDARIES dropped on connected.
+   <br><b>Parameter:  Type of capture vector [PRIMARY | SECONDARY] def = PRIMARY. SECONDARIES dropped on connected.
    <br><b>Returns:   Nothing
    <br><b>Requires:  Nothing
    <br><b>Promises:
@@ -248,8 +250,8 @@ void Drop(RegType type);  //@jl04a
   /**
    Copy caputre data to buffer
    <ul>
-   <br><b>Paramter:  ptr to buffer to place capture data
-   <br><b>Paramter:  maxsize of buffer area
+   <br><b>Parameter:  ptr to buffer to place capture data
+   <br><b>Parameter:  maxsize of buffer area
    <br><b>Returns:   Returns the number of bytes copied
    <br><b>Requirements: None
    <br><b>Promises:  bytes copied <= bufferSize
@@ -263,7 +265,7 @@ void Drop(RegType type);  //@jl04a
   /**
    Reconstruct data from flat data
    <ul>
-   <br><b>Paramter:  i_flatdata ptr to flat data
+   <br><b>Parameter:  i_flatdata ptr to flat data
    <br><b>Returns:   reference to the new capture data
    <br><b>Requirements: None
    <br><b>Promises:  CaptureData created form flatdata
@@ -278,7 +280,7 @@ private:
 
   // Notes *************************************************************
   //
-  // Instead of maintaining an actual data buffer, an auxilliary data
+  // Instead of maintaining an actual data buffer, an auxiliary data
   // structure is used to maintain data in a specific order.  The main
   // reason for this is that since data can be entered in the front or
   // back of the buffer, the data must be copied to maintain the order.

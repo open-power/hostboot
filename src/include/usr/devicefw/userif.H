@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -202,7 +202,7 @@ namespace DeviceFW
             static_cast<uint64_t>(( i_offset ))
 
     /**
-     * Construct the device addressing paramters for the GPIO port extender ops
+     * Construct the device addressing parameters for the GPIO port extender ops
      * @param[in] i_gpio_num - The port extender device type.
      * @param[in] i_gpio_pin = The GPIO port address
      */
@@ -221,7 +221,7 @@ namespace DeviceFW
      *  @param[in]     ...          Operation specific addressing parameters.
      *
      *  @return NULL - No error.
-     *  @return Non-NULL - An error handle when error has occured, typically
+     *  @return Non-NULL - An error handle when error has occurred, typically
      *                     passed directly from device driver but potentially
      *                     created by the device framework as in the case of
      *                     not finding an installed driver for the desired
@@ -251,7 +251,7 @@ namespace DeviceFW
      *  @param[in]     ...          Operation specific addressing parameters.
      *
      *  @return NULL - No error.
-     *  @return Non-NULL - An error handle when error has occured, typically
+     *  @return Non-NULL - An error handle when error has occurred, typically
      *                     passed directly from device driver but potentially
      *                     created by the device framework as in the case of
      *                     not finding an installed driver for the desired

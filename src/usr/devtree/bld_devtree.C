@@ -481,7 +481,7 @@ void add_reserved_mem(devTree * i_dt,
      * Unless a component (skiboot or Linux) specifically knows about a region
      * (usually based on its name) and decides to change or remove it, all
      * these regions are passed as-is to Linux and to subsequent kernels
-     * accross kexec and are kept preserved.
+     * across kexec and are kept preserved.
      */
 
     dtOffset_t rootNode = i_dt->findNode("/");
@@ -800,7 +800,7 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
      * In order to be able to handle affinity propertly, we require that
      * a memory node is created for each range of memory that has a different
      * "affinity", which in practice means for each chip since we don't
-     * support memory interleaved accross multiple chips on P8.
+     * support memory interleaved across multiple chips on P8.
      *
      * Additionally, it is *not* required that one chip = one memory node,
      * it is perfectly acceptable to break down the memory of one chip into

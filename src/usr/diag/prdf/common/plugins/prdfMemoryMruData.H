@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ namespace MemoryMruData
 
 /** Typically a MemoryMru callout is associated with a symbol (single DIMM
  *  callout), however, there are times were we cannot isolate down that far and
- *  instead need to callout a rank (pair of DIMMs) and the assoicated MBA.
+ *  instead need to callout a rank (pair of DIMMs) and the associated MBA.
  *  This enums will be used to indicate if any special callouts are needed.
  */
 enum Callout

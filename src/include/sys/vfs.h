@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,7 +28,7 @@
 #include <stdint.h>
 // NOTE!. This file is included by linker.C and can't include non standard header files
 #ifndef LINKER_C
-// other includes not visable to the linker
+// other includes not visible to the linker
 #include <sys/task.h>
 #endif
 

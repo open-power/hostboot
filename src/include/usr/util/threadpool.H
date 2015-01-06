@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -105,7 +107,7 @@ class ThreadPool : public Util::__Util_ThreadPool_Impl::ThreadPoolImpl
 
             /** @brief Insert a work item onto the thread-pool's queue.
              *
-             *  Ownership of the object is transfered to the thread-pool.
+             *  Ownership of the object is transferred to the thread-pool.
              *  After completing the work, the thread-pool will delete the
              *  work item.
              *

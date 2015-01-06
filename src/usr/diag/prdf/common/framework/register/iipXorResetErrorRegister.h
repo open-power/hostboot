@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -107,7 +109,7 @@ protected:  // functions
   // Requirements: None.
   // Promises:     Hardware Registers modified
   //               Bits in bit_list are turned off in SCR then SCR::Write()
-  //               Mask bits set if theshold was reached (see parent class)
+  //               Mask bits set if threshold was reached (see parent class)
   // Exceptions:   None.
   // Concurrency:
   // Notes:        bit_list.GetListLength() may be zero

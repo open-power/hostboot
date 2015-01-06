@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,7 +201,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
             {
                 // Get the AttributeTank that corresponds to the TankLayer in
                 // the AttrOverrideSection. Enum starts with TANK_LAYER_NONE
-                // so need to substract 1
+                // so need to subtract 1
                 AttributeTank* l_ptank = l_pOverTanks[l_pAttrOverSec->iv_layer - 1];
 
                 // Create serialized chunck with AttrOverrideSection data

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -212,7 +212,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
  * @param descString A string that will be put in front of the binary dump,
  *                   developer assigns anything they want.
  * @param address Address of beginning of data to dump.
- * @param length lenght of the binary data.
+ * @param length length of the binary data.
  *
  * @return void
 */

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnrandsource.H $            */
+/* $Source: src/usr/diag/attn/ipl/test/attnrandsource.H $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@ class RandSource
         /**
          * @brief start Start the testcase thread.
          *
-         * @retval[true] Testcase thread started succesfully.
+         * @retval[true] Testcase thread started successfully.
          * @retval[false] Testcase thread failed to start.
          */
         bool start();
@@ -59,8 +59,8 @@ class RandSource
          *
          * @post All resources reclaimed.
          *
-         * @retval[true] Testcase succesfully ran to completion.
-         * @retval[false] Testcase did not run succesfully to completion.
+         * @retval[true] Testcase successfully ran to completion.
+         * @retval[false] Testcase did not run successfully to completion.
          */
         bool wait();
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -745,7 +745,7 @@ errlHndl_t populate_attributes( void )
 
         // continue - multi-node
 
-        // This msgQ catches the reponses to populate the attributes
+        // This msgQ catches the responses to populate the attributes
         msg_q_t msgQ = msg_q_create();
         errhdl = MBOX::msgq_register(MBOX::HB_POP_ATTR_MSGQ,msgQ);
 

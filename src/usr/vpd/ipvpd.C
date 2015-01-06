@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -850,7 +850,7 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
 
         if( err )
         {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"Error occured during translateRecord\
+            TRACFCOMP( g_trac_vpd, ERR_MRK"Error occurred during translateRecord\
                         - IpVpdFacade::hasVpdPresent");
             break;
         }
@@ -860,7 +860,7 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
 
         if( err )
         {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"Error occured during \
+            TRACFCOMP( g_trac_vpd, ERR_MRK"Error occurred during \
                             translateKeyword - IpVpdFacade::hasVpdPresent" );
             break;
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1280,7 +1280,7 @@ int32_t AnalyzeFetch##TYPE##MBA( ExtensibleChip * i_membChip, \
 } \
 PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetch##TYPE##MBA );
 
-// This is bit inefficient. 1st and 3rd arguement have 1 to 1
+// This is bit inefficient. 1st and 3rd argument have 1 to 1
 // mapping. But to keep macro expansion simple, using extra argument.
 PLUGIN_FETCH_RCE_PREUE_ERROR( Rce, 0, true )
 PLUGIN_FETCH_RCE_PREUE_ERROR( Rce, 1, true )

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -377,7 +377,7 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         // if ptr is NULL && we don't have a saved SDC than we have noAttns
         // if ptr is NULL && we have a saved SDC then we have an attn with no-bits-on
-        // otherwise we are done - aready did the analysis
+        // otherwise we are done - already did the analysis
         if ( domainAtAttentionPtr == NULL)
         {
             if(l_saved_sdc == NULL)

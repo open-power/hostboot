@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -51,7 +53,7 @@ struct STEP_CODE_DATA_STRUCT;
     @par
       This resolution calls out a connected MRU, but waits until the time of the error
       to determine whats connected.  This allows for runtime GARD, dynamic failover and concurrent
-      maintainance - without having to call PRD to re-build itself.
+      maintenance - without having to call PRD to re-build itself.
     @code
      CalloutConnected iv_callout(PROC, TYPE_MCS ....);
      // ......

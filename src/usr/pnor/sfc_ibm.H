@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -253,7 +253,7 @@ class SfcIBM : public SfcDD
         SFC_REG_ECCRNG  = 0x7C, /**< ECCRNG : ECC Disable Range Size */
         SFC_REG_ERRORS  = 0x00, /**< ERRORS : Collection of Error Status Bits */
         SFC_REG_INTMSK  = 0x04, /**< INTMSK : Record of Events That Could Lead
-                                 To Interupt */
+                                 To Interrupt */
         SFC_REG_INTENM  = 0x14, /**< INTENM : Controls Which Events Lead
                                  To Interupts */
         SFC_REG_CONF2   = 0x18, /**< CONF2 : SPI Configuration */

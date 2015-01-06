@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -50,7 +50,7 @@ namespace GPIO
      * @param[in/out] io_buffer - Ptr to data buffer to be written/read into
      * @param[in/out] io_buflen - Length of the data buffer
      * @param[in] i_accessType @see devicefw/userif.H
-     * @param[in] i_args Device arguement list. Gpio Device type,
+     * @param[in] i_args Device argument list. Gpio Device type,
      *            Gpio port address
      *
      * @return errlHndl_t  NULL on success or error handle on error.
@@ -100,7 +100,7 @@ namespace GPIO
      * @param[in] i_target - Target that contains the attritutes for the device
      * @param[in/out] gpioAddr_t GPIO address information. @see gpioAddr_t
      *
-     * @return errlHndl_t - NULL on Sucess or error handle on error
+     * @return errlHndl_t - NULL on Success or error handle on error
      */
     errlHndl_t gpioReadAttributes ( TARGETING::Target * i_target,
                                     gpioAddr_t & io_gpioInfo);

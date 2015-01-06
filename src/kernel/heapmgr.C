@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -145,7 +147,7 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
 
 void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
 {
-    // Currently all large allocations fall on a page boundry,
+    // Currently all large allocations fall on a page boundary,
     // but small allocatoins never do
     if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
@@ -550,7 +552,7 @@ void* HeapManager::_allocateBig(size_t i_sz)
 
 bool HeapManager::_freeBig(void* i_ptr)
 {
-    // Currently all large allocations fall on a page boundry,
+    // Currently all large allocations fall on a page boundary,
     // but small allocations never do
     if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))

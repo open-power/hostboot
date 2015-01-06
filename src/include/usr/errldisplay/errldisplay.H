@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -139,7 +139,7 @@ private:
      * @param[in] moduleId    The id of the module which errored.
      * @param[in] reasonCode  The reason of the error.
      *
-     * @return the error log info stucture that matches the module/reason code.
+     * @return the error log info structure that matches the module/reason code.
      * or NULL, if there is no structure found.
      */
     static const errLogInfo* findErrLogInfo (uint8_t i_moduleId,

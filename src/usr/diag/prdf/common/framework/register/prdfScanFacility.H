@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -116,7 +118,8 @@ public:
    * @brief  Get a register that bitwise inverts the bitstring of a register
    *         when read or written to
    * @param  SCAN_COMM_REGISTER_CLASS source
-   * @post   Only one instance of the register with this SCR paramter will exist
+   * @post   Only one instance of the register with this SCR parameter will
+   *         exist
    */
   SCAN_COMM_REGISTER_CLASS & GetNotRegister(SCAN_COMM_REGISTER_CLASS & i_arg);
 
@@ -124,8 +127,8 @@ public:
    * @brief  Get a register that bitwise left shift the bitstring of a register
    *         when read or written to
    * @param  SCAN_COMM_REGISTER_CLASS source
-   * @post   Only one instance of the register with this SCR paramter and amount
-     @       will exist
+   * @post   Only one instance of the register with this SCR parameter and
+   *         amount will exist
    */
   SCAN_COMM_REGISTER_CLASS & GetLeftShiftRegister(
                         SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount);
@@ -134,7 +137,7 @@ public:
    * @brief Get a register that bitwise right shift the bitstring of a register
    *        when read or written to
    * @param SCAN_COMM_REGISTER_CLASS source
-   * @post  Only one instance of the register with this SCR paramter and amount
+   * @post  Only one instance of the register with this SCR parameter and amount
    * @      will exist
    */
   SCAN_COMM_REGISTER_CLASS & GetRightShiftRegister(

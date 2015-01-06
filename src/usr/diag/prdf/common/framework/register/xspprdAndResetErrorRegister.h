@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,7 +39,7 @@
 //  Description: Resets the bit(s) in an error register that were used to
 //               Analyze an error. Intended to be used with hardware
 //               registers that support SCOM AND-Write to reset bits.
-//               This has an advantage in that register is only writen
+//               This has an advantage in that register is only written
 //               to reset the bits as opposted to a read-modify-write.
 //
 //  Usage: See iipResetErrorRegister.h

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -298,7 +300,7 @@ void ResolutionFactory::printStats()
     iv_analyzeConnected.printStats( );
     PRDF_TRAC("pluginCallFW");
     iv_pluginCallFW.printStats( );
-    PRDF_TRAC("Threshhold");
+    PRDF_TRAC("Threshold");
     iv_thresholdSigFW.printStats( );
     PRDF_TRAC("EregResolution");
     iv_eregResolutionFW.printStats( );

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -145,7 +147,7 @@ public:
 protected:  // functions
 
   /**
-   Reset the error register and set mask bit if sdc is at theshold
+   Reset the error register and set mask bit if sdc is at threshold
    <ul>
    <br><b>Parameters:  </b> BitList
    <br><b>Returns:     </b> return code

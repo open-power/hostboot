@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -302,7 +304,7 @@ void* PageManager::_allocatePage(size_t n, bool userspace)
     // no chunks available and claimed we were out of memory.
     //
     // Simple solution is to just put a lock around the page allocation.  All
-    // calls to this function are guarenteed, by PageManager::allocatePage, to
+    // calls to this function are guaranteed, by PageManager::allocatePage, to
     // be from kernel space so we cannot run into any dead lock situations by
     // using a spinlock here.
     //

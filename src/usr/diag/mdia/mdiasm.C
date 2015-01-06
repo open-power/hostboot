@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -283,10 +283,10 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // Pending maint cmd complete, reset timer
                 if(mbaspa & ~mbaspamask)
                 {
-                    // Commiting an info log to help debug SW timeout
+                    // Committing an info log to help debug SW timeout
                     if((*wit)->timeoutCnt >= MBA_TIMEOUT_LOG)
                     {
-                        MDIA_FAST("sm: commiting a SW timed out info log "
+                        MDIA_FAST("sm: committing a SW timed out info log "
                                   "for %x", get_huid(target));
 
                         /*@
@@ -566,7 +566,7 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
     // schedule work items for execution in the thread pool
 
     // see if the workFlow for this target is complete
-    // and see if all phases have completed sucessfully
+    // and see if all phases have completed successfully
 
     if(i_wfp.workItem == getWorkFlow(i_wfp).end())
     {

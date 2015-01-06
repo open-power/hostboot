@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,7 +44,7 @@
  *  The operations on a standard BST are found in many algorithms books.  I
  *  used "Introduction to Algorithms, 2nd Ed." by Cormen, Leiserson, Rivest,
  *  and Stein.  The additional splay operation was first described in a 1985
- *  paper by Sleator and Tarjan, but explaination of it is readily available
+ *  paper by Sleator and Tarjan, but explanation of it is readily available
  *  online.
  *
  *  Additional reference: http://en.wikipedia.org/wiki/Splay_tree

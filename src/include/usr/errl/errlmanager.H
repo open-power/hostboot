@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -337,7 +337,7 @@ private:
 
     /**
       * @brief
-      * Pointer to the header that preceeds the error log storage buffer
+      * Pointer to the header that precedes the error log storage buffer
       * in L3 RAM.  This may go away when we adopt PNOR, or else become
       * instance variables instead of a pointer pointing within the
       * storage buffer.

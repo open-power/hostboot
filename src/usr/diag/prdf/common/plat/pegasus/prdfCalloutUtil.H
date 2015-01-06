@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,7 +47,7 @@ namespace CalloutUtil
 
 /**
  * @brief In many cases, an internal logic error may occur in which 2nd level
- *        support and FSP code need to be called out. This function is intented
+ *        support and FSP code need to be called out. This function is intended
  *        to help eliminate the need to constantly repeat the list of callouts.
  * @param i_sc The step code data struct.
  */

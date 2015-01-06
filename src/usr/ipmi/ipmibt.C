@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,7 +140,7 @@ namespace IPMI
         {
             delete[] iv_data;
 
-            // If the reading the reponse fails, the caller may still call
+            // If the reading the response fails, the caller may still call
             // delete[] on the pointer we return to them. This makes sure that
             // for this case, they're just deleting NULL.
             iv_data = NULL;

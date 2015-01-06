@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ namespace LineDelete
 {
 
     /** @enum CacheType
-     *  Used to express where a cache error occured.
+     *  Used to express where a cache error occurred.
      */
     enum CacheType
     {
@@ -83,7 +83,7 @@ namespace LineDelete
      *  Used to store and threshold cache CE errors.
      *
      *  Takes a threshold policy (such as "2 per day") and allows that many hits
-     *  per address before signalling "at threshold".  (the 2nd occurance would
+     *  per address before signalling "at threshold".  (the 2nd occurrence would
      *  be the at threshold).
      *
      *  @note This is now being used for eRepair as well as cache CEs.

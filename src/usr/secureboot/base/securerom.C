@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -468,7 +470,7 @@ void SecureROM::_cleanup()
 
             l_errl->collectTrace(SECURE_COMP_NAME,256);
 
-            // Commit here because funtion doesn't return error handle
+            // Commit here because function doesn't return error handle
             errlCommit(l_errl, SECURE_COMP_ID);
 
             // NOTE: Purposely not calling free() here -

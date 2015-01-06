@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,7 @@ private:
      *  @param[in]  i_priority      Priority of the callout
      *  @param[in]  i_deconfigState Enum indicating whether the failing part
      *                              should be deconfigured.
-     *  @param[in]  i_gardErrorType To indicate what type of failure occured
+     *  @param[in]  i_gardErrorType To indicate what type of failure occurred
      *
      *  @return void
      */
@@ -93,7 +93,7 @@ private:
      *  @param[in]  i_priority      Priority of the callout
      *  @param[in]  i_deconfigState Enum indicating whether the failing part
      *                              should be deconfigured.
-     *  @param[in]  i_gardErrorType To indicate what type of failure occured
+     *  @param[in]  i_gardErrorType To indicate what type of failure occurred
      *
      *  @return void
      */
@@ -134,7 +134,7 @@ private:
      *  @param[in]  i_priority      Priority of the callout
      *  @param [in] i_deconfigState Enum indicating whether the failing part
      *               should be deconfigured.
-     *  @param [in] i_gardErrorType to indicate what type of failure occured
+     *  @param [in] i_gardErrorType to indicate what type of failure occurred
      *
      *  @return void
      */

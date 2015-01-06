@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,7 +278,7 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
             // For the read we extract the data from the MBOX data registers.
             // MBOX_DATA_LBUS_START = 0x00050080 and the end address is
             // MBOX_DATA_LBUS_END   = 0x0005008F
-            // each address inbetween increments by 1.
+            // each address between increments by 1.
 
             //Loop through the mbox registers until all the data to be read has
             // been extracted from the mbox registers.
@@ -394,7 +394,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
 
             l_err->collectTrace(MBOX_TRACE_NAME,1024);
 
-            // Set the i_buflen to 0 to indicate no write occured
+            // Set the i_buflen to 0 to indicate no write occurred
             i_buflen = 0;
 
             break;
@@ -451,7 +451,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
             // For the write we put the data into the MBOX data registers.
             // MBOX_DATA_PIB_START    = 0x00050040 and the end address is
             // MBOX_DATA_PIB_END      = 0x0005004F
-            // each address inbetween increments by 1.
+            // each address between increments by 1.
 
             //Write Data registers.  Start at the first and increment through
             //the registers until all the data has been written.
@@ -527,7 +527,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
                                         reinterpret_cast<uint64_t>(l_64bitBuf),
                                         true /*Add HB Software Callout*/);
 
-            // Set the i_buflen to 0 to indicate no write occured
+            // Set the i_buflen to 0 to indicate no write occurred
             i_buflen = 0;
             l_err->collectTrace(MBOX_TRACE_NAME,1024);
             break;

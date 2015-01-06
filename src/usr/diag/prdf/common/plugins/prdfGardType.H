@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ namespace GardAction
     NoGard        = 0,
     // Recovered error at threshold
     Predictive    = 1,
-    // Checkstop, failing resources can be removed to prevent future occurances
+    // Checkstop, failing resources can be removed to prevent future occurrences
     Fatal         = 2,
   };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -355,7 +355,7 @@ namespace TRACEDAEMON
                 if (NULL != contBuffer)
                 {
                     sendContBuffer(contBuffer, contBufferSize);
-                    // contBuffer pointer is transfered to mailbox now.
+                    // contBuffer pointer is transferred to mailbox now.
                 }
 
                 contBuffer = reinterpret_cast<char*>(malloc(PAGESIZE));
@@ -364,7 +364,7 @@ namespace TRACEDAEMON
                 contBufferSize = 1;
             }
 
-            // Add entry to continous trace.
+            // Add entry to continuous trace.
             memcpy(&contBuffer[contBufferSize],
                    whichEntry->comp->iv_compName,
                    whichEntry->comp->iv_compNameLen);
@@ -393,13 +393,13 @@ namespace TRACEDAEMON
 
         } while(1);
 
-        // Send remainder of continous trace buffer.
+        // Send remainder of continuous trace buffer.
         if (NULL != contBuffer)
         {
             if (contBufferSize > 1)
             {
                 sendContBuffer(contBuffer, contBufferSize);
-                // contBuffer pointer is transfered to mailbox now.
+                // contBuffer pointer is transferred to mailbox now.
             }
             else
             {
@@ -736,7 +736,7 @@ namespace TRACEDAEMON
                         if (NULL != curBuffer)
                         {
                             sendExtractBuffer(curBuffer, curBufferSize);
-                            // curBuffer pointer is transfered to mailbox now.
+                            // curBuffer pointer is transferred to mailbox now.
                         }
 
                         curBuffer = reinterpret_cast<char*>
@@ -767,7 +767,7 @@ namespace TRACEDAEMON
         if (NULL != curBuffer)
         {
             sendExtractBuffer(curBuffer, curBufferSize);
-            // curBuffer pointer is transfered to mailbox now.
+            // curBuffer pointer is transferred to mailbox now.
         }
 
         // Send one last message to the SP to indicate we're done.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ class PegasusConfigurator : public Configurator
      * @brief  Create the PRD system object, all chip instances, and all domain
      *         instances.
      * @return error log handle
-     * @note   The caller of this function owns the responsiblity of deleting
+     * @note   The caller of this function owns the responsibility of deleting
      *         the system object created.
      */
     virtual errlHndl_t   build();

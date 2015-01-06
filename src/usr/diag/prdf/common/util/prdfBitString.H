@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -67,7 +69,7 @@
 //
 // Purpose:  This type is used to take advantage of the most efficient
 //           memory reference size for a specific CPU architecture.
-//           This type defintion is provided only to handle the case
+//           This type definition is provided only to handle the case
 //           where no previous defintions exists.
 //
 // End Type Specification //////////////////////////////////////////////
@@ -192,7 +194,7 @@ public:
 
   /*!
    Destructor
-   \notes This destructor does nothing. It is requred for proper desctruction
+   \notes This destructor does nothing. It is required for proper destruction
    of derived classes.
    */
   virtual ~BitString(void);
@@ -229,7 +231,7 @@ public:
   uint32_t GetSetCount(uint32_t bit_position, uint32_t leng) const;
 
   /*!
-   Get a copy of a subfield withing the bitstring
+   Get a copy of a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
    \return Returned value is left justified (See GetFieldJustified)
@@ -239,7 +241,7 @@ public:
   CPU_WORD GetField(uint32_t bit_position,uint32_t length) const;
 
   /*!
-   Get a copy of a subfield withing the bitstring
+   Get a copy of a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
    \return Returned value is right justified (See GetField)
@@ -249,7 +251,7 @@ public:
   CPU_WORD GetFieldJustify(uint32_t bit_position,uint32_t length) const;
 
   /*!
-   Set value into a subfield withing the bitstring
+   Set value into a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
    \pre (bit_position + length) <= GetLength(); length <= sizeof(CPU_WORD)*8
@@ -264,7 +266,7 @@ public:
 
 
   /*!
-   Set value into a subfield withing the bitstring
+   Set value into a subfield within the bitstring
    \param starting bit position
    \param # of bits in the field
    \pre (bit_position + length) <= GetLength(); length <= sizeof(CPU_WORD)*8
@@ -385,20 +387,20 @@ public:
   /*!
    Mask off (Clear) bits positions in this string that are Set in the string provided
    \param bitString containing the mask
-   \post Set bit positions in string provded are cleared in this string
-   \notes If the paramter string is longer than this string than extra bits are ignored.
-          If the paramter string is shorter than this string than extra bits in this string
+   \post Set bit positions in string provided are cleared in this string
+   \notes If the parameter string is longer than this string than extra bits are ignored.
+          If the parameter string is shorter than this string than extra bits in this string
           are not modified.
    \verbatim
-    Examples:  Paramter String:  1001
+    Examples:  Parameter String:  1001
                Old String:       1100
                New String:       0100
 
-               Paramter String:  100111
+               Parameter String:  100111
                Old String:       1100
                New String:       0100
 
-               Paramter String:  1001
+               Parameter String:  1001
                Old String:       110001
                New String:       010001
 
@@ -539,7 +541,7 @@ private:
  allocated to hold the Bit String.  The buffer is "owned"
  by the Bit String Buffer. Sufficient memory
  is allocated and deallocted in the constructor and
- destructor, respectively.  In addtion, the assignemnt
+ destructor, respectively.  In addition, the assignemnt
  operator will adjust the amount of memory needed as
  necessary for the assignment. A byte capacity value is also maintained.
  The internal buffer is always guaranteed to have this capacity of bytes.
@@ -607,7 +609,7 @@ private: // data
 //! BitStringOffset
 /*!
  BitStringOffset provides a Bit String that allows a starting position that
- is not limited to a memory alligned boundary.
+ is not limited to a memory aligned boundary.
  \remarks
  The Bit String Offset provides the ability to specify a start bit offset from the
  address provided as the start position of the bit string. The class will
@@ -766,7 +768,7 @@ CPU_WORD * BitString::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t i
 //  Dependencies:  None.
 //
 //  Time Complexity: O(m) where m is the number of bits to modify
-//                   (paramter l)
+//                   (parameter l)
 //
 //  Examples:  See Pattern(uint32_t, uint32_t, CPU_WORD, uint32_t)
 //

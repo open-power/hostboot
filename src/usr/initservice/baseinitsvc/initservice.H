@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -107,7 +109,7 @@ public:
      * @brief   Start a task using the taskname string in the TaskInfo struct.
      *
      *          taskname string will be something like "libtargeting.so", which
-     *          is the name of the compiled and linked targetting module.
+     *          is the name of the compiled and linked targeting module.
      *          The module is expected to have implemented a extern "C"
      *          function called "void _start(void *args)" which is considered
      *          to be the "task entry point".       *

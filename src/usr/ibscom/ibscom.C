@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -496,7 +496,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                 get_huid(i_target),
                                 i_addr);
                 //This error should NEVER get returned to caller, so it's a
-                //FW bug if it actually gets comitted.
+                //FW bug if it actually gets committed.
                 l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                            HWAS::SRCI_PRIORITY_HIGH);
                 break;
@@ -538,7 +538,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                                          i_addr),
                                     0);
                     //This error should NEVER get returned to caller, so it's a
-                    //FW bug if it actually gets comitted.
+                    //FW bug if it actually gets committed.
                     l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                                HWAS::SRCI_PRIORITY_HIGH);
                     ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target")

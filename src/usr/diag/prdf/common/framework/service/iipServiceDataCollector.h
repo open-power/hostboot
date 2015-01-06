@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -596,7 +596,7 @@ public:
   /**
    Query for RepeatGard ErrorType
    <ul>
-   <br><b>Paramters    </b> None.
+   <br><b>Parameters    </b> None.
    <br><b>Returns:     </b> GardAction::ErrorType
    <br><b>Requirements:</b> SetAttentionType()
    <br><b>Promises     </b> ErrorType set by Gard or NoGard
@@ -692,7 +692,7 @@ public:
   /**
    Get a PRD timer value based on the time of this error
    <ul>
-   <br><b>Paramter:    </b> None
+   <br><b>Parameter:    </b> None
    <br><b>Returns:     </b> Timer
    <br><b>Requirments: </b> None.
    <br><b>Promises:    </b> None.
@@ -738,8 +738,8 @@ public:
   /**
    Flatten the service data collector
    <ul>
-   <br><b>Paramter:    </b> i_buffer ptr to buffer
-   <br><b>Paramter:    </b> io_size = buffer size
+   <br><b>Parameter:    </b> i_buffer ptr to buffer
+   <br><b>Parameter:    </b> io_size = buffer size
    <br><b>Returns:     </b> [SUCCESS(0) | returncode]; io_size = # bytes written to buffer
    <br><b>Requirments: </b> None.
    <br><b>Promises:    </b> None.
@@ -753,7 +753,7 @@ public:
   uint32_t Flatten(uint8_t * i_buffer, uint32_t & io_size) const;
 
   ServiceDataCollector & operator=(const uint8_t * i_flatdata);
-  // ServiceDataCollector & operator=(const ServiceDataCollector &scd)-compiler default is sufficent
+  // ServiceDataCollector & operator=(const ServiceDataCollector &scd)-compiler default is sufficient
 
 #endif
 
@@ -857,7 +857,7 @@ public:
   /**
    SetDump - Specifiy dump of a callout
    <ul>
-   <br><b>Paramter:    </b> dumpRequestContent
+   <br><b>Parameter:    </b> dumpRequestContent
    <br><b>Returns:     </b> Nothing
    <br><b>Requirments: </b> None.
    <br><b>Promises:    </b> IsDump() == true
@@ -875,7 +875,7 @@ public:
   /**
    Has a Dump been requested
    <ul>
-   <br><b>Paramter:    </b> None
+   <br><b>Parameter:    </b> None
    <br><b>Returns:     </b> [true | false]
    <br><b>Requirments: </b> None.
    <br><b>Promises:    </b> None.
@@ -887,7 +887,7 @@ public:
   /**
    Get the dump Id
    <ul>
-   <br><b>Paramter:    </b> None
+   <br><b>Parameter:    </b> None
    <br><b>Return:      </b> dumpRequestType [DUMP_HARDWARE_ONLY | DUMP_HARDWARE_MAINSTORE | DUMP_NO_DUMP]
    <br><b>Return:      </b> dumpRequestContent [DUMP_HW_ABBR | DUMP_SW_ABBR]
    <br><b>Return:      </b> oDumpRequestChipId [Handle]

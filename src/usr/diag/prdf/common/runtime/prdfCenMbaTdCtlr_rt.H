@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -449,7 +449,7 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      * @param i_descTag Description tag for the capture data. Used to
      *        distinguish between data captured at the beginning or end or
      *        analysis.
-     * @note  Only intented to be called by collectStateCaptureDataStart() or
+     * @note  Only intended to be called by collectStateCaptureDataStart() or
      *        collectStateCaptureDataEnd().
      */
     void collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,

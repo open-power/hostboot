@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -229,7 +229,7 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                 if( NULL != errH ) break;
 
                 // If register is in a EX chiplet, need to update PORE image.
-                // The PORE update is necessary to avoid loosing the FIR MASK
+                // The PORE update is necessary to avoid losing the FIR MASK
                 // after the Core exits the sleep-winkle state.
                 if( TYPE_EX == PlatServices::getTargetType(i_target) )
                 {

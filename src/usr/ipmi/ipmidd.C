@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,7 +240,7 @@ void IpmiDD::pollCtrl(void)
         {
             // If we're idle, tell the resoure provider to check for any
             // pending messages which were delayed due to contention. But don't
-            // send a message everytime we see idle, only if there we suspect
+            // send a message every time we see idle, only if there we suspect
             // we sent EAGAINs.
             if ((ctrl & IDLE_STATE) == 0)
             {
