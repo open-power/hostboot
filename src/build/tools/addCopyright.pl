@@ -687,7 +687,7 @@ sub checkCopyrightBlock( $$ )
         }
 
         # Grab file contributors in block
-        if ( m/[+]/ )
+        if ( m/\[\+\]/ )
         {
             # remove everything through [+]
             $_ =~ s/[^\]]*\]//;
