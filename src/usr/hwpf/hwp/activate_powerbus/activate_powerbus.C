@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -349,7 +349,7 @@ void * call_host_slave_sbe_update( void * io_pArgs )
 
         // Reset I2C devices before trying to access the SBE SEEPROMs
         // Any error returned should not fail istep
-        l_errl = I2C::i2cResetMasters( I2C::I2C_RESET_PROC_HOST );
+        l_errl = I2C::i2cResetActiveMasters( I2C::I2C_RESET_PROC_HOST );
         if (l_errl)
         {
             // Commit error

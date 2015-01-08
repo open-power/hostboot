@@ -98,13 +98,11 @@ void* host_init_fsi( void *io_pArgs )
             break;
         }
 
-        l_errl = I2C::i2cResetMasters(I2C::I2C_RESET_ALL, false);
+        l_errl = I2C::i2cResetActiveMasters(I2C::I2C_RESET_ALL, false);
         if (l_errl)
         {
             // Commit this error
             errlCommit( l_errl, HWPF_COMP_ID );
-            l_errl = NULL;
-            break;
         }
 
     } while (0);
