@@ -57,6 +57,70 @@ namespace PlatServices
 
 //##############################################################################
 //##
+//##                     System Level Utility Functions
+//##
+//##############################################################################
+
+// local utility function.
+ATTR_PAYLOAD_KIND_type getPayloadType()
+{
+    ATTR_PAYLOAD_KIND_type payload = PAYLOAD_KIND_UNKNOWN;
+
+    TargetHandle_t sysTrgt = getSystemTarget();
+    if ( NULL != sysTrgt )
+    {
+        payload = sysTrgt->getAttr<ATTR_PAYLOAD_KIND>();
+    }
+
+    return payload;
+}
+
+//------------------------------------------------------------------------------
+
+bool isHyprConfigPhyp()
+{
+    return PAYLOAD_KIND_PHYP == getPayloadType();
+}
+
+//------------------------------------------------------------------------------
+
+bool isHyprConfigOpal()
+{
+    return PAYLOAD_KIND_SAPPHIRE == getPayloadType();
+}
+
+//------------------------------------------------------------------------------
+
+bool isHyprRunning()
+{
+    bool rc = false;
+
+    #ifdef __HOSTBOOT_MODULE
+
+        // ATTR_PAYLOAD_STATE is not defined in Hostboot. We can assume that if
+        // __HOSTBOOT_RUNTIME is defined then the hypervisor is running.
+
+        #ifdef __HOSTBOOT_RUNTIME
+        rc = true;
+        #else
+        rc = false;
+        #endif
+
+    #else
+
+    TargetHandle_t sysTrgt = getSystemTarget();
+    if ( NULL != sysTrgt )
+    {
+        rc = (PAYLOAD_STATE_RUNNING == sysTrgt->getAttr<ATTR_PAYLOAD_STATE>());
+    }
+
+    #endif
+
+    return rc;
+}
+
+//##############################################################################
+//##
 //##                 Target Manipulation Utility Functions
 //##
 //##############################################################################
@@ -1403,6 +1467,12 @@ bool mnfgSpareDramDeploy()
 
 bool isMfgCeCheckingEnabled()
 { return isMnfgFlagSet( MNFG_FLAG_IPL_MEMORY_CE_CHECKING ); }
+
+bool isMfgAvpEnabled()
+{ return isMnfgFlagSet( MNFG_FLAG_AVP_ENABLE ); }
+
+bool isMfgHdatAvpEnabled()
+{ return isMnfgFlagSet( MNFG_FLAG_HDAT_AVP_ENABLE ); }
 
 } // end namespace PlatServices
 

@@ -54,6 +54,21 @@ namespace PlatServices
 
 //##############################################################################
 //##
+//##                     System Level Utility Functions
+//##
+//##############################################################################
+
+/** @return TRUE if this system is, or will be, using PHYP. FALSE otherwise. */
+bool isHyprConfigPhyp();
+
+/** @return TRUE if this system is, or will be, using OPAL. FALSE otherwise. */
+bool isHyprConfigOpal();
+
+/** @return TRUE if the hypervisor is running. FALSE otherwise. */
+bool isHyprRunning();
+
+//##############################################################################
+//##
 //##                 Target Manipulation Utility Functions
 //##
 //##############################################################################
@@ -420,6 +435,13 @@ bool mnfgSpareDramDeploy();
  * @return TRUE if MNFG_IPL_MEMORY_CE_CHECKING is set, FALSE otherwise.
  */
 bool isMfgCeCheckingEnabled();
+
+/** @return TRUE if MNFG_FLAG_AVP_ENABLE is set, FALSE otherwise.
+ */
+bool isMfgAvpEnabled();
+
+/** @return TRUE if MNFG_FLAG_HDAT_AVP_ENABLE is set, FALSE otherwise. */
+bool isMfgHdatAvpEnabled();
 
 } // end namespace PlatServices
 

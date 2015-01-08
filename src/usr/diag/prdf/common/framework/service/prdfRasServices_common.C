@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -472,19 +472,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         PRDF_RECONFIG_LOOP(deconfigState);
     }
 
-    //**********************************************************
-    // Systems where Hypervisor is not PHYP, we should not gard
-    // a hardware resource until we are very sure that it is a
-    // hardware issue. Idea is to prevent a loss of hardware
-    // resource in cases where software could have been
-    // a cause as well.
-    //**********************************************************
-
-    if( isSapphireRunning() && sappSwNoGardReq && sappHwNoGardReq )
+    // OPAL has requested that we not gard any hardware if it is possible that
+    // software generated the attention. This will be determined if there is a
+    // software callout with higher priority than a hardware callout.
+    if ( sappSwNoGardReq && sappHwNoGardReq &&          // Gard requirements met
+         isHyprConfigOpal() && isHyprRunning() &&       // OPAL is running
+         !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() ) // No AVPs running
     {
-        // It is a Sapphire based system.
-        // Hardware callout is of low priority but SW callout priority
-        // is High/Medium.
         gardErrType = HWAS::GARD_NULL;
         prdGardErrType = GardAction::NoGard;
     }

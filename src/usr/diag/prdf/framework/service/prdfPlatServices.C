@@ -49,6 +49,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <targeting/common/targetservice.H>
+#include <initservice/initserviceif.H>
 
 using namespace TARGETING;
 
@@ -93,6 +94,21 @@ void initiateUnitDump( TargetHandle_t i_target,
     {
         PRDF_COMMIT_ERRL(i_errl, i_errlActions);
     }
+}
+
+//------------------------------------------------------------------------------
+
+bool isSpConfigFsp()
+{
+    #ifdef __HOSTBOOT_RUNTIME
+
+    return false; // Should never have an FSP when using HBRT.
+
+    #else
+
+    return INITSERVICE::spBaseServicesEnabled();
+
+    #endif
 }
 
 //##############################################################################

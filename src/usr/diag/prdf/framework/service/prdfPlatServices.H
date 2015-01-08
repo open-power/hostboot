@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,15 +64,6 @@ namespace PlatServices
 // prdfPlatServices_common.H for the function declarations.
 
 inline bool atRuntime()
-{
-    #ifdef __HOSTBOOT_RUNTIME
-    return true;
-    #else
-    return false;
-    #endif
-}
-
-inline bool isSapphireRunning()
 {
     #ifdef __HOSTBOOT_RUNTIME
     return true;
