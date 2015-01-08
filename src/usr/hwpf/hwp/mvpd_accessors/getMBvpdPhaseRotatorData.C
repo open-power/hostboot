@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,9 +175,9 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
                 break;  //  break out with fapirc
             }
 
-            uint32_t l_dimmPos = 0;
-            //@todo-RTC:116304
-            l_fapirc = FAPI_ATTR_GET(ATTR_POS,&l_mbTarget,l_dimmPos);
+            uint8_t l_dimmPos = 0;
+            l_fapirc = FAPI_ATTR_GET(ATTR_ISDIMM_MBVPD_INDEX,&l_mbTarget,
+                                    l_dimmPos);
             if(l_fapirc)
             {
                 FAPI_ERR("getMBvpdPhaseRotatorData: read of ATTR_POS failed");

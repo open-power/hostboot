@@ -773,4 +773,24 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>ISDIMM_MBVPD_INDEX</id>
+    <description>
+        Multiple centaurs can sometimes have their VPD located in one
+        physical SEEPROM. This is the index into the memory buffer VPD
+        for this centaur.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_ISDIMM_MBVPD_INDEX</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

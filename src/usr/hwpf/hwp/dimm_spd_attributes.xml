@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.45 2014/12/10 14:03:53 rjknight Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.46 2015/01/16 20:03:12 andrewg Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -2543,6 +2543,14 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_ISDIMM_MBVPD_INDEX</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>VPD index for associated chip's memory buffer VPD</description>
+    <valueType>uint8</valueType>
+    <platInit/>
 </attribute>
 
 </attributes>

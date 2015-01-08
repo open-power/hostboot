@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $ID: getISDIMMTOC4DAttrs.C, v 1.1 2014/9/25 04:38:00 eliner Exp $
+// $Id: getISDIMMTOC4DAttrs.C,v 1.3 2015/01/16 21:43:22 andrewg Exp $
 /**
  * @file getISDIMMTOC4DAttrs.C
  *
@@ -120,9 +120,8 @@ fapi::ReturnCode getDQAttrISDIMM(
             break;
         }
 
-        uint32_t l_dimmPos = 0;
-        //@todo: RTC 116304
-        l_fapirc = FAPI_ATTR_GET(ATTR_POS,&i_mbTarget,l_dimmPos);
+        uint8_t l_dimmPos = 0;
+        l_fapirc = FAPI_ATTR_GET(ATTR_ISDIMM_MBVPD_INDEX,&i_mbTarget,l_dimmPos);
         if(l_fapirc)
         {
             FAPI_ERR("getDQAttrISDIMM: read of ATTR_POS failed");
@@ -221,9 +220,8 @@ fapi::ReturnCode getDQSAttrISDIMM(
             break;
         }
 
-        uint32_t l_dimmPos = 0;
-        //@todo: RTC 116304
-        l_fapirc = FAPI_ATTR_GET(ATTR_POS,&i_mbTarget,l_dimmPos);
+        uint8_t l_dimmPos = 0;
+        l_fapirc = FAPI_ATTR_GET(ATTR_ISDIMM_MBVPD_INDEX,&i_mbTarget,l_dimmPos);
         if(l_fapirc)
         {
             FAPI_ERR("getDQAttrISDIMM: read of ATTR_POS failed");
