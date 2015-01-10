@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@
 
 #include <proc_enable_reconfig.H>
 
+#include <console/consoleif.H>
 
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmifruinv.H>
