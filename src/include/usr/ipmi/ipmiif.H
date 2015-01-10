@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,9 @@ namespace IPMI
     // Application messages
     inline const command_t get_device_id(void)
     { return std::make_pair(NETFUN_APP, 0x01); }
+
+    inline const command_t set_acpi_power_state(void)
+    { return std::make_pair(NETFUN_APP, 0x06); }
 
     inline const command_t set_watchdog(void)
     { return std::make_pair(NETFUN_APP, 0x24); }

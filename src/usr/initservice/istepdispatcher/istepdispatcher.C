@@ -66,6 +66,7 @@
 #include <hwpisteperror.H>
 #include <pnor/pnorif.H>
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
+#include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
 #include <config.h>
 
 namespace ISTEPS_TRACE
@@ -197,6 +198,19 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 break;
             }
         }
+#ifdef CONFIG_BMC_IPMI
+        //set ACPI power state
+        errlHndl_t err_ipmi = IPMI::setACPIPowerState();
+
+        if(err_ipmi)
+        {
+           TRACFCOMP(g_trac_initsvc,
+                          "init: ERROR: IPMI set ACPI Power State Failed");
+            err_ipmi->collectTrace("INITSVC", 1024);
+            errlCommit(err_ipmi, INITSVC_COMP_ID );
+        }
+#endif
+
 
         if(iv_istepMode)
         {
