@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,11 @@
 #include <limits.h>
 
 extern trace_desc_t *g_trac_devtree;
+
+#define DEBUGOUT(msg...)
+#define DEBUGOUTB(data,len,msg...)
+//#define DEBUGOUT(msg...)  TRACFCOMP(g_trac_devtree,msg)
+//#define DEBUGOUTB(data,len,msg...)  DEBUGOUT(msg);TRACFBIN(g_trac_devtree,"",data,len);
 
 namespace DEVTREE
 {
@@ -223,6 +228,7 @@ dtOffset_t devTree::findNode(const char* nodePath)
 
 dtOffset_t devTree::addNode(dtOffset_t parentNodeOffset, const char* nodeName)
 {
+    DEBUGOUT("DT> addNode:%s",nodeName);
     uint32_t* curWord = getStructSectionAtOffset(parentNodeOffset);
     int skipWords = getNodeTagAndNameWords(parentNodeOffset);
 
@@ -288,12 +294,14 @@ void devTree::addProperty(dtOffset_t parentNodeOffset, const char* propertyName)
     *curWord++ = DT_PROP;
     *curWord++ = 0;
     *curWord++ = addString(propertyName);
+    DEBUGOUT("DT> addProperty:%s",propertyName);
 }
 
 void devTree::addPropertyString(dtOffset_t parentNodeOffset,
                                 const char* propertyName,
                                 const char* propertyData)
 {
+    DEBUGOUT("DT> addPropertyString:%s=%s",propertyName,propertyData);
     uint32_t* curWord = getStructSectionAtOffset(parentNodeOffset);
     int skipWords = getNodeTagAndNameWords(parentNodeOffset);
 
@@ -329,6 +337,7 @@ void devTree::addPropertyBytes(dtOffset_t parentNodeOffset,
                                const uint8_t* propertyData,
                                uint32_t numBytes)
 {
+    DEBUGOUTB(propertyData,numBytes,"DT> addPropertyBytes:%s=",propertyName);
     uint32_t* curWord = getStructSectionAtOffset(parentNodeOffset);
     int skipWords = getNodeTagAndNameWords(parentNodeOffset);
 
@@ -385,6 +394,7 @@ void devTree::addPropertyStrings(dtOffset_t parentNodeOffset,
     *curWord++ = DT_PROP;
     *curWord++ = newPropertyDataLength ;
     *curWord++ = addString(propertyName);
+    DEBUGOUT("DT> addPropertyStrings:%s",propertyName);
 
     for(int i = 0; i < newPropertyDataWords; ++i)
     {
@@ -394,6 +404,7 @@ void devTree::addPropertyStrings(dtOffset_t parentNodeOffset,
     char* target = (char*)curWord;
     for(int stringIndex = 0; stringIndex < numStrings; stringIndex++)
     {
+        DEBUGOUT("DT>    %s",propertyData[stringIndex]);
         size_t curStringLen = strlen(propertyData[stringIndex]);
         memcpy(target, propertyData[stringIndex], curStringLen);
         target += curStringLen + 1;
@@ -432,9 +443,11 @@ void devTree::addPropertyCells32(dtOffset_t parentNodeOffset,
     *curWord++ = DT_PROP;
     *curWord++ = newPropertyDataLength;
     *curWord++ = addString(propertyName);
+    DEBUGOUT("DT> addPropertyCells32:%s",propertyName);
 
     for(uint32_t i = 0; i < numCells; ++i)
     {
+        DEBUGOUT("DT>    %.8X",cells[i]);
         *curWord++ = cells[i];
     }
 }
@@ -455,9 +468,11 @@ void devTree::addPropertyCells64(dtOffset_t parentNodeOffset,
     *curWord++ = DT_PROP;
     *curWord++ = newPropertyDataLength;
     *curWord++ = addString(propertyName);
+    DEBUGOUT("DT> addPropertyCells32:%s",propertyName);
 
     for(uint32_t i = 0; i < numCells; ++i)
     {
+        DEBUGOUT("DT>    %.16X",cells[i]);
         *curWord++ = cells[i] >> 32;
         *curWord++ = cells[i];
     }

@@ -78,9 +78,9 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 #define CENTAUR_MASTER_ENGINES 1    // Number of Engines in a Centaur
 
 // Derived from ATTR_I2C_BUS_SPEED_ARRAY[engine][port] attribute
-const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type  var = {{NULL}};
-#define I2C_BUS_ATTR_MAX_ENGINE sizeof(var)/sizeof(var[0])
-#define I2C_BUS_ATTR_MAX_PORT   sizeof(var[0])/sizeof(var[0][0])
+const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type g_var = {{NULL}};
+#define I2C_BUS_ATTR_MAX_ENGINE  I2C_BUS_MAX_ENGINE(g_var)
+#define I2C_BUS_ATTR_MAX_PORT    I2C_BUS_MAX_PORT(g_var)
 
 
 // ----------------------------------------------
@@ -2984,5 +2984,25 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
     return err;
 }
 
+/**
+ * @brief Return a set of information related to each I2C master on
+ *   the given target chip
+ */
+void getMasterInfo( const TARGETING::Target* i_chip,
+                    std::list<MasterInfo_t>& o_info )
+{
+    TRACDCOMP(g_trac_i2c,"getMasterInfo(%.8X)",TARGETING::get_huid(i_chip));
+    for( uint32_t engine = 0;
+         engine < I2C_BUS_ATTR_MAX_ENGINE;
+         engine++ )
+    {
+        MasterInfo_t info;
+        info.scomAddr = 0x000A0000 + engine*0x20;
+        info.engine = engine;
+        info.freq = i2cGetNestFreq()*1000*1000; //convert MHz->Hz
+
+        o_info.push_back(info);
+    }
+}
 
 } // end namespace I2C

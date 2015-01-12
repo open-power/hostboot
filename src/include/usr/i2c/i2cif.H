@@ -25,6 +25,11 @@
 #ifndef __I2CIF_H
 #define __I2CIF_H
 
+// Handy macros to check i2c ranges
+//  Pass in an instance of a TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type
+#define I2C_BUS_MAX_ENGINE(var) (sizeof(var)/sizeof(var[0]))
+#define I2C_BUS_MAX_PORT(var)   (sizeof(var[0])/sizeof(var[0][0]))
+
 namespace I2C
 {
 
@@ -145,6 +150,31 @@ enum i2cSetAccessModeType
  */
 void i2cSetAccessMode( i2cSetAccessModeType i_setModeType );
 
+
+
+/**
+ * @brief Define a set of information about the I2C masters
+ *   (primarily used to populate the devtree)
+ */
+struct MasterInfo_t
+{
+    uint64_t scomAddr; //< Base scom address for control regs
+    uint8_t engine;    //< Engine number
+    uint32_t freq;     //< Clock frequency of master in Hz
+};
+
+/**
+ * @brief Return a set of information related to each I2C master on
+ *   the given target chip
+ *
+ * @param[in] i_chip - I2C Master chip (proc or membuf)
+ * @param[out] o_info - list of I2C Information
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+void getMasterInfo( const TARGETING::Target* i_chip,
+                    std::list<MasterInfo_t>& o_info );
 
 };  // end namespace I2C
 

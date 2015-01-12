@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <i2c/i2cif.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/attributes.H>
+#include <targeting/common/utilFilter.H>
 #include "../i2c.H"
 
 extern trace_desc_t* g_trac_i2c;
@@ -1005,6 +1006,28 @@ class I2CTest: public CxxTest::TestSuite
             }while(0);
 
 
+        }
+
+        /**
+         * @brief Verify we retrieve all of the EEPROMs we can think of
+         */
+        void test_getMasterInfo( void )
+        {
+            std::list<I2C::MasterInfo_t> info;
+            TARGETING::TargetHandleList allchips;
+            TARGETING::getAllChips( allchips, TARGETING::TYPE_NA );
+            for( TARGETING::TargetHandleList::iterator tgt = allchips.begin();
+                 tgt != allchips.end();
+                 ++tgt )
+            {
+                getMasterInfo( *tgt, info );
+                for( std::list<I2C::MasterInfo_t>::iterator i2cm = info.begin();
+                     i2cm != info.end();
+                     ++i2cm )
+                {
+                    TRACFCOMP( g_trac_i2c, "Found I2C Master: Master=%.8X :: Scom=%.8X, Eng=%d, Freq=%d", TARGETING::get_huid(*tgt), i2cm->scomAddr, i2cm->engine, i2cm->freq );
+                }
+            }
         }
 
 };

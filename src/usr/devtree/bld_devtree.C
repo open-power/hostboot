@@ -46,6 +46,8 @@
 #include <config.h>
 #include <devicefw/userif.H>
 #include <vpd/cvpdenums.H>
+#include <i2c/i2cif.H>
+#include <i2c/eepromif.H>
 
 
 trace_desc_t *g_trac_devtree = NULL;
@@ -87,12 +89,37 @@ enum BuildConstants
 
 
 
+//@todo-RTC:123043 -- Should use the functions in RT_TARG
 uint32_t getProcChipId(const TARGETING::Target * i_pProc)
 {
     uint32_t l_fabId = i_pProc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
     uint32_t l_procPos = i_pProc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
     return ( (l_fabId << CHIPID_NODE_SHIFT) + l_procPos);
 }
+
+//@todo-RTC:123043 -- Should use the functions in RT_TARG
+uint32_t getMembChipId(const TARGETING::Target * i_pMemb)
+{
+    PredicateCTM l_mcs(CLASS_UNIT,TYPE_MCS, MODEL_NA);
+    TargetHandleList mcs_list;
+    targetService().getAssociated(mcs_list,
+                                  i_pMemb,
+                                  TargetService::PARENT_BY_AFFINITY,
+                                  TargetService::ALL,
+                                  &l_mcs);
+
+    if( mcs_list.size() != 1 )
+    {
+        //should never happen
+        return 0;
+    }
+    Target* l_parentMCS = *(mcs_list.begin());
+    uint32_t l_procId = getProcChipId(getParentChip(l_parentMCS));
+    uint32_t l_membId = CEN_ID_TAG | (l_procId << CEN_ID_SHIFT);
+    l_membId |= l_parentMCS->getAttr<ATTR_CHIP_UNIT>();
+    return l_membId;
+}
+
 
 uint64_t getHomerPhysAddr(const TARGETING::Target * i_pProc)
 {
@@ -114,6 +141,263 @@ uint64_t getHomerPhysAddr(const TARGETING::Target * i_pProc)
                getProcChipId(i_pProc), targHomer );
 
     return targHomer;
+}
+
+void add_i2c_info( const TARGETING::Target* i_targ,
+                   devTree* i_dt,
+                   dtOffset_t i_node )
+{
+    TRACFCOMP(g_trac_devtree,"add_i2c_info(%X)",TARGETING::get_huid(i_targ));
+
+    //get list of all I2C Masters
+    std::list<I2C::MasterInfo_t> l_i2cInfo;
+    I2C::getMasterInfo( i_targ, l_i2cInfo );
+
+    //find all of the EEPROMs connected via i2c
+    std::list<EEPROM::EepromInfo_t> l_eepromInfo;
+    EEPROM::getEEPROMs( l_eepromInfo );
+
+    //add any other i2c devices here as needed, e.g. TPM, etc
+
+    //figure out what kind of chip we're talking about
+    TARGETING::TYPE l_master_type = i_targ->getAttr<TARGETING::ATTR_TYPE>();
+    const char* l_masterName = "ibm,unknown";
+    const char* l_chipname = "xx";
+    uint32_t l_chipid = 0x0;
+    if( l_master_type == TARGETING::TYPE_PROC )
+    {
+        l_masterName = "ibm,power8-i2cm";
+        l_chipid = getProcChipId(i_targ);
+        l_chipname = "p8";
+    }
+    else if( l_master_type == TARGETING::TYPE_MEMBUF )
+    {
+        l_masterName = "ibm,centaur-i2cm";
+        l_chipid = getMembChipId(i_targ);
+        l_chipname = "cen";
+    }
+
+    //compatible devices to make Opal/Linux happy
+    static const struct
+    {
+        const char* name;
+        size_t byteSize;
+        size_t addrBytes;
+    } atmel_ids[] = {
+        { "atmel,24c128", 16*KILOBYTE, 2 },
+        { "atmel,24c256", 32*KILOBYTE, 2 },
+        { "atmel,24c02",  256,         1 },
+
+        //Currently our minimum is 1KB, even for the 256 byte SPD
+        { "atmel,24c02",  1*KILOBYTE,  1 },
+    };
+
+    /*
+     Devtree hierarchy is like so
+         i2cm@12345 {
+             i2c-bus@0 {
+                 eeprom@12 {
+                 }
+             }
+             i2c-bus@1 {
+                 eeprom@12 {
+                 }
+                 eeprom@34 {
+                 }
+             }
+         }
+     */
+    for( std::list<I2C::MasterInfo_t>::iterator i2cm = l_i2cInfo.begin();
+         i2cm != l_i2cInfo.end();
+         ++i2cm )
+    {
+        /*
+         i2cm@a0020 {
+             reg = <0xa0020 0x20>; << scom address space
+             chip-engine# = <0x1>; << i2c engine
+             compatible = "ibm,power8-i2cm"; << what Opal wants
+             clock-frequency = <0x2faf080>; << local bus in Hz
+             #address-cells = <0x1>;
+             phandle = <0x10000062>; << auto-filled
+             #size-cells = <0x0>;
+             linux,phandle = <0x10000062>; << Opal fills in
+         }
+         */
+        dtOffset_t l_i2cNode = i_dt->addNode(i_node,
+                                             "i2cm", i2cm->scomAddr);
+        uint32_t l_i2cProp[2] = {
+            static_cast<uint32_t>(i2cm->scomAddr),
+            0x20 }; //0x20 is number of scom regs per engine
+        i_dt->addPropertyCells32(l_i2cNode, "reg", l_i2cProp, 2);
+        i_dt->addPropertyCell32(l_i2cNode, "chip-engine#", i2cm->engine);
+        const char* l_i2cCompatStrs[] = {l_masterName, NULL};
+        i_dt->addPropertyStrings(l_i2cNode, "compatible", l_i2cCompatStrs);
+        i_dt->addPropertyCell32(l_i2cNode, "clock-frequency",
+                                i2cm->freq / 4); //Opal wants it pre-divided
+        i_dt->addPropertyCell32(l_i2cNode, "#address-cells", 1);
+        i_dt->addPropertyCell32(l_i2cNode, "#size-cells", 0);
+
+
+        /*I2C busses*/
+        std::list<EEPROM::EepromInfo_t>::iterator eep = l_eepromInfo.begin();
+        while( eep != l_eepromInfo.end() )
+        {
+            // ignore the devices that aren't on the current target
+            if( eep->i2cMaster != i_targ )
+            {
+                eep = l_eepromInfo.erase(eep);
+                continue;
+            }
+            // skip the devices that are on a different engine
+            else if( eep->engine != i2cm->engine )
+            {
+                ++eep;
+                continue;
+            }
+
+            /*
+             i2c-bus@0 {
+                 reg = <0x0>;
+                 bus-frequency = <0x61a80>;
+                 compatible = "ibm,power8-i2c-port", << Opal fills in
+                              "ibm,opal-i2c"; << Opal fills in
+                 ibm,opal-id = <0x1>; << Opal fills in
+                 ibm,port-name = "p8_00000000_e1p0"; << chip_chipid_eng_port
+                 #address-cells = <0x1>;
+                 phandle = <0x10000063>; << auto-filled
+                 #size-cells = <0x0>;
+                 linux,phandle = <0x10000063>;
+             }
+             */
+            dtOffset_t l_busNode = i_dt->addNode( l_i2cNode,
+                                                  "i2c-bus", eep->port );
+            i_dt->addPropertyCell32(l_busNode, "reg", 0);
+            i_dt->addPropertyCell32(l_busNode, "bus-frequency", eep->busFreq);
+            i_dt->addPropertyCell32(l_busNode, "#address-cells", 1);
+            i_dt->addPropertyCell32(l_busNode, "#size-cells", 0);
+            char portname[20];
+            sprintf( portname, "%s_%.8X_e%dp%d",
+                     l_chipname,
+                     l_chipid,
+                     eep->engine,
+                     eep->port );
+            i_dt->addPropertyString(l_busNode,
+                                    "ibm,port-name",
+                                    portname);
+
+            // find any other devices on the same port so we can add them
+            //  all at once
+            EEPROM::EepromInfo_t cur_eep = *eep;
+            std::list<EEPROM::EepromInfo_t>::iterator eep2 = eep;
+            while( eep2 != l_eepromInfo.end() )
+            {
+                // skip the devices for other busses
+                if( !((cur_eep.i2cMaster == eep2->i2cMaster)
+                      && (cur_eep.engine == eep2->engine)
+                      && (cur_eep.port == eep2->port)) )
+                {
+                    ++eep2;
+                    continue;
+                }
+
+                /*
+                eeprom@50 {
+                    reg = <0x50>; << right-justified 7-bit addr
+                    label = "system-vpd"; << arbitrary name
+                    compatible = "atmel,24c64"; << use table above
+                    status = "ok"; << Opal fills in
+                    phandle = <0x10000065>; << auto-filled
+                    linux,phandle = <0x10000065>; << Opal fills in
+                 }
+                */
+                dtOffset_t l_eepNode = i_dt->addNode( l_busNode,
+                                                      "eeprom",
+                                                      eep2->devAddr >> 1 );
+                i_dt->addPropertyCell32(l_eepNode, "reg", eep2->devAddr >> 1);
+                char l_label[30];
+                TARGETING::TYPE l_type = TARGETING::TYPE_NA;
+                l_type = eep2->assocTarg->getAttr<TARGETING::ATTR_TYPE>();
+                if( (l_type == TARGETING::TYPE_SYS)
+                    || (l_type == TARGETING::TYPE_NODE) )
+                {
+                    sprintf( l_label, "system-vpd" );
+                }
+                else if( l_type == TARGETING::TYPE_PROC )
+                {
+                    const char* l_type = "vpd";
+                    switch( eep2->device )
+                    {
+                        case(EEPROM::VPD_PRIMARY):
+                            l_type = "proc-vpd";
+                            break;
+                        case(EEPROM::VPD_BACKUP):
+                            l_type = "proc-vpd-backup";
+                            break;
+                        case(EEPROM::SBE_PRIMARY):
+                            l_type = "sbe0";
+                            break;
+                        case(EEPROM::SBE_BACKUP):
+                            l_type = "sbe1";
+                            break;
+                        default:
+                            break;
+                    }
+                    sprintf( l_label, "%s-%d",
+                             l_type,
+                             eep2->assocTarg
+                             ->getAttr<TARGETING::ATTR_POSITION>() );
+                }
+                else if( l_type == TARGETING::TYPE_MEMBUF )
+                {
+                    sprintf( l_label, "memb-vpd-%d",
+                             eep2->assocTarg
+                             ->getAttr<TARGETING::ATTR_POSITION>() );
+                }
+                else if( l_type == TARGETING::TYPE_DIMM )
+                {
+                    sprintf( l_label, "dimm-spd-%d",
+                             eep2->assocTarg
+                             ->getAttr<TARGETING::ATTR_POSITION>() );
+                }
+                else
+                {
+                    sprintf( l_label, "unknown" );
+                }
+                i_dt->addPropertyString(l_eepNode, "label", l_label);
+
+                // fill in atmel compatible
+                const char* l_compat = "unknown";
+                bool l_foundit = false;
+                for( size_t a = 0;
+                     a < (sizeof(atmel_ids)/sizeof(atmel_ids[0]));
+                     a++ )
+                {
+                    if( (atmel_ids[a].byteSize == (KILOBYTE*eep2->sizeKB))
+                        || (atmel_ids[a].addrBytes == eep2->addrBytes) )
+                    {
+                        l_compat = atmel_ids[a].name;
+                        l_foundit = true;
+                        break;
+                    }
+                }
+                if( !l_foundit )
+                {
+                    TRACFCOMP( g_trac_devtree, "Could not find matching eeprom device for %s : size=%d,addr=%d", l_label, eep2->sizeKB, eep2->addrBytes );
+                }
+                i_dt->addPropertyString(l_eepNode, "compatible", l_compat);
+
+                // need to increment the outer loop if we're going to
+                //  remove the element it points to
+                if( eep == eep2 )
+                {
+                    ++eep;
+                }
+                // now remove the device we added so we don't add it again
+                eep2 = l_eepromInfo.erase(eep2);
+            }
+        }
+    }
+
 }
 
 
@@ -239,6 +523,10 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
             reinterpret_cast<uint32_t*>(l_laneEq[l_phb]),
             (sizeof(l_laneEq[l_phb])/sizeof(uint32_t)));
     }
+
+    /*I2C Masters*/
+    add_i2c_info( i_pProc, i_dt, xscomNode );
+
 }
 
 uint32_t bld_l3_node(devTree * i_dt, dtOffset_t & i_parentNode,
@@ -927,6 +1215,8 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
                                                l_ibscomBase);
             uint64_t propertyCells[2] = {l_ibscomBase,THIRTYTWO_GB};
             i_dt->addPropertyCells64(membNode, "reg", propertyCells, 2);
+            i_dt->addPropertyCell32(membNode, "#address-cells", 1);
+            i_dt->addPropertyCell32(membNode, "#size-cells", 1);
 
             uint32_t l_ec = l_pMemB->getAttr<ATTR_EC>();
             char cenVerStr[32];
@@ -946,8 +1236,7 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             i_dt->addPropertyCell32(membNode, "ibm,fsi-master-chip-id",
                                     l_procId);
 
-            uint32_t l_cenId = CEN_ID_TAG | (l_procId << CEN_ID_SHIFT);
-            l_cenId |= parentMCS->getAttr<ATTR_CHIP_UNIT>();
+            uint32_t l_cenId = getMembChipId(l_pMemB);
             i_dt->addPropertyCell32(membNode, "ibm,chip-id",l_cenId);
 
             //Add the CMFSI (which CMFSI 0 or 1) and port
@@ -957,6 +1246,9 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
                            {linkinfo.mPort,linkinfo.link};
             i_dt->addPropertyCells32(membNode, "ibm,fsi-master-port",
                                      cmfsiCells, 2);
+
+            //Add any I2C devices hanging off this chip
+            add_i2c_info( l_pMemB, i_dt, membNode );
         }
 
 
