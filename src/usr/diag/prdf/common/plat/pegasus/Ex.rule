@@ -1057,7 +1057,8 @@ rule CoreFir
     RECOVERABLE: COREFIRWOF & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-group gCoreFir filter singlebit
+group gCoreFir filter singlebit,
+                      secondarybits( 33, 34, 35 )
 {
     /** COREFIR[0]
      *  IFU_SRAM_PARITY_ERR: SRAM recoverable error (ICACHE parity error, etc.)
@@ -1384,7 +1385,8 @@ rule L2Fir
     RECOVERABLE: L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
 };
 
-group gL2Fir filter singlebit
+group gL2Fir filter singlebit,
+                    secondarybits( 0, 6 )
 {
     /** L2FIR[0]
      *  CACHE_RD_CE
@@ -1587,7 +1589,8 @@ rule L3Fir
     RECOVERABLE: L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
 };
 
-group gL3Fir filter singlebit
+group gL3Fir filter singlebit,
+                    secondarybits( 4, 13 )
 {
     /** L3FIR[0]
      *  PowerBus Command Error - Overrun condition.

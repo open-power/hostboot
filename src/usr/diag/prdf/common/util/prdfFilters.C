@@ -193,7 +193,12 @@ bool SecondaryBitsFilter::Apply( BitKey & io_bitList,
     {
         // if it is not a primary pass then we need not apply this filter.
         // so continuing with usual flow.
-        if( !( io_sdc.service_data )->isPrimaryPass( ) ) break;
+        if( !( io_sdc.service_data )->isPrimaryPass( ) ||
+             CHECK_STOP != io_sdc.service_data->GetAttentionType( ) )
+        {
+            break;
+        }
+
         //if there is no secondary bit position to flip or if no bit is set in
         //bit key then let us skip this apply.
         if( ( 0 == iv_secBitList.size() ) || ( 0 == io_bitList.size()) ) break;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,19 +121,15 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
     #define PRDF_FUNC "[Mcs::PostAnalysis] "
     int32_t l_rc = SUCCESS;
 
-    if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) &&
-         (CHECK_STOP != i_sc.service_data->GetAttentionType()) )
+    P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
+    ExtensibleChip * membChip = mcsdb->getMembChip();
+    if ( NULL != membChip )
     {
-        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
-        ExtensibleChip * membChip = mcsdb->getMembChip();
-        if ( NULL != membChip )
+        l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
+        if( SUCCESS != l_rc )
         {
-            l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
-            if( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"ChnlCsCleanup() failed for Membuf:0x%08X",
-                          membChip->GetId() );
-            }
+            PRDF_ERR( PRDF_FUNC"ChnlCsCleanup() failed for Membuf:0x%08X",
+                      membChip->GetId() );
         }
     }
 

@@ -101,7 +101,7 @@ rule NestLFir
   RECOVERABLE: NEST_LFIR & ~NEST_LFIR_MASK & ~NEST_LFIR_ACT0 &  NEST_LFIR_ACT1;
 };
 
-group gNestLFir filter singlebit
+group gNestLFir filter singlebit, secondarybits( 0 )
 {
     /** NEST_LFIR[0]
      *  CFIR internal parity error
@@ -171,8 +171,9 @@ rule DmiFir
     RECOVERABLE: DMIFIR & ~DMIFIR_MASK & ~DMIFIR_ACT0 &  DMIFIR_ACT1;
 };
 
-group gDmiFir filter priority( 10,              # Channel failure
-                                2, 11, 12, 9  ) # Recoverable
+group gDmiFir filter priority( 10,               # Channel failure
+                                2, 11, 12, 9  ), # Recoverable
+                     secondarybits( 9, 48, 49 )
 {
     /** DMIFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -266,7 +267,7 @@ rule ScacFir
     RECOVERABLE: SCACFIR & ~SCACFIR_MASK & ~SCACFIR_ACT0 &  SCACFIR_ACT1;
 };
 
-group gScacFir filter singlebit
+group gScacFir filter singlebit, secondarybits( 35, 36 )
 {
     /** SCACFIR[0]
      *  SCAC_LFIR_I2CMINVADDR
@@ -427,7 +428,8 @@ rule MbiFir
 };
 
 group gMbiFir filter priority(  8, 9, 19, 20, 6, 0, # Channel failure
-                               16, 5, 10 )          # Recoverable
+                               16, 5, 10 ),         # Recoverable
+                     secondarybits( 25, 26 )
 {
     /** MBIFIR[0]
      *  MBIFIRQ_REPLAY_TIMEOUT
@@ -567,7 +569,7 @@ rule MbsFir
     RECOVERABLE: MBSFIR & ~MBSFIR_MASK & ~MBSFIR_ACT0 &  MBSFIR_ACT1;
 };
 
-group gMbsFir filter singlebit
+group gMbsFir filter singlebit, secondarybits( 9, 12, 26, 29, 33, 34 )
 {
     /** MBSFIR[0]
      *  MBS_FIR_REG_HOST_PROTOCOL_ERROR
@@ -779,8 +781,10 @@ rule Mba1_MbsEccFir
                ~MBA1_MBSECCFIR_ACT0 &  MBA1_MBSECCFIR_ACT1;
 };
 
-group gMbsEccFir filter  secondarybits(0,1,2,3,4,5,6,7,16,17,20,21,22,23,24,
-                                       25,26,27), priority (19,41)
+group gMbsEccFir filter priority ( 19, 41 ),
+                        secondarybits(  0,  1,  2,  3,  4,  5,  6,  7,
+                                       20, 21, 22, 23, 24, 25, 26, 27,
+                                       16, 17, 43, 48, 50, 51 )
 {
     /** MBA0_MBSECCFIR[0]
      *  Memory chip mark on rank 0
@@ -1118,7 +1122,7 @@ rule Mba1_McbistFir
                ~MBA1_MCBISTFIR_ACT0 &  MBA1_MCBISTFIR_ACT1;
 };
 
-group gMcbistFir filter singlebit
+group gMcbistFir filter singlebit, secondarybits( 15, 16 )
 {
     /** MBA0_MCBISTFIR[0]
      *  MBSFIRQ_SCOM_PAR_ERRORS
@@ -1421,9 +1425,6 @@ actionclass maskSecMbsBitsAndConnL4UE
     funccall("MaskMbsSecondaryBits");
     SUEGenerationPoint;
 };
-
-/** Callout DMI bus with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_dmiBus { calloutDmiBus; thresholdAndMask; };
 
 /** Callout MBA0 with "Threshold and Mask" policy. */
 actionclass thresholdAndMask_mba0 { calloutMba0; thresholdAndMask; };

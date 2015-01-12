@@ -45,6 +45,9 @@
 #include <prdfScanFacility.H>
 #include <prdfMfgThresholdMgr.H>
 #include <prdfGardType.H>
+#if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+#include <prdfSdcFileControl.H>
+#endif
 
 #include <prdfPegasusConfigurator.H>
 
@@ -268,6 +271,10 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
             //secondary bits set.
             sdc.service_data = &serviceData;
 
+            #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+            ForceSyncAnalysis( l_tempSdc ); // save SDC till end of primary pass
+            #endif
+
             // starting the second pass
             PRDF_INF( "PRDF::main() No bits found set in first pass,"
                       " starting second pass" );
@@ -285,6 +292,10 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
             serviceData.GetCaptureData().mergeData(
                                     l_tempSdc.GetCaptureData());
 
+            #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+            // save SDC till end of secondary pass
+            ForceSyncAnalysis( serviceData );
+            #endif
         }
         else
         {

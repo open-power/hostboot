@@ -151,7 +151,8 @@ rule PbesFir
 };
 
 
-group gPbesFir filter singlebit
+group gPbesFir filter singlebit,
+                      secondarybits( 6, 9, 12 )
 {
     /** PBESFIR[0]
      *  A0LINK_FMR_ERROR: a0link_fmr_error
@@ -378,7 +379,8 @@ rule IoaFir
     RECOVERABLE: IOAFIR & ~IOAFIR_MASK & ~IOAFIR_ACT0 &  IOAFIR_ACT1;
 };
 
-group gIoaFir filter singlebit
+group gIoaFir filter singlebit,
+                     secondarybits( 17, 25, 33 )
 {
     /** IOAFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR

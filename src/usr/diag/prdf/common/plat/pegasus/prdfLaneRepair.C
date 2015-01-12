@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -74,6 +74,18 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
     do
     {
+        #ifdef __HOSTBOOT_MODULE
+        if ( CHECK_STOP == i_sc.service_data->GetAttentionType() )
+        {
+            // This would only happen on OpenPOWER machines when we are doing
+            // the post IPL analysis. In this case, we do not have the FFDC to
+            // query the IO registers so simply set service call and skip
+            // everything else.
+            i_sc.service_data->SetServiceCall();
+            return SUCCESS;
+        }
+        #endif
+
         // Get RX bus target
         TYPE iChipType = getTargetType(i_chip->GetChipHandle());
 

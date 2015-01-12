@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -466,7 +466,7 @@ rule MbaFir
     RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
 };
 
-group gMbaFir filter singlebit
+group gMbaFir filter singlebit, secondarybits( 15, 16 )
 {
     /** MBAFIR[0]
      *  MBAFIRQ_INVALID_MAINT_CMD
@@ -588,7 +588,7 @@ rule MbaDdrPhyFir
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
 };
 
-group gMbaDdrPhyFir filter singlebit
+group gMbaDdrPhyFir filter singlebit, secondarybits( 53 )
 {
     /** MBADDRPHYFIR[48]
      *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_CKSTP
@@ -663,7 +663,7 @@ rule MbaCalFir
   RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
 };
 
-group gMbaCalFir filter singlebit
+group gMbaCalFir filter singlebit, secondarybits( 10, 14, 19, 20, 21, 24, 25 )
 {
     /** MBACALFIR[0]
      *  MBACALFIRQ_MBA_RECOVERABLE_ERROR
@@ -819,37 +819,37 @@ group gMbaSpa attntype SPECIAL filter singlebit
     /** MBASPA[1]
      *  MBSPAQ_HARD_CE_ETE_ATTN
      */
-    (MbaSpa, bit(1)) ? TBDDefaultCallout;
+    (MbaSpa, bit(1)) ? defaultMaskedError;
 
     /** MBASPA[2]
      *  MBSPAQ_SOFT_CE_ETE_ATTN
      */
-    (MbaSpa, bit(2)) ? TBDDefaultCallout;
+    (MbaSpa, bit(2)) ? defaultMaskedError;
 
     /** MBASPA[3]
      *  MBSPAQ_INTERMITTENT_ETE_ATTN
      */
-    (MbaSpa, bit(3)) ? TBDDefaultCallout;
+    (MbaSpa, bit(3)) ? defaultMaskedError;
 
     /** MBASPA[4]
      *  MBSPAQ_RCE_ETE_ATTN
      */
-    (MbaSpa, bit(4)) ? TBDDefaultCallout;
+    (MbaSpa, bit(4)) ? defaultMaskedError;
 
     /** MBASPA[5]
      *  MBSPAQ_EMERGENCY_THROTTLE_ATTN
      */
-    (MbaSpa, bit(5)) ? TBDDefaultCallout;
+    (MbaSpa, bit(5)) ? defaultMaskedError;
 
     /** MBASPA[6]
      *  MBSPAQ_FIRMWARE_ATTN0
      */
-    (MbaSpa, bit(6)) ? TBDDefaultCallout;
+    (MbaSpa, bit(6)) ? defaultMaskedError;
 
     /** MBASPA[7]
      *  MBSPAQ_FIRMWARE_ATTN1
      */
-    (MbaSpa, bit(7)) ? TBDDefaultCallout;
+    (MbaSpa, bit(7)) ? defaultMaskedError;
 
     /** MBASPA[8]
      *  MBSPAQ_WAT_DEBUG_ATTN
@@ -864,12 +864,12 @@ group gMbaSpa attntype SPECIAL filter singlebit
     /** MBASPA[9]
      *  MBSPAQ_SPARE_ATTN1
      */
-    (MbaSpa, bit(9)) ? TBDDefaultCallout;
+    (MbaSpa, bit(9)) ? defaultMaskedError;
 
     /** MBASPA[10]
      *  MBSPAQ_MCBIST_DONE
      */
-    (MbaSpa, bit(10)) ? TBDDefaultCallout;
+    (MbaSpa, bit(10)) ? defaultMaskedError;
 };
 
  ##############################################################################

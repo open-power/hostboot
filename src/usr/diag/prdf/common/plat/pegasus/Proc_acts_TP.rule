@@ -360,7 +360,8 @@ rule OccFir
 };
 
 #based on spreadsheet p8dd1_mss_FFDC_51/60.xls
-group gOccFir filter singlebit
+group gOccFir filter singlebit,
+                     secondarybits( 10, 39 )
 {
     /** OCCFIR[0]
      *  OCC_SCOM_OCCFIR_OCC_FW0

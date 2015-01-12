@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -174,7 +176,8 @@ rule PbenFir
     RECOVERABLE: PBENFIR & ~PBENFIR_MASK & ~PBENFIR_ACT0 &  PBENFIR_ACT1;
 };
 
-group gPbenFir filter singlebit
+group gPbenFir filter singlebit,
+                      secondarybits( 0, 3, 6, 9 )
 {
     /** PBENFIR[0]
      *  X0_LINK_RCV_CE: x0 link rcv ce
@@ -307,7 +310,8 @@ rule IoxFir_0
     RECOVERABLE: IOXFIR_0 & ~IOXFIR_0_MASK & ~IOXFIR_0_ACT0 &  IOXFIR_0_ACT1;
 };
 
-group gIoxFir_0 filter singlebit
+group gIoxFir_0 filter singlebit,
+                       secondarybits( 9 )
 {
     /** IOXFIR_0[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -400,7 +404,8 @@ rule IoxFir_1
     RECOVERABLE: IOXFIR_1 & ~IOXFIR_1_MASK & ~IOXFIR_1_ACT0 &  IOXFIR_1_ACT1;
 };
 
-group gIoxFir_1 filter singlebit
+group gIoxFir_1 filter singlebit,
+                       secondarybits( 9 )
 {
     /** IOXFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -493,7 +498,8 @@ rule IoxFir_2
     RECOVERABLE: IOXFIR_2 & ~IOXFIR_2_MASK & ~IOXFIR_2_ACT0 &  IOXFIR_2_ACT1;
 };
 
-group gIoxFir_2 filter singlebit
+group gIoxFir_2 filter singlebit,
+                       secondarybits( 9 )
 {
     /** IOXFIR_2[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -586,7 +592,8 @@ rule IoxFir_3
     RECOVERABLE: IOXFIR_3 & ~IOXFIR_3_MASK & ~IOXFIR_3_ACT0 &  IOXFIR_3_ACT1;
 };
 
-group gIoxFir_3 filter singlebit
+group gIoxFir_3 filter singlebit,
+                       secondarybits( 9 )
 {
     /** IOXFIR_3[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
@@ -795,17 +802,4 @@ actionclass calloutXbus3InterfaceTh5pDay
     threshold5pday;
     funccall("ClearServiceCallFlag");
 };
-
-/** Callout XBUS 0 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_xbus0 { calloutXbus0Interface; thresholdAndMask; };
-
-/** Callout XBUS 1 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_xbus1 { calloutXbus1Interface; thresholdAndMask; };
-
-/** Callout XBUS 2 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_xbus2 { calloutXbus2Interface; thresholdAndMask; };
-
-/** Callout XBUS 3 with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_xbus3 { calloutXbus3Interface; thresholdAndMask; };
-
 

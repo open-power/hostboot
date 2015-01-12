@@ -154,10 +154,16 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     if (i_attnType == MACHINE_CHECK)
     {
-#ifdef  __HOSTBOOT_MODULE
+        #ifdef __HOSTBOOT_MODULE
 
-        PRDF_ERR( PRDF_FUNC"Hostboot should NOT have any system checkstop!" );
-#else
+        // Do nothing. Saved SDCs only supported on FSP.
+
+        #ifdef __HOSTBOOT_RUNTIME
+        PRDF_ERR( PRDF_FUNC"HBRT should NOT have any CS attns!" );
+        #endif
+
+        #else
+
         severityParm = ERRL_SEV_UNRECOVERABLE;
 
         // Check for SUE-CS condition flags.
@@ -223,7 +229,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
             }
         }
-#endif  // if not __HOSTBOOT_MODULE
+
+        #endif  // if not __HOSTBOOT_HOSTBOOT
     }
     ////////////////////////////////////////////////////////////////
     // Recoverable ATTN or Unit CheckStop
