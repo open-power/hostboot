@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ class pstateTest: public CxxTest::TestSuite
 {
     public:
 
-        // TODO RTC: 116310 VPD needs to be fixed in simics before a valid
+        // TODO RTC: 123180 VPD needs to be fixed in simics before a valid
         // pstate table can be built in simics.
         void DISABLE_test_verifyPstate( void )
         {
@@ -97,7 +97,7 @@ class pstateTest: public CxxTest::TestSuite
                 TS_FAIL("verifyPstate failed");
             }
 
-            // TODO RTC 116310 check eyecatcher in pstate table
+            // TODO RTC 123180 check eyecatcher in pstate table
 
             if(pstateLibLoadedLocally)
             {

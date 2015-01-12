@@ -4694,11 +4694,8 @@ my $ridApssBase = 0;
 
 sub init_apss
 {
-    # Not every system currently has a *-proc-spi_busses.xml in the MRW
-    # If no file exists then assume there is no APSS, so just leave @SPIs empty
-    # TODO RTC 116310 revisit the need to allow this file to not exist.
     my $proc_spi_busses =
-                test_mrw_file($::mrwdir, "${sysname}-proc-spi-busses.xml");
+                open_mrw_file($::mrwdir, "${sysname}-proc-spi-busses.xml");
     if($proc_spi_busses ne "")
     {
         my $spiBus = ::parse_xml_file($proc_spi_busses,
@@ -5441,31 +5438,6 @@ sub open_mrw_file
         return $file_found;
     }
 }
-
-# TODO RTC 116310 Consider removing this once palmetto MRW APSS support
-# is delivered
-sub test_mrw_file
-{
-    my ($paths, $filename) = @_;
-
-    #Need to get list of paths to search
-    my @paths_to_search = split /:/, $paths;
-    my $file_found = "";
-
-    #Check for file at each directory in list
-    foreach my $path (@paths_to_search)
-    {
-        if ( open (FH, "<$path/$filename") )
-        {
-            $file_found = "$path/$filename";
-            close(FH);
-            last; #break out of loop
-        }
-    }
-
-    return $file_found;
-}
-
 
 my %g_xml_cache = ();
 sub parse_xml_file
