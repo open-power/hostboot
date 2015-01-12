@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -247,9 +247,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
                 i_data,
                 i_numBytes );
 
-        // @todo RTC:117042 - enable flush once PNOR writes supported
         // Flush the page to make sure it gets to the PNOR
-#if 0
         int rc = mm_remove_pages( FLUSH, (void*)addr, i_numBytes );
         if( rc )
         {
@@ -270,7 +268,6 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
                             TO_UINT64(rc),
                             true /*Add HB Software Callout*/ );
         }
-#endif
     } while( 0 );
 
     TRACSSCOMP( g_trac_vpd,
