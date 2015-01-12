@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/occ/occ.C $                                  */
+/* $Source: src/usr/hwpf/hwp/occ/occ_common.C $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -475,5 +475,193 @@ namespace HBOCC
                    EXIT_MRK"stopOCC");
         return err;
     }
+
+    /**
+     * @brief Stops OCCs on all Processors in the node
+     */
+    errlHndl_t stopAllOCCs()
+    {
+        TRACFCOMP( g_fapiTd,ENTER_MRK"stopAllOCCs" );
+        errlHndl_t l_errl    = NULL;
+        bool winkle_loaded = false;
+        do {
+
+#ifndef __HOSTBOOT_RUNTIME
+            //OCC requires the build_winkle_images library
+            if (  !VFS::module_is_loaded( "libbuild_winkle_images.so" ) )
+            {
+                l_errl = VFS::module_load( "libbuild_winkle_images.so" );
+
+                if ( l_errl )
+                {
+                    //  load module returned with errl set
+                    TRACFCOMP( g_fapiTd,ERR_MRK"loadnStartAllOccs: Could not load build_winkle module" );
+                    // break from do loop if error occured
+                    break;
+                }
+                winkle_loaded = true;
+            }
+#endif
+
+
+            TargetHandleList procChips;
+            getAllChips(procChips, TYPE_PROC, true);
+
+            if(procChips.size() == 0)
+            {
+                TRACFCOMP( g_fapiTd,INFO_MRK"loadnStartAllOccs: No processors found" );
+                //We'll never get this far in the IPL without any processors,
+                // so just exit.
+                break;
+            }
+
+            TRACFCOMP( g_fapiTd,
+                       INFO_MRK"loadnStartAllOccs: %d procs found",
+                       procChips.size());
+
+            //The OCC Procedures require processors within a DCM be
+            //setup together.  If DCM installed is set, we work under
+            //the assumption that each nodeID is a DCM.  So sort the
+            //list by NodeID then call OCC Procedures on NodeID pairs.
+            std::sort(procChips.begin(),
+                      procChips.end(),
+                      orderByNodeAndPosition);
+
+            //The OCC master for the node must be reset last.  For all
+            //OP systems there is only a single OCC that can be the
+            //master so it is safe to look at the MASTER_CAPABLE flag.
+            Target* masterProc0 = NULL;
+            Target* masterProc1 = NULL;
+
+            TargetHandleList::iterator itr1 = procChips.begin();
+
+            if(0 == (*itr1)->getAttr<ATTR_PROC_DCM_INSTALLED>())
+            {
+                TRACUCOMP( g_fapiTd,
+                       INFO_MRK"stopAllOCCs: non-dcm path entered");
+
+                for (TargetHandleList::iterator itr = procChips.begin();
+                     itr != procChips.end();
+                     ++itr)
+                {
+                    TargetHandleList pOccs;
+                    getChildChiplets(pOccs, *itr, TYPE_OCC);
+                    if (pOccs.size() > 0)
+                    {
+                        if( pOccs[0]->getAttr<ATTR_OCC_MASTER_CAPABLE>() )
+                        {
+                            masterProc0 = *itr;
+                            continue;
+                        }
+                    }
+
+                    l_errl = HBOCC::stopOCC( *itr, NULL );
+                    if (l_errl)
+                    {
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK"stopAllOCCs: stop failed");
+                        errlCommit (l_errl, HWPF_COMP_ID);
+                        // just commit and try the next chip
+                    }
+                }
+                if (l_errl)
+                {
+                    break;
+                }
+            }
+            else
+            {
+                TRACFCOMP( g_fapiTd,
+                           INFO_MRK"stopAllOCCs: Following DCM Path");
+
+                for (TargetHandleList::iterator itr = procChips.begin();
+                     itr != procChips.end();
+                     ++itr)
+                {
+                    Target* targ0 = *itr;
+                    Target* targ1 = NULL;
+
+                    TRACFCOMP( g_fapiImpTd, INFO_MRK"stopAllOCCs: Cur target nodeID=%d",
+                               targ0->getAttr<ATTR_FABRIC_NODE_ID>());
+
+                    //if the next target in the list is in the same node
+                    // they are on the same DCM, so bump itr forward
+                    // and update targ0 pointer
+                    if((itr+1) != procChips.end())
+                    {
+                        TRACFCOMP( g_fapiImpTd, INFO_MRK"stopAllOCCs: n+1 target nodeID=%d", ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()));
+
+                        if((targ0->getAttr<ATTR_FABRIC_NODE_ID>()) ==
+                           ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()))
+                        {
+                            //need to flip the numbers because we were reversed
+                            targ1 = targ0;
+                            itr++;
+                            targ0 = *itr;
+                        }
+                    }
+
+                    TargetHandleList pOccs;
+                    getChildChiplets(pOccs, targ0, TYPE_OCC);
+                    if (pOccs.size() > 0)
+                    {
+                        if( pOccs[0]->getAttr<ATTR_OCC_MASTER_CAPABLE>() )
+                        {
+                            masterProc0 = targ0;
+                            masterProc1 = targ1;
+                            continue;
+                        }
+                    }
+
+                    l_errl = HBOCC::stopOCC( targ0, targ1 );
+                    if (l_errl)
+                    {
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK"stopAllOCCs: stop failed");
+                        errlCommit (l_errl, HWPF_COMP_ID);
+                        // just commit and try the next module
+                    }
+                }
+                if (l_errl)
+                {
+                    break;
+                }
+            }
+
+            //now do the master OCC
+            if( masterProc0 )
+            {
+                l_errl = HBOCC::stopOCC( masterProc0, masterProc1 );
+                if (l_errl)
+                {
+                    TRACFCOMP( g_fapiImpTd, ERR_MRK"stopAllOCCs: stop failed on master");
+                    break;
+                }
+            }
+        } while(0);
+
+        //make sure we always unload the module if we loaded it
+        if (winkle_loaded)
+        {
+#ifndef __HOSTBOOT_RUNTIME
+            errlHndl_t l_tmpErrl =
+              VFS::module_unload( "libbuild_winkle_images.so" );
+            if ( l_tmpErrl )
+            {
+                TRACFCOMP( g_fapiTd,ERR_MRK"stopAllOCCs: Error unloading build_winkle module" );
+                if(l_errl)
+                {
+                    errlCommit( l_tmpErrl, HWPF_COMP_ID );
+                }
+                else
+                {
+                    l_errl = l_tmpErrl;
+                }
+            }
+#endif
+        }
+
+        TRACFCOMP( g_fapiTd,EXIT_MRK"stopAllOCCs" );
+        return l_errl;
+    }
+
 }  //end OCC namespace
 

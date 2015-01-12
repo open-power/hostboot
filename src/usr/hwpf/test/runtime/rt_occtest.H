@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,15 @@ class OccTest: public CxxTest::TestSuite
         {
             TS_FAIL("runtimeInterfaces->stopOCCs not set");
         }
+
+        /* Test case for stopAllOCCs
+        int err = stopAllOCCs();
+        if( err == -1 )
+        {
+            TS_FAIL("FAILURE!");
+        }
+        */
+
     }
 
     void testGetLidList()

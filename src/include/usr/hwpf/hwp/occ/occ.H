@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,15 +47,6 @@ namespace HBOCC {
      */
     errlHndl_t activateOCCs();
 
-    /**
-     * @brief Stops OCCs on all Processors in the node
-     *        Function will attempt to stop all OCCs and commit
-     *        logs inline.  An error will only be returned for
-     *        very unexpected software fails.
-     *
-     * @return errlHndl_t  Error log if OCC load failed
-     */
-    errlHndl_t stopOCCs();
 } //end OCC namespace
 
 #endif
