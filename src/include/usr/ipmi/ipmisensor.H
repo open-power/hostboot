@@ -137,6 +137,28 @@ namespace SENSOR
     }PACKED;
 
     /**
+     *   @struct getSensorReadingData
+     *       structure holding the data returned by the get sensor reading
+     *       command.
+     *
+     */
+    struct getSensorReadingData
+    {
+        uint8_t   completion_code;
+        uint8_t   sensor_status;
+        uint8_t   sensor_reading;
+        uint16_t  event_status;
+
+        // constructor for our data set
+        getSensorReadingData()
+            :completion_code(0),sensor_status(0),
+            sensor_reading(0), event_status(0)
+        {
+
+        };
+    }PACKED;
+
+    /**
      *  @enum  completionCode
      *  Sensor specific completion codes, defined in IPMI Spec.
      *
@@ -145,6 +167,18 @@ namespace SENSOR
     {
         CC_SENSOR_READING_NOT_SETTABLE    = 0x80,
         CC_EVENT_DATA_BYTES_NOT_SETTABLE  = 0x81
+    };
+    /**
+     * @enum SensorReadingValidEnum
+     *
+     *  enum defining masks used when reading a sensor
+     *
+     */
+    enum SensorReadingValidEnum
+    {
+        SENSOR_DISABLED = 0x80,
+        SENSOR_SCANNING_DISABLED = 0x40,
+        READING_UNAVAILABLE = 0x20,
     };
 
 
@@ -212,7 +246,7 @@ namespace SENSOR
              * @return Errorlog handle
              *
              */
-            virtual errlHndl_t readSensorData(uint8_t *& o_data);
+            virtual errlHndl_t readSensorData(getSensorReadingData& o_data);
 
 
             /**
@@ -251,12 +285,23 @@ namespace SENSOR
                     IPMI::completion_code& o_completion_code );
 
             /**
+             * @brief helper function to get the sensor nubmer
+             */
+            inline uint8_t getSensorNumber( )
+            {
+                return getSensorNumber(iv_target, iv_name );
+            };
+
+
+            /**
              * @brief return the sensor number
              *
              * @return sensor_number - sensor number for this sensor
              *
              */
-            uint8_t  getSensorNumber();
+            static uint8_t  getSensorNumber(TARGETING::Target * i_targ,
+                    TARGETING::SENSOR_NAME i_name );
+
 
         protected:
 
@@ -267,12 +312,16 @@ namespace SENSOR
              * as an assertion or deassertion mask.
              *
              * @param[in] = i_offset - offset for event do be signaled
+             * @param[in] = i_swap   - indicates if mask should be
+             *                         byteswapped before returning
+             *                         true =  byte swap mask
+             *                         false = do not byte swap the mask
              *
              * @return  eventMask - event status mask with correctly set bit
              *                      matching the offset passed in.
              *
              */
-            static uint16_t setMask( uint8_t i_offset );
+            static uint16_t setMask( uint8_t i_offset, bool i_swap = true );
 
             /**
              * @brief return the event offset from an assertion/deassertion mask
@@ -448,9 +497,6 @@ namespace SENSOR
     class RebootCountSensor : public SensorBase
     {
 
-        //< reboot count type
-        typedef uint8_t rebootCount_t;
-
         public:
 
             /**
@@ -471,14 +517,25 @@ namespace SENSOR
             ~RebootCountSensor();
 
             /**
-             * @brief Sent a value for the reboot count to the BMC.
+             * @brief Set the value for the reboot count to the BMC.
              *
              * @param[in] i_count - new reboot count value.
              *
              * @return Errorlog handle
              *
              */
-            errlHndl_t setRebootCount( rebootCount_t i_count );
+            errlHndl_t setRebootCount( uint16_t i_count );
+
+            /**
+             * @brief get the value of the reboot count from the BMC.
+             *
+             * @param[o] o_rebootCount - new reboot count value.
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t getRebootCount( uint16_t& o_rebootCount );
+
 
     };
 
@@ -668,15 +725,16 @@ namespace SENSOR
         public:
 
             /**
-             * @enum stateEnum
+             * @enum OccStateEnum
              *
              *  enum defining the state of the OCC sensor
              */
             enum OccStateEnum
             {
-                OCC_ACTIVE              = 0x0001,
-                OCC_NOT_ACTIVE          = 0x0002
+                OCC_NOT_ACTIVE          = 0x00,
+                OCC_ACTIVE              = 0x01
             };
+
 
             /**
              *  @brief Constructor for an OccActive sensor
@@ -695,13 +753,23 @@ namespace SENSOR
              */
             ~OCCActiveSensor();
 
+            /**
+             *  @brief Interface to set the state of the OCC
+             *  active sensor.
+             *
+             */
             errlHndl_t setState( OccStateEnum i_state );
+
+            /**
+             *  @brief Interface to determine if the OCC associated
+             *  with the passed in target is active.
+             *
+             */
+            bool isActive();
 
         private:
             // disable the default constructor
             OCCActiveSensor();
-
-            uint8_t iv_functionalOffset;
 
     };
 
@@ -745,6 +813,7 @@ namespace SENSOR
      *                                using the dcmi "activate power limit"
      *                                command.
      *
+     *  @return Errorlog handle
      */
     errlHndl_t getUserPowerLimit( uint16_t &o_powerLimit,
                                   bool &o_activeActive );
@@ -758,7 +827,8 @@ namespace SENSOR
      *                                   the sensor numbers for each of the 16
      *                                   apss channels
      *
-     *   const uint16_t (*array)[16] = NULL;
+     *  @return Errorlog handle
+     *
      */
     errlHndl_t getAPSSChannelSensorNumbers(
                                      const uint16_t (* &o_sensor_numbers)[16]);

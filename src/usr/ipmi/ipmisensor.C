@@ -35,7 +35,6 @@
 #include <targeting/common/utilFilter.H>
 #include <ipmi/ipmi_reasoncodes.H>
 #include <endian.h>
-
 extern trace_desc_t * g_trac_ipmi;
 
 namespace SENSOR
@@ -115,9 +114,9 @@ namespace SENSOR
                     * @devdesc         Set sensor reading command failed.
                     */
                     l_reasonCode = IPMI::RC_EVENT_DATA_NOT_SETTABLE;
-                    TRACFCOMP(g_trac_ipmi,"Attempted to set event data bytes but"
-                              "setting event data bytes is not supported for"
-                              " this sensor");
+                    TRACFCOMP(g_trac_ipmi,"Attempted to set event data bytes "
+                            "but setting event data bytes is not supported for"
+                            " this sensor");
                     break;
                 }
 
@@ -249,12 +248,20 @@ namespace SENSOR
     // Helper function to set the bit in the assertion/deassertion mask
     // associated with the desired sensor specific offset
     //
-    uint16_t SensorBase::setMask( const uint8_t offset )
+    uint16_t SensorBase::setMask( const uint8_t offset, bool swap )
     {
         const uint16_t mask = (0x0001 << offset);
 
-        // need to byte swap the mask (see set sensor reading in spec)
-        return le16toh(mask);
+        if(swap)
+        {
+            // need to byte swap the mask (see set sensor reading in spec)
+            return le16toh(mask);
+        }
+        else
+        {
+            return mask;
+        }
+
     };
 
     //
@@ -268,7 +275,7 @@ namespace SENSOR
     };
 
     // read data from the sensor.
-    errlHndl_t SensorBase::readSensorData(uint8_t *& o_data)
+    errlHndl_t SensorBase::readSensorData( getSensorReadingData& o_data)
     {
 
         // get sensor reading command only requires one byte of extra data,
@@ -276,26 +283,88 @@ namespace SENSOR
         // 3 and 5 bytes of data.
         size_t len =  1;
 
-        // need to allocate some me to hold the sensor number this will be
+        // need to allocate some mem to hold the sensor number this will be
         // deleted by the IPMI transport layer
-        o_data = new uint8_t[len];
+        uint8_t * l_data = new uint8_t[len];
 
-        o_data[0] = getSensorNumber();
+        l_data[0] = getSensorNumber();
 
         IPMI::completion_code cc = IPMI::CC_UNKBAD;
 
         // o_data will hold the response when this returns
         errlHndl_t l_err = sendrecv(IPMI::get_sensor_reading(), cc, len,
-                                  (uint8_t *&)o_data);
+                                  l_data);
 
         // if we didn't get an error back from the BT interface, but see a
         // bad completion code from the BMC, process the CC to see if we
         // need to create a PEL
-        if( (l_err == NULL ) && (cc != IPMI::CC_OK) )
+        if(  l_err == NULL )
         {
             l_err = processCompletionCode( cc );
-        }
 
+            // $TODO RTC:123045 - Remove when SDR is finalized
+            if( l_err == NULL && (cc != IPMI::CC_BADSENSOR) )
+            {
+                // populate the output structure with the sensor data
+                o_data.completion_code = cc;
+
+                o_data.sensor_status = l_data[0];
+
+                o_data.sensor_reading = l_data[1];
+
+                // bytes 3-5 of the reading are optional and will be dependent
+                // on the value of the sensor status byte.
+                if( !( o_data.sensor_status &
+                     ( SENSOR::SENSOR_DISABLED |
+                       SENSOR::SENSOR_SCANNING_DISABLED )) ||
+                     ( o_data.sensor_status & SENSOR::READING_UNAVAILABLE ))
+                {
+                    // sensor reading is available
+                    o_data.event_status =
+                                (( (uint16_t) l_data[3]) << 8  | l_data[2] );
+
+                    // spec indicates that the high order bit should be
+                    // ignored on a read, so lets mask it off now.
+                    o_data.event_status &= 0x7FFFF;
+                }
+                else
+                {
+                    uint32_t l_sensorNumber = getSensorNumber();
+
+                    TRACFCOMP(g_trac_ipmi,"Sensor reading not available: status = 0x%x",o_data.sensor_status);
+                    TRACFCOMP(g_trac_ipmi,"sensor number 0x%x, huid 0x%x",l_sensorNumber ,get_huid(iv_target));
+
+                    // something happened log an error to indicate the request
+                    // failed
+                    /* @errorlog tag
+                     * @errortype           ERRL_SEV_UNRECOVERABLE
+                     * @moduleid            IPMI::MOD_IPMISENSOR
+                     * @reasoncode          IPMI::RC_SENSOR_READING_NOT_AVAIL
+                     * @userdata1           sensor status indicating reason for
+                     *                      reading not available
+                     * @userdata2[0:31]     sensor number
+                     * @userdata2[32:64]    HUID of target
+                     *
+                     * @devdesc             Set sensor reading command failed.
+                     * @custdesc            Request to get sensor reading
+                     *                      IPMI completion code can be seen
+                     *                      in userdata1 field of the log.
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            IPMI::MOD_IPMISENSOR,
+                            IPMI::RC_SENSOR_READING_NOT_AVAIL,
+                            o_data.sensor_status,
+                            TWO_UINT32_TO_UINT64( l_sensorNumber,
+                                TARGETING::get_huid(iv_target)), true);
+
+                    l_err->collectTrace(IPMI_COMP_NAME);
+
+                }
+
+                delete[] l_data;
+            }
+        }
         return l_err;
     };
 
@@ -399,29 +468,32 @@ namespace SENSOR
         return getMajorType(i_sensorRecord[0]) == getMajorType(i_sensorName);
     }
 
+    // $TODO RTC:123035 investigate pre-populating some info if we end up
+    // doing this multiple times per sensor
     //
     // Helper function to search the sensor data for the correct sensor number
     // based on the sensor name.
     //
-    uint8_t SensorBase::getSensorNumber()
+    uint8_t SensorBase::getSensorNumber( TARGETING::Target * i_targ,
+                                         TARGETING::SENSOR_NAME i_name )
     {
 
         uint8_t l_sensor_number = INVALID_SENSOR;
 
-        if( iv_target == NULL )
+        if( i_targ == NULL )
         {
             // use the system target
-            TARGETING::targetService().getTopLevelTarget(iv_target);
+            TARGETING::targetService().getTopLevelTarget(i_targ);
 
             // die if there is no system target
-            assert(iv_target);
+            assert(i_targ);
 
         }
 
         TARGETING::AttributeTraits<TARGETING::ATTR_IPMI_SENSORS>::Type
                                                                     l_sensors;
 
-        if(  iv_target->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(l_sensors) )
+        if(  i_targ->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(l_sensors) )
         {
 
             // get the number of rows by dividing the total size by the size of
@@ -437,27 +509,27 @@ namespace SENSOR
             uint16_t (*end)[2] = &l_sensors[array_rows];
 
             uint16_t (*ptr)[2] =
-                        std::lower_bound(begin, end, iv_name, &compare_it);
+                        std::lower_bound(begin, end, i_name, &compare_it);
 
             // we have not reached the end of the array and the iterator
             // returned from lower_bound is pointing to an entry which equals
             // the one we are searching for.
             if( ( ptr != end ) &&
-               ( (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] == iv_name ) )
+               ( (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] == i_name ) )
             {
                 // found it
                 l_sensor_number =
                     (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NUMBER_OFFSET];
 
                 TRACFCOMP(g_trac_ipmi,"Found sensor number %d for HUID=0x%x",
-                          l_sensor_number, TARGETING::get_huid(iv_target));
+                          l_sensor_number, TARGETING::get_huid(i_targ));
             }
         }
         else
         {
             // bug here...
             assert(0,"no IPMI_SENSOR attribute check target HUID=0x%x",
-                   TARGETING::get_huid(iv_target));
+                   TARGETING::get_huid(i_targ));
         }
 
         return l_sensor_number;
@@ -512,14 +584,37 @@ namespace SENSOR
     //
     // setRebootCount - send a new value for the reboot count to the BMC.
     //
-    errlHndl_t RebootCountSensor::setRebootCount( rebootCount_t i_count )
+    errlHndl_t RebootCountSensor::setRebootCount( uint16_t i_count )
     {
 
-        // put the reboot count into the sensor
-        // reading byte of the message
-        iv_msg->iv_sensor_reading = i_count;
+        // the Reboot_count sensor is defined as a discrete sensor
+        // but the assertion bytes are being used to transfer the count
+        // to the bmc, will need to byte swap the data
+        iv_msg->iv_assertion_mask = le16toh(i_count);
 
         return writeSensorData();
+
+    }
+
+    //
+    // getRebootCount - get the reboot count from the BMC
+    //
+    errlHndl_t RebootCountSensor::getRebootCount( uint16_t &o_rebootCount )
+    {
+
+        // the Reboot_count sensor is defined as a discrete sensor
+        // but the assertion bytes are being used to transfer the count
+        // from the BMC
+        getSensorReadingData l_data;
+
+        errlHndl_t l_err = readSensorData( l_data );
+
+        if( l_err == NULL )
+        {
+            // this value is already byteswapped
+            o_rebootCount = l_data.event_status;
+        }
+        return l_err;
 
     }
 
@@ -702,10 +797,8 @@ namespace SENSOR
     //
     //
     OCCActiveSensor::OCCActiveSensor( TARGETING::Target * i_pTarget )
-        :SensorBase(TARGETING::SENSOR_NAME_OCC_ACTIVE, i_pTarget ),
-        iv_functionalOffset(PROC_DISABLED)
+        :SensorBase(TARGETING::SENSOR_NAME_OCC_ACTIVE, i_pTarget )
     {
-
     };
 
     //
@@ -718,36 +811,50 @@ namespace SENSOR
     // send the message to the BMC to update the event status for this sensor.
     errlHndl_t OCCActiveSensor::setState( OccStateEnum i_state )
     {
-
         errlHndl_t l_err = NULL;
 
-        uint16_t func_mask = setMask( iv_functionalOffset );
+        // assert the specified state
+        iv_msg->iv_assertion_mask = setMask(i_state);
 
-        switch ( i_state )
-        {
-
-            case OCC_ACTIVE:
-                // turn off the disabled bit
-                iv_msg->iv_deassertion_mask = func_mask;
-            break;
-
-            case OCC_NOT_ACTIVE:
-                // assert the disabled bit
-                iv_msg->iv_assertion_mask = func_mask;
-                break;
-
-            default:
-                // assert that it is non-functional
-                iv_msg->iv_assertion_mask = func_mask;
-            break;
-        }
-
-            l_err = writeSensorData();
-
+        l_err = writeSensorData();
 
         return l_err;
 
     };
+
+    // send the message to the BMC to read the event status for this sensor,
+    // will return true if the "disabled" state of the sensor is not
+    // asserted
+    bool OCCActiveSensor::isActive( )
+    {
+        getSensorReadingData l_data;
+
+        bool is_active = false;
+
+        // set the mask, but dont swap the bytes since we are using it locally
+        // not passing it in the set sensor cmd
+        uint16_t mask = setMask( OCC_ACTIVE, false );
+
+        errlHndl_t l_err = readSensorData( l_data );
+
+        if( l_err == NULL )
+        {
+            // check if "disabled" offset has been asserted -
+            // this would indicate that the OCC was not yet enabled
+            if( l_data.event_status & mask )
+            {
+                is_active = true;
+            }
+        }
+        else
+        {
+            // commit the error and return "not active" by default
+            errlCommit( l_err, IPMI_COMP_ID );
+        }
+
+        return is_active;
+    }
+
 
     //
     // HostStausSensor constructor - uses system target
@@ -845,9 +952,9 @@ namespace SENSOR
             {
                errlCommit( l_err, IPMI_COMP_ID );
             }
-        }
+       }
 
-    }
+     }
 
     void updateBMCFaultSensorStatus(void)
     {

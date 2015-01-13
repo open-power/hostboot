@@ -51,6 +51,7 @@ namespace IPMI
         RC_SET_SENSOR_FAILURE        = IPMI_COMP_ID | 0x0a,
         RC_READ_EVENT_FAILURE        = IPMI_COMP_ID | 0x0b,
         RC_DCMI_CMD_FAILED           = IPMI_COMP_ID | 0x0c,
+        RC_SENSOR_READING_NOT_AVAIL  = IPMI_COMP_ID | 0x0d,
 
     };
 };
