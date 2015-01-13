@@ -4554,10 +4554,13 @@ sub init_apss
         {
             if($getBaseRidApss == 0)  # TODO RTC 116460 FSP only
             {
-                my $locCode = $i->{endpoint}->{'location-code'};
-                my @locCodeComp = split( '-', $locCode );
-                $ridApssBase = (@locCodeComp > 2) ? 0x4900 : 0x800;
-                $getBaseRidApss = 1;
+                if ($i->{endpoint}->{'instance-path'} =~ /.*APSS-[0-9]+$/i)
+                {
+                    my $locCode = $i->{endpoint}->{'location-code'};
+                    my @locCodeComp = split( '-', $locCode );
+                    $ridApssBase = (@locCodeComp > 2) ? 0x4900 : 0x800;
+                    $getBaseRidApss = 1;
+                }
             }
 
             if ($i->{endpoint}->{'instance-path'} =~ /.*APSS-[0-9]+$/i)
