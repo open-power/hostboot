@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -238,6 +238,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         // we are not going to do an analysis - so fill out the Service Data
         (serviceData.GetErrorSignature())->setSigId(rc);
         serviceData.SetCallout(SP_CODE);
+        serviceData.SetCallout( NextLevelSupport_ENUM, MRU_LOW );
         serviceData.SetThresholdMaskId(0); // Sets AT_THRESHOLD, DEGRADED,
                                            // SERVICE_CALL
     }
@@ -301,6 +302,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
             (serviceData.GetErrorSignature())->setErrCode(
                                                     (uint16_t)analyzeRc );
             serviceData.SetCallout(SP_CODE);
+            serviceData.SetCallout( NextLevelSupport_ENUM, MRU_LOW );
             serviceData.SetServiceCall();
             // We don't want to gard unless we have a good
             // return code
@@ -313,6 +315,12 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         PRDF_INF("PRDTRACE: PrdMain: g_prd_errlHndl != NULL");
         PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_MED,
                                     EPUB_PRC_SP_CODE );
+        // This is a precautionary step. There is a possibilty that if
+        // severity for g_prd_errlHndl is Predictve and there is only
+        // EPUB_PRC_SP_CODE callout than it will be changed to tracing event.
+        // So adding EPUB_PRC_LVL_SUPP to avoid this.
+        PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_LOW,
+                                    EPUB_PRC_LVL_SUPP );
 
         // This forces any previous errls to be committed
         g_prd_errlHndl = NULL;

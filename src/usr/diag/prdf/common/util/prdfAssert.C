@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -71,7 +73,7 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
      * @procedure  EPUB_PRC_SP_CODE
      */
     PRDF_CREATE_ERRL(errl,
-                     ERRL_SEV_PREDICTIVE,         // error on diagnostic
+                     ERRL_SEV_UNRECOVERABLE,         // error on diagnostic
                      ERRL_ETYPE_NOT_APPLICABLE,
                      SRCI_ERR_INFO,
                      SRCI_NO_ATTR,
