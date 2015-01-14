@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -36,11 +36,10 @@ namespace CONSOLE
      *
      *  @param[in] - String to display.
      */
-    extern void display(const char*)
 #ifdef CONFIG_CONSOLE
-    ;
+    extern void display(const char*);
 #else
-    {};
+    inline void display(const char*) {};
 #endif
 
     /** @brief Display formatted string to the console.
@@ -48,11 +47,10 @@ namespace CONSOLE
      *  @param[in] - Header (or NULL).
      *  @param[in] - Format string.
      */
-    extern void displayf(const char*, const char*, ...)
 #ifdef CONFIG_CONSOLE
-    ;
+    extern void displayf(const char*, const char*, ...);
 #else
-    {};
+    inline void displayf(const char*, const char*, ...) {};
 #endif
 
     /** @brief Display formatted string to the console.
@@ -61,21 +59,19 @@ namespace CONSOLE
      *  @param[in] - Format string.
      *  @param[in] - va_list of arguments.
      */
-    extern void vdisplayf(const char*, const char*, va_list)
 #ifdef CONFIG_CONSOLE
-    ;
+    extern void vdisplayf(const char*, const char*, va_list);
 #else
-    {};
+    inline void vdisplayf(const char*, const char*, va_list) {};
 #endif
 
 
     /** @brief Wait for console buffers to be flushed to device.
-     */
-    extern void flush()
+    */
 #ifdef CONFIG_CONSOLE
-    ;
+    extern void flush();
 #else
-    {};
+    inline void flush() {};
 #endif
 
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,11 +31,11 @@
 #include "htmgt_occ.H"
 #include "htmgt_poll.H"
 
-//  Targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
+#include <console/consoleif.H>
 
 
 namespace HTMGT
@@ -159,7 +159,8 @@ namespace HTMGT
     OccManager::OccManager()
         :iv_configDataBuilt(false),
         iv_occMaster(NULL),
-        iv_state(OCC_STATE_UNKNOWN)
+        iv_state(OCC_STATE_UNKNOWN),
+        iv_targetState(OCC_STATE_ACTIVE)
     {
     }
 
@@ -319,19 +320,29 @@ namespace HTMGT
     {
         errlHndl_t l_err = NULL;
 
-
-        if ((i_state == OCC_STATE_ACTIVE) ||
-            (i_state == OCC_STATE_OBSERVATION))
+        occStateId requestedState = i_state;
+        if (OCC_STATE_NO_CHANGE == i_state)
         {
+            // If no state was requested use the target state
+            requestedState = iv_targetState;
+        }
+
+        if ((requestedState == OCC_STATE_ACTIVE) ||
+            (requestedState == OCC_STATE_OBSERVATION))
+        {
+            // Function is only called on initial IPL and when user/mfg
+            // requests a new state, so we can update target here.
+            iv_targetState = requestedState;
+
             if (NULL != iv_occMaster)
             {
-                TMGT_INF("_setOccState(state=0x%02X)", i_state);
+                TMGT_INF("_setOccState(state=0x%02X)", requestedState);
 
                 const uint8_t occInstance = iv_occMaster->getInstance();
                 bool needsRetry = false;
                 do
                 {
-                    l_err = iv_occMaster->setState(i_state);
+                    l_err = iv_occMaster->setState(requestedState);
                     if (NULL == l_err)
                     {
                         needsRetry = false;
@@ -374,11 +385,12 @@ namespace HTMGT
             {
                 // Send poll to query state of all OCCs
                 // and flush any errors reported by the OCCs
-                errlHndl_t l_err = sendOccPoll(true);
+                l_err = sendOccPoll(true);
                 if (l_err)
                 {
                     TMGT_ERR("_setOccState: Poll all OCCs failed");
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    l_err = NULL;
                 }
 
                 // Make sure all OCCs went to active state
@@ -386,10 +398,10 @@ namespace HTMGT
                      pOcc < iv_occArray.end();
                      pOcc++)
                 {
-                    if (i_state != (*pOcc)->getState())
+                    if (requestedState != (*pOcc)->getState())
                     {
                         TMGT_ERR("_setOccState: OCC%d is not in 0x%02X state",
-                                 (*pOcc)->getInstance(), i_state);
+                                 (*pOcc)->getInstance(), requestedState);
                         /*@
                          * @errortype
                          * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
@@ -401,17 +413,38 @@ namespace HTMGT
                          */
                         bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                                   HTMGT_RC_OCC_UNEXPECTED_STATE,
-                                  i_state, (*pOcc)->getState(),
+                                  requestedState, (*pOcc)->getState(),
                                   (*pOcc)->getInstance(), 0,
                                   ERRORLOG::ERRL_SEV_INFORMATIONAL);
                         break;
                     }
                 }
+
+                if (NULL == l_err)
+                {
+                    TMGT_INF("_setOccState: All OCCs have reached state 0x%02X",
+                             requestedState);
+
+#ifndef __HOSTBOOT_RUNTIME
+                    if (OCC_STATE_ACTIVE == requestedState)
+                    {
+                        CONSOLE::displayf(HTMGT_COMP_NAME,
+                               "OCCs are now running in ACTIVE state");
+                    }
+                    else
+                    {
+                        CONSOLE::displayf(HTMGT_COMP_NAME,
+                               "OCCs are now running in OBSERVATION state");
+                    }
+#endif
+                }
+
             }
         }
         else
         {
-            TMGT_ERR("_setOccState: Invalid state 0x%02X requested", i_state);
+            TMGT_ERR("_setOccState: Invalid state 0x%02X requested",
+                     requestedState);
             /*@
              * @errortype
              * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
@@ -421,7 +454,7 @@ namespace HTMGT
              */
             bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                       HTMGT_RC_INVALID_DATA,
-                      i_state, 0, 0, 0,
+                      requestedState, 0, 0, 0,
                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
         }
 
@@ -457,6 +490,12 @@ namespace HTMGT
     errlHndl_t OccManager::setOccState(const occStateId i_state)
     {
         return Singleton<OccManager>::instance()._setOccState(i_state);
+    }
+
+
+    occStateId OccManager::getTargetState()
+    {
+        return Singleton<OccManager>::instance()._getTargetState();
     }
 
 

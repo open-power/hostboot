@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <stdio.h>
-
+#include <console/consoleif.H>
 
 
 namespace HTMGT
@@ -84,6 +84,36 @@ namespace HTMGT
         {OCC_CMD_END_OF_TABLE,         0x00,  OCC_CHECK_RSP_LENGTH_EQUALS,
             0x0000, 0x0000,    0x0000, OCC_TRACE_NEVER}
     };
+
+
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+    // Dump header information and set of binary data to the console.
+    // NOTE: Data is dumped in groups of 16 bytes. If i_len is not a
+    // multiple of 16, additional data data will be dumped.
+    void dumpToConsole(const char * i_header,
+                       const uint8_t * i_data,
+                       uint16_t i_len)
+    {
+#ifndef __HOSTBOOT_RUNTIME
+        if (i_header[0] != '\0')
+        {
+            CONSOLE::displayf(HTMGT_COMP_NAME, "%s", i_header);
+        }
+        uint16_t index = 0;
+        while (index < i_len)
+        {
+            CONSOLE::displayf(HTMGT_COMP_NAME, "%04X:  %08X %08X %08X %08X",
+                              index,
+                              UINT32_GET(&i_data[index]),
+                              UINT32_GET(&i_data[index+4]),
+                              UINT32_GET(&i_data[index+8]),
+                              UINT32_GET(&i_data[index+12]));
+            index += 16;
+        }
+        CONSOLE::flush();
+#endif
+    }
+#endif
 
 
     /**
@@ -950,14 +980,20 @@ namespace HTMGT
         cmdBuffer[l_send_length++] = (iv_OccCmd.checksum >> 8) & 0xFF;
         cmdBuffer[l_send_length++] = iv_OccCmd.checksum & 0xFF;
 
-        //@fixme-RTC:119833-this hangs HB if traces are sent out to the console
-#ifndef CONFIG_CONSOLE_OUTPUT_TRACE
         if (G_debug_trace & DEBUG_TRACE_OCCCMD)
         {
             // Trace the command
             TMGT_BIN("buildOccCmdBuffer: OCC command (up to 256 bytes)",
                      cmdBuffer, std::min(l_send_length, (uint16_t)256));
         }
+
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+        // Trace full OCC command
+        char header[64];
+        sprintf(header, "OCC Command: %s (%d bytes)",
+                command_string(iv_OccCmd.cmdType), l_send_length);
+        dumpToConsole(header, cmdBuffer,
+                      std::min(l_send_length,(uint16_t)256));
 #endif
 
 #ifdef SIMICS_TESTING
@@ -990,6 +1026,12 @@ namespace HTMGT
 
         if ((NULL != rspBuffer) && (rspLen >= OCC_RSP_HDR_LENGTH))
         {
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+            // Trace raw OCC response
+            char header[64];
+            sprintf(header, "OCC Response: (%d bytes)", rspLen);
+            dumpToConsole(header, rspBuffer, std::min(rspLen,(uint16_t)256));
+#endif
             iv_OccRsp.sequenceNumber = rspBuffer[l_index++];
             iv_OccRsp.cmdType = (enum occCommandType)rspBuffer[l_index++];
             iv_OccRsp.returnStatus = (occReturnCodes)rspBuffer[l_index++];

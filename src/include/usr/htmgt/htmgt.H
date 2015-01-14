@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,30 @@ namespace HTMGT
      * @param[in]  i_failedOccTarget  OCC target of the failed OCC
      */
     void processOccReset(TARGETING::Target * i_failedOccTarget);
+
+
+
+    /**
+     * @brief Change the OCC state
+     *
+     * @details  This is a blocking call that will change the OCC state.
+     *           The OCCs will only actuate (update processor frequency/
+     *           voltages) when in Active state.  The OCC will only be
+     *           monitoring/observing when in Observation state.
+     *
+     * @note     When the OCCs are initially started, the state will default
+     *           to Active.  If the state is changed to Observation, that
+     *           state will be retained until the next IPL. (If the OCC would
+     *           get reset, it would return to the last requested state)
+     *
+     *
+     * @param[in]  i_occActivation  set to TRUE to move OCC to Active state
+     *                              or FALSE to move OCC to Observation state
+     *
+     * @returns  NULL on success, or an error handle if the state did not
+     *           change.
+     */
+    errlHndl_t enableOccActuation(bool i_occActivation);
 
 }
 

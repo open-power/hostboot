@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -286,6 +286,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
             numSets++;
 
             centPos = (*centaur)->getAttr<ATTR_POSITION>();
+            sensor = 0xC000 + centPos; //TODO RTC 115294
 
             //Do the entry for the Centaur itself
 
@@ -294,12 +295,10 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
             index += 4;
 
             //Hardware Sensor ID
-            sensor = 0; //TODO RTC 115294
             memcpy(&o_data[index], &sensor, 2);
             index += 2;
 
             //Temperature Sensor ID
-            sensor = 0; //TODO RTC 115294
             memcpy(&o_data[index], &sensor, 2);
             index += 2;
 
@@ -339,12 +338,12 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                     index += 4;
 
                     //Hardware Sensor ID
-                    sensor = 0; //TODO RTC 115294
+                    sensor = 0xD000 + (centPos<<8) + dimmPos; //TODO RTC 115294
                     memcpy(&o_data[index], &sensor, 2);
                     index += 2;
 
                     //Temperature Sensor ID
-                    sensor = 0; //TODO RTC 115294
+                    sensor = 0xD000 + (centPos<<8) + dimmPos; //TODO RTC 115294
                     memcpy(&o_data[index], &sensor, 2);
                     index += 2;
 
@@ -541,7 +540,7 @@ void getSystemConfigMessageData(uint8_t* o_data, uint64_t & o_size)
     o_data[index++] = OCC_CFGDATA_OPENPOWER_SYSTEMTYPE;
 
     //processor sensor ID
-    sensor = 0; //TODO all sensors - RTC 115294
+    sensor = 0x1000; //TODO all sensors - RTC 115294
     memcpy(&o_data[index], &sensor, 2);
     index += 2;
 
@@ -549,23 +548,23 @@ void getSystemConfigMessageData(uint8_t* o_data, uint64_t & o_size)
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {
         //Core Temp Sensor ID
-        sensor = 0;
+        sensor = 0x2000 + core; //TODO all sensors - RTC 115294
         memcpy(&o_data[index], &sensor, 2);
         index += 2;
 
         //Core Frequency Sensor ID
-        sensor = 0;
+        sensor = 0x3000 + core; //TODO all sensors - RTC 115294
         memcpy(&o_data[index], &sensor, 2);
         index += 2;
     }
 
     //Backplane sensor ID
-    sensor = 0;
+    sensor = 0xB000;
     memcpy(&o_data[index], &sensor, 2);
     index += 2;
 
     //APSS sensor ID
-    sensor = 0;
+    sensor = 0xA000;
     memcpy(&o_data[index], &sensor, 2);
     index += 2;
 
@@ -724,7 +723,7 @@ void getApssMessageData(uint8_t* o_data,
         o_data[idx] = function[channel]; // ADC Channel assignement
         idx += sizeof(uint8_t);
 
-        uint16_t sensorId = 0;
+        uint16_t sensorId = 0xA100 + channel; //TODO all sensors - RTC 115294
         memcpy(o_data+idx,&sensorId,sizeof(uint16_t)); // Sensor ID
         idx += sizeof(uint16_t);
 

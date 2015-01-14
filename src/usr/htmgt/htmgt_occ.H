@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,19 +278,37 @@ namespace HTMGT
 
 
             /**
-             * @brief Set the state of the OCCs
+             * @brief Set the state of the OCCs.  If i_state is
+             *        not specified (NO_CHANGE), OCCs will be set
+             *        to the target state (last requested state
+             *        or if not requested the default is ACTIVE)
              *
              * @param[in]  i_state  Desired OCC state
              *
              * @return NULL on success, or error handle on failure
              */
-            errlHndl_t setOccState(const occStateId i_state);
+            errlHndl_t setOccState(const occStateId i_state =
+                                   OCC_STATE_NO_CHANGE);
+
+
+            /**
+             * @brief Get the OCC state that should be used after the OCCs
+             *        have been loaded or reset
+             *
+             * @note Target state will default to ACTIVE, but
+             *       can be changed with HTMGT::enableOccActuation()
+             *
+             * @return target state
+             */
+            static occStateId getTargetState();
+
 
 
         private:
             Occ *                   iv_occMaster;
             std::vector<Occ*>       iv_occArray;
             occStateId              iv_state;
+            occStateId              iv_targetState;
 
             /* See buildOccs() above */
             uint32_t _buildOccs();
@@ -302,6 +320,10 @@ namespace HTMGT
 
             /* See getOccArray() above */
             std::vector<Occ*> _getOccArray() { return iv_occArray; };
+
+
+            /* See getTargetState() above */
+            occStateId _getTargetState() { return iv_targetState; };
 
 
             /**

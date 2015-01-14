@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,11 +39,11 @@ namespace HTMGT
 {
 
     /**
-     * @brief Wait for all OCCs to go to active state
+     * @brief Wait for all OCCs to go to the target state
      *
-     * @return  NULL if all OCCs reached active state, else error handle
+     * @return  NULL if all OCCs reached target state, else error handle
      */
-    errlHndl_t waitForOccsActive();
+    errlHndl_t waitForOccState();
 
 
     /**

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/htmgt/tmgtutility.C $                                 */
+/* $Source: src/usr/htmgt/htmgt.C $                                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
 #include <config.h>
+#include <console/consoleif.H>
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
@@ -74,6 +75,7 @@ namespace HTMGT
                 {
                     do
                     {
+                        // TODO: RTC 119831 - remove hardcoded delay
                         // Delay before communication with OCCs to make sure
                         // they are ready (since there is no initial attention)
                         nanosleep(HTMGT_DELAY_BEFORE_COMM, 0);
@@ -98,7 +100,7 @@ namespace HTMGT
                         // Send poll to establish comm
                         TMGT_INF("Send initial poll to all OCCs to"
                                  " establish comm");
-                        errlHndl_t l_err = sendOccPoll();
+                        l_err = sendOccPoll();
                         if (l_err)
                         {
                             // Continue even if failed (poll will be retried)
@@ -109,8 +111,8 @@ namespace HTMGT
                         // Send ALL config data
                         sendOccConfigData();
 
-                        // Wait for all OCCs to go active
-                        l_err = waitForOccsActive();
+                        // Wait for all OCCs to go to the target state
+                        l_err = waitForOccState();
                         if ( l_err )
                         {
                             break;
@@ -196,6 +198,11 @@ namespace HTMGT
         if (NULL != l_err)
         {
             TMGT_ERR("OCCs not all active.  System will stay in safe mode");
+#ifndef __HOSTBOOT_RUNTIME
+            CONSOLE::displayf(HTMGT_COMP_NAME, "OCCs are not active "
+                             "(rc=0x%04X). System will remain in safe mode",
+                             l_err->reasonCode());
+#endif
             // TODO: RTC 109066
             //stopAllOccs();
 
@@ -248,6 +255,29 @@ namespace HTMGT
         // TODO RTC 115296
 
     } // end processOccReset()
+
+
+
+    // Set the OCC state
+    errlHndl_t enableOccActuation(bool i_occActivation)
+    {
+        occStateId targetState = OCC_STATE_ACTIVE;
+        if (false == i_occActivation)
+        {
+            targetState = OCC_STATE_OBSERVATION;
+        }
+
+        // Set state for all OCCs
+        errlHndl_t l_err = occMgr::instance().setOccState(targetState);
+        if (NULL == l_err)
+        {
+            TMGT_INF("enableOccActuation: OCC states updated to 0x%02X",
+                     targetState);
+        }
+
+        return l_err;
+
+    } // end enableOccActuation()
 
 
 }
