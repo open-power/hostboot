@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,7 @@
 
 // Other includes
 #include <algorithm>
-// TODO: RTC 119023 remove after deque is supported in HBRT
-#ifdef __HOSTBOOT_RUNTIME
-// deque currently not supported in Hostboot.
 #include <vector>
-#else
-#include <queue>
-#endif
 
 namespace PRDF
 {
@@ -79,15 +73,8 @@ class TdQueue
 {
   public: // typedefs
 
-// TODO: RTC 119023 remove after deque is supported in HBRT
-#ifdef __HOSTBOOT_RUNTIME
-    // deque currently not supported in Hostboot.
     typedef std::vector<TdQueueEntry>           Queue;
     typedef std::vector<TdQueueEntry>::iterator QueueItr;
-#else
-    typedef std::deque<TdQueueEntry>           Queue;
-    typedef std::deque<TdQueueEntry>::iterator QueueItr;
-#endif
 
   public:
 
@@ -146,13 +133,12 @@ class TdQueue
     /**
      * @brief Removes the entry at the beginning of the queue.
      */
-// TODO: RTC 119023 remove after deque is supported in HBRT
-#ifdef __HOSTBOOT_RUNTIME
-    // deque currently not supported in Hostboot.
-    void pop() {}
-#else
-    void pop() { iv_queue.pop_front(); }
-#endif
+    // TODO: RTC 66487 This function currently has a complexity of 0(n). It
+    //       is preferred to have 0(1), which could be accomplished with by
+    //       using a deque or list. Unfortunately, Hostboot currently does not
+    //       support std::deque or std::list::sort(). Therefore, we must use a
+    //       vector at this time.
+    void pop() { iv_queue.erase(iv_queue.begin()); }
 
     /**
      * @return A constant reference to the queue.

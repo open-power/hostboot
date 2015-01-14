@@ -3113,11 +3113,11 @@ void CenMbaTdCtlr::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     data[sz_actData] = queueCount;
     sz_actData += 1;
 
-    for ( uint32_t i = 0; i < queueCount; i++ )
+    for ( TdQueue::QueueItr it = queue.begin(); it != queue.end(); it++ )
     {
-        data[sz_actData  ] = queue[i].type;
-        data[sz_actData+1] = queue[i].rank.getMaster() << 5 |
-                             queue[i].rank.getSlave()  << 2;     // 2 extra bits
+        data[sz_actData  ] = it->type;
+        data[sz_actData+1] = it->rank.getMaster() << 5 |
+                             it->rank.getSlave()  << 2;     // 2 extra bits
 
         sz_actData += 2;
     }
