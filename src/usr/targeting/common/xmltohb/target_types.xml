@@ -125,7 +125,6 @@
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <attribute><id>MFG_TRACE_ENABLE</id></attribute>
     <!-- Start memory_attributes.xml -->
-    <attribute><id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id></attribute>
     <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT</id></attribute>
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT</id></attribute>
@@ -991,7 +990,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000011</default> <!--GARD | DIMM_POWER_TEST -->
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
     <attribute><id>MSS_DIMM_MFG_ID_CODE</id></attribute>
     <attribute><id>EFF_DIMM_RANKS_CONFIGED</id></attribute>
@@ -1367,7 +1366,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000013</default> <!--GARD | MEMDIAG | DIMM_POWER_TEST -->
+        <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
     <attribute>
         <id>SCOM_SWITCHES</id>
@@ -1510,7 +1509,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000013</default> <!--GARD | MEMDIAG | DIMM_POWER_TEST -->
+        <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
 
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>

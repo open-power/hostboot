@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -54,7 +54,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mem_pll_setup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_trainadv
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_dimm_power_test
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_lrdimm_funcs
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/cen_stopclocks
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_throttle_sync
@@ -77,7 +76,6 @@ OBJS += mss_generic_shmoo.o
 OBJS += mss_mcbist.o
 OBJS += mss_mcbist_common.o
 OBJS += mss_mcbist_address.o
-OBJS += mss_dimm_power_test.o
 OBJS += mss_lrdimm_funcs.o
 OBJS += cen_stopclocks.o
 
@@ -87,7 +85,6 @@ OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o, hbVddrMsg.o)
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_dimm_power_test
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_mc
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit

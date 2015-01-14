@@ -1223,10 +1223,6 @@ ID for the sensor number returned with the elog. -->
        <name>HOSTSVC_HBEL</name>
        <value>0x00000008</value>
     </enumerator>
-    <enumerator>
-       <name>DIMM_POWER_TEST</name>
-       <value>0x00000010</value>
-   </enumerator>
 </enumerationType>
 
 <!-- For POD Testing -->
