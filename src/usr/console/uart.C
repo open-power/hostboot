@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -27,6 +27,7 @@
 #include <devicefw/userif.H>
 #include <lpc/lpcif.H>
 #include <kernel/console.H>
+#include <sys/task.h>
 #include <sys/time.h>
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
@@ -132,6 +133,7 @@ namespace CONSOLE
                         break;
                     }
                     nanosleep(0, DELAY_NS);
+                    task_yield();
 
                     loops++;
                 } while( loops < DELAY_LOOPS);

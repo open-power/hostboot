@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include    <errl/errludtarget.H>
 
 #include    <intr/interrupt.H>
+#include    <console/consoleif.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -238,6 +239,9 @@ void*    call_host_activate_master( void    *io_pArgs )
         //  put the master into winkle.
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: put master into winkle..." );
+
+        // Flush any lingering console traces first
+        CONSOLE::flush();
 
         int l_rc    =   cpu_master_winkle( );
         if ( l_rc )
