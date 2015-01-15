@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -409,7 +409,9 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
             if( scomout.piberr != 0 )
             {
                 // got an indirect write error
-                TRACFCOMP(g_trac_scom, "INDIRECT SCOM PIB Error=%d (reg=0x%.16X)", scomout.piberr, scomout.data64);
+                TRACFCOMP(g_trac_scom,
+                        "INDIRECT SCOM PIB Error=%d (reg=0x%.16X)",
+                        scomout.piberr, scomout.data64);
 
                 /*@
                  * @errortype
@@ -547,7 +549,9 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         && (l_err->reasonCode() == IBSCOM::IBSCOM_RETRY_DUE_TO_ERROR) )
     {
         delete l_err;
-        TRACFCOMP(g_trac_scom, "Forcing retry of Scom to %.16X on %.8X", i_addr, TARGETING::get_huid(i_target));
+        TRACFCOMP(g_trac_scom, "Forcing retry of Scom to %.16X on %.8X", i_addr,
+            (TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target ?
+                    0xFFFFFFFF : TARGETING::get_huid(i_target)));
         // use the unused i_accessType parameter to avoid an infinite recursion
         int64_t accessType_flag = 0xFFFFFFFF;
         l_err = doScomOp( i_opType, i_target, io_buffer,
@@ -647,14 +651,17 @@ void addScomFailFFDC( errlHndl_t i_err,
         //grab the clock/osc regs
         l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x00050019));
         l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x0005001A));
+
         //grab the clock regs via FSI too, just in case
-        TARGETING::Target* mproc = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(mproc);
-        if( (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-            && (i_target != mproc) )
+        if (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
         {
-            l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2864));//==2819
-            l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2868));//==281A
+            TARGETING::Target* mproc = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(mproc);
+            if (i_target != mproc)
+            {
+                l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2864));//==2819
+                l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2868));//==281A
+            }
         }
     }
 
