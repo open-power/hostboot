@@ -61,6 +61,7 @@ my $g_trace = 1;
 
 my $programName = File::Basename::basename $0;
 my %pnorLayout;
+my %PhysicalOffsets;
 my %binFiles;
 my $pnorLayoutFile;
 my $pnorBinName = "";
@@ -70,7 +71,6 @@ my $emitTestSections = 0;
 my $g_fpartCmd = "";
 my $g_fcpCmd = "";
 my %sidelessSecFilled = ();
-
 my %SideOptions = (
         A => "A",
         B => "B",
@@ -132,7 +132,7 @@ if (-e $pnorBinName)
 }
 
 #Load PNOR Layout XML file
-my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout);
+my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets);
 if($rc != 0)
 {
     trace(0, "Error detected from call to loadPnorLayout().  Exiting");
@@ -163,8 +163,6 @@ if($rc != 0)
 }
 trace(1, "Done checkSpaceConstraints");
 
-# @TODO RTC: 120062 - Determine which side is Golden, possibly handle a new
-#                    xml tag
 # Create all Partition Tables at each TOC offset
 # Each side has 2 TOC's created at different offsets for backup purposes.
 # Loop all side sections
@@ -174,7 +172,6 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
     foreach my $toc ( keys %{$pnorLayout{metadata}{sides}{$sideId}{toc}})
     {
         my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{$toc};
-
         $rc = createPnorPartition($tocVersion, $pnorBinName, \%pnorLayout,
                                   $sideId, $tocOffset);
         if($rc != 0)
@@ -182,7 +179,29 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
             trace(0, "Error detected from createPnorPartition() $tocOffset Exiting");
             exit 1;
         }
+
+        #Add the golden side tag to the "part" partition of PNOR`
+        my $userflags1 = ($pnorLayout{metadata}{sides}{$sideId}{golden} eq "yes") ?
+                            0x01 : 0x00;
+
+        #add a golden bit to the misc flags in userflag1
+        $userflags1 = $userflags1 << 16;
+        trace(2, "$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force");
+        $rc =    `$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force`;
+        if($rc != 0)
+        {
+            trace(0, "Call to add golden flag to PART failed.  rc=$rc.  Aborting!");
+            exit;
+        }
     }
+}
+
+#add backup TOC and other side's toc information to each TOC
+$rc = addTOCInfo(\%pnorLayout, $pnorBinName);
+if($rc)
+{
+    trace(0, "Error detected from call to addTOCInfo().  Exiting");
+    exit 1;
 }
 
 # Fill all sides
@@ -208,7 +227,7 @@ exit 0;
 ################################################################################
 sub loadPnorLayout
 {
-    my ($i_pnorFile, $i_pnorLayoutRef) = @_;
+    my ($i_pnorFile, $i_pnorLayoutRef, $i_physicalOffsets) = @_;
     my $this_func = (caller(0))[3];
 
     unless(-e $i_pnorFile)
@@ -220,49 +239,6 @@ sub loadPnorLayout
     #parse the input XML file
     my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
     my $xml = $xs->XMLin($i_pnorFile);
-
-    #Save the meatadata - imageSize, blockSize, etc.
-    # @TODO RTC:120062 enhance metadata section, fix metadataE1 to match xml
-    # and change TOC names accordingly
-    foreach my $metadataEl (@{$xml->{metadata}})
-    {
-        # Get meta data
-        my $imageSize = $metadataEl->{imageSize}[0];
-        my $blockSize = $metadataEl->{blockSize}[0];
-        $imageSize = getNumber($imageSize);
-        $blockSize = getNumber($blockSize);
-        $$i_pnorLayoutRef{metadata}{imageSize} = $imageSize;
-        $$i_pnorLayoutRef{metadata}{blockSize} = $blockSize;
-
-        # Get Side A
-        my $sideATocOffset = $metadataEl->{sideATocOffset}[0];
-        my $sideATocBackupOffset = $metadataEl->{sideATocBackupOffset}[0];
-        $sideATocOffset = getNumber($sideATocOffset);
-        $sideATocBackupOffset = getNumber($sideATocBackupOffset);
-        # @TODO RTC: 120062 change pnorLayoutRef hash to match new xml
-        $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{A}}{toc}{primary} = $sideATocOffset;
-        $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{A}}{toc}{backup} = $sideATocBackupOffset;
-
-        # Get side B info (if it exists)
-        if (exists $metadataEl->{sideBTocOffset}[0])
-        {
-            trace(1, "Adding Side B information ....");
-            my $sideBTocOffset = $metadataEl->{sideBTocOffset}[0];
-            my $sideBTocBackupOffset = $metadataEl->{sideBTocBackupOffset}[0];
-            $sideBTocOffset = getNumber($sideBTocOffset);
-            $sideBTocBackupOffset = getNumber($sideBTocBackupOffset);
-            # @TODO RTC: 120062 change pnorLayoutRef hash to match new xml
-            $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{B}}{toc}{primary} = $sideBTocOffset;
-            $$i_pnorLayoutRef{metadata}{sides}{$SideOptions{B}}{toc}{backup} = $sideBTocBackupOffset;
-
-            trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideATocOffset=$sideATocOffset, sideATocBackupOffset=$sideATocBackupOffset, sideBTocOffset=$sideBTocOffset, sideBTocBackupOffset=$sideBTocBackupOffset");
-        }
-        else
-        {
-           trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideATocOffset=$sideATocOffset, sideATocBackupOffset=$sideATocBackupOffset");
-        }
-
-    }
 
     #Iterate over the <section> elements.
     foreach my $sectionEl (@{$xml->{section}})
@@ -276,7 +252,6 @@ sub loadPnorLayout
         my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
         my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
         my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
-        my $sideless = (exists $sectionEl->{sideless} ? "yes" : "no");
         my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
         my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
         if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
@@ -297,12 +272,93 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{sideless} = $sideless;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
 
+        #store the physical offsets of each section in a hash, so, it is easy
+        #to search physicalOffsets based on the name of the section (eyecatch)
+        if ($side eq "sideless")
+        {
+            foreach my $metadata (@{$xml->{metadata}})
+            {
+                foreach my $sides (@{$metadata->{side}})
+                {
+                    $$i_physicalOffsets{side}{$sides->{id}[0]}{eyecatch}{$eyeCatch} = $physicalOffset;
+                }
+            }
+        }
+        else
+        {
+            $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
+        }
     }
+    # Save the metadata - imageSize, blockSize, toc Information etc.
+    foreach my $metadataEl (@{$xml->{metadata}})
+    {
+        # Get meta data
+        my $imageSize   = $metadataEl->{imageSize}[0];
+        my $blockSize   = $metadataEl->{blockSize}[0];
+        my $tocSize     = $metadataEl->{tocSize}[0];
+        my $arrangement = $metadataEl->{arrangement}[0];
+        $imageSize      = getNumber($imageSize);
+        $blockSize      = getNumber($blockSize);
+        $tocSize        = getNumber($tocSize);
+        $$i_pnorLayoutRef{metadata}{imageSize}   = $imageSize;
+        $$i_pnorLayoutRef{metadata}{blockSize}   = $blockSize;
+        $$i_pnorLayoutRef{metadata}{tocSize}     = $tocSize;
+        $$i_pnorLayoutRef{metadata}{arrangement} = $arrangement;
 
+        my $numOfSides  = scalar (@{$metadataEl->{side}});
+        my $sideSize = ($imageSize)/($numOfSides);
+
+        trace(1, " $this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, arrangement = $arrangement, numOfSides: $numOfSides, sideSize: $sideSize, tocSize: $tocSize");
+
+        #determine the TOC offsets from the arrangement and side Information
+        #stored in the layout xml
+        #
+        #Arrangement A-B-D means that the layout had Primary TOC (A), then backup TOC (B), then Data (pnor section information).
+        #Similaryly, arrangement A-D-B means that primary toc is followed by the data (section information) and then
+        #the backup TOC.
+        if ($arrangement eq "A-B-D")
+        {
+            my $count = 0;
+            foreach my $side (@{$metadataEl->{side}})
+            {
+                my $golden     = (exists $side->{golden} ? "yes" : "no");
+                my $sideId     = $side->{id}[0];
+                my $primaryTOC = ($sideSize)*($count);
+                my $backupTOC  = ($primaryTOC)+($tocSize);
+
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
+
+                $count = $count + 1;
+                trace(1, "A-B-D: side:$sideId primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
+            }
+        }
+        elsif ($arrangement eq "A-D-B")
+        {
+            foreach my $side (@{$metadataEl->{side}})
+            {
+                my $golden     = (exists $side->{golden} ? "yes" : "no");
+                my $sideId     = $side->{id}[0];
+                my $hbbAddr    = $$i_physicalOffsets{side}{$sideId}{eyecatch}{"HBB"};
+                my $primaryTOC = align_down($hbbAddr, $sideSize);
+                my $backupTOC  = align_up($hbbAddr, $sideSize) - $tocSize;
+
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
+                trace(1, "A-D-B: side:$sideId HBB:$hbbAddr, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
+            }
+        }
+        else
+        {
+            trace(0, "Arrangement:$arrangement is not supported");
+            exit(1);
+        }
+    }
     return 0;
 }
 
@@ -331,7 +387,6 @@ sub createPnorImg
             $rc = 1;
             last;
         }
-
         #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
         trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
         $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force`;
@@ -394,7 +449,6 @@ sub addUserData
         $miscFlags |= 0x40;
     }
 
-
     #First User Data Word
     #[1:chip][1:compressType][2:dataInteg]
     my $userflags0 = ($chip << 24)
@@ -449,7 +503,6 @@ sub createPnorPartition
         {
             last;
         }
-
         #get Block size
         my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
 
@@ -498,7 +551,7 @@ sub createPnorPartition
 
                 #Add Partition
                 #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
-                trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
+                trace(2, "$this_func: $g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
                 $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
                 if($rc)
                 {
@@ -535,6 +588,67 @@ sub createPnorPartition
 }
 
 ################################################################################
+# addTOCInfo -- adds BACKUP_PART and OTHER_SIDE information to all the TOCs
+################################################################################
+sub addTOCInfo
+{
+    my ($i_pnorLayout, $i_pnorBinName) = @_;
+    my $rc        = 0;
+    my $other_idx = 0;
+    my $sideShift = 0;
+    my @all_tocs;
+    foreach my $sideId (keys %{$$i_pnorLayout{metadata}{sides}})
+    {
+        push @all_tocs, $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{primary};
+        push @all_tocs, $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{backup};
+    }
+    foreach my $sideId ( keys %{$$i_pnorLayout{metadata}{sides}} )
+    {
+        my $physicalRegionSize = $$i_pnorLayout{metadata}{tocSize};
+        my $backup_part = "BACKUP_PART";
+        my $other_side  = "OTHER_SIDE";
+        my $backup_idx  = 0;
+        my $otherSide   = getOtherSide($sideId);
+        my $numOfTOCs   =  scalar keys %{$$i_pnorLayout{metadata}{sides}{$sideId}{toc}};
+
+        #Adding an extra entry in the TOC that points to its backup TOC and other side's TOC (if other side exists).
+        #This is used to search for all the TOCs in PnorRP code. The idea is to create a link between the tocs such that
+        #if we can find one valid TOC, then we can look at its  BACKUP_PART entry or OTHER_SIDE entry in the TOC to
+        #determine the location of backup TOC.Each TOC has only one BACKUP_PART entry and one OTHER_SIDE entry.
+        foreach my $toc (keys %{$$i_pnorLayout{metadata}{sides}{$sideId}{toc}})
+        {
+            #adding backup_part
+            my $toc_offset    = $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{$toc};
+            my $backup_offset = $all_tocs[(($backup_idx + 1)% $numOfTOCs) + $sideShift ];
+            trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $backup_offset --size $physicalRegionSize --name $backup_part --flags 0x0");
+            $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $backup_offset --size $physicalRegionSize --name $backup_part --flags 0x0`;
+            if($rc)
+            {
+                trace(0, "Call to add partition $backup_part failed.  rc=$rc.  Aborting!");
+                exit;
+            }
+
+            #Don't add OTHER_SIDE section if there is only one side in PNOR
+            if ((scalar keys % {$$i_pnorLayout{metadata}{sides}}) > 1)
+            {
+                #adding other_side
+                my $otherSide_offset = $all_tocs[(($other_idx + 2)% scalar @all_tocs)];
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $otherSide_offset --size $physicalRegionSize --name $other_side --flags 0x0");
+                $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $otherSide_offset --size $physicalRegionSize --name $other_side --flags 0x0`;
+                if($rc)
+                {
+                    trace(0, "Call to add partition $other_side failed.  rc=$rc.  Aborting!");
+                    exit;
+                }
+            }
+            $backup_idx++;
+            $other_idx++;
+        }
+        $sideShift = $sideShift + $numOfTOCs;
+    }
+    return $rc;
+}
+################################################################################
 # robustifyImgs - Perform any ECC or ShawHash manipulations
 ################################################################################
 sub robustifyImgs
@@ -546,6 +660,24 @@ sub robustifyImgs
     #@TODO: maybe a little SHA hashing?
 
     return 0;
+}
+
+################################################################################
+# align_down: Align the input to the lower end of the PNOR side
+################################################################################
+sub align_down
+{
+    my ($addr,$n) = @_;
+    return (($addr) - ($addr)%($n));
+}
+
+################################################################################
+# align_up: Align the input address to the higher end of the PNOR side
+################################################################################
+sub align_up
+{
+    my ($addr,$n) = @_;
+    return ((($addr) + ($n-1)) & ~($n-1));
 }
 
 ################################################################################
@@ -696,7 +828,7 @@ sub fillPnorImage
                 last;
             }
          }
-    }
+     }
 
     return $rc;
 }
@@ -792,15 +924,7 @@ sub getSideInfo
     my $side = "";
     my $eyeCatch = $i_sectionHash{$i_key}{eyeCatch};
 
-
-    if($i_sectionHash{$i_key}{sideless} eq "yes")
-    {
-        return $SideOptions{sideless};
-    }
-    else
-    {
-        $side = $i_sectionHash{$i_key}{side};
-    }
+    $side = $i_sectionHash{$i_key}{side};
 
     # Error paths
     if ($side eq "")
