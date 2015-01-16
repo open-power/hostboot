@@ -27,6 +27,7 @@
 #define _VPD_IPVPD_H
 
 
+#include <list>
 #include <pnor/pnorif.H>
 #include <devicefw/driverif.H>
 #include "vpd.H"
@@ -395,6 +396,23 @@ class IpVpdFacade
                                          uint16_t & o_length,
                                          TARGETING::Target * i_target,
                                          input_args_t i_args );
+
+    /**
+     * @brief This function will scan the SEEPROM and return a list of VPD
+     *      records for this target.
+     *
+     * @param[out] o_recList - The list of VPD records.
+     *
+     * @param[in] i_target - The target to retrieve the data for.
+     *
+     * @param[in] i_args - The input arguments.
+     *
+     * @return errHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
+                                      TARGETING::Target * i_target,
+                                      input_args_t i_args );
 
     /**
      * @brief This function will read the required keyword from the VPD data.

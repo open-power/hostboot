@@ -59,7 +59,7 @@ enum vpdModuleId
     VPD_IPVPD_FETCH_DATA                    = 0x31,
     VPD_IPVPD_WRITE_KEYWORD                 = 0x32,
     VPD_IPVPD_LOAD_PNOR                     = 0x33,
-
+    VPD_IPVPD_GET_RECORD_LIST_SEEPROM       = 0x34,
 
     // DIMM SPD
     VPD_SPD_GET_KEYWORD_VALUE               = 0x61,

@@ -459,94 +459,86 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
     input_args_t sRecArgs;
     sRecArgs.location = VPD::SEEPROM;
 
-    // Loop through all possible record types
-    for( uint32_t rec = 0; rec < iv_recSize; rec++ )
+    std::list<TocPtRecord> recList;
+    recList.clear();
+    err = getRecordListSeeprom( recList,
+                                i_target,
+                                sRecArgs );
+    if( err )
     {
-        sRecArgs.record = iv_vpdRecords[rec].record;
-        // Read the record offset from SEEPROM
-        err = findRecordOffsetSeeprom ( iv_vpdRecords[rec].recordName,
-                                        sRecOffset,
-                                        sRecLength,
-                                        i_target,
-                                        sRecArgs );
+        TRACFCOMP(g_trac_vpd,"IpVPdFacade::loadPnor() getRecordListSeeprom failed");
+        return err;
+    }
+
+    for ( std::list<TocPtRecord>::iterator it = recList.begin();
+          it != recList.end(); it++ )
+    {
+        // Copy the record name to the toc structure asciiRec
+        memcpy( pTocEntry.asciiRec,
+                (*it).record_name,
+                RECORD_BYTE_SIZE );
+
+        // Swap the bytes to match SEEPROM VPD format
+        pTocEntry.offset[0] = ((uint8_t*)(&pRecOffset))[1];
+        pTocEntry.offset[1] = ((uint8_t*)(&pRecOffset))[0];
+
+        // Just a signature after every TOC entry
+        pTocEntry.unusedByte[0] = 0x5A;
+        pTocEntry.unusedByte[1] = 0x5A;
+
+        // Write TOC to temp data
+        memcpy( (tmpVpdPtr + pTocOffset),
+                &pTocEntry,
+                IPVPD_TOC_ENTRY_SIZE );
+
+        // Byte swap fields, skip 'large resource' byte
+        sRecOffset = le16toh( (*it).record_offset ) + 1;
+        sRecLength = le16toh( (*it).record_length );
+
+        // Make sure we don't exceed our allocated space in PNOR
+        if( (pRecOffset + sRecLength) > iv_vpdSectionSize )
+        {
+            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor()> The amount of space required (0x%X) for the VPD cache exceeds the available space (0x%X)", pRecOffset + sRecLength, iv_vpdSectionSize );
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_CACHE_SIZE_EXCEEDED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_IPVPD_LOAD_PNOR
+             * @userdata1        HUID of target chip
+             * @userdata2[00:31] Available size
+             * @userdata2[32:63] Requested size
+             * @devdesc          The amount of space required for the VPD
+             *                   cache exceeds the available space
+             * @custdesc         Fatal firmware boot error
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_IPVPD_LOAD_PNOR,
+                                           VPD::VPD_CACHE_SIZE_EXCEEDED,
+                                           TARGETING::get_huid(i_target),
+                                           TWO_UINT32_TO_UINT64(
+                                              iv_vpdSectionSize,
+                                              pRecOffset + sRecLength ),
+                                           true /*Add HB SW Callout*/ );
+            err->collectTrace( "VPD", 256 );
+            break;
+        }
+
+        // Read record data from SEEPROM, put it into temp data
+        uint8_t* pRecPtr = tmpVpdPtr + pRecOffset;
+        err = fetchData( sRecOffset,
+                         sRecLength,
+                         pRecPtr,
+                         i_target,
+                         sRecArgs.location );
         if( err )
         {
-            TRACDCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() "
-                      "Did not find SEEPROM record %d recordName %s",
-                      iv_vpdRecords[rec].record, iv_vpdRecords[rec].recordName);
-            // Not all records will be found, don't log the error
-            // @todo RTC 115944  Need specific list of records to check here
-            delete err;
-            err = NULL;
+            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() Error reading record %s",(*it).record_name);
+            break;
         }
-        else
-        {
-            // Copy the record name to the toc structure asciiRec
-            memcpy( pTocEntry.asciiRec,
-                    iv_vpdRecords[rec].recordName,
-                    RECORD_BYTE_SIZE );
 
-            // Swap the bytes to match SEEPROM VPD format
-            pTocEntry.offset[0] = ((uint8_t*)(&pRecOffset))[1];
-            pTocEntry.offset[1] = ((uint8_t*)(&pRecOffset))[0];
-
-            // Just a signature after every TOC entry
-            pTocEntry.unusedByte[0] = 0x5A;
-            pTocEntry.unusedByte[1] = 0x5A;
-
-            // Write TOC to temp data
-            memcpy( (tmpVpdPtr + pTocOffset),
-                    &pTocEntry,
-                    IPVPD_TOC_ENTRY_SIZE );
-
-            // Make sure we don't exceed our allocated space in PNOR
-            if( (pRecOffset + sRecLength) > iv_vpdSectionSize )
-            {
-                TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor()> The amount of space required (0x%X) for the VPD cache exceeds the available space (0x%X)", pRecOffset + sRecLength, iv_vpdSectionSize );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_CACHE_SIZE_EXCEEDED
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_IPVPD_LOAD_PNOR
-                 * @userdata1        HUID of target chip
-                 * @userdata2[00:31] Available size
-                 * @userdata2[32:63] Requested size
-                 * @devdesc          The amount of space required for the VPD
-                 *                   cache exceeds the available space
-                 * @custdesc         Fatal firmware boot error
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               VPD::VPD_IPVPD_LOAD_PNOR,
-                                               VPD::VPD_CACHE_SIZE_EXCEEDED,
-                                               TARGETING::get_huid(i_target),
-                                               TWO_UINT32_TO_UINT64(
-                                                  iv_vpdSectionSize,
-                                                  pRecOffset + sRecLength ),
-                                               true /*Add HB SW Callout*/ );
-                err->collectTrace( "VPD", 256 );
-                break;
-            }
-
-            // Read record data from SEEPROM, put it into temp data
-            uint8_t* pRecPtr = tmpVpdPtr + pRecOffset;
-            err = fetchData( sRecOffset,
-                             sRecLength,
-                             pRecPtr,
-                             i_target,
-                             sRecArgs.location );
-            if( err )
-            {
-                TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() "
-                          "Error reading record data, record %d recordName %s",
-                          iv_vpdRecords[rec].record,
-                          iv_vpdRecords[rec].recordName);
-                break;
-            }
-
-            // Increment the PNOR TOC and record offsets
-            pTocOffset += IPVPD_TOC_ENTRY_SIZE;
-            pRecOffset += sRecLength;
-        }
+        // Increment the PNOR TOC and record offsets
+        pTocOffset += IPVPD_TOC_ENTRY_SIZE;
+        pRecOffset += sRecLength;
     }
 
     if( !err )
@@ -567,8 +559,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
                               &iv_mutex );
         if( err )
         {
-            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() "
-                      "Error writing PNOR VPD data");
+            TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() Error writing PNOR VPD data");
         }
     }
     else
@@ -1187,6 +1178,130 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
 
     TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// IpVpdFacade::getRecordListSeeprom
+// ------------------------------------------------------------------
+errlHndl_t
+IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
+                                    TARGETING::Target * i_target,
+                                    input_args_t i_args )
+{
+    errlHndl_t err = NULL;
+    char l_buffer[256] = { 0 };
+    uint16_t offset = 0x0;
+
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordListSeeprom()" );
+
+    // Skip the ECC data + large resource ID in the VHDR
+    offset = VHDR_ECC_DATA_SIZE + VHDR_RESOURCE_ID_SIZE;
+
+    // Read PT keyword from VHDR to find the VTOC.
+    size_t pt_len = sizeof(l_buffer);
+    err = retrieveKeyword( "PT",
+                           "VHDR",
+                           offset,
+                           0,
+                           i_target,
+                           l_buffer,
+                           pt_len,
+                           i_args );
+    if (err)
+    {
+        return err;
+    }
+
+    TocPtRecord *toc_rec = reinterpret_cast<TocPtRecord*>(l_buffer);
+    if (pt_len < sizeof(TocPtRecord) ||
+        (memcmp(toc_rec->record_name, "VTOC",
+                sizeof(toc_rec->record_name)) != 0))
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::getRecordListSeeprom: VHDR is invalid!");
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_RECORD_INVALID_VHDR
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_IPVPD_GET_RECORD_LIST_SEEPROM
+         * @userdata1        VHDR length
+         * @userdata2        Target HUID
+         * @devdesc          The VHDR was invalid
+         */
+        err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            VPD::VPD_IPVPD_FIND_RECORD_OFFSET_SEEPROM,
+                            VPD::VPD_RECORD_INVALID_VHDR,
+                            pt_len,
+                            TARGETING::get_huid(i_target) );
+
+        // Could be the VPD of the target wasn't set up properly
+        // -- DECONFIG so that we can possibly keep booting
+        err->addHwCallout( i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL );
+
+        // Or HB code didn't look for the record properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
+        err->collectTrace( "VPD" );
+        return err;
+    }
+
+    offset = le16toh( toc_rec->record_offset ) + 1;  // skip 'large resource'
+
+    // Read the PT keyword(s) from the VTOC
+    for (uint16_t index = 0; index < 2; ++index)
+    {
+        pt_len = sizeof(l_buffer);
+        err = retrieveKeyword( "PT",
+                               "VTOC",
+                               offset,
+                               index,
+                               i_target,
+                               l_buffer,
+                               pt_len,
+                               i_args );
+        if ( err )
+        {
+            // There may be only one PT keyword
+            if ( index != 0 )
+            {
+                delete err;
+                err = NULL;
+            }
+            break;
+        }
+
+        // Scan through the VTOC PT keyword records
+        // Copy the records to the list
+        for ( size_t vtoc_pt_offset = 0;
+              vtoc_pt_offset < pt_len;
+              vtoc_pt_offset += sizeof(TocPtRecord) )
+        {
+            toc_rec =
+                reinterpret_cast<TocPtRecord*>(l_buffer + vtoc_pt_offset);
+
+            // Save record if on the list for this target
+            for ( uint32_t rec = 0; rec < iv_recSize; rec++ )
+            {
+                if ( memcmp( toc_rec->record_name,
+                            iv_vpdRecords[rec].recordName,
+                            RECORD_BYTE_SIZE ) == 0 )
+                {
+                    o_recList.push_back(*toc_rec);
+                    break;
+                }
+            }
+        }
+    }
+
+    TRACSSCOMP( g_trac_vpd,EXIT_MRK"IpVpdFacade::getRecordListSeeprom()" );
 
     return err;
 }
