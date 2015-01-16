@@ -15186,6 +15186,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+    <id>RESOURCE_IS_CRITICAL</id>
+    <description>
+        Used to tell if a resource is critical to perform an IPL. If this
+        attribute is set to 1 and the target is deconfigured, the IPL MUST
+        terminate.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+        <persistency>non-volatile</persistency>
+        <readable/>
+</attribute>
+
+
 <!-- === Manufacturing threshold Attributes of PRD === -->
 
 </attributes>

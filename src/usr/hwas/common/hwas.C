@@ -667,6 +667,90 @@ errlHndl_t restrictEXunits(
     return errl;
 } // restrictEXunits
 
+
+void checkCriticalResources(uint32_t & io_commonPlid,
+                                  const Target * i_pTop)
+{
+    errlHndl_t l_errl = NULL;
+    PredicatePostfixExpr l_customPredicate;
+    PredicateIsFunctional l_isFunctional;
+
+    TargetHandleList l_plist;
+
+    // filter for targets that are deemed critical by ATTR_RESOURCE_IS_CRITICAL
+    uint8_t l_critical = 1;
+    PredicateAttrVal<ATTR_RESOURCE_IS_CRITICAL> l_isCritical(l_critical);
+
+
+    l_customPredicate.push(&l_isFunctional).Not().push(&l_isCritical).And();
+
+
+    targetService().getAssociated( l_plist, i_pTop,
+          TargetService::CHILD, TargetService::ALL, &l_customPredicate);
+
+    //if this list has ANYTHING then something critical has been deconfigured
+    if(l_plist.size())
+    {
+        HWAS_ERR("Insufficient HW to continue IPL: (critical resource"
+                 " not functional)");
+        /*@
+         * @errortype
+         * @severity          ERRL_SEV_UNRECOVERABLE
+         * @moduleid          MOD_CHECK_MIN_HW
+         * @reasoncode        RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE
+         * @devdesc           checkCriticalResources found a critical
+         *                    resource to be deconfigured
+         * @custdesc          A problem occurred during the IPL of the
+         *                    system: A critical resource was found
+         *                    to be deconfigured
+         *
+         * @userdata1[00:31]  Number of critical resources
+         * @userdata1[32:63]  HUID of first critical resource found
+         * @userdata2[00:31]  HUID of second critical resource found, if present
+         * @userdata2[32:63]  HUID of third critical resource found, if present
+         */
+
+        uint64_t userdata1 = 0;
+        uint64_t userdata2 = 0;
+        switch(std::min(3,(int)l_plist.size()))
+        {
+            case 3:
+                userdata2 = static_cast<uint64_t>(get_huid(l_plist[2]));
+
+            case 2:
+                userdata2 |=
+                    static_cast<uint64_t>(get_huid(l_plist[1])) << 32;
+
+            case 1:
+                userdata1 =
+                    (static_cast<uint64_t>(l_plist.size()) << 32) |
+                     static_cast<uint64_t>(get_huid(l_plist[0]));
+        }
+
+
+
+        l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                           MOD_CHECK_MIN_HW,
+                           RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE,
+                           userdata1,
+                           userdata2 );
+
+        // call out the procedure to find the deconfigured part.
+        hwasErrorAddProcedureCallout(l_errl,
+                                     EPUB_PRC_FIND_DECONFIGURED_PART,
+                                     SRCI_PRIORITY_HIGH);
+
+        //  if we already have an error, link this one to the earlier;
+        //  if not, set the common plid
+        hwasErrorUpdatePlid(l_errl, io_commonPlid);
+        errlCommit(l_errl, HWAS_COMP_ID);
+        // errl is now NULL
+    }
+}
+
+
+
+
 errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
         bool *o_bootable)
 {
@@ -1029,7 +1113,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
         //  running on (ie, hostboot or fsp in hwsv).
         //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
-        platCheckMinimumHardware(l_commonPlid, i_node,o_bootable);
+        HWAS::checkCriticalResources(l_commonPlid, pTop);
+        platCheckMinimumHardware(l_commonPlid, i_node, o_bootable);
     }
     while (0);
 
@@ -1038,7 +1123,6 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
     //  ---------------------------------------------------------------
     if ((l_commonPlid)&&(o_bootable == NULL))
     {
-
         /*@
          * @errortype
          * @severity          ERRL_SEV_UNRECOVERABLE
@@ -1063,6 +1147,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
                     "NOT available" : "available");
     return  l_errl ;
 } // checkMinimumHardware
+
+
 
 /**
  * @brief Checks if both targets have the same paths up to a certain number

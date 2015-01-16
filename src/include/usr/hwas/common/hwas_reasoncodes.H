@@ -45,13 +45,14 @@ namespace HWAS
         //  The first is a blanket error that will be returned to the caller,
         //      further errors will be committed in the routine.
         //termination_rc
-        RC_SYSAVAIL_INSUFFICIENT_HW         = HWAS_COMP_ID | 0x04,
-        RC_SYSAVAIL_NO_CORES_FUNC           = HWAS_COMP_ID | 0x05,
-        RC_SYSAVAIL_NO_MEMORY_FUNC          = HWAS_COMP_ID | 0x06,
-        RC_SYSAVAIL_NO_PROCS_FUNC           = HWAS_COMP_ID | 0x07,
-        RC_SYSAVAIL_NO_NODES_FUNC           = HWAS_COMP_ID | 0x08,
-        RC_SYSAVAIL_NO_MEMBUFS_FUNC         = HWAS_COMP_ID | 0x09,
-        RC_RESOURCE_RECOVERED               = HWAS_COMP_ID | 0x0A,
+        RC_SYSAVAIL_INSUFFICIENT_HW             = HWAS_COMP_ID | 0x04,
+        RC_SYSAVAIL_NO_CORES_FUNC               = HWAS_COMP_ID | 0x05,
+        RC_SYSAVAIL_NO_MEMORY_FUNC              = HWAS_COMP_ID | 0x06,
+        RC_SYSAVAIL_NO_PROCS_FUNC               = HWAS_COMP_ID | 0x07,
+        RC_SYSAVAIL_NO_NODES_FUNC               = HWAS_COMP_ID | 0x08,
+        RC_SYSAVAIL_NO_MEMBUFS_FUNC             = HWAS_COMP_ID | 0x09,
+        RC_RESOURCE_RECOVERED                   = HWAS_COMP_ID | 0x0A,
+        RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE   = HWAS_COMP_ID | 0x0B,
     };
 };
 
