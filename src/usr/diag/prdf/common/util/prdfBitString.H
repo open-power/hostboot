@@ -47,13 +47,7 @@
   #include <iomanip>
 #endif
 
-#if defined(NO_FSP)
-    // Can not use PRD implementation of assert() in error log parsing code.
-    #include <assert.h>
-    #define PRDF_ASSERT(x) assert(x)
-#else
-    #include <prdfAssert.h>
-#endif
+#include <prdfAssert.h>
 
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
