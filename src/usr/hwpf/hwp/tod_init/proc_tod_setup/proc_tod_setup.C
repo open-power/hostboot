@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.C,v 1.22 2014/10/22 17:11:05 jklazyns Exp $
+// $Id: proc_tod_setup.C,v 1.23 2015/01/08 19:50:38 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -101,8 +101,14 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
 
         FAPI_INF("proc_tod_setup: Configuring %s topology (OSC0 is %s, OSC1 is %s)",
                   (i_tod_sel==TOD_PRIMARY)?"Primary":"Secondary",
-                  (i_osc_sel==TOD_OSC_0 || i_osc_sel==TOD_OSC_0_AND_1)?"connected":"not connected",
-                  (i_osc_sel==TOD_OSC_1 || i_osc_sel==TOD_OSC_0_AND_1)?"connected":"not connected");
+                  (i_osc_sel==TOD_OSC_0             ||
+                   i_osc_sel==TOD_OSC_0_AND_1       ||
+                   i_osc_sel==TOD_OSC_0_AND_1_SEL_0 ||
+                   i_osc_sel==TOD_OSC_0_AND_1_SEL_1)?"connected":"not connected",
+                  (i_osc_sel==TOD_OSC_1             ||
+                   i_osc_sel==TOD_OSC_0_AND_1       ||
+                   i_osc_sel==TOD_OSC_0_AND_1_SEL_0 ||
+                   i_osc_sel==TOD_OSC_0_AND_1_SEL_1)?"connected":"not connected");
 
         // calculate_node_delays populates o_int_path_delay for each node
         rc = calculate_node_delays(i_tod_node);
@@ -147,7 +153,7 @@ fapi::ReturnCode proc_tod_setup(tod_topology_node*           i_tod_node,
 //
 // parameters: i_tod_node  Reference to TOD topology (FAPI targets included within)
 //             i_tod_sel   Specifies the topology to clear
-//             i_is_mpipl  if this IPL is an MPIPL, additional setup is needed; 
+//             i_is_mpipl  if this IPL is an MPIPL, additional setup is needed;
 //                         determined via an attribute
 //
 // returns: FAPI_RC_SUCCESS if TOD topology is successfully cleared
@@ -279,17 +285,22 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             if (is_mdmt)
             {
                 rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_PRI_M_S_TOD_SEL);
-                if (i_osc_sel == TOD_OSC_0_AND_1)
+                if (i_osc_sel == TOD_OSC_0             ||
+                    i_osc_sel == TOD_OSC_0_AND_1       ||
+                    i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
                 {
-                   rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
+                    rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
                 }
-                else if (i_osc_sel == TOD_OSC_0)
+                else if (i_osc_sel == TOD_OSC_1        ||
+                         i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
                 {
-                   rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
+                    rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
                 }
-                else // i_osc_sel == TOD_OSC_1
+                else // i_osc_sel == TOD_OSC_NONE
                 {
-                   rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SEL);
+                    FAPI_ERR("configure_tod_node: Invalid oscillator configuration!");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_SETUP_INVALID_TOPOLOGY);
+                    break;
                 }
             }
             else // Slave nodes (Drawer master is still a slave)
@@ -306,17 +317,22 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             if (is_mdmt)
             {
                 rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_S_TOD_SEL);
-                if (i_osc_sel == TOD_OSC_0_AND_1)
+                if (i_osc_sel == TOD_OSC_1       ||
+                    i_osc_sel == TOD_OSC_0_AND_1 ||
+                    i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
                 {
-                   rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
+                    rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
                 }
-                else if (i_osc_sel == TOD_OSC_0)
+                else if (i_osc_sel == TOD_OSC_0  ||
+                         i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
                 {
-                   rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
+                    rc_ecmd |= data.clearBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
                 }
-                else // i_osc_sel == TOD_OSC_1
+                else // i_osc_sel == TOD_OSC_NONE
                 {
-                   rc_ecmd |= data.setBit(TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SEL);
+                    FAPI_ERR("configure_tod_node: Invalid oscillator configuration!");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_SETUP_INVALID_TOPOLOGY);
+                    break;
                 }
             }
             else // Slave nodes (Drawer master is still a slave)
@@ -460,32 +476,42 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         {
             if (i_tod_sel==TOD_PRIMARY)
             {
-                if (i_osc_sel == TOD_OSC_0_AND_1)
+                if (i_osc_sel == TOD_OSC_0       ||
+                    i_osc_sel == TOD_OSC_0_AND_1 ||
+                    i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
                 {
                     path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
                 }
-                else if (i_osc_sel == TOD_OSC_0)
-                {
-                    path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
-                }
-                else // i_osc_sel == TOD_OSC_1
+                else if (i_osc_sel == TOD_OSC_1  ||
+                         i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
                 {
                     path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
+                }
+                else // i_osc_sel == TOD_OSC_NONE
+                {
+                    FAPI_ERR("configure_tod_node: Invalid oscillator configuration!");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_SETUP_INVALID_TOPOLOGY);
+                    break;
                 }
             }
-            else
+            else // i_tod_sel==TOD_SECONDARY
             {
-                if (i_osc_sel == TOD_OSC_0_AND_1)
+                if (i_osc_sel == TOD_OSC_1       ||
+                    i_osc_sel == TOD_OSC_0_AND_1 ||
+                    i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
                 {
                     path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
                 }
-                else if (i_osc_sel == TOD_OSC_0)
+                else if (i_osc_sel == TOD_OSC_0  || 
+                         i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
                 {
                     path_sel = TOD_PORT_CTRL_REG_M_PATH_0;
                 }
-                else // i_osc_sel == TOD_OSC_1
+                else // i_osc_sel == TOD_OSC_NONE
                 {
-                    path_sel = TOD_PORT_CTRL_REG_M_PATH_1;
+                    FAPI_ERR("configure_tod_node: Invalid oscillator configuration!");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_SETUP_INVALID_TOPOLOGY);
+                    break;
                 }
             }
         }
@@ -568,7 +594,10 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
         {
             FAPI_DBG("configure_tod_node: Configuring Master OSC path in TOD_M_PATH_CTRL_REG_00040000");
 
-            if (i_osc_sel == TOD_OSC_0 || i_osc_sel == TOD_OSC_0_AND_1)
+            if (i_osc_sel == TOD_OSC_0             ||
+                i_osc_sel == TOD_OSC_0_AND_1       ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
             {
                 FAPI_DBG("configure_tod_node: OSC0 is valid; master path-0 will be configured.");
 
@@ -600,7 +629,10 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
                 // OSC0 is not connected; any previous path-0 settings will be ignored
                 rc_ecmd |= data.setBit(TOD_M_PATH_CTRL_REG_M_PATH_0_OSC_NOT_VALID);
             }
-            if (i_osc_sel == TOD_OSC_1 || i_osc_sel == TOD_OSC_0_AND_1)
+            if (i_osc_sel == TOD_OSC_1             ||
+                i_osc_sel == TOD_OSC_0_AND_1       ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
+                i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
             {
                 FAPI_DBG("configure_tod_node: OSC1 is valid; master path-1 will be configured.");
 
@@ -632,7 +664,7 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
                 // OSC1 is not connected; any previous path-1 settings will be ignored
                 rc_ecmd |= data.setBit(TOD_M_PATH_CTRL_REG_M_PATH_1_OSC_NOT_VALID);
             }
-            
+
             // CPS deviation factor configures both path-0 and path-1
             rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_FACTOR_1,
                                             TOD_M_PATH_CTRL_REG_M_PATH_STEP_CHECK_DEVIATION_FACTOR,
@@ -1066,7 +1098,7 @@ fapi::ReturnCode set_topology_delays(tod_topology_node* i_tod_node,
 //
 // parameters: o_chic_ctrlReg_val => ecmdDataBuffer containing the
 //          Chip Control Status Register configuration
-// 
+//
 // returns: FAPI_RC_SUCCESS if TOD_CHIP_CTRL_REG_00040010's value was successfully
 //          calculated else ECMD error is sent back
 //
@@ -1114,7 +1146,7 @@ fapi::ReturnCode init_chip_ctrl_reg (ecmdDataBufferBase& o_chic_ctrlReg_val)
         }
 
     } while(0);
-    
+
     FAPI_INF("init_chip_ctrl_reg: End");
     return rc;
 }
