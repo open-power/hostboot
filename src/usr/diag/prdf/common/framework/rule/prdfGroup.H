@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -74,8 +76,19 @@ class Group : public ErrorRegisterType
                  Resolution & i_action,
                  ResetAndMaskPair &,
                  uint16_t i_scrID); // add default action.
-
-        void AddFilter(FilterClass * i_filter);
+        /**
+         * @brief adds filter to the group.
+         * @param   i_filter      filter to be added to the group.
+         * @param   i_addFirst    true, if filter should act ahead of filter(s)
+         *                      added previously to the group, false otherwise.
+         * @note    In most cases, we use original filter first. It ensures
+         *          transpose filters acts first on FIR data. However, if
+         *          secondary filter is defined for the group, it assumes
+         *          highest priority and should be added before any other
+         *          filter. It's because it should be the first filter acting on
+         *          FIR data.
+         */
+        void AddFilter( FilterClass * i_filter, bool i_addFirst = false );
 
         /**
          * No Filters applied by this Error Register - so undo is no-op

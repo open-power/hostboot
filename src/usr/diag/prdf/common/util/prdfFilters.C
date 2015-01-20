@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,16 +164,22 @@ bool FilterTranspose::Undo(BitKey & iBitList)
 
 bool FilterLink::Apply( BitKey & bit_list, STEP_CODE_DATA_STRUCT & io_sdc )
 {
-    bool rc = xFilter1.Apply( bit_list, io_sdc );
-    rc = rc || xFilter2.Apply( bit_list,io_sdc );
-    return rc;
+    // NOTE: Apply() for both filters must be called regardless of the rc.
+    bool rc1 = xFilter1.Apply( bit_list, io_sdc );
+    bool rc2 = xFilter2.Apply( bit_list,io_sdc );
+    rc2 = rc1 || rc2;
+
+    return rc2;
 }
 
 bool FilterLink::Undo( BitKey & bit_list )
 {
-    bool rc = xFilter1.Undo(bit_list);
-    rc = rc || xFilter2.Undo(bit_list);
-    return rc;
+    // NOTE: Undo() for both filters must be called regardless of the rc.
+    bool rc1 = xFilter1.Undo(bit_list);
+    bool  rc2 = xFilter2.Undo(bit_list);
+    rc2 = rc1 || rc2;
+
+    return rc2;
 }
 
 //------------------------------------------------------------------------------

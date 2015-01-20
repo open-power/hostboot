@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,7 +222,7 @@ void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
 
 };
 
-void Group::AddFilter(FilterClass * i_filter)
+void Group::AddFilter(FilterClass * i_filter, bool i_addFirst )
 {
     // Add to filter list, for deallocation later.
     cv_filters.push_back(i_filter);
@@ -233,25 +233,31 @@ void Group::AddFilter(FilterClass * i_filter)
         i++)
     {
         // Get old filter.
-        FilterClass * l_filter = ((ResolutionMap *)(*i).second)->getFilter();
+        FilterClass * l_bitFilter =
+                ((ResolutionMap *)(*i).second)->getFilter();
 
         // Need new filter link?
-        if (NULL != l_filter)
+        if (NULL != l_bitFilter)
         {
-            // Use original filters first. (we add transposes first.)
-            l_filter = new FilterLink(*l_filter,
-                                      *i_filter);                // pw01
+            if( i_addFirst )
+            {
+                l_bitFilter = new FilterLink( *i_filter, *l_bitFilter );
+            }
+            else
+            {
+                l_bitFilter = new FilterLink( *l_bitFilter, *i_filter );
+            }
 
             // Add to filter list, for deallocation later.
-            cv_filters.push_back(l_filter);
+            cv_filters.push_back(l_bitFilter);
         }
         else
         {
-            l_filter = i_filter;
+            l_bitFilter = i_filter;
         }
 
         // Assign filter to resolution map.
-        ((ResolutionMap *)(*i).second)->setFilter(l_filter);
+        ((ResolutionMap *)(*i).second)->setFilter(l_bitFilter);
     }
 }
 

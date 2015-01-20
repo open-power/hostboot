@@ -1010,7 +1010,7 @@ void RuleMetaData::createGroup(Group * i_group,
                 i_data.cv_loadChip->cv_groupSecondaryBits[i_groupId]);
 
         FilterClass * l_filter = new SecondaryBitsFilter( l_bits );
-        i_group->AddFilter( l_filter );
+        i_group->AddFilter( l_filter, true );
 
     }
 
