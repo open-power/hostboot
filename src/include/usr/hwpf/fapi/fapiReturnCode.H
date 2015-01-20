@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCode.H,v 1.20 2014/03/12 00:48:25 whs Exp $
+// $Id: fapiReturnCode.H,v 1.21 2015/01/16 11:30:02 sangeet2 Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.H,v $
 
 /**
@@ -58,6 +60,7 @@
  *                                                  MBA port and dimm number
  *                          mjjones     11/08/2013  Do not define struct in union
  *                          whs         03/11/2014  Add FW traces to error logs
+ *                          sangeet2    01/16/2015  Modify ErrorInfoEntryHwCallout
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -302,6 +305,8 @@ public:
         uint8_t iv_hw;
         uint8_t iv_calloutPriority;
         uint8_t iv_refObjIndex;
+        //For a HW callout (clock) the position of the clock
+        uint8_t iv_objPosIndex;
     };
 
     struct ErrorInfoEntryProcCallout
@@ -442,11 +447,14 @@ private:
      * @param[in] i_hw        The hardware to callout
      * @param[in] i_priority  The priority of the callout
      * @param[in] i_refTarget Reference to reference Target
+     * @param[in] i_position  Incase of a clock callout;
+     *                        position of the clock target
      */
      void addEIHwCallout(
          const HwCallouts::HwCallout i_hw,
          const CalloutPriorities::CalloutPriority i_priority,
-         const Target & i_refTarget);
+         const Target & i_refTarget,
+         const targetPos_t i_position = INVALID_CLOCK_POS);
 
     /**
      * @brief Add a procedure callout to the ErrorInfo

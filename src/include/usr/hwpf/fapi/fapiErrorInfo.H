@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.H,v 1.17 2015-02-02 18:31:53 dcrowell Exp $
+// $Id: fapiErrorInfo.H,v 1.18 2015/03/19 15:46:14 pragupta Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.H,v $
 
 /**
@@ -51,6 +51,7 @@
  *                                                  /gard of DIMM(s) related
  *                                                  to MBA
  *                          whs         03/11/2014  Add FW traces to error logs
+ *                          sangeet2    01/16/2015  Modify ErrorInfoHwCallout
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -62,6 +63,12 @@
 
 namespace fapi
 {
+
+// The type that will hold the position of clock
+typedef int8_t targetPos_t;
+
+// Used  incase a valid clock position is not specified
+const targetPos_t INVALID_CLOCK_POS = (-1);
 
 /**
  * @enum HwCallout
@@ -239,11 +246,14 @@ struct ErrorInfoHwCallout
      * @param[in] i_hw              Hardware to callout
      * @param[in] i_calloutPriority Priority of callout
      * @param[in] i_refTarget       Reference to reference target
+     * @param[in] i_position        Incase of a clock callout;
+     *                              the position of the clock to be called out
      */
     ErrorInfoHwCallout(
         const HwCallouts::HwCallout i_hw,
         const CalloutPriorities::CalloutPriority i_calloutPriority,
-        const Target & i_refTarget);
+        const Target & i_refTarget,
+        const targetPos_t i_position = INVALID_CLOCK_POS);
 
 #ifdef FAPI_CUSTOM_MALLOC
     /**
@@ -272,6 +282,9 @@ struct ErrorInfoHwCallout
     // The reference target (needed for some HW callouts to identify what to
     // callout). The target handle is NULL if there is no reference target.
     Target iv_refTarget;
+
+    // Incase of a clock callout; the position of the clock to be called out
+    targetPos_t iv_position;
 };
 
 /**

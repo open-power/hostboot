@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiReturnCode.C,v 1.21 2014/10/27 15:38:22 baiocchi Exp $
+// $Id: fapiReturnCode.C,v 1.22 2015/01/16 11:31:38 sangeet2 Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.C,v $
 
 /**
@@ -60,6 +60,8 @@
  *                          mjjones     08/26/2013  Support HW Callouts
  *                          whs         03/11/2014  Add FW traces to error logs
  *                          whs         07/23/2014  Reduce traces
+ *                          sangeet2    01/16/2015  Support "position" attribute
+ *                                                  for osc callout
  */
 
 #include <fapiReturnCode.H>
@@ -293,6 +295,9 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 static_cast<CalloutPriorities::CalloutPriority>(
                     i_pEntries[i].hw_callout.iv_calloutPriority);
 
+            // A l_posIndex of 0xff indicates that it is not a clock callout
+            uint8_t l_posIndex = i_pEntries[i].hw_callout.iv_objPosIndex;
+
             // A refIndex of 0xff indicates that there is no reference target
             uint8_t l_refIndex = i_pEntries[i].hw_callout.iv_refObjIndex;
 
@@ -303,7 +308,18 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 FAPI_DBG("addErrorInfo: Adding hw callout with ref, hw:"
                      " %d, pri: %d",
                      l_hw, l_pri);
-                addEIHwCallout(l_hw, l_pri, *l_pRefTarget);
+
+                if (l_posIndex != 0xff)
+                {
+                    const targetPos_t * l_posObj =
+                    static_cast<const targetPos_t *>(i_pObjects[l_posIndex]);
+
+                    addEIHwCallout(l_hw, l_pri, *l_pRefTarget, *l_posObj);
+                }
+                else
+                {
+                    addEIHwCallout(l_hw, l_pri, *l_pRefTarget);
+                }
             }
             else
             {
@@ -311,7 +327,17 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 FAPI_DBG("addErrorInfo: Adding hw callout with no ref, hw:"
                      " %d, pri: %d",
                      l_hw, l_pri);
-                addEIHwCallout(l_hw, l_pri, l_emptyTarget);
+
+                if (l_posIndex != 0xff)
+                {
+                    const targetPos_t * l_posObj =
+                    static_cast<const targetPos_t *>(i_pObjects[l_posIndex]);
+                    addEIHwCallout(l_hw, l_pri, l_emptyTarget, *l_posObj);
+                }
+                else
+                {
+                    addEIHwCallout(l_hw, l_pri, l_emptyTarget);
+                }
             }
         }
         else if (l_type == EI_TYPE_PROCEDURE_CALLOUT)
@@ -513,11 +539,12 @@ void ReturnCode::forgetData()
 void ReturnCode::addEIHwCallout(
     const HwCallouts::HwCallout i_hw,
     const CalloutPriorities::CalloutPriority i_priority,
-    const Target & i_refTarget)
+    const Target & i_refTarget,
+    const targetPos_t i_position)
 {
     // Create an ErrorInfoHwCallout object and add it to the Error Information
     ErrorInfoHwCallout * l_pCallout = new ErrorInfoHwCallout(
-        i_hw, i_priority, i_refTarget);
+        i_hw, i_priority, i_refTarget, i_position);
     getCreateReturnCodeDataRef().getCreateErrorInfo().
         iv_hwCallouts.push_back(l_pCallout);
 }

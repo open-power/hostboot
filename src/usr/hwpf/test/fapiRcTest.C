@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiRcTest.C,v 1.15 2015-02-02 19:14:33 dcrowell Exp $
+// $Id: fapiRcTest.C,v 1.16 2015/03/18 19:41:51 pragupta Exp $
 /**
  *  @file fapiTargetTest.C
  *
@@ -660,10 +660,12 @@ uint32_t rcTest12()
     l_entries[5].hw_callout.iv_hw = fapi::HwCallouts::MEM_REF_CLOCK;
     l_entries[5].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
     l_entries[5].hw_callout.iv_refObjIndex = 0xff;
+    l_entries[5].hw_callout.iv_objPosIndex = 0;
     l_entries[6].iv_type = fapi::ReturnCode::EI_TYPE_HW_CALLOUT;
     l_entries[6].hw_callout.iv_hw = fapi::HwCallouts::FLASH_CONTROLLER_PART;
     l_entries[6].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
     l_entries[6].hw_callout.iv_refObjIndex = 0xff;
+    l_entries[6].hw_callout.iv_objPosIndex = 0;
 
     l_rc.addErrorInfo(l_objects, l_entries, 7);
 
