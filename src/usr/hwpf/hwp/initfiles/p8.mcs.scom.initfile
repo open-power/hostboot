@@ -1,8 +1,10 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.19 2014/10/22 21:21:12 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.20 2014/11/14 19:28:16 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.20|baysah  |11/14/14|- FW630892 : Disable MCS Read Data OctoWord Gathering to prevent dcbz starvation
 #--         |        |        |
 #--     1.19|baysah  |10/22/14|- SW281364 : Remove ATTR_PM_SLEEP_ENABLE condition so MCS workaround for L4-CAPI Deadlock is for all systems types
 #--         |        |        |- per Kevin Reick
@@ -186,6 +188,7 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      bits ,                    scom_data        ;
      24   ,                    0b1              ;              # MCMODE3Q_ENABLE_LOCAL_TIMEOUT_TIMEBASE
      25:30,                    0b000001         ;              # MCMODE3Q_LOCAL_TIMEOUT_TIMEBASE_THRESHOLD
+     48:52,                    0b11111          ;              # MCMODE3Q_READ_RAMP_PERF_TRESHOLD
 }
 
 
