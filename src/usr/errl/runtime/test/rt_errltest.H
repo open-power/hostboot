@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -306,6 +308,11 @@ public:
             errl->addHwCallout(pTarget,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DELAYED_DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addHwCallout(pTarget,
+                    HWAS::SRCI_PRIORITY_MED,
+                    HWAS::DECONFIG,
                     HWAS::GARD_NULL);
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,

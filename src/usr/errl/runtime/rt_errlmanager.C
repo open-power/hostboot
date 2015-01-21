@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -266,14 +268,16 @@ bool rt_processCallout(errlHndl_t &io_errl,
     if(i_DeferredOnly)
     {
         if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
-            (pCalloutUD->deconfigState == HWAS::DELAYED_DECONFIG))
+            ((pCalloutUD->deconfigState == HWAS::DELAYED_DECONFIG) ||
+             (pCalloutUD->deconfigState == HWAS::DECONFIG)))
         {
             pCalloutUD->deconfigState = HWAS::NO_DECONFIG;
 
             TRACFCOMP( g_trac_errl, ERR_MRK
-                       "Runtime errorlog callout with DELAYED_DECONFIG not "
-                       "allowed! Changed to NO_DECONFIG. plid: 0x%X",
-                       io_errl->plid() );
+                       "Runtime errorlog callout with DELAYED_DECONFIG or "
+                       "DECONFIG not allowed! Changed to NO_DECONFIG. "
+                       " plid: 0x%X. Deconfig State: 0x%x", io_errl->plid(),
+                       pCalloutUD->deconfigState);
         }
 
     }

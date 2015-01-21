@@ -1089,7 +1089,7 @@ void ErrlEntry::deferredDeconfigure()
             ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
     if (pFn != NULL)
     {
-        //check for defered deconfigure callouts
+        //check for deferred deconfigure callouts
         // look thru the errlog for any Callout UserDetail sections
         for(std::vector<ErrlUD*>::const_iterator it = iv_SectionVector.begin();
                 it != iv_SectionVector.end();
@@ -1102,9 +1102,18 @@ void ErrlEntry::deferredDeconfigure()
                 (HWAS::HW_CALLOUT ==
                     reinterpret_cast<HWAS::callout_ud_t*>(
                         (*it)->iv_pData)->type) &&
+#if  __HOSTBOOT_RUNTIME
+                ((HWAS::DELAYED_DECONFIG ==
+                    reinterpret_cast<HWAS::callout_ud_t*>(
+                        (*it)->iv_pData)->deconfigState) ||
+                 (HWAS::DECONFIG ==
+                    reinterpret_cast<HWAS::callout_ud_t*>(
+                        (*it)->iv_pData)->deconfigState))
+#else
                 (HWAS::DELAYED_DECONFIG ==
                     reinterpret_cast<HWAS::callout_ud_t*>(
                         (*it)->iv_pData)->deconfigState)
+#endif
                )
             {
                 // call HWAS function to register this action,
@@ -1123,7 +1132,6 @@ void ErrlEntry::deferredDeconfigure()
 
     TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure returning");
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
