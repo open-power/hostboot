@@ -59,6 +59,7 @@ enum SectionId
     FIRDATA,        /**< FIRDATA */
     ATTR_TMP,       /**< Temporary Attribute Override */
     ATTR_PERM,      /**< Permanent Attribute Override */
+    CAPP,           /**< CAPP lid */
     TEST,           /**< Scratch space for PNOR test cases */
 
     NUM_SECTIONS,   /**< Number of defined sections */
