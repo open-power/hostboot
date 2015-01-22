@@ -31,6 +31,7 @@
  *  is used to handle setting the virtual sensors maintained by the BMC.
  */
 
+#include <initservice/initsvcstructs.H>
 #include <attributeenums.H>
 #include <targeting/common/target.H>
 #include <errl/errlentry.H>
@@ -323,22 +324,6 @@ namespace SENSOR
         public:
 
             /**
-             * @enum firmwareProgressPhase
-             *
-             * Current firmware progress phase
-             *
-             */
-            enum firmwareProgressPhase
-            {
-                MEMORY_INIT         = 0x01, //< isteps 10->14
-                SEC_PROCESSOR_INIT  = 0x03, //< isteps 15->16
-                STARTING_OS         = 0x13, //< isteps 17->21
-                BASE_INITIALIZATION = 0x14, //< isteps  6-> 9
-                PHASE_NA            = 0xFF, // Not applicable
-
-            };
-
-            /**
              *  @brief Constructor for the FirmwareProgressSensor
              *
              *  The firmware progress sensor is used to update the BMC
@@ -368,7 +353,8 @@ namespace SENSOR
              * @return Errorlog handle
              *
              */
-            errlHndl_t setBootProgressPhase(firmwareProgressPhase i_phase);
+            errlHndl_t setBootProgressPhase(
+                            INITSERVICE::firmwareProgressPhase i_phase);
 
         private:
             // @enum firmwareProgressOfsets

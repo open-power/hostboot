@@ -68,6 +68,7 @@
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
 #include <config.h>
+#include <ipmi/ipmisensor.H>
 
 namespace ISTEPS_TRACE
 {
@@ -620,6 +621,24 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                     "istep is enabled");
             istepPauseSet(i_istep, i_substep);
         }
+
+#ifdef CONFIG_BMC_IPMI
+
+        if(theStep->taskflags.fwprogtype != PHASE_NA)
+        {
+            SENSOR::FirmwareProgressSensor l_progressSensor;
+            errlHndl_t err_fwprog = l_progressSensor.setBootProgressPhase(
+                theStep->taskflags.fwprogtype);
+
+            if(err_fwprog)
+            {
+                TRACFCOMP(g_trac_initsvc,
+                    "init: ERROR: Update FW Progress Phase Failed");
+                errlCommit(err_fwprog, INITSVC_COMP_ID);
+            }
+        }
+
+#endif
 
         err = InitService::getTheInstance().executeFn(theStep, NULL);
 
@@ -1682,8 +1701,8 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
                       "init: ERROR: reset IPMI watchdog Failed");
         err_ipmi->collectTrace("INITSVC", 1024);
         errlCommit(err_ipmi, INITSVC_COMP_ID );
-
     }
+
 #endif
 
     msg_t * myMsg = msg_allocate();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,8 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(15,01,"host_build_winkle"),
                 BUILD_WINKLE_IMAGES::call_host_build_winkle,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true,
+                        SEC_PROCESSOR_INIT }
         },
         {
                 ISTEPNAME(15,02,"proc_set_pore_bar"),

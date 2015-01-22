@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
 
 #include <initservice/initsvcreasoncodes.H>
+#include <initservice/initsvcstructs.H>
 
 // This constant has a corresponding entry in src/build/tools/listdeps.pl.
 #define MAX_DEPENDENT_MODULES   9
@@ -119,7 +120,28 @@ enum IplOpType
     NORMAL_IPL_OP = 0x01,
     MPIPL_OP      = 0x02,
 };
-
+/**
+ * @enum    FirmwareProgressType
+ *  -   PHASE_NA                -> No FW progress update.  (All other isteps)
+ *  -   BASE_INITIALIZATION     -> 6.3
+ *  -   MEMORY_INIT             -> 10.1
+ *  -   SEC_PROCESSOR_INIT      -> 15.1
+ *  -   STARTING_OS             -> 18.13
+ *
+ *  See Dean's BMC Function Requirements (R3.2-3.16)
+ *  NOTE: The spec says we should update the progress code at the beginning
+ *        of each of the step ranges.  Here we are updating at specific
+ *        substeps since the previous substeps are functionally HB no-ops.
+ *        If these become functional, we will need to change this.
+ */
+enum firmwareProgressPhase
+{
+    PHASE_NA            = 0x0,  // Not applicable
+    MEMORY_INIT         = 0x01, //< isteps 10->14
+    SEC_PROCESSOR_INIT  = 0x03, //< isteps 15->16
+    STARTING_OS         = 0x13, //< isteps 17->21
+    BASE_INITIALIZATION = 0x14, //< isteps  6-> 9
+};
 /**
  * @struct  TaskFlags
  *
@@ -130,16 +152,18 @@ enum IplOpType
  */
 struct  TaskFlags
 {
-    TaskType            task_type;          // task execution flags
-    ModuleType          module_type;        // BASE_IMAGE or EXT_IMAGE
-    uint8_t             ipl_op;             // bitmap of IplOpType enum
-                                            // indicating whether task
-                                            // is an op in certain IPL modes.
-    bool                check_attn;         // flag indicating whether to check
-                                            // for attentions and invoke PRD
-                                            // for analysis after executing
-                                            // the istep substep
-                                            // true = check for attentions
+    TaskType               task_type;    // -- Task execution flags
+    ModuleType             module_type;  // -- BASE_IMAGE or EXT_IMAGE
+    uint8_t                ipl_op;       // -- Bitmap of IplOpType enum
+                                         //    indicating whether task
+                                         //    is an op in certain IPL modes.
+    bool                   check_attn;   // -- Flag indicating whether to check
+                                         //    for attentions and invoke PRD
+                                         //    for analysis after executing
+                                         //    the istep substep
+                                         //    true = check for attentions
+    firmwareProgressPhase  fwprogtype;   // -- Flag indicating current IPMI
+                                         //    Boot Progress code
 };
 
 

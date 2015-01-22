@@ -48,8 +48,6 @@ namespace SENSOR
                              TARGETING::Target * i_target)
         :iv_name(i_name) ,iv_target(i_target)
     {
-        assert(i_target != NULL);
-
         // allocate a new message structure to use with our sensors
         // this will be the payload for the IPMI send/sendrecv sensor message.
         iv_msg = new setSensorReadingRequest;
@@ -485,12 +483,11 @@ namespace SENSOR
 
     };
 
-
     //
     // setBootProgressPhase - update the boot progress sensor of the BMC
     //
     errlHndl_t FirmwareProgressSensor::setBootProgressPhase(
-            firmwareProgressPhase phase )
+            INITSERVICE::firmwareProgressPhase phase )
     {
         // event data 2 holds the progress info
         iv_msg->iv_event_data[1] = phase;

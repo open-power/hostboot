@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,8 @@ const   TaskInfo    g_istep06[]  =   {
         {
                 ISTEPNAME(06,03,"host_init_fsi"),
                 HWAS::host_init_fsi,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false,
+                        BASE_INITIALIZATION }
         },
         {
                 ISTEPNAME(06,04,"host_set_ipl_parms"),

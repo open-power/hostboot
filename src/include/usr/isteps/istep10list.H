@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,8 @@ const   TaskInfo    g_istep10[]  =   {
         {
                 ISTEPNAME(10,01,"host_prd_hwreconfig"),
                 HWAS::host_prd_hwreconfig,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true,
+                        MEMORY_INIT }
         },
         {
                 ISTEPNAME(10,02,"cen_sbe_tp_chiplet_init1"),

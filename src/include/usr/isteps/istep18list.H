@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,7 +127,8 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(18,13,"proc_tod_setup"),
                 TOD::call_tod_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false,
+                        STARTING_OS }
         },
         {
                 ISTEPNAME(18,14,"proc_tod_init"),

@@ -401,12 +401,12 @@ private:
     bool iv_progressThreadStarted;
 
     // Used in multiple threads, mutex protection needed
-    uint8_t iv_curIStep;               // Current Step
-    uint8_t iv_curSubStep;             // Current SubStep
-    msg_t* iv_pIstepMsg;               // External Istep request message
-    timespec_t iv_lastProgressMsgTime; // Last time progress message sent
-    bool iv_shutdown;                  // Shutdown request has been received
-                                       // from the FSP
+    uint8_t iv_curIStep;                // Current Step
+    uint8_t iv_curSubStep;              // Current SubStep
+    msg_t* iv_pIstepMsg;                // External Istep request message
+    timespec_t iv_lastProgressMsgTime;  // Last time progress message sent
+    bool iv_shutdown;                   // Shutdown request has been received
+                                        // from the FSP
     bool iv_futureShutdown;
     uint8_t iv_istepToCompleteBeforeShutdown;
     uint8_t iv_substepToCompleteBeforeShutdown;
