@@ -15108,6 +15108,25 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>OPT_MEMMAP_GROUP_POLICY</id>
+    <description>
+       Controls scope of grouping performed in memory map calculations
+       Possible values defined in FAPI ATTR_OPT_MEMMAP_GROUP_POLICY
+    </description>
+    <simpleType>
+        <uint8_t><default>0x00</default></uint8_t><!-- CHIP_AS_GROUP -->
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+<!-- @todo: enable with CQ:SW274292
+    <hwpfToHbAttrMap>
+        <id>ATTR_OPT_MEMMAP_GROUP_POLICY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+-->
+</attribute>
+
+<attribute>
     <id>MFG_TRACE_ENABLE</id>
     <description>
         Override this to a non-zero value to have the FAPI manufacturing

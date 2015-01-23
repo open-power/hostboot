@@ -262,6 +262,16 @@ push @systemAttr,
     "MNFG_TH_CEN_L4_CACHE_CES", $reqPol->{'mnfg_th_cen_l4_cache_ces'},
 ];
 
+#@todo RTC:122741 - Get this from MRW for real
+if ($sysname =~ /alpine/)
+{
+    push @systemAttr, ["OPT_MEMMAP_GROUP_POLICY", 0x01];
+}
+else
+{
+    push @systemAttr, ["OPT_MEMMAP_GROUP_POLICY", 0x00];
+}
+
 if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')
 {
    push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 1];

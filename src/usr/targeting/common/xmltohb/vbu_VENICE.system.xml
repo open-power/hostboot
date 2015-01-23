@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -326,6 +326,10 @@
     <attribute>
         <id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OPT_MEMMAP_GROUP_POLICY</id>
+        <default>0x00</default>
     </attribute>
 </targetInstance>
 
