@@ -91,6 +91,71 @@ uint32_t PNOR::pnor_ffs_checksum(void* data, size_t size)
     return checksum;
 }
 
+/*
+ * @brief determine the physical offset of the ffs entry
+ *        (to be used before readTOC is called)
+ */
+void PNOR::findPhysicalOffset(ffs_hdr* i_tocAddress,
+                                const char* i_entryName,
+                                uint64_t & o_offset)
+{
+    for(uint32_t i = 0; i < i_tocAddress->entry_count; i++)
+    {
+        ffs_entry* l_curEntry = (&i_tocAddress->entries[i]);
+        if(strcmp(i_entryName,l_curEntry->name) == 0)
+        {
+            o_offset = ((uint64_t)l_curEntry->base)*PAGESIZE;
+            break;
+        }
+    }
+}
+
+/*
+ * @brief used to translate mmio offset stored in mbox scratch 2
+ *        to physical offset of HBB Image
+ */
+errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
+{
+    errlHndl_t l_err = NULL;
+    do
+    {
+        uint64_t l_hbbMMIO = 0;
+        size_t l_size = sizeof(uint64_t);
+        TARGETING::Target* l_masterProc =
+            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+        //MBOX_SCRATCH_REG2 = 0x5003A
+        l_err = DeviceFW::deviceRead(l_masterProc, &l_hbbMMIO,l_size,
+                DEVICE_SCOM_ADDRESS(SPLESS::MBOX_SCRATCH_REG2));
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_pnor,"PNOR::mmioToPhysicalOffset: Failed to read"
+                    " HB MMIO offset");
+            break;
+        }
+        //All SCOMS are 64-bit, HB MMIO is stored in higher 32-bits.
+        //ANDing with TOP_OF_FLASH to maskout anything in the higher bits
+        l_hbbMMIO    = (l_hbbMMIO >> 32) & PNOR::LPC_TOP_OF_FLASH_OFFSET;
+        o_hbbAddress = ((9*l_hbbMMIO) - (9*PNOR::LPC_SFC_MMIO_OFFSET)
+                                 - PNOR::PNOR_SIZE) /8;
+    } while (0);
+    return l_err;
+}
+
+/*
+ * @brief used to translate HBB Address to MMIO offset
+ */
+void  PNOR::physicalToMmioOffset(uint64_t  i_hbbAddress,
+                                 uint64_t& o_mmioOffset)
+{
+    o_mmioOffset = (PNOR::LPC_SFC_MMIO_OFFSET + i_hbbAddress +
+                   ((PNOR::PNOR_SIZE - i_hbbAddress)/9)) & 0xFFFFFFF;
+}
+
+/*
+ *  @brief: parse the TOCs read from memory and store section information
+ *          from one of the verified TOCs
+ */
 errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
            TOCS & o_TOC_used, SectionData_t * o_TOC, uint64_t i_baseVAddr)
 {
@@ -398,7 +463,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                         break;
                     }
 
-# ifndef __HOSTBOOT_RUNTIME
+#ifndef __HOSTBOOT_RUNTIME
                     // Handle section permissions
                     if (o_TOC[secId].misc & FFS_MISC_READ_ONLY)
                     {
@@ -493,6 +558,13 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
             } // For TOC Entries
             if (l_errhdl)
             {
+                break;
+            }
+            if (!TOC_0_failed)
+            {
+                //if we find a working TOC we don't need to loop again.
+                //In runtime case, OPAL returns a working TOC.
+                //So, we don't want to look at the second one.
                 break;
             }
         } // For TOC's

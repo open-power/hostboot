@@ -37,6 +37,7 @@
 
 #include "../ffs.h"
 #include "../common/ffs_hb.H"
+#include <util/align.H>
 
 // Trace definition
 extern trace_desc_t* g_trac_pnor;
@@ -297,7 +298,6 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 }
 /*******Protected Methods**************/
 RtPnor::RtPnor()
-:iv_TOC_used(PNOR::TOC_0)
 {
     errlHndl_t l_err = readTOC();
     if (l_err)
@@ -574,27 +574,25 @@ errlHndl_t RtPnor::readTOC ()
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readTOC" );
     errlHndl_t l_err = NULL;
-    uint8_t* toc0Buffer = new uint8_t[PAGESIZE];
-    uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
+    uint8_t* l_toc0Buffer = new uint8_t[PNOR::TOC_SIZE];
     do {
-        //find proc id
-        uint64_t l_procId;
-        TARGETING::Target* l_masterProc = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
-        l_err = RT_TARG::getRtTarget (l_masterProc, l_procId);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: getRtTarget failed");
-            break;
-        }
-
         if (g_hostInterfaces && g_hostInterfaces->pnor_read)
         {
-            //@TODO RTC:120733
-            //RT code needs a way to get the active side tocs vs just defaulting
-            //to SIDE_A
-            l_err = readFromDevice(l_procId,PNOR::TOC,PNOR::SIDE_A_TOC_0_OFFSET,
-                    PAGESIZE,false,toc0Buffer);
+            //find proc id
+            uint64_t l_procId;
+            TARGETING::Target* l_masterProc = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+            l_err = RT_TARG::getRtTarget (l_masterProc, l_procId);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: getRtTarget failed");
+                break;
+            }
+            // offset = 0 means read the entire PNOR::TOC partition
+            // This offset is offset into the partition, not offset from the
+            // beginning of the flash
+            l_err = readFromDevice (l_procId, PNOR::TOC, 0,
+                    PNOR::TOC_SIZE, false, l_toc0Buffer);
             if (l_err)
             {
                 TRACFCOMP(g_trac_pnor,"RtPnor::readTOC:readFromDevice failed"
@@ -602,16 +600,11 @@ errlHndl_t RtPnor::readTOC ()
                 break;
             }
 
-            l_err = readFromDevice(l_procId,PNOR::TOC,PNOR::SIDE_A_TOC_1_OFFSET,
-                    PAGESIZE, false,toc1Buffer);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_pnor, "RtPnor::readTOC:readFromDevice failed"
-                          " for TOC1");
-                break;
-            }
-
-            l_err = PNOR::parseTOC(toc0Buffer,toc1Buffer,iv_TOC_used,iv_TOC,0);
+            // When we ask for TOC partition, Opal returns a valid TOC.
+            // So, we don't need to verify the second TOC in parseTOC
+            // Therefore, sending invalid value for second toc
+            PNOR::TOCS l_tocUsed;
+            l_err = PNOR::parseTOC(l_toc0Buffer, 0, l_tocUsed, iv_TOC, 0);
             if (l_err)
             {
                 TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");
@@ -620,14 +613,9 @@ errlHndl_t RtPnor::readTOC ()
         }
     } while (0);
 
-    if(toc0Buffer != NULL)
+    if(l_toc0Buffer != NULL)
     {
-        delete[] toc0Buffer;
-    }
-
-    if(toc1Buffer != NULL)
-    {
-        delete[] toc1Buffer;
+        delete[] l_toc0Buffer;
     }
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::readTOC" );

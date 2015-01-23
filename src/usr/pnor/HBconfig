@@ -38,7 +38,7 @@ config PNOR_IS_32MB
     help
         Size of the attached flash chip is 32MB, if not set then 64MB is default
 
-config TWO_SIDE_SUPPORT
+config PNOR_TWO_SIDE_SUPPORT
     default n
     help
         This is used to turn on/off two sided pnor support

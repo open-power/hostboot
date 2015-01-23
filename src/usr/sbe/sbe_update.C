@@ -2156,7 +2156,7 @@ namespace SBE
             // Determine if PNOR is 1- or 2-sided and if there is a
             // GOLDEN boot involved
 
-#ifdef CONFIG_TWO_SIDE_SUPPORT
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
 
             // @todo RTC 120734 - ask PNOR if we are in "GOLDEN" mode,
             // which would mean that we are booting off the the GOLDEN

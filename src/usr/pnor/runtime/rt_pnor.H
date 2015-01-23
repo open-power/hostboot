@@ -79,11 +79,6 @@ class RtPnor
 
     private:
         /**
-        * Which TOC (0 or 1) is used after verifying both.
-        */
-        PNOR::TOCS iv_TOC_used;
-
-        /**
          * Cached copy of section data
          */
         PNOR::SectionData_t iv_TOC[PNOR::NUM_SECTIONS+1];

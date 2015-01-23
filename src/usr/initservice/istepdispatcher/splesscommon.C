@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,7 +39,7 @@
 #include    <stdint.h>
 #include    <stdio.h>
 #include    <string.h>
-
+#include    <initservice/mboxRegs.H>
 //  $$$$$$$ undefine this before checking in....
 // #define SPLESS_DEBUG    1
 

@@ -493,8 +493,9 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 // @TODO RTC: 120061 - replace config flag with a pnor interface call to say if
 //                     there is a guard section on the current (active) side
 //                     of pnor
-#ifdef CONFIG_TWO_SIDE_SUPPORT
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
             HWAS_INF("getGardSectionInfo: No guard section disabling guard support");
+            delete l_errl;
             l_errl = NULL;
 #else
             HWAS_ERR("getGardSectionInfo:getSectionInfo failed");

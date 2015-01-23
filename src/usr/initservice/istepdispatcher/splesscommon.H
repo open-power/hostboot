@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -59,12 +61,6 @@
  */
 namespace   SPLESS
 {
-
-const   uint32_t    MBOX_SCRATCH_REG0               =   0x00050038;
-const   uint32_t    MBOX_SCRATCH_REG1               =   0x00050039;
-const   uint32_t    MBOX_SCRATCH_REG2               =   0x0005003a;
-const   uint32_t    MBOX_SCRATCH_REG3               =   0x0005003b;
-
 
 /**
  * @enum

@@ -46,7 +46,6 @@
 #include <config.h>
 #include "pnor_common.H"
 
-
 extern trace_desc_t* g_trac_pnor;
 
 // Easy macro replace for unit testing
@@ -193,9 +192,8 @@ void* wait_for_message( void* unused )
  * @brief  Constructor
  */
 PnorRP::PnorRP()
-: iv_activeTocOffsets(SIDE_A_TOC_0_OFFSET,SIDE_A_TOC_1_OFFSET)
-,iv_altTocOffsets(SIDE_B_TOC_0_OFFSET,SIDE_B_TOC_1_OFFSET)
-,iv_TOC_used(TOC_0)
+:
+iv_TOC_used(TOC_0)
 ,iv_msgQ(NULL)
 ,iv_startupRC(0)
 {
@@ -234,29 +232,6 @@ void PnorRP::initDaemon()
 
     do
     {
-        // @TODO RTC: 120062 - Determine which side is Golden
-        // Default TOC offsets set to side A. If two side support is enabled,
-        // check which SEEPROM hostboot booted from
-#ifdef CONFIG_TWO_SIDE_SUPPORT
-        TARGETING::Target* pnor_target = TARGETING::
-                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        // Get correct TOC
-        PNOR::sbeSeepromSide_t l_bootSide;
-        PNOR::getSbeBootSeeprom(pnor_target, l_bootSide);
-        if (l_bootSide == PNOR::SBE_SEEPROM1)
-        {
-            TRACFCOMP( g_trac_pnor, "PnorRP::initDaemon> Booting from Side B");
-            iv_activeTocOffsets.first = SIDE_B_TOC_0_OFFSET;
-            iv_activeTocOffsets.second = SIDE_B_TOC_1_OFFSET;
-            iv_altTocOffsets.first = SIDE_A_TOC_0_OFFSET;
-            iv_altTocOffsets.second = SIDE_A_TOC_0_OFFSET;
-        }
-        else
-        {
-            TRACFCOMP( g_trac_pnor, "PnorRP::initDaemon> Booting from Side A");
-        }
-#endif
-
         // create a message queue
         iv_msgQ = msg_q_create();
 
@@ -289,8 +264,16 @@ void PnorRP::initDaemon()
         INITSERVICE::registerBlock(reinterpret_cast<void*>(BASE_VADDR),
                                    TOTAL_SIZE,PNOR_PRIORITY);
 
-        // Read the TOC in the PNOR to compute the sections and set their
-        // correct permissions
+        //Find and read the TOC in the PNOR to compute the sections and set
+        //their correct permissions
+        l_errhdl = findTOC();
+        if( l_errhdl )
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to findTOC");
+            errlCommit(l_errhdl, PNOR_COMP_ID);
+            INITSERVICE::doShutdown(PNOR::RC_FINDTOC_FAILED);
+        }
+
         l_errhdl = readTOC();
         if( l_errhdl )
         {
@@ -409,6 +392,262 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
     return l_errhdl;
 }
 
+/*
+ * @brief Finds the toc locations based on hostboot base address
+ */
+errlHndl_t PnorRP::findTOC()
+{
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorRP::findTOC...");
+    errlHndl_t l_err             = NULL;
+    do {
+        const uint32_t l_shiftAmount = 32;
+        uint64_t l_chip         = 0;
+        uint64_t l_fatalError   = 0;
+        bool l_foundTOC         = false;
+        uint64_t l_toc          = PNOR::PNOR_SIZE - 1;
+        ffs_hdr* l_ffs_hdr      = 0;
+        uint64_t l_hbbAddr      = 0;
+        uint8_t l_tocBuffer [PAGESIZE];
+
+        //get the HBB Address we booted from
+        l_err =  PNOR::mmioToPhysicalOffset(l_hbbAddr);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::findTOC> mmioToPhysicalOffset failed");
+            break;
+        }
+
+        //if we booted from a lower address, then we need to increment
+        //sides as we find tocs, otherwise decrement.
+        bool l_inc = (ALIGN_DOWN_X(l_hbbAddr, l_shiftAmount*MEGABYTE) == 0);
+        uint64_t l_tempHBB = l_hbbAddr;
+
+        //while TOC not found and we are within the flash size
+        while((!l_foundTOC) && (l_tempHBB > 0) && (l_tempHBB < PNOR_SIZE))
+        {
+            //Align HBB down -- looking at 0x0 or 0x2000000
+            l_toc = ALIGN_DOWN_X(l_tempHBB, l_shiftAmount*MEGABYTE);
+            l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
+                    l_fatalError);
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_pnor,"findTOC: readFromDevice failed "
+                        "searching for primaryTOC");
+                break;
+            }
+
+            l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
+            l_foundTOC = ((l_ffs_hdr->magic == FFS_MAGIC) &&
+                        (PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE) == 0));
+            if (!l_foundTOC)
+            {
+                //If TOC not found at 0x0 or 0x2000000
+                //Align HBB down + 8000 -- looking at 0x8000 or 0x2008000
+                l_toc += TOC_SIZE;
+                l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
+                    l_fatalError);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_pnor,"findTOC: readFromDevice failed "
+                            "searching for backupTOC for A-B-D arrangement");
+                    break;
+                }
+
+                l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
+                l_foundTOC =
+                    ((l_ffs_hdr->magic == FFS_MAGIC) &&
+                     (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) == 0));
+            }
+
+            if (!l_foundTOC)
+            {
+                //If toc not found at 0x8000 or 0x2008000
+                //Align HBB up (l_shiftAmount) - 8000
+                // -- looking at 0x1FF8000 or 0x3FF8000
+                l_toc = ALIGN_X(l_tempHBB, l_shiftAmount*MEGABYTE);
+                l_toc -= TOC_SIZE;
+                l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
+                    l_fatalError);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_pnor,"findTOC: readFromDevice failed"
+                            "searching for backupTOC for A-D-B arrangement");
+                    break;
+                }
+
+                l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
+                l_foundTOC =
+                    ((l_ffs_hdr->magic == FFS_MAGIC) &&
+                     (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) == 0));
+            }
+
+            //Setup for next time -- look for the other side
+            l_tempHBB = (l_inc) ? (l_tempHBB + l_shiftAmount*MEGABYTE) :
+                                  (l_tempHBB - l_shiftAmount*MEGABYTE);
+        }
+
+        if(l_err)
+        {
+            break;
+        }
+
+        //found at least one TOC
+        if(l_foundTOC)
+        {
+            TRACFCOMP(g_trac_pnor, "findTOC> found at least one toc at 0x%X", l_toc);
+
+            //look for BACKUP_PART and read it
+            uint64_t l_backupTOC = INVALID_OFFSET;
+            PNOR::findPhysicalOffset(l_ffs_hdr,"BACKUP_PART",l_backupTOC);
+
+            //figure out if the toc found belongs to the side we booted from
+            //or if it belongs to the other side
+            uint64_t l_foundHBB;
+            PNOR::findPhysicalOffset(l_ffs_hdr, "HBB", l_foundHBB);
+            bool l_isActiveTOC = (l_foundHBB == l_hbbAddr);
+
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+            uint64_t l_otherPrimaryTOC = INVALID_OFFSET;
+            uint64_t l_otherBackupTOC  = INVALID_OFFSET;
+            uint8_t l_otherPrimaryTOCBuff [PAGESIZE];
+            uint8_t l_otherBackupTOCBuff  [PAGESIZE];
+            uint8_t l_backupTOCBuffer     [PAGESIZE];
+
+            //look for OTHER_SIDE
+            PNOR::findPhysicalOffset(l_ffs_hdr, "OTHER_SIDE",l_otherPrimaryTOC);
+
+            //reading to look for OTHER_SIDE's backup
+            bool l_foundOtherBackup  = false;
+            bool l_foundOtherPrimary = false;
+
+            if (l_otherPrimaryTOC != INVALID_OFFSET)
+            {
+                l_err = readFromDevice(l_otherPrimaryTOC,l_chip,
+                            false, l_otherPrimaryTOCBuff,l_fatalError);
+                l_ffs_hdr = (ffs_hdr*)l_otherPrimaryTOCBuff;
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_pnor, "findTOC: readFromDevice failed"
+                            " while looking for other side's primary TOC");
+                    errlCommit(l_err, PNOR_COMP_ID);
+                }
+                else if ((l_ffs_hdr->magic == FFS_MAGIC) &&
+                        (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE)==0))
+                {
+                        //if otherPrimaryTOC is valid,
+                        //then we can find it's backup
+                        PNOR::findPhysicalOffset(l_ffs_hdr, "BACKUP_PART",
+                              l_otherBackupTOC);
+                        l_foundOtherPrimary = true;
+                }
+            }
+            if ((!l_foundOtherPrimary) && (l_backupTOC != INVALID_OFFSET))
+            {
+                //if otherPrimaryTOC is not valid, find the other backup
+                //through BACKUP_PART's OTHER_SIDE
+                l_err = readFromDevice (l_backupTOC, l_chip, false,
+                        l_backupTOCBuffer, l_fatalError);
+                l_ffs_hdr = (ffs_hdr*)l_backupTOCBuffer;
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_pnor, "findTOC: readFromDevice failed"
+                            " while reading for backup TOC");
+                    errlCommit(l_err, PNOR_COMP_ID);
+                }
+                else if ((l_ffs_hdr->magic == FFS_MAGIC)
+                      && (PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE)==0))
+                {
+                    PNOR::findPhysicalOffset(l_ffs_hdr,"OTHER_SIDE",
+                                    l_otherBackupTOC);
+                    l_foundOtherBackup = true;
+                }
+            }
+
+            //figure out if other side's toc belongs to the side we booted from
+            if(l_foundOtherPrimary)
+            {
+                PNOR::findPhysicalOffset((ffs_hdr*)l_otherPrimaryTOCBuff, "HBB",
+                    l_foundHBB);
+            }
+            else if (l_foundOtherBackup)
+            {
+                l_err = readFromDevice (l_otherBackupTOC, l_chip, false,
+                        l_otherBackupTOCBuff, l_fatalError);
+                l_ffs_hdr = (ffs_hdr*)l_backupTOCBuffer;
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_pnor, "findTOC: readFromDevice failed"
+                            " while reading other side's backup TOC");
+                    errlCommit(l_err, PNOR_COMP_ID);
+                }
+                else if ((l_ffs_hdr->magic == FFS_MAGIC) &&
+                        (PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE)==0))
+                {
+                    PNOR::findPhysicalOffset(l_ffs_hdr,"HBB",
+                                    l_foundHBB);
+                }
+            }
+            bool l_isOtherActiveTOC = (l_foundHBB == l_hbbAddr);
+
+            if (l_isActiveTOC)
+            {
+                iv_activeTocOffsets.first  = l_toc;
+                iv_activeTocOffsets.second = l_backupTOC;
+                iv_altTocOffsets.first     = l_otherPrimaryTOC;
+                iv_altTocOffsets.second    = l_otherBackupTOC;
+            }
+            else if (l_isOtherActiveTOC)
+            {
+                iv_activeTocOffsets.first  = l_otherPrimaryTOC;
+                iv_activeTocOffsets.second = l_otherBackupTOC;
+                iv_altTocOffsets.first     = l_toc;
+                iv_altTocOffsets.second    = l_backupTOC;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_pnor,"findTOC>No valid TOC found, looked"
+                       "at following addresses PrimaryTOC:0x%08X, BackupTOC:"
+                       "0x%08X", l_toc, l_backupTOC);
+                INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_CORRUPTED);
+            }
+            TRACFCOMP(g_trac_pnor,"findTOC>activePrimary:0x%X,activeBackup:0x%X"
+                    "altPrimary:0x%X, altBackup:0x%X",iv_activeTocOffsets.first,
+                    iv_activeTocOffsets.second, iv_altTocOffsets.first,
+                    iv_altTocOffsets.second);
+#else
+            if (l_isActiveTOC)
+            {
+                iv_activeTocOffsets.first  = l_toc;
+                iv_activeTocOffsets.second = l_backupTOC;
+                TRACFCOMP(g_trac_pnor, "findTOC> activePrimary:0x%X, activeBackup:0x%X",
+                        iv_activeTocOffsets.first, iv_activeTocOffsets.second);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_pnor,"findTOC>No valid TOC found, looked"
+                       "at following addresses PrimaryTOC:0x%08X, BackupTOC:"
+                       "0x%08X", l_toc, l_backupTOC);
+                INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_CORRUPTED);
+            }
+
+#endif
+        }
+        else
+        {
+            //no valid TOC found
+            TRACFCOMP(g_trac_pnor, "No valid TOC found");
+            if (l_err)
+            {
+                errlCommit(l_err, PNOR_COMP_ID);
+            }
+            INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_NOT_FOUND);
+        }
+    } while (0);
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"findTOC");
+    return l_err;
+}
+
 /**
  * @brief Read the TOC and store section information
  */
@@ -420,20 +659,32 @@ errlHndl_t PnorRP::readTOC()
     uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
     uint64_t fatal_error = 0;
     do {
-        l_errhdl = readFromDevice( iv_activeTocOffsets.first, 0, false,
-                                toc0Buffer, fatal_error );
-        if (l_errhdl)
+        //Initialize toc bufferes to invalid value
+        //If these buffers are not read from device,
+        //then parseTOC will see invalid data
+        memset(toc0Buffer, 0xFF, PAGESIZE);
+        memset(toc1Buffer, 0xFF, PAGESIZE);
+
+        if (iv_activeTocOffsets.first != INVALID_OFFSET)
         {
-            TRACFCOMP(g_trac_pnor, "readTOC: readFromDevice failed for TOC0");
-            break;
+            l_errhdl = readFromDevice(iv_activeTocOffsets.first, 0, false,
+                                    toc0Buffer, fatal_error );
+            if (l_errhdl)
+            {
+                TRACFCOMP(g_trac_pnor,"readTOC:readFromDevice failed for TOC0");
+                break;
+            }
         }
 
-        l_errhdl = readFromDevice( iv_activeTocOffsets.second, 0, false,
-                                   toc1Buffer, fatal_error );
-        if (l_errhdl)
+        if (iv_activeTocOffsets.second != INVALID_OFFSET)
         {
-            TRACFCOMP(g_trac_pnor, "readTOC: readFromDevice failed for TOC1");
-            break;
+            l_errhdl = readFromDevice(iv_activeTocOffsets.second, 0, false,
+                                       toc1Buffer, fatal_error );
+            if (l_errhdl)
+            {
+                TRACFCOMP(g_trac_pnor,"readTOC:readFromDevice failed for TOC1");
+                break;
+            }
         }
 
         l_errhdl = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC,

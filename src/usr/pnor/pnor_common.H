@@ -26,6 +26,10 @@
 #define PNOR_COMMON_H
 
 #include <pnor/pnorif.H>
+#include "ffs.h"
+#include <devicefw/driverif.H>
+#include <initservice/mboxRegs.H>
+
 namespace PNOR {
     /**
      * Internal information to deal with the sections of PNOR
@@ -51,18 +55,13 @@ namespace PNOR {
 
     enum
     {
-        // @TODO RTC: 120061 - Determine TOC locations
-        // TOC offsets based on pnor layout
-        SIDE_A_TOC_0_OFFSET = 0,
-        SIDE_A_TOC_1_OFFSET = 0x8000,
-        SIDE_B_TOC_0_OFFSET = 0x2000000,
-        SIDE_B_TOC_1_OFFSET = 0x2008000,
-
         /** Real number of bytes required to read 1 logical page */
         PAGESIZE_PLUS_ECC = ((PAGESIZE * 9)/8),  // 8B data + 1B of ECC
 
         SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
         FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
+        TOC_SIZE = 0x8000,
+        INVALID_OFFSET = 0xFFFFFFF,
     };
 
     /**
@@ -81,7 +80,7 @@ namespace PNOR {
 
     /**
      * @brief parse the TOCs read from memory and store section
-     *        information from one of the verified TOC's
+     *        information from one of the verified TOCs
      * @param[in] i_toc0Buffer      Pointer to toc0
      * @param[in] i_toc1Buffer      Pointer to toc1
      * @param[out] o_TOC_used       which TOC is used
@@ -91,6 +90,49 @@ namespace PNOR {
      */
     errlHndl_t parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
            TOCS & o_TOC_used, SectionData_t * o_TOC, uint64_t i_baseVAddr);
+
+    /*
+     *  @brief: determine the physical offset of ffs entry
+     *          (to be used before readTOC is called)
+     *  @param[in] i_tocAddress - ffs hdr pointing to a valid TOC
+     *  @param[in] i_entryName  - Name of the ffs entry to find the offset of
+     *  @param[out] o_offset    - physical offset of the ffs entry
+     */
+    void findPhysicalOffset(ffs_hdr* i_tocAddress,
+                                  const char* i_entryName,
+                                  uint64_t & o_offset);
+
+    /*
+     * @brief used to translate mmio offset stored in mbox scratch 2
+     *        to physical offset of HBB Image
+     * @param[out] o_hbbAddress Physical Offset of HB Base Image
+     *                          associated with the current boot
+     * @return Error
+     */
+    errlHndl_t mmioToPhysicalOffset(uint64_t& o_hbbAddress);
+
+    /*
+     * @brief used to translate HBB Address to MMIO offset
+     * @param[in] i_hbbAddress  - Physical Offset of the HB Base image
+     * @param[out] o_mmioOffest - MMIO Offset of the HB Base image
+     */
+     void physicalToMmioOffset(uint64_t  i_hbbAddress,
+                               uint64_t& o_mmioOffset);
+
+    enum
+    {
+        LPC_TOP_OF_FLASH_OFFSET = 0x0FFFFFFF,
+#ifdef CONFIG_PNOR_IS_32MB
+        PNOR_SIZE = 32*MEGABYTE,
+#else //default to 64MB
+        PNOR_SIZE = 64*MEGABYTE,
+#endif
+        //The direct offset value must be equal to <top of flash>-<pnor size>+1
+        // for the SBE to work so we can rely on that same assertion
+        /**< Offset to direct read space, from FW base */
+        LPC_SFC_MMIO_OFFSET = LPC_TOP_OF_FLASH_OFFSET-PNOR_SIZE+1,
+    };
+
 }
 
 #endif

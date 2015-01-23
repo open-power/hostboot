@@ -44,6 +44,7 @@ namespace PNOR
         MOD_PNORRP_DIDSTARTUPFAIL       = 0x09, /**< didStartupFail(rc) */
         MOD_PNORRP_FLUSH                = 0x0A, /**< mm_remove_pages */
         MOD_PNORRP_FIXECC               = 0x0B, /**< fixECC */
+        MOD_PNORRP_FINDTOC              = 0x0C, /**< findTOC */
 
         // pnorvalid.C
         MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
@@ -138,6 +139,12 @@ namespace PNOR
         RC_NON_ECC_PROTECTED_SECTION = PNOR_COMP_ID | 0x21,
         RC_WRITABLE_PERM_FAIL        = PNOR_COMP_ID | 0x22,
         RC_WRITE_TRACKED_PERM_FAIL   = PNOR_COMP_ID | 0x23,
+        //termination_rc
+        RC_PARTITION_TABLE_NOT_FOUND = PNOR_COMP_ID | 0x24,
+        //termination_rc
+        RC_PARTITION_TABLE_CORRUPTED = PNOR_COMP_ID | 0x25,
+        //termination_rc
+        RC_FINDTOC_FAILED            = PNOR_COMP_ID | 0x26,
     };
 
     enum UserDetailsTypes

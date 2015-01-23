@@ -33,7 +33,8 @@
 #include <vmmconst.h>
 #include <map>
 #include "pnor_common.H"
-
+#include "ffs.h"
+#include <config.h>
 /**
  * PNOR Resource Provider
  */
@@ -102,8 +103,9 @@ class PnorRP
     // TOC 0 and 1 offsets of both PNOR sides. The active PNOR side determined
     // by the Seeprom the SBE booted from
     std::pair<uint64_t, uint64_t> iv_activeTocOffsets;
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
     std::pair<uint64_t, uint64_t> iv_altTocOffsets;
-
+#endif
     enum
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
@@ -151,6 +153,13 @@ class PnorRP
      * @brief Initialize the daemon, called by constructor
      */
     void initDaemon();
+
+    /**
+     * @brief Determine the TOC offsets based on the HBB address
+     *        System does a shutdown if any errors detected
+     * @return Error from device
+     */
+    errlHndl_t  findTOC();
 
     /**
      * @brief Verify both TOC's and store section information from one of the

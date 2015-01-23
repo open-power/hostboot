@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -43,7 +43,7 @@
 #include "sfc_ast2400.H"
 #include "norflash.H"
 #include <util/align.H>
-
+#include "pnor_common.H"
 
 /*****************************************************************************/
 // C o n s t a n t s
@@ -108,7 +108,8 @@ errlHndl_t SfcAST2400::readFlash( uint32_t i_addr,
              words_read ++ )
         {
             //Read directly from MMIO space
-            uint32_t lpc_addr = LPC_SFC_MMIO_OFFSET | (i_addr + words_read*4);
+            uint32_t lpc_addr = PNOR::LPC_SFC_MMIO_OFFSET |
+                                (i_addr + words_read*4);
             size_t reg_size = sizeof(uint32_t);
 
             l_err = deviceOp( DeviceFW::READ,
@@ -358,7 +359,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
                           &i_opCode,
                           opsize, //just send opcode
                           DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                             LPC_SFC_MMIO_OFFSET) );
+                                             PNOR::LPC_SFC_MMIO_OFFSET) );
         if( l_err ) { break; }
 
         // Send address if there is one
@@ -371,7 +372,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
                               &i_address,
                               opsize, //only supporting 4-byte addresses
                               DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                 LPC_SFC_MMIO_OFFSET) );
+                                                 PNOR::LPC_SFC_MMIO_OFFSET) );
             if( l_err ) { break; }
         }
 
@@ -391,7 +392,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
                                       curptr,
                                       opsize,
                                       DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                   LPC_SFC_MMIO_OFFSET) );
+                                                   PNOR::LPC_SFC_MMIO_OFFSET) );
                     break;
                 }
 
@@ -405,7 +406,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
                                   curptr,
                                   opsize,
                                   DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                     LPC_SFC_MMIO_OFFSET) );
+                                                   PNOR::LPC_SFC_MMIO_OFFSET));
                 if( l_err ) { break; }
 
                 curptr += 4;
@@ -430,7 +431,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
                                       curptr,
                                       opsize,
                                       DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                   LPC_SFC_MMIO_OFFSET) );
+                                                   PNOR::LPC_SFC_MMIO_OFFSET) );
                     break;
                 }
 
@@ -444,7 +445,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
                                   curptr,
                                   opsize,
                                   DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                     LPC_SFC_MMIO_OFFSET) );
+                                                    PNOR::LPC_SFC_MMIO_OFFSET));
                 if( l_err ) { break; }
 
                 curptr += 4;

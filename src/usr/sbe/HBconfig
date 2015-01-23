@@ -16,7 +16,7 @@ config SBE_UPDATE_SIMULTANEOUS
         result is that both SBE SEEPROMs will contain the same code.
 
 config SBE_UPDATE_INDEPENDENT
-    default y if TWO_SIDE_SUPPORT
+    default y if PNOR_TWO_SIDE_SUPPORT
     depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS
     help
         If an update is necessary, and if the "current" SBE SEEPROM of this
