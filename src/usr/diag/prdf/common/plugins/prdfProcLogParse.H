@@ -55,6 +55,24 @@ bool parseSlwFfdcData( uint8_t * i_buffer, uint32_t i_buflen,
 bool parseTodFfdcData( uint8_t * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser );
 
+/**
+ * @brief Parses the L2 Line Delete/Column Repair section.
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ */
+bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser );
+
+/**
+ * @brief Parses the L3 Line Delete/Column Repair section.
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ */
+bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser );
+
 } // namespace FSP/HOSTBBOT
 } // end namespace PRDF
 

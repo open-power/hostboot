@@ -184,6 +184,125 @@ namespace SLW_FFDC_DATA
 
 } // namespace SLW_FFDC_DATA
 
+// LineDelete/ColumnRepair FFDC
+namespace LD_CR_FFDC
+{
+    static const char * const L2TITLE = "L2_LD_COLRPR_FFDC";
+    static const char * const L3TITLE = "L3_LD_COLRPR_FFDC";
+
+    struct L2LdCrFfdc
+    {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+        uint32_t L2LDcnt        : 4;
+        uint32_t L2LDallowed    : 1;
+        uint32_t L2LDMaxAllowed : 4;
+        uint32_t L2CRMaxAllowed : 4;
+        uint32_t L2CRPresent    : 4;
+        uint32_t L2reserved1    :15;
+
+        uint32_t L2errMember    : 3;
+        uint32_t L2errDW        : 3;
+        uint32_t L2errMacro     : 2;
+        uint32_t L2errBank      : 1;
+        uint32_t L2errOWSelect  : 1;
+        uint32_t L2errBitLine   : 4;
+        uint32_t L2errIsTopSA   : 1;
+        uint32_t L2errAddress   :10;
+        uint32_t L2reserved2    : 7;
+
+        L2LdCrFfdc():
+           L2LDcnt(0), L2LDallowed(0), L2LDMaxAllowed(0),
+           L2CRMaxAllowed(0), L2CRPresent(0), L2reserved1(0),
+           L2errMember(0), L2errDW(0), L2errMacro(0),
+           L2errBank(0), L2errOWSelect(0), L2errBitLine(0),
+           L2errIsTopSA(0), L2errAddress(0), L2reserved2(0)
+        {}
+#else
+        uint32_t L2reserved1    :15;
+        uint32_t L2CRPresent    : 4;
+        uint32_t L2CRMaxAllowed : 4;
+        uint32_t L2LDMaxAllowed : 4;
+        uint32_t L2LDallowed    : 1;
+        uint32_t L2LDcnt        : 4;
+
+        uint32_t L2reserved2    : 7;
+        uint32_t L2errAddress   :10;
+        uint32_t L2errIsTopSA   : 1;
+        uint32_t L2errBitLine   : 4;
+        uint32_t L2errOWSelect  : 1;
+        uint32_t L2errBank      : 1;
+        uint32_t L2errMacro     : 2;
+        uint32_t L2errDW        : 3;
+        uint32_t L2errMember    : 3;
+
+        L2LdCrFfdc():
+           L2reserved1(0), L2CRPresent(0), L2CRMaxAllowed(0),
+           L2LDMaxAllowed(0), L2LDallowed(0), L2LDcnt(0),
+           L2reserved2(0),L2errAddress(0), L2errIsTopSA(0),
+           L2errBitLine(0), L2errOWSelect(0), L2errBank(0),
+           L2errMacro(0), L2errDW(0), L2errMember(0)
+        {}
+#endif
+
+    };
+
+    struct L3LdCrFfdc
+    {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+        uint32_t L3LDcnt        : 4;
+        uint32_t L3LDallowed    : 1;
+        uint32_t L3LDMaxAllowed : 4;
+        uint32_t L3CRMaxAllowed : 4;
+        uint32_t L3CRPresent    : 4;
+        uint32_t L3reserved1    :15;
+
+        uint32_t L3errMember    : 3;
+        uint32_t L3errDW        : 3;
+        uint32_t L3errBank      : 1;
+        uint32_t L3errDataOut   : 1;
+        uint32_t L3errAddress   : 4;
+        uint32_t L3errIO        : 1;
+        uint32_t L3errRow       :10;
+        uint32_t L3reserved2    : 9;
+
+        L3LdCrFfdc():
+           L3LDcnt(0), L3LDallowed(0), L3LDMaxAllowed(0),
+           L3CRMaxAllowed(0), L3CRPresent(0),
+           L3reserved1(0), L3errMember(0), L3errDW(0),
+           L3errBank(0), L3errDataOut(0), L3errAddress(0),
+           L3errIO(0), L3errRow(0), L3reserved2(0)
+        {}
+#else
+        uint32_t L3reserved1    :15;
+        uint32_t L3CRPresent    : 4;
+        uint32_t L3CRMaxAllowed : 4;
+        uint32_t L3LDMaxAllowed : 4;
+        uint32_t L3LDallowed    : 1;
+        uint32_t L3LDcnt        : 4;
+
+        uint32_t L3reserved2    : 9;
+        uint32_t L3errRow       :10;
+        uint32_t L3errIO        : 1;
+        uint32_t L3errAddress   : 4;
+        uint32_t L3errDataOut   : 1;
+        uint32_t L3errBank      : 1;
+        uint32_t L3errDW        : 3;
+        uint32_t L3errMember    : 3;
+
+        L3LdCrFfdc():
+           L3reserved1(0), L3CRPresent(0), L3CRMaxAllowed(0),
+           L3LDMaxAllowed(0), L3LDallowed(0), L3LDcnt(0),
+           L3reserved2(0), L3errRow(0), L3errIO(0),
+           L3errAddress(0), L3errDataOut(0), L3errBank(0),
+           L3errDW(0), L3errMember(0)
+        {}
+#endif
+
+    };
+
+
+} // namespace LD_CR_FFDC
+
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 } // end namespace HOSTBOOT
 #endif

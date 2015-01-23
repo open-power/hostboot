@@ -169,6 +169,113 @@ bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
     return o_rc;
 }
 
+//------------------------------------------------------------------------------
+
+bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser )
+{
+    bool o_rc = true;
+
+    const char * lines = "---------------------------------------------";
+    i_parser.PrintString( LD_CR_FFDC::L2TITLE, lines );
+
+    do
+    {
+        if ( NULL == i_buffer ) { o_rc = false; break; }
+
+        if ( i_buflen < sizeof(LD_CR_FFDC::L2LdCrFfdc) )
+            { o_rc = false; break; }
+
+        LD_CR_FFDC::L2LdCrFfdc ldcrffdc;
+        memcpy( &ldcrffdc, i_buffer, sizeof(LD_CR_FFDC::L2LdCrFfdc));
+
+        i_parser.PrintNumber( "   L2 LD Counts", "%d", ldcrffdc.L2LDcnt );
+        i_parser.PrintBool(   "   L2 LD Allowed",
+                                              0 != ldcrffdc.L2LDallowed );
+        i_parser.PrintNumber( "   L2 LD Max Allowed", "%d",
+                                              ldcrffdc.L2LDMaxAllowed );
+        i_parser.PrintNumber( "   L2 CR Max Allowed", "%d",
+                                              ldcrffdc.L2CRMaxAllowed );
+        i_parser.PrintNumber( "   L2 CR Present", "%d",
+                                              ldcrffdc.L2CRPresent );
+
+        i_parser.PrintNumber( "   L2 Error Member", "%d",
+                                               ldcrffdc.L2errMember );
+        i_parser.PrintNumber( "   L2 Error DW", "%d", ldcrffdc.L2errDW );
+        i_parser.PrintNumber( "   L2 Error Macro", "%d",
+                                               ldcrffdc.L2errMacro );
+        i_parser.PrintNumber( "   L2 Error Bank", "%d",
+                                               ldcrffdc.L2errBank );
+        i_parser.PrintNumber( "   L2 Error OW Select", "%d",
+                                               ldcrffdc.L2errOWSelect );
+        i_parser.PrintNumber( "   L2 Error Bit Line", "%d",
+                                               ldcrffdc.L2errBitLine );
+        i_parser.PrintBool(   "   L2 Error Is Top SA",
+                                               0 != ldcrffdc.L2errIsTopSA );
+        i_parser.PrintNumber( "   L2 Error Address", "%d",
+                                               ldcrffdc.L2errAddress );
+
+    } while (0);
+
+    if ( !o_rc && i_buffer )
+    {
+        i_parser.PrintHexDump(i_buffer, i_buflen);
+    }
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser )
+{
+    bool o_rc = true;
+
+    const char * lines = "---------------------------------------------";
+    i_parser.PrintString( LD_CR_FFDC::L3TITLE, lines );
+
+    do
+    {
+        if ( NULL == i_buffer ) { o_rc = false; break; }
+
+        if ( i_buflen < sizeof(LD_CR_FFDC::L3LdCrFfdc) )
+            { o_rc = false; break; }
+
+        LD_CR_FFDC::L3LdCrFfdc ldcrffdc;
+        memcpy( &ldcrffdc, i_buffer, sizeof(LD_CR_FFDC::L3LdCrFfdc));
+
+        i_parser.PrintNumber( "   L3 LD Counts", "%d", ldcrffdc.L3LDcnt );
+        i_parser.PrintBool(   "   L3 LD Allowed",
+                                               0 != ldcrffdc.L3LDallowed );
+        i_parser.PrintNumber( "   L3 LD Max Allowed", "%d",
+                                                ldcrffdc.L3LDMaxAllowed );
+        i_parser.PrintNumber( "   L3 CR Max Allowed", "%d",
+                                                ldcrffdc.L3CRMaxAllowed );
+        i_parser.PrintNumber( "   L3 CR Present", "%d",
+                                                ldcrffdc.L3CRPresent );
+
+        i_parser.PrintNumber( "   L3 Error Member", "%d",
+                                                ldcrffdc.L3errMember );
+        i_parser.PrintNumber( "   L3 Error DW", "%d", ldcrffdc.L3errDW );
+        i_parser.PrintNumber( "   L3 Error Bank", "%d", ldcrffdc.L3errBank );
+        i_parser.PrintNumber( "   L3 Error Data Out", "%d",
+                                                ldcrffdc.L3errDataOut );
+        i_parser.PrintNumber( "   L3 Error Address", "%d",
+                                                ldcrffdc.L3errAddress );
+        i_parser.PrintNumber( "   L3 Error IO", "%d", ldcrffdc.L3errIO );
+        i_parser.PrintNumber( "   L3 Error Row", "%d", ldcrffdc.L3errRow );
+
+    } while (0);
+
+    if ( !o_rc && i_buffer )
+    {
+        i_parser.PrintHexDump(i_buffer, i_buflen);
+    }
+
+    return o_rc;
+}
+
 } // namespace FSP/HOSTBBOT
 } // end namespace PRDF
 

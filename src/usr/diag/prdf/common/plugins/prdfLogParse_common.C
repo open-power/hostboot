@@ -385,6 +385,14 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 parseTodFfdcData( sigData, sigDataSize, i_parser );
             }
+            else if ( Util::hashString(LD_CR_FFDC::L2TITLE) == sigId )
+            {
+                 parseL2LdCrFfdc( sigData, sigDataSize, i_parser );
+            }
+            else if ( Util::hashString(LD_CR_FFDC::L3TITLE) == sigId )
+            {
+                 parseL3LdCrFfdc( sigData, sigDataSize, i_parser );
+            }
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
                 // Print one reg/line if the data size <= 8 bytes
