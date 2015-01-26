@@ -15118,12 +15118,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <readable/>
     <persistency>non-volatile</persistency>
-<!-- @todo: enable with CQ:SW274292
     <hwpfToHbAttrMap>
         <id>ATTR_OPT_MEMMAP_GROUP_POLICY</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
--->
 </attribute>
 
 <attribute>

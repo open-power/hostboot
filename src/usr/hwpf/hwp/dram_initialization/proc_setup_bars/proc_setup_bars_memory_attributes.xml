@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.14 2014-06-19 14:26:21 dcrowell Exp $ -->
+<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.15 2015/01/22 17:16:36 jmcgill Exp $ -->
 <!-- proc_setup_bars_memory_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -48,6 +50,23 @@
     </enum>
     <platInit/>
     <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+     <id>ATTR_OPT_MEMMAP_GROUP_POLICY</id>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <description>
+       Controls scope of group consideration in memory map calculations
+       creator: platform
+       consumer: opt_memmap
+     </description>
+     <valueType>uint8</valueType>
+     <enum>
+       CHIP_AS_GROUP = 0x0,
+       GROUP_AS_GROUP = 0x1
+     </enum>
+     <platInit/>
+     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

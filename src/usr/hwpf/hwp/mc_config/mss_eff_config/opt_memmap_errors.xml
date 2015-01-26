@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: opt_memmap_errors.xml,v 1.4 2014/02/28 15:27:39 jmcgill Exp $ -->
+<!-- $Id: opt_memmap_errors.xml,v 1.5 2015/01/23 01:58:43 jmcgill Exp $ -->
 <!-- Error definitions for proc_setup_bars -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -33,7 +35,7 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-  
+  <!-- *********************************************************************** -->  
   <hwpError>
     <rc>RC_OPT_MEMMAP_MIRROR_BASE_ERR</rc>
     <description>Unexpected value for ATTR_PROC_MIRROR_BASE returned after mss_eff_grouping execution.</description>
@@ -43,4 +45,16 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_OPT_MEMMAP_GROUP_ERR</rc>
+    <description>Internal error, chip matched multiple Group IDs.</description>
+    <ffdc>GROUP_ID</ffdc>
+    <ffdc>MATCH_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
