@@ -77,7 +77,7 @@ namespace HTMGT
         {OCC_CMD_SET_POWER_CAP,        0x80,  OCC_CHECK_RSP_LENGTH_NONE,
             0x0000, TO_20SEC,  0x0090, OCC_TRACE_EXTENDED},
         {OCC_CMD_RESET_PREP,           0x80,  OCC_CHECK_RSP_LENGTH_GREATER,
-            0x0006, TO_20SEC,  0x0190, OCC_TRACE_ALWAYS},
+            0x0000, TO_20SEC,  0x0190, OCC_TRACE_ALWAYS},
         {OCC_CMD_GET_FIELD_DEBUG_DATA, 0x80,  OCC_CHECK_RSP_LENGTH_GREATER,
             0x0001, TO_20SEC,  RD_MAX, OCC_TRACE_NEVER},
 
@@ -814,7 +814,7 @@ namespace HTMGT
         bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
                   (htmgtReasonCode)(OCCC_COMP_ID | iv_OccRsp.returnStatus),
                   iv_OccRsp.returnStatus, iv_OccRsp.dataLength, 0, 0,
-                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         const uint8_t * const exceptionData = iv_Occ->iv_homer + OCC_RSP_ADDR;
         l_excErr->addFFDC(OCCC_COMP_ID,
                           exceptionData,
@@ -861,6 +861,8 @@ namespace HTMGT
         {
             TMGT_ERR("writeOccCmd: Error writing to OCC Circular Buffer,"
                      " rc=0x%04X", l_err->reasonCode());
+
+            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
         }
 #endif
 

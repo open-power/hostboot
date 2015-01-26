@@ -62,9 +62,9 @@ namespace HTMGT
      *           be reported, this interface will be called to trigger
      *           HTMGT to collect and commit the error.
      *
-     * @param[in]  i_occTarget  OCC target reporting the error
+     * @param[in]  i_proc  Processor target of the OCC reporting the error
      */
-    void processOccError(TARGETING::Target * i_occTarget);
+    void processOccError(TARGETING::Target * i_proc);
 
 
 
@@ -79,9 +79,9 @@ namespace HTMGT
      *           fails to go active, an unrecoverable error will be logged
      *           and the system will remain in safe mode.
      *
-     * @param[in]  i_failedOccTarget  OCC target of the failed OCC
+     * @param[in]  i_proc  Proc target containing the failed OCC
      */
-    void processOccReset(TARGETING::Target * i_failedOccTarget);
+    void processOccReset(TARGETING::Target * i_proc);
 
 
 

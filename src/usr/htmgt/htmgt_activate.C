@@ -73,7 +73,7 @@ namespace HTMGT
         do
         {
             // Poll all OCCs
-            l_err = sendOccPoll();
+            l_err = OccManager::sendOccPoll();
             ++numPolls;
             if (NULL != l_err)
             {
@@ -148,13 +148,25 @@ namespace HTMGT
 
 
 
-    // Set active sensors for all OCCs so BMC can start communication
-    errlHndl_t setOccActiveSensors()
+    // Set active/inactive sensors for all OCCs so BMC can start communication
+    errlHndl_t setOccActiveSensors(bool i_activate)
     {
         errlHndl_t l_err = NULL;
 
-        TMGT_INF("setOccActiveSensors: STUB");
-        // TODO RTC 119073
+        TMGT_INF("setOccActiveSensors:");
+        std::vector<Occ*> occList = occMgr::instance().getOccArray();
+        for (std::vector<Occ*>::iterator itr = occList.begin();
+             (itr < occList.end());
+             ++itr)
+        {
+            Occ * occ = (*itr);
+            l_err = occ->ipmiSensor(i_activate);
+            if( l_err )
+            {
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            }
+        }
+
 
         return l_err;
     }

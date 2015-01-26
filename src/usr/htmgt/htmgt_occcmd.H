@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,14 @@ namespace HTMGT
         OCC_CMD_GET_FIELD_DEBUG_DATA    = 0x42,
 
         OCC_CMD_END_OF_TABLE            = 0xFF
+    };
+
+    enum occResetReasonType
+    {
+        OCC_RESET_CMD_VERSION           = 0x00,
+        OCC_RESET_NON_FAILURE           = 0x00,
+        OCC_RESET_FAIL_THIS_OCC         = 0x01,
+        OCC_RESET_FAIL_OTHER_OCC        = 0x02,
     };
 
     enum occCheckRspLengthType

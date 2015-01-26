@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,20 +67,6 @@ namespace HTMGT
     }  __attribute__((packed));
 
     const uint32_t HTMGT_OCC_POLL_DATA_SIZE = sizeof(occPollRspStruct_t);
-
-
-    /**
-     * @brief Send a poll command to each OCC
-     *
-     * @param[in]  i_flushAllErrors  If set to true, TMGT will send poll cmds
-     *                               to each OCC as long as that OCC continues
-     *                               to report errors.  If false, only one
-     *                               poll will be send to each OCC.
-     *
-     * @return NULL on success, else error handle
-     */
-    errlHndl_t sendOccPoll(const bool i_flushAllErrors = false);
-
 
 
 } // end namespace

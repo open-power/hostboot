@@ -178,13 +178,9 @@ namespace HBOCC
         return l_errl;
     }
 
-    /**
-     * @brief Execute procedures and steps necessary
-     *        to load OCC data in specified processor
-     */
      errlHndl_t loadOCC(TARGETING::Target* i_target,
-                    uint64_t i_homerPhysAddr,
-                    uint64_t i_homerVirtAddr,
+                    uint64_t i_occImgPaddr,
+                    uint64_t i_occImgVaddr,
                     uint64_t i_commonPhysAddr)
     {
         errlHndl_t  l_errl  =   NULL;
@@ -194,8 +190,12 @@ namespace HBOCC
             // Remember where we put things
             if( i_target )
             {
-                i_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_homerPhysAddr);
-                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(i_homerVirtAddr);
+                // Subtract HOMER_OFFSET_TO_OCC_IMG to be technically
+                // correct though HOMER_OFFSET_TO_OCC_IMG happens to be zero
+                i_target->setAttr<ATTR_HOMER_PHYS_ADDR>
+                    (i_occImgPaddr - HOMER_OFFSET_TO_OCC_IMG);
+                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>
+                    (i_occImgVaddr - HOMER_OFFSET_TO_OCC_IMG);
             }
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
@@ -210,13 +210,13 @@ namespace HBOCC
             // Bar size is in MB, obtained value of 4MB from Greg Still
             TRACUCOMP( g_fapiImpTd,
                        INFO_MRK"loadOCC: OCC Address: 0x%.8X, size=0x%.8X",
-                       i_homerPhysAddr, VMM_HOMER_INSTANCE_SIZE_IN_MB);
+                       i_occImgPaddr, VMM_HOMER_INSTANCE_SIZE_IN_MB);
 
             FAPI_INVOKE_HWP( l_errl,
                              p8_pba_bar_config,
                              l_fapiTarg,
                              0,
-                             i_homerPhysAddr,
+                             i_occImgPaddr,
                              VMM_HOMER_INSTANCE_SIZE_IN_MB,
                              PBA_CMD_SCOPE_NODAL );
 
@@ -279,7 +279,7 @@ namespace HBOCC
             //==============================
             //Load the OCC HOMER image
             //==============================
-            void* occVirt = reinterpret_cast<void *>(i_homerVirtAddr);
+            void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
             l_errl = loadOCCImageToHomer( occVirt );
             if( l_errl != NULL )
             {

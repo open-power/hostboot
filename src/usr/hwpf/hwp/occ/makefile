@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,7 @@ MODULE = occ
 SUBDIRS += runtime.d
 
 ## Objects unique to HB IPL
-OBJS += occ.o
+OBJS +=
 
 ## Objects common to HB IPL and HBRT
 include occ.mk

@@ -40,6 +40,8 @@
 #include <ecmdDataBufferBase.H>
 #include <hwpf/hwp/occ/occAccess.H>
 
+#include <hwpf/hwp/occ/occ.H>
+#include <hwpf/hwp/occ/occ_common.H>
 
 namespace HTMGT
 {
@@ -61,6 +63,7 @@ namespace HTMGT
         iv_target(i_target),
         iv_lastPollValid(false),
         iv_occsPresent(1 << i_instance),
+        iv_resetCount(0),
         iv_version(0x01)
     {
     }
@@ -172,6 +175,52 @@ namespace HTMGT
     };
 
 
+    // Reset OCC
+    bool Occ::resetPrep()
+    {
+        errlHndl_t err = NULL;
+        bool atThreshold = false;
+
+        // Send resetPrep command
+        uint8_t cmdData[2];
+        cmdData[0] = OCC_RESET_CMD_VERSION;
+
+        if(iv_failed)
+        {
+            cmdData[1] = OCC_RESET_FAIL_THIS_OCC;
+            ++iv_resetCount;
+            if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
+            {
+                atThreshold = true;
+            }
+        }
+        else
+        {
+            cmdData[1] = OCC_RESET_FAIL_OTHER_OCC;
+        }
+
+        OccCmd cmd(this, OCC_CMD_RESET_PREP, sizeof(cmdData), cmdData);
+        err = cmd.sendOccCmd();
+        if(err)
+        {
+            // log error and keep going
+            TMGT_ERR("OCC::resetPrep: OCC%d resetPrep failed with rc = 0x%04x",
+                     iv_instance,
+                     err->reasonCode());
+
+            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        }
+
+        // poll and flush error logs from OCC - Check Ex return code
+        err = pollForErrors(true);
+        if(err)
+        {
+            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        }
+
+        return atThreshold;
+    }
+
     /////////////////////////////////////////////////////////////////
 
 
@@ -187,6 +236,7 @@ namespace HTMGT
 
     OccManager::~OccManager()
     {
+        _removeAllOccs();
     }
 
 
@@ -214,6 +264,15 @@ namespace HTMGT
     {
         TMGT_INF("buildOccs called");
 
+#if defined(__HOSTBOOT_RUNTIME)
+        // At runtime need to keep occ state, only build OCC objects once.
+        if(iv_occArray.size() > 0 && iv_occMaster != NULL)
+        {
+            TMGT_INF("buildOccs: Existing OCC Targets kept = %d",
+                     iv_occArray.size());
+            return iv_occArray.size();
+        }
+#endif
         // Remove existing OCC objects
         _removeAllOccs();
 
@@ -480,6 +539,125 @@ namespace HTMGT
 
     } // end OccManager::_setOccState()
 
+    errlHndl_t OccManager::_resetOccs(TARGETING::Target * i_failedOccTarget)
+    {
+        errlHndl_t err = NULL;
+        bool atThreshold = false;
+
+        _buildOccs(); // if not a already built.
+        err = setOccActiveSensors(false); // Set OCC sensor to inactive
+        if( err )
+        {
+            TMGT_ERR("_resetOccs: Set OCC sensors to inactive failed.");
+            // log and continue
+            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        }
+
+        // Send poll cmd to all OCCs to establish comm
+        err = _sendOccPoll(false,NULL);
+        if (err)
+        {
+            TMGT_ERR("_resetOccs: Poll OCCs failed.");
+            // Proceed with reset even if failed
+            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        }
+
+        for(occList_t::const_iterator occ = iv_occArray.begin();
+            occ != iv_occArray.end();
+            ++occ)
+        {
+            if((*occ)->getTarget() == i_failedOccTarget)
+            {
+                (*occ)->failed(true);
+            }
+
+            if((*occ)->resetPrep())
+            {
+                atThreshold = true;
+            }
+        }
+
+        uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
+        while(retryCount)
+        {
+            // Reset all OCCs
+            TMGT_INF("Calling HBOCC::stopAllOCCs");
+            err = HBOCC::stopAllOCCs();
+            if(!err)
+            {
+                break;
+            }
+            --retryCount;
+
+            if(retryCount)
+            {
+                // log if not last retry
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+            else
+            {
+                TMGT_ERR("_resetOCCs: stopAllOCCs failed. "
+                         "Leaving OCCs in reset state");
+                // pass err handle back
+                err->collectTrace("HTMGT");
+            }
+        }
+
+        if(!atThreshold && !err)
+        {
+            for(occList_t::const_iterator occ = iv_occArray.begin();
+                occ != iv_occArray.end();
+                ++occ)
+            {
+                (*occ)->failed(false);
+            }
+
+            TMGT_INF("Calling HBOCC::activateOCCs");
+
+            err = HBOCC::activateOCCs();
+            if(err)
+            {
+                TMGT_ERR("_resetOCCs: activateOCCs failed. ");
+                err->collectTrace("HTMGT");
+            }
+        }
+        else if (!err) // Reset Threshold reached and no other err
+        {
+            // Create threshold error
+            TMGT_ERR("_resetOCCs: Retry Threshold reached. "
+                     "Leaving OCCs in reset state");
+            /*@
+             * @errortype
+             * @moduleid HTMTG_MOD_OCC_RESET
+             * @reasoncode HTMGT_RC_OCC_RESET_THREHOLD
+             * @devdesc OCC reset threshold reached.
+             *          Leaving OCCs in reset state
+             */
+            bldErrLog(err,
+                      HTMTG_MOD_OCC_RESET,
+                      HTMGT_RC_OCC_RESET_THREHOLD,
+                      0, 0, 0, 0,
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        }
+
+        // Any error at this point means OCCs were not reactivated
+        if(err)
+        {
+            err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+            uint8_t safeMode = 1;
+
+            // Put into safemode
+            if(sys)
+            {
+               sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+            }
+        }
+
+        return err;
+    }
 
     // Wait for all OCCs to reach communications checkpoint
     void OccManager::_waitForOccCheckpoint()
@@ -590,6 +768,12 @@ namespace HTMGT
     errlHndl_t OccManager::setOccState(const occStateId i_state)
     {
         return Singleton<OccManager>::instance()._setOccState(i_state);
+    }
+
+    errlHndl_t OccManager::resetOccs(TARGETING::Target * i_failedOccTarget)
+    {
+        return
+            Singleton<OccManager>::instance()._resetOccs(i_failedOccTarget);
     }
 
 

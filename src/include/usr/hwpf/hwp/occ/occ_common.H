@@ -92,18 +92,18 @@ namespace HBOCC
      * @brief Execute procedures and steps required to load
      *        OCC data in a specified processor
      *
-     * @param[in] i_target:         target processor to load
-     * @param[in] i_homerPhysAddr:  Physical address of current
-     *                                 proc's homer
-     * @param[in] i_homerVirtAddr:  Virtual address of current
-     *                                 proc's homer
+     * @param[in] i_target:         Target processor
+     * @param[in] i_occImgPaddr:    Physical address of current
+     *                                 proc's OCC image in the homer
+     * @param[in] i_occImgVaddr:  Virtual address of current
+     *                                 proc's OCC image int the homer
      * @param[in] i_commonPhysAddr: Physical address of common
-     *                              occ region
-     * @return errlHndl_t  Error log of loadOCC failed
+     *                              OCC region
+     * @return errlHndl_t  Error log if loadOCC failed
      */
     errlHndl_t loadOCC(TARGETING::Target* i_target,
-                       uint64_t i_homerPhysAddr,
-                       uint64_t i_homerVirtAddr,
+                       uint64_t i_occImgPaddr,
+                       uint64_t i_occImgVaddr,
                        uint64_t i_commonPhysAddr);
 
     /**

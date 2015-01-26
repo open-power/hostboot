@@ -28,6 +28,9 @@
 
 #include <stdint.h>
 #include <vector>
+#if defined(CONFIG_BMC_IPMI)
+#include <ipmi/ipmisensor.H>
+#endif
 
 
 namespace HTMGT
@@ -57,6 +60,11 @@ namespace HTMGT
         OCC_ROLE_MASTER         = 0x01,
         OCC_ROLE_BACKUP_MASTER  = 0x02,
         OCC_ROLE_FIR_MASTER     = 0x80
+    };
+
+    enum
+    {
+        OCC_RESET_COUNT_THRESHOLD   = 3,
     };
 
 
@@ -129,13 +137,17 @@ namespace HTMGT
 
 
             /**
-             * @brief Process an OCC poll response
+             * @brief Poll for Errors
              *
-             * @param[in] i_pollResponse      pointer to the response
-             * @param[in] i_pollResponseSize  length of the poll response
+             * @param[in]  i_flushAllErrors:
+             *      If set to true, HTMGT will send poll cmds
+             *      to the OCC as long as the OCC continues
+             *      to report errors.  If false, only one
+             *      poll will be sent.
+             *
+             * @return NULL on success, else error handle
              */
-            void pollRspHandler(const uint8_t * i_pollResponse,
-                                const uint16_t i_pollResponseSize);
+            errlHndl_t pollForErrors(const bool i_flushAllErrors = false);
 
 
             /**
@@ -175,6 +187,36 @@ namespace HTMGT
              */
             occStateId getState() { return iv_state; };
 
+            /**
+             * @brief Prepare this OCC for reset
+             * @return return true if at threshold otherwise false
+             */
+            bool resetPrep();
+
+            /**
+             * @brief Set IPMI OCC sensor state
+             * @param i_activate: true - set active
+             *                    false - set inactive
+             *
+             * @return error log on error
+             */
+            errlHndl_t ipmiSensor(bool i_activate)
+            {
+#if !defined(CONFIG_BMC_IPMI)
+                return NULL;
+#else
+                return SENSOR::OCCActiveSensor(iv_target).setState
+                    (i_activate ? SENSOR::OCCActiveSensor::OCC_ACTIVE :
+                                SENSOR::OCCActiveSensor::OCC_NOT_ACTIVE);
+#endif
+            }
+
+            /**
+             * @brief Set failed state
+             * @param[in] failed state
+             */
+            void failed(bool i_state) { iv_failed = i_state; }
+
 
             /**
              * @brief Return OCCs present bits
@@ -194,6 +236,17 @@ namespace HTMGT
              * @param[in]  i_slavePresent  Bitmask for slave OCC to add
              */
             void updateOccPresentBits(uint8_t i_slavePresent);
+
+        private:   // functions
+
+            /**
+             * @brief Process an OCC poll response
+             *
+             * @param[in] i_pollResponse      pointer to the response
+             * @param[in] i_pollResponseSize  length of the poll response
+             */
+            void pollRspHandler(const uint8_t * i_pollResponse,
+                                const uint16_t i_pollResponseSize);
 
 
         protected:
@@ -226,6 +279,8 @@ namespace HTMGT
 
 
         private:
+            // Reset count
+            uint8_t         iv_resetCount;
             // Version of data stored (0 = not written)
             uint8_t         iv_version;
 
@@ -298,6 +353,14 @@ namespace HTMGT
              */
             static Occ * getMasterOcc();
 
+            /**
+             * @brief Reset the OCCs
+             *
+             * @param[in] Failing occ target
+             * @return Error Log | NULL
+             */
+            static errlHndl_t resetOccs(TARGETING::Target * i_failedOccTarget);
+
 
             /**
              * @brief Set the state of the OCCs.  If i_state is
@@ -336,9 +399,29 @@ namespace HTMGT
             void waitForOccCheckpoint();
 
 
+            /**
+             * @brief Send a poll command to one or all OCCs
+             *
+             * @param[in]  i_flushAllErrors:
+             *                 If set to true, HTMGT will send poll cmds
+             *                 to each OCC that is selected as long as that OCC
+             *                 continues to report errors.  If false, only one
+             *                 poll will be send to each OCC.
+             * @param[in] i_occTarget: The Selected OCC or NULL for all OCCs
+             *
+             * @return NULL on success, else error handle
+             */
+            static errlHndl_t
+                sendOccPoll(const bool i_flushAllErrors = false,
+                            TARGETING::Target * i_occTarget = NULL);
+
+
         private:
+
+            typedef std::vector<Occ*> occList_t;
+
             Occ *                   iv_occMaster;
-            std::vector<Occ*>       iv_occArray;
+            occList_t               iv_occArray;
             occStateId              iv_state;
             occStateId              iv_targetState;
 
@@ -387,6 +470,14 @@ namespace HTMGT
             errlHndl_t _setOccState(const occStateId i_state);
 
             void _waitForOccCheckpoint();
+
+            /** See resetOccs() above */
+            errlHndl_t _resetOccs(TARGETING::Target * i_failedOccTarget);
+
+            /** See sendOccPoll() above */
+            errlHndl_t
+                _sendOccPoll(const bool i_flushAllErrors,
+                            TARGETING::Target * i_occTarget);
 
     };
 

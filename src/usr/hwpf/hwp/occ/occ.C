@@ -74,65 +74,83 @@ using namespace TARGETING;
 namespace HBOCC
 {
    /**
-     * @brief Setup homer addresses and load OCC for a specified processor
+     * @brief Determine homer addresses and load OCC image for a processor.
      *
-     * @param[in] i_target0  Target proc to load
-     * @param[in] i_homerVirtAddrBase Base Virtual
-     *                       address of all HOMER
-     *                       images
-     * @param[in] i_homerPhysAddrBase Base Physical
-     *                       address of all HOMER
-     *                       images
+     * @param[in] i_target0 Target proc to load
+     * @param[in] i_homerVirtAddrBase
+     *                      IPL: Base Virtual address of all HOMER images
+     *                      Runtime: Ignored - Determined using Attributes
      *
-     *  @return errlHndl_t  Error log
+     * @param[in] i_homerPhysAddrBase
+     *                      IPL: Base Physical address of all HOMER images
+     *                      Runtime: Ignored - Determined using Attributes
+     *
+     * @return errlHndl_t  Error log
      */
 
-     errlHndl_t Setupnload (Target* i_target,
-                            void* i_homerVirtAddrBase,
-                            uint64_t i_homerPhysAddrBase)
-     {
+    errlHndl_t primeAndLoadOcc (Target* i_target,
+                                void* i_homerVirtAddrBase,
+                                uint64_t i_homerPhysAddrBase)
+    {
          errlHndl_t  l_errl  =   NULL;
 
          TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"Setupnload" );
+                   ENTER_MRK"primeAndLoadOcc" );
 
 
         do {
             //==============================
             //Setup Addresses
             //==============================
-            uint8_t  tmpPos    = i_target->getAttr<ATTR_POSITION>();
-            uint64_t tmpOffset = (tmpPos * VMM_HOMER_INSTANCE_SIZE);
+            uint8_t  procPos    = i_target->getAttr<ATTR_POSITION>();
+            uint64_t procOffset = (procPos * VMM_HOMER_INSTANCE_SIZE);
 
-            uint64_t i_homerPhysAddr  = i_homerPhysAddrBase + tmpOffset +
-                                        HOMER_OFFSET_TO_OCC_IMG;
-            uint64_t i_homerVirtAddr  = reinterpret_cast<uint64_t>
-                                        (i_homerVirtAddrBase) + tmpOffset +
-                                        HOMER_OFFSET_TO_OCC_IMG;
+#ifndef __HOSTBOOT_RUNTIME
+            uint64_t occImgPaddr  =
+                i_homerPhysAddrBase + procOffset + HOMER_OFFSET_TO_OCC_IMG;
 
-            uint64_t i_commonPhysAddr = i_homerPhysAddrBase +
-                                        VMM_HOMER_REGION_SIZE;
+            uint64_t occImgVaddr  = reinterpret_cast<uint64_t>
+                (i_homerVirtAddrBase) + procOffset + HOMER_OFFSET_TO_OCC_IMG;
+
+            uint64_t commonPhysAddr =
+                i_homerPhysAddrBase + VMM_HOMER_REGION_SIZE;
+
+            uint64_t homerHostVirtAddr = reinterpret_cast<uint64_t>
+                (i_homerVirtAddrBase) + procOffset +
+                HOMER_OFFSET_TO_OCC_HOST_DATA;
+#else
+            uint64_t homerPaddr = i_target->getAttr<ATTR_HOMER_PHYS_ADDR>();
+            uint64_t homerVaddr = i_target->getAttr<ATTR_HOMER_VIRT_ADDR>();
+
+            uint64_t occImgPaddr = homerPaddr + HOMER_OFFSET_TO_OCC_IMG;
+            uint64_t occImgVaddr = homerVaddr + HOMER_OFFSET_TO_OCC_IMG;
+
+            uint64_t commonPhysAddr =  // After homer region
+                (homerPaddr - procOffset) + VMM_HOMER_REGION_SIZE;
+
+            uint64_t homerHostVirtAddr =
+                homerVaddr + HOMER_OFFSET_TO_OCC_HOST_DATA;
+
+#endif
+
 
             //==============================
             // Load OCC
             //==============================
             l_errl=  HBOCC::loadOCC(i_target,
-                                        i_homerPhysAddr,
-                                        i_homerVirtAddr,
-                                        i_commonPhysAddr);
+                                    occImgPaddr,
+                                    occImgVaddr,
+                                    commonPhysAddr);
             if(l_errl != NULL)
             {
-                TRACFCOMP( g_fapiImpTd, ERR_MRK"Setupnload: loadOCC failed" );
+                TRACFCOMP( g_fapiImpTd, ERR_MRK"primeAndLoadOcc: loadOCC failed" );
                 break;
             }
 
             //==============================
             //Setup host data area of HOMER;
             //==============================
-            uint64_t i_homerHostVirtAddr = reinterpret_cast<uint64_t>
-                                           (i_homerVirtAddrBase) +
-                                tmpOffset + HOMER_OFFSET_TO_OCC_HOST_DATA;
-            void* occHostVirt = reinterpret_cast<void*>(i_homerHostVirtAddr);
+            void* occHostVirt = reinterpret_cast<void*>(homerHostVirtAddr);
             l_errl = HBOCC::loadHostDataToHomer(i_target,occHostVirt);
             if( l_errl != NULL )
             {
@@ -156,12 +174,14 @@ namespace HBOCC
     {
         errlHndl_t  l_errl  =   NULL;
         void* homerVirtAddrBase = NULL;
+        uint64_t homerPhysAddrBase = VMM_HOMER_REGION_START_ADDR;
         bool winkle_loaded = false;
 
         TRACUCOMP( g_fapiTd,
                    ENTER_MRK"loadnStartAllOccs" );
 
         do {
+#ifndef __HOSTBOOT_RUNTIME
             //OCC requires the build_winkle_images library
             if (  !VFS::module_is_loaded( "libbuild_winkle_images.so" ) )
             {
@@ -181,7 +201,6 @@ namespace HBOCC
                    "loadnStartAllOccs: Unsupported HOMER Region size");
 
             //If running Sapphire need to place this at the top of memory
-            uint64_t homerPhysAddrBase = VMM_HOMER_REGION_START_ADDR;
             if(TARGETING::is_sapphire_load())
             {
                 homerPhysAddrBase = TARGETING::get_top_mem_addr();
@@ -195,6 +214,8 @@ namespace HBOCC
             homerVirtAddrBase =
               mm_block_map(reinterpret_cast<void*>(homerPhysAddrBase),
                            VMM_HOMER_REGION_SIZE);
+
+#endif
 
             TargetHandleList procChips;
             getAllChips(procChips, TYPE_PROC, true);
@@ -233,9 +254,9 @@ namespace HBOCC
                      ++itr)
                 {
                     /******* SETUP AND LOAD **************/
-                    l_errl =  Setupnload   (*itr,
-                                            homerVirtAddrBase,
-                                            homerPhysAddrBase);
+                    l_errl =  primeAndLoadOcc   (*itr,
+                                                 homerVirtAddrBase,
+                                                 homerPhysAddrBase);
                     if(l_errl)
                     {
                         o_failedOccTarget = *itr;
@@ -278,7 +299,8 @@ namespace HBOCC
                     Target* targ0 = *itr;
                     Target* targ1 = NULL;
 
-                    TRACUCOMP( g_fapiImpTd, INFO_MRK"loadnStartAllOccs: Cur target nodeID=%d",
+                    TRACUCOMP( g_fapiImpTd, INFO_MRK
+                               "loadnStartAllOccs: Cur target nodeID=%d",
                                targ0->getAttr<ATTR_FABRIC_NODE_ID>());
 
 
@@ -287,7 +309,10 @@ namespace HBOCC
                     // and update targ1 pointer
                     if((itr+1) != procChips.end())
                     {
-                        TRACUCOMP( g_fapiImpTd, INFO_MRK"loadnStartAllOccs: n+1 target nodeID=%d", ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()));
+                        TRACUCOMP( g_fapiImpTd, INFO_MRK
+                                   "loadnStartAllOccs: n+1 target nodeID=%d",
+                                   ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>())
+                                   );
 
                         if((targ0->getAttr<ATTR_FABRIC_NODE_ID>()) ==
                            ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()))
@@ -298,26 +323,28 @@ namespace HBOCC
                     }
 
                     /********** Setup and load targ0 ***********/
-                    l_errl =  Setupnload   (targ0,
-                                            homerVirtAddrBase,
-                                            homerPhysAddrBase);
+                    l_errl =  primeAndLoadOcc   (targ0,
+                                                 homerVirtAddrBase,
+                                                 homerPhysAddrBase);
                     if(l_errl)
                     {
                         o_failedOccTarget = targ0;
                         TRACFCOMP( g_fapiImpTd, ERR_MRK
-                        "loadnStartAllOccs: Setupnload failed on targ0");
+                                   "loadnStartAllOccs: "
+                                   "primeAndLoadOcc failed on targ0");
                         break;
                     }
 
                     /*********** Setup and load targ1 **********/
-                    l_errl =  Setupnload   (targ1,
-                                            homerVirtAddrBase,
-                                            homerPhysAddrBase);
+                    l_errl =  primeAndLoadOcc   (targ1,
+                                                 homerVirtAddrBase,
+                                                 homerPhysAddrBase);
                     if(l_errl)
                     {
                         o_failedOccTarget = targ1;
                         TRACFCOMP( g_fapiImpTd, ERR_MRK
-                        "loadnStartAllOccs:Setupnload failed on targ1");
+                                   "loadnStartAllOccs: "
+                                   "primeAndLoadOcc failed on targ1");
                         break;
                     }
 
@@ -325,7 +352,8 @@ namespace HBOCC
                     l_errl = HBOCC::startOCC (targ0, targ1, o_failedOccTarget);
                     if (l_errl)
                     {
-                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: start failed");
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK
+                                   "loadnStartAllOccs: start failed");
                         break;
                     }
                 }
@@ -385,7 +413,10 @@ namespace HBOCC
             l_tmpErrl = VFS::module_unload( "libbuild_winkle_images.so" );
             if ( l_tmpErrl )
             {
-                TRACFCOMP( g_fapiTd,ERR_MRK"loadnStartAllOccs: Error unloading build_winkle module" );
+                TRACFCOMP
+                    ( g_fapiTd,ERR_MRK
+                      "loadnStartAllOccs: Error unloading build_winkle module"
+                      );
                 if(l_errl)
                 {
                     errlCommit( l_tmpErrl, HWPF_COMP_ID );

@@ -211,7 +211,7 @@ namespace HTMGT
                             }
 
                             // Send poll between config packets to flush errors
-                            l_err = sendOccPoll();
+                            l_err = OccManager::sendOccPoll();
                             if (l_err)
                             {
                                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
