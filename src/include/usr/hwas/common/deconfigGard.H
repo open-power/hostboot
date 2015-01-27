@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,8 +116,7 @@ public:
         // set by call_mss_getecid() in dmi_training.c
         DECONFIGURED_BY_MEMORY_CONFIG,          // BASE | 0x03
 
-        // set by discover_targets() when mcs is disabled b/c there
-        // is a non functional membuf
+        // set by presentByAssoc() when a MCS has no MEMBUFs
         DECONFIGURED_BY_NO_CHILD_MEMBUF,        // BASE | 0x04
 
         // set by deconfigureAssocProc() in hwas/common/deconfigGard.C
@@ -132,15 +131,20 @@ public:
         // set for SPCN initiated deconfigure
         DECONFIGURED_BY_SPCN,                   // BASE | 0x08
 
-        // set by discoverTargets() when functional children
-        // are found connected to a non-functional Centaur
+        // set by presentByAssoc() when a MBA has no MEMBUF
         DECONFIGURED_BY_NO_PARENT_MEMBUF,       // BASE | 0x09
 
-        // set by presentByAssoc() when a MEMBUF has no DIMMs
+        // set by presentByAssoc() when a MBA has no DIMMs
         DECONFIGURED_BY_NO_CHILD_DIMM,          // BASE | 0x0A
 
         // set by presentByAssoc() when a MEMBUF has no MCS
         DECONFIGURED_BY_NO_PARENT_MCS,          // BASE | 0x0B
+
+        // set by presentByAssoc() when a MEMBUF has no MBAs
+        DECONFIGURED_BY_NO_CHILD_MBA,           // BASE | 0x0C
+
+        // set by presentByAssoc() when a DIMM has no MBA
+        DECONFIGURED_BY_NO_PARENT_MBA,          // BASE | 0x0D
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,

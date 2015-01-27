@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,10 +136,8 @@ struct TargetInfo
 {
     TARGETING::ATTR_AFFINITY_PATH_type affinityPath;
     TARGETING::Target * pThisTarget;
-    TARGETING::ATTR_HUID_type huid;
     TARGETING::ATTR_TYPE_type type;
     HWAS::DeconfigGard::DeconfiguredByReason reason;
-    bool functional;
 };
 
 // Structure populated in invokePresentByAssoc() for use in presentByAssoc()
