@@ -396,7 +396,7 @@ bool resolveVpdSource( TARGETING::Target * i_target,
             // PNOR needs to be loaded before we can use it
             TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                     i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-            if( vpdSwitches.pnorLoaded )
+            if( vpdSwitches.pnorCacheValid )
             {
                 o_vpdSource = VPD::PNOR;
             }
@@ -560,7 +560,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         // Set target attribute switch that says VPD is loaded into PNOR
         TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                     i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-        vpdSwitches.pnorLoaded = 1;
+        vpdSwitches.pnorCacheValid = 1;
         i_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( vpdSwitches );
 
     } while(0);
@@ -598,12 +598,23 @@ errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target )
     // Clear target attribute switch that says VPD is loaded into PNOR
     TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                 i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-    vpdSwitches.pnorLoaded = 0;
+    vpdSwitches.pnorCacheValid = 0;
     i_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( vpdSwitches );
 
     TRACSSCOMP( g_trac_vpd, EXIT_MRK"invalidatePnorCache()" );
 
     return l_err;
+}
+
+
+// ------------------------------------------------------------------
+// setVpdConfigFlagsHW
+// ------------------------------------------------------------------
+void setVpdConfigFlagsHW ( )
+{
+    Singleton<MvpdFacade>::instance().setConfigFlagsHW();
+    Singleton<CvpdFacade>::instance().setConfigFlagsHW();
+    SPD::setConfigFlagsHW();
 }
 
 

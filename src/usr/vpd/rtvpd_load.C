@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -101,46 +103,99 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
 {
     errlHndl_t err = NULL;
 
-    uint64_t vpd_addr = TARGETING::get_top_mem_addr();
-
-    assert (vpd_addr != 0,
-            "bld_devtree: Top of memory was 0!");
-
-    vpd_addr -= VMM_RT_VPD_OFFSET;
-
-    o_vpd_addr = vpd_addr;
-
-    uint8_t * vpd_ptr = reinterpret_cast<uint8_t*>(vpd_addr);
-
-    void * vptr = mm_block_map(vpd_ptr, VMM_RT_VPD_SIZE);
-
-    assert(vptr != NULL,"bld_devtree: Could not map VPD memory");
-
-    vpd_ptr = static_cast<uint8_t*>(vptr);
-
-    err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
-                             vpd_ptr,
-                             VMM_DIMM_JEDEC_VPD_SIZE);
-
-    vpd_ptr += VMM_DIMM_JEDEC_VPD_SIZE;
-
-    if(!err)
+    do
     {
+        uint64_t vpd_addr = TARGETING::get_top_mem_addr();
+
+        assert (vpd_addr != 0,
+                "bld_devtree: Top of memory was 0!");
+
+        vpd_addr -= VMM_RT_VPD_OFFSET;
+
+        o_vpd_addr = vpd_addr;
+
+        uint8_t * vpd_ptr = reinterpret_cast<uint8_t*>(vpd_addr);
+
+        void * vptr = mm_block_map(vpd_ptr, VMM_RT_VPD_SIZE);
+
+        assert(vptr != NULL,"bld_devtree: Could not map VPD memory");
+
+        vpd_ptr = static_cast<uint8_t*>(vptr);
+        err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
+                                 vpd_ptr,
+                                 VMM_DIMM_JEDEC_VPD_SIZE);
+        if(err)
+        {
+            break;
+        }
+
+        vpd_ptr += VMM_DIMM_JEDEC_VPD_SIZE;
         err = bld_vpd_image(PNOR::MODULE_VPD,
                                  vpd_ptr,
                                  VMM_MODULE_VPD_SIZE);
+        if(err)
+        {
+            break;
+        }
 
         vpd_ptr += VMM_MODULE_VPD_SIZE;
-    }
-
-    if(!err)
-    {
         err = bld_vpd_image(PNOR::CENTAUR_VPD,
                                  vpd_ptr,
                                  VMM_CENTAUR_VPD_SIZE);
-    }
+        if(err)
+        {
+            break;
+        }
 
-    mm_block_unmap(vptr);
+        mm_block_unmap(vptr);
+
+        // In manufacturing mode the VPD PNOR cache needs to be cleared
+        // And the VPD ATTR switch and flags need to be reset
+        // Note: this code should do nothing when not in PNOR caching mode
+        TARGETING::Target* l_pTopLevel = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+        TARGETING::ATTR_MNFG_FLAGS_type l_mnfgFlags =
+                    l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+        // @todo RTC 118752 Use generic mfg-mode attr when available
+        if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+        {
+            // Reset the PNOR config flags to HW - MVPD/CVPD/SPD
+            // Checks for PNOR caching mode before reset
+            VPD::setVpdConfigFlagsHW();
+            if (err)
+            {
+                break;
+            }
+
+            // Find all the targets with VPD switches
+            for (TARGETING::TargetIterator target =
+                        TARGETING::targetService().begin();
+                 target != TARGETING::targetService().end();
+                 ++target)
+            {
+                TARGETING::ATTR_VPD_SWITCHES_type l_switch;
+                if(target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(l_switch))
+                {
+                    if (l_switch.pnorCacheValid)
+                    {
+                        // Invalidate the VPD PNOR for this target
+                        // This also clears the VPD ATTR switch
+                        err = VPD::invalidatePnorCache(*target);
+                        if (err)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (err)
+            {
+                break;
+            }
+        }
+
+    } while( 0 );
 
     return err;
 }

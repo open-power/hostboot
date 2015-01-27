@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,14 @@
 #include <errl/errludtarget.H>
 #include <vpd/vpdreasoncodes.H>
 #include <initservice/initserviceif.H>
-#include "../vpd.H"
+#include <devicefw/driverif.H>
+#include <i2c/eepromif.H>
 #include <runtime/interface.h>
 #include <targeting/common/util.H>
+#include "vpd.H"
+#include "mvpd.H"
+#include "cvpd.H"
+#include "spd.H"
 
 // ----------------------------------------------
 // Trace definitions
@@ -261,29 +266,145 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
                        mutex_t * i_mutex )
 {
     errlHndl_t err = NULL;
-    // Does VPD write ever need to be supported at runtime?
-    TRACFCOMP(g_trac_vpd, ERR_MRK
-              "RT writePNOR: VPD write not supported at runtime.");
 
-    /*@
-     * @errortype
-     * @reasoncode       VPD::VPD_RT_WRITE_NOT_SUPPORTED
-     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-     * @moduleid         VPD::VPD_RT_WRITE_PNOR
-     * @userdata1        target huid
-     * @userdata2        VPD type
-     * @devdesc          VPD write not supported at runtime
-     */
-    err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   VPD::VPD_RT_WRITE_PNOR,
-                                   VPD::VPD_RT_WRITE_NOT_SUPPORTED,
-                                   get_huid(i_target),
-                                   i_pnorInfo.pnorSection);
+    int64_t vpdLocation = 0;
+    uint64_t addr = 0x0;
+    const char * writeAddr = NULL;
 
-    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                             HWAS::SRCI_PRIORITY_HIGH);
+    TRACSSCOMP( g_trac_vpd,
+                ENTER_MRK"RT writePNOR()" );
 
-    err->collectTrace( "VPD", 256);
+    do
+    {
+        if(INITSERVICE::spBaseServicesEnabled())
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd:writePNOR not supported with FSP");
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_RT_WRITE_NOT_SUPPORTED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_RT_WRITE_PNOR
+             * @userdata1        Target
+             * @userdata2        0
+             * @devdesc          MBOX send not supported in HBRT
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          VPD::VPD_RT_WRITE_PNOR,
+                                          VPD::VPD_RT_WRITE_NOT_SUPPORTED,
+                                          TARGETING::get_huid(i_target),
+                                          0);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
+
+            err->collectTrace( "VPD", 256);
+
+            break;
+        }
+
+        //----------------------------
+        // Write memory version of VPD
+        //----------------------------
+        // Fake getPnorAddr gets memory address of VPD
+        err = getPnorAddr( i_pnorInfo,
+                           io_cachedAddr,
+                           i_mutex );
+        if(err)
+        {
+            break;
+        }
+
+        addr = io_cachedAddr;
+
+        err = getVpdLocation( vpdLocation,
+                              i_target);
+        if(err)
+        {
+            break;
+        }
+
+        // Add Offset for target vpd location
+        addr += (vpdLocation * i_pnorInfo.segmentSize);
+
+        // Add keyword offset
+        addr += i_byteAddr;
+
+        TRACUCOMP( g_trac_vpd,
+                   INFO_MRK"Address to write: 0x%08x",
+                   addr );
+
+        // Write fake VPD in main-store
+        writeAddr = reinterpret_cast<const char *>( addr );
+        memcpy( (void*)(writeAddr),
+                i_data,
+                i_numBytes );
+
+        //--------------------------------
+        // Write PNOR cache version of VPD
+        //--------------------------------
+
+        // Check if the VPD PNOR cache is loaded for this target
+        TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
+                i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+        if( vpdSwitches.pnorCacheValid )
+        {
+            PNOR::SectionInfo_t info;
+            writeAddr = NULL;
+
+            // Get SPD PNOR section info from PNOR RP
+            err = PNOR::getSectionInfo( i_pnorInfo.pnorSection,
+                                        info );
+            if( err )
+            {
+                break;
+            }
+
+            addr = info.vaddr;
+
+            // Offset cached address by vpd location multiplier
+            addr += (vpdLocation * i_pnorInfo.segmentSize);
+
+            // Now offset into that chunk of data by i_byteAddr
+            addr += i_byteAddr;
+
+            TRACUCOMP( g_trac_vpd,
+                       INFO_MRK"Address to write: 0x%08x",
+                       addr );
+
+            // Write the data
+            writeAddr = reinterpret_cast<const char*>( addr );
+            memcpy( (void*)(writeAddr),
+                    i_data,
+                    i_numBytes );
+
+            // Flush the page to make sure it gets to the PNOR
+            err = PNOR::flush( info.id );
+            if( err )
+            {
+                break;
+            }
+        }
+
+        //------------------------
+        // Write HW version of VPD
+        //------------------------
+        err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                  i_target,
+                                  i_data,
+                                  i_numBytes,
+                                  DEVICE_EEPROM_ADDRESS(
+                                      EEPROM::VPD_PRIMARY,
+                                      i_byteAddr ) );
+        if( err )
+        {
+            break;
+        }
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_vpd,
+                EXIT_MRK"RT writePNOR()" );
 
     return err;
 }
@@ -375,7 +496,7 @@ bool resolveVpdSource( TARGETING::Target * i_target,
             // PNOR needs to be loaded before we can use it
             TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                     i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-            if( vpdSwitches.pnorLoaded )
+            if( vpdSwitches.pnorCacheValid )
             {
                 o_vpdSource = VPD::PNOR;
             }

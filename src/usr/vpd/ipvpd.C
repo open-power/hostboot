@@ -242,7 +242,7 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
             // PNOR needs to be loaded before we can write it
             TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                     i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-            if( vpdSwitches.pnorLoaded )
+            if( vpdSwitches.pnorCacheValid )
             {
                 l_args.location = VPD::PNOR;
                 err = write( i_target,
@@ -811,8 +811,8 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
          * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
          * @userdata1[0:31]  Target HUID
          * @userdata1[32:63] Requested VPD Source Location
-         * @userdata2[0:31]  CONFIG_<vpd>_READ_WRITE_CONFIG_PNOR
-         * @userdata2[32:63] CONFIG_<vpd>_READ_WRITE_CONFIG_HW
+         * @userdata2[0:31]  VPD write PNOR flag
+         * @userdata2[32:63] VPD write HW flag
          * @devdesc          Unable to resolve the VPD
          *                   source (PNOR or SEEPROM)
          */
@@ -1426,8 +1426,8 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
          * @moduleid         VPD::VPD_IPVPD_FETCH_DATA
          * @userdata1[0:31]  Target HUID
          * @userdata1[32:63] Requested VPD Source Location
-         * @userdata2[0:31]  CONFIG_<vpd>_READ_FROM_PNOR
-         * @userdata2[32:63] CONFIG_<vpd>_READ_FROM_HW
+         * @userdata2[0:31]  VPD read PNOR flag
+         * @userdata2[32:63] VPD read HW flag
          * @devdesc          Unable to resolve the VPD
          *                   source (PNOR or SEEPROM)
          */
@@ -1903,8 +1903,8 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
              * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
              * @userdata1[0:31]  Target HUID
              * @userdata1[32:63] Requested VPD Destination
-             * @userdata2[0:31]  CONFIG_<vpd>_WRITE_TO_PNOR
-             * @userdata2[32:63] CONFIG_<vpd>_WRITE_TO_HW
+             * @userdata2[0:31]  VPD write PNOR flag
+             * @userdata2[32:63] VPD write HW flag
              * @devdesc          Unable to resolve the VPD
              *                   destination (PNOR or SEEPROM)
              */
@@ -2006,4 +2006,25 @@ bool IpVpdFacade::compareKeywords ( const keywordInfo e1,
         return true;
     else
         return false;
+}
+
+
+// ------------------------------------------------------------------
+// IpVpdFacade::setConfigFlagsHW
+// ------------------------------------------------------------------
+void IpVpdFacade::setConfigFlagsHW ( )
+{
+    // Only change configs if in PNOR caching mode
+    if( iv_configInfo.vpdReadPNOR &&
+        iv_configInfo.vpdReadHW )
+    {
+        iv_configInfo.vpdReadPNOR = false;
+        iv_configInfo.vpdReadHW = true;
+    }
+    if( iv_configInfo.vpdWritePNOR &&
+        iv_configInfo.vpdWriteHW )
+    {
+        iv_configInfo.vpdWritePNOR = false;
+        iv_configInfo.vpdWriteHW = true;
+    }
 }

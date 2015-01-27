@@ -46,9 +46,12 @@
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eepromif.H>
 #include <i2c/i2creasoncodes.H>
-#include <i2c/i2cif.H>
 #include "eepromdd.H"
 #include "errlud_i2c.H"
+
+#ifndef __HOSTBOOT_RUNTIME
+#include <i2c/i2cif.H>
+#endif
 
 // ----------------------------------------------
 // Globals
@@ -254,6 +257,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     return err;
 } // end eepromPerformOp
 
+#ifndef __HOSTBOOT_RUNTIME
 //-------------------------------------------------------------------
 //eepromPresence
 //-------------------------------------------------------------------
@@ -315,7 +319,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
     TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence()");
     return l_present;
 }
-
+#endif
 
 
 // ------------------------------------------------------------------

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,10 +25,13 @@
 ROOTPATH = ../../..
 MODULE = i2c
 
+#include common objects between hb and runtime
+include i2c.mk
+
+#include unique objects
 OBJS += i2c.o
-OBJS += eepromdd.o
-OBJS += errlud_i2c.o
 
 SUBDIRS += test.d
+SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

@@ -226,6 +226,7 @@ RUNTIME_MODULES += devicefw_rt
 RUNTIME_MODULES += xscom_rt
 RUNTIME_MODULES += scom_rt
 RUNTIME_MODULES += vpd_rt
+RUNTIME_MODULES += i2c_rt
 RUNTIME_MODULES += ecmddatabuffer
 RUNTIME_MODULES += fapi_rt
 RUNTIME_MODULES += hwp_rt

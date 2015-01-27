@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,14 +210,14 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
  *
  * @param[out] o_source - The resolved VPD source to be accessed
  *
- * @return errHndl_t - NULL if successful, otherwise a pointer to the
- *      error log.
+ * @return bool - True if bad config detected otherwise False
  */
 bool resolveVpdSource( TARGETING::Target * i_target,
                        bool i_rwPnorEnabled,
                        bool i_rwHwEnabled,
                        vpdCmdTarget i_vpdCmdTarget,
                        vpdCmdTarget& o_vpdSource );
+
 
 }; //end VPD namespace
 

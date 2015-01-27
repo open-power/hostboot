@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/vpd/runtime/makefile $
+# $Source: src/usr/i2c/i2c.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -23,20 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
-HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
-MODULE = vpd_rt
-
-#include common objects between hostboot and runtime hostboot
-include ../vpd.mk
-
-#add unique object modules
-OBJS += rt_vpd.o
-
-SUBDIRS += test.d
-
-VPATH += ..
-CFLAGS += -iquote ../
-
-include $(ROOTPATH)/config.mk
-
+OBJS += eepromdd.o
+OBJS += errlud_i2c.o

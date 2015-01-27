@@ -37,6 +37,7 @@
 // ----------------------------------------------
 #include <errl/errlentry.H>
 #include <sys/time.h>
+#include "i2c_common.H"
 
 namespace I2C
 {
@@ -159,42 +160,6 @@ enum i2c_reg_offset_t
     I2C_REG_RESET_SCL   = 11,
     I2C_REG_SET_SDA     = 12,
     I2C_REG_RESET_SDA   = 13,
-
-};
-
-
-/**
- * @brief Structure used to pass important variables between functions
- */
-struct misc_args_t
-{
-    uint8_t  port;
-    uint8_t  engine;
-    uint64_t devAddr;
-    bool     skip_mode_setup;
-    bool     with_stop;
-    bool     read_not_write;
-    uint64_t bus_speed;          // in kbits/sec (ie 400KHz)
-    uint16_t bit_rate_divisor;   // uint16_t to match size in mode register
-    uint64_t polling_interval_ns;  // in nanoseconds
-    uint64_t timeout_count;
-    uint64_t offset_length;
-    uint8_t* offset_buffer;
-
-    TARGETING::I2cSwitches switches;
-
-    misc_args_t():port(0xFF),
-                  engine(0xFF),
-                  devAddr(0xFFFFFFFF),
-                  skip_mode_setup(false),
-                  with_stop(true),
-                  read_not_write(true),
-                  bus_speed(0),
-                  bit_rate_divisor(0),
-                  polling_interval_ns(0),
-                  timeout_count(0),
-                  offset_length(0),
-                  offset_buffer(NULL){};
 
 };
 

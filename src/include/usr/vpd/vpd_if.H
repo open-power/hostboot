@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,6 +86,11 @@ namespace VPD
      *      error log.
      */
     errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target );
+
+    /**
+     * @brief This function sets the VPD config flags to use HW and not PNOR
+     */
+    void setVpdConfigFlagsHW ( );
 
 }; //end vpd namespace
 

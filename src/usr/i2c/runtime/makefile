@@ -25,18 +25,15 @@
 # common objects with runtime
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
-MODULE = vpd_rt
+MODULE = i2c_rt
 
 #include common objects between hostboot and runtime hostboot
-include ../vpd.mk
+include ../i2c.mk
 
 #add unique object modules
-OBJS += rt_vpd.o
-
-SUBDIRS += test.d
+OBJS += rt_i2c.o
 
 VPATH += ..
-CFLAGS += -iquote ../
 
 include $(ROOTPATH)/config.mk
 

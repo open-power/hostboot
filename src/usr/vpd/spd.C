@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -86,6 +86,28 @@ uint64_t g_spdPnorAddr = 0x0;
 // By setting to false, allows debug at a later time by allowing to
 // substitute a binary file (dimmspd.dat) into PNOR.
 const bool g_usePNOR = true;
+
+// Define where to read/write SPD data
+#ifdef CONFIG_DJVPD_READ_FROM_PNOR
+    static bool g_spdReadPNOR = true;
+#else
+    static bool g_spdReadPNOR = false;
+#endif
+#ifdef CONFIG_DJVPD_READ_FROM_HW
+    static bool g_spdReadHW = true;
+#else
+    static bool g_spdReadHW = false;
+#endif
+#ifdef CONFIG_DJVPD_WRITE_TO_PNOR
+    static bool g_spdWritePNOR = true;
+#else
+    static bool g_spdWritePNOR = false;
+#endif
+#ifdef CONFIG_DJVPD_WRITE_TO_HW
+    static bool g_spdWriteHW = true;
+#else
+    static bool g_spdWriteHW = false;
+#endif
 
 
 /**
@@ -418,21 +440,12 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
             break;
         }
 
-        bool readFromPnorEnabled = false;
-#ifdef CONFIG_DJVPD_READ_FROM_PNOR
-        readFromPnorEnabled = true;
-#endif
-        bool readFromHwEnabled = false;
-#ifdef CONFIG_DJVPD_READ_FROM_HW
-        readFromHwEnabled = true;
-#endif
-
         // Determine the SPD source (PNOR/SEEPROM)
         VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
         bool configError = false;
         configError = VPD::resolveVpdSource( i_target,
-                                             readFromPnorEnabled,
-                                             readFromHwEnabled,
+                                             g_spdReadPNOR,
+                                             g_spdReadHW,
                                              i_location,
                                              vpdSource );
 
@@ -488,8 +501,8 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
              * @moduleid         VPD::VPD_SPD_FETCH_DATA
              * @userdata1[0:31]  Target HUID
              * @userdata1[32:63] Requested VPD Source Location
-             * @userdata2[0:31]  CONFIG_DJVPD_READ_FROM_PNOR
-             * @userdata2[32:63] CONFIG_DJVPD_READ_FROM_HW
+             * @userdata2[0:31]  SPD read PNOR flag
+             * @userdata2[32:63] SPD read HW flag
              * @devdesc          Unable to resolve the VPD
              *                   source (PNOR or SEEPROM)
              */
@@ -499,8 +512,8 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                         VPD::VPD_READ_SOURCE_UNRESOLVED,
                         TWO_UINT32_TO_UINT64( TARGETING::get_huid(i_target),
                                               i_location ),
-                        TWO_UINT32_TO_UINT64( readFromHwEnabled,
-                                              readFromHwEnabled ),
+                        TWO_UINT32_TO_UINT64( g_spdReadPNOR,
+                                              g_spdReadHW ),
                         true /*Add HB SW Callout*/ );
             err->collectTrace( "VPD", 256 );
             break;
@@ -531,44 +544,46 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 
     do
     {
-#ifdef CONFIG_DJVPD_WRITE_TO_HW
-        if( i_location != VPD::PNOR )
+        if( g_spdWriteHW )
         {
-            // Write directly to target's EEPROM.
-            err = DeviceFW::deviceOp( DeviceFW::WRITE,
-                                      i_target,
-                                      i_data,
+            if( i_location != VPD::PNOR )
+            {
+                // Write directly to target's EEPROM.
+                err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                          i_target,
+                                          i_data,
+                                          i_numBytes,
+                                          DEVICE_EEPROM_ADDRESS(
+                                              EEPROM::VPD_PRIMARY,
+                                              i_offset ) );
+                if( err )
+                {
+                    break;
+                }
+            }
+        }
+        if( g_spdWritePNOR )
+        {
+            if( i_location != VPD::SEEPROM )
+            {
+                // Setup info needed to write to PNOR
+                VPD::pnorInformation info;
+                info.segmentSize = DIMM_SPD_SECTION_SIZE;
+                info.maxSegments = DIMM_SPD_MAX_SECTIONS;
+                info.pnorSection = PNOR::DIMM_JEDEC_VPD;
+                err = VPD::writePNOR( i_offset,
                                       i_numBytes,
-                                      DEVICE_EEPROM_ADDRESS(
-                                          EEPROM::VPD_PRIMARY,
-                                          i_offset ) );
-            if( err )
-            {
-                break;
+                                      i_data,
+                                      i_target,
+                                      info,
+                                      g_spdPnorAddr,
+                                      &g_spdMutex );
+                if( err )
+                {
+                    break;
+                }
             }
         }
-#endif
-#ifdef CONFIG_DJVPD_WRITE_TO_PNOR
-        if( i_location != VPD::SEEPROM )
-        {
-            // Setup info needed to write from PNOR
-            VPD::pnorInformation info;
-            info.segmentSize = DIMM_SPD_SECTION_SIZE;
-            info.maxSegments = DIMM_SPD_MAX_SECTIONS;
-            info.pnorSection = PNOR::DIMM_JEDEC_VPD;
-            err = VPD::writePNOR( i_offset,
-                                  i_numBytes,
-                                  i_data,
-                                  i_target,
-                                  info,
-                                  g_spdPnorAddr,
-                                  &g_spdMutex );
-            if( err )
-            {
-                break;
-            }
-        }
-#endif
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
@@ -885,23 +900,24 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
             break;
         }
 
-#ifndef CONFIG_DJVPD_WRITE_TO_HW
-        // Send mbox message with new data to Fsp
-        VPD::VpdWriteMsg_t msgdata;
-        msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-        //XXXX=offset relative to whole section
-        memcpy( msgdata.record, "XXXX", sizeof(msgdata.record) );
-        msgdata.offset = entry->offset;
-        err = VPD::sendMboxWriteMsg( io_buflen,
-                                     io_buffer,
-                                     i_target,
-                                     VPD::VPD_WRITE_DIMM,
-                                     msgdata );
-        if( err )
+        if( !g_spdWriteHW )
         {
-            break;
+            // Send mbox message with new data to Fsp
+            VPD::VpdWriteMsg_t msgdata;
+            msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+            //XXXX=offset relative to whole section
+            memcpy( msgdata.record, "XXXX", sizeof(msgdata.record) );
+            msgdata.offset = entry->offset;
+            err = VPD::sendMboxWriteMsg( io_buflen,
+                                         io_buffer,
+                                         i_target,
+                                         VPD::VPD_WRITE_DIMM,
+                                         msgdata );
+            if( err )
+            {
+                break;
+            }
         }
-#endif
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
@@ -917,11 +933,14 @@ bool spdPresent ( TARGETING::Target * i_target )
 {
 
     TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent()" );
-#if(defined( CONFIG_DJVPD_READ_FROM_HW ) && !defined (__HOSTBOOT_RUNTIME ) )
 
-    return EEPROM::eepromPresence( i_target );
+#ifndef __HOSTBOOT_RUNTIME
+    if( g_spdReadHW )
+    {
+        return EEPROM::eepromPresence( i_target );
+    }
+#endif
 
-#else
     errlHndl_t err = NULL;
     bool pres = false;
 
@@ -953,7 +972,6 @@ bool spdPresent ( TARGETING::Target * i_target )
     } while( 0 );
 
     return pres;
-#endif
 }
 
 
@@ -2138,13 +2156,13 @@ errlHndl_t loadPnor ( TARGETING::Target * i_target )
 
 
 // ------------------------------------------------------------------
-// /*invalidatePnorCache*/
+// invalidatePnor
 // ------------------------------------------------------------------
 errlHndl_t invalidatePnor ( TARGETING::Target * i_target )
 {
     errlHndl_t err = NULL;
 
-    TRACSSCOMP( g_trac_spd, ENTER_MRK"invalidatePnorCache()" );
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"invalidatePnor()" );
 
     // Write SPD section to all Fs
     uint8_t writeData[DIMM_SPD_SECTION_SIZE];
@@ -2156,13 +2174,35 @@ errlHndl_t invalidatePnor ( TARGETING::Target * i_target )
                         VPD::PNOR );
     if( err )
     {
-        TRACFCOMP( g_trac_spd, ERR_MRK"invalidatePnorCache: "
+        TRACFCOMP( g_trac_spd, ERR_MRK"invalidatePnor: "
                    "Error invalidating the SPD in PNOR" );
     }
 
-    TRACSSCOMP( g_trac_spd, EXIT_MRK"invalidatePnorCache()" );
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"invalidatePnor()" );
 
     return err;
+}
+
+
+// ------------------------------------------------------------------
+// setConfigFlagsHW
+// ------------------------------------------------------------------
+void setConfigFlagsHW ( )
+{
+    // Only change configs if in PNOR caching mode
+    // In PNOR only mode we would lose all VPD data
+    if( g_spdReadPNOR &&
+        g_spdReadHW )
+    {
+        g_spdReadPNOR  = false;
+        g_spdReadHW    = true;
+    }
+    if( g_spdWritePNOR &&
+        g_spdWriteHW )
+    {
+        g_spdWritePNOR = false;
+        g_spdWriteHW   = true;
+    }
 }
 
 

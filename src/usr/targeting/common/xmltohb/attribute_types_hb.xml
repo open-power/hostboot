@@ -743,9 +743,9 @@
     <complexType>
         <description>VPD flags</description>
         <field>
-            <name>pnorLoaded</name>
+            <name>pnorCacheValid</name>
             <description>Set when this target's VPD data has been loaded
-                into the PNOR.
+                from EEPROM into the PNOR.
             </description>
             <type>uint8_t</type>
             <bits>1</bits>

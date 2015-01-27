@@ -275,6 +275,11 @@ class IpVpdFacade
      */
     errlHndl_t invalidatePnor ( TARGETING::Target * i_target );
 
+    /**
+     * @brief This function sets the config flags to use HW and not PNOR
+     */
+    void setConfigFlagsHW ( );
+
   protected:
 
     /**
