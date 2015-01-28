@@ -70,6 +70,8 @@
 #include <config.h>
 #include <ipmi/ipmisensor.H>
 
+#include <initservice/bootconfigif.H>
+
 namespace ISTEPS_TRACE
 {
     // declare storage for isteps_trace!
@@ -124,8 +126,6 @@ IStepDispatcher::IStepDispatcher() :
     TARGETING::targetService().getTopLevelTarget(l_pSys);
     iv_mpiplMode = l_pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
     TRACFCOMP(g_trac_initsvc, "IStepDispatcher: MPIPL Mode: %d", iv_mpiplMode);
-    iv_istepMode = l_pSys->getAttr<TARGETING::ATTR_ISTEP_MODE>();
-    TRACFCOMP(g_trac_initsvc, "IStepDispatcher: IStep Mode: %d", iv_istepMode);
     iv_spBaseServicesEnabled = spBaseServicesEnabled();
     TRACFCOMP(g_trac_initsvc, "IStepDispatcher: SP base Services Enabled: %d",
               iv_spBaseServicesEnabled);
@@ -180,6 +180,18 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
     printk( "IStepDispatcher entry.\n" );
     TRACFCOMP( g_trac_initsvc, "IStepDispatcher entry." );
+
+    //  Read the and process the Hostboot configuration flags
+    BOOTCONFIG::readAndProcessBootConfig();
+
+    TARGETING::Target* l_pTopLevelTarget = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);
+
+    assert(l_pTopLevelTarget != NULL );
+
+    iv_istepMode = l_pTopLevelTarget->getAttr<TARGETING::ATTR_ISTEP_MODE>();
+
+    TRACFCOMP(g_trac_initsvc, "IStepDispatcher: IStep Mode: %d", iv_istepMode);
 
     do
     {
@@ -253,19 +265,9 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             {
                 // Base Services available. Figure out if HWSV has overrides
                 uint8_t l_attrOverridesExist = 0;
-                TARGETING::Target* l_pTopLevelTarget = NULL;
-                TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);
 
-                if (l_pTopLevelTarget == NULL)
-                {
-                    TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Top level target not found");
-                }
-                else
-                {
-                    l_attrOverridesExist = l_pTopLevelTarget->
+                l_attrOverridesExist = l_pTopLevelTarget->
                     getAttr<TARGETING::ATTR_PLCK_IPL_ATTR_OVERRIDES_EXIST>();
-                }
 
                 if (l_attrOverridesExist)
                 {
@@ -291,11 +293,13 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_initsvc,"init: processing temporary overrides");
+                    TRACFCOMP(g_trac_initsvc,"init: processing temporary "
+                              "overrides");
                     err = TARGETING::getAttrOverrides(l_sectionInfo);
                     if (err)
                     {
-                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: getting temporary overrides");
+                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: "
+                                  "getting temporary overrides");
                         break;
                     }
                 }
@@ -309,11 +313,13 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_initsvc,"init: processing permanent overrides");
+                    TRACFCOMP(g_trac_initsvc,"init: processing permanent"
+                    " overrides");
                     err = TARGETING::getAttrOverrides(l_sectionInfo);
                     if (err)
                     {
-                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: getting permanent overrides");
+                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: "
+                                  "getting permanent overrides");
                         break;
                     }
                 }
@@ -493,7 +499,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     errlCommit(err, INITSVC_COMP_ID);
                     istep = newIstep;
                     substep = newSubstep;
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: Reconfig Loop: Back to %d:%d",
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: "
+                              "Reconfig Loop: Back to %d:%d",
                               istep, substep);
                     continue;
                 }
@@ -514,8 +521,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
             if (err)
             {
-                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: IStep Error on %d:%d",
-                          istep, substep);
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: "
+                          "IStep Error on %d:%d", istep, substep);
                 break;
             }
             substep++;
@@ -554,8 +561,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     // If the step has valid work to be done, then execute it.
     if(NULL != theStep)
     {
-        TRACFCOMP(g_trac_initsvc,ENTER_MRK"doIstep: step %d, substep %d, task %s",
-                  i_istep, i_substep, theStep->taskname);
+        TRACFCOMP(g_trac_initsvc,ENTER_MRK"doIstep: step %d, substep %d, "
+                  "task %s", i_istep, i_substep, theStep->taskname);
 
         // Send progress codes if in run-all mode
         if (!iv_istepMode)
@@ -651,14 +658,15 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         {
             if(isAttrSyncEnabled())
             {
-                TRACFCOMP(g_trac_initsvc, INFO_MRK"doIstep: sync attributes to FSP");
+                TRACFCOMP(g_trac_initsvc,
+                          INFO_MRK"doIstep: sync attributes to FSP");
 
                 errlHndl_t l_errl = TARGETING::syncAllAttributesToFsp();
 
                 if(l_errl)
                 {
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: syncattributes failed see %x for details",
-                              l_errl->eid());
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: sync attributes"
+                             " failed see %x for details", l_errl->eid());
                     errlCommit(l_errl, INITSVC_COMP_ID);
                 }
             }
@@ -681,7 +689,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
             if ( err )
             {
-                TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from checkForIplAttentions");
+                TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from "
+                          "checkForIplAttentions");
             }
         }
 
@@ -706,7 +715,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         if (HWAS::hwasPLDDetection())
         {
             // There was a PLD, clear any deferred deconfig records
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: PLD, clearing deferred deconfig records");
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: PLD, clearing deferred "
+                      "deconfig records");
             HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
         }
         else
@@ -717,11 +727,13 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         }
 
         // Check if ATTR_RECONFIGURE_LOOP is non-zero
-        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr = l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+                       l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+
         if (l_reconfigAttr)
         {
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Reconfigure needed, ATTR_RECONFIGURE_LOOP = %d",
-                      l_reconfigAttr);
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Reconfigure needed, "
+                      "ATTR_RECONFIGURE_LOOP = %d", l_reconfigAttr);
             o_doReconfig = true;
         }
 
@@ -730,7 +742,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     }
     else
     {
-        TRACDCOMP( g_trac_initsvc, INFO_MRK"doIstep: Empty Istep, nothing to do!" );
+        TRACDCOMP( g_trac_initsvc,
+                  INFO_MRK"doIstep: Empty Istep, nothing to do!" );
     }
 
     return err;
@@ -1816,7 +1829,7 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
     const uint16_t OUTER_START = (OUTER_START_STEP << 8) | OUTER_START_SUBSTEP;
     const uint16_t OUTER_STOP = (OUTER_STOP_STEP << 8) | OUTER_STOP_SUBSTEP;
 
-    // TODO RTC 101925. PRD enables FIRs in Istep 11. If Istep 12 deconfigures
+    // TODO RTC:101925. PRD enables FIRs in Istep 11. If Istep 12 deconfigures
     // HW that is asserting FIRs and performs the Inner Reconfig Loop then PRD
     // ends up logging errors when it sees FIR bits for the deconfigured HW.
     // The fix is to dispense with the Inner Reconfig Loop, if the code loops
@@ -2021,7 +2034,7 @@ void IStepDispatcher::reconfigLoopTestRunner(   uint8_t i_step,
                 {
                     TRACFCOMP(g_trac_initsvc, INFO_MRK"reconfigLoopTestRunner: "
                         "Step: %d.%d, "
-                        "Target HUID: 0x%08X not functional, skipping test.",
+                        "Target HUID: 0x%08X not functional, skiping test.",
                         i_step, i_substep,
                         l_p_reconfigLoopTests->test[i].deconfigTargetHuid);
                 }
@@ -2150,6 +2163,7 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
                         "pauseLen=0x%02X, Permanent pause enabled.",
                         l_p_pauseCfg->pauseLen
                         );
+                CONSOLE::flush();
 #endif
                 while(1)
                 {
@@ -2164,4 +2178,5 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
         }
     }
 }
-} // namespace
+
+}; // namespace

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/initservice/makefile $
+# $Source: src/usr/initservice/bootconfig/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -22,19 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+ROOTPATH = ../../../../../
 
-ROOTPATH = ../../..
-# MODULE =
-
-# OBJS +=
-
-# NOTE:	initsvctest is a dummy module that is executed by
-#		unit test 2 in the test directory.  Please do not rename.
-SUBDIRS += baseinitsvc.d
-SUBDIRS += extinitsvc.d
-SUBDIRS += istepdispatcher.d
-SUBDIRS += test.d
-SUBDIRS += initsvctesttask.d
-SUBDIRS += build.d
+BOOTCFG_OBJS = bootconfig.o
+BOOTCFG_OBJS += bootconfigif.o
+BOOTCFG_OBJS += $(if $(CONFIG_BMC_AST2400),bootconfig_ast2400.o)
 
 include ${ROOTPATH}/config.mk

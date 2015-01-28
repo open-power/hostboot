@@ -3,3 +3,8 @@ config VPO_COMPILE
     default n
     help
         Compile and build image for VPO environment
+
+config BMC_AST2400
+    default n
+    help
+        Compile hostboot support for AST2400 based BMC
