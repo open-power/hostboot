@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_bar_config.C,v 1.5 2014/11/07 17:53:36 cmolsen Exp $
+// $Id: p8_pba_bar_config.C,v 1.6 2015/01/23 14:57:37 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_bar_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -172,9 +172,9 @@ p8_pba_bar_config (const Target&  i_target,
         return l_rc;
     }
 
-    // Check if the size is 0 but the BAR is not zero.  If so, return error.
-    // The combination of both the size and BAR being zero is legal.
-    if ( (i_pba_bar_size == 0x0ull) && (i_index != 0) )
+    // Check if the BAR size is 0 but the BAR addr is not zero.  If so, return error.
+    // The combination of both the BAR size and addr being zero is legal.
+    if ( (i_pba_bar_size == 0) && (i_pba_bar_addr != 0) )
     {
         FAPI_ERR("ERROR: Bar size must be >=1MB for PBABAR%d but i_pba_bar_size=0x%08llx",
                     i_index, i_pba_bar_size);
