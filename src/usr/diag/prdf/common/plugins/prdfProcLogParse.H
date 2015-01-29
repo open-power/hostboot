@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,9 @@ namespace FSP
  * @param i_parser The error log parser.
  */
 bool parseSlwFfdcData( uint8_t * i_buffer, uint32_t i_buflen,
+                       ErrlUsrParser & i_parser );
+
+bool parseTodFfdcData( uint8_t * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser );
 
 } // namespace FSP/HOSTBBOT

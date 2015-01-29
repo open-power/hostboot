@@ -381,6 +381,10 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseSlwFfdcData( sigData, sigDataSize, i_parser );
             }
+            else if ( Util::hashString("TOD_ERROR_DATA") == sigId)
+            {
+                parseTodFfdcData( sigData, sigDataSize, i_parser );
+            }
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
                 // Print one reg/line if the data size <= 8 bytes

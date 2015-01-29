@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfPlatProcConst.H $   */
+/* $Source: src/usr/diag/prdf/common/plugins/prdfPlatProcConst.H $        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,6 +56,64 @@ enum Register
     PSMSCR          = 7,
     LAST_TOD_REG    = 8,
 };
+
+/**
+ * @brief summarizes error analysis for a TOD topology.
+ */
+enum
+{
+    NO_TOD_ERROR                 = 0,
+    MASTER_PATH_ERROR            = 1,
+    INTERNAL_PATH_ERROR          = 2,
+    SLAVE_PATH_NETWORK_ERROR     = 3,
+    UNKNOWN_TOD_ERROR            = 4,
+    LAST_TOD_ERROR               = 5,
+};
+
+/**
+ * @brief TOD error analysis data to be added to special user section of e-log.
+ */
+struct TodErrorSummary
+{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+
+    uint32_t reserved               :13;
+    uint32_t backUpTopologyMastPath :2; //master path for backup topology
+    uint32_t activeTopologyMastPath :2; // master path for active topology
+    uint32_t backUpTopologySummary  :3; // backup topology error status
+    uint32_t activeTopologySummary  :3; // active topology error status
+    uint32_t todOscCnt              :4; // functional TOD OSC count in system
+    uint32_t activeTopology         :1; // Topology acting as Active
+    uint32_t topologyResetRequested :1; // topology reset request status
+    uint32_t topologySwitchByPhyp   :1; // topology switch event detected
+    uint32_t phypDetectedTodError   :1; // TOD error detected by Phyp
+    uint32_t hardwareSwitchFlip     :1; // Master Path Failover by Hw
+
+#else
+
+    uint32_t hardwareSwitchFlip     :1; // Master Path Failover by Hw
+    uint32_t phypDetectedTodError   :1; // TOD error detected by Phyp
+    uint32_t topologySwitchByPhyp   :1; // topology switch event detected
+    uint32_t topologyResetRequested :1; // topology reset request status
+    uint32_t activeTopology         :1; // Topology acting as Active
+    uint32_t todOscCnt              :4; // functional TOD OSC count in system
+    uint32_t activeTopologySummary  :3; // active topology error status
+    uint32_t backUpTopologySummary  :3; // backup topology error status
+    uint32_t activeTopologyMastPath :2; // master path for active topology
+    uint32_t backUpTopologyMastPath :2; //master path for backup topology
+    uint32_t reserved               :13;
+
+#endif
+    uint32_t activeMdmt;       // HUID of active mdmt
+    uint32_t backUpMdmt;       // HUID of backup MDMT
+
+    TodErrorSummary():
+        activeMdmt(0),
+        backUpMdmt(0)
+    {};
+
+};
+
 
 }//end namespace TOD
 

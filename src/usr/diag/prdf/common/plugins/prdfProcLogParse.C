@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <iipconst.h>
 #include <prdfParserEnums.H>
 #include <netinet/in.h>
+#include <prdfPlatProcConst.H>
 
 namespace PRDF
 {
@@ -46,6 +47,7 @@ namespace FSP
 {
 
 using namespace PARSER;
+using namespace TOD;
 
 //------------------------------------------------------------------------------
 
@@ -85,6 +87,87 @@ bool parseSlwFfdcData( uint8_t * i_buffer, uint32_t i_buflen,
 }
 
 //------------------------------------------------------------------------------
+
+bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
+                        ErrlUsrParser & i_parser )
+{
+    char data[DATA_SIZE]  = "";
+    bool o_rc = true;
+    i_parser.PrintString("TOD Error Data", "" );
+    TodErrorSummary errorData;
+    size_t szData = sizeof(TodErrorSummary);
+
+    do
+    {
+        if( NULL == i_buffer )
+        {
+            o_rc = false;
+            break;
+        }
+
+        if( i_buflen < szData )
+        {
+            o_rc = false;
+            i_parser.PrintHexDump(i_buffer, i_buflen);
+            break;
+        }
+
+        memcpy( &errorData, i_buffer, szData );
+
+        i_parser.PrintBool( "Master Path Switch by HW",
+                            errorData.hardwareSwitchFlip  );
+
+        i_parser.PrintBool( "Host Detected TOD Error",
+                            errorData.phypDetectedTodError );
+
+        i_parser.PrintBool( "Host Switched Topology",
+                            errorData.topologySwitchByPhyp );
+
+        i_parser.PrintBool( "Topology Reset Requested",
+                            errorData.topologyResetRequested );
+
+        i_parser.PrintString( "Active Topology",
+                              errorData.activeTopology ?
+                              "Primary Config" : "Secondary Config" );
+
+        i_parser.PrintNumber( "Functional TOD Osc", "0x%08x",
+                              errorData.todOscCnt );
+
+        snprintf(data,  DATA_SIZE, "0x%08x", errorData.activeMdmt );
+        i_parser.PrintString( "Active MDMT", data );
+
+        snprintf(data,  DATA_SIZE, "0x%08x", errorData.backUpMdmt );
+        i_parser.PrintString( "Backup MDMT", data );
+
+        char calloutSummary[LAST_TOD_ERROR][HEADER_SIZE] =
+                                        { "No Error",
+                                          "Master Path Error",
+                                          "Internal Path Error",
+                                          "Slave Path Network Error",
+                                          "Unknown TOD Error" };
+
+        errorData.activeTopologySummary =
+                        errorData.activeTopologySummary % LAST_TOD_ERROR;
+        errorData.backUpTopologySummary =
+                        errorData.backUpTopologySummary % LAST_TOD_ERROR;
+
+        i_parser.PrintString( "Active Topology Summary",
+                              calloutSummary[errorData.activeTopologySummary] );
+
+        i_parser.PrintString( "Active Topology M Path",
+                              errorData.activeTopologyMastPath == 0 ?
+                              "Path 0" : "Path 1" );
+
+        i_parser.PrintString( "Backup Topology Summary",
+                              calloutSummary[errorData.backUpTopologySummary] );
+
+        i_parser.PrintString( "Backup Topology M Path",
+                              errorData.backUpTopologyMastPath == 0 ?
+                              "Path 0" : "Path 1" );
+    }while(0);
+
+    return o_rc;
+}
 
 } // namespace FSP/HOSTBBOT
 } // end namespace PRDF

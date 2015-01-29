@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,7 @@ enum PositionBounds
     MAX_L4_PER_MEMBUF   = 1,
 
     MAX_PCIE_OSC_PER_NODE = 2,
+    MAX_TOD_OSC_PER_NODE  = 2,
 
     INVALID_POSITION_BOUND = 0xffffffff,
 };
