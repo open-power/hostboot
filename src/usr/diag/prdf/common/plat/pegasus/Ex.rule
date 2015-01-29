@@ -170,7 +170,10 @@ chip Ex
         scomaddr    0x10013106;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("COREFIR");
+# As a P6 workaround that was never fixed in P7 or P8, recoverable attentions
+# are reported via the WOF register. Therefore, we cannot add this line
+# otherwise we could end up not capturing the required FFDC.
+#        capture     req nonzero("COREFIR");
     };
 
     register COREFIR_ACT1
@@ -179,7 +182,10 @@ chip Ex
         scomaddr    0x10013107;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("COREFIR");
+# As a P6 workaround that was never fixed in P7 or P8, recoverable attentions
+# are reported via the WOF register. Therefore, we cannot add this line
+# otherwise we could end up not capturing the required FFDC.
+#        capture     req nonzero("COREFIR");
     };
 
     register COREFIRWOF

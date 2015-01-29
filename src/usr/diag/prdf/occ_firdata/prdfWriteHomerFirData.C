@@ -215,7 +215,6 @@ static uint32_t ex_fir[] =
     0x10010800, // L3FIR
     0x10010c00, // NCUFIR
     0x10012800, // L2FIR
-    0x10013100, // COREFIR
     0x1004000a, // EX_LFIR
 };
 
@@ -224,6 +223,14 @@ static uint32_t ex_reg[] =
     // Chiplet FIRs
     0x10040002, // EX_CHIPLET_FIR_MASK
     0x10040004, // EX_CHIPLET_SPA (for FFDC only)
+
+    // The COREFIR needs to be captured differently because recoverable errors
+    // are reported through the WOF, not the FIR.
+    0x10013100, // COREFIR
+    0x10013103, // COREFIR_MASK
+    0x10013106, // COREFIR_ACT0
+    0x10013107, // COREFIR_ACT1
+    0x10013108, // COREFIR_WOF
 
     // FIRs for FFDC only
     0x10013007, // SPATTN_0
