@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1380,6 +1380,13 @@ void DeconfigGard::_deconfigureTarget(
         HWAS_DBG(
         "Target HWAS_STATE already has functional=0; deconfiguredByEid=0x%X",
                 l_state.deconfiguredByEid);
+
+        if (i_runTimeDeconfigRule != NOT_AT_RUNTIME)
+        {
+            // if FULLY_AT_RUNTIME or DUMP_AT_RUNTIME, then the dumpfunctional
+            // state changed, so do the setAttr
+            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+        }
     }
     else
     {
@@ -1395,7 +1402,7 @@ void DeconfigGard::_deconfigureTarget(
             *o_targetDeconfigured = true;
         }
 
-        // if this is a real error, deconfigure
+        // if this is a real error, trigger a reconfigure loop
         if (i_errlEid & DECONFIGURED_BY_PLID_MASK)
         {
             // Set RECONFIGURE_LOOP attribute to indicate it was caused by
