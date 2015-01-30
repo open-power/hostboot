@@ -1,27 +1,30 @@
 config SBE_UPDATE_SEQUENTIAL
-    default y if !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_GOLDEN
-    depends on !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_GOLDEN
+    default y if !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT
+    depends on !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT
     help
-        If an update is necessary, only 1 SBE SEEPROM will be updated on each
-        IPL per processor.  If a 2nd SBE SEEPROM needs to be updated, a re-IPL
-        will be requested.
+        If an update is necessary, only 1 SBE SEEPROM per processor will be
+        updated on each IPL.  If a 2nd SBE SEEPROM needs to be updated, a re-IPL
+        will be requested.  The end result is that both SBE SEEPROMs will
+        contain the same code.
 
 config SBE_UPDATE_SIMULTANEOUS
     default n
-    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_GOLDEN
+    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_INDEPENDENT
     help
-        If an update is necessary, both SBE SEEPROMs on a target will be updated
-        at the same time before a re-IPL request is issued.
+        If an update is necessary, both SBE SEEPROMs on a processor will be
+        updated at the same time before a re-IPL request is issued.  The end
+        result is that both SBE SEEPROMs will contain the same code.
 
-config SBE_UPDATE_GOLDEN
-    default n
+config SBE_UPDATE_INDEPENDENT
+    default y if TWO_SIDE_SUPPORT
     depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS
     help
-        If an update is necessary, only 1 SBE SEEPROM will be updated and
-        then a re-IPL request will be issued.  The other SBE SEEPROM will not
-        be touched and treated as the 'Golden' SEEPROM.
+        If an update is necessary, and if the "current" SBE SEEPROM of this
+        IPL is not the 'GOLDEN' SBE SEEPROM, then only the current SBE SEEPROM
+        will be updated.  After the update a re-IPL request will be issued.
+        The other SBE SEEPROM, whether 'GOLDEN' or not, will not be updated.
 
 config NO_SBE_UPDATES
     default n
     help
-        Don't update the SBE SEEPROMs at all
+        Don't update the SBE SEEPROMs at all.

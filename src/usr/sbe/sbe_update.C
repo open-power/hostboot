@@ -354,6 +354,10 @@ namespace SBE
                     errlCommit( err, SBE_COMP_ID );
                 }
 
+#ifdef CONFIG_BMC_IPMI
+                // @todo RTC 120734 reset system's reboot count via IPMI sensor
+#endif
+
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Calling "
                            "INITSERVICE::doShutdown() with "
@@ -680,6 +684,9 @@ namespace SBE
                             i_maxImgSize, io_imgPtr);
 
         do{
+
+            // @todo RTC 120734 - before customizing, ensure correct HBB address
+            // is set in the necessary attribute
 
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target
@@ -1935,7 +1942,6 @@ namespace SBE
             }
 
 
-
             /**************************************************************/
             /*  Compare SEEPROM 1 with PNOR and Customized Image CRC --   */
             /*  -- dirty or clean?                                        */
@@ -2139,25 +2145,91 @@ namespace SBE
         io_sbeState.update_actions   = CLEAR_ACTIONS;
         io_sbeState.seeprom_side_to_update = EEPROM::LAST_CHIP_TYPE;
 
-        // @todo RTC 107721 - Need to handle Habanero 'golden' SEEPROM side
-
         do{
 
             // To be safe, we're only look at the bits defined in sbe_update.H
             i_system_situation &= SITUATION_ALL_BITS_MASK;
 
-#ifdef CONFIG_SBE_UPDATE_GOLDEN
-            // @todo RTC 107721 - Need to handle Habanero 'golden' SEEPROM side
-            // For now default to no update and continue IPL
-                    l_actions = CLEAR_ACTIONS;
+#ifdef CONFIG_SBE_UPDATE_INDEPENDENT
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "Habanero 'GOLDEN' Seeprom Support to come. "
-                               "For now no updates. cur side=%d. "
-                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions);
+            // The 2 SBE SEEPROMs are independent of each other
+            // Determine if PNOR is 1- or 2-sided and if there is a
+            // GOLDEN boot involved
+
+#ifdef CONFIG_TWO_SIDE_SUPPORT
+
+            // @todo RTC 120734 - ask PNOR if we are in "GOLDEN" mode,
+            // which would mean that we are booting off the the GOLDEN
+            // SBE SEEPROM which corresponds to the GOLDEN side of PNOR
+/*
+            if (true)
+            {
+                // If true, nothing to do (covered in istep 6 function)
+                l_actions = CLEAR_ACTIONS;
+
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                           "Booting GOLDEN SBE SEEPROM in PNOR 2-sided Mode. "
+                           "No updates for cur side=%d. Continue IPL. "
+                           "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.cur_seeprom_side,
+                           i_system_situation, l_actions,
+                           io_sbeState.mvpdSbKeyword.flags);
+                break;
+            }
+            else // proceed to update this side
+            {
+                TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                           "NOT Booting GOLDEN SBE SEEPROM in PNOR 2-sided "
+                           "mode. Checking for update on cur side=%d ",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.cur_seeprom_side)
+            }
+*/
+#else
+
+            // @todo RTC 120734 - check this assumption
+            // Assume that we're only checking/updating the current side
+            TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                       "PNOR 1-sided so only check for update on cur side=%d",
+                       TARGETING::get_huid(io_sbeState.target),
+                       io_sbeState.cur_seeprom_side);
+#endif
+
+            // Check for clean vs. dirty only on cur side
+            if ( i_system_situation & SITUATION_CUR_IS_DIRTY )
+            {
+                //  Update cur side and re-ipl
+                l_actions |= IPL_RESTART;
+                l_actions |= DO_UPDATE;
+                l_actions |= UPDATE_SBE;
+
+                // Set Update side to cur
+                io_sbeState.seeprom_side_to_update =
+                                ( io_sbeState.cur_seeprom_side ==
+                                              PNOR::SBE_SEEPROM0 )
+                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP;
+
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                           "cur side (%d) dirty. Update cur. Re-IPL. "
+                           "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.cur_seeprom_side,
+                           i_system_situation, l_actions,
+                           io_sbeState.mvpdSbKeyword.flags);
+            }
+            else
+            {
+                // Cur side clean - No Updates - Continue IPL
+                l_actions = CLEAR_ACTIONS;
+
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                           "cur side (%d) clean-no updates. "
+                           "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.cur_seeprom_side,
+                           i_system_situation, l_actions);
+            }
 
 #elif CONFIG_SBE_UPDATE_SIMULTANEOUS
             // Updates both SEEPROMs if either side is dirty
@@ -2252,7 +2324,8 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side ==
+                                              PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                     // Update MVPD PERMANENT flag: make cur=perm
@@ -2298,7 +2371,8 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side ==
+                                              PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
 
@@ -2358,7 +2432,8 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side ==
+                                              PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                     // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
@@ -2455,7 +2530,8 @@ namespace SBE
 
                         // Set Update side to alt
                         io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side ==
+                                              PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                         // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
@@ -2491,7 +2567,8 @@ namespace SBE
 
                     // Set Update side to alt
                     io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side == PNOR::SBE_SEEPROM0 )
+                                ( io_sbeState.alt_seeprom_side ==
+                                              PNOR::SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
@@ -3201,7 +3278,8 @@ namespace SBE
 
                     // Compare against 'current' Master side in case there is
                     // an issue with the other side
-                    if (io_sbeStates_v[i].cur_seeprom_side == PNOR::SBE_SEEPROM0)
+                    if (io_sbeStates_v[i].cur_seeprom_side ==
+                                          PNOR::SBE_SEEPROM0)
                     {
                         ver_ptr =
                             &(io_sbeStates_v[i].seeprom_0_ver.image_version);
@@ -3245,6 +3323,9 @@ namespace SBE
                 // Special Master Processor checks
                 if ( i == mP )
                 {
+// Skip Master Processor check of Both SEEPROMs being identical
+#ifndef CONFIG_SBE_UPDATE_INDEPENDENT
+
                     // Compare Versions of Both SEEPROMs to PNOR Version
                     // Create a Predictive Error if there's an issue
                     if ((0 != memcmp(
@@ -3339,14 +3420,15 @@ namespace SBE
                         errlCommit( err, SBE_COMP_ID );
 
                     } // end of check
-
+#endif
                     // Continue to avoid remaining non-Master Processor checks
                     continue;
                 }
                 else
                 {
                     // Not Master, so get 'current' version
-                    if (io_sbeStates_v[i].cur_seeprom_side == PNOR::SBE_SEEPROM0)
+                    if (io_sbeStates_v[i].cur_seeprom_side ==
+                                          PNOR::SBE_SEEPROM0)
                     {
                         ver_ptr =
                             &(io_sbeStates_v[i].seeprom_0_ver.image_version);
