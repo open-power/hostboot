@@ -50,6 +50,7 @@ VALID_TARGETS = fsp tools openpower
 COPY_FILES = \
     src/build/debug/hb-dump-debug:tools,vpo,openpower \
     src/build/debug/vpo-debug-framework.pl:vpo \
+    src/build/debug/ecmd-debug-framework.pl:openpower \
     src/build/debug/fsp-memdump.sh:tools,vpo \
     src/build/vpo/hb-dump:vpo \
     src/build/vpo/hb-istep:vpo \
@@ -57,9 +58,9 @@ COPY_FILES = \
     src/build/vpo/VBU_Cacheline.pm:vpo \
     src/build/simics/hb-pnor-vpd-preload.pl:vpo \
     src/build/buildpnor/pnorLayoutVpo.xml:vpo \
-    img/errlparser:tools,vpo \
+    img/errlparser:tools,vpo,openpower \
     img/hbotStringFile:tools,vpo,openpower \
-    img/isteplist.csv:tools,vpo \
+    img/isteplist.csv:tools,vpo,openpower \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
     img/cvpd.dat:vpo \
@@ -99,10 +100,10 @@ COPY_RENAME_FILES = \
     vbu_NAPLES.pnor:img/vbu$(UNDERSCORE_TEST)_NAPLES.pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
     hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
-    hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
+    hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
     hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
     hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
-    hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
+    hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
 	Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower)
 
