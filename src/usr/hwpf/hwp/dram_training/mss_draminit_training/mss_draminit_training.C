@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.91 2014/09/24 22:18:24 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.94 2015/01/27 23:23:40 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -30,6 +30,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.94   | jdsloat  |27-JAN-14| Addressed FW concerns from gerrit.
+//  1.93   | jdsloat  |22-JAN-14| Moved the initialization of rank_invalid within BYTE DISABLE WORKAROUND
+//  1.92   | jdsloat  |20-JAN-14| Added new workaround for BYTE DISABLE and for WR LVL DISABLE.  This affects  RAS/BBM work.  
 //  1.91   | jdsloat  |24-SEP-14| Disabling spare CKE bit modify for SW275629.  This bit will be modified via initfile. 
 //  1.90   | jdsloat  |29-JUL-14| disable for delay reset call moved to system level
 //  1.89   | jdsloat  |29-JUL-14| Added a disable for delay reset call 
@@ -96,6 +99,7 @@
 //  1.42   | bellows  |06-DEC-12| Fixed up review comments
 //  1.41   | jdsloat  |02-DEC-12| Fixed RTT_NOM swap for Port 1
 //  1.40   | jdsloat  |30-NOV-12| Temporarily comment Bad Bit Mask.
+
 //  1.39   | jdsloat  |18-NOV-12| Fixed CAL_STEP to allow Zq Cal.
 //  1.38   | jdsloat  |16-NOV-12| Fixed Error Place holder and port addressing with BBM
 //  1.37   | jdsloat  |12-NOV-12| Fixed a bracket typo.
@@ -176,8 +180,6 @@
 #ifdef FAPI_LRDIMM
 #include <mss_lrdimm_ddr4_funcs.H>
 #endif
-
-#include <config.h>
 
 #ifndef FAPI_LRDIMM
 using namespace fapi;
@@ -260,12 +262,14 @@ ReturnCode mss_check_error_status(Target& i_target, uint8_t i_mbaPosition, uint8
 ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint8_t i_mbaPosition, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt, uint8_t& io_dram_rtt_nom_original);
 ReturnCode mss_read_center_workaround(Target& i_target, uint8_t i_mbaPosition, uint32_t i_port, uint32_t i_rank_group);
 ReturnCode mss_read_center_second_workaround(Target& i_target);
+ReturnCode mss_disable_workaround( Target& i_target);
+ReturnCode mss_wr_lvl_disable_workaround( Target& i_target);
 ReturnCode mss_reset_delay_values(Target& i_target);
 
 ReturnCode getC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg, uint8_t &is_clean);
 ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, const ecmdDataBufferBase &i_reg);
 ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target);
-ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target);
+ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target, uint8_t i_training_success);
 ReturnCode mss_get_dqs_lane (const fapi::Target & i_mba, const uint8_t i_port, const uint8_t i_block, const uint8_t i_quad, uint8_t &lane);
 
 
@@ -274,7 +278,6 @@ ReturnCode mss_draminit_training(Target& i_target)
     // Target is centaur.mba
 
     fapi::ReturnCode l_rc;
-
     uint8_t reset_disable;
     l_rc = FAPI_ATTR_GET(ATTR_MSS_DRAMINIT_RESET_DISABLE, NULL, reset_disable);
     if(l_rc) return l_rc;
@@ -391,6 +394,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 
     uint8_t l_nwell_misplacement = 0;
     uint8_t dram_rtt_nom_original = 0;
+    uint8_t training_success = 0; 
 
     fapi::Target l_target_centaur;
     rc = fapiGetParentChip(i_target, l_target_centaur);
@@ -447,12 +451,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     /*
     Disabling spare CKE bit modify for SW275629.  This bit will be modified via initfile. 
 
+
     //Setup SPARE CKE enable bit
     rc = fapiGetScom(i_target, MBA01_MBARPC0Q_0x03010434, data_buffer_64);
     if(rc) return rc;
     rc_num = rc_num | data_buffer_64.setBit(42);
     rc = fapiPutScom(i_target, MBA01_MBARPC0Q_0x03010434, data_buffer_64);
     if(rc) return rc;
+
     */
 
     //Set up CCS Mode Reg for Init cal
@@ -481,6 +487,8 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     }
 
 
+
+
     if ( ( cal_steps_8.isBitSet(0) ) ||
 	 ( (cal_steps_8.isBitClear(0)) && (cal_steps_8.isBitClear(1)) &&
 	   (cal_steps_8.isBitClear(2)) && (cal_steps_8.isBitClear(3)) &&
@@ -495,7 +503,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
 
-#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
             // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
 	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
                  (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
@@ -505,8 +512,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		 rc = mss_mxd_training(i_target,port,0);
 		 if(rc) return rc;
             }
-#endif
-        }
+	}
 
         if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) && 
 				(dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
@@ -736,7 +742,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			       if(rc) return rc;
                             }
 			}
-#ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
                         // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
                         else if ( (group == 0) && (cur_cal_step == 1)
                                   && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
@@ -745,7 +750,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
                            rc = mss_dram_write_leveling(i_target, port);
                            if(rc) return rc;
                         }
-#endif
+
 		        //Set the config register
 			if(port == 0)
 			{
@@ -840,8 +845,9 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			    ( waterfall_broken == fapi::ENUM_ATTR_MSS_BLUEWATERFALL_BROKEN_TRUE  ) )
 			{
 				rc = mss_read_center_workaround(i_target, mbaPosition, port, group);
-      		    if(rc) return rc;
+      		                if(rc) return rc;
 			}
+
 		    }
 		}//end of step loop
 	    }
@@ -855,21 +861,33 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		if(rc) return rc;
     }
 
+    if ((error_status != MSS_INIT_CAL_FAIL) && (error_status != MSS_INIT_CAL_STALL))
+    {
+	training_success = 0xFF; 
+    }
 
-    rc = mss_get_bbm_regs(i_target);
+    rc = mss_get_bbm_regs(i_target, training_success);
     if(rc)
     {
 	FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
 	return rc;
     }
-    //Move the VPD(flash) info back to the disable regs
-    //In order to have the rank masks match with corresponding ranks.
-    rc = mss_set_bbm_regs(i_target);
-    if(rc)
+
+    //Executes if we do "all at once" or on the last cal steps
+    //Must be a successful run.
+    if (error_status == MSS_INIT_CAL_PASS && 
+	((cal_steps_8.isBitSet(6) && cal_steps_8.isBitSet(7)) ||
+	 (cal_steps_8.isBitClear(0) && cal_steps_8.isBitClear(1) &&
+	  cal_steps_8.isBitClear(2) && cal_steps_8.isBitClear(3) &&
+	  cal_steps_8.isBitClear(4) && cal_steps_8.isBitClear(5) &&
+	  cal_steps_8.isBitClear(6) && cal_steps_8.isBitClear(7) ) ) )
     {
-	FAPI_ERR( "Error Moving bad bit information to the Phy regs. Exiting.");
-	return rc;
+
+	FAPI_INF( "WR LVL DISABLE WORKAROUND: Running wr_lvl workaround on %s", i_target.toEcmdString());
+    	rc = mss_wr_lvl_disable_workaround(i_target);
+      	if(rc) return rc;
     }
+
 
     // If we hit either of these States, the error callout originates from Mike Jones Bad Bit code. 
     if (complete_status == MSS_INIT_CAL_STALL)
@@ -988,6 +1006,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_WR_LVL_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(50))
         {
@@ -998,6 +1017,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(51))
         {
@@ -1008,6 +1028,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(52))
         {
@@ -1018,6 +1039,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_RD_CENTERING_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(53))
         {
@@ -1028,6 +1050,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_WR_CENTERING_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(55))
         {
@@ -1038,6 +1061,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_COURSE_RD_CENTERING_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(56))
         {
@@ -1048,6 +1072,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_CENTERING_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(57))
         {
@@ -1058,6 +1083,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_WR_CENTERING_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
         if(cal_error_buffer_64.isBitSet(58))
         {
@@ -1068,6 +1094,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 	    RANKGROUP_POSITION = i_group;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_DIGITAL_EYE_ERROR);
 	    fapiLogError(rc, FAPI_ERRL_SEV_RECOVERED);
+	    rc = FAPI_RC_SUCCESS;
         }
     }
     else
@@ -2491,6 +2518,2262 @@ ReturnCode mss_read_center_second_workaround(
     return rc;
 }
 
+
+ReturnCode mss_disable_workaround(
+            Target& i_target
+            )
+{
+    //MBA target level
+    //DQS_CLK for each nibble of a byte is being adjusted to the lowest value for the given byte
+    //Across all byte lanes
+
+    uint8_t primary_ranks_array[4][2]; //primary_ranks_array[group][port]
+    ecmdDataBufferBase data_buffer_64(64);
+    uint64_t DQSCLK_RD_PHASE_ADDR_0 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_1 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_2 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_3 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_4 = 0;
+    uint64_t DISABLE_ADDR_0 = 0;
+    uint64_t DISABLE_ADDR_1 = 0;
+    uint64_t DISABLE_ADDR_2 = 0;
+    uint64_t DISABLE_ADDR_3 = 0;
+    uint64_t DISABLE_ADDR_4 = 0;
+    uint64_t GATE_DELAY_ADDR_0 = 0;
+    uint64_t GATE_DELAY_ADDR_1 = 0;
+    uint64_t GATE_DELAY_ADDR_2 = 0;
+    uint64_t GATE_DELAY_ADDR_3 = 0;
+    uint64_t GATE_DELAY_ADDR_4 = 0;
+    uint8_t port = 0;
+    uint8_t rank_group = 0;
+    uint8_t l_value_n0_u8 = 0;
+    uint8_t l_value_n1_u8 = 0;
+    //uint8_t l_lowest_value_u8 = 0;
+    ReturnCode rc;
+    uint32_t rc_num = 0;
+
+    uint32_t block;
+    uint32_t maxblocks = 5;
+    uint32_t byte;
+    uint32_t maxbytes = 2;
+    uint32_t nibble;
+    uint32_t maxnibbles = 2;
+    uint8_t l_min_gate_delay = 255; 
+    uint8_t l_min_dqs_clk = 255; 
+
+    uint8_t l_lowest_value_u8[4][5][2][2]; // l_lowest_value_u8[group][block][byte_of_reg][nibble_of_byte]
+    uint8_t l_gate_delay_value_u8[4][5][2][2]; // l_lowest_value_u8[group][block][byte_of_reg][nibble_of_byte]
+    uint8_t l_disable_value_u8[4][5][2][2];
+
+
+    //populate primary_ranks_arrays_array
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, primary_ranks_array[0]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &i_target, primary_ranks_array[1]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP2, &i_target, primary_ranks_array[2]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, primary_ranks_array[3]);
+    if(rc) return rc;
+
+
+    for(port = 0; port < MAX_PORTS; port++)
+    {
+
+
+	//FAPI_INF( "DQS_CLK Byte matching Workaround being applied on  %s  PORT: %d RP: %d", i_target.toEcmdString(), port, rank_group);
+
+	//Gather all the byte information
+        for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{
+
+	     //Initialize values
+	     for(block = 0; block < maxblocks; block++)
+	     {
+		for (byte = 0; byte < maxbytes; byte++)
+		{
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+				l_lowest_value_u8[rank_group][block][byte][nibble] = 255;
+				l_gate_delay_value_u8[rank_group][block][byte][nibble] = 255;
+				l_disable_value_u8[rank_group][block][byte][nibble] = 0;
+			}
+		}
+	     }
+
+	    //Check if rank group exists
+	    if(primary_ranks_array[rank_group][port] != 255)
+	    {
+	        FAPI_INF( "DISABLE Workaround being applied on  %s  PORT: %d RP: %d", i_target.toEcmdString(), port, rank_group);
+    		if ( port == 0 )
+    		{
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_0_0x800000130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_1_0x800004130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_2_0x800008130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_3_0x80000C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_4_0x800010130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_0x8000007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1_0x8000047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2_0x8000087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3_0x80000c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4_0x8000107c0301143F;
+
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_0_0x800001130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_1_0x800005130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_2_0x800009130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_3_0x80000D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_4_0x800011130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0_0x8000017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1_0x8000057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2_0x8000097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3_0x80000d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4_0x8000117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_0_0x800002130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_1_0x800006130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_2_0x80000A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_3_0x80000E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_4_0x800012130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0_0x8000027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1_0x8000067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2_0x80000a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3_0x80000e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4_0x8000127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_0_0x800003130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_1_0x800007130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_2_0x80000B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_3_0x80000F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_4_0x800013130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0_0x8000037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1_0x8000077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2_0x80000b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3_0x80000f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4_0x8000137c0301143F;
+
+			}
+		    }
+		    else if (port == 1 )
+		    {
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_0_0x800100130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_1_0x800104130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_2_0x800108130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_3_0x80010C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_4_0x800110130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0_0x8001007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1_0x8001047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2_0x8001087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3_0x80010c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4_0x8001107c0301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_0_0x800101130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_1_0x800105130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_2_0x800109130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_3_0x80010D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_4_0x800111130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0_0x8001017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1_0x8001057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2_0x8001097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3_0x80010d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4_0x8001117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_0_0x800102130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_1_0x800106130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_2_0x80010A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_3_0x80010E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_4_0x800112130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0_0x8001027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1_0x8001067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2_0x80010a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3_0x80010e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4_0x8001127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_0_0x800103130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_1_0x800107130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_2_0x80010B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_3_0x80010F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_4_0x800113130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0_0x8001037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1_0x8001077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2_0x80010b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3_0x80010f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4_0x8001137c0301143F;
+
+			}
+		    }
+
+
+		    // PHY BLOCK 0
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_lowest_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_lowest_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 1
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_lowest_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_lowest_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 2
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_lowest_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_lowest_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 3
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_lowest_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_lowest_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 4
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_lowest_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_lowest_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    if(rc_num)
+		    {
+			rc.setEcmdError(rc_num);
+			return rc;
+		    }
+
+		}
+	}
+
+
+
+
+	//Finding the lowest Values on disabled bytes, then resetting mask.
+	for(block = 0; block < maxblocks; block++)
+	{
+		for (byte = 0; byte < maxbytes; byte++)
+		{
+
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+				if ( (l_disable_value_u8[0][block][byte][nibble] != 0) || (l_disable_value_u8[1][block][byte][nibble] != 0) 
+				  || (l_disable_value_u8[2][block][byte][nibble] != 0) || (l_disable_value_u8[3][block][byte][nibble] != 0) )
+				{
+
+					FAPI_INF( "Located disabled block %d byte %d nibble %d", block, byte, nibble);
+
+					l_min_gate_delay = 255; 
+					for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+					{						
+						if ( (l_gate_delay_value_u8[rank_group][block][byte][nibble] < l_min_gate_delay) 
+						  && (l_disable_value_u8[rank_group][block][byte][nibble] == 0) )
+						{
+							l_min_gate_delay = l_gate_delay_value_u8[rank_group][block][byte][nibble];
+						}
+					}
+
+					FAPI_INF( "Lowest gate_delay %d", l_min_gate_delay);
+
+					l_min_dqs_clk = 255; 
+					for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+					{						
+						if ( (l_lowest_value_u8[rank_group][block][byte][nibble] < l_min_dqs_clk) 
+						  && (l_disable_value_u8[rank_group][block][byte][nibble] == 0) )
+						{
+							l_min_dqs_clk = l_lowest_value_u8[rank_group][block][byte][nibble];
+						}
+					}
+
+
+					FAPI_INF( "Lowest rdclk phase %d", l_min_dqs_clk);
+					
+					for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+					{						
+						if (l_disable_value_u8[rank_group][block][byte][nibble] != 0)
+						{
+							l_gate_delay_value_u8[rank_group][block][byte][nibble] = l_min_gate_delay;
+							l_lowest_value_u8[rank_group][block][byte][nibble] = l_min_dqs_clk;
+							//l_disable_value_u8[rank_group][block][byte][nibble] = 0; 
+						}
+					}
+					
+				}
+			}
+		}
+
+	}
+
+
+	//Scoming in the New Values
+        for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{
+
+	    //Check if rank group exists
+	    if(primary_ranks_array[rank_group][port] != 255)
+	    {
+
+    		if ( port == 0 )
+    		{
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_0_0x800000130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_1_0x800004130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_2_0x800008130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_3_0x80000C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_4_0x800010130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_0x8000007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1_0x8000047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2_0x8000087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3_0x80000c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4_0x8000107c0301143F;
+
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_0_0x800001130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_1_0x800005130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_2_0x800009130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_3_0x80000D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_4_0x800011130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0_0x8000017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1_0x8000057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2_0x8000097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3_0x80000d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4_0x8000117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_0_0x800002130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_1_0x800006130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_2_0x80000A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_3_0x80000E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_4_0x800012130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0_0x8000027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1_0x8000067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2_0x80000a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3_0x80000e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4_0x8000127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_0_0x800003130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_1_0x800007130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_2_0x80000B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_3_0x80000F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_4_0x800013130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0_0x8000037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1_0x8000077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2_0x80000b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3_0x80000f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4_0x8000137c0301143F;
+
+			}
+		    }
+		    else if (port == 1 )
+		    {
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_0_0x800100130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_1_0x800104130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_2_0x800108130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_3_0x80010C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_4_0x800110130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0_0x8001007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1_0x8001047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2_0x8001087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3_0x80010c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4_0x8001107c0301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_0_0x800101130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_1_0x800105130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_2_0x800109130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_3_0x80010D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_4_0x800111130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0_0x8001017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1_0x8001057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2_0x8001097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3_0x80010d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4_0x8001117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_0_0x800102130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_1_0x800106130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_2_0x80010A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_3_0x80010E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_4_0x800112130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0_0x8001027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1_0x8001067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2_0x80010a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3_0x80010e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4_0x8001127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_0_0x800103130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_1_0x800107130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_2_0x80010B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_3_0x80010F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_4_0x800113130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0_0x8001037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1_0x8001077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2_0x80010b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3_0x80010f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4_0x8001137c0301143F;
+
+			}
+		    }
+
+		    //BLOCK 0
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+
+		    //BLOCK 1
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+
+		    //BLOCK 2
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+
+		    //BLOCK 3
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+
+		    //Block 4
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+
+		    if(rc_num)
+		    {
+			rc.setEcmdError(rc_num);
+			return rc;
+		    }
+
+
+		}
+	}
+    }
+
+    return rc;
+}
+
+ReturnCode mss_wr_lvl_disable_workaround(
+            Target& i_target
+            )
+{
+    //MBA target level
+    //DQS_CLK for each nibble of a byte is being adjusted to the lowest value for the given byte
+    //Across all byte lanes
+
+    uint8_t primary_ranks_array[4][2]; //primary_ranks_array[group][port]
+    ecmdDataBufferBase data_buffer_64(64);
+    uint64_t DISABLE_ADDR_0 = 0;
+    uint64_t DISABLE_ADDR_1 = 0;
+    uint64_t DISABLE_ADDR_2 = 0;
+    uint64_t DISABLE_ADDR_3 = 0;
+    uint64_t DISABLE_ADDR_4 = 0;
+
+    uint64_t DQSCLK_RD_PHASE_ADDR_0 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_1 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_2 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_3 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_4 = 0;
+    uint64_t GATE_DELAY_ADDR_0 = 0;
+    uint64_t GATE_DELAY_ADDR_1 = 0;
+    uint64_t GATE_DELAY_ADDR_2 = 0;
+    uint64_t GATE_DELAY_ADDR_3 = 0;
+    uint64_t  GATE_DELAY_ADDR_4 = 0;
+    uint8_t port = 0;
+    uint8_t rank_group = 0;
+    uint8_t l_value_n0_u8 = 0;
+    uint8_t l_value_n1_u8 = 0;
+
+    ReturnCode rc;
+    uint32_t rc_num = 0;
+
+    uint8_t block;
+    uint32_t maxblocks = 5;
+    uint32_t byte;
+    uint32_t maxbytes = 2;
+    uint32_t nibble;
+    uint32_t maxnibbles = 2;
+
+
+    uint8_t l_dqsclk_phase_value_u8[4][5][2][2]; // l_lowest_value_u8[group][block][byte_of_reg][nibble_of_byte]
+    uint8_t l_disable_value_u8[4][5][2][2];
+    uint8_t l_disable_old_value_u8[4][5][2][2];
+    uint8_t l_gate_delay_value_u8[4][5][2][2];
+    uint8_t l_rdclk_phase_value_u8[4][5][2][2];
+
+
+
+    //populate primary_ranks_arrays_array
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, primary_ranks_array[0]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &i_target, primary_ranks_array[1]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP2, &i_target, primary_ranks_array[2]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, primary_ranks_array[3]);
+    if(rc) return rc;
+
+    FAPI_DBG("WR LVL DISABLE WORKAROUND: Entered WR_LVL workaround");
+
+    for(port = 0; port < MAX_PORTS; port++)
+    {
+	//Gather all the byte information
+        for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{
+
+	     //Initialize values
+	     for(block = 0; block < maxblocks; block++)
+	     {
+		for (byte = 0; byte < maxbytes; byte++)
+		{
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+				l_dqsclk_phase_value_u8[rank_group][block][byte][nibble] = 255;
+				l_gate_delay_value_u8[rank_group][block][byte][nibble] = 255;
+				l_rdclk_phase_value_u8[rank_group][block][byte][nibble] = 255;
+				l_disable_value_u8[rank_group][block][byte][nibble] = 0;
+				l_disable_old_value_u8[rank_group][block][byte][nibble] = 0;
+
+			}
+		}
+	     }
+
+	    //Check if rank group exists
+	    if(primary_ranks_array[rank_group][port] != 255)
+	    {
+	        FAPI_DBG("WR LVL DISABLE WORKAROUND: DISABLE Workaround being applied on  %s  PORT: %d RP: %d", i_target.toEcmdString(), port, rank_group);
+ 
+    		if ( port == 0 )
+    		{
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_0_0x800000130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_1_0x800004130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_2_0x800008130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_3_0x80000C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_4_0x800010130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_0x8000007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1_0x8000047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2_0x8000087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3_0x80000c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4_0x8000107c0301143F;
+
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_0_0x800001130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_1_0x800005130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_2_0x800009130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_3_0x80000D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_4_0x800011130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0_0x8000017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1_0x8000057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2_0x8000097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3_0x80000d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4_0x8000117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_0_0x800002130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_1_0x800006130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_2_0x80000A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_3_0x80000E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_4_0x800012130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0_0x8000027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1_0x8000067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2_0x80000a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3_0x80000e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4_0x8000127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_0_0x800003130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_1_0x800007130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_2_0x80000B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_3_0x80000F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_4_0x800013130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0_0x8000037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1_0x8000077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2_0x80000b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3_0x80000f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4_0x8000137c0301143F;
+
+			}
+		    }
+		    else if (port == 1 )
+		    {
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_0_0x800100130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_1_0x800104130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_2_0x800108130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_3_0x80010C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_4_0x800110130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0_0x8001007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1_0x8001047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2_0x8001087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3_0x80010c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4_0x8001107c0301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_0_0x800101130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_1_0x800105130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_2_0x800109130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_3_0x80010D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_4_0x800111130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0_0x8001017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1_0x8001057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2_0x8001097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3_0x80010d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4_0x8001117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_0_0x800102130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_1_0x800106130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_2_0x80010A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_3_0x80010E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_4_0x800112130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0_0x8001027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1_0x8001067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2_0x80010a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3_0x80010e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4_0x8001127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_0_0x800103130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_1_0x800107130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_2_0x80010B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_3_0x80010F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_4_0x800113130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0_0x8001037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1_0x8001077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2_0x80010b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3_0x80010f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4_0x8001137c0301143F;
+
+			}
+		    }
+
+
+		    // PHY BLOCK 0
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_dqsclk_phase_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_dqsclk_phase_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_rdclk_phase_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_rdclk_phase_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+
+		    // PHY BLOCK 1
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_dqsclk_phase_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_dqsclk_phase_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_rdclk_phase_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_rdclk_phase_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 2
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_dqsclk_phase_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_dqsclk_phase_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_rdclk_phase_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_rdclk_phase_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 3
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_dqsclk_phase_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_dqsclk_phase_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_rdclk_phase_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_rdclk_phase_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 4
+
+		    rc = fapiGetScom(i_target, DISABLE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 4);
+		    l_disable_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 4);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 4);
+		    l_disable_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_disable_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+		    l_disable_old_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_disable_old_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_dqsclk_phase_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_dqsclk_phase_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_dqsclk_phase_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 50, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 54, 2);
+		    l_rdclk_phase_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 58, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 62, 2);
+		    l_rdclk_phase_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_rdclk_phase_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    if(rc_num)
+		    {
+			rc.setEcmdError(rc_num);
+			return rc;
+		    }
+
+		}
+	}
+
+	uint8_t ranks_array[4][4][2]; //[group][rank_group position][port]
+        // Determine rank and rank group matching
+        rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, ranks_array[0][0]); if(rc) return rc;
+      	rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &i_target, ranks_array[1][0]); if(rc) return rc;
+      	rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP2, &i_target, ranks_array[2][0]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, ranks_array[3][0]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP0, &i_target, ranks_array[0][1]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP1, &i_target, ranks_array[1][1]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP2, &i_target, ranks_array[2][1]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP3, &i_target, ranks_array[3][1]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP0, &i_target, ranks_array[0][2]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP1, &i_target, ranks_array[1][2]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP2, &i_target, ranks_array[2][2]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP3, &i_target, ranks_array[3][2]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP0, &i_target, ranks_array[0][3]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP1, &i_target, ranks_array[1][3]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP2, &i_target, ranks_array[2][3]); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP3, &i_target, ranks_array[3][3]); if(rc) return rc;
+
+
+        access_type_t l_access_type_e = READ;
+	//READ
+	//WRITE
+        input_type_t l_input_type_e = WR_DQS;
+        //WR_DQ_t,
+        //RAW_WR_DQ,
+        //WR_DQS_t,
+        //RAW_WR_DQS,
+	uint8_t l_flag = 0;
+	uint8_t l_verbose = 0;
+	uint8_t l_rank_u8;
+	uint32_t l_old_delay_value_u32 = 0;
+	uint32_t l_old_DQS_delay_value_u32 = 0;
+	uint32_t l_delay_value_u32 = 0;
+	uint32_t l_DQS_delay_value_u32 = 0;
+	uint8_t l_index_u8 = 0;
+	uint8_t mask;
+	uint8_t nibble_dq;
+        uint8_t lane;
+	uint8_t rg;
+        uint8_t rank_2;
+	uint8_t width;
+	uint8_t dqs_index;
+
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, width);
+
+	    uint32_t instruction_number = 0;
+	    ecmdDataBufferBase address_buffer_16(16);
+	    rc_num = rc_num | address_buffer_16.flushTo0();
+	    ecmdDataBufferBase bank_buffer_8(8);
+	    rc_num = rc_num | bank_buffer_8.flushTo0();
+	    ecmdDataBufferBase activate_buffer_1(1);
+	    rc_num = rc_num | activate_buffer_1.flushTo0();
+	    ecmdDataBufferBase rasn_buffer_1(1);
+	    ecmdDataBufferBase casn_buffer_1(1);
+	    ecmdDataBufferBase wen_buffer_1(1);
+	    ecmdDataBufferBase cke_buffer_8(8);
+	    rc_num = rc_num | cke_buffer_8.flushTo1();
+	    ecmdDataBufferBase csn_buffer_8(8);
+	    rc_num = rc_num | csn_buffer_8.flushTo1();
+	    ecmdDataBufferBase odt_buffer_8(8);
+	    rc_num = rc_num | odt_buffer_8.flushTo0();
+	    ecmdDataBufferBase test_buffer_4(4);
+	    rc_num = rc_num | test_buffer_4.setBit(0,4);
+
+	    ecmdDataBufferBase num_idles_buffer_16(16);
+	    rc_num = rc_num | num_idles_buffer_16.flushTo1();
+	    ecmdDataBufferBase num_repeat_buffer_16(16);
+	    rc_num = rc_num | num_repeat_buffer_16.flushTo0();
+	    ecmdDataBufferBase data_buffer_20(20);
+	    rc_num = rc_num | data_buffer_20.flushTo0();
+	    ecmdDataBufferBase read_compare_buffer_1(1);
+	    rc_num = rc_num | read_compare_buffer_1.flushTo0();
+	    ecmdDataBufferBase rank_cal_buffer_4(4);
+	    rc_num = rc_num | rank_cal_buffer_4.flushTo0();
+	    ecmdDataBufferBase ddr_cal_enable_buffer_1(1);
+	    rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo1();
+	    ecmdDataBufferBase ccs_end_buffer_1(1);
+	    rc_num = rc_num | ccs_end_buffer_1.flushTo1();
+	    uint8_t group = 255; 
+	    const uint32_t NUM_POLL = 10000;
+
+
+	    uint8_t cur_cal_step = 2;
+	    enum mss_draminit_training_result cur_error_status = MSS_INIT_CAL_PASS;
+	    uint8_t mbaPosition;
+	    // Get MBA position: 0 = mba01, 1 = mba23
+	    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, mbaPosition);
+	    if(rc)
+	    {
+		FAPI_ERR("Error getting MBA position");
+		return rc;
+	    }
+
+
+
+	//Resetting Disable mask.  Avoid spares.
+	for(block = 0; block < maxblocks; block++)
+	{
+		for (byte = 0; byte < 2; byte++)
+		{
+
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+
+				for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+				{	
+				
+				    //Check if rank group exists
+				    if(primary_ranks_array[rank_group][port] != 255)
+				    {
+
+			 
+			    		if ( port == 0 )
+			    		{
+
+						if ( rank_group == 0 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_0x8000007c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1_0x8000047c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2_0x8000087c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3_0x80000c7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4_0x8000107c0301143F;
+
+						}
+						else if ( rank_group == 1 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0_0x8000017c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1_0x8000057c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2_0x8000097c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3_0x80000d7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4_0x8000117c0301143F;
+
+						}
+						else if ( rank_group == 2 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0_0x8000027c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1_0x8000067c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2_0x80000a7c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3_0x80000e7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4_0x8000127c0301143F;
+
+						}
+						else if ( rank_group == 3 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0_0x8000037c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1_0x8000077c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2_0x80000b7c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3_0x80000f7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4_0x8000137c0301143F;
+
+						}
+					    }
+					    else if (port == 1 )
+					    {
+
+						if ( rank_group == 0 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0_0x8001007c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1_0x8001047c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2_0x8001087c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3_0x80010c7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4_0x8001107c0301143F;
+
+						}
+						else if ( rank_group == 1 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0_0x8001017c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1_0x8001057c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2_0x8001097c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3_0x80010d7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4_0x8001117c0301143F;
+
+
+						}
+						else if ( rank_group == 2 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0_0x8001027c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1_0x8001067c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2_0x80010a7c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3_0x80010e7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4_0x8001127c0301143F;
+
+
+						}
+						else if ( rank_group == 3 )
+						{
+
+						    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0_0x8001037c0301143F;
+						    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1_0x8001077c0301143F;
+						    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2_0x80010b7c0301143F;
+						    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3_0x80010f7c0301143F;
+						    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4_0x8001137c0301143F;
+
+						}
+					    }
+
+					lane = byte * 8 + nibble*4; 
+					l_input_type_e = WR_DQ;
+					l_flag = 1;
+					// C4 DQ to lane/block (flag = 0) in PHY or lane/block to C4 DQ (flag = 1) 
+					// In this case moving from  lane/block to C4 DQ to determine spare
+					rc = mss_c4_phy(i_target, port, rank_group, l_input_type_e, l_index_u8, l_verbose, lane, block, l_flag);
+					if (rc) return rc;
+
+					dqs_index = l_index_u8 / 8;
+
+
+					if ( ((dqs_index % 9 == 0)&&(dqs_index/9 > 0)) && (l_disable_value_u8[rank_group][block][byte][nibble] != 0x0))
+					{
+				                //This is a spare.  Unmark it in the old map for the rest of the workaround to not operate on a spare
+						FAPI_DBG("WR LVL DISABLE WORKAROUND: Denoting Spare that is disabled for block: %d byte: %d nibble: %d Previous Value: 0x%02X", block, byte, nibble, l_disable_value_u8[rank_group][block][byte][nibble]);
+						l_disable_old_value_u8[rank_group][block][byte][nibble] = 0x00;
+
+					}
+					else if (l_disable_value_u8[rank_group][block][byte][nibble] != 0x00)
+					{
+						//This is not a spare.  Unmark into what will be scommed back in; to be able to reset the disable mask.
+						FAPI_DBG("WR LVL DISABLE WORKAROUND: Unmasking disable for block: %d byte: %d nibble: %d Previous Value: 0x%02X", block, byte, nibble, l_disable_value_u8[rank_group][block][byte][nibble]);
+						l_disable_value_u8[rank_group][block][byte][nibble] = 0x00;
+
+					}
+
+
+					    //BLOCK 0
+					    rc = fapiGetScom(i_target, DISABLE_ADDR_0, data_buffer_64);
+					    if (rc) return rc;
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][0][0][0], 48, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][0][0][1], 52, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][0][1][0], 56, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][0][1][1], 60, 4);
+					    rc = fapiPutScom(i_target, DISABLE_ADDR_0, data_buffer_64);
+					    if (rc) return rc;
+
+					    //BLOCK 1
+
+					    rc = fapiGetScom(i_target, DISABLE_ADDR_1, data_buffer_64);
+					    if (rc) return rc;
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][1][0][0], 48, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][1][0][1], 52, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][1][1][0], 56, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][1][1][1], 60, 4);
+					    rc = fapiPutScom(i_target, DISABLE_ADDR_1, data_buffer_64);
+					    if (rc) return rc;
+
+					    //BLOCK 2
+
+					    rc = fapiGetScom(i_target, DISABLE_ADDR_2, data_buffer_64);
+					    if (rc) return rc;
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][2][0][0], 48, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][2][0][1], 52, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][2][1][0], 56, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][2][1][1], 60, 4);
+					    rc = fapiPutScom(i_target, DISABLE_ADDR_2, data_buffer_64);
+					    if (rc) return rc;
+
+
+					    //BLOCK 3
+
+					    rc = fapiGetScom(i_target, DISABLE_ADDR_3, data_buffer_64);
+					    if (rc) return rc;
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][3][0][0], 48, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][3][0][1], 52, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][3][1][0], 56, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][3][1][1], 60, 4);
+					    rc = fapiPutScom(i_target, DISABLE_ADDR_3, data_buffer_64);
+					    if (rc) return rc;
+
+
+					    //Block 4
+					    rc = fapiGetScom(i_target, DISABLE_ADDR_4, data_buffer_64);
+					    if (rc) return rc;
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][4][0][0], 48, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][4][0][1], 52, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][4][1][0], 56, 4);
+					    rc_num = rc_num | data_buffer_64.insertFromRight(&l_disable_value_u8[rank_group][4][1][1], 60, 4);
+					    rc = fapiPutScom(i_target, DISABLE_ADDR_4, data_buffer_64);
+					    if (rc) return rc;
+
+
+				    }
+			      }
+			}
+		}
+	}
+
+
+	//Re-run DQS ALIGN for only rank_group/ports that had a disable.
+
+	for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{	
+		group = 255;
+		for(block = 0; block < maxblocks; block++)
+		{
+			for (byte = 0; byte < maxbytes; byte++)
+			{
+
+				for (nibble = 0; nibble < maxnibbles; nibble++)
+				{
+				    //Check if rank group exists
+				    if(primary_ranks_array[rank_group][port] != 255)
+				    {
+					if (l_disable_old_value_u8[rank_group][block][byte][nibble] != 0x0)
+					{ 
+						group = rank_group;
+					}
+				    }
+
+				}
+			}
+		}
+		FAPI_DBG("WR LVL DISABLE WORKAROUND: DQS ALIGN LOOP on group: %d rank_group: %d port: %d", group, rank_group, port);
+		if (group != 255)
+		{
+
+		     FAPI_DBG("WR LVL DISABLE WORKAROUND: Re-Running DQS ALIGN on rank_group: %d port: %d", group, port);
+		    //Clearing any status or errors bits that may have occured in previous training subtest.
+		    if(port == 0)
+		    {
+			//clear status reg
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48, 4);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F, data_buffer_64);
+			if(rc) return rc;
+
+			//clear error reg
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48, 11);
+			rc_num = rc_num | data_buffer_64.clearBit(60, 4);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, data_buffer_64);
+			if(rc) return rc;
+
+                        //clear other port
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48);
+			rc_num = rc_num | data_buffer_64.clearBit(50);
+			rc_num = rc_num | data_buffer_64.clearBit(51);
+			rc_num = rc_num | data_buffer_64.clearBit(52);
+			rc_num = rc_num | data_buffer_64.clearBit(53);
+			rc_num = rc_num | data_buffer_64.clearBit(54);
+			rc_num = rc_num | data_buffer_64.clearBit(55);
+			rc_num = rc_num | data_buffer_64.clearBit(58);
+			rc_num = rc_num | data_buffer_64.clearBit(60);
+			rc_num = rc_num | data_buffer_64.clearBit(61);
+			rc_num = rc_num | data_buffer_64.clearBit(62);
+			rc_num = rc_num | data_buffer_64.clearBit(63);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			if(rc) return rc;
+
+		        //Setup the Config Reg bit for the only cal step we want
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			if(rc) return rc;
+
+		    }
+		    else
+		    {
+			//clear status reg
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48, 4);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F, data_buffer_64);
+			if(rc) return rc;
+
+			//clear error reg
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48, 11);
+			rc_num = rc_num | data_buffer_64.clearBit(60, 4);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, data_buffer_64);
+			if(rc) return rc;
+
+                        //clear other port
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48);
+			rc_num = rc_num | data_buffer_64.clearBit(50);
+			rc_num = rc_num | data_buffer_64.clearBit(51);
+			rc_num = rc_num | data_buffer_64.clearBit(52);
+			rc_num = rc_num | data_buffer_64.clearBit(53);
+			rc_num = rc_num | data_buffer_64.clearBit(54);
+			rc_num = rc_num | data_buffer_64.clearBit(55);
+			rc_num = rc_num | data_buffer_64.clearBit(58);
+			rc_num = rc_num | data_buffer_64.clearBit(60);
+			rc_num = rc_num | data_buffer_64.clearBit(61);
+			rc_num = rc_num | data_buffer_64.clearBit(62);
+			rc_num = rc_num | data_buffer_64.clearBit(63);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			if(rc) return rc;
+
+		        //Setup the Config Reg bit for the only cal step we want
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			if(rc) return rc;
+
+		    }
+
+		    //Clear training cnfg
+		    rc_num = rc_num | data_buffer_64.clearBit(48);
+		    rc_num = rc_num | data_buffer_64.setBit(50);
+		    rc_num = rc_num | data_buffer_64.clearBit(51);
+		    rc_num = rc_num | data_buffer_64.clearBit(52);
+		    rc_num = rc_num | data_buffer_64.clearBit(53);
+		    rc_num = rc_num | data_buffer_64.clearBit(54);
+		    rc_num = rc_num | data_buffer_64.clearBit(55);
+		    rc_num = rc_num | data_buffer_64.clearBit(60);
+		    rc_num = rc_num | data_buffer_64.clearBit(61);
+		    rc_num = rc_num | data_buffer_64.clearBit(62);
+		    rc_num = rc_num | data_buffer_64.clearBit(63);
+
+		    if(group == 0){
+			rc_num = rc_num | data_buffer_64.setBit(60);
+		    }
+		    else if(group == 1){
+			rc_num = rc_num | data_buffer_64.setBit(61);
+		    }
+		    else if(group == 2){
+			rc_num = rc_num | data_buffer_64.setBit(62);
+		    }
+		    else if(group == 3){
+			rc_num = rc_num | data_buffer_64.setBit(63);
+		    }
+
+		        //Set the config register
+			if(port == 0)
+			{
+			    rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			    if(rc) return rc;
+			}
+			else
+			{
+			    rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			    if(rc) return rc;
+			}
+
+			rc = mss_ccs_inst_arry_0(i_target,
+						 instruction_number,
+						 address_buffer_16,
+						 bank_buffer_8,
+						 activate_buffer_1,
+						 rasn_buffer_1,
+						 casn_buffer_1,
+						 wen_buffer_1,
+						 cke_buffer_8,
+						 csn_buffer_8,
+						 odt_buffer_8,
+						 test_buffer_4,
+						 port);
+
+			if(rc) return rc; 
+			rc_num = rc_num | rank_cal_buffer_4.insert(primary_ranks_array[rank_group][port], 0, 4, 4); // 8 bit storage, need last 4 bits
+			if(rc_num)
+			{
+				rc.setEcmdError(rc_num);
+				return rc;
+			}
+
+			rc = mss_ccs_inst_arry_1(i_target,
+						 instruction_number,
+						 num_idles_buffer_16,
+						 num_repeat_buffer_16,
+						 data_buffer_20,
+						 read_compare_buffer_1,
+						 rank_cal_buffer_4,
+						 ddr_cal_enable_buffer_1,
+						 ccs_end_buffer_1);
+			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+
+			rc = mss_execute_ccs_inst_array( i_target, NUM_POLL, 60);
+			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+
+			//Check to see if the training errored out
+			rc = mss_check_error_status(i_target, mbaPosition, port, group, cur_cal_step, cur_error_status);
+			if(rc) return rc;
+
+			if (cur_error_status == MSS_INIT_CAL_FAIL)
+			{
+				//RC/Log is generated in mss_check_error_status
+				FAPI_ERR("Error returned on workaround Re-run of DQS_ALIGN on %s  PORT: %d RP: %d", i_target.toEcmdString(), port, group);
+			}
+
+		}
+	}
+
+	uint8_t curr_bit;
+
+	//Finding the lowest Values on disabled bytes, then resetting mask.
+	for(block = 0; block < maxblocks; block++)
+	{
+		for (byte = 0; byte < maxbytes; byte++)
+		{
+
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+
+				for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+				{	
+					for (nibble_dq = 0; nibble_dq < 4; nibble_dq++)
+					{	
+
+
+						if (l_disable_old_value_u8[rank_group][block][byte][nibble] != 0x00)
+						{
+
+							FAPI_DBG("WR LVL DISABLE WORKAROUND: DISABLED block: %d byte: %d nibble: %d disable value: 0x%02X", block, byte, nibble, l_disable_old_value_u8[rank_group][block][byte][nibble]);
+						        FAPI_DBG("WR LVL DISABLE WORKAROUND: DQSCLK replacement: block: %d byte: %d nibble: %d current value: %d", block, byte, nibble, l_dqsclk_phase_value_u8[rank_group][block][byte][nibble]);
+							//SWAPPING DQSCLK PHASE SELECT
+							for (rg = 0; rg < MAX_PRI_RANKS; rg++)
+							{
+								FAPI_DBG("WR LVL DISABLE WORKAROUND: DQSCLK possible replacement value: %d", l_dqsclk_phase_value_u8[rg][block][byte][nibble]);
+
+								if ( (l_disable_old_value_u8[rg][block][byte][nibble] == 0) && (l_dqsclk_phase_value_u8[rg][block][byte][nibble] < l_dqsclk_phase_value_u8[rank_group][block][byte][nibble]) ) 
+								{
+								        FAPI_DBG("WR LVL DISABLE WORKAROUND: DQSCLK replacement: block: %d byte: %d nibble: %d", block, byte, nibble);
+									FAPI_DBG("WR LVL DISABLE WORKAROUND: DQSCLK replacement value: %d", l_dqsclk_phase_value_u8[rg][block][byte][nibble]);
+									l_dqsclk_phase_value_u8[rank_group][block][byte][nibble] = l_dqsclk_phase_value_u8[rg][block][byte][nibble];
+								}
+							}
+
+						        FAPI_DBG("WR LVL DISABLE WORKAROUND: RDCLK replacement: block: %d byte: %d nibble: %d current value: %d", block, byte, nibble, l_dqsclk_phase_value_u8[rank_group][block][byte][nibble]);
+							//SWAPPING RDCLK PHASE SELECT
+							for (rg = 0; rg < MAX_PRI_RANKS; rg++)
+							{
+								FAPI_DBG("WR LVL DISABLE WORKAROUND: RDCLK possible replacement value: %d", l_rdclk_phase_value_u8[rg][block][byte][nibble]);
+
+								if ( (l_disable_old_value_u8[rg][block][byte][nibble] == 0) && (l_rdclk_phase_value_u8[rg][block][byte][nibble] < l_rdclk_phase_value_u8[rank_group][block][byte][nibble]) ) 
+								{
+								        FAPI_DBG("WR LVL DISABLE WORKAROUND: RDCLK replacement: block: %d byte: %d nibble: %d", block, byte, nibble);
+									FAPI_DBG("WR LVL DISABLE WORKAROUND: RDCLK replacement value: %d", l_rdclk_phase_value_u8[rg][block][byte][nibble]);
+									l_rdclk_phase_value_u8[rank_group][block][byte][nibble] = l_rdclk_phase_value_u8[rg][block][byte][nibble];
+								}
+							}
+
+						        FAPI_DBG("WR LVL DISABLE WORKAROUND: GATE DELAY replacement: block: %d byte: %d nibble: %d current value: %d", block, byte, nibble, l_dqsclk_phase_value_u8[rank_group][block][byte][nibble]);
+							//SWAPPING RDCLK PHASE SELECT
+							for (rg = 0; rg < MAX_PRI_RANKS; rg++)
+							{
+								FAPI_DBG("WR LVL DISABLE WORKAROUND: GATE DELAY possible replacement value: %d", l_gate_delay_value_u8[rg][block][byte][nibble]);
+
+								if ( (l_disable_old_value_u8[rg][block][byte][nibble] == 0) && (l_gate_delay_value_u8[rg][block][byte][nibble] < l_gate_delay_value_u8[rank_group][block][byte][nibble]) ) 
+								{
+								        FAPI_DBG("WR LVL DISABLE WORKAROUND: GATE DELAY replacement: block: %d byte: %d nibble: %d", block, byte, nibble);
+									FAPI_DBG("WR LVL DISABLE WORKAROUND: GATE DELAY replacement value: %d", l_gate_delay_value_u8[rg][block][byte][nibble]);
+									l_gate_delay_value_u8[rank_group][block][byte][nibble] = l_gate_delay_value_u8[rg][block][byte][nibble];
+								}
+							}
+
+							//SWAPPING DQ AND DQS
+							mask = 0x8 >> nibble_dq;
+							curr_bit = l_disable_old_value_u8[rank_group][block][byte][nibble] & mask;
+							FAPI_DBG("WR LVL DISABLE WORKAROUND: DQ/DQS SWAP MASK: 0x%02X DISABLE BIT: 0x%02X CURR BIT: 0x%02X", mask, l_disable_old_value_u8[rank_group][block][byte][nibble] & mask, curr_bit);
+
+							if (curr_bit)
+							{
+						
+							FAPI_DBG("WR LVL DISABLE WORKAROUND: DQ/DQS SWAP RANK_GROUP: %d BLOCK: %d BYTE: %d NIBBLE: %d DISABLE VALUE: 0x%02X", rank_group, block, byte, nibble, l_disable_old_value_u8[rank_group][block][byte][nibble]);
+					
+							//Figure out which lane to investigate
+						    	l_index_u8 = nibble_dq + 4 * nibble + 8 * byte;
+							lane = l_index_u8;
+						
+							l_input_type_e = WR_DQ;
+							l_flag = 1;
+							// C4 DQ to lane/block (flag = 0) in PHY or lane/block to C4 DQ (flag = 1) 
+							// In this case moving from lane/block to C4 DQ to use access_delay_reg
+							rc = mss_c4_phy(i_target, port, rank_group, l_input_type_e, l_index_u8, l_verbose, lane, block, l_flag);
+
+						
+							l_access_type_e = READ;
+							l_rank_u8 = ranks_array[rank_group][0][0];
+							if (l_rank_u8 == 255) 
+							continue;
+
+							// Getting old DQ Value
+							l_input_type_e = WR_DQ;
+							rc = mss_access_delay_reg(i_target, l_access_type_e, port, ranks_array[rank_group][0][0], l_input_type_e, l_index_u8, l_verbose, l_old_delay_value_u32); 
+							if(rc) return rc;
+
+	
+							if (width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
+							{
+								dqs_index = l_index_u8 / 8;
+							}
+							else 
+							{
+								dqs_index = l_index_u8 / 4;
+							} 
+
+							// Getting old DQS Value
+							l_input_type_e = WR_DQS;
+							rc = mss_access_delay_reg(i_target, l_access_type_e, port, ranks_array[rank_group][0][0], l_input_type_e, dqs_index, l_verbose, l_old_DQS_delay_value_u32); 
+							if(rc) return rc;
+
+							FAPI_DBG("WR LVL DISABLE WORKAROUND: Value being replaced C4: %d C4 DQS: %d Rank:%d DQ DELAY VALUE: 0x%03X DQS DELAY VALUE: 0x%03X ", l_index_u8, dqs_index, ranks_array[rank_group][0][0], l_old_delay_value_u32, l_old_DQS_delay_value_u32);
+
+							for (rg = 0; rg < MAX_PRI_RANKS; rg++)
+							{
+								l_access_type_e = READ;
+								rank_2 = ranks_array[rg][0][0];
+								FAPI_DBG("WR LVL DISABLE WORKAROUND: RANK: %d DISABLE VALUE: 0x%02X MASKED: 0x%02X", rank_2, l_disable_old_value_u8[rg][block][byte][nibble], l_disable_old_value_u8[rg][block][byte][nibble] & mask);
+								if ( (rank_2 != 255) && (l_disable_old_value_u8[rg][block][byte][nibble] == 0 ) )
+								{
+									// Getting New DQ Value
+									l_input_type_e = WR_DQ;
+									rc = mss_access_delay_reg(i_target, l_access_type_e, port, rank_2, l_input_type_e, l_index_u8, l_verbose, l_delay_value_u32); 
+									if(rc) return rc;
+
+									// Getting New DQS Value
+									l_input_type_e = WR_DQS;
+									rc = mss_access_delay_reg(i_target, l_access_type_e, port, rank_2, l_input_type_e, dqs_index, l_verbose, l_DQS_delay_value_u32); 
+									if(rc) return rc;
+
+									FAPI_DBG("WR LVL DISABLE WORKAROUND: Possible Replacement Value C4: %d C4 DQS: %d Rank:%d DQ DELAY VALUE: 0x%03X DQS DELAY VALUE: 0x%03X", l_index_u8, dqs_index, rank_2, l_delay_value_u32, l_DQS_delay_value_u32);
+									
+									if ( l_delay_value_u32 < l_old_delay_value_u32)
+									{
+										l_old_delay_value_u32 = l_delay_value_u32;
+										// Writing DQ Value
+										l_access_type_e = WRITE;
+										l_rank_u8 = ranks_array[rank_group][0][0];
+										l_input_type_e = WR_DQ;
+										rc = mss_access_delay_reg(i_target, l_access_type_e, port, ranks_array[rank_group][0][0], l_input_type_e, l_index_u8, l_verbose, l_delay_value_u32); 
+										if(rc) return rc;
+
+										FAPI_DBG("WR LVL DISABLE WORKAROUND: Replacing DQ: Value C4: %d C4 DQS: %d Rank:%d DELAY VALUE: 0x%03X", l_index_u8, dqs_index, ranks_array[rank_group][0][0], l_delay_value_u32);
+									}
+									if ( l_DQS_delay_value_u32 < l_old_DQS_delay_value_u32)
+									{
+										l_old_DQS_delay_value_u32 = l_DQS_delay_value_u32;
+										// Writing DQS Value
+										l_access_type_e = WRITE;
+										l_rank_u8 = ranks_array[rank_group][0][0];
+										l_input_type_e = WR_DQS;
+										rc = mss_access_delay_reg(i_target, l_access_type_e, port, ranks_array[rank_group][0][0], l_input_type_e, dqs_index, l_verbose, l_DQS_delay_value_u32); 
+										if(rc) return rc;
+
+										FAPI_DBG("WR LVL DISABLE WORKAROUND: Replacing DQS: Value C4: %d C4 DQS: %d Rank:%d DQS DELAY VALUE: 0x%03X", l_index_u8, dqs_index, ranks_array[rank_group][0][0], l_DQS_delay_value_u32);
+									}
+
+								 }
+
+							  }
+
+
+							  }
+						}
+					}
+
+				}
+			}
+
+		}
+	}	
+
+
+	//Scoming in the New Values
+        for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{
+
+	    //Check if rank group exists
+	    if(primary_ranks_array[rank_group][port] != 255)
+	    {
+
+ 
+    		if ( port == 0 )
+    		{
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_0_0x800000130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_1_0x800004130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_2_0x800008130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_3_0x80000C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_4_0x800010130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_0x8000007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1_0x8000047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2_0x8000087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3_0x80000c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4_0x8000107c0301143F;
+
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_0_0x800001130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_1_0x800005130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_2_0x800009130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_3_0x80000D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_4_0x800011130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0_0x8000017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1_0x8000057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2_0x8000097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3_0x80000d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4_0x8000117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_0_0x800002130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_1_0x800006130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_2_0x80000A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_3_0x80000E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_4_0x800012130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0_0x8000027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1_0x8000067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2_0x80000a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3_0x80000e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4_0x8000127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_0_0x800003130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_1_0x800007130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_2_0x80000B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_3_0x80000F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_4_0x800013130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0_0x8000037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1_0x8000077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2_0x80000b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3_0x80000f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4_0x8000137c0301143F;
+
+			}
+		    }
+		    else if (port == 1 )
+		    {
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_0_0x800100130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_1_0x800104130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_2_0x800108130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_3_0x80010C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_4_0x800110130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0_0x8001007c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1_0x8001047c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2_0x8001087c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3_0x80010c7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4_0x8001107c0301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_0_0x800101130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_1_0x800105130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_2_0x800109130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_3_0x80010D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_4_0x800111130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0_0x8001017c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1_0x8001057c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2_0x8001097c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3_0x80010d7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4_0x8001117c0301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_0_0x800102130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_1_0x800106130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_2_0x80010A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_3_0x80010E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_4_0x800112130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0_0x8001027c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1_0x8001067c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2_0x80010a7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3_0x80010e7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4_0x8001127c0301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_0_0x800103130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_1_0x800107130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_2_0x80010B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_3_0x80010F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_4_0x800113130301143F;
+			    DISABLE_ADDR_0 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0_0x8001037c0301143F;
+			    DISABLE_ADDR_1 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1_0x8001077c0301143F;
+			    DISABLE_ADDR_2 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2_0x80010b7c0301143F;
+			    DISABLE_ADDR_3 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3_0x80010f7c0301143F;
+			    DISABLE_ADDR_4 = DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4_0x8001137c0301143F;
+
+			}
+		    }
+
+		    //Block 0
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][0][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][0][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][0][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][0][1][1], 60, 2);
+
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][0][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][0][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][0][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][0][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+			
+		    //Block 1
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][1][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][1][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][1][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][1][1][1], 60, 2);
+
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][1][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][1][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][1][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][1][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+			
+		    //Block 2
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][2][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][2][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][2][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][2][1][1], 60, 2);
+
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][2][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][2][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][2][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][2][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+
+		    //Block 3
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][3][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][3][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][3][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][3][1][1], 60, 2);
+
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][3][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][3][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][3][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][3][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+
+
+		    //Block 4
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][4][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][4][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][4][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_dqsclk_phase_value_u8[rank_group][4][1][1], 60, 2);
+
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][4][0][0], 50, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][4][0][1], 54, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][4][1][0], 58, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_rdclk_phase_value_u8[rank_group][4][1][1], 62, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+
+		    if(rc_num)
+		    {
+			rc.setEcmdError(rc_num);
+			return rc;
+		    }
+
+
+		}
+	}
+    }
+
+    return rc;
+}
+
+
+
+
 ReturnCode mss_reset_delay_values(
             Target& i_target
             )
@@ -2674,8 +4957,6 @@ ReturnCode mss_reset_delay_values(
 
     return rc;
 }
-
-
 
 ReturnCode mss_rtt_nom_rtt_wr_swap(
             Target& i_target,
@@ -3281,7 +5562,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	    DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2_0x8001087c0301143F,
 	    DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3_0x80010c7c0301143F,
 	    DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4_0x8001107c0301143F},
-           // primary rank pair 1
+           // primary rank p1
 	   {DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0_0x8001017c0301143F,
 	    DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1_0x8001057c0301143F,
 	    DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2_0x8001097c0301143F,
@@ -3321,6 +5602,14 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	ReturnCode rc;
 	ecmdDataBufferBase data_buffer(64);
         ecmdDataBufferBase db_reg(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank0(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank1(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank2(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank3(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank4(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank5(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank6(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_rank7(BITS_PER_PORT);
 	uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];		// primary rank group values
 
@@ -3343,6 +5632,8 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &mba_target, l_dram_width);
 	if(rc) return rc;
+
+	
 
         fapi::Target l_target_centaur;
         rc = fapiGetParentChip(mba_target, l_target_centaur);
@@ -3388,13 +5679,182 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	}
 	for (uint8_t port = 0; port < MAX_PORTS; port++ )	// [0:1]
 	{
+		db_reg_rank0.flushTo0();
+		db_reg_rank1.flushTo0();
+		db_reg_rank2.flushTo0();
+		db_reg_rank3.flushTo0();
+		db_reg_rank4.flushTo0();
+		db_reg_rank5.flushTo0();
+		db_reg_rank6.flushTo0();
+		db_reg_rank7.flushTo0();
+		uint8_t is_clean = 1;
+
+		uint8_t l_rank0_invalid = 1; //0 = valid, 1 = invalid
+		uint8_t l_rank1_invalid = 1; 
+		uint8_t l_rank2_invalid = 1; 
+		uint8_t l_rank3_invalid = 1; 
+		uint8_t l_rank4_invalid = 1; 
+		uint8_t l_rank5_invalid = 1; 
+		uint8_t l_rank6_invalid = 1; 
+		uint8_t l_rank7_invalid = 1;
+
+		// Gather all ranks first
+		// loop through primary ranks [0:3]
+		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
+		{
+
+		        is_clean = 1;
+			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+
+				continue;
+			}
+			
+			if ( prg[prank][port] == 0)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 0, 0, db_reg_rank0, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 0, 0,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank0_invalid = 0;
+			}
+			
+			if ( prg[prank][port] == 1)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 0, 1, db_reg_rank1, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 0, 1,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank1_invalid = 0;
+			}
+			
+			if ( prg[prank][port] == 2)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 0, 2, db_reg_rank2, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 0, 2,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank2_invalid = 0;
+			}
+			
+			
+			if ( prg[prank][port] == 3)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 0, 3, db_reg_rank3, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 0, 3,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank3_invalid = 0;
+			}
+			
+
+			
+			if ( prg[prank][port] == 4)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 1, 0, db_reg_rank4, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 1, 0,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank4_invalid = 0;
+			}
+			
+			
+			if ( prg[prank][port] == 5)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 1, 1, db_reg_rank5, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 1, 1,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank5_invalid = 0;
+			}
+			
+			
+			if ( prg[prank][port] == 6)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 1, 2, db_reg_rank6, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 1, 2,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank6_invalid = 0;
+			}
+			
+			
+			if ( prg[prank][port] == 7)
+			{
+				FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+						prank, port, prg[prank][port]);
+				rc = getC4dq2reg(mba_target, port, 1, 3, db_reg_rank7, is_clean);
+				if (rc)
+				{
+					FAPI_ERR("Error from getting register bitmap port=%i: "
+							"dimm=%i, rank=%i rc=%i", port, 1, 3,
+							static_cast<uint32_t>(rc));
+					return rc;
+				}
+				l_rank7_invalid = 0;
+			}
+			
+		}
+
 		// loop through primary ranks [0:3]
 		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
 		{
 			uint8_t dimm = prg[prank][port] >> 2;
 			uint8_t rank = prg[prank][port] & 0x03;
 			uint16_t l_data = 0;
-			uint8_t is_clean = 1;
+			uint16_t l_data_rank0 = 0; 
+			uint16_t l_data_rank1 = 0; 
+			uint16_t l_data_rank2 = 0; 
+			uint16_t l_data_rank3 = 0; 
+			uint16_t l_data_rank4 = 0; 
+			uint16_t l_data_rank5 = 0; 
+			uint16_t l_data_rank6 = 0; 
+			uint16_t l_data_rank7 = 0; 
+			is_clean = 1;
 
 			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
 			{
@@ -3411,6 +5871,9 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 						static_cast<uint32_t>(rc));
 				return rc;
 			}
+
+
+
 			// quick test to move on to next rank if no bits need to be set
 			if (is_clean == 1)			// Note ignores spares that match attribute
 			{
@@ -3426,6 +5889,15 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 
 				// check or not to check(always set register)?
 				l_data = db_reg.getHalfWord(i);
+				l_data_rank0 = db_reg_rank0.getHalfWord(i);
+				l_data_rank1 = db_reg_rank1.getHalfWord(i);
+				l_data_rank2 = db_reg_rank2.getHalfWord(i);
+				l_data_rank3 = db_reg_rank3.getHalfWord(i);
+				l_data_rank4 = db_reg_rank4.getHalfWord(i);
+				l_data_rank5 = db_reg_rank5.getHalfWord(i);
+				l_data_rank6 = db_reg_rank6.getHalfWord(i);
+				l_data_rank7 = db_reg_rank7.getHalfWord(i);
+
 				if (l_data == 0)
 				{
 					FAPI_DBG("\tDP18_%i has no bad bits set, continuing...", i);
@@ -3441,26 +5913,87 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 					 rc.setEcmdError(l_ecmdRc);
 					 return rc;
 				}
+
+				uint16_t mask = 0xF000;
+				// Temp 0xE removed.
+				//uint16_t emask = 0xE000;
+				uint8_t all_F_mask = 0;
+				for (uint8_t n=0; n < 4; n++) {	// check each nibble
+					uint16_t nmask = mask >> (4*n);
+					// Temp 0xE removed.
+					//uint16_t e_nmask = emask >> (4*n);
+
+
+					if ((nmask & l_data) == nmask) {
+						FAPI_DBG("BYTE DISABLE WORKAROUND  Found a 0XF on nibble=%i Port%i, dimm=%i, prg%i rank=%i data=0x%04X", n, port, dimm, prank, rank, l_data);
+						if ( ( ((nmask & l_data_rank0) == nmask) || (l_rank0_invalid) ) && 
+						     ( ((nmask & l_data_rank1) == nmask) || (l_rank1_invalid) ) && 
+						     ( ((nmask & l_data_rank2) == nmask) || (l_rank2_invalid) ) && 
+						     ( ((nmask & l_data_rank3) == nmask) || (l_rank3_invalid) ) &&
+						     ( ((nmask & l_data_rank4) == nmask) || (l_rank4_invalid) ) && 
+						     ( ((nmask & l_data_rank5) == nmask) || (l_rank5_invalid) ) && 
+						     ( ((nmask & l_data_rank6) == nmask) || (l_rank6_invalid) ) && 
+						     ( ((nmask & l_data_rank7) == nmask) || (l_rank7_invalid) )   )
+						{
+							//Leave it an F.
+							FAPI_DBG("BYTE DISABLE WORKAROUND  All ranks are a F so writing an 0xF to disable regs.");
+							FAPI_DBG("BYTE DISABLE WORKAROUND  data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X", l_data_rank0,l_data_rank1,l_data_rank2,l_data_rank3,l_data_rank4,l_data_rank5,l_data_rank6,l_data_rank7 );
+							all_F_mask = 1;
+						}
+						else
+						{
+							//Replacing F nibble with E nibble
+							FAPI_DBG("BYTE DISABLE WORKAROUND  Single rank is a 0xF so writing an 0x0 to disable regs. PRE DATA: 0x%04X", l_data);
+							l_data = l_data & ~(nmask); 
+						        FAPI_DBG("BYTE DISABLE WORKAROUND  POST DATA: 0x%04X", l_data);
+						}
+					}
+
+					// Temporarily removing the 0xE case
+					/*
+					if ((nmask & l_data) == e_nmask) {
+						FAPI_DBG("BYTE DISABLE WORKAROUND  Found a 0XE on nibble=%i Port%i, dimm=%i, prg%i rank=%i data=0x%04X", n, port, dimm, prank, rank, l_data);
+
+						//Leave it an E.
+						FAPI_DBG("BYTE DISABLE WORKAROUND  Found a 0xE so writing an 0xE to disable regs.");
+
+					}
+					*/
+
+	                                uint16_t wrclk_nmask = 0xF000 >> (4*n);
+					if (l_dram_width != 4) // x8 only disable the wrclk
+					{
+
+						if (((wrclk_nmask & l_data)>>(4*(3-n))) == 0x0F)
+						{
+							wrclk_mask |= wrclk_disable_mask[n];
+						}
+					}
+
+				}
 				
+				
+				if (all_F_mask ==1) {
+				FAPI_INF("Entering into all F across all ranks case. Need to Disable WRCLK Enable as well.");
 				for (uint8_t n=0; n < 4; n++)	// check each nibble
 				{
 					uint16_t nmask = 0xF000 >> (4*n);
 					if (l_dram_width == 4)
 					{
-					if ((nmask & l_data) > 0)		// bad bit(s) in nibble
-					{
- //				For Marc Gollub, since repair for x4 DRAM is in nibble
- //  			granularity.  Also due to higher chance of hitting dq0 of
- //  			Micron causing write leveling to fail for entire x4 DRAM.
- //  			Will also save a re-training loop.  Complement in get_bbm_regs.
+						if ((nmask & l_data) == nmask)		// bad bit(s) in nibble
+						{
+							 //	For Marc Gollub, since repair for x4 DRAM is in nibble
+							 //	granularity.  Also due to higher chance of hitting dq0 of
+							 //	Micron causing write leveling to fail for entire x4 DRAM.
+							 //	Will also save a re-training loop.  Complement in get_bbm_regs.
 
-						l_data = l_data | nmask;		// set entire nibble
-						FAPI_INF("Disabling entire nibble %i",n);
-						rc = mss_get_dqs_lane(mba_target, port, i, n,
-								disable1_data);
-						if (rc) return rc;
-						wrclk_mask |= wrclk_disable_mask[n];
-					}
+							
+							FAPI_INF("Disabling entire nibble %i",n);
+							rc = mss_get_dqs_lane(mba_target, port, i, n,
+									disable1_data);
+							if (rc) return rc;
+							wrclk_mask |= wrclk_disable_mask[n];
+						}
 					}  // end x4
 					else	// width == 8+?
 					{
@@ -3478,11 +6011,15 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 						}
 					}
 				}
+					
+				}
+				
 
 				FAPI_DBG("\t\tdisable1_data=0x%04X", disable1_data);
-				
+			
 				// set disable0(dq) reg
-				l_ecmdRc = data_buffer.setHalfWord(3, l_data);
+				l_ecmdRc |= data_buffer.setHalfWord(3, l_data);
+
 				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 				{
 					 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
@@ -3495,108 +6032,115 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 				l_addr = disable_reg[port][prank][i];
 
 				FAPI_INF("+++ Setting Disable0 Bad Bit Mask p%i: DIMM%i PRG%i "
-					"Rank%i \tdp18_%i addr=0x%llx, data=0x%04X", port,
+					"Rank%i dp18_%i addr=0x%llx, data=0x%04X", port,
 					dimm, prank, prg[prank][port], i, l_addr , l_data);
 
 				rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer,
 						data_buffer);
+
 				if (rc)
 				{
 					FAPI_ERR("Error from fapiPutScom writing disable0 reg");
 					return rc;
 				}
-					
-				// set address for disable1(dqs) register
-				l_addr += l_disable1_addr_offset;
-				if (disable1_data != 0)
-				{
-					l_ecmdRc = data_buffer.flushTo0();  // clear buffer
-					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+
+			        if (all_F_mask ==1) {
+					FAPI_INF("Entering into all F across ranks case. Need to Disable DQS as well.");
+					// set address for disable1(dqs) register
+					l_addr += l_disable1_addr_offset;
+					if (disable1_data != 0)
 					{
-					FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
-							"- rc 0x%.8X", l_ecmdRc);
+						l_ecmdRc = data_buffer.flushTo0();  // clear buffer
+						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+						{
+						FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+								"- rc 0x%.8X", l_ecmdRc);
 
-					rc.setEcmdError(l_ecmdRc);
-					return rc;
-					}
+						rc.setEcmdError(l_ecmdRc);
+						return rc;
+						}
 
-					l_ecmdRc = data_buffer.setByte(6, disable1_data);
-					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-					{
-					FAPI_ERR("Error from ecmdDataBuffer setByte() "
-							"- rc 0x%.8X", l_ecmdRc);
+						l_ecmdRc = data_buffer.setByte(6, disable1_data);
+						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+						{
+						FAPI_ERR("Error from ecmdDataBuffer setByte() "
+								"- rc 0x%.8X", l_ecmdRc);
 
-					rc.setEcmdError(l_ecmdRc);
-					return rc;
-					}
+						rc.setEcmdError(l_ecmdRc);
+						return rc;
+						}
 
-					// write disable1(dqs) register
-					rc = fapiPutScomUnderMask(mba_target, l_addr,
-					data_buffer, data_buffer);
-					if (rc)
-					{
-					FAPI_ERR("Error from PutScom writing disable1 reg");
-					return rc;
-					}
-				} // end disable1_data != 0
-
-				// set address for wrclk_en register
-				l_addr &= l_wrclk_en_addr_mask;
-
-				if (wrclk_mask != 0)
-				{
-					l_ecmdRc = data_buffer.flushTo0();	// clear buffer
-					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-					{
-						 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
-								 "- rc 0x%.8X", l_ecmdRc);
-
-						 rc.setEcmdError(l_ecmdRc);
-						 return rc;
-					}
-					ecmdDataBufferBase put_mask(64);
-					l_ecmdRc = put_mask.setHalfWord(3, wrclk_mask);
-					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-					{
-						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord()"
-								 " for wrclk_mask - rc 0x%.8X", l_ecmdRc);
-
-						 rc.setEcmdError(l_ecmdRc);
-						 return rc;
-					}
-
-					if (!l_disable1_fixed)
-					{
-						// clear(0) out the unused quads for wrclk
+						// write disable1(dqs) register
 						rc = fapiPutScomUnderMask(mba_target, l_addr,
-								data_buffer, put_mask);
+						data_buffer, data_buffer);
 						if (rc)
 						{
-							FAPI_ERR("Error from fapiPutScomUnderMask writing "
-									"wrclk_en reg");
-							return rc;
+						FAPI_ERR("Error from PutScom writing disable1 reg");
+						return rc;
 						}
-					}
-		                        // does disabling read clocks for unused bytes cause problems?
-					// SW25701 Workaround - x4s will not mask out RDCLKs on Bad Bits to avoid translation issues
-					else if ( (!l_disable1_rdclk_fixed) && (l_dram_width != 4) )
+					} // end disable1_data != 0
+
+
+					// set address for wrclk_en register
+					l_addr &= l_wrclk_en_addr_mask;
+
+					if (wrclk_mask != 0)
 					{
-						uint64_t rdclk_addr =
-							disable_reg[port][prank][i] & 0xFFFFFF040FFFFFFFull;
-						// clear(0) out the unused quads for rdclk
-						rc = fapiPutScomUnderMask(mba_target, rdclk_addr,
-							data_buffer, put_mask);
-						if (rc)
+						l_ecmdRc = data_buffer.flushTo0();	// clear buffer
+						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 						{
-							FAPI_ERR("Error from fapiPutScomUnderMask writing "
-										"rdclk_en reg");
-							return rc;
+							 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+									 "- rc 0x%.8X", l_ecmdRc);
+
+							 rc.setEcmdError(l_ecmdRc);
+							 return rc;
+						}
+						ecmdDataBufferBase put_mask(64);
+						l_ecmdRc = put_mask.setHalfWord(3, wrclk_mask);
+						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+						{
+							 FAPI_ERR("Error from ecmdDataBuffer setHalfWord()"
+									 " for wrclk_mask - rc 0x%.8X", l_ecmdRc);
+
+							 rc.setEcmdError(l_ecmdRc);
+							 return rc;
 						}
 
-						FAPI_DBG("rdclk_addr=0x%llx, wrclk_addr=0x%llx, "
-							"wrclk_mask=0x%04X", rdclk_addr, l_addr, wrclk_mask);
-					}
-				} // end wrclk_mask != 0
+						if (!l_disable1_fixed)
+						{
+							// clear(0) out the unused quads for wrclkdb_reg
+							rc = fapiPutScomUnderMask(mba_target, l_addr,
+									data_buffer, put_mask);
+							if (rc)
+							{
+								FAPI_ERR("Error from fapiPutScomUnderMask writing "
+										"wrclk_en reg");
+								return rc;
+							}
+						}
+				                // does disabling read clocks for unused bytes cause problems?
+						// SW25701 Workaround - x4s will not mask out RDCLKs on Bad Bits to avoid translation issues
+						else if ( (!l_disable1_rdclk_fixed) && (l_dram_width != 4) )
+						{
+							uint64_t rdclk_addr =
+								disable_reg[port][prank][i] & 0xFFFFFF040FFFFFFFull;
+							// clear(0) out the unused quads for rdclk
+							rc = fapiPutScomUnderMask(mba_target, rdclk_addr,
+								data_buffer, put_mask);
+							if (rc)
+							{
+								FAPI_ERR("Error from fapiPutScomUnderMask writing "
+											"rdclk_en reg");
+								return rc;
+							}
+
+							FAPI_DBG("rdclk_addr=0x%llx, wrclk_addr=0x%llx, "
+								"wrclk_mask=0x%04X", rdclk_addr, l_addr, wrclk_mask);
+						}
+					} // end wrclk_mask != 0
+				}
+				
+
 			} // end DP18 instance loop
 		} // end primary rank loop
 	} // end port loop
@@ -3666,7 +6210,7 @@ fapi::ReturnCode mss_get_dqs_lane (const fapi::Target & i_mba,
 	return rc;
 } //end mss_get_dqs_lane
 
-fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
+fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target, uint8_t i_training_success)
 {
 // Registers to Flash.
 
@@ -3736,10 +6280,19 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
         ReturnCode rc;
         ecmdDataBufferBase data_buffer(64);
         ecmdDataBufferBase db_reg(BITS_PER_PORT);
+        ecmdDataBufferBase db_reg_vpd(BITS_PER_PORT);
 	uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];		// primary rank group values
 	uint8_t l_dram_width;
 	uint8_t dimm;
+	uint8_t l_rank0_invalid = 1; //0 = valid, 1 = invalid
+	uint8_t l_rank1_invalid = 1; 
+	uint8_t l_rank2_invalid = 1; 
+	uint8_t l_rank3_invalid = 1; 
+	uint8_t l_rank4_invalid = 1; 
+	uint8_t l_rank5_invalid = 1; 
+	uint8_t l_rank6_invalid = 1; 
+	uint8_t l_rank7_invalid = 1;
 
 	//Storing all the errors across rank/eff dimm
         ecmdDataBufferBase db_reg_dimm0_rank0(BITS_PER_PORT);
@@ -3817,6 +6370,14 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 		l_ecmdRc |= db_reg_dimm1_rank1.flushTo0();
 		l_ecmdRc |= db_reg_dimm1_rank2.flushTo0();
 		l_ecmdRc |= db_reg_dimm1_rank3.flushTo0();
+		l_rank0_invalid = 1; //0 = valid, 1 = invalid
+		l_rank1_invalid = 1; 
+		l_rank2_invalid = 1; 
+		l_rank3_invalid = 1; 
+		l_rank4_invalid = 1; 
+		l_rank5_invalid = 1; 
+		l_rank6_invalid = 1; 
+		l_rank7_invalid = 1;
 
 		if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 		{
@@ -3833,12 +6394,121 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 			dimm = prg[prank][port] >> 2;
 			uint8_t rank = prg[prank][port] & 0x03;
 			uint16_t l_data = 0;
-			uint8_t l_has_bad_bits = 0;
 
 			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
 			{
 				FAPI_DBG("Primary rank group %i is INVALID, continuing...",
 						prank);
+				if ( prg[prank][port] == 0)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank0.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+				if ( prg[prank][port] == 1)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank1.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+				if ( prg[prank][port] == 2)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank2.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+			
+				if ( prg[prank][port] == 3)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank3.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+
+			
+				if ( prg[prank][port] == 4)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank0.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+			
+				if ( prg[prank][port] == 5)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank1.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+			
+				if ( prg[prank][port] == 6)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank2.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+			
+			
+				if ( prg[prank][port] == 7)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank3.flushTo1();
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+							 "- rc 0x%.8X", l_ecmdRc);
+
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+				}
+
 				continue;
 			}
 
@@ -3882,21 +6552,7 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 
 				if (l_data != 0)
 				{
-					l_has_bad_bits = 1;
-					// to complement Marc Gollub's request in mss_set_bbm_regs
-					// and stay consistent for procedures following this one
-					// if x4 and any bit in a nibble is bad, mask entire nibble
-					if (l_dram_width == 4) {
-						uint16_t mask = 0xF000;
-						for (uint8_t n=0; n < 4; n++) {	// check each nibble
-							uint16_t nmask = mask >> (4*n);
-							if ((nmask & l_data) > 0) {
-								l_data = l_data | nmask;
-								FAPI_INF("Disabling entire nibble %i",n);
-							}
-						}
-					}
-
+					
 					l_ecmdRc = db_reg.setHalfWord(i, l_data);
 					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 					{
@@ -3914,86 +6570,90 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 				}
 			} // end DP18 instance loop
 
-			if (l_has_bad_bits)
+			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
 			{
-				if (dimm == 0)
-				{
-					if (rank == 0)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank0);
-					}
-					else if (rank == 1)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank1);
-					}
-					else if (rank == 2)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank2);
-					}
-					else if (rank == 3)
-					{
+				FAPI_DBG("Primary rank group %i: INVALID, continuing...",
+						prank);
 
-						l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank3);
-					}
-				}
-				else if (dimm == 1)
-				{
-					if (rank == 0)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank0);
-					}
-					else if (rank == 1)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank1);
-					}
-					else if (rank == 2)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank2);
-					}
-					else if (rank == 3)
-					{
-						l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank3);
-					}
-				}
+				continue;
+			}
+			
 
-				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+			if (dimm == 0)
+			{
+				if (rank == 0)
 				{
-					 FAPI_ERR("Error from ecmdDataBuffer copy() "
-						 "- rc 0x%.8X", l_ecmdRc);
-
-					 rc.setEcmdError(l_ecmdRc);
-					 return rc;
+					l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank0);
+					l_rank0_invalid = 0; //0 = valid, 1 = invalid
 				}
+				else if (rank == 1)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank1);
+					l_rank1_invalid = 0; //0 = valid, 1 = invalid
+				}
+				else if (rank == 2)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank2);						
+					l_rank2_invalid = 0; //0 = valid, 1 = invalid
+				}
+				else if (rank == 3)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm0_rank3);
+					l_rank3_invalid = 0; //0 = valid, 1 = invalid
+				}
+			}
+			else if (dimm == 1)
+			{
+				if (rank == 0)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank0);
+					l_rank4_invalid = 0; //0 = valid, 1 = invalid
+				}
+				else if (rank == 1)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank1);
+					l_rank5_invalid = 0; //0 = valid, 1 = invalid
+				}
+				else if (rank == 2)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank2);
+					l_rank6_invalid = 0; //0 = valid, 1 = invalid
+				}
+				else if (rank == 3)
+				{
+					l_ecmdRc |= db_reg.copy(db_reg_dimm1_rank3);
+					l_rank7_invalid = 0; //0 = valid, 1 = invalid
+				}
+			}
+
+			if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+			{
+				 FAPI_ERR("Error from ecmdDataBuffer copy() "
+					 "- rc 0x%.8X", l_ecmdRc);
+
+				 rc.setEcmdError(l_ecmdRc);
+				 return rc;
 			}
 
 		} // end primary rank loop
 
 
-		FAPI_INF("HW278227 BBM workaround: Masking out the same bits/bytes across all ranks.");
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank0, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank1, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank2, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm0_rank3, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank0, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank1, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank2, 0, 80);
-		l_ecmdRc |= db_reg.setOr(db_reg_dimm1_rank3, 0, 80);
-
-		if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-		{
-			 FAPI_ERR("Error from ecmdDataBuffer setOr() "
-				 "- rc 0x%.8X", l_ecmdRc);
-
-			 rc.setEcmdError(l_ecmdRc);
-			 return rc;
-		}
-
-
 		// loop through primary ranks [0:3]
 		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
 		{
+
 			dimm = prg[prank][port] >> 2;
 			uint8_t rank = prg[prank][port] & 0x03;
+			uint16_t l_data = 0;
+			uint16_t l_data_rank0 = 0;
+			uint16_t l_data_rank1 = 0;
+			uint16_t l_data_rank2 = 0;
+			uint16_t l_data_rank3 = 0;
+			uint16_t l_data_rank4 = 0;
+			uint16_t l_data_rank5 = 0;
+			uint16_t l_data_rank6 = 0;
+			uint16_t l_data_rank7 = 0;
+			uint16_t l_data_curr_vpd = 0;
 
 			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
 			{
@@ -4002,7 +6662,321 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 				continue;
 			}
 
-			FAPI_INF("HW278227 BBM workaround: Setting same BBM across dimm: %d rank: %d", dimm, rank);
+			FAPI_DBG("Port%i, dimm=%i, prg%i rank=%i", port, dimm, prank, rank);
+			for ( uint8_t i=0; i < DP18_INSTANCES; i++ ) // dp18 [0:4]
+			{
+
+
+				l_data_rank0 = db_reg_dimm0_rank0.getHalfWord(i);
+				l_data_rank1 = db_reg_dimm0_rank1.getHalfWord(i);
+				l_data_rank2 = db_reg_dimm0_rank2.getHalfWord(i);
+				l_data_rank3 = db_reg_dimm0_rank3.getHalfWord(i);
+				l_data_rank4 = db_reg_dimm1_rank0.getHalfWord(i);
+				l_data_rank5 = db_reg_dimm1_rank1.getHalfWord(i);
+				l_data_rank6 = db_reg_dimm1_rank2.getHalfWord(i);
+				l_data_rank7 = db_reg_dimm1_rank3.getHalfWord(i);
+
+
+
+				if (dimm == 0)
+				{
+					if (rank == 0)
+					{
+						l_data = l_data_rank0;
+					}
+					else if (rank == 1)
+					{
+						l_data = l_data_rank1;
+					}
+					else if (rank == 2)
+					{
+						l_data = l_data_rank2;
+					}
+					else if (rank == 3)
+					{
+						l_data = l_data_rank3;
+					}
+				}
+				else if (dimm == 1)
+				{
+					if (rank == 0)
+					{
+						l_data = l_data_rank4;
+					}
+					else if (rank == 1)
+					{
+						l_data = l_data_rank5;
+					}
+					else if (rank == 2)
+					{
+						l_data = l_data_rank6;
+					}
+					else if (rank == 3)
+					{
+						l_data = l_data_rank7;
+					}
+				}
+
+
+				uint8_t is_clean = 1;
+			        rc = getC4dq2reg(mba_target, port, dimm, rank, db_reg_vpd, is_clean);
+				l_data_curr_vpd = db_reg_vpd.getHalfWord(i);
+
+				uint16_t mask = 0xF000;
+				// Temp remove of 0xE case
+				//uint16_t emask = 0xE000;
+				for (uint8_t n=0; n < 4; n++) {	// check each nibble
+					uint16_t nmask = mask >> (4*n);
+					// Temp remove of 0xE case
+					//uint16_t e_nmask = emask >> (4*n);
+
+
+					if ((nmask & l_data_curr_vpd) == nmask) {
+						FAPI_DBG("BYTE DISABLE WORKAROUND: Found a 0XF on nibble=%i Port%i, dimm=%i, prg%i rank=%i data= 0x%04X", n, port, dimm, prank, rank, l_data);
+						FAPI_DBG("BYTE DISABLE WORKAROUND: data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X", l_data_rank0,l_data_rank1,l_data_rank2,l_data_rank3,l_data_rank4,l_data_rank5,l_data_rank6,l_data_rank7 );
+						if (i_training_success)
+						{	//Leave it an F.
+							FAPI_DBG("BYTE DISABLE WORKAROUND: Training was successful so writing an 0xF to VPD. PRE data: 0x%04X", l_data);
+							l_data = l_data | nmask;
+						        FAPI_DBG("BYTE DISABLE WORKAROUND: POST DATA: 0x%04X", l_data);
+						}
+						else
+						{
+							if ( ( ((nmask & l_data_rank0) == nmask) || (l_rank0_invalid) ) && 
+							     ( ((nmask & l_data_rank1) == nmask) || (l_rank1_invalid) ) && 
+							     ( ((nmask & l_data_rank2) == nmask) || (l_rank2_invalid) ) && 
+							     ( ((nmask & l_data_rank3) == nmask) || (l_rank3_invalid) ) &&
+							     ( ((nmask & l_data_rank4) == nmask) || (l_rank4_invalid) ) && 
+							     ( ((nmask & l_data_rank5) == nmask) || (l_rank5_invalid) ) && 
+							     ( ((nmask & l_data_rank6) == nmask) || (l_rank6_invalid) ) && 
+							     ( ((nmask & l_data_rank7) == nmask) || (l_rank7_invalid) )   )
+							{
+								FAPI_DBG("BYTE DISABLE WORKAROUND: All ranks were F's and training was not successful.  Uncool.");
+								continue;
+							}
+							else
+							{
+
+								//Temprorarily removing 0xE version. Skipping Straight to 0xFs to all ranks.
+								/*
+								//Replacing F nibble with E nibble
+								FAPI_DBG("BYTE DISABLE WORKAROUND: Training was not successful so writing an 0xE to VPD. PRE DATA: 0x%04X", l_data);
+								l_data = (l_data & ~(nmask)) | e_nmask; 
+								FAPI_DBG("BYTE DISABLE WORKAROUND: POST DATA: 0x%04X", l_data);
+								*/
+								
+								//Replacing E nibble with F nibble
+								FAPI_DBG("BYTE DISABLE WORKAROUND: Training failed so writing an 0xF to VPD for all ranks.");
+								l_data = l_data  | nmask; 
+								l_data_rank0 = l_data_rank0  | nmask; 
+								l_data_rank1 = l_data_rank1  | nmask; 
+								l_data_rank2 = l_data_rank2  | nmask; 
+								l_data_rank3 = l_data_rank3  | nmask; 
+								l_data_rank4 = l_data_rank4  | nmask; 
+								l_data_rank5 = l_data_rank5  | nmask; 
+								l_data_rank6 = l_data_rank6  | nmask; 
+								l_data_rank7 = l_data_rank7  | nmask; 
+								
+							}
+						}
+					}
+					else if ( ((nmask & l_data_curr_vpd) != nmask) && ((nmask & l_data_curr_vpd) > 0)) {
+						FAPI_DBG("BYTE DISABLE WORKAROUND: Found a non-zero, non-F nibble. Applying to all ranks.");
+
+							if (l_dram_width == 4)
+							{
+								FAPI_DBG("BYTE DISABLE WORKAROUND: Its a x4 so turning it to a 0xF. PRE DATA: 0x%04X", l_data);
+								l_data = l_data  | nmask;
+								FAPI_DBG("BYTE DISABLE WORKAROUND: POST DATA: 0x%04X", l_data);
+
+ 								FAPI_DBG("BYTE DISABLE WORKAROUND: PRE data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X", l_data_rank0,l_data_rank1,l_data_rank2,l_data_rank3,l_data_rank4,l_data_rank5,l_data_rank6,l_data_rank7 );
+								l_data_rank0 = l_data_rank0  | nmask; 
+								l_data_rank1 = l_data_rank1  | nmask; 
+								l_data_rank2 = l_data_rank2  | nmask; 
+								l_data_rank3 = l_data_rank3  | nmask; 
+								l_data_rank4 = l_data_rank4  | nmask; 
+								l_data_rank5 = l_data_rank5  | nmask; 
+								l_data_rank6 = l_data_rank6  | nmask; 
+								l_data_rank7 = l_data_rank7  | nmask; 
+								FAPI_DBG("BYTE DISABLE WORKAROUND: POST data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X", l_data_rank0,l_data_rank1,l_data_rank2,l_data_rank3,l_data_rank4,l_data_rank5,l_data_rank6,l_data_rank7 );
+					
+							}
+							else if (l_dram_width == 8)
+							{
+								FAPI_DBG("BYTE DISABLE WORKAROUND: Its a x8 so leaving it the same.");
+								
+								FAPI_DBG("BYTE DISABLE WORKAROUND: PRE data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X", l_data_rank0,l_data_rank1,l_data_rank2,l_data_rank3,l_data_rank4,l_data_rank5,l_data_rank6,l_data_rank7 );
+								l_data_rank0 = (l_data_rank0) | ( l_data & nmask); 
+								l_data_rank1 = (l_data_rank1) | ( l_data & nmask); 
+								l_data_rank2 = (l_data_rank2) | ( l_data & nmask); 
+								l_data_rank3 = (l_data_rank3) | ( l_data & nmask);
+								l_data_rank4 = (l_data_rank4) | ( l_data & nmask); 
+								l_data_rank5 = (l_data_rank5) | ( l_data & nmask); 
+								l_data_rank6 = (l_data_rank6) | ( l_data & nmask); 
+								l_data_rank7 = (l_data_rank7) | ( l_data & nmask);
+
+								FAPI_DBG("BYTE DISABLE WORKAROUND: POST data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X", l_data_rank0,l_data_rank1,l_data_rank2,l_data_rank3,l_data_rank4,l_data_rank5,l_data_rank6,l_data_rank7 );
+							}
+
+
+
+
+					}
+					// Temporarily Removing the 0xE case with this workaround.
+					/*
+					else if ((nmask & l_data_curr_vpd) == e_nmask) {
+						FAPI_DBG("BYTE DISABLE WORKAROUND: Found a 0XE on nibble=%i Port%i, dimm=%i, prg%i rank=%i data= 0x%04X", n, port, dimm, prank, rank, l_data);
+						if (i_training_success)
+						{
+							//Leave it an E.
+							FAPI_DBG("BYTE DISABLE WORKAROUND: Training was successful so writing an 0xE to VPD.");
+						}
+						else
+						{
+							//Replacing E nibble with F nibble
+							FAPI_DBG("BYTE DISABLE WORKAROUND: Training failed so writing an 0xF to VPD for all ranks.");
+							l_data = l_data  | nmask; 
+							l_data_rank0 = l_data_rank0  | nmask; 
+							l_data_rank1 = l_data_rank1  | nmask; 
+							l_data_rank2 = l_data_rank2  | nmask; 
+							l_data_rank3 = l_data_rank3  | nmask; 
+							l_data_rank4 = l_data_rank4  | nmask; 
+							l_data_rank5 = l_data_rank5  | nmask; 
+							l_data_rank6 = l_data_rank6  | nmask; 
+							l_data_rank7 = l_data_rank7  | nmask; 
+						}
+					}
+					*/
+				}
+
+				if (dimm == 0)
+				{
+					if (rank == 0)
+					{
+						l_data_rank0 = l_data;
+					}
+					else if (rank == 1)
+					{
+						l_data_rank1 = l_data;
+					}
+					else if (rank == 2)
+					{
+						l_data_rank2 = l_data;
+					}
+					else if (rank == 3)
+					{
+						l_data_rank3 = l_data;
+					}
+				}
+				else if (dimm == 1)
+				{
+					if (rank == 0)
+					{
+						l_data_rank4 = l_data;
+					}
+					else if (rank == 1)
+					{
+						l_data_rank5 = l_data;
+					}
+					else if (rank == 2)
+					{
+						l_data_rank6 = l_data;
+					}
+					else if (rank == 3)
+					{
+						l_data_rank7 = l_data;
+					}
+				}
+
+
+				l_ecmdRc |= db_reg_dimm0_rank0.setHalfWord(i, l_data_rank0);
+				l_ecmdRc |= db_reg_dimm0_rank1.setHalfWord(i, l_data_rank1);
+				l_ecmdRc |= db_reg_dimm0_rank2.setHalfWord(i, l_data_rank2);
+				l_ecmdRc |= db_reg_dimm0_rank3.setHalfWord(i, l_data_rank3);
+
+				l_ecmdRc |= db_reg_dimm1_rank0.setHalfWord(i, l_data_rank4);
+				l_ecmdRc |= db_reg_dimm1_rank1.setHalfWord(i, l_data_rank5);
+				l_ecmdRc |= db_reg_dimm1_rank2.setHalfWord(i, l_data_rank6);
+				l_ecmdRc |= db_reg_dimm1_rank3.setHalfWord(i, l_data_rank7);
+
+				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+				{
+					 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+							 "- rc 0x%.8X", l_ecmdRc);
+					 rc.setEcmdError(l_ecmdRc);
+					 return rc;
+				}
+
+
+			}
+
+
+		}// end of primary rank loop
+
+
+		// loop through primary ranks [0:3]
+		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
+		{
+			dimm = prg[prank][port] >> 2;
+			uint8_t rank = prg[prank][port] & 0x03;
+			FAPI_DBG("BYTE DISABLE WORKAROUND: Looping through dimm: %d rank: %d ", dimm, rank);
+
+			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
+			{
+				FAPI_DBG("Primary rank group %i is INVALID, continuing...",
+						prank);
+				continue;
+			}
+
+			if (dimm == 0)
+			{
+				if (rank == 0)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank0.copy(db_reg);
+				}
+				else if (rank == 1)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank1.copy(db_reg);
+				}
+				else if (rank == 2)
+				{
+					l_ecmdRc |= db_reg_dimm0_rank2.copy(db_reg);
+				}
+				else if (rank == 3)
+				{
+
+					l_ecmdRc |= db_reg_dimm0_rank3.copy(db_reg);
+				}
+			}
+			else if (dimm == 1)
+			{
+				if (rank == 0)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank0.copy(db_reg);
+				}
+				else if (rank == 1)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank1.copy(db_reg);
+				}
+				else if (rank == 2)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank2.copy(db_reg);
+				}
+				else if (rank == 3)
+				{
+					l_ecmdRc |= db_reg_dimm1_rank3.copy(db_reg);
+				}
+			}
+
+			if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+			{
+				 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+						 "- rc 0x%.8X", l_ecmdRc);
+				 rc.setEcmdError(l_ecmdRc);
+				 return rc;
+			}
+
+			FAPI_INF("Setting BBM across dimm: %d rank: %d", dimm, rank);
 			rc = setC4dq2reg(mba_target, port, dimm, rank, db_reg);
 			if (rc)
 			{
@@ -4013,6 +6987,8 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 			}
 
 		}// end of primary rank loop
+
+
 
 	} // end port loop
     return rc;
@@ -4182,7 +7158,8 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
 	uint8_t phy_lane;
 	uint8_t phy_block;
  	uint8_t data;
-	
+
+
     // get Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
     rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
     if (rc)
@@ -4257,8 +7234,16 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
 							0, phy_lane, phy_block, 1);
 					if (rc) return rc;
 					l_bbm[(dq/8)] |= (0x80 >> (dq % 8));
-					FAPI_DBG("b=%i dp%i_%i dq=%i, lbbm=0x%02x",
-						b, phy_block, phy_lane, dq, l_bbm[dq/8]);
+
+				}
+				else		// bit is not set,
+				{
+					phy_lane = (8 * (byte % 2)) + b;
+					rc = mss_c4_phy(i_mba, i_port, 0, RD_DQ, dq,
+							0, phy_lane, phy_block, 1);
+					if (rc) return rc;
+					l_bbm[(dq/8)] &= (~(0x80 >> (dq % 8)));
+
 				}
 			}
 		} //end if not clean
@@ -4268,6 +7253,7 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
 	rc = dimmSetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
 	if (rc)
 	{
+
 		FAPI_ERR("Error from dimmSetBadDqBitmap on port %i: "
 			"dimm=%i, rank=%i rc=%i", i_port, i_dimm, i_rank,
 			static_cast<uint32_t>(rc));
