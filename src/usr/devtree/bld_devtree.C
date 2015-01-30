@@ -48,7 +48,7 @@
 #include <vpd/cvpdenums.H>
 #include <i2c/i2cif.H>
 #include <i2c/eepromif.H>
-
+#include <ipmi/ipmisensor.H>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -653,8 +653,28 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyCell32(cpuNode, "ibm,purr", 1);
     i_dt->addPropertyCell32(cpuNode, "ibm,spurr", 1);
 
-    //Set Nominal freq
-    uint64_t freq = sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+    //Set core clock freq
+    uint64_t freq = 0;
+
+#ifdef CONFIG_HTMGT
+    if(sys->getAttr<TARGETING::ATTR_HTMGT_SAFEMODE>())
+    {
+        // Safe mode on, OCC failed to load.  Set safe freq
+        freq = sys->getAttr<TARGETING::ATTR_BOOT_FREQ_MHZ>();
+    }
+    else
+    {
+        // Safe mode off, set nominal freq
+        freq = sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+    }
+#elif CONFIG_SET_NOMINAL_PSTATE
+    // Set nominal core freq if CONFIG_SET_NOMINAL_PSTATE is enabled
+    freq = sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+#else
+    // Else, set safe core freq
+    freq = sys->getAttr<TARGETING::ATTR_BOOT_FREQ_MHZ>();
+#endif
+
     freq *= MHZ;
 
     uint32_t ex_freq[2] = {static_cast<uint32_t>(freq >> 32),
