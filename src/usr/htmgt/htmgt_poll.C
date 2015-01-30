@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,8 @@ namespace HTMGT
         errlHndl_t l_err = NULL;
         uint8_t * l_poll_rsp = NULL;
 
+        TMGT_INF("sendOccPoll(flush=%c)", i_flushAllErrors?'y':'n');
+
         // Loop through all functional OCCs
         std::vector<Occ*> occList = occMgr::instance().getOccArray();
         for (std::vector<Occ*>::iterator itr = occList.begin();
@@ -57,6 +59,7 @@ namespace HTMGT
             Occ * occ = (*itr);
             const uint8_t occInstance = occ->getInstance();
 
+            TMGT_INF("sendOccPoll: Polling OCC%d", occInstance);
             bool continuePolling = false;
             size_t elogCount = 10;
             do
@@ -217,6 +220,8 @@ namespace HTMGT
             if ((OCC_STATE_ACTIVE == pollRsp->state) ||
                 (OCC_STATE_OBSERVATION == pollRsp->state))
             {
+                errlHndl_t l_err = NULL;
+
                 // Check role status
                 if (((OCC_ROLE_SLAVE == iv_role) &&
                      ((pollRsp->status & OCC_STATUS_MASTER) != 0)) ||
@@ -228,18 +233,59 @@ namespace HTMGT
                              iv_instance, iv_role, pollRsp->status,
                              pollRsp->extStatus);
                     iv_needsReset = true;
+                    /*@
+                     * @errortype
+                     * @reasoncode HTMGT_RC_INVALID_ROLE
+                     * @moduleid  HTMGT_MOD_OCC_POLL
+                     * @userdata1[0-15] OCC instance
+                     * @userdata[16-31] response state
+                     * @userdata2[0-15] expected role
+                     * @userdata2[16-31] response status byte
+                     * @devdesc Invalid role is POLL response
+                     */
+                    bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
+                              HTMGT_RC_INVALID_ROLE,
+                              iv_instance, pollRsp->state,
+                              iv_role, pollRsp->status,
+                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                     // TODO RTC 109224
                     //iv_resetReason = OCC_RESET_REASON_ERROR;
                     break;
                 }
+
+                if (pollRsp->occsPresent != iv_occsPresent)
+                {
+                    TMGT_ERR("pollRspHandler: OCC%d present mismatch"
+                             " (expected 0x%02X, but received 0x%02X)",
+                             iv_instance, iv_occsPresent,
+                             pollRsp->occsPresent);
+                    iv_needsReset = true;
+                    /*@
+                     * @errortype
+                     * @reasoncode HTMGT_RC_INVALID_DATA
+                     * @moduleid  HTMGT_MOD_OCC_POLL
+                     * @userdata1[0-15] OCC instance
+                     * @userdata[16-31] response OCC present
+                     * @userdata2[0-15] expected OCC present
+                     * @userdata2[16-31] response status byte
+                     * @devdesc Invalid OCC present data in POLL response
+                     */
+                    bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
+                              HTMGT_RC_INVALID_DATA,
+                              iv_instance, pollRsp->occsPresent,
+                              iv_occsPresent, pollRsp->status,
+                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    // TODO RTC 109224
+                    //iv_resetReason = OCC_RESET_REASON_ERROR;
+                }
             }
 
-            //iv_requestedFormat = (occCfgDataFormat)pollRsp->requestedCfg;
             if (pollRsp->requestedCfg != 0x00)
             {
                 TMGT_INF("pollRspHandler: OCC%d is requesting cfg format"
-                         " 0x%02X", iv_instance,
-                         pollRsp->requestedCfg);
+                         " 0x%02X", iv_instance, pollRsp->requestedCfg);
             }
 
             // Check for state change

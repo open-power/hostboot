@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/htmgt/tmgtutility.H $                                 */
+/* $Source: src/usr/htmgt/htmgt_utility.H $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 
 #define    TMGT_BIN( _fmt_, _args_...) \
                TRACFBIN(  g_trac_htmgt, _fmt_, ##_args_ )
+
 
 inline uint16_t UINT16_GET(const uint8_t * i_ptr)
 {

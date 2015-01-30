@@ -241,11 +241,16 @@ typedef struct runtimeInterfaces
     int (*occ_stop)(uint64_t* i_chip,
                     size_t i_num_chips);
 
-    /** Reset OCC upon failure
-     *  @param [in]: i_chipId: Id of processor with failing OCC
-     *  @return NONE
+    /**
+     * @brief Notify HTMGT that an OCC has an error to report
+     *
+     * @details  When an OCC has encountered an error that it wants to
+     *           be reported, this interface will be called to trigger
+     *           HTMGT to collect and commit the error.
+     *
+     * @param[in]  i_chipId  ChipID which identifies the OCC reporting an error
      */
-    void (*occ_error) (uint64_t i_chipId);
+    void (*process_occ_error)(uint64_t  i_chipId);
 
     /** Enable chip attentions
      *
@@ -270,6 +275,43 @@ typedef struct runtimeInterfaces
     int (*handle_attns)(uint64_t i_proc,
                         uint64_t i_ipollStatus,
                         uint64_t i_ipollMask);
+
+    /**
+     * @brief Notify HTMGT that an OCC has failed and needs to be reset
+     *
+     * @details  When BMC detects an OCC failure that requires a reset,
+     *           this interface will be called to trigger the OCC reset.
+     *           HTMGT maintains a reset count and if there are additional
+     *           resets available, the OCCs get reset/reloaded.
+     *           If the recovery attempts have been exhauseted or the OCC
+     *           fails to go active, an unrecoverable error will be logged
+     *           and the system will remain in safe mode.
+     *
+     * @param[in]  i_chipId  ChipID which identifies the failing OCC
+     */
+    void (*process_occ_reset)(uint64_t  i_chipId);
+
+    /**
+     * @brief Change the OCC state
+     *
+     * @details  This is a blocking call that will change the OCC state.
+     *           The OCCs will only actuate (update processor frequency/
+     *           voltages) when in Active state.  The OCC will only be
+     *           monitoring/observing when in Observation state.
+     *
+     * @note     When the OCCs are initially started, the state will default
+     *           to Active.  If the state is changed to Observation, that
+     *           state will be retained until the next IPL. (If the OCC would
+     *           get reset, it would return to the last requested state)
+     *
+     *
+     * @param[in]  i_occ_activation  set to 0 to move OCC to Observation state
+     *                          or any other value to move OCC to Active state
+     *
+     * @returns  0 on success, or return code if the state did not
+     *           change.
+     */
+    int (*enable_occ_actuation)(int i_occ_activation);
 
     // Reserve some space for future growth.
     void (*reserved[32])(void);

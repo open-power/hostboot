@@ -36,6 +36,9 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
 #include <console/consoleif.H>
+#include <sys/time.h>
+#include <ecmdDataBufferBase.H>
+#include <hwpf/hwp/occ/occAccess.H>
 
 
 namespace HTMGT
@@ -57,6 +60,7 @@ namespace HTMGT
         iv_homer(i_homer),
         iv_target(i_target),
         iv_lastPollValid(false),
+        iv_occsPresent(1 << i_instance),
         iv_version(0x01)
     {
     }
@@ -150,6 +154,22 @@ namespace HTMGT
 
     } // end Occ::setState()
 
+
+    // Update master occsPresent bits for poll rsp validataion
+    void Occ::updateOccPresentBits(uint8_t i_slavePresent)
+    {
+        if (iv_occsPresent & i_slavePresent)
+        {
+            // Flag error because multiple OCCs have same chip ID
+            TMGT_ERR("updateOccPreset: slave 0x%02X already exists (0x%02X)",
+                     i_slavePresent, iv_occsPresent);
+            iv_needsReset = true;
+        }
+        else
+        {
+            iv_occsPresent |= i_slavePresent;
+        }
+    };
 
 
     /////////////////////////////////////////////////////////////////
@@ -355,7 +375,6 @@ namespace HTMGT
                         if (false == needsRetry)
                         {
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                            l_err = NULL;
                             needsRetry = true;
                         }
                         else
@@ -390,7 +409,6 @@ namespace HTMGT
                 {
                     TMGT_ERR("_setOccState: Poll all OCCs failed");
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    l_err = NULL;
                 }
 
                 // Make sure all OCCs went to active state
@@ -463,6 +481,88 @@ namespace HTMGT
     } // end OccManager::_setOccState()
 
 
+    // Wait for all OCCs to reach communications checkpoint
+    void OccManager::_waitForOccCheckpoint()
+    {
+#ifdef CONFIG_HTMGT
+        // Wait up to 10 seconds for all OCCs to be ready (100 * 100ms = 10s)
+        const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
+        const size_t READ_RETRY_LIMIT = 100;
+
+        if (iv_occArray.size() > 0)
+        {
+            uint8_t retryCount = 0;
+            bool throttleErrors = false;
+
+            for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+                 pOcc < iv_occArray.end();
+                 pOcc++)
+            {
+                bool occReady = false;
+
+                while ((!occReady) && (retryCount++ < READ_RETRY_LIMIT))
+                {
+                    // Read SRAM response buffer to check for OCC checkpoint
+                     errlHndl_t l_err = NULL;
+                    const uint16_t l_length = 8;
+                    ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
+                    l_err = HBOCC::readSRAM((*pOcc)->getTarget(),
+                                            OCC_RSP_SRAM_ADDR,
+                                            l_buffer);
+                    if (NULL == l_err)
+                    {
+                        // Check response status for checkpoint
+                        if ((0x0E == l_buffer.getByte(6)) &&
+                            (0xFF == l_buffer.getByte(7)))
+                        {
+                            TMGT_INF("waitForOccCheckpoint OCC%d ready!",
+                                     (*pOcc)->getInstance());
+
+                            occReady = true;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (false == throttleErrors)
+                        {
+                            throttleErrors = true;
+                            TMGT_ERR("waitForOccCheckpoint: error trying to "
+                                     "read OCC%d SRAM (rc=0x%04X)",
+                                     (*pOcc)->getInstance(),
+                                     l_err->reasonCode());
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                        }
+                        else
+                        {
+                            delete l_err;
+                            l_err = NULL;
+                        }
+                    }
+
+                    nanosleep(0, NS_BETWEEN_READ);
+                }
+
+                if (!occReady)
+                {
+                    TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
+                             (*pOcc)->getInstance());
+                }
+
+                if ((OCC_ROLE_MASTER != (*pOcc)->getRole()) &&
+                    (NULL != iv_occMaster))
+                {
+                    // update master occsPresent bit for each slave OCC
+                    iv_occMaster->
+                        updateOccPresentBits((*pOcc)->getPresentBits());
+                }
+            }
+        }
+#endif
+    }
+
+
+
     uint8_t  OccManager::getNumOccs()
     {
         return Singleton<OccManager>::instance()._getNumOccs();
@@ -496,6 +596,12 @@ namespace HTMGT
     occStateId OccManager::getTargetState()
     {
         return Singleton<OccManager>::instance()._getTargetState();
+    }
+
+
+    void OccManager::waitForOccCheckpoint()
+    {
+        return Singleton<OccManager>::instance()._waitForOccCheckpoint();
     }
 
 

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/htmgt/htmgtreasoncodes.H $                    */
+/* $Source: src/include/usr/htmgt/htmgt_reasoncodes.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ namespace HTMGT
         HTMGT_RC_OCC_CMD_FAIL          = HTMGT_COMP_ID | 0x1B,
         HTMGT_RC_INVALID_LENGTH        = HTMGT_COMP_ID | 0x1C,
         HTMGT_RC_OCC_ERROR_LOG         = HTMGT_COMP_ID | 0x1D,
+        HTMGT_RC_INVALID_ROLE          = HTMGT_COMP_ID | 0x22,
         HTMGT_RC_INVALID_DATA          = HTMGT_COMP_ID | 0x23,
         HTMGT_RC_OCC_UNAVAILABLE       = HTMGT_COMP_ID | 0x24,
         HTMGT_RC_OCC_START_FAIL        = HTMGT_COMP_ID | 0x25,

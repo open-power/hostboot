@@ -176,6 +176,26 @@ namespace HTMGT
             occStateId getState() { return iv_state; };
 
 
+            /**
+             * @brief Return OCCs present bits
+             *
+             * @return bitmask representing this OCC position
+             */
+            uint8_t getPresentBits() { return iv_occsPresent; };
+
+
+            /**
+             * @brief Update OCCs present bits in the master OCC
+             *
+             * @note Should only be called for Maseter OCC.  This is
+             *       used to ensure the master can see all Slave OCCs
+             *       and that no two slaves have same chip id.
+             *
+             * @param[in]  i_slavePresent  Bitmask for slave OCC to add
+             */
+            void updateOccPresentBits(uint8_t i_slavePresent);
+
+
         protected:
             // Instance number of this OCC: 0 = first physical OCC
             uint8_t         iv_instance;
@@ -201,6 +221,8 @@ namespace HTMGT
             uint8_t         iv_lastPollResponse[OCC_POLL_DATA_MIN_SIZE];
             // true if lastPollResponse contains valid data
             bool            iv_lastPollValid;
+            // expected occsPresent byte in POLL response
+            uint8_t         iv_occsPresent;
 
 
         private:
@@ -304,6 +326,16 @@ namespace HTMGT
 
 
 
+            /**
+             * @brief Wait for all of the OCCs to reach their checkpoint
+             *        state.  That indicates that the OCCs are ready to
+             *        communicate and start handling commands.  This
+             *        function will wait up to 10 seconds for all OCCs
+             *        before returning to the caller.
+             */
+            void waitForOccCheckpoint();
+
+
         private:
             Occ *                   iv_occMaster;
             std::vector<Occ*>       iv_occArray;
@@ -353,6 +385,8 @@ namespace HTMGT
 
             /* See setOccState() above */
             errlHndl_t _setOccState(const occStateId i_state);
+
+            void _waitForOccCheckpoint();
 
     };
 

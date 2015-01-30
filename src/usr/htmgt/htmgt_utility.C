@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/htmgt/tmgtutility.C $                                 */
+/* $Source: src/usr/htmgt/htmgt_utility.C $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@ namespace HTMGT
 
     // Debug flags
     uint32_t G_debug_data = 0;
-    uint32_t G_debug_trace = DEBUG_TRACE_FULL_NONVERBOSE; // TODO RTC 117248
+    uint32_t G_debug_trace = DEBUG_TRACE_FULL_NONVERBOSE;
 
 
     // Create/Build an Error log and add HTMGT component trace

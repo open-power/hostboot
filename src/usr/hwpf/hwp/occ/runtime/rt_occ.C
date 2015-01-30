@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <util/utillidmgr.H>
+#include <htmgt/htmgt.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -65,21 +66,76 @@ namespace RT_OCC
 
     //------------------------------------------------------------------------
 
-    void occ_error (uint64_t i_chipId)
+    void process_occ_error (uint64_t i_chipId)
     {
-        do
+#ifdef CONFIG_HTMGT
+        TARGETING::Target* l_reportingOccTarget = NULL;
+        errlHndl_t err = RT_TARG::getHbTarget(i_chipId,l_reportingOccTarget);
+        if (err)
         {
-            TARGETING::Target* l_failedOccTarget = NULL;
-            errlHndl_t l_errl =RT_TARG::getHbTarget(i_chipId,l_failedOccTarget);
-            if (l_errl)
+            TRACFCOMP (g_fapiTd, ERR_MRK"process_occ_error: getHbTarget"
+                       " failed at %d chipId", i_chipId);
+            errlCommit (err, HWPF_COMP_ID);
+        }
+        else
+        {
+            HTMGT::processOccError(l_reportingOccTarget);
+        }
+#else
+        TRACFCOMP(g_fapiTd, ERR_MRK"Unexpected call to process_occ_error(%d)"
+                  " when HTMGT is not enabled", i_chipId);
+#endif
+    }
+
+    //------------------------------------------------------------------------
+
+    void process_occ_reset (uint64_t i_chipId)
+    {
+#ifdef CONFIG_HTMGT
+        TARGETING::Target* l_failedOccTarget = NULL;
+        errlHndl_t err = RT_TARG::getHbTarget(i_chipId,l_failedOccTarget);
+        if (err)
+        {
+            TRACFCOMP (g_fapiTd, ERR_MRK"process_occ_reset: getHbTarget"
+                       " failed at %d chipId", i_chipId);
+            errlCommit (err, HWPF_COMP_ID);
+        }
+        else
+        {
+            HTMGT::processOccReset(l_failedOccTarget);
+        }
+#else
+        TRACFCOMP(g_fapiTd, ERR_MRK"Unexpected call to process_occ_reset(%d)"
+                  " when HTMGT is not enabled", i_chipId);
+#endif
+    }
+
+    //------------------------------------------------------------------------
+
+    int enable_occ_actuation (int i_occ_activation)
+    {
+        int rc = 0;
+#ifdef CONFIG_HTMGT
+        errlHndl_t err = HTMGT::enableOccActuation(0 != i_occ_activation);
+        if (err)
+        {
+            rc = err->reasonCode();
+            if (0 == rc)
             {
-                TRACFCOMP (g_fapiTd, "occ_error: getHbTarget failed at %d chipId", i_chipId);
-                errlCommit (l_errl, HWPF_COMP_ID);
-                break;
+                // If there was a failure, be sure to return non-zero status
+                rc = -1;
             }
-            //TODO RTC: 114906
-            //HTMGT::htmgtProcessOccError(l_failedOccTarget);
-        } while (0);
+            TRACFCOMP (g_fapiTd,ERR_MRK"enable_occ_actuation: OCC state change"
+                       " failed with rc=0x%04X (actuate=%d)",
+                       err->reasonCode(), i_occ_activation);
+            errlCommit (err, HWPF_COMP_ID);
+        }
+#else
+        rc = -1;
+        TRACFCOMP(g_fapiTd,ERR_MRK"Unexpected call to enable_occ_actuation(%d)"
+                  " when HTMGT is not enabled", i_occ_activation);
+#endif
+        return rc;
     }
 
     //------------------------------------------------------------------------
@@ -368,7 +424,9 @@ namespace RT_OCC
             rt_intf->occ_load = &executeLoadOCC;
             rt_intf->occ_start = &executeStartOCCs;
             rt_intf->occ_stop = &executeStopOCCs;
-            rt_intf->occ_error  = &occ_error;
+            rt_intf->process_occ_error  = &process_occ_error;
+            rt_intf->process_occ_reset  = &process_occ_reset;
+            rt_intf->enable_occ_actuation  = &enable_occ_actuation;
 
             // If we already loaded OCC during the IPL we need to fix up
             //  the virtual address because we're now not using virtual

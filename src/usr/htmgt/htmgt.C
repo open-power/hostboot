@@ -49,9 +49,6 @@
 namespace HTMGT
 {
 
-    const uint32_t HTMGT_DELAY_BEFORE_COMM = 5;
-
-
     // Move the OCCs to active state or log unrecoverable error and
     // stay in safe mode
     void processOccStartStatus(const bool i_startCompleted,
@@ -75,11 +72,6 @@ namespace HTMGT
                 {
                     do
                     {
-                        // TODO: RTC 119831 - remove hardcoded delay
-                        // Delay before communication with OCCs to make sure
-                        // they are ready (since there is no initial attention)
-                        nanosleep(HTMGT_DELAY_BEFORE_COMM, 0);
-
 #ifndef __HOSTBOOT_RUNTIME
                         if (false == occMgr::instance().iv_configDataBuilt)
                         {
@@ -97,6 +89,9 @@ namespace HTMGT
                         }
 #endif
 
+                        // Make sure OCCs are ready for communication
+                        occMgr::instance().waitForOccCheckpoint();
+
                         // Send poll to establish comm
                         TMGT_INF("Send initial poll to all OCCs to"
                                  " establish comm");
@@ -105,7 +100,6 @@ namespace HTMGT
                         {
                             // Continue even if failed (poll will be retried)
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                            l_err = NULL;
                         }
 
                         // Send ALL config data
@@ -125,7 +119,6 @@ namespace HTMGT
                         {
                             // Continue even if failed to update sensor
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                            l_err = NULL;
                         }
 
                         // @TODO RTC 120059 remove after elog alerts supported
@@ -141,7 +134,6 @@ namespace HTMGT
                         if (l_err)
                         {
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                            l_err = NULL;
                         }
 #endif
 
