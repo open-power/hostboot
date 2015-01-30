@@ -62,6 +62,12 @@ namespace   INITSERVICE
  */
 const uint64_t MAX_WAIT_TIME_SEC = 10;
 
+/**
+ * @brief constant value that defines the infinite pause for the istepPauseSet
+ *      method.
+ */
+const uint64_t ISTEP_PAUSE_SET_INFINITE = 0xFF;
+
 #ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 /**
  * @brief The Maximum number of elements in the ATTR_RECONFIG_LOOP_TESTS

@@ -2111,12 +2111,33 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
                         l_p_pauseCfg->bpTagInfo
                         );
 
-            // If full stop is requested then send breakpoint message to FSP
-            // otherwise sleep for the requested number of seconds
+            // If full stop is requested then send breakpoint message to FSP.
+            // This stop can be resumed via external command from FSP.
             if(l_p_pauseCfg->fullStopEn)
             {
                 iStepBreakPoint(l_p_pauseCfg->bpTagInfo);
             }
+            // If infinite pause is set then hang in a tight loop indefinitely.
+            // This is a permanent stop that cannot be resumed via any command.
+            else if(l_p_pauseCfg->pauseLen == ISTEP_PAUSE_SET_INFINITE)
+            {
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"istepPauseSet: "
+                        "pauseLen=0x%02X, Permanent pause enabled.",
+                        l_p_pauseCfg->pauseLen
+                        );
+
+#ifdef CONFIG_CONSOLE
+                CONSOLE::displayf(NULL, "istepPauseSet: "
+                        "pauseLen=0x%02X, Permanent pause enabled.",
+                        l_p_pauseCfg->pauseLen
+                        );
+#endif
+                while(1)
+                {
+                    nanosleep(1,0);
+                }
+            }
+            // Otherwise sleep for the requested number of seconds
             else
             {
                 nanosleep(l_p_pauseCfg->pauseLen,0);
