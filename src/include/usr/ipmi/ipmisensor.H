@@ -735,6 +735,35 @@ namespace SENSOR
      */
     void updateBMCSensorStatus( TARGETING::TYPE i_type );
 
+    /**
+     *   Helper function to return the system power limit from the BMC.
+     *   This limit is set by the system administrator to limit the amout
+     *   of power the system can use.
+     *
+     *  @param[out] - o_powerLimit  - user defined power limit setting.
+     *  @param[out] - o_limitActive - indicates the limit has been activated
+     *                                using the dcmi "activate power limit"
+     *                                command.
+     *
+     */
+    errlHndl_t getUserPowerLimit( uint16_t &o_powerLimit,
+                                  bool &o_activeActive );
+
+    /**
+     *   Helper function to return the system power limit from the BMC.
+     *   This limit is set by the system administrator to limit the amount
+     *   of power the system can use.
+     *
+     *  @param[out] - o_sensor_numbers - pointer to a static array containing
+     *                                   the sensor numbers for each of the 16
+     *                                   apss channels
+     *
+     *   const uint16_t (*array)[16] = NULL;
+     */
+    errlHndl_t getAPSSChannelSensorNumbers(
+                                     const uint16_t (* &o_sensor_numbers)[16]);
+
+
 
 }; // end namespace
 

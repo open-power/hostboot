@@ -77,7 +77,8 @@ namespace IPMI
         NETFUN_FIRMWARE = (0x08 << 2),
         NETFUN_STORAGE  = (0x0a << 2),
         NETFUN_TRANPORT = (0x0c << 2),
-        NETFUN_IBM =      (0x3a << 2),
+        NETFUN_GRPEXT   = (0x2c << 2),
+        NETFUN_IBM      = (0x3a << 2),
 
         // Overload the OEM netfun for a "none" netfun. We use this as a
         // default for objects which will have their netfun filled in
@@ -235,6 +236,12 @@ namespace IPMI
 
     inline const command_t pnor_request(void)
     { return std::make_pair(NETFUN_IBM, 0x07); }
+
+    // $TODO RTC:123256 - need to add code to get dcmi capabilities
+    // This is a dcmi message used to request the
+    // user defined power limit from the BMC.
+    inline const command_t get_power_limit(void)
+    { return std::make_pair(NETFUN_GRPEXT, 0x03); }
 
     // Some helper messages
     // Used to create an empty message for reception

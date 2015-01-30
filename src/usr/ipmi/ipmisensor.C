@@ -989,8 +989,24 @@ namespace SENSOR
             }
 
         }
-
         return l_sensor_number;
+    }
+
+    // $TODO - RTC:123217 - modify code get info from attribute when available
+    // interface to retrieve the APSS channel sensor numbers.
+    errlHndl_t getAPSSChannelSensorNumbers(
+                        const uint16_t (* &o_sensor_numbers)[16])
+    {
+
+        static const uint16_t numbers[16] = { 0x47, 0x38, 0x39, 0x3A,
+                                              0x3B, 0x3C, 0x3D, 0x3E,
+                                              0x3F, 0x40, 0x41, 0x42,
+                                              0x43, 0x44, 0x45, 0x46 };
+
+        o_sensor_numbers = &numbers;
+
+        return NULL;
+
     }
 
 }; // end name space

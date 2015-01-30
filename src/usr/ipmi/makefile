@@ -37,6 +37,7 @@ OBJS += ipmiwatchdog.o
 OBJS += ipmifruinv.o
 OBJS += ipmipowerstate.o
 OBJS += ipmiselrecord.o
+OBJS += ipmidcmi.o
 
 #SUBDIRS += test.d
 

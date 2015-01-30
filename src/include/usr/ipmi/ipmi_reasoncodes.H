@@ -34,6 +34,7 @@ namespace IPMI
         MOD_IPMISRV_SEND        = 0x01, // IPMI::send/IPMI::sendrecv
         MOD_IPMISRV_REPLY       = 0x02, // IPMI::respond
         MOD_IPMISENSOR          = 0x03, // IPMI::sensor
+        MOD_IPMIDCMI            = 0x04, // IPMI::sensor
     };
 
     enum IPMIReasonCode
@@ -49,6 +50,7 @@ namespace IPMI
         RC_SENSOR_NOT_PRESENT        = IPMI_COMP_ID | 0x09,
         RC_SET_SENSOR_FAILURE        = IPMI_COMP_ID | 0x0a,
         RC_READ_EVENT_FAILURE        = IPMI_COMP_ID | 0x0b,
+        RC_DCMI_CMD_FAILED           = IPMI_COMP_ID | 0x0c,
 
     };
 };
