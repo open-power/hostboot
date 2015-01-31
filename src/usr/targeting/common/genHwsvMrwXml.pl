@@ -2186,10 +2186,10 @@ sub generate_sys
             0x0b00,0x09,  <!-- Power_Cap  -->
             0x0c00,0x06,  <!-- PCI -->
             0x0d00,0x00,  <!-- Boot_watchdog -->
-            0x0e00,0x85,  <!-- Reboot_Count -->
+            0x0e00,0x1d,  <!-- Boot_Count -->
             0x1000,0x82,  <!-- System_Event -->
             0x1010,0x83,  <!-- APSS Fault -->
-            0xFFFF,0xFF,
+            0xC615,0x88,  <!-- Activate Power Limit -->
             0xFFFF,0xFF,
             0xFFFF,0xFF,
             0xFFFF,0xFF,
@@ -3295,16 +3295,18 @@ sub generate_ex_core
     # call to do any fsp per-ex_core attributes
     do_plugin('fsp_ex_core', $proc, $ex, $ordinalId );
 
+    my $snbase=0x4d;
 
     # $TODO RTC:110399
     if( $haveFSPs == 0 )
     {
+     my $procsn = sprintf("0x%02X",($snbase+$ordinalId));
       print "\n<!-- IPMI Sensor numbers for Core status -->
     <attribute>
         <id>IPMI_SENSORS</id>
          <default>
              0x0100, 0x13, <!-- Temperature sensor -->
-             0x0500, 0x02, <!-- State sensor -->
+             0x0500, $procsn, <!-- State sensor -->
              0xFFFF, 0xFF,
              0xFFFF, 0xFF,
              0xFFFF, 0xFF,
@@ -4130,7 +4132,7 @@ sub generate_centaur
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0x12,  <!-- Temperature sensor -->
+            0x0100, 0x0F,  <!-- Temperature sensor -->
             0x0500, 0x01,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4448,12 +4450,16 @@ sub generate_is_dimm
         # $TODO RTC:110399
         if( $haveFSPs == 0 )
         {
+     my $snbase = 0x49;
+     my $sntbase = 0x10;
+     my $dimmsn = sprintf("0x%02X",($snbase+$dimmPos));
+     my $dimmtsn = sprintf("0x%02X",($sntbase+$dimmPos));
             print "\n<!-- IPMI Sensor numbers for DIMM status -->
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0x13,  <!-- Temperature sensor -->
-            0x0500, 0x01,  <!-- State sensor -->
+            0x0100, $dimmtsn,  <!-- Temperature sensor -->
+            0x0500, $dimmsn,  <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,

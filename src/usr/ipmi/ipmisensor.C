@@ -173,22 +173,28 @@ namespace SENSOR
                     break;
                 }
             }
-            // shift the sensor number into to bytes 0-3 and then
-            // or in the HUID to bytes 4-7
-            uint64_t userdata2 = getSensorNumber();
 
-            userdata2 = (userdata2 << 32) | TARGETING::get_huid(iv_target);
+            // $TODO RTC:123045 - Remove when SDR is finalized
+            // for now we will not create an error for bad sensor
+            // numbers
+            if( i_rc != IPMI::CC_BADSENSOR )
+            {
+                // shift the sensor number into to bytes 0-3 and then
+                // or in the HUID to bytes 4-7
+                uint64_t userdata2 = getSensorNumber();
 
-            l_err = new ERRORLOG::ErrlEntry(
+                userdata2 = (userdata2 << 32) | TARGETING::get_huid(iv_target);
+
+                l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 IPMI::MOD_IPMISENSOR,
                                 l_reasonCode,
                                 i_rc, userdata2, true);
 
-            l_err->collectTrace(IPMI_COMP_NAME);
+                l_err->collectTrace(IPMI_COMP_NAME);
 
+            }
         }
-
         return l_err;
     }
 
