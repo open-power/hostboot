@@ -268,11 +268,16 @@ void IpmiRP::getInterfaceCapabilities(void)
 
         // Protect the members as we're on another thread.
         mutex_lock(&iv_mutex);
-
-        iv_outstanding_req = data[0];
+        // @TODO RTC:123041 - In theory the number of outstanding requests is
+        //       set via the response data below, but currently the response
+        //       value isn't correct so the default will be used.
+        //iv_outstanding_req = data[0];
         iv_xmit_buffer_size = data[1];
         iv_recv_buffer_size = data[2];
-        iv_bmc_timeout = data[3];
+        // @TODO RTC:123041 - In theory the BMC timeout is set via the response
+        //       data below, but currently the response value isn't correct so
+        //       the default will be used.
+        //iv_bmc_timeout = data[3];
         iv_retries = data[4];
 
         IPMI_TRAC("get_capabilities: requests %d, in buf %d, "
