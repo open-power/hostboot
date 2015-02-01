@@ -177,9 +177,11 @@ void* host_discover_targets( void *io_pArgs )
     {
         uint8_t l_type = itr->first;
         uint64_t l_val = itr->second;
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"PRESENT> %s[%.2X]=%.8X%.8X", l_epath.pathElementTypeAsString(itr->first), l_type, l_val>>32, l_val&0xFFFFFFFF);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"PRESENT> %s[%.2X]=%.8X%.8X",
+                l_epath.pathElementTypeAsString(itr->first), l_type, l_val>>32, l_val&0xFFFFFFFF);
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        CONSOLE::displayf( "PRESENT> %s[%.2X]=%.8X%.8X", l_epath.pathElementTypeAsString(itr->first), l_type, l_val>>32, l_val&0xFFFFFFFF );
+        CONSOLE::displayf("HWAS", "PRESENT> %s[%.2X]=%.8X%.8X",
+                l_epath.pathElementTypeAsString(itr->first), l_type, l_val>>32, l_val&0xFFFFFFFF );
 #endif
     }
 

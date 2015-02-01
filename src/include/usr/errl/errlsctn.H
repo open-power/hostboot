@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -59,6 +59,7 @@ namespace ERRORLOG
  */
 class ErrlSctn
 {
+    friend class ErrlManager;
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
 
 

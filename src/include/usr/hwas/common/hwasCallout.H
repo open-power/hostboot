@@ -93,6 +93,7 @@ enum epubProcedureID
 // from srci/fsp/srci.H
 enum callOutPriority
 {
+    SRCI_PRIORITY_NONE  = 0,
     SRCI_PRIORITY_LOW   = 1,
     SRCI_PRIORITY_MEDC  = 2,
     SRCI_PRIORITY_MEDB  = 3,
@@ -161,21 +162,35 @@ typedef struct callout_ud
             // two Targets will follow
         };
         struct {    // type == CLOCK_CALLOUT
-            clockTypeEnum   clockType;      // uint32_t
-            DeconfigEnum    clkDeconfigState;  // uint32_t
-            GARD_ErrorType  clkGardErrorType;  // uint32_t
+            clockTypeEnum   clockType;          // uint32_t
+            DeconfigEnum    clkDeconfigState;   // uint32_t
+            GARD_ErrorType  clkGardErrorType;   // uint32_t
             // one Target will follow
         };
         struct {    // type == PART_CALLOUT
-            partTypeEnum   partType;      // uint32_t
+            partTypeEnum    partType;           // uint32_t
             DeconfigEnum    partDeconfigState;  // uint32_t
             GARD_ErrorType  partGardErrorType;  // uint32_t
             // one Target will follow
         };
-    };
+    }; // union
 } callout_ud_t;
 
 #ifndef PARSER
+
+/**
+ *  @brief retrieveTarget will convert the EntityPath to a Target
+ *
+ *  @param[in]  io_uData pointer to the userdetail data
+ *  @param[in]  o_pTarget target that is found
+ *  @param[in]  io_errl Error log handle reference
+ *
+ *  @return     true if error and o_pTarget data not valid,
+ *              false no error, o_pTarget data valid
+ */
+bool retrieveTarget(uint8_t * & io_uData,
+                    TARGETING::Target * & o_pTarget,
+                    errlHndl_t i_errl);
 
 /**
  *  @brief processCallout process the userdetail for a callout, calling
@@ -295,11 +310,7 @@ errlHndl_t platHandlePartCallout(
         DeconfigEnum    i_deconfigState = DECONFIG,
         GARD_ErrorType  i_gardErrorType = GARD_Fatal);
 
-
 #endif // not PARSER
 
-
-
 };   // end namespace
-
 #endif

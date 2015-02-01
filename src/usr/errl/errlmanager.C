@@ -35,6 +35,7 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <errl/errlmanager.H>
+#include <errl/errlreasoncodes.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <initservice/taskargs.H>
@@ -49,9 +50,11 @@
 #include <intr/interrupt.H>
 #include <errldisplay/errldisplay.H>
 #include <console/consoleif.H>
+#include <hwas/common/hwasCallout.H>
+#include <ipmi/ipmisel.H>
+#include <ipmi/ipmisensor.H>
 #include <config.h>
 #include <functional>
-#include <util/lockfree/counter.H>
 
 namespace ERRORLOG
 {
@@ -821,6 +824,40 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
     return;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Global function (not a method on an object) to ack that the error log
+// was sent to the BMC.
+void ErrlManager::errlAckErrorlog(uint32_t i_eid)
+{
+    ERRORLOG::theErrlManager::instance().sendAckErrorlog(i_eid);
+    return;
+}
+
+void ErrlManager::sendAckErrorlog(uint32_t i_eid)
+{
+    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendAddErrorlog 0x%.8X",
+            i_eid);
+
+    //Create a message to send to Host boot error message queue.
+    msg_t *msg = msg_allocate();
+    msg->type = ERRLOG_COMMITTED_ACK_RESPONSE_TYPE;
+    //Pass along the eid of the error, shifted up to the first word
+    msg->data[0] = static_cast<uint64_t>(i_eid) << 32;
+
+    //Send the msg asynchronously to error message queue to handle.
+    int rc = msg_send ( ERRORLOG::ErrlManager::iv_msgQ, msg );
+
+    //Return code is non-zero when the message queue is invalid
+    //or the message type is invalid.
+    if ( rc )
+    {
+        TRACFCOMP( g_trac_errl, ERR_MRK "Failed (rc=%d) to send ack 0x%.8X message.",
+                rc, i_eid);
+    }
+    return;
+}
+
+
 bool ErrlManager::errlCommittedThisBoot()
 {
     isync();
@@ -1295,101 +1332,93 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
         if (io_err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
         {
             TRACFCOMP( g_trac_errl, INFO_MRK
-                    "sendErrLogToBmc: INFORMATIONAL log, skipping");
+                    "sendErrLogToBmc: %.8X is INFORMATIONAL; skipping",
+                    io_err->eid());
             break;
         }
 
-        // TODO: RTC 117526
-        // look through the error log and determine what callouts there are,
-        // and what the corresponding sensors are. if there aren't any, then
-        // break;
+        // look thru the errlog for any Callout UserDetail sections
+        //  to determine the sensor information for the SEL
+        uint8_t l_sensorNumber = SENSOR::INVALID_SENSOR;
+        uint8_t l_sensorType = SENSOR::INVALID_SENSOR;
+        HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_NONE;
+        for(std::vector<ErrlUD*>::const_iterator
+                it = io_err->iv_SectionVector.begin();
+                it != io_err->iv_SectionVector.end();
+                it++ )
+        {
+            HWAS::callout_ud_t *l_ud =
+                    reinterpret_cast<HWAS::callout_ud_t*>((*it)->iv_pData);
 
-        // flatten into bufffer, truncate to 2K
-        uint32_t l_plidSize = io_err->flattenedSize();
-        if (l_plidSize > (ESEL_MAX_SIZE - sizeof(selRecord)))
+            // if this is a CALLOUT that will have a target
+            if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+                (1                == (*it)->iv_header.iv_ver) &&
+                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst) &&
+                (HWAS::HW_CALLOUT == l_ud->type)
+               )
+            {
+                // if this callout is higher than any previous
+                if (l_ud->priority > l_priority)
+                {
+                    // get the sensor number for the target
+                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
+                    TARGETING::Target *l_target = NULL;
+                    bool l_err = HWAS::retrieveTarget(l_uData,
+                            l_target, io_err);
+                    if (!l_err)
+                    {
+                        // got a target, now get the sensor number
+                        l_sensorNumber =
+                                SENSOR::getFaultSensorNumber(l_target);
+
+                        // and update the priority
+                        l_priority = l_ud->priority;
+                    }
+                }
+            }
+        } // for each SectionVector
+
+#if 0
+// TODO: RTC 119440
+        if (l_sensorNumber != SENSOR::INVALID_SENSOR)
+        {
+            l_sensorType = SENSOR::getSensorType(l_sensorNumber);
+        }
+#endif
+
+        // flatten into buffer, truncate to max eSEL size
+        uint32_t l_pelSize = io_err->flattenedSize();
+        if (l_pelSize > (IPMISEL::ESEL_MAX_SIZE - sizeof(IPMISEL::selRecord)))
         {
             TRACFCOMP( g_trac_errl, INFO_MRK
-                    "sendErrLogToBmc: msg size %d > 2K, truncating.",
-                    l_plidSize);
-            l_plidSize = ESEL_MAX_SIZE - sizeof(selRecord);
+                    "sendErrLogToBmc: msg size %d > %d, truncating.",
+                    l_pelSize, IPMISEL::ESEL_MAX_SIZE);
+            l_pelSize = IPMISEL::ESEL_MAX_SIZE - sizeof(IPMISEL::selRecord);
         }
 
-        uint8_t *l_plidData = new uint8_t[l_plidSize];
-        uint32_t l_errSize = io_err->flatten (l_plidData,
-                                    l_plidSize, true /* truncate */);
+        uint8_t *l_pelData = new uint8_t[l_pelSize];
+        uint32_t l_errSize = io_err->flatten (l_pelData,
+                                    l_pelSize, true /* truncate */);
 
         if (l_errSize ==0)
         {
             // flatten didn't work
             TRACFCOMP( g_trac_errl, ERR_MRK
                     "sendErrLogToBmc: could not flatten data - not sending");
-            delete [] l_plidData;
+            delete [] l_pelData;
             break;
         }
 
-        static uint16_t cv_recordID = 0;
-
-        // 0x0000 and 0xffff are reserved; handle wrap
-        uint16_t l_nextRecordID = cv_recordID++;
-        if (l_nextRecordID == 0xffff)
-        {
-            // force a wrap
-            TRACFCOMP( g_trac_errl, ERR_MRK
-                    "sendErrLogToBmc: wrapping on recordID!");
-            cv_recordID = 1;
-            l_nextRecordID = cv_recordID;
-        }
-        selRecord *l_sel = new selRecord();
-        l_sel->recordID = l_nextRecordID;
-        uint16_t eSelRecordID = cv_recordID++;
-
-        l_sel->record_type = SEL_RECORD_TYPE; // per AMI spec - SEL
-        l_sel->timestamp = io_err->iv_Private.iv_committed;
-        l_sel->generator_id = SEL_GENERATOR_ID;
-        l_sel->evm_format_version = SEL_FORMAT_VERSION;
-        // TODO: RTC 117526 - sensor data
-        l_sel->sensor_type = 1;
-        l_sel->sensor_number = 1;
-        l_sel->event_dir_type = 1;
-        l_sel->event_data1 = ESEL_EVENT_DATA_1; // per AMI spec
-        l_sel->event_data2 = ((eSelRecordID & 0xFF00) >> 8);
-        l_sel->event_data3 =  (eSelRecordID & 0x00FF);
-
-
-        // first part is a selRecord
-        selRecord *l_esel = new selRecord();
-        l_esel->recordID = eSelRecordID;
-        l_esel->record_type = ESEL_RECORD_TYPE; // per AMI spec - eSEL
-        l_esel->timestamp = io_err->iv_Private.iv_committed;
-        l_esel->generator_id = SEL_GENERATOR_ID;
-        l_esel->evm_format_version = SEL_FORMAT_VERSION;
-        l_esel->sensor_type = 1; // per AMI spec
-        l_esel->sensor_number = 1; // per AMI spec
-        l_esel->event_dir_type = 1; // per AMI spec
-        l_esel->event_data1 = ESEL_EVENT_DATA_1; // per AMI spec
-        l_esel->event_data2 = 0; // per AMI spec
-        l_esel->event_data3 = 0; // per AMI spec
-
         // send it to the BMC over IPMI
-        TRACFCOMP(g_trac_errl, INFO_MRK "sendErrLogToBmc: sent SEL %d, eSEL %d",
-            l_sel->recordID, l_esel->recordID);
+        TRACFCOMP(g_trac_errl, INFO_MRK
+                "sendErrLogToBmc: sensor %.2x/%.2x, size %d",
+                l_sensorType, l_sensorNumber, l_pelSize);
+        IPMISEL::sendESEL(l_pelData, l_pelSize,
+                            io_err->eid(), IPMISEL::event_unspecified,
+                            l_sensorType, l_sensorNumber);
 
-        // TODO: RTC 117454 call IPMI send_sel i/f when it's ready
-#if 0
-        errlHndl_t l_err = sendSel(&l_sel, &l_esel, &l_plidData, l_plidSize);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_errl, ERR_MRK "sendSel(%d,%d,%d) returned error",
-                l_sel->recordID, l_esel->recordID, l_plidSize);
-            errlCommit(l_err, IPMI_COMP_ID);
-        }
-#else
-        // free the buffers
-        delete l_sel;
-        delete l_esel;
-        delete [] l_plidData;
-#endif
-
+        // free the buffer
+        delete [] l_pelData;
 
     } while(0);
 

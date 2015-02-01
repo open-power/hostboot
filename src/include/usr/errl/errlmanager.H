@@ -39,7 +39,6 @@
 #include <util/singleton.H>
 #include <errl/errlentry.H>
 #include <errldisplay/errldisplay.H>
-#include <errl/errlipmi.H>
 #include <sys/sync.h>
 #include <kernel/timemgr.H>
 #include <hbotcompid.H>
@@ -156,13 +155,15 @@ public:
      static void errlResourceReady(errlManagerNeeds i_needs);
 
      /**
-      * @brief Sends msg to errlmanager telling what resources are ready
+      * @brief Sends msg to errlmanager to ack sending of errl to BMC
       *
-      * This is called by resources that the ErrlManager needs, which start up
-      * AFTER ErrlManager starts. Currently, that's PNOR MBOX and TARGeting.
+      * This is called by ipmi code once the SEL for the indicated errorlog
+      * has been successfully sent to the BMC
       *
+      * It is a static function because a module cannot call an interface on a
+      * singleton in another module
       */
-     void sendResourcesMsg(errlManagerNeeds i_needs);
+     static void errlAckErrorlog(uint32_t i_eid);
 
      /**
       * @brief  Returns the HWAS ProcessCallout function pointer
@@ -249,6 +250,20 @@ private:
       */
     ErrlManager(const ErrlManager& i_right);
     ErrlManager& operator=(const ErrlManager& i_right);
+
+     /**
+      * @brief Sends msg to errlmanager telling what resources are ready
+      *
+      * called by static errlResourceReady function.
+      */
+     void sendResourcesMsg(errlManagerNeeds i_needs);
+
+     /**
+      * @brief Sends msg to errlmanager telling which errlog to ack
+      *
+      * called by static errlAckErrorlog function.
+      */
+     void sendAckErrorlog(uint32_t i_eid);
 
     /**
      * @brief Access PNOR and get the address and size of the HBEL section in

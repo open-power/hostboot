@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -69,6 +69,7 @@ class ErrlSctnHdr
     friend class ErrlUD;
     friend class ErrlSrc;
     friend class ErrlEntry;
+    friend class ErrlManager;
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
 
 

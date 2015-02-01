@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -54,6 +54,7 @@ class ErrlUD : public ErrlSctn
     // you would expect to be part of ErrlEntry are actually instance data
     // in this class.
     friend class ErrlEntry;
+    friend class ErrlManager;
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
 
 

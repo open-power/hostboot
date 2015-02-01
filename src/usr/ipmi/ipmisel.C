@@ -27,7 +27,9 @@
  * @brief IPMI system error log transport definition
  */
 
-#include "ipmisel.H"
+#include <algorithm>
+#include <sys/time.h>
+#include <ipmi/ipmisel.H>
 #include "ipmiconfig.H"
 #include <ipmi/ipmi_reasoncodes.H>
 
@@ -41,6 +43,49 @@
 extern trace_desc_t * g_trac_ipmi;
 #define IPMI_TRAC(printf_string,args...) \
     TRACFCOMP(g_trac_ipmi,"sel: "printf_string,##args)
+
+namespace IPMISEL
+{
+    void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
+                  uint32_t i_eid, uint8_t i_eventDirType,
+                  uint8_t i_sensorType, uint8_t i_sensorNumber)
+    {
+        IPMI_TRAC(ENTER_MRK "sendESEL()");
+
+        // one message queue to the SEL thread
+        static msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
+
+        msg_t *msg = msg_allocate();
+        msg->type = MSG_SEND_ESEL;
+        msg->data[0] = i_eid;
+
+        // create the sel record of information
+        IPMISEL::selRecord l_sel;
+        l_sel.record_type = IPMISEL::record_type_ami_esel;
+        l_sel.generator_id = IPMISEL::generator_id_ami;
+        l_sel.evm_format_version = IPMISEL::format_ipmi_version_2_0;
+        l_sel.sensor_type = i_sensorType;
+        l_sel.sensor_number = i_sensorNumber;
+        l_sel.event_dir_type = i_eventDirType;
+        l_sel.event_data1 = IPMISEL::event_data1_ami;
+
+        eselInitData *eselData =
+            new eselInitData(&l_sel, i_eselData, i_dataSize);
+
+        msg->extra_data = eselData;
+
+        //Send the msg to the sel thread
+        int rc = msg_send(mq,msg);
+        if(rc)
+        {
+            IPMI_TRAC(ERR_MRK "Failed (rc=%d) to send message",rc);
+            delete eselData;
+        }
+        IPMI_TRAC(EXIT_MRK "sendESEL");
+        return;
+    } // sendESEL
+} // IPMISEL
+
 
 /**
  * @brief Constructor
@@ -100,8 +145,8 @@ void IpmiSEL::execute(void)
 
         switch(msg_type)
         {
-            case IPMISEL::MSG_SEND_SEL:
-                send_sel(msg);
+            case IPMISEL::MSG_SEND_ESEL:
+                process_esel(msg);
                 //done with msg
                 msg_free(msg);
                 break;
@@ -112,12 +157,11 @@ void IpmiSEL::execute(void)
                 //Respond that we are done shutting down.
                 msg_respond(iv_msgQ, msg);
                 break;
-        };
-
-    }
+        }
+    } // while(1)
     IPMI_TRAC(EXIT_MRK "message loop");
     return;
-}
+} // execute
 
 /*
  * @brief Store either Record/Reserve ID from given data
@@ -130,9 +174,9 @@ void storeReserveRecord(uint8_t* o_RData, uint8_t* i_data)
 }
 
 /*
- * @brief Create Partial Add Header from inputs
+ * @brief Create Partial Add eSEL Header from inputs
  */
-void createPAddHeader(uint8_t* i_reserveID, uint8_t* i_recordID,
+void createPartialAddHeader(uint8_t* i_reserveID, uint8_t* i_recordID,
                                uint16_t i_offset, uint8_t i_isLastEntry,
                                uint8_t* o_header)
 {
@@ -146,194 +190,215 @@ void createPAddHeader(uint8_t* i_reserveID, uint8_t* i_recordID,
     return;
 }
 
-/*
- * @brief Send sel msg
- */
-void IpmiSEL::send_sel(msg_t *i_msg)
+enum esel_retry
 {
-    IPMI_TRAC(ENTER_MRK "send_sel");
+    MAX_SEND_COUNT = 4,
+    SLEEP_BASE = 2 * NS_PER_MSEC,
+};
 
-    selInitData *l_data = (selInitData*)(i_msg->extra_data);
+/*
+ * @brief process esel msg
+ */
+void IpmiSEL::process_esel(msg_t *i_msg) const
+{
+    errlHndl_t l_err = NULL;
+    IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
+    const uint32_t l_eid = i_msg->data[0];
+    IPMISEL::eselInitData * l_data =
+            (IPMISEL::eselInitData*)(i_msg->extra_data);
+    IPMI_TRAC(ENTER_MRK "process_esel");
 
-    size_t eSELlen = i_msg->data[0];
-    uint8_t* eSelData[] = {l_data->sel,l_data->eSel,l_data->eSelExtra};
+    uint32_t l_send_count = MAX_SEND_COUNT;
+    while (l_send_count > 0)
+    {
+        // try to send the eles to the bmc
+        send_esel(l_data, l_err, l_cc);
 
-    errlHndl_t err = NULL;
-    IPMI::completion_code cc = IPMI::CC_UNKBAD;
-    size_t len = 0;
-    uint8_t* data = NULL;
-    uint8_t reserveID[2] = {0,0};
-    uint8_t recordID[2] = {0,0};
-    do{
-        err = IPMI::sendrecv(IPMI::reserve_sel(),cc,len,data);
-        if(err)
+        // if no error but last completion code was:
+        if ((l_err == NULL) &&
+            ((l_cc == IPMI::CC_BADRESV) ||  // lost reservation
+             (l_cc == IPMI::CC_TIMEOUT)))   // timeout
         {
-            IPMI_TRAC(ERR_MRK "error from reserve sel");
+            // update our count and pause
+            l_send_count--;
+            if (l_send_count)
+            {
+                IPMI_TRAC("process_esel: sleeping; retry_count %d",
+                    l_send_count);
+                // sleep 3 times - 2ms, 32ms, 512ms. if we can't get this
+                //  through by then, the system must really be busy...
+                nanosleep(0,
+                    SLEEP_BASE << (4 * (MAX_SEND_COUNT - l_send_count - 1)));
+                continue;
+            }
+        }
+
+        // else it did get sent down OR it didn't because of a bad error
+        break;
+
+    } // while
+
+    if(l_err)
+    {
+        l_err->collectTrace(IPMI_COMP_NAME);
+        errlCommit(l_err, IPMI_COMP_ID);
+    }
+    else if((l_cc == IPMI::CC_OK) &&        // no error
+            (l_eid != 0))                   // and it's an errorlog
+    {
+        // eSEL successfully sent to the BMC - send an ack to the errlmanager
+        IPMI_TRAC(INFO_MRK "Sending ack for eid 0x%.8X", l_eid);
+        ERRORLOG::ErrlManager::errlAckErrorlog(l_eid);
+    }
+
+    delete l_data;
+
+    IPMI_TRAC(EXIT_MRK "process_esel");
+    return;
+} // process_esel
+
+/*
+ * @brief Send esel data to bmc
+ */
+void IpmiSEL::send_esel(IPMISEL::eselInitData * i_data,
+            errlHndl_t &o_err, IPMI::completion_code &o_cc) const
+{
+    IPMI_TRAC(ENTER_MRK "send_esel");
+    uint8_t* data = NULL;
+    const size_t l_eSELlen = i_data->dataSize;
+
+    size_t len = 0;
+    uint8_t reserveID[2] = {0,0};
+    uint8_t esel_recordID[2] = {0,0};
+
+    do{
+        // we need to send down the extended sel data (eSEL), which is
+        // longer than the protocol buffer, so we need to do a reservation and
+        // call the AMI partial_add_esel command multiple times
+
+        // put a reservation on the SEL Device since we're doing a partial_add
+        len = 0;
+        delete [] data;
+        data = NULL;
+        o_cc = IPMI::CC_UNKBAD;
+        o_err = IPMI::sendrecv(IPMI::reserve_sel(),o_cc,len,data);
+        if(o_err)
+        {
+            IPMI_TRAC(ERR_MRK "error from reserve_sel");
             break;
         }
-        else if (cc != IPMI::CC_OK)
+        if(o_cc != IPMI::CC_OK)
         {
-            IPMI_TRAC(ERR_MRK "Failed to reserve sel, cc is %02x",cc);
+            IPMI_TRAC(ERR_MRK "Failed to reserve_sel, o_cc %02x",o_cc);
             break;
         }
         storeReserveRecord(reserveID,data);
 
-        delete [] data;
-
-        len = SEL_LENGTH; //16 being the size of one SEL.
-        cc = IPMI::CC_UNKBAD;
-        data = new uint8_t[len];
-        memcpy(data,eSelData[0],len);
-        err = IPMI::sendrecv(IPMI::add_sel(),cc,len,data);
-        if(err)
-        {
-            IPMI_TRAC(ERR_MRK "error from add sel");
-            break;
-        }
-        else if (cc != IPMI::CC_OK)
-        {
-            IPMI_TRAC(ERR_MRK "Failed to add sel, cc is %02x",cc);
-            break;
-        }
-        storeReserveRecord(recordID,data);
-
-        delete [] data;
-
-        len = ESEL_META_LEN + SEL_LENGTH; //16: SEL size, 7: size of meta data
-        cc = IPMI::CC_UNKBAD;
-        data = new uint8_t[len];
-
-        createPAddHeader(reserveID,recordID,0,0x00,data);
-
-        memcpy(&data[ESEL_META_LEN],eSelData[1],SEL_LENGTH);
-
-        err = IPMI::sendrecv(IPMI::partial_add_esel(),cc,len,data);
-        if(err)
-        {
-            IPMI_TRAC(ERR_MRK "error partial add esel");
-            break;
-        }
-        else if (cc != IPMI::CC_OK)
-        {
-            IPMI_TRAC(ERR_MRK "Failed to partial add sel, cc is %02x",cc);
-            break;
-        }
-        storeReserveRecord(recordID,data);
-
+        // first send down the SEL Event Record data
         size_t eSELindex = 0;
-        while(eSELindex<eSELlen)
-        {
-            if(eSELindex + (IPMI::max_buffer() - ESEL_META_LEN) < eSELlen)
-            {
-                len = IPMI::max_buffer();
-            }
-            else
-            {
-                len = eSELlen - eSELindex;
-            }
-            delete [] data;
-            data = new uint8_t[len];
-            cc = IPMI::CC_UNKBAD;
-            const uint16_t offset = eSELindex + SEL_LENGTH;
-            uint8_t dataCpyLen = 0;
+        uint8_t l_lastEntry = 0;
+        len = IPMISEL::PARTIAL_ADD_ESEL_REQ + sizeof(IPMISEL::selRecord);
+        delete [] data;
+        data = new uint8_t[len];
 
+        // fill in the partial_add_esel request (command) data
+        createPartialAddHeader(reserveID,esel_recordID,eSELindex,l_lastEntry,data);
+
+        // copy in the SEL event record data
+        memcpy(&data[IPMISEL::PARTIAL_ADD_ESEL_REQ], i_data->eSel,
+                sizeof(IPMISEL::selRecord));
+
+        o_cc = IPMI::CC_UNKBAD;
+        TRACFBIN( g_trac_ipmi, INFO_MRK"1st partial_add_esel:", data, len);
+        o_err = IPMI::sendrecv(IPMI::partial_add_esel(),o_cc,len,data);
+        if(o_err)
+        {
+            IPMI_TRAC(ERR_MRK "error from first partial_add_esel");
+            break;
+        }
+        // as long as we continue to get CC_OK, the reserve sel is good.
+        // if the reservation is lost (ie, because something else tried to
+        // create a SEL) then the BMC just discards all this data. the
+        // errorlog will still be in PNOR and won't get ACKed, so it'll get
+        // resent on the next IPL.
+        if (o_cc != IPMI::CC_OK)
+        {
+            IPMI_TRAC(ERR_MRK "failed first partial_add_esel, o_cc %02x, eSELindex %02x",
+                    o_cc, eSELindex);
+            break;
+        }
+        // BMC returns the recordID, it's always the same (unless
+        // there's a major BMC bug...)
+        storeReserveRecord(esel_recordID,data);
+
+        // now send down the eSEL data in chunks.
+        const size_t l_maxBuffer = IPMI::max_buffer();
+        while(eSELindex<l_eSELlen)
+        {
             //if the index + the maximum buffer is less than what we still
             //have left in the eSEL, this is not the last entry (data[6] = 0)
             //otherwise, it is and data[6] = 1
-            uint8_t l_lastEntry = 0x00;
-            if(eSELindex + (IPMI::max_buffer() - ESEL_META_LEN) < eSELlen)
+            if(eSELindex + (l_maxBuffer - IPMISEL::PARTIAL_ADD_ESEL_REQ)
+                    < l_eSELlen)
             {
+                len = l_maxBuffer;
                 l_lastEntry = 0x00;
-                dataCpyLen = len - ESEL_META_LEN;
             }
             else
             {
+                len = l_eSELlen - eSELindex + IPMISEL::PARTIAL_ADD_ESEL_REQ;
                 l_lastEntry = 0x01;
-                dataCpyLen = len;
             }
-            createPAddHeader(reserveID,recordID,offset,l_lastEntry,data);
-            memcpy(&data[ESEL_META_LEN],&eSelData[2][eSELindex],dataCpyLen);
+            delete [] data;
+            data = new uint8_t[len];
+
+            // fill in the partial_add_esel request (command) data
+            createPartialAddHeader(reserveID, esel_recordID,
+                    eSELindex + sizeof(IPMISEL::selRecord),
+                    l_lastEntry, data);
+
+            uint8_t dataCpyLen = len - IPMISEL::PARTIAL_ADD_ESEL_REQ;
+            memcpy(&data[IPMISEL::PARTIAL_ADD_ESEL_REQ],
+                    &i_data->eSelExtra[eSELindex],
+                    dataCpyLen);
+
+            // update the offset into the data
             eSELindex = eSELindex + dataCpyLen;
 
-            err = IPMI::sendrecv(IPMI::partial_add_esel(),cc,len,data);
-            if(err)
+            o_cc = IPMI::CC_UNKBAD;
+            TRACFBIN( g_trac_ipmi, INFO_MRK"partial_add_esel:", data, len);
+            o_err = IPMI::sendrecv(IPMI::partial_add_esel(),o_cc,len,data);
+            if(o_err)
             {
-                IPMI_TRAC(ERR_MRK "error from partial add esel");
+                IPMI_TRAC(ERR_MRK "error from partial_add_esel");
                 break;
             }
-            //as long as we continue to get CC_OK, the reserve sel is good.
-            //the reserve sel is not valid with a 'reservation canceled' CC
-            else if (cc != IPMI::CC_OK)
+            // as long as we continue to get CC_OK, the reserve sel is good.
+            // if the reservation is lost (ie, because something else tried to
+            // create a SEL) then the BMC just discards all this data. the
+            // errorlog will still be in PNOR and won't get ACKed, so it'll get
+            // resent on the next IPL.
+            if (o_cc != IPMI::CC_OK)
             {
-                IPMI_TRAC(ERR_MRK "failed partial add esel, cc is %02x,",cc);
-                IPMI_TRAC(ERR_MRK "eSELindex is %02x",eSELindex);
-                //and normally we would have to do some clean up but
-                //this will break out of the while loop and then hit the
-                //usual delete messages and then exit the function.
+                IPMI_TRAC(ERR_MRK "failed partial_add_esel, o_cc %02x, eSELindex %02x",
+                        o_cc, eSELindex);
                 break;
             }
-            storeReserveRecord(recordID,data);
+            // BMC returns the recordID, it's always the same (unless
+            // there's a major BMC bug...)
+            storeReserveRecord(esel_recordID,data);
         }
-        if(err || cc != IPMI::CC_OK)
+        if(o_err || (o_cc != IPMI::CC_OK))
         {
             break;
         }
     }while(0);
 
-    if(err)
-    {
-        err->collectTrace(IPMI_COMP_NAME);
-        errlCommit(err, IPMI_COMP_ID);
-    }
-
-    delete[] l_data;
     delete[] data;
 
-    IPMI_TRAC(EXIT_MRK "send_sel");
+    IPMI_TRAC(EXIT_MRK "send_esel (o_err %.8X, o_cc x%.2x, recID=x%x%x)",
+        o_err ? o_err->plid() : NULL, o_cc, esel_recordID[1], esel_recordID[0]);
 
     return;
-}
-
-namespace IPMISEL
-{
-    void sendData(uint8_t* i_SEL, uint8_t* i_eSEL,
-                  uint8_t* i_extraData, size_t i_dataSize)
-    {
-        IPMI_TRAC(ENTER_MRK "sendData()");
-
-        // one message queue to the SEL thread
-        static msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
-
-        //will eventually send SEL info this way.
-        msg_t *msg = msg_allocate();
-        msg->type = MSG_SEND_SEL;
-        msg->data[0] = i_dataSize;
-
-        selInitData *selData = new selInitData;
-
-        memcpy(selData->sel, i_SEL, SEL_LENGTH);
-        memcpy(selData->eSel,i_eSEL,SEL_LENGTH);
-        //2048 being the max size for eSELExtra
-        if(i_dataSize > 2048)
-        {
-            memcpy(selData->eSelExtra, i_extraData, 2048);
-        }
-        else
-        {
-            memcpy(selData->eSelExtra, i_extraData, i_dataSize);
-        }
-        msg->extra_data = selData;
-
-        //Send the msg to the sel thread
-        int rc =msg_send(mq,msg);
-
-        if(rc)
-        {
-            IPMI_TRAC(ERR_MRK "Failed (rc=%d) to send message",rc);
-            delete selData;
-        }
-        IPMI_TRAC(EXIT_MRK "sendData");
-        return;
-    }
-}
+} // send_esel
 
