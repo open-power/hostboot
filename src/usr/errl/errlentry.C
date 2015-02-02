@@ -293,10 +293,6 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
-// Use these to tag the UD section containing the trace.
-const int FIPS_ERRL_UDT_TRACE              = 0x0c;
-const int FIPS_ERRL_UDV_DEFAULT_VER_1      = 1;
-
 bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
 {
     bool l_rc = false;  // assume a problem.
@@ -349,7 +345,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
                                            l_cbOutput,
                                            FIPS_ERRL_COMP_ID,
                                            FIPS_ERRL_UDV_DEFAULT_VER_1,
-                                           FIPS_ERRL_UDT_TRACE );
+                                           FIPS_ERRL_UDT_HB_TRACE );
 
         // Add the trace section to the vector of sections
         // for this error log.
@@ -1322,7 +1318,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
             if( !(((ERRL_COMP_ID        == (*it)->iv_header.iv_compId) &&
                    (ERRL_UDT_CALLOUT    == (*it)->iv_header.iv_sst)) ||
                   ((FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
-                   (FIPS_ERRL_UDT_TRACE == (*it)->iv_header.iv_sst))) )
+                   (FIPS_ERRL_UDT_HB_TRACE == (*it)->iv_header.iv_sst))) )
             {
                 l_cb = (*it)->flatten( pBuffer, l_sizeRemaining );
                 if( 0 == l_cb )
@@ -1355,7 +1351,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         {
             // If UD section is a trace.
             if( (FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
-                (FIPS_ERRL_UDT_TRACE == (*it)->iv_header.iv_sst) )
+                (FIPS_ERRL_UDT_HB_TRACE == (*it)->iv_header.iv_sst) )
             {
                 l_cb = (*it)->flatten( pBuffer, l_sizeRemaining );
                 if( 0 == l_cb )

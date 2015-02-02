@@ -324,7 +324,7 @@ enum errlTermState_t
   */
 enum errlUserDataType_t
 {
-    ERRL_UDT_TRACE          = 0x0C,   // A trace buffer
+    FIPS_ERRL_UDT_HB_TRACE          = 0x15,   // A trace buffer
 };
 
 
@@ -337,7 +337,7 @@ enum errlUserDataType_t
 */
 enum errlUserDataVersion
 {
-    ERRL_UDV_DEFAULT_VER_1      = 0x0001,   // Version 1, default info
+    FIPS_ERRL_UDV_DEFAULT_VER_1      = 0x0001,   // Version 1, default info
 };
 
 
