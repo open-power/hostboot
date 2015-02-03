@@ -39,6 +39,7 @@
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>HB_EXISTING_IMAGE</id></attribute>
     <attribute><id>ADC_CHANNEL_FUNC_IDS</id></attribute>
+    <attribute><id>ADC_CHANNEL_SENSOR_NUMBERS</id></attribute>
     <attribute><id>ADC_CHANNEL_GNDS</id></attribute>
     <attribute><id>ADC_CHANNEL_GAINS</id></attribute>
     <attribute><id>ADC_CHANNEL_OFFSETS</id></attribute>
@@ -64,6 +65,12 @@
     <attribute><id>OCC_CONTROL_DATA</id></attribute>
     <attribute><id>OPAL_MODEL</id></attribute>
     <attribute><id>HTMGT_SAFEMODE</id></attribute>
+    <attribute><id>IPMI_SENSORS</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>enc-node-power8</id>
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -110,7 +117,11 @@
     <attribute>
         <id>XSCOM_VIRTUAL_ADDR</id>
     </attribute>
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
+
+
+
 
 <!-- Centaur chip/DMI -->
 
@@ -144,6 +155,12 @@
     <attribute>
         <id>ISDIMM_MBVPD_INDEX</id>
     </attribute>
+    <attribute><id>IPMI_SENSORS</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>unit-core-power8</id>
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -156,12 +173,16 @@
 <targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute><id>VPD_SWITCHES</id></attribute>
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
     <id>occ</id>
     <attribute>
         <id>PSTATE_TABLE</id>
+    </attribute>
+    <attribute>
+        <id>IPMI_SENSORS</id>
     </attribute>
 </targetTypeExtension>
 
