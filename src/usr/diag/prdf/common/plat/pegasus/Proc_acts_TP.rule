@@ -251,17 +251,17 @@ group gTpLFir filter singlebit, secondarybits( 16, 17, 18 )
     /** TP_LFIR[16]
      *  Error in TOD backup topology
      */
-    (TpLFir, bit(16)) ? TodReportByRegister;
+    (TpLFir, bit(16)) ? analyzeTodBackupTopology;
 
     /** TP_LFIR[17]
      *  TOD PIB Errors
      */
-    (TpLFir, bit(17)) ? SelfHighThr1;
+    (TpLFir, bit(17)) ? analyzePibError;
 
     /** TP_LFIR[18]
      *  PHYP detected TOD Error
      */
-    (TpLFir, bit(18)) ? TodReportByPHYP;
+    (TpLFir, bit(18)) ? analyzePhypTodError;
 
     /** TP_LFIR[19]
      *  PCB Slave Internal Parity Error
@@ -1271,4 +1271,41 @@ actionclass selfCapThr32TopReConfig
     capture(TODReg);
     selfCaptThr32;
     funccall("requestTopologySwitch");
+};
+
+/** analyzes backup topology if TOD error analysis is enabled */
+actionclass analyzeTodBackupTopology
+{
+    try( funccall("isTodDisabled"), TodReportByRegister );
+};
+
+/** analyzes active topology if TOD error analysis is enabled */
+actionclass analyzePhypTodError
+{
+    try( funccall("isTodDisabled"), TodReportByPHYP );
+};
+
+/** callout and gard self if TOD error analysis is enabled */
+actionclass analyzePibError
+{
+    try( funccall("isTodDisabled"), SelfHighThr1 );
+};
+
+/** analyzes backup topology if TOD error analysis is enabled */
+actionclass analyzeTodBackupTopology
+{
+    try( funccall("isTodDisabled"), TodReportByRegister );
+};
+
+/** analyzes active topology if TOD error analysis is enabled */
+actionclass analyzePhypTodError
+{
+    try( funccall("isTodDisabled"), TodReportByPHYP );
+};
+
+/** callout and gard self if TOD error analysis is enabled */
+actionclass analyzePibError
+{
+    capture(TODReg);
+    try( funccall("isTodDisabled"), SelfHighThr1 );
 };

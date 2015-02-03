@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,7 +34,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfGlobal.H>
 #include <prdfPlatServices.H>
-//#include <prdfTrace.H>
+#include <prdfThresholdUtils.H>
 
 namespace PRDF
 {
@@ -74,7 +76,9 @@ class P8DataBundle : public DataBundle
      * @brief Constructor.
      * @param i_chip The P8 chip.
      */
-    explicit P8DataBundle( ExtensibleChip * i_chip )
+    explicit P8DataBundle( ExtensibleChip * i_chip ) :
+      iv_todIgnoreAnalysisThr( TimeBasedThreshold(
+                                   32, ThresholdResolution::ONE_DAY)  )
     {}
 
     /**
@@ -91,6 +95,17 @@ class P8DataBundle : public DataBundle
         return iv_procPllErrRegList;
     }
 
+    /**
+     * @return get instance of TimeBasedThreshold meant for TOD error.
+     * @note   This instance is meant to threshold all the TOD errors for an
+     *         FSP based OPAL system. Once threshold is met, these errors
+     *         are masked.
+     */
+    TimeBasedThreshold & getTodErrorIgnoreThr()
+    {
+        return iv_todIgnoreAnalysisThr;
+    }
+
   private: // functions
 
     P8DataBundle( const P8DataBundle & );
@@ -99,6 +114,9 @@ class P8DataBundle : public DataBundle
   private: // instance variables
 
     ProcPllErrRegList iv_procPllErrRegList;
+    TimeBasedThreshold iv_todIgnoreAnalysisThr; ///< policy for masking TOD Err
+
+
 
 };
 

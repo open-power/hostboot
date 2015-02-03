@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,6 +32,7 @@
 #include <iipSystem.h>
 #include <prdfCalloutUtil.H>
 #include <iipServiceDataCollector.h>
+#include <prdfPlatUtil.H>
 
 using namespace TARGETING;
 
@@ -50,20 +53,39 @@ int32_t FUNC( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & i_sc ) \
 } \
 PRDF_PLUGIN_DEFINE( Proc, FUNC );
 
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestorePCRP0 )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestorePCRP1 )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestoreSCRP0 )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestoreSCRP1 )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestoreMPCR )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestorePSMSCR )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestoreIPCR )
-PLUGIN_TOD_UNEXPECTED_ATTN( todRestoreSPCR )
 PLUGIN_TOD_UNEXPECTED_ATTN( clearServiceCallFlag )
 PLUGIN_TOD_UNEXPECTED_ATTN( todNewTopologyIfBackupMDMT )
 PLUGIN_TOD_UNEXPECTED_ATTN( todStepCheckFault )
 PLUGIN_TOD_UNEXPECTED_ATTN( requestTopologySwitch )
 
 #undef PLUGIN_TOD_UNEXPECTED_ATTN
+
+/**
+ * @brief   Checks if TOD errors are disabled on the platform.
+ * @param   i_chip      chip reporting TOD logic parity error.
+ * @param   i_stepcode  The step code data struct.
+ * @return  SUCCESS
+ * @note    TOD errors are not expected during hostboot and its
+ *          analysis is disabled during HBRT. So, just returning SUCCESS.
+ *          This prevents execution of alternate resolution associated with
+ *          try resolution.
+ */
+int32_t isTodDisabled( ExtensibleChip * i_chip,
+                       STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    //FIXME RTC Issue 120820: Investigate behavior for manufacturing
+    //environment.
+    //On OPAL machine, mask TOD errors on first instance. There
+    //should not be any service action.
+
+    if( !PlatUtil::ignoreErrorForSapphire( i_stepcode ) )
+    {
+        CalloutUtil::defaultError( i_stepcode );
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, isTodDisabled );
 
 } //namespace Proc ends
 
