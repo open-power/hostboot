@@ -31,7 +31,11 @@
 //
 #include <stdint.h>
 #include <stdlib.h>
+
+#define PACKAGE 1
+#define PACKAGE_VERSION 1
 #include <bfd.h>
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>

@@ -5,9 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
-# [+] International Business Machines Corp.
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] Google Inc.
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,11 +38,11 @@ endif
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib
 CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
           -Wall -Werror -mtraceback=no -pipe \
-	  -ffunction-sections -fdata-sections -ffreestanding
-ASMFLAGS += $(COMMONFLAGS) -mcpu=power7
+	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
+ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall \
 	    -fuse-cxa-atexit
-LDFLAGS += --nostdlib --sort-common $(COMMONFLAGS)
+LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
 
 INCFLAGS = $(addprefix -I, $(INCDIR) )
 ASMINCFLAGS = $(addprefix $(lastword -Wa,-I), $(INCDIR))

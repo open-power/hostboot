@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -44,7 +46,9 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
-
+// Next 2 lines required by new BFD binutils package
+#define PACKAGE 1
+#define PACKAGE_VERSION 1
 #include <bfd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -177,8 +181,12 @@ char* format_content = NULL;
 /** Keep the full strings in the code rather than reduce to format strings. */
 int full_strings = 0;
 
+uint32_t *in_sect_idx_mod = NULL;
+uint32_t *out_sect_idx_mod = NULL;
+
 ///--------- Forward Declarations ------------------///
 void create_sections(bfd*, asection*, void*);
+void fixup_groups(bfd*, asection*, void*);
 void copy_relocs(bfd*, asection*, void*);
 void copy_content(bfd*, asection*, void*);
 char* create_format_string(const char*);
@@ -192,6 +200,9 @@ void parse_traceinfo_sections(bfd*, asection*, void*);
 
 int check_hash_collision(ahash_string_list*);
 void write_hash_file(const char*);
+
+void determine_section_index_offsets(bfd*, bfd*);
+
 ///--------- End Forward Declarations --------------///
 
 /** @fn main
@@ -220,6 +231,15 @@ int main(int argc, char** argv)
     bfd* outFile = bfd_openw(outFileName, bfd_get_target(inFile));
     CHECK_NONNULL(outFile);
 
+    // Set Format
+    bfd_set_format(outFile,bfd_get_format(inFile));
+
+    // Set start address and file flags
+    bfd_set_start_address(outFile,bfd_get_start_address(inFile));
+    flagword flags = bfd_get_file_flags(inFile);
+    flags &= bfd_applicable_file_flags (outFile);
+    bfd_set_file_flags(outFile,flags);
+
     // Copy header data from .o.trace file.
     CHECK_ERR(bfd_set_arch_mach(outFile, bfd_get_arch(inFile),
                                          bfd_get_mach(inFile)));
@@ -232,11 +252,12 @@ int main(int argc, char** argv)
 
     // Copy over other sections to new file.
     bfd_map_over_sections(inFile, create_sections, outFile);
-    // Create hash-string section.
-    create_hashstring_section(outFile);
 
     // Copy ELF private header.
     CHECK_ERR(bfd_copy_private_header_data(inFile, outFile));
+
+    // Create hash-string section.
+    create_hashstring_section(outFile);
 
     // Filter symbol table and add to destination file.
     symcount = filter_symtab(symsize, symcount);
@@ -257,9 +278,131 @@ int main(int argc, char** argv)
 
     // Copy additional private BFD data and close file.
     CHECK_ERR(bfd_copy_private_bfd_data(inFile, outFile));
+
+    // Calcuate and store section offsets in preperation
+    // for the fixup_groups call
+    determine_section_index_offsets(inFile,outFile);
+
+    bfd_map_over_sections(outFile, fixup_groups, inFile);
     bfd_close(outFile);
+    bfd_close(inFile);
 
     return 0;
+}
+
+
+/** @fn group_symbol
+ *
+ *  Return a pointer to the symbol used as a signature for input group
+ *
+ *  @param[in] group - Group section we are getting symbol for
+ *
+ *  @return Pointer to the symbol for input group
+ */
+static asymbol * group_symbol (asection *group)
+{
+
+    // Determine the proper offset to read the sh_info and then
+    // return the proper symbol
+    // See bfd_elf_section_data structure for offset info
+    uint32_t offset = sizeof(unsigned int) +
+                      sizeof(unsigned int) +
+                      sizeof(bfd_vma) +
+                      sizeof(bfd_vma) +
+                      sizeof(file_ptr) +
+                      sizeof(bfd_size_type) +
+                      sizeof(unsigned int);
+
+    void *ptr_sym_offset = group->used_by_bfd + offset;
+    return origsymtab[(*(unsigned int *)ptr_sym_offset) - 1];
+}
+
+/** @fn fixup_groups
+ *
+ *  This function will update the index values contained within
+ *  the group data.  This index value points to the section which
+ *  are a part of the group.  When we remove the trace sections,
+ *  this index does not get updated correctly by BFD
+ *
+ *  @param[in] newFile - The new BFD file we've generated
+ *  @param[in] s - The group section we're updating
+ *  @param[in] param - The original input BFD file
+ *
+ *  @return N/A
+ */
+void fixup_groups(bfd* newFile, asection* s, void* param)
+{
+    bfd* origFile = (bfd*)param;
+
+    if (bfd_get_section_flags(newFile, s) & SEC_GROUP)
+    {
+        bfd_byte *buf = NULL;
+
+        // Using newFile looks a little weird here but there is a correlation
+        // between newFile and s that requires us to use it here.  It doesn't
+        // matter since the section data was copied directly over into newFile.
+        CHECK_ERR(bfd_malloc_and_get_section(newFile,s,&buf));
+
+        uint32_t *group_val_ptr = (uint32_t *)buf;
+
+        // First uint32_t is a flag then we get into the section indexes
+        group_val_ptr++;
+
+        for(size_t i=1;i<((bfd_get_section_size(s))/sizeof(uint32_t));
+            i++,group_val_ptr++)
+        {
+            uint32_t group_val = 0;
+            if(newFile->xvec->byteorder ==  BFD_ENDIAN_BIG)
+            {
+                group_val = be32toh(*group_val_ptr);
+            }
+            else
+            {
+                group_val = le32toh(*group_val_ptr);
+            }
+            uint32_t mod_index = group_val - in_sect_idx_mod[group_val];
+
+            // Find the section name in the original file using the index
+            asection *search = origFile->sections;
+
+            while((search != NULL)
+                  &&(search->index != mod_index))
+            {
+                search=search->next;
+            }
+
+            if(search == NULL)
+            {
+                printf ("Symbol not found so we gotta error out\n");
+                exit(-1);
+            }
+
+            // Now find that section in the new file
+            asection *new_search = bfd_get_section_by_name(
+                                            newFile,search->name);
+            CHECK_NONNULL(new_search);
+
+            // Now add on the mod
+            mod_index = new_search->index +
+                         out_sect_idx_mod[new_search->index];
+
+            // Now point the group index to that symbol in the new file
+            if(newFile->xvec->byteorder ==  BFD_ENDIAN_BIG)
+            {
+                *group_val_ptr = htobe32(mod_index);
+            }
+            else
+            {
+                *group_val_ptr = htole32(mod_index);
+            }
+        }
+
+        CHECK_ERR(bfd_set_section_contents(newFile,s,buf,0,
+                  bfd_get_section_size(s)));
+
+        free(buf);
+    }
+
 }
 
 /** @fn create_sections
@@ -275,18 +418,32 @@ int main(int argc, char** argv)
 void create_sections(bfd* inFile, asection* s, void* param)
 {
     bfd* outFile = (bfd*)param;
+    asymbol *gsym = NULL;
 
     // Clear output-file section reference in the source section.
     s->output_section = NULL;
 
-    // Skip traceParseInfo and ELF-groups sections.
-    if (NULL != strstr(s->name, PARSEINFO_SECTION_NAME)) { return; }
-    if (bfd_get_section_flags(inFile, s) & SEC_GROUP) { return; }
+    // Skip traceParseInfo sections
+    if (NULL != strstr(s->name, PARSEINFO_SECTION_NAME))
+    {
+        return;
+    }
 
-    // Create result section.
+    // if group points to traceParseInfo section then don't copy over
+    if (bfd_get_section_flags(inFile, s) & SEC_GROUP)
+    {
+        gsym = group_symbol (s);
+        if (NULL != strstr(gsym->name, PARSEINFO_SECTION_NAME))
+        {
+            return;
+        }
+    }
+
+    // Create section.
     asection* new_s =
-        bfd_make_section_anyway_with_flags(outFile, s->name,
-                                           bfd_get_section_flags(inFile, s));
+      bfd_make_section_anyway_with_flags(outFile, s->name,
+                                         bfd_get_section_flags(inFile, s));
+
     CHECK_NONNULL(new_s);
 
     // Copy section sizes.
@@ -299,10 +456,35 @@ void create_sections(bfd* inFile, asection* s, void* param)
     // Copy alignment and private data.
     CHECK_ERR(bfd_set_section_alignment(outFile, new_s,
                                         bfd_section_alignment(inFile, s)));
-    CHECK_ERR(bfd_copy_private_section_data(inFile, s, outFile, new_s));
+
+    new_s->entsize = s->entsize;
 
     // Hook up output_section reference to source section.
     s->output_section = new_s;
+    s->output_offset = 0;
+
+    if (gsym != NULL)
+    {
+        if (inFile->xvec->flavour == bfd_target_elf_flavour)
+        {
+            // Add the magic number and update the group id
+            // for this section to point to the group
+            // symbol
+            // Binutils 2.24 BFD requires an offset of 176
+            // Binutils 2.22 BFD requires an offset of 168
+            // So we're just going to key off a define that's only in 2.24
+            // TODO RTC 123492
+#ifdef bfd_find_nearest_line_discriminator
+            uint32_t offset = 176;
+#else
+            uint32_t offset = 168;
+#endif
+            void *ptr_sym_offset = s->used_by_bfd + offset;
+            asymbol **tsym = (asymbol **)ptr_sym_offset;
+            *tsym = gsym;
+        }
+    }
+    CHECK_ERR(bfd_copy_private_section_data(inFile,s,outFile,new_s));
 }
 
 /** @fn copy_relocs
@@ -597,6 +779,7 @@ size_t filter_symtab(size_t symsize, size_t symcount)
 
     // Insert the symbol for the format string section.
     new_table[newcount++] = hash_section->symbol;
+    new_table[newcount] = NULL;
 
     symtab = new_table;
     return newcount;
@@ -914,4 +1097,63 @@ void write_hash_file(const char* file)
     }
 
     fclose(hash_file);
+}
+
+/** @fn determine_section_index_offsets
+ *
+ *  The RELOC sections are not officially counted in any of the BFD count
+ *  interfaces we have so we have to go through both the BFD's and manually
+ *  figure out the section count.
+ *  We then use this information later to update the group indexes which
+ *  reference the count that includes the RELOC sections.
+ *
+ *  @param[in] inFile - Input BFD file.
+ *  @param[in] outFile - Output BFD file.
+ *
+ *  @return N/A
+ */
+void determine_section_index_offsets(bfd* inFile, bfd* outFile)
+{
+    asection *sect = NULL;
+
+    // Start at 1 to skip the initial NULL section in all BFD's
+    int section_index=1;
+    int section_offset=1;
+
+    for(sect=inFile->sections; sect != NULL; sect = sect->next,section_index++)
+    {
+        in_sect_idx_mod = (uint32_t *)realloc(in_sect_idx_mod,
+                                                   (section_index +1)*
+                                                   sizeof(uint32_t));
+        in_sect_idx_mod[section_index] = section_offset;
+
+        if (bfd_get_section_flags(inFile, sect) & SEC_RELOC)
+        {
+            section_index++;
+            section_offset++;
+            in_sect_idx_mod = (uint32_t *)realloc(in_sect_idx_mod,
+                                                       (section_index +1)*
+                                                       sizeof(uint32_t));
+            in_sect_idx_mod[section_index] = section_offset;
+        }
+    }
+
+    section_index=1;
+    section_offset=1;
+
+    for(sect=outFile->sections; sect != NULL; sect = sect->next,section_index++)
+    {
+        out_sect_idx_mod = (uint32_t *)realloc(out_sect_idx_mod,
+                                                    (sect->index +1)*
+                                                    sizeof(uint32_t));
+
+        out_sect_idx_mod[sect->index] = section_offset;
+
+        if (bfd_get_section_flags(outFile, sect) & SEC_RELOC)
+        {
+            section_index++;
+            section_offset++;
+        }
+
+    }
 }
