@@ -26,6 +26,7 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <utilbase.H>
+#include <config.h>
 
 class LidMgrRtTest : public CxxTest::TestSuite
 {
@@ -64,11 +65,11 @@ class LidMgrRtTest : public CxxTest::TestSuite
 
                 PNOR::SectionInfo_t l_lidPnorInfo;
                 l_errl = PNOR::getSectionInfo(PNOR::TEST, l_lidPnorInfo);
-                // Section only present in openPOWER systems
                 if (l_errl)
                 {
-                    delete l_errl;
-                    l_errl = NULL;
+                    errlCommit(l_errl,UTIL_COMP_ID);
+                    TS_FAIL("testLidInPnor: Error getting lidId=0x%.8x",
+                            Util::TEST_LIDID);
                     break;
                 }
 

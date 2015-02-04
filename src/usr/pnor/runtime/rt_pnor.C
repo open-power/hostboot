@@ -588,31 +588,35 @@ errlHndl_t RtPnor::readTOC ()
             break;
         }
 
-        // @TODO RTC:120733
-        // RT code needs a way to get the active side tocs vs just defaulting
-        // to SIDE_A
-        l_err = readFromDevice (l_procId, PNOR::TOC, PNOR::SIDE_A_TOC_0_OFFSET,
-                PAGESIZE,false,toc0Buffer);
-        if (l_err)
+        if (g_hostInterfaces && g_hostInterfaces->pnor_read)
         {
-            TRACFCOMP(g_trac_pnor,"RtPnor::readTOC:readFromDevice failed"
-                      " for TOC0");
-            break;
-        }
-        l_err = readFromDevice (l_procId, PNOR::TOC, PNOR::SIDE_A_TOC_1_OFFSET,
-                PAGESIZE, false,toc1Buffer);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_pnor, "RtPnor::readTOC:readFromDevice failed"
-                      " for TOC1");
-            break;
-        }
+            //@TODO RTC:120733
+            //RT code needs a way to get the active side tocs vs just defaulting
+            //to SIDE_A
+            l_err = readFromDevice(l_procId,PNOR::TOC,PNOR::SIDE_A_TOC_0_OFFSET,
+                    PAGESIZE,false,toc0Buffer);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_pnor,"RtPnor::readTOC:readFromDevice failed"
+                          " for TOC0");
+                break;
+            }
 
-        l_err = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC, 0);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");
-            break;
+            l_err = readFromDevice(l_procId,PNOR::TOC,PNOR::SIDE_A_TOC_1_OFFSET,
+                    PAGESIZE, false,toc1Buffer);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_pnor, "RtPnor::readTOC:readFromDevice failed"
+                          " for TOC1");
+                break;
+            }
+
+            l_err = PNOR::parseTOC(toc0Buffer,toc1Buffer,iv_TOC_used,iv_TOC,0);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");
+                break;
+            }
         }
     } while (0);
 
