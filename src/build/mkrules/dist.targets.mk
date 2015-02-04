@@ -69,6 +69,7 @@ COPY_FILES = \
     obj/genfiles/targAttrInfo.csv:vpo \
     obj/genfiles/target_types_merged.xml:openpower \
     obj/genfiles/fapiattrs.xml:openpower \
+    obj/genfiles/attributeOverride:tools,openpower \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
@@ -80,7 +81,6 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
-    src/usr/targeting/attroverride/attributeOverride:tools,openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
 
 #

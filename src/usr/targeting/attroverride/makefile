@@ -27,7 +27,7 @@ ROOTPATH = ../../../..
 OUT_FILE += $(GENDIR)/attributeOverride
 CLEAN_TARGETS += $(OUT_FILE)
 
-GEN_PASS_BODY += $(OUT_FILE)
+CODE_PASS_BODY += $(OUT_FILE)
 
 INC_DIRS += $(ROOTPATH)/src/usr/targeting/
 INC_DIRS += $(GENDIR)
