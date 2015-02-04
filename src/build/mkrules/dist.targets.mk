@@ -81,6 +81,8 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
+    src/usr/targeting/common/xmltohb/bios.xsd:openpower \
+    src/usr/targeting/common/xmltohb/bios_metadata_petitboot.xslt:openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
 
 #

@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/bios.xsd $                   -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" >
+
+  <xs:element name="firmware-overrides">
+    <xs:annotation>
+      <xs:documentation>The firmware-overrides element is the root element.  An
+        empty firmware-overrides element implies there are no firmware overrides
+        for a given platform.  The firmware-overrides element can have any
+        number of attribute or group elements.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="group"/>
+          <xs:element ref="attribute"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="group">
+    <xs:annotation>
+      <xs:documentation>A group element defines a logical collection of
+        firmware-overrides, and sub-groups of the same.  A group element
+        contains a name element and any number of attribute + group elements,
+        but it must have at least one element other than the name element.
+  </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="name"/>
+        <xs:sequence>
+          <xs:choice maxOccurs="unbounded">
+            <xs:element ref="group"/>
+            <xs:element ref="attribute"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="attribute">
+    <xs:annotation>
+      <xs:documentation>An attribute element must have an id element, and up to
+        one each of a description element, display-name element,
+        targetRestriction element.  It may also have either a numericOverride
+        element (if signed/unsigned number) or enumerationOverride element (if
+        enumeration), in that order.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="id"/>
+        <xs:element ref="description" minOccurs="0"/>
+        <xs:element ref="display-name" minOccurs="0"/>
+        <xs:element ref="targetRestriction" minOccurs="0"/>
+        <xs:choice minOccurs="0">
+          <xs:element ref="enumerationOverride" minOccurs="0"/>
+          <xs:element ref="numericOverride" minOccurs="0"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="numericOverride">
+    <xs:annotation>
+      <xs:documentation>A numeric override limits the set of values an
+        attribute can be set to.  A numericOverride element must have a start
+        and end element in any order.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element ref="start" minOccurs="1" maxOccurs="1"/>
+          <xs:element ref="end" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element ref="end" minOccurs="1" maxOccurs="1"/>
+          <xs:element ref="start" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="targetRestriction">
+    <xs:annotation>
+      <xs:documentation>A target restriction restricts the attribute to apply
+         only to the target indicated by the sub-restrictions.  A
+         targetRestriction element may have up to one each of
+         a type, node, position, and unit element, in any order, provided at
+         least one of those appears.  This schema cannot easily restrict the
+         latter condition, so the code must ensure at least one child element is
+         present.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+       <xs:all minOccurs="0" maxOccurs="1">
+         <xs:element ref="type"     minOccurs="0"/>
+         <xs:element ref="node"     minOccurs="0"/>
+         <xs:element ref="position" minOccurs="0"/>
+         <xs:element ref="unit"     minOccurs="0"/>
+       </xs:all>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="enumerationOverride">
+    <xs:annotation>
+      <xs:documentation>An enumerationOverride allows an attribute to change
+        the behavior of the underlying enumeration.  An enumerationOverride
+        element can have one allowedEnumerator element, any number of
+        enumeratorOverride elements, or a union of those.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element ref="allowedEnumerators"/>
+          <xs:element ref="enumeratorOverride"
+            minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element ref="enumeratorOverride" maxOccurs="unbounded"/>
+          <xs:element ref="allowedEnumerators" minOccurs="0"/>
+        </xs:sequence>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="allowedEnumerators">
+    <xs:annotation>
+      <xs:documentation>An allowedEnumerator restricts which enumerators can be
+        used by the attribute.An allowedEnumerators element requires one or more
+        name elements.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="name" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="enumeratorOverride">
+    <xs:annotation>
+      <xs:documentation>An enumeratorOverride allows an attribute to change the
+        default text associated with an enumerator.  An enumeratorOverride
+        requires a name element and a display-name element, descriptionElement,
+        or union of both.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="name"/>
+        <xs:choice>
+          <xs:sequence>
+            <xs:element ref="display-name"/>
+            <xs:element ref="description" minOccurs="0"/>
+          </xs:sequence>
+          <xs:sequence>
+            <xs:element ref="description"/>
+            <xs:element ref="display-name" minOccurs="0"/>
+          </xs:sequence>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="id" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>An id element provides a symbolic attribute ID that maps
+        to a valid attribute in targeting
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="description" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>A description element provides a longer help text for an
+        attribute, enumeration, etc.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="display-name" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>A display-name element provides a short name for an
+        enumeration, attribute, etc.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="type" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>A type element restricts the attribute to a specific
+        named attribute type.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="start" type="xs:decimal">
+    <xs:annotation>
+      <xs:documentation>A start element gives the first value, inclusive, of one
+        of the valid ranges for a numerical attribute. It cannot fall outside
+        of the base range allowed for the given attribute type, and must be at
+        least one less than the max of the base range.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="end" type="xs:decimal">
+    <xs:annotation>
+      <xs:documentation>An end element gives the last value, inclusive, of one
+        of the valid ranges for a numerical attribute. It cannot fall outside
+        of the base range allowed for the given attribute type, and must be at
+        least one less than the max of the base range.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="name" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>A name element gives the name of the attribute group,
+        etc.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="unit">
+    <xs:annotation>
+      <xs:documentation>A unit element allows an attribute to restrict its
+        scope to a specific target unit.  If a position element is specified in
+        a targetRestriction along with a unit, then the unit's chip's position
+        must match that as well.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:unsignedByte">
+        <xs:minInclusive value="0"/>
+        <xs:maxInclusive value="254"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="position">
+    <xs:annotation>
+      <xs:documentation>A position element allows an attribute to restrict
+        its scope to a specific position.  Only applicable for targets with
+        positions, unless used in conjuction with the unit element.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:unsignedShort">
+        <xs:minInclusive value="0"/>
+        <xs:maxInclusive value="65534"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="node">
+    <xs:annotation>
+      <xs:documentation>A node element allows an attribute to restrict
+        its scope to a specific node.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:unsignedByte">
+        <xs:minInclusive value="0"/>
+        <xs:maxInclusive value="14"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+</xs:schema>
+

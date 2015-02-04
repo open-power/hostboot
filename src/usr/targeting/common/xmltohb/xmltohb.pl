@@ -48,6 +48,7 @@ use Text::Wrap;
 use Data::Dumper;
 use POSIX;
 use Env;
+use XML::LibXML;
 
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
@@ -76,6 +77,10 @@ my $cfgIncludeFspAttributes = 0;
 my $CfgSMAttrFile = "";
 my $cfgAddVersionPage = 0;
 
+my $cfgBiosXmlFile = undef;
+my $cfgBiosSchemaFile = undef;
+my $cfgBiosOutputFile = undef;
+
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
            "img-output-dir:s" =>  \$cfgImgOutputDir,
@@ -87,6 +92,9 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "smattr-output-file:s" => \$CfgSMAttrFile,
            "include-fsp-attributes!" =>  \$cfgIncludeFspAttributes,
            "version-page!" => \$cfgAddVersionPage,
+           "bios-xml-file:s" => \$cfgBiosXmlFile,
+           "bios-schema-file:s" => \$cfgBiosSchemaFile,
+           "bios-output-file:s" => \$cfgBiosOutputFile,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -116,6 +124,9 @@ if($cfgVerbose)
     print STDOUT "Big endian = $cfgBigEndian\n";
     print STDOUT "include-fsp-attributes = $cfgIncludeFspAttributes\n",
     print STDOUT "version-page = $cfgAddVersionPage\n",
+    print STDOUT "bios-schema-file = $cfgBiosSchemaFile\n";
+    print STDOUT "bios-xml-file = $cfgBiosXmlFile\n";
+    print STDOUT "bios-output-file = $cfgBiosOutputFile\n";
 }
 
 ################################################################################
@@ -140,6 +151,11 @@ my @associationTypes = ( PARENT_BY_CONTAINMENT,
 use constant ATTR_PHYS_PATH => "PHYS_PATH";
 use constant ATTR_AFFINITY_PATH => "AFFINITY_PATH";
 use constant ATTR_UNKNOWN => "UnknownAttributeName";
+use constant ATTR_POSITION => "POSITION";
+use constant ATTR_CHIP_UNIT => "CHIP_UNIT";
+use constant ATTR_CLASS => "CLASS";
+use constant ATTR_TYPE => "TYPE";
+use constant ATTR_MODEL => "MODEL";
 
 # Data manipulation constants
 use constant BITS_PER_BYTE => 8;
@@ -459,6 +475,7 @@ sub validateAttributes {
                              = { required => 0, isscalar => 0};
     $elements{"hwpfToHbAttrMap"}
                              = { required => 0, isscalar => 0};
+    $elements{"display-name"} = { required => 0, isscalar => 1};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -5250,6 +5267,10 @@ sub generateTargetingImage {
     my $pnorRoOffset = $offset;
     my $attributesWritten = 0;
 
+    my %biosData = ();
+    my %attributeDefCache =
+        map { $_->{id} => $_} @{$attributes->{attribute}};
+
     foreach my $targetInstance (@targetsAoH)
     {
         my $data;
@@ -5285,9 +5306,6 @@ sub generateTargetingImage {
         # themselves FSP specific.  Only need to do this 1x per target instance
         my $fspTarget = isFspTargetInstance($attributes,$targetInstance);
 
-        my %attributeDefCache =
-            map { $_->{id} => $_} @{$attributes->{attribute}};
-
         # Must have the same order as the attribute list from above.
         for my $attributeId
             (sort
@@ -5302,6 +5320,20 @@ sub generateTargetingImage {
             {
                 $targetAddrHash{$targetInstance->{id}}{$attributeId} =
                     $attrhash{$attributeId}->{default};
+            }
+
+            # Cache these attributes away in the BIOS data structure as
+            # identifying information that will be used to enforce the target
+            # restrictions
+            if(    ($attributeId eq ATTR_PHYS_PATH)
+                || ($attributeId eq ATTR_POSITION )
+                || ($attributeId eq ATTR_CHIP_UNIT)
+                || ($attributeId eq ATTR_CLASS    )
+                || ($attributeId eq ATTR_TYPE     )
+                || ($attributeId eq ATTR_MODEL    ) )
+            {
+                $biosData{$targetInstance->{id}}{_identity_}{$attributeId} =
+                     $attrhash{$attributeId}->{default};
             }
 
             my $attrValue =
@@ -5466,6 +5498,11 @@ sub generateTargetingImage {
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
 
+                $biosData{$targetInstance->{id}}{$attributeId}{size} =
+                    (length $heapZeroInitData);
+                $biosData{$targetInstance->{id}}{$attributeId}{default} =
+                    $attrhash{$attributeId}->{default};
+
                 my $hex = unpack ("H*",$heapZeroInitData);
                 push @attrDataforSM, [$attrValue, $huidValue,
                     $hex, $section, $targetInstance->{id}, $attributeId];
@@ -5489,6 +5526,11 @@ sub generateTargetingImage {
                 my ($heapPnorInitData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
+
+                $biosData{$targetInstance->{id}}{$attributeId}{size} =
+                    (length $heapPnorInitData);
+                $biosData{$targetInstance->{id}}{$attributeId}{default} =
+                    $attrhash{$attributeId}->{default};
 
                 my $hex = unpack ("H*",$heapPnorInitData);
                 push @attrDataforSM, [$attrValue, $huidValue,
@@ -5658,6 +5700,11 @@ sub generateTargetingImage {
                 my ($hbHeapZeroInitData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
+
+                $biosData{$targetInstance->{id}}{$attributeId}{size} =
+                    (length $hbHeapZeroInitData);
+                $biosData{$targetInstance->{id}}{$attributeId}{default} =
+                    $attrhash{$attributeId}->{default};
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($hbHeapZeroInitOffset
@@ -5981,6 +6028,37 @@ sub generateTargetingImage {
             - $fspP1DefaultedFromP3Offset));
     }
 
+    if(defined $cfgBiosXmlFile)
+    {
+        unless (-e $cfgBiosXmlFile)
+        {
+            fatal("BIOS XML file $cfgBiosXmlFile does not exist.\n");
+        }
+
+        unless (defined $cfgBiosSchemaFile)
+        {
+            fatal("BIOS XML file $cfgBiosXmlFile specified, but a BIOS schema "
+                . "file was not.\n");
+        }
+
+        unless (-e $cfgBiosSchemaFile)
+        {
+            fatal("BIOS schema file $cfgBiosSchemaFile does not exist.\n");
+        }
+
+        unless (defined $cfgBiosOutputFile)
+        {
+            fatal("BIOS output file not specified.\n");
+        }
+
+        my $bios = new
+            Bios($cfgBiosXmlFile,$cfgBiosSchemaFile,$cfgBiosOutputFile);
+        $bios->load();
+        $bios->processBios(
+            \%attributeDefCache,\$attributes,\%biosData,%targetPhysicalPath);
+        $bios->export();
+    }
+
     return $outFile;
 }
 
@@ -6010,6 +6088,935 @@ print SM_TARGET_FILE"
 </attributes>";
 
     close(SM_TARGET_FILE);
+}
+
+################################################################################
+# BIOS Package
+#    Consumes platform-specific BIOS XML file, validates it, and outputs
+#    extended data on the attributes, which will be transformed (via xslt
+#    stylesheets) and used by 3rd parties (like Petitboot).  The BIOS
+#    package validates the input file against a stylesheet to ensure
+#    proper formatting.
+################################################################################
+
+{
+
+package Bios;
+
+################################################################################
+# Constructor; create a new Bios object
+################################################################################
+
+sub new
+{
+    my ($class,$biosInputXmlFile,$biosSchemaXsdFile,$biosOutputXmlFile) = @_;
+    my $self = {
+        _biosInputXmlFile => $biosInputXmlFile,
+        _libXmlParser => XML::LibXML->new(),
+        _biosXmlDoc => undef,
+        _biosSchemaXsdFile => $biosSchemaXsdFile,
+        _biosOutputXmlFile => $biosOutputXmlFile,
+    };
+
+    bless $self, $class;
+
+    return $self;
+}
+
+################################################################################
+# Load and parse the BIOS XML data, then validate it
+################################################################################
+
+sub load
+{
+    my ($self) = @_;
+    my $biosSchemaXsd = undef;
+
+    eval
+    {
+        $self->{_biosXmlDoc} =
+            $self->{_libXmlParser}->parse_file($self->{_biosInputXmlFile});
+    };
+
+    main::fatal ("Failed to parse BIOS file [$self->{_biosInputXmlFile}].\n"
+        . " Reason: $@") if $@;
+
+    eval
+    {
+        $biosSchemaXsd =
+            XML::LibXML::Schema->new(location => $self->{_biosSchemaXsdFile} );
+    };
+
+    main::fatal ("Failed to load valid schema [$self->{_biosSchemaXsdFile}].\n"
+        . "Reason: $@") if $@;
+
+    eval
+    {
+        $biosSchemaXsd->validate($self->{_biosXmlDoc})
+    };
+
+    main::fatal ("Failed to validate [$self->{_biosInputXmlFile}] "
+        . "using schema [$self->{_biosSchemaXsdFile}].\n"
+        . "Reason: $@") if $@;
+}
+
+################################################################################
+# Export the working version of the BIOS document to a file our STDOUT
+################################################################################
+
+sub export
+{
+    my ($self,$forceStdout) = @_;
+
+    if(defined $forceStdout
+        && ($forceStdout == 1))
+    {
+        print STDOUT "In-memory BIOS XML dump:\n";
+        print STDOUT $self->{_biosXmlDoc}->toString();
+    }
+    else
+    {
+        open(OUTPUT_XML,">$self->{_biosOutputXmlFile}") or
+            main::fatal("Could not open output BIOS XML file "
+                . "[$self->{_biosOutputXmlFile}] for writing.\n"
+                . "Reason: $!");
+
+        print OUTPUT_XML $self->{_biosXmlDoc}->toString() or
+            main::fatal ("Failed write output BIOS XML file "
+                . "[$self->{_biosOutputXmlFile}].\n"
+                . "Reason: $!");
+
+        close OUTPUT_XML or
+            main::fatal ("Failed to close output BIOS XML file "
+                . "[$self->{_biosOutputXmlFile}].\n"
+                . "Reason: $!");
+    }
+}
+
+################################################################################
+# Create child element in BIOS XML tree and return it
+################################################################################
+
+sub createChildElement()
+{
+    my ($self,$parent,$name,$value) = @_;
+
+    my $child = XML::LibXML::Element->new($name);
+
+    # Value is optional parameter; if not specified, only the child container
+    # element is created
+    if(defined $value)
+    {
+        $child->appendTextNode($value);
+    }
+    $parent->addChild($child);
+
+    return $child;
+}
+
+################################################################################
+# Validate any constraint not enforced by the schema and amend the XML tree
+################################################################################
+
+sub processBios
+{
+    my($self,$attrMapRef,$attributesRef,$instanceRef,%targetPhysicalPath) = @_;
+
+    use bigint;
+
+    my %attrTargAttrSetByBios = ();
+
+    # Process all attribute elements regardless of tree location
+    foreach my $attribute ($self->{_biosXmlDoc}->findnodes('//attribute'))
+    {
+        my($id) = $attribute->findnodes('./id');
+        my $attributeId =  $id->to_literal;
+
+        # Attribute must be defined in targeting
+        if(!exists $attrMapRef->{$attributeId})
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute is not defined in targeting.\n");
+        }
+
+        # Attribute must have volatile persistency
+        if($attrMapRef->{$attributeId}{persistency} ne "volatile"
+             && $attrMapRef->{$attributeId}{persistency} ne "volatile-zeroed")
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute is neither volatile nor volatile-zeroed "
+                . "in targeting.  Actual persistency is "
+                . "$attrMapRef->{$attributeId}{persistency}.\n");
+        }
+
+        # Attribute must be read only
+        my $readable = exists $attrMapRef->{$attributeId}{readable} ? 1 : 0;
+        my $writeable = exists $attrMapRef->{$attributeId}{writeable} ? 1 : 0;
+        if(!$readable || $writeable)
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute is not read-only in targeting.  "
+                . "Readable? " . $readable
+                . " writeable? " . $writeable . "\n");
+        }
+
+        # Attribute must not be an FSP-only attribute
+        my $fspOnly = exists $attrMapRef->{$attributeId}{fspOnly} ? 1 : 0;
+        if($fspOnly)
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute is FSP only in targeting.\n");
+        }
+
+        # Attribute must be an allowed type -and- supported by the BIOS code
+        # Current support is for signed/unsigned ints (1,2,4,8 bytes in size)
+        # and enumerations
+        my $simpleType = exists $attrMapRef->{$attributeId}{simpleType} ? 1 : 0;
+        my $complexType =
+            exists $attrMapRef->{$attributeId}{complexType} ? 1 : 0;
+        my $nativeType = exists $attrMapRef->{$attributeId}{nativeType} ? 1 : 0;
+        if(!$simpleType)
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute is not a simple type in targeting.  "
+                . "Complex type? $complexType, native type? $nativeType.\n");
+        }
+
+        # Defines which attributes can be put in the BIOS and provides
+        # associated BIOS type hint for 3rd party consumer
+        my %typeHash = ();
+
+        $typeHash{"int8_t"} =
+             { generalType => 'signed',
+               min         => -128,
+               max         => 127,
+               ror         => 1,
+             };
+        $typeHash{"int16_t"} =
+             { generalType => 'signed',
+               min         => -32768,
+               max         => 32767,
+               ror         => 1,
+             };
+        $typeHash{"int32_t"} =
+             { generalType => 'signed',
+               min         => -2147483648,
+               max         => 2147483647,
+               ror         => 1,
+             };
+        $typeHash{"int64_t"} =
+             { generalType => 'signed',
+               min         => -9223372036854775808,
+               max         => 9223372036854775807,
+               ror         => 1,
+             };
+        $typeHash{"uint8_t"} =
+             { generalType => 'unsigned',
+               min         => 0,
+               max         => 255,
+               ror         => 1,
+              };
+        $typeHash{"uint16_t"} =
+             { generalType => 'unsigned',
+               min         => 0,
+               max         => 65535,
+               ror         => 1,
+             };
+        $typeHash{"uint32_t"} =
+             { generalType => 'unsigned',
+               min         => 0,
+               max         => 4294967295,
+               ror         => 1,
+             };
+        $typeHash{"uint64_t"} =
+             { generalType => 'unsigned',
+               min         => 0,
+               max         => 18446744073709551615,
+               ror         => 1,
+             };
+        $typeHash{"enumeration"} =
+             { generalType => 'unsigned',
+               min         => 'na',
+               max         => 'na',
+               ror         => 1,
+             };
+
+        my $validType = 0;
+        my $attrType = "unknown";
+        # Convert actual type into a generalized type hint for the BIOS consumer
+        # and append to the XML tree
+        foreach my $type (keys %typeHash)
+        {
+            if(exists $attrMapRef->{$attributeId}{simpleType}{$type})
+            {
+                $self->createChildElement($attribute,"encoding",
+                    $typeHash{$type}{generalType});
+                $attrType = $type;
+                $validType = 1;
+                last;
+            }
+        }
+        if(!$validType)
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute's type is not supported in BIOS context. "
+                . "Dump of type:\n"
+                . ::Dumper($attrMapRef->{$attributeId}{simpleType}) . "\n");
+        }
+
+        # Simple type must not be array
+        if(exists $attrMapRef->{$attributeId}{simpleType}{array})
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "that attribute is an array which is not supported in "
+                . "BIOS context.\n");
+        }
+
+        # If attribute definition doesn't have a short name, it must be
+        # overridden by the BIOS config.  Add final value to the XML tree
+        my($displayNameNodes) = $attribute->findnodes('./display-name');
+        if(!$displayNameNodes)
+        {
+            if(exists $attrMapRef->{$attributeId}{'display-name'})
+            {
+                $self->createChildElement(
+                    $attribute,"display-name",
+                    $attrMapRef->{$attributeId}{'display-name'});
+            }
+            else
+            {
+                main::fatal("BIOS definition specified attribute $attributeId, "
+                    . "but attribute definition does not give a display name, "
+                    . "so BIOS config must (but failed to do so).\n");
+            }
+        }
+
+        # If attribute definition doesn't have a description, it must be
+        # overridden by the BIOS config.  Add final value to the XML tree
+        my($descriptionNodes) = $attribute->findnodes('./description');
+        if(!$descriptionNodes)
+        {
+            if(exists $attrMapRef->{$attributeId}{description})
+            {
+               $self->createChildElement(
+                    $attribute,"description",
+                    $attrMapRef->{$attributeId}{description});
+            }
+            else
+            {
+                main::fatal("BIOS definition specified attribute $attributeId, "
+                    . "but attribute definition does not give a description, "
+                    . "so BIOS config must (but failed to do so).\n");
+            }
+        }
+
+        my $default = undef;
+        my $size = undef;
+        my @targetRestrictions = $attribute->findnodes('./targetRestriction');
+
+        # Assume all targets have this BIOS attribute to begin with, then prove
+        # otherwise during processing
+        my %filteredTargets = %$instanceRef;
+        foreach my $target (keys %filteredTargets)
+        {
+            $filteredTargets{$target}{_allowed_} = 1;
+        }
+
+        # Hold the target override data
+        my %restriction = ();
+        $restriction{node} = 0x0F; # FAPI override value = any position
+        $restriction{position} = 0xFFFF; # FAPI override value = any position
+        $restriction{unit} = 0xFF; # FAPI override value = any unit
+        $restriction{symbolicType} = "*"; # Easy to understand target type
+        $restriction{numericType} = 0x0; # FAPI type indicator; 0 = any
+
+        # Scan target restriction(s).  If no restriction, the BIOS attribute
+        # must have same default for all instances.  If target restriction, all
+        # attributes that are grouped by the restriction must have the same
+        # default value.
+        if(scalar @targetRestrictions > 0)
+        {
+            my $restrictNode = "*";
+            my $restrictPos  = "*"; # NA except for things with positions
+                                    # including units
+            my $restrictUnit = "*"; # NA except for units
+            my $restrictType = "*";
+
+            # By default, a BIOS setting applies to every target the attribute
+            # is assigned to in targeting.  However, a target restriction can
+            # restrict an attribute to one or more subsets of those.  The set of
+            # targets tied to same BIOS attribute+restriction cannot intersect
+            # with any other similar grouping.  Further, all attributes of
+            # same type tied to same BIOS attribute via the restriction must
+            # have same default value.  Only one target restriction allowed by
+            # the schema
+            foreach my $targetRestriction (@targetRestrictions)
+            {
+                # Schema validation doesn't easily force targetRestrictions to
+                # have at least one child, so bail if that's the case
+                my @childElements = $targetRestriction->findnodes('./*');
+                if(scalar @childElements == 0)
+                {
+                    main::fatal("BIOS definition specified attribute "
+                        . "$attributeId, but requested targetRestriction with "
+                        . "no parameters.\n");
+                }
+
+                my @nodeElements = $targetRestriction->findnodes('./node');
+                my @positionElements
+                    = $targetRestriction->findnodes('./position');
+                my @unitElements = $targetRestriction->findnodes('./unit');
+                my @typeElements = $targetRestriction->findnodes('./type');
+
+                if(scalar @nodeElements)
+                {
+                    $restriction{node} = $nodeElements[0]->to_literal;
+                }
+
+                if(scalar @positionElements)
+                {
+                    $restriction{position} = $positionElements[0]->to_literal;
+                }
+
+                if(scalar @unitElements)
+                {
+                    $restriction{unit} = $unitElements[0]->to_literal;
+                }
+
+                # If any type restriction, verify it is a valid type designator
+                # any hold onto the numeric ID which will end up in the XML tree
+                if(scalar @typeElements)
+                {
+                    my $symbolicType = $typeElements[0]->to_literal;
+                    my $typeEnumDef =
+                        ::getEnumerationType($$attributesRef,"TYPE");
+                    my $numericType =
+                        ::enumNameToValue($typeEnumDef,$symbolicType);
+
+                    $restriction{numericType} = $numericType;
+                    $restriction{symbolicType} = $symbolicType;
+                }
+
+                # Compute the affected targets
+                foreach my $target (keys %filteredTargets)
+                {
+                    if(scalar @typeElements > 0)
+                    {
+                        $restrictType = $typeElements[0]->to_literal;
+
+                        # Screen out targets that don't match the given type
+                        if($filteredTargets{$target}{_allowed_} == 1)
+                        {
+                            my $type =
+                                $filteredTargets{$target}{_identity_}{TYPE};
+                            if($restrictType ne $type
+                                && $filteredTargets{$target}{_allowed_} == 1)
+                            {
+                                $filteredTargets{$target}{_allowed_} = 0;
+                                next;
+                            }
+                        }
+                    }
+
+                    if(scalar @nodeElements > 0)
+                    {
+                        $restrictNode = $nodeElements[0]->to_literal;
+
+                        # Screen out targets that don't match the given node.
+                        # A target matches the node restriction if its physical
+                        # path contains the same node ID.
+                        my $isInSameNodeExpr =
+                            quotemeta "physical:sys-0/node-$restrictNode" ;
+                        my $path =
+                            $filteredTargets{$target}{_identity_}{PHYS_PATH};
+
+                        if($path !~ m/^$isInSameNodeExpr/)
+                        {
+                            $filteredTargets{$target}{_allowed_} = 0;
+                            next;
+                        }
+                    }
+
+                    if(scalar @unitElements > 0)
+                    {
+                        $restrictUnit = $unitElements[0]->to_literal;
+
+                        my $checkPosition = 0;
+
+                        # Screen out targets that do not have unit attributes,
+                        # or which have non-matching unit attributes
+                        if(   (!exists
+                               $filteredTargets{$target}{_identity_}{CHIP_UNIT})
+                           || ($filteredTargets{$target}{_identity_}{CHIP_UNIT}
+                               != $restrictUnit)   )
+                        {
+                            $filteredTargets{$target}{_allowed_} = 0;
+                            next;
+                        }
+                        else
+                        {
+                            $checkPosition = 1;
+                        }
+
+                        # If unit matches, need to make sure it also sits on
+                        # chip at requested position, if specified
+                        if($checkPosition && ((scalar @positionElements) > 0))
+                        {
+                            my $candidatePath =
+                               $filteredTargets{$target}{_identity_}{PHYS_PATH};
+
+                            my $parent_phys_path = substr(
+                                $candidatePath, 0,(rindex $candidatePath, "/"));
+                            my $foundPosition = 0;
+
+                            # Walk from unit to whatever parent has the position
+                            # attribute; Remove this target from consideration
+                            # if the position does not match the restriction
+                            while(
+                                defined $targetPhysicalPath{$parent_phys_path})
+                            {
+                                if(defined $filteredTargets{
+                                       $targetPhysicalPath{$parent_phys_path}
+                                   }{_identity_}{POSITION})
+                                {
+                                    if ($filteredTargets{
+                                          $targetPhysicalPath{$parent_phys_path}
+                                        }{_identity_}{POSITION}
+                                        == $positionElements[0]->to_literal)
+                                    {
+                                        $foundPosition = 1;
+                                    }
+
+                                    last;
+                                }
+
+                                $candidatePath = $parent_phys_path;
+                                $parent_phys_path = substr(
+                                    $candidatePath, 0,
+                                    (rindex $candidatePath, "/"));
+                            }
+
+                            if(!$foundPosition)
+                            {
+                                $filteredTargets{$target}{_allowed_} = 0;
+                                next;
+                            }
+                        }
+                    }
+
+                    # If no unit restriction but position restriction, screen
+                    # out targets that don't have position attribute or whose
+                    # position attribute does not match the restriction
+                    if(   (scalar @positionElements > 0)
+                       && (scalar @unitElements == 0)   )
+                    {
+                        $restrictPos = $positionElements[0]->to_literal;
+
+                        if(   (!exists
+                                $filteredTargets{$target}{_identity_}{POSITION})
+                           || (  $filteredTargets{$target}{_identity_}{POSITION}
+                               != $restrictPos))
+                        {
+                            $filteredTargets{$target}{_allowed_} = 0;
+                        }
+                    }
+                 }
+            }
+        }
+
+        foreach my $target (keys %filteredTargets)
+        {
+            # Don't bother with any target that is not in play
+            if($filteredTargets{$target}{_allowed_} != 1)
+            {
+                next;
+            }
+
+            # Candidate is any target having the attribute and a default
+            # value determined
+            if(   exists $instanceRef->{$target}{$attributeId}
+               && exists $instanceRef->{$target}{$attributeId}{default}
+               && exists $instanceRef->{$target}{$attributeId}{size})
+            {
+                # Multiple BIOS directives cannot touch same
+                # target/attribute
+                if(defined $attrTargAttrSetByBios{$target}{$attributeId})
+                {
+                    main::fatal("$target, $attributeId set by multiple BIOS "
+                        . "definitions.\n");
+                }
+                else
+                {
+                    $attrTargAttrSetByBios{$target}{$attributeId} = 1;
+                }
+
+                # If no default set yet
+                if(! (defined $default) )
+                {
+                    $default = $instanceRef->{$target}{$attributeId}{default};
+                    $size = $instanceRef->{$target}{$attributeId}{size};
+                }
+                # Cannot have different defaults in same group
+                elsif(   $instanceRef->{$target}{$attributeId}{default}
+                      != $default )
+                {
+                    main::fatal("BIOS definition specified attribute "
+                        . "$attributeId, but default values are not same "
+                        . "across all qualifying targets.  "
+                        . "$target/ $attributeId = "
+                        . "$instanceRef->{$target}{$attributeId}{default}.\n");
+                }
+            }
+        }
+
+        # If no targets had the attribute
+        if(!defined $default || !defined $size)
+        {
+            main::fatal("BIOS definition specified attribute $attributeId, but "
+                . "after considering target restrictions/etc., no "
+                . "valid targets were found.\n");
+        }
+
+        # Add the restriction info to the XML tree.  This info is useful for 3rd
+        # parties to create Hostboot attribute overrides.
+        my $targetElement = $self->createChildElement($attribute,"target");
+        $self->createChildElement(
+            $targetElement,"type",sprintf("0x%08X",$restriction{numericType}));
+        $self->createChildElement(
+            $targetElement,"node",sprintf("0x%02X",$restriction{node}));
+        $self->createChildElement(
+            $targetElement,"position",sprintf("0x%04X",$restriction{position}));
+        $self->createChildElement(
+            $targetElement,"unit",sprintf("0x%02X",$restriction{unit}));
+
+        my @enumerationOverrideElement
+            = $attribute->findnodes('./enumerationOverride');
+        if($attrType eq "enumeration")
+        {
+            # Get a copy of the enumeration description.  Schema requires
+            # enumerator to have only a name (symbolic handle) + value.
+            # Customization allows overriding description + short name
+            # Customization allows specifying subset of values to actually use
+            # Output includes short name, long name, value
+            my $enumType =
+                $attrMapRef->{$attributeId}{simpleType}{enumeration}{id};
+            my $enumerationType =
+                ::getEnumerationType($$attributesRef,$enumType);
+
+            my %foundAllowed = ();
+            my $enableRestrictions = 0;
+            if(scalar @enumerationOverrideElement)
+            {
+                # Each enumerator name must tie back to a valid enumeration
+                foreach my $overrideNameElement (
+                    $attribute->findnodes(
+                        './enumerationOverride/allowedEnumerators/name'))
+                {
+                    my $overrideName = $overrideNameElement->to_literal;
+                    my $nameFound = 0;
+                    foreach my $enumerator (@{$enumerationType->{enumerator}})
+                    {
+                        if($enumerator->{name} eq $overrideName)
+                        {
+                            # Each allowed value must be different from all the
+                            # rest previously found for this attribute
+                            if(exists $foundAllowed{$overrideName})
+                            {
+                                main::fatal("BIOS definition specified "
+                                    . "attribute $attributeId, and supplied "
+                                    . "override to allowed enumeration values, "
+                                    . "but duplicated a value of "
+                                    . "$overrideName.\n");
+                            }
+                            else
+                            {
+                                $foundAllowed{$overrideName} = 1;
+                                $enumerator->{allowed} = 1;
+                            }
+
+                            $enableRestrictions = 1;
+                            $nameFound = 1;
+
+                            last;
+                        }
+                    }
+
+                    if(!$nameFound)
+                    {
+                        main::fatal("BIOS definition specified attribute "
+                            . "$attributeId, and supplied override to allowed "
+                            . "enumeration values, but requested enumerator "
+                            . "$overrideName is not valid.\n");
+                    }
+                }
+
+                # Apply any overrides to the enumerator text
+                my %textOverrideAllowed = ();
+                foreach my $enumeratorOverrideElement (
+                    $attribute->findnodes(
+                        './enumerationOverride/enumeratorOverride'))
+                {
+                    # Each override must have exactly one name element
+                    my @name = $enumeratorOverrideElement->findnodes('./name');
+
+                    # Each override must have 0 or 1 display-name and
+                    # descriptions elements
+                    my @displayName =
+                        $enumeratorOverrideElement->findnodes('./display-name');
+                    my @description =
+                        $enumeratorOverrideElement->findnodes('./description');
+
+                    # Make sure enumerator name is valid
+                    my $overrideName = $name[0]->to_literal;
+                    my $nameFound = 0;
+                    foreach my $enumerator (@{$enumerationType->{enumerator}})
+                    {
+                        if($enumerator->{name} eq $overrideName)
+                        {
+                            # Must not duplicate already overridden enumerator
+                            if(exists $textOverrideAllowed{$overrideName})
+                            {
+                                main::fatal("BIOS definition specified "
+                                     . "attribute $attributeId, and supplied "
+                                     . "override to allowed enumerator, "
+                                     . "but already overrode this "
+                                     . "enuemrator.\n");
+                            }
+                            # Can only override things that are not restricted
+                            elsif(   !exists $foundAllowed{$overrideName}
+                                  && $enableRestrictions)
+                            {
+                                main::fatal("BIOS definition specified "
+                                     . "attribute $attributeId, and supplied "
+                                     . "override to allowed enumerator, but "
+                                     . "this enumerator $overrideName is "
+                                     . "restricted.\n");
+                            }
+                            else
+                            {
+                                $textOverrideAllowed{$overrideName} = 1;
+                            }
+
+                            if(scalar @displayName)
+                            {
+                                $enumerator->{'display-name'} =
+                                    $displayName[0]->to_literal;
+                            }
+
+                            if(scalar @description)
+                            {
+                                $enumerator->{description} =
+                                    $description[0]->to_literal;
+                            }
+
+                            $nameFound = 1;
+                            last;
+                        }
+                    }
+
+                    if(!$nameFound)
+                    {
+                        main::fatal("BIOS definition specified attribute "
+                            . "$attributeId, and supplied override to allowed "
+                            . "enumeration, but requested invalid enumerator "
+                            . "name to override of $overrideName.\n");
+                    }
+                }
+            }
+
+            my $enumerationElement =
+                $self->createChildElement($attribute,"enumeration");
+
+            foreach my $enumerator (@{$enumerationType->{enumerator}})
+            {
+                if($enableRestrictions && !exists $enumerator->{allowed})
+                {
+                    # If enumerator is not allowed and is same as attribute
+                    # default then can't continue
+                    if($default eq  $enumerator->{name})
+                    {
+                        main::fatal("BIOS definition specified attribute "
+                            . "$attributeId as not allowing "
+                            . "$enumerator->{name}, but that is the attribute "
+                            . "default.\n");
+                    }
+
+                    next;
+                }
+
+                my $enumeratorElement =
+                    $self->createChildElement($enumerationElement,"enumerator");
+
+                if(!exists $enumerator->{'display-name'})
+                {
+                    main::fatal("BIOS definition specified attribute "
+                        . "$attributeId, and supplied override to enumerator "
+                        . "$enumerator->{name}, but there is no "
+                        . "display-name.\n");
+                }
+
+                $self->createChildElement(
+                   $enumeratorElement,"display-name",
+                   $enumerator->{'display-name'});
+
+                if(!exists $enumerator->{description})
+                {
+                    main::fatal("BIOS definition specified attribute "
+                        . "$attributeId, and supplied override to enumerator "
+                        . "$enumerator->{name}, but there is no "
+                        . "description.\n");
+                }
+
+                $self->createChildElement(
+                   $enumeratorElement,"description",$enumerator->{description});
+                $self->createChildElement(
+                   $enumeratorElement,"value",
+                   sprintf("0x%08X",$enumerator->{value}));
+            }
+
+            # Translate attribute default to actual value
+            $default = ::enumNameToValue($enumerationType,$default);
+        }
+        # No enums allowed to be specified
+        elsif(scalar @enumerationOverrideElement)
+        {
+                main::fatal("BIOS definition specified attribute $attributeId, "
+                    . "and supplied enumerated values, but this is not an "
+                    . "enumeration attribute, it is of type $attrType.\n");
+        }
+
+        # Can only specify numeric override for signed/unsigned values of
+        # 1,2,4,8 byte values
+        my @numericOverrideElements= $attribute->findnodes('./numericOverride');
+
+        # Hash of min(key), max(value) pairs
+        my %allowedRange = ();
+        if(scalar @numericOverrideElements)
+        {
+            # If range override not allowed for this attribute, bail
+            if($typeHash{$attrType}{ror} != 1)
+            {
+                main::fatal("BIOS definition specified attribute $attributeId, "
+                    . "and supplied numeric override, but this attribute "
+                    . "type does not support such override.  Type is "
+                    . "$attrType.\n");
+            }
+
+            # A numericOverride has exactly one start + end element
+            my @startElements =
+                @numericOverrideElements[0]->findnodes('./start');
+            my @endElements = @numericOverrideElements[0]->findnodes('./end');
+            my $min = $typeHash{$attrType}{min};
+            my $max = $typeHash{$attrType}{max};
+
+            # Validate range min
+            if(scalar @startElements)
+            {
+                my $rawMin = @startElements[0]->to_literal;
+
+                if($rawMin < $min || $rawMin > $max)
+                {
+                    main::fatal("BIOS definition specified attribute "
+                        . "$attributeId, and supplied valid start or end "
+                        . "range, but min out of range. requested "
+                        . "min = $rawMin, allowed min = "
+                        . "$typeHash{$attrType}{min}, allowed max = "
+                        . "$typeHash{$attrType}{max}.\n");
+                }
+                $min = $rawMin;
+            }
+
+            # Validate range max
+            if(scalar @endElements)
+            {
+                my $rawMax = @endElements[0]->to_literal;
+
+                if($rawMax > $max || $rawMax < $min)
+                {
+                    main::fatal("BIOS definition specified attribute "
+                        . "$attributeId, and supplied valid start or end "
+                        . "range, but max out of range. requested "
+                        . "max = $rawMax, current min = $min, "
+                        . "allowed min = "
+                        . "$typeHash{$attrType}{min}, allowed max = "
+                        . "$typeHash{$attrType}{max}.\n");
+                }
+                $max = $rawMax;
+            }
+
+            # Min must be <= Max
+            if($min > $max)
+            {
+                main::fatal("BIOS definition specified attribute "
+                    . "$attributeId, and supplied valid start or end "
+                    . "range, but min > max. min = $min, "
+                    . "max = $max.\n");
+            }
+
+            # To prevent range overlaps, cannot duplicate the same start of
+            # a range
+            if(defined $allowedRange{$min})
+            {
+                main::fatal("Already range starting at $min.\n");
+            }
+
+            $allowedRange{$min} = $max;
+            my $defaultInRange = 0;
+
+            my $min = undef;
+            my $max = undef;
+
+            # Ensure default value falls within a defined range.  The ranges are
+            # sorted in numerically ascending order according to the start of
+            # each range, so if the start of
+            # range N falls within range N-1, we know there is an illegal range
+            # overlap and fail.
+            foreach my $rangeKey (sort {$a <=> $b} keys %allowedRange)
+            {
+                if(   ($default >= $rangeKey)
+                   && ($default <= $allowedRange{$rangeKey}) )
+                {
+                    $defaultInRange = 1;
+                }
+
+                if(!defined $min)
+                {
+                    $min = $rangeKey;
+                    $max = $allowedRange{$rangeKey};
+                    next;
+                }
+
+                if($rangeKey <= $max)
+                {
+                    main::fatal("Range starting with $rangeKey overlaps "
+                        . "range ending at $max.\n");
+                }
+
+                $min = $rangeKey;
+                $max = $allowedRange{$rangeKey};
+            }
+
+            if(!$defaultInRange)
+            {
+                main::fatal("Default value $default not in any valid range.\n");
+            }
+        }
+
+        # Convert attribute ID to numerical value and append to XML tree
+        my $attributeIdEnumeration
+            = ::getAttributeIdEnumeration($$attributesRef);
+        my $attrValue = ::enumNameToValue($attributeIdEnumeration,$attributeId);
+        $attrValue = sprintf ("0x%0X", $attrValue);
+
+        # Add the remaining metadata to the XML tree
+        $self->createChildElement($attribute,"default",$default);
+        $self->createChildElement($attribute,"numeric-id",$attrValue);
+        $self->createChildElement($attribute,"size",$size);
+    }
+}
+
+1;
+
 }
 
 __END__
@@ -6109,6 +7116,23 @@ Adds 4096 bytes of version page as first page in the generated binaries.
 =item B<--no-version-page>
 Does not add 4096 bytes of version page as first page in the generated
 binaries . This is the default behavior.
+
+=item B<--bios-xml-file>
+
+Path + file name of XML file describing the platform's BIOS configuration.
+Optional.
+
+=item B<--bios-schema-file>
+
+Path + file name of XSD schema file used to validate the BIOS XML file. Required
+if a BIOS XML file is given.
+
+=item B<--bios-output-file>
+
+Path + filename of output XML file describing the amended BIOS configuration.
+This output is commonly later modified by 3rd parties via xslt transformation to
+tailor the output for a given application.  Required if a BIOS XML file is
+given.
 
 =item B<--verbose>
 
