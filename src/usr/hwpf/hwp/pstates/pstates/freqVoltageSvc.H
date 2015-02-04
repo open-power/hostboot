@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,17 @@
 
 namespace FREQVOLTSVC
 {
+
+
+/**
+ *  @brief - Constants used to calculate boot voltage value and set
+ *           ATTR_PROC_BOOT_VOLTAGE_VID attribute.
+ */
+static const uint32_t PROC_BOOT_VOLT_PORT0_ENABLE = 0x80000000;
+static const uint8_t PROC_BOOT_VOLT_VDD_SHIFT = 16;
+static const uint8_t PROC_BOOT_VOLT_VCS_SHIFT = 8;
+static const uint32_t PROC_BOOT_VOLT_VDD_MASK = 0x00ff0000;
+static const uint32_t PROC_BOOT_VOLT_VCS_MASK = 0x0000ff00;
 
     /**
      * @brief Set system frequency attribute
@@ -81,24 +92,18 @@ namespace FREQVOLTSVC
      *     This function is wrapper for executing proc_get_voltage
      *     HW procedure.
      *
-     * @param[in] i_procChip
+     * @param[in] io_procChip
      *     Valid functional Processor Chip target pointer
      * @param[in] i_bootFreqMhz
      *     Boot Frequency in MHZ
-     * @param[out] o_vdd_vid
-     *     On success, holds VDD value
-     * @param[out] o_vcs_vid
-     *     On success, holds VCS value
      *
      * @return Error log handle indicating the status of the request
      *
      * @retval NULL  Successfully retrieved boot voltage data
      * @retval !NULL Failed to get boot voltage, ignore output
      */
-    errlHndl_t runProcGetVoltage(const TARGETING::Target * i_procChip,
-                                 const uint32_t i_bootFreqMhz,
-                                 uint8_t & o_vdd_vid,
-                                 uint8_t & o_vcs_vid);
+    errlHndl_t runProcGetVoltage(TARGETING::Target * io_procChip,
+                                 const uint32_t i_bootFreqMhz);
 
     /**
      * @brief Get system frequency

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -94,6 +96,15 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs);
  *  return any error logs to istep 
  */
 void* call_host_slave_sbe_config(void *io_pArgs);
+
+
+/**
+ *  @brief set_proc_voltage_vid - sets ATTR_PROC_BOOT_VOLTAGE_VID
+ *
+ *  return error logs
+ */
+errlHndl_t set_proc_boot_voltage_vid();
+
 
 /**
  *  @brief host_sbe_start

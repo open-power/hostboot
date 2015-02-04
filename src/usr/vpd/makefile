@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -38,9 +38,10 @@ SUBDIRS += runtime.d
 
 
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
-#Update to Murano DD2.1 for CCIN 54E6
-BINARY_FILES += $(IMGDIR)/procmvpd.dat:c510eda768a9e3921ff957b549574507fd5c9ce9
-BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:683bdae079c2e2708ffda655dbd849f14a16f816
+#Update mvpd to include LRPx records for all possible cores CCIN 54E3
+BINARY_FILES += $(IMGDIR)/procmvpd.dat:254c30077a002ccdaca3b34c50abcafbf5ae3e48
+BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
+
 #Update to Centaur DD2.0 for CCIN 31E8
 BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
 

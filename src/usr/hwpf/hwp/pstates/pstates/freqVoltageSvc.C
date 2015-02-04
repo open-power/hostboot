@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,12 +43,14 @@
 #include <fapiPlatHwpInvoker.H>
 #include <hwpf/fapi/fapiMvpdAccess.H>
 #include <hwpf/hwpf_reasoncodes.H>
+#include <slave_sbe.H>
 #include <p8_build_pstate_datablock.H>
 #include <proc_get_voltage.H>
 #include <pstates.h>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <vpd/mvpdenums.H>
+#include <initserviceif.H>
 
 extern trace_desc_t* g_fapiTd;
 
@@ -362,34 +364,54 @@ namespace FREQVOLTSVC
     // FREQVOLTSVC::runProcGetVoltage
     //**************************************************************************
     errlHndl_t runProcGetVoltage(
-                    const TARGETING::Target * i_procChip,
-                    const uint32_t i_bootFreqMhz,
-                    uint8_t & o_vdd_vid,
-                    uint8_t & o_vcs_vid)
+                    TARGETING::Target * io_procChip,
+                    const uint32_t i_bootFreqMhz)
     {
-        errlHndl_t l_err = NULL;
+        TRACDCOMP(g_fapiTd,INFO_MRK"Enter runProcGetVoltage");
 
-        TRACFCOMP(g_fapiTd,INFO_MRK"i_bootFreqMhz: 0x%08X",i_bootFreqMhz);
+        uint8_t l_vdd_vid = 0;
+        uint8_t l_vcs_vid = 0;
+
+        errlHndl_t l_err = NULL;
+        TARGETING::ATTR_BOOT_VOLTAGE_type l_boot_voltage_info =
+                                    PROC_BOOT_VOLT_PORT0_ENABLE;
+
+        TRACDCOMP(g_fapiTd,INFO_MRK"i_bootFreqMhz: 0x%08X",i_bootFreqMhz);
 
         // Assert on NULL input target
-        assert(i_procChip != NULL);
+        // If the target is NULL, we have NO functional PROCS.
+        // Terminate IPL
+        assert(io_procChip != NULL);
 
         // convert to fapi target
         fapi::Target l_fapiProcChip(fapi::TARGET_TYPE_PROC_CHIP,
                                   reinterpret_cast<void *>
-                                  (const_cast<TARGETING::Target*>(i_procChip)));
+                                 (const_cast<TARGETING::Target*>(io_procChip)));
 
         // Invoke HW procedure
         FAPI_INVOKE_HWP(l_err, proc_get_voltage,l_fapiProcChip,i_bootFreqMhz,
-                        o_vdd_vid,o_vcs_vid);
+                        l_vdd_vid,l_vcs_vid);
 
         if( l_err != NULL)
         {
             TRACFCOMP( g_fapiTd,ERR_MRK"Error from HWP: proc_get_voltage: "
                      "i_bootFreq: 0x%08X, "
                      "HUID: 0x%08X", i_bootFreqMhz,
-                     i_procChip->getAttr<TARGETING::ATTR_HUID>());
+                     io_procChip->getAttr<TARGETING::ATTR_HUID>());
         }
+
+        TRACDCOMP("Vdd: 0x%02x, vcs: 0x%02x", l_vdd_vid, l_vcs_vid);
+
+        // create boot voltage value
+        l_boot_voltage_info |= ( ( static_cast<uint32_t>(l_vdd_vid) <<
+                  PROC_BOOT_VOLT_VDD_SHIFT) & ( PROC_BOOT_VOLT_VDD_MASK ) );
+        l_boot_voltage_info |= ( ( static_cast<uint32_t>(l_vcs_vid) <<
+                  PROC_BOOT_VOLT_VCS_SHIFT) & ( PROC_BOOT_VOLT_VDD_MASK ) );
+
+        // set ATTR_PROC_BOOT_VOLTAGE_VID
+        io_procChip->setAttr<
+             TARGETING::ATTR_PROC_BOOT_VOLTAGE_VID>( l_boot_voltage_info );
+
 
         return l_err;
     }
