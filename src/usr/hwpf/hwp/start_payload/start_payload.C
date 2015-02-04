@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -705,12 +705,13 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         // divisor
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Setup I2C Masters" );
-        err = I2C::i2cSetupMasters();
+        err = I2C::i2cSetupActiveMasters(I2C::I2C_PROC_ALL);
         if( err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "Error setting up I2C Bus Divisors" );
-            break;
+            // just commit the error and keep going
+            errlCommit(err, ISTEP_COMP_ID);
         }
 
         // Get Target Service, and the system target.

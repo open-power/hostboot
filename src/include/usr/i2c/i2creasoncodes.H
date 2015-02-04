@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ enum i2cModuleId
     I2C_CHECK_FOR_ERRORS                = 0x07,
     I2C_SETUP_MASTERS                   = 0x08,
     I2C_SEND_SLAVE_STOP                 = 0x09,
-    I2C_RESET_MASTERS                   = 0x0A,
+    I2C_PROCESS_ACTIVE_MASTERS          = 0x0A,
 };
 
 

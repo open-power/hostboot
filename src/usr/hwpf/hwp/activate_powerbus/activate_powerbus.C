@@ -349,12 +349,11 @@ void * call_host_slave_sbe_update( void * io_pArgs )
 
         // Reset I2C devices before trying to access the SBE SEEPROMs
         // Any error returned should not fail istep
-        l_errl = I2C::i2cResetActiveMasters( I2C::I2C_RESET_PROC_HOST );
+        l_errl = I2C::i2cResetActiveMasters( I2C::I2C_PROC_HOST );
         if (l_errl)
         {
-            // Commit error
+            // Commit error and keep going
             errlCommit( l_errl, HWPF_COMP_ID );
-            break;
         }
 
         // Call to check state of Processor SBE SEEPROMs and

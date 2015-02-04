@@ -98,7 +98,7 @@ void* host_init_fsi( void *io_pArgs )
             break;
         }
 
-        l_errl = I2C::i2cResetActiveMasters(I2C::I2C_RESET_ALL, false);
+        l_errl = I2C::i2cResetActiveMasters(I2C::I2C_ALL, false);
         if (l_errl)
         {
             // Commit this error

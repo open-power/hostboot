@@ -33,37 +33,14 @@
 namespace I2C
 {
 
-/*
- * @enum i2cRangeType
- *
- * @brief i2cRangeType is used to create function-specific enums below
- */
-enum i2cRangeType
-{
-    I2C_RANGE_HOST    = 0x01,
-    I2C_RANGE_FSI     = 0x02,
-    I2C_RANGE_PROC    = 0x04,
-    I2C_RANGE_MEMBUF  = 0x08,
-};
-
 /**
- * @brief This function will handle everything required to setup the master
- *      engines on the processor.
- *      Mainly, as of current code, this is being used to write the I2C Bus
- *      Divisor values to the master engines to be used by Phyp.
+ * @enum i2cProcessType
  *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t i2cSetupMasters ( void );
-
-/**
- * @enum i2cResetType
- *
- * @brief I2C Reset Type specifies which targets and which I2C master engines
- *        are reset
+ * @brief I2C Process Type specifies which targets and which I2C master
+ *        engines are reset or setup
  *
  * Specifically:
+ *
  * _PROC_   --> loops through the processors in the system
  * _MEMBUF_ --> loops through membufs in the system
  *
@@ -74,19 +51,24 @@ errlHndl_t i2cSetupMasters ( void );
  * _ALL     --> combines one or more of the PROC/MEMBUF and HOST/FSI pairs
  *
  */
-enum i2cResetType
+enum i2cProcessType
 {
-    I2C_RESET_INVALID = 0,
+    // used to create function-specific enums below
+    I2C_RANGE_HOST    = 0x01,
+    I2C_RANGE_FSI     = 0x02,
+    I2C_RANGE_PROC    = 0x04,
+    I2C_RANGE_MEMBUF  = 0x08,
 
-    I2C_RESET_PROC_HOST = I2C_RANGE_PROC | I2C_RANGE_HOST,
-    I2C_RESET_PROC_FSI  = I2C_RANGE_PROC | I2C_RANGE_FSI,
-    I2C_RESET_PROC_ALL  = I2C_RESET_PROC_HOST | I2C_RESET_PROC_FSI,
+    // external interface for i2cResetActiveMasters and i2cSetupActiveMasters
+    I2C_PROC_HOST = I2C_RANGE_PROC | I2C_RANGE_HOST,
+    I2C_PROC_FSI  = I2C_RANGE_PROC | I2C_RANGE_FSI,
+    I2C_PROC_ALL  = I2C_PROC_HOST | I2C_PROC_FSI,
 
-    I2C_RESET_MEMBUF_HOST = I2C_RANGE_MEMBUF | I2C_RANGE_HOST,
-    I2C_RESET_MEMBUF_FSI  = I2C_RANGE_MEMBUF | I2C_RANGE_FSI,
-    I2C_RESET_MEMBUF_ALL  = I2C_RESET_MEMBUF_HOST  | I2C_RESET_MEMBUF_FSI,
+    I2C_MEMBUF_HOST = I2C_RANGE_MEMBUF | I2C_RANGE_HOST,
+    I2C_MEMBUF_FSI  = I2C_RANGE_MEMBUF | I2C_RANGE_FSI,
+    I2C_MEMBUF_ALL  = I2C_MEMBUF_HOST  | I2C_MEMBUF_FSI,
 
-    I2C_RESET_ALL = I2C_RESET_PROC_ALL | I2C_RESET_MEMBUF_ALL,
+    I2C_ALL = I2C_PROC_ALL | I2C_MEMBUF_ALL,
 };
 
 /**
@@ -97,7 +79,7 @@ enum i2cResetType
  *
  * @param[in] i_resetType - Specfies which targets and which I2C master engines
  *                          to reset
- *                          (see i2cResetType description above)
+ *                          (see i2cProcessType description above)
  *
  * @param[in] i_functional - Specfies if reset is performed on functional or
  *                           any existing targets that match the i_resetType
@@ -107,7 +89,28 @@ enum i2cResetType
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t i2cResetActiveMasters ( i2cResetType i_resetType,
+errlHndl_t i2cResetActiveMasters ( i2cProcessType i_resetType,
+                                   bool i_functional = true );
+
+/**
+ * @brief This function will handle everything required to setup a target's
+ *        "active" I2C master engine.
+ * [NOTE: "active" engine is determined by target's I2C_SWITCHES attribute]
+ *
+ *
+ * @param[in] i_setupType - Specfies which targets and which I2C master engines
+ *                          to setup
+ *                          (see i2cProcessType description above)
+ *
+ * @param[in] i_functional - Specfies if setup is performed on functional or
+ *                           any existing targets that match the i_resetType
+ *                           if true - functional targets
+ *                           if false - existing targets
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cSetupActiveMasters ( i2cProcessType i_setupType,
                                    bool i_functional = true );
 
 

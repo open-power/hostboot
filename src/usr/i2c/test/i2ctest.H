@@ -631,30 +631,29 @@ class I2CTest: public CxxTest::TestSuite
          *      needed by PHYP to ensure that the I2C masters are
          *      setup correctly on the system.
          */
-        void testI2CSetupMasters ( void )
+        void testI2CSetupActiveMasters ( void )
         {
             errlHndl_t err = NULL;
             int fails = 0;
             const int NUM_CMDS = 1;
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2CSetupMasters - Start" );
+                       "testI2CSetupActiveMasters - Start" );
 
-            err = I2C::i2cSetupMasters();
+            err = I2C::i2cSetupActiveMasters(I2C::I2C_PROC_ALL);
 
             if( err )
             {
-                TS_FAIL( "testI2CSetupMasters - Error returned from "
-                         "i2cSetupMasters()");
+                TS_FAIL( "testI2CSetupActiveMasters - Error returned from "
+                         "i2cSetupActiveMasters(I2C_PROC_ALL)");
                 fails++;
                 delete err;
             }
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2CSetupMasters - End: %d/%d fails",
+                       "testI2CSetupActiveMasters - End: %d/%d fails",
                        fails, NUM_CMDS );
         }
-
 
 
         /**
