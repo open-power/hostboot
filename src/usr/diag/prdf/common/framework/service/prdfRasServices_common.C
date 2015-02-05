@@ -49,13 +49,20 @@
 #include <iipSystem.h>         //For RemoveStoppedChips
 
 #ifdef __HOSTBOOT_MODULE
+
   #include <stdio.h>
+
+  #ifdef __HOSTBOOT_RUNTIME
+    #include <prdfCenMbaDynMemDealloc_rt.H>
+  #endif
+
 #else
   #include <srcisrc.H>
   #include <utilreg.H> //For registry functions
   #include <evenmgt.H>
   #include <rmgrBaseClientLib.H>  //for rmgrSyncFile
   #include <prdfSdcFileControl.H>
+  #include <prdfCenMbaDynMemDealloc_rt.H>
 #endif
 
 using namespace TARGETING;
@@ -1008,6 +1015,80 @@ bool ErrDataService::SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer)
 }
 
 #endif // if not __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
+{
+    #define PRDF_FUNC "[ErrDataService::deallocateDimms] "
+
+    #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME) // RT only
+
+    do
+    {
+        // First check if Dynamic Memory Deallocation is supported. Then check
+        // if it is enabled for predictive callouts.
+        if ( !DEALLOC::isEnabled() || !isPredDynDeallocEnabled() ) break;
+
+        TargetHandleList dimmList;
+        for ( SDC_MRU_LIST::const_iterator it = i_mruList.begin();
+              it != i_mruList.end(); ++it )
+        {
+            PRDcallout thiscallout = it->callout;
+            if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
+            {
+                TargetHandle_t calloutTgt = thiscallout.getTarget();
+                TYPE tgtType = getTargetType( calloutTgt );
+
+                if ( TYPE_L4 == tgtType )
+                {
+                    calloutTgt = getConnectedParent( calloutTgt, TYPE_MEMBUF );
+                    tgtType    = TYPE_MEMBUF;
+                }
+
+                if ( (TYPE_MEMBUF == tgtType) ||
+                     (TYPE_MBA    == tgtType) ||
+                     (TYPE_MCS    == tgtType) )
+                {
+                    TargetHandleList dimms = getConnected( calloutTgt,
+                                                           TYPE_DIMM );
+                    dimmList.insert( dimmList.end(), dimms.begin(),
+                                     dimms.end() );
+                }
+                else if ( TYPE_DIMM == tgtType )
+                {
+                    dimmList.push_back( calloutTgt );
+                }
+            }
+            else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
+            {
+                MemoryMru memMru (thiscallout.flatten());
+
+                TargetHandleList dimms = memMru.getCalloutList();
+                for ( TargetHandleList::iterator dimm = dimms.begin();
+                      dimm != dimms.end(); ++dimm )
+                {
+                    if ( TYPE_DIMM == getTargetType(*dimm) )
+                        dimmList.push_back(*dimm);
+                }
+            }
+        }
+
+        if( 0 == dimmList.size() ) break;
+
+        int32_t rc = DEALLOC::dimmListGard( dimmList );
+        if ( SUCCESS != rc )
+        {
+            PRDF_ERR( PRDF_FUNC"dimmListGard failed" );
+            break;
+        }
+
+    } while(0);
+
+    #endif
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 // RasServices class

@@ -391,6 +391,14 @@ int32_t rankGard( ExtensibleChip * i_mbaChip, CenRank i_rank )
 
 //------------------------------------------------------------------------------
 
+bool isEnabled()
+{
+    return ( isHyprRunning() && (isHyprConfigPhyp() || isHyprConfigOpal()) &&
+             !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() );
+}
+
+//------------------------------------------------------------------------------
+
 int32_t pageGard( ExtensibleChip * i_mbaChip, CenAddr i_addr )
 {
     #define PRDF_FUNC "[DEALLOC::pageGard] "
@@ -399,6 +407,8 @@ int32_t pageGard( ExtensibleChip * i_mbaChip, CenAddr i_addr )
     int32_t o_rc = SUCCESS;
     do
     {
+        if ( !isEnabled() ) break; // nothing to do
+
         o_rc = getSystemAddr( i_mbaChip, i_addr, sysAddr);
         if( SUCCESS != o_rc )
         {
@@ -426,6 +436,8 @@ int32_t lmbGard( ExtensibleChip * i_mbaChip, CenAddr i_addr, bool i_isFetch )
     int32_t o_rc = SUCCESS;
     do
     {
+        if ( !isEnabled() ) break; // nothing to do
+
         if( isHyprConfigOpal() )
         {
             o_rc = rankGard( i_mbaChip, i_addr.getRank() );
@@ -465,6 +477,8 @@ int32_t mbaGard( ExtensibleChip * i_mbaChip )
 
     do
     {
+        if ( !isEnabled() ) break; // nothing to do
+
         CenAddr startAddr, endAddr;
         TargetHandle_t mba = i_mbaChip->GetChipHandle();
         o_rc = getMemAddrRange( mba, startAddr, endAddr );
@@ -507,6 +521,8 @@ int32_t dimmSlctGard( TargetHandle_t  i_dimm )
 
     do
     {
+        if ( !isEnabled() ) break; // nothing to do
+
         TargetHandle_t mba =  getConnectedParent( i_dimm, TYPE_MBA );
 
         ExtensibleChip * mbaChip = (ExtensibleChip *)systemPtr->GetChip( mba );

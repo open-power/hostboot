@@ -819,29 +819,32 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
                            MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
 
-        // Add a TPS request to the TD queue and ban any further TPS requests
-        // for this rank.
-        l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
-                                               CenMbaTdCtlrCommon::TPS_EVENT,
-                                               true );
-        if ( SUCCESS != l_rc )
+        if ( CHECK_STOP != i_sc.service_data->GetAttentionType() )
         {
-            PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
-                      rank.getMaster(), rank.getSlave() );
-            // We are not adding break here as we still want to do lmbGard
-            // If you want to add any code after this which depends on result
-            // of handleTdEvent result, add the code judicially.
-        }
+            // Add a TPS request to the TD queue and ban any further TPS
+            // requests for this rank.
+            l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
+                                                  CenMbaTdCtlrCommon::TPS_EVENT,
+                                                  true );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
+                          rank.getMaster(), rank.getSlave() );
+                // We are not adding break here as we still want to do lmbGard
+                // If you want to add any code after this which depends on
+                // result of handleTdEvent result, add the code judicially.
+            }
 
-        #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
-        // Send lmb gard message to hypervisor.
-        int32_t lmbRc =  DEALLOC::lmbGard( mbaChip, addr );
-        if ( SUCCESS != lmbRc )
-        {
-            PRDF_ERR( PRDF_FUNC"lmbGard() failed" );
-            l_rc = lmbRc; break;
+            #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
+            // Send lmb gard message to hypervisor.
+            int32_t lmbRc =  DEALLOC::lmbGard( mbaChip, addr );
+            if ( SUCCESS != lmbRc )
+            {
+                PRDF_ERR( PRDF_FUNC"lmbGard() failed" );
+                l_rc = lmbRc; break;
+            }
+            #endif
         }
-        #endif
 
     } while (0);
 

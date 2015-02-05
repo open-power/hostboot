@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,13 +67,6 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
     } while(0);
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
-{
-    //No OP for HB
 }
 
 //------------------------------------------------------------------------------

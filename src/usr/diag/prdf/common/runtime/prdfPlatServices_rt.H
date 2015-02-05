@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,9 @@ namespace PlatServices
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################
+
+// TODO: RTC 124850 need to add support for this.
+inline bool isPredDynDeallocEnabled() { return false; }
 
 /**
  * @brief Communicates a page gard request to the hypervisor.

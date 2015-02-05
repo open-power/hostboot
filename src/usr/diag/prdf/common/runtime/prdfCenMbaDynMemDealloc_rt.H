@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,11 @@ class CenAddr;
 
 namespace DEALLOC
 {
+
+/**
+ * @return True, if Dynamic Memory Deallocation is enabled. False, otherwise.
+ */
+bool isEnabled();
 
 /**
  * @brief  Sends a page gard message to PHYP.
