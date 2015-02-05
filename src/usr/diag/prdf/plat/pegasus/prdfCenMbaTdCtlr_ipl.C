@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -271,10 +271,31 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
                                             ? mss_MaintCmd::FAST_MED_BW_IMPACT
                                             : mss_MaintCmd::FAST_MIN_BW_IMPACT;
 
+        uint32_t stopCond = COND_FAST_SCRUB;
+
+        // TODO: RTC 123338: There are some OpenPOWER companies that do not want
+        //       to run with HBRT PRD enabled. Currently the only option right
+        //       now is to use the compile flag. Eventually, we may want to add
+        //       this as MRW/BIOS option.
+        #ifndef CONFIG_HBRT_PRD
+
+        // HBRT PRD is not enabled. Check if this system has an FSP.
+        if ( !isSpConfigFsp() )
+        {
+            // No runtime PRD will be present. Do not start the initial fast
+            // scrub. Instead, simply start continuous background scrubbing with
+            // no stop-on-error conditions.
+            cmdSpeed = enableFastBgScrub() ? mss_MaintCmd::FAST_MED_BW_IMPACT
+                                           : mss_MaintCmd::BG_SCRUB;
+            stopCond = 0;
+        }
+
+        #endif // ifdef CONFIG_HBRT_PRD
+
         // Start the initial fast scrub.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
                                   iv_mbaTrgt, startAddr.getRank(),
-                                  COND_FAST_SCRUB, cmdSpeed,
+                                  stopCond, cmdSpeed,
                                   mss_MaintCmdWrapper::END_OF_MEMORY );
         if ( NULL == iv_mssCmd )
         {
