@@ -10,6 +10,13 @@ config SFC_IS_AST2400
     help
         The Serial Flash Controller is the AST2400 BMC.
 
+config SFC_IS_MEMBOOT_AST2400
+    default n
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2400
+    help
+    	Uses main memory on AST2400 BMC as the flash source. Writing is not
+    	supported.
+
 config SFC_IS_FAKE
     default n
     depends on !SFC_IS_IBM_DPSS && !SFC_IS_AST2400
