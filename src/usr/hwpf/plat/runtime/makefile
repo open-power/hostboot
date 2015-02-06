@@ -5,7 +5,8 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
+# [+] International Business Machines Corp.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ MODULE = plat_rt
 VPATH += ../
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/pll_accessors/
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/runtime
 
 # include common fapi OBJs
 include ../plat.mk

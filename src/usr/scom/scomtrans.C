@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,6 +43,11 @@
 #include "scomtrans.H"
 #include <scom/scomreasoncodes.H>
 #include <errl/errludtarget.H>
+#include <initservice/initserviceif.H>
+
+#if __HOSTBOOT_RUNTIME
+    #include "handleSpecialWakeup.H"
+#endif
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
@@ -48,6 +55,7 @@ extern trace_desc_t* g_trac_scom;
 namespace SCOM
 {
 
+bool g_wakeupInProgress = false;
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
@@ -90,7 +98,13 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
     uint64_t l_instance = 0;
 
     uint64_t i_addr = va_arg(i_args,uint64_t);
+#if __HOSTBOOT_RUNTIME
+    static const uint64_t l_lowerBound = 0x0000000010000000;
+    static const uint64_t l_upperBound = 0x00000000100F0000;
 
+    //true => FSP present, false =>OP HBRT
+    bool isFSP_HBRT = INITSERVICE::spBaseServicesEnabled();
+#endif
     // Get the attribute type.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
@@ -101,6 +115,24 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
     {
         if (l_type == TARGETING::TYPE_EX)
         {
+#if __HOSTBOOT_RUNTIME
+            if(i_addr >= l_lowerBound && i_addr < l_upperBound
+                   && !g_wakeupInProgress && !isFSP_HBRT)
+            {
+                g_wakeupInProgress = true;
+
+                l_err = handleSpecialWakeup(i_target,true);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_scom,
+                              "Enable p8_cpu_special_wakeup ERROR");
+
+                    //capture the target data in the elog
+                    ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
+                }
+                g_wakeupInProgress = false;
+            }
+#endif
  
         // Below are the assumptions used for the EX translate
         // EX
@@ -560,6 +592,28 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                                             i_accessType,
                                             i_addr);
     }
+
+    // @todo RTC:124196 need to move this to a more general location so that
+    //       the disable occurs after the HBRT is complete.
+#if __HOSTBOOT_RUNTIME
+    if(l_type == TARGETING::TYPE_EX &&
+       (i_addr >= l_lowerBound && i_addr < l_upperBound)
+       && !g_wakeupInProgress && !isFSP_HBRT)
+    {
+        g_wakeupInProgress = true;
+
+        l_err = handleSpecialWakeup(i_target,false);
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_scom,"Disable p8_cpu_special_wakeup ERROR");
+
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
+        }
+        g_wakeupInProgress = false;
+    }
+#endif
     return l_err;
 }
 

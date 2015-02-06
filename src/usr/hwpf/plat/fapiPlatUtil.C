@@ -39,12 +39,15 @@
 #include <vfs/vfs.H>
 #include <initservice/initsvcbreakpoint.H>
 #include <errl/errlentry.H>
+#include <initservice/initserviceif.H>
+
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/interface.h>
 #include <targeting/common/targetservice.H>
 #include <runtime/rt_targeting.H>
 #include <hwpf/hwpf_reasoncodes.H>
+#include "handleSpecialWakeup.H"
 #endif
 
 //******************************************************************************
@@ -258,7 +261,19 @@ fapi::ReturnCode fapiSpecialWakeup(const fapi::Target & i_target,
     fapi::ReturnCode fapi_rc = fapi::FAPI_RC_SUCCESS;
     FAPI_INF("fapiSpecialWakeup");
 #ifdef __HOSTBOOT_RUNTIME
-    if(g_hostInterfaces && g_hostInterfaces->wakeup)
+    if(!INITSERVICE::spBaseServicesEnabled())
+    {
+        TARGETING::Target* l_EXtarget =
+            reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        errlHndl_t err_SW = handleSpecialWakeup(l_EXtarget,i_enable);
+        if(err_SW)
+        {
+            fapi_rc.setPlatError(reinterpret_cast<void *>(err_SW));
+        }
+
+    }
+    else if(g_hostInterfaces && g_hostInterfaces->wakeup)
     {
         TARGETING::Target* target =
             reinterpret_cast<TARGETING::Target*>(i_target.get());
