@@ -372,10 +372,8 @@ static void rejectPnorRequest(void)
     uint8_t* data = new uint8_t(reject_request);
     IPMI_TRAC("rejecting pnor access request %x", *data);
 
-    // TODO: RTC: 120127, check to ensure this works properly on a newer BMC
-
     uint8_t len = 0;
-    errlHndl_t err = send(IPMI::pnor_request(), len, data);
+    errlHndl_t err = send(IPMI::pnor_response(), len, data);
     if (err)
     {
         err->collectTrace(IPMI_COMP_NAME);
