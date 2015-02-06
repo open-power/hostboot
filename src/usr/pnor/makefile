@@ -36,7 +36,7 @@ OBJS += pnorsbe.o
 
 #SFC Implementations
 OBJS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibm.o)
-OBJS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400.o)
+OBJS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400.o sfc_memboot_ast2400.o)
 OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
 
 #NOR Implementations
