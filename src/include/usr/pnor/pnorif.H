@@ -30,6 +30,7 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <utility>
+#include <config.h>
 
 namespace PNOR
 {
@@ -90,6 +91,46 @@ struct SectionInfo_t
 };
 
 /**
+ * PNOR Sides
+ */
+enum SideId
+{
+    WORKING = 0,
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+    ALTERNATE = 1,
+#endif
+    NUM_SIDES,
+    INVALID_SIDE = NUM_SIDES,
+    FIRST_SIDE   = WORKING,
+};
+
+/**
+ * Information about a side of PNOR
+ */
+struct SideInfo_t
+{
+    SideId id;              /**< Side ID */
+    char side;              /**< name of the side either A or B */
+    bool isGolden;          /**< True if side is golden */
+    bool isGuardPresent;    /**< True if guard section is present */
+    bool hasOtherSide;      /**< True if a valid alternate side exists*/
+    uint64_t primaryTOC;    /**< Address of the primary TOC */
+    uint64_t backupTOC;     /**< Address of the backup TOC  */
+    uint64_t hbbAddress;    /**< HBB Address associated with this side */
+    uint64_t hbbMmioOffset; /**< HBB MMIO Offset associated with hbbAddress*/
+};
+
+/**
+ * @brief Returns information about a given side of pnor
+ *
+ * @param[in]  i_side PNOR side
+ * @param[out] o_info side information
+ *
+ * @return errlHndl_t Error log if request was invalid
+ */
+errlHndl_t getSideInfo (SideId i_side, SideInfo_t& o_info);
+
+/**
  * @brief  Return the size and address of a given section of PNOR data
  *
  * @param[in] i_section  PNOR section
@@ -143,14 +184,6 @@ errlHndl_t clearSection(PNOR::SectionId i_section);
  * @return errlHndl_t  Error log if validation failed
  */
 errlHndl_t validateAltMaster( void );
-
-//@ TODO RTC: 120061 add golden info
-//@ TODO RTC: 109703 make golden changes for informing OPAL
-struct TocInfo_t
-{
-    std::pair<uint64_t, uint64_t> activeTocOffsets;
-    std::pair<uint64_t, uint64_t> altTocOffsets;
-};
 
 /** @brief PNOR::TEST section offsets for test cases to prevent
  *         concurrency problems

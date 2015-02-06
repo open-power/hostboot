@@ -43,8 +43,10 @@ namespace PNOR
         MOD_PNORRP_WRITETODEVICE        = 0x08, /**< PnorRP::writeToDevice */
         MOD_PNORRP_DIDSTARTUPFAIL       = 0x09, /**< didStartupFail(rc) */
         MOD_PNORRP_FLUSH                = 0x0A, /**< mm_remove_pages */
-        MOD_PNORRP_FIXECC               = 0x0B, /**< fixECC */
-        MOD_PNORRP_FINDTOC              = 0x0C, /**< findTOC */
+        MOD_PNORRP_FIXECC               = 0x0B, /**< PnorRP::fixECC */
+        MOD_PNORRP_FINDTOC              = 0x0C, /**< PnorRP::findTOC */
+        MOD_PNORRP_GETSIDEINFO          = 0x0D, /**< PnorRP::getSideInfo */
+        MOD_PNORRP_SETSIDEINFO          = 0x0E, /**< PnorRP::setSideInfo */
 
         // pnorvalid.C
         MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
@@ -145,6 +147,10 @@ namespace PNOR
         RC_PARTITION_TABLE_CORRUPTED = PNOR_COMP_ID | 0x25,
         //termination_rc
         RC_FINDTOC_FAILED            = PNOR_COMP_ID | 0x26,
+        RC_INVALID_PNOR_SIDE         = PNOR_COMP_ID | 0x27,
+        //termination_rc
+        RC_INVALID_WORKING_TOC       = PNOR_COMP_ID | 0x28,
+        RC_INVALID_TOC               = PNOR_COMP_ID | 0x29,
     };
 
     enum UserDetailsTypes

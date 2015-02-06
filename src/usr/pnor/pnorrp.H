@@ -48,6 +48,16 @@ class PnorRP
     static void init( errlHndl_t &io_rtaskRetErrl );
 
     /**
+     * @brief Returns information about a given side of pnor
+     *        (Called by an external interface PNOR::getSideInfo())
+     * @param[in]  i_side PNOR side
+     * @param[out] o_info side information
+     *
+     * @return errlHndl_t Error log if request was invalid
+     */
+    errlHndl_t getSideInfo (PNOR::SideId i_side, PNOR::SideInfo_t& o_info);
+
+    /**
      * @brief  Return the size and address of a given section of PNOR data
      *    Called by external PNOR::getSectionInfo()
      *
@@ -78,9 +88,9 @@ class PnorRP
     errlHndl_t fixECC(PNOR::SectionId i_section);
 
     /**
-     * @brief  Get TOC offset of specified TOC on active side
+     * @brief  Get TOC offset of specified TOC and side
      *
-     * @param[in] i_toc     TOC offset desired on active side
+     * @param[in] i_toc     TOC id of the TOC requested
      *
      * @return uint64_t     TOC offset
      */
@@ -100,12 +110,12 @@ class PnorRP
 
   private:
 
-    // TOC 0 and 1 offsets of both PNOR sides. The active PNOR side determined
-    // by the Seeprom the SBE booted from
-    std::pair<uint64_t, uint64_t> iv_activeTocOffsets;
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-    std::pair<uint64_t, uint64_t> iv_altTocOffsets;
-#endif
+    /*
+     * Stores primary and backup TOCs for each side of PNOR
+     */
+    typedef std::pair<uint64_t, uint64_t> TocOffsets_t;
+    TocOffsets_t iv_TocOffset [PNOR::NUM_SIDES];
+
     enum
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
@@ -125,6 +135,11 @@ class PnorRP
         uint8_t numWrites;  /**< Number of writes to this page */
         uint8_t numCEs;  /**< Number of ECC corrections made */
     };
+
+    /**
+     * Stores information about all sides of PNOR
+     */
+    PNOR::SideInfo_t iv_side[PNOR::NUM_SIDES];
 
     /**
      * Cached copy of section data
@@ -160,6 +175,13 @@ class PnorRP
      * @return Error from device
      */
     errlHndl_t  findTOC();
+
+    /*
+     * @brief determines the sides information and fills the class variable
+     *          iv_side
+     * @return Error
+     */
+    errlHndl_t setSideInfo();
 
     /**
      * @brief Verify both TOC's and store section information from one of the

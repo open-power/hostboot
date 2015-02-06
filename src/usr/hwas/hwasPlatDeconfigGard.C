@@ -270,7 +270,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         }
 
         l_pErr = _GardRecordIdSetup(iv_platDeconfigGard);
-        if (l_pErr && iv_platDeconfigGard)
+        if (l_pErr || !iv_platDeconfigGard)
         {
             break;
         }
@@ -490,16 +490,26 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
         if (l_errl)
         {
             g_GardSectionInfo.size = 0;
-// @TODO RTC: 120061 - replace config flag with a pnor interface call to say if
-//                     there is a guard section on the current (active) side
-//                     of pnor
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-            HWAS_INF("getGardSectionInfo: No guard section disabling guard support");
-            delete l_errl;
-            l_errl = NULL;
-#else
-            HWAS_ERR("getGardSectionInfo:getSectionInfo failed");
-#endif
+
+            PNOR::SideInfo_t l_sideInfo;
+            errlHndl_t l_tempErr = PNOR::getSideInfo(PNOR::WORKING,l_sideInfo);
+            if (l_tempErr)
+            {
+                HWAS_ERR("getGardSectionInfo: getSideInfo failed");
+                errlCommit (l_errl,HWAS_COMP_ID);
+                l_errl = l_tempErr;
+            }
+            if (!l_sideInfo.isGuardPresent)
+            {
+                HWAS_INF("getGardSectionInfo: No guard section disabling guard"
+                        " support");
+                delete l_errl;
+                l_errl = NULL;
+            }
+            else
+            {
+                HWAS_ERR("getGardSectionInfo:getSectionInfo failed");
+            }
         }
         else
         {

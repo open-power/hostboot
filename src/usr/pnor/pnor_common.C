@@ -148,8 +148,11 @@ errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
 void  PNOR::physicalToMmioOffset(uint64_t  i_hbbAddress,
                                  uint64_t& o_mmioOffset)
 {
-    o_mmioOffset = (PNOR::LPC_SFC_MMIO_OFFSET + i_hbbAddress +
-                   ((PNOR::PNOR_SIZE - i_hbbAddress)/9)) & 0xFFFFFFF;
+    //Left shifting 32-bits because SCOMS store a 64-bit value
+    //and HBB Offset is stored in the higher 32-bits
+    o_mmioOffset = ((PNOR::LPC_SFC_MMIO_OFFSET + i_hbbAddress +
+                   ((PNOR::PNOR_SIZE - i_hbbAddress)/9)) |
+                   PNOR::LPC_FW_SPACE) << 32;
 }
 
 /*

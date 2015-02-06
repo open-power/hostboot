@@ -131,6 +131,10 @@ namespace PNOR {
         // for the SBE to work so we can rely on that same assertion
         /**< Offset to direct read space, from FW base */
         LPC_SFC_MMIO_OFFSET = LPC_TOP_OF_FLASH_OFFSET-PNOR_SIZE+1,
+
+        //@TODO: RTC:124503 - delete the following line and call the LPC
+        //interface instead
+        LPC_FW_SPACE = 0xF0000000,
     };
 
 }

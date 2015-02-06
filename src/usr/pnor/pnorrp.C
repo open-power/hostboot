@@ -45,6 +45,7 @@
 #include <util/align.H>
 #include <config.h>
 #include "pnor_common.H"
+#include <hwas/common/hwasCallout.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -68,6 +69,15 @@ TASK_ENTRY_MACRO( PnorRP::init );
 /********************
  Public Methods
  ********************/
+
+/**
+ * @brief  Returns information about a given side of PNOR
+ */
+errlHndl_t PNOR::getSideInfo( PNOR::SideId i_side,
+                              PNOR::SideInfo_t& o_info)
+{
+    return Singleton<PnorRP>::instance().getSideInfo(i_side,o_info);
+}
 
 /**
  * @brief  Return the size and address of a given section of PNOR data
@@ -280,6 +290,12 @@ void PnorRP::initDaemon()
             TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to readTOC");
             break;
         }
+        l_errhdl =  PnorRP::setSideInfo ();
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setSideInfo failed");
+            break;
+        }
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
@@ -301,6 +317,39 @@ void PnorRP::initDaemon()
     TRACUCOMP(g_trac_pnor, "< PnorRP::initDaemon" );
 }
 
+errlHndl_t PnorRP::getSideInfo( PNOR::SideId i_side,
+                              PNOR::SideInfo_t& o_info)
+{
+    errlHndl_t l_err = NULL;
+    do
+    {
+        //check to make sure side id is valid
+        if (i_side != PNOR::INVALID_SIDE)
+        {
+            memcpy (&o_info, &iv_side[i_side], sizeof(SideInfo_t));
+        }
+        else
+        {
+            TRACFCOMP(g_trac_pnor, "Side:%d is currently not supported",
+                    (int)i_side);
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORRP_GETSIDEINFO
+             * @reasoncode   PNOR::RC_INVALID_PNOR_SIDE
+             * @userdata1    Requested SIDE
+             * @userdata2    0
+             * @devdesc      PnorRP::getSideInfo> Side not supported
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORRP_GETSIDEINFO,
+                                            PNOR::RC_INVALID_PNOR_SIDE,
+                                            TO_UINT64(i_side),
+                                            0,true);
+            break;
+        }
+    } while (0);
+    return l_err;
+}
 
 /**
  * @brief  Return the size and address of a given section of PNOR data
@@ -591,17 +640,17 @@ errlHndl_t PnorRP::findTOC()
 
             if (l_isActiveTOC)
             {
-                iv_activeTocOffsets.first  = l_toc;
-                iv_activeTocOffsets.second = l_backupTOC;
-                iv_altTocOffsets.first     = l_otherPrimaryTOC;
-                iv_altTocOffsets.second    = l_otherBackupTOC;
+                iv_TocOffset[WORKING].first    = l_toc;
+                iv_TocOffset[WORKING].second   = l_backupTOC;
+                iv_TocOffset[ALTERNATE].first  = l_otherPrimaryTOC;
+                iv_TocOffset[ALTERNATE].second = l_otherBackupTOC;
             }
             else if (l_isOtherActiveTOC)
             {
-                iv_activeTocOffsets.first  = l_otherPrimaryTOC;
-                iv_activeTocOffsets.second = l_otherBackupTOC;
-                iv_altTocOffsets.first     = l_toc;
-                iv_altTocOffsets.second    = l_backupTOC;
+                iv_TocOffset[WORKING].first    = l_otherPrimaryTOC;
+                iv_TocOffset[WORKING].second   = l_otherBackupTOC;
+                iv_TocOffset[ALTERNATE].first  = l_toc;
+                iv_TocOffset[ALTERNATE].second = l_backupTOC;
             }
             else
             {
@@ -611,16 +660,17 @@ errlHndl_t PnorRP::findTOC()
                 INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_CORRUPTED);
             }
             TRACFCOMP(g_trac_pnor,"findTOC>activePrimary:0x%X,activeBackup:0x%X"
-                    "altPrimary:0x%X, altBackup:0x%X",iv_activeTocOffsets.first,
-                    iv_activeTocOffsets.second, iv_altTocOffsets.first,
-                    iv_altTocOffsets.second);
+                  "altPrimary:0x%X, altBackup:0x%X",iv_TocOffset[WORKING].first,
+                  iv_TocOffset[WORKING].second, iv_TocOffset[ALTERNATE].first,
+                  iv_TocOffset[ALTERNATE].second);
 #else
             if (l_isActiveTOC)
             {
-                iv_activeTocOffsets.first  = l_toc;
-                iv_activeTocOffsets.second = l_backupTOC;
-                TRACFCOMP(g_trac_pnor, "findTOC> activePrimary:0x%X, activeBackup:0x%X",
-                        iv_activeTocOffsets.first, iv_activeTocOffsets.second);
+                iv_TocOffset[WORKING].first  = l_toc;
+                iv_TocOffset[WORKING].second = l_backupTOC;
+                TRACFCOMP(g_trac_pnor, "findTOC> activePrimary:0x%X, "
+                        "activeBackup:0x%X", iv_TocOffset[WORKING].first,
+                        iv_TocOffset[WORKING].second);
             }
             else
             {
@@ -665,9 +715,9 @@ errlHndl_t PnorRP::readTOC()
         memset(toc0Buffer, 0xFF, PAGESIZE);
         memset(toc1Buffer, 0xFF, PAGESIZE);
 
-        if (iv_activeTocOffsets.first != INVALID_OFFSET)
+        if (iv_TocOffset[WORKING].first != INVALID_OFFSET)
         {
-            l_errhdl = readFromDevice(iv_activeTocOffsets.first, 0, false,
+            l_errhdl = readFromDevice(iv_TocOffset[WORKING].first, 0, false,
                                     toc0Buffer, fatal_error );
             if (l_errhdl)
             {
@@ -676,9 +726,9 @@ errlHndl_t PnorRP::readTOC()
             }
         }
 
-        if (iv_activeTocOffsets.second != INVALID_OFFSET)
+        if (iv_TocOffset[WORKING].second != INVALID_OFFSET)
         {
-            l_errhdl = readFromDevice(iv_activeTocOffsets.second, 0, false,
+            l_errhdl = readFromDevice(iv_TocOffset[WORKING].second, 0, false,
                                        toc1Buffer, fatal_error );
             if (l_errhdl)
             {
@@ -710,6 +760,118 @@ errlHndl_t PnorRP::readTOC()
     return l_errhdl;
 }
 
+errlHndl_t PnorRP::setSideInfo ()
+{
+    uint64_t l_chip       = 0;
+    uint64_t l_fatalError = 0;
+    uint8_t* l_tocBuffer  = new uint8_t [PAGESIZE];
+    ffs_hdr* l_ffs_hdr    = 0;
+    errlHndl_t l_err      = NULL;
+    for (SideId i = FIRST_SIDE; i < NUM_SIDES; i = (SideId)(i+1))
+    {
+        //id
+        iv_side[i].id = (SideId)i;
+
+        //get a valid TOC
+        uint64_t l_primaryTOC = iv_TocOffset[i].first;
+        uint64_t l_backupTOC  = iv_TocOffset[i].second;
+
+        uint64_t l_validTOC = (l_primaryTOC != INVALID_OFFSET) ? l_primaryTOC :
+                              ((l_backupTOC != INVALID_OFFSET) ? l_backupTOC  :
+                                INVALID_OFFSET);
+        if(l_validTOC == INVALID_OFFSET)
+        {
+            if (i == WORKING)
+            {
+                TRACFCOMP(g_trac_pnor, "setSideInfo: No valid TOC found for"
+                        "working side");
+                INITSERVICE::doShutdown(PNOR::RC_INVALID_WORKING_TOC);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_pnor,"setSideInfo: No valid TOC found for"
+                        " side: %d", i);
+                /*@
+                 * @errortype
+                 * @moduleid         PNOR::MOD_PNORRP_SETSIDEINFO
+                 * @reasoncode       PNOR::RC_INVALID_TOC
+                 * @userdata1        Side Id
+                 * @userdata2[00:31] primary toc
+                 * @userdata2[32:63] backup toc
+                 * @devdesc          PnorRP::setSideInfo> No valid TOCs found
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            PNOR::MOD_PNORRP_SETSIDEINFO,
+                            PNOR::RC_INVALID_TOC,
+                            i,TWO_UINT32_TO_UINT64(l_primaryTOC,l_backupTOC),
+                            true);
+                l_err->addPartCallout(
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        HWAS::PNOR_PART_TYPE,
+                        HWAS::SRCI_PRIORITY_LOW,
+                        HWAS::NO_DECONFIG,
+                        HWAS::GARD_NULL);
+                break;
+            }
+        }
+
+        iv_side[i].primaryTOC = l_primaryTOC;
+        iv_side[i].backupTOC  = l_backupTOC;
+
+        l_err = readFromDevice(l_validTOC,l_chip,
+                    false, l_tocBuffer,l_fatalError);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_pnor, "setSideInfo: readFromDevice failed"
+                    " while reading a valid TOC");
+            break;
+        }
+        l_ffs_hdr = (ffs_hdr*)l_tocBuffer;
+
+        //isGolden
+        //Entry 0 is the "part" partition
+        //Need to read from the ffs hdr instead of the TOC because
+        //TOC has no knowledge of other side
+        ffs_entry* cur_entry = (&l_ffs_hdr->entries[0]);
+        ffs_hb_user_t* ffsUserData = (ffs_hb_user_t*)&(cur_entry->user);
+        iv_side[i].isGolden = (ffsUserData->miscFlags & FFS_MISC_GOLDEN);
+
+        //isGuardPresent
+        uint64_t l_secOffset = INVALID_OFFSET;
+        findPhysicalOffset (l_ffs_hdr, "GUARD", l_secOffset);
+        iv_side[i].isGuardPresent = (l_secOffset != INVALID_OFFSET);
+
+        //isOtherSide
+        iv_side[i].hasOtherSide = false;
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+        iv_side[i].hasOtherSide =
+            ((iv_TocOffset[(i+1)%NUM_SIDES].first != INVALID_OFFSET) ||
+            (iv_TocOffset[(i+1)%NUM_SIDES].second != INVALID_OFFSET));
+#endif
+
+        //hbbAddress
+        l_secOffset = INVALID_OFFSET;
+        findPhysicalOffset (l_ffs_hdr, "HBB", l_secOffset);
+        iv_side[i].hbbAddress = l_secOffset;
+
+        //mmioOffset
+        uint64_t l_mmioOffset;
+        physicalToMmioOffset(l_secOffset, l_mmioOffset);
+        iv_side[i].hbbMmioOffset = l_mmioOffset;
+
+        //char side
+        iv_side[i].side =(ALIGN_DOWN_X(l_secOffset,32*MEGABYTE) == 0) ? 'A':'B';
+
+        TRACFCOMP(g_trac_pnor, "setSideInfo: sideId:%d, isGolden:%d, "
+              "isGuardPresent:%d, hasOtherSide:%d, primaryTOC: 0x%x, backupTOC"
+              ":0x%X, HBB:0x%X, MMIO:0x%X",i, iv_side[i].isGolden,
+              iv_side[i].isGuardPresent,iv_side[i].hasOtherSide,
+              iv_side[i].primaryTOC, iv_side[i].backupTOC,
+              iv_side[i].hbbAddress, iv_side[i].hbbMmioOffset);
+    }
+    return l_err;
+}
 /**
  * @brief  Message receiver
  */
@@ -1271,6 +1433,6 @@ errlHndl_t PnorRP::fixECC (PNOR::SectionId i_section)
 uint64_t PnorRP::getTocOffset(TOCS i_toc) const
 {
     // Can use a ternary operator because there are only 2 TOCs per side
-    return (i_toc == TOC_0) ? iv_activeTocOffsets.first :
-                              iv_activeTocOffsets.second;
+    return (i_toc == TOC_0) ? iv_TocOffset[WORKING].first :
+                              iv_TocOffset[WORKING].second;
 }
