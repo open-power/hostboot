@@ -63,6 +63,7 @@
     <attribute><id>OPEN_POWER_TURBO_MODE_SUPPORTED</id></attribute>
     <attribute><id>OCC_CONTROL_DATA</id></attribute>
     <attribute><id>OPAL_MODEL</id></attribute>
+    <attribute><id>HTMGT_SAFEMODE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

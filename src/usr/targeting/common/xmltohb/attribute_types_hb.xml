@@ -801,4 +801,17 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>HTMGT_SAFEMODE</id>
+    <description>1 = in safemode. 0 = in normal mode.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>
