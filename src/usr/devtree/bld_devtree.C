@@ -435,6 +435,14 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     uint64_t xscom_prop[2] = { l_xscomAddr,  THIRTYTWO_GB};
     i_dt->addPropertyCells64(xscomNode, "reg", xscom_prop, 2);
 
+    // Add proc chip ECIDs
+    ATTR_ECID_type ecid;
+    i_pProc->tryGetAttr<ATTR_ECID>(ecid);
+    char ecid_ascii[33];
+    sprintf(ecid_ascii, "%.16llX%.16llX", ecid[0], ecid[1]);
+    i_dt->addPropertyString(xscomNode, "ecid", ecid_ascii);
+    CPPASSERT(sizeof(ATTR_ECID_type) == 16);
+
     /*PSI Host Bridge*/
     uint32_t l_psiInfo = 0x2010900; /*PSI Host Bridge Scom addr*/
     dtOffset_t psiNode = i_dt->addNode(xscomNode, "psihb", l_psiInfo);
@@ -1271,6 +1279,14 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
 
             //Add any I2C devices hanging off this chip
             add_i2c_info( l_pMemB, i_dt, membNode );
+
+            // Add membuf ECIDs
+            ATTR_ECID_type ecid;
+            l_pMemB->tryGetAttr<ATTR_ECID>(ecid);
+            char ecid_ascii[33];
+            sprintf(ecid_ascii, "%.16llX%.16llX", ecid[0], ecid[1]);
+            i_dt->addPropertyString(membNode, "ecid", ecid_ascii);
+            CPPASSERT(sizeof(ATTR_ECID_type) == 16);
         }
 
 
