@@ -75,7 +75,8 @@ IpmiRP::IpmiRP(void):
     iv_recv_buffer_size(IPMI::g_recv_buffer_size),
     iv_retries(IPMI::g_retries),
     iv_shutdown_msg(NULL),
-    iv_shutdown_now(false)
+    iv_shutdown_now(false),
+    iv_graceful_shutdown_pending(false)
 {
     mutex_init(&iv_mutex);
     sync_cond_init(&iv_cv);
@@ -188,7 +189,7 @@ void IpmiRP::timeoutThread(void)
         msg_t*& msq_msg = iv_timeoutq.front();
         IPMI::Message* msg = static_cast<IPMI::Message*>(msq_msg->extra_data);
 
-        // The diffence between the timeout of the first message in the
+        // The difference between the timeout of the first message in the
         // queue and the current time is the time we wait for a timeout
         timespec_t tmp_time;
         clock_gettime(CLOCK_MONOTONIC, &tmp_time);
@@ -234,7 +235,7 @@ void IpmiRP::getInterfaceCapabilities(void)
     // Mark as an independent daemon so if it crashes we terminate.
     task_detach();
 
-    // Queue up a get-capabilties message. Anything that queues up behind us
+    // Queue up a get-capabilities message. Anything that queues up behind us
     // (I guess it could queue up in front of us too ...) will use the defaults.
 
     IPMI::completion_code cc = IPMI::CC_UNKBAD;
@@ -246,7 +247,7 @@ void IpmiRP::getInterfaceCapabilities(void)
         // If we have a problem, we can't "turn on" the IPMI stack.
         if (err)
         {
-            IPMI_TRAC("get_capabilties returned an error, using defaults");
+            IPMI_TRAC("get_capabilities returned an error, using defaults");
             err->collectTrace(IPMI_COMP_NAME);
             errlCommit(err, IPMI_COMP_ID);
             break;
@@ -388,15 +389,11 @@ void IpmiRP::lastChanceEventHandler(void)
     // Mark as an independent daemon so if it crashes we terminate.
     task_detach();
 
-    // TODO: RTC: 108830, copy the code below to make a handler for power-off
-    //
     // To create a event handler, all you need to do is create a message
-    // queue (or use one you have) and register for events. I left this
-    // code here as an example.
-    //
-    // Create a message queue and register with the resource provider
-    // msg_q_t queue = msg_q_create();
-    // registerForEvent(IPMI::power_off(), queue);
+    // queue (or use one you have) and register for events.
+
+    // register with the resource provider, use the existing queue
+    registerForEvent(IPMI::power_off(), iv_last_chanceq);
 
 
     // We'll handle the pnor request in this context as we just send
@@ -414,6 +411,23 @@ void IpmiRP::lastChanceEventHandler(void)
             // We'll handle the pnor request in this context as we just send
             // an async message which says "no."
             rejectPnorRequest();
+        }
+        else if ( event->iv_cmd[0] == IPMI::power_off().second )
+        {
+            // handle the graceful shutdown message
+            IPMI_TRAC("Graceful shutdown request recieved");
+
+            // register for the post memory flush callback
+            INITSERVICE::registerShutdownEvent(iv_msgQ,
+                            IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
+                            INITSERVICE::POST_MEM_FLUSH_START_PRIORITY);
+
+            iv_graceful_shutdown_pending = true;
+            lwsync();
+
+            // initiate the shutdown processing in the background
+            INITSERVICE::doShutdown(SHUTDOWN_STATUS_GOOD,true);
+
         }
         else {
             // TODO: RTC: 120128
@@ -447,7 +461,7 @@ void IpmiRP::execute(void)
     task_detach();
 
     // Register shutdown events with init service.
-    //      Done at the "end" of shutdown processesing.
+    //      Done at the "end" of shutdown processing.
     //      This will flush out any IPMI messages which were sent as
     //      part of the shutdown processing. We chose MBOX priority
     //      as we don't want to accidentally get this message after
@@ -476,7 +490,7 @@ void IpmiRP::execute(void)
             static_cast<IPMI::msg_type>(msg->type);
 
         // Invert the "default" by checking here. This allows the compiler
-        // to warn us if the enum has an unhandled case but still catch
+        // to warn us if the enum has an un-handled case but still catch
         // runtime errors where msg_type is set out of bounds.
         assert(msg_type <= IPMI::MSG_LAST_TYPE,
                "msg_type %d not handled", msg_type);
@@ -497,7 +511,7 @@ void IpmiRP::execute(void)
             {
                 IPMI_TRAC(WARN_MRK "IPMI shutdown pending. Message dropped");
                 IPMI::Message* ipmi_msg =
-                            static_cast<IPMI::Message*>(msg->extra_data);
+                    static_cast<IPMI::Message*>(msg->extra_data);
                 response(ipmi_msg, IPMI::CC_BADSTATE);
                 msg_free(msg);
             }
@@ -537,10 +551,37 @@ void IpmiRP::execute(void)
             // Accept no more messages. Anything in the sendq is sent and
             // we wait for the reply from the BMC.
         case IPMI::MSG_STATE_SHUTDOWN:
-            IPMI_TRAC(INFO_MRK "ipmi begin shutdown");
-            l_shutdown_pending = true;    // Stop incoming new messages
-            iv_shutdown_msg = msg;        // Reply to this message
+            {
+                IPMI_TRAC(INFO_MRK "MSG_STATE_SHUTDOWN: ipmi begin shutdown");
+                l_shutdown_pending = true;    // Stop incoming new messages
+                iv_shutdown_msg = msg;        // Reply to this message
+
+                break;
+            }
+
+        case IPMI::MSG_STATE_GRACEFUL_SHUTDOWN:
+            {
+                IPMI_TRAC(INFO_MRK "MSG_STATE_GRACEFUL_SHUTDOWN: send power"
+                                    " off command to BMC");
+                // clear the graceful shutdown flag so we will exit after
+                // sending the power off cmd
+                iv_graceful_shutdown_pending = false;
+                size_t len = 1;
+                uint8_t* data = new uint8_t[len];
+
+                // send the force shutdown option.
+                data[0] = 0;
+
+                IPMI::Message* ipmi_msg = IPMI::Message::factory(
+                        IPMI::chassis_power_off(), len, data, IPMI::TYPE_ASYNC);
+
+                // queue up the power off message
+                iv_sendq.push_back(ipmi_msg->iv_msg);
+
+                iv_shutdown_msg = msg;   // Reply to this message
+            }
             break;
+
         };
 
         // There's a good chance the interface will be idle right after
@@ -555,11 +596,25 @@ void IpmiRP::execute(void)
             idle();
         }
 
-        // Once quiesced, shutdown and reply to shutdown msg
+        // Once quiesced, reply to shutdown msg and exit.
+        // For IPMI based systems if we received the soft power off (graceful
+        // shutdown) request then we have more processing to do, so respond
+        // to the first shutdown message and instead of exiting we go back
+        // and wait for the post memory flush shutdown message then send a
+        // power off command to the BMC
         if (l_shutdown_pending && iv_respondq.empty() && iv_sendq.empty())
         {
-            shutdownNow();
-            break; // exit loop and terminate task
+            if(iv_graceful_shutdown_pending)
+            {
+
+                IPMI_TRAC(INFO_MRK "reply to the MSG_STATE_SHUTDOWN message");
+                msg_respond(iv_msgQ, iv_shutdown_msg);
+            }
+            else
+            {
+                shutdownNow();
+                break; // exit loop and terminate task
+            }
         }
     }
 
@@ -664,7 +719,7 @@ void IpmiRP::response(IPMI::Message* i_msg)
     do {
 
         // Look for a message with this seq number waiting for a
-        // repsonse. If there isn't a message looking for this response,
+        // response. If there isn't a message looking for this response,
         // that's an error. Async messages should also be on this queue,
         // even though the caller has long gone on to other things.
         IPMI::respond_q_t::iterator itr = iv_respondq.find(i_msg->iv_key);
@@ -709,7 +764,7 @@ void IpmiRP::response(IPMI::Message* i_msg)
         IPMI::Message* ipmi_msg =
             static_cast<IPMI::Message*>(original_msg->extra_data);
 
-        // Hand ownership of the data to the original requestor
+        // Hand ownership of the data to the original requester
         ipmi_msg->iv_data   = i_msg->iv_data;
         ipmi_msg->iv_len    = i_msg->iv_len;
         ipmi_msg->iv_cc     = i_msg->iv_cc;
@@ -771,7 +826,7 @@ void IpmiRP::queueForResponse(IPMI::Message& i_msg)
 ///
 void IpmiRP::shutdownNow(void)
 {
-    IPMI_TRAC(INFO_MRK "ipmi shut down now");
+    IPMI_TRAC(INFO_MRK "IpmiRP::shutdownNow() ");
 
     mutex_lock(&iv_mutex);
     iv_shutdown_now = true; // Shutdown underway

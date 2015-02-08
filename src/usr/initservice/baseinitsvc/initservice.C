@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -756,21 +758,19 @@ void InitService::doShutdown(uint64_t i_status,
 
     TRACFCOMP(g_trac_initsvc, "doShutdown> status=%.16X",worst_status);
 
-    // Call registered services and notify of shutdown
-    msg_t * l_msg = msg_allocate();
-    l_msg->data[1] = 0;
-    l_msg->extra_data = 0;
+    msg_t * l_msg = msg_allocate(); // filled with zeros on creation
 
+    // Call registered services and notify of shutdown
+    // except those who asked for post memory flush callbacks
     for(EventRegistry_t::iterator i = iv_regMsgQ.begin();
-        i != iv_regMsgQ.end();
+        ( (i != iv_regMsgQ.end()) &&
+          (i->msgPriority <= HIGHEST_PRIORITY));
         ++i)
     {
         l_msg->type = i->msgType;
         l_msg->data[0] = worst_status;
         msg_sendrecv(i->msgQ,l_msg);
     }
-
-    msg_free(l_msg);
 
     std::vector<regBlock_t*>::iterator l_rb_iter = iv_regBlock.begin();
     //FLUSH each registered block in order
@@ -804,6 +804,20 @@ void InitService::doShutdown(uint64_t i_status,
         l_rb_iter++;
     }
 
+    // send message to registered services who asked for a
+    // post memory flush callback
+    for(EventRegistry_t::iterator i = iv_regMsgQ.begin();
+            i != iv_regMsgQ.end(); ++i)
+    {
+        if( i->msgPriority >= POST_MEM_FLUSH_START_PRIORITY)
+        {
+            l_msg->type = i->msgType;
+            l_msg->data[0] = worst_status;
+            msg_sendrecv(i->msgQ,l_msg);
+        }
+    }
+    msg_free(l_msg);
+
     // Wait a little bit to give other tasks a chance to call shutdown
     // before moving on in case we want to modify the status we are
     // failing with.  This is after shutting down all daemons and flushing
@@ -811,6 +825,7 @@ void InitService::doShutdown(uint64_t i_status,
     // a chance to log a better RC (e.g. pnor errors).
     task_yield();
     nanosleep(0,TEN_CTX_SWITCHES_NS);
+
     TRACFCOMP(g_trac_initsvc, "doShutdown> Final status=%.16X",worst_status);
 
     shutdown(worst_status,

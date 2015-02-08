@@ -50,8 +50,10 @@ namespace IPMI
 
         MSG_STATE_SHUTDOWN,
 
+        MSG_STATE_GRACEFUL_SHUTDOWN,
+
         // Used to check range. Leave as last.
-        MSG_LAST_TYPE = MSG_STATE_SHUTDOWN,
+        MSG_LAST_TYPE = MSG_STATE_GRACEFUL_SHUTDOWN,
     };
 
     // Used in the factory for creating the proper subclass.
@@ -199,6 +201,11 @@ namespace IPMI
     { return std::make_pair(NETFUN_APP, 0x36); }
 
 
+    // Chassis messages
+    inline const command_t chassis_power_off(void)
+    { return std::make_pair(NETFUN_CHASSIS, 0x02); }
+
+
     // Storage messages
     inline const command_t set_sel_time(void)
     { return std::make_pair(NETFUN_STORAGE, 0x49); }
@@ -206,8 +213,6 @@ namespace IPMI
     inline const command_t write_fru_data(void)
     { return std::make_pair(NETFUN_STORAGE, 0x12); }
 
-
-    // Sensor messages
     inline const command_t get_sel_info(void)
     { return std::make_pair(NETFUN_STORAGE, 0x40); }
 
@@ -225,6 +230,7 @@ namespace IPMI
     inline const command_t platform_event(void)
     { return std::make_pair(NETFUN_SENSOR, 0x02); }
 
+    // Sensor messages
     inline const command_t set_sensor_reading(void)
     { return std::make_pair(NETFUN_SENSOR, 0x30); }
 

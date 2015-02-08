@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -43,16 +43,17 @@ namespace INITSERVICE
      */
     enum EventPriority_t
     {
-        LOWEST_PRIORITY = 0,    //!<< Notifiy last, LIFO order
+        LOWEST_PRIORITY = 0,    //!<< Notify last, LIFO order
         CONSOLE_PRIORITY = LOWEST_PRIORITY,     //!<< Shutdown Console
         INTR_PRIORITY   = 1,    //!<< Shutdown INTR
         MBOX_PRIORITY   = 2,    //!<< Shutdown MBOX
         NO_PRIORITY = 16,       //!<< No dependency / dont' care, LIFO order
-        HIGHEST_PRIORITY = 127, //!<< Nofity first, LIFO order
+        HIGHEST_PRIORITY = 127, //!<< Notify first, LIFO order
+        POST_MEM_FLUSH_START_PRIORITY = 128, //!<< Post Mem Flush callbacks
     };
 
 /**
- * @brief Register a block/range of vitual memory to be handled during a
+ * @brief Register a block/range of virtual memory to be handled during a
  *        shutdown.
  *
  * @param[in] i_vaddr - Base virtual address
