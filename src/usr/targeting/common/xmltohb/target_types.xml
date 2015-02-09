@@ -906,6 +906,8 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
+    <attribute><id>TPM_PRIMARY_INFO</id></attribute>
+    <attribute><id>TPM_BACKUP_INFO</id></attribute>
 </targetType>
 
 <targetType>

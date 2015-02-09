@@ -1386,6 +1386,130 @@
 </attribute>
 
 <attribute>
+    <id>TPM_PRIMARY_INFO</id>
+    <description>Information needed to address the TPM slaves</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C
+                     TPM.</description>
+        <field>
+            <name>tpmEnabled</name>
+            <description>Boolean indicating whether this TPM is available
+              in the system</description>
+            <type>uint8_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x01</default>
+        </field>
+        <field>
+            <name>devAddrLocality0</name>
+            <description>Device address on the I2C bus for Locality 0.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xAE</default>
+        </field>
+        <field>
+            <name>devAddrLocality4</name>
+            <description>Device address on the I2C bus for Locality 4.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xFF</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x00</default>
+        </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x01</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TPM_BACKUP_INFO</id>
+    <description>Information needed to address the TPM slaves</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C
+                     TPM device.</description>
+        <field>
+            <name>tpmEnabled</name>
+            <description>Boolean indicating whether this TPM is available
+              in the system</description>
+            <type>uint8_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x01</default>
+        </field>
+        <field>
+            <name>devAddrLocality0</name>
+            <description>Device address on the I2C bus for Locality 0.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xAE</default>
+        </field>
+        <field>
+            <name>devAddrLocality4</name>
+            <description>Device address on the I2C bus for Locality 4.
+                         This is a 7-bit value, but then shifted 1
+                         bit left.</description>
+            <type>uint8_t</type>
+            <default>0xFF</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x00</default>
+        </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x01</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>EC</id>
     <description>attribute indicating the chip target's EC level</description>
     <simpleType>
