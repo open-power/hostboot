@@ -36,6 +36,7 @@
 #include <targeting/common/target.H>
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/targplatutil.H>
 #include <ipmi/ipmiif.H>
 
 #ifndef __IPMI_IPMISENSOR_H
@@ -103,9 +104,6 @@ namespace SENSOR
     // Status command" for
     // details on this byte.
 
-    // sensors have the range 0x0-0xFE - 0xFF is reserved for invalid sensor
-    static const uint16_t INVALID_SENSOR = 0xFF;
-
     // Mask which preserves major type of the sensor
     static const uint16_t SENSOR_NAME_MAJOR_MASK = 0xFF00;
 
@@ -156,7 +154,7 @@ namespace SENSOR
         {
 
         };
-    }PACKED;
+    };
 
     /**
      *  @enum  completionCode
@@ -180,8 +178,6 @@ namespace SENSOR
         SENSOR_SCANNING_DISABLED = 0x40,
         READING_UNAVAILABLE = 0x20,
     };
-
-
 
     /**
      *  @class SensorBase
@@ -287,21 +283,16 @@ namespace SENSOR
             /**
              * @brief helper function to get the sensor nubmer
              */
-            inline uint8_t getSensorNumber( )
+            inline uint32_t getSensorNumber( )
             {
-                return getSensorNumber(iv_target, iv_name );
+                return TARGETING::UTIL::getSensorNumber(iv_target, iv_name );
             };
 
 
-            /**
-             * @brief return the sensor number
-             *
-             * @return sensor_number - sensor number for this sensor
-             *
-             */
-            static uint8_t  getSensorNumber(TARGETING::Target * i_targ,
-                    TARGETING::SENSOR_NAME i_name );
-
+            // return the sensor type and event reading data
+            errlHndl_t getSensorType(uint32_t i_sensorNumber,
+                                     uint8_t &o_sensorType,
+                                     uint8_t &o_eventReadingType );
 
         protected:
 
@@ -780,7 +771,7 @@ namespace SENSOR
      *   sensor types, the "System Error" sensor number will be returned.
      *
      */
-    uint8_t getFaultSensorNumber(TARGETING::Target * i_pTarget );
+    uint32_t getFaultSensorNumber(TARGETING::Target * i_pTarget );
 
 
     /**

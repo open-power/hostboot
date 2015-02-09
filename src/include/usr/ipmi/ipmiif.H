@@ -231,6 +231,9 @@ namespace IPMI
     inline const command_t get_sensor_reading(void)
     { return std::make_pair(NETFUN_SENSOR, 0x2D); }
 
+    inline const command_t get_sensor_type(void)
+    { return std::make_pair(NETFUN_SENSOR, 0x2F); }
+
     // OEM Messages
     inline const command_t power_off(void)
     { return std::make_pair(NETFUN_IBM, 0x04); }

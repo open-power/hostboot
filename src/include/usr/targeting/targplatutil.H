@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -51,6 +53,10 @@ namespace TARGETING
 
 namespace UTIL
 {
+
+    // IPMI sensors have the range 0x0-0xFE - 0xFF
+    // is reserved for invalid sensor
+    static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
 
 /**
  *  @brief Creates a standard error log of tracing type
@@ -136,8 +142,8 @@ inline errlHndl_t setMasterNode(Target* i_pToBeMasterNodeTarget)
  *  @brief Sets the IS_MASTER_NODE attribute in the node target passed
  *
  *  @par Detailed Description:
- *  This method should be used when targetService itself is not initiliazed yet
- *  This simply takes the node target handle of the node which is requird to be
+ *  This method should be used when targetService itself is not initialized yet
+ *  This simply takes the node target handle of the node which is required to be
  *  set as master node, sets the IS_MASTER_NODE Attribute field and returns.
  *  This method doesn't try to find out the current master node or any other
  *  sync related stuff.
@@ -247,6 +253,49 @@ inline void subsystemIsMasterNodeCapable(bool& o_masterNodeCapable)
 {
     o_masterNodeCapable = false;
 }
+
+/**
+ * Return the sensor ID for a given target and sensor name
+ *
+ * @param[in] i_pTarget - pointer to the Target which sensor is associated
+ * @param[in] i_name - the name of the sensor
+ *
+ * @return    IPMI Sensor number when IPMI is enabled or HUID if IPMI is not
+ *            enabled.
+ *
+ */
+uint32_t getSensorNumber( const Target* i_pTarget,
+                          TARGETING::SENSOR_NAME i_name );
+
+/**
+ * Return the target for a given sensor number
+ *
+ * @param[in] i_sensorNumber - Sensor number associated with an
+ *                             unknown target
+ *
+ * @return    Target associated with the passed in sensor number.
+ *
+ */
+TARGETING::Target * getSensorTarget( uint32_t i_sensorNumber );
+
+#ifdef CONFIG_BMC_IPMI
+/**
+ *  @brief Returns the target handle referencing a target whose sensor
+ *          number matches the caller supplied value
+ *
+ *  @param[in] i_sensorNumber IPMI sensor number of target to find
+ *
+ *  @pre Target service must be initialized
+ *
+ *  @return Target handle referencing a target whose sensor matches the
+ *      caller supplied value
+ *
+ *  @retval !NULL Target handle referencing a target whose sensor
+ *      matches the caller supplied value.
+ *  @retval NULL No target found
+ */
+Target * getTargetFromIPMISensor( uint32_t i_sensorNumber );
+#endif
 
 } // End namespace TARGETING::UTIL
 

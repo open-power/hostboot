@@ -2172,16 +2172,16 @@ sub generate_sys
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0700,0x07,  <!-- OS_Boot -->
+            0x0700,90,    <!-- OS_Boot -->
             0x0800,0x04,  <!-- Host_Status -->
             0x0900,0x05,  <!-- FW_Boot_Progress -->
-            0x0b00,0x09,  <!-- Power_Cap  -->
-            0x0c00,0x06,  <!-- PCI -->
+            0x0b00, 88,   <!-- Power_Cap  -->
+            0x0c00, 85,   <!-- PCI -->
             0x0d00,0x00,  <!-- Boot_watchdog -->
-            0x0e00,0x1d,  <!-- Boot_Count -->
-            0x1000,0x82,  <!-- System_Event -->
-            0x1010,0x83,  <!-- APSS Fault -->
-            0xC615,0x88,  <!-- Activate Power Limit -->
+            0x0e00, 80,   <!-- Boot_Count -->
+            0x1000, 82,   <!-- System_Event -->
+            0x1010, 87,   <!-- APSS Fault -->
+            0xC615, 83,   <!-- Activate Power Limit -->
             0xFFFF,0xFF,
             0xFFFF,0xFF,
             0xFFFF,0xFF,
@@ -2619,10 +2619,10 @@ sub generate_system_node
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x1000,0x80, <!-- Backplane fault sensor -->
-            0x1017,0x14, <!-- TOD clock fault sensor -->
-            0x101A,0x15, <!-- REF clock fault sensor -->
-            0x101B,0x16, <!-- PCI clock fault sensor -->
+            0x1000, 81, <!-- Backplane fault sensor -->
+            0x1017, 86, <!-- TOD clock fault sensor -->
+            0x101A, 84, <!-- REF clock fault sensor -->
+            0x101B, 85, <!-- PCI clock fault sensor -->
             0xFFFF,0xFF,
             0xFFFF,0xFF,
             0xFFFF,0xFF,
@@ -3190,8 +3190,8 @@ sub generate_proc
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0x12, <!-- Temperature sensor -->
-            0x0500, 0x03, <!-- State sensor -->
+            0x0100, 100, <!-- Temperature sensor -->
+            0x0500, 78, <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -3287,19 +3287,26 @@ sub generate_ex_core
     # call to do any fsp per-ex_core attributes
     do_plugin('fsp_ex_core', $proc, $ex, $ordinalId );
 
-    my $snbase=0x4d;
+    my $snbase=62;
 
+    my $tempsnbase= 137;
+    my $freqsnbase= 149;
     # $TODO RTC:110399
     if( $haveFSPs == 0 )
     {
-     my $procsn = sprintf("0x%02X",($snbase+$ordinalId));
+
+     my $procsn = $snbase+$ordinalId;
+     my $tempsn = $tempsnbase+$ordinalId;
+     my $freqsn = $freqsnbase+$ordinalId;
+
+
       print "\n<!-- IPMI Sensor numbers for Core status -->
     <attribute>
         <id>IPMI_SENSORS</id>
          <default>
-             0x0100, 0x13, <!-- Temperature sensor -->
+             0x0100, $tempsn, <!-- Temperature sensor -->
              0x0500, $procsn, <!-- State sensor -->
-             0xFFFF, 0xFF,
+             0xC100, $freqsn, <!-- Frequency sensor -->
              0xFFFF, 0xFF,
              0xFFFF, 0xFF,
              0xFFFF, 0xFF,
@@ -4104,16 +4111,24 @@ sub generate_centaur
        $scanFspAsize, $scomFspBpath, $scomFspBsize, $scanFspBpath,
        $scanFspBsize, $relativeCentaurRid, $ordinalId, $membufVrmUuidHash);
 
+
     # $TODO RTC:110399
     if( $haveFSPs == 0 )
     {
+
+    my @CentaurSensors = (
+                    [74,101],[75,102],[76,103],[77,104] );
+
+    my $temp_sensor  = $CentaurSensors[$ordinalId][1];
+    my $state_sensor = $CentaurSensors[$ordinalId][0];
+
 
       print "<!-- IPMI Sensor numbers for Centaur status -->
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, 0x0F,  <!-- Temperature sensor -->
-            0x0500, 0x01,  <!-- State sensor -->
+            0x0100, $temp_sensor,  <!-- Temperature sensor -->
+            0x0500, $state_sensor, <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
@@ -4430,16 +4445,16 @@ sub generate_is_dimm
         # $TODO RTC:110399
         if( $haveFSPs == 0 )
         {
-     my $snbase = 0x49;
-     my $sntbase = 0x10;
-     my $dimmsn = sprintf("0x%02X",($snbase+$dimmPos));
-     my $dimmtsn = sprintf("0x%02X",($sntbase+$dimmPos));
-            print "\n<!-- IPMI Sensor numbers for DIMM status -->
+
+     my $status_base = 30+$dimm;
+     my $temp_base = 105+$dimm;
+
+     print "\n<!-- IPMI Sensor numbers for DIMM status -->
     <attribute>
         <id>IPMI_SENSORS</id>
         <default>
-            0x0100, $dimmtsn,  <!-- Temperature sensor -->
-            0x0500, $dimmsn,  <!-- State sensor -->
+            0x0100, $temp_base, <!-- Temperature sensor -->
+            0x0500, $status_base, <!-- State sensor -->
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,
             0xFFFF, 0xFF,

@@ -1339,8 +1339,8 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
 
         // look thru the errlog for any Callout UserDetail sections
         //  to determine the sensor information for the SEL
-        uint8_t l_sensorNumber = SENSOR::INVALID_SENSOR;
-        uint8_t l_sensorType = SENSOR::INVALID_SENSOR;
+        uint8_t l_sensorNumber = TARGETING::UTIL::INVALID_IPMI_SENSOR;
+        uint8_t l_sensorType = TARGETING::UTIL::INVALID_IPMI_SENSOR;
         HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_NONE;
         for(std::vector<ErrlUD*>::const_iterator
                 it = io_err->iv_SectionVector.begin();
@@ -1380,7 +1380,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
 
 #if 0
 // TODO: RTC 119440
-        if (l_sensorNumber != SENSOR::INVALID_SENSOR)
+        if (l_sensorNumber != TARGETING::UTLI::INVALID_IPMI_SENSOR)
         {
             l_sensorType = SENSOR::getSensorType(l_sensorNumber);
         }

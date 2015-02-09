@@ -206,7 +206,7 @@ namespace SENSOR
 
         iv_msg->iv_sensor_number = getSensorNumber();
 
-        if( iv_msg->iv_sensor_number != INVALID_SENSOR )
+        if( iv_msg->iv_sensor_number != TARGETING::UTIL::INVALID_IPMI_SENSOR )
         {
 
             IPMI::completion_code l_rc = IPMI::CC_UNKBAD;
@@ -283,7 +283,7 @@ namespace SENSOR
         // 3 and 5 bytes of data.
         size_t len =  1;
 
-        // need to allocate some mem to hold the sensor number this will be
+        // need to allocate some memory to hold the sensor number this will be
         // deleted by the IPMI transport layer
         uint8_t * l_data = new uint8_t[len];
 
@@ -297,7 +297,8 @@ namespace SENSOR
 
         // if we didn't get an error back from the BT interface, but see a
         // bad completion code from the BMC, process the CC to see if we
-        // need to create a PEL
+        // need to create a PEL - if an error occurs sendrcv will clean up
+        // l_data for us
         if(  l_err == NULL )
         {
             l_err = processCompletionCode( cc );
@@ -362,8 +363,9 @@ namespace SENSOR
 
                 }
 
-                delete[] l_data;
             }
+
+            delete[] l_data;
         }
         return l_err;
     };
@@ -388,13 +390,49 @@ namespace SENSOR
         return l_err;
     }
 
-
-    // given an array[][2] compare the sensor name, located in the first column,
-    // to the passed in key value
-    static inline bool compare_it( uint16_t (&a)[2], uint16_t key )
+    // return the sensor type and event reading data
+    errlHndl_t SensorBase::getSensorType(uint32_t i_sensorNumber,
+                                        uint8_t &o_sensorType,
+                                         uint8_t &o_eventReadingType )
     {
-        return  a[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] < key;
+
+        size_t len =  1;
+
+        // need to allocate some memory to hold the sensor number this will be
+        // deleted by the IPMI transport layer
+        uint8_t *l_data = new uint8_t[len];
+
+        l_data[0] = i_sensorNumber;
+
+        IPMI::completion_code cc = IPMI::CC_UNKBAD;
+
+        // l_data will hold the response when this returns
+        errlHndl_t l_err = sendrecv(IPMI::get_sensor_type(), cc, len,
+                                  l_data);
+
+        // if we didn't get an error back from the BT interface,
+        // process the CC to see if we need to create a PEL - sendrecv will
+        // delete l_data if an error occurs
+        if( l_err == NULL )
+        {
+            // check the completion code
+            l_err = processCompletionCode( cc );
+
+            // $TODO RTC:123045 - Remove when SDR is finalized
+            if( l_err == NULL &&  (cc!=IPMI::CC_BADSENSOR) )
+            {
+                // grab the type and reading code to pass back to the caller
+                o_sensorType = l_data[0];
+
+                // high order bit is reserved
+                o_eventReadingType = ( 0x7f & l_data[1]);
+
+            }
+            delete[] l_data;
+        }
+        return l_err;
     };
+
 
     /**
      *  @brief Returns major type of input sensor name
@@ -466,73 +504,6 @@ namespace SENSOR
         const uint16_t i_sensorName)
     {
         return getMajorType(i_sensorRecord[0]) == getMajorType(i_sensorName);
-    }
-
-    // $TODO RTC:123035 investigate pre-populating some info if we end up
-    // doing this multiple times per sensor
-    //
-    // Helper function to search the sensor data for the correct sensor number
-    // based on the sensor name.
-    //
-    uint8_t SensorBase::getSensorNumber( TARGETING::Target * i_targ,
-                                         TARGETING::SENSOR_NAME i_name )
-    {
-
-        uint8_t l_sensor_number = INVALID_SENSOR;
-
-        if( i_targ == NULL )
-        {
-            // use the system target
-            TARGETING::targetService().getTopLevelTarget(i_targ);
-
-            // die if there is no system target
-            assert(i_targ);
-
-        }
-
-        TARGETING::AttributeTraits<TARGETING::ATTR_IPMI_SENSORS>::Type
-                                                                    l_sensors;
-
-        if(  i_targ->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(l_sensors) )
-        {
-
-            // get the number of rows by dividing the total size by the size of
-            // the first row
-            uint16_t array_rows = (sizeof(l_sensors)/sizeof(l_sensors[0]));
-
-            // create an iterator pointing to the first element of the array
-            uint16_t (*begin)[2]  = &l_sensors[0];
-
-            // using the number entries as the index into the array will set the
-            // end iterator to the correct position or one entry past the last
-            // element of the array
-            uint16_t (*end)[2] = &l_sensors[array_rows];
-
-            uint16_t (*ptr)[2] =
-                        std::lower_bound(begin, end, i_name, &compare_it);
-
-            // we have not reached the end of the array and the iterator
-            // returned from lower_bound is pointing to an entry which equals
-            // the one we are searching for.
-            if( ( ptr != end ) &&
-               ( (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] == i_name ) )
-            {
-                // found it
-                l_sensor_number =
-                    (*ptr)[TARGETING::IPMI_SENSOR_ARRAY_NUMBER_OFFSET];
-
-                TRACFCOMP(g_trac_ipmi,"Found sensor number %d for HUID=0x%x",
-                          l_sensor_number, TARGETING::get_huid(i_targ));
-            }
-        }
-        else
-        {
-            // bug here...
-            assert(0,"no IPMI_SENSOR attribute check target HUID=0x%x",
-                   TARGETING::get_huid(i_targ));
-        }
-
-        return l_sensor_number;
     }
 
     ///
@@ -1041,12 +1012,12 @@ namespace SENSOR
     };
 
     // returns a sensor number based on input target type
-    uint8_t getFaultSensorNumber( TARGETING::TargetHandle_t i_pTarget )
+    uint32_t getFaultSensorNumber( TARGETING::TargetHandle_t i_pTarget )
     {
 
         TARGETING::TYPE l_type = i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
 
-        uint8_t l_sensor_number = INVALID_SENSOR;
+        uint32_t l_sensor_number = TARGETING::UTIL::INVALID_IPMI_SENSOR;
 
         switch( l_type )
         {
@@ -1105,15 +1076,16 @@ namespace SENSOR
                         const uint16_t (* &o_sensor_numbers)[16])
     {
 
-        static const uint16_t numbers[16] = { 0x47, 0x38, 0x39, 0x3A,
-                                              0x3B, 0x3C, 0x3D, 0x3E,
-                                              0x3F, 0x40, 0x41, 0x42,
-                                              0x43, 0x44, 0x45, 0x46 };
+
+        // habanero only..
+        static const uint16_t numbers[16] = { 161, 162, 163, 164,
+                                              165, 166, 167, 168,
+                                              169, 170, 171, 172,
+                                              173, 174, 175, 176};
 
         o_sensor_numbers = &numbers;
 
         return NULL;
-
     }
 
 }; // end name space
