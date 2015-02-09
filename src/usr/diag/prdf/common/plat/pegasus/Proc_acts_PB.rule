@@ -1219,7 +1219,8 @@ rule PbCentFir
   SPECIAL:     PBCENTFIR & ~PBCENTFIR_MASK &  PBCENTFIR_ACT0 & ~PBCENTFIR_ACT1;
 };
 
-group gPbCentFir filter singlebit
+group gPbCentFir filter singlebit,
+                        secondarybits( 9 )
 {
     /** PBCENTFIR[0]
      *  PB_CENT_PROTOCOL_ERROR
@@ -1269,7 +1270,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[9]
      *  PB_CENT_HANG_RECOVERY_GTE_LEVEL1
      */
-    (PbCentFir, bit(9)) ? defaultMaskedError;
+    (PbCentFir, bit(9)) ? thresholdAndMask_self;
 
     /** PBCENTFIR[10]
      *  PB_CENT_FORCE_MP_IPL
