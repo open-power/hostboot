@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,6 +170,7 @@ errlHndl_t ServiceCommon::configureInterrupts(
             break;
         }
 
+        #ifndef __HOSTBOOT_RUNTIME
         // enable attentions in ipoll mask
 
         mask = HostMask::nonHost();
@@ -186,6 +187,7 @@ errlHndl_t ServiceCommon::configureInterrupts(
         {
             break;
         }
+        #endif //__HOSTBOOT_RUNTIME
 
         ++it;
     }

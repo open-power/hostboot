@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,12 +47,10 @@ namespace ATTN
 errlHndl_t Service::disableAttns()
 {
     ATTN_SLOW("Service::disableAttns() enter");
-
-    errlHndl_t err = configureInterrupts(DOWN);
-
+    // During runtime do nothing.
     ATTN_SLOW("Service::disableAttns() exit");
 
-    return err;
+    return NULL;
 }
 
 errlHndl_t Service::enableAttns()
