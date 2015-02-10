@@ -304,6 +304,7 @@
     <attribute><id>MNFG_TH_CEN_MBA_RT_RCE_PER_RANK</id></attribute>
     <attribute><id>MNFG_TH_CEN_L4_CACHE_CES</id></attribute>
     <attribute><id>OPT_MEMMAP_GROUP_POLICY</id></attribute>
+    <attribute><id>FRU_ID</id></attribute>
 </targetType>
 
 <targetType>
@@ -533,7 +534,6 @@
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
     <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
     <attribute><id>EEPROM_VPD_BACKUP_INFO</id></attribute>
     <attribute><id>EEPROM_SBE_PRIMARY_INFO</id></attribute>
     <attribute><id>EEPROM_SBE_BACKUP_INFO</id></attribute>
@@ -903,7 +903,7 @@
         <default>0x00000009</default> <!-- HOSTSVC_HBEL and GARD -->
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
-    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
+    <attribute><id>FRU_ID</id></attribute>
 </targetType>
 
 <targetType>
@@ -1409,7 +1409,6 @@
         </default>
     </attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>400,0,0,0,0,0</default>
@@ -1472,6 +1471,7 @@
         </default>
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
+    <attribute><id>FRU_ID</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->
@@ -1542,12 +1542,12 @@
     </attribute>
 
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-    <attribute><id>EEPROM_VPD_FRU_INFO</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>DIMM</default></attribute>
 
+    <attribute><id>FRU_ID</id></attribute>
 </targetType>
 
 <targetType>

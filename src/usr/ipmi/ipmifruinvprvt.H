@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/ipmi/ipmifru.H $                              */
+/* $Source: src/usr/ipmi/ipmifruinvprvt.H $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,8 +73,11 @@ class IpmiFruInv
      * @brief Factory Pattern Creator function
      * @param[in] TargetHandle_t, Handle to target for which
      *             to get relevant IPMI FRU Data from
+     * @param[in] isUpdate, Indicator if the code is updating
+     *             existing data, or setting base data.
      */
-    static IpmiFruInv *Factory(TARGETING::TargetHandle_t i_target);
+    static IpmiFruInv *Factory(TARGETING::TargetHandleList i_targets,
+                               bool i_isUpdate);
 
     /**
      * @brief Package and send the IPMI FRU Data
@@ -171,6 +174,16 @@ class IpmiFruInv
      */
     void printRecordDebugData(const std::vector<uint8_t> &i_data);
 
+    /**
+      * @brief Adds ECID attribute data
+      * @param[in] target, The target to get the Sensor Number from
+      * @param[in] ecid_info, The ECID attribute data
+      * @param[in/out] data, The container to put ECID attribute data in
+      */
+    void addEcidData(const TARGETING::TargetHandle_t& i_target,
+                     const TARGETING::ATTR_ECID_type& i_ecidInfo,
+                     std::vector<uint8_t> &io_data);
+
   private:
 
     /**
@@ -251,7 +264,7 @@ class isdimmIpmiFruInv : public IpmiFruInv
      * @param[in] TargetHandle_t, Handle to target for which
      *             to get relevant IPMI FRU Data from
      */
-    isdimmIpmiFruInv( TARGETING::TargetHandle_t i_target );
+    isdimmIpmiFruInv( TARGETING::TargetHandle_t i_target);
 
     /**
      * @brief Builds the Internal Use Area Data Section
@@ -307,8 +320,11 @@ class procIpmiFruInv : public IpmiFruInv
      *
      * @param[in] TargetHandle_t, Handle to target for which
      *             to get relevant IPMI FRU Data from
+     * @param[in] isUpdate, Indicator if the code is updating
+     *             existing data, or setting base data.
      */
-    procIpmiFruInv( TARGETING::TargetHandle_t i_target );
+    procIpmiFruInv( TARGETING::TargetHandle_t i_target,
+                    bool i_isUpdate );
 
     /**
      * @brief Builds the Internal Use Area Data Section
@@ -340,6 +356,13 @@ class procIpmiFruInv : public IpmiFruInv
      */
     errlHndl_t buildMultiRecordInfoArea(std::vector<uint8_t> &io_data);
 
+  protected:
+
+    //Indicator if a data update is happening.
+    //True - means we are solely updating certain data
+    //False - means we are doing the initial 'base' data set
+    bool iv_isUpdate;
+
   private:
 
     /**
@@ -368,8 +391,14 @@ class backplaneIpmiFruInv : public IpmiFruInv
      *
      * @param[in] TargetHandle_t, Handle to target for which
      *             to get relevant IPMI FRU Data from
+     * @param[in] TargetHandleList, Handle to list of extra
+     *             targets associated with this FRU Record
+     * @param[in] isUpdate, Indicator if the code is updating
+     *             existing data, or setting base data.
      */
-    backplaneIpmiFruInv( TARGETING::TargetHandle_t i_target );
+    backplaneIpmiFruInv( TARGETING::TargetHandle_t i_target,
+                         TARGETING::TargetHandleList i_extraTargets,
+                         bool i_isUpdate );
 
     /**
      * @brief Builds the Internal Use Area Data Section
@@ -401,6 +430,16 @@ class backplaneIpmiFruInv : public IpmiFruInv
      */
     errlHndl_t buildMultiRecordInfoArea(std::vector<uint8_t>& io_data);
 
+  protected:
+    //Indicator if a data update is happening.
+    //True - means we are solely updating certain data
+    //False - means we are doing the initial 'base' data set
+    bool iv_isUpdate;
+
+    //The list of Extra Targets if multiple targets are
+    //associated with one FRU_ID
+    TARGETING::TargetHandleList iv_extraTargets;
+
   private:
 
     /**
@@ -414,7 +453,8 @@ class backplaneIpmiFruInv : public IpmiFruInv
     errlHndl_t addVpdData(std::vector<uint8_t> &io_data,
                           uint8_t i_record,
                           uint8_t i_keyword,
-                          bool i_ascii=false);
+                          bool i_ascii=false,
+                          bool i_typeLengthByte=true);
 
 };
 

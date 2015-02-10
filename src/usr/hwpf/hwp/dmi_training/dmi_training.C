@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -77,6 +79,7 @@
 #include    <pbusLinkSvc.H>
 #include    <ibscom/ibscomif.H>
 #include    <config.h>
+#include <ipmi/ipmifruinv.H>
 
 namespace   DMI_TRAINING
 {
@@ -316,6 +319,11 @@ void*    call_mss_getecid( void *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS :  mss_get_cen_ecid HWP( )" );
     }
+
+    #ifdef CONFIG_BMC_IPMI
+        // Gather + Send the IPMI Fru Inventory data to the BMC
+        IPMIFRUINV::setData(true);
+    #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
 

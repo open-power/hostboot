@@ -24,18 +24,32 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <vector>
+#include <map>
 #include <vpd/mvpdenums.H>
 #include <devicefw/userif.H>
 #include <vpd/spdenums.H>
 #include <vpd/cvpdenums.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <errl/errlmanager.H>
 #include <ipmi/ipmifruinv.H>
 #include "ipmifru.H"
 #include "ipmifruinvprvt.H"
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-
 
 extern trace_desc_t * g_trac_ipmi;
+
+
+/**
+ * @brief Compairs two pairs - used for std:sort
+ * @param[in] lhs - left pair for comparison
+ * @param[in] rhs - right pair for comparison
+ */
+inline static bool comparePairs(
+              const std::pair<TARGETING::TargetHandle_t, uint8_t>& i_lhs,
+              const std::pair<TARGETING::TargetHandle_t, uint8_t>& i_rhs)
+{
+        return (i_lhs.second < i_rhs.second);
+}
 
 IpmiFruInv::IpmiFruInv(TARGETING::TargetHandle_t i_target)
     :iv_target(i_target)
@@ -46,26 +60,32 @@ IpmiFruInv::~IpmiFruInv()
 {}
 
 
-IpmiFruInv *IpmiFruInv::Factory(TARGETING::TargetHandle_t i_target)
+IpmiFruInv *IpmiFruInv::Factory(TARGETING::TargetHandleList i_targets,
+                                bool i_updateData)
 {
     IpmiFruInv *l_fru = NULL;
+    TARGETING::TargetHandle_t l_target;
 
-    switch (i_target->getAttr<TARGETING::ATTR_TYPE>())
+    assert( ! i_targets.empty(),
+                "IpmiFruInv::Factory: Input was empty List of Targets");
+    l_target = i_targets[0];
+
+    switch (l_target->getAttr<TARGETING::ATTR_TYPE>())
     {
         case TARGETING::TYPE_DIMM:
-            l_fru = new isdimmIpmiFruInv(i_target);
+            l_fru = new isdimmIpmiFruInv(l_target);
             break;
         case TARGETING::TYPE_PROC:
-            l_fru = new procIpmiFruInv(i_target);
+            l_fru = new procIpmiFruInv(l_target, i_updateData);
             break;
         case TARGETING::TYPE_MEMBUF:
             // @todo-RTC:117702
-            l_fru = new backplaneIpmiFruInv(i_target);
+            l_fru = new backplaneIpmiFruInv(l_target, i_targets, i_updateData);
             break;
         default:
-            TRACFCOMP(g_trac_ipmi,"IpmiFruInv::Factory: No support for target type given: [%08x]",
-                       i_target->getAttr<TARGETING::ATTR_TYPE>());
-            assert(false);
+            assert(false,
+                "IpmiFruInv::Factory: No support for target type given: [%08x]",
+                       l_target->getAttr<TARGETING::ATTR_TYPE>());
             break;
     }
 
@@ -76,7 +96,7 @@ void IpmiFruInv::sendFruData(uint8_t i_deviceId)
 {
     if (iv_record_data.size() > 0)
     {
-        //Use IMPIFRU::writeData to sand data to service processor
+        //Use IMPIFRU::writeData to send data to service processor
         // it will do any error handling and memory management
         IPMIFRU::writeData(i_deviceId, &iv_record_data[0],
                          iv_record_data.size(), IPMIFRUINV::DEFAULT_FRU_OFFSET);
@@ -226,12 +246,15 @@ errlHndl_t IpmiFruInv::buildEmptyArea(std::vector<uint8_t> &i_data)
 // so padding is needed to make records properly formatted
 void IpmiFruInv::padData(std::vector<uint8_t> &io_data)
 {
+    uint8_t l_pad_remainder = (io_data.size() + IPMIFRUINV::CHECKSUM_SIZE) %
+                          IPMIFRUINV::RECORD_UNIT_OF_MEASUREMENT;
 
-    io_data.insert(io_data.end(),
-                   ((io_data.size() + IPMIFRUINV::CHECKSUM_SIZE) %
-                          IPMIFRUINV::RECORD_UNIT_OF_MEASUREMENT),
-                   uint8_t(0));
-
+    if (l_pad_remainder)
+    {
+        io_data.insert(io_data.end(),
+                       IPMIFRUINV::RECORD_UNIT_OF_MEASUREMENT - l_pad_remainder,
+                       uint8_t(0));
+    }
     return;
 }
 
@@ -312,7 +335,7 @@ void IpmiFruInv::postFormatProcessing(std::vector<uint8_t> &io_data)
     //This area needs to be padded to a multiple of 8 bytes (after checksum)
     padData(io_data);
 
-    //Set size of board info area
+    //Set size of data info area
     setAreaSize(io_data, 1);
 
     //Finally add board info checksum
@@ -324,6 +347,7 @@ void IpmiFruInv::postFormatProcessing(std::vector<uint8_t> &io_data)
 //Helper function containing the logic to set the proper size of a data section
 void IpmiFruInv::setAreaSize(std::vector<uint8_t> &io_data, uint8_t i_offset)
 {
+
     io_data.at(i_offset) = (io_data.size() + IPMIFRUINV::CHECKSUM_SIZE)
                              / IPMIFRUINV::RECORD_UNIT_OF_MEASUREMENT;
 
@@ -417,7 +441,7 @@ errlHndl_t isdimmIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
 
     do {
         //First get size with NULL call:
-        errlHndl_t l_errl = deviceRead(iv_target,
+        l_errl = deviceRead(iv_target,
                                        NULL,
                                        l_vpdSize,
                                        DEVICE_SPD_ADDRESS(i_keyword));
@@ -434,17 +458,17 @@ errlHndl_t isdimmIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
 
         if (l_vpdSize > 0)
         {
-            uint8_t l_vDataPtr[l_vpdSize];
-            l_errl = deviceRead(iv_target, l_vDataPtr, l_vpdSize,
-                                DEVICE_SPD_ADDRESS(i_keyword));
+            //Determine how big data is and expand it to handle the soon to
+            //be read VPD data
+            uint8_t l_offset = io_data.size();
+            io_data.resize(l_offset + 1 + l_vpdSize);
 
-            //First append data size to vector data
-            io_data.push_back(l_vpdSize);
+            //Add on the data to the type/length byte indicating it is binary
+            io_data.at(l_offset) = l_vpdSize;
 
-            //Second append all data found onto vector data
-            io_data.insert(io_data.end(),
-                                   &l_vDataPtr[0], &l_vDataPtr[l_vpdSize]);
-
+            //Read the VPD data directly into fru inventory data buffer
+            l_errl = deviceRead(iv_target,&io_data[l_offset+1], l_vpdSize,
+                        DEVICE_SPD_ADDRESS(i_keyword));
         }
         else
         {
@@ -463,10 +487,11 @@ errlHndl_t isdimmIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
 }
 
 //##############################################################################
-procIpmiFruInv::procIpmiFruInv( TARGETING::TargetHandle_t i_target )
-    :IpmiFruInv(i_target)
+procIpmiFruInv::procIpmiFruInv( TARGETING::TargetHandle_t i_target,
+                                bool i_isUpdate )
+    :IpmiFruInv(i_target),
+    iv_isUpdate(i_isUpdate)
 {
-
 };
 
 errlHndl_t procIpmiFruInv::buildInternalUseArea(std::vector<uint8_t> &io_data)
@@ -501,9 +526,9 @@ errlHndl_t procIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
         // - add together and the value for this byte is 0xC3
         io_data.push_back(0xC3);
         // - Now put in 'IBM'
-        io_data.push_back(0x49); //I
-        io_data.push_back(0x42); //B
-        io_data.push_back(0x4D); //M
+        io_data.push_back('I');
+        io_data.push_back('B');
+        io_data.push_back('M');
 
         //Set Board Info description
         l_errl = addVpdData(io_data, MVPD::VINI, MVPD::DR, true);
@@ -517,6 +542,25 @@ errlHndl_t procIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
         //Set Board FRU File ID
         l_errl = addVpdData(io_data, MVPD::VINI, MVPD::VZ);
         if (l_errl) { break; }
+
+        //Push Fru File ID Byte - NULL
+        io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+        //Get ECID Data
+        TARGETING::ATTR_ECID_type ecidInfo;
+        bool getEcid = iv_target->tryGetAttr<TARGETING::ATTR_ECID>(ecidInfo);
+        //Only add ECID Data if in an update scenario
+        if (getEcid && iv_isUpdate == true)
+        {
+            addEcidData(iv_target, ecidInfo, io_data);
+        }
+        else
+        {
+            //Indicate no custom fields if ecid data not found
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+        }
+
+        //Indicate end of custom fields
         io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
 
         //Complete formatting for this data record
@@ -557,7 +601,7 @@ errlHndl_t procIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
     do {
 
         //First get size of data by passing NULL
-        errlHndl_t l_errl = deviceRead(iv_target,
+        l_errl = deviceRead(iv_target,
                                       NULL,
                                       l_vpdSize,
                                       DEVICE_MVPD_ADDRESS(i_record, i_keyword));
@@ -574,28 +618,26 @@ errlHndl_t procIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
 
         if (l_vpdSize > 0)
         {
-            uint8_t l_vDataPtr[l_vpdSize];
-
-            l_errl = deviceRead(iv_target, l_vDataPtr, l_vpdSize,
-                                DEVICE_MVPD_ADDRESS(i_record, i_keyword));
+            //Determine how big data is and expand it to handle the soon to
+            //be read VPD data
+            uint8_t l_offset = io_data.size();
+            io_data.resize(l_offset + 1 + l_vpdSize);
 
             //Add on the data to the type/length byte indicating it is ascii
             // otherwise leave it as binary
             if (i_ascii)
             {
-                io_data.push_back(l_vpdSize
-                                          + IPMIFRUINV::TYPELENGTH_BYTE_ASCII);
+                io_data.at(l_offset) = l_vpdSize
+                                       + IPMIFRUINV::TYPELENGTH_BYTE_ASCII;
             }
             else
             {
-                //First push back the size of this data
-                io_data.push_back(l_vpdSize);
+                io_data.at(l_offset) = l_vpdSize;
             }
 
-            //Second append all data found onto vector data
-            io_data.insert(io_data.end(),
-                                   &l_vDataPtr[0], &l_vDataPtr[l_vpdSize]);
-
+            //Read the VPD data directly into fru inventory data buffer
+            l_errl = deviceRead(iv_target,&io_data[l_offset+1],l_vpdSize,
+                                DEVICE_MVPD_ADDRESS(i_record, i_keyword));
         }
         else
         {
@@ -614,10 +656,13 @@ errlHndl_t procIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
 
 
 //##############################################################################
-backplaneIpmiFruInv::backplaneIpmiFruInv( TARGETING::TargetHandle_t i_target )
-    :IpmiFruInv(i_target)
+backplaneIpmiFruInv::backplaneIpmiFruInv( TARGETING::TargetHandle_t i_target,
+                                     TARGETING::TargetHandleList i_extraTargets,
+                                     bool i_isUpdate)
+    :IpmiFruInv(i_target),
+    iv_isUpdate(i_isUpdate),
+    iv_extraTargets(i_extraTargets)
 {
-
 };
 
 errlHndl_t backplaneIpmiFruInv::buildInternalUseArea(
@@ -634,18 +679,48 @@ errlHndl_t backplaneIpmiFruInv::buildChassisInfoArea(
 
     do {
         //Set formatting data that goes at the beginning of the record
-        preFormatProcessing(io_data, true);
+        preFormatProcessing(io_data, false);
+        //Set Chassis Enclosure Type - Not Ascii
+        // Also, do not include type/length byte
+        //@fixme RTC Story 118373
+        l_errl = addVpdData(io_data, CVPD::OSYS, CVPD::ET, false, false);
 
-        //Set default chassis type
-        io_data.push_back(IPMIFRUINV::DEFAULT_CHASSIS_TYPE);
-        //Set chassis part number - ascii formatted field
-        //@fixme RTC Story 118373
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VP, true);
-        if (l_errl) { break; }
-        //Set chassis serial number - ascii formatted field
-        //@fixme RTC Story 118373
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VS, true);
-        if (l_errl) { break; }
+        //Support Legacy VPD without OSYS record
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildChassisInfoArea - "
+                      " Using Legacy Chassis VPD Data");
+            //Delete errorlog and use Default data and Legacy VPD Fields
+            delete l_errl;
+            l_errl = NULL;
+
+            //Set default chassis type
+            io_data.push_back(IPMIFRUINV::DEFAULT_CHASSIS_TYPE);
+            //Set chassis part number - ascii formatted field
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VP, true);
+            if (l_errl) { break; }
+            //Set chassis serial number - ascii formatted field
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VS, true);
+            if (l_errl) { break; }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildChassisInfoArea - "
+                      " Using NEW OSYS RECORD FOR Chassis VPD Data");
+
+            //Set chassis part number - ascii formatted field
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OSYS, CVPD::MM, true);
+            if (l_errl) { break; }
+
+            //Set chassis serial number - ascii formatted field
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OSYS, CVPD::SS, true);
+            if (l_errl) { break; }
+
+        }
 
         //Indicate no custom fields
         io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
@@ -682,23 +757,89 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
         //@fixme RTC Story 118373
         l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VN, true);
         if (l_errl) { break; }
+
         //Set Product Name - ascii formatted data
         //@fixme RTC Story 118373
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::DR, true);
-        if (l_errl) { break; }
-        //Set Product Part number - ascii formatted data
-        //@fixme RTC Story 118373
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VS, true);
-        if (l_errl) { break; }
-        //Set Product Serial number - ascii formatted data
-        //@fixme RTC Story 118373
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VP, true);
+        l_errl = addVpdData(io_data, CVPD::OSYS, CVPD::DR, true);
 
-        //Indicate No Custom Fields
+        //Support Legacy VPD without OSYS record
+        if (l_errl)
+        {
+
+            TRACFCOMP(g_trac_ipmi,
+                      "backplaneIpmiFruInv::buildChassisBoardInfoArea - "
+                      " Using Legacy Chassis VPD Data without OSYS record");
+
+            //Delete errorlog and use Legacy VPD Fields
+            delete l_errl;
+            l_errl = NULL;
+            //Set Product Name - ascii formatted data
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::DR, true);
+            if (l_errl) { break; }
+
+            //Set Product Serial number - ascii formatted data
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VS, true);
+            if (l_errl) { break; }
+
+            //Set Product Part number - ascii formatted data
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VP, true);
+            if (l_errl) { break; }
+
+        }
+        else
+        {
+            //Set serial number - ascii formatted field
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OSYS, CVPD::SS, true);
+            if (l_errl) { break; }
+
+            //Set chassis part number - ascii formatted field
+            //@fixme RTC Story 118373
+            l_errl = addVpdData(io_data, CVPD::OSYS, CVPD::MM, true);
+            if (l_errl) { break; }
+        }
+
+        //Push Fru File ID Byte - NULL
         io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+        bool l_setCustomData = false;
+        // Check if we should add ECID
+        for (TARGETING::TargetHandleList::const_iterator extraTargets_it =
+                iv_extraTargets.begin();
+                extraTargets_it != iv_extraTargets.end();
+                ++extraTargets_it
+            )
+        {
+            TARGETING::TargetHandle_t l_extraTarget = *extraTargets_it;
+
+            //Only set the ECID Data during an update scenario
+            if (iv_isUpdate == true &&
+                (l_extraTarget->getAttr<TARGETING::ATTR_TYPE>() ==
+                                                        TARGETING::TYPE_MEMBUF))
+            {
+                TARGETING::ATTR_ECID_type ecidInfo;
+                bool getEcid =
+                      l_extraTarget->tryGetAttr<TARGETING::ATTR_ECID>(ecidInfo);
+                if (getEcid)
+                {
+                    l_setCustomData = true;
+                    addEcidData(l_extraTarget, ecidInfo, io_data);
+                }
+            }
+        }
+
+        //If no Custom data was sent, an Empty Byte is needed
+        if (!l_setCustomData)
+        {
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+        }
+        //Indicate End of Custom Fields
         io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
 
-        ////Complete record data formatting
+        //Complete record data formatting
         postFormatProcessing(io_data);
 
     } while (0);
@@ -729,14 +870,15 @@ errlHndl_t backplaneIpmiFruInv::buildMultiRecordInfoArea(
 errlHndl_t backplaneIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
                                      uint8_t i_record,
                                      uint8_t i_keyword,
-                                     bool i_ascii)
+                                     bool i_ascii,
+                                     bool i_typeLengthByte)
 {
     size_t     l_vpdSize = 0;
     errlHndl_t l_errl = NULL;
 
     do {
         //First get size of data with NULL parameter
-        errlHndl_t l_errl = deviceRead(iv_target,
+        l_errl = deviceRead(iv_target,
                                       NULL,
                                       l_vpdSize,
                                       //@fixme RTC Story 118373
@@ -754,26 +896,37 @@ errlHndl_t backplaneIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
 
         if (l_vpdSize > 0)
         {
-            uint8_t l_vDataPtr[l_vpdSize];
-            l_errl = deviceRead(iv_target, l_vDataPtr, l_vpdSize,
-                                DEVICE_CVPD_ADDRESS(i_record, i_keyword));
-
-            //Add on the data to the type/length byte indicating it is ascii
-            // otherwise leave it as binary
-            if (i_ascii)
+            uint8_t l_offset = 0;
+            //Add on the typelength byte if requested
+            if (i_typeLengthByte)
             {
-                io_data.push_back(l_vpdSize
-                                       + IPMIFRUINV::TYPELENGTH_BYTE_ASCII);
+                //Determine how big data is and expand it to handle the soon to
+                //be read VPD data
+                l_offset = io_data.size();
+                io_data.resize(l_offset + 1 + l_vpdSize);
+                //Add on the data to the type/length byte indicating it is ascii
+                // otherwise leave it as binary
+                if (i_ascii)
+                {
+                    io_data.at(l_offset) = l_vpdSize
+                                           + IPMIFRUINV::TYPELENGTH_BYTE_ASCII;
+                }
+                else
+                {
+                    io_data.at(l_offset) = l_vpdSize;
+                }
+                l_offset += 1;
             }
             else
             {
-                //First addon the size of this data
-                io_data.push_back(l_vpdSize);
+                //Determine how big data is and expand it to handle the soon to
+                //be read VPD data
+                l_offset = io_data.size();
+                io_data.resize(l_offset + l_vpdSize);
             }
-
-            //Then add on the data returned from the VPD read
-            io_data.insert(io_data.end(),
-                                   &l_vDataPtr[0], &l_vDataPtr[l_vpdSize]);
+            //Read the VPD data directly into fru inventory data buffer
+            l_errl = deviceRead(iv_target,&io_data[l_offset],l_vpdSize,
+                                     DEVICE_CVPD_ADDRESS(i_record, i_keyword));
         }
         else
         {
@@ -791,7 +944,47 @@ errlHndl_t backplaneIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
     return l_errl;
 }
 
-errlHndl_t IPMIFRUINV::setData()
+void IpmiFruInv::addEcidData(const TARGETING::TargetHandle_t& i_target,
+                             const TARGETING::ATTR_ECID_type& i_ecidInfo,
+                             std::vector<uint8_t> &io_data)
+{
+    // Create Custom ECID Field
+    // - First put in 'ECID:' to make it obvious what this is
+    uint8_t l_data[] = {IPMIFRUINV::TYPELENGTH_BYTE_ASCII + 5,'E','C','I','D',
+                                   ':', IPMIFRUINV::TYPELENGTH_BYTE_NULL + 16};
+
+    // @todo-RTC:124687 - Refactor multiple reallocations
+    io_data.insert( io_data.end(),
+                    &l_data[0],
+                    &l_data[0] + (uint8_t(sizeof(l_data) / sizeof(uint8_t))));
+
+    uint8_t* l_vDataPtr = (uint8_t*) &i_ecidInfo[0];
+    //Insert first 64 bits of ECID data
+    io_data.insert(io_data.end(),
+                &l_vDataPtr[0], &l_vDataPtr[0]+8);
+    l_vDataPtr = (uint8_t*) &i_ecidInfo[1];
+    //Insert second 64 bits of ECID data
+    io_data.insert(io_data.end(),
+        &l_vDataPtr[0], &l_vDataPtr[0]+8);
+
+    return;
+}
+
+void IPMIFRUINV::clearData(uint8_t i_fruId)
+{
+    uint8_t l_clearData[] =
+        {IPMIFRUINV::RECORD_NOT_PRESENT, IPMIFRUINV::RECORD_NOT_PRESENT,
+         IPMIFRUINV::RECORD_NOT_PRESENT, IPMIFRUINV::RECORD_NOT_PRESENT,
+         IPMIFRUINV::RECORD_NOT_PRESENT, IPMIFRUINV::RECORD_NOT_PRESENT,
+         IPMIFRUINV::RECORD_NOT_PRESENT, IPMIFRUINV::RECORD_NOT_PRESENT};
+
+    //Use IMPIFRU::writeData to send data to service processor
+    IPMIFRU::writeData(i_fruId, l_clearData,
+                        IPMIFRUINV::COMMON_HEADER_FORMAT_SIZE,
+                        IPMIFRUINV::DEFAULT_FRU_OFFSET);
+}
+
+void IPMIFRUINV::setData(bool i_updateData)
 {
     errlHndl_t l_errl = NULL;
 
@@ -808,57 +1001,192 @@ errlHndl_t IPMIFRUINV::setData()
             break;
         }
 
-        // Find list of all target types that may need a fru inventory
-        // record created for them
-        TARGETING::PredicateCTM predChip(TARGETING::CLASS_CHIP);
-        TARGETING::PredicateCTM predDimm(TARGETING::CLASS_LOGICAL_CARD,
-                                         TARGETING::TYPE_DIMM);
-        TARGETING::PredicatePostfixExpr checkExpr;
-        TARGETING::PredicateHwas l_present;
-        l_present.present(true);
-        checkExpr.push(&predChip).push(&predDimm).Or().push(&l_present).And();
+        //Container with list of frus and a boolean indicating whether the data
+        //needs to be cleared or not
+        // @todo-RTC:124687 - Refactor map use
+        std::map<uint8_t,bool> frusToClear;
+        //List of all potential Frus that could need IPMI Fru Inv. Data Sent
+        std::vector< std::pair<TARGETING::TargetHandle_t, uint8_t> >
+                                                                l_potentialFrus;
 
-        TARGETING::TargetHandleList pCheckPres;
-        TARGETING::targetService().getAssociated( pCheckPres, pSys,
-            TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
-            &checkExpr );
-
-        for (TARGETING::TargetHandleList::const_iterator pTarget_it =
-                pCheckPres.begin();
-                pTarget_it != pCheckPres.end();
-                ++pTarget_it
-            )
+        if (i_updateData == false)
         {
+            IPMIFRUINV::gatherClearData(pSys, frusToClear);
+        }
 
-            TARGETING::TargetHandle_t pTarget = *pTarget_it;
+        // Find list of all target types that may need a fru inv. record set
+        IPMIFRUINV::gatherSetData(pSys, frusToClear,
+                                     l_potentialFrus, i_updateData);
 
-            //Check if EEPROM_VPD_FRU_INFO attribute exists
-            TARGETING::EepromVpdFruInfo eepromVpdFruInfo;
-            bool getFruInfo =
-                 pTarget->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_FRU_INFO>
-                                                             (eepromVpdFruInfo);
-            if (getFruInfo)
+        //Now Loop through all TargetHandle_t, uint8_t pairs to see if there are
+        //multiple targets with the same fruId. These will be formed into a list
+        //as data from all Targets will be combined into one IPMI Fru Inventory
+        //Record under the same fruId.
+        std::vector<std::pair<TARGETING::TargetHandle_t,uint8_t> >::iterator
+                                                                        l_iter;
+
+        for (l_iter = l_potentialFrus.begin(); l_iter != l_potentialFrus.end();
+                   ++l_iter)
+        {
+            //iterators to walk list and group frus together
+            std::vector<std::pair<TARGETING::TargetHandle_t,uint8_t> >::iterator
+                                                             l_curPair = l_iter;
+            std::vector<std::pair<TARGETING::TargetHandle_t,uint8_t> >::iterator
+                                                            l_nextPair = l_iter;
+
+            //The 'base' TargetHandleList will have one FRU
+            TARGETING::TargetHandleList l_curFru;
+            l_curFru.push_back(l_curPair->first);
+            //This will be the fruId to compare with what comes after this
+            //Target in the vector
+            uint8_t l_fruId = l_curPair->second;
+
+            TRACFCOMP(g_trac_ipmi, "IPMIFRUINV::setData - Collecting all IPMI FRU Inventory Targets with fruId: [%08x]",
+                        l_fruId);
+
+            ++l_nextPair;
+            for( ; l_nextPair != l_potentialFrus.end()
+                            && l_nextPair->second == l_fruId; ++l_nextPair)
             {
-                TRACFCOMP(g_trac_ipmi, "IPMIFRUINV::setData - Sending IPMI FRU Inventory Data for target with HUID: [%08x]",
-                         pTarget->getAttr<TARGETING::ATTR_HUID>());
+                l_curFru.push_back(l_nextPair->first);
+                l_iter = l_nextPair;
+            }
+            IpmiFruInv *l_fru = IpmiFruInv::Factory(l_curFru, i_updateData);
 
-                IpmiFruInv *l_fru = IpmiFruInv::Factory(pTarget);
-
-                if (l_fru != NULL)
+            if (l_fru != NULL)
+            {
+                //Target recognized, build & send IPMI FRU Invenotry record
+                l_errl = l_fru->buildFruInvRecord();
+                if (l_errl)
                 {
-                    //Target recognized, build & send IPMI FRU Invenotry record
-                    l_errl = l_fru->buildFruInvRecord();
-                    if (l_errl)
-                    {
-                        TRACFCOMP(g_trac_ipmi, "IPMIFRUINV::setData - Errors encountered, will skip setting the rest of the data");
-                        break;
-                    }
-                    l_fru->sendFruData(eepromVpdFruInfo.fruId);
-                    delete l_fru;
+                    TRACFCOMP(g_trac_ipmi, "IPMIFRUINV::setData - Errors encountered, will skip setting the rest of the data");
+                    break;
+                }
+                TRACFCOMP(g_trac_ipmi, "IPMIFRUINV::setData - Sending IPMI FRU Inventory Data for target with fruId: [%08x] and size [%08x]",
+                         l_fruId, l_curFru.size());
+                l_fru->sendFruData(l_fruId);
+                delete l_fru;
+            }
+        }
+
+        //Do not clear data during a data update
+        if (i_updateData == false)
+        {
+            //Now clear any FRU Data for fruIds that didn't have data set. This
+            //will handle the case where something was removed from the system
+            for (std::map<uint8_t,bool>::iterator it=frusToClear.begin();
+                    it!=frusToClear.end();
+                    ++it)
+            {
+                //If the bool is true its data needs to be cleared
+                if (it->second == true)
+                {
+                    IPMIFRUINV::clearData(it->first);
                 }
             }
         }
+
     } while(0);
 
-    return l_errl;
+    if (l_errl)
+    {
+        //Commit errorlog encountered indicating there were issues
+        //setting the FRU Inventory Data
+        TRACFCOMP(g_trac_ipmi, "Errors encountered setting Fru Inventory Data");
+        l_errl->collectTrace(IPMI_COMP_NAME);
+        errlCommit(l_errl, IPMI_COMP_ID);
+    }
+    return;
+}
+
+
+void IPMIFRUINV::gatherClearData(const TARGETING::Target* i_pSys,
+                                    std::map<uint8_t,bool>& io_frusToClear)
+{
+    TARGETING::PredicateCTM predChip(TARGETING::CLASS_CHIP);
+    TARGETING::PredicateCTM predDimm(TARGETING::CLASS_LOGICAL_CARD,
+                                         TARGETING::TYPE_DIMM);
+    TARGETING::PredicatePostfixExpr checkAllExpr;
+    checkAllExpr.push(&predChip).push(&predDimm).Or();
+    TARGETING::TargetHandleList l_allPossibleFrus;
+    TARGETING::targetService().getAssociated( l_allPossibleFrus, i_pSys,
+    TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+            &checkAllExpr );
+
+    for (TARGETING::TargetHandleList::const_iterator pTarget_it =
+         l_allPossibleFrus.begin();
+         pTarget_it != l_allPossibleFrus.end();
+         ++pTarget_it)
+    {
+        TARGETING::TargetHandle_t pTarget = *pTarget_it;
+        uint32_t l_fruId = pTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+
+        if (l_fruId)
+        {
+            //Assume we clear all possible targets to start
+            // @todo-RTC:124506 - New logic may be needed to clear all targets
+            // after a code update
+            io_frusToClear[l_fruId] = true;
+        }
+    }
+
+    return;
+}
+
+void IPMIFRUINV::gatherSetData(const TARGETING::Target* i_pSys,
+                                  std::map<uint8_t,bool>& io_frusToClear,
+                   std::vector< std::pair<TARGETING::TargetHandle_t, uint8_t> >&
+                                                               io_potentialFrus,
+                                  bool i_updateData)
+{
+    TARGETING::PredicateCTM predChip(TARGETING::CLASS_CHIP);
+    TARGETING::PredicateCTM predDimm(TARGETING::CLASS_LOGICAL_CARD,
+                                     TARGETING::TYPE_DIMM);
+    TARGETING::PredicatePostfixExpr checkExpr;
+    TARGETING::PredicateHwas l_present;
+    // @todo-RTC:124553 - Additional logic for deconfigured Frus
+    //                    may be needed
+    l_present.present(true);
+
+    //When updating data on a later pass ignore dimms
+    if (i_updateData)
+    {
+        checkExpr.push(&predChip).push(&l_present).And();
+    }
+    else
+    {
+        checkExpr.push(&predChip).push(&predDimm).Or().push(&l_present).And();
+    }
+
+    TARGETING::TargetHandleList pCheckPres;
+    TARGETING::targetService().getAssociated( pCheckPres, i_pSys,
+    TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+            &checkExpr );
+
+    for (TARGETING::TargetHandleList::const_iterator pTarget_it =
+                pCheckPres.begin();
+                pTarget_it != pCheckPres.end();
+                ++pTarget_it
+        )
+    {
+
+        TARGETING::TargetHandle_t pTarget = *pTarget_it;
+        uint32_t l_fruId = pTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+
+        if (l_fruId)
+        {
+            //when updating data, ignore clearing data
+            if (i_updateData == false)
+            {
+                //Indicate this fruId has data and later clear is not needed
+                io_frusToClear[l_fruId] = false;
+            }
+            io_potentialFrus.push_back(std::make_pair(pTarget, l_fruId));
+        }
+    }
+
+    //Sort the vector by FRU_ID for later use.
+    std::sort(io_potentialFrus.begin(),
+              io_potentialFrus.end(),
+              comparePairs);
 }

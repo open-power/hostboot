@@ -79,6 +79,7 @@ namespace CVPD
         { OPFR, "OPFR" },
         { VNDR, "VNDR" },
         { SPDX, "SPDX" },
+        { OSYS, "OSYS" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_RECORD, "TEST" },
@@ -157,6 +158,9 @@ namespace CVPD
         { K6,  "K6" },
         { K7,  "K7" },
         { K8,  "K8" },
+        { MM,  "MM" },
+        { SS,  "SS" },
+        { ET,  "ET" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

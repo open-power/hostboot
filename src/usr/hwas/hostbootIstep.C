@@ -186,14 +186,11 @@ void* host_discover_targets( void *io_pArgs )
     }
 
 #ifdef CONFIG_BMC_IPMI
+    // Gather + Send the base IPMI Fru Inventory data to the BMC
+    IPMIFRUINV::setData();
+
     // send DIMM/CORE/PROC sensor status to the BMC
     SENSOR::updateBMCSensorStatus();
-
-    if (errl == NULL)
-    {
-        // Gather + Send the IPMI Fru Inventory data to the BMC
-        errl = IPMIFRUINV::setData();
-    }
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

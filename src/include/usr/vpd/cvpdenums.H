@@ -45,6 +45,7 @@ namespace CVPD
         OPFR        = 0x05,
         VNDR        = 0x06,
         SPDX        = 0x07,
+        OSYS        = 0x08,
         // Last Record
         CVPD_LAST_RECORD,
         CVPD_TEST_RECORD,   // Test purposes ONLY!
@@ -120,6 +121,9 @@ namespace CVPD
         K6          = 0x39,
         K7          = 0x3a,
         K8          = 0x3b,
+        MM          = 0x3c,
+        SS          = 0x3d,
+        ET          = 0x3e,
 
         // Last Keyword
         CVPD_LAST_KEYWORD,
