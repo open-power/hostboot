@@ -66,6 +66,7 @@ enum ModuleId
     PRDF_START_SCRUB              = 0x0E,
     PRDF_SYNC_SVC                 = 0x0F,
     PRDF_CS_FIRDATA_READ          = 0x10,
+    PRDF_CS_FIRDATA_WRITE         = 0x11,
 };
 
 /******************************************************************************/
@@ -121,7 +122,7 @@ enum ReasonCode
 
     // general code for user error or unsupported configuration
     PRDF_INVALID_CONFIG                     = PRDF_COMP_ID | 0x82,
-    PRDF_NULL_VALUE_RETURNED                = PRDF_COMP_ID | 0x81,
+    PRDF_NULL_VALUE_RETURNED                = PRDF_COMP_ID | 0x83,
 
     PRDF_LAST_REASONCODE                    = PRDF_COMP_ID | 0xFF,
 };

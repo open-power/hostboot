@@ -928,6 +928,15 @@ bool checkLastFuncEx( TARGETING::TargetHandle_t i_exTarget )
     return o_lastEx;
 }
 
+//------------------------------------------------------------------------------
+
+TargetHandle_t getMasterProc()
+{
+    TargetHandle_t masterProc = NULL;
+    targetService().masterProcChipTargetHandle( masterProc );
+    return masterProc;
+}
+
 //##############################################################################
 //##
 //##                       Target position support code

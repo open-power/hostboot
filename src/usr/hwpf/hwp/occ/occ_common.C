@@ -60,6 +60,10 @@
 #include <p8_pm_firinit.H>
 #include <p8_pm_prep_for_reset.H>
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+  #include <diag/prdf/prdfWriteHomerFirData.H>
+#endif
+
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -168,6 +172,14 @@ namespace HBOCC
         {
             config_data->firMaster = NOT_FIR_MASTER;
         }
+
+        // TODO: RTC 124683 The ability to write the HOMER data is currently not
+        //       available at runtime.
+        #ifndef __HOSTBOOT_RUNTIME
+        l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
+                                          sizeof(config_data->firdataConfig) );
+        #endif
+
 #else
         config_data->firMaster = 0;
         //force to an older version so we can support

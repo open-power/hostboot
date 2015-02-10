@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/occ_firdata/firDataConst_common.h $         */
+/* $Source: src/usr/diag/prdf/occ_firdata/prdfWriteHomerFirData.H $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,54 +23,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __firDataConst_common_h
-#define __firDataConst_common_h
+#include <errl/errlentry.H>
 
-/** NOTE: This file is common between OCC and Hosboot. Any change to this file
- *        must be mirrored to both repositories. Also, this must be C, not C++,
- *        because OCC strictly uses C. */
-
-#include <stdint.h>
-
-/** Target types for all supported targets. */
-typedef enum
+namespace PRDF
 {
-    // NOTE: These will be used as array indexes.
-    FIRST_TRGT = 0,
-    PROC       = FIRST_TRGT,
-    EX,
-    MCS,
-    MEMB,
-    MBA,
-    MAX_TRGTS,
 
-} TrgtType_t;
+/** @brief  Writes register lists and hardware config in the HOMER data for
+ *          the OCC to capture in the event of a system checkstop.
+ *  @param  i_hBuf     SRAM pointer to the beginning of the HOMER data buffer.
+ *  @param  i_hBufSize Total size of the HOMER data buffer.
+ *  @return An error log on failure. NULL on success.
+ */
+errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize );
 
-/** Boundary/position ranges for each target type. */
-typedef enum
-{
-    MAX_PROC_PER_NODE = 8,
-    MAX_EX_PER_PROC   = 16,
-    MAX_MCS_PER_PROC  = 8,
-    MAX_MEMB_PER_PROC = MAX_MCS_PER_PROC,
-    MAX_MEMB_PER_NODE = MAX_MEMB_PER_PROC * MAX_PROC_PER_NODE,
-    MAX_MBA_PER_MEMB  = 2,
-    MAX_MBA_PER_PROC  = MAX_MEMB_PER_PROC * MAX_MBA_PER_MEMB,
+}; // end namespace PRDF
 
-} TrgtPos_t;
-
-/** All register types. */
-typedef enum
-{
-    // NOTE: These will be used as array indexes.
-    FIRST_REG = 0,
-    GLBL      = FIRST_REG,
-    FIR,
-    REG,
-    IDFIR,
-    IDREG,
-    MAX_REGS,
-
-} RegType_t;
-
-#endif // __firDataConst_common_h

@@ -71,9 +71,9 @@ class FirData
 
   private:
 
-    uint8_t  * iv_pBuf;        ///< Pointer to the PNOR data buffer
-    uint32_t   iv_maxPBufSize; ///< Maximum size of the PNOR data buffer
-    size_t     iv_pBufSize;    ///< Current size of the PNOR data buffer
+    uint8_t * iv_pBuf;        ///< Pointer to the PNOR data buffer
+    size_t    iv_maxPBufSize; ///< Maximum size of the PNOR data buffer
+    size_t    iv_pBufSize;    ///< Current size of the PNOR data buffer
 };
 
 //------------------------------------------------------------------------------

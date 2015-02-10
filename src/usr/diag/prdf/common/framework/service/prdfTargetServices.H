@@ -245,6 +245,9 @@ TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type );
  */
 bool checkLastFuncEx( TARGETING::TargetHandle_t i_exTarget );
 
+/** @return The master PROC target. NULL on failure. */
+TARGETING::TargetHandle_t getMasterProc();
+
 //##############################################################################
 //##
 //##                       Target position support code

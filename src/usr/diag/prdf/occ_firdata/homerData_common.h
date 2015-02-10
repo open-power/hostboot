@@ -27,7 +27,8 @@
 #define __homerData_common_h
 
 /** NOTE: This file is common between OCC and Hosboot. Any change to this file
- *        must be mirrored to both repositories. */
+ *        must be mirrored to both repositories. Also, this must be C, not C++,
+ *        because OCC strictly uses C. */
 
 #include <firDataConst_common.h>
 #include <string.h>

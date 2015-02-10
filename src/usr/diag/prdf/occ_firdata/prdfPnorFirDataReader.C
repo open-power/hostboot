@@ -51,14 +51,25 @@ PnorFirDataReader & PnorFirDataReader::getPnorFirDataReader()
 
 errlHndl_t PnorFirDataReader::readPnor( bool & o_validData )
 {
-    return readPnorFirData(o_validData, iv_trgtRegMap, iv_ffdc, iv_trgtFfdcMap);
+    errlHndl_t errl = readPnorFirData( o_validData, iv_trgtRegMap, iv_ffdc,
+                                       iv_trgtFfdcMap );
+    if ( NULL != errl )
+    {
+        errl->collectTrace( PRDF_COMP_NAME, 512 );
+    }
+    return errl;
 }
 
 //------------------------------------------------------------------------------
 
 errlHndl_t PnorFirDataReader::clearPnor() const
 {
-    return clearPnorFirData();
+    errlHndl_t errl = clearPnorFirData();
+    if ( NULL != errl )
+    {
+        errl->collectTrace( PRDF_COMP_NAME, 512 );
+    }
+    return errl;
 }
 
 //------------------------------------------------------------------------------

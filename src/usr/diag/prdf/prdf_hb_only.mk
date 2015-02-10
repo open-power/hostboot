@@ -115,6 +115,7 @@ prd_obj += prdfMfgSync.o
 # occ_firdata/
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfPnorFirDataReader.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
+prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfCenMbaIplCeStats.o
