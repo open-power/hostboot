@@ -667,7 +667,7 @@ bool Object::read_relocation()
             s.type |= Symbol::GLOBAL;
             cout << "\t\tGLOBAL" << endl;
         }
-        else if (syms[i]->flags & (BSF_LOCAL | BSF_WEAK))
+        else if (syms[i]->flags & (BSF_LOCAL | BSF_WEAK | BSF_GNU_UNIQUE))
         {
             // Check weak symbol list for duplicate weak symbols.
             if (syms[i]->flags & (BSF_WEAK))
