@@ -38,6 +38,7 @@ prd_vpath += ${PRD_SRC_PATH}/framework/config
 prd_vpath += ${PRD_SRC_PATH}/framework/resolution
 prd_vpath += ${PRD_SRC_PATH}/framework/service
 prd_vpath += ${PRD_SRC_PATH}/mnfgtools
+prd_vpath += ${PRD_SRC_PATH}/occ_firdata
 prd_vpath += ${PRD_SRC_PATH}/plat
 prd_vpath += ${PRD_SRC_PATH}/plat/pegasus
 
@@ -49,6 +50,7 @@ prd_incpath += ${PRD_SRC_PATH}/framework/config
 prd_incpath += ${PRD_SRC_PATH}/framework/resolution
 prd_incpath += ${PRD_SRC_PATH}/framework/service
 prd_incpath += ${PRD_SRC_PATH}/mnfgtools
+prd_incpath += ${PRD_SRC_PATH}/occ_firdata
 prd_incpath += ${PRD_SRC_PATH}/plat/pegasus
 
 # External header paths
@@ -104,6 +106,9 @@ prd_obj += prdfPlatServices_ipl.o
 
 # mnfgtools/
 prd_obj += prdfMfgSync.o
+
+# occ_firdata/
+prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
 
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfCenMbaIplCeStats.o
