@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -811,7 +811,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
             }
             else
             {
-                TRACFCOMP( g_trac_fsi, "%.8X = %.8X", dump_regs[x], data );
+                TRACDCOMP( g_trac_fsi, "%.8X = %.8X", dump_regs[x], data );
                 l_eud_fsiT.addDataBuffer(&data, sizeof(data),
                                          DEVICE_FSI_ADDRESS(dump_regs[x]));
             }
@@ -828,7 +828,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
             }
             else
             {
-                TRACFCOMP( g_trac_fsi, "%.8X = %.8X",
+                TRACDCOMP( g_trac_fsi, "%.8X = %.8X",
                            ctl_reg|(FSI_MSTAP0_0D0+p*0x4), data );
                 l_eud_fsiT.addDataBuffer(&data, sizeof(data),
                                          DEVICE_FSI_ADDRESS(addr1));
@@ -863,7 +863,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
             }
             else
             {
-                TRACFCOMP( g_trac_fsi, "%.8X = %.8X", dump_regs[x], databuf );
+                TRACDCOMP( g_trac_fsi, "%.8X = %.8X", dump_regs[x], databuf );
                 regdata2.addDataBuffer(&databuf, sizeof(databuf),
                                        DEVICE_FSI_ADDRESS(dump_regs[x]));
             }
@@ -2011,7 +2011,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
                            bool& o_enabled)
 {
     errlHndl_t l_err = NULL;
-    TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initPort> Initializing %.8X", i_fsiInfo.linkid.id );
+    TRACDCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initPort> Initializing %.8X", i_fsiInfo.linkid.id );
     o_enabled = false;
 
     do {
@@ -2057,7 +2057,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
           sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
         if( spfuncs.fsiSlaveInit )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init because SP did it, only doing FSI2PIB reset" );
+            TRACDCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init because SP did it, only doing FSI2PIB reset" );
             o_enabled = true;
 
             //Reset the port to clear up any previous error state
@@ -2077,7 +2077,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
             && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl)
             && is_mpipl )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init in MPIPL, only doing reset" );
+            TRACDCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init in MPIPL, only doing reset" );
             o_enabled = true;
 
             //Reset the port to clear up any previous error state
@@ -2357,7 +2357,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                 ec_level = (idec & 0xF0000000) >> 24;
                 ec_level |= ((idec & 0x00F00000) >> 20);
 
-                TRACFCOMP( g_trac_fsi, "%.8X: EC=%X", TARGETING::get_huid(i_master), ec_level );
+                TRACDCOMP( g_trac_fsi, "%.8X: EC=%X", TARGETING::get_huid(i_master), ec_level );
                 if( ec_level < 0x20 )
                 {
                     // 25=clock/4 (legacy) mode
@@ -2629,8 +2629,8 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfoFromAttr( TARGETING::Target* i_target )
         }
     }
 
-    TRACFCOMP( g_trac_fsi, "getFsiInfoFromAttr> i_target=%.8X : master=%.8X, type=%X", TARGETING::get_huid(i_target), TARGETING::get_huid(info.master), info.type );
-    TRACFCOMP( g_trac_fsi, "getFsiInfoFromAttr> port=%X, cascade=%X, flags=%X, linkid=%.8X", info.port, info.cascade, info.flags, info.port );
+    TRACDCOMP( g_trac_fsi, "getFsiInfoFromAttr> i_target=%.8X : master=%.8X, type=%X", TARGETING::get_huid(i_target), TARGETING::get_huid(info.master), info.type );
+    TRACDCOMP( g_trac_fsi, "getFsiInfoFromAttr> port=%X, cascade=%X, flags=%X, linkid=%.8X", info.port, info.cascade, info.flags, info.port );
     return info;
 }
 
