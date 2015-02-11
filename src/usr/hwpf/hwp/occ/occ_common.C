@@ -119,14 +119,9 @@ namespace HBOCC
 
     /**
      * @brief Sets up OCC Host data
-     *
-     * @param[in] i_occHostDataVirtAddr Virtual
-     *                       address of current
-     *                       proc's Host data area.
-     *
-     * @return errlHndl_t  Error log Host data setup failed
      */
-    errlHndl_t loadHostDataToHomer(void* i_occHostDataVirtAddr)
+    errlHndl_t loadHostDataToHomer( TARGETING::Target* i_proc,
+                                    void* i_occHostDataVirtAddr)
     {
         TRACUCOMP( g_fapiTd,
                    ENTER_MRK"loadHostDataToHomer(%p)",
@@ -161,6 +156,22 @@ namespace HBOCC
             config_data->interruptType = USE_PSIHB_COMPLEX;
         }
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+        // Figure out the FIR master
+        TARGETING::Target* masterproc = NULL;
+        tS.masterProcChipTargetHandle( masterproc );
+        if( masterproc == i_proc )
+        {
+            config_data->firMaster = IS_FIR_MASTER;
+        }
+        else
+        {
+            config_data->firMaster = NOT_FIR_MASTER;
+        }
+#else
+        config_data->firMaster = 0;
+#endif
+
         TRACUCOMP( g_fapiTd,
                    EXIT_MRK"loadHostDataToHomer");
 
@@ -170,16 +181,6 @@ namespace HBOCC
     /**
      * @brief Execute procedures and steps necessary
      *        to load OCC data in specified processor
-     *
-     * @param[in] i_target   Target proc to load
-     * @param[in] i_homerVirtAddrBase Virtual
-     *                       address of current
-     *                       proc's HOMER
-     * @param[in] i_homerPhysAddrBase Physical
-     *                       address of current
-     *                       proc's HOMER
-     *
-     * @return errlHndl_t  Error log image load failed
      */
      errlHndl_t loadOCC(TARGETING::Target* i_target,
                     uint64_t i_homerPhysAddr,
@@ -299,12 +300,6 @@ namespace HBOCC
      * @brief Start OCC for specified DCM pair of processors.
      *        If 2nd input is NULL, OCC will be setup on just
      *        one target.
-     *
-     * @param[in] i_target0:    target of first processor in DCM pair
-     * @param[in] i_target1:    target of second processor in DCM pair
-     * @param[out] o_failedTarget failed target in case of an error
-     *
-     * @return errlHndl_t  Error log of startOCC failed
      */
     errlHndl_t startOCC (Target* i_target0,
                          Target* i_target1,
@@ -423,11 +418,6 @@ namespace HBOCC
      * @brief Stop OCC for specified DCM pair of processors.
      *        If 2nd input is NULL, OCC will be setup on just
      *        one target.
-     *
-     * @param[in] i_target0:    target of first processor in DCM pair
-     * @param[in] i_target1:    target of second processor in DCM pair
-     *
-     * @return errlHndl_t  Error log of stopOCC failed
      */
     errlHndl_t stopOCC(TARGETING::Target * i_target0,
                        TARGETING::Target * i_target1)

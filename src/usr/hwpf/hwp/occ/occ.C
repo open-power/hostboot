@@ -133,7 +133,7 @@ namespace HBOCC
                                            (i_homerVirtAddrBase) +
                                 tmpOffset + HOMER_OFFSET_TO_OCC_HOST_DATA;
             void* occHostVirt = reinterpret_cast<void*>(i_homerHostVirtAddr);
-            l_errl = HBOCC::loadHostDataToHomer(occHostVirt);
+            l_errl = HBOCC::loadHostDataToHomer(i_target,occHostVirt);
             if( l_errl != NULL )
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );

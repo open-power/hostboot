@@ -179,7 +179,7 @@ namespace RT_OCC
 
             void* occHostVirt = reinterpret_cast <void *> (i_homer_addr_va +
                                 HOMER_OFFSET_TO_OCC_HOST_DATA);
-            err = HBOCC::loadHostDataToHomer(occHostVirt);
+            err = HBOCC::loadHostDataToHomer(proc_target,occHostVirt);
             if( err != NULL )
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );

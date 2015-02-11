@@ -36,19 +36,38 @@ namespace HBOCC
     struct occHostConfigDataArea_t
     {
         uint32_t version;
+
+        //For computation of timebase frequency
         uint32_t nestFrequency;
+
+        // For determining the interrupt type to Host
+        //  0x00000000 = Use FSI2HOST Mailbox
+        //  0x00000001 = Use OCC interrupt line through PSIHB complex
         uint32_t interruptType;
+
+        // For informing OCC if it is the FIR master:
+        //  0x00000000 = Default
+        //  0x00000001 = FIR Master
+        uint32_t firMaster;
+
+        // FIR collection configuration data needed by FIR Master
+        //  OCC in the event of a checkstop
+        uint8_t firdataConfig[3072];
     };
 
     enum
     {
-        OccHostDataVersion = 2,
+        OccHostDataVersion = 3,
         OCC_LIDID = 0x81e00430,
         OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
 
         // Interrupt Types
         USE_FSI2HOST_MAILBOX = 0x00000000,
-        USE_PSIHB_COMPLEX    = 0x00000001
+        USE_PSIHB_COMPLEX    = 0x00000001,
+
+        // FIR Master
+        NOT_FIR_MASTER = 0x00000000,
+        IS_FIR_MASTER  = 0x00000001
     };
 
     enum occAction_t
@@ -59,13 +78,15 @@ namespace HBOCC
     /**
      * @brief Sets up OCC Host data
      *
+     * @param[in] i_proc:         target processor to load
      * @param[in] i_occHostDataVirtAddr Virtual
      *                       address of current
      *                       proc's Host data area.
      *
      * @return errlHndl_t  Error log Host data setup failed
      */
-    errlHndl_t loadHostDataToHomer(void* i_occHostDataVirtAddr);
+    errlHndl_t loadHostDataToHomer(TARGETING::Target* i_proc,
+                                   void* i_occHostDataVirtAddr);
 
     /**
      * @brief Execute procedures and steps required to load
