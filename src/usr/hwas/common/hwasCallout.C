@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -46,6 +46,11 @@
 namespace HWAS
 {
 
+#ifdef __HOSTBOOT_RUNTIME // defined in hwas.C
+HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
+TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   KILOBYTE );
+#endif
+
 using namespace HWAS::COMMON;
 
 bool retrieveTarget(uint8_t * & io_uData,
@@ -72,7 +77,7 @@ bool retrieveTarget(uint8_t * & io_uData,
         if (unlikely(o_pTarget == NULL))
         {   // only happen if we have a corrupt errlog or targeting.
             HWAS_ERR("HW callout; o_pTarget was NULL!!!");
-
+#ifndef __HOSTBOOT_RUNTIME
             /*@
              * @errortype
              * @moduleid     HWAS::MOD_PROCESS_CALLOUT
@@ -87,6 +92,7 @@ bool retrieveTarget(uint8_t * & io_uData,
                         HWAS::RC_INVALID_TARGET,
                         i_errl->plid());
             errlCommit(errl, HWAS_COMP_ID);
+#endif
             l_err = true;
         }
     }
@@ -98,6 +104,7 @@ bool retrieveTarget(uint8_t * & io_uData,
     return l_err;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 void processCallout(errlHndl_t &io_errl,
         uint8_t *i_pData,
         uint64_t i_Size,
@@ -243,5 +250,7 @@ void processCallout(errlHndl_t &io_errl,
 
     HWAS_DBG("processCallout exit");
 } // processCallout
+
+#endif
 
 }; // end namespace

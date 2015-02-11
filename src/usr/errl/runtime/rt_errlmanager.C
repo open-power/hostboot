@@ -125,14 +125,19 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
     TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendToHypervisor" );
     do
     {
-        uint32_t l_msgSize = io_err->flattenedSize();
-
-        uint8_t * temp_buff = new uint8_t [l_msgSize ];
-        io_err->flatten ( temp_buff, l_msgSize );
-
+#ifdef CONFIG_BMC_IPMI
+        TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
+                  io_err->plid() );
+        // convert to SEL/eSEL and send to BMC over IPMI
+        sendErrLogToBmc(io_err);
+#else
         TRACDCOMP(g_trac_errl,
                   INFO_MRK"Send msg to FSP for errlogId [0x%08x]",
                   io_err->plid() );
+
+        uint32_t l_msgSize = io_err->flattenedSize();
+        uint8_t * temp_buff = new uint8_t [l_msgSize ];
+        io_err->flatten ( temp_buff, l_msgSize );
 
         if(g_hostInterfaces && g_hostInterfaces->sendErrorLog)
         {
@@ -157,8 +162,8 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                       io_err->plid()
                       );
         }
-
         delete [] temp_buff;
+#endif
         delete io_err;
         io_err = NULL;
 

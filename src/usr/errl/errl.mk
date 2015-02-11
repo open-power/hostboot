@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/errl/runtime/makefile $
+# $Source: src/usr/errl/errl.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -22,24 +22,20 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
-MODULE = errl_rt
-
-#include common ojects between hostboot and runtime hostboot
-include ../errl.mk
-
-VPATH += ${ROOTPATH}/src/usr/hwas/common
-
-OBJS += rt_errlmanager.o
-OBJS += rt_vfs.o
-OBJS += $(if $(CONFIG_BMC_IPMI),hwasCallout.o)
-
-SUBDIRS += test.d
-
-VPATH += ..
-include $(ROOTPATH)/config.mk
-
-# to find errludattribute.[CH] and errludtarget.[CH] - they are generated
-#  by src/usr/targeting/common/xmltohb/xmltohb.pl
-vpath %.C ${GENDIR}
+# common objects between hostboot and runtime hostboot
+OBJS += errlentry.o
+OBJS += errlsctn.o
+OBJS += errlsctnhdr.o
+OBJS += errlprvt.o
+OBJS += errluh.o
+OBJS += errlud.o
+OBJS += errlsrc.o
+OBJS += errluserdetails.o
+OBJS += backtrace.o
+OBJS += errludtarget.o
+OBJS += errludstring.o
+OBJS += errludbacktrace.o
+OBJS += errludattribute.o
+OBJS += errludlogregister.o
+OBJS += errludcallout.o
+OBJS += $(if $(CONFIG_BMC_IPMI),errlmanager_common.o)

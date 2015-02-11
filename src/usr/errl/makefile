@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,22 +25,10 @@
 ROOTPATH = ../../..
 MODULE = errl
 
-OBJS += errlentry.o
+#include common ojects between hostboot and runtime hostboot
+include errl.mk
+
 OBJS += errlmanager.o
-OBJS += errlsctn.o
-OBJS += errlsctnhdr.o
-OBJS += errlprvt.o
-OBJS += errluh.o
-OBJS += errlud.o
-OBJS += errlsrc.o
-OBJS += errluserdetails.o
-OBJS += backtrace.o
-OBJS += errludtarget.o
-OBJS += errludstring.o
-OBJS += errludbacktrace.o
-OBJS += errludattribute.o
-OBJS += errludlogregister.o
-OBJS += errludcallout.o
 OBJS += errludprintk.o
 
 SUBDIRS += test.d
