@@ -1806,14 +1806,14 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
     //start off with the addresses being the same
     io_addrInfo.absAddr = io_addrInfo.relAddr;
 
+    //pull the FSI info out for this target
+    io_addrInfo.accessInfo = getFsiInfo( io_addrInfo.fsiTarg );
+
     //target matches master so the address is correct as-is
     if( io_addrInfo.fsiTarg == iv_master )
     {
         return NULL;
     }
-
-    //pull the FSI info out for this target
-    io_addrInfo.accessInfo = getFsiInfo( io_addrInfo.fsiTarg );
 
     TRACU1COMP( g_trac_fsi, "target=%.8X : Link Id=%.8X", TARGETING::get_huid(io_addrInfo.fsiTarg), io_addrInfo.accessInfo.linkid.id );
 
@@ -3011,17 +3011,26 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 void FsiDD::getFsiLinkInfo( TARGETING::Target* i_slave,
                             FSI::FsiLinkInfo_t& o_info )
 {
-    FsiChipInfo_t info = getFsiInfo( i_slave );
-    o_info.master = info.master;
-    o_info.type = info.type;
-    o_info.link = info.port;
-    o_info.cascade = info.cascade;
+    FsiAddrInfo_t addr_info( i_slave, 0x0 );
+    errlHndl_t tmp_err = genFullFsiAddr( addr_info );
+    if( tmp_err )
+    {
+        TRACFCOMP( g_trac_fsi, "Error getting FsiLinkInfo for %.8X", TARGETING::get_huid(i_slave) );
+        delete tmp_err;
+        return;
+    }
+
+    o_info.master = addr_info.accessInfo.master;
+    o_info.type = addr_info.accessInfo.type;
+    o_info.link = addr_info.accessInfo.port;
+    o_info.cascade = addr_info.accessInfo.cascade;
     o_info.mPort = 0;
-    if( info.master
-        && (info.master != iv_master )
-        && (getFsiInfo(info.master).flagbits.flipPort) )
+    if( addr_info.accessInfo.master
+        && (addr_info.accessInfo.master != iv_master )
+        && (getFsiInfo(addr_info.accessInfo.master).flagbits.flipPort) )
     {
         o_info.mPort = 1;
     }
+    o_info.baseAddr = addr_info.absAddr;
 }
 

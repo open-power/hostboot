@@ -183,6 +183,22 @@ enum sbeSeepromSide_t
 errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
                              sbeSeepromSide_t& o_bootSide);
 
+
+/** Information about PNOR Layout */
+struct PnorInfo_t
+{
+    uint32_t mmioOffset; //< Address of MMIO access
+    uint32_t norWorkarounds; //< NOR flash workarounds
+    uint32_t flashSize; //< Size of PNOR in bytes
+};
+
+/**
+ * @brief Retrieve some information about the PNOR/SFC hardware
+ *
+ * @param[out] o_pnorInfo Information about PNOR
+ */
+void getPnorInfo( PnorInfo_t& o_pnorInfo );
+
 }
 
 #endif

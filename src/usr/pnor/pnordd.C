@@ -191,6 +191,19 @@ bool usingL3Cache()
     return Singleton<PnorDD>::instance().usingL3Cache();
 }
 
+/**
+ * @brief Retrieve some information about the PNOR/SFC hardware
+ */
+void getPnorInfo( PnorInfo_t& o_pnorInfo )
+{
+    o_pnorInfo.mmioOffset = 0; //LPC_SFC_MMIO_OFFSET;//@fixme-need Prachi's code for this
+    o_pnorInfo.norWorkarounds =
+      Singleton<PnorDD>::instance().getNorWorkarounds();
+    o_pnorInfo.flashSize =
+      Singleton<PnorDD>::instance().getNorSize();
+}
+
+
 
 // Register PNORDD access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
@@ -864,4 +877,24 @@ errlHndl_t PnorDD::_eraseFlash( uint32_t i_addr )
     }
 
     return l_err;
+}
+
+/**
+ * @brief Retrieve bitstring of NOR workarounds
+ */
+uint32_t PnorDD::getNorWorkarounds( void )
+{
+    return iv_sfc->getNorWorkarounds();
+}
+
+/**
+ * @brief Retrieve size of NOR flash
+ */
+uint32_t PnorDD::getNorSize( void )
+{
+#ifdef CONFIG_PNOR_IS_32MB
+    return (32*MEGABYTE);
+#else //default to 64MB
+    return (64*MEGABYTE);
+#endif
 }

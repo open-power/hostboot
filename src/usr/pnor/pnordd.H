@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -80,6 +80,19 @@ class PnorDD
      *         false = PNOR DD not using L3 Cache for fake PNOR
      */
     bool usingL3Cache( );
+
+
+    /**
+     * @brief Retrieve bitstring of NOR workarounds
+     * @return NOR workarounds (see VendorWorkarounds in norflash.H)
+     */
+    uint32_t getNorWorkarounds( void );
+
+    /**
+     * @brief Retrieve size of NOR flash
+     * @return Size of PNOR in bytes
+     */
+    uint32_t getNorSize( void );
 
 
     // Enumeration values must match those in debug framework.
@@ -339,6 +352,7 @@ class PnorDD
      * @return Error from operation
      */
     errlHndl_t _eraseFlash( uint32_t i_address );
+
 
   private: // Variables
 

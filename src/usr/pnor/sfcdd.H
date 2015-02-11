@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -146,6 +146,15 @@ class SfcDD
     virtual void addFFDC( errlHndl_t& io_errhdl )
     {
         //do nothing by default
+    };
+
+    /**
+     * @brief Retrieve bitstring of NOR workarounds
+     * @return NOR workarounds (see VendorWorkarounds in norflash.H)
+     */
+    uint32_t getNorWorkarounds( void )
+    {
+        return iv_flashWorkarounds;
     };
 
     /**

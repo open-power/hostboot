@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -445,6 +447,94 @@ class FsiDDTest : public CxxTest::TestSuite
 
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Finish" );
     };
+
+    /**
+     * @brief FSI DD test - FSI Link Info
+     *        Spot check getFsiLinkInfo results
+     */
+    void test_getFsiLinkInfo(void)
+    {
+        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_getFsiLinkInfo> Start" );
+
+        enum {
+            PROC0,
+            CENTAUR4,
+            NUM_TARGETS
+        };
+        TARGETING::Target* fsi_targets[NUM_TARGETS];
+        for( size_t x = 0; x < NUM_TARGETS; x++ )
+        {
+            fsi_targets[x] = NULL;
+        }
+
+        TARGETING::Target* fsi_target = NULL;
+
+        // master processor target
+        TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+        epath.addLast(TARGETING::TYPE_SYS,0);
+        epath.addLast(TARGETING::TYPE_NODE,0);
+        epath.addLast(TARGETING::TYPE_PROC,0);
+        fsi_target = TARGETING::targetService().toTarget(epath);
+        fsi_targets[PROC0] = fsi_target;
+
+        // local centaur target (physical:sys-0/node-0/membuf-4)
+        epath.removeLast();
+        epath.addLast(TARGETING::TYPE_MEMBUF,4);
+        fsi_target = TARGETING::targetService().toTarget(epath);
+        fsi_targets[CENTAUR4] = fsi_target;
+
+
+
+        // loop through all of the targets we defined to
+        //  check the data
+        for( size_t x = 0; x < NUM_TARGETS; x++ )
+        {
+            if( fsi_targets[x] == NULL )
+            {
+                continue;
+            }
+
+            // Get the FSI port info for this target
+            TARGETING::FSI_MASTER_TYPE type =
+              fsi_targets[x]->getAttr<TARGETING::ATTR_FSI_MASTER_TYPE>();
+            uint8_t slave_port =
+              fsi_targets[x]->getAttr<TARGETING::ATTR_FSI_MASTER_PORT>();
+            TARGETING::EntityPath masterpath =
+              fsi_targets[x]->getAttr<TARGETING::ATTR_FSI_MASTER_CHIP>();
+            TARGETING::Target* master =
+              TARGETING::targetService().toTarget(masterpath);
+            uint8_t master_port = 0;
+            if( type != TARGETING::FSI_MASTER_TYPE_NO_MASTER )
+            {
+                master_port =
+                  master->getAttr<TARGETING::ATTR_FSI_MASTER_PORT>()+1;
+            }
+
+            TRACFCOMP( g_trac_fsi, "sport=%d, mport=%d, master=%.8X, type=%d",slave_port,master_port, TARGETING::get_huid(master), master_port);
+            // Compute the offset
+            //   CMFSI ports start at 0x040000 and increment by 0x008000
+            //   MFSI ports start at 0x080000 and increment by 0x080000
+            //    (local CMFSI ports have no MFSI offset)
+            uint32_t offset = (master_port * 0x080000);
+            if( type == TARGETING::FSI_MASTER_TYPE_CMFSI )
+            {
+                offset += ((slave_port * 0x008000) + 0x040000);
+            }
+
+            // Now call the interface we want to test
+            FSI::FsiLinkInfo_t linkinfo;
+            FSI::getFsiLinkInfo( fsi_targets[x], linkinfo );
+
+            // Compare the results
+            TRACFCOMP( g_trac_fsi, "FsiDDTest::test_getFsiLinkInfo> Data for %.8X: exp=%.6X, act=%.6X", TARGETING::get_huid(fsi_targets[x]), offset, linkinfo.baseAddr );
+            if( linkinfo.baseAddr != offset )
+            {
+                TS_FAIL( "FsiDDTest::test_getFsiLinkInfo> Mismatch for %.8X: exp=%.6X, act=%.6X", TARGETING::get_huid(fsi_targets[x]), offset, linkinfo.baseAddr );
+            }
+        }
+
+        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_getFsiLinkInfo> End" );
+    }
 };     
 
 

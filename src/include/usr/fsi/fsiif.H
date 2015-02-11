@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -109,10 +111,11 @@ struct FsiLinkInfo_t
     uint8_t link; ///< Which link is this chip hanging off of
     uint8_t cascade; ///< Slave cascade position
     uint8_t mPort; ///< FSI Master port (0=A,1=B)
+    uint32_t baseAddr; ///< Base FSI Address for this chip
 
     FsiLinkInfo_t() :
       master(NULL), type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
-    link(0xFF), cascade(0), mPort(0)
+    link(0xFF), cascade(0), mPort(0), baseAddr(UINT32_MAX)
     {};
 };
 
