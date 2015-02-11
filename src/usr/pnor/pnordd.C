@@ -46,6 +46,7 @@
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include "pnordd.H"
+#include "pnor_common.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <sys/time.h>
@@ -196,7 +197,7 @@ bool usingL3Cache()
  */
 void getPnorInfo( PnorInfo_t& o_pnorInfo )
 {
-    o_pnorInfo.mmioOffset = 0; //LPC_SFC_MMIO_OFFSET;//@fixme-need Prachi's code for this
+    o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET|LPC_FW_SPACE;
     o_pnorInfo.norWorkarounds =
       Singleton<PnorDD>::instance().getNorWorkarounds();
     o_pnorInfo.flashSize =

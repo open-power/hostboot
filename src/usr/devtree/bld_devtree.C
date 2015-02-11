@@ -405,6 +405,113 @@ void add_i2c_info( const TARGETING::Target* i_targ,
 
 }
 
+void bld_getSideInfo(PNOR::SideId i_side,
+                     uint32_t     o_TOCaddress[2],
+                     uint8_t    & o_count,
+                     bool       & o_isGolden)
+{
+    errlHndl_t  errhdl = NULL;
+    PNOR::SideInfo_t  l_info;
+
+    o_count = 0;
+    o_isGolden = false;
+
+    errhdl = getSideInfo (i_side, l_info);
+    if (!errhdl)
+    {
+        // return the valid TOC offsets & count of valid TOCs
+        if (PNOR::INVALID_OFFSET != l_info.primaryTOC)
+        {
+            o_TOCaddress[o_count++] = l_info.primaryTOC;
+        }
+        if (PNOR::INVALID_OFFSET != l_info.backupTOC)
+        {
+            o_TOCaddress[o_count++] = l_info.backupTOC;
+        }
+        o_isGolden      = l_info.isGolden;
+    }
+    else
+    {
+        // commit error and return 0 TOC offsets
+        errlCommit(errhdl, DEVTREE_COMP_ID);
+    }
+
+    return;
+}
+
+void bld_fdt_pnor(devTree *   i_dt,
+                  dtOffset_t  i_parentNode)
+{
+    do
+    {
+        uint32_t l_active[2]    = {PNOR::INVALID_OFFSET,PNOR::INVALID_OFFSET};
+        uint32_t l_golden[2]    = {PNOR::INVALID_OFFSET,PNOR::INVALID_OFFSET};
+        uint8_t  l_count = 0;
+        bool     l_isGolden = false;
+        bool     l_goldenFound = false;
+        uint8_t  l_goldenCount = 0;
+        PNOR::PnorInfo_t l_pnorInfo;
+
+        //Get pnor address and size
+        getPnorInfo (l_pnorInfo);
+
+        dtOffset_t l_pnorNode = i_dt->addNode(i_parentNode,
+                                              "pnor",
+                                              l_pnorInfo.mmioOffset);
+
+        const uint8_t l_isaLinkage = 0; // 0==Mem
+        uint32_t pnor_prop[3] = {l_isaLinkage,
+                                 l_pnorInfo.mmioOffset,
+                                 l_pnorInfo.flashSize};
+        i_dt->addPropertyCells32(l_pnorNode, "reg", pnor_prop, 3);
+
+        //Add Working/Active parition
+        bld_getSideInfo(PNOR::WORKING,l_active,l_count,l_isGolden);
+        if (l_count) // valid TOCs present
+        {
+            i_dt->addPropertyCells32(l_pnorNode,
+                                 "active-image-tocs", l_active, l_count);
+            // capture golden
+            if (l_isGolden)
+            {
+                l_golden[0] = l_active[0];
+                l_golden[1] = l_active[1];
+                l_goldenCount = l_count;
+                l_goldenFound = true;
+            }
+        }
+
+#if CONFIG_PNOR_TWO_SIDE_SUPPORT
+        //Add Alternate parition
+        uint32_t l_alternate[2] = {PNOR::INVALID_OFFSET,PNOR::INVALID_OFFSET};
+
+        bld_getSideInfo(PNOR::ALTERNATE,l_alternate,l_count,l_isGolden);
+        if (l_count) // valid TOCs present
+        {
+            i_dt->addPropertyCells32(l_pnorNode,
+                                 "alternate-image-tocs",l_alternate,l_count);
+            // capture golden
+            if (l_isGolden)
+            {
+                l_golden[0] = l_alternate[0];
+                l_golden[1] = l_alternate[1];
+                l_goldenCount = l_count;
+                l_goldenFound = true;
+            }
+        }
+#endif
+
+        //Include golden if there is one
+        if (l_goldenFound)
+        {
+            i_dt->addPropertyCells32(l_pnorNode,
+                                 "golden-image-tocs",l_golden,l_goldenCount);
+        }
+
+    } while (0);
+
+    return;
+}
 
 void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
                     const TARGETING::Target * i_pProc, uint32_t i_chipid)
@@ -487,6 +594,8 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
         i_dt->addPropertyCells32(lpcNode, "reg", lpc_prop, 2);
         i_dt->addPropertyCell32(lpcNode, "#address-cells", 2);
         i_dt->addPropertyCell32(lpcNode, "#size-cells", 1);
+
+        bld_fdt_pnor (i_dt, lpcNode);
 
     }
 
@@ -907,6 +1016,7 @@ void load_hbrt_image(uint64_t& io_address)
         errlCommit(l_errl, DEVTREE_COMP_ID);
     }
 }
+
 
 errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 {

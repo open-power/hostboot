@@ -120,6 +120,11 @@ struct SideInfo_t
     uint64_t hbbMmioOffset; /**< HBB MMIO Offset associated with hbbAddress*/
 };
 
+enum
+{
+    INVALID_OFFSET = 0xFFFFFFF,  // Invalid primary or alternate TOC
+};
+
 /**
  * @brief Returns information about a given side of pnor
  *

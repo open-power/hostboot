@@ -61,7 +61,6 @@ namespace PNOR {
         SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
         FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
         TOC_SIZE = 0x8000,
-        INVALID_OFFSET = 0xFFFFFFF,
     };
 
     /**
