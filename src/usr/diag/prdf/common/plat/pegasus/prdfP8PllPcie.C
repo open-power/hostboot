@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <prdfGlobal_common.H>
 #include <prdfP8DataBundle.H>
 #include <UtilHash.H>
-#include <prdfPllUtils.H>
+#include <prdfP8PllPcie.H>
 #include <prdfFsiCapUtil.H>
 
 using namespace TARGETING;
@@ -53,15 +53,43 @@ using namespace PlatServices;
 namespace Proc
 {
 
-enum
+int32_t isPllUnlockCausedByPciOscFo( ExtensibleChip * i_chip,
+                                     uint32_t i_activeOscPos,
+                                     bool & o_pciOscSwitchCausedPllError )
 {
-    // All of the chiplet PLL_ERROR bits below
-    // are collected in this TP_LFIR bit
-    PLL_DETECT_P8 = 19,
-    // Chiplet PLL_ERROR mask and error bits
-    PLL_ERROR_MASK  = 12,
-    PLL_ERROR_BIT   = 25,
-};
+    #define PRDF_FUNC "Proc::isPllUnlockCausedByPciOscFo "
+    int32_t o_rc = SUCCESS;
+    o_pciOscSwitchCausedPllError = false;
+
+    #ifndef __HOSTBOOT_MODULE
+
+    do
+    {
+        uint32_t u32Data = 0;
+        o_rc = getCfam( i_chip, 0x00002819, u32Data );
+
+        if( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"PCI Status register Read failed 0x%08x",
+                      i_chip->GetId() );
+            break;
+        }
+
+        uint32_t pciOscMask = ( 0 == i_activeOscPos ) ? 0x00000C00 : 0x00000300;
+
+        if( !(u32Data & pciOscMask) )
+        {
+            // PLL unlock error has occurred due to problem in secondary or
+            // backup pci osc.
+            o_pciOscSwitchCausedPllError = true;
+        }
+    }while(0);
+
+    #endif
+    #undef PRDF_FUNC
+
+    return o_rc;
+}
 
 /**
   * @brief Query the PLL chip for a PCI PLL error
@@ -211,13 +239,18 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
             rc |= tmpRC;
         }
 
-        pciErrReg->ClearBit(PLL_ERROR_BIT);
-        tmpRC = pciErrReg->Write();
-        if (tmpRC != SUCCESS)
+        if( pciErrReg->IsBitSet( PLL_ERROR_BIT ) )
         {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG write failed"
-                     "for chip: 0x%08x", i_chip->GetId());
-            rc |= tmpRC;
+            pciErrReg->clearAllBits();
+            pciErrReg->SetBit(PLL_ERROR_BIT);
+            tmpRC = pciErrReg->Write();
+
+            if ( SUCCESS != tmpRC )
+            {
+                PRDF_ERR( PRDF_FUNC"Write() failed on PCI Error register: "
+                          "proc=0x%08x", i_chip->GetId() );
+                rc |= tmpRC;
+            }
         }
 
         // Clear TP_LFIR
@@ -376,6 +409,23 @@ int32_t CalloutPllIo( ExtensibleChip * i_chip,
     do
     {
         uint32_t oscPos = getIoOscPos( i_chip, io_sc );
+        bool pllUnlockDuetoOscSwitch;
+        rc = isPllUnlockCausedByPciOscFo( i_chip, oscPos,
+                                          pllUnlockDuetoOscSwitch );
+
+        if( SUCCESS != rc )
+        {
+            PRDF_ERR( PRDF_FUNC"PCI Osc switch analysis failed" );
+            break;
+        }
+
+        if( pllUnlockDuetoOscSwitch )
+        {
+            // PLL unlock has occurred due to PCI OSC switchover. We can ignore
+            // this error. It shall be handled seprately as PC OSC switchover
+            // event.
+            break;
+        }
 
         // oscPos will be checked inside getClockId and in case
         // a connected osc is not found, will use the proc target
@@ -416,5 +466,49 @@ int32_t CalloutPllIo( ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE( Proc, CalloutPllIo );
 
 } // end namespace Proc
+
+namespace PLL
+{
+
+uint32_t getIoOscPos( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[PLL::getIoOscPos] "
+    uint32_t o_oscPos = MAX_PCIE_OSC_PER_NODE;
+
+    do
+    {
+        int32_t rc = SUCCESS;
+
+        SCAN_COMM_REGISTER_CLASS * pcieOscSwitchReg =
+                i_chip->getRegister("PCIE_OSC_SWITCH");
+
+        rc = pcieOscSwitchReg->Read();
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC"PCIE_OSC_SWITCH read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
+
+        // [ 16 ] == 1    ( OSC 0 is active )
+        // [ 16 ] == 0    ( OSC 1 is active )
+        if(pcieOscSwitchReg->IsBitSet(16))
+        {
+            o_oscPos = 0;
+        }
+        else
+        {
+            o_oscPos = 1;
+        }
+
+    } while(0);
+
+    return o_oscPos;
+
+    #undef PRDF_FUNC
+}
+
+}// namespace PLL
 
 } // end namespace PRDF

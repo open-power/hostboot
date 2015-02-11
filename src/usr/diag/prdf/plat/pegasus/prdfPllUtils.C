@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,13 +25,12 @@
 
 /** @file prdfPllUtils.C */
 
-#include <prdfPllUtils.H>
-
-#include <prdfPlatServices.H>
+#include <prdfExtensibleChip.H>
 #include <prdfTrace.H>
-#include <prdfGlobal.H>
 #include <UtilHash.H>
+#include <prdfPluginDef.H>
 #include <iipServiceDataCollector.h>
+#include <prdfPciOscSwitchDomain.H>
 
 using namespace TARGETING;
 
@@ -40,49 +39,72 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace PLL
+namespace Proc
 {
 
-uint32_t getIoOscPos( ExtensibleChip * i_chip,
-                      STEP_CODE_DATA_STRUCT & io_sc)
+/**
+ * @brief queries if there is PCI osc error.
+ * @param   i_procChip       P8 proc chip.
+ * @param   o_pciOscError    PCI Osc error status.
+ * @return  SUCCESS if query is successful FAIL otherwise.
+ */
+int32_t  queryPciOscErr( ExtensibleChip * i_procChip,
+                         bool & o_pciClkSwitchOver )
 {
-    #define PRDF_FUNC "[PLL::getIoOscPos] "
-    uint32_t o_oscPos = MAX_PCIE_OSC_PER_NODE;
+    #define PRDF_FUNC "[Proc::queryPciOscErr] "
 
-    do
-    {
-        int32_t rc = SUCCESS;
+    int32_t o_rc = FAIL;
+    o_pciClkSwitchOver = false;
+    PRDF_TRAC( PRDF_FUNC"PCI Osc Switch over not expected during hostboot "
+               "HUID: 0x%08x", i_procChip->GetId() );
 
-        SCAN_COMM_REGISTER_CLASS * pcieOscSwitchReg =
-                i_chip->getRegister("PCIE_OSC_SWITCH");
+    return o_rc;
+    #undef PRDF_FUNC
+}PRDF_PLUGIN_DEFINE( Proc, queryPciOscErr );
 
-        rc = pcieOscSwitchReg->Read();
-        if (rc != SUCCESS)
-        {
-            PRDF_ERR(PRDF_FUNC"PCIE_OSC_SWITCH read failed"
-                     "for 0x%08x", i_chip->GetId());
-            break;
-        }
+//------------------------------------------------------------------------------
 
-        // [ 16 ] == 1    ( OSC 0 is active )
-        // [ 16 ] == 0    ( OSC 1 is active )
-        if(pcieOscSwitchReg->IsBitSet(16))
-        {
-            o_oscPos = 0;
-        }
-        else
-        {
-            o_oscPos = 1;
-        }
+/**
+ * @brief analyzes PCI osc error and switchover.
+ * @param   i_procChip       P8 proc chip.
+ * @param   PciOscConnList   PCI osc error data.
+ * @return  SUCCESS if analysis is successful FAIL otherwise.
+ */
+int32_t analyzePciClkFailover( ExtensibleChip * i_procChip,
+                               PciOscConnList & o_pciOscSwitchData )
+{
+    #define PRDF_FUNC "Proc::analyzePciClkFailover "
 
-    } while(0);
-
-    return o_oscPos;
+    int32_t o_rc = FAIL;
+    PRDF_TRAC( PRDF_FUNC"PCI Osc Switch over not expected during hostboot "
+               "HUID: 0x%08x", i_procChip->GetId() );
+    return o_rc;
 
     #undef PRDF_FUNC
-}
+}PRDF_PLUGIN_DEFINE( Proc, analyzePciClkFailover );
 
-} // namespace PLL
+//------------------------------------------------------------------------------
+
+/**
+ * @brief   cleans up PCI osc error data.
+ * @param   i_chip           P8 proc chip.
+ * @param   i_faultyOscPos   position of faulty PCI osc.
+ * @return  SUCCESS if cleanup is successful FAIL otherwise.
+ */
+int32_t clearPciOscFailOver( ExtensibleChip * i_procChip,
+                             PciOscConnList & i_oscData )
+{
+    #define PRDF_FUNC "Proc::clearPciOscFailOver "
+
+    int32_t o_rc = FAIL;
+    PRDF_TRAC( PRDF_FUNC"PCI Osc Switch over not expected during hostboot "
+               "HUID: 0x%08x", i_procChip->GetId() );
+    return o_rc;
+
+    #undef PRDF_FUNC
+}PRDF_PLUGIN_DEFINE( Proc, clearPciOscFailOver );
+
+} // end namespace Proc
 
 } // end namespace PRDF
 

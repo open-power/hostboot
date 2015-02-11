@@ -81,9 +81,6 @@ prd_obj += prdfDumpResolution.o
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
-# plat/pegasus/ (non-rule plugin related)
-prd_obj += prdfPllUtils.o
-
 # plat/pegasus/ (rule plugin related)
 prd_rule_plugin += prdfP8TodPlugins.o
 prd_rule_plugin += prdfPlatCenMemUtils.o

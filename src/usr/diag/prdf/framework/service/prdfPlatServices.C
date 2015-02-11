@@ -138,7 +138,6 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
 //##############################################################################
 
 int32_t getCfam( ExtensibleChip * i_chip,
-                 STEP_CODE_DATA_STRUCT & io_sc,
                  const uint32_t i_addr,
                  uint32_t & o_data)
 {

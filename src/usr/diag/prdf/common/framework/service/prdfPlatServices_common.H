@@ -464,13 +464,11 @@ mss_MaintCmdWrapper * createIncAddrMssCmd( TARGETING::TargetHandle_t i_mba );
 /**
  * @brief   get cfam data
  * @param   i_chip   Extensible chip
- * @param   i_sc     service data collector
  * @param   i_addr   address
  * @param   o_data   returned data
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t getCfam( ExtensibleChip * i_chip,
-                 STEP_CODE_DATA_STRUCT & io_sc,
                  const uint32_t i_addr,
                  uint32_t & o_data);
 

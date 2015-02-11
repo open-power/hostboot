@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,8 +39,8 @@
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <UtilHash.H>
+#include <prdfP8PllPcie.H>
 #include <prdfP8ProcMbCommonExtraSig.H>
-#include <prdfPllUtils.H>
 
 using namespace TARGETING;
 

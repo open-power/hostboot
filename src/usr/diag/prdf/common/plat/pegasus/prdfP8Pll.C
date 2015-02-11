@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <iipSystem.h>
 #include <prdfGlobal_common.H>
 #include <prdfP8DataBundle.H>
-#include <prdfPllUtils.H>
+#include <prdfP8PllPcie.H>
 #include <prdfFsiCapUtil.H>
 #include <UtilHash.H>
 
@@ -53,22 +53,6 @@ using namespace PlatServices;
 
 namespace Proc
 {
-
-
-enum
-{
-    // All of the chiplet PLL_ERROR bits below
-    // are collected in this TP_LFIR bit
-    PLL_DETECT_P8 = 19,
-    // Chiplet PLL_ERROR mask and error bits
-    PLL_ERROR_MASK  = 12,
-    PLL_ERROR_BIT   = 25,
-    PB_DMI_RIGHT_PLL_ERROR = 25, // Venice only
-    PB_DMI_LEFT_PLL_ERROR  = 26, // Venice and Murano
-    // PCB Slave internal parity error
-    PARITY_ERROR_MASK  = 8,
-    PARITY_ERROR_BIT   = 4,
-};
 
 /**
   * @brief this is to get a list of pll error

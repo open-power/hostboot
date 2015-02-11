@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
 
     uint32_t u32Data = 0;
 
-    int32_t rc = getCfam( i_chip, io_sc, 0x00001007, u32Data );
+    int32_t rc = getCfam( i_chip, 0x00001007, u32Data );
 
     if ( SUCCESS == rc )
     {
@@ -63,7 +63,7 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
     if( TYPE_PROC == getTargetType(i_chip->GetChipHandle()) )
     {
         uint32_t fsiGp7 = 0;
-        rc = getCfam( i_chip, io_sc, 0x2816, fsiGp7 );
+        rc = getCfam( i_chip, 0x2816, fsiGp7 );
         if ( SUCCESS == rc )
         {
             BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &fsiGp7);

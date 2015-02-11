@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <prdfPlatServices.H>
 #include <iipSystem.h>
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
+#include <prdfPciOscSwitchDomain.H>
 
 using namespace TARGETING;
 
@@ -116,6 +117,8 @@ errlHndl_t PegasusConfigurator::build()
     McsDomain    * l_mcsDomain    = new McsDomain(    MCS_DOMAIN    );
     MembufDomain * l_membufDomain = new MembufDomain( MEMBUF_DOMAIN );
     MbaDomain    * l_mbaDomain    = new MbaDomain(    MBA_DOMAIN    );
+    PciOscSwitchDomain * l_pciSwitchDomain =
+                            new PciOscSwitchDomain ( PCI_OSC_SWITCH_DOMAIN );
 
     uint32_t l_maxNodeCount = _getMaxNumNodes();
     // PLL domains
@@ -140,6 +143,9 @@ errlHndl_t PegasusConfigurator::build()
                                &l_fabricPllDomains, &l_pciePllDomains );
         if ( NULL != errl ) break;
 
+        errl = addDomainChips( TYPE_PROC, l_pciSwitchDomain );
+        if ( NULL != errl ) break;
+
         errl = addDomainChips( TYPE_EX, l_exDomain );
         if ( NULL != errl ) break;
 
@@ -156,6 +162,8 @@ errlHndl_t PegasusConfigurator::build()
 
         // Add domains to domain list. NOTE: Order is important because this is
         // the order the domains will be analyzed.
+
+        sysDmnLst.push_back( l_pciSwitchDomain );
 
         addPllDomainsToSystem( l_fabricPllDomains,
                                l_pciePllDomains,

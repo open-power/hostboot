@@ -73,6 +73,7 @@ prd_obj += iipSystem.o
 prd_obj += prdfExtensibleDomain.o
 prd_obj += prdfFabricDomain.o
 prd_obj += prdfParentDomain.o
+prd_obj += prdfPciOscSwitchDomain.o
 prd_obj += prdfPllDomain.o
 prd_obj += prdfRuleChipDomain.o
 
@@ -149,6 +150,7 @@ prd_rule_plugin += prdfP8Mcs.o
 prd_rule_plugin += prdfP8Pll.o
 prd_rule_plugin += prdfP8PllPcie.o
 prd_rule_plugin += prdfP8Proc.o
+prd_rule_plugin += prdfPllUtils.o
 
 # common/plugins/ (errl plugin related)
 prd_obj += prdfParserUtils.o

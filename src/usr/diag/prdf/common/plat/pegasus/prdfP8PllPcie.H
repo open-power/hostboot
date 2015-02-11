@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfPllUtils.H $        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfP8PllPcie.H $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PLL_UTILS_H
-#define PLL_UTILS_H
+#ifndef __prdfP8PllPcie_H
+#define __prdfP8PllPcie_H
 
-/** @file  prdfPllUtils.H
+/** @file  prdfP8PllPcie.H
  *  @brief Utility functions for PLL domain.
  */
 
@@ -48,8 +48,27 @@ namespace PLL
 uint32_t getIoOscPos( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & io_sc );
 
-} // end namespace Proc
+} // end namespace PLL
 
+namespace Proc
+{
+
+enum
+{
+    // All of the chiplet PLL_ERROR bits below
+    // are collected in this TP_LFIR bit
+    PLL_DETECT_P8 = 19,
+    // Chiplet PLL_ERROR mask and error bits
+    PLL_ERROR_MASK  = 12,
+    PLL_ERROR_BIT   = 25,
+    PB_DMI_RIGHT_PLL_ERROR = 25, // Venice only
+    PB_DMI_LEFT_PLL_ERROR  = 26, // Venice and Murano
+    // PCB Slave internal parity error
+    PARITY_ERROR_MASK  = 8,
+    PARITY_ERROR_BIT   = 4,
+};
+
+}//end namespace Proc
 } // end namespace PRDF
 
-#endif // PHB_CONFIG_H
+#endif // __prdfP8PllPcie_H

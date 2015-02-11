@@ -183,6 +183,12 @@ chip Proc
         capture     group PllFIRs;
     };
 
+    register OSCERR_MASK
+    {
+        name        "EH.TPCHIP.TPC.ITR.OSCERR.OSCERR_MASK";
+        scomaddr    0x0102001A;
+        capture     group PllFIRs;
+    };
 };
 
  ##############################################################################
