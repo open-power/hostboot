@@ -1,0 +1,142 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/ipmi/runtime/rt_ipmirp.C $                            */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file rt_ipmirp.C
+ * @brief IPMI resource provider definition for runtime
+ */
+
+#include "../ipmirp.H"
+#include "../ipmiconfig.H"
+#include "../ipmidd.H"
+#include <ipmi/ipmi_reasoncodes.H>
+#include <ipmi/ipmiif.H>
+
+#include <config.h>
+#include <sys/task.h>
+#include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
+#include <sys/vfs.h>
+
+#include <targeting/common/commontargeting.H>
+#include <kernel/ipc.H>
+#include <arch/ppc.H>
+#include <errl/errlmanager.H>
+#include <sys/time.h>
+#include <sys/misc.h>
+#include <errno.h>
+#include <runtime/interface.h>
+
+trace_desc_t * g_trac_ipmi;
+#define IPMI_TRAC(printf_string,args...) \
+    TRACFCOMP(g_trac_ipmi,"rt: "printf_string,##args)
+
+namespace IPMI
+{
+    // TODO RTC: 124099 move to a _hb attribute
+    // ATTR_IPMI_MAX_BUFFER_SEND_SIZE
+    static const size_t g_max_buffer = 61;
+    size_t max_buffer(void)
+    {
+        return g_max_buffer;
+    }
+
+    ///
+    /// @brief  Synchronus message send
+    ///
+    errlHndl_t sendrecv(const IPMI::command_t& i_cmd,
+                        IPMI::completion_code& o_completion_code,
+                        size_t& io_len, uint8_t*& io_data)
+    {
+        errlHndl_t err = NULL;
+        int rc = 0;
+
+        // if the buffer is too large this is a programming error.
+        assert(io_len <= g_max_buffer);
+
+        IPMI_TRAC("calling sync %x:%x  len=%d",
+            i_cmd.first, i_cmd.second, io_len);
+
+        if(g_hostInterfaces && g_hostInterfaces->ipmi_msg)
+        {
+            size_t l_len = g_max_buffer; // max size the BMC can return
+            uint8_t *l_data = new uint8_t[l_len];
+
+            rc = g_hostInterfaces->ipmi_msg(
+                        i_cmd.first, i_cmd.second,
+                        io_data, io_len,
+                        l_data, &l_len);
+
+            if(rc)
+            {
+                IPMI_TRAC(ERR_MRK
+                          "Failed sending ipmi msg (%x:%x) to bmc rc: %d. ",
+                          i_cmd.first, i_cmd.second, rc);
+
+                /* @errorlog tag
+                 * @errortype           ERRL_SEV_UNRECOVERABLE
+                 * @moduleid            IPMI::MOD_IPMIRT
+                 * @reasoncode          IPMI::RC_INVALID_SENDRECV
+                 * @userdata1[0:31]     rc from ipmi_msg()
+                 * @userdata1[32:46]    netfn of failing msg
+                 * @userdata1[47:63]    cmd of failing msg
+                 * @userdata2           length of failing msg
+                 * @devdesc             ipmi_msg() failed
+                 * @custdesc            Firmware error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            IPMI::MOD_IPMIRT,
+                            IPMI::RC_INVALID_SENDRECV,
+                            TWO_UINT32_TO_UINT64(rc,
+                                TWO_UINT16_TO_UINT32(i_cmd.first, i_cmd.second)),
+                            io_len,
+                            true);
+                err->collectTrace(IPMI_COMP_NAME);
+                delete[] io_data;
+                io_data = NULL;
+                io_len = 0;
+            }
+            else
+            {
+                // clean up the memory for the caller
+                o_completion_code = static_cast<IPMI::completion_code>(io_data[0]);
+
+                // now need to create the buffer to return
+                io_len = l_len - 1; // get rid of the completion_code
+                delete[] io_data;
+                io_data = new uint8_t[io_len];
+                memcpy(io_data, &l_data[1], io_len); // data after CC
+            }
+            delete[] l_data;
+        }
+        else
+        {
+            IPMI_TRAC(ERR_MRK
+                      "Host interfaces not initialized; ipmi msg not sent. ");
+        }
+
+        return err;
+    } // sendrecv
+};

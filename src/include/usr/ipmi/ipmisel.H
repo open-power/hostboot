@@ -202,8 +202,26 @@ namespace IPMISEL
             delete eSelExtra;
         }
     };
+
+    /**
+     * @brief parse the msg and call send_esel to send the esel (handles if
+     * the SEL reservation is lost)
+     * @param[in] i_msg
+     */
+    void process_esel(msg_t *i_msg);
+
+    /**
+     * @brief do the actual ipmi calls to send the esel data to the bmc
+     * @param[in] i_data  esel data
+     * @param[in] o_err   any error generated during the send
+     * @param[in] o_cc    ipmi completion code from last sendrecv
+     */
+    void send_esel(IPMISEL::eselInitData * i_data,
+          errlHndl_t &o_err, IPMI::completion_code &o_cc);
+
 } // namespace IPMISEL
 
+#ifndef __HOSTBOOT_RUNTIME
 class IpmiSEL
 {
     public:
@@ -238,27 +256,12 @@ class IpmiSEL
        */
       void execute(void);
 
-      /**
-       * @brief parse the msg and call send_esel to send the esel (handles if
-       * the SEL reservation is lost)
-       * @param[in] i_msg
-       */
-      void process_esel(msg_t *i_msg) const;
-
-      /**
-       * @brief do the actual ipmi calls to send the esel data to the bmc
-       * @param[in] i_data  esel data
-       * @param[in] o_err   any error generated during the send
-       * @param[in] o_cc    ipmi completion code from last sendrecv
-       */
-      void send_esel(IPMISEL::eselInitData * i_data,
-            errlHndl_t &o_err, IPMI::completion_code &o_cc) const;
-
       msg_q_t           iv_msgQ;      //!< ipmi message queue
 
       //Disallow copying of this class.
       IpmiSEL& operator=(const IpmiSEL&);
       IpmiSEL(const IpmiSEL&);
 };
+#endif
 
 #endif

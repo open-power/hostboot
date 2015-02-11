@@ -865,7 +865,7 @@ namespace IPMI
         IPMI_TRAC("queuing sync %x:%x", ipmi_msg->iv_netfun, ipmi_msg->iv_cmd);
         int rc = msg_sendrecv(mq, ipmi_msg->iv_msg);
 
-        // If the kernel didn't give a hassle about he message, check to see if
+        // If the kernel didn't give a hassle about the message, check to see if
         // there was an error reported back from the other end of the queue. If
         // this message made it to the other end of the queue, then our memory
         // (io_data) is in the proper state.

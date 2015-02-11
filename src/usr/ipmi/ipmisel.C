@@ -44,125 +44,7 @@ extern trace_desc_t * g_trac_ipmi;
 #define IPMI_TRAC(printf_string,args...) \
     TRACFCOMP(g_trac_ipmi,"sel: "printf_string,##args)
 
-namespace IPMISEL
-{
-    void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-                  uint32_t i_eid, uint8_t i_eventDirType,
-                  uint8_t i_sensorType, uint8_t i_sensorNumber)
-    {
-        IPMI_TRAC(ENTER_MRK "sendESEL()");
-
-        // one message queue to the SEL thread
-        static msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
-
-        msg_t *msg = msg_allocate();
-        msg->type = MSG_SEND_ESEL;
-        msg->data[0] = i_eid;
-
-        // create the sel record of information
-        IPMISEL::selRecord l_sel;
-        l_sel.record_type = IPMISEL::record_type_ami_esel;
-        l_sel.generator_id = IPMISEL::generator_id_ami;
-        l_sel.evm_format_version = IPMISEL::format_ipmi_version_2_0;
-        l_sel.sensor_type = i_sensorType;
-        l_sel.sensor_number = i_sensorNumber;
-        l_sel.event_dir_type = i_eventDirType;
-        l_sel.event_data1 = IPMISEL::event_data1_ami;
-
-        eselInitData *eselData =
-            new eselInitData(&l_sel, i_eselData, i_dataSize);
-
-        msg->extra_data = eselData;
-
-        //Send the msg to the sel thread
-        int rc = msg_send(mq,msg);
-        if(rc)
-        {
-            IPMI_TRAC(ERR_MRK "Failed (rc=%d) to send message",rc);
-            delete eselData;
-        }
-        IPMI_TRAC(EXIT_MRK "sendESEL");
-        return;
-    } // sendESEL
-} // IPMISEL
-
-
-/**
- * @brief Constructor
- */
-IpmiSEL::IpmiSEL(void):
-    iv_msgQ(msg_q_create())
-{
-    IPMI_TRAC(ENTER_MRK "IpmiSEL ctor");
-    task_create(&IpmiSEL::start,NULL);
-}
-
-/**
- * @brief Destructor
- */
-IpmiSEL::~IpmiSEL(void)
-{
-    msg_q_destroy(iv_msgQ);
-}
-
-void* IpmiSEL::start(void* unused)
-{
-    Singleton<IpmiSEL>::instance().execute();
-    return NULL;
-}
-
-/**
- * @brief Entry point of the sel ipmi thread
- */
-//@todo: RTC 119832
-void IpmiSEL::execute(void)
-{
-    //Mark as an independent daemon so if it crashes we terminate.
-    task_detach();
-
-    // Register shutdown events with init service.
-    //      Done at the "end" of shutdown processesing.
-    //      This will flush out any IPMI messages which were sent as
-    //      part of the shutdown processing. We chose MBOX priority
-    //      as we don't want to accidentally get this message after
-    //      interrupt processing has stopped in case we need intr to
-    //      finish flushing the pipe.
-    INITSERVICE::registerShutdownEvent(iv_msgQ, IPMISEL::MSG_STATE_SHUTDOWN,
-                                       INITSERVICE::MBOX_PRIORITY);
-
-    while(true)
-    {
-        msg_t* msg = msg_wait(iv_msgQ);
-
-        const IPMISEL::msg_type msg_type =
-            static_cast<IPMISEL::msg_type>(msg->type);
-
-        // Invert the "default" by checking here. This allows the compiler
-        // to warn us if the enum has an unhadled case but still catch
-        // runtime errors where msg_type is set out of bounds.
-        assert(msg_type <= IPMISEL::MSG_LAST_TYPE,
-               "msg_type %d not handled", msg_type);
-
-        switch(msg_type)
-        {
-            case IPMISEL::MSG_SEND_ESEL:
-                process_esel(msg);
-                //done with msg
-                msg_free(msg);
-                break;
-
-            case IPMISEL::MSG_STATE_SHUTDOWN:
-                IPMI_TRAC(INFO_MRK "ipmisel shutdown event");
-
-                //Respond that we are done shutting down.
-                msg_respond(iv_msgQ, msg);
-                break;
-        }
-    } // while(1)
-    IPMI_TRAC(EXIT_MRK "message loop");
-    return;
-} // execute
-
+// local functions
 /*
  * @brief Store either Record/Reserve ID from given data
  */
@@ -196,10 +78,63 @@ enum esel_retry
     SLEEP_BASE = 2 * NS_PER_MSEC,
 };
 
+
+namespace IPMISEL
+{
+void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
+              uint32_t i_eid, uint8_t i_eventDirType,
+              uint8_t i_sensorType, uint8_t i_sensorNumber)
+{
+    IPMI_TRAC(ENTER_MRK "sendESEL()");
+
+#ifdef __HOSTBOOT_RUNTIME
+    // HBRT doesn't send a msg, but use the msg structure to pass the data
+    msg_t l_msg;
+    msg_t *msg = &l_msg;
+    memset(msg, 0, sizeof(msg_t));
+#else
+    msg_t *msg = msg_allocate();
+#endif
+    msg->type = MSG_SEND_ESEL;
+    msg->data[0] = i_eid;
+
+    // create the sel record of information
+    IPMISEL::selRecord l_sel;
+    l_sel.record_type = IPMISEL::record_type_ami_esel;
+    l_sel.generator_id = IPMISEL::generator_id_ami;
+    l_sel.evm_format_version = IPMISEL::format_ipmi_version_2_0;
+    l_sel.sensor_type = i_sensorType;
+    l_sel.sensor_number = i_sensorNumber;
+    l_sel.event_dir_type = i_eventDirType;
+    l_sel.event_data1 = IPMISEL::event_data1_ami;
+
+    eselInitData *eselData =
+        new eselInitData(&l_sel, i_eselData, i_dataSize);
+
+    msg->extra_data = eselData;
+
+#ifdef __HOSTBOOT_RUNTIME
+    process_esel(msg);
+#else
+    // one message queue to the SEL thread
+    static msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
+
+    //Send the msg to the sel thread
+    int rc = msg_send(mq,msg);
+    if(rc)
+    {
+        IPMI_TRAC(ERR_MRK "Failed (rc=%d) to send message",rc);
+        delete eselData;
+    }
+#endif
+    IPMI_TRAC(EXIT_MRK "sendESEL");
+    return;
+} // sendESEL
+
 /*
  * @brief process esel msg
  */
-void IpmiSEL::process_esel(msg_t *i_msg) const
+void process_esel(msg_t *i_msg)
 {
     errlHndl_t l_err = NULL;
     IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
@@ -212,7 +147,7 @@ void IpmiSEL::process_esel(msg_t *i_msg) const
     while (l_send_count > 0)
     {
         // try to send the eles to the bmc
-        send_esel(l_data, l_err, l_cc);
+        IPMISEL::send_esel(l_data, l_err, l_cc);
 
         // if no error but last completion code was:
         if ((l_err == NULL) &&
@@ -240,15 +175,31 @@ void IpmiSEL::process_esel(msg_t *i_msg) const
 
     if(l_err)
     {
+#ifdef __HOSTBOOT_RUNTIME
+        // HBRT can't commit an error, since this could already be in the
+        // errlCommit path since HBRT is single threaded
+        IPMI_TRAC(ERR_MRK "DELETING l_err 0x%.8X", l_err->eid());
+        delete l_err;
+        l_err = NULL;
+
+        // TODO RTC: 123419 investigate adding a 'iv_isIpmiEnabled' flag and setting
+        // that to false somehow, so that we can commit error logs in this path
+        // and future calls wont try to send them down.
+#else
         l_err->collectTrace(IPMI_COMP_NAME);
         errlCommit(l_err, IPMI_COMP_ID);
+#endif
     }
     else if((l_cc == IPMI::CC_OK) &&        // no error
             (l_eid != 0))                   // and it's an errorlog
     {
+#ifdef __HOSTBOOT_RUNTIME
+        // TODO RTC: 123419 story to add storing errlog to PNOR in HBRT if IPMI
+#else
         // eSEL successfully sent to the BMC - send an ack to the errlmanager
         IPMI_TRAC(INFO_MRK "Sending ack for eid 0x%.8X", l_eid);
         ERRORLOG::ErrlManager::errlAckErrorlog(l_eid);
+#endif
     }
 
     delete l_data;
@@ -260,8 +211,8 @@ void IpmiSEL::process_esel(msg_t *i_msg) const
 /*
  * @brief Send esel data to bmc
  */
-void IpmiSEL::send_esel(IPMISEL::eselInitData * i_data,
-            errlHndl_t &o_err, IPMI::completion_code &o_cc) const
+void send_esel(IPMISEL::eselInitData * i_data,
+            errlHndl_t &o_err, IPMI::completion_code &o_cc)
 {
     IPMI_TRAC(ENTER_MRK "send_esel");
     uint8_t* data = NULL;
@@ -401,4 +352,84 @@ void IpmiSEL::send_esel(IPMISEL::eselInitData * i_data,
 
     return;
 } // send_esel
+
+} // IPMISEL
+
+#ifndef __HOSTBOOT_RUNTIME
+/**
+ * @brief Constructor
+ */
+IpmiSEL::IpmiSEL(void)
+    :iv_msgQ(msg_q_create())
+{
+    IPMI_TRAC(ENTER_MRK "IpmiSEL ctor");
+    task_create(&IpmiSEL::start,NULL);
+}
+
+/**
+ * @brief Destructor
+ */
+IpmiSEL::~IpmiSEL(void)
+{
+    msg_q_destroy(iv_msgQ);
+}
+
+void* IpmiSEL::start(void* unused)
+{
+    Singleton<IpmiSEL>::instance().execute();
+    return NULL;
+}
+
+/**
+ * @brief Entry point of the sel ipmi thread
+ */
+//@todo: RTC 119832
+void IpmiSEL::execute(void)
+{
+    //Mark as an independent daemon so if it crashes we terminate.
+    task_detach();
+
+    // Register shutdown events with init service.
+    //      Done at the "end" of shutdown processesing.
+    //      This will flush out any IPMI messages which were sent as
+    //      part of the shutdown processing. We chose MBOX priority
+    //      as we don't want to accidentally get this message after
+    //      interrupt processing has stopped in case we need intr to
+    //      finish flushing the pipe.
+    INITSERVICE::registerShutdownEvent(iv_msgQ, IPMISEL::MSG_STATE_SHUTDOWN,
+                                       INITSERVICE::MBOX_PRIORITY);
+
+    while(true)
+    {
+        msg_t* msg = msg_wait(iv_msgQ);
+
+        const IPMISEL::msg_type msg_type =
+            static_cast<IPMISEL::msg_type>(msg->type);
+
+        // Invert the "default" by checking here. This allows the compiler
+        // to warn us if the enum has an unhadled case but still catch
+        // runtime errors where msg_type is set out of bounds.
+        assert(msg_type <= IPMISEL::MSG_LAST_TYPE,
+               "msg_type %d not handled", msg_type);
+
+        switch(msg_type)
+        {
+            case IPMISEL::MSG_SEND_ESEL:
+                IPMISEL::process_esel(msg);
+                //done with msg
+                msg_free(msg);
+                break;
+
+            case IPMISEL::MSG_STATE_SHUTDOWN:
+                IPMI_TRAC(INFO_MRK "ipmisel shutdown event");
+
+                //Respond that we are done shutting down.
+                msg_respond(iv_msgQ, msg);
+                break;
+        }
+    } // while(1)
+    IPMI_TRAC(EXIT_MRK "message loop");
+    return;
+} // execute
+#endif
 

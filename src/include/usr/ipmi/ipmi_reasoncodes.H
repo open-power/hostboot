@@ -35,6 +35,7 @@ namespace IPMI
         MOD_IPMISRV_REPLY       = 0x02, // IPMI::respond
         MOD_IPMISENSOR          = 0x03, // IPMI::sensor
         MOD_IPMIDCMI            = 0x04, // IPMI::sensor
+        MOD_IPMIRT              = 0x05, // rt IPMI::send/IPMI::sendrecv
     };
 
     enum IPMIReasonCode

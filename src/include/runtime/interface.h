@@ -42,8 +42,29 @@
 #include <stdint.h>
 #include <time.h>
 
+/** Memory error types defined for memory_error() interface. */
+enum MemoryError_t
+{
+    /** Hardware has reported a solid memory CE that is correctable, but
+     *  continues to report errors on subsequent reads. A second CE on that
+     *  cache line will result in memory UE. Therefore, it is advised to migrate
+     *  off of the address range as soon as possible. */
+    MEMORY_ERROR_CE,
+
+    /** Hardware has reported an uncorrectable error in memory (memory UE,
+     *  channel failure, etc). The hypervisor should migrate any partitions off
+     *  this address range as soon as possible. Note that these kind of errors
+     *  will most likely result in partition failures. It is advised that the
+     *  hypervisor waits some time for PRD to handle hardware attentions so that
+     *  the hypervisor will know all areas of memory that are impacted by the
+     *  failure. */
+    MEMORY_ERROR_UE,
+};
+
+
+
 /**
- * i2c master description: chip, engine and port packed into
+ * I2C Master Description: chip, engine and port packed into
  * a single 64-bit argument
  *
  * ---------------------------------------------------
@@ -51,12 +72,12 @@
  * |         (32)         |    (16)    |  (8) | (8)  |
  * ---------------------------------------------------
  */
-#define HBRT_I2C_MASTER_CHIP_SHIFT       32
-#define HBRT_I2C_MASTER_CHIP_MASK        (0xfffffffful << 32)
-#define HBRT_I2C_MASTER_ENGINE_SHIFT     8
-#define HBRT_I2C_MASTER_ENGINE_MASK      (0xfful << 8)
-#define HBRT_I2C_MASTER_PORT_SHIFT       0
-#define HBRT_I2C_MASTER_PORT_MASK        (0xfful)
+#define HBRT_I2C_MASTER_CHIP_SHIFT        32
+#define HBRT_I2C_MASTER_CHIP_MASK         (0xfffffffful << 32)
+#define HBRT_I2C_MASTER_ENGINE_SHIFT      8
+#define HBRT_I2C_MASTER_ENGINE_MASK       (0xfful << 8)
+#define HBRT_I2C_MASTER_PORT_SHIFT        0
+#define HBRT_I2C_MASTER_PORT_MASK         (0xfful)
 
 
 /** @typedef hostInterfaces_t
@@ -154,9 +175,10 @@ typedef struct hostInterfaces
     void (*nanosleep)(uint64_t i_seconds, uint64_t i_nano_seconds);
 
     /**
-     * @brief Report an error to the host
+     * @brief Report an OCC error to the host
      * @param[in] Failing status that identifies the nature of the fail
      * @param[in] Identifier that specifies the failing part
+     * @platform FSP
      */
     void (*report_failure)( uint64_t i_status, uint64_t i_partId );
 
@@ -197,15 +219,21 @@ typedef struct hostInterfaces
     int (*pnor_write) (uint32_t i_proc, const char* i_partitionName,
                    uint64_t i_offset, void* i_data, size_t i_sizeBytes);
 
+
     /**
      * @brief Read data from an i2c device
-     * @param[in] i_master - Chip/engine/port of i2c bus
+     * @param[in] i_master - chip, engine and port packed into 
+     *    a single 64-bit argument
+     *    ---------------------------------------------------
+     *    |         chip         |  reserved  |  eng | port |
+     *    |         (32)         |    (16)    |  (8) | (8)  |
+     *    ---------------------------------------------------
      * @param[in] i_devAddr - I2C address of device
      * @param[in] i_offsetSize - Length of offset (in bytes)
      * @param[in] i_offset - Offset within device to read
      * @param[in] i_length - Number of bytes to read
      * @param[out] o_data - Data that was read
-     * @return 0 on success else return code
+     * @return 0 on success else return code 
      * @platform OpenPOWER
      */
     int (*i2c_read)( uint64_t i_master, uint16_t i_devAddr,
@@ -214,7 +242,12 @@ typedef struct hostInterfaces
 
     /**
      * @brief Write data to an i2c device
-     * @param[in] i_master - Chip/engine/port of i2c bus
+     * @param[in] i_master - chip, engine and port packed into 
+     *    a single 64-bit argument
+     *    ---------------------------------------------------
+     *    |         chip         |  reserved  |  eng | port |
+     *    |         (32)         |    (16)    |  (8) | (8)  |
+     *    ---------------------------------------------------
      * @param[in] i_devAddr - I2C address of device
      * @param[in] i_offsetSize - Length of offset (in bytes)
      * @param[in] i_offset - Offset within device to write
@@ -227,7 +260,50 @@ typedef struct hostInterfaces
                       uint32_t i_offsetSize, uint32_t i_offset,
                       uint32_t i_length, void* i_data );
 
+    /**
+     * @brief Perform an IPMI transaction
+     * @param[in] netfn The IPMI netfn byte
+     * @param[in] cmd The IPMI cmd byte
+     * @param[in] tx_buf The IPMI packet to send to the host
+     * @param[in] tx_size The number of bytes to send
+     * @param[in] rx_buf A buffer to be populated with the IPMI
+     *                       response. First bytes will be the
+     *                       IPMI completion code.
+     * @param[inout] rx_size The allocated size of the rx buffer on input
+     *                       updated to the size of the response on output.
+     * @retval rc - non-zero on error
+     * @platform OpenPower
+     */
+    int (*ipmi_msg)(uint8_t netfn, uint8_t cmd,
+                    void *tx_buf, size_t tx_size,
+                    void *rx_buf, size_t *rx_size);
+
+
+    /**
+     * @brief Hardware has reported a memory error. This function requests the
+     *        hypervisor to remove the all addresses within the address range given
+     *        (including endpoints) from the available memory space.
+     *
+     * It is understood that the hypervisor may not be able to immediately
+     * deallocate the memory because it may be in use by a partition. Therefore, the
+     * hypervisor should cache all requests and deallocate the memory once it has
+     * been freed.
+     *
+     * @param  i_startAddr The beginning address of the range.
+     * @param  i_endAddr   The end address of the range.
+     * @param  i_errorType See enum MemoryError_t.
+     *
+     * @return 0 if the request is successfully received. Any value other than 0 on
+     *         failure. The hypervisor should cache the request and return
+     *         immediately. It should not wait for the request to be applied. See
+     *         note above.
+     */
+    int32_t memory_error( uint64_t i_startAddr, uint64_t i_endAddr,
+                          MemoryError_t i_errorType );
+
+
     // Reserve some space for future growth.
+    // do NOT ever change this number, even if you add functions.
     void (*reserved[32])(void);
 
 } hostInterfaces_t;

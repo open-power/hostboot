@@ -41,6 +41,7 @@
 #include <string.h>
 #include <devicefw/userif.H>
 #include <pnor/ecc.H>
+#include <ipmi/ipmiif.H>
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
 
@@ -122,6 +123,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->get_reserved_mem = rt_get_reserved_mem;
                 intf->pnor_read = rt_pnor_read;
                 intf->pnor_write= rt_pnor_write;
+                intf->ipmi_msg= rt_ipmi_msg;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -517,6 +519,33 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             return cv_targ_addr;
         }
+
+        static int rt_ipmi_msg(uint8_t netfn, uint8_t cmd,
+                    void *tx_buf, size_t tx_size,
+                    void *rx_buf, size_t *rx_size)
+        {
+            TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                "rt_ipmi_msg: tx_buf:%x/%x, size:%d, rx_buf:%p, size:%d",
+                    netfn, cmd, tx_size,
+                    rx_buf, *rx_size);
+
+            errlHndl_t l_err = NULL;
+            do {
+                ((uint8_t*)rx_buf)[0] = IPMI::CC_OK;
+                rx_size = 0;
+            } while (0);
+
+            //commit the error
+            uint32_t  l_plid = 0;
+            if (l_err)
+            {
+                l_plid = l_err->plid();
+                errlCommit (l_err, CXXTEST_COMP_ID);
+            }
+            TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_ipmi_msg");
+            return l_plid;
+        }
+
 
         static uint64_t cv_vpd_addr;
         static uint64_t cv_vpd_phys_addr;
