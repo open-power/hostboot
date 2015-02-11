@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -176,7 +176,7 @@ rule TpLFir
   RECOVERABLE: TP_LFIR & ~TP_LFIR_MASK & ~TP_LFIR_ACT0 &  TP_LFIR_ACT1;
 };
 
-group gTpLFir filter singlebit
+group gTpLFir filter singlebit, secondarybits( 16, 17, 18 )
 {
     /** TP_LFIR[0]
      *  CFIR internal parity error
