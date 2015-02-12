@@ -91,21 +91,28 @@ errlHndl_t UtilLidMgr::loadLid()
     size_t l_size = 0;
     errlHndl_t l_errl = NULL;
 
-    if(iv_isLidInPnor)
+    do
     {
-        iv_lidSize = iv_lidPnorInfo.size;
-        iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
-    }
-    else if (iv_isLidInVFS)
-    {
-        l_errl = VFS::module_address(iv_lidFileName, l_addr, l_size);
-        if (l_errl)
+        if(iv_isLidInVFS)
         {
-            delete l_errl;
-            l_errl = NULL;
-            int rc =
-              g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer, &iv_lidSize);
-
+            l_errl = VFS::module_address(iv_lidFileName, l_addr, l_size);
+            if (l_errl)
+            {
+                break;
+            }
+            iv_lidBuffer = const_cast<void*>(reinterpret_cast<const void*>
+                    (l_addr));
+            iv_lidSize = l_size;
+        }
+        else if (iv_isLidInPnor)
+        {
+            iv_lidSize = iv_lidPnorInfo.size;
+            iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
+        }
+        else
+        {
+            int rc = g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer,
+                    &iv_lidSize);
             if (0 != rc)
             {
                 /*@
@@ -121,30 +128,39 @@ errlHndl_t UtilLidMgr::loadLid()
                     Util::UTIL_LIDMGR_RC_FAIL,
                     rc);
             }
-        }
-
-        else
-        {
-            iv_isLidInVFS = true;
-            iv_lidBuffer = const_cast<void*>(reinterpret_cast<const void*>
-                    (l_addr));
-            iv_lidSize = l_size;
-        }
-    }
+          }
+    } while (0);
     return l_errl;
 }
 
 errlHndl_t UtilLidMgr::cleanup()
 {
-    if ((iv_isLidInVFS) && (NULL != iv_lidBuffer))
+    errlHndl_t l_err = NULL;
+    if ((!iv_isLidInVFS) && (!iv_isLidInPnor) && (NULL != iv_lidBuffer))
     {
-        g_hostInterfaces->lid_unload(iv_lidBuffer);
+        int l_rc = g_hostInterfaces->lid_unload(iv_lidBuffer);
+        if (l_rc)
+        {
+            /*@
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        Util::UTIL_LIDMGR_RT
+             * @reasoncode      Util::UTIL_LIDMGR_UNLOAD_RC_FAIL
+             * @userdata1       Return code from lid_unload call.
+             * @devdesc         Unable to unload LID via host interface.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        Util::UTIL_LIDMGR_RT,
+                        Util::UTIL_LIDMGR_UNLOAD_RC_FAIL,
+                        l_rc);
+        }
     }
-    iv_lidBuffer = NULL;
 
-    iv_lidSize = 0;
+    iv_lidBuffer   = NULL;
+    iv_lidSize     = 0;
     iv_isLidInPnor = false;
-    return NULL;
+    iv_isLidInVFS  = false;
+    return l_err;
 }
 
 void UtilLidMgr::updateLid(uint32_t i_lidId)
