@@ -74,6 +74,7 @@ my $cfgShortEnums = 0;
 my $cfgBigEndian = 1;
 my $cfgIncludeFspAttributes = 0;
 my $CfgSMAttrFile = "";
+my $cfgAddVersionPage = 0;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -85,6 +86,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "big-endian!" =>  \$cfgBigEndian,
            "smattr-output-file:s" => \$CfgSMAttrFile,
            "include-fsp-attributes!" =>  \$cfgIncludeFspAttributes,
+           "version-page!" => \$cfgAddVersionPage,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -113,6 +115,7 @@ if($cfgVerbose)
     print STDOUT "Short enums = $cfgShortEnums\n";
     print STDOUT "Big endian = $cfgBigEndian\n";
     print STDOUT "include-fsp-attributes = $cfgIncludeFspAttributes\n",
+    print STDOUT "version-page = $cfgAddVersionPage\n",
 }
 
 ################################################################################
@@ -334,9 +337,21 @@ use constant SECTION => 3;
 use constant TARGET => 4;
 use constant ATTRNAME => 5;
 my @attrDataforSM = ();
+
+#Flag which indicates if the script needs to add the 4096 bytes of version
+#checksum as first page in the binary file generated.
+my $addRO_Section_VerPage = 0;
 if( !($cfgImgOutputDir =~ "none") )
 {
-    my $Data = generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t);
+    #Version page will be added only if the script is called in with the flag
+    #--version-flag
+    if ($cfgAddVersionPage)
+    {
+        $addRO_Section_VerPage = 1;
+    }
+    #Pass the $addRO_Section_VerPage into the sub rotuine
+    my $Data = generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t,
+                                      $addRO_Section_VerPage);
 
     open(PNOR_TARGETING_FILE,">$cfgImgOutputDir".$cfgImgOutputFile)
       or fatal ("Targeting image file: \"$cfgImgOutputDir"
@@ -4958,7 +4973,7 @@ sub serializeAssociations
 ################################################################################
 
 sub generateTargetingImage {
-    my($vmmConstsFile, $attributes, $Target_t) = @_;
+    my($vmmConstsFile, $attributes, $Target_t,$addRO_Section_VerPage) = @_;
 
     # 128 MB virtual memory offset between sections
     my $vmmSectionOffset = 128 * 1024 * 1024; # 128MB
@@ -4982,6 +4997,12 @@ sub generateTargetingImage {
     # Reserve 256 bytes for the header, then keep track of PNOR RO offset
     my $headerSize = 256;
     my $offset = $headerSize;
+
+
+    #If the file to be created is the HB targeting binary , then it will contain
+    #first page (4096 bytes) as the read-only data checksum. Need to adjust the
+    #read-only section offset.
+    my $versionSectionSize = 4096;
 
     # Reserve space for the pointer to the # of targets, update later;
     my $numTargetsPointer = 0;
@@ -5747,6 +5768,15 @@ sub generateTargetingImage {
     my $blockSize = 4*1024;
 
     my %sectionHoH = ();
+
+    my $roOffset = 0;
+    if ($addRO_Section_VerPage == 1)
+    {
+        #First section to start after 4096 bytes
+        #as RO version data occupies first page in the binary file
+        $roOffset = $versionSectionSize;
+    }
+
     $sectionHoH{ pnorRo }{ offset } = 0;
     $sectionHoH{ pnorRo }{ type   } = 0;
     $sectionHoH{ pnorRo }{ size   } = sizeBlockAligned($offset,$blockSize,1);
@@ -5867,6 +5897,24 @@ sub generateTargetingImage {
     }
 
     my $outFile;
+
+    #HB Targeting binary file will contain <Version Page>+<Targeting Header>+
+    #<Section  data>...
+    if ($addRO_Section_VerPage == 1)
+    {
+        #Generate the MD5 checksum value for the read-only data and update the
+        #content of the version section
+        my $versionHeader = "VERSION";
+        $versionHeader .= md5_hex($roAttrBinData);
+
+        $outFile .= $versionHeader;
+        my $versionHeaderPadSize =
+            (sizeBlockAligned ((length $versionHeader),$versionSectionSize,1)
+             - (length $versionHeader));
+        $outFile .= pack ("@".$versionHeaderPadSize);
+    }
+
+    #Append the 256 bytes header data
     $outFile .= $headerBinData;
     my $padSize = sizeBlockAligned((length $headerBinData),$headerSize,1)
         - (length $headerBinData);
@@ -6054,6 +6102,13 @@ generated code.
 
 Omits FSP specific attributes and targets from the generated binaries and
 generated code.  This is the default behavior.
+
+=item B<--version-page>
+Adds 4096 bytes of version page as first page in the generated binaries.
+
+=item B<--no-version-page>
+Does not add 4096 bytes of version page as first page in the generated
+binaries . This is the default behavior.
 
 =item B<--verbose>
 

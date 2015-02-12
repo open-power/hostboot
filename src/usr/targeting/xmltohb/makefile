@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -154,5 +154,6 @@ ${GENDIR}/%_targeting.bin: ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
         $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=none --img-output-dir=$(dir $@) \
          --img-output-file=$(notdir $@) \
-         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums
+         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums \
+         --version-page
 

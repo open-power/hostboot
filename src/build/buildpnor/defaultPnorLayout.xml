@@ -97,6 +97,7 @@ Layout Description
         <eyeCatch>HBD</eyeCatch>
         <physicalOffset>0x5D000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
