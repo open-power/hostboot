@@ -28,6 +28,9 @@ Layout Description
     <imageSize>    -> Size of PNOR image in bytes.
     <blockSize>    -> size of erase blocks in bytes.
     <tocSize>      -> size of each partition table
+    <!- TODO:RTC:123734 - remove side offsets once hwsv implements new layout ->
+    <sideAOffset>  -> Location of Side A Partition Table
+    <sideBOffset>  -> Location of Side B Partition Table
     <side>         -> Contains information about the side
         <id>            -> Id of the side (A or B)
         <arrangement>   -> Tag that specifies the arrangement of the side
@@ -64,6 +67,10 @@ Layout Description
         <imageSize>0x4000000</imageSize>
         <blockSize>0x1000</blockSize>
         <tocSize>0x8000</tocSize>
+        <!--TODO: RTC 123734 - remove side offsets once hwsv implements new
+        layout-->
+        <sideAOffset>0x0</sideAOffset>
+        <sideBOffset>0x8000</sideBOffset>
         <arrangement>A-B-D</arrangement>
         <side>
             <id>B</id>
