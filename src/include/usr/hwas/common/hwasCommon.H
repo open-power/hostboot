@@ -253,9 +253,13 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
  *
  * @param[io] io_plid Reference to plid.
  * @param[in] i_node  node target to restrict hw check
+ * @param[out] o_bootable Indicates whether system is bootable with current
+ *             configuratio, if a non NULL pointer is passed erros will not
+ *             be logged if system cannot ipl and just return a true or false.
  */
 void platCheckMinimumHardware(uint32_t & io_plid,
-                            const TARGETING::ConstTargetHandle_t i_node = NULL);
+                            const TARGETING::ConstTargetHandle_t i_node = NULL,
+                            bool *o_bootable = NULL);
 
 } // namespace HWAS
 

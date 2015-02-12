@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -503,7 +503,8 @@ void markTargetChanged(TARGETING::TargetHandle_t i_target)
 //  platCheckMinimumHardware()
 //******************************************************************************
 void platCheckMinimumHardware(uint32_t & io_plid,
-                            const TARGETING::ConstTargetHandle_t i_node)
+                            const TARGETING::ConstTargetHandle_t i_node,
+                            bool *o_bootable)
 {
     //errlHndl_t l_errl = NULL;
 

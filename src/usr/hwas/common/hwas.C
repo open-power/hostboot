@@ -667,7 +667,8 @@ errlHndl_t restrictEXunits(
     return errl;
 } // restrictEXunits
 
-errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
+errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
+        bool *o_bootable)
 {
     errlHndl_t l_errl = NULL;
     HWAS_INF("checkMinimumHardware entry");
@@ -679,9 +680,18 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
         //  Common present and functional hardware checks.
         //*********************************************************************/
 
+        if(o_bootable)
+        {
+            *o_bootable = true;
+        }
         PredicateHwas l_present;
         l_present.present(true);
-        PredicateIsFunctional l_functional;
+        PredicateHwas l_functional;
+        if(o_bootable)
+        {
+            l_functional.specdeconfig(false);
+        }
+        l_functional.functional(true);
 
         // top 'starting' point - use first node if no i_node given (hostboot)
         Target *pTop;
@@ -698,6 +708,12 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
 
             if (l_nodes.empty())
             { // no functional nodes, get out now
+                if(o_bootable)
+                {
+                    *o_bootable = false;
+                    break;
+                }
+
                 HWAS_ERR("Insufficient HW to continue IPL: (no func nodes)");
                 /*@
                  * @errortype
@@ -748,6 +764,11 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
         {
             HWAS_ERR("Insufficient HW to continue IPL: (no master proc)");
 
+            if(o_bootable)
+            {
+                *o_bootable = false;
+                break;
+            }
             // determine some numbers to help figure out what's up..
             PredicateCTM l_proc(CLASS_CHIP, TYPE_PROC);
             TargetHandleList l_plist;
@@ -805,7 +826,13 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
             // we have a Master Proc and it's functional
             // check for at least 1 functional ex/core on Master Proc
             TargetHandleList l_cores;
-            getChildChiplets(l_cores, l_pMasterProc, TYPE_EX, true);
+            PredicateCTM l_core(CLASS_UNIT, TYPE_EX);
+            PredicatePostfixExpr l_coresFunctional;
+            l_coresFunctional.push(&l_core).push(&l_functional).And();
+            targetService().getAssociated(l_cores, l_pMasterProc,
+                    TargetService::CHILD, TargetService::ALL,
+                    &l_coresFunctional);
+
             HWAS_DBG( "checkMinimumHardware: %d functional cores",
                       l_cores.size() );
 
@@ -813,6 +840,11 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
             {
                 HWAS_ERR("Insufficient HW to continue IPL: (no func cores)");
 
+                if(o_bootable)
+                {
+                    *o_bootable = false;
+                    break;
+                }
                 // determine some numbers to help figure out what's up..
                 PredicateCTM l_ex(CLASS_UNIT, TYPE_EX);
                 TargetHandleList l_plist;
@@ -875,7 +907,12 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
         if (l_dimms.empty())
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
-
+                
+            if(o_bootable)
+            {
+                *o_bootable = false;
+                break;
+            }
             // determine some numbers to help figure out what's up..
             TargetHandleList l_plist;
             PredicatePostfixExpr l_checkExprPresent;
@@ -934,7 +971,11 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
         if (l_funcMembufTargetList.empty())
         {
              HWAS_ERR( "Insufficient hardware to continue IPL (func membufs)");
-
+             if(o_bootable)
+             {
+                *o_bootable = false;
+                break;
+             }
              TargetHandleList l_presentMembufTargetList;
              PredicatePostfixExpr l_checkExprPresentMembufs;
              l_checkExprPresentMembufs.push(&l_membuf).push(&l_present).And();
@@ -988,14 +1029,14 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
         //  running on (ie, hostboot or fsp in hwsv).
         //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
-        platCheckMinimumHardware(l_commonPlid, i_node);
+        platCheckMinimumHardware(l_commonPlid, i_node,o_bootable);
     }
     while (0);
 
     //  ---------------------------------------------------------------
     // if the common plid got set anywhere above, we have an error.
     //  ---------------------------------------------------------------
-    if (l_commonPlid)
+    if ((l_commonPlid)&&(o_bootable == NULL))
     {
 
         /*@
@@ -1018,7 +1059,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
     }
 
     HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
-            (l_errl == NULL) ? "available" : "NOT available");
+            ((l_errl != NULL)||((o_bootable!=NULL)&&(!*o_bootable))) ?
+                    "NOT available" : "available");
     return  l_errl ;
 } // checkMinimumHardware
 

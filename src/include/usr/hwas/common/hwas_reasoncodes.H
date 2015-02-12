@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@ namespace HWAS
         MOD_DECONFIG_GARD         = 0x01,
         MOD_PROCESS_CALLOUT       = 0x02,
         MOD_CHECK_MIN_HW          = 0x03,
+        MOD_DECONFIG_TARGETS_FROM_GARD = 0x04,
     };
 
     enum HwasReasonCode
@@ -50,6 +51,7 @@ namespace HWAS
         RC_SYSAVAIL_NO_PROCS_FUNC           = HWAS_COMP_ID | 0x07,
         RC_SYSAVAIL_NO_NODES_FUNC           = HWAS_COMP_ID | 0x08,
         RC_SYSAVAIL_NO_MEMBUFS_FUNC         = HWAS_COMP_ID | 0x09,
+        RC_RESOURCE_RECOVERED               = HWAS_COMP_ID | 0x0A,
     };
 };
 

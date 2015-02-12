@@ -121,11 +121,16 @@ errlHndl_t restrictEXunits(
  *  running.
  *
  * @param[in] i_node  node target to restrict hw check
+ * @param[out] o_bootable Indicate whether the system is
+ *             is bootable with current configuration.
+ *             if o_bootable is not NULL an error for
+ *             system unavailability will not be logged 
  *
  * @return error log handle
  */
 errlHndl_t checkMinimumHardware(
-    const TARGETING::ConstTargetHandle_t i_node = NULL);
+    const TARGETING::ConstTargetHandle_t i_node = NULL,
+    bool *o_bootable = NULL);
 
 /**
  * @brief  Struct representing a particular target.  Used by

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -125,6 +127,15 @@ class PredicateHwas : public PredicateBase
          */
          PredicateHwas& dumpFunctional(const bool i_dumpFunctional);
 
+         /**
+          *  @brief Configure predicate to look for the given speculative
+          *  deconfig state
+          *
+          *  @param[in] i_specdeconfig Desired speculative deconfig state
+          *
+          *  @return Reference to the predicate, for chaining
+          */
+         PredicateHwas& specdeconfig(const bool i_specdeconfig);
         /**
          *  @brief Returns whether target matches the desired HWAS state
          *
@@ -229,6 +240,16 @@ inline PredicateHwas& PredicateHwas::dumpFunctional(
     return *this;
 }
 
+//******************************************************************************
+// PredicateHwas::specdeconfig
+//******************************************************************************
+inline PredicateHwas& PredicateHwas::specdeconfig(
+    const bool i_specdeconfig)
+{
+    iv_desired.attribute.specdeconfig = i_specdeconfig;
+    iv_valid.attribute.specdeconfig = true;
+    return *this;
+}
 #undef TARG_CLASS
 #undef TARG_NAMESPACE
 

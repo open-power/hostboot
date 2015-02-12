@@ -88,10 +88,11 @@ public:
         PREDICTIVE,         //  not applied due to predictive policy
         PREDICATE,          //  not applied due to predicate
         GARD_NOT_APPLIED,   //  not applied for other reason
+        RESOURCE_RECOVERED  //  Resource recovered
     };
 
-    // enums to indicate to deconfigureTarget() specific RUNTIME behaviors
-    enum DeconfigureRuntime
+    // enums to indicate to deconfigureTarget() specific behaviors
+    enum DeconfigureFlags
     {
         NOT_AT_RUNTIME,     // non-runtime behavior - if the system is at
                             // runtime, no deconfigs happen;
@@ -99,6 +100,7 @@ public:
                             // runtime behaviors:
         FULLY_AT_RUNTIME,   // - functional=false,dumpfunctional=false
         DUMP_AT_RUNTIME,    // - functional=false,dumpfunctional=true
+        SPEC_DECONFIG,      //speculative deconfig
     };
 
     // enums to indicate non-error reason for a targets deconfiguration.
@@ -146,6 +148,8 @@ public:
         // set by presentByAssoc() when a DIMM has no MBA
         DECONFIGURED_BY_NO_PARENT_MBA,          // BASE | 0x0D
 
+        CONFIGURED_BY_RESOURCE_RECOVERY,        // BASE | 0x0E
+
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
     };
@@ -192,6 +196,23 @@ public:
      * @brief Destructor.
      */
     ~DeconfigGard();
+
+    /**
+     * @brief Apply gard record for a specific target.
+     *
+     * Called by deconfigureTargetsFromGardRecordsForIpl.
+     *
+     * @param i_pTarget Target to be garded
+     *
+     * @param i_gardRecord gard record to be applied
+     *
+     * @param i_deconfigRule Options for deconfigure
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t applyGardRecord(TARGETING::Target *i_pTarget,
+            GardRecord &i_gardRecord,
+            const DeconfigureFlags i_deconfigRule =  NOT_AT_RUNTIME);
 
     /**
      * @brief Clears GARD Records for replaced Targets.
@@ -260,14 +281,14 @@ public:
      * @param[in]  i_errlEid Error log EID to store in Deconfigure Record.
      * @param[out] o_targetDeconfigured - if pointer is valid, bool is set
      *                  to true if target was deconfigured; NOT SET OTHERWISE
-     * @param[in]  i_runTimeDeconfigRule Deconfigure Runtime options -
+     * @param[in]  i_deconfigRule Deconfigure options -
      *              default not at runtime
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
                            const uint32_t i_errlEid,
                            bool *o_targetDeconfigured = NULL,
-                           const DeconfigureRuntime i_runTimeDeconfigRule =
+                           const DeconfigureFlags i_deconfigRule =
                                     NOT_AT_RUNTIME);
 
     /**
@@ -433,12 +454,12 @@ private:
      *
      * @param[in] i_target   Reference to base Target.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
-     * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
+     * @param[in] i_deconfigRule Deconfigure Runtime options -
      *              default not at runtime
      */
     void _deconfigureByAssoc(TARGETING::Target & i_target,
                              const uint32_t i_errlEid,
-                             const DeconfigureRuntime i_runTimeDeconfigRule =
+                             const DeconfigureFlags i_deconfigRule =
                                     NOT_AT_RUNTIME);
 
     /**
@@ -451,13 +472,13 @@ private:
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
      * @param[out] o_targetDeconfigured - if pointer is valid, bool is set
      *                  to true if target was deconfigured; NOT SET OTHERWISE
-     * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
+     * @param[in] i_deconfigRule Deconfigure Runtime options -
      *              default not at runtime
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
                             const uint32_t i_errlEid,
                             bool *o_targetDeconfigured = NULL,
-                            const DeconfigureRuntime i_runTimeDeconfigRule =
+                            const DeconfigureFlags i_deconfigRule =
                                     NOT_AT_RUNTIME);
 
     /**
