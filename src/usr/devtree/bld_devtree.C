@@ -857,6 +857,8 @@ void load_hbrt_image(uint64_t& io_address)
         TRACFCOMP(g_trac_devtree, "HBRT image: start = %lx, size = %lx",
                   image_start, image_size);
         io_address -= ALIGN_PAGE(image_size);
+        // Align to 64KB for Opal
+        io_address = ALIGN_DOWN_X(io_address,64*KILOBYTE);
 
             // Copy image.
         void* memArea = mm_block_map(reinterpret_cast<void*>(io_address),

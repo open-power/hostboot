@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,29 +27,28 @@
 
 #include <limits.h>
 
-// Return a number >= input that is aligned up to the next 4-byte boundary
-#define ALIGN_4(u) (((u) + 0x3ull) & ~0x3ull)
+// Return a number >= input that is aligned up to the next x boundary,
+// where x is a power of 2.
+#define ALIGN_X(u,x) (((u) + ((x)-1)) & ~((x)-1))
 
-// Return a number <= input that is rounded down to nearest 4-byte boundary
-#define ALIGN_DOWN_4(u) ((u) & ~3ull)
+// Return a number <= input that is aligned on a x boundary, where x
+// is a power of 2.
+#define ALIGN_DOWN_X(u,x) ((u) - (u)%(x))
 
-// Return a number >= input that is aligned up to the next 8-byte bounday
-#define ALIGN_8(u) (((u) + 0x7ull) & ~0x7ull)
+// Useful shortcut macros for 4.
+#define ALIGN_4(u)              (ALIGN_X(u,4))
+#define ALIGN_DOWN_4(u)         (ALIGN_DOWN_X(u,4))
 
-// Return a number <= input that is rounded down to nearest 8-byte boundary
-#define ALIGN_DOWN_8(u) ((u) & ~7ull)
+// Useful shortcut macros for 8.
+#define ALIGN_8(u)              (ALIGN_X(u,8))
+#define ALIGN_DOWN_8(u)         (ALIGN_DOWN_X(u,8))
 
-// Return a number >= input that is aligned up to the next page boundary
-#define ALIGN_PAGE(u) (((u) + (PAGESIZE-1)) & ~(PAGESIZE-1))
+// Useful shortcut macros for a page.
+#define ALIGN_PAGE(u)           (ALIGN_X(u,PAGESIZE))
+#define ALIGN_PAGE_DOWN(u)      (ALIGN_DOWN_X(u,PAGESIZE))
 
-// Return a number <= input that is aligned on a page boundary
-#define ALIGN_PAGE_DOWN(u) ((u) - (u)%PAGESIZE)
-
-// Return a number >= input that is aligned up to the next MB boundary
-#define ALIGN_MEGABYTE(u) (((u) + (MEGABYTE-1)) & ~(MEGABYTE-1))
-
-// Return a number <= input that is aligned on a MB boundary
-#define ALIGN_MEGABYTE_DOWN(u) ((u) - (u)%MEGABYTE)
-
+// Useful shortcut macros for a MB.
+#define ALIGN_MEGABYTE(u)       (ALIGN_X(u,MEGABYTE))
+#define ALIGN_MEGABYTE_DOWN(u)  (ALIGN_DOWN_X(u,MEGABYTE))
 
 #endif

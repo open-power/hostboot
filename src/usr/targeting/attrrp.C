@@ -505,6 +505,8 @@ namespace TARGETING
 
         // Determine bottom of the address region.
         io_addr = io_addr - l_size;
+        // Align to 64KB for Opal
+        io_addr = ALIGN_DOWN_X(io_addr,64*KILOBYTE);
 
 
         // Map in region.

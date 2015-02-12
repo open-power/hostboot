@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -141,7 +143,7 @@ enum BlockPriority
 
 
 /** Reserved runtime VPD sizes in bytes */
-//  must be page aligned
+//  must be 64KB aligned
 #define VMM_MODULE_VPD_SIZE 0x80000
 #define VMM_CENTAUR_VPD_SIZE 0x40000
 #define VMM_DIMM_JEDEC_VPD_SIZE 0x40000
