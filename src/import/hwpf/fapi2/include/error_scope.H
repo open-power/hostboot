@@ -70,7 +70,7 @@
 /// @brief Wrapper to check an operation for an error state
 /// and jump to the label cleam_up if there is an error.
 /// @param[in] __operation__ an operation which returns a fapi::ReturnCode
-/// @param[in] Optional vararg format/agruments for trace output.
+/// @param[in] ... vararg format/agruments for trace output (optional)
 /// @note This implementation does not support PIB error masks or
 /// FSP operational states.
 /// @warning The trace information is only going to be seen during
