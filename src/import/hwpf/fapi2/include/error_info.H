@@ -22,10 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- * @file erro_infor.H
- * @brief Defines the Error Information structures and classes
- */
+
+///
+/// @file error_info.H
+/// @brief Defines the Error Information structures and classes
+///
 
 #ifndef FAPI2_ERRORINFO_H_
 #define FAPI2_ERRORINFO_H_
@@ -174,7 +175,7 @@ namespace fapi2
     }
 
     ///
-    /// @enum Enumeration of firmware traces
+    /// @enum Collect Trace
     ///
     /// This enumeration defines the possible firmware traces to collect
     ///
@@ -738,6 +739,9 @@ namespace fapi2
                           const void* const* i_object) const;
     };
 
+    ///
+    /// @brief Structure representing a hardware callout
+    ///
     struct ErrorInfoEntryHwCallout
     {
         uint8_t iv_hw;
@@ -747,6 +751,9 @@ namespace fapi2
                           const void* const* i_object) const;
     };
 
+    ///
+    /// @brief Structure representing a procedure callout
+    ///
     struct ErrorInfoEntryProcCallout
     {
         uint8_t iv_procedure;
@@ -762,6 +769,9 @@ namespace fapi2
         ErrorInfoEntryProcCallout(void) = default;
     };
 
+    ///
+    /// @brief Structure representing a bus callout
+    ///
     struct ErrorInfoEntryBusCallout
     {
         uint8_t iv_endpoint1ObjIndex;
@@ -771,6 +781,9 @@ namespace fapi2
                           const void* const* i_object) const;
     };
 
+    ///
+    /// @brief Structure representing a target callout
+    ///
     struct ErrorInfoEntryTargetCDG
     {
         uint8_t iv_targetObjIndex;
@@ -782,6 +795,9 @@ namespace fapi2
                           const void* const* i_object) const;
     };
 
+    ///
+    /// @brief Structure representing a child callout
+    ///
     struct ErrorInfoEntryChildrenCDG
     {
         uint8_t  iv_parentObjIndex;
@@ -796,6 +812,9 @@ namespace fapi2
                           const void* const* i_object) const;
     };
 
+    ///
+    /// @brief Structure representing collected trace information
+    ///
     struct ErrorInfoEntryCollectTrace
     {
         uint32_t  iv_eieTraceId;
@@ -803,6 +822,9 @@ namespace fapi2
                           const void* const* i_object) const;
     };
 
+    ///
+    /// @brief Union of all the error info types
+    ///
     struct ErrorInfoEntry
     {
         uint8_t iv_type; // Value from ErrorInfoType
@@ -816,6 +838,12 @@ namespace fapi2
             ErrorInfoEntryChildrenCDG children_cdg;
             ErrorInfoEntryCollectTrace collect_trace;
         };
+
+        ///
+        /// @brief Add error information to the FFDC object
+        /// @param[in] i_info a shared pointer to the error info
+        /// @param[in] i_object the list of ffdc objects being collected
+        ///
         void addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
                           const void* const* i_object) const
             {

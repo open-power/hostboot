@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file erro_infor.H
- * @brief Defines the Error Information structures and classes
+ * @file utils.H
+ * @brief Defines common fapi2 utilities
  */
 
 #ifndef FAPI2_UTILS_H_
