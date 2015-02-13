@@ -3949,14 +3949,6 @@ sub generate_centaur
     my $scanFspAsize = length($scanFspApath) + 1;
     my $scomFspBpath = "";
 
-    # $TODO RTC:120587
-    # This will be deleted and set by serverwiz2 once available
-    my $mbVpdIndex = $ctaur;
-    if ($sysname =~ /firestone/)
-    {
-        $mbVpdIndex = 0;
-    }
-
     if (ref($devpath->{chip}->{$ipath}->{'scom-path-b'}) ne "HASH")
     {
         $scomFspBpath = $devpath->{chip}->{$ipath}->{'scom-path-b'};
@@ -4025,10 +4017,6 @@ sub generate_centaur
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
-    </attribute>
-        <attribute>
-        <id>ISDIMM_MBVPD_INDEX</id>
-        <default>$mbVpdIndex</default>
     </attribute>";
 
     # FSI Connections #
