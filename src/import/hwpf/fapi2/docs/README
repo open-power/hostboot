@@ -1,0 +1,6 @@
+
+To generate FAPI2 documentation, run
+
+$doxygen Doxyfile
+
+The documentation will be output into genfiles.
