@@ -52,6 +52,7 @@ namespace fapi2
     class buffer : public buffer_base<T>
     {
     public:
+        /// Shortcut typedef to map to our traits class
         typedef typename buffer_base<T, buffer>::bits_type bits_type;
 
         ///
@@ -280,7 +281,7 @@ namespace fapi2
         /// @tparam L Length of bits to insert
         /// @tparam SS Start bit in source
         /// @tparam OT the type of the incoming (origin) data
-        /// @param[in] i_data OT value to copy into DataBuffer
+        /// @param[in] i_datain OT value to copy into DataBuffer
         ///    - data is taken left aligned
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
@@ -352,7 +353,7 @@ namespace fapi2
         /// @tparam SB Start bit to insert into
         /// @tparam L Length of bits to insert
         /// @tparam OT the type of the incoming (origin) data
-        /// @param[in] i_data OT value to copy into DataBuffer
+        /// @param[in] i_datain OT value to copy into DataBuffer
         ///    - data is taken right aligned
         /// @note Data is assumed to be aligned on the word boundary of L
         /// @note Asserting that all the parameters are known at

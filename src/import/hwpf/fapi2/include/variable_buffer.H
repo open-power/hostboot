@@ -34,6 +34,7 @@
 
 namespace fapi2
 {
+    /// @brief Get a 32 bit mask quickly
     // This is one of the main reasons we static_assert in the ctor's
     // to ensure the unit_type is 32 bits.
     inline uint32_t fast_mask32(int32_t i_pos, int32_t i_len)
@@ -71,7 +72,6 @@ namespace fapi2
     ///            incoming data
     /// @param[in] i_target_start_bit The starting bit position in this
     /// @param[in] i_length The length, in bits, the user wants copied.
-    /// @endcond
     ///
     template<typename unit_type, typename bits_type>
     inline fapi2::ReturnCode _insert(const unit_type* i_source,
@@ -154,6 +154,7 @@ namespace fapi2
 
         return fapi2::FAPI2_RC_SUCCESS;
     }
+    /// @endcond
 
     /// @brief Class representing a FAPI variable_buffer.
     /// @remark Variable buffers are buffers which can be variable in length
@@ -422,11 +423,11 @@ namespace fapi2
 
         ///
         /// @brief Copy in a right aligned (decimal) element
-        /// @param[in] i_data, the incoming data
+        /// @param[in] i_data the incoming data
         ///    - data is taken right aligned
         /// @param[in] i_targetStart The starting bit position in this
         ///            - Defaultst to 0
-        /// @param[in] i_length The length, in bits, the user wants copied.
+        /// @param[in] i_len The length, in bits, the user wants copied.
         ///            - Defaults to all of the bits in the source which fit
         /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
         ///
@@ -518,7 +519,7 @@ namespace fapi2
 
 
 
-
+    /// @cond
     //
     // Generic insert
     //
@@ -656,7 +657,6 @@ namespace fapi2
         bits_type i_offset);
 #endif
     /// @endcond
-
 };
 
 

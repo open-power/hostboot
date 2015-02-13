@@ -119,7 +119,7 @@ namespace fapi2
 
         ///
         /// @brief Constructor.
-        /// @param[in] The rc to set
+        /// @param[in] i_rc the rc to set
         ///
         ReturnCode(const uint64_t i_rc = FAPI2_RC_SUCCESS):
             iv_rc(i_rc)
@@ -168,13 +168,12 @@ namespace fapi2
         uint64_t iv_rc;
     };
 
-
     /// This implementation assumes no exception handling and leverages thread-local
     /// storage. For platforms without thread support, a global variable will
     /// suffice for the error state.
-    extern thread_local ReturnCode current_err;
-    extern thread_local uint64_t pib_error_mask;
-    extern thread_local uint64_t operational_state;
+    extern thread_local ReturnCode current_err;      /// the current error state
+    extern thread_local uint64_t pib_error_mask;     /// the pib mask
+    extern thread_local uint64_t operational_state;  /// the operational mode
 
 };
 
