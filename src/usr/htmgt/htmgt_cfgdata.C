@@ -28,6 +28,7 @@
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
 #include "htmgt_poll.H"
+#include "ipmi/ipmisensor.H"
 
 
 using namespace TARGETING;
@@ -160,7 +161,8 @@ namespace HTMGT
                                 break;
 
                             case OCC_CFGDATA_SYS_CONFIG:
-                                getSystemConfigMessageData(cmdData, cmdDataLen);
+                                getSystemConfigMessageData(occ->getTarget(),
+                                                           cmdData, cmdDataLen);
                                 break;
 
                             case OCC_CFGDATA_MEM_THROTTLE:
@@ -285,9 +287,6 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
         {
             numSets++;
 
-            centPos = (*centaur)->getAttr<ATTR_POSITION>();
-            sensor = 0xC000 + centPos; //TODO RTC 115294
-
             //Do the entry for the Centaur itself
 
             //Reserved
@@ -295,14 +294,19 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
             index += 4;
 
             //Hardware Sensor ID
+            sensor = UTIL::getSensorNumber(*centaur,
+                                           SENSOR_NAME_MEMBUF_STATE);
             memcpy(&o_data[index], &sensor, 2);
             index += 2;
 
             //Temperature Sensor ID
+            sensor = UTIL::getSensorNumber(*centaur,
+                                           SENSOR_NAME_MEMBUF_TEMP);
             memcpy(&o_data[index], &sensor, 2);
             index += 2;
 
             //Centaur #
+            centPos = (*centaur)->getAttr<ATTR_POSITION>();
             o_data[index++] = centPos;
 
             //Dimm # (0xFF since a centaur)
@@ -331,19 +335,19 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                     //Fill in the DIMM entry
                     numSets++;
 
-                    dimmPos = getOCCDIMMPos(*mba, *dimm);
-
                     //Reserved
                     memset(&o_data[index], 0, 4);
                     index += 4;
 
                     //Hardware Sensor ID
-                    sensor = 0xD000 + (centPos<<8) + dimmPos; //TODO RTC 115294
+                    sensor = UTIL::getSensorNumber(*dimm,
+                                                   SENSOR_NAME_DIMM_STATE);
                     memcpy(&o_data[index], &sensor, 2);
                     index += 2;
 
                     //Temperature Sensor ID
-                    sensor = 0xD000 + (centPos<<8) + dimmPos; //TODO RTC 115294
+                    sensor = UTIL::getSensorNumber(*dimm,
+                                                   SENSOR_NAME_DIMM_TEMP);
                     memcpy(&o_data[index], &sensor, 2);
                     index += 2;
 
@@ -351,6 +355,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
                     o_data[index++] = centPos;
 
                     //DIMM #
+                    dimmPos = getOCCDIMMPos(*mba, *dimm);
                     o_data[index++] = dimmPos;
 
                     //Reserved
@@ -527,7 +532,9 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
 }
 
 
-void getSystemConfigMessageData(uint8_t* o_data, uint64_t & o_size)
+
+void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
+                                uint64_t & o_size)
 {
     uint64_t index = 0;
     uint16_t sensor = 0;
@@ -540,31 +547,59 @@ void getSystemConfigMessageData(uint8_t* o_data, uint64_t & o_size)
     o_data[index++] = OCC_CFGDATA_OPENPOWER_SYSTEMTYPE;
 
     //processor sensor ID
-    sensor = 0x1000; //TODO all sensors - RTC 115294
+    ConstTargetHandle_t proc = getParentChip(i_occ);
+    sensor = UTIL::getSensorNumber(proc, SENSOR_NAME_PROC_STATE);
     memcpy(&o_data[index], &sensor, 2);
     index += 2;
 
-    //Next 12*4 bytes are for core sensors
+    //Next 12*4 bytes are for core sensors.
+    //If a new processor with more cores comes along,
+    //this command will have to change.
+    TargetHandleList cores;
+    TargetHandleList::iterator coreIt;
+    getChildChiplets(cores, proc, TYPE_CORE, false);
+
+    uint16_t tempSensor = 0;
+    uint16_t freqSensor = 0;
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {
+        tempSensor = 0;
+        freqSensor = 0;
+
+        if (core < cores.size())
+        {
+            tempSensor = UTIL::getSensorNumber(cores[core],
+                                               SENSOR_NAME_CORE_TEMP);
+
+            freqSensor = UTIL::getSensorNumber(cores[core],
+                                               SENSOR_NAME_CORE_FREQ);
+        }
+
         //Core Temp Sensor ID
-        sensor = 0x2000 + core; //TODO all sensors - RTC 115294
-        memcpy(&o_data[index], &sensor, 2);
+        memcpy(&o_data[index], &tempSensor, 2);
         index += 2;
 
         //Core Frequency Sensor ID
-        sensor = 0x3000 + core; //TODO all sensors - RTC 115294
-        memcpy(&o_data[index], &sensor, 2);
+        memcpy(&o_data[index], &freqSensor, 2);
         index += 2;
     }
 
+    TargetHandle_t sys = NULL;
+    TargetHandleList nodes;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != NULL);
+    getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
+    assert(!nodes.empty());
+    TargetHandle_t node = nodes[0];
+
+
     //Backplane sensor ID
-    sensor = 0xB000;
+    sensor = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
     memcpy(&o_data[index], &sensor, 2);
     index += 2;
 
     //APSS sensor ID
-    sensor = 0xA000;
+    sensor = UTIL::getSensorNumber(sys, SENSOR_NAME_APSS_FAULT);
     memcpy(&o_data[index], &sensor, 2);
     index += 2;
 
@@ -596,12 +631,13 @@ void getThermalControlMessageData(uint8_t* o_data,
     o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
 
     o_data[index++] = CFGDATA_FRU_TYPE_MEMBUF;
-    o_data[index++] = CFDATA_DVFS_NOT_DEFINED;
+    o_data[index++] = sys->
+                        getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
     o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
     o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
 
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
-    o_data[index++] = CFDATA_DVFS_NOT_DEFINED;
+    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
     o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
     o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
 
@@ -712,18 +748,37 @@ void getApssMessageData(uint8_t* o_data,
     CPPASSERT(sizeof(function) == sizeof(gain));
     CPPASSERT(sizeof(function) == sizeof(offset));
 
+    //The APSS function below hardcodes 16 channels,
+    //so everything better agree.
+    CPPASSERT(sizeof(function) == 16);
+
+    const uint16_t (*sensors)[16] = NULL;
+    errlHndl_t err = SENSOR::getAPSSChannelSensorNumbers(sensors);
+    if (err)
+    {
+        TMGT_ERR("getApssMessageData: Call to getAPSSChannelSensorNumbers "
+                 "failed.");
+        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        sensors = NULL;
+    }
+
     o_data[0] = OCC_CFGDATA_APSS_CONFIG;
     o_data[1] = OCC_CFGDATA_APSS_VERSION;
     o_data[2] = 0;
     o_data[3] = 0;
     uint64_t idx = 4;
+    uint16_t sensorId = 0;
 
     for(uint64_t channel = 0; channel < sizeof(function); ++channel)
     {
         o_data[idx] = function[channel]; // ADC Channel assignement
         idx += sizeof(uint8_t);
 
-        uint16_t sensorId = 0xA100 + channel; //TODO all sensors - RTC 115294
+        sensorId = 0;
+        if (sensors != NULL)
+        {
+            sensorId = (*sensors)[channel];
+        }
         memcpy(o_data+idx,&sensorId,sizeof(uint16_t)); // Sensor ID
         idx += sizeof(uint16_t);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,36 +347,45 @@ public:
 
     void testSystemConfigData()
     {
+        TargetHandleList occs;
+        TargetHandleList::iterator occ;
         uint8_t data[4*KILOBYTE];
         uint64_t size = 0;
 
         TS_TRACE(ENTER_MRK"HTMGT: testSystemConfigData");
 
-        getSystemConfigMessageData(data, size);
+        getAllChiplets(occs, TYPE_OCC, true);
 
-        if (data[0] != OCC_CFGDATA_SYS_CONFIG)
+        for (occ=occs.begin();occ!=occs.end();++occ)
         {
-            TS_FAIL("Wrong format 0x%X for system config data command",
-                    data[0]);
-        }
+            memset(data, 0, 4*KILOBYTE);
 
-        if (data[1] != 0x10)
-        {
-            TS_FAIL("Wrong version 0x%X for system config data command",
-                    data[1]);
-        }
+            getSystemConfigMessageData(*occ, data, size);
+
+            if (data[0] != OCC_CFGDATA_SYS_CONFIG)
+            {
+                TS_FAIL("Wrong format 0x%X for system config data command",
+                        data[0]);
+            }
+
+            if (data[1] != 0x10)
+            {
+                TS_FAIL("Wrong version 0x%X for system config data command",
+                        data[1]);
+            }
 
 
-        if (data[2] != OCC_CFGDATA_OPENPOWER_SYSTEMTYPE)
-        {
-            TS_FAIL("wrong system type 0x%X for system config data command",
-                    data[2]);
-        }
+            if (data[2] != OCC_CFGDATA_OPENPOWER_SYSTEMTYPE)
+            {
+                TS_FAIL("wrong system type 0x%X for system config data command",
+                        data[2]);
+            }
 
-        if (size != 57)
-        {
-            TS_FAIL("wrong size %d for system config data command",
-                    size);
+            if (size != 57)
+            {
+                TS_FAIL("wrong size %d for system config data command",
+                        size);
+            }
         }
 
     }

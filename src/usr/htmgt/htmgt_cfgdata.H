@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,11 +173,13 @@ namespace HTMGT
     /**
      * Fills in the System Config Configuration Data message buffer.
      *
+     * @param[in]  i_occ  - the OCC target
      * @param[out] o_data - preallocated buffer to fill in
      * @param[out] o_size - set to the message size
      * @pre o_data is large enough.
      */
-    void getSystemConfigMessageData(uint8_t* o_data, uint64_t & o_size);
+    void getSystemConfigMessageData(const TARGETING::TargetHandle_t i_occ,
+                                    uint8_t* o_data, uint64_t & o_size);
 
 
     /**
