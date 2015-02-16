@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <endian.h>
+#include <unistd.h>
 #include <hwpf/fapi/fapiTarget.H>
 #include <attributeenums.H>
 #include <pnor/ecc.H>
@@ -1024,7 +1025,7 @@ bool AttrTextToBinaryBlob::getAttrDataFromMap(const char * i_attrString,
 
         o_attrId = currentAttr->iv_attrId;
         o_attrElemSizeBytes = currentAttr->iv_attrElemSizeBytes;
-        for(size_t i = 0; i < sizeof(o_dims)/sizeof(uint32_t); ++i)
+        for(size_t i = 0; i < sizeof(o_dims)/sizeof(size_t); ++i)
         {
             o_dims[i] = currentAttr->iv_dims[i];
         }
