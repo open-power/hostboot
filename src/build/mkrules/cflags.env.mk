@@ -36,10 +36,12 @@ CFLAGS += -D__HOSTBOOT_MODULE=$(MODULE)
 endif
 
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib
+# TODO RTC: 123994 - ELFv2 ABI support (-mabi=elfv1)
 CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
           -Wall -Werror -mtraceback=no -pipe \
-	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
-ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian
+	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian \
+      -mabi=elfv1
+ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian -mabi=elfv1
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall \
 	    -fuse-cxa-atexit
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
