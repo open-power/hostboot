@@ -175,6 +175,18 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
         }
     }
+
+    // Resolve the side characteristics of the Processor SBE Seeproms
+    errlHndl_t err = SBE::resolveProcessorSbeSeeproms();
+    if ( err )
+    {
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( err );
+
+        // Commit Error
+        errlCommit( err, HWPF_COMP_ID );
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config exit" );
 

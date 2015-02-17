@@ -20,9 +20,9 @@ config SBE_UPDATE_INDEPENDENT
     depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS
     help
         If an update is necessary, and if the "current" SBE SEEPROM of this
-        IPL is not the 'GOLDEN' SBE SEEPROM, then only the current SBE SEEPROM
-        will be updated.  After the update a re-IPL request will be issued.
-        The other SBE SEEPROM, whether 'GOLDEN' or not, will not be updated.
+        IPL is not pointing at PNOR's 'GOLDEN' side, then only the current SBE
+        SEEPROM will be updated.  After the update a re-IPL request will be
+        issued. The other SBE SEEPROM will not be updated.
 
 config NO_SBE_UPDATES
     default n

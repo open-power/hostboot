@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,6 +56,10 @@ enum sbeModuleId
     SBE_CUSTOMIZE_IMG                   = 0x0B,
     SBE_PERFORM_UPDATE_ACTIONS          = 0x0C,
     SBE_MASTER_VERSION_COMPARE          = 0x0D,
+    SBE_RESOLVE_HBB_ADDR                = 0x0E,
+    SBE_READ_SBE_IMAGE                  = 0x0F,
+    SBE_WRITE_SBE_IMAGE                 = 0x10,
+    SBE_GET_SBE_IMAGE_SIZE              = 0x11,
 };
 
 /**
@@ -91,6 +97,8 @@ enum sbeReasonCode
     SBE_MISCOMPARE_WITH_MASTER_VERSION  = SBE_COMP_ID | 0x13,
     SBE_ERROR_ON_UPDATE                 = SBE_COMP_ID | 0x14,
     SBE_MASTER_VERSION_DOWNLEVEL        = SBE_COMP_ID | 0x15,
+    SBE_IMAGE_GET_SET_SCALAR_FAIL       = SBE_COMP_ID | 0x16,
+
 };
 
 };  // end SBE

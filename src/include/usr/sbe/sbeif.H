@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -65,6 +67,15 @@ namespace SBE
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t updateProcessorSbeSeeproms();
+
+    /**
+     * @brief Iterates through all the functional processors and resolves
+     *        the Hostboot Base Addresses (HBB) in each SBE Image and performs
+     *        any necessary operations related to GOLDEN side support.
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t resolveProcessorSbeSeeproms();
 
 
 } //end namespace SBE

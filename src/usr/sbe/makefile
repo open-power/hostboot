@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 
 OBJS += sbe_update.o
+OBJS += sbe_resolve_sides.o
 
 SUBDIRS += test.d
 

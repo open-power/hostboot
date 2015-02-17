@@ -50,6 +50,7 @@
 #include <sbe/sbeif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
+#include "sbe_resolve_sides.H"
 
 //  fapi support
 #include    <fapi.H>
@@ -111,6 +112,25 @@ namespace SBE
                    ENTER_MRK"updateProcessorSbeSeeproms()" );
 
         do{
+
+#ifdef CONFIG_NO_SBE_UPDATES
+            TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
+                       "SBE updates not configured");
+            break;
+#endif
+
+#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
+            // Check if FSP-services are enabled and if we're running in simics
+            if ( !INITSERVICE::spBaseServicesEnabled() &&
+                 !Util::isSimicsRunning() )
+            {
+                assert (false, "resolveProcessorSbeSeeproms() - "
+                        "SBE_UPDATE_SEQUENTIAL mode, but FSP-services are not "
+                        "enabled - Invalid Configuration");
+            }
+            // else - continue on
+#endif
+
 
             // Get Target Service, and the system target.
             TargetService& tS = targetService();
@@ -204,11 +224,6 @@ namespace SBE
                  err = NULL;
             }
 
-#ifdef CONFIG_NO_SBE_UPDATES
-            TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
-                       "SBE updates not configured");
-            break;
-#endif
 
             for(uint32_t i=0; i<procList.size(); i++)
             {
@@ -277,7 +292,6 @@ namespace SBE
                 /**********************************************/
                 if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
                 {
-
                     err = performUpdateActions(sbeState);
                     if (err)
                     {
@@ -328,7 +342,6 @@ namespace SBE
 
             } //end of Target for loop collecting each target's SBE State
 
-
             /**************************************************************/
             /*  Perform System Operation                                  */
             /**************************************************************/
@@ -355,7 +368,7 @@ namespace SBE
                 }
 
 #ifdef CONFIG_BMC_IPMI
-                // @todo RTC 120734 reset system's reboot count via IPMI sensor
+                sbePreShutdownIpmiCalls();
 #endif
 
                 TRACFCOMP( g_trac_sbe,
@@ -685,14 +698,15 @@ namespace SBE
 
         do{
 
-            // @todo RTC 120734 - before customizing, ensure correct HBB address
-            // is set in the necessary attribute
-
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target
               l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
                          (const_cast<TARGETING::Target*>(i_target)));
 
+            // NOTE: The p8_xip_customize_procedure uses SBE_IMAGE_OFFSET
+            // attribute for HBB address value.  Purpsely leaving this
+            // attribute as-is for now and will do the check for HBB address
+            // later.
 
             // The p8_xip_customize() procedure tries to include as much core
             // information as possible, but is limited by SBE Image size
@@ -870,7 +884,6 @@ namespace SBE
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH );
             }
-
 
         }while(0);
 
@@ -1715,6 +1728,26 @@ namespace SBE
             // The Customized Image For This Target Still Resides In
             // The SBE Update VMM Space: SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE
 
+#ifdef CONFIG_SBE_UPDATE_INDEPENDENT
+            // Ensure HBB address value in the customized image is correct
+            // for this side
+            bool imageWasUpdated=false;
+            err = resolveImageHBBaddr ( io_sbeState.target,
+                                        reinterpret_cast<void*>(SBE_IMG_VADDR),
+                                        ((io_sbeState.seeprom_side_to_update ==
+                                         EEPROM::SBE_PRIMARY ) ?
+                                            PNOR::SBE_SEEPROM0 :
+                                            PNOR::SBE_SEEPROM1  ),
+                                        PNOR::WORKING,
+                                        imageWasUpdated );
+
+            if (imageWasUpdated == true )
+            {
+                TRACUCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - "
+                           "HBB Address's MMIO Offset Updated in Image");
+            }
+
+#endif
 
             // Inject ECC
             // clear out back half of page block to use as temp space
@@ -1941,7 +1974,6 @@ namespace SBE
                            io_sbeState.seeprom_0_ver.data_crc, isSimics_check);
             }
 
-
             /**************************************************************/
             /*  Compare SEEPROM 1 with PNOR and Customized Image CRC --   */
             /*  -- dirty or clean?                                        */
@@ -2153,22 +2185,55 @@ namespace SBE
 #ifdef CONFIG_SBE_UPDATE_INDEPENDENT
 
             // The 2 SBE SEEPROMs are independent of each other
-            // Determine if PNOR is 1- or 2-sided and if there is a
-            // GOLDEN boot involved
+            // Determine if PNOR is 1- or 2-sided and if the current
+            // Seeprom is pointing at PNOR's GOLDEN side
 
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+            PNOR::SideId tmp_side = PNOR::WORKING;
+            PNOR::SideInfo_t pnor_side_info;
+            err = PNOR::getSideInfo (tmp_side, pnor_side_info);
+            if ( err )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK
+                           "SBE Update() - Error returned from "
+                           "PNOR::getSideInfo() rc=0x%.4X, Target UID=0x%X",
+                           err->reasonCode(),
+                           TARGETING::get_huid(io_sbeState.target));
+                break;
+            }
 
-            // @todo RTC 120734 - ask PNOR if we are in "GOLDEN" mode,
-            // which would mean that we are booting off the the GOLDEN
-            // SBE SEEPROM which corresponds to the GOLDEN side of PNOR
-/*
-            if (true)
+            TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: PNOR Info: "
+                       "side-%c, sideId=0x%X, isGolden=%d, hasOtherSide=%d",
+                       TARGETING::get_huid(io_sbeState.target),
+                       pnor_side_info.side, pnor_side_info.id,
+                       pnor_side_info.isGolden, pnor_side_info.hasOtherSide);
+
+            if ( pnor_side_info.isGolden == true )
             {
                 // If true, nothing to do (covered in istep 6 function)
                 l_actions = CLEAR_ACTIONS;
 
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                           "Booting GOLDEN SBE SEEPROM in PNOR 2-sided Mode. "
+                           "Booting READ_ONLY SEEPROM pointing at PNOR's "
+                           "GOLDEN side. No updates for cur side=%d. Continue "
+                            "IPL. (sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.cur_seeprom_side,
+                           i_system_situation, l_actions,
+                           io_sbeState.mvpdSbKeyword.flags);
+                break;
+            }
+
+            else if (  ( pnor_side_info.hasOtherSide == false ) &&
+                       ( io_sbeState.cur_seeprom_side == READ_ONLY_SEEPROM ) )
+            {
+                // Even though current seeprom is not pointing at PNOR's
+                // GOLDEN side, treat like READ_ONLY if booting from READ_ONLY
+                // seeprom and and PNOR does not have another side - No Update
+                // (ie, Palmetto configuration)
+                l_actions = CLEAR_ACTIONS;
+
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                           "Treating cur like READ_ONLY SBE SEEPROM. "
                            "No updates for cur side=%d. Continue IPL. "
                            "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
                            TARGETING::get_huid(io_sbeState.target),
@@ -2179,22 +2244,14 @@ namespace SBE
             }
             else // proceed to update this side
             {
+                // proceed to update this side
                 TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                           "NOT Booting GOLDEN SBE SEEPROM in PNOR 2-sided "
-                           "mode. Checking for update on cur side=%d ",
+                           "NOT Booting READ_ONLY SEEPROM. Check for update "
+                           "on cur side=%d ",
                            TARGETING::get_huid(io_sbeState.target),
                            io_sbeState.cur_seeprom_side)
             }
-*/
-#else
 
-            // @todo RTC 120734 - check this assumption
-            // Assume that we're only checking/updating the current side
-            TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                       "PNOR 1-sided so only check for update on cur side=%d",
-                       TARGETING::get_huid(io_sbeState.target),
-                       io_sbeState.cur_seeprom_side);
-#endif
 
             // Check for clean vs. dirty only on cur side
             if ( i_system_situation & SITUATION_CUR_IS_DIRTY )
@@ -2203,6 +2260,7 @@ namespace SBE
                 l_actions |= IPL_RESTART;
                 l_actions |= DO_UPDATE;
                 l_actions |= UPDATE_SBE;
+                l_actions |= UPDATE_MVPD; // even though flags byte not updated
 
                 // Set Update side to cur
                 io_sbeState.seeprom_side_to_update =
