@@ -2980,6 +2980,9 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         info.scomAddr = 0x000A0000 + engine*0x20;
         info.engine = engine;
         info.freq = i2cGetNestFreq()*1000*1000; //convert MHz->Hz
+        // PIB_CLK = NEST_FREQ /4
+        // Local Bus = PIB_CLK / 4
+        info.freq = info.freq/16; //convert nest to local bus
 
         o_info.push_back(info);
     }

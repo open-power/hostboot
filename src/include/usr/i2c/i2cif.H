@@ -158,7 +158,7 @@ struct MasterInfo_t
 {
     uint64_t scomAddr; //< Base scom address for control regs
     uint8_t engine;    //< Engine number
-    uint32_t freq;     //< Clock frequency of master in Hz
+    uint32_t freq;     //< Local Bus frequency of master in Hz
 };
 
 /**

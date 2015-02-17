@@ -235,8 +235,7 @@ void add_i2c_info( const TARGETING::Target* i_targ,
         i_dt->addPropertyCell32(l_i2cNode, "chip-engine#", i2cm->engine);
         const char* l_i2cCompatStrs[] = {l_masterName, NULL};
         i_dt->addPropertyStrings(l_i2cNode, "compatible", l_i2cCompatStrs);
-        i_dt->addPropertyCell32(l_i2cNode, "clock-frequency",
-                                i2cm->freq / 4); //Opal wants it pre-divided
+        i_dt->addPropertyCell32(l_i2cNode, "clock-frequency", i2cm->freq);
         i_dt->addPropertyCell32(l_i2cNode, "#address-cells", 1);
         i_dt->addPropertyCell32(l_i2cNode, "#size-cells", 0);
 
@@ -274,7 +273,7 @@ void add_i2c_info( const TARGETING::Target* i_targ,
              */
             dtOffset_t l_busNode = i_dt->addNode( l_i2cNode,
                                                   "i2c-bus", eep->port );
-            i_dt->addPropertyCell32(l_busNode, "reg", 0);
+            i_dt->addPropertyCell32(l_busNode, "reg", eep->port);
             i_dt->addPropertyCell32(l_busNode, "bus-frequency", eep->busFreq);
             i_dt->addPropertyCell32(l_busNode, "#address-cells", 1);
             i_dt->addPropertyCell32(l_busNode, "#size-cells", 0);
