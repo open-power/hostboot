@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttrData.C,v 1.1 2014/12/11 13:39:02 whs Exp $
+// $Id: getMBvpdAttrData.C,v 1.2 2015/02/24 19:23:06 whs Exp $
 /**
  *  @file getMBvpdAttrData.C
  *
@@ -48,43 +48,64 @@ namespace getAttrData
 // Attribute definition table
 // ----------------------------------------------------------------------------
 
-//  Attribute defintions
 const MBvpdAttrDef g_MBVPD_ATTR_DEF_array [] =
 {
+//----------------------------------------------------------------------------------
+// Attribute exceptions to use with SPDX or VSPD VD keyword
+// Note: Ideally, all new exception will be in this section and be for both
+//       ISDIMMs and CDIMMMs
+//----------------------------------------------------------------------------------
+    {ATTR_VPD_DIMM_RCD_IBT,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|UINT8_DATA,0},
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|BOTH_DIMMS,0},
+    {ATTR_VPD_DRAM_WR_VREF,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
 
-// Planar ISDIMM changes in V61 (ascii 11) and V63 (ascii 13)
-    {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,V13,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|UINT8_DATA,0},
-    {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,VBASE,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|DEFAULT_VALUE,0x64},
-    {ATTR_VPD_DIMM_RCD_IBT,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|DEFAULT_VALUE,0},
+//----------------------------------------------------------------------------------
+// Attribute exceptions to use with VINI VZ keyword
+// All entries should select either ISDIMM or CDIMM since both used the VZ keyword
+// Note: Ideally, there will be no more additions in this section as all future
+//       DIMMs will use the VD keword
+//----------------------------------------------------------------------------------
 
-    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,V13,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|BOTH_DIMMS,0},
-    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,VBASE,MBVPD_KEYWORD_MT,35,UINT8_BY2_BY2|DEFAULT_VALUE,1},
-    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|DEFAULT_VALUE,0},
-
-    {ATTR_VPD_DRAM_WR_VREF,ISDIMM,V13,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
+// Planar ISDIMM changes
+// Need to include these exceptions to support early Palmetto and Habanero without the VD keyword & VZ=13
+    {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|UINT8_DATA,0},
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|BOTH_DIMMS,0},
+    // Create 3 reserved bytes in V13
+    {ATTR_VPD_DRAM_WR_VREF,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
+// Need to include these exceptions to support early Palmetto and Habanero with VZ=11 and 10
+    {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,ALL_VZ,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|DEFAULT_VALUE,0x64},
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,ALL_VZ,MBVPD_KEYWORD_MT,35,UINT8_BY2_BY2|DEFAULT_VALUE,1},
 
 // CDIMM changes in V60 (ascii 10)
-    {ATTR_VPD_TSYS_ADR,CDIMM,V10,MBVPD_KEYWORD_MR,49,UINT8_BY2|PORT00,0},
-    {ATTR_VPD_TSYS_ADR,CDIMM,VBASE,MBVPD_KEYWORD_MR,51,UINT8_BY2|PORT00,0},
+// Need to include these exceptions to support pre DD 2.0 centaurs
+    {ATTR_VPD_TSYS_ADR,CDIMM,VZ_10,MBVPD_KEYWORD_MR,49,UINT8_BY2|PORT00,0},
+    {ATTR_VPD_TSYS_ADR,CDIMM,ALL_VZ,MBVPD_KEYWORD_MR,51,UINT8_BY2|PORT00,0},
 
-    {ATTR_VPD_TSYS_DP18,CDIMM,V10,MBVPD_KEYWORD_MR,49,UINT8_BY2|PORT11,0},
-    {ATTR_VPD_TSYS_DP18,CDIMM,VBASE,MBVPD_KEYWORD_MR,51,UINT8_BY2|PORT11,0},
+    {ATTR_VPD_TSYS_DP18,CDIMM,VZ_10,MBVPD_KEYWORD_MR,49,UINT8_BY2|PORT11,0},
+    {ATTR_VPD_TSYS_DP18,CDIMM,ALL_VZ,MBVPD_KEYWORD_MR,51,UINT8_BY2|PORT11,0},
 
-    {ATTR_VPD_RLO,CDIMM,V10,MBVPD_KEYWORD_MT,60,UINT8_BY2|LOW_NIBBLE,0},
-    {ATTR_VPD_RLO,CDIMM,VBASE,MBVPD_KEYWORD_MR,49,UINT8_BY2|LOW_NIBBLE,0},
+    {ATTR_VPD_RLO,CDIMM,VZ_10,MBVPD_KEYWORD_MT,60,UINT8_BY2|LOW_NIBBLE,0},
+    {ATTR_VPD_RLO,CDIMM,ALL_VZ,MBVPD_KEYWORD_MR,49,UINT8_BY2|LOW_NIBBLE,0},
 
-    {ATTR_VPD_WLO,CDIMM,V10,MBVPD_KEYWORD_MT,60,UINT8_BY2|HIGH_NIBBLE,0},
-    {ATTR_VPD_WLO,CDIMM,VBASE,MBVPD_KEYWORD_MR,49,UINT8_BY2|HIGH_NIBBLE,0},
+    {ATTR_VPD_WLO,CDIMM,VZ_10,MBVPD_KEYWORD_MT,60,UINT8_BY2|HIGH_NIBBLE,0},
+    {ATTR_VPD_WLO,CDIMM,ALL_VZ,MBVPD_KEYWORD_MR,49,UINT8_BY2|HIGH_NIBBLE,0},
 
-    {ATTR_VPD_GPO,CDIMM,V10,MBVPD_KEYWORD_MT,61,UINT8_BY2,0},
-    {ATTR_VPD_GPO,CDIMM,VBASE,MBVPD_KEYWORD_MR,50,UINT8_BY2,0},
+    {ATTR_VPD_GPO,CDIMM,VZ_10,MBVPD_KEYWORD_MT,61,UINT8_BY2,0},
+    {ATTR_VPD_GPO,CDIMM,ALL_VZ,MBVPD_KEYWORD_MR,50,UINT8_BY2,0},
 
+//----------------------------------------------------------------------------------
 // Base Term Data definitions to be used if no other version exceptions
+// All entries to be ALL_DIMM ALL_VER
+// Note: No changes are expected in this section
+//----------------------------------------------------------------------------------
+// Base Term Data definitions to be used if no version exceptions
     {ATTR_VPD_DRAM_RON,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,0,UINT8_BY2_BY2|XLATE_DRAM_RON,0},
     {ATTR_VPD_DRAM_RTT_NOM,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,2,UINT8_BY2_BY2_BY4|XLATE_RTT_NOM,0},
     {ATTR_VPD_DRAM_RTT_WR,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,10,UINT8_BY2_BY2_BY4|XLATE_RTT_WR,0},
     {ATTR_VPD_ODT_RD,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,18,UINT8_BY2_BY2_BY4,0},
     {ATTR_VPD_ODT_WR,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,26,UINT8_BY2_BY2_BY4,0},
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|DEFAULT_VALUE,0},
+    {ATTR_VPD_DIMM_RCD_IBT,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|DEFAULT_VALUE,0},
     {ATTR_VPD_CEN_RD_VREF,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,37,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
     {ATTR_VPD_DRAM_WR_VREF,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,38,UINT32_BY2|XLATE_WR_VREF,0},
     {ATTR_VPD_DRAM_WRDDR4_VREF,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,42,UINT8_BY2,0},
@@ -105,7 +126,7 @@ const MBvpdAttrDef g_MBVPD_ATTR_DEF_array [] =
     {ATTR_VPD_WLO,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,60,UINT8_BY2|HIGH_NIBBLE,0},
     {ATTR_VPD_GPO,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MT,61,UINT8_BY2,0},
 
-// Base Phase Rotator definitions to be used if no other version exceptions
+// Base Phase Rotator definitions to be used if no version exceptions
     {ATTR_VPD_CEN_PHASE_ROT_M0_CLK_P0,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MR,0,UINT8_BY2,0},
     {ATTR_VPD_CEN_PHASE_ROT_M0_CLK_P1,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MR,1,UINT8_BY2,0},
     {ATTR_VPD_CEN_PHASE_ROT_M1_CLK_P0,ALL_DIMM,ALL_VER,MBVPD_KEYWORD_MR,2,UINT8_BY2,0},

@@ -1146,35 +1146,49 @@ public:
 #endif
         TS_TRACE( "testGetTermData entry" );
 
-        // ensure attribute look up table is in proper version order
+        // ensure attributes are in proper version order
         for (uint32_t i=0;
-                      i <= fapi::getAttrData::g_MBVPD_ATTR_DEF_array_size; i++)
+                   i < fapi::getAttrData::g_MBVPD_ATTR_DEF_array_size; i++)
         {
             fapi::AttributeId l_attrId  =
-                       fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_attrId;
+                   fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_attrId;
             fapi::getAttrData::DimmType l_dimmType =
-                       fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_dimmType;
+                   fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_dimmType;
             fapi::getAttrData::VpdVersion l_version =
-                       fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_version;
+                   fapi::getAttrData::g_MBVPD_ATTR_DEF_array[i].iv_version;
             // from this piont to the end of the table, for this attribute
-            // dimm type pair, the version should be less in value.
+            // dimm type and version type (VZ or VD),
+            // the version should be less in value.
             // Otherwise, an intended match will not be found
-            for (uint32_t j=i;
-                       j <= fapi::getAttrData::g_MBVPD_ATTR_DEF_array_size; j++)
+            fapi::getAttrData::VpdVersion l_verType =
+                      (fapi::getAttrData::VpdVersion)
+                          (l_version & fapi::getAttrData::ALL_VER);
+            l_version = (fapi::getAttrData::VpdVersion)
+                          (l_version & fapi::getAttrData::VER_MASK);
+
+            for (uint32_t j=i+1;
+                   j < fapi::getAttrData::g_MBVPD_ATTR_DEF_array_size; j++)
             {
                 if ( (l_attrId ==
-                    fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_attrId) &&
-                     (l_dimmType ==
-                    fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_dimmType) &&
+                  fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_attrId) &&
+                     (l_verType &
+                fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version &
+                                              fapi::getAttrData::ALL_VER) &&
+                     ((l_dimmType ==
+                fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_dimmType) ||
+                     ( fapi::getAttrData::ALL_DIMM ==
+                fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_dimmType)) &&
                      (l_version   <
-                    fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version))
+                (fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version &
+                                             fapi::getAttrData::VER_MASK)))
                 {
                     TS_FAIL( "testGetTermData table error: "
                       " attr 0x%08x dimm %d row %d version 0x%04x <"
                       " row %d version 0x%04x",
                       l_attrId,l_dimmType,i,l_version,
                       j,
-                      fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version);
+                  (fapi::getAttrData::g_MBVPD_ATTR_DEF_array[j].iv_version &
+                        fapi::getAttrData::VER_MASK));
                 }
             }
         }

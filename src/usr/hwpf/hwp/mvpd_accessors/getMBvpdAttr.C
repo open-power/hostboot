@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.C,v 1.4 2015/01/09 21:53:07 whs Exp $
+// $Id: getMBvpdAttr.C,v 1.5 2015/02/24 19:22:51 whs Exp $
 /**
  *  @file getMBvpdAttr.C
  *
@@ -156,6 +156,11 @@ fapi::ReturnCode getMBvpdAttr(const fapi::Target   &i_mbaTarget,
             break; // return with error
         }
 
+        FAPI_DBG("getMBvpdAttr: attr=0x%08x, dimmType=%d "
+                 "keyword=%d offset=%d outType=0x%04x default=%d ",
+             i_attr,l_dimmType,l_pAttrDef->iv_keyword,l_pAttrDef->iv_offset,
+             l_pAttrDef->iv_outputType,l_pAttrDef->iv_defaultValue  );
+
         // Either just return defaults or read keyword and return vpd data
         // Mask off the special processing flags from the output type.
         if (DEFAULT_VALUE ==
@@ -222,7 +227,7 @@ fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
             FAPI_ERR(" getMBvpdAttr: Get MBA position failed ");
             break;  //  break out with fapirc
         }
-        FAPI_DBG("getMBvpdAttr: mba %s position=%d",
+        FAPI_DBG("findDimmInfo: mba %s position=%d",
              i_mbaTarget.toEcmdString(),
              o_pos);
 
@@ -230,10 +235,10 @@ fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
         l_fapirc = fapiGetParentChip (i_mbaTarget,o_mbTarget);
         if (l_fapirc)
         {
-            FAPI_ERR("getMBvpdAttr: Finding the parent mb failed ");
+            FAPI_ERR("findDimmInfo: Finding the parent mb failed ");
             break;  //  break out with fapirc
         }
-        FAPI_DBG("getMBvpdAttr: parent path=%s ",
+        FAPI_DBG("findDimmInfo: parent path=%s ",
              o_mbTarget.toEcmdString()  );
 
         // Determine if ISDIMM or CDIMM
@@ -242,7 +247,7 @@ fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
         l_fapirc = fapiGetAssociatedDimms(i_mbaTarget, l_target_dimm_array);
         if(l_fapirc)
         {
-           FAPI_ERR("getMBvpdAttr: Problem getting DIMMs of MBA");
+           FAPI_ERR("findDimmInfo: Problem getting DIMMs of MBA");
            break;   //return error
         }
         if(l_target_dimm_array.size() != 0)
@@ -251,26 +256,109 @@ fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
             l_fapirc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM,&l_target_dimm_array[0],
                           l_customDimm);
             if(l_fapirc) {
-               FAPI_ERR(" getMBvpdAttr: ATTR_SPD_CUSTOM failed ");
+               FAPI_ERR("findDimmInfo: ATTR_SPD_CUSTOM failed ");
                break;   //return error
             }
 
             if (l_customDimm == fapi::ENUM_ATTR_SPD_CUSTOM_YES)
             {
                 o_dimmType = CDIMM;
-                FAPI_DBG("getMBvpdAttr: CDIMM TYPE!!!");
+                FAPI_DBG("findDimmInfo: CDIMM TYPE!!!");
             }
             else
             {
                 o_dimmType = ISDIMM;
-                FAPI_DBG("getMBvpdAttr: ISDIMM TYPE!!!");
+                FAPI_DBG("findDimmInfo: ISDIMM TYPE!!!");
             }
         }
         else
         {
            o_dimmType = ISDIMM;
-           FAPI_DBG("getMBvpdAttr: ISDIMM TYPE (dimm array size = 0)");
+           FAPI_DBG("findDimmInfo: ISDIMM TYPE (dimm array size = 0)");
         }
+    }
+    while (0);
+
+    return l_fapirc;
+}
+
+// return version from keyword VZ or VD
+fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
+                              const DimmType        & i_dimmType,
+                              VpdVersion            & o_version)
+{
+    fapi::ReturnCode l_fapirc;
+    fapi::Target l_mbTarget;
+    fapi::MBvpdKeyword l_keyword = fapi::MBVPD_KEYWORD_VD;  // try VD first
+    fapi::MBvpdRecord  l_record  = fapi::MBVPD_RECORD_SPDX; // default to SPDX
+    uint16_t l_versionBuf = 0;
+    uint32_t  l_bufSize = sizeof(l_versionBuf);
+
+    do
+    {
+        o_version = VD_VER;    // initialize to finding VD keyword
+
+        // find the Centaur memory buffer from the passed MBA
+        l_fapirc = fapiGetParentChip (i_mbaTarget,l_mbTarget);
+        if (l_fapirc)
+        {
+            FAPI_ERR("getVersion: Finding the parent mb failed ");
+            break;  //  break out with fapirc
+        }
+
+        if (CDIMM == i_dimmType)
+        {
+            l_record = fapi::MBVPD_RECORD_VSPD;
+        }
+        // try to get VD keyword from SPDX or VSPD
+        l_fapirc = fapiGetMBvpdField(l_record,
+                                     l_keyword,
+                                     l_mbTarget,
+                                     reinterpret_cast<uint8_t *>(&l_versionBuf),
+                                     l_bufSize);
+
+        // try record VINI keyword VZ (should work)
+        if (l_fapirc)
+        {
+            fapi::ReturnCode l_fapirc2;
+
+            o_version = VZ_VER;    // VZ keyword
+            l_record  = fapi::MBVPD_RECORD_VINI;
+            l_keyword = fapi::MBVPD_KEYWORD_VZ;
+            l_bufSize = sizeof(l_versionBuf);
+
+            l_fapirc2 = fapiGetMBvpdField(l_record,
+                                     l_keyword,
+                                     l_mbTarget,
+                                     reinterpret_cast<uint8_t *>(&l_versionBuf),
+                                     l_bufSize);
+            l_fapirc  = l_fapirc2;   //explicitly free previous error infor
+        }
+        if (l_fapirc)
+        {
+            FAPI_ERR("getVersion: Read of VD and VZ keyword failed");
+            break;  //  break out with fapirc
+        }
+
+        // Check that sufficient size was returned.
+        if (l_bufSize < sizeof(l_versionBuf))
+        {
+            FAPI_ERR("getVersion:"
+                     " less keyword data returned than expected %d < %d",
+                       l_bufSize, sizeof(l_versionBuf));
+            const uint32_t & KEYWORD = l_keyword;
+            const uint32_t & RETURNED_SIZE = l_bufSize;
+            const fapi::Target & CHIP_TARGET = l_mbTarget;
+            FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
+            break;  //  break out with fapirc
+        }
+
+        //return value along with VD or VZ
+        o_version = static_cast<VpdVersion>(o_version |
+                           static_cast<VpdVersion>(FAPI_BE16TOH(l_versionBuf)));
+
+        FAPI_DBG("getVersion: vpd version=0x%x keyword=%d",
+                o_version,l_keyword);
     }
     while (0);
 
@@ -282,23 +370,24 @@ fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
 //     Vesions must be in decreasing order (highest first...)
 //        for a specific Dimm Type. The first match found, searching
 //        from row index 0 to the end, will be used.
-
 fapi::ReturnCode findAttrDef (const fapi::Target    & i_mbaTarget,
                               const DimmType        & i_dimmType,
                               const AttributeId     & i_attr,
                               const MBvpdAttrDef*   & o_pAttrDef)
 {
-    fapi::ReturnCode l_fapirc;
+
+fapi::ReturnCode l_fapirc;
     o_pAttrDef = NULL;
 
     // find first row in the attribute defintion table for this attribute
-    uint32_t l_version = ALL_VER; // invalid vpd value
+    VpdVersion l_version = INVALID_VER; // invalid vpd value
+
     uint32_t i=0; //at this scope for the debug message at end
-    for (; i <= g_MBVPD_ATTR_DEF_array_size; i++)
+    for (; i < g_MBVPD_ATTR_DEF_array_size; i++)
     {
         if ( (g_MBVPD_ATTR_DEF_array[i].iv_attrId == i_attr) &&
-             ((i_dimmType == g_MBVPD_ATTR_DEF_array[i].iv_dimmType) ||
-              (ALL_DIMM   == g_MBVPD_ATTR_DEF_array[i].iv_dimmType)) )
+             ((ALL_DIMM   == g_MBVPD_ATTR_DEF_array[i].iv_dimmType) ||
+              (i_dimmType == g_MBVPD_ATTR_DEF_array[i].iv_dimmType)) )
         {
 
             // most are expected to be the same for all Dimm Types and versions
@@ -307,24 +396,24 @@ fapi::ReturnCode findAttrDef (const fapi::Target    & i_mbaTarget,
                 o_pAttrDef = &g_MBVPD_ATTR_DEF_array[i];
                 break; //use this row
             }
-            if (ALL_VER == l_version)  // have not read version yet
+            if (INVALID_VER == l_version)  // have not read version yet
             {
                 // get vpd version (only when actually needed)
-                FAPI_EXEC_HWP(l_fapirc,
-                              getMBvpdVersion,
-                              i_mbaTarget,
-                              l_version);
-
+                l_fapirc = getVersion (i_mbaTarget,
+                                       i_dimmType,
+                                       l_version);
                 if (l_fapirc)
                 {
-                    FAPI_ERR("getMBvpdAttr: getMBvpdVersion failed");
+                    FAPI_ERR("findAttrDef: getMBvpdVersion failed");
                     break;  //  break out with fapirc
                 }
-                FAPI_DBG("getMBvpdAttr: read vpd version = 0x%04x",
-                          l_version );
-
             }
-            if ((uint32_t)g_MBVPD_ATTR_DEF_array[i].iv_version <= l_version)
+            // If this row is for this version type (VD or VZ)
+            // and is equal or less than the version, then use it
+            if ((g_MBVPD_ATTR_DEF_array[i].iv_version &
+                        (VpdVersion)(ALL_VER & l_version)) &&
+                ((g_MBVPD_ATTR_DEF_array[i].iv_version & VER_MASK) <=
+                 (l_version & VER_MASK)) )
             {
                 o_pAttrDef = &g_MBVPD_ATTR_DEF_array[i];
                 break; //use this row
@@ -340,16 +429,20 @@ fapi::ReturnCode findAttrDef (const fapi::Target    & i_mbaTarget,
             // Could be due to a table error, which shouldn't happen because
             // every attribute has an ALL_DIMM ALL_VER entry.
             // More likely due to an invalid attribute ID being passed.
-            FAPI_ERR("getMBvpdAttr: attr ID not in table 0x%02x dimmType=%d",
+            FAPI_ERR("findAttrDef:"
+                     " attr ID 0x%x not in table  dimmType=%d version=%x",
                       i_attr,
-                      i_dimmType);
-            const fapi::AttributeId & ATTR_ID = i_attr;
-            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_ATTRIBUTE_ID);
+                      i_dimmType,
+                      l_version);
+            const fapi::AttributeId & ATTR_ID   = i_attr;
+            const DimmType          & DIMM_TYPE = i_dimmType;
+            const VpdVersion        & VERSION   = l_version;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_ATTRIBUTE_NOT_FOUND);
         }
     }
     else
     {
-        FAPI_DBG("getMBvpdAttr: use attribute definition row=%d",i );
+        FAPI_DBG("findAttrDef: use attribute definition row=%d",i );
     }
 
     return l_fapirc;
@@ -370,7 +463,7 @@ fapi::ReturnCode readKeyword (const fapi::Target   & i_mbTarget,
     fapi::MBvpdKeyword l_keyword = i_pAttrDef->iv_keyword; //default for CDIMMs
     fapi::MBvpdRecord  l_record  = MBVPD_RECORD_VSPD;      //default for CDIMMs
 
-    FAPI_DBG("getMBvpdAttr: Read keyword %d ",l_keyword);
+    FAPI_DBG("readKeyword: Read keyword %d ",l_keyword);
     do
     {
         if (CDIMM != i_dimmType)
@@ -390,7 +483,7 @@ fapi::ReturnCode readKeyword (const fapi::Target   & i_mbTarget,
             }
             else //table error, shouldn't happen
             {
-                FAPI_ERR("getMBvpdAttr: invalid keyword %d for dimmType=%d",
+                FAPI_ERR("readKeyword: invalid keyword %d for dimmType=%d",
                       l_keyword,
                       i_dimmType);
                 const fapi::AttributeId & ATTR_ID = i_pAttrDef->iv_attrId;
@@ -408,14 +501,14 @@ fapi::ReturnCode readKeyword (const fapi::Target   & i_mbTarget,
                              l_bufsize);
         if (l_fapirc)
         {
-            FAPI_ERR("getMBvpdAttr: Read of attr keyword failed");
+            FAPI_ERR("readKeyword: Read of attr keyword failed");
             break;  //  break out with fapirc
         }
 
         // Check that sufficient keyword was returned.
         if (l_bufsize < ATTR_KEYWORD_SIZE )
         {
-            FAPI_ERR("getMBvpdAttr:"
+            FAPI_ERR("readKeyword:"
                      " less keyword returned than expected %d < %d",
                        i_bufsize, ATTR_KEYWORD_SIZE);
             const uint32_t & KEYWORD = l_keyword;
@@ -437,7 +530,7 @@ fapi::ReturnCode sizeMismatch (const size_t   i_correctSize,
     fapi::ReturnCode l_fapirc;
     do
     {
-        FAPI_ERR("getMBvpdAttr:"
+        FAPI_ERR("sizeMismatch:"
                  " output variable size does not match expected %d != %d"
                  " for attr id=0x%08x",
                    i_correctSize, i_inputSize, i_attr);
@@ -459,7 +552,7 @@ fapi::ReturnCode returnDefault (const MBvpdAttrDef  * i_pAttrDef,
     fapi::ReturnCode l_fapirc;
     uint16_t  l_outputType = i_pAttrDef->iv_outputType & OUTPUT_TYPE_MASK;
 
-    FAPI_DBG("getMBvpdAttr: default value outputType=0x%04x ",
+    FAPI_DBG("returnDefault: default value outputType=0x%04x ",
               l_outputType);
 
     // return default according to the attribute varible type
@@ -590,7 +683,7 @@ fapi::ReturnCode returnDefault (const MBvpdAttrDef  * i_pAttrDef,
             break ;
         }
         default: // Hard to do, but needs to be caught
-            FAPI_ERR("getMBvpdAttrData: invalid output type 0x%04x for"
+            FAPI_ERR("returnDefault: invalid output type 0x%04x for"
                        " attribute ID 0x%08x",
                        i_pAttrDef->iv_outputType,
                        i_pAttrDef->iv_attrId);
@@ -643,7 +736,7 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
     uint16_t  l_outputType= i_pAttrDef->iv_outputType & OUTPUT_TYPE_MASK;
     uint16_t  l_special   = i_pAttrDef->iv_outputType & SPECIAL_PROCESSING_MASK;
 
-    FAPI_DBG("getMBvpdAttr: output offset=0%02x pos=%d outputType=0x%04x"
+    FAPI_DBG("returnValue: output offset=0%02x pos=%d outputType=0x%04x"
               " special=0x%04x ",
               l_attrOffset,i_pos,l_outputType,l_special);
 
@@ -869,7 +962,7 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
             }
             else
             {
-                FAPI_ERR("getMBvpdAttrData: invalid output type 0x%04x for"
+                FAPI_ERR("returnValue: invalid output type 0x%04x for"
                        " attribute ID 0x%08x UINT64_T",
                        i_pAttrDef->iv_outputType,
                        i_pAttrDef->iv_attrId);
@@ -884,7 +977,7 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
             break ;
         }
         default: // Hard to do, but needs to be caught
-            FAPI_ERR("getMBvpdAttrData: invalid output type 0x%04x for"
+            FAPI_ERR("returnValue: invalid output type 0x%04x for"
                        " attribute ID 0x%08x",
                        i_pAttrDef->iv_outputType,
                        i_pAttrDef->iv_attrId);
@@ -1445,12 +1538,12 @@ fapi::ReturnCode FindMRkeyword (const fapi::Target       & i_mbTarget,
                                      l_M0Bufsize);
         if (l_fapirc)
         {
-            FAPI_ERR("getMBvpdAttrData: Read of M0 keyword failed");
+            FAPI_ERR("FindMRkeyword: Read of M0 keyword failed");
             break;  //  break out with fapirc
         }
         if (l_M0_KEYWORD_SIZE > l_M0Bufsize)
         {
-            FAPI_ERR("getMBvpdAttr:"
+            FAPI_ERR("FindMRkeyword:"
                      " less M0 keyword returned than expected %d < %d",
                        l_M0Bufsize, l_M0_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_M0;
@@ -1465,7 +1558,7 @@ fapi::ReturnCode FindMRkeyword (const fapi::Target       & i_mbTarget,
                                     l_index);
         if(l_fapirc)
         {
-            FAPI_ERR("getMBvpdAttrData: read of ISDIMM MBVPD Index failed");
+            FAPI_ERR("FindMRkeyword: read of ISDIMM MBVPD Index failed");
             break;
         }
         if (l_M0_KEYWORD_SIZE < l_index)
@@ -1517,7 +1610,7 @@ fapi::ReturnCode FindMRkeyword (const fapi::Target       & i_mbTarget,
     while (0);
     if (!l_fapirc)
     {
-        FAPI_DBG ("getMBvpdAttr: use MR keyword %d",o_keyword);
+        FAPI_DBG ("FindMRkeyword: use MR keyword %d",o_keyword);
     }
 
     return  l_fapirc;
@@ -1549,7 +1642,7 @@ fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
                                               fapi::TARGET_STATE_PRESENT);
         if(l_fapirc)
         {
-            FAPI_ERR("getMBvpdAttr: read of Associated Dimms failed");
+            FAPI_ERR("FindMTkeyword: read of Associated Dimms failed");
             break;
         }
 
@@ -1561,7 +1654,7 @@ fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
                             l_mba_port);
             if(l_fapirc)
             {
-                FAPI_ERR("getMBvpdAttr: read of ATTR_MBA_PORT failed");
+                FAPI_ERR("FindMTkeyword: read of ATTR_MBA_PORT failed");
                 break;
             }
             l_fapirc = FAPI_ATTR_GET(ATTR_MBA_DIMM,
@@ -1569,7 +1662,7 @@ fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
                             l_mba_dimm);
             if(l_fapirc)
             {
-                FAPI_ERR("getMBvpdAttr: read of ATTR_MBA_DIMM failed");
+                FAPI_ERR("FindMTkeyword: read of ATTR_MBA_DIMM failed");
                 break;
             }
 
@@ -1578,7 +1671,7 @@ fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
                             l_spd_dimm_ranks[l_mba_port][l_mba_dimm]);
             if(l_fapirc)
             {
-                FAPI_ERR("getMBvpdAttr: read of ATTR_SPD_NUM_RANKS failed");
+                FAPI_ERR("FindMTkeyword: read of ATTR_SPD_NUM_RANKS failed");
                 break;
             }
         }
@@ -1610,7 +1703,7 @@ fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
                 {
                     l_rankCopy = 1;
                     //throwing error for all empty
-                    FAPI_ERR("No dimm's found");
+                    FAPI_ERR("FindMTkeyword: No dimm's found");
                     const uint8_t DIMM_P0S0 = l_spd_dimm_ranks[0][0];
                     const uint8_t DIMM_P0S1 = l_spd_dimm_ranks[0][1];
                     const uint8_t DIMM_P1S0 = l_spd_dimm_ranks[1][0];
@@ -1691,7 +1784,7 @@ fapi::ReturnCode FindMTkeyword (const fapi::Target       & i_mbTarget,
     while (0);
     if (!l_fapirc)
     {
-        FAPI_DBG ("getMBvpdAttr: use MT keyword %d",o_keyword);
+        FAPI_DBG ("FindMTkeyword: use MT keyword %d",o_keyword);
     }
 
     return  l_fapirc;

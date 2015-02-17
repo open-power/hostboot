@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.H,v 1.1 2014/12/11 13:38:54 whs Exp $
+// $Id: getMBvpdAttr.H,v 1.2 2015/02/24 19:22:26 whs Exp $
 
 /**
  *  @file getMBvpdAttr.H
@@ -68,18 +68,29 @@ namespace getAttrData
     //  DIMM types
     enum DimmType
     {
-        ALL_DIMM,        // Same for all Dimm types
-        CDIMM,
-        ISDIMM,
+        ALL_DIMM = 0,        // Same for all Dimm types
+        CDIMM    = 1,
+        ISDIMM   = 2,
     };
 
     //  Versions to check for
     enum VpdVersion
     {
-        ALL_VER=0,  // Same for all versions
-        VBASE=1,    // Use this before any other defined versions
-        V10=0x3130, // Version 6.0 is ascii "10"
-        V13=0x3133, // Version 6.3 is ascii "13"
+        VD_VER  = 0x010000,        // Version came from VD keyword
+        VZ_VER  = 0x020000,        // Version came from VZ keyword
+        ALL_VD  = VD_VER,          // Base value for VD keyword (version=0)
+        ALL_VZ  = VZ_VER,          // Base value for VZ keyword (version=0)
+        ALL_VER = VD_VER|VZ_VER,   // Base value for all versions
+
+        // VZ values
+        VZ_10   = VZ_VER | 0x3130, // Version 6.0 is ascii "10"
+        VZ_13   = VZ_VER | 0x3133, // Version 6.3 is ascii "13"
+
+        // VD values
+        VD_01   = VD_VER | 0x3031, // VD version "01"
+
+        VER_MASK= 0xffff,          // Just version
+        INVALID_VER = 0,           // Invalid initialization value
     };
 
 //  Output data types

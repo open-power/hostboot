@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.22 2014/12/11 13:30:47 whs Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.23 2015/02/24 19:25:00 whs Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -381,6 +381,20 @@
     <ffdc>ATTR_ID</ffdc>
     <ffdc>DIMM_TYPE</ffdc>
     <ffdc>OUTPUT_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_ATTRIBUTE_NOT_FOUND</rc>
+    <description>
+        Attribute not found in attribute look up table
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>VERSION</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

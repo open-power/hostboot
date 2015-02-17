@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdVersion.C,v 1.2 2014/02/12 22:14:44 mjjones Exp $
+// $Id: getMBvpdVersion.C,v 1.3 2015/02/24 19:23:56 whs Exp $
 /**
  *  @file getMBvpdVersion.C
  *
@@ -79,7 +81,7 @@ fapi::ReturnCode getMBvpdVersion(
             FAPI_ERR("getMBvpdVersion:"
                      " less keyword data returned than expected %d < %d",
                        l_bufSize, sizeof(l_vpdVersion));
-            const uint32_t & KEYWORD = sizeof(l_vpdVersion);
+            const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_VZ;
             const uint32_t & RETURNED_SIZE = l_bufSize;
             const fapi::Target & CHIP_TARGET = l_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
