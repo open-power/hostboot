@@ -193,7 +193,9 @@ sub printAttribute
     $filter{ENTITY_INSTANCE}                = 1;
     $filter{MBA_NUM}                        = 1;
     $filter{IPMI_INSTANCE}                  = 1;
+    $filter{IPMI_NAME}                      = 1;
     $filter{INSTANCE_ID}                    = 1;
+    $filter{ADC_CHANNEL_SENSOR_NUMBERS}     = 1;
 
     if ($filter{$attribute} == 1)
     {
@@ -531,6 +533,7 @@ sub buildAffinity
                 {
                     $self->processMcs($unit, $node, $proc, $parent_affinity,
                         $parent_physical, $node_phys);
+
                 }
             }
         }
@@ -671,8 +674,8 @@ sub processMcs
                         $self->setHuid($dimm, 0, $node);
                         $self->{targeting}
                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MCSS}[$mcs]
-                          {MEMBUFS}[0]{MBAS}[$mba]{DIMMS}[$affinitypos]{KEY}
-                                = $dimm;
+                          {MEMBUFS}[0]{MBAS}[$mba] {DIMMS}[$affinitypos]{KEY} =
+                          $dimm;
                         $self->setAttribute($dimm, "ENTITY_INSTANCE",
                              $self->{dimm_tpos});
                         $self->{dimm_tpos}++;
