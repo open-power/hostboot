@@ -54,5 +54,11 @@ namespace HTMGT
     errlHndl_t setOccActiveSensors();
 
 
+    /**
+     * @brief Sends the User selected Power Cap to the master OCC.
+     */
+    errlHndl_t sendOccUserPowerCap();
+
+
 } // end namespace
 #endif

@@ -105,6 +105,13 @@ namespace HTMGT
                         // Send ALL config data
                         sendOccConfigData();
 
+                        // Set the User PCAP
+                        l_err = sendOccUserPowerCap();
+                        if (l_err)
+                        {
+                            break;
+                        }
+
                         // Wait for all OCCs to go to the target state
                         l_err = waitForOccState();
                         if ( l_err )
