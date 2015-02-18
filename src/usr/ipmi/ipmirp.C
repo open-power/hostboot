@@ -286,8 +286,18 @@ void IpmiRP::getInterfaceCapabilities(void)
                   iv_outstanding_req, iv_xmit_buffer_size,
                   iv_recv_buffer_size, iv_bmc_timeout, iv_retries);
 
-        mutex_unlock(&iv_mutex);
+        // store this size for hbrt's usage
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        if (sys)
+        {
+            sys->setAttr<TARGETING::ATTR_IPMI_MAX_BUFFER_SIZE>
+                            (iv_xmit_buffer_size - getXportHeaderSize() - 1);
+            IPMI_TRAC("setAttr(IPMI_MAX_BUFFER_SIZE) = %d",
+                        (iv_xmit_buffer_size - getXportHeaderSize() - 1));
+        }
 
+        mutex_unlock(&iv_mutex);
     } while(false);
 
     delete[] data;

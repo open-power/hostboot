@@ -1037,4 +1037,17 @@ ID for the sensor number returned with the elog. -->
     </enumerator>
 </enumerationType>
 
+<attribute>
+    <id>IPMI_MAX_BUFFER_SIZE</id>
+    <description>max buffer size to use for ipmi messages</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>

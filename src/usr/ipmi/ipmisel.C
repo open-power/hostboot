@@ -99,14 +99,14 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
     msg->data[0] = i_eid;
 
     // create the sel record of information
-    IPMISEL::selRecord l_sel;
-    l_sel.record_type = IPMISEL::record_type_ami_esel;
-    l_sel.generator_id = IPMISEL::generator_id_ami;
-    l_sel.evm_format_version = IPMISEL::format_ipmi_version_2_0;
+    selRecord l_sel;
+    l_sel.record_type = record_type_ami_esel;
+    l_sel.generator_id = generator_id_ami;
+    l_sel.evm_format_version = format_ipmi_version_2_0;
     l_sel.sensor_type = i_sensorType;
     l_sel.sensor_number = i_sensorNumber;
     l_sel.event_dir_type = i_eventDirType;
-    l_sel.event_data1 = IPMISEL::event_data1_ami;
+    l_sel.event_data1 = event_data1_ami;
 
     eselInitData *eselData =
         new eselInitData(&l_sel, i_eselData, i_dataSize);
@@ -139,15 +139,15 @@ void process_esel(msg_t *i_msg)
     errlHndl_t l_err = NULL;
     IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
     const uint32_t l_eid = i_msg->data[0];
-    IPMISEL::eselInitData * l_data =
-            (IPMISEL::eselInitData*)(i_msg->extra_data);
+    eselInitData * l_data =
+            (eselInitData*)(i_msg->extra_data);
     IPMI_TRAC(ENTER_MRK "process_esel");
 
     uint32_t l_send_count = MAX_SEND_COUNT;
     while (l_send_count > 0)
     {
         // try to send the eles to the bmc
-        IPMISEL::send_esel(l_data, l_err, l_cc);
+        send_esel(l_data, l_err, l_cc);
 
         // if no error but last completion code was:
         if ((l_err == NULL) &&
@@ -211,7 +211,7 @@ void process_esel(msg_t *i_msg)
 /*
  * @brief Send esel data to bmc
  */
-void send_esel(IPMISEL::eselInitData * i_data,
+void send_esel(eselInitData * i_data,
             errlHndl_t &o_err, IPMI::completion_code &o_cc)
 {
     IPMI_TRAC(ENTER_MRK "send_esel");
@@ -248,7 +248,7 @@ void send_esel(IPMISEL::eselInitData * i_data,
         // first send down the SEL Event Record data
         size_t eSELindex = 0;
         uint8_t l_lastEntry = 0;
-        len = IPMISEL::PARTIAL_ADD_ESEL_REQ + sizeof(IPMISEL::selRecord);
+        len = PARTIAL_ADD_ESEL_REQ + sizeof(selRecord);
         delete [] data;
         data = new uint8_t[len];
 
@@ -256,8 +256,8 @@ void send_esel(IPMISEL::eselInitData * i_data,
         createPartialAddHeader(reserveID,esel_recordID,eSELindex,l_lastEntry,data);
 
         // copy in the SEL event record data
-        memcpy(&data[IPMISEL::PARTIAL_ADD_ESEL_REQ], i_data->eSel,
-                sizeof(IPMISEL::selRecord));
+        memcpy(&data[PARTIAL_ADD_ESEL_REQ], i_data->eSel,
+                sizeof(selRecord));
 
         o_cc = IPMI::CC_UNKBAD;
         TRACFBIN( g_trac_ipmi, INFO_MRK"1st partial_add_esel:", data, len);
@@ -289,7 +289,7 @@ void send_esel(IPMISEL::eselInitData * i_data,
             //if the index + the maximum buffer is less than what we still
             //have left in the eSEL, this is not the last entry (data[6] = 0)
             //otherwise, it is and data[6] = 1
-            if(eSELindex + (l_maxBuffer - IPMISEL::PARTIAL_ADD_ESEL_REQ)
+            if(eSELindex + (l_maxBuffer - PARTIAL_ADD_ESEL_REQ)
                     < l_eSELlen)
             {
                 len = l_maxBuffer;
@@ -297,7 +297,7 @@ void send_esel(IPMISEL::eselInitData * i_data,
             }
             else
             {
-                len = l_eSELlen - eSELindex + IPMISEL::PARTIAL_ADD_ESEL_REQ;
+                len = l_eSELlen - eSELindex + PARTIAL_ADD_ESEL_REQ;
                 l_lastEntry = 0x01;
             }
             delete [] data;
@@ -305,11 +305,11 @@ void send_esel(IPMISEL::eselInitData * i_data,
 
             // fill in the partial_add_esel request (command) data
             createPartialAddHeader(reserveID, esel_recordID,
-                    eSELindex + sizeof(IPMISEL::selRecord),
+                    eSELindex + sizeof(selRecord),
                     l_lastEntry, data);
 
-            uint8_t dataCpyLen = len - IPMISEL::PARTIAL_ADD_ESEL_REQ;
-            memcpy(&data[IPMISEL::PARTIAL_ADD_ESEL_REQ],
+            uint8_t dataCpyLen = len - PARTIAL_ADD_ESEL_REQ;
+            memcpy(&data[PARTIAL_ADD_ESEL_REQ],
                     &i_data->eSelExtra[eSELindex],
                     dataCpyLen);
 

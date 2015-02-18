@@ -25,19 +25,19 @@
 ROOTPATH = ../../..
 MODULE = ipmi
 
+#include common ojects between hostboot and runtime hostboot
+include ipmi.mk
+
 OBJS += ipmimsg.o
 OBJS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmibt.o)
 OBJS += ipmirp.o
-OBJS += ipmisel.o
 OBJS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmidd.o)
 OBJS += ipmifru.o
 OBJS += ipmiconfig.o
-OBJS += ipmisensor.o
 OBJS += ipmiwatchdog.o
 OBJS += ipmifruinv.o
 OBJS += ipmipowerstate.o
 OBJS += ipmiselrecord.o
-OBJS += ipmidcmi.o
 
 SUBDIRS += runtime.d
 #SUBDIRS += test.d

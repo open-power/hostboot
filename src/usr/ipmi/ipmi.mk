@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/ipmi/runtime/makefile $
+# $Source: src/usr/ipmi/ipmi.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,17 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
-MODULE = ipmi_rt
-
-#include common ojects between hostboot and runtime hostboot
-include ../ipmi.mk
-
-OBJS += rt_ipmirp.o
-
-SUBDIRS += test.d
-
-VPATH += ..
-include $(ROOTPATH)/config.mk
-
+# common objects between hostboot and runtime hostboot
+OBJS += ipmisel.o
+OBJS += ipmisensor.o
+OBJS += ipmidcmi.o

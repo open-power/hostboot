@@ -54,11 +54,25 @@ trace_desc_t * g_trac_ipmi;
 
 namespace IPMI
 {
-    // TODO RTC: 124099 move to a _hb attribute
-    // ATTR_IPMI_MAX_BUFFER_SEND_SIZE
-    static const size_t g_max_buffer = 61;
+    static size_t g_max_buffer = 0;
     size_t max_buffer(void)
     {
+        if (g_max_buffer == 0)
+        {
+            TARGETING::Target * sys = NULL;
+            TARGETING::targetService().getTopLevelTarget( sys );
+            if (sys)
+            {
+                g_max_buffer = sys->getAttr
+                                <TARGETING::ATTR_IPMI_MAX_BUFFER_SIZE>();
+                IPMI_TRAC( INFO_MRK"getAttr(IPMI_MAX_BUFFER_SIZE) = %d",
+                        g_max_buffer);
+            }
+            else
+            {
+                IPMI_TRAC( ERR_MRK"IPMI_MAX_BUFFER_SIZE not available" );
+            }
+        }
         return g_max_buffer;
     }
 
@@ -73,14 +87,14 @@ namespace IPMI
         int rc = 0;
 
         // if the buffer is too large this is a programming error.
-        assert(io_len <= g_max_buffer);
+        assert(io_len <= max_buffer());
 
         IPMI_TRAC("calling sync %x:%x  len=%d",
             i_cmd.first, i_cmd.second, io_len);
 
         if(g_hostInterfaces && g_hostInterfaces->ipmi_msg)
         {
-            size_t l_len = g_max_buffer; // max size the BMC can return
+            size_t l_len = max_buffer(); // max size the BMC can return
             uint8_t *l_data = new uint8_t[l_len];
 
             rc = g_hostInterfaces->ipmi_msg(

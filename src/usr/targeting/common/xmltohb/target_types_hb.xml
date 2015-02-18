@@ -66,6 +66,7 @@
     <attribute><id>OPAL_MODEL</id></attribute>
     <attribute><id>HTMGT_SAFEMODE</id></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute><id>IPMI_MAX_BUFFER_SIZE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
