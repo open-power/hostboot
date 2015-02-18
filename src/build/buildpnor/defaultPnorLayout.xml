@@ -165,10 +165,10 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Runtime Services for Sapphire (2.25MB)</description>
+        <description>Hostboot Runtime Services for Sapphire (3.375MB)</description>
         <eyeCatch>HBRT</eyeCatch>
         <physicalOffset>0xA35000</physicalOffset>
-        <physicalRegionSize>0x240000</physicalRegionSize>
+        <physicalRegionSize>0x360000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -176,7 +176,7 @@ Layout Description
     <section>
         <description>Payload (22.5MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0xC75000</physicalOffset>
+        <physicalOffset>0xD95000</physicalOffset>
         <physicalRegionSize>0x1680000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -184,7 +184,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TEST</eyeCatch>
-        <physicalOffset>0x3590000</physicalOffset>
+        <physicalOffset>0x2415000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
         <side>sideless</side>
@@ -193,7 +193,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TESTRO</eyeCatch>
-        <physicalOffset>0x3599000</physicalOffset>
+        <physicalOffset>0x241E000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <testonly/>
