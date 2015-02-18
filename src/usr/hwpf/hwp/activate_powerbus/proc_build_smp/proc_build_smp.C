@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.19 2014/11/18 17:41:03 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.20 2015/02/09 22:36:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1450,6 +1450,14 @@ fapi::ReturnCode proc_build_smp(
                 FAPI_ERR("proc_build_smp: Error from proc_build_smp_set_fbc_cd");
                 break;
             }
+        }
+
+        // set fabric trace configuration registers (non-hotplug)
+        rc = proc_build_smp_set_fbc_nohp_trace(smp);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp: Error from proc_build_smp_set_fbc_nohp_trace");
+            break;
         }
 
         // activate SMP

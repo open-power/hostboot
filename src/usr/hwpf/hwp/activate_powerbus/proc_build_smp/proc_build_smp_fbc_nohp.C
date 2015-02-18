@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_nohp.C,v 1.6 2014/02/23 21:41:07 jmcgill Exp $
+// $Id: proc_build_smp_fbc_nohp.C,v 1.7 2015/02/09 22:37:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_nohp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -854,6 +854,68 @@ fapi::ReturnCode proc_build_smp_set_f_trace(
 
 
 // NOTE: see comments above function prototype in header
+fapi::ReturnCode proc_build_smp_set_fbc_nohp_trace(
+    proc_build_smp_system& i_smp)
+{
+    fapi::ReturnCode rc;
+    std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
+    std::map<proc_fab_smp_chip_id, proc_build_smp_chip>::iterator p_iter;
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_fbc_nohp_trace: Start");
+
+    // process each chip in SMP, program unit non-hotplug registers
+    for (n_iter = i_smp.nodes.begin();
+         (n_iter != i_smp.nodes.end()) && (rc.ok());
+         n_iter++)
+    {
+        for (p_iter = n_iter->second.chips.begin();
+             (p_iter != n_iter->second.chips.end()) && (rc.ok());
+             p_iter++)
+        {
+            fapi::Target target = p_iter->second.chip->this_chip;
+
+            // X link trace setup
+            if (p_iter->second.x_enabled)
+            {
+                rc = proc_build_smp_set_x_trace(p_iter->second);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_x_trace");
+                    break;
+                }
+            }
+
+            // A link trace setup
+            if (p_iter->second.a_enabled)
+            {
+                rc = proc_build_smp_set_a_trace(p_iter->second);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_a_trace");
+                    break;
+                }
+            }
+
+            // F link trace setup
+            if (p_iter->second.pcie_enabled)
+            {
+                rc = proc_build_smp_set_f_trace(p_iter->second);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_f_trace");
+                    break;
+                }
+            }
+	}
+    }
+    // mark function exit
+    FAPI_DBG("proc_build_smp_set_fbc_nohp_trace: End");
+    return rc;
+}
+
+
+// NOTE: see comments above function prototype in header
 fapi::ReturnCode proc_build_smp_set_fbc_nohp(
     proc_build_smp_system& i_smp)
 {
@@ -891,39 +953,6 @@ fapi::ReturnCode proc_build_smp_set_fbc_nohp(
             {
                 FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_pacing_rates");
                 break;
-            }
-
-            // X link trace setup
-            if (p_iter->second.x_enabled)
-            {
-                rc = proc_build_smp_set_x_trace(p_iter->second);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_x_trace");
-                    break;
-                }
-            }
-
-            // A link trace setup
-            if (p_iter->second.a_enabled)
-            {
-                rc = proc_build_smp_set_a_trace(p_iter->second);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_a_trace");
-                    break;
-                }
-            }
-
-            // F link trace setup
-            if (p_iter->second.pcie_enabled)
-            {
-                rc = proc_build_smp_set_f_trace(p_iter->second);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_f_trace");
-                    break;
-                }
             }
         }
     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_nohp.H,v 1.3 2014/02/23 21:41:07 jmcgill Exp $
+// $Id: proc_build_smp_fbc_nohp.H,v 1.4 2015/02/09 22:37:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_nohp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -53,6 +53,15 @@ extern "C"
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// function: program fabric trace configuration registers (non-hotplug)
+// parameters: i_smp => structure encapsulating SMP topology
+// returns: FAPI_RC_SUCCESS if register programming is successful,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_set_fbc_nohp_trace(
+    proc_build_smp_system& i_smp);
 
 //------------------------------------------------------------------------------
 // function: program fabric configuration registers (non-hotplug)
