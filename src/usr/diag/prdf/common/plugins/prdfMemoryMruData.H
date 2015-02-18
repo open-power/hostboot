@@ -33,6 +33,7 @@
 #define __prdfMemoryMruData_H
 
 #include <stdint.h>
+#include <endian.h>
 
 namespace PRDF
 {
