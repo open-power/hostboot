@@ -46,6 +46,9 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfCenSymbol.H>
 
+// Custom compile configs
+#include <config.h>
+
 using namespace TARGETING;
 
 namespace PRDF

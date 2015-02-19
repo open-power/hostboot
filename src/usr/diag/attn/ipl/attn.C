@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/attn.C $                           */
+/* $Source: src/usr/diag/attn/ipl/attn.C $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,9 @@
 #include "common/attnmem.H"
 #include <util/singleton.H>
 #include <errl/errlmanager.H>
+
+// Custom compile configs
+#include <config.h>
 
 using namespace std;
 using namespace PRDF;
@@ -84,5 +87,18 @@ errlHndl_t checkForIplAttentions()
 
     return 0;
 }
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+errlHndl_t checkForCSAttentions()
+{
+    errlHndl_t err = NULL;
+
+    // TODO: RTC 119543
+
+    return err;
+}
+
+#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 }

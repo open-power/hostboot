@@ -39,6 +39,7 @@
 #include <fsi/fsiif.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 #include <hwpisteperror.H>
 
 #include <targeting/attrsync.H>
@@ -69,7 +70,13 @@
 
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmifruinv.H>
+
+// Custom compile configs
 #include <config.h>
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+  #include <diag/attn/attn.H>
+#endif
 
 namespace HWAS
 {
@@ -208,11 +215,26 @@ void* host_gard( void *io_pArgs )
     errlHndl_t errl;
 
     do {
-        // Check whether we're in MPIPL mode
         TARGETING::Target* l_pTopLevel = NULL;
         targetService().getTopLevelTarget( l_pTopLevel );
         HWAS_ASSERT(l_pTopLevel, "HWAS host_gard: no TopLevelTarget");
 
+        #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   INFO_MRK"host_gard: invoke PRD to check for previous CS" );
+
+        errl = ATTN::checkForCSAttentions();
+        if ( NULL != errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"host_gard: error from checkForCSAttentions" );
+            errlCommit(errl, HWPF_COMP_ID);
+        }
+
+        #endif
+
+        // Check whether we're in MPIPL mode
         if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
