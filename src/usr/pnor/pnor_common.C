@@ -66,7 +66,8 @@ const char* cv_EYECATCHER[] = {
     "FIRDATA",   /**< PNOR::FIRDATA        : FIRDATA */
     "ATTR_TMP",  /**< PNOR::ATTR_TMP       : Temporary Attribute Overrides */
     "ATTR_PERM", /**< PNOR::ATTR_PERM      : Permanent Attribute Overrides */
-    "CAPP",      /**< PNOR::CAPP            : CAPP LID */
+    "CAPP",      /**< PNOR::CAPP           : CAPP LID */
+    "VERSION",   /**< PNOR::VERSION        : PNOR Version string */
     "TEST",      /**< PNOR::TEST           : Test space for PNOR*/
     "TESTRO",    /**< PNOR::TESTRO         : ReadOnly Test space for PNOR */
     //Not currently used

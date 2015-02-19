@@ -61,6 +61,7 @@ enum SectionId
     ATTR_TMP,       /**< Temporary Attribute Override */
     ATTR_PERM,      /**< Permanent Attribute Override */
     CAPP,           /**< CAPP lid */
+    VERSION,        /**< PNOR version string section */
     TEST,           /**< Scratch space for PNOR test cases */
     TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
 
