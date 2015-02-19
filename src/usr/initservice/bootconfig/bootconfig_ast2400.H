@@ -53,6 +53,8 @@ class AST2400BootConfig : public BootConfig
     enum {
 
         // Hostboot/BMC shared register addresses.
+        ISTEP_STATUS_REG          = 0x26,
+        ISTEP_HOST_CTL_REG        = 0x27,
         BOOT_FLAGS_VERSION_REG    = 0x28,
         BOOT_FLAGS_REG            = 0x29,
         ISTEP_CONTROL_REG         = 0x2a,
@@ -128,6 +130,20 @@ public:
      *              0x2C      Minor step number
      */
     errlHndl_t readIstepControl(istepControl_t & o_istepInfo );
+
+   /**
+    * @brief Write BMC Scratch register which contains ISTEP control
+    *
+    * @param[out] i_istepInfo - ISTEP control structure containing the
+    *                           next control action
+    * @return - errlHndl_t
+    *
+    *        SIO Register :  Contents
+    *              0x2a      Istep control
+    */
+
+    errlHndl_t writeIstepControl(istepControl_t i_istepCtl);
+
 
     /**
      * @brief Read BMC Scratch registers containing the boot flags

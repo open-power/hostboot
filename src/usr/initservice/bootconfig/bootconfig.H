@@ -72,12 +72,11 @@ namespace BOOTCONFIG
      *          NOTE: base class implemetation is a no-op
      *
      * @param[in] i_istepInfo - ISTEP control structure containing the
-     *                           next control action as well as next istep
-     *                           information.
+     *                           next control action
      */
 
            virtual errlHndl_t writeIstepControl(
-                                        BOOTCONFIG::istepControl_t &  i_info );
+                                        BOOTCONFIG::istepControl_t   i_info );
 
     };
 

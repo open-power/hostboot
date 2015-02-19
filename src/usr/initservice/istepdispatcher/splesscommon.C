@@ -41,7 +41,7 @@
 #include    <string.h>
 #include    <initservice/mboxRegs.H>
 //  $$$$$$$ undefine this before checking in....
-// #define SPLESS_DEBUG    1
+//#define SPLESS_DEBUG    1
 
 #ifdef  SPLESS_DEBUG
     #include    <kernel/console.H>          // printk DEBUG
@@ -49,30 +49,26 @@
 
 #include    <sys/mmio.h>                    //  mmio_scratch_read()
 #include    <devicefw/userif.H>        //  deviceRead(), deviceWrite()
+#include     <errl/errlentry.H>
 
 #include    <targeting/common/attributes.H>        //  ISTEP_MODE attribute
 #include    <targeting/common/targetservice.H>
 
 #include    "splesscommon.H"
-
+#include    <config.h>
+#include    <initservice/bootconfigif.H>
+#include    <errl/errlmanager.H>
 
 // external reference
 namespace   INITSERVICE
 {
     extern trace_desc_t *g_trac_initsvc;
-}   // end namespace    INITSERVICE
-
-
-
 namespace   SPLESS
 {
 
 using namespace   TARGETING;
 
 //  extern declarations for regs.
-extern  uint64_t    g_SPLess_Command_Reg;
-extern  uint64_t    g_SPLess_Status_Reg;
-
 
 /**
  * @def g_SPLess_pMasterProcChip
@@ -90,7 +86,7 @@ TARGETING::Target* g_SPLess_pMasterProcChip =   NULL;
 //  SPLESS Command functions
 /******************************************************************************/
 
-void    readCmd( SPLessCmd   &io_rcmd )
+void    readCmdSts( SPLessCmd   &io_rcmd )
 {
     // Do this once and save it...
     if ( g_SPLess_pMasterProcChip  == NULL )
@@ -99,25 +95,46 @@ void    readCmd( SPLessCmd   &io_rcmd )
                                                        g_SPLess_pMasterProcChip );
     }
 
-    // $$ save - mem io_rcmd.val64   =   g_SPLess_Command_Reg;
+#ifdef CONFIG_BMC_AST2400
+    errlHndl_t err = NULL;
+    INITSERVICE::BOOTCONFIG::istepControl_t istepCtl;
+    memset (&istepCtl, 0x0, sizeof(istepCtl));
+    err = INITSERVICE::BOOTCONFIG::readIstepControl(istepCtl);
+    if(err)
+    {
+        TRACFCOMP( g_trac_initsvc, "Error reading SIO regs... blindly continuing" );
+        errlCommit(err, INITSVC_COMP_ID);
+    }
+    else
+    {
+        io_rcmd.bytes[HDR] = istepCtl.istepControl;
+        io_rcmd.bytes[STS] = istepCtl.istepStatus;
+        io_rcmd.istep = istepCtl.istepMajorNumber;
+        io_rcmd.substep = istepCtl.istepMinorNumber;
+    }
+
+#else
     // $$ save -io_rcmd.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_COMMAND);
 
     //  command reg is GMB2EC is mailbox scratchpad 3 { regs 0 - 3 }.
     size_t  op_size =   sizeof( uint64_t );
+    uint64_t op = 0x0;
     DeviceFW::deviceRead(
               g_SPLess_pMasterProcChip,
-              &(io_rcmd.val64),
+              &(op),
               op_size,
               DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG3 )  );
 
+    io_rcmd.word = (op >>32);
+#endif
+
 #ifdef  SPLESS_DEBUG
-    printk( "readCmd hi 0x%x\n", io_rcmd.hi32 );
-    printk( "readCmd lo 0x%x\n", io_rcmd.lo32 );
+    printk( "readCmd 0x%x\n", io_rcmd.word );
 #endif
 }
 
 
-void    writeCmd( SPLessCmd    &io_rcmd )
+void    writeCmdSts( SPLessCmd    i_rcmd )
 {
     // Do this once and save it...
     if ( g_SPLess_pMasterProcChip  == NULL )
@@ -126,98 +143,40 @@ void    writeCmd( SPLessCmd    &io_rcmd )
                                                        g_SPLess_pMasterProcChip );
     }
 
-    // save - mem g_SPLess_Command_Reg    =   io_rcmd.val64;
-    // save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_COMMAND, io_rcmd.val64 );
+#ifdef CONFIG_BMC_AST2400
+    errlHndl_t err = NULL;
+    INITSERVICE::BOOTCONFIG::istepControl_t istepCtl;
+    memset (&istepCtl, 0x0, sizeof(istepCtl));
+    istepCtl.istepControl = i_rcmd.bytes[HDR];
+    istepCtl.istepStatus  = i_rcmd.bytes[STS];
+    TRACFCOMP( g_trac_initsvc, "Write istep control" );
+
+    err = BOOTCONFIG::writeIstepControl(istepCtl);
+    if(err)
+    {
+        TRACFCOMP( g_trac_initsvc, "Error writing SIO regs... blindly continuing" );
+        errlCommit(err, INITSVC_COMP_ID);
+    }
+
+#else
+
+    // save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_COMMAND, i_rcmd.val64 );
 
     //  command reg is GMB2EC is mailbox scratchpad 3 { regs 0 - 3 }.
     size_t  op_size =   sizeof( uint64_t );
+    uint64_t op = (static_cast<uint64_t>(i_rcmd.word))<<32;
     DeviceFW::deviceWrite(
                g_SPLess_pMasterProcChip,
-               &(io_rcmd.val64),
+               &(op),
                op_size,
                DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG3 )  );
+#endif
 
 #ifdef  SPLESS_DEBUG
-    printk( "writeCmd hi 0x%x\n", io_rcmd.hi32 );
-    printk( "writeCmd lo 0x%x\n", io_rcmd.lo32 );
+    printk( "writeCmd 0x%x\n", i_rcmd.word );
 #endif
 }
 
-
-/******************************************************************************/
-//  SPLESS Status
-/******************************************************************************/
-
-void    readSts(   SPLessSts   &io_rsts )
-{
-    // Do this once and save it...
-    if ( g_SPLess_pMasterProcChip  == NULL )
-    {
-        (void)TARGETING::targetService().masterProcChipTargetHandle(
-                                                       g_SPLess_pMasterProcChip );
-    }
-
-    // $$ save - mem io_rsts.val64   =   g_SPLess_Status_Reg;
-    // $$ io_rsts.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_STATUS);
-
-    // status reg (Hi 32) is now GMB2E8 is mailbox scratchpad 2  {regs 0 - 3 }
-    size_t  op_size =   sizeof( uint64_t );
-    DeviceFW::deviceRead(
-              g_SPLess_pMasterProcChip,
-              &(io_rsts.val64),
-              op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG2 )  );
-    // status reg lo is GMB2E4 - mailbox scratchpad 1  { regs 0 -3 }
-    uint64_t    swap    =   0;
-    DeviceFW::deviceRead(
-              g_SPLess_pMasterProcChip,
-              &(swap),
-              op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG1 )  );
-    io_rsts.lo32    =
-        static_cast<uint32_t>( ((swap >> 32) & 0x00000000ffffffff) );
-
-#ifdef  SPLESS_DEBUG
-    printk( "readSts hi 0x%x\n", io_rsts.hi32 );
-    printk( "readSts lo 0x%x\n", io_rsts.lo32 );
-#endif
-}
-
-
-void    writeSts(  SPLessSts   &io_rsts )
-{
-    // Do this once and save it...
-    if ( g_SPLess_pMasterProcChip  == NULL )
-    {
-        (void)TARGETING::targetService().masterProcChipTargetHandle(
-                                                       g_SPLess_pMasterProcChip );
-    }
-
-    size_t  op_size =   sizeof( uint64_t );
-
-    //  Write Status reg first
-    // status reg lo is GMB2E4 - mailbox scratchpad 1  { regs 0 -3 }
-    uint64_t    swap    =
-        ((static_cast<uint64_t>(io_rsts.lo32) << 32 ) & 0xffffffff00000000) ;
-    DeviceFW::deviceWrite(
-              g_SPLess_pMasterProcChip,
-              &(swap),
-              op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG1 )  );
-
-    // $$ save - mem g_SPLess_Status_Reg =   io_rsts.val64;
-    // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_STATUS, io_rsts.val64 );
-    DeviceFW::deviceWrite(
-              g_SPLess_pMasterProcChip,
-              &(io_rsts.val64),
-              op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG2 )  );
-
-#ifdef  SPLESS_DEBUG
-    printk( "writeSts hi 0x%x\n", io_rsts.hi32 );
-    printk( "writeSts lo 0x%x\n", io_rsts.lo32 );
-#endif
-}
-
-}   // namespace
+};   // namespace
+};   // end namespace    INITSERVICE
 

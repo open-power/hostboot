@@ -292,6 +292,31 @@ errlHndl_t AST2400BootConfig::readIstepControl( istepControl_t &o_stepInfo )
     return l_err;
 }
 
+// ----------------------------------------------------------------------------
+// IStepDispatcher::writeIstepControl()
+// ----------------------------------------------------------------------------
+errlHndl_t AST2400BootConfig::writeIstepControl( istepControl_t i_istepCtl )
+{
+    errlHndl_t l_err = NULL;
+
+    // read istep control from 0x2a
+    TRACFCOMP( g_bc_trace, "AST2400BootConfig:: Write istep control %x",  i_istepCtl.istepControl);
+
+    do
+    {
+        //write status
+        l_err = writeSIORegister( ISTEP_STATUS_REG, i_istepCtl.istepStatus);
+        if(l_err) break;
+
+        //write command/control
+        l_err = writeSIORegister( ISTEP_HOST_CTL_REG, i_istepCtl.istepControl);
+        if(l_err) break;
+    }
+    while(0);
+
+    return l_err;
+}
+
 
 };
 };

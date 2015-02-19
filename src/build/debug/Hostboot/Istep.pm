@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,8 +69,6 @@ our @EXPORT_OK = ('main');
 #   Constants
 #------------------------------------------------------------------------------
 ##  @todo   extract these from splesscommon.H
-use constant    SPLESS_MODE_SIGNATURE     =>  0x4057b0074057b007;
-use constant    RUN_ALL_MODE_SIGNATURE    =>  0xBADC0FFEE0DDF00D;
 
 use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
 use constant    SPLESS_RESUME_ISTEP_CMD     =>  0x01;
@@ -91,21 +91,15 @@ use constant    NOSHOW                      =>  1;
 #------------------------------------------------------------------------------
 my  $opt_debug          =   0;
 my  $opt_splessmode     =   0;
-my  $opt_fspmode        =   0;
 my  $opt_command        =   0;
 my  $opt_list           =   0;
 my  $opt_resume         =   0;
 my  $opt_clear_trace    =   0;
 
-##  deprecated - keep around for now
-my  $opt_istepmode      =   0;
-
 my  $command            =   "";
 
 my  @inList;
 
-##  initialize the sequence number - 6 bit field, { 0 - 63 }
-my  $g_SeqNum   =   int(rand(64));
 
 my  $THREAD         =   "0";
 
@@ -130,8 +124,6 @@ if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
 my  $ShutDownFlag   =   "";
 my  $ShutDownSts    =   "";
 
-my  $CommandReg     =   "";
-my  $StatusReg      =   "";
 
 
 ########################################################################
@@ -167,9 +159,6 @@ sub main
     ##  ---------------------------------------------------------------------------
     ##  Fetch the symbols we need from syms file
     ##  ---------------------------------------------------------------------------
-
-    $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
-    $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
 
     $ShutDownFlag   =   getSymbol(  "CpuManager::cv_shutdown_requested" );
     $ShutDownSts    =   getSymbol(  "CpuManager::cv_shutdown_status" );
@@ -213,6 +202,11 @@ sub main
 
         ## ::userDisplay ".$_.";
 
+        if ( m/^\-{0,2}help$/ )
+        {
+            showHelp();
+            exit
+        }
         if ( m/^\-{0,2}debug$/ )
         {
             $opt_debug      =   1;
@@ -223,19 +217,9 @@ sub main
             $opt_list       =   1;
             $options[$i]    =   "";
         }
-        if ( m/^\-{0,2}istepmode$/ )
-        {
-            $opt_istepmode  =   1;
-            $options[$i]    =   "";
-        }
         if ( m/^\-{0,2}splessmode$/ )
         {
             $opt_splessmode  =   1;
-            $options[$i]    =   "";
-        }
-        if ( m/^\-{0,2}fspmode$/ )
-        {
-            $opt_fspmode  =   1;
             $options[$i]    =   "";
         }
         if ( m/^\-{0,2}command$/ )
@@ -267,16 +251,12 @@ sub main
         ::userDisplay   "debug          =   $opt_debug\n";
         ::userDisplay   "list           =   $opt_list\n";
         ::userDisplay   "splessmode     =   $opt_splessmode\n";
-        ::userDisplay   "fspmode        =   $opt_fspmode\n";
 
         ::userDisplay   "resume         =   $opt_resume\n";
         ::userDisplay   "clear-trace    =   $opt_clear_trace\n";
         ::userDisplay   "command flag   =   $opt_command\n";
         ::userDisplay   "command        =   \"$command\"\n";
 
-        ::userDisplay   "g_SeqNum       =   ", sprintf("0x%x",$g_SeqNum),     "\n";
-        ::userDisplay   "CommandReg     =   ", sprintf("0x%x",$CommandReg),   "\n";
-        ::userDisplay   "StatusReg      =   ", sprintf("0x%x",$StatusReg),    "\n";
         ::userDisplay   "ShutDownFlag   =   ", sprintf("0x%x",$ShutDownFlag), "\n";
         ::userDisplay   "ShutDownSts    =   ", sprintf("0x%x",$ShutDownSts),  "\n";
 
@@ -303,23 +283,11 @@ sub main
         exit;
     }
 
-    if ( $opt_istepmode )
-    {
-        ::userDisplay "istepmode no longer used - use splessmode\n";
-        exit;
-    }
-
     if ( $opt_splessmode )
     {
         ::userDisplay   "ENable splessmode\n";
         setMode( "spless" );
         ::userDisplay   "Done.\n";
-        exit;
-    }
-
-    if ( $opt_fspmode )
-    {
-        ::userDisplay "istepmode no longer used - use splessmode\n";
         exit;
     }
 
@@ -378,20 +346,21 @@ sub helpInfo
     );
 }
 
-
-##  Increment the sequence number, rolling over at 64
-##  ---------------------------------------------------------------------------
-sub bumpSeqNum()
+sub showHelp
 {
+    ::userDisplay "Executes isteps.\n";
+    ::userDisplay "Options =>\n";
+    ::userDisplay "          list =>  list out all supported isteps\n";
+    ::userDisplay "        resume =>  resume an istep at a break point\n";
+    ::userDisplay "   clear-trace =>  clear trace buffers before starting\n";
+    ::userDisplay "            sN =>  run istep N\n";
+    ::userDisplay "         sN..M =>  run isteps N through M\n";
+    ::userDisplay "         <foo> =>  run named istep \"foo\"\n";
+    ::userDisplay "  <foo>..<bar> =>  run isteps \"foo\" through \"bar\"\n";
 
-    $g_SeqNum++;
-
-    $g_SeqNum   %=  64;
-
-    $g_SeqNum += ($g_SeqNum == 0) ? 1 : 0;
-
-    return  $g_SeqNum;
+    exit 0;
 }
+
 
 ##  ---------------------------------------------------------------------------
 ##  Dump environment variable specified.
@@ -524,7 +493,7 @@ sub isReadyBitOn()
     my  $readybit   =   0;
 
     $result = getStatus( );
-    $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
+    $readybit    =   ( ( $result & 0x8000000000000000 ) >> 63 );
 
     if ( $opt_debug )   {   ::userDisplay   "=== readybit: $readybit\n";    }
 
@@ -578,12 +547,24 @@ sub isShutDown()
 sub sendCommand( $ )
 {
     my  $data    =   shift;
+    my  $read_bindata;
 
     if ( $opt_debug )
         {   ::userDisplay "===  sendCommand( $data )\n";    }
 
+    ## because of the way the SIO regs work on the BMC,
+    ## Hostboot expects a key to be set to trigger the command
+    ## when doing via scom we simply need to read, modify write
+    ## the reg
+    $read_bindata = ::readScom( MBOX_SCRATCH3, 8 );
+    my $key = (($read_bindata) & 0x1F00000000000000);
+
     ## convert to binary before sending to writescom
     my  $bindata    =   ( hex $data );
+
+    ## Or in key
+    my $bindata = (($bindata) & 0xE0FFFFFFFFFFFFFF);
+    $bindata = (($bindata) | ($key));
 
     ## now write the data
     ::writeScom( MBOX_SCRATCH3, 8, $bindata );
@@ -616,15 +597,12 @@ sub getStatus()
     my  $statusHi   =   "";
     my  $statusLo   =   "";
 
-    $statusHi   =   ::readScom( MBOX_SCRATCH2, 8 );
+    $statusHi   =   ::readScom( MBOX_SCRATCH3, 8 );
     if ( $opt_debug )   {   ::userDisplay   "===  statusHi: $statusHi \n";  }
 
-    $statusLo   =   ::readScom( MBOX_SCRATCH1, 8 );
-    if ( $opt_debug )   {   ::userDisplay   "===  statusLo: $statusLo \n";  }
+    $statusLo   =   0;
 
-    $status =   (   (  ( $statusHi) & 0xffffffff00000000 )
-                  | (( ( $statusLo) & 0x7fffffff00000000 ) >> 32)
-                );
+    $status =   ( ( $statusHi) & 0xffffffff00000000 );
 
     if ( $opt_debug )
     {
@@ -636,19 +614,17 @@ sub getStatus()
 
 
 ##
-##  keep trying to get status until seqnum syncs up
+##  keep trying to get status until readybit turns back on
 ##
 sub getSyncStatus( )
 {
     # set # of retries
     my  $count          =   $hbCount ;
     my  $result         =   0;
-    my  $seqnum         =   0;
     my  $running        =   0;
+    my  $ready          =   0;
 
-    ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
-    ##  here for a reasonable amount of time waiting for the correct sequence
-    ##  number to come back.
+    ##  get response
     while(1)
     {
 
@@ -661,24 +637,22 @@ sub getSyncStatus( )
         ##::checkContTrace();
 
         $result     = getStatus();
-        $seqnum     =   ( ( $result & 0x3f00000000000000 ) >> 56 );
-        $running    =   ( ( $result & 0x8000000000000000 ) >> 63 );
+        $running    =   ( ( $result & 0x2000000000000000 ) >> 61 );
+        $ready      =   ( ( $result & 0x8000000000000000 ) >> 63 );
+
 
         ## @todo great place to add some debug, check running bit BEFORE
         ##  starting the clock (should be off), then run (relatively) small
         ##  number of clocks till the bit turns on.
-        ##  If it doesn't go on, command was never received.  If so,
-        ##  come here to wait for it to go back off again.
-        ## if (    ( $running == 0 )
-        ##     && ( $seqnum == $g_SeqNum )
-        if ( $seqnum == $g_SeqNum )
+        ##  Wait for the readybit to turn back on
+        if ( $ready )
         {
             return $result;
         }
 
         if ( $count <= 0)
         {
-            ::userDisplay   "TIMEOUT waiting for seqnum=$g_SeqNum\n";
+            ::userDisplay   "TIMEOUT waiting for readyBit to assert again\n";
             return -1;
         }
 
@@ -700,12 +674,9 @@ sub runIStep( $$ )
     my  $result;
 
 
-    ##  bump the seqnum
-    bumpSeqNum() ;
-
     ::userDisplay   "run  $istep.$substep $inList[$istep][$substep]:\n" ;
 
-    $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
+    $byte0   =   0x40;      ## gobit
     $command =   SPLESS_SINGLE_ISTEP_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, $istep, $substep );
 
@@ -721,32 +692,30 @@ sub runIStep( $$ )
     }
     else
     {
-        my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
+        my $taskStatus  =   ( ( $result & 0x00FF000000000000 ) >> 48 );
         my $stsIStep    =   ( ( $result & 0x0000ff0000000000 ) >> 40 );
         my $stsSubstep  =   ( ( $result & 0x000000ff00000000 ) >> 32 );
-        my $istepStatus =   ( ( $result & 0x00000000ffffffff )  );
 
         ::userDisplay "---------------------------------\n";
         if ( $taskStatus != 0 )
         {
-            ::userDisplay   "Istep $stsIStep.$stsSubstep FAILED to launch, task status is $taskStatus\n" ;
+            ::userDisplay   "Istep $stsIStep.$stsSubstep FAILED , task status is $taskStatus, check error logs\n" ;
             exit;
         }
         else
         {
             ::userDisplay   "Istep $stsIStep.$stsSubstep $inList[$istep][$substep] returned Status: ",
-                            sprintf("%x",$istepStatus),
+                            sprintf("%x",$taskStatus),
                             "\n" ;
-            if ( $istepStatus == 0xa )
+            if ( $taskStatus == 0xa )
             {
                 ::userDisplay   ":     not implemented yet.\n";
             }
-            elsif ( $istepStatus != 0 )
+            elsif ( $taskStatus != 0 )
             {
                 exit;
             }
         }
-        ::userDisplay   "------------------------------------------------------- SeqNum: $g_SeqNum\n";
     }
 }
 
@@ -967,11 +936,10 @@ sub resume_istep()
     my $cmd;
     my $result;
 
-    bumpSeqNum();
 
     ::userDisplay   "resume istep\n";
 
-    $byte0 = 0x80 + $g_SeqNum;      ## gobit + seqnum
+    $byte0 = 0x40 ;      ## gobit
     $command = SPLESS_RESUME_ISTEP_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x000000000000", $byte0, $command );
     sendCommand( $cmd );
@@ -985,7 +953,7 @@ sub resume_istep()
     }
     else
     {
-        my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
+        my $taskStatus  =   ( ( $result & 0x00FF000000000000 ) >> 48 );
 
         ::userDisplay   "-----------------------------------------------------------------\n";
         if ( $taskStatus != 0 )
@@ -1008,10 +976,7 @@ sub clear_trace( )
     my  $result;
 
 
-    ##  bump the seqnum
-    bumpSeqNum();
-
-    $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
+    $byte0   =   0x40;      ## gobit
     $command =   SPLESS_CLEAR_TRACE_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, 0, 0 );
     sendCommand( $cmd );
@@ -1025,10 +990,7 @@ sub clear_trace( )
     }
     else
     {
-        my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
-        my $stsIStep    =   ( ( $result & 0x0000ff0000000000 ) >> 40 );
-        my $stsSubstep  =   ( ( $result & 0x000000ff00000000 ) >> 32 );
-        my $istepStatus =   ( ( $result & 0x00000000ffffffff )  );
+        my $taskStatus  =   ( ( $result & 0x00FF000000000000 ) >> 48 );
 
         ::userDisplay   "-----------------------------------------------------------------\n";
         if ( $taskStatus != 0 )
@@ -1037,7 +999,7 @@ sub clear_trace( )
         }
         else
         {
-            ::userDisplay   "Clear Trace returned Status: $istepStatus\n" ;
+            ::userDisplay   "Clear Trace returned Status: $taskStatus\n" ;
         }
         ::userDisplay   "-----------------------------------------------------------------\n";
     }

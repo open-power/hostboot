@@ -85,7 +85,7 @@ errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
 
         //MBOX_SCRATCH_REG2 = 0x5003A
         l_err = DeviceFW::deviceRead(l_masterProc, &l_hbbMMIO,l_size,
-                DEVICE_SCOM_ADDRESS(SPLESS::MBOX_SCRATCH_REG2));
+                   DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MBOX_SCRATCH_REG2));
         if (l_err)
         {
             TRACFCOMP(g_trac_pnor,"PNOR::mmioToPhysicalOffset: Failed to read"

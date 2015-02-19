@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,6 +52,8 @@
 #include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
 
 #include    <targeting/common/util.H>       //
+#include    <console/consoleif.H>
+#include    <config.h>
 
 #include    "istepdispatcher.H"
 #include    "splesscommon.H"
@@ -93,8 +97,8 @@ const   uint64_t    SINGLESTEP_PAUSE_NS    =   10000000;
 void    userConsoleComm( void *  io_msgQ )
 {
     SPLessCmd               l_cmd;
-    SPLessSts               l_sts;
-    uint8_t                 l_seqnum        =   0;
+    SPLessCmd               l_trigger;
+    l_trigger.cmd.key = 0x15;           //Random starting value
     int                     l_sr_rc         =   0;
     msg_q_t                 l_SendMsgQ      =   static_cast<msg_q_t>( io_msgQ );
     msg_t                   *l_pMsg         =   msg_allocate();
@@ -105,17 +109,25 @@ void    userConsoleComm( void *  io_msgQ )
             "userConsoleComm entry, args=%p",
             io_msgQ  );
 
-    // initialize command reg
-    l_cmd.val64 =   0;
-    writeCmd( l_cmd );
-
+    // initialize command status reg
     //  init status reg, enable ready bit
-    l_sts.val64 =   0;
-    l_sts.hdr.readybit  =   true;
-    writeSts( l_sts );
+    l_cmd.cmd.readybit  =   true;
+    l_cmd.cmd.key = l_trigger.cmd.key;
+    writeCmdSts( l_cmd );
 
     TRACFCOMP( g_trac_initsvc,
             "userConsoleComm : readybit set." );
+
+#ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
+#ifdef CONFIG_BMC_AST2400
+    const char* l_input = "SIO";
+#else
+    const char* l_input = "CFAM";
+#endif
+    CONSOLE::displayf(NULL, "ISTEP mode -- awaiting user input from %s", l_input);
+    CONSOLE::flush();
+#endif
+
 
     //  set Current to our message on entry
     l_pCurrentMsg   =   l_pMsg;
@@ -124,38 +136,26 @@ void    userConsoleComm( void *  io_msgQ )
     //
     while( 1 )
     {
-        //  read command register from user console
-        readCmd( l_cmd );
+        //  read command register
+        readCmdSts( l_cmd );
 
         //  process any pending commands
-        if ( l_cmd.hdr.gobit )
+        if ( l_cmd.cmd.gobit &&
+             (l_cmd.cmd.key == l_trigger.cmd.key))
         {
-            l_cmd.hdr.readbit = 1;
-            writeCmd( l_cmd );
-
-            // get the sequence number from caller
-            l_seqnum    =   l_cmd.hdr.seqnum;
-
-            //  clear status
-            l_sts.val64 =   0;
-
-            //  set running bit, fill in istep and substep
-            l_sts.hdr.runningbit    =   true;
-            l_sts.hdr.readybit      =   true;
-
-            // @todo modify hb-istep to check both running bit and seqnum
-            // l_sts.hdr.seqnum        =   l_seqnum;
-            l_sts.istep             =   l_cmd.istep;
-            l_sts.substep           =   l_cmd.substep;
-
+            // clear go bit, status, and set running bit
+            l_cmd.sts               =   0;
+            l_cmd.cmd.key           =   0;
+            l_cmd.cmd.runningbit    =   true;
+            l_cmd.cmd.readybit      =   false;
+            l_cmd.cmd.gobit         =   false;
 
             // write the intermediate value back to the console.
-            TRACDCOMP( g_trac_initsvc,
-                    "userConsoleComm Write status (running) 0x%x.%x",
-                    static_cast<uint32_t>( l_sts.val64 >> 32 ),
-                    static_cast<uint32_t>( l_sts.val64 & 0x0ffffffff ) );
+            TRACFCOMP( g_trac_initsvc,
+                    "userConsoleComm Write status (running) istep %d.%d",
+                    l_cmd.istep, l_cmd.substep );
 
-            writeSts( l_sts );
+            writeCmdSts( l_cmd );
 
             // pass the command on to IstepDisp, block until reply
 
@@ -166,8 +166,13 @@ void    userConsoleComm( void *  io_msgQ )
             l_pCurrentMsg->data[1]     =   0;
             l_pCurrentMsg->extra_data  =   NULL;
 
-            TRACDCOMP( g_trac_initsvc,
-            "userConsoleComm: sendmsg type=0x%08x, d0=0x%16x, d1=0x%16x, x=%p",
+#ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
+            CONSOLE::displayf(NULL, "ISTEP %2d.%2d", l_cmd.istep, l_cmd.substep);
+            CONSOLE::flush();
+#endif
+            TRACFCOMP( g_trac_initsvc,
+            "userConsoleComm: sendmsg type=0x%08x, d0=0x%016llx,"
+                       " d1=0x%016llx, x=%p",
                        l_pCurrentMsg->type,
                        l_pCurrentMsg->data[0],
                        l_pCurrentMsg->data[1],
@@ -183,20 +188,15 @@ void    userConsoleComm( void *  io_msgQ )
             //  This should unblock on any message sent on the Q,
             l_pCurrentMsg  =   msg_wait( l_RecvMsgQ );
 
-            // build status to return to console
-            l_sts.istep         =   l_cmd.istep;
-            l_sts.substep       =   l_cmd.substep;
-            l_sts.hdr.status    =   0;
+            // Update command/status reg when the command is done
+            l_cmd.cmd.key           =   ++l_trigger.cmd.key;
+            l_cmd.cmd.runningbit    =   false;
+            l_cmd.cmd.readybit      =   true;
+            l_cmd.cmd.gobit         =   false;
 
-            // Clear command reg when the command is done
-            TRACDCOMP( g_trac_initsvc,
-                    "userConsoleComm Clear Command reg" );
-            l_cmd.val64 =   0;
-            writeCmd( l_cmd );
-
-
-            TRACDCOMP( g_trac_initsvc,
-            "userConsoleComm: rcvmsg type=0x%08x, d0=0x%16x, d1=0x%16x, x=%p",
+            TRACFCOMP( g_trac_initsvc,
+                       "userConsoleComm: rcvmsg type=0x%08x, d0=0x%016llx"
+                       ", d1=0x%016llx, x=%p",
                        l_pCurrentMsg->type,
                        l_pCurrentMsg->data[0],
                        l_pCurrentMsg->data[1],
@@ -204,30 +204,19 @@ void    userConsoleComm( void *  io_msgQ )
 
             if ( l_pCurrentMsg->type   == BREAKPOINT )
             {
-                l_sts.hdr.status    =   SPLESS_AT_BREAK_POINT;
+                l_cmd.sts    =   SPLESS_AT_BREAK_POINT;
             }
 
             //  istep status is the hi word in the returned data 0
             //  this should be either 0 or a plid from a returned errorlog
-            l_sts.istepStatus   =
-                        static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 );
+            //  Don't have enough space to store entire, PLID... just check
+            //  If non zero
+            else if(static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 ) !=0x0)
+            {
+                l_cmd.sts = SPLESS_ISTEP_FAIL;
+            }
 
-            // finish filling in status
-            l_sts.hdr.runningbit    =   false;
-            l_sts.hdr.seqnum        =   l_seqnum;
-
-            TRACDCOMP( g_trac_initsvc,
-                    "userConsoleComm Write (finished) status 0x%x.%x",
-                    static_cast<uint32_t>( l_sts.val64 >> 32 ),
-                    static_cast<uint32_t>( l_sts.val64 & 0x0ffffffff ) );
-            writeSts( l_sts );
-
-            // clear command reg, including go bit (i.e. set to false)
-            //  2012-04-27 hb-istep will clear the command reg after it sees
-            //      the running bit turn on.
-            //      Please save the following in case we have to turn this
-            //      back on.
-
+            writeCmdSts( l_cmd );
         }   //  endif   gobit
 
         // sleep, and wait for user to give us something else to do.
@@ -248,10 +237,9 @@ void    userConsoleComm( void *  io_msgQ )
     //  @note
     //  Fell out of loop, clear sts reg and turn off readybit
     //  disable the ready bit so the user knows.
-    l_sts.val64 =   0;
-    l_sts.hdr.status    =   SPLESS_TASKRC_TERMINATED;
-    l_sts.hdr.seqnum    =   l_seqnum;
-    writeSts( l_sts );
+    l_cmd.cmd.readybit = false;
+    l_cmd.sts    =   SPLESS_TASKRC_TERMINATED;
+    writeCmdSts( l_cmd );
 
     TRACFCOMP( g_trac_initsvc,
             "userConsoleComm exit" );
