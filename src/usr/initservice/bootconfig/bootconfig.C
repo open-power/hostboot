@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,7 +58,7 @@ namespace BOOTCONFIG
             return NULL;
         }
 
-        errlHndl_t BootConfig::writeIstepControl( istepControl_t & i_stepInfo)
+        errlHndl_t BootConfig::writeIstepControl( istepControl_t  i_stepInfo)
         {
             TRACFCOMP(g_bc_trace, "writeIstepControl() - Default version called no-op");
             return NULL;

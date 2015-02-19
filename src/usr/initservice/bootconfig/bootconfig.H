@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,12 +72,11 @@ namespace BOOTCONFIG
      *          NOTE: base class implemetation is a no-op
      *
      * @param[in] i_istepInfo - ISTEP control structure containing the
-     *                           next control action as well as next istep
-     *                           information.
+     *                           next control action
      */
 
            virtual errlHndl_t writeIstepControl(
-                                        BOOTCONFIG::istepControl_t &  i_info );
+                                        BOOTCONFIG::istepControl_t   i_info );
 
     };
 

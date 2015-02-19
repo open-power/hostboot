@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -286,6 +286,41 @@ errlHndl_t AST2400BootConfig::readIstepControl( istepControl_t &o_stepInfo )
                           &(o_stepInfo.istepMinorNumber),
                           l_len,
                           DEVICE_SIO_ADDRESS(SIO::DONT_CARE, ISTEP_MINOR_REG));
+    }
+    while(0);
+
+    return l_err;
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::writeIstepControl()
+// ----------------------------------------------------------------------------
+errlHndl_t AST2400BootConfig::writeIstepControl( istepControl_t i_istepCtl )
+{
+    errlHndl_t l_err = NULL;
+    size_t l_len = sizeof(uint8_t);
+
+    // read istep control from 0x2a
+    TRACFCOMP( g_bc_trace, "AST2400BootConfig:: Write istep control %x",  i_istepCtl.istepControl);
+
+    do
+    {
+        //write status
+        l_err = deviceOp( DeviceFW::WRITE,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(i_istepCtl.istepStatus),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE, ISTEP_STATUS_REG));
+        if(l_err) { break; }
+
+        //write command/control
+        l_err = deviceOp( DeviceFW::WRITE,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(i_istepCtl.istepControl),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE,
+                                             ISTEP_HOST_CTL_REG));
+        if(l_err) { break; }
     }
     while(0);
 

@@ -193,12 +193,59 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
     assert(l_pTopLevelTarget != NULL );
 
-    iv_istepMode = l_pTopLevelTarget->getAttr<TARGETING::ATTR_ISTEP_MODE>();
-
-    TRACFCOMP(g_trac_initsvc, "IStepDispatcher: IStep Mode: %d", iv_istepMode);
-
     do
     {
+        //Need to get ATTR overides first if non FSP system
+        if(!iv_spBaseServicesEnabled)
+        {
+            PNOR::SectionInfo_t l_sectionInfo;
+            // Get temporary attribute overrides from pnor
+            err = PNOR::getSectionInfo(PNOR::ATTR_TMP, l_sectionInfo);
+            // Attr override sections are optional so just delete error
+            if (err)
+            {
+                delete err;
+                err = NULL;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_initsvc,"init: processing temporary "
+                          "overrides");
+                err = TARGETING::getAttrOverrides(l_sectionInfo);
+                if (err)
+                {
+                    TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: "
+                              "getting temporary overrides");
+                    break;
+                }
+            }
+            // Get permanent attribute overrides from pnor
+            err = PNOR::getSectionInfo(PNOR::ATTR_PERM, l_sectionInfo);
+            // Attr override sections are optional so just delete error
+            if (err)
+            {
+                delete err;
+                err = NULL;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_initsvc,"init: processing permanent"
+                          " overrides");
+                err = TARGETING::getAttrOverrides(l_sectionInfo);
+                if (err)
+                {
+                    TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: "
+                              "getting permanent overrides");
+                    break;
+                }
+            }
+        }
+
+        iv_istepMode = l_pTopLevelTarget->getAttr<TARGETING::ATTR_ISTEP_MODE>();
+
+        TRACFCOMP(g_trac_initsvc, "IStepDispatcher: IStep Mode: %d", iv_istepMode);
+
+
         if(iv_mailboxEnabled)
         {
             // Register message Q with FSP Mailbox
@@ -282,51 +329,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 // (e.g. sync point reached)
                 tid_t msgHndlrTaskTid = task_create(startMsgHndlrThread, this);
                 assert(msgHndlrTaskTid > 0);
-            }
-            // Get Attribute overrides from PNOR
-            else
-            {
-                PNOR::SectionInfo_t l_sectionInfo;
-                // Get temporary attribute overrides from pnor
-                err = PNOR::getSectionInfo(PNOR::ATTR_TMP, l_sectionInfo);
-                // Attr override sections are optional so just delete error
-                if (err)
-                {
-                    delete err;
-                    err = NULL;
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_initsvc,"init: processing temporary "
-                              "overrides");
-                    err = TARGETING::getAttrOverrides(l_sectionInfo);
-                    if (err)
-                    {
-                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: "
-                                  "getting temporary overrides");
-                        break;
-                    }
-                }
-                // Get permanent attribute overrides from pnor
-                err = PNOR::getSectionInfo(PNOR::ATTR_PERM, l_sectionInfo);
-                // Attr override sections are optional so just delete error
-                if (err)
-                {
-                    delete err;
-                    err = NULL;
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_initsvc,"init: processing permanent"
-                    " overrides");
-                    err = TARGETING::getAttrOverrides(l_sectionInfo);
-                    if (err)
-                    {
-                        TRACFCOMP(g_trac_initsvc,"Failed getAttrOverrides: "
-                                  "getting permanent overrides");
-                        break;
-                    }
-                }
             }
 
             err = executeAllISteps();
