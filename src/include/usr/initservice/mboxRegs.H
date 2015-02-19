@@ -25,6 +25,8 @@
 #ifndef MBOXREGS_H_
 #define MBOXREGS_H_
 
+namespace INITSERVICE
+{
 namespace SPLESS
 {
     const   uint32_t    MBOX_SCRATCH_REG0               =   0x00050038;
@@ -32,5 +34,5 @@ namespace SPLESS
     const   uint32_t    MBOX_SCRATCH_REG2               =   0x0005003a;
     const   uint32_t    MBOX_SCRATCH_REG3               =   0x0005003b;
 };
-
+};
 #endif

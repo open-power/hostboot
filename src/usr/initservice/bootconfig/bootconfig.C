@@ -58,7 +58,7 @@ namespace BOOTCONFIG
             return NULL;
         }
 
-        errlHndl_t BootConfig::writeIstepControl( istepControl_t & i_stepInfo)
+        errlHndl_t BootConfig::writeIstepControl( istepControl_t  i_stepInfo)
         {
             TRACFCOMP(g_bc_trace, "writeIstepControl() - Default version called no-op");
             return NULL;

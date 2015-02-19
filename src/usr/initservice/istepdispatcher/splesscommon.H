@@ -53,6 +53,8 @@
 //  SPLESS Command and Status Prototypes
 /******************************************************************************/
 
+namespace   INITSERVICE
+{
 /**
  * @namespace   SPLESS
  *
@@ -72,19 +74,24 @@ namespace   SPLESS
  *
  */
 enum    {
-    SPLESS_TASKRC_INVALID_ISTEP     =   -3,     // invalid istep or substep
-    SPLESS_TASKRC_LAUNCH_FAIL       =   -4,     // failed to launch the task
-    SPLESS_TASKRC_RETURNED_ERRLOG   =   -5,     // istep returned an errorlog
-    SPLESS_TASKRC_TERMINATED        =   -6,     // terminated the polling loop
-    SPLESS_TASKRC_FAIL_LOADMODULE   =   -7,     // failed to load module
-
-    SPLESS_INVALID_COMMAND          =   10,     // invalid command from user console
+    SPLESS_TASKRC_TERMINATED        =    1,     // SPless task no longer active
+    SPLESS_ISTEP_FAIL               =    2,     // ISTEP failed -- look for PLID
     SPLESS_AT_BREAK_POINT           =   11,     // at breakpoint
     SPLESS_NOT_AT_BREAK_POINT       =   12,     // resume command w/o breakpoint
-    SPLESS_SHUTTING_DOWN            =   13,     // shutdown command issued
-    SPLESS_SENDRCV_FAILED           =   14,     // could not send cmd to IstepDisp
-    SPLESS_TASKRC_INVALID_RECV_TYPE =   15,     // received wrong message type
     SPLESS_TRACE_BUFFERS_CLEARED    =   16,     // trace buffers cleared
+};
+
+/**
+ * @enum
+ *  List out the fields of the SPLessCmd structureSPLess Task return codes
+ *
+ */
+enum    {
+
+    HDR                             =    0,
+    STS                             =    1,
+    MAJOR                           =    2,
+    MINOR                           =    3,
 };
 
 
@@ -92,32 +99,33 @@ enum    {
  * @note    SPLess commands, and masks for the status.
  *
  */
-//const   uint8_t     SPLESS_SINGLE_ISTEP_CMD         =   0x00;
-//const   uint8_t     SPLESS_RESUME_ISTEP_CMD         =   0x01;
-//const   uint8_t     SPLESS_CLEAR_TRACE_CMD          =   0x02;
-//const   uint8_t     SPLESS_SHUTDOWN_CMD             =   0x03;
-//const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
 
 /**
- * @struct  CommandHdr
+ * @struct  CommandStsHdr
  *
- * Command Header for all SPless commands.  2 bytes long.
+ * Command Status Header for all SPless commands.  1 byte long.
  * Bit numbers are in ppc notation, where bit 0 is the most significant bit.
- *      Go Bit : bit 0 (ppc notation, msbit)
- *          - set to 1 by the user to start the IStep
- *          - cleared to 0 by HostBoot
- *      Reserved: bit 1: always 0
- *      Sequence #: bits 2-7
- *      Command Number: bits 8:15
+ *  Ready bit, bit 0:
+ *      = 1 when IStep Dispatcher is ready to run individual ISteps
+ *      = 0 if IStep Dispatcher is not ready:
+ *          - System has not loaded the IStep Dispatcher yet
+ *  Go Bit : bit 1 (ppc notation, msbit)
+ *      - set to 1 by the user to start the IStep
+ *      - cleared to 0 by HostBoot
+ * Running bit, bit 2 (ppc notation, msbit):
+ *      = 1  when IStep is running
+ *      = 0   when IStep is finished
+ * Status: bits 4:7
+ *      Return code from executing the istep command
  *
  *
  */
 struct  CommandHdr
 {
+    bool            readybit:1;
     bool            gobit:1;
-    uint8_t         readbit:1;
-    uint8_t         seqnum:6;
-    uint8_t         cmdnum;
+    bool            runningbit:1;
+    uint8_t         key:5;
 
 }   __attribute__((packed));
 
@@ -125,28 +133,24 @@ struct  CommandHdr
 /**
  * @union   SPLessCmd
  *
- *  64-bit "template" struct for the SPLess command.
+ *  3 byte "template" struct for the SPLess command.
  *  This will be read in and used to extract the header info, then "cast"
  *  to the correct command.
  */
 union   SPLessCmd
 {
-    uint64_t            val64;
+    uint32_t           word;
+    uint8_t            bytes[4];
     struct
     {
-        uint32_t        hi32;
-        uint32_t        lo32;
-    } __attribute__((packed));
-    struct
-    {
-        CommandHdr      hdr;
+        CommandHdr      cmd;
+        uint8_t         sts;
         uint8_t         istep;
         uint8_t         substep;
-        uint32_t        reserved2;
     }   __attribute__((packed));
 
     //  init struct to 0
-    SPLessCmd() : val64(0) {};
+    SPLessCmd() :word(0x0) {};
 } ;
 
 
@@ -157,7 +161,7 @@ union   SPLessCmd
  *
  *  @return none
  */
-void    readCmd( SPLessCmd   &io_rcmd );
+void    readCmdSts( SPLessCmd   &io_rcmd );
 
 
 /**
@@ -170,92 +174,10 @@ void    readCmd( SPLessCmd   &io_rcmd );
     *
     *  @return none
     */
-void    writeCmd( SPLessCmd    &io_rcmd );
+void    writeCmdSts( SPLessCmd    i_rcmd );
 
-
-
-/******************************************************************************/
-//  SPLESS Status  Prototypes
-/******************************************************************************/
-
-/**
- * @struct  StatusHdr
- *
- * header for the Status Reg returned by all SPLess Commands.
- *
- * Bit numbers are in ppc notation, where bit 0 is the most significant bit.
- *  *  Running bit, bit 0 (ppc notation, msbit):
- *      = 1  when IStep is running
- *      = 0   when IStep is finished
- *  Ready bit, bit 1:
- *      = 1 when IStep Dispatcher is ready to run individual ISteps
- *      = 0 if IStep Dispatcher is not ready:
- *          - System has not loaded the IStep Dispatcher yet
- *          - IStep Mode Flag   =   0
- *  Sequence # : bits 2-7 - echoes the sequence number in the associated
- *      command frame.
- *  Status :    returned status for the command, from IStepDisp.
- *  For example:
- *      -EINVAL IStep number is invalid
- *      -ENOENT, -ENOEXEC   (return code from kernel)  IStep could not
- *          be launched as a task or as a function within a task
- */
-struct  StatusHdr
-{
-    bool            runningbit:1;
-    bool            readybit:1;
-    uint8_t         seqnum:6;
-    int8_t          status;
-
-}   __attribute__((packed));
-
-
-/**
- * @union   SPLessSts
- *
- *  Send HostBoot Status to the user console
- *
- */
-union   SPLessSts  {
-    uint64_t            val64;
-    struct
-    {
-        uint32_t        hi32;
-        uint32_t        lo32;
-    }   __attribute((packed));
-    struct      {
-        StatusHdr       hdr;
-        uint8_t         istep;
-        uint8_t         substep;
-        uint32_t        istepStatus;
-    }   __attribute__((packed));
-
-    //  init struct to 0
-    SPLessSts()    : val64(0)  {};
-}   ;
-
-
-/**
- * @brief   Read the SPLess Status reg and return a filled in struct.
- *
- * @param[in,out]   io_rsts -   ref SPLessSts struct
- *
- * @return  none.
- */
-void    readSts(   SPLessSts   &io_rsts );
-
-
-/**
- * @brief   Write a filled in SPLessSts struct to the SPLess Status Reg
- *
- * @param[in,out]   io_rsts
- *
- * @return  none
- */
-void    writeSts(  SPLessSts   &io_rsts );
-
-
-}   // namespace
+};   // namespace
+};
 
 
 #endif

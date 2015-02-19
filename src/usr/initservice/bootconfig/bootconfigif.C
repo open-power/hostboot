@@ -59,7 +59,7 @@ namespace BOOTCONFIG
             static BootConfig&  getConfigObject( uint8_t config_version )
             {
                 {
-                    #if CONFIG_BMC_AST2400
+                    #ifdef CONFIG_BMC_AST2400
                     return Singleton<AST2400BootConfig>::instance();
                     #else
                     return Singleton<BootConfig>::instance();
@@ -85,7 +85,7 @@ namespace BOOTCONFIG
                         CURRENT_CONFIG_VERSION ).readIstepControl(o_stepInfo);
     }
 
-    errlHndl_t writeIstepControl( BOOTCONFIG::istepControl_t & i_stepInfo )
+    errlHndl_t writeIstepControl( BOOTCONFIG::istepControl_t  i_stepInfo )
     {
         return ConfigFactory::getConfigObject(
                         CURRENT_CONFIG_VERSION ).writeIstepControl(i_stepInfo);
