@@ -40,19 +40,20 @@ namespace IPMI
 
     enum IPMIReasonCode
     {
-        RC_INVALID_QRESPONSE         = IPMI_COMP_ID | 0x01,
-        RC_INVALID_SENDRECV          = IPMI_COMP_ID | 0x02,
-        RC_INVALID_SEND              = IPMI_COMP_ID | 0x03,
-        RC_WAITER_NOT_FOUND          = IPMI_COMP_ID | 0x04,
-        RC_ASYNC_BAD_CC              = IPMI_COMP_ID | 0x05,
-        RC_INVALID_SENSOR_CMD        = IPMI_COMP_ID | 0x06,
-        RC_SENSOR_NOT_SETTABLE       = IPMI_COMP_ID | 0x07,
-        RC_EVENT_DATA_NOT_SETTABLE   = IPMI_COMP_ID | 0x08,
-        RC_SENSOR_NOT_PRESENT        = IPMI_COMP_ID | 0x09,
-        RC_SET_SENSOR_FAILURE        = IPMI_COMP_ID | 0x0a,
-        RC_READ_EVENT_FAILURE        = IPMI_COMP_ID | 0x0b,
-        RC_DCMI_CMD_FAILED           = IPMI_COMP_ID | 0x0c,
-        RC_SENSOR_READING_NOT_AVAIL  = IPMI_COMP_ID | 0x0d,
+        RC_INVALID_QRESPONSE            = IPMI_COMP_ID | 0x01,
+        RC_INVALID_SENDRECV             = IPMI_COMP_ID | 0x02,
+        RC_INVALID_SEND                 = IPMI_COMP_ID | 0x03,
+        RC_WAITER_NOT_FOUND             = IPMI_COMP_ID | 0x04,
+        RC_ASYNC_BAD_CC                 = IPMI_COMP_ID | 0x05,
+        RC_INVALID_SENSOR_CMD           = IPMI_COMP_ID | 0x06,
+        RC_SENSOR_NOT_SETTABLE          = IPMI_COMP_ID | 0x07,
+        RC_EVENT_DATA_NOT_SETTABLE      = IPMI_COMP_ID | 0x08,
+        RC_SENSOR_NOT_PRESENT           = IPMI_COMP_ID | 0x09,
+        RC_SET_SENSOR_FAILURE           = IPMI_COMP_ID | 0x0a,
+        RC_READ_EVENT_FAILURE           = IPMI_COMP_ID | 0x0b,
+        RC_DCMI_CMD_FAILED              = IPMI_COMP_ID | 0x0c,
+        RC_SENSOR_READING_NOT_AVAIL     = IPMI_COMP_ID | 0x0d,
+        RC_GET_SENSOR_TYPE_CMD_FAILED   = IPMI_COMP_ID | 0x0e,
 
     };
 };

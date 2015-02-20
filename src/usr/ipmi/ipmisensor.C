@@ -44,7 +44,7 @@ namespace SENSOR
     // be used as the base for any additional sensors defined.
     //
     SensorBase::SensorBase( TARGETING::SENSOR_NAME i_name,
-                             TARGETING::Target * i_target)
+                             const TARGETING::Target * i_target)
         :iv_name(i_name) ,iv_target(i_target)
     {
         // allocate a new message structure to use with our sensors
@@ -392,11 +392,14 @@ namespace SENSOR
 
     // return the sensor type and event reading data
     errlHndl_t SensorBase::getSensorType(uint32_t i_sensorNumber,
-                                        uint8_t &o_sensorType,
+                                         uint8_t &o_sensorType,
                                          uint8_t &o_eventReadingType )
     {
 
         size_t len =  1;
+
+        o_sensorType = INVALID_TYPE;
+        o_eventReadingType = INVALID_TYPE;
 
         // need to allocate some memory to hold the sensor number this will be
         // deleted by the IPMI transport layer
@@ -411,22 +414,43 @@ namespace SENSOR
                                   l_data);
 
         // if we didn't get an error back from the BT interface,
-        // process the CC to see if we need to create a PEL - sendrecv will
-        // delete l_data if an error occurs
+        // process the CC to see if we need to create a PEL
         if( l_err == NULL )
         {
             // check the completion code
-            l_err = processCompletionCode( cc );
-
-            // $TODO RTC:123045 - Remove when SDR is finalized
-            if( l_err == NULL &&  (cc!=IPMI::CC_BADSENSOR) )
+            if( (cc!= IPMI::CC_OK) &&  (cc!=IPMI::CC_BADSENSOR) )
             {
-                // grab the type and reading code to pass back to the caller
-                o_sensorType = l_data[0];
+                TRACFCOMP(g_trac_ipmi,"bad completion code from BMC=0x%x",cc);
 
-                // high order bit is reserved
-                o_eventReadingType = ( 0x7f & l_data[1]);
+                /* @errorlog tag
+                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @moduleid        IPMI::MOD_IPMISENSOR
+                 * @reasoncode      IPMI::RC_GET_SENSOR_TYPE_CMD_FAILED
+                 * @userdata1       BMC IPMI Completion code.
+                 * @devdesc         Request to get sensor type form the bmc
+                 *                  failed.
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            IPMI::MOD_IPMISENSOR,
+                            IPMI::RC_GET_SENSOR_TYPE_CMD_FAILED,
+                            static_cast<uint64_t>(cc),0, true);
 
+                l_err->collectTrace(IPMI_COMP_NAME);
+
+
+            }
+            else
+            {
+                if( cc!=IPMI::CC_BADSENSOR )
+                {
+                    // grab the type and reading code to pass back to the caller
+                    o_sensorType = l_data[0];
+
+                    // high order bit is reserved
+                    o_eventReadingType = ( 0x7f & l_data[1]);
+
+                }
             }
             delete[] l_data;
         }
@@ -592,9 +616,11 @@ namespace SENSOR
     //
     // StatusSensor constructor - uses system DIMM/CORE/PROC target
     //
-    StatusSensor::StatusSensor( TARGETING::Target * i_target )
+    StatusSensor::StatusSensor( TARGETING::ConstTargetHandle_t i_target )
         :SensorBase(TARGETING::SENSOR_NAME_STATE, i_target)
     {
+        iv_functionalOffset  = PROC_DISABLED;
+        iv_presentOffset     = PROC_PRESENCE_DETECTED;
 
         switch ( i_target->getAttr<TARGETING::ATTR_TYPE>() )
         {
@@ -602,20 +628,27 @@ namespace SENSOR
                 {
                     iv_functionalOffset  = MEMORY_DEVICE_DISABLED;
                     iv_presentOffset     = MEM_DEVICE_PRESENCE_DETECTED;
+                    iv_name = TARGETING::SENSOR_NAME_DIMM_STATE;
                     break;
                 }
-
-            case TARGETING::TYPE_PROC:
-            case TARGETING::TYPE_CORE:
+            case TARGETING::TYPE_MEMBUF:
                 {
-                    iv_functionalOffset  = PROC_DISABLED;
-                    iv_presentOffset     = PROC_PRESENCE_DETECTED;
+                    iv_functionalOffset  = MEMORY_DEVICE_DISABLED;
+                    iv_presentOffset     = MEM_DEVICE_PRESENCE_DETECTED;
+                    iv_name = TARGETING::SENSOR_NAME_MEMBUF_STATE;
                     break;
                 }
+            case TARGETING::TYPE_PROC:
+                iv_name = TARGETING::SENSOR_NAME_PROC_STATE;
+                break;
+
+            case TARGETING::TYPE_CORE:
+                iv_name = TARGETING::SENSOR_NAME_CORE_STATE;
+                break;
 
             default:
-                iv_presentOffset     = 0xFF;
-                iv_functionalOffset  = 0xFF;
+                assert(0, "No status sensor associated with target type 0x%x",
+                         i_target->getAttr<TARGETING::ATTR_TYPE>());
                 break;
         }
 
@@ -635,62 +668,56 @@ namespace SENSOR
     {
 
         errlHndl_t l_err = NULL;
-        // if the offset isn't configured then the target does not have
-        // one of these sensors.
-        if( iv_functionalOffset != 0xFF && iv_presentOffset != 0xFF )
+
+        uint16_t func_mask = setMask( iv_functionalOffset );
+        uint16_t pres_mask = setMask( iv_presentOffset );
+
+        switch ( i_state )
         {
+            case NOT_PRESENT:
+                // turn off the present bit
+                iv_msg->iv_deassertion_mask = pres_mask;
+                // turn on the disabled bit
+                iv_msg->iv_assertion_mask = func_mask;
+                break;
 
-            uint16_t func_mask = setMask( iv_functionalOffset );
-            uint16_t pres_mask = setMask( iv_presentOffset );
+            case PRESENT:
+                // turn on the present bit
+                iv_msg->iv_assertion_mask = pres_mask;
+                break;
 
-            switch ( i_state )
-            {
-                case NOT_PRESENT:
-                    // turn off the present bit
-                    iv_msg->iv_deassertion_mask = pres_mask;
-                    // turn on the disabled bit
-                    iv_msg->iv_assertion_mask = func_mask;
-                    break;
+            case FUNCTIONAL:
+                // turn off the disabled bit
+                iv_msg->iv_deassertion_mask = func_mask;
+                break;
 
-                case PRESENT:
-                    // turn on the present bit
-                    iv_msg->iv_assertion_mask = pres_mask;
-                    break;
+            case PRESENT_FUNCTIONAL:
+                // assert the present bit
+                iv_msg->iv_assertion_mask = pres_mask;
+                // turn off the disabled bit
+                iv_msg->iv_deassertion_mask = func_mask;
+                break;
 
-                case FUNCTIONAL:
-                    // turn off the disabled bit
-                    iv_msg->iv_deassertion_mask = func_mask;
-                    break;
+            case PRESENT_NONFUNCTIONAL:
+                // assert the present bit
+                iv_msg->iv_assertion_mask = pres_mask;
+                // assert the disabled bit
+                iv_msg->iv_assertion_mask |= func_mask;
+                break;
 
-                case PRESENT_FUNCTIONAL:
-                    // assert the present bit
-                    iv_msg->iv_assertion_mask = pres_mask;
-                    // turn off the disabled bit
-                    iv_msg->iv_deassertion_mask = func_mask;
-                    break;
+            case NON_FUNCTIONAL:
+                // assert the disabled bit
+                iv_msg->iv_assertion_mask = func_mask;
+                break;
 
-                case PRESENT_NONFUNCTIONAL:
-                    // assert the present bit
-                    iv_msg->iv_assertion_mask = pres_mask;
-                    // assert the disabled bit
-                    iv_msg->iv_assertion_mask |= func_mask;
-                    break;
-
-                case NON_FUNCTIONAL:
-                    // assert the disabled bit
-                    iv_msg->iv_assertion_mask = func_mask;
-                    break;
-
-                default:
-                    // mark as not present
-                    iv_msg->iv_deassertion_mask = pres_mask;
-                    iv_msg->iv_assertion_mask = func_mask;
-                    break;
-            }
-
-            l_err = writeSensorData();
-
+            default:
+                // mark as not present
+                iv_msg->iv_deassertion_mask = pres_mask;
+                iv_msg->iv_assertion_mask = func_mask;
+                break;
         }
+
+        l_err = writeSensorData();
 
         return l_err;
 
@@ -701,8 +728,8 @@ namespace SENSOR
     //**************************************************************************
 
     FaultSensor::FaultSensor(
-        TARGETING::Target* i_pTarget)
-      : SensorBase(TARGETING::SENSOR_NAME_FAULT, i_pTarget)
+            TARGETING::ConstTargetHandle_t i_pTarget)
+        : SensorBase(TARGETING::SENSOR_NAME_FAULT, i_pTarget)
     {
     }
 
@@ -711,12 +738,12 @@ namespace SENSOR
     //**************************************************************************
 
     FaultSensor::FaultSensor(
-        TARGETING::Target* i_pTarget,
-        const TARGETING::TYPE i_associatedType)
-      : SensorBase(
-            static_cast<TARGETING::SENSOR_NAME>(
-                TARGETING::SENSOR_NAME_FAULT | i_associatedType),
-            i_pTarget)
+            TARGETING::ConstTargetHandle_t i_pTarget,
+            const TARGETING::ENTITY_ID i_associatedType)
+        : SensorBase(
+                static_cast<TARGETING::SENSOR_NAME>(
+                    TARGETING::SENSOR_NAME_FAULT | i_associatedType),
+                i_pTarget)
     {
     }
 
@@ -733,30 +760,28 @@ namespace SENSOR
     //**************************************************************************
 
     errlHndl_t FaultSensor::setStatus(
-        const FAULT_STATE i_faultState)
+            const FAULT_STATE i_faultState)
     {
         errlHndl_t pError = NULL;
 
         switch(i_faultState)
         {
             case FAULT_STATE_ASSERTED:
-                iv_msg->iv_deassertion_mask = setMask(FAULT_DEASSERTED_OFFSET);
                 iv_msg->iv_assertion_mask = setMask(FAULT_ASSERTED_OFFSET);
                 break;
             case FAULT_STATE_DEASSERTED:
                 iv_msg->iv_deassertion_mask = setMask(FAULT_ASSERTED_OFFSET);
-                iv_msg->iv_assertion_mask = setMask(FAULT_DEASSERTED_OFFSET);
                 break;
             default:
                 assert(0,"Caller passed unsupported fault state of 0x%X",
-                    i_faultState);
+                        i_faultState);
         }
 
         pError = writeSensorData();
         if(pError)
         {
             TRACFCOMP(g_trac_ipmi, ERR_MRK " "
-                "Failed to write sensor data for sensor name 0x%X",
+                    "Failed to write sensor data for sensor name 0x%X",
                     iv_name);
         }
 
@@ -768,7 +793,8 @@ namespace SENSOR
     //
     //
     OCCActiveSensor::OCCActiveSensor( TARGETING::Target * i_pTarget )
-        :SensorBase(TARGETING::SENSOR_NAME_OCC_ACTIVE, i_pTarget )
+        :SensorBase(TARGETING::SENSOR_NAME_OCC_ACTIVE,
+                (TARGETING::ConstTargetHandle_t) i_pTarget )
     {
     };
 
@@ -978,8 +1004,8 @@ namespace SENSOR
                     (*ptr)[0], (*ptr)[1], TARGETING::get_huid(pTarget));
 
                 FaultSensor faultSensor(pTarget,
-                    static_cast<TARGETING::TYPE>(
-                        (*ptr)[0]));
+                    static_cast<TARGETING::ENTITY_ID>(
+                        getMinorType((*ptr)[0])));
 
                 errlHndl_t pError = faultSensor.setStatus(
                     FaultSensor::FAULT_STATE_DEASSERTED);
@@ -1012,8 +1038,9 @@ namespace SENSOR
     };
 
     // returns a sensor number based on input target type
-    uint32_t getFaultSensorNumber( TARGETING::TargetHandle_t i_pTarget )
+    uint32_t getFaultSensorNumber( TARGETING::ConstTargetHandle_t i_pTarget )
     {
+        TRACDCOMP(g_trac_ipmi,">>getFaultSensorNumber()");
 
         TARGETING::TYPE l_type = i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
 
@@ -1025,65 +1052,71 @@ namespace SENSOR
             case TARGETING::TYPE_PROC:
             case TARGETING::TYPE_CORE:
             case TARGETING::TYPE_DIMM:
+            case TARGETING::TYPE_MEMBUF:
             {
                 l_sensor_number =  StatusSensor(i_pTarget).getSensorNumber();
 
                 break;
             }
 
-            case TARGETING::TYPE_OSC:
-            case TARGETING::TYPE_OSCREFCLK:
-            case TARGETING::TYPE_OSCPCICLK:
+            case TARGETING::TYPE_OCC:
             {
-                TARGETING::TargetHandleList parentList;
+                 // should return the processor associated with this OCC
+                TARGETING::ConstTargetHandle_t proc = getParentChip( i_pTarget);
 
-                // The clock fault sensors are associated with the NODE target
-                (void)getParentAffinityTargets (
-                        parentList, i_pTarget, TARGETING::CLASS_ENC,
-                        TARGETING::TYPE_NODE, false);
+                 // we should get the processor as the parent here
+                 assert(i_pTarget,"OCC target failed to return parent proc");
 
-                assert(parentList.size() == 1 );
-
-                TARGETING::TargetHandle_t l_node = parentList[0];
-
-                l_sensor_number =
-                    SENSOR::FaultSensor( l_node, l_type ).getSensorNumber();
+                 l_sensor_number = getFaultSensorNumber( proc );
 
                 break;
             }
-
             default:
             {
                 TARGETING::TargetHandle_t l_sys;
 
-                // get the "system error sensor number" associated with the
+                // get the "system error" sensor number associated with the
                 // system target.
                 TARGETING::targetService().getTopLevelTarget(l_sys);
 
-                l_sensor_number = SENSOR::FaultSensor(
-                                 l_sys, TARGETING::TYPE_NA ).getSensorNumber();
+               l_sensor_number = TARGETING::UTIL::getSensorNumber(l_sys,
+                       TARGETING::SENSOR_NAME_SYSTEM_EVENT );
 
                 break;
             }
 
         }
+
+        TRACDCOMP(g_trac_ipmi,"<<getFaultSensorNumber() returning sensor number %d,");
+
         return l_sensor_number;
     }
 
-    // $TODO - RTC:123217 - modify code get info from attribute when available
     // interface to retrieve the APSS channel sensor numbers.
     errlHndl_t getAPSSChannelSensorNumbers(
                         const uint16_t (* &o_sensor_numbers)[16])
     {
 
+        TARGETING::TargetHandle_t l_sys;
 
-        // habanero only..
-        static const uint16_t numbers[16] = { 161, 162, 163, 164,
-                                              165, 166, 167, 168,
-                                              169, 170, 171, 172,
-                                              173, 174, 175, 176};
+        // get the "system error" sensor number associated with the
+        // system target.
 
-        o_sensor_numbers = &numbers;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+
+        static TARGETING::ATTR_ADC_CHANNEL_SENSOR_NUMBERS_type
+                                                apss_sensors;
+
+        if( l_sys->tryGetAttr<TARGETING::
+                ATTR_ADC_CHANNEL_SENSOR_NUMBERS>(apss_sensors) )
+        {
+            o_sensor_numbers = &apss_sensors;
+        }
+        else
+        {
+            // need that attribute or things dont work
+            assert(0,"Missing ADC_CHANNEL_SENSOR_NUMBERS attribute");
+        }
 
         return NULL;
     }

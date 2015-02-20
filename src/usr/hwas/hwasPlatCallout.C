@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,18 +203,18 @@ errlHndl_t platHandleClockCallout(
         TARGETING::TargetHandle_t pTarget = parentList[0];
 
         // Get associated target
-        TARGETING::ATTR_TYPE_type associatedType = TARGETING::TYPE_NA;
+        TARGETING::ENTITY_ID associatedType = TARGETING::ENTITY_ID_NA;
         switch(i_clockType)
         {
             case TODCLK_TYPE:
-                associatedType = TARGETING::TYPE_OSC;
+                associatedType = TARGETING::ENTITY_ID_TOD_CLOCK;
                 break;
             case MEMCLK_TYPE:
             case OSCREFCLK_TYPE:
-                associatedType = TARGETING::TYPE_OSCREFCLK;
+                associatedType = TARGETING::ENTITY_ID_REF_CLOCK;
                 break;
             case OSCPCICLK_TYPE:
-                associatedType = TARGETING::TYPE_OSCPCICLK;
+                associatedType = TARGETING::ENTITY_ID_PCI_CLOCK;
                 break;
             default:
                 assert(0,"Bug! Caller supplied illegal clock type.  "

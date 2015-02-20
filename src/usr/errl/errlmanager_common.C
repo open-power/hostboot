@@ -53,8 +53,8 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
 
         // look thru the errlog for any Callout UserDetail sections
         //  to determine the sensor information for the SEL
-        uint8_t l_sensorNumber = SENSOR::INVALID_SENSOR;
-        uint8_t l_sensorType = SENSOR::INVALID_SENSOR;
+        uint8_t l_sensorNumber = TARGETING::UTIL::INVALID_IPMI_SENSOR;
+        uint8_t l_sensorType = TARGETING::UTIL::INVALID_IPMI_SENSOR;
         HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_NONE;
         for(std::vector<ErrlUD*>::const_iterator
                 it = io_err->iv_SectionVector.begin();
@@ -92,13 +92,20 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
             }
         } // for each SectionVector
 
-#if 0
-// TODO: RTC 119440
-        if (l_sensorNumber != SENSOR::INVALID_SENSOR)
+        if (l_sensorNumber != TARGETING::UTIL::INVALID_IPMI_SENSOR)
         {
-            l_sensorType = SENSOR::getSensorType(l_sensorNumber);
+            uint8_t unused = 0;
+            errlHndl_t e =
+                SENSOR::SensorBase::getSensorType( l_sensorNumber,
+                                                   l_sensorType, unused );
+            if( e )
+            {
+                TRACFCOMP(g_trac_errl, ERR_MRK"Failed to get sensor type for sensor %d",l_sensorNumber);
+                // since we are in the commit path, lets just delete this
+                // error and move on.
+                delete e;
+            }
         }
-#endif
 
         // flatten into buffer, truncate to max eSEL size
         uint32_t l_pelSize = io_err->flattenedSize();

@@ -45,6 +45,8 @@
 namespace SENSOR
 {
 
+    const uint8_t INVALID_TYPE = 0xFF;
+
     /**
      *  @enum procStatusSensorOffsets
      *  Sensor specific completion codes, defined in IPMI Spec.
@@ -204,7 +206,7 @@ namespace SENSOR
              *  @par Detailed Description:
              */
             SensorBase(TARGETING::SENSOR_NAME i_name,
-                    TARGETING::Target * i_target);
+                    TARGETING::ConstTargetHandle_t i_target);
 
             /**
              *  @brief Destructor for the base sensor object
@@ -290,7 +292,7 @@ namespace SENSOR
 
 
             // return the sensor type and event reading data
-            errlHndl_t getSensorType(uint32_t i_sensorNumber,
+            static errlHndl_t getSensorType(uint32_t i_sensorNumber,
                                      uint8_t &o_sensorType,
                                      uint8_t &o_eventReadingType );
 
@@ -333,7 +335,7 @@ namespace SENSOR
             TARGETING::SENSOR_NAME iv_name;
 
             // Target associated with this sensor.
-            TARGETING::Target * iv_target;
+            TARGETING::ConstTargetHandle_t iv_target;
 
             // data structure for the send sensor reading command.
             setSensorReadingRequest * iv_msg;
@@ -574,7 +576,7 @@ namespace SENSOR
              *  each instance of the DIMM, CORE and Processor targets.
              *
              */
-            StatusSensor( TARGETING::Target * );
+            StatusSensor( TARGETING::ConstTargetHandle_t );
 
             /**
              *  @brief Destructor for the StatusSensor
@@ -640,7 +642,7 @@ namespace SENSOR
              *  @param[in] i_pTarget
              *      Target associated with the fault sensor.  Must not be NULL.
              */
-            FaultSensor(TARGETING::Target* i_pTarget);
+            FaultSensor(TARGETING::ConstTargetHandle_t i_pTarget);
 
             /**
              *  @brief Constructor for a fault sensor, used to differentiate
@@ -653,8 +655,9 @@ namespace SENSOR
              *      Type of non-instantiated target linked to the main target
              *      for which this sensor provides readings.
              */
-            FaultSensor(TARGETING::Target* i_pTarget,
-                TARGETING::TYPE i_associatedType = TARGETING::TYPE_NA);
+            FaultSensor(TARGETING::ConstTargetHandle_t i_pTarget,
+                TARGETING::ENTITY_ID i_associatedType =
+                                            TARGETING::ENTITY_ID_NA);
 
             /**
              *  @brief Destructor for a fault sensor
@@ -771,7 +774,7 @@ namespace SENSOR
      *   sensor types, the "System Error" sensor number will be returned.
      *
      */
-    uint32_t getFaultSensorNumber(TARGETING::Target * i_pTarget );
+    uint32_t getFaultSensorNumber(TARGETING::ConstTargetHandle_t i_pTarget );
 
 
     /**

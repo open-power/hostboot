@@ -574,7 +574,7 @@
     <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
     <description>ADC Channel IPMI sensor numbers. 16 channels.</description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint16_t></uint16_t>
         <array>16</array>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -897,172 +897,109 @@
     <id>SENSOR_NAME</id>
     <description>Enumeration indicating the IPMI sensor name, which will
         be used by hostboot when determining the sensor number to return.
-        The name is unique per hostboot sensor type, actual IPMI sensor
-        types have been overloaded to map our needs.  The sensor name consists
-        of one byte of sensor type plus one byte of sub-type, to differentiate
-        similar sensors under the same target</description>
+        he sensor name consists of one byte of sensor type plus one byte of
+        sub-type, to differentiate similar sensors under the same target.
+        Our implementaion uses the IPMI defined entity ID as the sub-type.
+    </description>
     <enumerator>
-        <name>TEMPERATURE</name>
-        <value>0x0100</value>
+        <name>PROC_TEMP</name>
+        <value>0x0103</value>
     </enumerator>
     <enumerator>
-        <name>VOLTAGE</name>
-        <value>0x0200</value>
+        <name>DIMM_TEMP</name>
+        <value>0x01C0</value>
     </enumerator>
     <enumerator>
-        <name>CURRENT</name>
-        <value>0x0300</value>
-    </enumerator>
-    <enumerator>
-        <name>INTRUSION</name>
-        <value>0x0400</value>
+        <name>CORE_TEMP</name>
+        <value>0x01D0</value>
     </enumerator>
     <enumerator>
         <name>STATE</name>
         <value>0x0500</value>
     </enumerator>
     <enumerator>
-        <name>POWER_UNIT</name>
-        <value>0x0600</value>
+        <name>MEMBUF_TEMP</name>
+        <value>0x01D1</value>
     </enumerator>
     <enumerator>
-        <name>OS_BOOT</name>
-        <value>0x0700</value>
+        <name>PROC_STATE</name>
+        <value>0x0703</value>
     </enumerator>
     <enumerator>
-        <name>HOST_STATUS</name>
-        <value>0x0800</value>
+        <name>CORE_STATE</name>
+        <value>0x07D0</value>
+    </enumerator>
+    <enumerator>
+        <name>DIMM_STATE</name>
+        <value>0x0C20</value>
+    </enumerator>
+    <enumerator>
+        <name>MEMBUF_STATE</name>
+        <value>0x0CD1</value>
     </enumerator>
     <enumerator>
         <name>FW_BOOT_PROGRESS</name>
-        <value>0x0900</value>
+        <value>0x0F22</value>
     </enumerator>
     <enumerator>
-        <name>OCC_ACTIVE</name>
-        <value>0x0A00</value>
-    </enumerator>
-    <enumerator>
-        <name>SYSTEM_POWER_CAP</name>
-        <value>0x0b00</value>
-    </enumerator>
-    <enumerator>
-        <name>PCI_ACTIVE</name>
-        <value>0x0c00</value>
-    </enumerator>
-    <enumerator>
-        <name>BOOT_WATCHDOG</name>
-        <value>0x0d00</value>
-    </enumerator>
-    <enumerator>
-        <name>REBOOT_COUNT</name>
-        <value>0x0e00</value>
-    </enumerator>
-    <enumerator>
-        <name>FAULT</name>
-        <value>0x1000</value>
-    </enumerator>
-    <enumerator>
-        <name>APSS_FAULT</name> <!-- APSS Fault -->
-        <value>0x1010</value>
-    </enumerator>
-    <enumerator>
-        <name>TOD_CLOCK_FAULT</name>
-        <value>0x1017</value>
-    </enumerator>
-    <enumerator>
-        <name>REF_CLOCK_FAULT</name>
-        <value>0x101A</value>
-    </enumerator>
-    <enumerator>
-        <name>PCI_CLOCK_FAULT</name>
-        <value>0x101B</value>
-    </enumerator>
-    <enumerator>
-        <name>APSS_CHANNEL</name> <!-- Power sensors -->
-        <value>0x1100</value>     <!-- 16 channels -->
-    </enumerator>
-    <enumerator>
-        <name>FREQUENCY</name> <!-- Power sensors -->
-        <value>0xC100</value>     <!-- 16 channels -->
-    </enumerator>
-</enumerationType>
-
-<enumerationType>
-    <id>SENSOR_TYPE</id>
-    <description>Enumeration indicating the IPMI sensor type, these values
-        are defined in the IPMI specification. These values will be used when
-    sending sensor reading events to the BMC.</description>
-    <enumerator>
-        <name>NA</name>
-        <value>0</value>
-    </enumerator>
-    <enumerator>
-        <name>TEMPERATURE</name>
-        <value>0x01</value>
-    </enumerator>
-    <enumerator>
-        <name>VOLTAGE</name>
-        <value>0x02</value>
-    </enumerator>
-    <enumerator>
-        <name>CURRENT</name>
-        <value>0x03</value>
-    </enumerator>
-    <enumerator>
-        <name>PHYSICAL_SECURITY</name>
-        <value>0x05</value>
-    </enumerator>
-    <enumerator>
-        <name>PROCESSOR</name>
-        <value>0x07</value>
-    </enumerator>
-    <enumerator>
-        <name>MEMORY</name>
-        <value>0x0c</value>
-    </enumerator>
-    <enumerator>
-        <name>POWER_UNIT</name>
-        <value>0x09</value>
-    </enumerator>
-    <enumerator>
-        <name>SYS_FW_PROGRESS</name>
-        <value>0x0F</value>
-    </enumerator>
-    <enumerator>
-        <name>SYS_EVENT</name>
-        <value>0x12</value>
+        <name>SYSTEM_EVENT</name>
+        <value>0x1201</value>
     </enumerator>
     <enumerator>
         <name>OS_BOOT</name>
-        <value>0x1F</value>
+        <value>0x1F23</value>
     </enumerator>
     <enumerator>
-        <name>APCI_POWER_STATE</name>
-        <value>0x22</value>
+        <name>HOST_STATUS</name>
+        <value>0x2223</value>
     </enumerator>
     <enumerator>
-        <name>FREQ</name>
-        <value>0xC1</value>
+        <name>OCC_ACTIVE</name>
+        <value>0x07D2</value>
     </enumerator>
     <enumerator>
-        <name>POWER</name>
-        <value>0xC2</value>
+        <name>CORE_FREQ</name>
+        <value>0xC1D0</value>
     </enumerator>
     <enumerator>
-        <name>BOOT_COUNT</name>
-        <value>0xC3</value>
+        <name>APSS_CHANNEL</name>
+        <value>0xC2D7</value>
     </enumerator>
     <enumerator>
-        <name>PCI_LINK_PRES</name>
-        <value>0xC4</value>
+        <name>PCI_ACTIVE</name>
+        <value>0xC423</value>
     </enumerator>
     <enumerator>
-        <name>PWR_LIMIT_ACTIVE</name>
-        <value>0xC4</value>
+        <name>REBOOT_COUNT</name>
+        <value>0xC322</value>
     </enumerator>
     <enumerator>
         <name>FAULT</name>
-        <value>0xC7</value>
+        <value>0xC700</value>
+    </enumerator>
+    <enumerator>
+        <name>BACKPLANE_FAULT</name>
+        <value>0xC707</value>
+    </enumerator>
+    <enumerator>
+        <name>REF_CLOCK_FAULT</name>
+        <value>0xC7D4</value>
+    </enumerator>
+    <enumerator>
+        <name>PCI_CLOCK_FAULT</name>
+        <value>0xC7D5</value>
+    </enumerator>
+    <enumerator>
+        <name>TOD_CLOCK_FAULT</name>
+        <value>0xC7D6</value>
+    </enumerator>
+    <enumerator>
+        <name>APSS_FAULT</name>
+        <value>0xC7D7</value>
+    </enumerator>
+    <enumerator>
+        <name>DERATING_FACTOR</name>
+        <value>0xC815</value>
     </enumerator>
 </enumerationType>
 

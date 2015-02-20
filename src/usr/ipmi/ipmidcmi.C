@@ -89,6 +89,13 @@ namespace SENSOR
                 TRACFCOMP(g_trac_ipmi,"Power limit is %d watts",o_powerLimit);
                 TRACFCOMP(g_trac_ipmi,"Power limit is %s", ((cc) ? "not active": "active"));
 
+                // $TODO RTC:124093 de-rating factor for the power limit will
+                // be stored in a sensor, which is not defined currently so
+                // hardcode it at 90% efficency per power team suggestion
+
+                // derate the power limit to 90% of the input power
+                o_powerLimit = ( static_cast<uint32_t>(o_powerLimit) * 9 )/10;
+
                 // the completion code also tells us if the limit is active
                 if(l_cc == POWER_LIMIT_ACTIVE )
                 {
@@ -108,6 +115,10 @@ namespace SENSOR
                  * @userdata1       BMC IPMI Completion code.
                  * @devdesc         Request to get power limit information
                  *                  failed
+                 * @custdesc        The DCMI command to retrieve the power limit
+                 *                  data from the BMC has failed, the user
+                 *                  defined power limit cannot be applied.
+                 *
                  */
 
                 l_err = new ERRORLOG::ErrlEntry(
