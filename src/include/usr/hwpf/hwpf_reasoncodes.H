@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -78,6 +78,7 @@ namespace fapi
         MOD_GET_POUNDV_BUCKET_DATA                 = 0x24,
         MOD_GET_VER_ONE_VOLTAGE_BUCKET_DATA        = 0x25,
         MOD_PLAT_MVPD_GET_VLTG_BUCKET_ATTR         = 0x26,
+        MOD_PLAT_ATTR_SVC_CEN_DQ_TO_DIMM_CONN_DQ   = 0x27,
 
     };
 

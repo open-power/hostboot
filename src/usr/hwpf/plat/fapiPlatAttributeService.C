@@ -347,17 +347,20 @@ fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmFapiTarget,
                                       uint8_t (&o_data)[DIMM_DQ_NUM_DQS])
 {
     fapi::ReturnCode l_rc;
-    TARGETING::Target * l_pDimmTarget = NULL;
 
-    l_rc = getTargetingTarget(i_pDimmFapiTarget, l_pDimmTarget,
+    do
+    {
+        TARGETING::Target * l_pDimmTarget = NULL;
+
+        l_rc = getTargetingTarget(i_pDimmFapiTarget, l_pDimmTarget,
                               TARGETING::TYPE_DIMM);
 
-    if (l_rc)
-    {
-        FAPI_ERR("fapiPlatGetDqMapping: Error from getTargetingTarget");
-    }
-    else
-    {
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetDqMapping: Error from getTargetingTarget");
+            break;
+        }
+
         if (l_pDimmTarget->getAttr<TARGETING::ATTR_MODEL>() ==
             TARGETING::MODEL_CDIMM)
         {
@@ -371,13 +374,80 @@ fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmFapiTarget,
         }
         else
         {
-            // IS-DIMM. Get the mapping using a Hostboot attribute. Note that
-            // getAttr() cannot be used to get an array attribute so using
-            // tryGetAttr and ignoring result
-            l_pDimmTarget->
-                tryGetAttr<TARGETING::ATTR_CEN_DQ_TO_DIMM_CONN_DQ>(o_data);
+            // ISDIMM. Work back up from Dimm target to MBA to Mem Buf and
+            // gather dimm position to select ATTR_VPD_ISDIMMTOC4DQ data
+
+            // Get DIMM's Port position off the MBA
+            uint8_t l_port=l_pDimmTarget->getAttr<TARGETING::ATTR_MBA_PORT>();
+
+            // Find MBA from DIMM
+            TARGETING::TargetHandleList l_mbaList;
+            getParentAffinityTargets (l_mbaList,l_pDimmTarget,
+                                  TARGETING::CLASS_UNIT,
+                                  TARGETING::TYPE_MBA, false);
+
+            if (l_mbaList.size () != 1 )
+            {
+                FAPI_ERR("fapiPlatGetDqMapping: expect 1 mba %d ",
+                    l_mbaList.size());
+
+                /*@
+                 * @errortype
+                 * @moduleid     fapi::MOD_PLAT_ATTR_SVC_CEN_DQ_TO_DIMM_CONN_DQ
+                 * @reasoncode   fapi::RC_NO_SINGLE_MBA
+                 * @userdata1    Number of MBAs
+                 * @userdata2    DIMM HUID
+                 * @devdesc      fapiPlatGetVpdVersion could not find the
+                 *               expected 1 mba from the passed dimm target
+                 */
+                const bool hbSwError = true;
+                errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    fapi::MOD_PLAT_ATTR_SVC_CEN_DQ_TO_DIMM_CONN_DQ,
+                    fapi::RC_NO_SINGLE_MBA,
+                    l_mbaList.size(),
+                    TARGETING::get_huid(l_pDimmTarget),
+                    hbSwError);
+
+                // Attach the error log to the fapi::ReturnCode
+                l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+                break;
+            }
+            fapi::Target l_fapiMbaTarget(TARGET_TYPE_MBA_CHIPLET,
+                    static_cast<void *>(l_mbaList[0]));
+
+            // Get MBA position off the Mem Buf
+            uint8_t l_mbaPos = l_mbaList[0]->
+                                    getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            // find mem buff
+            fapi::Target l_fapiMbTarget;
+            l_rc = fapiGetParentChip(l_fapiMbaTarget, l_fapiMbTarget);
+            if (l_rc)
+            {
+                FAPI_ERR("fapiPlatGetDqMapping: Error getting MBA's parent ");
+                break;
+            }
+
+            // Read wiring data
+            uint8_t l_wiringData[DIMM_TO_C4_PORTS][DIMM_TO_C4_DQ_ENTRIES];
+            l_rc = FAPI_ATTR_GET(ATTR_VPD_ISDIMMTOC4DQ,
+                                    &l_fapiMbTarget,l_wiringData);
+            if (l_rc)
+            {
+                FAPI_ERR("fapiPlatGetDqMapping:"
+                                  " Error getting VPD_ISDIMMTOC4DQ data");
+                break;
+            }
+
+            // Map data
+            uint8_t l_index = l_mbaPos*2+l_port;
+            for (uint8_t i = 0; i < DIMM_DQ_NUM_DQS; i++)
+            {
+                o_data[i] = l_wiringData[l_index][i];
+            }
         }
-    }
+    } while (0);
 
     return l_rc;
 }
