@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -106,10 +108,10 @@ namespace Util
                 std::swap(*pivot,*division);
             }
 
-            // Sort each partition.
-            sort(first,division);
+            // Sort each partition
+            __Util_QSort_Impl::sort(first,division);
             std::advance(division, 1);
-            sort(division, last);
+            __Util_QSort_Impl::sort(division, last);
         };
 
 
@@ -178,9 +180,9 @@ namespace Util
             }
 
             // Sort each partition.
-            sort(first,division,pred);
+             __Util_QSort_Impl::sort(first,division,pred);
             std::advance(division, 1);
-            sort(division, last,pred);
+             __Util_QSort_Impl::sort(division, last,pred);
         };
 
     };
