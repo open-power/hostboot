@@ -822,6 +822,16 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+<attribute>
+    <id>IPMI_INSTANCE</id>
+    <description>Holds the IPMI instance number for this entity.</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
 <enumerationType>
     <id>ENTITY_ID</id>
     <description>Enumeration indicating the IPMI entity ID, these values are
@@ -1000,6 +1010,69 @@
     <enumerator>
         <name>DERATING_FACTOR</name>
         <value>0xC815</value>
+    </enumerator>
+</enumerationType>
+
+<enumerationType>
+    <id>SENSOR_TYPE</id>
+    <description>Enumeration indicating the IPMI sensor type, these values
+        are defined in the IPMI specification. These values will be used when
+    sending sensor reading events to the BMC.</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>TEMPERATURE</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>PROCESSOR</name>
+        <value>0x07</value>
+    </enumerator>
+    <enumerator>
+        <name>MEMORY</name>
+        <value>0x0c</value>
+    </enumerator>
+    <enumerator>
+        <name>SYS_FW_PROGRESS</name>
+        <value>0x0F</value>
+    </enumerator>
+    <enumerator>
+        <name>SYS_EVENT</name>
+        <value>0x12</value>
+    </enumerator>
+    <enumerator>
+        <name>OS_BOOT</name>
+       <value>0x1F</value>
+    </enumerator>
+    <enumerator>
+        <name>APCI_POWER_STATE</name>
+        <value>0x22</value>
+    </enumerator>
+    <enumerator>
+        <name>FREQ</name>
+        <value>0xC1</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER</name>
+        <value>0xC2</value>
+    </enumerator>
+    <enumerator>
+        <name>BOOT_COUNT</name>
+        <value>0xC3</value>
+    </enumerator>
+    <enumerator>
+        <name>PCI_LINK_PRES</name>
+        <value>0xC4</value>
+    </enumerator>
+    <enumerator>
+        <name>PWR_LIMIT_ACTIVE</name>
+        <value>0xC4</value>
+    </enumerator>
+    <enumerator>
+        <name>FAULT</name>
+        <value>0xC7</value>
     </enumerator>
 </enumerationType>
 

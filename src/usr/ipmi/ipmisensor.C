@@ -1121,4 +1121,79 @@ namespace SENSOR
         return NULL;
     }
 
+    uint16_t getSensorOffsets( TARGETING::SENSOR_NAME i_name,
+                             sensorReadingType &o_readType )
+    {
+
+        uint16_t offsets = 0;
+
+        // most of our sensors use generic sensor specific reading types
+        // so use that as the default value
+        o_readType = SENSOR_SPECIFIC;
+
+        // sensor type is lower byte of sensor name, if we dont match
+        // based on name, then try the sensor type
+        uint16_t t = ( i_name >> 8 ) & 0x00FF;
+
+        switch( i_name )
+        {
+            case TARGETING::SENSOR_NAME_FW_BOOT_PROGRESS:
+                {
+                    offsets = ( 1 << SYSTEM_FIRMWARE_PROGRESS );
+                    break;
+                }
+            case TARGETING::SENSOR_NAME_OCC_ACTIVE:
+                {
+                    offsets = ( 1 << DEVICE_DISABLED ) |
+                              ( 1 << DEVICE_ENABLED );
+                    o_readType = DIGITAL_ENABLE_DISABLE;
+                    break;
+                }
+            case TARGETING::SENSOR_NAME_HOST_STATUS:
+                {
+                    offsets = ( 1 << S0_G0_WORKING ) |
+                              ( 1 << G5_SOFT_OFF )   |
+                              ( 1 << LEGACY_ON );
+                    break;
+                }
+            case TARGETING::SENSOR_NAME_PCI_ACTIVE:
+            case TARGETING::SENSOR_NAME_OS_BOOT:
+                {
+                    // default all offsets enabled
+                    offsets = 0x7FFF;
+                    break;
+                }
+
+            default:
+                {
+                    // try sensor type
+                    switch (t)
+                    {
+                        case TARGETING::SENSOR_TYPE_FAULT:
+                            offsets = ( 1 << ASSERTED );
+                            o_readType = DIGITAL_ASSERT_DEASSERT;
+                            break;
+
+                        case TARGETING::SENSOR_TYPE_PROCESSOR:
+                            offsets = ( 1 << PROC_PRESENCE_DETECTED ) |
+                                      ( 1 << PROC_DISABLED )          |
+                                      ( 1 << IERR );
+                            break;
+
+                        case TARGETING::SENSOR_TYPE_MEMORY:
+                            offsets = ( 1 << MEMORY_DEVICE_DISABLED ) |
+                                ( 1 << MEM_DEVICE_PRESENCE_DETECTED );
+                            break;
+                        default:
+                            offsets = 0;
+                            o_readType = THRESHOLD;
+                            break;
+                    }
+
+                }
+        }
+
+        return offsets;
+    }
+
 }; // end name space

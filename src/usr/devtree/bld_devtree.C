@@ -1299,40 +1299,70 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
     return errhdl;
 }
 
+
+#ifdef CONFIG_BMC_IPMI
+enum
+{
+    ENTITY_ID_MASK      = 0x00FF,
+    SENSOR_TYPE_MASK    = 0xFF00,
+};
+
 /* create a node for each IPMI sensor in the system, the sensor unit number
    corresponds to the BMC assigned sensor number */
 uint32_t bld_sensor_node(devTree * i_dt, const dtOffset_t & i_parentNode,
-                         const uint16_t sensorData[] )
+                         const uint16_t sensorData[],
+                         uint32_t instance, uint32_t chipId )
 {
 
-    const uint32_t sensorNumber = sensorData[
+    SENSOR::sensorReadingType readType;
+
+    // pass in the sensor name to get back the supported offsets and the event
+    // reading type for this sensor.
+    uint32_t offsets = SENSOR::getSensorOffsets(
+             static_cast<TARGETING::SENSOR_NAME>(
+                 sensorData[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET]),
+             readType);
+
+    const uint16_t sensorNumber = sensorData[
                         TARGETING::IPMI_SENSOR_ARRAY_NUMBER_OFFSET];
 
-    const uint32_t sensorName =
-                        sensorData[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET];
+    // the sensor name is a combination of the sensor type + entity ID
+    const uint16_t sensorType = (
+        sensorData[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET]
+                    & SENSOR_TYPE_MASK) >> 8;
+
+    const uint16_t entityId =
+        sensorData[TARGETING::IPMI_SENSOR_ARRAY_NAME_OFFSET] & ENTITY_ID_MASK;
 
     /* Build sensor node based on sensor number */
     dtOffset_t sensorNode = i_dt->addNode(i_parentNode, "sensor", sensorNumber);
 
+    /* compatibility strings -- currently only one */
+    const char* compatStr[] = {"ibm,ipmi-sensor", NULL};
+
+    i_dt->addPropertyStrings(sensorNode, "compatible", compatStr);
+
     i_dt->addPropertyCell32(sensorNode, "reg", sensorNumber);
 
     // add sensor type
-    i_dt->addPropertyCell32(sensorNode, "ipmi-sensor-type", sensorName);
+    i_dt->addPropertyCell32(sensorNode, "ipmi-sensor-type", sensorType);
+    i_dt->addPropertyCell32(sensorNode, "ipmi-entity-id", entityId);
+    i_dt->addPropertyCell32(sensorNode, "ipmi-entity-instance", instance);
+    i_dt->addPropertyCell32(sensorNode, "ipmi-sensor-offsets", offsets);
+    i_dt->addPropertyCell32(sensorNode, "ipmi-sensor-reading-type", readType);
 
-   // @TODO RTC:113902
-    // get more info from Ben H. regarding what info he needs
-    // add the name of the sensor
-    //i_dt->addPropertyString(sensorNode, "name", sensorToString( sensorName ));
-    //   i_dt->addPropertyCell32(sensorNode, "ipmi-entity-type",
-    //                                          sensorData[ENTITY_TYPE_OFFSET]);
-    //   i_dt->addPropertyCell32(sensorNode, "ipmi-reading-type",
-    //                                         sensorData[READING_TYPE_OFFSET]);
+    // currently we only add the chip ID to the OCC sensor
+    if(chipId != 0xFF )
+    {
+        i_dt->addPropertyCell32(sensorNode, "ibm,chip-id", chipId);
+    }
 
-    /* return the phandle for this sensor, might need to add it to the
-    cpus node per Ben H. proposal */
+    /* return the phandle for this sensor */
     return i_dt->getPhandle(sensorNode);
 }
 
+
+// build the sensor node for a given target
 uint32_t bld_sensor_node(devTree * i_dt, const dtOffset_t & i_sensorNode,
         TARGETING::Target * i_pTarget )
 {
@@ -1344,6 +1374,21 @@ uint32_t bld_sensor_node(devTree * i_dt, const dtOffset_t & i_sensorNode,
      * for each sensor */
     if ( i_pTarget->tryGetAttr<ATTR_IPMI_SENSORS>(l_sensors) )
     {
+        uint32_t chipId = 0xFF;
+
+        AttributeTraits<ATTR_IPMI_INSTANCE>::Type l_instance;
+
+        l_instance = i_pTarget->getAttr<TARGETING::ATTR_IPMI_INSTANCE>();
+
+        // add the chip id to the OCC sensor since OPAL needs it to figure out
+        // which OCC it is.
+        if( TARGETING::TYPE_OCC == i_pTarget->getAttr<TARGETING::ATTR_TYPE>())
+        {
+            ConstTargetHandle_t proc = getParentChip(i_pTarget);
+
+            chipId = getProcChipId( proc );
+        }
+
         for(uint16_t i=0; i< array_rows; i++)
         {
             /*  if the sensor number is 0xFF move on */
@@ -1351,7 +1396,8 @@ uint32_t bld_sensor_node(devTree * i_dt, const dtOffset_t & i_sensorNode,
             {
                 /* use this row to create the next sensor node - ignoring
                  * return value for now */
-                bld_sensor_node(i_dt, i_sensorNode, l_sensors[i] );
+                bld_sensor_node(i_dt, i_sensorNode, l_sensors[i],
+                        l_instance , chipId );
             }
             else
             {
@@ -1385,18 +1431,9 @@ errlHndl_t bld_fdt_sensors(devTree * i_dt, const dtOffset_t & i_parentNode,
 
     i_dt->addPropertyString(sensorNode, "name", sensorNodeName );
 
-    /* compatibility strings -- currently only one */
-    const char* compatStr[] = {"ibm,ipmi-sensor", NULL};
-
-    i_dt->addPropertyStrings(sensorNode, "compatible", compatStr);
-
     /* Add the # address & size cell properties to /sensors node. */
     i_dt->addPropertyCell32(sensorNode, "#address-cells", 1);
     i_dt->addPropertyCell32(sensorNode, "#size-cells", 0);
-
-    // pass ALL IPMI_SENSORS to opal
-    // @TODO RTC:113902 - add remaining sensor info and limit sensors
-    // and adjust the sensors passed to opal to match their requirements
 
     /*  loop through all the targets and get the IPMI sensor data if it
         exists */
@@ -1410,7 +1447,6 @@ errlHndl_t bld_fdt_sensors(devTree * i_dt, const dtOffset_t & i_parentNode,
 
     return errhdl;
 }
-
 
 /* add the BMC node to the device tree, this node will hold any BMC info needed
    in the device tree */
@@ -1433,11 +1469,6 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
     i_dt->addPropertyCell32(bmcNode, "#address-cells", 1);
     i_dt->addPropertyCell32(bmcNode, "#size-cells", 0);
 
-    /* compatibility strings -- currently only one */
-    const char* compatStr[] = {"ibm,ipmi-sensor", NULL};
-
-    i_dt->addPropertyStrings(bmcNode, "compatible", compatStr);
-
     i_dt->addPropertyString(bmcNode, "name", bmcNodeName );
 
     //Pass Opal their device string
@@ -1454,6 +1485,7 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
 
     return errhdl;
 }
+#endif
 
 errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
 {

@@ -48,6 +48,20 @@ namespace SENSOR
     const uint8_t INVALID_TYPE = 0xFF;
 
     /**
+     *  @enum sensorReadingTypes
+     *  Sensor specific completion codes, defined in IPMI Spec.
+     *
+     */
+    enum sensorReadingType
+    {
+        THRESHOLD                   = 0x01,
+        DIGITAL_ASSERT_DEASSERT     = 0x03,
+        DIGITAL_ENABLE_DISABLE      = 0x09,
+        SENSOR_SPECIFIC             = 0x6f,
+    };
+
+
+    /**
      *  @enum procStatusSensorOffsets
      *  Sensor specific completion codes, defined in IPMI Spec.
      *
@@ -88,6 +102,74 @@ namespace SENSOR
         SPARE                           = 0x08,
         MEMORY_AUTOMATICALLY_THROTTLED  = 0x09,
         CRITICAL_OVER_TEMP              = 0x0A,
+    };
+
+    /**
+     *  @enum firmwareBootProgressSensorOffsets
+     *  Boot progress specific offsets defined in IPMI Spec.
+     *
+     */
+    enum firmwareProgressSensorOffsets
+    {
+        // offset 02h
+        SYSTEM_FIRMWARE_PROGRESS = 0x02,
+    };
+
+    /**
+     *  @enum discrete09_Offsets
+     *
+     *      Offsets specific to IPMI sensor reading type 09
+     *      digital discrete senosrs. These offsets result in
+     *      Device Enabled or Device Disabled events in the
+     *      BMC event log.
+     *
+     */
+    enum discrete09_Offsets
+    {
+        // offset 00h
+        DEVICE_DISABLED = 0x0,
+
+        //offset 01h
+        DEVICE_ENABLED  = 0x1,
+    };
+
+     /**
+     *  @enum discrete03_Offsets
+     *
+     *      Offsets specific to IPMI sensor reading type 03
+     *      digital discrete senosrs. These offsets result in generic
+     *      State Asserted or State Deasserted events in the
+     *      BMC event log.
+     *
+     */
+    enum discrete03_Offsets
+    {
+        // offset 00h
+        DEASSERTED = 0x00,
+
+        //offset 01h
+        ASSERTED   = 0x01,
+    };
+
+     /**
+     *  @enum acpiPowerState_Offsets
+     *
+     *      Offsets specific to IPMI ACPI Power state
+     *      senosrs. These offsets result in power
+     *      state messages in the BMC event log.
+     *
+     */
+    enum acpiPowerState_Offsets
+    {
+        // offset 0h
+        S0_G0_WORKING   = 0x00,
+
+        // offset 05h
+        G5_SOFT_OFF     = 0x05,
+
+        //offset 0Bh
+        LEGACY_ON       = 0x0B,
+
     };
 
     //**  Bit definition for set sensor reading cmd operation field
@@ -826,6 +908,20 @@ namespace SENSOR
      */
     errlHndl_t getAPSSChannelSensorNumbers(
                                      const uint16_t (* &o_sensor_numbers)[16]);
+
+    /**
+     *   Helper function to return a mask of the supported masks for the
+     *   sensor passed in.
+     *
+     *  @param[i] - sensor name to determine the offset for.
+     *  @param[o] - sensor reading type, defined in IPMI spec for the
+     *              passed in sensor number.
+     *
+     *
+     *  @return sensor offsets
+     */
+    uint16_t getSensorOffsets(TARGETING::SENSOR_NAME i_name,
+                              sensorReadingType &o_readType );
 
 
 

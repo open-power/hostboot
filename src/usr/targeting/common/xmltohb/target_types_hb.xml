@@ -33,6 +33,14 @@
      ================================================================= -->
 
 <targetTypeExtension>
+    <id>base</id>
+    <attribute>
+        <id>IPMI_INSTANCE</id>
+        <default>0xFF</default>
+    </attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
     <id>sys-sys-power8</id>
     <attribute><id>IS_MPIPL_HB</id></attribute>
     <attribute><id>IBSCOM_ENABLE_OVERRIDE</id></attribute>
@@ -182,9 +190,7 @@
     <attribute>
         <id>PSTATE_TABLE</id>
     </attribute>
-    <attribute>
-        <id>IPMI_SENSORS</id>
-    </attribute>
+    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

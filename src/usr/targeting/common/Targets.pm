@@ -195,7 +195,7 @@ sub printAttribute
     $filter{ENTITY_ID_LOOKUP}               = 1;
     $filter{ENTITY_INSTANCE}                = 1;
     $filter{MBA_NUM}                        = 1;
-    $filter{IPMI_INSTANCE}                  = 1;
+    $filter{IPMI_INSTANCE}                  = 0;
     $filter{IPMI_NAME}                      = 1;
     $filter{INSTANCE_ID}                    = 1;
     #$filter{ADC_CHANNEL_SENSOR_NUMBERS}     = 1;
