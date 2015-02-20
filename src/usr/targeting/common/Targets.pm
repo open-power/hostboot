@@ -47,6 +47,7 @@ sub new
         NUM_PROCS    => 0,
         TOP_LEVEL    => "sys-0",
         TOPOLOGY     => undef,
+        report_log   => "",
         DMI_FSI_MAP  => {
             '0' => '3',
             '1' => '2',
@@ -89,6 +90,8 @@ sub loadXML
     $self->storeEnumerations();
     $self->buildHierarchy($self->{TOP_LEVEL});
     $self->buildAffinity();
+    $self->{report_filename}=$filename.".rpt";
+    $self->{report_filename}=~s/\.xml//g;
 }
 
 ################################################
@@ -195,7 +198,10 @@ sub printAttribute
     $filter{IPMI_INSTANCE}                  = 1;
     $filter{IPMI_NAME}                      = 1;
     $filter{INSTANCE_ID}                    = 1;
-    $filter{ADC_CHANNEL_SENSOR_NUMBERS}     = 1;
+    #$filter{ADC_CHANNEL_SENSOR_NUMBERS}     = 1;
+    $filter{IO_CONFIG_SELECT}               = 1;
+    #$filter{FRU_ID}                         = 1;
+    $filter{FRU_NAME}                       = 1;
 
     if ($filter{$attribute} == 1)
     {
@@ -1011,6 +1017,10 @@ sub getAttribute
         #print Dumper($target_ptr);
         $self->myExit(4);
     }
+    if (ref($target_ptr->{ATTRIBUTES}->{$attribute}->{default}) eq "HASH")
+    {
+        return "";
+    }
     return $target_ptr->{ATTRIBUTES}->{$attribute}->{default};
 }
 ## renames a target attribute
@@ -1246,6 +1256,21 @@ sub log
         print "DEBUG: ($target) $msg\n";
     }
 }
+sub writeReport
+{
+    my $self   = shift;
+    my $msg    = shift;
+    $self->{report_log}=$self->{report_log}.$msg;
+}
+sub writeReportFile
+{
+    my $self   = shift;
+    open(R,">$self->{report_filename}") ||
+          die "Unable to create file: ".$self->{report_filename};
+    print R $self->{report_log};
+    close R;
+}
+
 1;
 
 =head1 NAME

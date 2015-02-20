@@ -76,6 +76,15 @@ $targetObj->setVersion($VERSION);
 my $xmldir = dirname($serverwiz_file);
 $targetObj->loadXML($serverwiz_file);
 
+
+
+my $str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %s\n",
+           "Sensor Name","FRU Name","Ent ID","Type","ID","Inst","FRU","Target");
+$targetObj->writeReport($str);
+$str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %s\n",
+                   "------------------------------","----------",
+                   "------","----","----","----","----","----------");
+$targetObj->writeReport($str);
 #--------------------------------------------------
 ## loop through all targets and do stuff
 foreach my $target (sort keys %{ $targetObj->getAllTargets() })
@@ -97,6 +106,12 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     {
         processBmc($targetObj, $target);
     }
+    elsif ($type eq "APSS")
+    {
+        processApss($targetObj, $target);
+    }
+
+    processIpmiSensors($targetObj,$target);
 }
 
 
@@ -132,62 +147,15 @@ $targetObj->printXML($xml_fh, "top");
 close $xml_fh;
 if (!$targetObj->{errorsExist})
 {
+    ## optionally print out report
+    if ($report)
+    {
+        print "Writing report to: ".$targetObj->{report_filename}."\n";
+        $targetObj->writeReportFile();
+    }
     print "MRW created successfully!\n";
 }
 
-
-## optionally print out report
-if ($report)
-{
-    my $report_file = $xmldir . "/" . $targetObj->getSystemName() . ".rpt";
-    open(SUM,">$report_file") || die "Unable to create: $report_file\n";
-    my $ref = $targetObj->{targeting}->{SYS}[0]{NODES}[0]{PROCS};
-    foreach my $proc (@{$ref})
-    {
-        foreach my $mcs (@{$proc->{MCSS}})
-        {
-            my $mcs_target = $mcs->{KEY};
-            my $membuf=$mcs->{MEMBUFS}[0];
-            my $membuf_target = $membuf->{KEY};
-
-            my $sch = $targetObj->getAttribute($mcs_target,
-                      "SCHEMATIC_INTERFACE");
-            my $aff = $targetObj->getAttribute($mcs_target,"AFFINITY_PATH");
-            my $huid = $targetObj->getAttribute($mcs_target,"HUID");
-            print SUM "$sch | $huid | $mcs_target | $aff\n";
-            if ($membuf_target ne "") {
-                foreach my $mba (@{$membuf->{MBAS}}) {
-                    my $mba_target = $mba->{KEY};
-
-                    $huid = $targetObj->getAttribute($mba_target,"HUID");
-                    $aff = $targetObj->getAttribute($mcs_target,
-                                   "AFFINITY_PATH");
-                    print SUM "\t | $huid | $mba_target | $aff\n";
-                    foreach my $dimm (@{$mba->{DIMMS}}) {
-                        my $dimm_target = $dimm->{KEY};
-                        $aff = $targetObj->getAttribute($dimm_target,
-                                   "AFFINITY_PATH");
-                        $huid = $targetObj->getAttribute($dimm_target,"HUID");
-                        my $p = $targetObj->getAttribute($dimm_target,
-                                  "MBA_PORT");
-                        my $d = $targetObj->getAttribute($dimm_target,
-                                   "MBA_DIMM");
-                        my $i2c = $targetObj->getAttributeField($dimm_target,
-                                  "EEPROM_VPD_PRIMARY_INFO","devAddr");
-                        my $sens = $targetObj->getAttribute($dimm_target,
-                                  "IPMI_SENSORS");
-                        my @s = split(/\,/,$sens);
-
-                        print SUM "\t\t$huid | $dimm_target".
-                                  " | $aff | $p | $d | $i2c | ".
-                                  "$s[0],$s[1] | $s[2],$s[3]\n";
-                    }
-                }
-            }
-        }
-    }
-    close SUM;
-}
 
 #--------------------------------------------------
 #--------------------------------------------------
@@ -209,9 +177,174 @@ sub processSystem
     $targetObj->setAttribute($target, "MAX_PROC_CHIPS_PER_NODE",
         $targetObj->{NUM_PROCS_PER_NODE});
     parseBitwise($targetObj,$target,"CDM_POLICIES");
-    convertNegativeNumbers($targetObj,$target,"ADC_CHANNEL_OFFSETS",32);
+
 }
 
+sub processIpmiSensors {
+    my $targetObj=shift;
+    my $target=shift;
+
+    if ($targetObj->isBadAttribute($target,"IPMI_INSTANCE") ||
+        $targetObj->getMrwType($target) eq "IPMI_SENSOR" ||
+        $targetObj->getTargetChildren($target) eq "")
+    {
+        return;
+    }
+
+    my $instance=$targetObj->getAttribute($target,"IPMI_INSTANCE");
+    my $name="";
+    if (!$targetObj->isBadAttribute($target,"IPMI_NAME"))
+    {
+        $name=$targetObj->getAttribute($target,"IPMI_NAME");
+    }
+    my $fru_id="N/A";
+    if (!$targetObj->isBadAttribute($target,"FRU_ID"))
+    {
+        $fru_id=$targetObj->getAttribute($target,"FRU_ID");
+    }
+    my @sensors;
+
+    foreach my $child (@{$targetObj->getTargetChildren($target)})
+    {
+        if ($targetObj->getMrwType($child) eq "IPMI_SENSOR")
+        {
+            my $entity_id=$targetObj->
+                 getAttribute($child,"IPMI_ENTITY_ID");
+            my $sensor_type=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_TYPE");
+            my $name_suffix=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
+            my $sensor_id=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_ID");
+
+            $name_suffix=~s/\n//g;
+            $name_suffix=~s/\s+//g;
+            $name_suffix=~s/\t+//g;
+            my $sensor_name=$name_suffix;
+            if ($name ne "")
+            {
+                $sensor_name=$name."_".$name_suffix;
+            }
+            my $attribute_name="";
+            my $s=sprintf("0x%02X%02X,0x%02X",
+                  oct($sensor_type),oct($entity_id),oct($sensor_id));
+            push(@sensors,$s);
+            my $sensor_id_str = "";
+            if ($sensor_id ne "")
+            {
+                $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
+            }
+            my $str=sprintf(
+                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %s\n",
+                    $sensor_name,$name,oct($entity_id),oct($sensor_type),
+                    $sensor_id_str,$instance,$fru_id,$target);
+            $targetObj->writeReport($str);
+        }
+    }
+    for (my $i=@sensors;$i<16;$i++)
+    {
+        push(@sensors,"0xFFFF,0xFF");
+    }
+    my @sensors_sort = sort(@sensors);
+    $targetObj->setAttribute($target,
+                 "IPMI_SENSORS",join(',',@sensors_sort));
+
+}
+sub processApss {
+    my $targetObj=shift;
+    my $target=shift;
+
+    my $systemTarget = $targetObj->getTargetParent($target);
+    my @sensors;
+    my @channel_ids;
+    my @channel_offsets;
+    my @channel_gains;
+    my @channel_grounds;
+
+    foreach my $child (@{$targetObj->getTargetChildren($target)})
+    {
+        if ($targetObj->getMrwType($child) eq "APSS_SENSOR")
+        {
+            my $entity_id=$targetObj->
+                 getAttribute($child,"IPMI_ENTITY_ID");
+            my $sensor_type=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_TYPE");
+            my $name=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
+            my $sensor_id=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_ID");
+            my $channel = $targetObj->
+                 getAttribute($child,"ADC_CHANNEL_ASSIGNMENT");
+            my $channel_id = $targetObj->
+                 getAttribute($child,"ADC_CHANNEL_ID");
+            my $channel_gain = $targetObj->
+                 getAttribute($child,"ADC_CHANNEL_GAIN");
+            my $channel_offset = $targetObj->
+                 getAttribute($child,"ADC_CHANNEL_OFFSET");
+            my $channel_ground = $targetObj->
+                 getAttribute($child,"ADC_CHANNEL_GROUND");
+
+            $name=~s/\n//g;
+            $name=~s/\s+//g;
+            $name=~s/\t+//g;
+
+            my $sensor_id_str = "";
+            if ($sensor_id ne "")
+            {
+                $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
+            }
+            if ($channel ne "")
+            {
+                $sensors[$channel] = $sensor_id_str;
+                $channel_ids[$channel] = $channel_id;
+                $channel_grounds[$channel] = $channel_ground;
+                $channel_offsets[$channel] = $channel_offset;
+                $channel_gains[$channel] = $channel_gain;
+            }
+            my $str=sprintf(
+                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %s\n",
+                    $name,"",oct($entity_id),oct($sensor_type),
+                    $sensor_id_str,$channel,"",$systemTarget);
+            $targetObj->writeReport($str);
+        }
+    }
+    for (my $i=0;$i<16;$i++)
+    {
+        if ($sensors[$i] eq "")
+        {
+            $sensors[$i]="0x00";
+        }
+        if ($channel_ids[$i] eq "")
+        {
+            $channel_ids[$i]="0";
+        }
+        if ($channel_grounds[$i] eq "")
+        {
+            $channel_grounds[$i]="0";
+        }
+        if ($channel_gains[$i] eq "")
+        {
+            $channel_gains[$i]="0";
+        }
+        if ($channel_offsets[$i] eq "")
+        {
+            $channel_offsets[$i]="0";
+        }
+    }
+
+    $targetObj->setAttribute($systemTarget,
+                 "ADC_CHANNEL_FUNC_IDS",join(',',@channel_ids));
+    $targetObj->setAttribute($systemTarget,
+                 "ADC_CHANNEL_SENSOR_NUMBERS",join(',',@sensors));
+    $targetObj->setAttribute($systemTarget,
+                 "ADC_CHANNEL_GNDS",join(',',@channel_grounds));
+    $targetObj->setAttribute($systemTarget,
+                 "ADC_CHANNEL_GAINS",join(',',@channel_gains));
+    $targetObj->setAttribute($systemTarget,
+                 "ADC_CHANNEL_OFFSETS",join(',',@channel_offsets));
+
+    convertNegativeNumbers($targetObj,$systemTarget,"ADC_CHANNEL_OFFSETS",32);
+}
 sub convertNegativeNumbers
 {
     my $targetObj=shift;
@@ -293,8 +426,6 @@ sub processProcessor
     my $socket_target =
        $targetObj->getTargetParent($targetObj->getTargetParent($target));
     $targetObj->copyAttribute($socket_target,$target,"LOCATION_CODE");
-    $targetObj->copyAttribute($socket_target,$target,"FRU_ID");
-
 
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
@@ -562,12 +693,8 @@ sub processAbus
 
         # copy Abus attributes to proc
         my $abus = $targetObj->getFirstConnectionBus($target);
-        $targetObj->setAttribute($target, "EI_BUS_TX_LANE_INVERT",
-            $abus->{bus_attribute}->{SOURCE_TX_LANE_INVERT}->{default});
         $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
-        $targetObj->setAttribute($abus_child_conn, "EI_BUS_TX_LANE_INVERT",
-            $abus->{bus_attribute}->{DEST_TX_LANE_INVERT}->{default});
         $targetObj->setAttribute($abus_child_conn, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
         $found_abus = 1;
@@ -845,8 +972,8 @@ sub processMembufVpdAssociation
                 my $membuf_target = $membuf_assoc->{DEST_PARENT};
                 setEepromAttributes($targetObj,
                        "EEPROM_VPD_PRIMARY_INFO",$membuf_target,$vpd);
-                setEepromAttributes($targetObj,
-                       "EEPROM_VPD_FRU_INFO",$membuf_target,$vpd,"0++");
+                #setEepromAttributes($targetObj,
+                #       "EEPROM_VPD_FRU_INFO",$membuf_target,$vpd,"0++");
                 my $index = $targetObj->getBusAttribute($membuf_assoc->{SOURCE},
                                 $membuf_assoc->{BUS_NUM}, "ISDIMM_MBVPD_INDEX");
                 $targetObj->setAttribute(
