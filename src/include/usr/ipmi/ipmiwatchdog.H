@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,10 +43,12 @@ namespace IPMIWATCHDOG
 // Globals/Constants
 /******************************************************************************/
 /**
- * @brief the default watchdog countdown setting it to 15 secs since progress
- * have to be sent every 15 secs.
+ * @brief the default watchdog countdown setting it to 120 seconds.
+ *
+ * @TODO RTC:124499 revisit after performace improvments
+ *
  */
-const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 15;
+const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 120;
 
 /**
  * @brief the default watchdog countdown for transition between hostboot
