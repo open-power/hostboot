@@ -1270,6 +1270,174 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
 
 
 /**
+ * @brief Compare predicate for EepromInfo_t
+ */
+class isSameEeprom
+{
+  public:
+    isSameEeprom( EepromInfo_t& i_first )
+    : iv_first(i_first)
+    {}
+
+    bool operator()( EepromInfo_t& i_second )
+    {
+        return( (iv_first.i2cMaster == i_second.i2cMaster)
+                && (iv_first.engine == i_second.engine)
+                && (iv_first.port == i_second.port)
+                && (iv_first.devAddr == i_second.devAddr) );
+    }
+  private:
+    EepromInfo_t& iv_first;
+};
+
+/**
+ * @brief Add any new EEPROMs associated with this target
+ *   to the list
+ * @param[in] i_list : list of previously discovered EEPROMs
+ * @param[out] i_targ : owner of EEPROMs to add
+ */
+void add_to_list( std::list<EepromInfo_t>& i_list,
+                  TARGETING::Target* i_targ )
+{
+    TRACDCOMP(g_trac_eeprom,"Targ %.8X",TARGETING::get_huid(i_targ));
+
+    // try all defined types of EEPROMs
+    for( eeprom_chip_types_t eep_type = FIRST_CHIP_TYPE;
+         eep_type < LAST_CHIP_TYPE;
+         eep_type = static_cast<eeprom_chip_types_t>(eep_type+1) )
+    {
+        bool found_eep = false;
+        TARGETING::EepromVpdPrimaryInfo eepromData;
+
+        switch( eep_type )
+        {
+            case VPD_PRIMARY:
+                if( i_targ->
+                    tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
+                    ( eepromData ) )
+
+                {
+                    found_eep = true;
+                }
+                break;
+
+            case VPD_BACKUP:
+                if( i_targ->
+                    tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>
+                    ( reinterpret_cast<
+                      TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type&>
+                      ( eepromData) ) )
+                {
+                    found_eep = true;
+                }
+                break;
+
+            case SBE_PRIMARY:
+                if( i_targ->
+                    tryGetAttr<TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO>
+                    ( reinterpret_cast<
+                      TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO_type&>
+                      ( eepromData) ) )
+                {
+                    found_eep = true;
+                }
+                break;
+
+            case SBE_BACKUP:
+                if( i_targ->
+                    tryGetAttr<TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO>
+                    ( reinterpret_cast<
+                      TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO_type&>
+                      ( eepromData) ) )
+                {
+                    found_eep = true;
+                }
+                break;
+
+            case LAST_CHIP_TYPE:
+                //only included to catch additional types later on
+                found_eep = false;
+                break;
+        }
+
+        if( !found_eep )
+        {
+            //nothing to do
+            continue;
+        }
+
+        // check that the path exists
+        bool exists = false;
+        TARGETING::targetService().exists( eepromData.i2cMasterPath,
+                                           exists );
+        if( !exists )
+        {
+            continue;
+        }
+
+        // Since it exists, convert to a target
+        TARGETING::Target* i2cm = TARGETING::targetService()
+          .toTarget( eepromData.i2cMasterPath );
+        if( NULL == i2cm )
+        {
+            //not sure how this could happen, but just skip it
+            continue;
+        }
+
+        // ignore anything with junk data
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        if( i2cm == sys )
+        {
+            continue;
+        }
+
+        // copy all the data out
+        EepromInfo_t eep_info;
+        eep_info.i2cMaster = i2cm;
+        eep_info.engine = eepromData.engine;
+        eep_info.port = eepromData.port;
+        eep_info.devAddr = eepromData.devAddr;
+        eep_info.device = eep_type;
+        eep_info.assocTarg = i_targ;
+        eep_info.sizeKB = eepromData.maxMemorySizeKB;
+        eep_info.addrBytes = eepromData.byteAddrOffset;
+        //one more lookup for the speed
+        TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speeds;
+        if( i2cm->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
+            (speeds) )
+        {
+            if( (eep_info.engine > I2C_BUS_MAX_ENGINE(speeds))
+                || (eep_info.port > I2C_BUS_MAX_PORT(speeds)) )
+            {
+                continue;
+            }
+            eep_info.busFreq = speeds[eep_info.engine][eep_info.port];
+            eep_info.busFreq *= 1000; //convert KHz->Hz
+        }
+        else
+        {
+            continue;
+        }
+
+        // check if the eeprom is already in our list
+        std::list<EepromInfo_t>::iterator oldeep =
+          find_if( i_list.begin(), i_list.end(),
+                   isSameEeprom(eep_info) );
+        if( oldeep == i_list.end() )
+        {
+            // didn't find it in our list so stick it into the output list
+            i_list.push_back(eep_info);
+            TRACDCOMP(g_trac_eeprom,"--Adding i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+        }
+        else
+        {
+            TRACDCOMP(g_trac_eeprom,"--Skipping duplicate i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+        }
+    }
+}
+
+/**
  * @brief Return a set of information related to every unique
  *        EEPROM in the system
  */
@@ -1277,141 +1445,74 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
 {
     TRACDCOMP(g_trac_eeprom,">>getEEPROMs()");
 
-    // loop through every present target
+    // We only want to have a single entry in our list per
+    //  physical EEPROM.  Since multiple targets could be
+    //  using the same EEPROM, we need to have a hierarchy
+    //  of importance.
+    //    node/planar > proc > membuf > dimm
+
+    // predicate to only look for this that are actually there
     TARGETING::PredicateHwas isPresent;
     isPresent.reset().poweredOn(true).present(true);
-    TARGETING::PredicatePostfixExpr goodFilter;
-    goodFilter.push(&isPresent);
-    //  apply the filter through all targets.
-    TARGETING::TargetRangeFilter targ_itr(
-                                          TARGETING::targetService().begin(),
-                                          TARGETING::targetService().end(),
-                                          &goodFilter );
-    for( ; targ_itr; ++targ_itr )
+
+    // #1 - Nodes
+    TARGETING::PredicateCTM nodes( TARGETING::CLASS_ENC,
+                                   TARGETING::TYPE_NODE,
+                                   TARGETING::MODEL_NA );
+    TARGETING::PredicatePostfixExpr l_nodeFilter;
+    l_nodeFilter.push(&isPresent).push(&nodes).And();
+    TARGETING::TargetRangeFilter node_itr( TARGETING::targetService().begin(),
+                                           TARGETING::targetService().end(),
+                                           &l_nodeFilter );
+    for( ; node_itr; ++node_itr )
     {
-        TRACDCOMP(g_trac_eeprom,"Targ %.8X",TARGETING::get_huid(*targ_itr));
-
-        // try all defined types of EEPROMs
-        for( eeprom_chip_types_t eep_type = FIRST_CHIP_TYPE;
-             eep_type < LAST_CHIP_TYPE;
-             eep_type = static_cast<eeprom_chip_types_t>(eep_type+1) )
-        {
-            bool found_eep = false;
-            TARGETING::EepromVpdPrimaryInfo eepromData;
-
-            switch( eep_type )
-            {
-                case VPD_PRIMARY:
-                    if( targ_itr->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
-                        ( eepromData ) )
-
-                    {
-                        found_eep = true;
-                    }
-                    break;
-
-                case VPD_BACKUP:
-                    if( targ_itr->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>
-                        ( reinterpret_cast<
-                          TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type&>
-                          ( eepromData) ) )
-                    {
-                        found_eep = true;
-                    }
-                    break;
-
-                case SBE_PRIMARY:
-                    if( targ_itr->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO>
-                        ( reinterpret_cast<
-                          TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO_type&>
-                          ( eepromData) ) )
-                    {
-                        found_eep = true;
-                    }
-                    break;
-
-                case SBE_BACKUP:
-                    if( targ_itr->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO>
-                        ( reinterpret_cast<
-                          TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO_type&>
-                          ( eepromData) ) )
-                    {
-                        found_eep = true;
-                    }
-                    break;
-
-                case LAST_CHIP_TYPE:
-                    //only included to catch additional types later on
-                    found_eep = false;
-                    break;
-            }
-            if( found_eep )
-            {
-                // check that the path exists
-                bool exists = false;
-                TARGETING::targetService().exists( eepromData.i2cMasterPath,
-                                                   exists );
-                if( !exists )
-                {
-                    continue;
-                }
-
-                // Since it exists, convert to a target
-                TARGETING::Target* i2cm = TARGETING::targetService()
-                  .toTarget( eepromData.i2cMasterPath );
-                if( NULL == i2cm )
-                {
-                    //not sure how this could happen, but just skip it
-                    continue;
-                }
-
-                // ignore anything with junk data
-                TARGETING::Target * sys = NULL;
-                TARGETING::targetService().getTopLevelTarget( sys );
-                if( i2cm == sys )
-                {
-                    continue;
-                }
-
-                // copy all the data out
-                EepromInfo_t eep_info;
-                eep_info.i2cMaster = i2cm;
-                eep_info.engine = eepromData.engine;
-                eep_info.port = eepromData.port;
-                eep_info.devAddr = eepromData.devAddr;
-                eep_info.device = eep_type;
-                eep_info.assocTarg = *targ_itr;
-                eep_info.sizeKB = eepromData.maxMemorySizeKB;
-                eep_info.addrBytes = eepromData.byteAddrOffset;
-                //one more lookup for the speed
-                TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speeds;
-                if( i2cm->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
-                    (speeds) )
-                {
-                    if( (eep_info.engine > I2C_BUS_MAX_ENGINE(speeds))
-                        || (eep_info.port > I2C_BUS_MAX_PORT(speeds)) )
-                    {
-                        continue;
-                    }
-                    eep_info.busFreq = speeds[eep_info.engine][eep_info.port];
-                    eep_info.busFreq *= 1000; //convert KHz->Hz
-                }
-                else
-                {
-                    continue;
-                }
-
-                // stick it into the output list
-                o_info.push_back(eep_info);
-                TRACDCOMP(g_trac_eeprom,"--Adding i2cm=%.8X, type=%d, eng=%d, port=%d", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port);
-            }
-        }
+        add_to_list( o_info, *node_itr );
     }
+
+    // #2 - Procs
+    TARGETING::PredicateCTM procs( TARGETING::CLASS_CHIP,
+                                   TARGETING::TYPE_PROC,
+                                   TARGETING::MODEL_NA );
+    TARGETING::PredicatePostfixExpr l_procFilter;
+    l_procFilter.push(&isPresent).push(&procs).And();
+    TARGETING::TargetRangeFilter proc_itr( TARGETING::targetService().begin(),
+                                           TARGETING::targetService().end(),
+                                           &l_procFilter );
+    for( ; proc_itr; ++proc_itr )
+    {
+        add_to_list( o_info, *proc_itr );
+    }
+
+    // #3 - Membufs
+    TARGETING::PredicateCTM membs( TARGETING::CLASS_CHIP,
+                                   TARGETING::TYPE_MEMBUF,
+                                   TARGETING::MODEL_NA );
+    TARGETING::PredicatePostfixExpr l_membFilter;
+    l_membFilter.push(&isPresent).push(&membs).And();
+    TARGETING::TargetRangeFilter memb_itr( TARGETING::targetService().begin(),
+                                           TARGETING::targetService().end(),
+                                           &l_membFilter );
+    for( ; memb_itr; ++memb_itr )
+    {
+        add_to_list( o_info, *memb_itr );
+    }
+
+    // #4 - DIMMs
+    TARGETING::PredicateCTM dimms( TARGETING::CLASS_CARD,
+                                   TARGETING::TYPE_DIMM,
+                                   TARGETING::MODEL_NA );
+    TARGETING::PredicatePostfixExpr l_dimmFilter;
+    l_dimmFilter.push(&isPresent).push(&dimms).And();
+    TARGETING::TargetRangeFilter dimm_itr( TARGETING::targetService().begin(),
+                                           TARGETING::targetService().end(),
+                                           &l_dimmFilter );
+    for( ; dimm_itr; ++dimm_itr )
+    {
+        add_to_list( o_info, *dimm_itr );
+    }
+
     TRACDCOMP(g_trac_eeprom,"<<getEEPROMs()");
 }
+
 
 } // end namespace EEPROM

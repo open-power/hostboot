@@ -351,9 +351,12 @@ void add_i2c_info( const TARGETING::Target* i_targ,
                 }
                 else if( l_type == TARGETING::TYPE_MEMBUF )
                 {
-                    sprintf( l_label, "memb-vpd-%d",
+                    //@fixme-RTC:118373-Remove Hab/Palm workaround
+                    //   once node vpd is supported
+                    sprintf( l_label, "system-vpd" );
+                    /*sprintf( l_label, "memb-vpd-%d",
                              eep2->assocTarg
-                             ->getAttr<TARGETING::ATTR_POSITION>() );
+                             ->getAttr<TARGETING::ATTR_POSITION>() );*/
                 }
                 else if( l_type == TARGETING::TYPE_DIMM )
                 {
