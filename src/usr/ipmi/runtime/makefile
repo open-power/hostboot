@@ -26,6 +26,7 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = ipmi_rt
 
+OBJS += ipmidcmi.o
 OBJS += ipmisel.o
 OBJS += ipmisensor.o
 OBJS += rt_ipmirp.o
