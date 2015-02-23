@@ -222,7 +222,7 @@ typedef struct hostInterfaces
 
     /**
      * @brief Read data from an i2c device
-     * @param[in] i_master - chip, engine and port packed into 
+     * @param[in] i_master - chip, engine and port packed into
      *    a single 64-bit argument
      *    ---------------------------------------------------
      *    |         chip         |  reserved  |  eng | port |
@@ -233,7 +233,7 @@ typedef struct hostInterfaces
      * @param[in] i_offset - Offset within device to read
      * @param[in] i_length - Number of bytes to read
      * @param[out] o_data - Data that was read
-     * @return 0 on success else return code 
+     * @return 0 on success else return code
      * @platform OpenPOWER
      */
     int (*i2c_read)( uint64_t i_master, uint16_t i_devAddr,
@@ -242,7 +242,7 @@ typedef struct hostInterfaces
 
     /**
      * @brief Write data to an i2c device
-     * @param[in] i_master - chip, engine and port packed into 
+     * @param[in] i_master - chip, engine and port packed into
      *    a single 64-bit argument
      *    ---------------------------------------------------
      *    |         chip         |  reserved  |  eng | port |
@@ -304,6 +304,21 @@ typedef struct hostInterfaces
 
     // Reserve some space for future growth.
     // do NOT ever change this number, even if you add functions.
+    //
+    // The value of 32 was somewhat arbitrarily chosen.
+    //
+    // If either side modifies the interface.h file we're suppose to be able to
+    // tolerate the other side not supporting the function yet.  The function
+    // pointer can be NULL.  So if we require a new interface from OPAL, like
+    // "read_iic", we need to be able to tolerate that function pointer being
+    // NULL and do something sane (and erroring out is not consider sane).
+    //
+    // The purpose of this is to give us the ability to update Hostboot and
+    // OPAL independently.  It is pretty rare that we both have function ready
+    // at the same time.  The "reserve" is there so that the structures are
+    // allocated with sufficient space and populated with NULL function
+    // pointers.  32 is big enough that we should not likely add that many
+    // functions from either direction in between any two levels of support.
     void (*reserved[32])(void);
 
 } hostInterfaces_t;
