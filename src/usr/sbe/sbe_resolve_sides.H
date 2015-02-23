@@ -43,7 +43,7 @@ namespace SBE
     /******************************************/
 
     // This seeprom is a candidate to be READ_ONLY (ie, not updated)
-    const PNOR::sbeSeepromSide_t READ_ONLY_SEEPROM = PNOR::SBE_SEEPROM1;
+    const sbeSeepromSide_t READ_ONLY_SEEPROM = SBE_SEEPROM1;
 
     // Used to keep SBE Seeproms in sync with EEPROM::eeprom_chip_types_t
     const EEPROM::eeprom_chip_types_t sbe_side_sync[2] =
@@ -81,9 +81,9 @@ namespace SBE
         // Target Information
         TARGETING::Target*       tgt;
 
-        PNOR::sbeSeepromSide_t   cur_side;    // aka 'booted' side
-        PNOR::sbeSeepromSide_t   alt_side;    // non-booted/non-cur side
-        PNOR::sbeSeepromSide_t   update_side; // side to be updated
+        sbeSeepromSide_t   cur_side;    // aka 'booted' side
+        sbeSeepromSide_t   alt_side;    // non-booted/non-cur side
+        sbeSeepromSide_t   update_side; // side to be updated
 
         // Info from PNOR
         PNOR::SideId pnor_sideId;
@@ -95,9 +95,9 @@ namespace SBE
 
         // Constructor to default certain values
         sbeResolveState_t() :
-          tgt(NULL), cur_side(PNOR::SBE_SEEPROM_INVALID),
-          alt_side(PNOR::SBE_SEEPROM_INVALID),
-          update_side(PNOR::SBE_SEEPROM_INVALID),
+          tgt(NULL), cur_side(SBE_SEEPROM_INVALID),
+          alt_side(SBE_SEEPROM_INVALID),
+          update_side(SBE_SEEPROM_INVALID),
           pnor_sideId(PNOR::WORKING),
           pnor_side(NULL),
           pnor_isGolden(false), pnor_hasOtherSide(false),
@@ -166,7 +166,7 @@ namespace SBE
      */
     errlHndl_t readSbeImage(TARGETING::Target* i_target,
                               void* o_imgPtr,
-                              PNOR::sbeSeepromSide_t i_side,
+                              sbeSeepromSide_t i_side,
                               size_t& o_image_size,
                               sbeSeepromVersionInfo_t& o_version);
 
@@ -192,10 +192,9 @@ namespace SBE
      */
     errlHndl_t writeSbeImage(TARGETING::Target* i_target,
                              void* i_imgPtr,
-                             PNOR::sbeSeepromSide_t i_side,
+                             sbeSeepromSide_t i_side,
                              size_t i_image_size,
                              sbeSeepromVersionInfo_t& io_version);
-
 
     /**
      * @brief Read SBE Image Header from SBE Seeprom and gets the
@@ -214,7 +213,7 @@ namespace SBE
      */
     errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
                                void* i_imgPtr,
-                               PNOR::sbeSeepromSide_t i_side,
+                               sbeSeepromSide_t i_side,
                                size_t& o_image_size);
 
 
@@ -245,7 +244,7 @@ namespace SBE
      */
     errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
                                    void* io_imgPtr,
-                                   PNOR::sbeSeepromSide_t i_side,
+                                   sbeSeepromSide_t i_side,
                                    PNOR::SideId i_pnorSideId,
                                    bool& o_imageWasUpdated);
 

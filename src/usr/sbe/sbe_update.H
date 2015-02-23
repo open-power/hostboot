@@ -55,6 +55,10 @@ namespace SBE
     const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x400; // 1KB
     const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 0x300; // 1KB - 256B
 
+    //Used to read SBE Boot Side from processor
+    const uint64_t SBE_VITAL_REG_0x0005001C = 0x005001C;
+    const uint64_t SBE_BOOT_SELECT_MASK = 0x0080000000000000;
+
     // PNOR SBE and SBEC Partition constants
     const uint32_t MAX_SBE_ENTRIES = 9;
     const uint32_t SBETOC_EYECATCH = 0x53424500;  //'SBE\0'
@@ -102,6 +106,14 @@ namespace SBE
         MVPDOP_UNKNOWN,   // Invalid
         MVPDOP_READ,      // Read version data from MVPD
         MVPDOP_WRITE,     // Write version data to MVPD
+    };
+
+    // Used to keep track of perm/temp, and cur/alt
+    enum sbeSeepromSide_t
+    {
+        SBE_SEEPROM0         = 0x00,   // corresponds to EEPROM::SBE_PRIMARY
+        SBE_SEEPROM1         = 0x01,   // corresponts to EEPROM::SBE_BACKUP
+        SBE_SEEPROM_INVALID  = 0xFF,
     };
 
     // Actions can be combined
@@ -196,9 +208,9 @@ namespace SBE
         bool                     seeprom_0_ver_ECC_fail;
         bool                     seeprom_1_ver_ECC_fail;
 
-        PNOR::sbeSeepromSide_t         cur_seeprom_side; // aka 'booted' side
-        PNOR::sbeSeepromSide_t         alt_seeprom_side;
-        PNOR::sbeSeepromSide_t         permanent_seeprom_side;
+        sbeSeepromSide_t         cur_seeprom_side; // aka 'booted' side
+        sbeSeepromSide_t         alt_seeprom_side;
+        sbeSeepromSide_t         permanent_seeprom_side;
 
         // Customized Image Information for this Target
         size_t                   customizedImage_size;
@@ -317,6 +329,18 @@ namespace SBE
                                    size_t i_maxImgSize,
                                    void* io_imgPtr,
                                    size_t& o_actImgSize);
+
+    /**
+     * @brief Determines which Seeprom was used to boot the SBE
+     *
+     * @param[in] i_target      Target processor to customize
+     *
+     * @param[out] o_bootSide   The Seeprom the SBE booted from
+     *
+     * @return errlHndl_t       Error log handle on failure.
+     */
+    errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
+                                 sbeSeepromSide_t& o_bootSide);
 
     /**
      * @brief Collects Version information from a specific SEEPROM

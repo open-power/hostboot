@@ -32,7 +32,6 @@ OBJS += pnor_common.o
 OBJS += pnorvalid.o
 OBJS += ecc.o
 OBJS += sfcdd.o
-OBJS += pnorsbe.o
 
 #SFC Implementations
 OBJS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibm.o)

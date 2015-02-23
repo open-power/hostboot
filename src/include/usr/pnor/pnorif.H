@@ -199,30 +199,6 @@ enum TestSectionOffset{
     pnorTestSec_rt_readwrite_offset = 0x6000,
 };
 
-////////////////////////////////////////////////////////////////////////////////
-// SBE functionality that lives in PNOR
-
-// Used to keep track of perm/temp, and cur/alt
-enum sbeSeepromSide_t
-{
-    SBE_SEEPROM0         = 0x00,   // corresponds to EEPROM::SBE_PRIMARY
-    SBE_SEEPROM1         = 0x01,   // corresponts to EEPROM::SBE_BACKUP
-    SBE_SEEPROM_INVALID  = 0xFF,
-};
-
-/**
- * @brief Determines which Seeprom was used to boot the SBE
- *
- * @param[in] i_target      Target processor to customize
- *
- * @param[out] o_bootSide   The Seeprom the SBE booted from
- *
- * @return errlHndl_t       Error log handle on failure.
- */
-errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                             sbeSeepromSide_t& o_bootSide);
-
-
 /** Information about PNOR Layout */
 struct PnorInfo_t
 {

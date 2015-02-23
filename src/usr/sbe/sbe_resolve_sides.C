@@ -363,13 +363,13 @@ errlHndl_t getSideState(sbeResolveState_t& io_sideState)
         /***********************************************/
         /*  Get Side This Processor did/will boot from */
         /***********************************************/
-        PNOR::sbeSeepromSide_t tmp_cur_side = PNOR::SBE_SEEPROM_INVALID;
-        err = PNOR::getSbeBootSeeprom(io_sideState.tgt, tmp_cur_side);
+        sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
+        err = getSbeBootSeeprom(io_sideState.tgt, tmp_cur_side);
         if ( err )
         {
             TRACFCOMP( g_trac_sbe, ERR_MRK
                        "resolveProcessorSbeSeeproms() - Error returned "
-                       "from PNOR::getSbeBootSeeprom() "
+                       "from getSbeBootSeeprom() "
                        "rc=0x%.4X, Target UID=0x%X",
                        err->reasonCode(),
                        TARGETING::get_huid(io_sideState.tgt));
@@ -378,8 +378,8 @@ errlHndl_t getSideState(sbeResolveState_t& io_sideState)
 
         io_sideState.cur_side = tmp_cur_side;
 
-        io_sideState.alt_side = (tmp_cur_side == PNOR::SBE_SEEPROM0)
-                                 ? PNOR::SBE_SEEPROM1 : PNOR::SBE_SEEPROM0;
+        io_sideState.alt_side = (tmp_cur_side == SBE_SEEPROM0)
+                                 ? SBE_SEEPROM1 : SBE_SEEPROM0;
 
         /**********************************************/
         /*  Get PNOR Side Information                 */
@@ -640,7 +640,7 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
 /////////////////////////////////////////////////////////////////////
 errlHndl_t readSbeImage(TARGETING::Target* i_target,
                         void* o_imgPtr,
-                        PNOR::sbeSeepromSide_t i_side,
+                        sbeSeepromSide_t i_side,
                         size_t& o_image_size,
                         sbeSeepromVersionInfo_t& o_image_version)
 {
@@ -859,10 +859,9 @@ errlHndl_t readSbeImage(TARGETING::Target* i_target,
 /////////////////////////////////////////////////////////////////////
 errlHndl_t writeSbeImage(TARGETING::Target* i_target,
                           void* i_imgPtr,
-                          PNOR::sbeSeepromSide_t i_side,
+                          sbeSeepromSide_t i_side,
                           size_t i_image_size,
                           sbeSeepromVersionInfo_t& io_version)
-
 {
     TRACFCOMP( g_trac_sbe,
                ENTER_MRK"writeSbeImage(): tgt=0x%X, i_side=%d "
@@ -1017,7 +1016,7 @@ errlHndl_t writeSbeImage(TARGETING::Target* i_target,
 /////////////////////////////////////////////////////////////////////
 errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
                                void* i_imgPtr,
-                               PNOR::sbeSeepromSide_t i_side,
+                               sbeSeepromSide_t i_side,
                                size_t& o_image_size)
 {
     TRACUCOMP( g_trac_sbe,
@@ -1149,7 +1148,7 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
 /////////////////////////////////////////////////////////////////////
 errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
                                void* io_imgPtr,
-                               PNOR::sbeSeepromSide_t i_side,
+                               sbeSeepromSide_t i_side,
                                PNOR::SideId  i_pnorSideId,
                                bool& o_imageWasUpdated )
 {
