@@ -627,40 +627,43 @@ void IpmiRP::execute(void)
 ///
 void IpmiRP::idle(void)
 {
-    // Check to see if we have many outstanding requests. If so, don't send
-    // any more messages. Note the eagain mechanism still works even though
-    // we're not sending messages as eventually we'll get enough responses
-    // to shorten the response queue and since the message loop calls us
-    // to transmit even for the reception of a message, the driver will
-    // eventually reset egagains. If responses timeout, we end up here as
-    // the response queue processing sends an idle message when anything is
-    // removed.
-    if (iv_outstanding_req > iv_respondq.size())
+    // If the interface is idle, we can write anything we need to write.
+    for (IPMI::send_q_t::iterator i = iv_sendq.begin();
+         i != iv_sendq.end();)
     {
-        // If the interface is idle, we can write anything we need to write.
-        for (IPMI::send_q_t::iterator i = iv_sendq.begin();
-             i != iv_sendq.end();)
+        // Check to see if we have many outstanding requests. If so, don't send
+        // any more messages. Note the eagain mechanism still works even though
+        // we're not sending messages as eventually we'll get enough responses
+        // to shorten the response queue and since the message loop calls us
+        // to transmit even for the reception of a message, the driver will
+        // eventually reset egagains. If responses timeout, we end up here as
+        // the response queue processing sends an idle message when anything is
+        // removed.
+        if (iv_outstanding_req <= iv_respondq.size())
         {
-            // If we have a problem transmitting a message, then we just stop
-            // here and wait for the next time the interface transitions to idle
-            // Note that there are two failure cases: the first is that there is
-            // a problem transmitting. In this case we told the other end of the
-            // message queue, and so the life of this message is over. The other
-            // case is that the interface turned out to be busy in which case
-            // this message can sit on the queue and it'll be next.
-
-            IPMI::Message* msg = static_cast<IPMI::Message*>((*i)->extra_data);
-
-            // If there was an i/o error, we do nothing - leave this message on
-            // the queue. Don't touch msg after xmit returns. If the message was
-            // sent, and it was async, msg has been destroyed.
-            if (msg->xmit())
-            {
-                break;
-            }
-            i  = iv_sendq.erase(i);
+            break;
         }
+
+        // If we have a problem transmitting a message, then we just stop
+        // here and wait for the next time the interface transitions to idle
+        // Note that there are two failure cases: the first is that there is
+        // a problem transmitting. In this case we told the other end of the
+        // message queue, and so the life of this message is over. The other
+        // case is that the interface turned out to be busy in which case
+        // this message can sit on the queue and it'll be next.
+
+        IPMI::Message* msg = static_cast<IPMI::Message*>((*i)->extra_data);
+
+        // If there was an i/o error, we do nothing - leave this message on
+        // the queue. Don't touch msg after xmit returns. If the message was
+        // sent, and it was async, msg has been destroyed.
+        if (msg->xmit())
+        {
+            break;
+        }
+        i  = iv_sendq.erase(i);
     }
+
     return;
 }
 
@@ -720,7 +723,7 @@ void IpmiRP::response(IPMI::Message* i_msg)
 
         // Look for a message with this seq number waiting for a
         // response. If there isn't a message looking for this response,
-        // that's an error. Async messages should also be on this queue,
+        // log and leave. Async messages should also be on this queue,
         // even though the caller has long gone on to other things.
         IPMI::respond_q_t::iterator itr = iv_respondq.find(i_msg->iv_key);
         if (itr == iv_respondq.end())
@@ -728,25 +731,6 @@ void IpmiRP::response(IPMI::Message* i_msg)
             IPMI_TRAC(ERR_MRK "message not found on the response queue: "
                       "%d %x:%x", i_msg->iv_key, i_msg->iv_netfun,
                       i_msg->iv_cmd);
-
-            /* @errorlog tag
-             * @errortype       ERRL_SEV_UNRECOVERABLE
-             * @moduleid        IPMI::MOD_IPMISRV_REPLY
-             * @reasoncode      IPMI::RC_WAITER_NOT_FOUND
-             * @userdata1       the network function/lun
-             * @userdata2       the command which was in error
-             * @devdesc         there was no matching message on
-             *                  the response queue
-             * @custdesc        Unexpected IPMI message from the BMC
-             */
-            errlHndl_t err = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                IPMI::MOD_IPMISRV_REPLY,
-                IPMI::RC_WAITER_NOT_FOUND,
-                i_msg->iv_netfun, i_msg->iv_cmd, true);
-
-            err->collectTrace(IPMI_COMP_NAME);
-            errlCommit(err, IPMI_COMP_ID);
 
             delete[] i_msg->iv_data;
             break;

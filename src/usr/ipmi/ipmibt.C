@@ -290,31 +290,12 @@ namespace IPMI
     {
         // If our completion code isn't CC_OK, lets log that fact. There's
         // not much we can do, but at least this might give a hint that
-        // something is awry.
+        // something is awry. Note the caller doesn't care, or this would
+        // be synchronous.
         if (iv_cc != IPMI::CC_OK)
         {
             IPMI_TRAC(ERR_MRK "async message (%x:%x seq %d) completion code %x",
                       iv_netfun, iv_cmd, iv_seq, iv_cc);
-
-            /* @errorlog tag
-             * @errortype       ERRL_SEV_INFORMATIONAL
-             * @moduleid        IPMI::MOD_IPMISRV_REPLY
-             * @reasoncode      IPMI::RC_ASYNC_BAD_CC
-             * @userdata1       command of message
-             * @userdata2       completion code
-             * @devdesc         an async message completion code was not CC_OK
-             * @custdesc        Unexpected IPMI completion code from the BMC
-             */
-            errlHndl_t err = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                IPMI::MOD_IPMISRV_REPLY,
-                IPMI::RC_ASYNC_BAD_CC,
-                iv_cmd,
-                iv_cc,
-                true);
-
-            err->collectTrace(IPMI_COMP_NAME);
-            errlCommit(err, IPMI_COMP_ID);
         }
 
         // Yes, this is OK - there is no further reference to this object.
