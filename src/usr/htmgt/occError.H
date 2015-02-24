@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/htmgt/htmgt_error.H $                                 */
+/* $Source: src/usr/htmgt/occError.H $                                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,6 @@ namespace HTMGT
     // Error Actions
     enum tmgtErrlActionsType
     {
-        TMGT_ERRL_ACTIONS_CONSOLIDATE_ERRORS       = 0x01,
-        TMGT_ERRL_ACTIONS_MANUFACTURING_ERROR      = 0x08,
-        TMGT_ERRL_ACTIONS_UNRECOVERABLE_CPM_ERROR  = 0x10,
         TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED       = 0x40,
         TMGT_ERRL_ACTIONS_RESET_REQUIRED           = 0x80,
     };
@@ -51,7 +48,7 @@ namespace HTMGT
     // Type of Callout
     enum occCalloutType
     {
-        OCC_CALLOUT_TYPE_HUID          = 0x01,
+        OCC_CALLOUT_TYPE_SENSOR        = 0x01,
         OCC_CALLOUT_TYPE_COMPONENT_ID  = 0x02,
     };
 
@@ -80,24 +77,22 @@ namespace HTMGT
         TMGT_COMP_DATA_END_OF_TABLE        = 0xFF
     };
 
-#if 0
-    // TODO: RTC 109224
+    // Callout Priority Translation
     struct occSrciPriorityXlate
     {
         uint8_t      occPriority;
-        srciPriority errlPriority;
+        HWAS::callOutPriority errlPriority;
     } __attribute__ ((__packed__));
     typedef struct occSrciPriorityXlate occSrciPriorityXlate_t;
 
     const occSrciPriorityXlate_t occPriorityXlateTbl[] =
     {
-        {0x01, SRCI_PRIORITY_LOW},
-        {0x02, SRCI_PRIORITY_MED},
-        {0x03, SRCI_PRIORITY_HIGH},
+        {0x01, HWAS::SRCI_PRIORITY_LOW},
+        {0x02, HWAS::SRCI_PRIORITY_MED},
+        {0x03, HWAS::SRCI_PRIORITY_HIGH},
     };
     const uint8_t OCC_SRCI_PRIORITY_XLATE_SIZE =
-        (sizeof(occPriorityXlateTbl) /sizeof(occSrciPriorityXlate_t));
-#endif
+        (sizeof(occPriorityXlateTbl) / sizeof(occSrciPriorityXlate_t));
 
     // OCC Usr Dtls Structure
     struct occErrlUsrDtls
@@ -118,16 +113,6 @@ namespace HTMGT
         uint16_t    userDetailEntrySize; // User Details Size
     } __attribute__ ((__packed__));
     typedef struct occErrlUsrDtls occErrlUsrDtls_t;
-
-    // OCC Callout Structure
-    struct occErrlCallout
-    {
-        uint8_t     type;
-        uint64_t    calloutValue;
-        uint8_t     priority;
-        uint16_t    reserved1;
-    } __attribute__ ((__packed__));
-    typedef struct occErrlCallout occErrlCallout_t;
 
     // User Detail Entry Structure
     struct occUserDetailsEntry
@@ -157,34 +142,35 @@ namespace HTMGT
         // Actions to process the errors
         uint8_t             actions;
         // Reserved
-        uint32_t            userData4;
+        uint32_t            reserved;
         // Log Callout Number
-        uint8_t             numCallouts;
+        uint8_t             maxCallouts;
+        // Callouts
+        occErrlCallout      callout[ERRL_MAX_CALLOUTS];
     } __attribute__ ((__packed__));
     typedef struct occErrlEntry occErrlEntry_t;
 
 
-#if 0
-    // TODO: RTC 109224
     // OCC Severity and Action
     struct occSeverityActionXlate
     {
-        occSeverityType   occSeverity;
-        errlSeverity occErrlSeverity;
-        errlActions  occErrlAction;
+        occSeverityType             occSeverity;
+        ERRORLOG::errlSeverity_t    occErrlSeverity;
     };
     typedef struct occSeverityActionXlate occSeverityActionXlate_t;
 
-    // Translate Severity and Actios
+    // Translate Severity and Actions
     const occSeverityActionXlate_t occSeverityErrorActionXlate[] =
     {
-        {OCC_SEV_INFORMATIONAL,   ERRL_SEV_INFORMATIONAL,   ERRL_ACTION_HIDDEN},
-        {OCC_SEV_RECOVERABLE,     ERRL_SEV_PREDICTIVE,      ERRL_ACTION_REPORT},
-        {OCC_SEV_UNRECOVERABLE,   ERRL_SEV_UNRECOVERABLE,   ERRL_ACTION_REPORT},
+        {OCC_SEV_INFORMATIONAL, ERRORLOG::ERRL_SEV_INFORMATIONAL},
+        {OCC_SEV_RECOVERABLE,   ERRORLOG::ERRL_SEV_PREDICTIVE},
+        {OCC_SEV_UNRECOVERABLE, ERRORLOG::ERRL_SEV_UNRECOVERABLE},
     };
     const uint8_t OCC_SEV_ACTION_XLATE_SIZE =
         (sizeof(occSeverityErrorActionXlate)/sizeof(occSeverityActionXlate_t));
-#endif
+
+
+
 
     struct tmgtCompXlate
     {
@@ -201,7 +187,7 @@ namespace HTMGT
 
     const tmgtCompXlate_t tmgt_compXlateTable[TMGT_MAX_COMP_IDS] =
     {
-        { 0x01, TMGT_COMP_DATA_PROCEDURE,    ERRORLOG::EPUB_FIRMWARE_SP}, // FW
+        { 0x01, TMGT_COMP_DATA_PROCEDURE,    HWAS::EPUB_PRC_HB_CODE}, // FW
         { 0x04, TMGT_COMP_DATA_SYMBOLIC_FRU, OVERTMP}, // over temperature
         { 0x05, TMGT_COMP_DATA_SYMBOLIC_FRU, TPMD_OV}, // oversub throttling
         { 0xFF, TMGT_COMP_DATA_END_OF_TABLE, 0},       // none
@@ -221,6 +207,16 @@ namespace HTMGT
                         const uint8_t  i_id,
                         const uint32_t i_address,
                         const uint16_t i_length);
+
+
+
+
+    struct tmgtSafeModeReasonCode_t
+    {
+        uint32_t    returnCode;
+        uint32_t    huid;
+        bool        infoOnly;
+    };
 
 
 } // end namespace

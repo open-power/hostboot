@@ -3,12 +3,6 @@ config HTMGT
     help
         Enable Host TMGT in hostboot/HBRT
 
-config DELAY_AFTER_OCC_ACTIVATION
-    default n
-    help
-        After OCC has been activated, wait for 30 seconds for any
-        potential errors to be reported before continuing the IPL
-
 config CONSOLE_OUTPUT_OCC_COMM
     default n
     help

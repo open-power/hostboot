@@ -61,11 +61,11 @@ namespace HTMGT
         const size_t MAX_POLL = 40;
         const size_t MSEC_BETWEEN_POLLS = 250;
         size_t numPolls = 0;
-        std::vector<Occ*> occList = occMgr::instance().getOccArray();
+        std::vector<Occ*> occList = OccManager::getOccArray();
 
         // Determine which bit to check
         uint8_t targetBit = OCC_STATUS_ACTIVE_READY;
-        if (OCC_STATE_OBSERVATION == occMgr::instance().getTargetState())
+        if (OCC_STATE_OBSERVATION == OccManager::getTargetState())
         {
             targetBit = OCC_STATUS_OBS_READY;
         }
@@ -139,7 +139,7 @@ namespace HTMGT
         {
             // Send Set State command to master OCC.
             // The master will use the target state (default = ACTIVE)
-            l_err = occMgr::instance().setOccState();
+            l_err = OccManager::setOccState();
         }
 
         return l_err;
@@ -153,8 +153,8 @@ namespace HTMGT
     {
         errlHndl_t l_err = NULL;
 
-        TMGT_INF("setOccActiveSensors:");
-        std::vector<Occ*> occList = occMgr::instance().getOccArray();
+        TMGT_INF("setOccActiveSensors: %s", i_activate?"active":"inactive");
+        std::vector<Occ*> occList = OccManager::getOccArray();
         for (std::vector<Occ*>::iterator itr = occList.begin();
              (itr < occList.end());
              ++itr)

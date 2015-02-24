@@ -185,10 +185,14 @@ namespace HTMGT
         uint8_t cmdData[2];
         cmdData[0] = OCC_RESET_CMD_VERSION;
 
+        TMGT_INF("resetPrep: OCC%d (failed=%c, reset count=%d)",
+                 iv_instance, iv_failed?'y':'n', iv_resetCount);
         if(iv_failed)
         {
             cmdData[1] = OCC_RESET_FAIL_THIS_OCC;
             ++iv_resetCount;
+            TMGT_INF("resetPrep: OCC%d failed, incrementing reset count to %d",
+                     iv_instance, iv_resetCount);
             if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
             {
                 atThreshold = true;
@@ -221,13 +225,28 @@ namespace HTMGT
         return atThreshold;
     }
 
+
+    void Occ::postResetClear()
+    {
+        iv_state = OCC_STATE_UNKNOWN;
+        iv_commEstablished = false;
+        iv_needsReset = false;
+        iv_failed = false;
+        iv_lastPollValid = false;
+        iv_resetReason = OCC_RESET_REASON_NONE;
+    }
+
+
+
     /////////////////////////////////////////////////////////////////
 
 
+    uint32_t OccManager::cv_safeReturnCode = 0;
+    uint32_t OccManager::cv_safeOccInstance = 0;
+
 
     OccManager::OccManager()
-        :iv_configDataBuilt(false),
-        iv_occMaster(NULL),
+        :iv_occMaster(NULL),
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE)
     {
@@ -297,7 +316,7 @@ namespace HTMGT
                     ((*proc)->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>());
                 const uint8_t * homerPhys = (uint8_t*)
                     ((*proc)->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>());
-                TMGT_INF("buildOccs: homer = 0x%08X (virt) / 0x%08X (phys)"
+                TMGT_INF("buildOccs: homer = 0x%08llX (virt) / 0x%08llX (phys)"
                          " for Proc%d", homer, homerPhys, instance);
 #ifdef SIMICS_TESTING
                 // Starting of OCCs is not supported in SIMICS, so fake out
@@ -413,6 +432,18 @@ namespace HTMGT
             // requests a new state, so we can update target here.
             iv_targetState = requestedState;
 
+            _buildOccs(); // if not already built.
+
+            // Send poll cmd to confirm comm has been established.
+            // Flush old errors to ensure any new errors will be collected
+            l_err = _sendOccPoll(true, NULL);
+            if (l_err)
+            {
+                TMGT_ERR("_setOccState: Poll OCCs failed.");
+                // Proceed with reset even if failed
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            }
+
             if (NULL != iv_occMaster)
             {
                 TMGT_INF("_setOccState(state=0x%02X)", requestedState);
@@ -502,18 +533,15 @@ namespace HTMGT
                     TMGT_INF("_setOccState: All OCCs have reached state 0x%02X",
                              requestedState);
 
-#ifndef __HOSTBOOT_RUNTIME
                     if (OCC_STATE_ACTIVE == requestedState)
                     {
-                        CONSOLE::displayf(HTMGT_COMP_NAME,
-                               "OCCs are now running in ACTIVE state");
+                        TMGT_CONSOLE("OCCs are now running in ACTIVE state");
                     }
                     else
                     {
-                        CONSOLE::displayf(HTMGT_COMP_NAME,
-                               "OCCs are now running in OBSERVATION state");
+                        TMGT_CONSOLE("OCCs are now running in OBSERVATION "
+                                     "state");
                     }
-#endif
                 }
 
             }
@@ -609,11 +637,11 @@ namespace HTMGT
                 occ != iv_occArray.end();
                 ++occ)
             {
-                (*occ)->failed(false);
+                // After OCCs have been reset, clear flags
+                (*occ)->postResetClear();
             }
 
             TMGT_INF("Calling HBOCC::activateOCCs");
-
             err = HBOCC::activateOCCs();
             if(err)
             {
@@ -654,6 +682,9 @@ namespace HTMGT
             {
                sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
             }
+
+            TMGT_ERR("_resetOccs: Safe Mode RC: 0x%04X (OCC%d)",
+                     cv_safeReturnCode, cv_safeOccInstance);
         }
 
         return err;
@@ -740,6 +771,36 @@ namespace HTMGT
     }
 
 
+    void OccManager::_updateSafeModeReason(uint32_t i_src,
+                                           uint32_t i_instance)
+    {
+        if (cv_safeReturnCode == 0)
+        {
+            // Only update safe mode reason for the first failure
+            cv_safeReturnCode = i_src;
+            cv_safeOccInstance = i_instance;
+        }
+    }
+
+
+    bool OccManager::_occNeedsReset()
+    {
+        bool needsReset = false;
+
+        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+             pOcc < iv_occArray.end();
+             pOcc++)
+        {
+            if ((*pOcc)->needsReset())
+            {
+                needsReset = true;
+                break;
+            }
+        }
+
+        return needsReset;
+    }
+
 
     uint8_t  OccManager::getNumOccs()
     {
@@ -788,36 +849,17 @@ namespace HTMGT
         return Singleton<OccManager>::instance()._waitForOccCheckpoint();
     }
 
-
-#if 0
-    // TODO: RTC 115296
-    void update_occ_data()
+    void OccManager::updateSafeModeReason(uint32_t i_src,
+                                          uint32_t i_instance)
     {
-        if (occMgr::instance().getNumOccs() > 0)
-        {
-            // TBD: define as one block of data or in each OCC target?
+        return Singleton<OccManager>::instance().
+            _updateSafeModeReason(i_src, i_instance);
+    }
 
-            uint32_t dataSize = occMgr::instance().getNumOccs() *
-                sizeof(occInstance);
-            if (dataSize > 256)
-            {
-                TMGT_ERR("update_occ_data: data exceeds attr size, truncating");
-                dataSize = 256;
-            }
-            // Update OCC_CONTROL_DATA Attribute
-            bool success = ->trySetAttr<ATTR_OCC_CONTROL_DATA>(dataSize, G_occ);
-            if (false == success)
-            {
-                TMGT_ERR("update_occ_data: failed to update OCC_CONTROL_DATA");
-            }
-        }
-        else
-        {
-            TMGT_INF("update_occ_data: No OCC data to update");
-        }
-    } // end update_occ_data()
-#endif
-
+    bool OccManager::occNeedsReset()
+    {
+        return Singleton<OccManager>::instance()._occNeedsReset();
+    }
 
 } // end namespace
 

@@ -68,32 +68,27 @@ namespace HTMGT
         if (i_startCompleted)
         {
             // Query functional OCCs
-            const uint8_t numOccs = occMgr::instance().buildOccs();
+            const uint8_t numOccs = OccManager::buildOccs();
             if (numOccs > 0)
             {
-                if (NULL != occMgr::instance().getMasterOcc())
+                if (NULL != OccManager::getMasterOcc())
                 {
                     do
                     {
 #ifndef __HOSTBOOT_RUNTIME
-                        if (false == occMgr::instance().iv_configDataBuilt)
+                        // Build pstate tables (once per IPL)
+                        l_err = genPstateTables();
+                        if(l_err)
                         {
-                            // Build pstate tables (once per IPL)
-                            l_err = genPstateTables();
-                            if(l_err)
-                            {
-                                break;
-                            }
-
-                            // Calc memory throttles (once per IPL)
-                            calcMemThrottles();
-
-                            occMgr::instance().iv_configDataBuilt = true;
+                            break;
                         }
+
+                        // Calc memory throttles (once per IPL)
+                        calcMemThrottles();
 #endif
 
                         // Make sure OCCs are ready for communication
-                        occMgr::instance().waitForOccCheckpoint();
+                        OccManager::waitForOccCheckpoint();
 
 #ifdef __HOSTBOOT_RUNTIME
                         // TODO RTC 124738  Final solution TBD
@@ -136,22 +131,6 @@ namespace HTMGT
                             // Continue even if failed to update sensor
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                         }
-
-                        // @TODO RTC 120059 remove after elog alerts supported
-#ifdef CONFIG_DELAY_AFTER_OCC_ACTIVATION
-                        // Delay to allow the OCC to complete several
-                        // sensor readings and create errors if necessary
-                        TMGT_INF("Delay after OCC activation");
-                        nanosleep(30, 0);
-                        // Poll the OCCs to retrieve any errors that may
-                        // have been created
-                        TMGT_INF("Send final poll to all OCCs");
-                        l_err = OccManager::sendOccPoll(true);
-                        if (l_err)
-                        {
-                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                        }
-#endif
 
                     } while(0);
                 }
@@ -206,13 +185,17 @@ namespace HTMGT
         if (NULL != l_err)
         {
             TMGT_ERR("OCCs not all active.  System will stay in safe mode");
-#ifndef __HOSTBOOT_RUNTIME
-            CONSOLE::displayf(HTMGT_COMP_NAME, "OCCs are not active "
-                             "(rc=0x%04X). System will remain in safe mode",
-                             l_err->reasonCode());
-#endif
-            // TODO: RTC 109066
-            //stopAllOccs();
+            TMGT_CONSOLE("OCCs are not active (rc=0x%04X). "
+                         "System will remain in safe mode",
+                         l_err->reasonCode());
+            TMGT_INF("Calling HBOCC::stopAllOCCs");
+            errlHndl_t err2 = HBOCC::stopAllOCCs();
+            if(err2)
+            {
+                TMGT_ERR("stopAllOCCs() failed with 0x%04X",
+                         err2->reasonCode());
+                ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+            }
 
             // Update error log to unrecoverable and set SRC
             // to indicate the system will remain in safe mode
@@ -244,21 +227,52 @@ namespace HTMGT
 
 
     // Notify HTMGT that an OCC has an error to report
-    void processOccError(TARGETING::Target * i_proc)
+    void processOccError(TARGETING::Target * i_procTarget)
     {
-        const uint32_t l_huid = i_proc->getAttr<TARGETING::ATTR_HUID>();
-        TMGT_INF("processOccError(HUID=0x%08X) called", l_huid);
+        bool polledOneOcc = false;
+        OccManager::buildOccs();
 
-        //TARGETING::Target * failedOccTarget = NULL;
-        // Get OCC target (one per proc)
-        TARGETING::TargetHandleList pOccs;
-        getChildChiplets(pOccs, i_proc, TARGETING::TYPE_OCC);
-        if (pOccs.size() > 0)
+        if (i_procTarget != NULL)
         {
-        //    failedOccTarget = pOccs[0];
+            const uint32_t l_huid =
+                i_procTarget->getAttr<TARGETING::ATTR_HUID>();
+            TMGT_INF("processOccError(HUID=0x%08X) called", l_huid);
+
+            TARGETING::TargetHandleList pOccs;
+            getChildChiplets(pOccs, i_procTarget, TARGETING::TYPE_OCC);
+            if (pOccs.size() > 0)
+            {
+                // Poll specified OCC flushing any errors
+                errlHndl_t err = OccManager::sendOccPoll(true, pOccs[0]);
+                if (err)
+                {
+                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                }
+                polledOneOcc = true;
+            }
         }
 
-        // TODO RTC 109224
+        if ((OccManager::getNumOccs() > 1) || (false == polledOneOcc))
+        {
+            // Send POLL command to all OCCs to flush any other errors
+            errlHndl_t err = OccManager::sendOccPoll(true);
+            if (err)
+            {
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+        }
+
+        if (OccManager::occNeedsReset())
+        {
+            TMGT_ERR("processOccError(): OCCs need to be reset");
+            // Don't pass failed target as OCC should have already
+            // been marked as failed during the poll.
+            errlHndl_t err = OccManager::resetOccs(NULL);
+            if(err)
+            {
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+        }
 
     } // end processOccError()
 
@@ -340,11 +354,23 @@ namespace HTMGT
         }
 
         // Set state for all OCCs
-        errlHndl_t l_err = occMgr::instance().setOccState(targetState);
+        errlHndl_t l_err = OccManager::setOccState(targetState);
         if (NULL == l_err)
         {
             TMGT_INF("enableOccActuation: OCC states updated to 0x%02X",
                      targetState);
+        }
+
+        if (OccManager::occNeedsReset())
+        {
+            TMGT_ERR("enableOccActuation(): OCCs need to be reset");
+            // Don't pass failed target as OCC should have already
+            // been marked as failed during the poll.
+            errlHndl_t err2 = OccManager::resetOccs(NULL);
+            if(err2)
+            {
+                ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+            }
         }
 
         return l_err;

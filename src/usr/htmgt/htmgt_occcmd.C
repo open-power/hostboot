@@ -97,17 +97,17 @@ namespace HTMGT
 #ifndef __HOSTBOOT_RUNTIME
         if (i_header[0] != '\0')
         {
-            CONSOLE::displayf(HTMGT_COMP_NAME, "%s", i_header);
+            TMGT_CONSOLE("%s", i_header);
         }
         uint16_t index = 0;
         while (index < i_len)
         {
-            CONSOLE::displayf(HTMGT_COMP_NAME, "%04X:  %08X %08X %08X %08X",
-                              index,
-                              UINT32_GET(&i_data[index]),
-                              UINT32_GET(&i_data[index+4]),
-                              UINT32_GET(&i_data[index+8]),
-                              UINT32_GET(&i_data[index+12]));
+            TMGT_CONSOLE("%04X:  %08X %08X %08X %08X",
+                         index,
+                         UINT32_GET(&i_data[index]),
+                         UINT32_GET(&i_data[index+4]),
+                         UINT32_GET(&i_data[index+8]),
+                         UINT32_GET(&i_data[index+12]));
             index += 16;
         }
         CONSOLE::flush();
@@ -130,7 +130,7 @@ namespace HTMGT
     {
         uint8_t l_index = 0;
 
-        // TODO RTC 109224 - convert to use lower_bound
+        // TODO RTC 124739 - convert to use lower_bound
         //= find(&cv_occCommandTable[0],
         //       &cv_occCommandTable[OCC_CMDTABLE_SIZE-1],
         //       i_cmd);
@@ -182,7 +182,7 @@ namespace HTMGT
         };
 
         uint8_t l_idx = 0;
-        // TODO RTC 109224
+        // TODO RTC 124739
         for (l_idx=0; l_idx < STATUS_STRING_COUNT; l_idx++)
         {
             if (i_status == L_status_string[l_idx].str_num)
@@ -320,7 +320,7 @@ namespace HTMGT
                     rsp_status_string(iv_OccRsp.returnStatus));
         }
 
-        // TODO RTC 109224 - refactor/optimize trace strings
+        // TODO RTC 124739 - refactor/optimize trace strings
         TMGT_INF("OCC%d rsp status=0x%02X%s, length=0x%04X",
                  l_instance, iv_OccRsp.returnStatus,
                  l_rsp_status_string, iv_OccRsp.dataLength);
@@ -677,7 +677,8 @@ namespace HTMGT
         uint16_t rspLength = 0;
         if (G_debug_trace & DEBUG_TRACE_VERBOSE)
         {
-            TMGT_INF("waitForOccRsp(%d) address=0x%08X", i_timeout, rspBuffer);
+            TMGT_INF("waitForOccRsp(%d) address=0x%08llX",
+                     i_timeout, rspBuffer);
         }
 
         bool l_time_expired = true;
@@ -735,36 +736,15 @@ namespace HTMGT
                 // time expired
                 l_msec_remaining = -1;
 
+                TMGT_ERR("waitForOccRsp: OCC%d timeout waiting for"
+                         " response", iv_Occ->iv_instance);
+                uint8_t * const rspBuffer = iv_Occ->iv_homer +
+                    OCC_RSP_ADDR;
+                TMGT_BIN("Rsp Buffer (32 bytes)", rspBuffer, 32);
+
                 // Read SRAM response buffer to check for exception
                 // (On exception, data may not be copied to HOMER)
-                const uint16_t l_length = 4*KILOBYTE;
-                uint8_t l_sram_data[l_length];
-                ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
-// HBOCC is only defined for HTMGT
-#ifdef CONFIG_HTMGT
-                errlHndl_t l_err = HBOCC::readSRAM(iv_Occ->getTarget(),
-                                                   OCC_RSP_SRAM_ADDR,
-                                                   l_buffer);
-                if (NULL == l_err)
-#endif
-                {
-                    const uint32_t l_flatSize = l_buffer.flattenSize();
-                    l_buffer.flatten(l_sram_data, l_flatSize);
-                    // Skip 8 byte ecmd header
-                    const uint8_t *sramRspPtr = &l_sram_data[8];
-                    // Check response status for exception
-                    if (0xE0 == (sramRspPtr[2] & 0xE0))
-                    {
-                        TMGT_ERR("waitForOccRsp: OCC%d timeout waiting for"
-                                 " response, and OCC 0x%02X exception found",
-                                 iv_Occ->iv_instance, sramRspPtr[2]);
-                        // Exception found, copy data to rsp buffer
-                        uint8_t * const rspBuffer = iv_Occ->iv_homer +
-                            OCC_RSP_ADDR;
-                        memcpy(rspBuffer, sramRspPtr, l_length);
-                        TMGT_BIN("SRAM Rsp Buffer (32 bytes)", sramRspPtr, 32);
-                    }
-                }
+                handleOccException();
             }
 
         } // while(time remaining)
@@ -783,45 +763,79 @@ namespace HTMGT
 
 
 
-    // Create/commit an error log with the OCC exception data
+    // Check for an OCC exception in SRAM.  If found:
+    // create/commit an error log with the OCC exception data
     void OccCmd::handleOccException(void)
     {
-        // Exception length includes response header (w/o checksum) and
-        // the data length
-        uint32_t l_exceptionDataLength = OCC_RSP_HDR_LENGTH - 2 +
-            iv_OccRsp.dataLength;
-
-        TMGT_ERR("handleOccException: OCC%d returned abnormal rsp status of"
-                 " 0x%02X, rsp len=%d",
-                 iv_Occ->iv_instance, iv_OccRsp.returnStatus,
-                 l_exceptionDataLength);
-        if (l_exceptionDataLength > 4*KILOBYTE)
+#ifdef CONFIG_HTMGT
+        // Read SRAM to check for exception
+        // (Exception data not copied into HOMER)
+        const uint16_t l_length = 4*KILOBYTE;
+        uint8_t l_sram_data[l_length];
+        ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
+        errlHndl_t l_err = HBOCC::readSRAM(iv_Occ->getTarget(),
+                                           OCC_RSP_SRAM_ADDR,
+                                           l_buffer);
+        if (NULL == l_err)
         {
-            TMGT_INF("handleOccException: truncating data length to 4K");
-            l_exceptionDataLength = 4*KILOBYTE;
-            // TODO RTC 109224 - HB elogs are only 4K
-        }
+            const uint32_t l_flatSize = l_buffer.flattenSize();
+            l_buffer.flatten(l_sram_data, l_flatSize);
+            // Skip 8 byte ecmd header
+            const uint8_t *sramRspPtr = &l_sram_data[8];
+            // Check buffer status for exception
+            if ((l_flatSize >= 3) && (0xE0 == (sramRspPtr[2] & 0xE0)))
+            {
+                const uint8_t exceptionType = sramRspPtr[2];
+                uint16_t exceptionDataLength = 0;
+                if (l_flatSize >= 5)
+                {
+                    exceptionDataLength = UINT16_GET(&sramRspPtr[3]);
+                }
+                // Exception length includes response header (w/o checksum) and
+                // the data length
+                uint32_t exceptionLength = OCC_RSP_HDR_LENGTH - 2 +
+                    exceptionDataLength;
+                if (exceptionLength > l_flatSize)
+                {
+                    exceptionLength = l_flatSize;
+                }
 
-        /*@
-         * @errortype
-         * @reasoncode HTMGT_RC_INTERNAL_ERROR
-         * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
-         * @userdata1[0-15] rsp status
-         * @userdata1[16-31] exception data length
-         * @devdesc OCC reported exception
-         */
-        errlHndl_t l_excErr = NULL;
-        bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
-                  (htmgtReasonCode)(OCCC_COMP_ID | iv_OccRsp.returnStatus),
-                  iv_OccRsp.returnStatus, iv_OccRsp.dataLength, 0, 0,
-                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-        const uint8_t * const exceptionData = iv_Occ->iv_homer + OCC_RSP_ADDR;
-        l_excErr->addFFDC(OCCC_COMP_ID,
-                          exceptionData,
-                          std::min(l_exceptionDataLength, (uint32_t)MAX_FFDC),
-                          1,  // version
-                          iv_OccRsp.returnStatus); // subsection == exception rc
-        ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
+                TMGT_ERR("handleOccException: OCC%d SRAM has exception"
+                         " 0x%02X, length=%d",
+                         iv_Occ->iv_instance, exceptionType,
+                         exceptionDataLength);
+                if (exceptionLength > 4*KILOBYTE)
+                {
+                    TMGT_INF("handleOccException: truncating length to 4K");
+                    exceptionLength = 4*KILOBYTE;
+                    // TODO RTC 124739 - HB elogs are only 4K
+                }
+
+                /*@
+                 * @errortype
+                 * @reasoncode HTMGT_RC_INTERNAL_ERROR
+                 * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
+                 * @userdata1[0-15] rsp status
+                 * @userdata1[16-31] exception data length
+                 * @userdata2[0-15] OCC instance
+                 * @devdesc OCC reported exception
+                 */
+                errlHndl_t l_excErr = NULL;
+                bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
+                          (htmgtReasonCode)(OCCC_COMP_ID | exceptionType),
+                          exceptionType, exceptionDataLength,
+                          iv_Occ->iv_instance, 0,
+                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                l_excErr->addFFDC(OCCC_COMP_ID,
+                                  sramRspPtr,
+                                  std::min(exceptionLength,(uint32_t)MAX_FFDC),
+                                  1,  // version
+                                  exceptionType); // subsection
+                ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
+
+            }
+        }
+#endif
 
     } // end OccCmd::handleOccException()
 

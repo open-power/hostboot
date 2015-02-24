@@ -76,7 +76,7 @@ namespace HTMGT
         if (validFormat)
         {
             // Loop through all functional OCCs
-            std::vector<Occ*> occList = occMgr::instance().getOccArray();
+            std::vector<Occ*> occList = OccManager::getOccArray();
             for (std::vector<Occ*>::iterator itr = occList.begin();
                  itr < occList.end();
                  itr++)

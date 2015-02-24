@@ -49,6 +49,12 @@
 #define    TMGT_BIN( _fmt_, _args_...) \
                TRACFBIN(  g_trac_htmgt, _fmt_, ##_args_ )
 
+#ifndef __HOSTBOOT_RUNTIME
+#define TMGT_CONSOLE( _fmt_, _args_...) \
+    CONSOLE::displayf( HTMGT_COMP_NAME, _fmt_, ##_args_ )
+#else
+#define TMGT_CONSOLE(_fmt_, _args_...)
+#endif
 
 inline uint16_t UINT16_GET(const uint8_t * i_ptr)
 {

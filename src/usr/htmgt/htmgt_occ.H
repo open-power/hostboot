@@ -67,6 +67,26 @@ namespace HTMGT
         OCC_RESET_COUNT_THRESHOLD   = 3,
     };
 
+    enum occResetReason
+    {
+        OCC_RESET_REASON_NONE              = 0x00,
+        OCC_RESET_REASON_CRIT_FAILURE      = 0x01,
+        OCC_RESET_REASON_PWR_ON_FAIL       = 0x02,
+        OCC_RESET_REASON_ERROR             = 0x03,
+        OCC_RESET_REASON_POWER_FAULT       = 0x04,
+        OCC_RESET_REASON_DIFF_OCC          = 0x05,
+        OCC_RESET_REASON_OCC_REQUEST       = 0x06,
+    };
+
+    // OCC Callout Structure
+    struct occErrlCallout
+    {
+        uint8_t     type;
+        uint64_t    calloutValue;
+        uint8_t     priority;
+        uint16_t    reserved1;
+    } __attribute__ ((__packed__));
+    typedef struct occErrlCallout occErrlCallout_t;
 
 
     /**
@@ -211,11 +231,20 @@ namespace HTMGT
 #endif
             }
 
+
             /**
              * @brief Set failed state
              * @param[in] failed state
              */
             void failed(bool i_state) { iv_failed = i_state; }
+
+
+            /**
+             * @brief Determine if OCC needs to be reset
+             *
+             * @return true if this OCC needs to be reset
+             */
+            bool needsReset() { return iv_needsReset; }
 
 
             /**
@@ -248,6 +277,42 @@ namespace HTMGT
             void pollRspHandler(const uint8_t * i_pollResponse,
                                 const uint16_t i_pollResponseSize);
 
+            /**
+             * @brief Collect, Commit and Clear error log from the OCC
+             *
+             * @param[in] i_id       OCC elog id to retrieve
+             * @param[in] i_address  SRAM address for elog entry
+             * @param[in] i_length   size of the elog entry
+             */
+            void occProcessElog(const uint8_t  i_id,
+                                const uint32_t i_address,
+                                const uint16_t i_length);
+
+            /**
+             * @brief Determine what actions are required for elog
+             *
+             * @param[in]  i_actions       Action requested by OCC
+             * @param[out] o_occReset      returns true if OCC reset is needed
+             * @param[out] o_errlSeverity  severity to use for elog commit
+             */
+            void elogProcessActions(const uint8_t i_actions,
+                                    bool        & o_occReset,
+                                    ERRORLOG::errlSeverity_t & o_errlSeverity);
+
+            /**
+             * @brief Add specified callout to the error log
+             *
+             * @param[in,out] io_errlHndl     elog to add callout
+             * @param[in]     i_priority      priority for callout
+             * @param[in]     i_callout       callout from OCC
+             * @param[in,out] io_numCallouts  number of callouts in elog,
+             *                                incremented if new callout added
+             * */
+            bool elogAddCallout(errlHndl_t &               io_errlHndl,
+                                HWAS::callOutPriority    & i_priority,
+                                const occErrlCallout_t     i_callout,
+                                uint8_t &                  io_callout_num);
+
 
         protected:
             // Instance number of this OCC: 0 = first physical OCC
@@ -277,6 +342,14 @@ namespace HTMGT
             // expected occsPresent byte in POLL response
             uint8_t         iv_occsPresent;
 
+            occResetReason  iv_resetReason;
+
+
+            /**
+             * @brief Clear flags after OCC has been reset
+             */
+            void postResetClear();
+
 
         private:
             // Reset count
@@ -302,14 +375,6 @@ namespace HTMGT
         friend class Occ;
 
         public:
-            /**
-             * @brief true if the required config data has been built
-             *        This must be persisted across IPL/RT
-             *        TODO: RTC 115296
-             */
-            bool  iv_configDataBuilt;
-
-
             /**
              * @brief Constructor
              */
@@ -372,8 +437,8 @@ namespace HTMGT
              *
              * @return NULL on success, or error handle on failure
              */
-            errlHndl_t setOccState(const occStateId i_state =
-                                   OCC_STATE_NO_CHANGE);
+            static errlHndl_t setOccState(const occStateId i_state =
+                                          OCC_STATE_NO_CHANGE);
 
 
             /**
@@ -396,7 +461,7 @@ namespace HTMGT
              *        function will wait up to 10 seconds for all OCCs
              *        before returning to the caller.
              */
-            void waitForOccCheckpoint();
+            static void waitForOccCheckpoint();
 
 
             /**
@@ -416,6 +481,24 @@ namespace HTMGT
                             TARGETING::Target * i_occTarget = NULL);
 
 
+            /**
+             * @brief Save the reason that the system is entering safe mode
+             *
+             * @param[in]  i_src       SRC which triggered safe mode
+             * @param[in]  i_instance  OCC which triggered safe mode
+             */
+            static void updateSafeModeReason(uint32_t i_src,
+                                             uint32_t i_instance);
+
+
+            /**
+             * @brief Check if any OCCs need to be reset
+             *
+             * @return true if any OCC needs to be reset
+             */
+            static bool occNeedsReset();
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -424,6 +507,17 @@ namespace HTMGT
             occList_t               iv_occArray;
             occStateId              iv_state;
             occStateId              iv_targetState;
+
+            /**
+             * @brief SRC that caused system to enter safe mode
+             */
+            static uint32_t         cv_safeReturnCode;
+
+            /**
+             * @brief OCC instance that triggered safe mode
+             */
+            static uint32_t         cv_safeOccInstance;
+
 
             /* See buildOccs() above */
             uint32_t _buildOccs();
@@ -479,6 +573,12 @@ namespace HTMGT
                 _sendOccPoll(const bool i_flushAllErrors,
                             TARGETING::Target * i_occTarget);
 
+            /** See updateSafeModeReason() above */
+            void _updateSafeModeReason(uint32_t i_src,
+                                       uint32_t i_instance);
+
+            /** See occNeedsReset() above */
+            bool _occNeedsReset();
     };
 
     typedef Singleton<OccManager> occMgr;

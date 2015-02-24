@@ -54,7 +54,7 @@ namespace HTMGT
                  " %08X, sev: 0x%02X, fw:%c",
                  i_modid, i_rc, i_data1, i_data2, i_data3, i_data4,
                  i_sev, i_addFwCallout?'y':'n');
-        // TODO RTC 109224 - RAS review what logs need fw callout
+        // TODO RTC 124739 - RAS review what logs need fw callout
 
         if (NULL == io_err)
         {
@@ -70,7 +70,7 @@ namespace HTMGT
         }
         else
         {
-            // TODO RTC 109224:
+            // TODO RTC 124739
             // - collectTrace will not filter dup traces and no way to clear
             // - no way to add secondary SRC to elog
             io_err->collectTrace("HTMGT");
@@ -90,7 +90,7 @@ namespace HTMGT
     }
 
 
-    // TODO RTC 109224 - refactor/optimize trace strings
+    // TODO RTC 124739 - refactor/optimize trace strings
 
     // Internal utility to convert OCC command type to a string
     const char *command_string(const uint8_t i_cmd)
@@ -114,7 +114,7 @@ namespace HTMGT
         const uint8_t l_total =
             sizeof(L_cmd_string) / sizeof(struct string_data_t);
 
-        // TODO RTC 109224
+        // TODO RTC 124739
         uint8_t l_idx = 0;
         for (l_idx=0; l_idx<l_total; l_idx++)
         {

@@ -60,6 +60,11 @@ namespace HTMGT
             }
         }
 
+        if (occNeedsReset())
+        {
+            TMGT_ERR("_sendOccPoll(): OCCs need to be reset");
+        }
+
         return err;
     }
 
@@ -223,8 +228,7 @@ namespace HTMGT
                     }
 
                     // Handle a new error log from the OCC
-                    occProcessElog(this,
-                                   pollRsp->errorId,
+                    occProcessElog(pollRsp->errorId,
                                    pollRsp->errorAddress,
                                    pollRsp->errorLength);
                     if (iv_needsReset)
@@ -275,8 +279,7 @@ namespace HTMGT
                               iv_role, pollRsp->status,
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    // TODO RTC 109224
-                    //iv_resetReason = OCC_RESET_REASON_ERROR;
+                    iv_resetReason = OCC_RESET_REASON_ERROR;
                     break;
                 }
 
@@ -303,8 +306,7 @@ namespace HTMGT
                               iv_occsPresent, pollRsp->status,
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    // TODO RTC 109224
-                    //iv_resetReason = OCC_RESET_REASON_ERROR;
+                    iv_resetReason = OCC_RESET_REASON_ERROR;
                 }
             }
 
