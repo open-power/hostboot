@@ -31,6 +31,9 @@
 #include <pnor/pnorif.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/vpd_if.H>
+#include <errl/errlmanager.H>
+
+
 
 // ----------------------------------------------
 // Trace definitions
@@ -149,6 +152,8 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
 
         mm_block_unmap(vptr);
 
+        bool l_invalidateCaches = false;
+
         // In manufacturing mode the VPD PNOR cache needs to be cleared
         // And the VPD ATTR switch and flags need to be reset
         // Note: this code should do nothing when not in PNOR caching mode
@@ -156,39 +161,37 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
         TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
         TARGETING::ATTR_MNFG_FLAGS_type l_mnfgFlags =
                     l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-
         // @todo RTC 118752 Use generic mfg-mode attr when available
         if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
         {
-            // Reset the PNOR config flags to HW - MVPD/CVPD/SPD
-            // Checks for PNOR caching mode before reset
-            VPD::setVpdConfigFlagsHW();
-            if (err)
-            {
-                break;
-            }
+            l_invalidateCaches = true;
+        }
 
-            // Find all the targets with VPD switches
-            for (TARGETING::TargetIterator target =
-                        TARGETING::targetService().begin();
-                 target != TARGETING::targetService().end();
-                 ++target)
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+        // We also need to wipe the cache out after booting from the
+        //  golden side of pnor
+        if( !l_invalidateCaches )
+        {
+            PNOR::SideInfo_t l_pnorInfo;
+            err = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
+            if( err )
             {
-                TARGETING::ATTR_VPD_SWITCHES_type l_switch;
-                if(target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(l_switch))
-                {
-                    if (l_switch.pnorCacheValid)
-                    {
-                        // Invalidate the VPD PNOR for this target
-                        // This also clears the VPD ATTR switch
-                        err = VPD::invalidatePnorCache(*target);
-                        if (err)
-                        {
-                            break;
-                        }
-                    }
-                }
+                // commit the error but keep going
+                errlCommit(err, VPD_COMP_ID);
+                // force the caches to get wiped out just in case
+                l_invalidateCaches = true;
             }
+            else if( l_pnorInfo.isGolden )
+            {
+                l_invalidateCaches = true;
+            }
+        }
+#endif
+
+        if( l_invalidateCaches )
+        {
+            // Invalidate the VPD Caches for all targets
+            err = invalidateAllPnorCaches(true);
             if (err)
             {
                 break;

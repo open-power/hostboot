@@ -87,6 +87,8 @@
 #include    <algorithm>
 #include    <config.h>
 #include    <ipmi/ipmiwatchdog.H>
+#include    <vpd/vpd_if.H>
+
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
@@ -351,6 +353,30 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 // break from do loop if error occured
                 break;
             }
+
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+            // We also need to wipe the cache out after booting from the
+            //  golden side of pnor
+            PNOR::SideInfo_t l_pnorInfo;
+            l_err = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
+            if( l_err )
+            {
+                // commit the error but keep going
+                errlCommit(l_err, ISTEP_COMP_ID);
+                // force the caches to get wiped out just in case
+                l_pnorInfo.isGolden = true;
+            }
+            if( l_pnorInfo.isGolden )
+            {
+                // Invalidate the VPD Caches for all targets
+                l_err = VPD::invalidateAllPnorCaches(true);
+                if (l_err)
+                {
+                    break;
+                }
+            }
+#endif
+
         }
         else if( is_sapphire_load() )
         {

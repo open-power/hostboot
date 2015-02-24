@@ -381,6 +381,30 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 {
     errlHndl_t errl = NULL;
 
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+    // If we're booting from the golden side of PNOR we need
+    //  to wipe out our VPD caches to force a re-read of
+    //  the data from hardware
+    PNOR::SideInfo_t l_pnorInfo;
+    errl = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
+    if( errl )
+    {
+        // commit the error but keep going
+        errlCommit(errl, HWAS_COMP_ID);
+        // force the caches to get wiped out just in case
+        l_pnorInfo.isGolden = true;
+    }
+    if( l_pnorInfo.isGolden )
+    {
+        errl = VPD::invalidateAllPnorCaches(false);
+        if( errl )
+        {
+            // commit the error but keep going
+            errlCommit(errl, HWAS_COMP_ID);
+        }
+    }
+#endif
+
     // we got a list of targets - determine if they are present
     //  if not, delete them from the list
     for (TargetHandleList::iterator pTarget_it = io_targets.begin();

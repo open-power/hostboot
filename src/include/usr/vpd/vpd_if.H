@@ -88,9 +88,12 @@ namespace VPD
     errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target );
 
     /**
-     * @brief This function sets the VPD config flags to use HW and not PNOR
+     * @brief This function invalidates all of the VPD data in the PNOR cache.
+     * @param[in] i_setHwOnly - Also set vars to not access VPD cache
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
      */
-    void setVpdConfigFlagsHW ( );
+    errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly );
 
 }; //end vpd namespace
 

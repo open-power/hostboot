@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -213,6 +213,7 @@ my %resident_modules = (
     "libconsole.so"        => '1',
     "liberrldisplay.so"    => '1',
     "libipmi.so"           => '1',
+    "libvpd.so"            => '1',
 );
 
 # has with library to istep list file were the DepMod array is kept

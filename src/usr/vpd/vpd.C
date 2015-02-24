@@ -36,6 +36,8 @@
 #include "cvpd.H"
 #include "spd.H"
 
+
+
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
@@ -615,6 +617,54 @@ void setVpdConfigFlagsHW ( )
     Singleton<MvpdFacade>::instance().setConfigFlagsHW();
     Singleton<CvpdFacade>::instance().setConfigFlagsHW();
     SPD::setConfigFlagsHW();
+}
+
+
+// ------------------------------------------------------------------
+// invalidateAllPnorCaches
+// ------------------------------------------------------------------
+errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly )
+{
+    TRACFCOMP(g_trac_vpd,"invalidateAllPnorCaches");
+    errlHndl_t l_err = NULL;
+
+    do {
+        // Reset the PNOR config flags to HW - MVPD/CVPD/SPD
+        // Checks for PNOR caching mode before reset
+        if( i_setHwOnly )
+        {
+            VPD::setVpdConfigFlagsHW();
+        }
+
+        // Find all the targets with VPD switches
+        for (TARGETING::TargetIterator target =
+             TARGETING::targetService().begin();
+             target != TARGETING::targetService().end();
+             ++target)
+        {
+            TARGETING::ATTR_VPD_SWITCHES_type l_switch;
+            if(target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(l_switch))
+            {
+                if (l_switch.pnorCacheValid)
+                {
+                    // Invalidate the VPD PNOR for this target
+                    // This also clears the VPD ATTR switch
+                    l_err = invalidatePnorCache(*target);
+                    if (l_err)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        if (l_err)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return l_err;
 }
 
 
