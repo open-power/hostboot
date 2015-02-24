@@ -28,8 +28,8 @@
 
 #include <map>
 
-#include <pnorData_common.h>
-#include <prdfPlatServices.H>
+#include <errl/errlentry.H>
+#include <targeting/common/target.H>
 
 namespace PRDF
 {
@@ -65,17 +65,17 @@ typedef std::map<TARGETING::TargetHandle_t, PnorTrgtFfdc> PnorTrgtFfdcMap;
  *                      values for each target and address.
  *  @param  o_ffdc      PNOR FFDC data for debug.
  *  @param  o_trgtFfdc  PNOR target FFDC data for debug.
- *  @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ *  @return An error log if something failed. Otherwise, NULL.
  */
-int32_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
-                         PnorFfdc & o_ffdc, PnorTrgtFfdcMap & o_trgtFfdc );
+errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
+                            PnorFfdc & o_ffdc, PnorTrgtFfdcMap & o_trgtFfdc );
 
 /** @brief  Clears the OCC FIR data from the PNOR. This must be done after the
  *          checkstop analysis is complete so that analysis is not repeated on
  *          subsequent IPLs.
- *  @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ *  @return An error log if something failed. Otherwise, NULL.
  */
-int32_t clearPnorFirData();
+errlHndl_t clearPnorFirData();
 
 }; // end namespace PRDF
 

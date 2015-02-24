@@ -25,6 +25,9 @@
 
 #include <prdfReadPnorFirData.H>
 
+#include <pnorData_common.h>
+
+#include <prdfPlatServices.H>
 #include <prdfTrace.H>
 
 #include <pnor/pnorif.H>
@@ -138,19 +141,15 @@ TargetHandle_t getTargetHandle( PNOR_Trgt_t * i_pTrgt )
 
 //------------------------------------------------------------------------------
 
-int32_t readPnorData( uint8_t * & o_pBuf, size_t & o_pBufSize )
+errlHndl_t readPnorData( uint8_t * & o_pBuf, size_t & o_pBufSize )
 {
     #define FUNC "[PRDF::readPnorData] "
-
-    int32_t rc = SUCCESS;
 
     PNOR::SectionInfo_t info;
     errlHndl_t errl = PNOR::getSectionInfo( PNOR::FIRDATA, info );
     if ( NULL != errl )
     {
-        ERRORLOG::errlCommit( errl, PRDF_COMP_ID );
         PRDF_ERR( FUNC"getSectionInfo() failed" );
-        rc = FAIL;
     }
     else
     {
@@ -158,19 +157,19 @@ int32_t readPnorData( uint8_t * & o_pBuf, size_t & o_pBufSize )
         o_pBufSize = info.size;
     }
 
-    return rc;
+    return errl;
 
     #undef FUNC
 }
 
 //------------------------------------------------------------------------------
 
-int32_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
-                         PnorFfdc & o_ffdc, PnorTrgtFfdcMap & o_trgtFfdc )
+errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
+                            PnorFfdc & o_ffdc, PnorTrgtFfdcMap & o_trgtFfdc )
 {
     #define FUNC "[PRDF::readPnorFirData] "
 
-    int32_t rc = SUCCESS;
+    errlHndl_t errl = NULL;
 
     o_validData = false;
 
@@ -181,8 +180,8 @@ int32_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
     do
     {
         // Read the PNOR data.
-        rc = readPnorData( pBuf, sz_pBuf );
-        if ( SUCCESS != rc )
+        errl = readPnorData( pBuf, sz_pBuf );
+        if ( NULL != errl )
         {
             PRDF_ERR( FUNC"readPnorData() failed" );
             break;
@@ -193,13 +192,7 @@ int32_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
         // Get the PNOR header data.
         PNOR_Data_t * data = NULL;
         bool full = firData.getData( data );
-        if ( full )
-        {
-            PRDF_ERR( FUNC"PNOR buffer size %d is less than PNOR header data "
-                      "size %d", sz_pBuf, sizeof(*data) );
-            rc = FAIL;
-            break;
-        }
+        if ( full ) break;
 
         // Check the header for valid data.
         if ( PNOR_FIR1 != data->header )
@@ -222,7 +215,19 @@ int32_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
             if ( NULL == trgtHndl )
             {
                 PRDF_ERR( FUNC"getTargetHandle() failed" );
-                rc = FAIL;
+
+                /*@
+                 * @errortype
+                 * @reasoncode PRDF_NULL_VALUE_RETURNED
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   PRDF_CS_FIRDATA_READ
+                 * @userdata1  0
+                 * @userdata2  0
+                 * @devdesc    NULL system target.
+                 */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               PRDF_CS_FIRDATA_READ,
+                                               PRDF_NULL_VALUE_RETURNED, 0, 0);
                 break;
             }
 
@@ -265,33 +270,30 @@ int32_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
     {
         PRDF_ERR( FUNC"Needed more data than availabe in PNOR (%d bytes)",
                   sz_pBuf );
-        rc = FAIL;
+        /*@
+         * @errortype
+         * @reasoncode PRDF_INVALID_CONFIG
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   PRDF_CS_FIRDATA_READ
+         * @userdata1  Size needed
+         * @userdata2  0
+         * @devdesc    PNOR data is of inefficient size.
+         */
+        errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        PRDF_CS_FIRDATA_READ,
+                                        PRDF_INVALID_CONFIG, sz_pBuf, 0);
     }
 
-    return rc;
+    return errl;
 
     #undef FUNC
 }
 
 //------------------------------------------------------------------------------
 
-int32_t clearPnorFirData()
+errlHndl_t clearPnorFirData()
 {
-    #define FUNC "[PRDF::clearPnorFirData] "
-
-    int32_t rc = SUCCESS;
-
-    errlHndl_t errl = PNOR::clearSection( PNOR::FIRDATA );
-    if ( NULL != errl )
-    {
-        ERRORLOG::errlCommit( errl, PRDF_COMP_ID );
-        PRDF_ERR( FUNC"clearSection() failed" );
-        rc = FAIL;
-    }
-
-    return rc;
-
-    #undef FUNC
+    return PNOR::clearSection( PNOR::FIRDATA );
 }
 
 }; // end namespace PRDF

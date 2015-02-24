@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -63,6 +65,7 @@ enum ModuleId
     PRDF_MNFG_IPL_CE_ANALYSIS     = 0x0D,
     PRDF_START_SCRUB              = 0x0E,
     PRDF_SYNC_SVC                 = 0x0F,
+    PRDF_CS_FIRDATA_READ          = 0x10,
 };
 
 /******************************************************************************/
@@ -118,6 +121,7 @@ enum ReasonCode
 
     // general code for user error or unsupported configuration
     PRDF_INVALID_CONFIG                     = PRDF_COMP_ID | 0x82,
+    PRDF_NULL_VALUE_RETURNED                = PRDF_COMP_ID | 0x81,
 
     PRDF_LAST_REASONCODE                    = PRDF_COMP_ID | 0xFF,
 };

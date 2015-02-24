@@ -43,6 +43,10 @@
 // Custom compile configs
 #include <config.h>
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+  #include <diag/prdf/prdfPnorFirDataReader.H>
+#endif
+
 using namespace std;
 using namespace PRDF;
 using namespace TARGETING;
@@ -92,11 +96,46 @@ errlHndl_t checkForIplAttentions()
 
 errlHndl_t checkForCSAttentions()
 {
-    errlHndl_t err = NULL;
+    ATTN_SLOW("Checking for checkstop attentions");
 
-    // TODO: RTC 119543
+    errlHndl_t errl = NULL;
 
-    return err;
+    assert(!Singleton<Service>::instance().running());
+
+    do
+    {
+        // Read register data from PNOR into memory.
+        PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
+        bool validData;
+        errl = firData.readPnor( validData );
+        if ( NULL != errl )
+        {
+            ATTN_ERR("PnorFirDataReader::readPnor() failed");
+            break;
+        }
+
+        // Check if there was valid data in PNOR.
+        if ( !validData )
+        {
+            // Nothing to do, exit quietly.
+            break;
+        }
+
+        // TODO: RTC 119543 Process the checkstop attention
+
+        // Analysis is complete. Clear the PNOR data.
+        errl = firData.clearPnor();
+        if ( NULL != errl )
+        {
+            ATTN_ERR("PnorFirDataReader::clearPnor() failed");
+            break;
+        }
+
+    } while (0);
+
+    ATTN_SLOW("checkForCSAttentions complete");
+
+    return errl;
 }
 
 #endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
