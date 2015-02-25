@@ -38,7 +38,7 @@
 #include    <stdint.h>
 #include    <errno.h>
 #include    <config.h>
-
+#include    <initservice/initserviceif.H>
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
@@ -743,106 +743,111 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         }
 
 
-        //  Loop through all the centaurs in the system
-        //  and run cen_switch_rec_attn
-        TARGETING::TargetHandleList l_memTargetList;
-        getAllChips(l_memTargetList, TYPE_MEMBUF );
-
-        for ( TargetHandleList::iterator l_iter = l_memTargetList.begin();
-              l_iter != l_memTargetList.end();
-              ++l_iter )
+        if ( INITSERVICE::spBaseServicesEnabled())
         {
-            TARGETING::Target * l_memChip  =   (*l_iter) ;
+            // For FSP based systems, do not route centaur
+            // attentions through host after this step.
+            // Loop through all the centaurs in the system
+            // and run cen_switch_rec_attn
+            TARGETING::TargetHandleList l_memTargetList;
+            getAllChips(l_memTargetList, TYPE_MEMBUF );
 
-            //  dump physical path to target
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Running cen_switch_rec_attn HWP on target HUID %.8X",
-                       TARGETING::get_huid(l_memChip) );
-
-            // cast OUR type of target to a FAPI type of target.
-            fapi::Target l_fapi_centaur_target( TARGET_TYPE_MEMBUF_CHIP,
-                                                l_memChip );
-            FAPI_INVOKE_HWP( l_err,
-                             cen_switch_rec_attn,
-                             l_fapi_centaur_target );
-            if (l_err)
+            for ( TargetHandleList::iterator l_iter = l_memTargetList.begin();
+                  l_iter != l_memTargetList.end();
+                  ++l_iter )
             {
-                // log error for this centaur and continue
+                TARGETING::Target * l_memChip  =   (*l_iter) ;
 
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: cen_switch_rec_attn HWP( )",
-                          l_err->reasonCode() );
-
-                // Add all the details for this centaur
-                ErrlUserDetailsTarget myDetails(l_memChip);
-
-                // capture the target data in the elog
-                myDetails.addToLog(l_err);
-
-                // Create IStep error log and cross ref error that occurred
-                l_stepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, HWPF_COMP_ID );
-            }
-            else
-            {
+                //  dump physical path to target
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS: cen_switch_rec_attn HWP( )" );
-            }
-        }   // endfor
+                         "Running cen_switch_rec_attn HWP on target HUID %.8X",
+                         TARGETING::get_huid(l_memChip) );
+
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_centaur_target( TARGET_TYPE_MEMBUF_CHIP,
+                                                    l_memChip );
+                FAPI_INVOKE_HWP( l_err,
+                                 cen_switch_rec_attn,
+                                 l_fapi_centaur_target );
+                if (l_err)
+                {
+                    // log error for this centaur and continue
+
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR 0x%.8X: cen_switch_rec_attn HWP( )",
+                              l_err->reasonCode() );
+
+                    // Add all the details for this centaur
+                    ErrlUserDetailsTarget myDetails(l_memChip);
+
+                    // capture the target data in the elog
+                    myDetails.addToLog(l_err);
+
+                    // Create IStep error log and cross ref error that occurred
+                    l_stepError.addErrorDetails( l_err );
+
+                    // Commit Error
+                    errlCommit( l_err, HWPF_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "SUCCESS: cen_switch_rec_attn HWP( )" );
+                }
+            }   // endfor
 
 
-        //  Loop through all the mcs in the system
-        //  and run proc_switch_rec_attn
-        TARGETING::TargetHandleList l_mcsTargetList;
-        getAllChiplets(l_mcsTargetList, TYPE_MCS);
+            //  Loop through all the mcs in the system
+            //  and run proc_switch_rec_attn
+            TARGETING::TargetHandleList l_mcsTargetList;
+            getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-        for ( TargetHandleList::iterator l_iter = l_mcsTargetList.begin();
-            l_iter != l_mcsTargetList.end();
-            ++l_iter )
-        {
-            TARGETING::Target * l_mcsChiplet  =   (*l_iter) ;
+            for ( TargetHandleList::iterator l_iter = l_mcsTargetList.begin();
+                l_iter != l_mcsTargetList.end();
+                ++l_iter )
+            {
+                TARGETING::Target * l_mcsChiplet  =   (*l_iter) ;
 
-            //  dump physical path to target
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Running cen_switch_rec_attn HWP on target HUID %.8X",
+                //  dump physical path to target
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Running cen_switch_rec_attn HWP on target HUID %.8X",
                        TARGETING::get_huid(l_mcsChiplet) );
 
-            // cast OUR type of target to a FAPI type of target.
-            fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
-                                            l_mcsChiplet );
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
+                                                l_mcsChiplet );
 
-            FAPI_INVOKE_HWP( l_err,
-                             proc_switch_rec_attn,
-                             l_fapi_mcs_target );
-            if (l_err)
-            {
-                // log error for this mcs and continue
+                FAPI_INVOKE_HWP( l_err,
+                                 proc_switch_rec_attn,
+                                 l_fapi_mcs_target );
+                if (l_err)
+                {
+                    // log error for this mcs and continue
 
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: proc_switch_rec_attn HWP( )",
-                          l_err->reasonCode() );
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR 0x%.8X: proc_switch_rec_attn HWP( )",
+                              l_err->reasonCode() );
 
-                // Add all the details for this proc
-                ErrlUserDetailsTarget myDetails(l_mcsChiplet);
+                    // Add all the details for this proc
+                    ErrlUserDetailsTarget myDetails(l_mcsChiplet);
 
-                // capture the target data in the elog
-                myDetails.addToLog(l_err);
+                    // capture the target data in the elog
+                    myDetails.addToLog(l_err);
 
-                // Create IStep error log and cross ref error that occurred
-                l_stepError.addErrorDetails( l_err );
+                    // Create IStep error log and cross ref error that occurred
+                    l_stepError.addErrorDetails( l_err );
 
-                // Commit Error
-                errlCommit( l_err, HWPF_COMP_ID );
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS: proc_switch_rec_attn HWP( )" );
-            }
+                    // Commit Error
+                    errlCommit( l_err, HWPF_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "SUCCESS: proc_switch_rec_attn HWP( )" );
+                }
 
-        }   //  endfor
+            }   //  endfor
+        } // end if ( INITSERVICE::spBaseServicesEnabled())
 
 #ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
         //  Loop through all the procs in the system
