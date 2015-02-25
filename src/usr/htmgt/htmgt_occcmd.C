@@ -983,8 +983,9 @@ namespace HTMGT
         if (G_debug_trace & DEBUG_TRACE_OCCCMD)
         {
             // Trace the command
-            TMGT_BIN("buildOccCmdBuffer: OCC command (up to 256 bytes)",
-                     cmdBuffer, std::min(l_send_length, (uint16_t)256));
+            // TODO: RTC 124618 - Trace is having issues handling 256
+            TMGT_BIN("buildOccCmdBuffer: OCC command (up to 64 bytes)",
+                     cmdBuffer, std::min(l_send_length, (uint16_t)64));
         }
 
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
