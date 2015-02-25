@@ -160,6 +160,13 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
             udLogRegister.addToLog(io_log);
         }
     }
+
+    // collect these traces for timeout debugging
+    io_log->collectTrace("MDIA_FAST",512);
+    io_log->collectTrace(PRDF_COMP_NAME,512);
+    io_log->collectTrace(FAPI_TRACE_NAME,512);
+    io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);
+
 }
 // Do the setup for CE thresholds
 errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
