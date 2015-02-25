@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.H,v 1.5 2014/01/24 06:59:30 sasethur Exp $
+// $Id: mss_mcbist_address.H,v 1.7 2014/12/16 11:35:52 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -42,6 +42,7 @@
 //  1.3    |bellows |03-Apr-13| Added Id for firmware
 //  1.4    |preeragh|17-Dec-14| Removed unwanted header includes
 //  1.5    |mjjones |20-Jan-14| RAS Review Updates
+//  1.7    |preeragh|15-Dec-14| Fix FW review comments
 // --------|--------|---------|--------------------------------------------------
 //------------------------------------------------------------------------------
 #ifndef MSS_MCBIST_ADDRESS_H

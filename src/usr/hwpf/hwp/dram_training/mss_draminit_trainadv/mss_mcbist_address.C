@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.C,v 1.14 2014/01/24 06:59:19 sasethur Exp $
+// $Id: mss_mcbist_address.C,v 1.17 2014/12/16 11:35:38 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -33,13 +33,16 @@
 // *! DESCRIPTION          : MCBIST procedures
 // *! CONTEXT              : 
 // *!
-// *! OWNER  NAME          : preeragh@in.ibm.com
-// *! BACKUP               : 
+// *! OWNER  NAME          : Preetham Hosmane | preeragh@in.ibm.com
+// *! BACKUP               : Saravanan Sethuraman
 // *!***************************************************************************
 // CHANGE HISTORY:
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+// 1.17    |preeragh|15-Dec-14| Fix FW Review Comments
+// 1.16    |rwheeler|10-Nov-14| Update to address_generation for custom address string
+// 1.15    |preeragh|03-Nov-14| Fix for 128GB Schmoo
 // 1.14    |mjjones |20-Jan-13| RAS Review Updates
 // 1.13    |preet   |18-Dec-13| Added 64K default for few addr_mode
 // 1.12    |preet   |17-Dec-13| Added Addr modes
@@ -120,16 +123,16 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
     if (rc) return rc;
 
     //------------------------------ Debug Stuff -------------------------------
-    //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][0]);
-    //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][1]);
-    //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][0]);
-    //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][1]);
-    //------------------------------ Debug Stuff -------------------------------
-    //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim0 is %d ",l_num_master_ranks[0][0]);
-    //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim1 is %d ",l_num_master_ranks[0][1]);
-    //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim0 is %d ",l_num_master_ranks[1][0]);
-    //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim1 is %d ",l_num_master_ranks[1][1]);
-    //-------------------------------------------------------------------------------
+   //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][0]);
+   //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][1]);
+   //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][0]);
+   //FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][1]);
+   //------------------------------ Debug Stuff -------------------------------
+   //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim0 is %d ",l_num_master_ranks[0][0]);
+   //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim1 is %d ",l_num_master_ranks[0][1]);
+   //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim0 is %d ",l_num_master_ranks[1][0]);
+   //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim1 is %d ",l_num_master_ranks[1][1]);
+   //-------------------------------------------------------------------------------
 
     l_num_ranks_p0_dim0 = l_num_ranks_per_dimm[0][0];
     l_num_ranks_p0_dim1 = l_num_ranks_per_dimm[0][1];
@@ -319,7 +322,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
-    i++;
+    
 
     ////FAPI_INF("Inside strcmp mr3");
     l_sbit = 18;
@@ -351,7 +354,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("mr3 Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp mr2");
@@ -385,7 +388,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("mr2 Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp mr1");
@@ -419,7 +422,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("mr1 Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp mr0");
@@ -437,7 +440,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
-    i++;
+    
     ////FAPI_INF("Value of i = %d",i);
     //FAPI_INF("mr0 Invalid\n");
 
@@ -455,7 +458,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
     if (rc) return rc;
-    i++;
+    
     //FAPI_INF("col2 Invalid");
     ////FAPI_INF("Value of i = %d",i);
     ////FAPI_INF("Inside strcmp cl3");
@@ -488,7 +491,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 3 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp cl4");
@@ -522,7 +525,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 4 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp cl5");
@@ -555,7 +558,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 5 -- Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp cl6");
@@ -589,7 +592,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 6 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp cl7");
@@ -623,7 +626,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 7 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp cl8");
@@ -657,7 +660,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 8 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp cl9");
@@ -691,7 +694,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 9 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp cl11");
@@ -727,7 +730,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
             rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
             if (rc) return rc;
             FAPI_DBG("%s:Col 11 -- Invalid", i_target_mba.toEcmdString());
-            i++;
+            
         }
     }
     else
@@ -742,7 +745,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 11 -- Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Value of i = %d",i);
@@ -776,7 +779,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("Col 13 Invalid");
-        i++;
+        
     }
     ////FAPI_INF("Value of i = %d",i);
     ////FAPI_INF("Inside strcmp r0");
@@ -810,7 +813,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 0 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r1");
@@ -844,7 +847,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 1 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r2");
@@ -878,7 +881,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 2 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r3");
@@ -912,7 +915,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 3 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r4");
@@ -946,7 +949,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 4 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r5");
@@ -980,7 +983,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 5 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r6");
@@ -1014,7 +1017,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 6 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r7");
@@ -1048,7 +1051,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 7 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r8");
@@ -1082,7 +1085,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 8 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r9");
@@ -1116,7 +1119,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 9 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r10");
@@ -1150,7 +1153,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 10 --  Invalid");
-        i++;
+        
     }
 
     ////FAPI_INF("Inside strcmp r11");
@@ -1184,7 +1187,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 11 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r12");
@@ -1218,7 +1221,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 12 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r13");
@@ -1252,7 +1255,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 13 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r14");
@@ -1286,7 +1289,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 14 --  Invalid");
-        i++;
+       
     }
 
     ////FAPI_INF("Inside strcmp r15");
@@ -1319,7 +1322,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("row 15 --  Invalid");
-        i++;
+       
     }
     ////FAPI_INF("Value of i = %d",i);
     ////FAPI_INF("Inside strcmp r16 and l_dram_rows = %d",l_dram_rows);
@@ -1353,7 +1356,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         //FAPI_INF("Row 16 Invalid");
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
-        i++;
+       
     }
     ////FAPI_INF("Value of i = %d",i);
 
@@ -1378,7 +1381,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
     //FAPI_INF("sl2 Invalid");
-    i++;
+   
     ////FAPI_INF("Value of i = %d",i);
     ////FAPI_INF("Inside strcmp sl1");
     l_sbit = 30;
@@ -1399,10 +1402,10 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
-    i++;
+    
     //FAPI_INF("sl1 Invalid");
     ////FAPI_INF("Value of i = %d",i);
-    ////FAPI_INF("Inside strcmp sl0");
+    FAPI_INF("Inside strcmp sl0");
     l_sbit = 24;
     l_value = i;
     rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
@@ -1422,12 +1425,12 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
     //FAPI_INF("sl0 Invalid");
-    i++;
+    
     ////FAPI_INF("Value of i = %d",i);
 
     //------ Setting Start and end addr counters
 
-    //FAPI_INF("Debug - --------------- Setting Start and End Counters -----------\n");
+    FAPI_INF("Debug - --------------- Setting Start and End Counters -----------\n");
     rc_num = l_data_buffer_rd64.flushTo0();
     if (rc_num)
     {
@@ -1438,7 +1441,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     rc = fapiPutScom(i_target_mba, 0x030106d0, l_data_buffer_rd64);
     if (rc) return rc;
     l_value = i + 1;
-    //FAPI_INF("Setting end_addr Value of i = %d",i);
+    FAPI_INF("Setting end_addr Value of i = %d",i);
     rc_num = l_data_buffer_rd64.flushTo0();
 
     //Calculate and set Valid bits for end_addr
@@ -1498,7 +1501,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     {
         if (l_attr_addr_mode == 0)
         {
-            //FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- Few Address Mode --------",l_attr_addr_mode);
+            FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- Few Address Mode --------",l_attr_addr_mode);
             l_sbit = 32;
             rc_num = l_data_buffer_rd64.flushTo0();
             l_start = 24;
@@ -1523,9 +1526,9 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         else if (l_attr_addr_mode == 1)
         {
-            //FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- QUARTER ADDRESSING Mode --------",l_attr_addr_mode);
+            FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- QUARTER ADDRESSING Mode --------",l_attr_addr_mode);
             l_readscom_value = l_readscom_value >> 2;
-            //FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+            FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
             rc_num = l_data_buffer_rd64.setDoubleWord(0, l_readscom_value);
             if (rc_num)
             {
@@ -1540,9 +1543,9 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         else if (l_attr_addr_mode == 2)
         {
-            //FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- HALF ADDRESSING Mode --------",l_attr_addr_mode);
+            FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- HALF ADDRESSING Mode --------",l_attr_addr_mode);
             l_readscom_value = l_readscom_value >> 1;
-            //FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+            FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
             rc_num = l_data_buffer_rd64.setDoubleWord(0, l_readscom_value);
             if (rc_num)
             {
@@ -1557,8 +1560,8 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         else
         {
-            //FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- FULL Address Mode --------",l_attr_addr_mode);
-            //FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+            FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- FULL Address Mode --------",l_attr_addr_mode);
+            FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
             rc = fapiPutScom(i_target_mba, 0x030106d2, l_data_buffer_rd64);
             if (rc) return rc;
             rc = fapiPutScom(i_target_mba, 0x030106d3, l_data_buffer_rd64);

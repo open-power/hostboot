@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.63 2014/02/07 17:17:46 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.72 2015/02/09 15:54:57 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -33,13 +33,21 @@
 // *! DESCRIPTION          : MCBIST Procedures
 // *! CONTEXT              :
 // *!
-// *! OWNER  NAME          : Devashikamani, Aditya         Email: adityamd@in.ibm.com
+// *! OWNER  NAME          : Preetham Hosmane        	   Email: preeragh@in.ibm.com
 // *! BACKUP               : Sethuraman, Saravanan         Email: saravanans@in.ibm.com
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.72  |sglancy |02/09/15|Fixed FW comments and addressed bugs
+//   1.71  |preeragh|01/16/15|Fixed FW comments
+//   1.70  |preeragh|12/16/14|Revert to FW build v.1.66
+//   1.68  |rwheeler|11/19/14|option to pass in rotate data seed
+//   1.67  |sglancy |11/03/14|Fixed MCBIST to allow for a custom user generated address - removed forcing of l_new_addr=1
+//   1.66  |preeragh|11/03/14|Fix Addressing Map and enable Refresh
+//   1.65  |        | -      | - 
+//   1.64  |rwheeler|10/24/14|Added thermal sensor data 
 //   1.63  |adityamd|02/07/14|RAS Review Updates
 //   1.62  |mjjones |01/17/14|RAS Review Updates
 //   1.61  |aditya  |01/15/14|Updated attr ATTR_EFF_CUSTOM_DIMM
@@ -103,6 +111,7 @@
 #include <mss_access_delay_reg.H>
 #include <fapiTestHwpDq.H>
 #include <dimmBadDqBitmapFuncs.H>
+
 
 extern "C"
 {
@@ -366,9 +375,10 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
     uint8_t i_port = 0;
     uint8_t i_rank = 0;
 
-    //FAPI_DBG("%s:DEBUG-----Print----Address Gen ",i_target_mba.toEcmdString());
-    rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_MODES, &i_target_mba, l_new_addr);
-    if (rc) return rc;
+  FAPI_DBG("%s:DEBUG-----Print----Address Gen ",i_target_mba.toEcmdString());
+  rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_MODES, &i_target_mba, l_new_addr);
+  if (rc) return rc;
+  FAPI_DBG("DEBUG----- l_new_addr = %d ",l_new_addr);
 
     if (l_new_addr != 0)
     {
@@ -380,7 +390,21 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
             return rc;
         }
     }
+	
+ FAPI_INF( "+++ Enabling Refresh +++");
 
+	rc = fapiGetScom(i_target_mba, 0x03010432, l_data_buffer_64);
+	if(rc) return rc;
+	//Bit 0 is enable		   
+	rc_num = rc_num | l_data_buffer_64.setBit(0);
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+	rc = fapiPutScom(i_target_mba, 0x03010432, l_data_buffer_64);
+        if(rc)return rc;
+        
     if (i_mcbbytemask != NONE)
     {
         rc = cfg_byte_mask(i_target_mba);
@@ -585,9 +609,12 @@ fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
     uint32_t l_time_count = 0;
     uint8_t l_index = 0;
     uint8_t l_Subtest_no = 0;
+    uint64_t l_counter = 0x0ll;
     uint32_t i_mcbtest = 0;
     uint32_t l_st_ln = 0;
     uint32_t l_len = 0;
+    uint32_t l_dts_0 = 0;
+    uint32_t l_dts_1 = 0;
     uint8_t l_mcb_stop_on_fail = 0;
     mcbist_test_mem i_mcbtest1;
     Target i_target_centaur;
@@ -628,12 +655,35 @@ fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
                 l_time_count = 0;
                 FAPI_DBG("%s:POLLING STATUS:POLLING IN PROGRESS...........",
                          i_target_mba.toEcmdString());
+		//rc = mss_cen_dimm_temp_sensor(i_target_centaur);if (rc) return rc;
+		rc = fapiGetScom(i_target_centaur, 0x02050000, l_data_buffer_64);if (rc) return rc;
+                rc_num = l_data_buffer_64.extractToRight(&l_dts_0, 0, 12);
+                rc_num = rc_num | l_data_buffer_64.extractToRight(&l_dts_1, 16, 12);
+		if (rc_num)
+                {
+                     FAPI_ERR("Buffer error in function poll_mcb");
+                     rc.setEcmdError(rc_num);
+                     return rc;
+                 }
+
+                FAPI_DBG("%s:DTS Thermal Sensor 0 Results %d", i_target_centaur.toEcmdString(), l_dts_0);
+                FAPI_DBG("%s:DTS Thermal Sensor 1 Results %d", i_target_centaur.toEcmdString(), l_dts_1);
+		
                 if (i_flag == 0)
                 {
+                    // Read Counter Reg
+                    
+                    rc = fapiGetScom(i_target_mba, 0x030106b0, l_data_buffer_64);
+                    if (rc) return rc;
+                    l_counter = l_data_buffer_64.getDoubleWord (0);
+                   
+                   FAPI_DBG("%s:MCBCounter  %016llX  ", i_target_mba.toEcmdString(), l_counter);
+                    
+                    //Read Sub-Test number
                     rc = fapiGetScom(i_target_centaur, 0x02011670, l_data_buffer_64);
                     if (rc) return rc;
                     l_st_ln = 3;
-                    l_len = 4;
+                    l_len = 5;
                     rc_num = l_data_buffer_64.extract(&l_Subtest_no, l_st_ln, l_len);
                     if (rc_num)
                     {
@@ -641,8 +691,8 @@ fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
                         rc.setEcmdError(rc_num);
                         return rc;
                     }
-
-                    FAPI_DBG("%s:SUBTEST No  %d  ", i_target_mba.toEcmdString(), l_Subtest_no);
+                     
+                    //FAPI_DBG("%s:SUBTEST No  %08x  ", i_target_mba.toEcmdString(), l_Subtest_no);
                     rc = FAPI_ATTR_GET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, i_mcbtest);
                     if (rc) return rc;//---------i_mcbtest------->run
                     rc = mss_conversion_testtype(i_target_mba, i_mcbtest, i_mcbtest1);
@@ -880,12 +930,10 @@ fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
 
     if (*o_mcb_status == 1)
     {
-        FAPI_ERR("poll_mcb:MCBIST failed");
-        const fapi::Target & MBA_CHIPLET = i_target_mba;
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_MCBIST_TIMEOUT_ERROR);//We decided to use TIMEOUT ERROR INSTEAD Of RC_MSS_MCBIST_FAILED
-        //FAPI_SET_HWP_ERROR(rc, RC_MSS_MCBIST_FAILED);
-        return rc;
+        FAPI_DBG("poll_mcb:MCBIST failed");
+	return rc;
     }
+
     return rc;
 }
 fapi::ReturnCode mcb_error_map_print(const fapi::Target & i_target_mba,
@@ -1001,13 +1049,13 @@ fapi::ReturnCode mcb_error_map_print(const fapi::Target & i_target_mba,
 
     rc_num |= l_data_buffer1_64.flushTo0();
     //FAPI_ERR("Buffer error in function mcb_error_map_print");
-
-    if (rc_num) //The check for if bad rc_num was misplaced
-    {
-        FAPI_ERR("Error in function  mcb_error_map_print:");
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
+	
+	if (rc_num) //The check for if bad rc_num was misplaced
+        {
+            FAPI_ERR("Error in function  mcb_error_map_print:");
+            rc.setEcmdError(rc_num);
+            return rc;
+        }
 
     uint8_t l_num, io_num, l_inter, l_num2, l_index2;
     l_num = 0;
@@ -2736,6 +2784,19 @@ fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,
         i_mcbtest = W_ONLY_INFINITE_RAND;
         FAPI_INF("%s:TESTTYPE :W_ONLY_INFINITE_RAND", i_target_mba.toEcmdString());
         break;
+    case 45:
+        i_mcbtest = MCB_2D_CUP_SEQ;
+        FAPI_INF("%s:TESTTYPE :MCB_2D_CUP_SEQ", i_target_mba.toEcmdString());
+        break;
+    case 46:
+        i_mcbtest = MCB_2D_CUP_RAND;
+        FAPI_INF("%s:TESTTYPE :MCB_2D_CUP_RAND", i_target_mba.toEcmdString());
+        break;
+    case 47:
+        i_mcbtest = SHMOO_STRESS_INFINITE;
+        FAPI_INF("%s:TESTTYPE :SHMOO_STRESS_INFINITE", i_target_mba.toEcmdString());
+        break;
+
     default:
         FAPI_INF("%s:Wrong Test_type,so using default test_type",
                  i_target_mba.toEcmdString());

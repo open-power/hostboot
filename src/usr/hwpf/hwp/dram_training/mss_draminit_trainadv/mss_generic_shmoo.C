@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.87 2014/02/07 16:54:14 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.92 2014/12/16 11:36:15 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.92  |preeragh|15-Dec-14| Reverted Changes to v.1.87
+//   1.88  |rwheeler|10-Nov-14| Updated setup_mcbist for added variable.
 //   1.87  |abhijsau|7-Feb-14| added sanity check and error call out for schmoo's , removed printing of disconnected DQS. 
 //   1.86  |abhijsau|24-Jan-14| Fixed code as per changes in access delay error check
 //   1.85  |mjjones |24-Jan-14| Fixed layout and error handling for RAS Review

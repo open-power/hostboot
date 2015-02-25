@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.46 2014/01/23 19:35:58 sasethur Exp $
+// $Id: mss_mcbist.C,v 1.51 2015/02/09 15:54:47 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -33,13 +33,18 @@
 // *! DESCRIPTION          : MCBIST Procedures
 // *! CONTEXT              : 
 // *!
-// *! OWNER  NAME          : Devashikamani, Aditya         Email: adityamd@in.ibm.com
+// *! OWNER  NAME          : Hosmane, Preetham         Email: preeragh@in.ibm.com
 // *! BACKUP               : Sethuraman, Saravanan         Email: saravanans@in.ibm.com
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.51  |sglancy |02/09/15| Fixed FW comments and adjusted whitespace
+//   1.50  |preeragh|01/16/15| Fixed FW comments
+//   1.48  |preeragh|01/05/15| Added FW workaround for drand
+//   1.48  |preeragh|12/16/14| Revert back changes. v.1.46
+//   1.47  |rwheeler|11/19/14|option to pass in rotate data seed
 //   1.46  |mjjones |01/20/14|RAS Review Updates
 //   1.45  |aditya  |12/17/13|Added Simple_fix_rf
 //   1.43  |aditya  |10/05/13|Updated fw comments
@@ -739,7 +744,7 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
             }
         }
         else if (i_datamode == MCBIST_2D_CUP_PAT8)
-        {
+        { //FAPI_DBG(" Inside MCBIST_2D_CUP_PAT8 !");
             l_var = 0xFFFFFFFFFFFFFFFFull;
             l_var1 = 0x0000000000000000ull;
             l_spare = 0xFFFF0000FFFF0000ull;
@@ -944,7 +949,7 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
     }
 
     if (l_random_flag == 1)
-    {
+    { //FAPI_DBG("Inside l_rand_flag !");
         for (l_index = 0; l_index < MAX_BYTE; l_index++)
         {
 
@@ -976,39 +981,104 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
             }
         }
     }
+    
+    //struct drand48_data randBuffer;
+    //double l_rand_D = 0;
+    uint8_t l_rand_l = 0;
+	uint8_t l_rand_array[8] = {48,52,56,60,64,68,72,76};	
+    //uint64_t l_data_buffer_64_value = 0;
 
-    if (i_mcbrotate == 0)
+    // get the rotate value loaded into reg, if rotate value 0 / not defined the default to rotate =13
+    if(i_mcbrotate == 0)
     {
-        l_rotnum = 13; // for random data generation - basic setup
+        FAPI_DBG("%s:i_mcbrotate == 0 , the l_rotnum is set to 13",i_target_mba.toEcmdString());
+        l_rotnum = 13;   // for random data generation - basic setup
     }
     else
     {
         l_rotnum = i_mcbrotate;
     }
+	rc_num = rc_num | l_data_buffer_64.flushTo0();
+    // get the rotate data seed loaded into reg, if rotate data value = 0 / not defined the default rotate pttern is randomlly generated.    
 
-    rc_num |= l_data_buffer_4.insert(l_rotnum, 0, 4, 0);
-    rc_num |= l_data_buffer_64.insert(l_data_buffer_4, 0, 4, 0);
-    rc_num |= l_data_buffer_16.insert(l_data_buffer1_4, 0, 4);
-    rc_num |= l_data_buffer_16.insert(l_data_buffer1_4, 4, 4);
-    rc_num |= l_data_buffer_16.insert(l_data_buffer1_4, 8, 4);
-    rc_num |= l_data_buffer_16.insert(l_data_buffer1_4, 12, 4);
-    rc_num |= l_data_buffer_64.insert(l_data_buffer_16, 4, 16, 0);
-    if (l_print == 0)
+	   // generate the random number
+	FAPI_DBG("FW workaround for drand !");
+     	for(l_index1 = 0; l_index1 < 8; l_index1++)
+     	{
+     	   //l_rand_8 = drand48_r();
+		   
+     	   //drand48_r(&randBuffer, &l_rand_D);
+     	   //l_rand_l = (uint8_t)l_rand_D;
+     	   //l_rand_l = static_cast<unsigned int>((l_rand_D * 100) + 0.5);
+     	   /*if(l_rand_l == 0x00)
+     	   {
+     	      l_rand_l = 0xFF;
+     	   }
+		   */
+		   l_rand_l = l_rand_array[l_index1];
+     	   FAPI_DBG("%s:Value of seed drand48_r : %02X",i_target_mba.toEcmdString(), l_rand_l  );
+     	   rc_num = rc_num | l_data_buffer_64.insert(l_rand_l,8*l_index1,8);	   // Source start in sn is given as 24 -- need to ask
+		  
+     	}
+    
+   if (rc_num)
     {
-        FAPI_INF("Clearing bit 20 of MBA01_MCBIST_MCBDRCRQ_0x030106bd to avoid inversion of data to the write data flow");
-    }
-    rc_num |= l_data_buffer_64.clearBit(20);
-    if (rc_num)
-    {
-        FAPI_ERR("cfg_mcb_dgen:");
-        rc.setEcmdError(rc_num);
+		FAPI_ERR( "cfg_mcb_dgen:");       // Error setting up buffers
+		rc.setEcmdError(rc_num);
         return rc;
     }
-    rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBDRCRQ_0x030106bd, l_data_buffer_64);
-    if (rc) return rc;
+    
+    // load the mcbist and mba with rotnum and rotdata.
+    rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBDRSRQ_0x030106bc , l_data_buffer_64); if(rc) return rc;//added
+    if(l_mbaPosition == 0)
+    {
+       rc = fapiPutScom(i_target_centaur, 0x0201167F , l_data_buffer_64); if(rc) return rc;
+       //l_data_buffer_64_value = l_data_buffer_64.getDoubleWord (0);
+       //FAPI_INF("%s:Value of Rotate data seed %016llX for reg %08X",i_target_mba.toEcmdString(), l_data_buffer_64_value, l_mbs01_mcb_random[l_index] );
+       
+       rc_num = l_data_buffer_16.insert(l_data_buffer_64,0,16); 
+       rc = fapiGetScom(i_target_centaur, 0x02011680 , l_data_buffer_64); if(rc) return rc;
+       rc_num = rc_num | l_data_buffer_64.insert(l_rotnum,0,4,4);
+       rc_num = rc_num | l_data_buffer_64.insert(l_data_buffer_16,4,16);
+       if (rc_num)
+       {
+          FAPI_ERR( "cfg_mcb_dgen:");       // Error setting up buffers
+          rc.setEcmdError(rc_num);
+          return rc;
+       }	   
+       rc = fapiPutScom(i_target_centaur, 0x02011680 , l_data_buffer_64); if(rc) return rc;
+       
+    }
+    else
+    {
+       rc = fapiPutScom(i_target_centaur, 0x0201177F , l_data_buffer_64); if(rc) return rc;//added
+       //l_data_buffer_64_value = l_data_buffer_64.getDoubleWord (0);
+       //FAPI_INF("%s:Value of Rotate data seed %016llX for reg %08X",i_target_mba.toEcmdString(), l_data_buffer_64_value, l_mbs23_mcb_random[l_index] );
 
-    //if(l_print == 0)FAPI_INF("Function Name: cfg_mcb_dgen");
-    //if(l_print == 0)FAPI_INF("Stop Time");
+       rc_num = rc_num | l_data_buffer_16.insert(l_data_buffer_64,0,16);        
+       rc = fapiGetScom(i_target_centaur, 0x02011780 , l_data_buffer_64); if(rc) return rc;
+       rc_num = rc_num | l_data_buffer_64.insert(l_rotnum,0,4,4);
+       rc_num = rc_num | l_data_buffer_64.insert(l_data_buffer_16,4,16);
+       if (rc_num)
+       {
+          FAPI_ERR( "cfg_mcb_dgen:");       // Error setting up buffers
+          rc.setEcmdError(rc_num);
+          return rc;
+       }	  	   
+       rc = fapiPutScom(i_target_centaur, 0x02011780 , l_data_buffer_64); if(rc) return rc;
+       
+    }
+
+    FAPI_DBG("%s: Preet Clearing bit 20 of MBA01_MCBIST_MCBDRCRQ_0x030106bd to avoid inversion of data to the write data flow",i_target_mba.toEcmdString());
+    rc_num = rc_num | l_data_buffer_64.clearBit(20,2); 
+    if (rc_num)
+    {
+       FAPI_ERR( "cfg_mcb_dgen:");	 // Error setting up buffers
+       rc.setEcmdError(rc_num);
+       return rc;
+    }
+    rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBDRCRQ_0x030106bd,l_data_buffer_64); 
+   
     return rc;
 }
 

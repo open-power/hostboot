@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.43 2014/03/10 16:30:18 jdsloat Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.45 2015/02/09 15:54:37 sglancy Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -85,6 +85,8 @@
 //  1.41   | abhijsau |16-JAN-14| removed EFF_DIMM_TYPE attribute
 //  1.42   | mjjones  |17-Jan-14| Fixed layout and error handling for RAS Review
 //  1.43   | jdsloat  |10-MAR-14| Edited comments
+//  1.44   |preeragh  |06-NOV-14| Added Sanity checks for wr_vref and rd_vref only at nominal and disabled any other
+//  1.45   |sglancy   |09-FEB-14| Responded to FW comments
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -646,11 +648,11 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
     uint32_t l_wr_dram_vref_schmoo[MAX_PORT] = {0}; 
     uint32_t l_wr_dram_vref_nom_fc = 0;
     uint32_t l_wr_dram_vref_in = 0;
-    i_shmoo_type_valid = WR_EYE; // Hard coded - Temporary
+    i_shmoo_type_valid = MCBIST; 
     
     uint8_t index = 0;
     uint8_t count = 0;
-    uint8_t shmoo_param_count = 0;
+    //uint8_t shmoo_param_count = 0;
     uint32_t l_left_margin = 0;
     uint32_t l_right_margin = 0;
     uint32_t l_left_margin_wr_vref_array[MAX_WR_VREF]= {0};
@@ -661,6 +663,19 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WR_VREF_SCHMOO, &i_target_mba, l_wr_dram_vref_schmoo);
     if (rc) return rc;
+	
+	FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++ Patch - Preet - WR_VREF - Check Sanity only at 500 +++++++++++++++++++++++++++");
+    rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
+                                 &l_left_margin, &l_right_margin,
+                                 l_wr_dram_vref_in);
+    if(rc) return rc;
+    rc = set_attribute(i_target_mba);
+    if (rc) return rc;
+					
+					
+					
+    i_shmoo_type_valid = WR_EYE;
+	
     FAPI_INF("+++++++++++++++++WRITE DRAM VREF Shmoo Attributes Values+++++++++++++++");
     FAPI_INF("DRAM_WR_VREF[0]  = %d , DRAM_WR_VREF[1]  = %d on %s",
              l_wr_dram_vref_nom[0],
@@ -691,18 +706,14 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
                 if (rc) return rc;
                 l_wr_dram_vref_in = l_wr_dram_vref[i_port];
                 //FAPI_INF(" Calling Shmoo for finding Timing Margin:");
-                if (shmoo_param_count)
-                {
-                    rc = set_attribute(i_target_mba);
-                    if (rc) return rc;
-                }
+               
                 rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
                                  &l_left_margin, &l_right_margin,
                                  l_wr_dram_vref_in);
                 if (rc) return rc;
                 l_left_margin_wr_vref_array[index] = l_left_margin;
                 l_right_margin_wr_vref_array[index] = l_right_margin;
-                shmoo_param_count++;
+                
                 FAPI_INF("Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d",
                          wr_vref_array[index],
                          l_left_margin_wr_vref_array[index],
@@ -772,8 +783,8 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
     uint32_t l_rd_cen_vref_schmoo[MAX_PORT] = {0};
     uint8_t index  = 0;
     uint8_t count  = 0;
-    uint8_t shmoo_param_count = 0;
-    i_shmoo_type_valid = RD_EYE; // Hard coded - Temporary
+    //uint8_t shmoo_param_count = 0;
+    //i_shmoo_type_valid = RD_EYE; // Hard coded - Temporary
     
     uint32_t l_left_margin = 0;
     uint32_t l_right_margin = 0;
@@ -784,7 +795,19 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_CEN_RD_VREF_SCHMOO, &i_target_mba, l_rd_cen_vref_schmoo);
     if (rc) return rc;
-    
+	i_shmoo_type_valid = MCBIST;
+	
+	
+	FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++ Patch - Preet - RD_VREF - Check Sanity only at 500000 +++++++++++++++++++++++++++");
+    rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
+                                 &l_left_margin, &l_right_margin,
+                                 l_rd_cen_vref_in);
+	if(rc) return rc;
+	FAPI_INF(" Setup and Sanity - Check disabled from now on..... Continuing .....");
+					rc = set_attribute(i_target_mba);
+                    if (rc) return rc;
+					
+	i_shmoo_type_valid = RD_EYE;
     FAPI_INF("+++++++++++++++++CENTAUR VREF Read Shmoo Attributes values+++++++++++++++");
     FAPI_INF("CEN_RD_VREF[0]  = %d CEN_RD_VREF[1]  = %d on %s",
              l_rd_cen_vref_nom[0],
@@ -794,7 +817,7 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
              l_rd_cen_vref_schmoo[0],
              l_rd_cen_vref_schmoo[1],
              i_target_mba.toEcmdString());
-    FAPI_INF("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++ Patch - Preet - RD_VREF +++++++++++++++++++++++++++");
     
     if (l_rd_cen_vref_schmoo[i_port] == 0)
     {
@@ -815,18 +838,14 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
                 if (rc) return rc;
                 l_rd_cen_vref_in = l_rd_cen_vref[i_port];
                 //FAPI_INF(" Calling Shmoo function to find out Timing Margin:");
-                if (shmoo_param_count)
-                {
-                    rc = set_attribute(i_target_mba);
-                    if (rc) return rc;
-                }
+               
                 rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
                                  &l_left_margin, &l_right_margin,
                                  l_rd_cen_vref_in);
                 if (rc) return rc;
                 l_left_margin_rd_vref_array[index] = l_left_margin;
                 l_right_margin_rd_vref_array[index] = l_right_margin;
-                shmoo_param_count++;
+               
                 FAPI_INF("Read Vref = %d ; Min Setup time = %d; Min Hold time = %d",
                          rd_cen_vref_array[index],
                          l_left_margin_rd_vref_array[index],
@@ -863,12 +882,12 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
                                     l_rd_cen_vref_nom[i_port]);
             if (rc) return rc;
         }
-        FAPI_INF("Restoring mcbist setup attribute...");
-        rc = reset_attribute(i_target_mba);
-        if (rc) return rc;
-        FAPI_INF("++++ Centaur Read Vref Shmoo function executed successfully ++++");
+        
+		FAPI_INF("++++ Centaur Read Vref Shmoo function executed successfully ++++");
     }
-    return rc;
+		FAPI_INF("Restoring mcbist setup attribute...");
+        rc = reset_attribute(i_target_mba);if (rc) return rc;
+		return rc;
 }
 
 //------------------------------------------------------------------------------

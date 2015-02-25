@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.42 2014/01/23 19:35:51 sasethur Exp $
+// $Id: mss_mcbist.H,v 1.46 2014/12/16 11:34:58 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -33,13 +33,15 @@
 // *! DESCRIPTION          : MCBIST procedures
 // *! CONTEXT              :
 // *!
-// *! OWNER  NAME          : Devashikamani, Aditya        Email: adityamd@in.ibm.com
+// *! OWNER  NAME          : Preetham Hosmane        Email: preeragh@in.ibm.com
 // *! BACKUP               : Sethuraman, Saravanan        Email: saravanans@in.ibm.com
 // *!***************************************************************************
 // CHANGE HISTORY:
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//	 1.46  |preeragh|12/15/14| Revert back, removed rwheeler changes
+//   1.43  |rwheeler|11/19/14|option to pass in rotate data seed
 //   1.42  |mjjones |01/20/14 |RAS Review Updates
 //   1.41  |aditya  |12/17/13 |Updated mcb_error_map function parameters
 //   1.40  |rwheeler|10/29/13 |added W_ONLY_INFINITE_RAND test
@@ -138,7 +140,11 @@ enum mcbist_test_mem
     SIMPLE_FIX_RF_RA,
     TEST_RR,
     TEST_RF,
-    W_ONLY_INFINITE_RAND
+    W_ONLY_INFINITE_RAND,
+    MCB_2D_CUP_SEQ,
+    MCB_2D_CUP_RAND,
+    SHMOO_STRESS_INFINITE,
+    HYNIX_1_COL
 };
 
 enum mcbist_data_gen
@@ -331,7 +337,7 @@ fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
 fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
                               mcbist_byte_mask i_mcbbytemask,
                               uint8_t i_mcbrotate,
-                              struct Subtest_info l_sub_info[30]);
+                             struct Subtest_info l_sub_info[30]);
 
 fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,
                                       ecmdDataBufferBase & l_mcb_fail_160,
