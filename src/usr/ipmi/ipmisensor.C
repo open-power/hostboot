@@ -171,26 +171,23 @@ namespace SENSOR
                 }
             }
 
-            // $TODO RTC:123045 - Remove when SDR is finalized
-            // for now we will not create an error for bad sensor
-            // numbers
-            if( i_rc != IPMI::CC_BADSENSOR )
-            {
                 // shift the sensor number into to bytes 0-3 and then
                 // or in the HUID to bytes 4-7
-                uint64_t userdata2 = getSensorNumber();
+                uint32_t sensor_number = getSensorNumber();
+                uint32_t huid = TARGETING::get_huid( iv_target );
 
-                userdata2 = (userdata2 << 32) | TARGETING::get_huid(iv_target);
+                TRACFCOMP(g_trac_ipmi,"Sensor Number: 0x%X, HUID: 0x%X", sensor_number, huid );
 
                 l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 IPMI::MOD_IPMISENSOR,
                                 l_reasonCode,
-                                i_rc, userdata2, true);
+                                i_rc,
+                                TWO_UINT32_TO_UINT64( sensor_number, huid ),
+                                true);
 
                 l_err->collectTrace(IPMI_COMP_NAME);
 
-            }
         }
         return l_err;
     }
@@ -204,7 +201,7 @@ namespace SENSOR
 
         errlHndl_t l_err = NULL;
 
-        iv_msg->iv_sensor_number = getSensorNumber();
+        iv_msg->iv_sensor_number = static_cast<uint8_t>(getSensorNumber());
 
         if( iv_msg->iv_sensor_number != TARGETING::UTIL::INVALID_IPMI_SENSOR )
         {
@@ -287,7 +284,7 @@ namespace SENSOR
         // deleted by the IPMI transport layer
         uint8_t * l_data = new uint8_t[len];
 
-        l_data[0] = getSensorNumber();
+        l_data[0] = static_cast<uint8_t>(getSensorNumber());
 
         IPMI::completion_code cc = IPMI::CC_UNKBAD;
 
@@ -303,8 +300,7 @@ namespace SENSOR
         {
             l_err = processCompletionCode( cc );
 
-            // $TODO RTC:123045 - Remove when SDR is finalized
-            if( l_err == NULL && (cc != IPMI::CC_BADSENSOR) )
+            if( l_err == NULL )
             {
                 // populate the output structure with the sensor data
                 o_data.completion_code = cc;
@@ -418,7 +414,7 @@ namespace SENSOR
         if( l_err == NULL )
         {
             // check the completion code
-            if( (cc!= IPMI::CC_OK) &&  (cc!=IPMI::CC_BADSENSOR) )
+            if( cc!= IPMI::CC_OK )
             {
                 TRACFCOMP(g_trac_ipmi,"bad completion code from BMC=0x%x",cc);
 
@@ -442,15 +438,12 @@ namespace SENSOR
             }
             else
             {
-                if( cc!=IPMI::CC_BADSENSOR )
-                {
                     // grab the type and reading code to pass back to the caller
                     o_sensorType = l_data[0];
 
                     // high order bit is reserved
                     o_eventReadingType = ( 0x7f & l_data[1]);
 
-                }
             }
             delete[] l_data;
         }
