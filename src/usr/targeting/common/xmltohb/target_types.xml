@@ -1726,6 +1726,9 @@
     <attribute>
         <id>OCC_MASTER_CAPABLE</id>
     </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+    </attribute>
 </targetType>
 
 </attributes>
