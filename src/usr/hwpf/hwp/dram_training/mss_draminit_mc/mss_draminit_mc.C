@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.47 2014/09/24 14:48:18 dcadiga Exp $
+// $Id: mss_draminit_mc.C,v 1.48 2014/12/05 15:37:43 dcadiga Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -46,6 +46,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.48   | dcadiga  |05-DEC-14| Powerdown control at initfile
 //  1.47   | dcadiga  |09-SEP-14| Removed SPARE cke disable step
 //  1.46   | gollub   |07-APR-14| Removed call to mss_unmask_inband_errors (moved it to proc_cen_framelock)
 //  1.45   | dcadiga  |14-FEB-14| Periodic Cal Fix for DD2
@@ -254,12 +255,14 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
 
         // Step Five: Setup Power Management
         FAPI_INF( "+++ Setting Up Power Management +++");
-        rc = mss_enable_power_management(l_mbaChiplets[i]);
-        if(rc)
-        {
-           FAPI_ERR("---Error During Power Management Setup and Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
-           return rc;
-        }
+        FAPI_INF( "+++ POWER MANAGEMENT HANDLED AT INITFILE +++");
+        //Procedure commented out because domain reduction enablement now handled at the initfile
+        //rc = mss_enable_power_management(l_mbaChiplets[i]);
+        //if(rc)
+        //{
+        //   FAPI_ERR("---Error During Power Management Setup and Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+        //   return rc;
+        //}
   
     }
 
