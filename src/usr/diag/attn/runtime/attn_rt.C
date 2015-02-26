@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,28 @@ namespace ATTN_RT
                 ATTN_ERR("ATTN_RT::handleAttns service::handleAttentions "
                    "returned error for RtProc: %llx", i_proc);
                 break;
+            }
+
+            // For host attentions, clear gpio interrupt type register.
+            // If we do not clear gpio register, ipoll status will again
+            // get set and we will end up in infinite loop.
+
+            uint64_t hostMask = 0;
+            IPOLL::getCheckbits(HOST, hostMask);
+
+            if( i_ipollMask & hostMask)
+            {
+                err = putScom( proc, INTR_TYPE_LCL_ERR_STATUS_AND_REG, 0 );
+
+                if(err)
+                {
+                    ATTN_ERR("ATTN_RT::handleAttns putscom failed for "
+                             "RtProc: %llx address:0x%08X", i_proc,
+                              INTR_TYPE_LCL_ERR_STATUS_AND_REG);
+                    //Let us commit and continue.
+                    errlCommit(err, ATTN_COMP_ID);
+                }
+
             }
         } while(0);
 
