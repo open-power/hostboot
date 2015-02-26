@@ -1525,24 +1525,40 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             TRACFCOMP( g_trac_i2c,
                        ERR_MRK"i2cCheckForErrors() - Error(s) found" );
 
+            // Combine the status registers
+            uint64_t userdata1 = (0xFFFFFFFF00000000 & i_statusVal.value);
+            userdata1 |= ( 0xFFFFFFFF00000000 & intRegVal)  >> 32;
+
+
+            // Combine multiple input arguments
+            uint64_t userdata2 = 0;
+            userdata2 = static_cast<uint64_t>(i_args.engine) << 56;
+            userdata2 |= static_cast<uint64_t>(i_args.port) << 48;
+            userdata2 |= static_cast<uint64_t>(i_args.bit_rate_divisor) << 32;
+            userdata2 |= TARGETING::get_huid(i_target);
+
             /*@
              * @errortype
-             * @reasoncode     I2C_HW_ERROR_FOUND
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       I2C_CHECK_FOR_ERRORS
-             * @userdata1      Status Register Value
-             * @userdata2      Interrupt Register Value (only valid in
-             *                 Interrupt case)
-             * @devdesc        Error was found in I2C status register.
-             *                 Check userdata1 to determine what the error was.
+             * @reasoncode       I2C_HW_ERROR_FOUND
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         I2C_CHECK_FOR_ERRORS
+             * @userdata1[0:31   Status Register Value
+             * @userdata1[32:63] Interrupt Register Value (only valid in
+             *                   Interrupt case)
+             * @userdata2[0:7]   I2C Master Engine
+             * @userdata2[8:15]  I2C Master Port
+             * @userdata2[16:31] I2C Mode Register Bit Rate Divisor
+             * @userdata2[32:63] I2C Master Target HUID
+             * @devdesc          Error was found in I2C status register.
+             *                   Check userdata to determine what the error was.
              * @custdesc       A problem occurred during the IPL of the system:
              *                 An error was found in the I2C status register.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,
                                            I2C_HW_ERROR_FOUND,
-                                           i_statusVal.value,
-                                           intRegVal );
+                                           userdata1,
+                                           userdata2);
 
             // For now limited in what we can call out:
             // Could be an issue with Processor or its bus

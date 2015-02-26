@@ -105,11 +105,15 @@ void* host_init_fsi( void *io_pArgs )
             break;
         }
 
-        l_errl = I2C::i2cResetActiveMasters(I2C::I2C_ALL, false);
-        if (l_errl)
+        // Only reset the I2C Masters if FSP is not running
+        if ( !INITSERVICE::spBaseServicesEnabled() )
         {
-            // Commit this error
-            errlCommit( l_errl, HWPF_COMP_ID );
+            l_errl = I2C::i2cResetActiveMasters(I2C::I2C_ALL, false);
+            if (l_errl)
+            {
+                // Commit this error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
         }
 
     } while (0);
