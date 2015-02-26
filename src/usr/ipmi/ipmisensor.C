@@ -326,7 +326,7 @@ namespace SENSOR
 
                     // spec indicates that the high order bit should be
                     // ignored on a read, so lets mask it off now.
-                    o_data.event_status &= 0x7FFFF;
+                    o_data.event_status &= 0x7FFF;
                 }
                 else
                 {
