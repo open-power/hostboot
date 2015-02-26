@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -350,6 +350,47 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
 
 //------------------------------------------------------------------------------
 
+int32_t rankGard( ExtensibleChip * i_mbaChip, CenRank i_rank )
+{
+    #define PRDF_FUNC "[DEALLOC::rankGard] "
+
+    int32_t o_rc = SUCCESS;
+    do
+    {
+        CenAddr startAddr, endAddr;
+        TargetHandle_t mba = i_mbaChip->GetChipHandle();
+        o_rc = getMemAddrRange( mba, i_rank, startAddr, endAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getMemAddrRange() Failed. HUID:0x%08X",
+                      i_mbaChip->GetId() );
+            break;
+        }
+
+        // Get the system addresses
+        uint64_t ssAddr = 0;
+        uint64_t seAddr = 0;
+        o_rc = getSystemAddr( i_mbaChip, startAddr, ssAddr);
+        o_rc |= getSystemAddr( i_mbaChip, endAddr, seAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+                      i_mbaChip->GetId() );
+            break;
+        }
+        // Send the address range to HV
+        sendDynMemDeallocRequest( ssAddr, seAddr );
+        PRDF_TRAC( PRDF_FUNC"Rank gard for Start Addr: 0x%016llx "
+                   "End Addr: 0x%016llX", ssAddr, seAddr );
+
+    } while( 0 );
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 int32_t pageGard( ExtensibleChip * i_mbaChip, CenAddr i_addr )
 {
     #define PRDF_FUNC "[DEALLOC::pageGard] "
@@ -385,16 +426,29 @@ int32_t lmbGard( ExtensibleChip * i_mbaChip, CenAddr i_addr, bool i_isFetch )
     int32_t o_rc = SUCCESS;
     do
     {
-        o_rc = getSystemAddr( i_mbaChip, i_addr, sysAddr);
-        if( SUCCESS != o_rc )
+        if( isHyprConfigOpal() )
         {
-            PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
-                      i_mbaChip->GetId() );
-            break;
+            o_rc = rankGard( i_mbaChip, i_addr.getRank() );
+            if( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"rankGard() failed. HUID:0x%08X",
+                          i_mbaChip->GetId() );
+                break;
+            }
         }
+        else
+        {
+            o_rc = getSystemAddr( i_mbaChip, i_addr, sysAddr);
+            if( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+                          i_mbaChip->GetId() );
+                break;
+            }
 
-        sendLmbGardRequest( sysAddr, i_isFetch );
-        PRDF_TRAC( PRDF_FUNC"LMB gard for address: 0x%016llX", sysAddr );
+            sendLmbGardRequest( sysAddr, i_isFetch );
+            PRDF_TRAC( PRDF_FUNC"LMB gard for address: 0x%016llX", sysAddr );
+        }
 
     } while( 0 );
 

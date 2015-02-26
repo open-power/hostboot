@@ -298,8 +298,8 @@ typedef struct hostInterfaces
      *         immediately. It should not wait for the request to be applied. See
      *         note above.
      */
-    int32_t memory_error( uint64_t i_startAddr, uint64_t i_endAddr,
-                          MemoryError_t i_errorType );
+    int32_t (*memory_error)( uint64_t i_startAddr, uint64_t i_endAddr,
+                             MemoryError_t i_errorType );
 
 
     // Reserve some space for future growth.

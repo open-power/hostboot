@@ -48,7 +48,7 @@
 #include <prdfCenMembufExtraSig.H>
 #include <prdfLaneRepair.H>
 #include <prdfCenMemUtils.H>
-#ifndef __HOSTBOOT_MODULE
+#if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
   #include <prdfCenMbaDynMemDealloc_rt.H>
 #endif
 
@@ -833,8 +833,8 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
             // of handleTdEvent result, add the code judicially.
         }
 
-        #ifndef __HOSTBOOT_MODULE
-        // Send lmb gard message to PHYP.
+        #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
+        // Send lmb gard message to hypervisor.
         int32_t lmbRc =  DEALLOC::lmbGard( mbaChip, addr );
         if ( SUCCESS != lmbRc )
         {

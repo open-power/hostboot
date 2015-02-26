@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
  */
 
 #include <prdfPlatServices.H>
+#include <prdfTrace.H>
+#include <runtime/interface.h>
 
 //------------------------------------------------------------------------------
 
@@ -47,21 +49,60 @@ namespace PlatServices
 
 void sendPageGardRequest( uint64_t i_systemAddress )
 {
-    // TODO: RTC 118920 need to create and call OPAL interfaces
+    #define PRDF_FUNC "[PlatServices::sendPageGardRequest] "
+
+    do
+    {
+        if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
+        {
+            PRDF_ERR(PRDF_FUNC" memory_error() interface is not defined");
+            break;
+        }
+
+        int32_t rc = g_hostInterfaces->memory_error( i_systemAddress,
+                                                      i_systemAddress,
+                                                      MEMORY_ERROR_CE );
+        if( SUCCESS != rc )
+        {
+            PRDF_ERR(PRDF_FUNC" memory_error() failed");
+            break;
+        }
+    }while(0);
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
 void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE )
 {
-    // TODO: RTC 118920 need to create and call OPAL interfaces
+    //NO-OP for OPAL
 }
-
 //------------------------------------------------------------------------------
 
 void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
 {
-    // TODO: RTC 118920 need to create and call OPAL interfaces
+    #define PRDF_FUNC "[PlatServices::sendDynMemDeallocRequest] "
+
+    do
+    {
+        if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
+        {
+            PRDF_ERR(PRDF_FUNC" memory_error() interface is not defined");
+            break;
+        }
+
+        int32_t rc = g_hostInterfaces->memory_error( i_startAddr,
+                                                     i_startAddr,
+                                                     MEMORY_ERROR_UE );
+        if( SUCCESS != rc )
+        {
+            PRDF_ERR(PRDF_FUNC" memory_error() failed");
+            break;
+        }
+    }while(0);
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
