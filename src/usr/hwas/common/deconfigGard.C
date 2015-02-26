@@ -29,6 +29,7 @@
  */
 #include <stdint.h>
 #include <algorithm>
+#include <vector>
 
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
@@ -186,6 +187,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     // Create the predicate with HWAS changed state and our GARD bit
     PredicateHwasChanged l_predicateHwasChanged;
     l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_GARD, true);
+    std::vector<uint32_t> l_gardedRecordEids;
 
     do
     {
@@ -219,7 +221,8 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 continue;
             }
 
-            // if this does NOT match, continue to next in loop
+
+            // if target is unchanged, continue to next in loop
             if (l_predicateHwasChanged(l_pTarget) == false)
             {
                 HWAS_INF("skipping %.8X - GARD changed bit false",
@@ -227,6 +230,8 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 continue;
             }
 
+            // we have made it this far so we know the target has changed
+            // requiring its gard record to be cleared and eid stored
             // Clear the gard record
             HWAS_INF("clearing GARD for %.8X, recordId %d",
                         get_huid(l_pTarget),
@@ -238,8 +243,71 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 HWAS_ERR("Error from platClearGardRecords");
                 break;
             }
+            // add gardRecord eid to vector so we can clear other records with
+            // the same eid
+            l_gardedRecordEids.push_back(l_gardRecord.iv_errlogEid);
         } // for
 
+        if(!l_pErr)
+        {
+            // Second pass over present gard records to look for Errlog Ids
+            GardRecords_t l_gardRecordsSecond;
+            l_pErr = platGetGardRecords(NULL, l_gardRecordsSecond);
+            if (l_pErr)
+            {
+                HWAS_ERR("Error from platGetGardRecords");
+                break;
+            }
+            //PASS TWO: Check for other like error log Ids
+            for(GardRecordsCItr_t l_itr = l_gardRecordsSecond.begin();
+                    l_itr != l_gardRecordsSecond.end();
+                    ++l_itr)
+            {
+                GardRecord l_gardRecord = *l_itr;
+
+                // Find the associated Target
+                Target* l_pTarget = targetService().
+                                toTarget(l_gardRecord.iv_targetId);
+
+                if (l_pTarget == NULL)
+                {
+                    // could be a platform specific target for the other
+                    // ie, we are hostboot and this is an FSP target,
+                    // or vice-versa
+                    HWAS_INF("Could not find Target for %08X",
+                            get_huid(l_pTarget));
+
+                    // we just skip this GARD record
+                    continue;
+                }
+
+                // Compare the current GARD record against all the stored
+                // EIDs from the first pass. If there is a match,
+                // clear the GARD record.
+
+                if(l_gardedRecordEids.end() != std::find(
+                                                     l_gardedRecordEids.begin(),
+                                                     l_gardedRecordEids.end(),
+                                                     l_gardRecord.iv_errlogEid))
+                {
+                    // we have found a gard record that has a matching EID
+                    // as something else that has been cleared, so clear
+                    // GARD record.
+                    HWAS_INF("clearing GARD for %08x, recordId %d due to"
+                             " matching EID of %08x",
+                                get_huid(l_pTarget),
+                                l_gardRecord.iv_recordId,
+                                l_gardRecord.iv_errlogEid);
+                    l_pErr = platClearGardRecords(l_pTarget);
+
+                    if (l_pErr)
+                    {
+                        HWAS_ERR("Error from platClearGardRecords");
+                        break;
+                    }
+                }
+            }
+        }
         // now we need to go thru and clear all of the GARD bits in the
         // changed flags for all targets
         for (TargetIterator t_iter = targetService().begin();
