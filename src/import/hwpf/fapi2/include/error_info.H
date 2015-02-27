@@ -267,12 +267,11 @@ namespace fapi2
         /// @brief Get a pointer to the FfdcData
         ///
         /// @param[out] o_size Reference to uint32_t that is filled in with
-        /// the FFDC
-        ///                    size
+        /// the FFDC size
         ///
         /// @return void *. Pointer to the FFDC
         ///
-        const void* getData(uint32_t & o_size) const
+        inline const void* getData(uint32_t & o_size) const
             {
                 o_size = iv_size;
                 return iv_pFfdc.get();
@@ -282,7 +281,7 @@ namespace fapi2
         /// @brief Get a pointer to the FfdcData
         /// @return void *. Pointer to the FFDC
         ///
-        void* getData(void) const
+        inline void* getData(void) const
             { return iv_pFfdc.get(); }
 
         ///
@@ -290,7 +289,8 @@ namespace fapi2
         ///
         /// @return uint32_t The FFDC Identifier
         ///
-        uint32_t getFfdcId(void) {return iv_ffdcId;}
+        inline uint32_t getFfdcId(void)
+            { return iv_ffdcId; }
 
 #ifdef FAPI_CUSTOM_MALLOC
         ///
@@ -667,53 +667,25 @@ namespace fapi2
 
         // Vector of FFDC Data
         std::vector<std::shared_ptr<ErrorInfoFfdc> > iv_ffdcs;
-        typedef std::vector<std::shared_ptr<ErrorInfoFfdc> >::iterator
-          ErrorInfoFfdcItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoFfdc> >::const_iterator
-          ErrorInfoFfdcCItr_t;
 
         // Vector of Hardware to callout
         std::vector<std::shared_ptr<ErrorInfoHwCallout> > iv_hwCallouts;
-        typedef std::vector<std::shared_ptr<ErrorInfoHwCallout> >::iterator
-          ErrorInfoHwCalloutItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoHwCallout> >::const_iterator
-          ErrorInfoHwCalloutCItr_t;
 
         // Vector of procedures to callout
         std::vector<std::shared_ptr<ErrorInfoProcedureCallout> >
           iv_procedureCallouts;
-        typedef std::vector<std::shared_ptr<ErrorInfoProcedureCallout> >
-          ::iterator ErrorInfoProcedureCalloutItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoProcedureCallout> >
-          ::const_iterator ErrorInfoProcedureCalloutCItr_t;
 
         // Vector of buses to callout
         std::vector<std::shared_ptr<ErrorInfoBusCallout> > iv_busCallouts;
-        typedef std::vector<std::shared_ptr<ErrorInfoBusCallout> >::iterator
-          ErrorInfoBusCalloutItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoBusCallout> >
-          ::const_iterator ErrorInfoBusCalloutCItr_t;
 
         // Vector of targets to callout/deconfigure/GARD
         std::vector<std::shared_ptr<ErrorInfoCDG> > iv_CDGs;
-        typedef std::vector<std::shared_ptr<ErrorInfoCDG> >
-          ::iterator ErrorInfoCDGItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoCDG> >
-          ::const_iterator ErrorInfoCDGCItr_t;
 
         // Vector of children targets to callout/deconfigure/GARD
         std::vector<std::shared_ptr<ErrorInfoChildrenCDG> > iv_childrenCDGs;
-        typedef std::vector<std::shared_ptr<ErrorInfoChildrenCDG> >::iterator
-          ErrorInfoChildrenCDGItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoChildrenCDG> >
-          ::const_iterator ErrorInfoChildrenCDGCItr_t;
 
         // Vector of traces to collect
         std::vector<std::shared_ptr<ErrorInfoCollectTrace> > iv_traces;
-        typedef std::vector<std::shared_ptr<ErrorInfoCollectTrace> >::iterator
-          ErrorInfoCollectTraceItr_t;
-        typedef std::vector<std::shared_ptr<ErrorInfoCollectTrace> >
-          ::const_iterator ErrorInfoCollectTraceCItr_t;
     };
 
     ///

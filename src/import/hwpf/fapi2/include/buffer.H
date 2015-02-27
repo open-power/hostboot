@@ -256,10 +256,17 @@ namespace fapi2
 #endif
 
         ///
+        /// @brief operator~()
+        ///
+#ifdef DOXYGEN
+        buffer<T>& operator~(const T& rhs) const;
+#endif
+
+        ///
         /// @brief operator==()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator==(const T& rhs) const;
+        bool operator==(const T& rhs) const;
 #endif
 
         ///
@@ -269,12 +276,6 @@ namespace fapi2
         bool operator!=(const T& rhs) const;
 #endif
 
-        ///
-        /// @brief operator~()
-        ///
-#ifdef DOXYGEN
-        bool operator~(const T& rhs) const;
-#endif
         ///
         /// @brief Copy part of a OT into the DataBuffer
         /// @tparam TS Start bit to insert into (target start)
