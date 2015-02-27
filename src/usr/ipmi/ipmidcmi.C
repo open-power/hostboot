@@ -83,8 +83,8 @@ namespace SENSOR
                 // byte 6:7 power limit
                 // data[0] is pointing at byte 2 of the dcmi spec description
                 // so our offsets will be off by two below
-                o_powerLimit = data[4];
-                o_powerLimit = ( o_powerLimit << 8 ) + data[5];
+                o_powerLimit = data[5];
+                o_powerLimit = ( o_powerLimit << 8 ) + data[4];
 
                 TRACFCOMP(g_trac_ipmi,"Power limit is %d watts",o_powerLimit);
                 TRACFCOMP(g_trac_ipmi,"Power limit is %s", ((cc) ? "not active": "active"));
@@ -101,8 +101,6 @@ namespace SENSOR
                 {
                     o_limitActive = true;
                 }
-
-                delete[] data;
             }
             else
             {
@@ -122,14 +120,16 @@ namespace SENSOR
                  */
 
                 l_err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            IPMI::MOD_IPMIDCMI,
-                            IPMI::RC_DCMI_CMD_FAILED,
-                            static_cast<uint64_t>(cc),0, true);
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        IPMI::MOD_IPMIDCMI,
+                        IPMI::RC_DCMI_CMD_FAILED,
+                        static_cast<uint64_t>(cc),0, true);
 
                 l_err->collectTrace(IPMI_COMP_NAME);
 
             }
+
+            delete[] data;
         }
 
         return l_err;
