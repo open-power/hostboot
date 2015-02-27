@@ -33,6 +33,28 @@ config CVPD_WRITE
     help
         Ensure at least one of the CVPD WRITEs are enabled
 
+config PVPD_READ_FROM_PNOR
+    default n
+    help
+        Read Planar VPD data from PNOR cache
+
+config PVPD_READ_FROM_HW
+    default n
+    help
+        Read Planar VPD data from HW resources
+
+config PVPD_WRITE_TO_PNOR
+    default y if PVPD_READ_FROM_PNOR
+    depends on PVPD_READ_FROM_PNOR
+    help
+        Write Planar VPD data to PNOR cache
+
+config PVPD_WRITE_TO_HW
+    default y if PVPD_READ_FROM_HW
+    depends on PVPD_READ_FROM_HW
+    help
+        Write Planar VPD data to HW resources
+
 config MVPD_READ_FROM_PNOR
     default y
     help
@@ -104,6 +126,11 @@ config HAVE_MBVPD
     depends on (CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW) && !PALMETTO_PASS1
     help
         Have MemBuff/Centaur VPD, PNOR or HW
+
+config HAVE_PVPD
+    default y if PVPD_READ_FROM_PNOR || PVPD_READ_FROM_HW
+    help
+        Have Planar VPD, PNOR or HW
 
 config PALMETTO_PASS1
     default n

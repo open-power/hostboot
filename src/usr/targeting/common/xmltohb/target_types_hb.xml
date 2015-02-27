@@ -180,6 +180,11 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
+    <id>enc-node-power8</id>
+    <attribute><id>VPD_SWITCHES</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute><id>VPD_SWITCHES</id></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>

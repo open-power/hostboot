@@ -677,7 +677,24 @@ class IpVpdFacade
     errlHndl_t checkBufferSize( size_t i_bufferSize,
                                 size_t i_expectedSize,
                                 TARGETING::Target * i_target );
-
+    /**
+     * @brief This function returns a primary and an alternate list of records
+     *       that should be copied to pnor. The Alternate list is optional.
+     *
+     * @param[out] o_primaryVpdRecords - Pointer to array of VPD Records to use
+     *
+     * @param[out] o_primaryRecSize -    Size of o_primaryVpdRecords array
+     *
+     * @param[out] o_altVpdRecords -     Pointer to array of VPD Records to use
+     *
+     * @param[out] o_altRecSize -        Size of o_altVpdRecords array
+     *
+     */
+    virtual void getRecordLists(
+                const  recordInfo* & o_primaryVpdRecords,
+                uint64_t           & o_primaryRecSize,
+                const  recordInfo* & o_altVpdRecords,
+                uint64_t           & o_altRecSize);
 
   protected: // Variables
 
@@ -693,6 +710,8 @@ class IpVpdFacade
      */
     uint64_t iv_vpdMaxSections;
 
+
+  public: // Variables
     /**
      * @brief Pointer to array of VPD Record information
      *
@@ -705,6 +724,7 @@ class IpVpdFacade
      */
     uint64_t iv_recSize;
 
+  protected: // Variables
     /**
      * @brief Pointer to array of VPD Keyword information
      *

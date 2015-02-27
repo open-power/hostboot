@@ -122,10 +122,12 @@ errlHndl_t platHandleHWCallout(
         } // switch i_deconfigState
 
         // check to see if this target is the master processor
-        //  and if it's been deconfigured.
+        //  and if it's being deconfigured.
+        //  NOTE: will be non-functional early in IPL before discovery complete.
         TARGETING::Target *l_masterProc;
         TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
-        if (i_pTarget == l_masterProc)
+        if ( (i_pTarget == l_masterProc) &&
+             (NO_DECONFIG != i_deconfigState) )
         {
             const TARGETING::HwasState hwasState =
                     l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();

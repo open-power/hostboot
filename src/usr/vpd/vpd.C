@@ -34,9 +34,8 @@
 #include "vpd.H"
 #include "mvpd.H"
 #include "cvpd.H"
+#include "pvpd.H"
 #include "spd.H"
-
-
 
 // ----------------------------------------------
 // Trace definitions
@@ -456,6 +455,13 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         l_keywordPN = CVPD::VP;
         l_keywordSN = CVPD::VS;
     }
+    else if( l_type == TARGETING::TYPE_NODE )
+    {
+        l_ipvpd     = &(Singleton<PvpdFacade>::instance());
+        l_record    = PVPD::OPFR;
+        l_keywordPN = PVPD::VP;
+        l_keywordSN = PVPD::VS;
+    }
     else if( l_type == TARGETING::TYPE_DIMM )
     {
         // SPD does not have a singleton instance
@@ -487,7 +493,8 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
     do
     {
         // Make sure we are comparing the correct pn/sn for CVPD
-        if( l_type == TARGETING::TYPE_MEMBUF )
+        if( ( l_type == TARGETING::TYPE_MEMBUF ) ||
+            ( l_type == TARGETING::TYPE_NODE   ) )
         {
             bool l_zeroPN;
             l_err = l_ipvpd->cmpSeepromToZero( i_target,
@@ -523,6 +530,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         // Compare the Part Numbers in PNOR/SEEPROM
         bool l_matchPN = false;
         if( ( l_type == TARGETING::TYPE_PROC   ) ||
+            ( l_type == TARGETING::TYPE_NODE   ) ||
             ( l_type == TARGETING::TYPE_MEMBUF ) )
         {
             l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
@@ -577,7 +585,8 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             HWAS::markTargetChanged(i_target);
 
             // Load the PNOR data from the SEEPROM
-            if( ( l_type == TARGETING::TYPE_PROC   ) ||
+            if( ( l_type == TARGETING::TYPE_PROC ) ||
+                ( l_type == TARGETING::TYPE_NODE ) ||
                 ( l_type == TARGETING::TYPE_MEMBUF ) )
             {
                 l_err = l_ipvpd->loadPnor( i_target );

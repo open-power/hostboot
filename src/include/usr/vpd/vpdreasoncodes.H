@@ -61,6 +61,9 @@ enum vpdModuleId
     VPD_IPVPD_LOAD_PNOR                     = 0x33,
     VPD_IPVPD_GET_RECORD_LIST_SEEPROM       = 0x34,
 
+    // PVPD
+    VPD_PVPD_PRESENCEDETECT                 = 0x50,
+
     // DIMM SPD
     VPD_SPD_GET_KEYWORD_VALUE               = 0x61,
     VPD_SPD_GET_VALUE                       = 0x62,
@@ -131,6 +134,7 @@ enum vpdReasonCode
     VPD_UNEXPECTED_TARGET_TYPE          = VPD_COMP_ID | 0x33,
     VPD_WRITE_DEST_UNRESOLVED           = VPD_COMP_ID | 0x34,
     VPD_CACHE_SIZE_EXCEEDED             = VPD_COMP_ID | 0x35,
+    VPD_INVALID_LENGTH                  = VPD_COMP_ID | 0x36,
 };
 
 

@@ -71,6 +71,14 @@ namespace VPD
     bool cvpdPresent ( TARGETING::Target * i_target );
 
     /**
+     * @brief This function checks to see if the given pvpd target
+     *      is present
+     * @param[in] i_target - Target device to search for pvpd
+     * @return bool - true if pvpd is present, false if it is not.
+     */
+    bool pvpdPresent ( TARGETING::Target * i_target );
+
+    /**
      * @brief This function checks if the PNOR cache for this target is in
      *      sync with the SEEPROM, if not it loads the PNOR cache from SEEPROM.
      * @param[in] i_target - Target device

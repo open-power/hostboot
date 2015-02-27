@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/cvpd.C $                                          */
+/* $Source: src/usr/vpd/pvpd.C $                                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2013,2015                        */
-/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,19 +30,18 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
-#include <vpd/cvpdenums.H>
+#include <vpd/pvpdenums.H>
 #include <vpd/vpd_if.H>
 #include <i2c/eepromif.H>
 #include <config.h>
-#include "cvpd.H"
 #include "pvpd.H"
+#include "cvpd.H"
 #include "vpd.H"
 
 // ----------------------------------------------
@@ -59,7 +57,7 @@ extern trace_desc_t* g_trac_vpd;
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
-namespace CVPD
+namespace PVPD
 {
     // ----------------------------------------------
     // Globals
@@ -67,12 +65,9 @@ namespace CVPD
     mutex_t g_mutex = MUTEX_INITIALIZER;
 
 
-
-
-
     /**
      * @brief This function will perform the steps required to do a read from
-     *      the Hostboot CVPD data.
+     *      the Hostboot PVPD data.
      *
      * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
      *       driververif.H
@@ -99,7 +94,7 @@ namespace CVPD
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t cvpdRead ( DeviceFW::OperationType i_opType,
+    errlHndl_t pvpdRead ( DeviceFW::OperationType i_opType,
                           TARGETING::Target * i_target,
                           void * io_buffer,
                           size_t & io_buflen,
@@ -108,14 +103,14 @@ namespace CVPD
     {
         errlHndl_t err = NULL;
         IpVpdFacade::input_args_t args;
-        args.record = ((cvpdRecord)va_arg( i_args, uint64_t ));
-        args.keyword = ((cvpdKeyword)va_arg( i_args, uint64_t ));
+        args.record = ((pvpdRecord)va_arg( i_args, uint64_t ));
+        args.keyword = ((pvpdKeyword)va_arg( i_args, uint64_t ));
         args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
-                    ENTER_MRK"cvpdRead()" );
+                    ENTER_MRK"pvpdRead()" );
 
-        err = Singleton<CvpdFacade>::instance().read(i_target,
+        err = Singleton<PvpdFacade>::instance().read(i_target,
                                                      io_buffer,
                                                      io_buflen,
                                                      args);
@@ -126,7 +121,7 @@ namespace CVPD
 
     /**
      * @brief This function will perform the steps required to do a write to
-     *      the Hostboot CVPD data.
+     *      the Hostboot PVPD data.
      *
      * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
      *       driververif.H
@@ -152,7 +147,7 @@ namespace CVPD
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t cvpdWrite ( DeviceFW::OperationType i_opType,
+    errlHndl_t pvpdWrite ( DeviceFW::OperationType i_opType,
                            TARGETING::Target * i_target,
                            void * io_buffer,
                            size_t & io_buflen,
@@ -161,15 +156,15 @@ namespace CVPD
     {
         errlHndl_t err = NULL;
         IpVpdFacade::input_args_t args;
-        args.record = ((cvpdRecord)va_arg( i_args, uint64_t ));
-        args.keyword = ((cvpdKeyword)va_arg( i_args, uint64_t ));
+        args.record = ((pvpdRecord)va_arg( i_args, uint64_t ));
+        args.keyword = ((pvpdKeyword)va_arg( i_args, uint64_t ));
         args.location = ((VPD::vpdCmdTarget)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
-                    ENTER_MRK"cvpdWrite()" );
+                    ENTER_MRK"pvpdWrite()" );
 
 
-        err = Singleton<CvpdFacade>::instance().write(i_target,
+        err = Singleton<PvpdFacade>::instance().write(i_target,
                                                       io_buffer,
                                                       io_buflen,
                                                       args);
@@ -179,71 +174,168 @@ namespace CVPD
 
     // Register with the routing code
     DEVICE_REGISTER_ROUTE( DeviceFW::READ,
-                           DeviceFW::CVPD,
-                           TARGETING::TYPE_MEMBUF,
-                           cvpdRead );
+                           DeviceFW::PVPD,
+                           TARGETING::TYPE_NODE,
+                           pvpdRead );
     DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
-                           DeviceFW::CVPD,
-                           TARGETING::TYPE_MEMBUF,
-                           cvpdWrite );
+                           DeviceFW::PVPD,
+                           TARGETING::TYPE_NODE,
+                           pvpdWrite );
 
+}; // end namespace PVPD
 
-
-}; // end namespace CVPD
-
+#if !defined(__HOSTBOOT_RUNTIME)
 // --------------------------------------------------------
 // Presence Detection
 //---------------------------------------------------------
-bool VPD::cvpdPresent( TARGETING::Target * i_target )
+
+/**
+ * @brief Performs a presence detect operation on a Node card.
+ *
+ * There is no FSI presence detection, just Planar vpd detection.
+ * Presence is always returned as Success (unless the unlikely case of too
+ * small of a buffer passed). A problem with planar EEPROM is logged but
+ * not passed up so that the enclosure and everything inside is not
+ * deconfigured.
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
+                              TARGETING::Target* i_target,
+                              void* io_buffer,
+                              size_t& io_buflen,
+                              int64_t i_accessType,
+                              va_list i_args)
 {
-    TRACSSCOMP( g_trac_vpd, ENTER_MRK"cvpdPresent()");
-#if(defined( CONFIG_CVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
+    errlHndl_t l_errl = NULL;
+    bool pvpd_present = true;
+
+    if (unlikely(io_buflen < sizeof(bool)))
+    {
+        TRACFCOMP(g_trac_vpd,
+                  ERR_MRK "nodePresenceDetect> Invalid data length: %d",
+                  io_buflen);
+        /*@
+         * @errortype
+         * @moduleid     VPD::VPD_PVPD_PRESENCEDETECT
+         * @reasoncode   VPD::VPD_INVALID_LENGTH
+         * @userdata1    Data Length
+         * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
+         */
+        l_errl =
+                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        VPD::VPD_PVPD_PRESENCEDETECT,
+                                        VPD::VPD_INVALID_LENGTH,
+                                        TO_UINT64(io_buflen),
+                                        true /*SW error*/);
+        io_buflen = 0;
+        return l_errl;
+    }
+
+#if defined(CONFIG_PVPD_READ_FROM_HW) && defined(CONFIG_PVPD_READ_FROM_PNOR)
+    pvpd_present = VPD::pvpdPresent( i_target );
+    if( pvpd_present )
+    {
+        // Check if the VPD data in the PNOR matches the SEEPROM
+        l_errl = VPD::ensureCacheIsInSync( i_target );
+        if( l_errl )
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK "nodePresenceDetect>"
+                    " Error during ensureCacheIsInSync (PVPD)" );
+            errlCommit( l_errl, FSI_COMP_ID );
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_vpd,
+                  ERR_MRK "nodePresenceDetect> failed presence detect");
+
+        // Invalidate PVPD in the PNOR
+        l_errl = VPD::invalidatePnorCache(i_target);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_vpd, "Error invalidating PVPD in PNOR" );
+            errlCommit( l_errl, VPD_COMP_ID );
+        }
+        pvpd_present = true;
+    }
+#endif
+
+    // Always return presence.
+    // A returned error deconfigures the node and stops the IPL.
+    memcpy(io_buffer, &pvpd_present, sizeof(pvpd_present));
+    io_buflen = sizeof(pvpd_present);
+
+    return NULL;
+}
+
+// Register as the presence detect for nodes.
+DEVICE_REGISTER_ROUTE(DeviceFW::READ,
+                      DeviceFW::PRESENT,
+                      TARGETING::TYPE_NODE,
+                      nodePresenceDetect);
+#endif
+
+bool VPD::pvpdPresent( TARGETING::Target * i_target )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"pvpdPresent()");
+#if(defined( CONFIG_PVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
 
     return EEPROM::eepromPresence( i_target );
 
 #else
-    return Singleton<CvpdFacade>::instance().hasVpdPresent( i_target,
-                                                            CVPD::VEIR,
-                                                            CVPD::PF );
+    return Singleton<PvpdFacade>::instance().hasVpdPresent( i_target,
+                                                            PVPD::OPFR,
+                                                            PVPD::VP );
 #endif
 }
 
 
-
-
-//CVPD Class Functions
+//PVPD Class Functions
 /**
  * @brief  Constructor
+ * Planar VPD is included in the Centaur PNOR section.
+ * Including with Centaur vpd minimizes the number of PNOR sections.
  */
-CvpdFacade::CvpdFacade() :
-IpVpdFacade(CVPD::SECTION_SIZE,
-            CVPD::MAX_SECTIONS,
-            CVPD::cvpdRecords,
-            (sizeof(CVPD::cvpdRecords)/sizeof(CVPD::cvpdRecords[0])),
-            CVPD::cvpdKeywords,
-            (sizeof(CVPD::cvpdKeywords)/sizeof(CVPD::cvpdKeywords[0])),
-            PNOR::CENTAUR_VPD,
-            CVPD::g_mutex,
-            VPD::VPD_WRITE_MEMBUF)
+PvpdFacade::PvpdFacade() :
+IpVpdFacade(CVPD::SECTION_SIZE, // note use of CVPD
+            CVPD::MAX_SECTIONS, // note use of CVPD
+            PVPD::pvpdRecords,
+            (sizeof(PVPD::pvpdRecords)/sizeof(PVPD::pvpdRecords[0])),
+            PVPD::pvpdKeywords,
+            (sizeof(PVPD::pvpdKeywords)/sizeof(PVPD::pvpdKeywords[0])),
+            PNOR::CENTAUR_VPD,  // note use of CVPD
+            PVPD::g_mutex,
+            VPD::VPD_WRITE_PLANAR)
 {
-    TRACUCOMP(g_trac_vpd, "CvpdFacade::CvpdFacade> " );
+    TRACUCOMP(g_trac_vpd, "PvpdFacade::PvpdFacade> " );
 
-#ifdef CONFIG_CVPD_READ_FROM_PNOR
+#ifdef CONFIG_PVPD_READ_FROM_PNOR
     iv_configInfo.vpdReadPNOR = true;
 #else
     iv_configInfo.vpdReadPNOR = false;
 #endif
-#ifdef CONFIG_CVPD_READ_FROM_HW
+#ifdef CONFIG_PVPD_READ_FROM_HW
     iv_configInfo.vpdReadHW = true;
 #else
     iv_configInfo.vpdReadHW = false;
 #endif
-#ifdef CONFIG_CVPD_WRITE_TO_PNOR
+#ifdef CONFIG_PVPD_WRITE_TO_PNOR
     iv_configInfo.vpdWritePNOR = true;
 #else
     iv_configInfo.vpdWritePNOR = false;
 #endif
-#ifdef CONFIG_CVPD_WRITE_TO_HW
+#ifdef CONFIG_PVPD_WRITE_TO_HW
     iv_configInfo.vpdWriteHW = true;
 #else
     iv_configInfo.vpdWriteHW = false;
@@ -251,7 +343,7 @@ IpVpdFacade(CVPD::SECTION_SIZE,
 }
 
 // Retrun lists of records that should be copied to pnor.
-void CvpdFacade::getRecordLists(
+void PvpdFacade::getRecordLists(
                 const  recordInfo* & o_primaryVpdRecords,
                 uint64_t           & o_primaryRecSize,
                 const  recordInfo* & o_altVpdRecords,
@@ -261,14 +353,14 @@ void CvpdFacade::getRecordLists(
     o_primaryVpdRecords = iv_vpdRecords;
     o_primaryRecSize = iv_recSize;
 
-    // If the planar errprom  being shared with a mem buf,
-    // then return the pvpd list as the alternative record list.
-    // At thip point, if the membufs are be processed, then the node
-    // might not have been discovered yet. If pvpd is being cached, then
-    // include the pvpd list as the altnative.
-#ifdef CONFIG_PVPD_READ_FROM_PNOR
-    o_altVpdRecords = Singleton<PvpdFacade>::instance().iv_vpdRecords;
-    o_altRecSize = Singleton<PvpdFacade>::instance().iv_recSize;
+    // If the planar eeprom is being shared with a mem buf,
+    // then return the cvpd list as the alternative record list.
+    // At thip point, if the node is be processed, then the mem buffs
+    // might have not been discovered yet. If cvpd is being cached, then
+    // include the cvpd list as the altnative.
+#ifdef CONFIG_CVPD_READ_FROM_PNOR
+    o_altVpdRecords = Singleton<CvpdFacade>::instance().iv_vpdRecords;
+    o_altRecSize = Singleton<CvpdFacade>::instance().iv_recSize;
 #else
     o_altVpdRecords = NULL;
     o_altRecSize = 0;

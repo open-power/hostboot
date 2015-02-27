@@ -50,6 +50,7 @@ enum VPD_MSG_TYPE
     VPD_WRITE_DIMM    = 0x00C1, //< DIMM SPD
     VPD_WRITE_PROC    = 0x00C2, //< Processor MVPD
     VPD_WRITE_MEMBUF  = 0x00C3, //< Centaur FRU VPD
+    VPD_WRITE_PLANAR  = 0x00C4, //< Planar VPD
 };
 
 /**

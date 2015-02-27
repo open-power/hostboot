@@ -61,6 +61,7 @@ namespace DeviceFW
         GPIO,
         LPC,
         IPMIBT,    // As opposed to other phy's
+        PVPD,
 
         LAST_ACCESS_TYPE,
     };
@@ -162,6 +163,28 @@ namespace DeviceFW
      */
     #define DEVICE_CVPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
         DeviceFW::CVPD, static_cast<uint64_t>(( i_record )),\
+            static_cast<uint64_t>(( i_keyword )),\
+            static_cast<uint64_t>(( i_location ))
+
+    /**
+     * Construct the device addressing parameters for the PVPD device ops.
+     * @param[in] i_record - The enumeration of the PVPD record to access.
+     * @param[in] i_keyword - The enumeration of the PVPD keyword, located
+     *      within the i_record Record to access.
+     */
+    #define DEVICE_PVPD_ADDRESS( i_record, i_keyword )\
+        DEVICE_PVPD_FORCE_ADDRESS( i_record, i_keyword, VPD::AUTOSELECT )
+
+    /**
+     * Construct the device addressing parameters for the PVPD device ops.
+     * @param[in] i_record - The enumeration of the PVPD record to access.
+     * @param[in] i_keyword - The enumeration of the PVPD keyword, located
+     *      within the i_record Record to access.
+     * @param[in] i_location - The location of the data (PNOR/SEEPROM)
+            see vpd_if.H
+     */
+    #define DEVICE_PVPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
+        DeviceFW::PVPD, static_cast<uint64_t>(( i_record )),\
             static_cast<uint64_t>(( i_keyword )),\
             static_cast<uint64_t>(( i_location ))
 

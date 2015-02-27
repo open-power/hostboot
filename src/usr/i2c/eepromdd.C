@@ -97,6 +97,11 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_MEMBUF,
                        eepromPerformOp );
 
+// Register the perform Op with the routing code for Nodes.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::EEPROM,
+                       TARGETING::TYPE_NODE,
+                       eepromPerformOp );
 
 // ------------------------------------------------------------------
 // eepromPerformOp

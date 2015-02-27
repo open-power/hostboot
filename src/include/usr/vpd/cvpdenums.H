@@ -45,7 +45,6 @@ namespace CVPD
         OPFR        = 0x05,
         VNDR        = 0x06,
         SPDX        = 0x07,
-        OSYS        = 0x08,
         // Last Record
         CVPD_LAST_RECORD,
         CVPD_TEST_RECORD,   // Test purposes ONLY!

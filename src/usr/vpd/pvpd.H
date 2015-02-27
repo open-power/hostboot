@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/cvpd.H $                                          */
+/* $Source: src/usr/vpd/pvpd.H $                                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,14 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __CVPD_H
-#define __CVPD_H
+#ifndef __PVPD_H
+#define __PVPD_H
 
 
 /**
- * @file cvpd.H
+ * @file pvpd.H
  *
- * @brief Provides the interfaces for the CVPD device driver
+ * @brief Provides the interfaces for the PVPD device driver
  *
  */
 
@@ -37,33 +37,19 @@
 // Includes
 // ----------------------------------------------
 #include <errl/errlentry.H>
-#include <vpd/cvpdenums.H>
+#include <vpd/pvpdenums.H>
 
 #include "ipvpd.H"
 #include <config.h>
 
-namespace CVPD
+namespace PVPD
 {
 
-    enum
-    {
-#ifdef CONFIG_CDIMM_FORMAT_FOR_CVPD
-        // 4KB x 64
-        SECTION_SIZE       = 0x1000,
-        MAX_SECTIONS       = 64,
-#else
-        // 8KB x 32
-        SECTION_SIZE       = 0x2000,
-        MAX_SECTIONS       = 32,
-#endif
-    };
-
-
     /**
-     * @brief Conversion of CVPD Records to corresponding character
+     * @brief Conversion of PVPD Records to corresponding character
      *        representation.
      */
-    const IpVpdFacade::recordInfo cvpdRecords[] =
+    const IpVpdFacade::recordInfo pvpdRecords[] =
     {
         // -------------------------------------------------------------------
         // NOTE: This list must remain an ordered list!  There will be a
@@ -71,25 +57,21 @@ namespace CVPD
         //      list, be sure that the keyword in each entry (value 0)
         //      are in ascending order.
         // -------------------------------------------------------------------
-        { VEIR, "VEIR" },
-        { VER0, "VER0" },  //Not currently used, but keep support
-        { MER0, "MER0" },
-        { VSPD, "VSPD" },
         { VINI, "VINI" },
+        { OSYS, "OSYS" },
         { OPFR, "OPFR" },
         { VNDR, "VNDR" },
-        { SPDX, "SPDX" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
-        { CVPD_TEST_RECORD, "TEST" },
+        { PVPD_TEST_RECORD, "TEST" },
         // -------------------------------------------------------------------
     };
 
     /**
-     * @brief Conversion of CVPD Keywords to corresponding character
+     * @brief Conversion of PVPD Keywords to corresponding character
      *        representation.
      */
-    const IpVpdFacade::keywordInfo cvpdKeywords[] =
+    const IpVpdFacade::keywordInfo pvpdKeywords[] =
     {
         // -------------------------------------------------------------------
         // NOTE: This list must remain an ordered list!  There will be a
@@ -98,88 +80,49 @@ namespace CVPD
         //      are in ascending order.
         // -------------------------------------------------------------------
         { pdI, "#I" },
-        { PF,  "PF" },
-        { MT,  "MT" },
-        { MR,  "MR" },
-        { pdA, "#A" },
-        { EL,  "EL" },
-        { LM,  "LM" },
-        { MW,  "MW" },
-        { MV,  "MV" },
-        { AM,  "AM" },
-        { VZ,  "VZ" },
-        { pdD, "#D" },
-        { MX,  "MX" },
-        { DW,  "DW" },
-        { PN,  "PN" },
-        { SN,  "SN" },
-        { DR,  "DR" },
-        { CE,  "CE" },
-        { FN,  "FN" },
+        { B3,  "B3" },
+        { B4,  "B4" },
+        { B7,  "B7" },
         { CC,  "CC" },
-        { HE,  "HE" },
+        { CE,  "CE" },
         { CT,  "CT" },
+        { DR,  "DR" },
+        { ET,  "ET" },
+        { FN,  "FN" },
+        { HE,  "HE" },
         { HW,  "HW" },
+        { IN,  "IN" },
+        { MM,  "MM" },
+        { PF,  "PF" },
+        { PN,  "PN" },
+        { RT,  "RT" },
+        { SN,  "SN" },
+        { SS,  "SS" },
         { VD,  "VD" },
         { VN,  "VN" },
         { VP,  "VP" },
         { VS,  "VS" },
-        { M0,  "M0" },
-        { M1,  "M1" },
-        { M2,  "M2" },
-        { M3,  "M3" },
-        { M4,  "M4" },
-        { M5,  "M5" },
-        { M6,  "M6" },
-        { M7,  "M7" },
-        { M8,  "M8" },
-        { T1,  "T1" },
-        { T2,  "T2" },
-        { T4,  "T4" },
-        { T5,  "T5" },
-        { T6,  "T6" },
-        { T8,  "T8" },
-        { Q0,  "Q0" },
-        { Q1,  "Q1" },
-        { Q2,  "Q2" },
-        { Q3,  "Q3" },
-        { Q4,  "Q4" },
-        { Q5,  "Q5" },
-        { Q6,  "Q6" },
-        { Q7,  "Q7" },
-        { Q8,  "Q8" },
-        { K0,  "K0" },
-        { K1,  "K1" },
-        { K2,  "K2" },
-        { K3,  "K3" },
-        { K4,  "K4" },
-        { K5,  "K5" },
-        { K6,  "K6" },
-        { K7,  "K7" },
-        { K8,  "K8" },
-        { MM,  "MM" },
-        { SS,  "SS" },
-        { ET,  "ET" },
+        { VZ,  "VZ" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
-        { CVPD_TEST_KEYWORD, "XX" },
+        { PVPD_TEST_KEYWORD, "XX" },
         // -------------------------------------------------------------------
 
         //Common ipvpd
         { FULL_RECORD, "FL"},
     };
 
-}; // end CVPD namespace
+}; // end PVPD namespace
 
-class CvpdFacade: public IpVpdFacade
+class PvpdFacade: public IpVpdFacade
 {
   public:
 
     /**
      * @brief Constructor
      */
-    CvpdFacade( );
+    PvpdFacade( );
 
   private:
 
@@ -203,4 +146,4 @@ class CvpdFacade: public IpVpdFacade
                 uint64_t           & o_altRecSize);
 
 };
-#endif  // __CVPD_H
+#endif  // __PVPD_H

@@ -421,9 +421,13 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             HWAS_DBG("pTarget %.8X - detected present",
                 pTarget->getAttr<ATTR_HUID>());
 
-            // on to the next target
+        // If there is planar VPD, then don't skip the presence detect.
+        // The presence detect will log any problems and load pnor.
+#if !defined(CONFIG_HAVE_PVPD)
+            // on to the next target if there is no Planar VPD
             pTarget_it++;
             continue;
+#endif
         }
 
         // call deviceRead() to see if they are present

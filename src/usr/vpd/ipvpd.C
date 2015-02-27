@@ -43,6 +43,7 @@
 #include <vpd/ipvpdenums.H>
 
 #include "vpd.H"
+#include "cvpd.H"
 #include "ipvpd.H"
 #include "errlud_vpd.H"
 
@@ -1336,6 +1337,19 @@ IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
         return err;
     }
 
+    // Get the list of records that should be copied to pnor.
+    // The list of records for this vpd sub class will be the primary list.
+    // If the eeprom is being shared, then their might be an alternate list
+    // to also include.
+    const  recordInfo* l_primaryVpdRecords = NULL;
+    uint64_t           l_primaryRecSize = 0;
+    const  recordInfo* l_altVpdRecords = NULL;
+    uint64_t           l_altRecSize = 0;
+    getRecordLists(l_primaryVpdRecords,
+                   l_primaryRecSize,
+                   l_altVpdRecords,
+                   l_altRecSize);
+
     offset = le16toh( toc_rec->record_offset ) + 1;  // skip 'large resource'
 
     // Read the PT keyword(s) from the VTOC
@@ -1367,18 +1381,34 @@ IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
               vtoc_pt_offset < pt_len;
               vtoc_pt_offset += sizeof(TocPtRecord) )
         {
+            bool l_found = false;
             toc_rec =
                 reinterpret_cast<TocPtRecord*>(l_buffer + vtoc_pt_offset);
 
             // Save record if on the list for this target
-            for ( uint32_t rec = 0; rec < iv_recSize; rec++ )
+            for ( uint32_t rec = 0; rec < l_primaryRecSize; rec++ )
             {
                 if ( memcmp( toc_rec->record_name,
-                            iv_vpdRecords[rec].recordName,
+                            l_primaryVpdRecords[rec].recordName,
                             RECORD_BYTE_SIZE ) == 0 )
                 {
                     o_recList.push_back(*toc_rec);
+                    l_found = true;
                     break;
+                }
+            }
+            // if not found, check the alternate list
+            if (!l_found)
+            {
+                for ( uint32_t rec = 0; rec < l_altRecSize; rec++ )
+                {
+                    if ( memcmp( toc_rec->record_name,
+                            l_altVpdRecords[rec].recordName,
+                            RECORD_BYTE_SIZE ) == 0 )
+                    {
+                        o_recList.push_back(*toc_rec);
+                        break;
+                    }
                 }
             }
         }
@@ -2182,3 +2212,19 @@ void IpVpdFacade::setConfigFlagsHW ( )
         iv_configInfo.vpdWriteHW = true;
     }
 }
+
+// Return the lists of records that should be copied to pnor.
+// The default lists to use are this object's record list and size.
+// No Alternate.
+void IpVpdFacade::getRecordLists(
+                const  recordInfo* & o_primaryVpdRecords,
+                uint64_t           & o_primaryRecSize,
+                const  recordInfo* & o_altVpdRecords,
+                uint64_t           & o_altRecSize)
+{
+    o_primaryVpdRecords = iv_vpdRecords;
+    o_primaryRecSize = iv_recSize;
+    o_altVpdRecords = NULL;
+    o_altRecSize = 0;
+}
+
