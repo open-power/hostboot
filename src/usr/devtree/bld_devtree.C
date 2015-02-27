@@ -1446,7 +1446,7 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
     TARGETING::targetService().getTopLevelTarget(pSys);
     assert(pSys != NULL,
                "bld_fdt_bmc - Error: Could not find the top level target.");
-    i_dt->addPropertyCell32(bmcNode, "fruId",
+    i_dt->addPropertyCell32(bmcNode, "firmware-fru-id",
                                    pSys->getAttr<TARGETING::ATTR_FRU_ID>());
 
     /* create a node to hold the sensors */
