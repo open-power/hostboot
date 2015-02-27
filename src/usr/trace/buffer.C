@@ -32,6 +32,7 @@
 #include <limits.h>
 #include <string.h>
 #include <util/align.H>
+#include <util/lockfree/abaptr.H>
 
 namespace TRACE
 {
@@ -204,7 +205,9 @@ namespace TRACE
         // No we begin the search for an entry.
         do
         {
-            BufferPage* first = iv_firstPage;
+            Util::Lockfree::AbaPtr<BufferPage> original_first =
+                Util::Lockfree::AbaPtr<BufferPage>(iv_firstPage);
+            BufferPage* first = original_first.get();
 
             // Attempt to claim from the current page first.
             if (first)
@@ -234,7 +237,7 @@ namespace TRACE
                 iv_daemon->signal();
                 futex_wait(reinterpret_cast<uint64_t*>(
                                 const_cast<BufferPage**>(&iv_firstPage)),
-                           reinterpret_cast<uint64_t>(first));
+                           reinterpret_cast<uint64_t>(original_first.value()));
                 _producerEnter();
                 // A page might be allocated now, start over.
                 continue;
@@ -255,14 +258,13 @@ namespace TRACE
             // Successfully updated the count so allocate the new page.
             BufferPage* newPage = BufferPage::allocate();
             newPage->prev = first;
+            original_first.set(newPage);
 
             // Now we have a page allocated, claim our entry first and then
             // hook it up to master list.
             l_entry = newPage->claimEntry(i_size);
 
-            if (!__sync_bool_compare_and_swap(&iv_firstPage,
-                                              first,
-                                              newPage))
+            if (!original_first.update(&iv_firstPage))
             {
                 // We got beat adding page to the master list, so release it
                 // and use that page.
@@ -333,7 +335,8 @@ namespace TRACE
         _consumerEnter();
 
         // Take page(s) from buffer.
-        BufferPage* page = iv_firstPage;
+        BufferPage* page =
+            Util::Lockfree::AbaPtr<BufferPage>(iv_firstPage).get();
         iv_firstPage = NULL;
         iv_pagesAlloc = 0;
 
