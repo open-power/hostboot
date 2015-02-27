@@ -79,6 +79,7 @@ enum TIMER_USE
  */
 enum TIMER_ACTIONS
 {
+    NO_ACTIONS              =   0x00, // all bits
     PRE_TIMEOUT_INT_SMI     =   0x10, // bit 4
     PRE_TIMEOUT_INT_NMI     =   0x20, // bit 5
     PRE_TIMEOUT_INT_MSG     =   0x30, // bits 4 & 5

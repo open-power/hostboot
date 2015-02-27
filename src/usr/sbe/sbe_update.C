@@ -46,6 +46,7 @@
 #include <sys/msg.h>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H>
+#include <console/consoleif.H>
 #include <config.h>
 #include <sbe/sbeif.H>
 #include <sbe/sbereasoncodes.H>
@@ -369,6 +370,19 @@ namespace SBE
 
 #ifdef CONFIG_BMC_IPMI
                 sbePreShutdownIpmiCalls();
+#endif
+
+#ifdef CONFIG_CONSOLE
+  #ifdef CONFIG_BMC_IPMI
+            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down In %d "
+                              "Seconds To Perform SBE Update\n",
+                              SET_WD_TIMER_IN_SECS);
+  #else
+            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down To "
+                              "Perform SBE Update\n");
+  #endif
+
+            CONSOLE::flush();
 #endif
 
                 TRACFCOMP( g_trac_sbe,

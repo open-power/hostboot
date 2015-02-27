@@ -40,6 +40,7 @@
 #include <sys/misc.h>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H>
+#include <console/consoleif.H>
 #include <config.h>
 #include <ipmi/ipmiwatchdog.H>
 #include <ipmi/ipmisensor.H>
@@ -285,7 +286,20 @@ errlHndl_t resolveProcessorSbeSeeproms()
                        l_restartNeeded);
 
 #ifdef CONFIG_BMC_IPMI
-                sbePreShutdownIpmiCalls();
+            sbePreShutdownIpmiCalls();
+#endif
+
+#ifdef CONFIG_CONSOLE
+  #ifdef CONFIG_BMC_IPMI
+            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down In %d "
+                              "Seconds To Perform SBE Update\n",
+                              SET_WD_TIMER_IN_SECS);
+  #else
+            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down To "
+                              "Perform SBE Update\n");
+  #endif
+
+            CONSOLE::flush();
 #endif
 
             TRACFCOMP( g_trac_sbe,
@@ -1276,7 +1290,6 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
 void sbePreShutdownIpmiCalls( void )
 {
     errlHndl_t err = NULL;
-
     TRACFCOMP( g_trac_sbe, ENTER_MRK"sbePreShutdownIpmiCalls");
 
     do{
@@ -1328,13 +1341,17 @@ void sbePreShutdownIpmiCalls( void )
         }
 
         // @todo RTC 124679 - Remove Once BMC Monitors Shutdown Attention
-        // Set Watchdog Timer To 10 seconds
-        const uint16_t SET_WD_TIMER_10_SECS = 10;
+        // Set Watchdog Timer before calling doShutdown()
         TRACFCOMP( g_trac_sbe,"sbePreShutdownIpmiCalls: "
                    "Set Watch Dog Timer To %d Seconds",
-                   SET_WD_TIMER_10_SECS);
+                   SET_WD_TIMER_IN_SECS);
 
-        err = IPMIWATCHDOG::setWatchDogTimer(SET_WD_TIMER_10_SECS);
+        err = IPMIWATCHDOG::setWatchDogTimer(
+                               SET_WD_TIMER_IN_SECS,  // new time
+                               static_cast<uint8_t>
+                                          (IPMIWATCHDOG::DO_NOT_STOP |
+                                           IPMIWATCHDOG::BIOS_FRB2), // default
+                               IPMIWATCHDOG::NO_ACTIONS); // boot count reset
         if(err)
         {
                TRACFCOMP( g_trac_sbe,
@@ -1342,7 +1359,7 @@ void sbePreShutdownIpmiCalls( void )
                           "FAIL Setting Watch Dog Timer to %d seconds. "
                           "Committing Error Log rc=0x%.4X eid=0x%.8X "
                           "plid=0x%.8X, but continuing shutdown",
-                          SET_WD_TIMER_10_SECS,
+                          SET_WD_TIMER_IN_SECS,
                           err->reasonCode(),
                           err->eid(),
                           err->plid());

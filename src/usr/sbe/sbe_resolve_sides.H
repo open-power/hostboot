@@ -50,6 +50,10 @@ namespace SBE
                                       { EEPROM::SBE_PRIMARY,
                                         EEPROM::SBE_BACKUP };
 
+    // @todo RTC 124679 - Remove Once BMC Monitors Shutdown Attention
+    // Set Watchdog Timer To 15 seconds before calling doShutdown()
+    const uint16_t SET_WD_TIMER_IN_SECS = 15;
+
     /******************************************/
     /*  Enums                                 */
     /******************************************/
