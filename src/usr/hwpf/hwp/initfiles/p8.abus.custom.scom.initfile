@@ -1,8 +1,9 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.15 2014/11/18 17:23:22 jmcgill Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.16 2015/02/25 21:00:12 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.15|jgrell  |02/25/15| Added rx_fifo_final_l2u_dly for Venice only (SW296793)
 #--     1.14|garyp   |02/19/14| Added rx_min_eye_width and rx_min_eye_height for manufacturing and lab thresholding
 #--     1.13|jgrell  |02/12/14| Added rx_wt_lane_disabled=1 on lane 17 (SW244284)
 #--     1.12|jgrell  |12/03/13| Set rx_eo_ddc_timeout_sel to 110 for DD2
@@ -487,6 +488,10 @@ scom 0x8004340B08010C3F {
 	tx_prbs_tap_id, 0b011, ATTR_CHIP_EC_FEATURE_SET_ABUS_PRBS_TAP_ID==1;
 }
 
+scom 0x800.0b(rx_fifo_mode_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_fifo_final_l2u_dly,        0b0011,		ATTR_CHIP_EC_FEATURE_SET_ABUS_PRBS_TAP_ID==1;
+}
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------
