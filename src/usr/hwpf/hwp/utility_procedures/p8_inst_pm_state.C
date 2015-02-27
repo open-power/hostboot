@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: p8_inst_pm_state.C,v 1.15 2014/08/05 18:26:15 jmcgill Exp $
+//$Id: p8_inst_pm_state.C,v 1.20 2015/02/03 16:00:37 cswenson Exp $
 //$Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_inst_pm_state.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,14 +40,14 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_inst_pm_state.H"
+#include <p8_inst_pm_state.H>
 #include <p8_scom_addresses.H>
-//#include <p8_scom_errors.H>  // PIB slave unit error codes
 
 
 extern "C"
 {
 
+using namespace fapi;
 
 //------------------------------------------------------------------------------
 // @proc_name  ex_determine_inst_pm_state()
@@ -81,6 +81,8 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
     uint64_t            address=0x0;
     uint64_t            address_oha_status=0x0;
     uint8_t             ex_number=0xff;
+
+    uint8_t             oha_spwkup_flag = 0;
 
     uint32_t            pcbs_fsm=0xff, pcbs_fsm_prev=0xff;
     uint32_t            trans_sv=0xff, trans_sv_etr=0xff;
@@ -412,7 +414,20 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
         {
             FAPI_INF("  pcbs_fsm=0x%x and pmhist_state=0x%x : Using AISS FSM to determine IPMS", pcbs_fsm, pmhist_state);
             
-            // determine clock status of OHA region
+            //-----------------------------------
+            // Spwu disable wrapper - SET FLAG
+            // (Make sure we don't recursively call spwu->inst_pm->spwu->etc.)
+            oha_spwkup_flag = 1;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_ex_target, oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("p8_inst_pm_state(): fapiSetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                return rc;
+            }
+            FAPI_INF("Set OHA special wakeup flag");
+            //-----------------------------------
+            
+            // Determine clock status of OHA region
             uint8_t oha_clk_status = 0x7;
             rc = fapiGetScom( i_ex_target, EX_CLK_STATUS_0x10030008, data);
             if (rc)
@@ -420,6 +435,19 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
                 FAPI_ERR("fapiGetScom error (addr: 0x%08llX)", EX_CLK_STATUS_0x10030008);
                 return rc;
             }
+
+            //-----------------------------------
+            // Spwu disable wrapper - CLEAR FLAG
+            oha_spwkup_flag = 0;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_ex_target, oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("p8_inst_pm_state(): fapiSetAttribute to clear ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                return rc;
+            }
+            FAPI_INF("Cleared OHA special wakeup flag");
+            //-----------------------------------
+
             rc_ecmd = data.extractToRight(&oha_clk_status, 0, 3);
             if (rc_ecmd)
             {
@@ -434,11 +462,35 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
                 break;
             }
 
+            //-----------------------------------
+            // Spwu disable wrapper - SET FLAG
+            // (Make sure we don't recursively call spwu->inst_pm->spwu->etc.)
+            oha_spwkup_flag = 1;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_ex_target, oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("p8_inst_pm_state(): fapiSetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                return rc;
+            }
+            FAPI_INF("Set OHA special wakeup flag");
+            //-----------------------------------
+
             address_oha_status = EX_OHA_RO_STATUS_REG_0x1002000B;
-            rc = fapiGetScom( i_ex_target, address_oha_status, data);
-            // Reacting to this rc as follows..
-            rc_eco = rc;
+            rc_eco = fapiGetScom( i_ex_target, address_oha_status, data);
             
+            //-----------------------------------
+            // Spwu disable wrapper - CLEAR FLAG
+            oha_spwkup_flag = 0;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_ex_target, oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("p8_inst_pm_state(): fapiSetAttribute to clear ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                return rc;
+            }
+            FAPI_INF("Cleared OHA special wakeup flag");
+            //-----------------------------------
+
+            // Reacting to this rc_eco as follows..
             if (rc_eco.ok())    // ECO region still accessible
             {
                 rc_ecmd = data.extractToRight(&aiss_fsm, 13, 7);
@@ -553,8 +605,15 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
             }
             else
             {
-                FAPI_ERR("pcbs_fsm=0x%x in conjunction with pmc_queue_state=0x%x is an unsupported state", pcbs_fsm, pmc_queue_state);
                 o_inst_pm_state = INST_PM_STATE_UNRESOLVED;
+                FAPI_ERR("pcbs_fsm=0x%x in conjunction with pmc_queue_state=0x%x is an unsupported state", pcbs_fsm, pmc_queue_state);
+                FAPI_ERR("  PORRR0 reg:          0x%016llx",dataPORRR0.getDoubleWord(0));
+                FAPI_ERR("  PORRR1 reg:          0x%016llx",dataPORRR1.getDoubleWord(0));
+                FAPI_ERR("  ETR reg:             0x%016llx",dataETR.getDoubleWord(0));
+                FAPI_ERR("  PCBS_FSM (prev):     0x%x",pcbs_fsm_prev);
+                FAPI_ERR("  PCBS_FSM (new):      0x%x",pcbs_fsm);
+                FAPI_ERR("  PMHIST:              0x%x",pmhist_state);
+                FAPI_ERR("  PMC_QUEUE_STATE:     0x%x",pmc_queue_state);
                 const uint64_t & PCBS_FSM = pcbs_fsm;
                 const uint64_t & PMHIST_STATE = pmhist_state;
                 const uint64_t & PMC_QUEUE_STATE = pmc_queue_state;
@@ -713,8 +772,15 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
             }
             else
             {
-                FAPI_ERR("pcbs_fsm=0x%x in conjunction with pmc_queue_state=0x%x is an unsupported state", pcbs_fsm, pmc_queue_state);
                 o_inst_pm_state = INST_PM_STATE_UNRESOLVED;
+                FAPI_ERR("pcbs_fsm=0x%x in conjunction with pmc_queue_state=0x%x is an unsupported state", pcbs_fsm, pmc_queue_state);
+                FAPI_ERR("  PORRR0 reg:          0x%016llx",dataPORRR0.getDoubleWord(0));
+                FAPI_ERR("  PORRR1 reg:          0x%016llx",dataPORRR1.getDoubleWord(0));
+                FAPI_ERR("  ETR reg:             0x%016llx",dataETR.getDoubleWord(0));
+                FAPI_ERR("  PCBS_FSM (prev):     0x%x",pcbs_fsm_prev);
+                FAPI_ERR("  PCBS_FSM (new):      0x%x",pcbs_fsm);
+                FAPI_ERR("  PMHIST:              0x%x",pmhist_state);
+                FAPI_ERR("  PMC_QUEUE_STATE:     0x%x",pmc_queue_state);
                 const uint64_t & PCBS_FSM = pcbs_fsm;
                 const uint64_t & PMHIST_STATE = pmhist_state;
                 const uint64_t & PMC_QUEUE_STATE = pmc_queue_state;
@@ -748,7 +814,7 @@ fapi::ReturnCode  ex_determine_inst_pm_state( const fapi::Target &i_ex_target,
         // Extract FAST/DEEP status from PM GP1
         //
         address = EX_PMGP1_0x100F0103;
-        rc = fapiGetScom( l_parentTarget, address, dataPMGP1);
+        rc = fapiGetScom( i_ex_target, address, dataPMGP1);
         if (rc)
         {
             FAPI_ERR("fapiGetScom error (addr: 0x%08llX)", address);
@@ -1072,7 +1138,7 @@ fapi::ReturnCode  ex_determine_ipms_from_pirrx( const fapi::Target &i_ex_target,
     }
     else
     {
-        FAPI_ERR("\tThere is no queueing request for this chiplet.");
+        FAPI_INF("\tThere is no queueing request for this chiplet.");
         o_inst_pm_state = INST_PM_STATE_UNRESOLVED;
         FAPI_SET_HWP_ERROR(rc, RC_IPMS_PIRRX_NO_QUEUE_REQUEST);
         return rc;
