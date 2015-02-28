@@ -39,6 +39,7 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
+#include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 
