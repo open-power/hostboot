@@ -170,6 +170,9 @@ namespace HBOCC
         }
 #else
         config_data->firMaster = 0;
+        //force to an older version so we can support
+        // older levels of OCC
+        config_data->version = PRE_FIR_MASTER_VERSION;
 #endif
 
         TRACUCOMP( g_fapiTd,

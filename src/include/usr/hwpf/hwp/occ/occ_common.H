@@ -58,6 +58,8 @@ namespace HBOCC
     enum
     {
         OccHostDataVersion = 3,
+        PRE_FIR_MASTER_VERSION = 2,
+
         OCC_LIDID = 0x81e00430,
         OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
 
