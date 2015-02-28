@@ -888,12 +888,17 @@ namespace SENSOR
         // get all targets of the passed in type, functional or not
         switch( i_type )
         {
-            case TARGETING::TYPE_PROC:
-                getAllChips( l_tList, TARGETING::TYPE_PROC, false );
-                break;
 
             case TARGETING::TYPE_DIMM:
                 getAllLogicalCards( l_tList, TARGETING::TYPE_DIMM, false );
+                break;
+
+            case TARGETING::TYPE_MEMBUF:
+                getAllChips( l_tList, TARGETING::TYPE_MEMBUF, false );
+                break;
+
+            case TARGETING::TYPE_PROC:
+                getAllChips( l_tList, TARGETING::TYPE_PROC, false );
                 break;
 
             case TARGETING::TYPE_CORE:
@@ -1018,6 +1023,10 @@ namespace SENSOR
 
     void updateBMCSensorStatus()
     {
+
+        // send status of all MEMBUF targets
+        updateBMCSensorStatus(TARGETING::TYPE_MEMBUF);
+
         // send status of all DIMM targets
         updateBMCSensorStatus(TARGETING::TYPE_DIMM);
 
