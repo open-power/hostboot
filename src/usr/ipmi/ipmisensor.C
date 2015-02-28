@@ -39,6 +39,7 @@ extern trace_desc_t * g_trac_ipmi;
 
 namespace SENSOR
 {
+
     //
     // Base class for sensor construction.  It is expected that this object will
     // be used as the base for any additional sensors defined.
@@ -640,8 +641,10 @@ namespace SENSOR
                 break;
 
             default:
-                assert(0, "No status sensor associated with target type 0x%x",
+                TRACFCOMP(g_trac_ipmi,"INF>>No status sensor associated with target type 0x%x",
                          i_target->getAttr<TARGETING::ATTR_TYPE>());
+                iv_functionalOffset = INVALID_OFFSET;
+                iv_presentOffset    = INVALID_OFFSET;
                 break;
         }
 
@@ -662,56 +665,59 @@ namespace SENSOR
 
         errlHndl_t l_err = NULL;
 
-        uint16_t func_mask = setMask( iv_functionalOffset );
-        uint16_t pres_mask = setMask( iv_presentOffset );
-
-        switch ( i_state )
+        if( iv_functionalOffset != INVALID_OFFSET
+                && iv_presentOffset != INVALID_OFFSET )
         {
-            case NOT_PRESENT:
-                // turn off the present bit
-                iv_msg->iv_deassertion_mask = pres_mask;
-                // turn on the disabled bit
-                iv_msg->iv_assertion_mask = func_mask;
-                break;
+            uint16_t func_mask = setMask( iv_functionalOffset );
+            uint16_t pres_mask = setMask( iv_presentOffset );
 
-            case PRESENT:
-                // turn on the present bit
-                iv_msg->iv_assertion_mask = pres_mask;
-                break;
+            switch ( i_state )
+            {
+                case NOT_PRESENT:
+                    // turn off the present bit
+                    iv_msg->iv_deassertion_mask = pres_mask;
+                    // turn on the disabled bit
+                    iv_msg->iv_assertion_mask = func_mask;
+                    break;
 
-            case FUNCTIONAL:
-                // turn off the disabled bit
-                iv_msg->iv_deassertion_mask = func_mask;
-                break;
+                case PRESENT:
+                    // turn on the present bit
+                    iv_msg->iv_assertion_mask = pres_mask;
+                    break;
 
-            case PRESENT_FUNCTIONAL:
-                // assert the present bit
-                iv_msg->iv_assertion_mask = pres_mask;
-                // turn off the disabled bit
-                iv_msg->iv_deassertion_mask = func_mask;
-                break;
+                case FUNCTIONAL:
+                    // turn off the disabled bit
+                    iv_msg->iv_deassertion_mask = func_mask;
+                    break;
 
-            case PRESENT_NONFUNCTIONAL:
-                // assert the present bit
-                iv_msg->iv_assertion_mask = pres_mask;
-                // assert the disabled bit
-                iv_msg->iv_assertion_mask |= func_mask;
-                break;
+                case PRESENT_FUNCTIONAL:
+                    // assert the present bit
+                    iv_msg->iv_assertion_mask = pres_mask;
+                    // turn off the disabled bit
+                    iv_msg->iv_deassertion_mask = func_mask;
+                    break;
 
-            case NON_FUNCTIONAL:
-                // assert the disabled bit
-                iv_msg->iv_assertion_mask = func_mask;
-                break;
+                case PRESENT_NONFUNCTIONAL:
+                    // assert the present bit
+                    iv_msg->iv_assertion_mask = pres_mask;
+                    // assert the disabled bit
+                    iv_msg->iv_assertion_mask |= func_mask;
+                    break;
 
-            default:
-                // mark as not present
-                iv_msg->iv_deassertion_mask = pres_mask;
-                iv_msg->iv_assertion_mask = func_mask;
-                break;
+                case NON_FUNCTIONAL:
+                    // assert the disabled bit
+                    iv_msg->iv_assertion_mask = func_mask;
+                    break;
+
+                default:
+                    // mark as not present
+                    iv_msg->iv_deassertion_mask = pres_mask;
+                    iv_msg->iv_assertion_mask = func_mask;
+                    break;
+            }
+
+            l_err = writeSensorData();
         }
-
-        l_err = writeSensorData();
-
         return l_err;
 
     };
@@ -876,9 +882,9 @@ namespace SENSOR
 
     //
     //  Used to update the sensor status for a specific set of target types
-    //  currently supported types are TYPE_DIMM, TYPE_CORE, TYPE_PROC.  These
-    //  are virtual sensors where Hostboot updates the present and functional
-    //  states and the BMC maintains the sensor.
+    //  currently supported types are TYPE_DIMM, TYPE_MEMBUF, TYPE_CORE,
+    //  TYPE_PROC.  These are virtual sensors where Hostboot updates the
+    //  present and functional states and the BMC maintains the sensor.
     //
     void updateBMCSensorStatus(TARGETING::TYPE i_type)
     {

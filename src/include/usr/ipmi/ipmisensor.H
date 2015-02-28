@@ -81,6 +81,7 @@ namespace SENSOR
         PROCESSOR_THROTTLED             = 0x0A,
         MACHINE_CHECK_EXCEPTION         = 0x0B,
         CORRECTABLE_MACHINE_CHECK       = 0x0C,
+        INVALID_OFFSET                  = 0xFF,
 
     };
 
