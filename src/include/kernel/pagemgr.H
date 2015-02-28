@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -81,8 +83,13 @@ class PageManagerCore
          * Return page allocations to the page manager
          * @param[in] i_page, pointer to the allocation
          * @param[in] i_pageCount, the number of pages in the allocation
+         * @param[in] i_overAllocated, whether pages to free are the being
+         *     returned because the intial allocation was larger than needed
          */
-        void freePage( void * i_page, size_t i_pageCount );
+        void freePage(
+            void*  i_page,
+            size_t i_pageCount,
+            bool   i_overAllocated = false );
 
         /**
          * Coalesce pages in the page manager (defrag)

@@ -98,7 +98,7 @@ PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
             freePage(reinterpret_cast<void*>(
                             reinterpret_cast<uintptr_t>(page) +
                             (i_pageCount*PAGESIZE)),
-                     bucket_size - i_pageCount);
+                     bucket_size - i_pageCount,true);
         }
     }
 
@@ -107,7 +107,10 @@ PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
 
 
 
-void PageManagerCore::freePage( void * i_page, size_t i_pageCount )
+void PageManagerCore::freePage(
+    void*  i_page,
+    size_t i_pageCount,
+    bool   i_overAllocated)
 {
     if ((NULL == i_page) || (0 == i_pageCount)) return;
 
@@ -115,7 +118,10 @@ void PageManagerCore::freePage( void * i_page, size_t i_pageCount )
                                 __builtin_clzl(i_pageCount));
     size_t bucket_size = ((size_t)1) << which_bucket;
 
-    push_bucket((page_t*)i_page, which_bucket);
+    push_bucket(
+           (page_t*)(reinterpret_cast<uintptr_t>(i_page)
+         + (i_overAllocated ? ((i_pageCount-bucket_size)*PAGESIZE) : 0)),
+         which_bucket);
 
     // Update statistics.
     __sync_add_and_fetch(&iv_available, bucket_size);
@@ -124,10 +130,11 @@ void PageManagerCore::freePage( void * i_page, size_t i_pageCount )
     // spare pages to free.  ie. the non-2^k portion of i_pageCount.
     if (bucket_size != i_pageCount)
     {
-        freePage(reinterpret_cast<void*>(
-                    reinterpret_cast<uintptr_t>(i_page) +
-                    (bucket_size*PAGESIZE)),
-                 i_pageCount - bucket_size);
+        freePage(
+            reinterpret_cast<void*>(
+                  reinterpret_cast<uintptr_t>(i_page)
+                + (i_overAllocated ? 0 : (bucket_size*PAGESIZE))),
+            i_pageCount - bucket_size, i_overAllocated);
     }
 
     return;
