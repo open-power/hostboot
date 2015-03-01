@@ -40,5 +40,6 @@ config PNOR_IS_32MB
 
 config PNOR_TWO_SIDE_SUPPORT
     default n
+    depends on !PNOR_IS_32MB
     help
         This is used to turn on/off two sided pnor support
