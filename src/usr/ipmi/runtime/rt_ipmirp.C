@@ -49,6 +49,8 @@
 #include <runtime/interface.h>
 
 trace_desc_t * g_trac_ipmi;
+TRAC_INIT(&g_trac_ipmi, IPMI_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
+
 #define IPMI_TRAC(printf_string,args...) \
     TRACFCOMP(g_trac_ipmi,"rt: "printf_string,##args)
 
@@ -89,8 +91,9 @@ namespace IPMI
         // if the buffer is too large this is a programming error.
         assert(io_len <= max_buffer());
 
+        uint8_t netfn = i_cmd.first >> 2; //remove embedded LUN
         IPMI_TRAC("calling sync %x:%x  len=%d",
-            i_cmd.first, i_cmd.second, io_len);
+            netfn, i_cmd.second, io_len);
 
         if(g_hostInterfaces && g_hostInterfaces->ipmi_msg)
         {
@@ -98,7 +101,7 @@ namespace IPMI
             uint8_t *l_data = new uint8_t[l_len];
 
             rc = g_hostInterfaces->ipmi_msg(
-                        i_cmd.first, i_cmd.second,
+                        netfn, i_cmd.second,
                         io_data, io_len,
                         l_data, &l_len);
 
@@ -124,7 +127,7 @@ namespace IPMI
                             IPMI::MOD_IPMIRT,
                             IPMI::RC_INVALID_SENDRECV,
                             TWO_UINT32_TO_UINT64(rc,
-                                TWO_UINT16_TO_UINT32(i_cmd.first, i_cmd.second)),
+                                TWO_UINT16_TO_UINT32(netfn, i_cmd.second)),
                             io_len,
                             true);
                 err->collectTrace(IPMI_COMP_NAME);
@@ -135,7 +138,8 @@ namespace IPMI
             else
             {
                 // clean up the memory for the caller
-                o_completion_code = static_cast<IPMI::completion_code>(io_data[0]);
+                o_completion_code =
+                  static_cast<IPMI::completion_code>(l_data[0]);
 
                 // now need to create the buffer to return
                 io_len = l_len - 1; // get rid of the completion_code
