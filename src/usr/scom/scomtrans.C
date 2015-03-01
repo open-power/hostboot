@@ -104,6 +104,7 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
 
     //true => FSP present, false =>OP HBRT
     bool isFSP_HBRT = INITSERVICE::spBaseServicesEnabled();
+    TARGETING::Target* l_target_SW = NULL;
 #endif
     // Get the attribute type.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
@@ -130,6 +131,7 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                     //capture the target data in the elog
                     ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
                 }
+                l_target_SW = i_target;
                 g_wakeupInProgress = false;
             }
 #endif
@@ -596,20 +598,24 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
     // @todo RTC:124196 need to move this to a more general location so that
     //       the disable occurs after the HBRT is complete.
 #if __HOSTBOOT_RUNTIME
-    if(l_type == TARGETING::TYPE_EX &&
-       (i_addr >= l_lowerBound && i_addr < l_upperBound)
-       && !g_wakeupInProgress && !isFSP_HBRT)
+    if(l_target_SW != NULL && !g_wakeupInProgress)
     {
         g_wakeupInProgress = true;
+        errlHndl_t l_errSW = NULL;
 
-        l_err = handleSpecialWakeup(i_target,false);
+        l_errSW = handleSpecialWakeup(l_target_SW,false);
 
-        if(l_err)
+        if(l_err != NULL && l_errSW)
         {
             TRACFCOMP(g_trac_scom,"Disable p8_cpu_special_wakeup ERROR");
 
             // capture the target data in the elog
-            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
+            ERRORLOG::ErrlUserDetailsTarget(l_target_SW).addToLog(l_errSW);
+            errlCommit(l_errSW,RUNTIME_COMP_ID);
+        }
+        else if(l_errSW)
+        {
+            l_err = l_errSW;
         }
         g_wakeupInProgress = false;
     }
