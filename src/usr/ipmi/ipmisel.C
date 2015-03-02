@@ -82,7 +82,8 @@ enum esel_retry
 namespace IPMISEL
 {
 void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-              uint32_t i_eid, uint8_t i_eventDirType,
+              uint32_t i_eid,
+              uint8_t i_eventDirType, uint8_t i_eventOffset,
               uint8_t i_sensorType, uint8_t i_sensorNumber)
 {
     IPMI_TRAC(ENTER_MRK "sendESEL()");
@@ -100,13 +101,13 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 
     // create the sel record of information
     selRecord l_sel;
-    l_sel.record_type = record_type_ami_esel;
+    l_sel.record_type = record_type_system_event;
     l_sel.generator_id = generator_id_ami;
     l_sel.evm_format_version = format_ipmi_version_2_0;
     l_sel.sensor_type = i_sensorType;
     l_sel.sensor_number = i_sensorNumber;
     l_sel.event_dir_type = i_eventDirType;
-    l_sel.event_data1 = event_data1_ami;
+    l_sel.event_data1 = i_eventOffset;
 
     eselInitData *eselData =
         new eselInitData(&l_sel, i_eselData, i_dataSize);
@@ -216,13 +217,16 @@ void send_esel(eselInitData * i_data,
 {
     IPMI_TRAC(ENTER_MRK "send_esel");
     uint8_t* data = NULL;
-    const size_t l_eSELlen = i_data->dataSize;
 
     size_t len = 0;
-    uint8_t reserveID[2] = {0,0};
     uint8_t esel_recordID[2] = {0,0};
+    uint8_t sel_recordID[2] = {0,0};
 
+#ifndef __HOSTBOOT_RUNTIME
+// TODO RTC: 124972 take this out when runtime supports the eSEL
     do{
+        const size_t l_eSELlen = i_data->dataSize;
+        uint8_t reserveID[2] = {0,0};
         // we need to send down the extended sel data (eSEL), which is
         // longer than the protocol buffer, so we need to do a reservation and
         // call the AMI partial_add_esel command multiple times
@@ -258,6 +262,9 @@ void send_esel(eselInitData * i_data,
         // copy in the SEL event record data
         memcpy(&data[PARTIAL_ADD_ESEL_REQ], i_data->eSel,
                 sizeof(selRecord));
+        // update to make this what AMI eSEL wants
+        data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,record_type)] = record_type_ami_esel;
+        data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,event_data1)] = event_data1_ami;
 
         o_cc = IPMI::CC_UNKBAD;
         TRACFBIN( g_trac_ipmi, INFO_MRK"1st partial_add_esel:", data, len);
@@ -338,17 +345,51 @@ void send_esel(eselInitData * i_data,
             // BMC returns the recordID, it's always the same (unless
             // there's a major BMC bug...)
             storeReserveRecord(esel_recordID,data);
-        }
-        if(o_err || (o_cc != IPMI::CC_OK))
-        {
-            break;
-        }
+        } // while eSELindex
     }while(0);
+#endif
+
+    // if eSEL wasn't created due to an error, we don't want to continue
+    if(o_err == NULL)
+    {
+        // if the eSEL wasn't created due to a bad completion code, we will
+        // still try to send down a SEL that we create, which will contain
+        // the eSEL recordID (if it was successful)
+        delete [] data;
+        len = sizeof(IPMISEL::selRecord);
+        data = new uint8_t[len];
+
+        // copy in the SEL event record data
+        memcpy(data, i_data->eSel, sizeof(IPMISEL::selRecord));
+        // copy the eSEL recordID (if it was created) into the extra data area
+        data[offsetof(selRecord,event_data2)] = esel_recordID[1];
+        data[offsetof(selRecord,event_data3)] = esel_recordID[0];
+
+        // use local cc so that we don't corrupt the esel from above
+        IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
+        TRACFBIN( g_trac_ipmi, INFO_MRK"add_sel:", data, len);
+        o_err = IPMI::sendrecv(IPMI::add_sel(),l_cc,len,data);
+        if(o_err)
+        {
+            IPMI_TRAC(ERR_MRK "error from add_sel");
+        }
+        else if (l_cc != IPMI::CC_OK)
+        {
+            IPMI_TRAC(ERR_MRK "failed add_sel, l_cc %02x", l_cc);
+        }
+        else
+        {
+            // if CC_OK, then len = 2 and data contains the recordID of the new SEL
+            storeReserveRecord(sel_recordID,data);
+        }
+    }
 
     delete[] data;
 
-    IPMI_TRAC(EXIT_MRK "send_esel (o_err %.8X, o_cc x%.2x, recID=x%x%x)",
-        o_err ? o_err->plid() : NULL, o_cc, esel_recordID[1], esel_recordID[0]);
+    IPMI_TRAC(EXIT_MRK
+        "send_esel o_err=%.8X, o_cc=x%.2x, sel recID=x%x%x, esel recID=x%x%x",
+        o_err ? o_err->plid() : NULL, o_cc, sel_recordID[1], sel_recordID[0],
+        esel_recordID[1], esel_recordID[0]);
 
     return;
 } // send_esel

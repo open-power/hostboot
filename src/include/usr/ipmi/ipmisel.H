@@ -65,11 +65,13 @@ namespace IPMISEL
      * @param[in] size of eSEL data
      * @param[in] eid of errorlog for this eSEL (for ack)
      * @param[in] event_dir_type for this eSEL
+     * @param[in] event_offset for this eSEL
      * @param[in] sensorType that caused the error/eSEL
      * @param[in] sensorNumber that caused the error/eSEL
      */
     void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-                  uint32_t i_eid, uint8_t i_eventDirType,
+                  uint32_t i_eid,
+                  uint8_t i_eventDirType, uint8_t i_eventOffset,
                   uint8_t i_sensorType, uint8_t i_sensorNumber);
 
     // per IPMI Spec, section 32.1 SEL Event Records
@@ -85,6 +87,7 @@ namespace IPMISEL
         format_ipmi_version_2_0 = 0x04,
     };
 
+    // event_type, per section 42.1 of the IPMI spec
     enum sel_event_dir_type
     {
         event_unspecified       = 0x00,
@@ -93,11 +96,24 @@ namespace IPMISEL
         event_predictive        = 0x04,
         event_limit             = 0x05,
         event_permformance      = 0x06,
+        event_transition        = 0x07,
+        event_OEM               = 0x70,
     };
 
     enum sel_event_data
     {
-        event_data1_ami         = 0xAA,
+        event_data1_ami                         = 0xAA,
+        event_data1_deasserted                  = 0x00,
+        event_data1_asserted                    = 0x01,
+        event_data1_trans_to_ok                 = 0x00,
+        event_data1_trans_to_noncrit_from_ok    = 0x01,
+        event_data1_trans_to_crit_from_less     = 0x02,
+        event_data1_trans_to_non_recv_from_less = 0x03,
+        event_data1_trans_to_non_crit_from_more = 0x04,
+        event_data1_trans_to_crit_from_non_r    = 0x05,
+        event_data1_trans_to_non_recoverable    = 0x06,
+        event_data1_trans_monitor               = 0x07,
+        event_data1_trans_informational         = 0x08,
     };
 
     enum sel_generator_id

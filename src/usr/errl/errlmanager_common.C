@@ -100,7 +100,9 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
                                                    l_sensorType, unused );
             if( e )
             {
-                TRACFCOMP(g_trac_errl, ERR_MRK"Failed to get sensor type for sensor %d",l_sensorNumber);
+                TRACFCOMP(g_trac_errl,
+                        ERR_MRK"Failed to get sensor type for sensor %d",
+                        l_sensorNumber);
                 // since we are in the commit path, lets just delete this
                 // error and move on.
                 delete e;
@@ -130,12 +132,45 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
             break;
         }
 
+        uint8_t l_eventDirType  = IPMISEL::event_transition;
+        uint8_t l_eventOffset   = IPMISEL::event_data1_trans_to_non_recoverable;
+        switch (io_err->sev())
+        {
+            case ERRORLOG::ERRL_SEV_INFORMATIONAL:
+                l_eventDirType  = IPMISEL::event_transition;
+                l_eventOffset   = IPMISEL::event_data1_trans_informational;
+                break;
+            case ERRL_SEV_RECOVERED:
+                l_eventDirType  = IPMISEL::event_transition;
+                l_eventOffset   = IPMISEL::event_data1_trans_to_ok;
+                break;
+            case ERRL_SEV_PREDICTIVE:
+                l_eventDirType  = IPMISEL::event_predictive;
+                l_eventOffset   = IPMISEL::event_data1_trans_to_noncrit_from_ok;
+                break;
+            case ERRL_SEV_UNRECOVERABLE:
+                l_eventDirType  = IPMISEL::event_transition;
+                l_eventOffset   = IPMISEL::event_data1_trans_to_non_recoverable;
+                break;
+            case ERRL_SEV_CRITICAL_SYS_TERM:
+                l_eventDirType  = IPMISEL::event_transition;
+                l_eventOffset   = IPMISEL::event_data1_trans_to_crit_from_non_r;
+                break;
+            case ERRL_SEV_UNKNOWN:
+                l_eventDirType  = IPMISEL::event_state;
+                l_eventOffset   = IPMISEL::event_data1_asserted;
+                break;
+        }
+
         // send it to the BMC over IPMI
         TRACFCOMP(g_trac_errl, INFO_MRK
-                "sendErrLogToBmc: sensor %.2x/%.2x, size %d",
-                l_sensorType, l_sensorNumber, l_pelSize);
+                "sendErrLogToBmc: sensor %.2x/%.2x event %x/%x, size %d",
+                l_sensorType, l_sensorNumber,
+                l_eventDirType, l_eventOffset,
+                l_pelSize);
         IPMISEL::sendESEL(l_pelData, l_pelSize,
-                            io_err->eid(), IPMISEL::event_unspecified,
+                            io_err->eid(),
+                            l_eventDirType, l_eventOffset,
                             l_sensorType, l_sensorNumber);
 
         // free the buffer
