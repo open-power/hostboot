@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.18 2015/01/23 17:54:09 dcrowell Exp $
+// $Id: mss_thermal_init.C,v 1.19 2015/02/12 23:23:56 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -49,6 +49,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.18  | pardeik  |12-FEB-15| change ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP to
+//                              | a centaur target (was system)
 //   1.17  | pardeik  |19-NOV-14| Use MRW attribute for SC address map for ISDIMMs
 //   1.16  | pardeik  |06-FEB-14| removed string in trace statement
 //   1.15  | pardeik  |24-FEB-14| added support for ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE
@@ -277,7 +279,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       else
       {
 	  // sensor cache address map for non custom dimm temperature sensors (which i2c bus and i2c address they are)
-	  l_rc = FAPI_ATTR_GET(ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP, NULL, l_dimm_sensor_cache_addr_map);
+	  l_rc = FAPI_ATTR_GET(ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP, &i_target, l_dimm_sensor_cache_addr_map);
 	  if (l_rc) return l_rc;
       }
 
