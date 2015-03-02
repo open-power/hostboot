@@ -917,7 +917,7 @@
     </enumerator>
     <enumerator>
         <name>DIMM_TEMP</name>
-        <value>0x01C0</value>
+        <value>0x0120</value>
     </enumerator>
     <enumerator>
         <name>CORE_TEMP</name>
