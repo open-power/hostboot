@@ -775,7 +775,7 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
     uint8_t * l_buffer = NULL;
     uint8_t * l_writeBuffer;
     size_t l_totalSize = 0;
-    size_t l_newSizeECC;
+    size_t l_newSize;
     size_t l_whitespacePos;
 
 
@@ -939,18 +939,19 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
     //inject ECC protection bytes if desired
     if( i_injectECC )
     {
-        l_newSizeECC = (l_totalSize/8)*9;
-        l_writeBuffer = (uint8_t *) malloc((l_newSizeECC));
+        l_newSize = (l_totalSize/8)*9;
+        l_writeBuffer = (uint8_t *) malloc((l_newSize));
         PNOR::ECC::injectECC( l_buffer, l_totalSize, l_writeBuffer );
     }
     else
     {
+        l_newSize = l_totalSize;
         l_writeBuffer = l_buffer;
     }
 
     //write the overrides to the file
-    l_fwriteSuccess = fwrite(l_writeBuffer, 1, l_totalSize, l_attrBlob);
-    if( l_fwriteSuccess != l_totalSize )
+    l_fwriteSuccess = fwrite(l_writeBuffer, 1, l_newSize, l_attrBlob);
+    if( l_fwriteSuccess != l_newSize )
     {
         printf("There was an error writing to the file!\n");
     }
