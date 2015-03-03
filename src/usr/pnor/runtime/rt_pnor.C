@@ -343,12 +343,13 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
             l_offset     = (i_offset * 9)/8;
         }
 
+        int l_rc = 0;
         if (g_hostInterfaces && g_hostInterfaces->pnor_read)
         {
             // get the data from OPAL
-            int l_rc = g_hostInterfaces->pnor_read(i_procId, l_partitionName,
+            l_rc = g_hostInterfaces->pnor_read(i_procId, l_partitionName,
                     l_offset, l_dataToRead, l_readSize);
-            if (l_rc)
+            if (l_rc < 0)
             {
                 TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice: pnor_read"
                         " failed proc:%d, part:%s, offset:0x%X, size:0x%X,"
@@ -374,6 +375,10 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                                  TWO_UINT32_TO_UINT64(l_offset, l_readSize),
                                  true);
                 break;
+            }
+            else if( l_rc != static_cast<int>(l_readSize) )
+            {
+                TRACFCOMP( g_trac_pnor, "RtPnor::readFromDevice: only read 0x%X bytes, expecting 0x%X", l_rc, l_readSize );
             }
         }
         else
@@ -403,7 +408,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
             PNOR::ECC::eccStatus ecc_stat =
                  PNOR::ECC::removeECC(reinterpret_cast<uint8_t*>(l_dataToRead),
                                       reinterpret_cast<uint8_t*>(o_data),
-                                    i_size);
+                                      l_rc); //actual size of read data
 
             // create an error if we couldn't correct things
             if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
@@ -438,7 +443,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                     //need to write good data back to PNOR
                     int l_rc = g_hostInterfaces->pnor_write(i_procId,
                             l_partitionName,l_offset, l_dataToRead,l_readSize);
-                    if (l_rc)
+                    if (l_rc != static_cast<int>(l_readSize))
                     {
                         TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice> Error"
                         " writing corrected data back to device");
@@ -448,6 +453,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                          * @moduleid   PNOR::MOD_RTPNOR_READFROMDEVICE
                          * @reasoncode PNOR::RC_PNOR_WRITE_FAILED
                          * @userdata1  rc returned from pnor_write
+                         * @userdata2  Expected size of write
                          * @devdesc    error writing corrected data back to PNOR
                          * @custdesc   Error accessing system firmware flash
                          */
@@ -455,7 +461,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           PNOR::MOD_RTPNOR_READFROMDEVICE,
                                           PNOR::RC_PNOR_WRITE_FAILED,
-                                          l_rc, 0, true);
+                                          l_rc, l_readSize, true);
                         errlCommit(l_err, PNOR_COMP_ID);
                     }
                 }
@@ -511,7 +517,7 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
             //make call into opal to write the data
             int l_rc = g_hostInterfaces->pnor_write(i_procId,
                         l_partitionName,l_offset,l_dataToWrite,l_writeSize);
-            if (l_rc)
+            if (l_rc != static_cast<int>(l_writeSize))
             {
                 TRACFCOMP(g_trac_pnor, "RtPnor::writeToDevice: pnor_write failed "
                     "proc:%d, part:%s, offset:0x%X, size:0x%X, dataPt:0x%X,"
@@ -536,6 +542,10 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
                              TWO_UINT32_TO_UINT64(l_offset, l_writeSize),
                              true);
                  break;
+            }
+            else if( l_rc != static_cast<int>(l_writeSize) )
+            {
+                TRACFCOMP( g_trac_pnor, "RtPnor::writeToDevice: only read 0x%X bytes, expecting 0x%X", l_rc, l_writeSize );
             }
         }
         else

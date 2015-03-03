@@ -51,6 +51,7 @@ namespace Util
         UTIL_LIDMGR_UNSUP_MSG        = UTIL_COMP_ID | 0x07,
         UTIL_LIDMGR_INVAL_SIZE_PNOR  = UTIL_COMP_ID | 0x08,
         UTIL_LIDMGR_UNLOAD_RC_FAIL   = UTIL_COMP_ID | 0x09,
+        UTIL_LIDMGR_NOT_FOUND        = UTIL_COMP_ID | 0x0A,
     };
 };
 

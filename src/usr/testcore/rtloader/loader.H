@@ -345,7 +345,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             PNOR::SectionId l_id = PNOR::INVALID_SECTION;
             PNOR::SectionInfo_t l_info;
             errlHndl_t l_err = NULL;
-            uint32_t l_plid = 0;
 
             do
             {
@@ -395,13 +394,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             } while (0);
 
             //commit the error
+            int rc = i_sizeBytes;
             if (l_err)
             {
-                l_plid = l_err -> plid();
                 errlCommit(l_err,CXXTEST_COMP_ID);
+                rc = -1;
             }
             TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_pnor_read");
-            return l_plid;
+            return rc;
         }
 
 
@@ -415,7 +415,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             PNOR::SectionId     l_id = PNOR::INVALID_SECTION;
             PNOR::SectionInfo_t l_info;
             errlHndl_t          l_err = NULL;
-            uint32_t            l_plid = 0;
             do {
 
                 TARGETING::Target* pnor_target =
@@ -458,13 +457,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             } while (0);
 
             //commit the error
+            int rc = i_sizeBytes;
             if (l_err)
             {
-                l_plid = l_err -> plid();
                 errlCommit (l_err, CXXTEST_COMP_ID);
+                rc = -1;
             }
             TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_pnor_write");
-            return l_plid;
+            return rc;
         }
 
         //--------------------------------------------------------------------

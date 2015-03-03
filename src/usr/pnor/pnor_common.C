@@ -188,10 +188,22 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
             ffs_hdr* l_ffs_hdr;
             if (cur_TOC == 0)
             {
+                if( !i_toc0Buffer )
+                {
+                    TRACFCOMP(g_trac_pnor, "TOC0 buffer is NULL");
+                    TOC_0_failed = true;
+                    o_TOC_used = TOC_1;
+                    continue;
+                }
                 l_ffs_hdr = (ffs_hdr*) i_toc0Buffer;
             }
             else if (cur_TOC == 1)
             {
+                if( !i_toc1Buffer )
+                {
+                    TRACFCOMP(g_trac_pnor, "TOC1 buffer is NULL");
+                    continue;
+                }
                 l_ffs_hdr = (ffs_hdr*) i_toc1Buffer;
             }
 

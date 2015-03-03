@@ -201,11 +201,12 @@ typedef struct hostInterfaces
      * @param[in] i_partitionName: name of the partition to read
      * @param[in] i_offset: offset within the partition
      * @param[out] o_data: pointer to the data read
-     * @param[in] i_sizeBytes: size of data to read
-     * @retval rc - non-zero on error
+     * @param[in] i_sizeBytes: size of o_data buffer, maximum number
+     *            of bytes to read
+     * @retval rc - negative on error, else number of bytes actually read
      */
     int (*pnor_read) (uint32_t i_proc, const char* i_partitionName,
-                   uint64_t i_offset, void* o_data, size_t i_sizeBytes);
+                      uint64_t i_offset, void* o_data, size_t i_sizeBytes);
 
     /**
      * @brief Write to Pnor
@@ -213,11 +214,12 @@ typedef struct hostInterfaces
      * @param[in] i_partitionName: name of the partition to write
      * @param[in] i_offset: offset withing the partition
      * @param[in] i_data: pointer to the data to write
-     * @param[in] i_sizeBytes: size of data to write
-     * @retval rc - non-zero on error
+     * @param[in] i_sizeBytes: size of i_data buffer, maximum number
+     *            of bytes to read
+     * @retval rc - negative on error, else number of bytes actually written
      */
     int (*pnor_write) (uint32_t i_proc, const char* i_partitionName,
-                   uint64_t i_offset, void* i_data, size_t i_sizeBytes);
+                       uint64_t i_offset, void* i_data, size_t i_sizeBytes);
 
 
     /**

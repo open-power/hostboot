@@ -31,6 +31,7 @@
 #include <vfs/vfs.H>
 #include <runtime/interface.h>
 #include <hwpf/hwp/occ/occ_common.H>
+#include <initservice/initserviceif.H>
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     iv_isLidInPnor(false), iv_lidBuffer(NULL), iv_lidSize(0),
@@ -109,7 +110,8 @@ errlHndl_t UtilLidMgr::loadLid()
             iv_lidSize = iv_lidPnorInfo.size;
             iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
         }
-        else
+        else if( g_hostInterfaces->lid_load
+                 && INITSERVICE::spBaseServicesEnabled() )
         {
             int rc = g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer,
                     &iv_lidSize);
@@ -120,15 +122,39 @@ errlHndl_t UtilLidMgr::loadLid()
                  * @moduleid        Util::UTIL_LIDMGR_RT
                  * @reasoncode      Util::UTIL_LIDMGR_RC_FAIL
                  * @userdata1       Return code from lid_load call.
+                 * @userdata2       Lid number
                  * @devdesc         Unable to load LID via host interface.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
                     Util::UTIL_LIDMGR_RT,
                     Util::UTIL_LIDMGR_RC_FAIL,
-                    rc);
+                    rc,
+                    iv_lidId,
+                    true/*SW Error*/);
+                break;
             }
-          }
+        }
+
+        // Could not find the lid anywhere
+        if( iv_lidSize == 0 )
+        {
+            /*@
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        Util::UTIL_LIDMGR_RT
+             * @reasoncode      Util::UTIL_LIDMGR_NOT_FOUND
+             * @userdata1       Lid number
+             * @devdesc         Unable to find Lid.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                             Util::UTIL_LIDMGR_RT,
+                                             Util::UTIL_LIDMGR_NOT_FOUND,
+                                             iv_lidId,
+                                             0,
+                                             true/*SW Error*/);
+            break;
+        }
     } while (0);
     return l_errl;
 }
