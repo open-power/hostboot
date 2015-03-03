@@ -49,6 +49,7 @@
 #include <sys/misc.h>
 #include <errno.h>
 
+#include <console/consoleif.H>
 // Defined in ipmidd.C
 extern trace_desc_t * g_trac_ipmi;
 #define IPMI_TRAC(printf_string,args...) \
@@ -425,7 +426,12 @@ void IpmiRP::lastChanceEventHandler(void)
         else if ( event->iv_cmd[0] == IPMI::power_off().second )
         {
             // handle the graceful shutdown message
-            IPMI_TRAC("Graceful shutdown request recieved");
+            IPMI_TRAC("Graceful shutdown request received");
+
+#ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(NULL, "IPMI: shutdown requested");
+            CONSOLE::flush();
+#endif
 
             // register for the post memory flush callback
             INITSERVICE::registerShutdownEvent(iv_msgQ,
@@ -589,6 +595,13 @@ void IpmiRP::execute(void)
                 iv_sendq.push_back(ipmi_msg->iv_msg);
 
                 iv_shutdown_msg = msg;   // Reply to this message
+
+
+#ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(NULL, "IPMI: shutdown complete");
+            CONSOLE::flush();
+#endif
+
             }
             break;
 
@@ -901,7 +914,7 @@ namespace IPMI
     }
 
     ///
-    /// @brief  Asynchronus message send
+    /// @brief  Asynchronous message send
     ///
     errlHndl_t send(const IPMI::command_t& i_cmd,
                     const size_t i_len, uint8_t* i_data,
