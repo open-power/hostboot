@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,8 +76,12 @@ use constant STACK_PREV_STACK_OFFEST => 8;
 use constant STACK_KEY_OFFSET => 16;
 use constant STACK_BLOCKPTR_OFFSET => 24;
 
+use constant MMIO_STRUCT_SIZE           => 16;
 use constant MMIO_STRUCT_SEGADDR_OFFSET => 0;
 use constant MMIO_STRUCT_SEGSIZE_OFFSET => 8;
+use constant MMIO_STRUCT_GUARDED_MASK   => 0x4000000000000000;
+use constant MMIO_STRUCT_NO_CI_MASK     => 0x8000000000000000;
+use constant MMIO_STRUCT_SIZE_MASK      => 0x3FFFFFFFFFFFFFFF;
 
 use constant BLOCK_BASE_ADDR => 0;
 use constant BLOCK_SIZE_OFFSET => 8;
@@ -890,14 +896,26 @@ sub printDeviceSegments
                 # loop through all mmio devices max of 32 per device segment.
                 while($curmmiodevice < $maxmmiodevices)
                 {
-                    my $segmentPhyAddr =::read64($mmiostructptr +
-                                                 $curmmiodevice*16 +
-                                                 MMIO_STRUCT_SEGADDR_OFFSET, 8);
+                    my $segmentPhyAddr =::read64($mmiostructptr
+                                            + $curmmiodevice*MMIO_STRUCT_SIZE
+                                            + MMIO_STRUCT_SEGADDR_OFFSET, 8);
 
-                    my $segmentSize =::read64($mmiostructptr + $curmmiodevice*16
-                                              + MMIO_STRUCT_SEGSIZE_OFFSET, 8);
-                        # Segment size is a 63 bit quantity.
-                    $segmentSize = $segmentSize & 0x7FFFFFFFFFFFFFFF;
+                    my $segmentSize =::read64($mmiostructptr
+                                            + $curmmiodevice*MMIO_STRUCT_SIZE
+                                            + MMIO_STRUCT_SEGSIZE_OFFSET, 8);
+                    use bigint;
+
+                    # DeviceSegment::devSegData.no_ci
+                    my $no_ci = (   ($segmentSize & MMIO_STRUCT_NO_CI_MASK)
+                                 == MMIO_STRUCT_NO_CI_MASK);
+
+                    # DeviceSegment::devSegData.guarded
+                    my $guarded = (   ($segmentSize & MMIO_STRUCT_GUARDED_MASK)
+                                == MMIO_STRUCT_GUARDED_MASK);
+
+                    # Segment size is a 62 bit quantity.
+                    # DeviceSegment::devSegData.size
+                    $segmentSize = ($segmentSize & MMIO_STRUCT_SIZE_MASK);
 
                     if ($segmentPhyAddr != 0)
                     {
@@ -911,7 +929,12 @@ sub printDeviceSegments
                         ::userDisplay (sprintf
                                        "          MMio Device Size:   %X\n" ,
                                        $segmentSize);
-
+                        ::userDisplay (sprintf
+                                       "          MMio no_ci flag:   %u\n" ,
+                                       $no_ci);
+                        ::userDisplay (sprintf
+                                       "          MMio guarded flag:   %u\n" ,
+                                       $guarded);
                     }
 
                     $curmmiodevice = $curmmiodevice + 1;

@@ -110,9 +110,12 @@ class VmmManager
          * @param ra[in] - Void pointer to real address to be mapped in
          * @param i_devDataSize[in] - Size of device segment block
          * @param i_nonCI[in] - Device should be mapped cacheable instead of CI
+         * @param i_guarded[in] - Whether to prevent out-of-order acces to
+         *     instructions or data in the segment.  Ignored if CI.
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        static void* devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI);
+        static void* devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI,
+            bool i_guarded);
 
         /**
          * @brief Unmap a device from the device segment
@@ -253,7 +256,9 @@ class VmmManager
         int _mmExtend( void );
 
         /** See devMap */
-        void* _devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI);
+        void* _devMap(
+            void* ra, uint64_t i_devDataSize, bool i_nonCI, bool i_guarded);
+
         /** See devUnmap */
         int _devUnmap(void* ea);
 

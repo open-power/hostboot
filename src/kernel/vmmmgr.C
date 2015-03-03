@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -86,10 +88,11 @@ void VmmManager::flushPageTable( void )
     Singleton<VmmManager>::instance()._flushPageTable();
 }
 
-void* VmmManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
+void* VmmManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI,
+    bool i_guarded)
 {
     return Singleton<VmmManager>::instance()._devMap(ra, i_devDataSize,
-                                                     i_nonCI);
+                                                     i_nonCI, i_guarded);
 }
 
 int VmmManager::devUnmap(void* ea)
@@ -222,12 +225,13 @@ int VmmManager::_mmExtend(void)
     return rc;
 }
 
-void* VmmManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
+void* VmmManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI,
+    bool i_guarded)
 {
     void* ea = NULL;
 
     lock.lock();
-    ea = SegmentManager::devMap(ra, i_devDataSize, i_nonCI);
+    ea = SegmentManager::devMap(ra, i_devDataSize, i_nonCI, i_guarded);
     lock.unlock();
 
     return ea;

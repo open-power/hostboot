@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@ using namespace Systemcalls;
 
 void* mmio_dev_map(void *ra, uint64_t i_devDataSize)
 {
-    return _syscall3(DEV_MAP, ra, (void*)i_devDataSize, (void*)0);
+    return _syscall4(DEV_MAP, ra, (void*)i_devDataSize, (void*)0, (void*)1);
 }
 
 int mmio_dev_unmap(void *ea)

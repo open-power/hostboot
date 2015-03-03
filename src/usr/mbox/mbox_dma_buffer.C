@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -183,7 +185,7 @@ void DmaBuffer::initPhysicalArea(void*& io_addr, uint64_t& o_phys)
               VMM_UNSECURE_RESERVED_MEMORY_BASEADDR;
 
     // Allocate a new VMM block for the buffer.
-    io_addr = mm_block_map(reinterpret_cast<void*>(o_phys),
+    io_addr = mm_guarded_block_map(reinterpret_cast<void*>(o_phys),
                            VmmManager::MBOX_DMA_SIZE);
         // Note: We do not plan on deleting this block, even when the buffer
         //       is destructed, because we have fundamentally changed the

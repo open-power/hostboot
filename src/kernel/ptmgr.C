@@ -903,6 +903,12 @@ void PageTableManager::setAccessBits( PageTableEntry* o_pte,
         // All others are set to 0b0010
         o_pte->WIMG = 0b0010; // Memory Coherency Required
 
+        // Turn on the guarded access permission if requested
+        if(i_accessType & GUARDED)
+        {
+            o_pte->WIMG |= 0b0001;
+        }
+
         if (i_accessType & READ_ONLY)
         {
             o_pte->pp1_2 = 0b01;  // PP=001
@@ -940,7 +946,7 @@ uint64_t PageTableManager::getAccessType( const PageTableEntry* i_pte )
     {
       return SegmentManager::CI_ACCESS;
     }
-    else if (i_pte->WIMG == 0b0010)
+    else if ( (i_pte->WIMG & 0b1110) == 0b0010)
       {
 	if (i_pte->pp1_2 == 0b00)
 	{

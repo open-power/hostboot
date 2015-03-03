@@ -137,7 +137,16 @@ void mm_tolerate_ue(uint64_t i_state)
  */
 void* mm_block_map(void* i_paddr, uint64_t i_size)
 {
-    return _syscall3(DEV_MAP, i_paddr, (void*)i_size, (void*)1);
+    return _syscall4(DEV_MAP, i_paddr, (void*)i_size, (void*)1, (void*)0);
+}
+
+/**
+ * System call to map an arbitrary physical address into the VMM with guarded
+ *     permissions to prevent out-of-order access to instructions and data
+ */
+void* mm_guarded_block_map(void* i_paddr, uint64_t i_size)
+{
+    return _syscall4(DEV_MAP, i_paddr, (void*)i_size, (void*)1, (void*)1);
 }
 
 /**

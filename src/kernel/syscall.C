@@ -535,6 +535,7 @@ namespace Systemcalls
         void *ra = (void*)TASK_GETARG0(t);
         uint64_t devDataSize = ALIGN_PAGE(TASK_GETARG1(t));
         bool cacheable = (0 != TASK_GETARG2(t));
+        bool guarded = (0 != TASK_GETARG3(t));
 
         if (TASK_GETARG0(t) & (PAGESIZE - 1)) // ensure address page alignment.
         {
@@ -547,7 +548,8 @@ namespace Systemcalls
         else
         {
             TASK_SETRTN(t,
-                        (uint64_t)VmmManager::devMap(ra,devDataSize,cacheable));
+                        (uint64_t)VmmManager::devMap(
+                            ra,devDataSize,cacheable,guarded));
         }
     }
 

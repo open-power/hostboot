@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -63,10 +65,11 @@ void SegmentManager::castOutPages(uint64_t i_type)
     Singleton<SegmentManager>::instance()._castOutPages(i_type);
 }
 
-void* SegmentManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
+void* SegmentManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI,
+    bool i_guarded)
 {
     return Singleton<SegmentManager>::instance()._devMap(ra, i_devDataSize,
-                                                         i_nonCI);
+                                                         i_nonCI, i_guarded);
 }
 
 int SegmentManager::devUnmap(void* ea)
@@ -162,7 +165,8 @@ void SegmentManager::_castOutPages(uint64_t i_type)
     }
 }
 
-void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
+void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI,
+    bool i_guarded)
 {
     void* ea = NULL;
     for (size_t i = MMIO_FIRST_SEGMENT_ID; i <= MMIO_LAST_SEGMENT_ID; i++)
@@ -170,7 +174,7 @@ void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
         if (NULL == iv_segments[i]) continue;
 
         ea = reinterpret_cast<DeviceSegment*>(iv_segments[i])->
-                devMap(ra, i_devDataSize, i_nonCI);
+                devMap(ra, i_devDataSize, i_nonCI, i_guarded);
 
         if (ea != NULL) break;
     }

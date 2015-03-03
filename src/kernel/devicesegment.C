@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,7 +75,8 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
     PageTableManager::addEntry((i_addr / PAGESIZE) * PAGESIZE,
                               (iv_mmioMap[idx].addr + device_offset) / PAGESIZE,
                               (iv_mmioMap[idx].no_ci ?
-                                    (BYPASS_HRMOR | WRITABLE) :
+                                    (BYPASS_HRMOR | WRITABLE |
+                                    ( iv_mmioMap[idx].guarded ? GUARDED : 0) ) :
                                     SegmentManager::CI_ACCESS)
                               );
     return true;
@@ -85,9 +88,12 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
  * @param ra[in] - Void pointer to real address to be mapped in
  * @param i_devDataSize[in] - Size of device segment block
  * @param i_nonCI[in] - Device should be mapped cacheable instead of CI
+ * @param i_guarded[in] - Whether to prevent out-of-order acces to
+ *     instructions or data in the segment.  Ignored if CI.
  * @return void* - Pointer to beginning virtual address, NULL otherwise
  */
-void *DeviceSegment::devMap(void *ra, uint64_t i_devDataSize, bool i_nonCI)
+void *DeviceSegment::devMap(void *ra, uint64_t i_devDataSize, bool i_nonCI,
+    bool i_guarded)
 {
     void *segBlock = NULL;
     if (i_devDataSize <= THIRTYTWO_GB)
@@ -97,6 +103,7 @@ void *DeviceSegment::devMap(void *ra, uint64_t i_devDataSize, bool i_nonCI)
             if ((0 == iv_mmioMap[i].addr) && (0 == iv_mmioMap[i].size))
             {
                 iv_mmioMap[i].no_ci = i_nonCI;
+                iv_mmioMap[i].guarded = i_guarded;
                 iv_mmioMap[i].size = i_devDataSize;
                 iv_mmioMap[i].addr = reinterpret_cast<uint64_t>(ra);
 
@@ -137,6 +144,7 @@ int DeviceSegment::devUnmap(void *ea)
                  false);
         iv_mmioMap[idx].addr = 0;
         iv_mmioMap[idx].size = 0;
+        iv_mmioMap[idx].guarded = 0;
         rc = 0;
     }
 

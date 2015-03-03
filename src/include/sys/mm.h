@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -59,6 +61,7 @@ enum PAGE_PERMISSIONS
   NO_ALLOCATE_FROM_ZERO = 0x00000020,
   NO_ACCESS = 0x00000040,
   BYPASS_HRMOR = 0x00000080,
+  GUARDED = 0x00000100,
 };
 
 
@@ -131,6 +134,18 @@ int mm_linear_map(void *i_paddr, uint64_t i_size);
  *  @return Virtual address or NULL.
  */
 void* mm_block_map(void* i_paddr, uint64_t i_size);
+
+/** @fn mm_guarded_block_map()
+ *  @brief   Allocate an arbitrary physical address into the VMM with guarded
+ *    permissions to prevent out-of-order access to instructions and data.
+ *  @note Use mm_block_unmap to unmap a region mapped using
+ *    mm_guarded_block_map.
+ *  @param[in] i_paddr - Physical address of the memory to map.
+ *  @param[in] i_size - Size of memory to map (in bytes).
+ *
+ *  @return Virtual address or NULL.
+ */
+void* mm_guarded_block_map(void* i_paddr, uint64_t i_size);
 
 /** @fn mm_block_unmap()
  *  @brief   Unallocate a block previously allocated with mm_block_map.
