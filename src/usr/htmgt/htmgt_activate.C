@@ -39,6 +39,7 @@
 
 #include <ipmi/ipmisensor.H>
 #include <sys/time.h>
+#include <console/consoleif.H>
 
 using namespace TARGETING;
 
@@ -163,6 +164,14 @@ namespace HTMGT
             l_err = occ->ipmiSensor(i_activate);
             if( l_err )
             {
+                TMGT_ERR("setOccActiveSensors failed. (OCC%d state:%d)",
+                         occ->getInstance(),
+                         i_activate);
+
+                TMGT_CONSOLE("setOccActiveSensors failed. (OCC%d state:%d)",
+                         occ->getInstance(),
+                         i_activate);
+
                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }
         }

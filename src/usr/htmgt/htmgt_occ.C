@@ -248,7 +248,8 @@ namespace HTMGT
     OccManager::OccManager()
         :iv_occMaster(NULL),
         iv_state(OCC_STATE_UNKNOWN),
-        iv_targetState(OCC_STATE_ACTIVE)
+        iv_targetState(OCC_STATE_ACTIVE),
+        iv_resetCount(0)
     {
     }
 
@@ -605,6 +606,21 @@ namespace HTMGT
             }
         }
 
+        if(false == _occNeedsReset())
+        {
+            // No occ target needs reset - increment system reset count
+            ++iv_resetCount;
+
+            TMGT_INF("resetOCCs: Incrementing system OCC reset count to %d",
+                     iv_resetCount);
+
+            if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
+            {
+                atThreshold = true;
+            }
+
+        }
+
         uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
         while(retryCount)
         {
@@ -663,7 +679,7 @@ namespace HTMGT
              */
             bldErrLog(err,
                       HTMTG_MOD_OCC_RESET,
-                      HTMGT_RC_OCC_RESET_THREHOLD,
+                      HTMGT_RC_OCC_CRIT_FAILURE,
                       0, 0, 0, 0,
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         }
@@ -672,6 +688,13 @@ namespace HTMGT
         if(err)
         {
             err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+
+            // Add level 2 support callout
+            err->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                     HWAS::SRCI_PRIORITY_MED);
+            // Add HB firmware callout
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
 
             TARGETING::Target* sys = NULL;
             TARGETING::targetService().getTopLevelTarget(sys);
@@ -683,8 +706,13 @@ namespace HTMGT
                sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
             }
 
-            TMGT_ERR("_resetOccs: Safe Mode RC: 0x%04X (OCC%d)",
+            TMGT_ERR("_resetOccs: Safe Mode (RC: 0x%04X OCC%d)",
                      cv_safeReturnCode, cv_safeOccInstance);
+
+            TMGT_CONSOLE("OCCs are not active. The system will remain in "
+                         "safe mode (RC: 0x%04x  for OCC%d)",
+                         cv_safeReturnCode,
+                         cv_safeOccInstance);
         }
 
         return err;

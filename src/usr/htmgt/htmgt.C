@@ -184,42 +184,30 @@ namespace HTMGT
 
         if (NULL != l_err)
         {
-            TMGT_ERR("OCCs not all active.  System will stay in safe mode");
+            TMGT_ERR("OCCs not all active.  Attempting OCC Reset");
             TMGT_CONSOLE("OCCs are not active (rc=0x%04X). "
-                         "System will remain in safe mode",
+                         "Attempting OCC Reset",
                          l_err->reasonCode());
-            TMGT_INF("Calling HBOCC::stopAllOCCs");
-            errlHndl_t err2 = HBOCC::stopAllOCCs();
+            TMGT_INF("Calling resetOccs");
+            errlHndl_t err2 = OccManager::resetOccs(NULL);
             if(err2)
             {
-                TMGT_ERR("stopAllOCCs() failed with 0x%04X",
+                TMGT_ERR("OccManager:;resetOccs failed with 0x%04X",
                          err2->reasonCode());
+
+                // Set original error log  as unrecoverable and commit
+                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+
+                // Commit occReset error
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
             }
-
-            // Update error log to unrecoverable and set SRC
-            // to indicate the system will remain in safe mode
-            /*@
-             * @errortype
-             * @reasoncode      HTMGT_RC_OCC_CRIT_FAILURE
-             * @moduleid        HTMGT_MOD_LOAD_START_STATUS
-             * @userdata1[0:7]  load/start completed
-             * @devdesc         OCCs did not all reach active state,
-             *                  system will be in Safe Mode
-             */
-            bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
-                      HTMGT_RC_OCC_CRIT_FAILURE,
-                      i_startCompleted, 0, 0, 1,
-                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-
-            // Add level 2 support callout
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
-                                       HWAS::SRCI_PRIORITY_MED);
-            // Add HB firmware callout
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_MED);
-
-            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            else
+            {
+                // retry worked - commit original error as informational
+                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            }
         }
 
     } // end processOccStartStatus()
@@ -229,6 +217,19 @@ namespace HTMGT
     // Notify HTMGT that an OCC has an error to report
     void processOccError(TARGETING::Target * i_procTarget)
     {
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+
+        // If the system is in safemode then can't talk to OCCs -
+        // ignore call to processOccError
+        if(sys &&
+           sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
+           safeMode)
+        {
+            return;
+        }
+
         bool polledOneOcc = false;
         OccManager::buildOccs();
 
@@ -347,29 +348,57 @@ namespace HTMGT
     // Set the OCC state
     errlHndl_t enableOccActuation(bool i_occActivation)
     {
-        occStateId targetState = OCC_STATE_ACTIVE;
-        if (false == i_occActivation)
-        {
-            targetState = OCC_STATE_OBSERVATION;
-        }
+        errlHndl_t l_err = NULL;
+        TARGETING::Target* sys = NULL;
 
-        // Set state for all OCCs
-        errlHndl_t l_err = OccManager::setOccState(targetState);
-        if (NULL == l_err)
-        {
-            TMGT_INF("enableOccActuation: OCC states updated to 0x%02X",
-                     targetState);
-        }
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
 
-        if (OccManager::occNeedsReset())
+        // If the system is in safemode then can't talk to OCCs -
+        // ignore call to enableOccActuation
+        if(sys &&
+           sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
+           safeMode)
         {
-            TMGT_ERR("enableOccActuation(): OCCs need to be reset");
-            // Don't pass failed target as OCC should have already
-            // been marked as failed during the poll.
-            errlHndl_t err2 = OccManager::resetOccs(NULL);
-            if(err2)
+            /*@
+             * @errortype
+             * @reasoncode      HTMGT_RC_OCC_CRIT_FAILURE
+             * @moduleid        HTMGT_MOD_ENABLE_OCC_ACTUATION
+             * @userdata1[0:7]  OCC activate [1==true][0==false]
+             * @devdesc         Invalid operation when OCCs are in safemode
+             */
+            bldErrLog(l_err,
+                      HTMGT_MOD_ENABLE_OCC_ACTUATION,
+                      HTMGT_RC_OCC_CRIT_FAILURE,
+                      i_occActivation, 0, 0, 1,
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        }
+        else
+        {
+            occStateId targetState = OCC_STATE_ACTIVE;
+            if (false == i_occActivation)
             {
-                ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+                targetState = OCC_STATE_OBSERVATION;
+            }
+
+            // Set state for all OCCs
+            l_err = OccManager::setOccState(targetState);
+            if (NULL == l_err)
+            {
+                TMGT_INF("enableOccActuation: OCC states updated to 0x%02X",
+                         targetState);
+            }
+
+            if (OccManager::occNeedsReset())
+            {
+                TMGT_ERR("enableOccActuation(): OCCs need to be reset");
+                // Don't pass failed target as OCC should have already
+                // been marked as failed during the poll.
+                errlHndl_t err2 = OccManager::resetOccs(NULL);
+                if(err2)
+                {
+                    ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+                }
             }
         }
 

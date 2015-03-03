@@ -507,6 +507,7 @@ namespace HTMGT
             occList_t               iv_occArray;
             occStateId              iv_state;
             occStateId              iv_targetState;
+            uint8_t                 iv_resetCount;
 
             /**
              * @brief SRC that caused system to enter safe mode

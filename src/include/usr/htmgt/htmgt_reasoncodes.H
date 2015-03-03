@@ -48,6 +48,7 @@ namespace HTMGT
         HTMGT_MOD_CHECK_OCC_RSP         = 0x92,
         HTMGT_MOD_PARSE_OCC_RSP         = 0x94,
         HTMGT_MOD_HANLDE_OCC_EXCEPTION  = 0xE0,
+        HTMGT_MOD_ENABLE_OCC_ACTUATION  = 0xE1,
     };
 
     enum htmgtReasonCode
