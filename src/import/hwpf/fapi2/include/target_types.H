@@ -68,6 +68,7 @@ namespace fapi2
         TARGET_TYPE_PERV          = 0x00200000, ///< Pervasive type
         TARGET_TYPE_PEC           = 0x00400000, ///< PEC type
         TARGET_TYPE_PHB           = 0x00800000, ///< PHB type
+        TARGET_TYPE_EL            = 0x01000000, ///< L3/L2 Caches
 
         TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
 
