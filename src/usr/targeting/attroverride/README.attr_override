@@ -1,0 +1,175 @@
+#Overview
+Hostboot software is responsible for initializing the hardware on OpenPower
+systems.
+
+
+## OpenPOWER Standalone Attribute Override tool
+
+The attribute override tool allows users to create their own custom attribute
+overrides to flash onto their system. See the Targeting Model overview in our
+[doc](https://github.com/open-power/docs/blob/master/hostboot/HostBoot_PG.md)
+for more information on this. The override tool has two main components, the
+input file and the executable that will convert the file into its binary
+representation.
+
+To use the tool, make sure to first compile hostboot in order to generate
+necessary .H files in obj/genfiles.
+
+
+###Attribute Override Text file:
+The general format is a list of targets and the corresponding attributes
+the user would like to override along with their new values.
+
+    target=<target string>
+    ATTR_ATTRIBUTE_1 <datatype> <value in hex>
+    ATTR_ATTRIBUTE_2 <datatype> <value in hex>
+    ATTR_ATTRIBUTE_3 <datatype> <value in hex> CONST
+
+
+####Examples
+
+-----------------------------------------------------------------
+       # This is a comment
+
+       CLEAR
+
+       target = k0:n0:s0:
+       ATTR_SCRATCH_UINT8_1 0x12
+       ATTR_SCRATCH_UINT32_1 0x12345678
+       ATTR_SCRATCH_UINT64_1 0x8000000000000001 CONST
+
+       target = k0:n0:s0:centaur:p06
+       ATTR_MSS_CACHE_ENABLE 0x0 CONST
+
+       target = k0:n0:s0:centaur.mba:p06:c1
+       ATTR_MSS_FREQ 0x00000640 CONST
+       ATTR_MSS_VOLT 0x00000546 CONST
+       ATTR_EFF_CEN_DRV_IMP_CNTL[0] OHM15 CONST
+       ATTR_EFF_CEN_DRV_IMP_CNTL[1] OHM15 CONST
+
+       target = k0:n0:s0:centaur.mba:pall:call
+       ATTR_MSS_DIMM_MFG_ID_CODE[0][0] 0x12345678
+       ATTR_MSS_DIMM_MFG_ID_CODE[0][1] 0x12345678
+       ATTR_MSS_DIMM_MFG_ID_CODE[1][0] 0x12345678
+       ATTR_MSS_DIMM_MFG_ID_CODE[1][1] 0x12345678
+-----------------------------------------------------------------
+
+#####Other target examples:
+
+
+    - System Target:
+        - target
+        - target = k0:n0:s0
+        - target = k0:n0:s0:
+
+    - DIMM Target
+        - target = k0:n0:s0:dimm:p06
+
+    - All p8 chips
+        - target = k0:n0:s0:p8:pall
+
+    - All MCS chiplets:
+        - target = k0:n0:s0:p8.mcs:pall:call
+
+    - Node number specified (Brazos only, for Tuleta, always use n0)
+        - target = k0:n1:s0:dimm:p06
+        -  target = k0:nall:s0:dimm:p06
+
+###Rules:
+
+    - Lines starting with "CLEAR" are an instruction to clear all current
+      overrides
+
+        -  All overrides can be cleared with a file just containing "CLEAR"
+        -  You may want to have CLEAR as the first line of an overrides file to
+           clear all overrides before applying the new set.
+
+    - Lines starting with "target = k0:n0:s0:" specify the target for all
+      following attributes until the next target line.
+
+        - The next part of the line specifies the target type
+
+            - p8.ex (EX (core) unit takes chip position and unit position)
+            - p8.mcs (MCS unit takes chip position and unit position)
+            - p8.xbus (XBUS unit takes chip position and unit position)
+            - p8.abus (ABUS unit takes chip position and unit position)
+            - centaur.mba (MBA unit takes chip position and unit position)
+            - centaur (takes chip position only)
+            - p8 (takes chip position only)
+            - dimm (takes dimm position only)
+            - else system target is assumed
+
+
+        - The next part of the line specifies the target position (for units
+        this is the parent chip position)
+
+            - :p0 or :p1 or :p511 or :pall etc (note that 'all' specifies an
+            override for all Targets of the specified type)
+
+
+        - The next part of the line specified the target unit position (only
+          applicable to targets)
+
+            - :c0 or :c1 or :call etc (note that 'all' specifies an override for
+              all Targets of the specified type)
+
+
+    - Lines starting with "ATTR_" specify attribute overrides
+
+        -  There are 2 or 3 columns, they must be separated by one or more
+           spaces
+
+           - Column 1 is the attribute name from the attribute XML file
+
+               - If the attribute is an array attribute then all elements in the
+                 array must be overridden
+
+           - Column 2 is the override value, if it is not "0x<hexval>" then it
+             is interpreted as an enumerator from the <enum> field of the
+             attribute XML file
+
+           - Column 3, if it exists is "CONST" to specify a constant override.
+             Most overrides will be const.
+
+               -  A const override is one which is always returned when a HWP
+                  gets the attribute, even if the attribute is set to a
+                  different value by HWP.
+
+               -  A non-const override is one which is cancelled when the
+                  attribute is set (effectively, a non-const override is just
+                  like setting the attribute to a value)
+
+    -  Other lines are ignored, so lines starting with "#" are ignored and can
+       be used as comments.
+
+
+###Attribute Override Compiler
+The tool is located in
+op-build/output/build/hostboot-<hostboot version>/obj/genfiles/attributeOverride
+Running the tool is done like so:
+
+./attributeOverride <input attribute override file\> [options]
+
+After the tool runs, the file attrOverride.bin will be created in obj/genfiles/.
+Make sure to add a unique extension so that you do not overwrite
+your binary sections each time you run the tool.
+i.e. attrOverride.bin.testFeatureAlpha
+####The available options are as follows:
+
+
+- '-d' - display debug logs when running tool
+- '-h' - display help text describing options and input file syntax
+- '-f' - generate binary with no ECC protection bits
+- '-t' - generate binary with ECC protection bits
+- no options - same as -t
+
+
+###Installing Attribute Overrides on a system
+
+In order to apply the overrides onto a system, you must first flash a working
+PNOR image and then you may flash your overrides.
+
+#####pflash command for overrides:
+pflash -e -f -p [your generated attribute override binary] -P ATTR_TMP
+
+
