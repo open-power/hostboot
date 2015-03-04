@@ -4408,12 +4408,11 @@ sub generate_is_dimm
          </default>
     </attribute>";
 
-            print "
                last;
             }
         }
 
-       print"
+       print "
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>$pos</default>
