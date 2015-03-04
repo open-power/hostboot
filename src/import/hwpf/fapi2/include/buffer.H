@@ -398,24 +398,23 @@ namespace fapi2
             return;
         }
 
-#if 0
         ///
         /// @brief Copy data from this buffer into an OT and right justify
-        /// @tparam OT the type of the outgoing data - defaults to T
-        /// @tparam SB Start bit to insert into - defaults to 0
-        /// @tparam SS Start bit in o_out - default value is zero
-        /// @tparam L Length of bits to copy - defaults to sizeof(OT) * 8
+        /// @tparam SS Start bit to insert into (source start)
+        /// @tparam L Length of bits to insert
+        /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed right aligned
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
-        /// @post Data is copied from specified location to o_out, right
-        /// aligned. Data is only right aligned if L < sizeof(bits_type)
         ///
-        template< typename OT = T, bits_type L = parameterTraits<OT>::bit_length,
-                  bits_type SB = 0, bits_type SS = 0 >
-        void extractFromRight(OT& o_out);
-#endif
+        template<bits_type SS, bits_type L, typename OT>
+        inline void extractToRight(OT& o_out)
+        {
+            extract<parameterTraits<OT>::bit_length - L, L, SS>(o_out);
+            return;
+        }
+
         ///@}
     };
 };
