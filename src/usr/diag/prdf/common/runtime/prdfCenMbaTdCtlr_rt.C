@@ -312,12 +312,10 @@ int32_t CenMbaTdCtlr::handleRrFo()
 
     do
     {
-        o_rc = initialize();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"initialize() failed" );
-            break;
-        }
+        // NOTE: For performance reasons, we will not call initialize() yet.
+        //       Instead, we will first query the hardware to determine if the
+        //       TD controller even needed to be involved. Then we will call
+        //       initialize(), if needed.
 
         // Check for condition which may require to start a maintenance
         // command during R/R or F/o.
@@ -351,6 +349,14 @@ int32_t CenMbaTdCtlr::handleRrFo()
 
         if ( mbaSpa->IsBitSet(0) ||  mbaSpa->IsBitSet(8) )
             break;
+
+        // Now that we know we need to use the TD controller, initialize it.
+        o_rc = initialize();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"initialize() failed" );
+            break;
+        }
 
         // Create a temporary sdc as we do not want to write separate
         // version for startBgScrub during R/R and FO
