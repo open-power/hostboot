@@ -81,9 +81,6 @@ prd_obj += prdfDumpResolution.o
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
-# framework/register
-prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfFileRegisterAccess.o)
-
 # plat/pegasus/ (non-rule plugin related)
 prd_obj += prdfPllUtils.o
 
@@ -105,6 +102,9 @@ prd_obj += prdfMain_ipl.o
 
 # framework/config/
 prd_obj += prdfMbaDomain.o
+
+# framework/register
+prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfFileRegisterAccess.o)
 
 # framework/service/
 prd_obj += prdfPlatServices_ipl.o
