@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.50 2014/12/03 19:55:07 jdsloat Exp $
+// $Id: mss_eff_config.C,v 1.51 2015/03/13 19:13:44 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,7 +45,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.50  | asaetow  |03-DEC-14| Removed string data types that are not supported.
+//   1.51  | asaetow  |13-MAR-15| Changed DRAM_AL to be CL-2 in 2N/2T mode and CL-1 in 1N/1T mode.
+//   1.50  | jdsloat  |03-DEC-14| Removed string data types that are not supported.
 //   1.49  | asaetow  |01-DEC-14| Added RDIMM SPD/VPD support for ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15 to take in SPD bits69:76 thru new VPD attribute ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15.
 //         |          |         | Added ATTR_VPD_DIMM_RCD_IBT and ATTR_VPD_DIMM_RCD_OUTPUT_TIMING merge, per meeting with Ken and Dan P.
 //         |          |         | NOTE: DO NOT pickup w/o getMBvpdTermData.C v1.18 or newer from Dan.C and Corey.
@@ -371,7 +372,7 @@ struct mss_eff_config_atts
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_type;
     uint8_t eff_custom_dimm;
-    uint8_t eff_dram_al; // Always use AL = CL - 1.
+    uint8_t eff_dram_al; // Based on 2N/2T or 1N/1T enable
     uint8_t eff_dram_asr;
     uint8_t eff_dram_bl;
     uint8_t eff_dram_banks;
@@ -1225,8 +1226,15 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     fapi::ReturnCode rc;
     const fapi::Target& TARGET_MBA = i_target_mba;
 
+    uint8_t mss_dram_2n_mode_enable;
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_2N_MODE_ENABLED, &i_target_mba, mss_dram_2n_mode_enable);
+    if(rc) return rc;
     // set select atts members to non-zero
-    p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1; // Always use AL = CL - 1.
+    if ( mss_dram_2n_mode_enable == fapi::ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE ) {
+       p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_2; // Always use AL = CL - 2 for 2N/2T mode
+    } else {
+       p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1; // Always use AL = CL - 1 for 1N/1T mode
+    }
 
     // Transfer powerdown request from system attr to DRAM attr
     uint8_t mss_power_control_requested;

@@ -129,8 +129,10 @@
     <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT</id></attribute>
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT</id></attribute>
-    <attribute><id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id></attribute>
-
+    <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
+    <attribute><id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
+    <attribute><id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
+    <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id></attribute>
     <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
@@ -274,6 +276,7 @@
     <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE</id></attribute>
     <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id></attribute>
     <attribute><id>MSS_VDDR_OVERIDE_SPD</id></attribute>
+    <attribute><id>MSS_VOLT_COMPLIANT_DIMMS</id></attribute>
     <attribute><id>PM_PFET_WORKAROUND_RUN_FLAG</id></attribute>
     <attribute><id>PM_SLEEP_ENABLE</id></attribute>
     <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
@@ -1433,6 +1436,7 @@
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>ECID</id></attribute>
+    <attribute><id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id></attribute>
     <attribute>
         <!-- Centaur memory buffer chips do not have SCOM accessible FSI GP regs -->
         <id>FSI_GP_REG_SCOM_ACCESS</id>

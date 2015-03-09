@@ -211,6 +211,14 @@
         <id>REDUNDANT_CLOCKS</id>
         <default>0x01</default>
     </attribute>
+    <attribute>
+        <id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
+        <default>5500</default>
+    </attribute>
     <!-- End System Attributes from MRW -->
     <attribute>
         <id>BOOT_FREQ_MHZ</id>
