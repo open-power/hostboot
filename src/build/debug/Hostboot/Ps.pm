@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +24,8 @@
 #
 # IBM_PROLOG_END_TAG
 use strict;
+
+use Hostboot::VirtToPhys;
 
 package Hostboot::Ps;
 use Exporter;
@@ -49,8 +53,18 @@ use constant PS_TRACKER_ENTRYPOINT_OFFSET => 8 + PS_TRACKER_WAITINFO_OFFSET;
 use constant PS_TASK_STATE_OFFSET => 8*43;
 use constant PS_TASK_STATEEXTRA_OFFSET => 8 + PS_TASK_STATE_OFFSET;
 
+use bigint;
+
 sub main
 {
+    my ($packName,$args) = @_;
+
+    my $withBacktrace = 0;
+    if(defined $args->{"with-backtrace"})
+    {
+        $withBacktrace = 1;
+    }
+
     # Find symbol containing kernel list of task objects.
     #   (Tasks who's parent is the kernel)
     my ($symAddr, $symSize) = ::findSymbolAddress(PS_TASKMGR_SYMBOLNAME);
@@ -62,13 +76,119 @@ sub main
 
     # Pass address of list to 'displayList' function.
     $symAddr += PS_TASKMGR_TRACKER_LIST_OFFSET;
-    displayList($symAddr,0);
+    displayList($symAddr,0,$withBacktrace);
+}
+
+# @sub displayStackTrace
+#
+# Displays a task's stack trace, including frame number, symbol, offset within
+# symbol
+#
+# @param[in] i_taskAddr Task address
+# @param[in] i_level Level of indent for stack trace
+#
+sub displayStackTrace
+{
+    my ( $i_taskAddr, $i_level ) = @_;
+
+    my $off = 0;
+
+    # Knobs for the VMM package
+    my $vmmDebug = 0;
+    my $vmmDisplaySPTE = 0;
+    my $vmmQuiet = 1;
+
+    use constant FRAME_TO_LR_OFFSET => 16;
+    use constant MAX_STACK_FRAMES => 25;
+
+    # Read in the task struct, which mirrors struct task_t in Hostboot
+    # d prefix means "display", i.e. "dstack_ptr" is the display version of
+    # "stack_ptr".  d-prefixed values are not part of task_t
+    my %task = ();
+    $task{cpu} = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{stack_ptr} = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{dstack_ptr} = sprintf "0x%X", $task{context_t}{stack_ptr};
+    $task{context_t}{nip} = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{dnip} = sprintf "0x%X",$task{context_t}{nip};
+
+    foreach(my $gpr=0; $gpr<32; ++$gpr)
+    {
+        $task{context_t}{"gprs$gpr"} =
+           ::read64($i_taskAddr + $off); $off+=8;
+        $task{context_t}{"dgprs$gpr"} =
+            sprintf "0x%X",$task{context_t}{"gprs$gpr"};
+
+        # For now, only interpret gpr1 as a virtual address having to be
+        # converted to a physical address.  This gives the frame pointer
+        if($gpr==1)
+        {
+            $task{context_t}{"pgprs$gpr"}
+                = Hostboot::_DebugFrameworkVMM::getPhysicalAddr(
+                    $task{context_t}{"gprs$gpr"}, $vmmDebug, $vmmDisplaySPTE,
+                    $vmmQuiet);
+            $task{context_t}{"dpgprs$gpr"} =
+                sprintf "0x%x",$task{context_t}{"pgprs$gpr"} ;
+        }
+    }
+
+    $task{context_t}{lr} = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{dlr} = sprintf "0x%X",$task{context_t}{lr} ;
+    $task{context_t}{cr}              = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{ctr}             = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{xer}             = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{msr_mask}        = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{fp_context}      = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{tid}             = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{affinity_pinned} = ::read64($i_taskAddr + $off); $off+=8;
+    $task{context_t}{state}           = ::read8( $i_taskAddr + $off); $off+=1;
+
+    # At this point we cached the whole task struct, for any later application.
+    # Now dump the stack trace
+
+    my $curFrame = $task{context_t}{"pgprs1"} ;
+    my $curLinkReg = $task{context_t}{lr};
+    my ($entryPointName, $symOff) = ::findSymbolWithinAddrRange($curLinkReg);
+
+    my $prefix = makeTabs($i_level);
+
+    print sprintf("%s     F[%02d]: %s : 0x%08X\n",
+        $prefix, 0, $entryPointName,$symOff);
+
+    for(my $i=0; $i<MAX_STACK_FRAMES; ++$i)
+    {
+        my $nextFrame = ::read64($curFrame);
+        my $linkReg = ::read64($curFrame + FRAME_TO_LR_OFFSET);
+
+        $nextFrame = Hostboot::_DebugFrameworkVMM::getPhysicalAddr(
+            $nextFrame, $vmmDebug, $vmmDisplaySPTE,$vmmQuiet);
+        if (   ($nextFrame eq Hostboot::_DebugFrameworkVMM::NotFound)
+            || ($nextFrame eq Hostboot::_DebugFrameworkVMM::NotPresent))
+        {
+            last;
+        }
+
+        ($entryPointName,$symOff) = ::findSymbolWithinAddrRange($linkReg);
+
+        if($i!=0)
+        {
+            if($entryPointName eq "UNKNOWN")
+            {
+                last;
+            }
+            print sprintf("%s     F[%02d]: %s : 0x%08X\n",
+                $prefix, $i, $entryPointName,$symOff);
+        }
+
+        $curFrame = $nextFrame;
+    }
+
+    print $prefix . "\n";
 }
 
 # Display a list of task objects.
 sub displayList
 {
-    my ($listAddr, $level) = @_;
+    my ($listAddr, $level, $withBacktrace) = @_;
 
     my $firstDisplayed = 0;
 
@@ -86,7 +206,7 @@ sub displayList
         }
 
         # Display tracker object for this node.
-        displayTracker($node, $level);
+        displayTracker($node, $level, $withBacktrace);
         # Follow pointer to the next node.
         $node = ::read64(PS_TRACKER_PREV_OFFSET + $node);
     }
@@ -94,7 +214,7 @@ sub displayList
 
 sub displayTracker
 {
-    my ($trackAddr, $level) = @_;
+    my ($trackAddr, $level, $withBacktrace) = @_;
 
     # Read TID.
     my $tid = ::read16(PS_TRACKER_TID_OFFSET + $trackAddr);
@@ -148,6 +268,12 @@ sub displayTracker
     ::userDisplay makeTabs($level)."-+ TID $tid   State: $state$stateExtra\n";
     ::userDisplay makeTabs($level)." |     $entryPointName [$moduleName]\n";
 
+    # Display stack trace for each task if specifically requested
+    if($withBacktrace)
+    {
+        displayStackTrace($taskAddr, $level+1);
+    }
+
     # Display list of children tasks.
     displayList($trackAddr + PS_TRACKER_CHILDREN_LIST_OFFSET, $level + 1);
 }
@@ -171,5 +297,9 @@ sub helpInfo
     my %info = (
         name => "Ps",
         intro => ["Displays a tree of all tasks and their current state."],
+        options => {
+                    "with-backtrace" => ["Additionally display backtrace for",
+                                         "each task."],
+                   },
     );
 }

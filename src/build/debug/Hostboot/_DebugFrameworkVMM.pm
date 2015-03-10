@@ -381,6 +381,13 @@ sub getPhysicalAddr
     my $vaddr = shift;
     my $debug = shift;
     my $displaySPTE = shift;
+    my $quiet = shift;
+
+    # The quiet flag suppresses some annoying traces when used by other tools
+    if(!defined $quiet)
+    {
+        $quiet = 0;
+    }
 
     my $phyAddr = NotFound;
 
@@ -629,7 +636,10 @@ sub getPhysicalAddr
     }
     else
     {
-        ::userDisplay ("  \nVirtualToPhy: ERROR.. VA Address is out of range.\n");
+        if(!$quiet)
+        {
+            ::userDisplay ("  \nVirtualToPhy: ERROR.. VA Address is out of range.\n");
+        }
     }
 
     if ($debug)

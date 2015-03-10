@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,11 +52,12 @@ our @EXPORT = ( 'callToolModule', 'callToolModuleHelp', 'callToolModuleHelpInfo'
                 'read64', 'read32', 'read16', 'read8', 'readStr',
                 'write64', 'write32', 'write16', 'write8',
                 'translateHRMOR',
-                'getIstepList'
+                'getIstepList',
+                'findSymbolWithinAddrRange',
               );
 
 our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
-     %addressSymbol, %symbolSize);
+     %addressSymbol, %symbolSize, %addrRangeHash);
 our ($parsedModuleFile, %moduleAddress);
 our (%toolOpts);
 
@@ -64,6 +67,8 @@ BEGIN
     %symbolAddress = ();
     %symbolTOC = ();
     %addressSymbol = ();
+    %addrRangeHash = ();
+
     %symbolSize = ();
 
     $parsedModuleFile = 0;
@@ -283,6 +288,9 @@ sub parseSymbolFile
         $addressSymbol{$addr} = $name;
         $addressSymbol{$tocAddr} = $name;
 
+        $addrRangeHash{$addr}{name} = $name;
+        $addrRangeHash{$addr}{size} = $size;
+
         # Use only the first definition of a symbol.
         #    This is useful for constructors where we only want to call the
         #    'in-charge' version of the constructor.
@@ -349,6 +357,46 @@ sub findSymbolByAddress
     parseSymbolFile();
 
     return $addressSymbol{$addr};
+}
+
+# @sub findSymbolWithinAddrRange
+#
+# Searches a syms file for the symbol name for a given address that might not be
+# the beginning of the symbol, and returns the symbol name and offset within
+# symbol
+#
+# @param[in] i_addr Address to locate, within some symbol
+# @return On success, string name of symbol + offset within symbol.  On failure,
+#     UNKNOWN + 0
+#
+sub findSymbolWithinAddrRange
+{
+    my $i_addr = shift;
+
+    parseSymbolFile();
+
+    my $found = 0;
+    my $symName = undef;
+    my $symOff = 0;
+    foreach my $sym (sort { $a <=> $b } keys %addrRangeHash)
+    {
+        if(   ($i_addr >= $sym)
+           && ($i_addr <= ($sym+$addrRangeHash{$sym}{size})) )
+        {
+            $symName = $addrRangeHash{$sym}{name};
+            $symOff = ($i_addr - $sym);
+            last;
+        }
+
+    }
+
+    if(!defined $symName)
+    {
+        $symName = "UNKNOWN";
+        $symOff = 0;
+    }
+
+    return ($symName , $symOff) ;
 }
 
 # @sub parseModuleFile <INTERNAL ONLY>
