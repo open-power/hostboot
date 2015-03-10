@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.33 2014/05/14 21:04:08 asaetow Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.35 2014/05/28 14:46:21 asaetow Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,9 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#  1.35     |asaetow |05/28/14| Removed v1.34 from working since we will not be GAing with those settings.
+#           |        |        | NOTE: Re-evaluation in progress on PLL settings for SP1.
+#  1.34     |asaetow |05/22/14| Changed ADR/DP18 PLL charge pump setting from 33x3=99uA to 66x2=132uA. Based on Qual FA sample data's potential DTMOAT leakage suspect Lot7DVBT.
 #  1.33     |asaetow |05/14/14| Changed ADR/DP18 VCO bit61 from 0b1 to 0b0 and PLL_TUNEF bit54 from 0b1 to 0b0 to dampen noise. Based on Qual FA sample data.
 #           |        |        | Note bit61 is VCO low range from >700MHz to <700MHz.
 #           |        |        | Note bit54 is Cap from 2.5pF to 1.0pF.

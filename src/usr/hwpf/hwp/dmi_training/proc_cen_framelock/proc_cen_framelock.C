@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_cen_framelock.C,v 1.27 2014/06/01 16:20:59 baysah Exp $
+// $Id: proc_cen_framelock.C,v 1.29 2015/01/08 16:04:52 bwieman Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,6 +40,10 @@
 // Change Log
 // Version | who      |Date     | Comment
 // -----------------------------------------------------------------------------
+//         |          |         |
+//   1.29  | bwieman  |08-jan-14| revert of 1.28
+//   1.28  | baysah   |12-DEC-14| Masked MCIFIR(26) MCIFIRQ_POWERBUS_PROTOCOL_ERROR due to CAPI defect HW281374
+//         |          |         |
 //   1.27  | baysah   |09-MAY-14| Added Delay in status register polling routine
 //         |          |         |
 //   1.25  | baysah   |11-APR-14| Changed MBI internal scom FIRs from masked to recoverable error per Marc Gollub
@@ -2078,7 +2082,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
     l_ecmdRc |= mci_data.setBit(24);    //Recoverable MC Internal Error
     l_ecmdRc |= mci_data.setBit(25);    //Non-Recoverable MC Internal Error (xstop)
-    l_ecmdRc |= mci_data.setBit(26);    //PowerBus Protocol Error (xstop)
+    l_ecmdRc |= mci_data.setBit(26);    //PowerBus Protocol Error (xstop)                //1.29 UNDONE Mask for CAPI defect HW281374
     l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PB
     l_ecmdRc |= mci_data.setBit(28);    //Multiple RCMD or CRESP active
     l_ecmdRc |= mci_data.setBit(29);    //Inband Bar Hit with Incorrect TTYPE (xstop)
@@ -2118,7 +2122,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.clearBit(23);    //Replay Buffer Overrun
     l_ecmdRc |= mci_data.clearBit(24);    //Recoverable MC Internal Error
     l_ecmdRc |= mci_data.clearBit(25);    //Non-Recoverable MC Internal Error (xstop)
-    l_ecmdRc |= mci_data.clearBit(26);    //PowerBus Protocol Error (xstop)
+    l_ecmdRc |= mci_data.clearBit(26);    //PowerBus Protocol Error (xstop)            //1.29 UNDONE Mask for CAPI defect HW281374
     l_ecmdRc |= mci_data.clearBit(27);    //MCS Command List Timeout due to PB
     l_ecmdRc |= mci_data.clearBit(28);    //Multiple RCMD or CRESP active
     l_ecmdRc |= mci_data.clearBit(29);    //Inband Bar Hit with Incorrect TTYPE (xstop)

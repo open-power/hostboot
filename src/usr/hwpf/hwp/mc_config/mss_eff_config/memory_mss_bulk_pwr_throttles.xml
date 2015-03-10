@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -21,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.4 2014/03/07 00:25:55 pardeik Exp $ -->
+<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.5 2014/06/02 13:11:07 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_bulk_pwr_throttles.C -->
 <!-- // *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com -->
 <!-- // *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com -->

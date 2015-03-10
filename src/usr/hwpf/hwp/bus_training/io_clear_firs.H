@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_clear_firs.H,v 1.8 2013/08/01 12:57:19 varkeykv Exp $
+// $Id: io_clear_firs.H,v 1.11 2014/07/22 12:35:23 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 2012, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.11  |jaswamin|07/22/14|  Fixed the address
 //   1.7   |jaswmain|03/26/13|  Removed DOS line endings
 //   1.6   |jaswamin|03/25/13|  Removed 64 bit fir clearing function.
 //   1.5   |varkeykv|03/20/13|  Additional moved FIR functions from clear firs to training files
