@@ -569,7 +569,7 @@ rule MbsFir
     RECOVERABLE: MBSFIR & ~MBSFIR_MASK & ~MBSFIR_ACT0 &  MBSFIR_ACT1;
 };
 
-group gMbsFir filter singlebit, secondarybits( 9, 12, 26, 29, 33, 34 )
+group gMbsFir filter singlebit, secondarybits( 3, 9, 12, 26, 29, 33, 34 )
 {
     /** MBSFIR[0]
      *  MBS_FIR_REG_HOST_PROTOCOL_ERROR
