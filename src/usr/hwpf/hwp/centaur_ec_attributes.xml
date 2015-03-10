@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/xml/attribute_info/centaur_ec_attributes.xml,v $                  -->
+<!-- $Source: src/usr/hwpf/hwp/centaur_ec_attributes.xml $                  -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,7 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.30 2014/10/30 14:50:22 jprispol Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.31 2015/01/14 16:30:24 jdsloat Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -459,5 +459,23 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
+
+  <attribute>
+    <id>ATTR_CENTAUR_EC_DISABLE_VDDR_DYNAMIC_VID</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on EC less than DD2.0 (TRUE), otherwise FALSE.   If true, mss_volt_vddr_offset will use the value from mss_volt instead of the calculated dynamic vid value, even if vddr dynamic vid is enabled in the MRW.  Centaur DD1.X chips need vmem voltage to be at 1.35V.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
 
 </attributes>

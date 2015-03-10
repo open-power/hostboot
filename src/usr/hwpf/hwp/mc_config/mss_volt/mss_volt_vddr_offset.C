@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vddr_offset.C,v 1.20 2014/10/06 15:56:56 sglancy Exp $
+// $Id: mss_volt_vddr_offset.C,v 1.24 2015/01/21 18:13:30 sglancy Exp $
 /* File mss_volt_vddr_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.24   | sglancy  | 01/21/15 | Updated for addition of ATTR_CENTAUR_EC_DISABLE_VDDR_DYNAMIC_VID
+//  1.23   | sglancy  | 11/20/14 | Updated for rounding
+//  1.22   | sglancy  | 11/20/14 | Fixed compile issue
+//  1.21   | sglancy  | 11/19/14 | Fixed a truncation issue
 //  1.20   | sglancy  | 10/06/14 | Added in checks for going over voltage limits
 //  1.19   | sglancy  | 09/12/14 | Removed references to EFF attributes
 //  1.18   | sglancy  | 09/11/14 | Fixed bugs and fixed typos
@@ -99,9 +103,11 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     uint8_t dram_gen , cur_dram_gen;    
     bool dram_gen_found = false;
     uint8_t enable, is_functional;
+    uint8_t ec_disable_attr;
     uint8_t num_non_functional = 0;
     uint8_t percent_uplift,percent_uplift_idle;
     uint32_t vddr_max_limit_mv;
+    uint32_t param_vddr_voltage_mv;
     std::vector<fapi::Target>  l_mbaChiplets;
     std::vector<fapi::Target>  l_dimm_targets;
     
@@ -201,6 +207,29 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     if(l_rc) return l_rc;
     if(enable == fapi::ENUM_ATTR_MSS_VDDR_OFFSET_DISABLE_DISABLE){
        FAPI_INF("ATTR_MSS_VDDR_OFFSET_DISABLE is set to be disabled. Exiting....., %d",enable);
+       return l_rc;
+    }
+    
+    //loops checks if any MC's have the disable attribute set, if so, set to MSS_VOLT value
+    //if not, continue with the code
+    for(uint32_t i = 0; i < i_targets.size();i++) {
+       //reads in the attribute
+       l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_DISABLE_VDDR_DYNAMIC_VID,&i_targets[i],ec_disable_attr); 
+       if(l_rc) return l_rc;
+       //disable is set, read mss_volt and exit out of the code
+       if(ec_disable_attr) break;
+    }
+    
+    //disable is set, sets the enable attribute based upon MSS_VOLT attribute
+    if(ec_disable_attr) {
+       FAPI_INF("Found Centaur with EC disable attribute set. Setting ATTR_MSS_VDDR_OFFSET based upon ATTR_MSS_VOLT");
+       //sets the output attributes
+       for(uint32_t i = 0; i< i_targets.size();i++) {
+          l_rc = FAPI_ATTR_GET(ATTR_MSS_VOLT,&i_targets[i],param_vddr_voltage_mv); 
+          if(l_rc) return l_rc;
+    	  l_rc = FAPI_ATTR_SET(ATTR_MSS_VDDR_OFFSET,&i_targets[i],param_vddr_voltage_mv); 
+    	  if(l_rc) return l_rc;
+       }//end for 
        return l_rc;
     }
     
@@ -319,12 +348,12 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
        //found an active centaur
        //multiply by total number of active logical dimms
        if(is_functional == fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
-           var_power_on_vddr += num_dimms_to_add*((vpd_master_power_slope*volt_util_active/10000+vpd_master_power_intercept)*num_logical_dimms*(100+percent_uplift)/100);
+           var_power_on_vddr += (int)(num_dimms_to_add*(((float)vpd_master_power_slope*volt_util_active/10000+vpd_master_power_intercept)*num_logical_dimms*(100+percent_uplift)/100));
 	   FAPI_INF("var_power_on_vddr: %d cW vpd_master_power_slope: %d cW volt_util_active: %d per 10k vpd_master_power_intercept %d cW num_logical_dimms %d percent_uplift %d %%",var_power_on_vddr,vpd_master_power_slope,volt_util_active,vpd_master_power_intercept,num_logical_dimms,percent_uplift);
        }
        //centaur must be inactive
        else  {
-           var_power_on_vddr += num_dimms_to_add*((vpd_master_power_slope*volt_util_inactive/10000+vpd_master_power_intercept)*num_logical_dimms*(100+percent_uplift_idle)/100);
+            var_power_on_vddr += (int)(num_dimms_to_add*(((float)vpd_master_power_slope*volt_util_inactive/10000+vpd_master_power_intercept)*num_logical_dimms*(100+percent_uplift_idle)/100));
 	   FAPI_INF("var_power_on_vddr: %d cW vpd_master_power_slope: %d cW volt_util_inactive: %d per 10k vpd_master_power_intercept %d cW num_logical_dimms %d percent_uplift_idle %d %%",var_power_on_vddr,vpd_master_power_slope,volt_util_inactive,vpd_master_power_intercept,num_logical_dimms,percent_uplift_idle);
        }
        
@@ -342,7 +371,7 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     FAPI_INF("var_power_on_vddr: %d cW volt_slope: %d uV/W volt_intercept: %d mV",var_power_on_vddr,volt_slope,volt_intercept);
     
     //computes and converts the voltage offset into mV
-    uint32_t param_vddr_voltage_mv = (500 + var_power_on_vddr*volt_slope/100) / 1000 + volt_intercept;
+    param_vddr_voltage_mv = (500 + var_power_on_vddr*volt_slope/100) / 1000 + volt_intercept;
     FAPI_INF("param_vddr_voltage_mv: %d mV",param_vddr_voltage_mv);
     //found that the VDDR voltage is over the maximum limit
     if(param_vddr_voltage_mv > vddr_max_limit_mv) {
