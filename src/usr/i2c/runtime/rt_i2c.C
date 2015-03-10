@@ -76,15 +76,49 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
 
+    // i2c addresses are 7 bits so shift that right 1 bit
+    args.devAddr >>= 1;
+
     // These are additional parms in the case an offset is passed in
     // via va_list, as well
+    args.offset_length = va_arg( i_args, uint64_t);
 
-    uint64_t offset_length = va_arg( i_args, uint64_t);
-    uint64_t offset_buffer = 0;
-
-    if ( offset_length != 0 )
+    uint32_t offset = 0;
+    if ( args.offset_length != 0 )
     {
-        offset_buffer = va_arg(i_args, uint64_t);
+        args.offset_buffer = reinterpret_cast<uint8_t*>
+                                             (va_arg(i_args, uint64_t));
+        if ( args.offset_length == 1 )
+        {
+            offset = *(args.offset_buffer);
+        }
+        else if ( args.offset_length == 2 )
+        {
+            offset = *(reinterpret_cast<uint16_t*>(args.offset_buffer));
+        }
+        else if ( args.offset_length == 4 )
+        {
+            offset = *(reinterpret_cast<uint32_t*>(args.offset_buffer));
+        }
+        else
+        {
+            /*@
+            * @errortype
+            * @moduleid     I2C_PERFORM_OP
+            * @reasoncode   I2C_RUNTIME_INVALID_OFFSET_LENGTH
+            * @userdata1    Offset length
+            * @userdata2    Op type
+            * @devdesc      I2C offset length is invalid
+            */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          I2C_PERFORM_OP,
+                                          I2C_RUNTIME_INVALID_OFFSET_LENGTH,
+                                          args.offset_length,
+                                          i_opType);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
+        }
     }
 
     int rc = 0;
@@ -113,8 +147,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                     (
                         proc_engine_port,   // Master Chip/Engine/Port
                         args.devAddr,       // Dev Addr
-                        offset_length,      // Offset size
-                        offset_buffer,      // Offset
+                        args.offset_length, // Offset size
+                        offset,             // Offset
                         io_buflen,          // Buffer length
                         io_buffer           // Buffer
                     );
@@ -133,8 +167,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                     (
                         proc_engine_port,   // Master Chip/Engine/Port
                         args.devAddr,       // Dev Addr
-                        offset_length,      // Offset size
-                        offset_buffer,      // Offset
+                        args.offset_length, // Offset size
+                        offset,             // Offset
                         io_buflen,          // Buffer length
                         io_buffer           // Buffer
                     );

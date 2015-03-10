@@ -84,6 +84,7 @@ enum i2cReasonCode
     I2C_ARBITRATION_LOST_ONLY_FOUND     = I2C_COMP_ID | 0x0C,   // Bus Arbi lost found in status reg
     I2C_RUNTIME_INTERFACE_ERR           = I2C_COMP_ID | 0x0D,   // Read/write unavailable at runtime
     I2C_RUNTIME_ERR                     = I2C_COMP_ID | 0x0E,   // Failed run-time operation
+    I2C_RUNTIME_INVALID_OFFSET_LENGTH   = I2C_COMP_ID | 0x0F,   // Offset length of invalid size
 };
 
 
