@@ -1339,6 +1339,16 @@ PLUGIN_MEMORY_MPE_ERROR( 1, 7 )
 
 #undef PLUGIN_MEMORY_MPE_ERROR
 
+//------------------------------------------------------------------------------
+
+int32_t calloutInterface_dmi( ExtensibleChip * i_membChip,
+                              STEP_CODE_DATA_STRUCT & io_sc )
+{
+    CalloutUtil::calloutBusInterface( i_membChip, MRU_LOW );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Membuf, calloutInterface_dmi );
+
 } // end namespace Membuf
 
 } // end namespace PRDF

@@ -524,6 +524,7 @@ actionclass calloutAbus0Interface
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
     callout(connected(TYPE_ABUS, 0), MRU_MEDA);
     callout(connected_peer(TYPE_ABUS, 0), MRU_MEDA);
+    funccall("calloutInterface_abus0");
 };
 
 /** Callout the ABUS 1 interface */
@@ -532,6 +533,7 @@ actionclass calloutAbus1Interface
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
     callout(connected(TYPE_ABUS, 1), MRU_MEDA);
     callout(connected_peer(TYPE_ABUS, 1), MRU_MEDA);
+    funccall("calloutInterface_abus1");
 };
 
 /** Callout the ABUS 2 interface */
@@ -540,6 +542,7 @@ actionclass calloutAbus2Interface
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
     callout(connected(TYPE_ABUS, 2), MRU_MEDA);
     callout(connected_peer(TYPE_ABUS, 2), MRU_MEDA);
+    funccall("calloutInterface_abus2");
 };
 
 /** Callout the ABUS 0 interface, threshold 1 */

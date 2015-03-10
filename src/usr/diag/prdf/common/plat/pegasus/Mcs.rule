@@ -518,7 +518,7 @@ actionclass calloutDmiBus
 {
     calloutSelfMedA;
     callout(connected(TYPE_MEMBUF), MRU_MEDA);
-    calloutDmiBusSymFru;
+    funccall("calloutInterface_dmi");
 };
 
 /** Clear MBS SecondaryBits and calloutDmiBusTh1 */
@@ -578,7 +578,7 @@ actionclass calloutDmiBusSelfLowConnMed
 {
     calloutSelfLow;
     callout(connected(TYPE_MEMBUF), MRU_MED);
-    calloutDmiBusSymFru;
+    funccall("calloutInterface_dmi");
     threshold1;
 };
 

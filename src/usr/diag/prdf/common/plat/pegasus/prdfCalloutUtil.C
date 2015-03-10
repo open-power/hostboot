@@ -30,8 +30,11 @@
 #include <iipServiceDataCollector.h>
 #include <prdfCenAddress.H>
 #include <prdfCenMarkstore.H>
+#include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
+
+#include <hwas/common/hwasCallout.H>
 
 using namespace TARGETING;
 
@@ -219,6 +222,164 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
     }
 
     return o_list;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getBusEndpoints( ExtensibleChip * i_chip,
+                         TargetHandle_t o_rxTrgt, TargetHandle_t o_txTrgt,
+                         TYPE i_busType, uint32_t i_busPos )
+{
+    #define PRDF_FUNC "[CalloutUtil::getBusEndpoints] "
+
+    int32_t rc = SUCCESS;
+
+    o_rxTrgt = NULL;
+    o_txTrgt = NULL;
+
+    TargetHandle_t chipTrgt = i_chip->GetChipHandle();
+    TYPE           chipType = getTargetType(chipTrgt);
+
+    if ( TYPE_PROC == chipType )
+    {
+        o_rxTrgt = getConnectedChild( chipTrgt, i_busType, i_busPos );
+
+        if ( TYPE_ABUS == i_busType || TYPE_XBUS == i_busType )
+        {
+            o_txTrgt = getConnectedPeerTarget( o_rxTrgt );
+        }
+        else if ( TYPE_MCS == i_busType )
+        {
+            o_txTrgt = getConnectedChild( o_rxTrgt, TYPE_MEMBUF, 0 );
+        }
+    }
+    else if ( TYPE_MCS == chipType )
+    {
+        o_rxTrgt = chipTrgt;
+        o_txTrgt = getConnectedChild( o_rxTrgt, TYPE_MEMBUF, 0 );
+    }
+    else if ( TYPE_MEMBUF == chipType )
+    {
+        o_rxTrgt = chipTrgt;
+        o_txTrgt = getConnectedParent( o_rxTrgt, TYPE_MCS );
+    }
+
+    // Note that all of the 'getConnected' functions above do proper parameter
+    // checking and will return NULL if anything is wrong. So this is the only
+    // NULL check we actually need in this function.
+
+    if ( NULL == o_rxTrgt || NULL == o_txTrgt )
+    {
+        PRDF_ERR( PRDF_FUNC"i_chip:0x%08x o_rxTrgt:0x%08x o_txTrgt:0x%08x "
+                  "i_busType:%d i_busPos:%d", getHuid(chipTrgt),
+                  getHuid(o_rxTrgt), getHuid(o_txTrgt), i_busType, i_busPos );
+        rc = FAIL;
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t calloutBusInterface( TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
+                             PRDpriority i_priority )
+{
+    #define PRDF_FUNC "[CalloutUtil::calloutBusInterface] "
+
+    int32_t rc = SUCCESS;
+
+    do
+    {
+        // Check for valid targets.
+        if ( NULL == i_rxTrgt || NULL == i_txTrgt )
+        {
+            PRDF_ERR( PRDF_FUNC"Given target(s) are NULL" );
+            rc = FAIL; break;
+        }
+
+        // Get the HWAS bus type.
+        HWAS::busTypeEnum hwasType;
+
+        TYPE rxType = getTargetType(i_rxTrgt);
+        TYPE txType = getTargetType(i_txTrgt);
+
+        if ( TYPE_ABUS == rxType && TYPE_ABUS == txType )
+        {
+            hwasType = HWAS::A_BUS_TYPE;
+        }
+        else if ( TYPE_XBUS == rxType && TYPE_XBUS == txType )
+        {
+            hwasType = HWAS::X_BUS_TYPE;
+        }
+        else if ( (TYPE_MCS    == rxType && TYPE_MEMBUF == txType) ||
+                  (TYPE_MEMBUF == rxType && TYPE_MCS    == txType) )
+        {
+            hwasType = HWAS::DMI_BUS_TYPE;
+        }
+        else
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported target types" );
+            rc = FAIL; break;
+        }
+
+        // Get the global error log.
+        errlHndl_t errl = NULL;
+        errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
+        if ( NULL == errl )
+        {
+            PRDF_ERR( PRDF_FUNC"Failed to get the global error log" );
+            rc = FAIL; break;
+        }
+
+        // Callout this bus interface.
+        PRDF_ADD_BUS_CALLOUT( errl, i_rxTrgt, i_txTrgt, hwasType, i_priority );
+
+    } while(0);
+
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( PRDF_FUNC"i_rxTrgt:0x%08x i_txTrgt:0x%08x i_priority:%d",
+                  getHuid(i_rxTrgt), getHuid(i_txTrgt), i_priority );
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t calloutBusInterface( ExtensibleChip * i_chip, PRDpriority i_priority,
+                             TYPE i_busType, uint32_t i_busPos )
+{
+    #define PRDF_FUNC "[CalloutUtil::calloutBusInterface] "
+
+    int32_t rc = SUCCESS;
+
+    do
+    {
+        TargetHandle_t rxTrgt = NULL; TargetHandle_t txTrgt = NULL;
+
+        rc = getBusEndpoints( i_chip, rxTrgt, txTrgt, i_busType, i_busPos );
+        if ( SUCCESS != rc ) break;
+
+        rc = calloutBusInterface( rxTrgt, txTrgt, i_priority );
+        if ( SUCCESS != rc ) break;
+
+    } while(0);
+
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( PRDF_FUNC"i_chip:0x%08x i_busType:%d i_busPos:%d "
+                  "i_priority:%d", i_chip->GetId(), i_busType, i_busPos,
+                  i_priority );
+    }
+
+    return rc;
 
     #undef PRDF_FUNC
 }

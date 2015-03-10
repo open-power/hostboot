@@ -115,6 +115,59 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
 TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
                                                uint8_t i_port );
 
+/**
+ * @brief Will return the bus endpoint targets based in the given information.
+ *
+ *   Supported configurations:
+ *     i_chip     i_busType       i_busPos      o_rxTrgt        o_txTrgt
+ *     ------     -----------     --------      -------------   -------------
+ *     PROC       TYPE_ABUS       0-2           ABUS target     ABUS target
+ *     PROC       TYPE_XBUS       0-3           XBUS target     XBUS target
+ *     PROC       TYPE_MCS        0-7           MCS target      MEMBUF target
+ *     MCS        n/a             n/a           MCS target      MEMBUF target
+ *     MEMBUF     n/a             n/a           MEMBUF target   MCS target
+ *
+ * @param i_chip     Chip or unit on the RX side of the bus.
+ * @param o_rxTrgt   The RX target, NULL on failure.
+ * @param o_txTrgt   The TX target, NULL on failure.
+ * @param i_busType  Bus type.
+ * @param i_busPos   Bus position.
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ *
+ */
+int32_t getBusEndpoints( ExtensibleChip * i_chip,
+                         TARGETING::TargetHandle_t o_rxTrgt,
+                         TARGETING::TargetHandle_t o_txTrgt,
+                         TARGETING::TYPE i_busType = TARGETING::TYPE_NA,
+                         uint32_t i_busPos = 0 );
+
+/**
+ * @brief  Will add target bus interface endpoints and all parts in between the
+ *         endpoints to the global error log in RasServices.
+ * @param  i_rxTrgt   The RX target.
+ * @param  i_txTrgt   The TX target.
+ * @param  i_priority Callout priority (default MRU_LOW).
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+int32_t calloutBusInterface( TARGETING::TargetHandle_t i_rxTrgt,
+                             TARGETING::TargetHandle_t i_txTrgt,
+                             PRDpriority i_priority = MRU_LOW );
+
+/**
+ * @brief  Will add target bus interface endpoints and all parts in between the
+ *         endpoints to the global error log in RasServices.
+ * @note   See function getBusEndpoints() for parameter rules.
+ * @param  i_chip     Chip or unit on the RX side of the bus.
+ * @param  i_priority Callout priority (default MRU_LOW).
+ * @param  i_busType  Bus type.
+ * @param  i_busPos   Bus position.
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+int32_t calloutBusInterface( ExtensibleChip * i_chip,
+                             PRDpriority i_priority = MRU_LOW,
+                             TARGETING::TYPE i_busType = TARGETING::TYPE_NA,
+                             uint32_t i_busPos = 0 );
+
 } // end namespace CalloutUtil
 
 } // end namespace PRDF

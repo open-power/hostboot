@@ -141,10 +141,6 @@ actionclass callout2ndLvlMed
 actionclass callout2ndLvlLow
 { callout(procedure(NextLevelSupport_ENUM), MRU_LOW); };
 
-/** Callout the DMI bus symbolic FRU */
-actionclass calloutDmiBusSymFru
-{ callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW); };
-
 /** Callout self with  medium priority but don't gard it */
 actionclass calloutSelfMedNoGard
 { callout(MRU_MED, NO_GARD); };

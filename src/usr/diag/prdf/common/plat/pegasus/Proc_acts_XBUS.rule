@@ -685,7 +685,7 @@ actionclass calloutXbus0Interface
 {
     callout(connected(TYPE_XBUS, 0), MRU_MEDA);
     callout(connected_peer(TYPE_XBUS, 0), MRU_MEDA);
-    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("calloutInterface_xbus0");
 };
 
 /** Callout the XBUS 1 interface */
@@ -693,7 +693,7 @@ actionclass calloutXbus1Interface
 {
     callout(connected(TYPE_XBUS, 1), MRU_MEDA);
     callout(connected_peer(TYPE_XBUS, 1), MRU_MEDA);
-    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("calloutInterface_xbus1");
 };
 
 /** Callout the XBUS 2 interface */
@@ -701,7 +701,7 @@ actionclass calloutXbus2Interface
 {
     callout(connected(TYPE_XBUS, 2), MRU_MEDA);
     callout(connected_peer(TYPE_XBUS, 2), MRU_MEDA);
-    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("calloutInterface_xbus2");
 };
 
 /** Callout the XBUS 3 interface */
@@ -709,7 +709,7 @@ actionclass calloutXbus3Interface
 {
     callout(connected(TYPE_XBUS, 3), MRU_MEDA);
     callout(connected_peer(TYPE_XBUS, 3), MRU_MEDA);
-    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("calloutInterface_xbus3");
 };
 
 /** Callout the XBUS 0 interface, threshold 1 */

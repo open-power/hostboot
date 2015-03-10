@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,6 +181,13 @@
                 (i_deconfigState == HWAS::DECONFIG ?            \
                    HWAS::DELAYED_DECONFIG : i_deconfigState),   \
                 i_gardErrType);
+
+/**
+ * @brief Add bus callout user data section to an existing error log
+ */
+#define PRDF_ADD_BUS_CALLOUT( io_errl, i_ep1, i_ep2, i_busType, i_priority )  \
+  io_errl->addBusCallout( i_ep1, i_ep2, i_busType, \
+                          (const HWAS::callOutPriority)i_priority );
 
 /**
  * @brief Process's pending deconfig and GARD service actions

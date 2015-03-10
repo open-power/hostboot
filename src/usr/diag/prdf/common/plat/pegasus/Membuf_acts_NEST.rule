@@ -1261,7 +1261,7 @@ actionclass calloutDmiBus
 {
     calloutSelfMedA;
     callout(connected(TYPE_MCS), MRU_MEDA);
-    calloutDmiBusSymFru;
+    funccall("calloutInterface_dmi");
 };
 
 /** Handles MCS Chnl XSTOP if present otherwise handles MBIFIR Replay Timeout */

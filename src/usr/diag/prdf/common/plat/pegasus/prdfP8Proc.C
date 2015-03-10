@@ -766,6 +766,37 @@ PRDF_PLUGIN_DEFINE( Proc, combinedResponseCallout );
 
 //------------------------------------------------------------------------------
 
+#define PLUGIN_BUS_INTERFACE_CALLOUT( BUS, TYPE, POS ) \
+int32_t calloutInterface_##BUS##POS( ExtensibleChip * i_chip, \
+                                     STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    CalloutUtil::calloutBusInterface(i_chip, MRU_LOW, TYPE, POS); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( Proc, calloutInterface_##BUS##POS );
+
+PLUGIN_BUS_INTERFACE_CALLOUT( abus, TYPE_ABUS, 0 )
+PLUGIN_BUS_INTERFACE_CALLOUT( abus, TYPE_ABUS, 1 )
+PLUGIN_BUS_INTERFACE_CALLOUT( abus, TYPE_ABUS, 2 )
+
+PLUGIN_BUS_INTERFACE_CALLOUT( xbus, TYPE_XBUS, 0 )
+PLUGIN_BUS_INTERFACE_CALLOUT( xbus, TYPE_XBUS, 1 )
+PLUGIN_BUS_INTERFACE_CALLOUT( xbus, TYPE_XBUS, 2 )
+PLUGIN_BUS_INTERFACE_CALLOUT( xbus, TYPE_XBUS, 3 )
+
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 0 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 1 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 2 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 3 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 4 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 5 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 6 )
+PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 7 )
+
+#undef PLUGIN_BUS_INTERFACE_CALLOUT
+
+//------------------------------------------------------------------------------
+
 /**
  * @brief   When not in MNFG mode, clear the service call flag so that
  *          thresholding will still be done, but no visible error log committed.
@@ -877,6 +908,10 @@ PLUGIN_CALLOUT_PHB( 0 )
 PLUGIN_CALLOUT_PHB( 1 )
 
 #undef PLUGIN_CALLOUT_PHB
+
+//------------------------------------------------------------------------------
+// Misc plugins
+//------------------------------------------------------------------------------
 
 /**
   * @brief  checks if proc is Venice chip.

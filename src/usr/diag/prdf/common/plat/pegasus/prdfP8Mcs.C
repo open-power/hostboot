@@ -36,6 +36,7 @@
 #include <UtilHash.H>
 
 // Pegasus includes
+#include <prdfCalloutUtil.H>
 #include <prdfCenMbaCaptureData.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfLaneRepair.H>
@@ -365,6 +366,15 @@ int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
 }
 PRDF_PLUGIN_DEFINE( Mcs, handleMirrorAction );
 
+//------------------------------------------------------------------------------
+
+int32_t calloutInterface_dmi( ExtensibleChip * i_mcsChip,
+                              STEP_CODE_DATA_STRUCT & io_sc )
+{
+    CalloutUtil::calloutBusInterface( i_mcsChip, MRU_LOW );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Mcs, calloutInterface_dmi );
 
 } // end namespace Mcs
 } // end namespace PRDF
