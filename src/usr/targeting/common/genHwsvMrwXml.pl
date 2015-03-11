@@ -259,6 +259,7 @@ push @systemAttr,
     "MNFG_TH_CEN_MBA_RT_RCE_PER_RANK",
                                    $reqPol->{'mnfg_th_cen_mba_rt_rce_per_rank'},
     "MNFG_TH_CEN_L4_CACHE_CES", $reqPol->{'mnfg_th_cen_l4_cache_ces'},
+    "OPT_MEMMAP_GROUP_POLICY", $reqPol->{'memmap_group_policy'},
 ];
 
 
@@ -335,8 +336,6 @@ $optTargPolicies{'MRW_DDR3_VDDR_MAX_LIMIT'}{MRW_NAME}
     = "mem_ddr3_vddr_max_limit" ;
 $optTargPolicies{'MRW_DDR4_VDDR_MAX_LIMIT'}{MRW_NAME}
     = "mem_ddr4_vddr_max_limit" ;
-$optTargPolicies{'OPT_MEMMAP_GROUP_POLICY'}{MRW_NAME}
-    = "opt_memmap_group_policy" ;
 
 foreach my $policy ( keys %optTargPolicies )
 {
