@@ -1791,8 +1791,8 @@ namespace SBE
                                         reinterpret_cast<void*>(SBE_IMG_VADDR),
                                         ((io_sbeState.seeprom_side_to_update ==
                                          EEPROM::SBE_PRIMARY ) ?
-                                            PNOR::SBE_SEEPROM0 :
-                                            PNOR::SBE_SEEPROM1  ),
+                                            SBE_SEEPROM0 :
+                                            SBE_SEEPROM1  ),
                                         PNOR::WORKING,
                                         imageWasUpdated );
 
