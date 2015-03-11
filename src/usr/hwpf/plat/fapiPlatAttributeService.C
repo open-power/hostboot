@@ -58,10 +58,13 @@
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <hwpf/hwp/winkle_ring_accessors/getL3DeltaDataAttr.H>
 #include <fapiAttributeIds.H>
+#include <hwas/common/hwasCommon.H>
+
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
 // supported HWPF attributes lists attributes handled by Hostboot
 #include <fapiAttributePlatCheck.H>
+
 
 //******************************************************************************
 // Implementation
@@ -1239,6 +1242,7 @@ fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
 {
     fapi::ReturnCode l_rc;
     TARGETING::Target * l_pTarget = NULL;
+    o_enable = 0;
 
     // Get the Targeting Target
     l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
@@ -1271,10 +1275,20 @@ fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
                 o_enable = 1;
                 break;
             case fapi::ATTR_PROC_X_ENABLE:
-                // The enable flag reflects the state of the pervasive chiplet,
-                //  NOT the bus logic, so always return true since we don't
-                //  support partial good on the XBUS chiplet
-                o_enable = 1;
+                // Need to support having the X bus chiplet partial good
+                // Look at the saved away PG data
+                TARGETING::ATTR_CHIP_REGIONS_TO_ENABLE_type l_chipRegionData;
+                l_rc = FAPI_ATTR_GET(ATTR_CHIP_REGIONS_TO_ENABLE, i_pFapiTarget,
+                                     l_chipRegionData);
+                if (l_rc) {
+                    FAPI_ERR("fapi_attr_get( ATTR_CHIP_REGIONS_TO_ENABLE ) failed. With rc = 0x%x",
+                             (uint32_t) l_rc );
+                    break;
+                }
+                else if (l_chipRegionData[HWAS::VPD_CP00_PG_XBUS_INDEX] != 0)
+                {
+                    o_enable = 0x1;
+                }
                 break;
             default:
                 o_enable = 0;
