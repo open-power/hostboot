@@ -148,7 +148,11 @@ my $mruAttr = parse_xml_file($mru_ids_file);
 # Process the system-policy MRW file
 #------------------------------------------------------------------------------
 my $system_policy_file = open_mrw_file($mrwdir, "${sysname}-system-policy.xml");
-my $sysPolicy = parse_xml_file($system_policy_file);
+my $sysPolicy = parse_xml_file($system_policy_file,
+    forcearray=>['proc_r_loadline_vdd','proc_r_distloss_vdd',
+        'proc_vrm_voffset_vdd','proc_r_loadline_vcs','proc_r_distloss_vcs',
+        'proc_vrm_voffset_vcs']);
+
 my $reqPol = $sysPolicy->{"required-policy-settings"};
 
 my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
@@ -207,12 +211,6 @@ push @systemAttr,
     "PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY",
         $reqPol->{'pm_resonant_clock_high_band_upper_frequency'}->{content},
     "PM_SPIPSS_FREQUENCY", $reqPol->{'pm_spipss_frequency'}->{content},
-    "PROC_R_LOADLINE_VDD", $reqPol->{'proc_r_loadline_vdd'},
-    "PROC_R_DISTLOSS_VDD", $reqPol->{'proc_r_distloss_vdd'},
-    "PROC_VRM_VOFFSET_VDD", $reqPol->{'proc_vrm_voffset_vdd'},
-    "PROC_R_LOADLINE_VCS", $reqPol->{'proc_r_loadline_vcs'},
-    "PROC_R_DISTLOSS_VCS", $reqPol->{'proc_r_distloss_vcs'},
-    "PROC_VRM_VOFFSET_VCS", $reqPol->{'proc_vrm_voffset_vcs'},
     "MEM_MIRROR_PLACEMENT_POLICY", $placement,
     "MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT",
         $reqPol->{'dimm_power_curve_percent_uplift'},
@@ -262,6 +260,34 @@ push @systemAttr,
     "OPT_MEMMAP_GROUP_POLICY", $reqPol->{'memmap_group_policy'},
 ];
 
+my %procLoadline = ();
+$procLoadline{PROC_R_LOADLINE_VDD}{sys}  = $reqPol->{'proc_r_loadline_vdd' }[0];
+$procLoadline{PROC_R_DISTLOSS_VDD}{sys}  = $reqPol->{'proc_r_distloss_vdd' }[0];
+$procLoadline{PROC_VRM_VOFFSET_VDD}{sys} = $reqPol->{'proc_vrm_voffset_vdd'}[0];
+$procLoadline{PROC_R_LOADLINE_VCS}{sys}  = $reqPol->{'proc_r_loadline_vcs' }[0];
+$procLoadline{PROC_R_DISTLOSS_VCS}{sys}  = $reqPol->{'proc_r_distloss_vcs' }[0];
+$procLoadline{PROC_VRM_VOFFSET_VCS}{sys} = $reqPol->{'proc_vrm_voffset_vcs'}[0];
+
+my $optPol = $sysPolicy->{"optional-policy-settings"};
+if(defined $optPol->{'loadline-overrides'})
+{
+    foreach my $attr (keys %procLoadline)
+    {
+        my $mrwPolicy = lc $attr;
+        foreach my $pol (@ {$optPol->{'loadline-overrides'}{$mrwPolicy}} )
+        {
+            if(defined $pol->{target})
+            {
+                if(defined $procLoadline{$attr}{ $pol->{target} })
+                {
+                    die "Multiple overrides of $attr specified for same target "
+                        . "proc $pol->{target}\n";
+                }
+                $procLoadline{$attr}{ $pol->{target} } = $pol->{content} ;
+            }
+        }
+    }
+}
 
 if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')
 {
@@ -3245,7 +3271,25 @@ sub generate_proc
     </attribute>\n";
     }
 
-    print "    </targetInstance>\n";
+    my $nXpY = "n" . $node . "p" . $proc;
+    foreach my $attr (keys %procLoadline)
+    {
+        my $val;
+        if(defined $procLoadline{$attr}{ $nXpY })
+        {
+            $val = $procLoadline{$attr}{ $nXpY };
+        }
+        else
+        {
+            $val = $procLoadline{$attr}{sys};
+        }
+        print "    <attribute>\n";
+        print "        <id>$attr</id>\n";
+        print "        <default>$val</default>\n";
+        print "    </attribute>\n";
+    }
+
+    print "</targetInstance>\n";
 
 }
 

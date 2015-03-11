@@ -226,30 +226,6 @@
         <default>0xa</default>
     </attribute>
     <attribute>
-        <id>PROC_R_LOADLINE_VDD</id>
-        <default>0x23a</default>
-    </attribute>
-    <attribute>
-        <id>PROC_R_DISTLOSS_VDD</id>
-        <default>0x140</default>
-    </attribute>
-    <attribute>
-        <id>PROC_VRM_VOFFSET_VDD</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PROC_R_LOADLINE_VCS</id>
-        <default>0x23a</default>
-    </attribute>
-    <attribute>
-        <id>PROC_R_DISTLOSS_VCS</id>
-        <default>0xdac</default>
-    </attribute>
-    <attribute>
-        <id>PROC_VRM_VOFFSET_VCS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>MEM_MIRROR_PLACEMENT_POLICY</id>
         <default>0</default><!-- NORMAL -->
     </attribute>
@@ -702,6 +678,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -1945,6 +1945,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p1 EX units -->
@@ -3185,6 +3209,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -4427,6 +4475,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p3 EX units -->
@@ -5668,6 +5740,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p4 EX units -->
@@ -6878,6 +6974,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p5 EX units -->
@@ -8086,6 +8206,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p6 EX units -->
@@ -9293,6 +9437,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
         </default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 

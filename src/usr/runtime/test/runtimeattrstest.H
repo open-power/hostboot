@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -88,13 +90,14 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         }
         bool freq_found = false;
 
-        fapi::ATTR_PROC_R_LOADLINE_VDD_Type loadline = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_PROC_R_LOADLINE_VDD,NULL,loadline);
+        fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL_Type vpdMinLevel = 0;
+        l_rc = FAPI_ATTR_GET(
+            ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL,NULL,vpdMinLevel);
         if( l_rc )
         {
-            TS_FAIL("Error getting fapi::ATTR_PROC_R_LOADLINE_VDD");
+            TS_FAIL("Error getting fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL");
         }
-        bool loadline_found = false;
+        bool vpdMinLevel_found = false;
 
         uint64_t attr = 0;
         while( headers[attr].id != hsvc_attr_header_t::NO_ATTRIBUTE )
@@ -120,24 +123,28 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                     }
                 }
             }
-            else if( headers[attr].id == fapi::ATTR_PROC_R_LOADLINE_VDD )
+            else if(   headers[attr].id
+                    == fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL )
             {
-                loadline_found = true;
+                vpdMinLevel_found = true;
                 if( headers[attr].sizeBytes !=
-                    sizeof(fapi::ATTR_PROC_R_LOADLINE_VDD_Type) )
+                    sizeof(fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL_Type) )
                 {
                     TRACFCOMP( g_trac_runtime, "size=%.16X", headers[attr].sizeBytes );
-                    TS_FAIL("Size of fapi::ATTR_PROC_R_LOADLINE_VDD data is wrong");
+                    TS_FAIL("Size of fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL "
+                        "data is wrong");
                 }
                 else
                 {
-                    fapi::ATTR_PROC_R_LOADLINE_VDD_Type* loadline_act =
-                      reinterpret_cast<fapi::ATTR_PROC_R_LOADLINE_VDD_Type*>
+                    fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL_Type*
+                        vpdMinLevel_act = reinterpret_cast<
+                            fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL_Type*>
                       (beginning+headers[attr].offset);
-                    if( *loadline_act != loadline )
+                    if( *vpdMinLevel_act != vpdMinLevel )
                     {
-                        TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", loadline, *loadline_act );
-                        TS_FAIL("fapi::ATTR_PROC_R_LOADLINE_VDD data is wrong");
+                        TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", vpdMinLevel, *vpdMinLevel_act );
+                        TS_FAIL("fapi::ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL data "
+                            "is wrong");
                     }
                 }
             }
@@ -154,9 +161,10 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         {
             TS_FAIL("Never found FREQ_PB in system attributes");
         }
-        if( !loadline_found )
+        if( !vpdMinLevel_found )
         {
-            TS_FAIL("Never found ATTR_PROC_R_LOADLINE_VDD in system attributes");
+            TS_FAIL("Never found ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL in system "
+                "attributes");
         }
 
         TRACFCOMP( g_trac_runtime, "testVerifySystemAttributes> finish" );

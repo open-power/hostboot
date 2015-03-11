@@ -141,12 +141,6 @@
     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
     <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
     <attribute><id>FREQ_CORE_MAX</id></attribute>
     <attribute><id>CPM_TURBO_BOOST_PERCENT</id></attribute>
     <!-- End pm_plat_attributes.xml -->
@@ -525,7 +519,13 @@
     </attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
-     <attribute><id>HOT_PLUG_POWER_CONTROLLER_INFO</id></attribute>
+    <attribute><id>HOT_PLUG_POWER_CONTROLLER_INFO</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
 </targetType>
 
 <targetType>

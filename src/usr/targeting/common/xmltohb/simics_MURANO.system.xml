@@ -222,30 +222,6 @@
         <default>0xa</default>
     </attribute>
     <attribute>
-        <id>PROC_R_LOADLINE_VDD</id>
-        <default>0x23a</default>
-    </attribute>
-    <attribute>
-        <id>PROC_R_DISTLOSS_VDD</id>
-        <default>0x140</default>
-    </attribute>
-    <attribute>
-        <id>PROC_VRM_VOFFSET_VDD</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PROC_R_LOADLINE_VCS</id>
-        <default>0x23a</default>
-    </attribute>
-    <attribute>
-        <id>PROC_R_DISTLOSS_VCS</id>
-        <default>0xdac</default>
-    </attribute>
-    <attribute>
-        <id>PROC_VRM_VOFFSET_VCS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>MEM_MIRROR_PLACEMENT_POLICY</id>
         <default>0</default><!-- NORMAL -->
     </attribute>
@@ -740,6 +716,30 @@
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>1000,1000,0,400,0,0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -1631,6 +1631,30 @@
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p1 EX units -->
@@ -2518,6 +2542,30 @@
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>1000,1000,0,400,0,0</default>
     </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p2 EX units -->
@@ -3398,6 +3446,30 @@
         <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
