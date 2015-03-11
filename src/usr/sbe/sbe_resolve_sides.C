@@ -123,12 +123,21 @@ errlHndl_t resolveProcessorSbeSeeproms()
         }
         else
         {
-            TRACUCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
-                       "Do Nothing in SBE_UPDATE_INDEPENDENT mode with FSP-"
+            TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
+                       "Do Nothing in SBE_UPDATE_SEQUENTIAL mode with FSP-"
                        "services enabled or running in simics");
              break;
         }
 #endif
+
+
+        // Don't run this function in simics
+        if ( Util::isSimicsRunning() )
+        {
+            TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
+                       "Do Nothing in SBE_UPDATE_INDEPENDENT mode in simics");
+             break;
+        }
 
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
