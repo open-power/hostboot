@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid_decode.C,v 1.9 2014/02/19 13:41:29 bellows Exp $
+// $Id: mss_get_cen_ecid_decode.C,v 1.10 2015/02/03 15:08:48 sglancy Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.10  | sglancy  |03-FEB-15| Fixed bugs surrounding the ATTR_CENTAUR_BLUEWATERFALL_NWELL_BROKEN_CHECK_FLAG update
 //   1.9   | bellows  |17-FEB-14| RAS Review Comments
 //   1.8   | bellows  |14-OCT-13| One more sprintf update to make this hostboot/cronus agnostic
 //   1.7   | bellows  |08-OCT-13| Made update so it compiles with cronus + hostboot
@@ -128,12 +129,12 @@ extern "C" {
 
     if(i_user_info.io_ec < 0x20)
     {
-
       if(!i_user_info.o_nwell_misplacement) chip_version = 1.01;
       if(!i_user_info.o_bluewaterfall_broken) chip_version=1.10;
-
     }
-
+    else {
+       chip_version=2.00;
+    }
 
     if(!(i_user_info.i_user_defined & CSV))
     {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.37 2014/11/03 17:40:02 jprispol Exp $
+// $Id: mss_get_cen_ecid.C,v 1.41 2015/02/11 15:26:08 janssens Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -41,6 +41,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.41  | janssens |11-FEB-15| Fixed compile bug
+//   1.40  | sglancy  |11-FEB-15| Fixed Firmware compile bug
+//   1.39  | sglancy  |10-FEB-15| Removed hardcoding of centaur version and removed erroneous FAPI_ERR statement
+//   1.38  | sglancy  |03-FEB-15| Fixed bugs surrounding the ATTR_CENTAUR_BLUEWATERFALL_NWELL_BROKEN_CHECK_FLAG update
 //   1.37  | jprispol |03-NOV-14| Moved bluewaterfall/nwell variable declarations
 //   1.36  | jprispol |28-OCT-14| Updated bluewaterfall/nwell broken attribute name
 //   1.34  | jprispol |24-OCT-14| Replaced privileged fapi attribute call
@@ -123,6 +127,10 @@ using namespace fapi;
         return rc;
     }
 
+    if(l_bluewaterfall_nwell_broken) ecid_struct.io_ec = 0x10;
+    else ecid_struct.io_ec = 0x20;
+    FAPI_INF("Centaur EC version 0x%02x",ecid_struct.io_ec);
+    
     if(ecid_struct.valid) {
 
       rc = mss_parse_ecid(ecid_struct.io_ecid,
@@ -244,7 +252,7 @@ using namespace fapi;
       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_NWELL_MISPLACEMENT" );
       return rc;
     }
-
+    
    // mark HWP exit
     FAPI_IMP("Exiting mss_get_cen_ecid....");
     return rc;
