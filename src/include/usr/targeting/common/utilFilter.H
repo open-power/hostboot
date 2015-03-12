@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -258,6 +260,15 @@ const Target * getParentChip( const Target * i_pChiplet );
  */
 const Target * getExChiplet( const Target * i_pCoreChiplet );
 
+/**
+ * @brief return the Core target of the specified input EX chiplet
+ *
+ * @parm[in]  i_pExChiplet, EX chiplet target for retrieving the
+ *            Core target
+ *
+ * @return Core target pointer or NULL if error
+ */
+const Target * getCoreChiplet( const Target * i_pExChiplet );
 
 /**
  * @brief Return a list of all cards in a system

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -454,6 +456,35 @@ const Target * getExChiplet( const Target * i_pCoreChiplet )
 
     return l_pExChiplet;
 }
+
+const Target * getCoreChiplet( const Target * i_pExChiplet )
+{
+    const Target * l_pCoreChiplet = NULL;
+
+    // Create a Class/Type/Model predicate to look for Core chiplet of the input
+    // ex (i.e. the ex's child)
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_UNIT);
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_coreList;
+
+    // The core is an immediate child of the ex
+    TARGETING::targetService().getAssociated(l_coreList, i_pExChiplet,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::IMMEDIATE, &l_predicate);
+
+    if (l_coreList.size() == 1)
+    {
+        l_pCoreChiplet = l_coreList[0];
+    }
+    else
+    {
+        TARG_ERR("Number of Core chiplets is not 1, but %d", l_coreList.size());
+    }
+
+    return l_pCoreChiplet;
+}
+
 
 
 void getPeerTargets(

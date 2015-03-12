@@ -35,6 +35,7 @@
 #include <targeting/common/utilFilter.H>
 #include <ipmi/ipmi_reasoncodes.H>
 #include <endian.h>
+
 extern trace_desc_t * g_trac_ipmi;
 
 namespace SENSOR
@@ -1057,52 +1058,63 @@ namespace SENSOR
         switch( l_type )
         {
 
-            case TARGETING::TYPE_PROC:
-            case TARGETING::TYPE_CORE:
+            case TARGETING::TYPE_SYS:
+                {
+                    TRACDCOMP(g_trac_ipmi, "returning the \"System Event\" sensor\n");
+                    l_sensor_number = TARGETING::UTIL::getSensorNumber(
+                            i_pTarget,
+                            TARGETING::SENSOR_NAME_SYSTEM_EVENT );
+                    break;
+                }
+
+            case TARGETING::TYPE_NODE:
+                {
+
+                    TRACDCOMP(g_trac_ipmi, "return backplane fault sensor\n");
+                    l_sensor_number = TARGETING::UTIL::getSensorNumber(
+                            i_pTarget,
+                            TARGETING::SENSOR_NAME_BACKPLANE_FAULT );
+                    break;
+                }
+
             case TARGETING::TYPE_DIMM:
             case TARGETING::TYPE_MEMBUF:
-            {
-                l_sensor_number =  StatusSensor(i_pTarget).getSensorNumber();
+            case TARGETING::TYPE_PROC:
+            case TARGETING::TYPE_CORE:
+                {
+                    l_sensor_number =
+                                StatusSensor(i_pTarget).getSensorNumber();
+                    break;
+                }
 
-                break;
-            }
+            case TARGETING::TYPE_EX:
+                {
+                    // sensor number attribute is associated with the core
+                    const TARGETING::Target * targ = getCoreChiplet(i_pTarget);
 
-            case TARGETING::TYPE_OCC:
-            {
-                 // should return the processor associated with this OCC
-                TARGETING::ConstTargetHandle_t proc = getParentChip( i_pTarget);
+                    l_sensor_number = getFaultSensorNumber( targ );
 
-                 // we should get the processor as the parent here
-                 assert(i_pTarget,"OCC target failed to return parent proc");
+                    break;
+                }
 
-                 l_sensor_number = getFaultSensorNumber( proc );
-
-                break;
-            }
             default:
-            {
-                TARGETING::TargetHandle_t l_sys;
+                {
 
-                // get the "system error" sensor number associated with the
-                // system target.
-                TARGETING::targetService().getTopLevelTarget(l_sys);
+                    TARGETING::ConstTargetHandle_t targ =
+                                                getParentChip( i_pTarget);
 
-               l_sensor_number = TARGETING::UTIL::getSensorNumber(l_sys,
-                       TARGETING::SENSOR_NAME_SYSTEM_EVENT );
-
-                break;
-            }
-
+                    l_sensor_number = getFaultSensorNumber( targ );
+                }
         }
 
-        TRACDCOMP(g_trac_ipmi,"<<getFaultSensorNumber() returning sensor number %d,");
+        TRACDCOMP(g_trac_ipmi,"<<getFaultSensorNumber() returning sensor number %#x", l_sensor_number);
 
         return l_sensor_number;
     }
 
     // interface to retrieve the APSS channel sensor numbers.
     errlHndl_t getAPSSChannelSensorNumbers(
-                        const uint16_t (* &o_sensor_numbers)[16])
+            const uint16_t (* &o_sensor_numbers)[16])
     {
 
         TARGETING::TargetHandle_t l_sys;
