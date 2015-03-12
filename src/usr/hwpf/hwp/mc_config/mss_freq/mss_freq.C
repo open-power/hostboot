@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,9 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.29 2014/12/10 23:05:37 jdsloat Exp $
+// $Id: mss_freq.C,v 1.30 2015/01/29 20:28:38 jdsloat Exp $
 /* File mss_freq.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
+//------------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2007
+// *! All Rights Reserved -- Property of IBM
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : mss_freq.C
 // *! DESCRIPTION : Tools for centaur procedures
@@ -67,6 +71,7 @@
 //  1.27   | jdsloat  | 03/12/14 | Fixed inf loop bug associated with edit 1.26
 //  1.28   | jdsloat  | 04/30/14 | Fixed a divide by 0 error opened up by RAS review Edits -- Error HW callouts v1.25
 //  1.29   | jdsloat  | 12/10/14 | Fixed 1333 speed limitation for config/ Habenero
+//  1.30   | jdsloat  | 01/29/14 | Fixed 1600 speed limitation for DDR4
 
 // Add continues to logerrors to lines 650, 560.  IN order to avoid possible future problems.
 //
@@ -638,7 +643,14 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 
         // Impose configuration limitations
         // Single Drop RDIMMs Cnfgs cannot run faster than 1333
-        if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(l_dimm_freq_min > 1333))
+        // DDR4 min speed 1600 and Cen no longer supports 1866.
+        if (l_spd_dram_dev_type == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4)
+        {
+            l_dimm_freq_min = 1600;
+            l_spd_min_tck_max = 1250;
+            FAPI_INF( "DDR4/Centaur limitation. Centaur no longer handles 1866 and 1600 is min speed of DDR4.  New Freq: %d", l_dimm_freq_min); 
+        }
+        else if ((module_type_group_1 == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(l_dimm_freq_min > 1333))
         {
             l_dimm_freq_min = 1333;
             l_spd_min_tck_max = 1500;
@@ -658,14 +670,6 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
             l_spd_min_tck_max = 1875;
             FAPI_INF( "Dual Drop RDIMM with more than 8 Rank Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
         }
-        // DDR4 min speed 1600 and Cen no longer supports 1866.
-        else if (l_spd_dram_dev_type == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4)
-        {
-            l_dimm_freq_min = 1600;
-            l_spd_min_tck_max = 1250;
-            FAPI_INF( "DDR4/Centaur limitation. Centaur no longer handles 1866 and 1600 is min speed of DDR4.  New Freq: %d", l_dimm_freq_min); 
-        }
-
 
         if ( l_spd_min_tck_max == 0)
         {
@@ -1015,5 +1019,4 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
     //all done.
     return l_rc;
 }
-
 
