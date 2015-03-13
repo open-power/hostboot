@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.42 2014/11/18 18:08:49 anoo Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.44 2015/03/16 17:54:25 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -544,34 +544,58 @@ ReturnCode proc_get_attributes(const Target& i_target,
             l_rc = FAPI_ATTR_GET(attr_name, target, attr->attr_assign); \
             if (l_rc) break; \
             FAPI_INF("%-60s = 0x%08x %u", #attr_name, attr->attr_assign, attr->attr_assign);
+            
+    // This macro is in place to to deal with the movement of attribute placement
+    // from SYSTEM to PROC_CHIP per SW298278 hhile allowing for this procedure 
+    // to still operate in system that continue store attributes at the SYSTEM level.
+    // This is done by trying the passed target first; if it doesn't succeed, the 
+    // SYSTEM level is attempted.  Failure of both will cause a break.
+    #define DATABLOCK_GET_ATTR_CHECK_PROC(attr_name, target, attr_assign) \
+            l_rc = FAPI_ATTR_GET(attr_name, target, attr->attr_assign); \
+            if (!l_rc) { \
+                FAPI_INF("%-60s = 0x%08x %u from PROC_CHIP target", #attr_name, attr->attr_assign, attr->attr_assign); \
+            } \
+            else { \
+                FAPI_INF("Accessing %s as the passed target did not succeed.  Trying from the SYSTEM target", #attr_name); \
+                l_rc = FAPI_ATTR_GET(attr_name, NULL, attr->attr_assign); \
+                if (!l_rc) { \
+                    FAPI_INF("%-60s = 0x%08x %u from SYSTEM target", #attr_name, attr->attr_assign, attr->attr_assign); \
+                } \
+                else { \
+                    FAPI_ERR("%-60s access failed after trying both PROC_CHIP and SYSTEM targets", #attr_name ); \
+                    break; \
+                } \
+            }
 
-    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_UP,                                &i_target, attr_freq_ext_bias_up);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_DOWN,                              &i_target, attr_freq_ext_bias_down);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_UP,                         &i_target, attr_voltage_ext_vdd_bias_up);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_UP,                         &i_target, attr_voltage_ext_vcs_bias_up);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN,                       &i_target, attr_voltage_ext_vdd_bias_down);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN,                       &i_target, attr_voltage_ext_vcs_bias_down);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_UP,                         &i_target, attr_voltage_int_vdd_bias_up);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_UP,                         &i_target, attr_voltage_int_vcs_bias_up);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_DOWN,                       &i_target, attr_voltage_int_vdd_bias_down);
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_DOWN,                       &i_target, attr_voltage_int_vcs_bias_down);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK,                                   NULL, attr_freq_proc_refclock);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_MAX,                                        NULL, attr_freq_core_max);
-    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY,                                    NULL, attr_pm_safe_frequency);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR,                                      NULL, attr_freq_core_floor);
-    DATABLOCK_GET_ATTR(ATTR_BOOT_FREQ_MHZ,                                        NULL, attr_boot_freq_mhz);
-    DATABLOCK_GET_ATTR(ATTR_CPM_TURBO_BOOST_PERCENT,                              NULL, attr_cpm_turbo_boost_percent);
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDD,                                  NULL, attr_proc_r_loadline_vdd);
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VCS,                                  NULL, attr_proc_r_loadline_vcs);
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VDD,                                  NULL, attr_proc_r_distloss_vdd);
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS,                                  NULL, attr_proc_r_distloss_vcs);
-    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VDD,                                 NULL, attr_proc_vrm_voffset_vdd);
-    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS,                                 NULL, attr_proc_vrm_voffset_vcs);
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY, NULL, attr_pm_resonant_clock_full_clock_sector_buffer_frequency);
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY,           NULL, attr_pm_resonant_clock_low_band_lower_frequency);
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY,           NULL, attr_pm_resonant_clock_low_band_upper_frequency);
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY,          NULL, attr_pm_resonant_clock_high_band_lower_frequency);
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY,          NULL, attr_pm_resonant_clock_high_band_upper_frequency);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_UP,                                     &i_target, attr_freq_ext_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_DOWN,                                   &i_target, attr_freq_ext_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_UP,                              &i_target, attr_voltage_ext_vdd_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_UP,                              &i_target, attr_voltage_ext_vcs_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN,                            &i_target, attr_voltage_ext_vdd_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN,                            &i_target, attr_voltage_ext_vcs_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_UP,                              &i_target, attr_voltage_int_vdd_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_UP,                              &i_target, attr_voltage_int_vcs_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_DOWN,                            &i_target, attr_voltage_int_vdd_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_DOWN,                            &i_target, attr_voltage_int_vcs_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK,                                   NULL,      attr_freq_proc_refclock);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_MAX,                                        NULL,      attr_freq_core_max);
+    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY,                                    NULL,      attr_pm_safe_frequency);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR,                                      NULL,      attr_freq_core_floor);
+    DATABLOCK_GET_ATTR(ATTR_BOOT_FREQ_MHZ,                                        NULL,      attr_boot_freq_mhz);
+    DATABLOCK_GET_ATTR(ATTR_CPM_TURBO_BOOST_PERCENT,                              NULL,      attr_cpm_turbo_boost_percent);
+       
+    DATABLOCK_GET_ATTR_CHECK_PROC(ATTR_PROC_R_LOADLINE_VDD,                       &i_target, attr_proc_r_loadline_vdd);
+    DATABLOCK_GET_ATTR_CHECK_PROC(ATTR_PROC_R_LOADLINE_VCS,                       &i_target, attr_proc_r_loadline_vcs);
+    DATABLOCK_GET_ATTR_CHECK_PROC(ATTR_PROC_R_DISTLOSS_VDD,                       &i_target, attr_proc_r_distloss_vdd);
+    DATABLOCK_GET_ATTR_CHECK_PROC(ATTR_PROC_R_DISTLOSS_VCS,                       &i_target, attr_proc_r_distloss_vcs);
+    DATABLOCK_GET_ATTR_CHECK_PROC(ATTR_PROC_VRM_VOFFSET_VDD,                      &i_target, attr_proc_vrm_voffset_vdd);
+    DATABLOCK_GET_ATTR_CHECK_PROC(ATTR_PROC_VRM_VOFFSET_VCS,                      &i_target, attr_proc_vrm_voffset_vcs); 
+    
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY, NULL,      attr_pm_resonant_clock_full_clock_sector_buffer_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY,           NULL,      attr_pm_resonant_clock_low_band_lower_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY,           NULL,      attr_pm_resonant_clock_low_band_upper_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY,          NULL,      attr_pm_resonant_clock_high_band_lower_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY,          NULL,      attr_pm_resonant_clock_high_band_upper_frequency);
 
     // Read array attribute
     l_rc = FAPI_ATTR_GET(ATTR_CPM_INFLECTION_POINTS, &i_target, attr->attr_cpm_inflection_points); if (l_rc) break;

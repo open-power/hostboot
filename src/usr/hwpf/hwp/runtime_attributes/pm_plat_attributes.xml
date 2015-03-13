@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_plat_attributes.xml,v 1.12 2014/07/22 18:34:52 jmcgill Exp $ -->
+<!-- $Id: pm_plat_attributes.xml,v 1.13 2015/03/12 18:02:45 stillgs Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized by the platform.
@@ -307,7 +307,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_R_LOADLINE_VDD</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Impedance (binary microOhms) of the load line from a processor VDD VRM to the
       Processor Module pins.  This value is applied to each processor instance.
@@ -323,7 +323,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_R_DISTLOSS_VDD</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Impedance (binary in microOhms) of the VDD distribution loss sense point
       to the circuit. This value is applied to each processor instance.
@@ -338,7 +338,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
       the processor module.  This value is applied to each processor instance.
@@ -353,7 +353,7 @@
     <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_R_LOADLINE_VCS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Impedance (binary microOhms) of the load line from a processor VCS VRM to the
       Processor Module pins.  This value is applied to each processor instance.
@@ -368,7 +368,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_R_DISTLOSS_VCS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Impedance (binary in microOhms) of the VCS distribution loss sense point
       to the circuit. This value is applied to each processor instance.
@@ -383,7 +383,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
       the processor module.  This value is applied to each processor instance.

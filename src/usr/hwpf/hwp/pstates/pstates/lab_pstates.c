@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: lab_pstates.c,v 1.9 2014/02/21 03:02:20 jmcgill Exp $
+// $Id: lab_pstates.c,v 1.10 2015/03/12 18:06:46 stillgs Exp $
 
 /// \file lab_pstates.c
 /// \brief Lab-only (as opposed to product-procedure) support for Pstates.
@@ -257,7 +259,9 @@ gpst_print(FILE *stream, GlobalPstateTable *gpst)
     uint32_t options;
     uint32_t pstate0_frequency_khz, frequency_step_khz;
     uint8_t entries, pstate_stepsize, vrm_stepdelay_range, vrm_stepdelay_value;
-    Pstate pmin, pvsafe, psafe;
+//    Pstate pmin, pvsafe, psafe;
+    Pstate pvsafe, psafe;
+    
 
     // Endian-corrected vector Pstate fields
 
@@ -285,7 +289,7 @@ gpst_print(FILE *stream, GlobalPstateTable *gpst)
     pstate_stepsize = gpst->pstate_stepsize;
     vrm_stepdelay_range = gpst->vrm_stepdelay_range;
     vrm_stepdelay_value = gpst->vrm_stepdelay_value;
-    pmin = gpst->pmin;
+//    pmin = gpst->pmin;
     pvsafe = gpst->pvsafe;
     psafe = gpst->psafe;
 
