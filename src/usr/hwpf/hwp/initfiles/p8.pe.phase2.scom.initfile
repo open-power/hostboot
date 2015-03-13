@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase2.scom.initfile,v 1.6 2014/11/18 17:26:01 jmcgill Exp $
+#-- $Id: p8.pe.phase2.scom.initfile,v 1.7 2015/02/16 22:21:07 ricmata Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -72,33 +72,33 @@ scom 0x02012C0B {
 #-- PCI Hardware Configuration 0 Register
 scom 0x02012018 {
     bits,    scom_data,    expr;  
-    0:3,     0b0000,       (phb0);                                  #-- hang poll scale (reg=0, scale of 1)
-    4:7,     0b0010,       (phb0);                                  #-- data poll scale (reg=2, scale of 3)
-    8:11,    0b0000,       (phb0);                                  #-- data poll scale (PE) (reg=0, scale of 1)
+    0:3,     0b0001,       (phb0);                                  #-- hang poll scale (reg=1, value of 6)
+    4:7,     0b0010,       (phb0);                                  #-- data poll scale (reg=2, value of 9)
+    8:11,    0b0001,       (phb0);                                  #-- data poll scale (PE) (reg=1, value of 6)
     17,      0b1,          (phb0);                                  #-- disable out-of-order store behavior
 }
 
 scom 0x02012418 {
     bits,    scom_data,    expr;  
-    0:3,     0b0000,       (phb1);
+    0:3,     0b0001,       (phb1);
     4:7,     0b0010,       (phb1);
-    8:11,    0b0000,       (phb1);
+    8:11,    0b0001,       (phb1);
     17,      0b1,          (phb1);
 }
 
 scom 0x02012818 {
     bits,    scom_data,    expr;  
-    0:3,     0b0000,       (phb2);
+    0:3,     0b0001,       (phb2);
     4:7,     0b0010,       (phb2);
-    8:11,    0b0000,       (phb2);
+    8:11,    0b0001,       (phb2);
     17,      0b1,          (phb2);
 }
 
 scom 0x02012C18 {
     bits,    scom_data,    expr;
-    0:3,     0b0000,       (phb3);
+    0:3,     0b0001,       (phb3);
     4:7,     0b0010,       (phb3);
-    8:11,    0b0000,       (phb3);
+    8:11,    0b0001,       (phb3);
     17,      0b1,          (phb3);
 }
 
