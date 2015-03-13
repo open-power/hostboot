@@ -189,5 +189,5 @@ namespace fapi2
         std::shared_ptr<ErrorInfo> iv_info;
     };
 
-};
+}
 #endif // FAPI2_FFDC_H_
