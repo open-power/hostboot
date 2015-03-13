@@ -48,14 +48,14 @@ namespace fapi2
         TARGET_TYPE_DIMM          = 0x00000002, ///< DIMM type
         TARGET_TYPE_PROC_CHIP     = 0x00000004, ///< Processor type
         TARGET_TYPE_MEMBUF_CHIP   = 0x00000008, ///< Membuf type
-        TARGET_TYPE_EX            = 0x00000010, ///< Ex type
+        TARGET_TYPE_EX            = 0x00000010, ///< EX - 2x Core, L2, L3 - can be deconfigured
         TARGET_TYPE_MBA           = 0x00000020, ///< MBA type
         TARGET_TYPE_MCS           = 0x00000040, ///< MCS type
         TARGET_TYPE_XBUS          = 0x00000080, ///< XBUS type
         TARGET_TYPE_ABUS          = 0x00000100, ///< ABUS type
         TARGET_TYPE_L4            = 0x00000200, ///< L4 type
-        TARGET_TYPE_CORE          = 0x00000400, ///< Core type
-        TARGET_TYPE_EQ            = 0x00000800, ///< EQ type
+        TARGET_TYPE_CORE          = 0x00000400, ///< Core - 4x threads(?) - can be deconfigured
+        TARGET_TYPE_EQ            = 0x00000800, ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
         TARGET_TYPE_MCA           = 0x00001000, ///< MCA type
         TARGET_TYPE_MCBIST        = 0x00002000, ///< MCBIST type
         TARGET_TYPE_MIA           = 0x00004000, ///< MIA type
@@ -68,7 +68,6 @@ namespace fapi2
         TARGET_TYPE_PERV          = 0x00200000, ///< Pervasive type
         TARGET_TYPE_PEC           = 0x00400000, ///< PEC type
         TARGET_TYPE_PHB           = 0x00800000, ///< PHB type
-        TARGET_TYPE_EL            = 0x01000000, ///< L3/L2 Caches
 
         TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
 
@@ -100,6 +99,6 @@ namespace fapi2
         static const uint8_t count = 0;
     };
     /// @endcond
-};
+}
 
 #endif
