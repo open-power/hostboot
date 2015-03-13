@@ -175,6 +175,6 @@ namespace fapi2
     extern thread_local uint64_t pib_error_mask;     /// the pib mask
     extern thread_local uint64_t operational_state;  /// the operational mode
 
-};
+}
 
 #endif

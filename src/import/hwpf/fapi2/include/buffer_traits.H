@@ -43,7 +43,10 @@ namespace fapi2
 {
     /// @cond
     /// Types representing a container of bits. Used to create
-    /// variable_buffer.
+    /// variable_buffer. container_unit must remain 32-bits
+    /// for now - there will be a lot of code to change if it
+    /// changes. There are assertions helping to enforce this
+    /// in places in the code.
     typedef uint32_t container_unit;
     typedef std::vector<container_unit> bits_container;
 
@@ -137,7 +140,8 @@ namespace fapi2
 
         typedef B bits_type;
         typedef T unit_type;
-        enum { bits_per_unit = sizeof(unit_type) * 8 };
+        constexpr static uint32_t bits_per_unit(void)
+            { return sizeof(unit_type) * 8; }
     };
 
     //
@@ -222,10 +226,11 @@ namespace fapi2
 
         typedef uint32_t bits_type;
         typedef container_unit unit_type;
-        enum { bits_per_unit = sizeof(unit_type) * 8 };
+        constexpr static uint32_t bits_per_unit(void)
+            { return sizeof(unit_type) * 8; }
     };
     /// @endcond
-};
+}
 
 
 
