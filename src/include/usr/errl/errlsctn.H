@@ -43,7 +43,6 @@
 #include <hbotcompid.H>
 #include <errl/errlsctnhdr.H>
 
-
 namespace ERRORLOGDISPLAY
 {
 class ErrLogDisplay;
@@ -61,7 +60,7 @@ class ErrlSctn
 {
     friend class ErrlManager;
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
-
+    friend class ErrlTest;
 
 protected:
 

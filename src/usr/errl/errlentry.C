@@ -42,6 +42,8 @@
 #include <errl/errludcallout.H>
 #include <errl/errlreasoncodes.H>
 #include <errl/errludstring.H>
+#include <errl/errluserdetails.H>
+#include <errl/errludattribute.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
@@ -549,6 +551,33 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         #endif
         TARGETING::EntityPath ep;
         TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+        TARGETING::TYPE l_type_ecid = l_type;
+        const TARGETING::Target* l_parentTarget = i_target;
+        if((l_type_ecid != TARGETING::TYPE_MEMBUF) ||
+              (l_type_ecid != TARGETING::TYPE_PROC) ||
+              (l_type_ecid != TARGETING::TYPE_NODE)
+             )
+        {
+            //since this returns NULL if the parent is not found,
+            // we need a placeholder
+            const TARGETING::Target* l_tempParentTarget =
+                    getParentChip(l_parentTarget);
+            if(l_tempParentTarget != NULL)
+            {
+                l_parentTarget = l_tempParentTarget;
+                l_type_ecid = l_parentTarget->getAttr<TARGETING::ATTR_TYPE>();
+            }
+        }
+        //if we have found a type_membuf or type_proc, store the ecid
+        //otherwise, (type_node), do nothing.
+        if(l_type_ecid == TARGETING::TYPE_MEMBUF ||
+           l_type_ecid == TARGETING::TYPE_PROC)
+        {
+            ErrlUserDetailsAttribute(l_parentTarget,
+                                     TARGETING::ATTR_ECID).addToLog(this);
+        }
+
         if (l_type == TARGETING::TYPE_CORE)
         {
             //IF the type being garded is a Core the associated EX Chiplet

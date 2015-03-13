@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <targeting/common/predicates/predicates.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
+#include <targeting/common/utilFilter.H>
 
 #include "../../trace/entry.H"
 
@@ -63,6 +64,8 @@
 #define TEST_USR_64BIT_2    0x9000000000000003
 
 
+namespace ERRORLOG
+{
 
 class ErrlTest: public CxxTest::TestSuite
 {
@@ -719,6 +722,153 @@ public:
 #endif
     }
 
-};
+    /**
+     * @brief Test ECIDs in callouts
+     */
+    void testErrl6(void)
+    {
+        TS_TRACE( "test testErrl6");
+#if 1
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        //  tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        do
+        {
+            // find a ex unit that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
 
+            TARGETING::PredicateCTM predEx(TARGETING::CLASS_UNIT,
+                                           TARGETING::TYPE_EX);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predEx).push(&predFunctional).And();
+
+            TARGETING::TargetHandleList pExList;
+            TARGETING::targetService().getAssociated( pExList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+                &checkExpr );
+
+            if (pExList.empty())
+            {
+                TS_FAIL("test callout: empty pExList");
+                break;
+            }
+
+            TARGETING::TargetHandle_t l_target = *pExList.begin();
+
+            // find a membuf target
+            TARGETING::PredicateCTM membufChipFilter(
+                TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
+            TARGETING::TargetRangeFilter pMembuf(
+                TARGETING::targetService().begin(),
+                TARGETING::targetService().end(),
+                &membufChipFilter);
+
+            // Create an error log
+            errlHndl_t errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
+
+            TS_TRACE( "test callout pEx %p", l_target);
+            ERRORLOG::ErrlUserDetailsTarget(l_target).addToLog(errl);
+
+            //HW callout with Membuf target, after ECID has been read.
+            // ECID should be present
+            errl->addHwCallout(*pMembuf,
+                   HWAS::SRCI_PRIORITY_HIGH,
+                   HWAS::NO_DECONFIG,
+                   HWAS::GARD_NULL);
+            uint64_t l_ecid[2];
+            (*pMembuf)->tryGetAttr<TARGETING::ATTR_ECID>(l_ecid);
+            bool correctECID = containsEcidData(errl,l_ecid);
+            if(!correctECID)
+            {
+                TS_FAIL("testErrl6: ECID value incorrect from target %p",
+                       (*pMembuf));
+                break;
+            }
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+            errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            ERRORLOG::ERRL_TEST_MOD_ID,
+                            ERRORLOG::ERRL_TEST_REASON_CODE);
+
+
+            //Hw callout with non-proc and non-membuf target before
+            // ECID has been read. ECID should be present for parent target.
+            // We have to find the parent target, and get the ecid value
+            // before calling the containsEcidData() checker function.
+            const TARGETING::Target* l_parentTarget = getParentChip(l_target);
+            (l_parentTarget)->tryGetAttr<TARGETING::ATTR_ECID>(l_ecid);
+
+            errl->addHwCallout(l_target,
+                   HWAS::SRCI_PRIORITY_HIGH,
+                   HWAS::NO_DECONFIG,
+                   HWAS::GARD_NULL);
+            correctECID = containsEcidData(errl,l_ecid);
+            if(!correctECID)
+            {
+                TS_FAIL("testErrl6: ECID value incorrect from target %p",
+                       (l_target));
+                break;
+            }
+
+            errlCommit(errl,CXXTEST_COMP_ID);
+
+            TS_TRACE("testErrl6 done");
+        }
+        while(0);
 #endif
+    }
+    bool containsEcidData(errlHndl_t &i_errl, uint64_t* i_ecidOrig)
+    {
+        TS_TRACE("containsEcidData errlogId 0x%.8x",i_errl->eid());
+        bool l_dataMatching = false;
+        uint32_t* l_ecid_data = NULL;
+
+        // look thru the errlog for any Attribute UserDetail sections
+        //  to find the ecid data, check that it matches the
+        //  expected value and return true or false.
+        for(std::vector<ERRORLOG::ErrlUD*>::const_iterator
+                it = i_errl->iv_SectionVector.begin();
+                it != i_errl->iv_SectionVector.end();
+                it++ )
+        {
+            l_ecid_data = (uint32_t *)((*it)->iv_pData);
+
+            //look for an ATTR_ECID section
+            if((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+               (1                == (*it)->iv_header.iv_ver) &&
+               (ERRORLOG::ERRL_UDT_ATTRIBUTE == (*it)->iv_header.iv_sst) &&
+               (TARGETING::ATTR_ECID         == l_ecid_data[0])
+              )
+            {
+                uint64_t l_ecidCompare[2] = {l_ecid_data[1],l_ecid_data[3]};
+                l_ecidCompare[0] = (l_ecidCompare[0] << 32) | l_ecid_data[2];
+                l_ecidCompare[1] = (l_ecidCompare[1] << 32) | l_ecid_data[4];
+                if((l_ecidCompare[0] == i_ecidOrig[0]) &&
+                   (l_ecidCompare[1] == i_ecidOrig[1]))
+                {
+                    l_dataMatching = true;
+                    break;
+                }
+            }
+        }
+
+        TS_TRACE("containsEcidData");
+        return l_dataMatching;
+    }
+
+};
+}
+#endif
+

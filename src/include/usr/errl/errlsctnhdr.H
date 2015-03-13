@@ -71,7 +71,7 @@ class ErrlSctnHdr
     friend class ErrlEntry;
     friend class ErrlManager;
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
-
+    friend class ErrlTest;
 
 private:
 
