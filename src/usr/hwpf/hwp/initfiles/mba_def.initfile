@@ -1,8 +1,9 @@
-#-- $Id: mba_def.initfile,v 1.70 2014/12/05 16:21:33 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.71 2015/02/13 12:20:10 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.71|yctschan| 2/13/15| SW294743 - Update initfile to support RCD parity error reporting
 #--     1.70|yctschan|12/05/14| Updated settings for fast exit power down
 #--     1.69|asaetow | 9/24/14| Force SpareCKE sync. Spare DRAM workaround.
 #--     1.68|jdsloat | 4/04/14| Turned off Power controls for GA1 concerns - Turn back on at a later date
@@ -1434,6 +1435,27 @@ scom 0x0301040E     {
     bits    ,   scom_data                                 ,       ATTR_FUNCTIONAL,     expr;
     57      ,   0b1                                       ,            1            ,     (ATTR_CENTAUR_EC_ENABLE_PAGE_MODE_FOR_RRQ == 1);          # Enable Page Mode for the Read Reorder Queue	
 }
+
+#Register Name	Final Arb Parms
+#Mnemonic	MBA_FARB0Q
+#Attributes	PAR:EVEN	Bit	Field Mnemonic	Attribute or Setting to use
+#Description	FARB command control
+#1. FARB0 bit 38: cfg_parity_after_cmd
+#	- set this bit if DDR3 and (RDIMM or LDRIMM)
+#	- clear this bit if DDR4 and (RDIMM or LDRIMM)
+#2. FARB0 bit 60: cfg_ignore_rcd_parity_err
+#	- clear this bit if (RDIMM or LDRIMM)
+#3. FARB0 bit 61: cfg_enable_rcd_rw_retry
+#	- set this bit if  (RDIMM or LDRIMM)
+
+scom 0x03010413     {
+    bits    ,   scom_data                                 ,       ATTR_FUNCTIONAL,     expr;
+    38      ,   0b1                                       ,            1            ,     (((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3)) && (ATTR_EFF_DRAM_GEN == 1));
+    38      ,   0b0                                       ,            1            ,     (((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3)) && (ATTR_EFF_DRAM_GEN == 2));
+    60      ,   0b0                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3));
+    61      ,   0b1                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3));
+}
+
 
 #######################################
 #MBA01 MBASRQ Base Address:  0x03010416
