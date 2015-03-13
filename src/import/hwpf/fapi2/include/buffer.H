@@ -108,11 +108,11 @@ namespace fapi2
         inline buffer& setBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit), "failed range check");
+                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
 
             // Force iv_data to be dependent on the template type to force
             // its look up in the second phase
-            this->iv_data |= (static_cast<T>(1)) << (bufferTraits<T>::bits_per_unit - B - 1);
+            this->iv_data |= (static_cast<T>(1)) << (bufferTraits<T>::bits_per_unit() - B - 1);
             return *this;
         }
 
@@ -128,7 +128,7 @@ namespace fapi2
         inline buffer& clearBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit), "failed range check");
+                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
 
             this->iv_data &= buffer<T>().setBit<B>().invert();
             return *this;
@@ -146,7 +146,7 @@ namespace fapi2
         inline buffer& flipBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit), "failed range check");
+                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
 
             this->iv_data ^= buffer<T>().setBit<B>();
             return *this;
@@ -160,7 +160,7 @@ namespace fapi2
         ///
         inline fapi2::ReturnCode setBit(const bits_type& i_bit)
             {
-                if (i_bit >= bufferTraits<T>::bits_per_unit)
+                if (i_bit >= bufferTraits<T>::bits_per_unit())
                 {
                     return FAPI2_RC_INVALID_PARAMETER;
                 }
@@ -168,7 +168,7 @@ namespace fapi2
                 // Force iv_data to be dependent on the template type to force
                 // its look up in the second phase
                 this->iv_data |=
-                    (static_cast<T>(1)) << (bufferTraits<T>::bits_per_unit - i_bit - 1);
+                    (static_cast<T>(1)) << (bufferTraits<T>::bits_per_unit() - i_bit - 1);
                 return FAPI2_RC_SUCCESS;
             }
 
@@ -280,7 +280,7 @@ namespace fapi2
         /// @brief Copy part of a OT into the DataBuffer
         /// @tparam TS Start bit to insert into (target start)
         /// @tparam L Length of bits to insert
-        /// @tparam SS Start bit in source
+        /// @tparam SS Start bit in source - defaults to bit 0
         /// @tparam OT the type of the incoming (origin) data
         /// @param[in] i_datain OT value to copy into DataBuffer
         ///    - data is taken left aligned
@@ -288,11 +288,11 @@ namespace fapi2
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
-        template<bits_type TS, bits_type L, bits_type SS, typename OT>
+        template<bits_type TS, bits_type L, bits_type SS = 0, typename OT>
         inline void insert(const OT i_datain)
         {
-            const bits_type target_length = parameterTraits<T>::bit_length;
-            const bits_type source_length = parameterTraits<OT>::bit_length;
+            const bits_type target_length = parameterTraits<T>::bit_length();
+            const bits_type source_length = parameterTraits<OT>::bit_length();
 
             // Error if input data don't make sense
             static_assert((TS + L) <= target_length,
@@ -304,48 +304,30 @@ namespace fapi2
             static_assert(SS < source_length,
                           "insert(): Source Start is out of bounds");
 
+            // Normalize the input to 2 64 bit integers and adjust the starts accordingly
+            uint64_t source = static_cast<uint64_t>(i_datain);
+            const uint64_t target = static_cast<uint64_t>(this->iv_data);
+
+            const bits_type source_start = parameterTraits<uint64_t>::bit_length() - (source_length - SS);
+            const bits_type target_start = parameterTraits<uint64_t>::bit_length() - (target_length - TS);
+
             // Get mask value for Target buffer
-            // Note: Need "& ((T)-1) because bit shift left for Target buffer doesn't roll off
-            T mask =((T(~0) << (target_length - L)) & T(~0)) >> TS;
+            // Note: Need "& 0UL" because bit shift left for Target buffer doesn't roll off
+            uint64_t mask = ((~0UL << (parameterTraits<uint64_t>::bit_length() - L)) & ~0UL) >> target_start;
 
-            // Calculate the equivalent position of the input Source start for the size of the Target buffer.
-
-            // Assume OT is smaller (sizeof(T) > sizeof(OT))
-            uint64_t sourceShift = abs(TS - ((target_length - source_length) + SS));
-            uint64_t sourceAlign = T(i_datain) << sourceShift;
-
-            if (sizeof(T) == sizeof(OT))
+            // Align the source to the target. Make things signed so we know which way to shift.
+            int32_t shift = source_start - target_start;
+            if (shift > 0)
             {
-                sourceShift = abs(SS - TS);
-                sourceAlign = (SS > TS) ? ((T)i_datain) << sourceShift : ((T)i_datain) >> sourceShift;
+                source <<= shift;
+            }
+            else
+            {
+                shift = target_start - source_start;
+                source >>= shift;
             }
 
-            if (sizeof(T) < sizeof(OT))
-            {
-                sourceShift = source_length - target_length;
-                if (SS <= sourceShift)
-                {
-                    sourceShift = sourceShift +  TS - SS;
-                    sourceAlign = ((OT)i_datain) >> sourceShift;
-                }
-
-                // (SS > sourceShift)
-                else
-                {
-                    if (sourceShift > TS)
-                    {
-                        sourceShift = SS - sourceShift - TS;
-                        sourceAlign = OT(i_datain) << sourceShift;
-                    }
-                    else
-                    {
-                        sourceShift = SS - sourceShift;
-                        sourceAlign = (sourceShift < TS) ? OT(i_datain) >> sourceShift : OT(i_datain);
-                    }
-                }
-            }
-
-            this->iv_data = (this->iv_data & ~mask) | (sourceAlign & mask);
+            this->iv_data = ((target & ~mask) | (source & mask));
             return;
         }
 
@@ -365,14 +347,14 @@ namespace fapi2
         inline void insertFromRight(const OT i_datain)
         {
             // Error if input data don't make sense
-            static_assert(L < parameterTraits<OT>::bit_length,
+            static_assert(L < parameterTraits<OT>::bit_length(),
                           "insertFromRight(): Len >= input buffer");
-            static_assert(TS < parameterTraits<T>::bit_length,
+            static_assert(TS < parameterTraits<T>::bit_length(),
                           "insertFromRight(): Target Start is out of bounds");
-            static_assert((TS + L) <= parameterTraits<T>::bit_length,
+            static_assert((TS + L) <= parameterTraits<T>::bit_length(),
                           "InsertFromRight(): (Target Start + Len) is out of bounds");
 
-            this->insert<TS, L, parameterTraits<OT>::bit_length - L>(i_datain);
+            this->insert<TS, L, parameterTraits<OT>::bit_length() - L>(i_datain);
             return;
         }
 
@@ -411,12 +393,12 @@ namespace fapi2
         template<bits_type SS, bits_type L, typename OT>
         inline void extractToRight(OT& o_out)
         {
-            extract<parameterTraits<OT>::bit_length - L, L, SS>(o_out);
+            extract<parameterTraits<OT>::bit_length() - L, L, SS>(o_out);
             return;
         }
 
         ///@}
     };
-};
+}
 
 #endif
