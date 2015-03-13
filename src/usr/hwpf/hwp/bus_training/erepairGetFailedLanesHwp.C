@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: erepairGetFailedLanesHwp.C,v 1.4 2014/08/05 15:04:38 kahnevan Exp $
+// $Id: erepairGetFailedLanesHwp.C,v 1.10 2015/03/13 05:14:40 bilicon Exp $
 /**
  *  @file erepairGetFailedLanesHwp.C
  *
@@ -490,19 +490,14 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                                                 i_tgtHandle,
                                                 l_mcsTarget,
                                                 fapi::TARGET_STATE_FUNCTIONAL);
-
                 if(l_rc)
                 {
                     FAPI_ERR("determineRepairLanes: Unable to get the connected"
                              " MCS target");
                     break;
                 }
-
                 l_tgtHandle = l_mcsTarget;
-            }
 
-            if(l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
-            {
                 // Check whether we have Memory on a CDIMM
                 l_rc = getDimmType(i_tgtHandle, l_customDimm);
 
@@ -543,7 +538,8 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                 // only for systems with ISDIMM because in the ISDIMM systems
                 // the Lane eRepair data for multiple Centaurs is maintained in
                 // a common VPD.
-                if((l_customDimm != fapi::ENUM_ATTR_SPD_CUSTOM_YES) &&
+                if((l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)     &&
+                   (l_customDimm != fapi::ENUM_ATTR_SPD_CUSTOM_YES) &&
                    (l_chipPosition != l_memBus->device.proc_centaur_id))
                 {
                     continue;
@@ -618,11 +614,14 @@ fapi::ReturnCode getDimmType(const fapi::Target &i_tgtHandle,
 
     do
     {
+        o_customDimm = fapi::ENUM_ATTR_SPD_CUSTOM_NO;
+
         // Get the connected MBA chiplet and determine whether we have CDIMM
         l_rc = fapiGetChildChiplets(i_tgtHandle,
                                     fapi::TARGET_TYPE_MBA_CHIPLET,
                                     l_mbaChiplets,
                                     fapi::TARGET_STATE_FUNCTIONAL);
+
         if(l_rc || (0 == l_mbaChiplets.size()))
         {
             FAPI_ERR("Error (0x%x) during get child MBA targets",
