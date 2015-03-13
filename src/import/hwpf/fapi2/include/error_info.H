@@ -53,7 +53,7 @@ namespace fapi2
             {}
 
         operator const void*() const { return iv_value.first; }
-        operator const uint8_t() const
+        operator uint8_t() const
             { return *(reinterpret_cast<const uint8_t*>(iv_value.first)); }
 
         int16_t size(void) const { return iv_value.second; }
@@ -219,6 +219,7 @@ namespace fapi2
     {
         static_assert(std::is_pointer<T>::value,
                       "pointer passed to getErrorInfoFfdcSize");
+        return 0;
     }
 
     ///
