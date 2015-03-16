@@ -34,6 +34,7 @@
 #include <thread>
 #include <stdio.h>
 #include <return_code.H>
+#include <hwp_ffdc_classes.H>
 
 /// @cond
 #define FAPI_VA_NARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N
