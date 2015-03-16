@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.19 2015/02/12 23:23:56 pardeik Exp $
+// $Id: mss_thermal_init.C,v 1.20 2015/03/02 20:43:37 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -49,6 +49,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.20  | pardeik  |02-MAR-15| initialize l_dimm_ranks_array to zero
+//                              | use const variables in for loops instead of numbers
 //   1.18  | pardeik  |12-FEB-15| change ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP to
 //                              | a centaur target (was system)
 //   1.17  | pardeik  |19-NOV-14| Use MRW attribute for SC address map for ISDIMMs
@@ -160,6 +162,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       const uint8_t I2C_BUS_ENCODE_PRIMARY = 0;
       const uint8_t I2C_BUS_ENCODE_SECONDARY = 8;
       const uint8_t MAX_NUM_DIMM_SENSORS = 8;
+      const uint8_t MAX_I2C_BUSSES = 2;
 
       // Variable declaration
       uint8_t l_dimm_ranks_array[l_NUM_MBAS][l_NUM_PORTS][l_NUM_DIMMS];	// Number of ranks for each configured DIMM in each MBA
@@ -247,6 +250,19 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
            i++ )
       {
           l_custom_dimm[i] = fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO;
+      }
+
+      // zero out the l_dimm_ranks_array so it is initialized for later use if there is a deconfigured MBA
+      for (uint8_t i = 0; i < l_NUM_MBAS; i++)
+      {
+	  for (uint8_t j = 0; j < l_NUM_PORTS; j++)
+	  {
+	      for (uint8_t k = 0; k < l_NUM_DIMMS; k++)
+	      {
+		  l_dimm_ranks_array[i][j][k]=0;
+	      }
+	  }
+
       }
 
       for (uint8_t mba_index = 0; mba_index < l_target_mba_array.size(); mba_index++){
@@ -399,9 +415,9 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 
 	  l_cdimm_number_dimm_temp_sensors = 0;
 	  // cycle through both primary and secondary i2c busses, determine i2c address and enable bits
-	  for (uint8_t k = 0; k < 2; k++)
+	  for (uint8_t k = 0; k < MAX_I2C_BUSSES; k++)
 	  {
-	      for (uint8_t i = 0; i < 8; i++)
+	      for (uint8_t i = 0; i < MAX_NUM_DIMM_SENSORS; i++)
 	      {
 		  if (k == 0)
 		  {
@@ -492,7 +508,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
          // Iterate through the num_ranks array to determine what DIMMs are plugged
 	 // Enable sensor monitoring for each plugged DIMM
          uint32_t l_iterator = 0;
-         for (uint32_t i = 0; i < 2; i++){
+         for (uint32_t i = 0; i < l_NUM_MBAS; i++){
 	    if (l_dimm_ranks_array[i][0][0] != 0){
 	       l_ecmd_rc |= l_data_scac_enable.setBit(l_iterator);
 	    }
