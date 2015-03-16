@@ -48,8 +48,8 @@ enum NorChipIDs
     MICRON_NOR_ID     = 0x20ba2000, /**< Micron NOR */
 
     MACRONIX_MFG_ID   = 0xC2000000, /**< Macronix Mfg ID */
-    MACRONIX32_NOR_ID = 0xC2201A00, /**< Macronix NOR MXxxL51235F */
-    MACRONIX64_NOR_ID = 0xC2201900, /**< Macronix NOR MXxxL25635F */
+    MACRONIX64_NOR_ID = 0xC2201A00, /**< Macronix NOR MXxxL51235F */
+    MACRONIX32_NOR_ID = 0xC2201900, /**< Macronix NOR MXxxL25635F */
 
     /* Note: Simics currently models Micron NOR  */
     VPO_NOR_ID        = 0x20201800, /**< VPO NOR chip ID */
