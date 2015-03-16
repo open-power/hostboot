@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.9 2014/08/29 18:19:55 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.10 2015/02/12 22:07:20 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -67,7 +67,8 @@
 //         |          |         | New DD2: MBACALFIR 20,21,22 recoverable masked
 //   1.8   |08-APR-14 | gollub  | Removed debug trace
 //   1.9   |29-AUG-14 | gollub  | SW275672: Changed MBS_FIR_REG[3][4] from channel checkstop to recoverable
-
+//   1.10  |12-FEB-15 | gollub  | Updated mss_unmask_draminit_errors: unmask RCD parity errors if RDIMM or LRDIMM
+//         |          |         | Updated mss_unmask_fetch_errors: load max_cfg_rcd_protection_time and enable RCD recovery if RDIMM or LRDIMM
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -1268,6 +1269,7 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     
     uint8_t l_dd2_fir_bit_defn_changes = 0;
     fapi::Target l_targetCentaur;
+    uint8_t l_dimm_type = 0;    
     
     // Get Centaur target for the given MBA
     l_rc = fapiGetParentChip(i_target, l_targetCentaur);
@@ -1287,7 +1289,13 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
         return l_rc;
     }        
     
-
+    // Get DIMM type        
+    l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, l_dimm_type);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_EFF_DIMM_TYPE");
+        return l_rc;
+    }
 
     // Read mask
     l_rc = fapiGetScom_w_retry(i_target, MBA01_MBACALFIR_MASK_0x03010403, l_mbacalfir_mask); 
@@ -1336,11 +1344,17 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbacalfir_action1.setBit(3);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(3);
 
-    // 4	RCD Parity Error 0          recoverable         unmask (only if set)
-    // TODO: Unmask, only if set, only if ISD DIMM
+    // 4	RCD Parity Error 0          recoverable         unmask (if RDIMM or LRDIMM)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(4);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(4);
-    l_ecmd_rc |= l_mbacalfir_mask_or.setBit(4);
+    if ((l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)||(l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+    {
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(4);
+    }
+    else
+    {
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(4);    
+    }        
 
     // 5	ddr0_cal_timeout_err        recoverable         mask (until after draminit_mc)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(5);            
@@ -1352,12 +1366,17 @@ fapi::ReturnCode mss_unmask_draminit_errors( const fapi::Target & i_target,
     l_ecmd_rc |= l_mbacalfir_action1.setBit(6);
     l_ecmd_rc |= l_mbacalfir_mask_or.setBit(6);
 
-    // 7	RCD Parity Error 1          recoverable         unmask (only if set)
-    // TODO: Unmask, only if set, only if ISD DIMM
+    // 7	RCD Parity Error 1          recoverable         unmask (if RDIMM or LRDIMM)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(7);            
     l_ecmd_rc |= l_mbacalfir_action1.setBit(7);
-    l_ecmd_rc |= l_mbacalfir_mask_or.setBit(7);
-
+    if ((l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)||(l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+    {
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(7);
+    }
+    else
+    {
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(7);    
+    }        
 
     // 8	mbx to mba par error        channel checkstop   mask (until after draminit_training_adv)
     l_ecmd_rc |= l_mbacalfir_action0.clearBit(8);            
@@ -1610,11 +1629,6 @@ fapi::ReturnCode mss_unmask_draminit_training_errors(
     // 0	MBA Recoverable Error       recoverable         umask
     l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(0);
 
-    // 4	RCD Parity Error 0          recoverable         unmask (only if set)
-    // TODO: Unmask, only if set, only if ISD DIMM
-
-    // 7	RCD Parity Error 1          recoverable         unmask (only if set)
-    // TODO: Unmask, only if set, only if ISD DIMM
 
     if(l_ecmd_rc)
     {
@@ -1714,12 +1728,6 @@ fapi::ReturnCode mss_unmask_draminit_training_advanced_errors(
                 
     l_ecmd_rc |= l_mbacalfir_mask_and.flushTo1();            
     
-    // 4	RCD Parity Error 0          recoverable         unmask 
-    // TODO: Unmask, only if ISD DIMM
-
-    // 7	RCD Parity Error 1          recoverable         unmask 
-    // TODO: Unmask, only if ISD DIMM
-
     // 8	mbx to mba par error        channel checkstop   unmask
     l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(8);
 
@@ -2682,6 +2690,13 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     
     fapi::ReturnCode l_rc;
     uint32_t l_ecmd_rc = 0;            
+    uint8_t l_dimm_type = 0;    
+    uint8_t l_cfg_wrdone_dly = 0;
+    uint8_t l_cfg_rdtag_dly = 0;
+    uint8_t l_max_cfg_rcd_protection_time = 0;
+    
+    ecmdDataBufferBase l_mba_dsm0(64);    
+    ecmdDataBufferBase l_mba_farb0(64);    
 
 
     //*************************
@@ -3147,6 +3162,85 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
             return l_rc;
         }    
     
+        // Get DIMM type        
+        l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &l_mbaChiplets[i], l_dimm_type);
+        if(l_rc)
+        {
+            FAPI_ERR("Error getting ATTR_EFF_DIMM_TYPE");
+            if (i_bad_rc) fapiLogError(i_bad_rc);                
+            return l_rc;
+        }
+
+        // If RDIMM or LRDIMM, load max_cfg_rcd_protection_time and enable RCD recovery
+        if ((l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)||(l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+        {
+
+            l_rc = fapiGetScom_w_retry(l_mbaChiplets[i], MBA01_MBA_DSM0_0x0301040a, l_mba_dsm0);
+            if(l_rc)
+            {
+                // Log passed in error before returning with new error
+                if (i_bad_rc) fapiLogError(i_bad_rc);        
+                return l_rc;
+            }
+            
+            // Get 24:29 cfg_wrdone_dly
+            l_ecmd_rc |= l_mba_dsm0.extractPreserve(&l_cfg_wrdone_dly, 24, 6, 8-6);
+
+            // Get 36:41 cfg_rdtag_dly
+            l_ecmd_rc |= l_mba_dsm0.extractPreserve(&l_cfg_rdtag_dly, 36, 6, 8-6);
+
+            if(l_ecmd_rc)
+            {
+                // Log passed in error before returning with new error
+                if (i_bad_rc) fapiLogError(i_bad_rc);        
+
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
+            }
+
+            // Pick lower of the two: cfg_wrdone_dly and cfg_rdtag_dly, and use that for l_max_cfg_rcd_protection_time
+            if (l_cfg_wrdone_dly <= l_cfg_rdtag_dly)
+            {
+                l_max_cfg_rcd_protection_time = l_cfg_wrdone_dly;
+            }
+            else
+            {
+                l_max_cfg_rcd_protection_time = l_cfg_rdtag_dly;
+            }                       
+            
+            // Read FARB0
+            l_rc = fapiGetScom_w_retry(l_mbaChiplets[i], MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+            if(l_rc)
+            {
+                // Log passed in error before returning with new error
+                if (i_bad_rc) fapiLogError(i_bad_rc);        
+                return l_rc;
+            }
+
+            // Load l_max_cfg_rcd_protection_time
+            l_ecmd_rc |= l_mba_farb0.insert( l_max_cfg_rcd_protection_time, 48, 6, 8-6 );
+            
+            // Clear bit 54, cfg_disable_rcd_recovery, to enable RCD recovery
+            l_ecmd_rc |= l_mba_farb0.clearBit(54);                
+                        
+            if(l_ecmd_rc)
+            {
+                // Log passed in error before returning with new error
+                if (i_bad_rc) fapiLogError(i_bad_rc);        
+
+                l_rc.setEcmdError(l_ecmd_rc);
+                return l_rc;
+            }
+            // Write FARB0
+            l_rc = fapiPutScom_w_retry(l_mbaChiplets[i], MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+            if(l_rc)
+            {
+                // Log passed in error before returning with new error
+                if (i_bad_rc) fapiLogError(i_bad_rc);        
+                return l_rc;
+            }
+        }
+
 
         // NOTE: FW wants to mask these and rely instead on detecting the 
         // cmd complete attention, then checking these manually to see if 

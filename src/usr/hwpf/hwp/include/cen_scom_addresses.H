@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.70 2014/07/15 13:42:27 jmcgill Exp $
+// $Id: cen_scom_addresses.H,v 1.71 2015/02/12 22:05:07 gollub Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,6 +46,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.71   | gollub   |12-FEB-15| Added MBACALFIR_OR, MBACALFIR_AND
+//         |          |         | Added MBA_DSM0
+//         |          |         | Added MBA_FARB0
 //  1.69   | gollub   |07-APR-14| Added MBSCFGQ so we can enable/disable exit point 1
 //  1.64   | jdsloat  |28-MAR-14| ADDED MEM SCOM CCS MODEQ, STATQ, and CAL FIR addresses.
 //  1.63   | mwuu     |18-Jun-13| Fixed naming of IO_FET_SLICE_EN_MAP1_P0_ADR0:3
@@ -732,11 +735,19 @@ CONST_UINT64_T( MBA01_MBABS7_0x03010447           , ULL(0x03010447) );
 //      MBA CAL FIR Registers
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBA01_MBACALFIR_0x03010400           , ULL(0x03010400) );
+CONST_UINT64_T( MBA01_MBACALFIR_AND_0x03010401       , ULL(0x03010401) );
+CONST_UINT64_T( MBA01_MBACALFIR_OR_0x03010402        , ULL(0x03010402) );
 CONST_UINT64_T( MBA01_MBACALFIR_MASK_0x03010403      , ULL(0x03010403) );
 CONST_UINT64_T( MBA01_MBACALFIR_MASK_AND_0x03010404  , ULL(0x03010404) );
 CONST_UINT64_T( MBA01_MBACALFIR_MASK_OR_0x03010405   , ULL(0x03010405) );
 CONST_UINT64_T( MBA01_MBACALFIR_ACTION0_0x03010406   , ULL(0x03010406) );
 CONST_UINT64_T( MBA01_MBACALFIR_ACTION1_0x03010407   , ULL(0x03010407) );
+
+//------------------------------------------------------------------------------
+//      MBA Data State Machine Configurations Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBA01_MBA_DSM0_0x0301040a           , ULL(0x0301040a) );
+
 
 //------------------------------------------------------------------------------
 //      MBA Error report register
@@ -1791,6 +1802,12 @@ CONST_UINT64_T( MBA01_MCBIST_MCBRDS6Q_0x030106b8                     , ULL(0x030
 CONST_UINT64_T( MBA01_MCBIST_MCBRDS7Q_0x030106b9                     , ULL(0x030106b9) );
 CONST_UINT64_T( MBA01_MCBIST_MCBRDS8Q_0x030106ba                     , ULL(0x030106ba) );
 CONST_UINT64_T( MBA01_MCBIST_MCBDRSRQ_0x030106bc                     , ULL(0x030106bc) );
+
+//------------------------------------------------------------------------------
+//    Final ARB Parameters
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBA01_MBA_FARB0Q_0x03010413, ULL(0x03010413) );
+
 //------------------------------------------------------------------------------
 //    N/M Throttling Control Register
 //------------------------------------------------------------------------------
@@ -1854,6 +1871,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.71  2015/02/12 22:05:07  gollub
+
+/!/  1.71   | gollub   |12-FEB-15| Added MBACALFIR_OR, MBACALFIR_AND
+/!/         |          |         | Added MBA_DSM0
+/!/         |          |         | Added MBA_FARB0
+
 Revision 1.70  2014/07/15 13:42:27  jmcgill
 add FIR/repair loader register definitions for FFDC collection (SW260441)
 

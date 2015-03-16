@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -21,9 +23,82 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_draminit_mc.xml,v 1.1 2013/06/19 18:27:47 bellows Exp $ -->
+<!-- $Id: memory_mss_draminit_mc.xml,v 1.2 2015/02/12 22:09:31 gollub Exp $ -->
 <!-- For file ../../ipl/fapi/mss_draminit_mc.C -->
 <!-- // *! OWNER NAME :  David Cadigan   Email: dcadiga@us.ibm.com -->
 <!-- // *! BACKUP NAME : Jacob Sloat   Email: jdsloat@us.ibm.com -->
+
+
+  <hwpError>
+    <rc>RC_MSS_DRAMINIT_MC_DISPLAY_INVALID_ADDR</rc>
+    <description>Display invalid address.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture invalid address -->    
+    <ffdc>MBMACA</ffdc>
+    <!-- FFDC: Capture FIR -->    
+    <ffdc>MBAFIR</ffdc>    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>    
+</hwpError>
+
+
+  <hwpError>
+    <rc>RC_MSS_DRAMINIT_MC_DISPLAY_TIMEOUT</rc>
+    <description>Display timeout.</description>
+    <!-- FFDC: Capture cmd type -->    
+    <ffdc>MBMCT</ffdc>
+    <!-- FFDC: Capture address -->    
+    <ffdc>MBMACA</ffdc>    
+    <!-- FFDC: Capture stop conditions -->    
+    <ffdc>MBASCTL</ffdc>    
+    <!-- FFDC: Capture stop/start control reg -->    
+    <ffdc>MBMCC</ffdc>    
+    <!-- FFDC: Capture cmd in progress reg -->    
+    <ffdc>MBMSR</ffdc>    
+    <!-- FFDC: Capture FIR -->    
+    <ffdc>MBAFIR</ffdc>    
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>        
+    <!-- Callout MBA LOW -->
+    <callout><target>MBA</target><priority>LOW</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MBA -->    
+    <gard><target>MBA</target></gard>        
+    
+</hwpError>
+
+
+  <hwpError>
+    <rc>RC_MSS_DRAMINIT_MC_INSUF_RCD_PROTECT_TIME</rc>
+    <description>Injected RCD parity error detected too late for RCD retry to be effective.</description>
+    <!-- FFDC: PORT select: 0,1 -->    
+    <ffdc>PORT_SELECT</ffdc>
+    <!-- FFDC: DIMM select: 0,1 -->        
+    <ffdc>DIMM_SELECT</ffdc>        
+    <!-- FFDC: MBS has to be told about RCD parity error before cfg_wrdone_dly so it knows to retry writes -->
+    <ffdc>CFG_WRDONE_DLY</ffdc>                
+    <!-- FFDC: MBS has to be told about RCD parity error before cfg_rdtag_dly so it knows to retry reads -->
+    <ffdc>CFG_RDTAG_DLY</ffdc>                
+    <!-- FFDC: Injected RCD parity error not detected within detected max_cfg_rcd_protection_time, so RCD retry not effective -->
+    <ffdc>MAX_CFG_RCD_PROTECTION_TIME</ffdc>                
+    <!-- FFDC: Capture register with the RCD retry settings -->
+    <ffdc>MBA_FARB0</ffdc>                
+    <!-- FFDC: Capture MBACALFIR to see if at least the MBA detected the injected RCD parity error -->
+    <ffdc>MBACALFIR</ffdc>                
+    <!-- Callout DIMM HIGH -->
+    <callout><target>DIMM</target><priority>HIGH</priority></callout>
+    <!-- Deconfigure DIMM -->
+    <deconfigure><target>DIMM</target></deconfigure>
+    <!-- Create GARD record for DIMM -->    
+    <gard><target>DIMM</target></gard>         
+    <!-- Callout MBA LOW -->
+    <callout><target>MBA</target><priority>LOW</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MBA -->    
+    <gard><target>MBA</target></gard>        
+</hwpError>
 
 </hwpErrors>

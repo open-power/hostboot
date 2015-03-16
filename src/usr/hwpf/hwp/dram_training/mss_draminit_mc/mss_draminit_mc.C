@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.48 2014/12/05 15:37:43 dcadiga Exp $
+// $Id: mss_draminit_mc.C,v 1.50 2015/02/19 20:51:29 gollub Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -46,6 +46,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.50   | gollub   |12-FEB-20| Changed maint cmd delay from 100mSec to 1mSec
+//  1.49   | gollub   |12-FEB-15| Add check for RCD protect time on RDIMM and LRDIMM
 //  1.48   | dcadiga  |05-DEC-14| Powerdown control at initfile
 //  1.47   | dcadiga  |09-SEP-14| Removed SPARE cke disable step
 //  1.46   | gollub   |07-APR-14| Removed call to mss_unmask_inband_errors (moved it to proc_cen_framelock)
@@ -128,6 +130,7 @@ ReturnCode mss_set_iml_complete(Target& i_target);
 ReturnCode mss_enable_power_management(Target& i_target);
 ReturnCode mss_enable_control_bit_ecc(Target& i_target);
 ReturnCode mss_ccs_mode_reset(Target& i_target);
+ReturnCode mss_check_RCD_protect_time(Target& i_target);
 ReturnCode mss_spare_cke_disable(Target& i_target);
 
 
@@ -224,6 +227,17 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
            FAPI_ERR("---Error During CCS Mode Reset rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
            return rc;
         }
+
+
+        // Check RCD protect time on RDIMM and LRDIMM
+        FAPI_INF( "+++ Check RCD protect time on RDIMM and LRDIMM +++");
+        rc = mss_check_RCD_protect_time(l_mbaChiplets[i]);
+        if(rc)
+        {
+           FAPI_ERR("---Error During Check RCD protect time rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+           return rc;
+        }
+
 
         // Step Three: Enable Refresh
         FAPI_INF( "+++ Enabling Refresh +++");
@@ -614,6 +628,585 @@ ReturnCode mss_ccs_mode_reset (Target& i_target)
     FAPI_INF("+++ mss_ccs_mode_reset complete +++");
     return rc;
 }
+
+
+ReturnCode mss_check_RCD_protect_time (Target& i_target)
+{
+
+    // Target MBA
+    
+    uint32_t l_ecmd_rc = 0; 
+    fapi::ReturnCode l_rc;
+    fapi::Target l_targetCentaur;
+    uint8_t l_mbaPosition = 0;    
+    uint8_t l_dimm_type = 0;
+    uint8_t l_cfg_wrdone_dly = 0;
+    uint8_t l_cfg_rdtag_dly = 0;
+    uint8_t l_cfg_rcd_protection_time = 0;
+    uint8_t l_highest_cfg_rcd_protection_time = 0;
+    uint8_t l_max_cfg_rcd_protection_time = 0;
+    uint8_t l_cmdType = 0x10; // DISPLAY, bit 0:5 = 10000b 
+    uint8_t l_valid_dimms  = 0;
+    uint8_t l_valid_dimm[2][2];
+    uint8_t l_port=0;
+    uint8_t l_dimm=0;
+    uint8_t l_dimm_index = 0;
+
+    std::vector<fapi::Target> l_target_dimm_array;
+    uint8_t l_target_port = 0;
+    uint8_t l_target_dimm = 0;
+
+    // 1 ms delay for HW mode
+    const uint64_t  HW_MODE_DELAY = 1000000;
+    
+    // 200000 sim cycle delay for SIM mode
+    const uint64_t  SIM_MODE_DELAY = 200000;
+
+    uint32_t l_mbeccfir_mask_or_address[2]={
+    // port0/1                            port2/3
+    MBS_ECC0_MBECCFIR_MASK_OR_0x02011445, MBS_ECC1_MBECCFIR_MASK_OR_0x02011485};
+
+    uint32_t l_mbeccfir_and_address[2]={
+    // port0/1                            port2/3
+    MBS_ECC0_MBECCFIR_AND_0x02011441,  MBS_ECC0_MBECCFIR_AND_0x02011481};
+    
+    uint32_t l_mbeccfir_address[2]={
+    // port0/1                            port2/3
+    MBS_ECC0_MBECCFIR_0x02011440, MBS_ECC1_MBECCFIR_0x02011480};
+      
+    ecmdDataBufferBase l_mbeccfir_mask_or(64);  
+    ecmdDataBufferBase l_mbeccfir_and(64);
+    ecmdDataBufferBase l_mbeccfir(64);
+    ecmdDataBufferBase l_mbacalfir_mask_or(64);
+    ecmdDataBufferBase l_mbacalfir_mask_and(64);
+    ecmdDataBufferBase l_mbacalfir_and(64);    
+    ecmdDataBufferBase l_mbacalfir(64);        
+    ecmdDataBufferBase l_mba_dsm0(64);    
+    ecmdDataBufferBase l_mba_farb0(64);    
+    ecmdDataBufferBase l_mbmct(64);    
+    ecmdDataBufferBase l_mbmaca(64);    
+    ecmdDataBufferBase l_mbasctl(64);
+    ecmdDataBufferBase l_mbmcc(64);
+    ecmdDataBufferBase l_mbafir(64);    
+    ecmdDataBufferBase l_mbmsr(64);
+
+    //------------------------------------------------------    
+    // Get DIMM type        
+    //------------------------------------------------------        
+    l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, l_dimm_type);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_EFF_DIMM_TYPE on %s.",i_target.toEcmdString());
+        return l_rc;
+    }
+    
+    //------------------------------------------------------            
+    // Only run on RDIMM or LRDIMM
+    //------------------------------------------------------            
+    if ((l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)||(l_dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+    {
+        //------------------------------------------------------
+        // Exit if parity error reporting disabled
+        //------------------------------------------------------
+        // NOTE: This is just to be safe, so we don't create errors in case the initfile is out of sync.
+        // Read FARB0
+        l_rc = fapiGetScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+        if(l_rc) return l_rc;
+        
+        if(l_mba_farb0.isBitSet(60))
+        {
+            FAPI_ERR("Exit mss_check_RCD_protect_time, since parity error reporting disabled on %s.",i_target.toEcmdString());
+            return l_rc;
+        }
+
+        //------------------------------------------------------    
+        // Get Centaur target for the given MBA
+        //------------------------------------------------------
+        l_rc = fapiGetParentChip(i_target, l_targetCentaur);
+        if(l_rc)
+        {
+            FAPI_ERR("Error getting Centaur parent target for the given MBA on %s.",i_target.toEcmdString());
+            return l_rc;
+        }        
+
+        //------------------------------------------------------
+        // Get MBA position: 0 = mba01, 1 = mba23
+        //------------------------------------------------------
+        l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
+        if(l_rc)
+        {
+            FAPI_ERR("Error getting MBA position on %s.",i_target.toEcmdString());
+            return l_rc;
+        } 
+
+        //------------------------------------------------------
+        // Find out which DIMMs are functional
+        //------------------------------------------------------
+        l_rc = FAPI_ATTR_GET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, &i_target, l_valid_dimms);
+        if (l_rc)
+        {
+            FAPI_ERR("Failed to get attribute: ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR on %s.",i_target.toEcmdString());
+            return l_rc;
+        }
+        l_valid_dimm[0][0] = (l_valid_dimms & 0x80); // port0, dimm0
+        l_valid_dimm[0][1] = (l_valid_dimms & 0x40); // port0, dimm1
+        l_valid_dimm[1][0] = (l_valid_dimms & 0x08); // port1, dimm0
+        l_valid_dimm[1][1] = (l_valid_dimms & 0x04); // port1, dimm1
+
+
+        //------------------------------------------------------ 
+        // Mask MBECCFIR bit 45: maint RCD parity error
+        //------------------------------------------------------    
+        l_ecmd_rc |= l_mbeccfir_mask_or.flushTo0();
+        // Set bit 45 in the OR mask
+        l_ecmd_rc |= l_mbeccfir_mask_or.setBit(45);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        // Write OR mask
+        l_rc = fapiPutScom(l_targetCentaur, l_mbeccfir_mask_or_address[l_mbaPosition], l_mbeccfir_mask_or); 
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------ 
+        // Mask MBACALFIR bits 4,7: port0,1 RCD parity error
+        //------------------------------------------------------    
+        l_ecmd_rc |= l_mbacalfir_mask_or.flushTo0();
+        // Set bit 4,7 in the OR mask
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(4);
+        l_ecmd_rc |= l_mbacalfir_mask_or.setBit(7);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        // Write OR mask
+        l_rc = fapiPutScom(i_target, MBA01_MBACALFIR_MASK_OR_0x03010405, l_mbacalfir_mask_or); 
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------ 
+        // Find l_max_cfg_rcd_protection_time
+        //------------------------------------------------------    
+        l_rc = fapiGetScom(i_target, MBA01_MBA_DSM0_0x0301040a, l_mba_dsm0);
+        if(l_rc) return l_rc;
+        // Get 24:29 cfg_wrdone_dly
+        l_ecmd_rc |= l_mba_dsm0.extractPreserve(&l_cfg_wrdone_dly, 24, 6, 8-6);
+        // Get 36:41 cfg_rdtag_dly
+        l_ecmd_rc |= l_mba_dsm0.extractPreserve(&l_cfg_rdtag_dly, 36, 6, 8-6);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+        // Pick lower of the two: cfg_wrdone_dly and cfg_rdtag_dly, and use that for l_max_cfg_rcd_protection_time
+        if (l_cfg_wrdone_dly <= l_cfg_rdtag_dly)
+        {
+            l_max_cfg_rcd_protection_time = l_cfg_wrdone_dly;
+        }
+        else
+        {
+            l_max_cfg_rcd_protection_time = l_cfg_rdtag_dly;
+        }                       
+        
+        //------------------------------------------------------ 
+        // Maint cmd setup steps we can do once per MBA
+        //------------------------------------------------------    
+
+        // Load display cmd type: MBMCT, 0:5 = 10000b      
+        l_rc = fapiGetScom(i_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
+        if(l_rc) return l_rc;        
+        l_ecmd_rc |= l_mbmct.insert(l_cmdType, 0, 5, 8-5 );
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        l_rc = fapiPutScom(i_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
+        if(l_rc) return l_rc;
+
+        // Clear all stop conditions in MBASCTL        
+        l_rc = fapiGetScom(i_target, MBA01_MBASCTLQ_0x0301060F, l_mbasctl);
+        if(l_rc) return l_rc;
+        l_ecmd_rc |= l_mbasctl.clearBit(0,13);
+        l_ecmd_rc |= l_mbasctl.clearBit(16);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        l_rc = fapiPutScom(i_target, MBA01_MBASCTLQ_0x0301060F, l_mbasctl);
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------
+        // For each port in the given MBA:0,1
+        //------------------------------------------------------
+        for(l_port=0; l_port<2; l_port++ )
+        {
+            //------------------------------------------------------
+            // For each DIMM select on the given port:0,1
+            //------------------------------------------------------            
+            for(l_dimm=0; l_dimm<2; l_dimm++ )
+            {
+                //------------------------------------------------------
+                // If DIMM valid
+                //------------------------------------------------------            
+                if (l_valid_dimm[l_port][l_dimm])
+                {
+                    //------------------------------------------------------ 
+                    // Start with cfg_rcd_protection_time of 8
+                    //------------------------------------------------------                     
+                    l_cfg_rcd_protection_time = 8;
+
+                    //------------------------------------------------------ 
+                    // Clear MBECCFIR bit 45: maint RCD parity error
+                    //------------------------------------------------------    
+                    l_ecmd_rc |= l_mbeccfir_and.flushTo1();
+                    // Clear bit 45 in the AND mask
+                    l_ecmd_rc |= l_mbeccfir_and.clearBit(45);
+                    if(l_ecmd_rc)
+                    {
+                        l_rc.setEcmdError(l_ecmd_rc);
+                        return l_rc;
+                    }
+                    // Write AND mask
+                    l_rc = fapiPutScom(l_targetCentaur, l_mbeccfir_and_address[l_mbaPosition], l_mbeccfir_and); 
+                    if(l_rc) return l_rc;
+
+                    //------------------------------------------------------ 
+                    // Loop until we find a passing cfg_rcd_protection_time
+                    //------------------------------------------------------    
+                    do
+                    {
+                        //------------------------------------------------------ 
+                        // Clear MBACALFIR bits 4,7: port0,1 RCD parity error
+                        //------------------------------------------------------
+                        // NOTE: Clearing these each time so they will be accrate for FFDC
+                        l_ecmd_rc |= l_mbacalfir_and.flushTo1();
+                        // Clear bit 4,7 in the AND mask
+                        l_ecmd_rc |= l_mbacalfir_and.clearBit(4);
+                        l_ecmd_rc |= l_mbacalfir_and.clearBit(7);
+                        if(l_ecmd_rc)
+                        {
+                            l_rc.setEcmdError(l_ecmd_rc);
+                            return l_rc;
+                        }
+                        // Write AND mask
+                        l_rc = fapiPutScom(i_target, MBA01_MBACALFIR_AND_0x03010401, l_mbacalfir_and); 
+                        if(l_rc) return l_rc;
+
+
+                        //------------------------------------------------------ 
+                        // Set l_cfg_rcd_protection_time
+                        //------------------------------------------------------                            
+                        // Read FARB0
+                        l_rc = fapiGetScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+                        if(l_rc) return l_rc;
+                        
+                        // Set cfg_rcd_protection_time
+                        l_ecmd_rc |= l_mba_farb0.insert( l_cfg_rcd_protection_time, 48, 6, 8-6 );
+                                
+
+                        //------------------------------------------------------ 
+                        // Arm single shot RCD parity error for the given port
+                        //------------------------------------------------------                            
+                        // Select single shot
+                        l_ecmd_rc |= l_mba_farb0.clearBit(59);                                
+                        if(l_port == 0)
+                        {
+                            // Select port0 CAS
+                            l_ecmd_rc |= l_mba_farb0.setBit(40);
+                        }
+                        else
+                        {
+                            // Select port1 CAS
+                            l_ecmd_rc |= l_mba_farb0.setBit(42);
+                        }                                
+                        if(l_ecmd_rc)
+                        {
+                            l_rc.setEcmdError(l_ecmd_rc);
+                            return l_rc;
+                        }
+                        // Write FARB0
+                        l_rc = fapiPutScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+                        if(l_rc) return l_rc;
+
+
+                        //------------------------------------------------------ 
+                        // Do single address display cmd
+                        //------------------------------------------------------    
+
+                        // Load start address in MBMACA for the given DIMM
+                        l_ecmd_rc |= l_mbmaca.flushTo0();                      
+                        if(l_dimm == 1)
+                        {
+                            l_ecmd_rc |= l_mbmaca.setBit(1);
+                        }
+                        
+                        if(l_ecmd_rc)
+                        {
+                            l_rc.setEcmdError(l_ecmd_rc);
+                            return l_rc;
+                        }                        
+                        l_rc = fapiPutScom(i_target, MBA01_MBMACAQ_0x0301060D, l_mbmaca);
+                        if(l_rc) return l_rc;
+                        
+                        // Start the command: MBMCCQ
+                        l_ecmd_rc |= l_mbmcc.flushTo0();        
+                        l_ecmd_rc |= l_mbmcc.setBit(0);
+                        if(l_ecmd_rc)
+                        {
+                            l_rc.setEcmdError(l_ecmd_rc);
+                            return l_rc;
+                        }
+                        l_rc = fapiPutScom(i_target, MBA01_MBMCCQ_0x0301060B, l_mbmcc);
+                        if(l_rc) return l_rc;        
+
+                        // Check for MBAFIR[1], invalid maint address.
+                        l_rc = fapiGetScom(i_target, MBA01_MBAFIRQ_0x03010600, l_mbafir);
+                        if(l_rc) return l_rc;
+                        
+                        if (l_mbafir.isBitSet(1))
+                        {
+                            FAPI_ERR("Display invalid address = 0x%.8X 0x%.8X, on port%d, dimm%d, %s.",
+                            l_mbmaca.getWord(0), l_mbmaca.getWord(1), l_port, l_dimm, i_target.toEcmdString());
+
+                            // Calling out FW high
+                            // FFDC: MBA target
+                            const fapi::Target & MBA = i_target;
+                            // FFDC: Capture invalid address
+                            ecmdDataBufferBase & MBMACA = l_mbmaca;
+                            // FFDC: Capture FIR
+                            ecmdDataBufferBase & MBAFIR = l_mbafir;
+                            // Create new log
+                            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_DRAMINIT_MC_DISPLAY_INVALID_ADDR);
+                            
+                            return l_rc;                            
+                        }
+
+                        // Delay 1 mSec
+                        fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY);
+
+                        // See if MBMSRQ[0] maint cmd in progress bit if off
+                        l_rc = fapiGetScom(i_target, MBA01_MBMSRQ_0x0301060C, l_mbmsr);
+                        if(l_rc) return l_rc;
+
+                        // If cmd still in progress
+                        if (l_mbmsr.isBitSet(1))
+                        {
+                            FAPI_ERR("Display timeout on %s.",i_target.toEcmdString());
+
+                            // Calling out FW high
+                            // Calling out MBA target low, deconfig, gard
+                            const fapi::Target & MBA = i_target;
+                            // FFDC: Capture cmd type
+                            ecmdDataBufferBase & MBMCT = l_mbmct;
+                            // FFDC: Capture address
+                            ecmdDataBufferBase & MBMACA = l_mbmaca;
+                            // FFDC: Capture stop conditions
+                            ecmdDataBufferBase & MBASCTL = l_mbasctl;
+                            // FFDC: Capture stop/start control reg
+                            ecmdDataBufferBase & MBMCC = l_mbmcc;
+                            // FFDC: Capture Capture cmd in progress reg
+                            ecmdDataBufferBase & MBMSR = l_mbmsr;
+                            // FFDC: Capture FIR
+                            ecmdDataBufferBase & MBAFIR = l_mbafir;
+                            // Create new log
+                            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_DRAMINIT_MC_DISPLAY_TIMEOUT);
+                            
+                            return l_rc;
+                        }
+                    
+
+                        //------------------------------------------------------ 
+                        // Check for MBECCFIR bit 45: maint RCD parity error
+                        //------------------------------------------------------    
+
+                        l_rc = fapiGetScom(l_targetCentaur, l_mbeccfir_address[l_mbaPosition], l_mbeccfir); 
+                        if(l_rc) return l_rc;
+
+                        // If FIR bit set
+                        if (l_mbeccfir.isBitSet(45))
+                        {                            
+                            // Save highest value seen on this MBA
+                            if (l_cfg_rcd_protection_time > l_highest_cfg_rcd_protection_time)
+                            {
+                                l_highest_cfg_rcd_protection_time = l_cfg_rcd_protection_time;
+                            }
+                            
+                            break; // Exit do-while loop and move on to another DIMM
+                        }
+                        
+                        // Else FIR not set
+                        else
+                        {                        
+                            // Reached max_cfg_rcd_protection_time
+                            if (l_cfg_rcd_protection_time == l_max_cfg_rcd_protection_time)
+                            {
+                                FAPI_ERR("Injected RCD parity error detected too late for RCD retry to be effective, max_cfg_rcd_protection_time=%d, port%d, dimm%d, %s",
+                                 l_max_cfg_rcd_protection_time, l_port, l_dimm, i_target.toEcmdString());
+
+
+                                //Read mbacalfir for FFDC                               
+                                l_rc = fapiGetScom(i_target, MBA01_MBACALFIR_0x03010400, l_mbacalfir);
+                                if(l_rc) return l_rc;
+
+                                // Get DIMM targets for this MBA
+                                l_rc = fapiGetAssociatedDimms(i_target, l_target_dimm_array);
+                                if (l_rc)
+                                {
+                                    FAPI_ERR("Failed to get associated DIMMs on %s.",i_target.toEcmdString());
+                                    return l_rc;
+                                }
+                                
+                                // Find DIMM target for this l_port and l_dimm
+                                for (l_dimm_index = 0; l_dimm_index < l_target_dimm_array.size(); l_dimm_index ++)
+                                {
+                                    l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &l_target_dimm_array[l_dimm_index], l_target_port);
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Failed to get ATTR_MBA_PORT on %s.",i_target.toEcmdString());
+                                        return l_rc;
+                                    }
+
+                                    l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &l_target_dimm_array[l_dimm_index], l_target_dimm);
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Failed to get ATTR_MBA_DIMM on %s.",i_target.toEcmdString());
+                                        return l_rc;
+                                    }
+                                    
+                                    if ((l_target_port == l_port) && (l_target_dimm == l_dimm))
+                                    {
+                                        break; // Break out of for loop since we found the DIMM target for this l_port and l_dimm
+                                    }
+                                }
+
+
+                                // Calling out DIMM high, deconfig, gard                                
+                                const fapi::Target & DIMM = l_target_dimm_array[l_dimm_index];
+                                // Calling out MBA target low, deconfig, gard
+                                const fapi::Target & MBA = i_target;
+                                // FFDC: PORT select: 0,1
+                                uint8_t PORT_SELECT = l_port;
+                                // FFDC: DIMM select: 0,1
+                                uint8_t DIMM_SELECT = l_dimm;
+                                // FFDC: MBS has to be told about RCD parity error before cfg_wrdone_dly so it knows to retry writes
+                                uint8_t CFG_WRDONE_DLY = l_cfg_wrdone_dly;
+                                // FFDC: MBS has to be told about RCD parity error before cfg_rdtag_dly so it knows to retry reads                                
+                                uint8_t CFG_RDTAG_DLY = l_cfg_rdtag_dly;
+                                // FFDC: Injected RCD parity error not detected within detected max_cfg_rcd_protection_time, so RCD retry not effective
+                                uint8_t MAX_CFG_RCD_PROTECTION_TIME = l_max_cfg_rcd_protection_time;                                
+                                // FFDC: Capture register with the RCD retry settings
+                                ecmdDataBufferBase & MBA_FARB0 = l_mba_farb0;
+                                // FFDC: Capture MBACALFIR to see if at least the MBA detected the injected RCD parity error
+                                ecmdDataBufferBase & MBACALFIR = l_mbacalfir;
+                                // Create new log
+                                FAPI_SET_HWP_ERROR(l_rc, RC_MSS_DRAMINIT_MC_INSUF_RCD_PROTECT_TIME);
+                                // 'Commit' the log so we can keep running
+                                fapiLogError(l_rc);
+                                                                                                                               
+                                break; // Exit do-while loop and move on to another DIMM
+                            }
+                            
+                            // Else increment cfg_rcd_protection_time and try again
+                            else
+                            {                           
+                                l_cfg_rcd_protection_time++;                        
+                            }                        
+                        }
+                    }
+                    while (1);
+                    
+                }// End if valid DIMM
+            }// End for each DIMM select
+        }// End for each port                                                
+
+
+        //------------------------------------------------------ 
+        // Clear MBECCFIR bit 45
+        //------------------------------------------------------    
+        l_ecmd_rc |= l_mbeccfir_and.flushTo1();
+        // Clear bit 45 in the AND mask
+        l_ecmd_rc |= l_mbeccfir_and.clearBit(45);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        // Write AND mask
+        l_rc = fapiPutScom(l_targetCentaur, l_mbeccfir_and_address[l_mbaPosition], l_mbeccfir_and); 
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------ 
+        // Clear MBACALFIR bits 4,7: port0,1 RCD parity error
+        //------------------------------------------------------    
+        l_ecmd_rc |= l_mbacalfir_and.flushTo1();
+        // Clear bit 4,7 in the AND mask
+        l_ecmd_rc |= l_mbacalfir_and.clearBit(4);
+        l_ecmd_rc |= l_mbacalfir_and.clearBit(7);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        // Write AND mask
+        l_rc = fapiPutScom(i_target, MBA01_MBACALFIR_AND_0x03010401, l_mbacalfir_and); 
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------ 
+        // Unmask MBACALFIR bits 4,7: port0,1 RCD parity error
+        //------------------------------------------------------    
+        l_ecmd_rc |= l_mbacalfir_mask_and.flushTo1();
+        // Set bit 4,7 in the AND mask
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(4);
+        l_ecmd_rc |= l_mbacalfir_mask_and.clearBit(7);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        // Write AND mask
+        l_rc = fapiPutScom(i_target, MBA01_MBACALFIR_MASK_AND_0x03010404, l_mbacalfir_mask_and); 
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------ 
+        // Load l_highest_cfg_rcd_protection_time
+        //------------------------------------------------------    
+        // NOTE: We are loading highest_cfg_rcd_protection_time here just so we can stop after mss_draminit_mc and read out the values from the hw as a way to debug
+        // NOTE: The final value we want to load is max_cfg_rcd_protection_time, which we will do in mss_thermal_init, before we enable RCD recovery.
+        // NOTE: If no DIMM on this MBA passed, highest_cfg_rcd_protection_time will be 0
+        
+        // Read FARB0
+        l_rc = fapiGetScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+        if(l_rc) return l_rc;        
+        // Set highest_cfg_rcd_protection_time
+        l_ecmd_rc |= l_mba_farb0.insert( l_highest_cfg_rcd_protection_time, 48, 6, 8-6 );
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        // Write FARB0
+        l_rc = fapiPutScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+        if(l_rc) return l_rc;
+
+        
+    } // End if RDIMM or LRDIMM
+
+
+
+    FAPI_INF("+++ mss_check_RCD_protect_time complete +++");
+    return l_rc;
+}
+
 
 ReturnCode mss_spare_cke_disable (Target& i_target)
 {
