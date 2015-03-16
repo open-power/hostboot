@@ -43,3 +43,9 @@ config PNOR_TWO_SIDE_SUPPORT
     depends on !PNOR_IS_32MB
     help
         This is used to turn on/off two sided pnor support
+
+config PNOR_INIT_FOUR_BYTE_ADDR
+    default n
+    depends on !BMC_DOES_SFC_INIT
+    help
+        PNOR starts out in 3-byte address mode, hostboot must enable 4-byte mode.
