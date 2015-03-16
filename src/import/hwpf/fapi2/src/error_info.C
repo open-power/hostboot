@@ -118,9 +118,9 @@ namespace fapi2
         const CalloutPriorities::CalloutPriority i_priority):
         iv_target(i_target),
         iv_callout(i_callout),
+        iv_calloutPriority(i_priority),
         iv_deconfigure(i_deconfigure),
-        iv_gard(i_gard),
-        iv_calloutPriority(i_priority)
+        iv_gard(i_gard)
     {}
 
     ///
@@ -271,7 +271,7 @@ namespace fapi2
     ///
     void ErrorInfoEntryProcCallout::addErrorInfo(
         std::shared_ptr<ErrorInfo> i_info,
-        const void* const* i_object) const
+        const void* const* ) const
     {
         ErrorInfoProcedureCallout* ei = new ErrorInfoProcedureCallout(
             static_cast<ProcedureCallouts::ProcedureCallout>(iv_procedure),
@@ -396,7 +396,7 @@ namespace fapi2
     ///
     void ErrorInfoEntryCollectTrace::addErrorInfo(
         std::shared_ptr<ErrorInfo> i_info,
-        const void* const* i_object) const
+        const void* const* ) const
     {
         ErrorInfoCollectTrace* ei = new ErrorInfoCollectTrace(
             static_cast<CollectTraces::CollectTrace>(iv_eieTraceId));
