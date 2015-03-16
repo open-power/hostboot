@@ -409,6 +409,69 @@ errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
     return l_err;
 }
 
+// ------------------------------------------------------------------
+// IpVpdFacade::cmpSeepromToZero
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
+                                           VPD::vpdRecord i_record,
+                                           VPD::vpdKeyword i_keyword,
+                                           bool &o_match )
+{
+    errlHndl_t l_err = NULL;
+
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"cmpSeepromToZero() " );
+
+    o_match = false;
+
+    input_args_t l_seepromArgs;
+    l_seepromArgs.record = i_record;
+    l_seepromArgs.keyword = i_keyword;
+    l_seepromArgs.location = VPD::SEEPROM;
+
+    do
+    {
+        // Get the SEEPROM size
+        size_t l_sizeSeeprom = 0;
+        l_err = read( i_target,
+                      NULL,
+                      l_sizeSeeprom,
+                      l_seepromArgs );
+        if( l_err || (l_sizeSeeprom == 0) )
+        {
+            break;
+        }
+
+        // Get the SEEPROM data
+        uint8_t l_dataSeeprom[l_sizeSeeprom];
+        l_err = read( i_target,
+                      l_dataSeeprom,
+                      l_sizeSeeprom,
+                      l_seepromArgs );
+        if( l_err )
+        {
+            break;
+        }
+
+        // Compare the SEEPROM data to zero
+        uint8_t l_zero[l_sizeSeeprom];
+        memset(l_zero,0,l_sizeSeeprom);
+
+        if( memcmp( l_zero,
+                    l_dataSeeprom,
+                    l_sizeSeeprom ) != 0 )
+        {
+            break;
+        }
+
+        o_match = true;
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"cmpSeepromToZero()" );
+
+    return l_err;
+}
+
 /*             IPVPD PNOR FORMAT
    |-----------------------------------------------------------|----|
    |TOC0|TOC1|...........................................|TOC31|    |

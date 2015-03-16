@@ -88,6 +88,7 @@ namespace MVPD
         { LWPE, "LWPE" },
         { VWML, "VWML" },
         { MER0, "MER0" },
+        { VRML, "VRML" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { MVPD_TEST_RECORD, "TEST" },

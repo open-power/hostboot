@@ -445,16 +445,16 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
     if( l_type == TARGETING::TYPE_PROC )
     {
-        l_record    = MVPD::VINI;
+        l_record    = MVPD::VRML;
         l_keywordPN = MVPD::PN;
         l_keywordSN = MVPD::SN;
     }
     else if( l_type == TARGETING::TYPE_MEMBUF )
     {
         l_ipvpd     = &(Singleton<CvpdFacade>::instance());
-        l_record    = CVPD::VINI;
-        l_keywordPN = CVPD::PN;
-        l_keywordSN = CVPD::SN;
+        l_record    = CVPD::OPFR;
+        l_keywordPN = CVPD::VP;
+        l_keywordSN = CVPD::VS;
     }
     else if( l_type == TARGETING::TYPE_DIMM )
     {
@@ -486,6 +486,40 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
     do
     {
+        // Make sure we are comparing the correct pn/sn for CVPD
+        if( l_type == TARGETING::TYPE_MEMBUF )
+        {
+            bool l_zeroPN;
+            l_err = l_ipvpd->cmpSeepromToZero( i_target,
+                                               l_record,
+                                               l_keywordPN,
+                                               l_zeroPN );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking if OPFR:VP == 0");
+                break;
+            }
+
+            bool l_zeroSN;
+            l_err = l_ipvpd->cmpSeepromToZero( i_target,
+                                               l_record,
+                                               l_keywordSN,
+                                               l_zeroSN );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking if OPFR:VS == 0");
+                break;
+            }
+
+            // If VP and VS are zero, use VINI instead
+            if( l_zeroPN && l_zeroSN )
+            {
+                l_record    = CVPD::VINI;
+                l_keywordPN = CVPD::PN;
+                l_keywordSN = CVPD::SN;
+            }
+        }
+
         // Compare the Part Numbers in PNOR/SEEPROM
         bool l_matchPN = false;
         if( ( l_type == TARGETING::TYPE_PROC   ) ||

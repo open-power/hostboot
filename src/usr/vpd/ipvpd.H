@@ -254,6 +254,27 @@ class IpVpdFacade
                                   bool &o_match );
 
     /**
+     * @brief This function compares the specified record/keyword
+     *      in SEEPROM to zero and returns the result.  A mismatch
+     *      will not return an error.
+     *
+     * @param[in] i_target - Target device
+     *
+     * @param[in] i_record - Record to compare
+     *
+     * @param[in] i_keyword - Keyword to compare
+     *
+     * @param[out] o_match - Result of compare
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *       error log.
+     */
+    errlHndl_t cmpSeepromToZero ( TARGETING::Target * i_target,
+                                  VPD::vpdRecord i_record,
+                                  VPD::vpdKeyword i_keyword,
+                                  bool &o_match );
+
+    /**
      * @brief This function will perform the steps required to load the
      *      MVPD data from SEEPROM into the PNOR cache.
      *
