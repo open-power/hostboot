@@ -594,27 +594,21 @@ errlHndl_t SfcIBM::hwInit( )
             //*** End Micron
 #endif
 
-#ifdef CONFIG_RHESUS
-            // HACK: Micron N25Q256A13 for use with EM100.
-            { 0x20ba1900, SFC_REG_CONF4, SPI_JEDEC_SECTOR_ERASE },
-            { 0x20ba1900, SFC_REG_CONF5, 4096 },
-#endif
-
 #ifdef CONFIG_ALLOW_MACRONIX_PNOR
             //*** Macronix 512mb chip specific settings.
-            { PNOR::MACRONIX_NOR_ID, SFC_REG_SPICLK,
+            { PNOR::MACRONIX64_NOR_ID, SFC_REG_SPICLK,
             0 << SFC_REG_SPICLK_OUTDLY_SHFT |
             0 << SFC_REG_SPICLK_INSAMPDLY_SHFT |
             0 << SFC_REG_SPICLK_CLKHI_SHFT |
             0 << SFC_REG_SPICLK_CLKLO_SHFT
             },
-            { PNOR::MACRONIX_NOR_ID, SFC_REG_CONF8,
+            { PNOR::MACRONIX64_NOR_ID, SFC_REG_CONF8,
             2 << SFC_REG_CONF8_CSINACTIVEREAD_SHFT |
             8 << SFC_REG_CONF8_DUMMY_SHFT |
             SPI_JEDEC_FAST_READ << SFC_REG_CONF8_READOP_SHFT
             },
-            { PNOR::MACRONIX_NOR_ID, SFC_REG_CONF4, SPI_JEDEC_SECTOR_ERASE },
-            { PNOR::MACRONIX_NOR_ID, SFC_REG_CONF5, 4096 },
+            { PNOR::MACRONIX64_NOR_ID, SFC_REG_CONF4, SPI_JEDEC_SECTOR_ERASE },
+            { PNOR::MACRONIX64_NOR_ID, SFC_REG_CONF5, 4096 },
             //*** End Macronix
 #endif
         };
@@ -637,15 +631,20 @@ errlHndl_t SfcIBM::hwInit( )
         }
         if( l_err ) { break; }
 
-#if 0   //@fixme-RTC:109860
-        // Enable 4-byte addressing.
-        l_err = SfcErrlFromRc( iv_sfc.set_4ba( &iv_sfc, 1 ) );
-        if( l_err ) { break; }
+#ifdef CONFIG_PNOR_INIT_FOUR_BYTE_ADDR
+        // Enable 4 byte addressing.  This is safe even if 4BA is already
+        // enabled by the BMC/FSP/etc.
+        SfcCmdReg_t sfc_cmd;
+        sfc_cmd.opcode = SFC_OP_START4BA;
+        sfc_cmd.length = 0;
+        l_err = writeReg(SFC_CMD_SPACE,
+                         SFC_REG_CMD,
+                         sfc_cmd.data32);
+        if(l_err) { break; }
 
-        // Re-initialize internal erase size cached value.
-        l_err = SfcErrlFromRc( iv_sfc.get_erase_size(
-                                     &iv_sfc, &iv_eraseSizeBytes, NULL ) );
-        if( l_err ) { break; }
+        //Poll for complete status
+        l_err = pollOpComplete();
+        if(l_err) { break; }
 #endif
 
 #endif //!CONFIG_BMC_DOES_SFC_INIT
@@ -656,7 +655,6 @@ errlHndl_t SfcIBM::hwInit( )
                         iv_eraseSizeBytes);
         if(l_err) { break; }
         TRACFCOMP(g_trac_pnor,"iv_eraseSizeBytes=0x%X",iv_eraseSizeBytes);
-
 
 #ifdef CONFIG_ALLOW_MICRON_PNOR
         if( iv_norChipId == PNOR::MICRON_NOR_ID )
