@@ -352,6 +352,27 @@ namespace fapi2
         template< bits_type SB, bits_type L = 1 >
         bits_type getNumBitsSet(void) const;
 
+        ///
+        /// @brief Set and entire buffer to X's
+        /// @tparam X {0,1} depending if you want to clear (0)
+        /// or fill (1) a buffer
+        /// @return buffer_base&, Useful for method chaining
+        ///
+        template< uint8_t X >
+        inline variable_buffer& flush(void)
+            {
+                static_assert( (X == 1) || (X == 0), "bad argument to flush" );
+                (0 == X) ? bufferTraits<bits_container>::clear(this->iv_data) : bufferTraits<bits_container>::set(this->iv_data);
+                return *this;
+            }
+
+        ///
+        /// @brief Invert entire buffer
+        /// @return buffer_base&, Useful for method chaining
+        ///
+        inline variable_buffer& invert(void)
+            { bufferTraits<bits_container>::invert(this->iv_data); return *this; }
+
         ///@}
 
         /// @name Buffer Manipulation Functions
