@@ -135,6 +135,25 @@ namespace fapi2
         }
 
         ///
+        /// @brief Write a bit in buffer to a given value
+        /// @tparam B Bit in buffer to write
+        /// @return buffer& Useful for method chaining
+        /// @note Asserting that all the parameters are known at
+        /// compile time so this can be templated only. If that is not
+        /// the case we can add a function parameter version.
+        ///
+        template< bits_type B >
+        inline buffer& writeBit(const bool i_value)
+        {
+            static_assert((B >= 0) &&
+                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
+
+            (i_value == 0) ? clearBit<B>() : setBit<B>();
+            return *this;
+        }
+
+
+        ///
         /// @brief Invert bit
         /// @tparam B Bit in buffer to invert.
         /// @return buffer& Useful for method chaining
@@ -182,6 +201,35 @@ namespace fapi2
             {
                 return buffer<T>().setBit<B>() & this->iv_data;
             }
+
+        ///
+        /// @brief Set and entire buffer to X's
+        /// @tparam X {0,1} depending if you want to clear (0)
+        /// or fill (1) a buffer
+        /// @return buffer_base&, Useful for method chaining
+        ///
+        template< uint8_t X >
+        inline buffer& flush(void)
+            {
+                static_assert( (X == 1) || (X == 0), "bad argument to flush" );
+                (0 == X) ? bufferTraits<T>::clear(this->iv_data) : bufferTraits<T>::set(this->iv_data);
+                return *this;
+            }
+
+        ///
+        /// @brief Invert entire buffer
+        /// @return buffer_base&, Useful for method chaining
+        ///
+        inline buffer& invert(void)
+            { bufferTraits<T>::invert(this->iv_data); return *this; }
+
+        ///
+        /// @brief Bit reverse entire buffer
+        /// @return buffer_base&, Useful for method chaining
+        ///
+        inline buffer& reverse(void)
+            { bufferTraits<T>::reverse(this->iv_data); return *this; }
+
 
         ///@}
 
@@ -284,12 +332,13 @@ namespace fapi2
         /// @tparam OT the type of the incoming (origin) data
         /// @param[in] i_datain OT value to copy into DataBuffer
         ///    - data is taken left aligned
+        /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
         template<bits_type TS, bits_type L, bits_type SS = 0, typename OT>
-        inline void insert(const OT i_datain)
+        inline buffer& insert(const OT i_datain)
         {
             const bits_type target_length = parameterTraits<T>::bit_length();
             const bits_type source_length = parameterTraits<OT>::bit_length();
@@ -328,7 +377,7 @@ namespace fapi2
             }
 
             this->iv_data = ((target & ~mask) | (source & mask));
-            return;
+            return *this;
         }
 
         ///
@@ -338,13 +387,14 @@ namespace fapi2
         /// @tparam OT the type of the incoming (origin) data
         /// @param[in] i_datain OT value to copy into DataBuffer
         ///    - data is taken right aligned
+        /// @return buffer& Useful for method chaining
         /// @note Data is assumed to be aligned on the word boundary of L
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
         template<bits_type TS, bits_type L, typename OT>
-        inline void insertFromRight(const OT i_datain)
+        inline buffer& insertFromRight(const OT i_datain)
         {
             // Error if input data don't make sense
             static_assert(L < parameterTraits<OT>::bit_length(),
@@ -355,7 +405,7 @@ namespace fapi2
                           "InsertFromRight(): (Target Start + Len) is out of bounds");
 
             this->insert<TS, L, parameterTraits<OT>::bit_length() - L>(i_datain);
-            return;
+            return *this;
         }
 
         ///
@@ -365,19 +415,20 @@ namespace fapi2
         /// @tparam SS Start bit in source
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed left aligned
+        /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
         template<bits_type TS, bits_type L, bits_type SS, typename OT>
-        inline void extract(OT& o_out)
+        inline buffer& extract(OT& o_out)
         {
             // Extraction is just an insert into o_out
 
             buffer<OT> out(o_out);
             out.insert<TS, L, SS>(this->iv_data);
             o_out = out;
-            return;
+            return *this;
         }
 
         ///
@@ -386,15 +437,16 @@ namespace fapi2
         /// @tparam L Length of bits to insert
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed right aligned
+        /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
         template<bits_type SS, bits_type L, typename OT>
-        inline void extractToRight(OT& o_out)
+        inline buffer& extractToRight(OT& o_out)
         {
             extract<parameterTraits<OT>::bit_length() - L, L, SS>(o_out);
-            return;
+            return *this;
         }
 
         ///@}
