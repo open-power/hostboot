@@ -75,7 +75,10 @@ struct misc_args_t
                   polling_interval_ns(0),
                   timeout_count(0),
                   offset_length(0),
-                  offset_buffer(NULL){};
+                  offset_buffer(NULL)
+                  {
+                      memset(&switches, 0x0, sizeof(switches));
+                  };
 
 };
 

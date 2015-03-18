@@ -688,7 +688,9 @@ bool i2cPresence( TARGETING::Target * i_target,
 
 
 
-        //Set Host vs FSI switches
+        // Set I2C Mode (Host vs FSI) for the target
+        args.switches.useHostI2C = 0;
+        args.switches.useFsiI2C  = 0;
         i2cSetSwitches( i_target, args );
 
         err = i2cSetBusVariables(i_target,
