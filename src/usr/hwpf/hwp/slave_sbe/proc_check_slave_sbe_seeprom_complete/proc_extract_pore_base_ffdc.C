@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_pore_base_ffdc.C,v 1.1 2014/07/23 19:38:05 jmcgill Exp $
+// $Id: proc_extract_pore_base_ffdc.C,v 1.3 2015/03/01 21:45:05 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_pore_base_ffdc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -127,10 +127,23 @@ fapi::ReturnCode proc_extract_pore_base_ffdc(const por_base_state & i_pore_state
                 const uint64_t & SEEPROM_ECCB_STATUS = i_pore_sbe_state.i2cm_eccb_status.getDoubleWord(0);
                 const uint8_t & SOFT_ERROR_STATUS = i_pore_sbe_state.soft_err;
                 const bool & ATTN_REPORTED = i_pore_sbe_state.reported_attn;
-                FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_PROC_EXTRACT_PORE_BASE_FFDC_SBE);
+                if ((o_rc == fapi::RC_SBE_TRIGGER_WINKLE_HOSTBOOT_DID_NOT_RESPOND) ||
+                    (o_rc == fapi::RC_SBE_TRIGGER_WINKLE_EX_DID_NOT_ENTER_WINKLE) ||
+                    (o_rc == fapi::RC_SBE_TRIGGER_WINKLE_EX_WAKEUP_DID_NOT_HIT_GOTO) ||
+                    (o_rc == fapi::RC_SBE_TRIGGER_WINKLE_EX_WAKEUP_DID_NOT_FINISH))
+                {
+                    FAPI_ERR("proc_extract_pore_base_ffdc: Collecting base FFDC for SBE deadman timer fail...");
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_PROC_EXTRACT_PORE_BASE_FFDC_SBE_DEADMAN);
+                }
+                else
+                {
+                    FAPI_ERR("proc_extract_pore_base_ffdc: Collecting base FFDC for SBE non-deadman timer fail...");
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_PROC_EXTRACT_PORE_BASE_FFDC_SBE);
+                }
             }
             else
             {
+                FAPI_ERR("proc_extract_pore_base_ffdc: Collecting base FFDC for SLW fail...");
                 FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_PROC_EXTRACT_PORE_BASE_FFDC_SLW);
             }
         }
