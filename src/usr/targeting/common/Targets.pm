@@ -338,8 +338,15 @@ sub buildHierarchy
     {
         foreach my $b (@{ $target_xml->{bus} })
         {
+            if (ref($b->{dest_path}) eq "HASH") {
+                $b->{dest_path}="";
+            }
+            if (ref($b->{source_path}) eq "HASH") {
+                $b->{source_path}="";
+            }
             my $source_target =
               $key . "/" . $b->{source_path} . $b->{source_target};
+
             my $dest_target = $key . "/" . $b->{dest_path} . $b->{dest_target};
             my $bus_type    = $b->{bus_type};
             push(
