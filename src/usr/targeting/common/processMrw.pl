@@ -977,8 +977,24 @@ sub processMembufVpdAssociation
                                 $membuf_assoc->{BUS_NUM}, "ISDIMM_MBVPD_INDEX");
                 $targetObj->setAttribute(
                             $membuf_target,"ISDIMM_MBVPD_INDEX",$index);
+                $targetObj->setAttribute($membuf_target,
+                            "VPD_REC_NUM",$targetObj->{vpd_num});
             }
         }
+        my $node_assocs=$targetObj->findConnections($vpd->{DEST_PARENT},
+                          "LOGICAL_ASSOCIATION","CARD");
+
+        if ($node_assocs ne "") {
+            foreach my $node_assoc (@{$node_assocs->{CONN}}) {
+                my $mb_target = $node_assoc->{DEST_PARENT};
+                my $node_target = $targetObj->getTargetParent($mb_target);
+                setEepromAttributes($targetObj,
+                       "EEPROM_VPD_PRIMARY_INFO",$node_target,$vpd);
+                $targetObj->setAttribute($node_target,
+                            "VPD_REC_NUM",$targetObj->{vpd_num});
+            }
+        }
+        $targetObj->{vpd_num}++;
     }
 }
 
