@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +33,7 @@
 
 .if(${CONTEXT:R} == "ppc")
 
+SETUP_SUBDIRS    += fsp
 EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
@@ -40,6 +43,7 @@ RUNBVT_SUBDIRS   +=
 
 .elseif(${CONTEXT} == "x86.nfp")
 
+SETUP_SUBDIRS    += fsp
 EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
@@ -59,10 +63,10 @@ TARFILES = fsp.tar simics.tar
 
 VPATH += fsp/hwas/common:
 
-_SUBDIR/BUILD/EXPINC/fsp: expand_tars_fsp.tar
-_SUBDIR/BUILD/EXPINC/simics: expand_tars_simics.tar
+_SUBDIR/BUILD/SETUP/fsp: expand_tars_fsp.tar
+_SUBDIR/BUILD/SETUP/simics: expand_tars_simics.tar
 
-EXPINC_TARGETS += expand_tars
+SETUP_TARGETS += expand_tars
 EXPLIB_TARGETS += epub_check
 
 expand_tars: ${TARFILES:S/^/expand_tars_/g}

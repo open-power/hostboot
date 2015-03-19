@@ -5,4 +5,15 @@ Brief description of the problem or reason for patch
 -Files: list of files
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
+CMVC prereg patch to add SETUP pass to FSP build process.
+-RTC:  126183
+-CMVC: 954557
+-Files:
+    src/build/citest/etc/bbuild
+    src/build/citest/etc/patches/prereq_954557_bld.passes.mk.patch
+    src/build/citest/etc/patches/prereq_954557_build_all_steps.patch
+    src/build/citest/etc/patches/prereq_954557_hbfwmakefile.patch
+    src/build/citest/etc/patches/prereq_954557_srcmakefile.patch
+    src/build/citest/etc/workarounds.postsimsetup
+-Coreq: None
 

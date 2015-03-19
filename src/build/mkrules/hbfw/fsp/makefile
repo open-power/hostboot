@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +34,7 @@
 
 .if(${CONTEXT:R} == "ppc")
 
+SETUP_SUBDIRS    += targeting
 EXPINC_SUBDIRS   += targeting hwas pnor plugins
 OBJECTS_SUBDIRS  += plugins
 EXPLIB_SUBDIRS   += plugins
@@ -49,6 +52,7 @@ INCLUDES = hbdescriptor.H \
 # this file is in src/hbfw/fsp in cmvc
 .include "makefile.nfp"
 
+SETUP_SUBDIRS    += targeting
 EXPINC_SUBDIRS   += plugins
 OBJECTS_SUBDIRS  += plugins
 EXPLIB_SUBDIRS   += plugins

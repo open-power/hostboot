@@ -1,0 +1,18 @@
+--- .makefile	2015-03-23 14:45:48.000000000 -0500
++++ makefile	2015-03-23 14:45:54.000000000 -0500
+@@ -58,6 +58,7 @@
+ 
+ .if(${CONTEXT:R} == "ppc")
+ 
++SETUP_SUBDIRS    += xmltohb
+ EXPINC_SUBDIRS   += xmltohb
+ OBJECTS_SUBDIRS  +=
+ EXPLIB_SUBDIRS   +=
+@@ -67,6 +68,7 @@
+ 
+ .elseif(${CONTEXT} == "x86.nfp")
+ 
++SETUP_SUBDIRS    += xmltohb
+ EXPINC_SUBDIRS   += xmltohb
+ OBJECTS_SUBDIRS  +=
+ EXPLIB_SUBDIRS   +=
