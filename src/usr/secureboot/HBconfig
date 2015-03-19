@@ -1,0 +1,5 @@
+
+config SECUREBOOT
+    default y
+    help
+        Enable secure boot

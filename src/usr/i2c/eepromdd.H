@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -150,7 +152,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
  */
 errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                          void * io_buffer,
-                         size_t io_buflen,
+                         size_t & io_buflen,
                          eeprom_addr_t i_i2cInfo );
 
 /**

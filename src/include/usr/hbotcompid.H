@@ -356,6 +356,14 @@ const compId_t HTMGT_COMP_ID = 0x2600;
 const char HTMGT_COMP_NAME[] = "htmgt";
 //@}
 
+/** @name TPMDD
+ * TPM Device Driver
+ */
+//@{
+const compId_t TPMDD_COMP_ID = 0x2700;
+const char TPMDD_COMP_NAME[] = "tpmdd";
+//@}
+
 // OCCC id 2A00 matches OCCC id on FSP
 /** @name OCCC
  * OCC Thermal Management Device

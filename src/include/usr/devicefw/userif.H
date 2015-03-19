@@ -62,6 +62,7 @@ namespace DeviceFW
         LPC,
         IPMIBT,    // As opposed to other phy's
         PVPD,
+        TPM,
 
         LAST_ACCESS_TYPE,
     };
@@ -223,6 +224,20 @@ namespace DeviceFW
     #define DEVICE_EEPROM_ADDRESS( i_eeprom_enum, i_offset )\
         DeviceFW::EEPROM, static_cast<uint64_t>(( i_eeprom_enum )),\
             static_cast<uint64_t>(( i_offset ))
+
+    /**
+     * Construct the device addressing parameters for the TPM device ops.
+     * @param[in] i_tpm_enum The chip number of the TPM to access. See
+     *                            tpm_chip_types_t in tpmddif.H
+     * @param[in] i_tpm_operation The TPM operation to perform. See
+     *                            tpm_op_types_t in tpmddif.H
+     * @param[in] i_command_len Command length to write during transmit
+     *                            operations
+     */
+    #define DEVICE_TPM_ADDRESS( i_tpm_enum, i_tpm_op, i_command_len )\
+        DeviceFW::TPM, static_cast<uint64_t>(( i_tpm_enum )),\
+            static_cast<uint64_t>(( i_tpm_op )),\
+            static_cast<uint64_t>(( i_command_len ))
 
     /**
      * Construct the device addressing parameters for the GPIO port extender ops

@@ -30,6 +30,7 @@ include i2c.mk
 
 #include unique objects
 OBJS += i2c.o
+OBJS += $(if $(CONFIG_TPMDD),tpmdd.o,)
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

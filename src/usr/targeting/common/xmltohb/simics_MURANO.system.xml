@@ -395,6 +395,19 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0</default>
     </attribute>
+    <attribute>
+        <id>TPM_PRIMARY_INFO</id>
+        <default>
+             <field><id>tpmEnabled</id><value>1</value></field>
+             <field><id>i2cMasterPath</id>
+               <value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>2</value></field>
+             <field><id>devAddrLocality0</id><value>0xAE</value></field>
+             <field><id>devAddrLocality4</id><value>0xFF</value></field>
+             <field><id>engine</id><value>1</value></field>
+             <field><id>byteAddrOffset</id><value>0x01</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Murano n0p0 processor chip -->
@@ -727,7 +740,7 @@
     </attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
-        <default>1000,1000,0,400,0,0</default>
+        <default>1000,1000,0,400,0,400</default>
     </attribute>
     <attribute>
         <id>PROC_R_LOADLINE_VDD</id>

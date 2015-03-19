@@ -599,7 +599,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
 // ------------------------------------------------------------------
 errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                          void * io_buffer,
-                         size_t io_buflen,
+                         size_t & io_buflen,
                          eeprom_addr_t i_i2cInfo )
 {
     errlHndl_t err = NULL;
