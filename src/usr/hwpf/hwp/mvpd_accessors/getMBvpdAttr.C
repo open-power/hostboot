@@ -976,6 +976,22 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
             (*(UINT64_t*)o_pVal) = l_value;
             break ;
         }
+        case  UINT8:            // uint8_t
+        {
+            // make sure return value size is correct
+            if (sizeof(UINT8_t) != i_valSize)
+            {
+                l_fapirc = sizeMismatch(sizeof(UINT8_t),
+                                        i_valSize,
+                                        i_pAttrDef->iv_attrId);
+                break; //return with error
+            }
+
+            // only 1 value is present, it isn't stored per mba/port
+            uint8_t l_value = (reinterpret_cast<uint8_t*>(i_pBuffer))[l_attrOffset];
+            (*(UINT8_t*)o_pVal) = l_value;
+            break ;
+        }
         default: // Hard to do, but needs to be caught
             FAPI_ERR("returnValue: invalid output type 0x%04x for"
                        " attribute ID 0x%08x",

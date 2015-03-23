@@ -46,11 +46,14 @@ namespace getAttrData
     const uint8_t NUM_PORTS = 2;   //Each MBA has 2 ports
     const uint8_t NUM_DIMMS = 2;   //Each port has 2 DIMMs
     const uint8_t NUM_RANKS = 4;   //Number of ranks
-    const uint8_t PORT_SECTION_SIZE = 64; //Each port has 64 bytes
+    //Each port has 64 bytes of space, but only 62 bytes is useable
+    const uint8_t PORT_SECTION_SIZE = 64; 
+    const uint8_t PORT_SECTION_USED = 62; 
 
     struct port_attributes
     {
-       uint8_t port_attr[PORT_SECTION_SIZE];
+       uint8_t port_attr[PORT_SECTION_USED];
+       uint8_t nonport_data[PORT_SECTION_SIZE-PORT_SECTION_USED];
     };
     struct mba_attributes
     {
@@ -102,6 +105,7 @@ namespace getAttrData
         UINT32_BY2        =0x0004,   // uint32_t [2]
         UINT32_BY2_BY2    =0x0005,   // uint32_t [2][2]
         UINT64            =0x0006,   // uint64_t
+        UINT8             =0x0007,   // uint8_t  
     };
     const uint16_t OUTPUT_TYPE_MASK = 0x00FF;
 
@@ -111,6 +115,7 @@ namespace getAttrData
     typedef uint32_t UINT32_BY2_t [2];
     typedef uint32_t UINT32_BY2_BY2_t [2][2];
     typedef uint64_t UINT64_t;
+    typedef uint8_t UINT8_t;
 
     //  Special processing
     //  Rules:
@@ -343,6 +348,8 @@ template<>class MBvpdAttrDataType<fapi::ATTR_VPD_TSYS_ADR>
     { public: typedef fapi::ATTR_VPD_TSYS_ADR_Type Type; };
 template<>class MBvpdAttrDataType<fapi::ATTR_VPD_TSYS_DP18>
     { public: typedef fapi::ATTR_VPD_TSYS_DP18_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_POWER_CONTROL_CAPABLE>
+    { public: typedef fapi::ATTR_VPD_POWER_CONTROL_CAPABLE_Type Type; };
 
 
 // Template function that checks that the type is as expected.

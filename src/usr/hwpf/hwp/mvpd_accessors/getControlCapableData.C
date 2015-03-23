@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,38 +40,38 @@ fapi::ReturnCode getControlCapableData(
                 const fapi::Target &i_mbTarget,
                 uint8_t & o_val)
 {
-    //Record:VSPD, Keyword:MR, offset: 253, 1 byte.
-    const uint32_t MR_KEYWORD_SIZE = 255;
+    fapi::ReturnCode l_rc;
 
-    struct mr_keyword
-    {
-        uint8_t filler[253];
-        uint8_t position; //offset 253
-        uint8_t extraFiller[MR_KEYWORD_SIZE-sizeof(filler)-sizeof(position)];
-    };
-
-    fapi::ReturnCode l_fapirc;
-    mr_keyword * l_pMrBuffer = new mr_keyword;
-    uint32_t l_MrBufsize = MR_KEYWORD_SIZE;
-    do{
-
-        l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
-                    fapi::MBVPD_KEYWORD_MR,
-                    i_mbTarget,
-                    reinterpret_cast<uint8_t *>(l_pMrBuffer),
-                    l_MrBufsize);
-        if(l_fapirc)
+    FAPI_DBG("getControlCapableData: start");
+    do {
+        // ATTR_VPD_POWER_CONTROL_CAPABLE is at the membuf level, but the
+        //  getMBvpdAttr() function takes a mba, so need to do a
+        //  conversion
+        std::vector<fapi::Target> l_mbas;
+        l_rc = fapiGetChildChiplets( i_mbTarget,
+                                     fapi::TARGET_TYPE_MBA_CHIPLET,
+                                     l_mbas );
+        if( l_rc )
         {
-            FAPI_ERR("getControlCapableData: Read of MR Keyword failed");
+            FAPI_ERR("getControlCapableData: fapiGetChildChiplets failed");
             break;
         }
-        o_val = l_pMrBuffer->position;
 
-    }while(0);
+        // If we don't have any functional MBAs then we will fail in
+        //  the other function so just return a default value here
+        if( l_mbas.empty() )
+        {
+            o_val = fapi::ENUM_ATTR_VPD_POWER_CONTROL_CAPABLE_NONE;
+            break;
+        }
 
-    delete l_pMrBuffer;
-    l_pMrBuffer = NULL;
+        // Call a VPD Accessor HWP to get the data
+        FAPI_EXEC_HWP(l_rc, getMBvpdAttr,
+                      l_mbas[0], ATTR_VPD_POWER_CONTROL_CAPABLE,
+                      &o_val, sizeof(ATTR_VPD_POWER_CONTROL_CAPABLE_Type));
+    } while(0);
+    FAPI_DBG("getControlCapableData: end");
 
-    return l_fapirc;
+    return l_rc;
 }
 }
