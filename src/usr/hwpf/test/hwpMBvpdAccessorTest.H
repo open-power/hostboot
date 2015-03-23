@@ -1241,7 +1241,8 @@ public:
                            &val1, sizeof(val1)+1); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
-                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                  TS_FAIL("testGetTermData: expect invalid size RC"
+                         " for output type UINT8_BY2_BY2_t:"
                          " 0x%08x,0x%08x",
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
@@ -1251,7 +1252,8 @@ public:
                            &val2, sizeof(val2)-1); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
-                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                  TS_FAIL("testGetTermData: expect invalid size RC"
+                         " for output type UINT8_BY2_BY2_BY4_t:"
                          " 0x%08x,0x%08x",
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
@@ -1261,7 +1263,8 @@ public:
                            &val3, sizeof(val3)+2); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
-                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                  TS_FAIL("testGetTermData: expect invalid size RC"
+                         " for output type UINT32_BY2_t:"
                          " 0x%08x,0x%08x",
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
@@ -1271,7 +1274,8 @@ public:
                            &val4, 0); //invalid size
                if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
                {
-                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                  TS_FAIL("testGetTermData: expect invalid size RC"
+                         " for output type UINT8_BY2_t:"
                          " 0x%08x,0x%08x",
                          fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
                          static_cast<uint32_t>(l_fapirc));
@@ -1280,11 +1284,11 @@ public:
                l_fapirc = (*l_getMBvpdAttr)(l_fapi_mba_target,
                            (fapi::AttributeId)99, //invalid ID
                            &val1, sizeof(val1));
-               if (l_fapirc != fapi::RC_MBVPD_INVALID_ATTRIBUTE_ID)
+               if (l_fapirc != fapi::RC_MBVPD_ATTRIBUTE_NOT_FOUND)
                {
-                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                  TS_FAIL("testGetTermData: expect invalid ID:"
                          " 0x%08x,0x%08x",
-                         fapi::RC_MBVPD_INVALID_ATTRIBUTE_ID,
+                         fapi::RC_MBVPD_ATTRIBUTE_NOT_FOUND,
                          static_cast<uint32_t>(l_fapirc));
                }
                l_errorChk =0;

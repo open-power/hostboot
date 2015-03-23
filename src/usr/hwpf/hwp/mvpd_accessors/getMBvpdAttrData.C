@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttrData.C,v 1.2 2015/02/24 19:23:06 whs Exp $
+// $Id: getMBvpdAttrData.C,v 1.4 2015/03/16 18:51:46 janssens Exp $
 /**
  *  @file getMBvpdAttrData.C
  *
@@ -57,7 +57,7 @@ const MBvpdAttrDef g_MBVPD_ATTR_DEF_array [] =
 //----------------------------------------------------------------------------------
     {ATTR_VPD_DIMM_RCD_IBT,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|UINT8_DATA,0},
     {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|BOTH_DIMMS,0},
-    {ATTR_VPD_DRAM_WR_VREF,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
+    {ATTR_VPD_DRAM_WR_VREF,ALL_DIMM,VD_01,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_WR_VREF,0},
 
 //----------------------------------------------------------------------------------
 // Attribute exceptions to use with VINI VZ keyword
@@ -71,7 +71,7 @@ const MBvpdAttrDef g_MBVPD_ATTR_DEF_array [] =
     {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|UINT8_DATA,0},
     {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,36,UINT8_BY2_BY2|BOTH_DIMMS,0},
     // Create 3 reserved bytes in V13
-    {ATTR_VPD_DRAM_WR_VREF,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
+    {ATTR_VPD_DRAM_WR_VREF,ISDIMM,VZ_13,MBVPD_KEYWORD_MT,38,UINT32_BY2|UINT8_DATA|XLATE_WR_VREF,0},
 // Need to include these exceptions to support early Palmetto and Habanero with VZ=11 and 10
     {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,ALL_VZ,MBVPD_KEYWORD_MT,34,UINT32_BY2_BY2|DEFAULT_VALUE,0x64},
     {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,ALL_VZ,MBVPD_KEYWORD_MT,35,UINT8_BY2_BY2|DEFAULT_VALUE,1},
