@@ -34,16 +34,3 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $HOSTBOOTROOT/src/build/citest/etc/patches/my_patch_File
 
-echo "+++ Extracting prereq 954557"
-mkdir -p $SANDBOXBASE/src/hbfw/fsp/targeting/
-mkdir -p $SANDBOXBASE/src/rules_mk/
-mkdir -p $SANDBOXBASE/tools/x86/
-cp $BACKING_BUILD/src/hbfw/fsp/targeting/makefile $SANDBOXBASE/src/hbfw/fsp/targeting
-cp $BACKING_BUILD/src/makefile                    $SANDBOXBASE/src/
-cp $BACKING_BUILD/src/rules_mk/bld.passes.mk      $SANDBOXBASE/src/rules_mk/
-cp $BACKING_BUILD/tools/x86/build_all_steps       $SANDBOXBASE/tools/x86/
-patch $SANDBOXBASE/src/hbfw/fsp/targeting/makefile $HOSTBOOTROOT/src/build/citest/etc/patches/prereq_954557_hbfwmakefile.patch
-patch $SANDBOXBASE/src/makefile                    $HOSTBOOTROOT/src/build/citest/etc/patches/prereq_954557_srcmakefile.patch
-patch $SANDBOXBASE/src/rules_mk/bld.passes.mk      $HOSTBOOTROOT/src/build/citest/etc/patches/prereq_954557_bld.passes.mk.patch
-patch $SANDBOXBASE/tools/x86/build_all_steps       $HOSTBOOTROOT/src/build/citest/etc/patches/prereq_954557_build_all_steps.patch
-
