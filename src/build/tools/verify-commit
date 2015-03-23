@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -163,10 +163,11 @@ sub verifyFileLine
     # Check "TODO" or "FIXME" type comments.
     if (($line =~ m/TODO/i) || ($line =~ m/FIXME/i))
     {
-        if (not ($line =~ m/RTC[\s:]*[0-9]*/))
+        if ( (not ($line =~ m/RTC[\s:]\s*[0-9]+/)) &&
+             (not ($line =~ m/CQ[\s:]\s*[A-Z][A-Z][0-9]+/)))
         {
             warning($file,$line,$count,
-                    "TODO/FIXME tag without corresponding RTC number.");
+                    "TODO/FIXME tag without corresponding RTC or CQ number.");
         }
     }
 
