@@ -2538,6 +2538,15 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     continue;
                 }
 
+                // @todo RTC 126069 - only resetting engine 0 for now
+                // -- only processors have an engine 1
+                // (separate block from above to avoid merge issues)
+                if ( ( i_processType & I2C_OP_RESET ) &&
+                     ( engine != 0 ) )
+                {
+                    continue;
+                }
+
                 // Look for any device on this engine based on speed_array
                 bool skip = true;
                 for ( size_t j = 0; j < I2C_BUS_ATTR_MAX_PORT; j++ )
