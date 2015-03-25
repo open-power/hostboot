@@ -385,8 +385,11 @@ errlHndl_t SfcIBM::writeFlash( uint32_t i_addr,
 
         while(addr < end_addr)
         {
-            chunk_size = SFC_CMDBUF_SIZE;
-            if( (addr + SFC_CMDBUF_SIZE) > end_addr)
+            // Flash devices "wrap" writes at 256 byte page boundaries.
+            // Adjust the write length so we don't write across a page
+            // when starting from an unaligned offset.
+            chunk_size = SFC_CMDBUF_SIZE - (addr & 0xff);
+            if( (addr + chunk_size) > end_addr)
             {
                 chunk_size = end_addr - addr;
             }
