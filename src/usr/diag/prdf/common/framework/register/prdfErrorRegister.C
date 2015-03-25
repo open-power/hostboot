@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,12 +126,12 @@ ErrorRegister::ErrorRegister( SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm,
 
 /*---------------------------------------------------------------------*/
 
-int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
+int32_t ErrorRegister::Analyze( STEP_CODE_DATA_STRUCT & io_sdc )
 {
     int32_t rc = SUCCESS;
     uint32_t l_savedErrSig = 0;
 
-    ErrorSignature * esig = error.service_data->GetErrorSignature();
+    ErrorSignature * esig = io_sdc.service_data->GetErrorSignature();
 
     if(xScrId == 0x0fff)
     {
@@ -144,21 +144,50 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 
     // Get Data from hardware
     const BIT_STRING_CLASS &bs =
-                Read( error.service_data->GetCauseAttentionType() );
+                Read( io_sdc.service_data->GetCauseAttentionType() );
     BitKey bl;     // null bit list has length 0
 
     if ( scr_rc == SUCCESS )
     {
         bl = Filter( bs );
-        rc = SetErrorSignature( error,bl );
+        rc = SetErrorSignature( io_sdc, bl );
 
         // Save signature to determine if it changes during resolution
         // execution.
         l_savedErrSig = esig->getSigId();
     }
 
-    uint32_t res_rc = Lookup(error, bl); // lookup and execute the resolutions
-    if(SUCCESS == rc) rc = res_rc; // previous rc has prioity over res_rc
+    // This loop will iterate through all bits in the bit list until an active
+    // attention is found. This is useful in the cases where a global or chiplet
+    // level FIR has multiple bits set, but the associated local FIRs may not
+    // have an active attention because of a filter or hardware bug.
+    uint32_t res_rc = SUCCESS;
+    BitKey analyzed_bl;       // Keep track of bits that have been analyzed.
+    BitKey remaining_bl = bl; // Keep track of bits that need to be analyzed.
+    do
+    {
+        BitKey res_bl = remaining_bl;
+        BitKey tmp_bl = remaining_bl;
+
+        // lookup and execute the resolutions
+        res_rc = Lookup( io_sdc, res_bl );
+
+        // Add the resolved bits to the analyzed list.
+        // TODO: RTC 126267 Should modify BitKey to have a more efficient way of
+        //       adding bits to a list.
+        for ( uint32_t i = 0; i < res_bl.size(); i++ )
+            analyzed_bl.setBit(res_bl.getListValue(i));
+
+        // Remove the resolved bits from the remaining list.
+        remaining_bl.removeBits(res_bl);
+
+        // Make sure forward progress is made.
+        if ( tmp_bl == remaining_bl ) break;
+
+    } while ( (PRD_SCAN_COMM_REGISTER_ZERO == res_rc) &&
+              (0 != remaining_bl.size()) );
+
+    if ( SUCCESS == rc ) rc = res_rc; // previous rc has prioity over res_rc
 
     // If we had a DD02 and the signature changes, ignore DD02.
     if ( rc == PRD_SCAN_COMM_REGISTER_ZERO )
@@ -173,7 +202,7 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 
     if( scr_rc == SUCCESS )
     {
-        FilterUndo( bl );
+        FilterUndo( analyzed_bl );
         // NOTE:  This is an unusual work-a-round for NOT clearing
         //        particular FIR bits in a register because they are cleared
         //        in another part of the plugin code.
@@ -185,7 +214,7 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
         else
         {
             int32_t reset_rc;
-            reset_rc = Reset(bl,error);
+            reset_rc = Reset( analyzed_bl, io_sdc );
             if( rc == SUCCESS ) rc = reset_rc;
         }
     }

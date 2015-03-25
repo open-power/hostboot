@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -306,7 +306,11 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
         // secondary pass. In secondary pass, bits set shall be identified and
         // associated resolution shall be executed.
 
-        if( !scd.service_data->isPrimaryPass() ) o_list.push_back( defaultRes );
+        if ( !(scd.service_data->isPrimaryPass() &&
+               scd.service_data->isSecondaryErrFound()) )
+        {
+            o_list.push_back( defaultRes );
+        }
     }
 
     if( iv_filter != NULL )

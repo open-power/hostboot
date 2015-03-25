@@ -191,13 +191,16 @@ bool SecondaryBitsFilter::Apply( BitKey & io_bitList,
     bool l_modified = false;
     do
     {
-        // if it is not a primary pass then we need not apply this filter.
-        // so continuing with usual flow.
-        if( !( io_sdc.service_data )->isPrimaryPass( ) ||
-             CHECK_STOP != io_sdc.service_data->GetAttentionType( ) )
-        {
-            break;
-        }
+        // This filter should only be applied on the primary passs.
+        if ( !io_sdc.service_data->isPrimaryPass() ) break;
+
+        // This filter should only be applied if the primary attention type is
+        // CHECK_STOP.
+        if ( CHECK_STOP != io_sdc.service_data->GetAttentionType() ) break;
+
+        // This filter should only be applied if the the secondary attention
+        // type is RECOVERABLE.
+        if ( RECOVERABLE != io_sdc.service_data->GetCauseAttentionType()) break;
 
         //if there is no secondary bit position to flip or if no bit is set in
         //bit key then let us skip this apply.
