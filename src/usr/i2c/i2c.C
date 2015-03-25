@@ -2531,7 +2531,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 io_args.engine = engine;
 
                 // Only reset engine 0 for FSI
-                if ( (i_processType & I2C_OP_RESET ) &&
+                if ( (i_processOperation & I2C_OP_RESET ) &&
                      ( engine != 0 ) &&
                      (io_args.switches.useFsiI2C == 1) )
                 {
@@ -2541,7 +2541,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 // @todo RTC 126069 - only resetting engine 0 for now
                 // -- only processors have an engine 1
                 // (separate block from above to avoid merge issues)
-                if ( ( i_processType & I2C_OP_RESET ) &&
+                if ( ( i_processOperation & I2C_OP_RESET ) &&
                      ( engine != 0 ) )
                 {
                     continue;
@@ -2605,7 +2605,8 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                            engine );
 
                 TRACUCOMP( g_trac_i2c,INFO_MRK
-                           "i2cProcessActiveMasters: Reset 0x%X engine = %d",
+                           "i2cProcessActiveMasters: Setup/Reset "
+                           "0x%X engine = %d",
                            TARGETING::get_huid(tgt), engine );
 
                 // Setup Bus Speed
