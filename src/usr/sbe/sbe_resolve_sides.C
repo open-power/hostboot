@@ -1350,7 +1350,7 @@ void sbePreShutdownIpmiCalls( void )
                                static_cast<uint8_t>
                                           (IPMIWATCHDOG::DO_NOT_STOP |
                                            IPMIWATCHDOG::BIOS_FRB2), // default
-                               IPMIWATCHDOG::NO_ACTIONS); // boot count reset
+                               IPMIWATCHDOG::TIMEOUT_HARD_RESET);
         if(err)
         {
                TRACFCOMP( g_trac_sbe,
