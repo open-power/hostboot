@@ -88,6 +88,14 @@ namespace IPMI
         NETFUN_NONE     = (0x30 << 2),
     };
 
+    // SMS_ATN OEM Event constants
+    enum oem_event
+    {
+        OEM_VALID_NETFUN      = 0x3a,
+        OEM_VALID_SEL_ID      = 0x5555,
+        OEM_VALID_RECORD_TYPE = 0xC0,
+    };
+
     // IPMI Completion Codes
     enum completion_code
     {
