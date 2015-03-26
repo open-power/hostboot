@@ -32,6 +32,7 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
+#include <sys/time.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -56,6 +57,11 @@ TRAC_INIT( & g_trac_i2c, I2C_COMP_NAME, KILOBYTE );
 namespace I2C
 {
 
+const uint64_t SCAC_CONFIG_REG = 0x00000000020115CEULL;
+const uint64_t SCAC_CONFIG_SET = 0x00000000020115CFULL;
+const uint64_t SCAC_CONFIG_CLR = 0x00000000020115D0ULL;
+const uint64_t SCAC_ENABLE_MSK = 0x8000000000000000ULL;
+
 // ------------------------------------------------------------------
 // i2cPerformOp
 // ------------------------------------------------------------------
@@ -67,6 +73,9 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          va_list i_args )
 {
     errlHndl_t err = NULL;
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cPerformOp()" );
 
     // Get the args out of the va_list
     //  Address, Port, Engine, Device Addr.
@@ -262,5 +271,89 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::I2C,
                        TARGETING::TYPE_MEMBUF,
                        i2cPerformOp );
+
+// ------------------------------------------------------------------
+//  i2cDisableSensorCache
+// ------------------------------------------------------------------
+errlHndl_t i2cDisableSensorCache ( TARGETING::Target * i_target,
+                                   bool & o_disabled )
+{
+    errlHndl_t err = NULL;
+
+    o_disabled = false;
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cDisableSensorCache()" );
+
+    do
+    {
+        uint64_t scacData = 0x0;
+        size_t dataSize = sizeof(scacData);
+
+        // Read the scac config reg to get the enabled/disabled bit
+        err = DeviceFW::deviceOp( DeviceFW::READ,
+                                  i_target,
+                                  &scacData,
+                                  dataSize,
+                                  DEVICE_SCOM_ADDRESS(SCAC_CONFIG_REG) );
+        if ( err )
+        {
+            break;
+        }
+
+        // Disable SCAC if it's enabled
+        if( scacData & SCAC_ENABLE_MSK )
+        {
+            o_disabled = true;  // Enable SCAC again after op completes
+            scacData = SCAC_ENABLE_MSK;
+
+            // Write the scac clear reg to disable the sensor cache
+            err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                      i_target,
+                                      &scacData,
+                                      dataSize,
+                                      DEVICE_SCOM_ADDRESS(SCAC_CONFIG_CLR) );
+            if ( err )
+            {
+                break;
+            }
+
+            // Wait 30 msec for outstanding sensor cache
+            // operations to complete
+            nanosleep(0,30 * NS_PER_MSEC);
+        }
+    } while( 0 );
+
+    TRACDCOMP( g_trac_i2c,
+               EXIT_MRK"i2cDisableSensorCache()" );
+
+    return err;
+} // end i2cDisableSensorCache
+
+// ------------------------------------------------------------------
+//  i2cEnableSensorCache
+// ------------------------------------------------------------------
+errlHndl_t i2cEnableSensorCache ( TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
+    TRACDCOMP( g_trac_i2c,
+               ENTER_MRK"i2cEnableSensorCache()" );
+
+    uint64_t scacData = SCAC_ENABLE_MSK;
+    size_t dataSize = sizeof(scacData);
+
+    // Write the scac set reg to enable the sensor cache
+    err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                              i_target,
+                              &scacData,
+                              dataSize,
+                              DEVICE_SCOM_ADDRESS(SCAC_CONFIG_SET) );
+
+    TRACDCOMP( g_trac_i2c,
+               EXIT_MRK"i2cEnableSensorCache()" );
+
+    return err;
+} // end i2cEnableSensorCache
 
 } // end namespace I2C

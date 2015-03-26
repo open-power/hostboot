@@ -28,6 +28,9 @@
 namespace I2C
 {
 
+// @todo RTC 125540 - Ensure no possible Centaur i2c collisions during HB IPL
+//                    Need to re-evaluate the ifdef/ifndef in this file
+#ifndef __HOSTBOOT_RUNTIME
 /**
  * @enum i2cProcessType
  *
@@ -173,6 +176,32 @@ struct MasterInfo_t
  */
 void getMasterInfo( const TARGETING::Target* i_chip,
                     std::list<MasterInfo_t>& o_info );
+#endif // !__HOSTBOOT_RUNTIME
+
+#ifdef __HOSTBOOT_RUNTIME
+/**
+ * @brief This function disables the OCC sensor cache for the specified target
+ *
+ * @param[in] i_target - I2C Master Target device
+ * @param[out] o_disabled - Indicates the sensor cache was enabled
+ *                          and is now disabled
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cDisableSensorCache( TARGETING::Target * i_target,
+                                  bool & o_disabled );
+
+/**
+ * @brief This function enables the OCC sensor cache for the specified target
+ *
+ * @param[in] i_target - I2C Master Target device
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cEnableSensorCache( TARGETING::Target * i_target );
+#endif //__HOSTBOOT_RUNTIME
 
 };  // end namespace I2C
 

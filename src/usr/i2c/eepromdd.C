@@ -46,12 +46,9 @@
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eepromif.H>
 #include <i2c/i2creasoncodes.H>
+#include <i2c/i2cif.H>
 #include "eepromdd.H"
 #include "errlud_i2c.H"
-
-#ifndef __HOSTBOOT_RUNTIME
-#include <i2c/i2cif.H>
-#endif
 
 // ----------------------------------------------
 // Globals
@@ -125,6 +122,13 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                "i_opType=%d, chip=%d, offset=%d, len=%d",
                (uint64_t) i_opType, i2cInfo.chip, i2cInfo.offset, io_buflen);
 
+#ifdef __HOSTBOOT_RUNTIME
+    // At runtime the OCC sensor cache will need to be diabled to avoid I2C
+    // collisions. This bool indicates the sensor cache was enabled but is
+    // now disabled and needs to be re-enabled when the eeprom op completes.
+    bool scacDisabled = false;
+#endif //__HOSTBOOT_RUNTIME
+
     do
     {
         // Read Attributes needed to complete the operation
@@ -185,6 +189,18 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
             break;
         }
 
+#ifdef __HOSTBOOT_RUNTIME
+        // Disable Sensor Cache if the I2C master target is MEMBUF
+        if( theTarget->getAttr<TARGETING::ATTR_TYPE>() ==
+                                                    TARGETING::TYPE_MEMBUF )
+        {
+            err = I2C::i2cDisableSensorCache(theTarget,scacDisabled);
+            if ( err )
+            {
+                break;
+            }
+        }
+#endif //__HOSTBOOT_RUNTIME
 
         // Do the read or write
         if( i_opType == DeviceFW::READ )
@@ -239,6 +255,30 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
             break;
         }
     } while( 0 );
+
+#ifdef __HOSTBOOT_RUNTIME
+    // Re-enable sensor cache if it was disabled before the eeprom op and
+    // the I2C master target is MEMBUF
+    if( scacDisabled &&
+       (theTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_MEMBUF) )
+    {
+        errlHndl_t tmp_err = NULL;
+
+        tmp_err = I2C::i2cEnableSensorCache(theTarget);
+
+        if( err && tmp_err)
+        {
+            delete tmp_err;
+            TRACFCOMP(g_trac_eeprom,
+                ERR_MRK" Enable Sensor Cache failed for HUID=0x%.8X",
+                TARGETING::get_huid(theTarget));
+        }
+        else if(tmp_err)
+        {
+            err = tmp_err;
+        }
+    }
+#endif //__HOSTBOOT_RUNTIME
 
     // If there is an error, add parameter info to log
     if ( err != NULL )
