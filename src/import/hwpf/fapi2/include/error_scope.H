@@ -46,7 +46,7 @@
 #define FAPI_TRY_NO_TRACE( __operation__ )                              \
     if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
     {                                                                   \
-        goto clean_up;                                                  \
+        goto fapi_try_exit;                                             \
     }
 
 // Why debug? Because this isn't a mechanism to gather FFDC
@@ -57,7 +57,7 @@
     if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
     {                                                                   \
         FAPI_DBG(__VA_ARGS__);                                          \
-        goto clean_up;                                                  \
+        goto fapi_try_exit;                                             \
     }
 
 #define FAPI_TRY1 FAPI_TRY_NO_TRACE
@@ -98,7 +98,7 @@
     {                                                   \
         (__ffdc__).execute();                           \
         FAPI_ERR(__VA_ARGS__);                          \
-        goto clean_up;                                  \
+        goto fapi_try_exit;                             \
     }
 
 
