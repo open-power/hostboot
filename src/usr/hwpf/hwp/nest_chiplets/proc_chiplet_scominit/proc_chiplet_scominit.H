@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.15 2013/11/09 21:06:39 jmcgill Exp $
+// $Id: proc_chiplet_scominit.H,v 1.16 2014/12/11 21:11:59 szhong Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -58,6 +58,7 @@ const char * const PROC_CHIPLET_SCOMINIT_NX_IF          = "p8.nx.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_AS_IF          = "p8.as.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_CXA_IF         = "p8.cxa.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_A_X_PCI_DMI_IF = "p8.a_x_pci_dmi_fir.scom.if";
+const char * const PROC_CHIPLET_SCOMINIT_NPU_IF = "p8.npu.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_MCS_IF         = "p8.mcs.scom.if";
 
 

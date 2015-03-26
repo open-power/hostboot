@@ -1,0 +1,113 @@
+#-- $Id: p8.npu.scom.initfile,v 1.2 2014/12/11 00:24:12 camille Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- ***  ***
+#--
+#-- TITLE       : p8.npu.scom.initfile
+#-- DESCRIPTION : Perform NPU configuration
+#--
+#-- OWNER NAME  : Lonny Lambrecht         Email: lonny@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--******************************************************************************
+# -- ESNPUFIR
+#--******************************************************************************
+# spy name  ES.NPU.NP_AT.REG.FIR_MASK_REG
+scom 0x0000000008013D83 {
+     bits,   	 scom_data        ;
+    0:63,  	0xE0002C02000F5F3F      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.FIR_ACTION0_REG
+scom 0x0000000008013D86 {
+    bits, 	scom_data        		;
+    0:63, 	0x1CBFC1FCB7F0A300      ;
+      }
+
+# spy name  ES.NPU.NP_AT.REG.FIR_ACTION1_REG
+scom 0x0000000008013D87 {
+   bits,   	 scom_data   	      ;
+    0:63,  	0xFFFFFFFFFFFFFFFF      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_LR_ER    (Lem enable)
+scom 0x0000000008013D9C {
+     bits,   	 scom_data        ;
+    0:63,  	0xFFFFF00000000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_SI_ER    (LSI enable)
+scom 0x0000000008013D9D {
+     bits,   	 scom_data        ;
+    0:63,  	0xE000240200000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_FR_ER    (freeze enable)
+scom 0x0000000008013D9E {
+     bits,   	 scom_data        ;
+    0:63,  	0xE00024020C000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_FE_ER    (fence enable)
+scom 0x0000000008013D9F {
+     bits,   	 scom_data        ;
+    0:63,  	0x1CBFC1FCB7F0A000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP0.NTL_PMU_CONTROL (ntl00 pmu counter)
+scom 0x0000000008013C27 {
+     bits,   	 scom_data        ;
+    0:63,  	0xF21045C200000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_PMU_CONTROL (ntl00 pmu counter)
+scom 0x0000000008013C67 {
+     bits,   	 scom_data        ;
+    0:63,  	0xF21045C200000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP0.NTL_PMU_CONTROL (ntl20 pmu counter)
+scom 0x0000000008013D27 {
+     bits,   	 scom_data        ;
+    0:63,  	0xF21045C200000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_PMU_CONTROL (ntl20 pmu counter)
+scom 0x0000000008013D67 {
+     bits,   	 scom_data        ;
+    0:63,  	0xF21045C200000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_PMU_CTRL    (at pmu counter)
+scom 0x0000000008013DA6 {
+     bits,   	 scom_data        ;
+    0:63,  	0xF210145000000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_DEBUG  (Debug/trace control)
+scom 0x0000000008013DAB {
+     bits,   	 scom_data        ;
+    0:63,  	0x7000000000000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_CNFG0    (npu bar select)
+scom 0x0000000008013DA9 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0211000043500000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NP_BUID_REG   (npu bar select)
+scom 0x0000000008013C13 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0800000043500000      ;
+    }
+
+
+# NPCQ control register?  scom-only        ??
+# NPCQ Int_lvl_REG register?  scom-only        ??
+

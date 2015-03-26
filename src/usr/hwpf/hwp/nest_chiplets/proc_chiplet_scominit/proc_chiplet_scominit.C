@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.26 2014/11/20 18:00:37 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.27 2014/12/11 21:11:43 szhong Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -437,7 +437,36 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          i_target.toEcmdString());
                 break;
             }
-
+            //execute NV scominit file
+            FAPI_INF("proc_chiplet_scominit: Executing  %s on %s",
+                     PROC_CHIPLET_SCOMINIT_NPU_IF, i_target.toEcmdString());
+            uint8_t exist_NV=0x00;
+            rc=FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NV_PRESENT, &i_target, exist_NV);
+            if(!rc.ok())
+            {
+                    FAPI_ERR("proc_chiplet_scominit: error getting attribute value ATTR_CHIP_EC_FEATURE_NV_PRESENT");
+                    break;
+            }
+            if(exist_NV)
+            {
+                    FAPI_INF("NV link exist, run npu scominit");
+                    FAPI_EXEC_HWP(
+                            rc,
+                            fapiHwpExecInitFile,
+                            initfile_targets,
+                            PROC_CHIPLET_SCOMINIT_NPU_IF);
+                    if (!rc.ok())
+                    {
+                            FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                                     PROC_CHIPLET_SCOMINIT_NPU_IF,
+                                     i_target.toEcmdString());
+                            break;
+                    }
+            }
+            else
+            {
+                    FAPI_INF("NV link does not exist, skip npu scominit");
+            }
             // determine set of functional MCS chiplets
             rc = fapiGetChildChiplets(i_target,
                                       fapi::TARGET_TYPE_MCS_CHIPLET,
