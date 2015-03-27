@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2723,12 +2724,13 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
                 // So just commit the log here and let the function continue.
                 errlCommit( err, I2C_COMP_ID );
             }
-        }
+        } else {
 
-        // Part of doing the I2C Master reset is also sending a stop
-        // command to the slave device.
-        err = i2cSendSlaveStop( i_target,
-                                i_args );
+            // Part of doing the I2C Master reset is also sending a stop
+            // command to the slave device.
+            err = i2cSendSlaveStop( i_target,
+                                    i_args );
+        }
 
         if( err )
         {
