@@ -1,8 +1,11 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.20 2014/11/14 19:28:16 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.21 2014/11/17 21:13:37 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.21|baysah  |11/17/14|- FW630892 : Disable MCS Read Data OctoWord Gathering to prevent dcbz starvation
+#--         |        |        |- Don't attempt to enable this workaround for MurDD1.x, because it doesn't exist.
 #--         |        |        |
 #--     1.20|baysah  |11/14/14|- FW630892 : Disable MCS Read Data OctoWord Gathering to prevent dcbz starvation
 #--         |        |        |
@@ -184,11 +187,11 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
 #--******************************************************************************
 #-- MCS Mode3 Register
 #--******************************************************************************
- scom 0x000000000201180A              {
-     bits ,                    scom_data        ;
-     24   ,                    0b1              ;              # MCMODE3Q_ENABLE_LOCAL_TIMEOUT_TIMEBASE
-     25:30,                    0b000001         ;              # MCMODE3Q_LOCAL_TIMEOUT_TIMEBASE_THRESHOLD
-     48:52,                    0b11111          ;              # MCMODE3Q_READ_RAMP_PERF_TRESHOLD
+ scom 0x000000000201180A               {
+     bits ,                    scom_data     ,     expr                                             ;
+     24   ,                    0b1           ,     any                                              ;              # MCMODE3Q_ENABLE_LOCAL_TIMEOUT_TIMEBASE
+     25:30,                    0b000001      ,     any                                              ;              # MCMODE3Q_LOCAL_TIMEOUT_TIMEBASE_THRESHOLD
+     48:52,                    0b11111       , (ATTR_CHIP_EC_FEATURE_MCS_MURDD1_FIR_CONTROL == 0)   ;              # MCMODE3Q_READ_RAMP_PERF_TRESHOLD
 }
 
 
