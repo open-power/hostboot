@@ -5175,15 +5175,15 @@ sub addHotPlug
 
     for my $i ( 0 .. $#I2CHotPlug )
     {
-        my $drivingProcNode;
-        my $drivingProcPos;
+        my $i2cmProcNode;
+        my $i2cmProcPos;
         for my $x (0 .. $#I2CHotPlug_Host )
         {
             if( $I2CHotPlug_Host[$x]{i2c_slave_path} eq
                     $I2CHotPlug[$i]{i2c_instPath})
             {
-                $drivingProcNode = $I2CHotPlug_Host[$i]{i2c_proc_node};
-                $drivingProcPos = $I2CHotPlug_Host[$i]{i2c_proc_pos};
+                $i2cmProcNode = $I2CHotPlug_Host[$i]{i2c_proc_node};
+                $i2cmProcPos = $I2CHotPlug_Host[$i]{i2c_proc_pos};
                 last;
             }
         }
@@ -5223,8 +5223,8 @@ sub addHotPlug
             $hot_plug_array[($hot_count*$row_count) + 4] =
                 sprintf("0x%x",(hex $I2CHotPlug[$i]{i2c_slaveAddr}) * 2);
             $hot_plug_array[($hot_count*$row_count) + 5] = $part_id_enum;
-            $hot_plug_array[($hot_count*$row_count) + 6] = $drivingProcNode;
-            $hot_plug_array[($hot_count*$row_count) + 7] = $drivingProcPos;
+            $hot_plug_array[($hot_count*$row_count) + 6] = $i2cmProcNode;
+            $hot_plug_array[($hot_count*$row_count) + 7] = $i2cmProcPos;
 
             $hot_count = $hot_count + 1;
         }
