@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_lrdimm_funcs.C,v 1.9 2014/08/05 15:08:12 kahnevan Exp $
+// $Id: mss_lrdimm_funcs.C,v 1.10 2015/03/16 21:37:44 jdsloat Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.10   | jdsloat  |16-MAR-15| Fixed 2 declarations of ecmddatabuffer to ecmddatabufferbase
 //  1.8    | kcook    |13-FEB-14| More FW updates.
 //  1.7    | kcook    |12-FEB-14| Updated HWP_ERROR per RAS review to be used with memory_mss_lrdimm_funcs.xml
 //  1.6    | bellows  |02-JAN-14| VPD attribute removal
