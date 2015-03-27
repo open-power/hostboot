@@ -250,8 +250,11 @@ class IpmiRP
     msg_t *     iv_shutdown_msg;     //!< shutdown msg to respond to
     bool        iv_shutdown_now;     //!< shutdown now
 
-    //!< handle ipmi soft power off request
+    //!< handle ipmi chassis power off request
     bool        iv_graceful_shutdown_pending;
+
+    //!< handle ipmi chassis power off request modifier
+    IPMI::power_request_type iv_chassis_power_mod;
 
     // Disallow copying this class.
     IpmiRP& operator=(const IpmiRP&);

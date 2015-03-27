@@ -77,7 +77,8 @@ IpmiRP::IpmiRP(void):
     iv_retries(IPMI::g_retries),
     iv_shutdown_msg(NULL),
     iv_shutdown_now(false),
-    iv_graceful_shutdown_pending(false)
+    iv_graceful_shutdown_pending(false),
+    iv_chassis_power_mod(IPMI::CHASSIS_POWER_OFF)
 {
     mutex_init(&iv_mutex);
     sync_cond_init(&iv_cv);
@@ -447,13 +448,32 @@ void IpmiRP::lastChanceEventHandler(void)
         }
         else if ( event->iv_cmd[0] == IPMI::power_off().second )
         {
-            // handle the graceful shutdown message
-            IPMI_TRAC("Graceful shutdown request received");
+            // if the event type is "soft off" then update the modifier to send
+            // a power off to the BMC, otherwise all other requests will be
+            // handled as a power cycle
+            if( event->iv_cmd[1] == IPMI::CHASSIS_POWER_OFF )
+             {
+                 iv_chassis_power_mod = IPMI::CHASSIS_POWER_OFF;
+
+                 // handle the graceful shutdown message
+                 IPMI_TRAC("Graceful shutdown request received");
 
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(NULL, "IPMI: shutdown requested");
-            CONSOLE::flush();
+                 CONSOLE::displayf(NULL, "IPMI: shutdown requested");
+                 CONSOLE::flush();
 #endif
+
+             }
+            else
+            {
+                // handle the message as a power cycle request
+                IPMI_TRAC("IPMI power cycle request received");
+                iv_chassis_power_mod = IPMI::CHASSIS_POWER_CYCLE;
+#ifdef CONFIG_CONSOLE
+                CONSOLE::displayf(NULL, "IPMI: power cycle requested");
+                CONSOLE::flush();
+#endif
+            }
 
             // register for the post memory flush callback
             INITSERVICE::registerShutdownEvent(iv_msgQ,
@@ -607,8 +627,8 @@ void IpmiRP::execute(void)
                 size_t len = 1;
                 uint8_t* data = new uint8_t[len];
 
-                // send the force shutdown option.
-                data[0] = 0;
+                // send the correct chassis power modifier.
+                data[0] = iv_chassis_power_mod;
 
                 IPMI::Message* ipmi_msg = IPMI::Message::factory(
                         IPMI::chassis_power_off(), len, data, IPMI::TYPE_ASYNC);

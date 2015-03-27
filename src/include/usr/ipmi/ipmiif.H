@@ -56,6 +56,13 @@ namespace IPMI
         MSG_LAST_TYPE = MSG_STATE_GRACEFUL_SHUTDOWN,
     };
 
+    // chassis power off request types
+    enum power_request_type
+    {
+        CHASSIS_POWER_OFF = 0x00,
+        CHASSIS_POWER_CYCLE = 0x02,
+    };
+
     // Used in the factory for creating the proper subclass.
     enum message_type
     {
