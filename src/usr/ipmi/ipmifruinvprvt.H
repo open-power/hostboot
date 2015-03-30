@@ -303,9 +303,11 @@ class isdimmIpmiFruInv : public IpmiFruInv
      *        record
      * @param[in/out] data, The container with record data
      * @param[in] keyword, Indicates where in the VPD to get more data
-
+     * @param[in] ascii, Indicates if VPD field is in ascii format or not
      */
-    errlHndl_t addVpdData(std::vector<uint8_t> &io_data, uint8_t i_keyword);
+    errlHndl_t addVpdData(std::vector<uint8_t> &io_data,
+                          uint8_t i_keyword,
+                          bool i_ascii=false);
 
 };
 
