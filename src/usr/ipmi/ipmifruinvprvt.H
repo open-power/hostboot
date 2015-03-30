@@ -42,6 +42,8 @@ namespace IPMIFRUINV
         COMMON_HEADER_FORMAT_SIZE     = 8, //size in bytes
         DEFAULT_CHASSIS_TYPE          = 0x05,
         DEFAULT_FRU_OFFSET            = 0,
+        MAX_ASCII_FIELD_SIZE          = 0x3F, //size in bytes
+        MAX_RECORD_SIZE               = 0xFF, //size in bytes
     };
 };
 
@@ -457,6 +459,51 @@ class backplaneIpmiFruInv : public IpmiFruInv
                           uint8_t i_keyword,
                           bool i_ascii=false,
                           bool i_typeLengthByte=true);
+
+};
+
+//Child class for building up System Firwmare Fru Inventory Record Data
+class systemFwIpmiFruInv : public IpmiFruInv
+{
+
+  public:
+    /**
+    * @brief Constructor
+    *
+    * @param[in] TargetHandle_t, Handle to target for which
+    *             to get relevant IPMI FRU Data from
+    */
+    systemFwIpmiFruInv( TARGETING::TargetHandle_t i_target);
+
+    /**
+     * @brief Builds the Internal Use Area Data Section
+     * @param[in/out] data, The container to put internal use area data in
+     */
+    errlHndl_t buildInternalUseArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the Chassis Info Area Data Section
+     * @param[in/out] data, The container to put chassis info area data in
+     */
+    errlHndl_t buildChassisInfoArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the Board Info Area Data Section
+     * @param[in/out] data, The container to put board info area data in
+     */
+    errlHndl_t buildBoardInfoArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the Product Info Area Data Section
+     * @param[in/out] data, The container to put product info area data in
+     */
+    errlHndl_t buildProductInfoArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the MultiRecord Info Area Data Section
+     * @param[in/out] data, The container to put multirecord info area data in
+     */
+    errlHndl_t buildMultiRecordInfoArea(std::vector<uint8_t> &io_data);
 
 };
 

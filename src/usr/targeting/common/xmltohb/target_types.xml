@@ -300,6 +300,7 @@
     <attribute><id>MNFG_TH_CEN_L4_CACHE_CES</id></attribute>
     <attribute><id>OPT_MEMMAP_GROUP_POLICY</id></attribute>
     <attribute><id>FRU_ID</id></attribute>
+    <attribute><id>BMC_FRU_ID</id></attribute>
 </targetType>
 
 <targetType>

@@ -37,6 +37,7 @@
 #include "ipmifruinvprvt.H"
 #include <stdio.h>
 #include <assert.h>
+#include <pnor/pnorif.H>
 
 extern trace_desc_t * g_trac_ipmi;
 
@@ -83,6 +84,10 @@ IpmiFruInv *IpmiFruInv::Factory(TARGETING::TargetHandleList i_targets,
         case TARGETING::TYPE_MEMBUF:
             // @todo-RTC:117702
             l_fru = new backplaneIpmiFruInv(l_target, i_targets, i_updateData);
+            break;
+        case TARGETING::TYPE_SYS:
+            // Use sys target for setting System Firmware Info
+            l_fru = new systemFwIpmiFruInv(l_target);
             break;
         default:
             assert(false,
@@ -927,6 +932,197 @@ errlHndl_t backplaneIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
     return l_errl;
 }
 
+//##############################################################################
+systemFwIpmiFruInv::systemFwIpmiFruInv( TARGETING::TargetHandle_t i_target )
+    :IpmiFruInv(i_target)
+{
+
+};
+
+errlHndl_t systemFwIpmiFruInv::buildInternalUseArea(std::vector<uint8_t>
+                                                                       &io_data)
+{
+    //This section not needed for system firmware type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+errlHndl_t systemFwIpmiFruInv::buildChassisInfoArea(std::vector<uint8_t>
+                                                                       &io_data)
+{
+    //This section not needed for system firmware type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+errlHndl_t systemFwIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
+{
+    //This section not needed for system firmware type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+errlHndl_t systemFwIpmiFruInv::buildProductInfoArea(std::vector<uint8_t>
+                                                                       &io_data)
+{
+    errlHndl_t l_errl = NULL;
+
+    do {
+        //Set formatting data that goes at the beginning of the record
+        preFormatProcessing(io_data, true);
+
+        uint8_t l_data[] = {IPMIFRUINV::TYPELENGTH_BYTE_NULL,
+                            IPMIFRUINV::TYPELENGTH_BYTE_ASCII + 18, 'O','p','e',
+                            'n','P','O','W','E','R',' ','F','i','r','m','w','a',
+                            'r','e', IPMIFRUINV::TYPELENGTH_BYTE_NULL};
+
+        io_data.insert( io_data.end(),
+                    &l_data[0],
+                    &l_data[0] + (uint8_t(sizeof(l_data) / sizeof(uint8_t))));
+
+        //Get PNOR Version Here
+        PNOR::SectionInfo_t l_pnorInfo;
+        l_errl = getSectionInfo( PNOR::VERSION , l_pnorInfo);
+        if (l_errl) { break; }
+
+        uint8_t* l_versionData = reinterpret_cast<uint8_t*>( l_pnorInfo.vaddr );
+        //Total Bytes in PNOR Version String
+        uint8_t l_numBytes = 0;
+        uint8_t l_curOffset = 0;
+
+        //Total Number of fields needed to print PNOR Version String
+        uint8_t l_numFields = 0;
+        bool l_clearStandardFields = true;
+
+        //First determine number of bytes in PNOR Version string
+        //  with the caveat there is a max record size allowed, so
+        //  the string will be cut off if too long
+        //Also, remove newline chars
+        while ((l_numBytes < IPMIFRUINV::MAX_RECORD_SIZE -
+                              (uint8_t(sizeof(l_data) / sizeof(uint8_t))) -
+                              IPMIFRUINV::COMMON_HEADER_FORMAT_SIZE - 8)
+                               && (((char)(l_versionData[l_numBytes])) != '\0'))
+        {
+
+            if (((char)(l_versionData[l_numBytes])) == '\n')
+            {
+
+                if (l_numBytes > l_curOffset)
+                {
+                    //Add on size of this field to the data buffer
+                    io_data.push_back(
+                         IPMIFRUINV::TYPELENGTH_BYTE_ASCII
+                           + (l_numBytes-l_curOffset));
+
+                    io_data.insert(io_data.end(),
+                       &l_versionData[0]+(l_curOffset),
+                       &l_versionData[0]+(l_numBytes));
+                }
+
+                //Null data for standard fields needs to be indicated once after
+                // the first segment of data is displayed to match the
+                // ipmi fru spec
+                if (l_clearStandardFields)
+                {
+                    //Add Empty Asset Tag
+                    io_data.push_back(uint8_t(0));
+                    //FRU File ID - Empty
+                    io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+                    io_data.push_back(uint8_t(0)); // Empty FRU File ID bytes
+                    l_clearStandardFields = false;
+                }
+
+                //Increment past the newline char
+                l_curOffset = l_numBytes + 1;
+            }
+            l_numBytes++;
+        }
+
+        if (l_curOffset == 0)
+        {
+            //Calculate the number of fields required to display this data
+            //  given only MAX_ASCII_FIELD_SIZE bytes can be in any one given
+            //  IPMI fru inventory field
+            l_numFields = l_numBytes / IPMIFRUINV::MAX_ASCII_FIELD_SIZE;
+            if (l_numBytes % IPMIFRUINV::MAX_ASCII_FIELD_SIZE)
+            {
+                l_numFields += 1;
+            }
+
+            //Count by number of fields, adding the data to the buffer as
+            // we go.
+            for (uint8_t i=0; i < l_numFields; i++)
+            {
+                //Determine the data size for this particular field
+                uint8_t l_dataSize=IPMIFRUINV::MAX_ASCII_FIELD_SIZE;
+                if (i == l_numFields - 1)
+                {
+                    l_dataSize = l_numBytes -
+                           (i * IPMIFRUINV::MAX_ASCII_FIELD_SIZE);
+                }
+
+                //Add on size of this field to the data buffer
+                io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_ASCII
+                                         + l_dataSize);
+
+                //Insert this segment of version string data
+                io_data.insert(io_data.end(),
+                       &l_versionData[0]+(i * IPMIFRUINV::MAX_ASCII_FIELD_SIZE),
+                       &l_versionData[0]+(i * IPMIFRUINV::MAX_ASCII_FIELD_SIZE)
+                                        +l_dataSize);
+
+                //Null data for standard fields needs to be indicated once after
+                // the first segment of data is displayed to match the
+                // ipmi fru spec
+                if (l_clearStandardFields)
+                {
+                    //Add Empty Asset Tag
+                    io_data.push_back(uint8_t(0));
+                    //FRU File ID - Empty
+                    io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+                    l_clearStandardFields = false;
+                }
+
+            }
+        }
+        else
+        {
+            if (l_numBytes > l_curOffset)
+            {
+                io_data.push_back( IPMIFRUINV::TYPELENGTH_BYTE_ASCII
+                        + (l_numBytes-l_curOffset));
+
+                io_data.insert(io_data.end(),
+                       &l_versionData[0]+(l_curOffset),
+                       &l_versionData[0]+(l_numBytes));
+            }
+
+        }
+
+        if (l_clearStandardFields)
+        {
+            //Add Asset Tag
+            io_data.push_back(uint8_t(0)); //No Asset Tag needed - O bytes
+            //FRU File ID - Empty
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+        }
+
+        io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
+
+        //Finalize section formatting
+        postFormatProcessing(io_data);
+
+    } while(0);
+
+    return l_errl;
+}
+
+errlHndl_t systemFwIpmiFruInv::buildMultiRecordInfoArea(std::vector<uint8_t>
+                                                                       &io_data)
+{
+    //This section not needed for system firmware type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+
+
 void IpmiFruInv::addEcidData(const TARGETING::TargetHandle_t& i_target,
                              const TARGETING::ATTR_ECID_type& i_ecidInfo,
                              std::vector<uint8_t> &io_data)
@@ -995,6 +1191,15 @@ void IPMIFRUINV::setData(bool i_updateData)
         if (i_updateData == false)
         {
             IPMIFRUINV::gatherClearData(pSys, frusToClear);
+        }
+
+        //Get System FW FRU_ID if available
+        uint32_t l_systemFwFruId;
+        bool hasSystemFwFruId =
+                  pSys->tryGetAttr<TARGETING::ATTR_BMC_FRU_ID>(l_systemFwFruId);
+        if (hasSystemFwFruId)
+        {
+            l_potentialFrus.push_back(std::make_pair(pSys, l_systemFwFruId));
         }
 
         // Find list of all target types that may need a fru inv. record set
