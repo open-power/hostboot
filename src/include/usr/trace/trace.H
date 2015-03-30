@@ -42,6 +42,9 @@ const uint32_t TRACE_DEBUG_OFF   = 0;       //< Set to this when debug trace off
 const uint32_t TRAC_COMP_SIZE    = 16;      //< Max component name size
 const uint32_t TRAC_MAX_ARGS     = 9;       //< Max number of arguments in trace
 
+//TODO: RTC 124618 - remove this block once issue is resolved
+const uint16_t MAX_WORKING_TRACBIN_SIZE = 64; //< Max working tracBin size
+
 typedef uint32_t trace_hash_val;    //< Hash values are 32 bits.
 
 

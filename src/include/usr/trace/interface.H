@@ -218,13 +218,20 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 */
 #define TRACFBIN(des,printf_string,address,len) \
     { \
+        /*TODO: RTC 124618 - remove this block once issue is resolved*/ \
+        uint16_t l_length = len; \
+        if(l_length > MAX_WORKING_TRACBIN_SIZE) \
+        { \
+            l_length = MAX_WORKING_TRACBIN_SIZE; \
+            TRACFCOMP(des,"Shrinking to max size in TRACFBIN"); \
+        } \
         __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_bin((des), \
-                                    &__traceData_codeInfo, \
-                                    __LINE__, \
-                                    address, \
-                                    len, \
-                                    TRACE_FIELD); \
+                                &__traceData_codeInfo, \
+                                __LINE__, \
+                                address, \
+                                l_length, \
+                                TRACE_FIELD); \
     }
 
 /**
