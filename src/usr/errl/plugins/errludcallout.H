@@ -278,8 +278,10 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
                     case_PROCEDURE(EPUB_PRC_MEMBUS_ERROR)
                     case_PROCEDURE(EPUB_PRC_EIBUS_ERROR)
                     case_PROCEDURE(EPUB_PRC_POWER_ERROR)
+                    case_PROCEDURE(EPUB_PRC_MEMORY_UE)
                     case_PROCEDURE(EPUB_PRC_PERFORMANCE_DEGRADED)
                     case_PROCEDURE(EPUB_PRC_HB_CODE)
+                    case_PROCEDURE(EPUB_PRC_TOD_CLOCK_ERR)
                     default:
                         i_parser.PrintNumber( "Procedure", "UNKNOWN: 0x%X",
                                         ntohl(pData->procedure) );

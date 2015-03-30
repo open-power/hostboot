@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,8 +59,8 @@ enum MFG_THRES_SYNC_MSG_TYPE
     #define EPUB_PRC_MEMBUS_ERROR   HWAS::EPUB_PRC_MEMBUS_ERROR
     #define EPUB_PRC_PROC_XYZ_BUS   HWAS::EPUB_PRC_PROC_XYZ_BUS
     #define EPUB_PRC_PROC_AB_BUS    HWAS::EPUB_PRC_PROC_AB_BUS
-    #define EPUB_PRC_MEMORY_UE      0x4F
-    #define EPUB_PRC_TOD_CLOCK_ERR  0x56 //FIXME RTC 116446
+    #define EPUB_PRC_MEMORY_UE      HWAS::EPUB_PRC_MEMORY_UE
+    #define EPUB_PRC_TOD_CLOCK_ERR  HWAS::EPUB_PRC_TOD_CLOCK_ERR
 
     // FIXME: remove these mapping once the enums are made common
     #define SRCI_PRIORITY_HIGH  HWAS::SRCI_PRIORITY_HIGH

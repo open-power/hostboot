@@ -87,7 +87,9 @@ enum epubProcedureID
     EPUB_PRC_EIBUS_ERROR            = 0x37,
     EPUB_PRC_POWER_ERROR            = 0x3F,
     EPUB_PRC_PERFORMANCE_DEGRADED   = 0x4D,
-    EPUB_PRC_HB_CODE                = 0x55
+    EPUB_PRC_MEMORY_UE              = 0x4F,
+    EPUB_PRC_HB_CODE                = 0x55,
+    EPUB_PRC_TOD_CLOCK_ERR          = 0x56
 };
 
 // from srci/fsp/srci.H
