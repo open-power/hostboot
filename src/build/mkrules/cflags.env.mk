@@ -52,8 +52,8 @@ FLAGS_FILTER ?= $(1)
 ifdef HOSTBOOT_RUNTIME
 CFLAGS += -D__HOSTBOOT_RUNTIME=1
 TRACE_FLAGS += --full-strings
-endif
-
+else # just need one or the other
 ifdef CONFIG_CONSOLE_OUTPUT_TRACE
 TRACE_FLAGS += --full-strings
+endif
 endif
