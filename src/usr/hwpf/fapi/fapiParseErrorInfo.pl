@@ -24,7 +24,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-# $Id: fapiParseErrorInfo.pl,v 1.32 2015-02-02 18:57:30 dcrowell Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.32 2015/02/02 18:57:30 dcrowell Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #

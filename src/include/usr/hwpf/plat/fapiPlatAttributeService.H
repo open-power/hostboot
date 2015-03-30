@@ -430,6 +430,51 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_PROC_NPU_MMIO_BAR_ENABLE
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget       Target pointer
+ *  @param[out] o_mmioBarEnable NPU MMIO Bar Enable
+ *                          @note:  the array size of 4,2 was pulled from
+ *                          the xml file and is not expected to change.
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetNpuMmioBarEnable (
+                                    const fapi::Target * i_pTarget,
+                                    uint8_t    (&o_mmioBarEnable) [4][2] );
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget         Target pointer
+ *  @param[out] o_mmioBarBaseAddr NPU MMIO Bar Base Address
+ *                          @note:  the array size of 4,2 was pulled from
+ *                          the xml file and is not expected to change.
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetNpuMmioBarBaseAddr (
+                                    const fapi::Target * i_pTarget,
+                                    uint64_t    (&o_mmioBarBaseAddr) [4][2] );
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_PROC_NPU_MMIO_BAR_SIZE
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget       Target pointer
+ *  @param[out] o_mmioBarSize   NPU MMIO Bar Size
+ *                          @note:  the array size of 4,2 was pulled from
+ *                          the xml file and is not expected to change.
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetNpuMmioBarSize (
+                                    const fapi::Target * i_pTarget,
+                                    uint64_t    (&o_mmioBarSize) [4][2] );
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_EX_L2_SINGLE_MEMBER_ENABLE. It should not be called directly.
  *
  *  @param[in]  i_pTarget Target MB pointer
@@ -1190,6 +1235,15 @@ fapi::ReturnCode fapiPlatGetRCDCntlWord015 (const fapi::Target * i_pTarget,
 #define ATTR_PROC_PCIE_BAR_SIZE_GETMACRO( ID, PTARGET, VAL )   \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetProcPcieBarSize (PTARGET, VAL )
+#define ATTR_PROC_NPU_MMIO_BAR_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetNpuMmioBarEnable (PTARGET, VAL )
+#define ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetNpuMmioBarBaseAddr (PTARGET, VAL )
+#define ATTR_PROC_NPU_MMIO_BAR_SIZE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetNpuMmioBarSize (PTARGET, VAL )
 
 //------------------------------------------------------------------------------
 //  MACROS to support enable attributes in p8_xip_customize_attributes.xml

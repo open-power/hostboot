@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: fapiHwpErrorInfo.xml,v 1.17 2015-02-02 18:40:42 dcrowell Exp $ -->
+<!-- $Id: fapiHwpErrorInfo.xml,v 1.17 2015/02/02 18:40:42 dcrowell Exp $ -->
 <!-- XML file specifying Test HW Procedure generated errors. -->
 
 <hwpErrors>

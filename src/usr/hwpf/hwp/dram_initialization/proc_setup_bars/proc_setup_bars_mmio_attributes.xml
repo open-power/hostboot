@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_mmio_attributes.xml,v 1.5 2014/11/18 17:44:22 jmcgill Exp $ -->
+<!-- $Id: proc_setup_bars_mmio_attributes.xml,v 1.6 2015/02/02 18:57:33 jmcgill Exp $ -->
 <!-- proc_setup_bars_mmio_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -258,6 +258,65 @@
        64_KB = 0x0000000000010000,
         4_KB = 0x0000000000001000
     </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU MMIO BAR enables
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        first dimension: unit number (0:3)
+        second dimension: BAR number (0:1)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <array>4,2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU MMIO BAR base address values
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        64-bit address representing BAR RA
+        NOTE: BAR register covers RA 14:51
+        first dimension: unit number (0:3)
+        second dimension: BAR number (0:1)
+    </description>
+    <valueType>uint64</valueType>
+    <array>4,2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_MMIO_BAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU MMIO BAR size values
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes: none
+        first dimension: unit number (0:3)
+        second dimension: BAR number (0:1)
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        2_MB = 0x0000000000200000,
+        1_MB = 0x0000000000100000,
+      512_KB = 0x0000000000080000,
+      256_KB = 0x0000000000040000,
+      128_KB = 0x0000000000020000,
+       64_KB = 0x0000000000010000
+    </enum>
+    <array>4,2</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
