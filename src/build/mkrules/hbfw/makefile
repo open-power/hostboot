@@ -33,7 +33,7 @@
 
 .if(${CONTEXT:R} == "ppc")
 
-SETUP_SUBDIRS    += fsp
+SETUP_SUBDIRS    += fsp simics
 EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
@@ -43,7 +43,7 @@ RUNBVT_SUBDIRS   +=
 
 .elseif(${CONTEXT} == "x86.nfp")
 
-SETUP_SUBDIRS    += fsp
+SETUP_SUBDIRS    += fsp simics
 EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
