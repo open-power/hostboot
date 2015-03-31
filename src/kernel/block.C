@@ -404,7 +404,7 @@ void Block::castOutPages(uint64_t i_type)
                 //else printk("r");
                 //printk("%d",(int)pte->getLRU());
 
-                if(pte->isWritable())
+                if(pte->isWritable() && pte->isDirty())
                 {
                     if(pte->getLRU() > rw_constraint && pte->isWriteTracked())
                     {
