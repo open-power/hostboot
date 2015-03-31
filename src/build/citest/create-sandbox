@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +46,7 @@ fi
 
 # Create sandbox.
 mksb -rc $SANDBOXRC -dir $SANDBOXROOT -back $BACKING_BUILD -sb $SANDBOXNAME \
-      -m ppc  || exit -1
+      -m ppc -auto || exit -1
 
 # workaround scripts expect $sb variable to be populated.
 export sb=$SANDBOXBASE/src
