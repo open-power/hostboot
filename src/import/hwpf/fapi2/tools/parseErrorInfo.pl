@@ -1184,11 +1184,13 @@ foreach my $argnum (0 .. $#ARGV)
             print ECFILE $methods{$key}{method};
         }
 
-        # Stick the execute method at the end of the other methods.
-        print ECFILE "    void execute(void)\n";
+        # Stick the execute method at the end of the other methods. We allow
+        # passing in of the severity so that macros which call execute() can over-ride
+        # the default severity.
+        print ECFILE "    void execute(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED)\n";
         print ECFILE "    {\n";
         print ECFILE "        FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n" if ($arg_empty_ffdc eq undef);
-        print ECFILE "        fapi2::logError(iv_rc, iv_sev);\n" if ($arg_empty_ffdc eq undef);
+        print ECFILE "        fapi2::logError(iv_rc, (i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED) ? iv_sev : i_sev);\n" if ($arg_empty_ffdc eq undef);
         print ECFILE "    }\n\n";
 
         # Instance variables
