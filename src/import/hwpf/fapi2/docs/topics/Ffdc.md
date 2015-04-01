@@ -124,6 +124,27 @@ And it can be used:
 
 Note the indifference to integral or variable buffers.
 
+### Collecting Buffers as Part of FFDC
+
+To collect a buffer as part of an FFDC collection (as opposed to being
+the FFDC you want to collect) you can add it to the XML:
+
+    <buffer>RAS_STATUS</buffer>
+
+This will generate fapi2::buffer and fapi2::variable_buffer set methods
+for this element:
+
+    fapi2::buffer<uint64_t> data;
+    set_RAS_STATUS(data) ...
+
+Also, you can force the conversion of the buffer to an integral
+type without changing the XML
+
+    <ffdc>RAS_STATUS</ffdc>
+
+    fapi2::buffer<uint64_t> data;
+    set_RAS_STATUS(unt64_t(data)) ...
+
 ## Error Log Generation
 
 FAPI had a function called fapiLogError() which would generate platform
