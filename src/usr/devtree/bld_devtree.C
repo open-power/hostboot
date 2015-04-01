@@ -1197,10 +1197,13 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
                 }
             }
         }
-        // just commit any errors we get, this isn't critical
+        // just delete any errors we get, this isn't critical
         if( errhdl )
         {
-            errlCommit(errhdl, DEVTREE_COMP_ID);
+            // since there are old parts out in the wild without
+            //  this data, we can't log an error
+            delete errhdl;
+            errhdl = NULL;
         }
 
         if( !foundvpd ) //serial number not found, default to unavailable

@@ -96,6 +96,7 @@ struct epubTargetTypeToSub_t
 // Target type to subsystem table.
 static const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
 {
+    { TARGETING::TYPE_NODE             , EPUB_CEC_HDW_SUBSYS       },
     { TARGETING::TYPE_DIMM             , EPUB_MEMORY_DIMM          },
     { TARGETING::TYPE_MEMBUF           , EPUB_MEMORY_SUBSYS        },
     { TARGETING::TYPE_PROC             , EPUB_PROCESSOR_SUBSYS     },
