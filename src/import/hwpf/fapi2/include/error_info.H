@@ -71,9 +71,7 @@ namespace fapi2
     ///        special type that cannot simply be memcopied
     enum ErrorInfoFfdcSize
     {
-        EI_FFDC_SIZE_BUF    = 0xffff,   // fapi2::buffer<T>
         EI_FFDC_SIZE_TARGET = 0xfffe,   // fapi2::Target
-        EI_FFDC_SIZE_VBUF   = 0xfffd,   // fapi2::variable_buffer
         EI_FFDC_MAX_SIZE    = 0x1000,   // Limit regular FFDC capture to 4kb
     };
 
@@ -82,6 +80,7 @@ namespace fapi2
     ///
     enum errlSeverity_t
     {
+        FAPI2_ERRL_SEV_UNDEFINED     = 0x00, /// Used internally by ffdc mechanism
         FAPI2_ERRL_SEV_RECOVERED     = 0x10, /// Not seen by customer
         FAPI2_ERRL_SEV_PREDICTIVE    = 0x20, /// Error recovered but customer will see
         FAPI2_ERRL_SEV_UNRECOVERABLE = 0x40  /// Unrecoverable, general

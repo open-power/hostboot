@@ -178,24 +178,8 @@ namespace fapi2
     void ErrorInfoEntryFfdc::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
                                           const void* const* i_objects) const
     {
-        // "variable buffer ffdc not yet implemented");
-        assert(iv_ffdcSize != EI_FFDC_SIZE_VBUF);
-
         switch(iv_ffdcSize)
         {
-        case EI_FFDC_SIZE_BUF:
-        {
-            const buffer<uint64_t>* object =
-                static_cast<const buffer<uint64_t>*>(i_objects[iv_ffdcObjIndex]);
-
-            i_info->iv_ffdcs.push_back(std::shared_ptr<ErrorInfoFfdc>(
-                                           new ErrorInfoFfdc(iv_ffdcId, object,
-                                                             sizeof(object))));
-
-            FAPI_DBG("addErrorInfo: Adding buffer id: 0x%x size: %lu buf: 0x%lx",
-                     iv_ffdcId, sizeof(object), uint64_t(*object));
-        }
-        break;
 
         case EI_FFDC_SIZE_TARGET:
         {
