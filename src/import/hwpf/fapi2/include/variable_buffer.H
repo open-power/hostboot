@@ -492,6 +492,12 @@ namespace fapi2
 #endif
 
         ///
+        /// @brief Get a pointer to the buffer bits
+        /// @return Pointer to the buffer itself
+        ///
+        inline unit_type* pointer(void) { return &(iv_data[0]); }
+
+        ///
         /// @brief operator!=()
         ///
         bool operator!=(const variable_buffer& rhs) const
