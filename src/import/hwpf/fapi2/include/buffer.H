@@ -236,6 +236,12 @@ namespace fapi2
         /// @name Buffer Manipulation Functions
         ///@{
 
+        ///
+        /// @brief Get a pointer to the buffer bits
+        /// @return Pointer to the buffer itself
+        ///
+        inline T* pointer(void) { return &this->iv_data; }
+
         // Note: Many (all?) of these are not needed and the compiler complains
         // as the cast to T yields a better operator. There are here mainly for
         // documenation purposes.
