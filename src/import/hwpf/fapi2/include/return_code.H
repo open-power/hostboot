@@ -144,17 +144,10 @@ namespace fapi2
         ///
         /// @brief Assignement operator
         ///
+#ifdef DOXYGEN
         inline ReturnCode& operator=(const uint64_t& rhs)
-            {
-                iv_rc = rhs;
-                return *this;
-            }
-
         inline ReturnCode& operator=(const ReturnCodes& rhs)
-            {
-                iv_rc = rhs;
-                return *this;
-            }
+#endif
 
         inline bool operator==(const uint64_t& rhs) const
             { return rhs == iv_rc; }
