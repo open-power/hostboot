@@ -44,7 +44,7 @@ namespace fapi2
         // Why constexpr functions? Enums are hard to do math on, and
         // static const doesn't work without -O1 (or greater.) That might
         // be a bug in g++ but this works just the same.
-        constexpr static uint32_t mask(void)
+        constexpr static T mask(void)
             { return T(~0); }
 
         constexpr static uint32_t byte_length(void)
