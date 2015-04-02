@@ -374,11 +374,14 @@ class IpVpdFacade
      *
      * @param[in] i_target - The target to retrieve the data for.
      *
+     * @param[in] i_location - VPD location to fetch data from (PNOR/SEEPROM)
+     *
      * @return bool - True if the record is found, False otherwise.
      */
     bool recordPresent( const char * i_record,
                         uint16_t & offset,
-                        TARGETING::Target * i_target );
+                        TARGETING::Target * i_target,
+                        VPD::vpdCmdTarget i_location );
 
     /**
      * @brief This function will read the VPD TOC to find the offset where the

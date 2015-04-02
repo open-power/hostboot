@@ -567,7 +567,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         // If we did not match, we need to load SEEPROM VPD data into PNOR
         if( l_matchPN && l_matchSN )
         {
-            TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN = SEEPROM_PN/SN for target %.8X",TARGETING::get_huid(i_target));
+            TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN == SEEPROM_PN/SN for target %.8X",TARGETING::get_huid(i_target));
         }
         else
         {

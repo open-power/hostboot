@@ -397,6 +397,9 @@ errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
                     l_dataSeeprom,
                     l_sizePnor ) != 0 )
         {
+            TRACFCOMP( g_trac_vpd, "cmpPnorToSeeprom found mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_record, i_keyword );
+            TRACFBIN( g_trac_vpd, "EEPROM", l_dataSeeprom, l_sizeSeeprom );
+            TRACFBIN( g_trac_vpd, "PNOR", l_dataPnor, l_sizePnor );
             break;
         }
 
@@ -961,8 +964,9 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
         }
 
         vpdPresent = recordPresent( recordName,
-                                recordOffset,
-                                i_target );
+                                    recordOffset,
+                                    i_target,
+                                    VPD::AUTOSELECT );
 
     }while( 0 );
 
@@ -981,7 +985,8 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
 // ------------------------------------------------------------------
 bool IpVpdFacade::recordPresent( const char * i_record,
                                  uint16_t & o_offset,
-                                 TARGETING::Target * i_target )
+                                 TARGETING::Target * i_target,
+                                 VPD::vpdCmdTarget i_location )
 {
     errlHndl_t err = NULL;
     uint64_t tmpOffset = 0x0;
@@ -1009,7 +1014,7 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                              RECORD_BYTE_SIZE,
                              record,
                              i_target,
-                             VPD::AUTOSELECT );
+                             i_location );
             tmpOffset += RECORD_BYTE_SIZE;
 
             if( err )
@@ -1026,7 +1031,7 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                                  RECORD_ADDR_BYTE_SIZE,
                                  &o_offset,
                                  i_target,
-                                 VPD::AUTOSELECT );
+                                 i_location );
                 if( err )
                 {
                     break;
@@ -1066,7 +1071,8 @@ errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
 
     matchFound = recordPresent( i_record,
                                 offset,
-                                i_target );
+                                i_target,
+                                i_args.location );
 
     if( !matchFound )
     {
