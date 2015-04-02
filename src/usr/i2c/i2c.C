@@ -1927,6 +1927,11 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
 {
 
     errlHndl_t err = NULL;
+    mode_reg_t mode;
+    uint64_t l_speed = I2C_BUS_SPEED_FROM_MRW;
+
+    // I2C Bus Speed Array
+    TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cForceResetAndUnlock()" );
@@ -1934,62 +1939,122 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
     do
     {
 
-        // enable diagnostic mode
-        // set bit in mode register
-        mode_reg_t diagnostic;
-
-        diagnostic.diag_mode = 0x1;
-
-        err = i2cRegisterOp( DeviceFW::WRITE,
-                             i_target,
-                             &diagnostic.value,
-                             I2C_REG_MODE,
-                             i_args );
-
-        if( err )
+        // Get I2C Bus Speed Array attribute.  It will be used to determine
+        // which engine/port combinations have devices on them
+        if (  !( i_target->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
+                                          (speed_array) ) )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C Enable Diagnostic mode Failed!!" );
+                       ERR_MRK"i2cForceResetAndUnlock() - Cannot find "
+                       "ATTR_I2C_BUS_SPEED_ARRAY needed for operation");
+            /*@
+             * @errortype
+             * @reasoncode     I2C_ATTRIBUTE_NOT_FOUND
+             * @severity       ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid       I2C_FORCE_RESET_AND_UNLOCK
+             * @userdata1      Target for the attribute
+             * @userdata2      <UNUSED>
+             * @devdesc        ATTR_I2C_BUS_SPEED_ARRAY not found
+             * @custdesc       I2C configuration data missing
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_FORCE_RESET_AND_UNLOCK,
+                                           I2C_ATTRIBUTE_NOT_FOUND,
+                                           TARGETING::get_huid(i_target),
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( I2C_COMP_NAME, 256);
+
             break;
         }
 
-
-        //toggle clock line
-        err = i2cToggleClockLine( i_target,
-                                  i_args );
-
-        if( err )
+        // Need to send slave stop to all ports with a device on the engine
+        for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
         {
-            break;
-        }
 
-        //manually send stop signal
-        err = i2cSendStopSignal( i_target,
-                                  i_args );
+            // Only send stop to a port if there are devices on it
+            l_speed = speed_array[i_args.engine][port];
+            if ( l_speed == 0 )
+            {
+                continue;
+            }
 
-        if( err )
-        {
-            break;
-        }
+            TRACUCOMP( g_trac_i2c,
+                       INFO_MRK"i2cForceResetAndUnlock() - Performing op on "
+                       "engine=%d, port=%d",
+                       i_args.engine, port);
 
-        //disable diagnostic mode
-        //set bit in mode register
-        diagnostic.diag_mode = 0x0;
+            // Clear mode register
+            mode.value = 0x0ull;
 
-        err = i2cRegisterOp( DeviceFW::WRITE,
-                             i_target,
-                             &diagnostic.value,
-                             I2C_REG_MODE,
-                             i_args );
+            // set port in mode register
+            mode.port_num = port;
+
+            // enable diagnostic mode in mode register
+            mode.diag_mode = 0x1;
+
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &mode.value,
+                                 I2C_REG_MODE,
+                                 i_args );
+
+            if( err )
+            {
+                TRACFCOMP( g_trac_i2c,
+                           ERR_MRK"I2C Enable Diagnostic mode Failed!!" );
 
 
-        if( err )
-        {
-            TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C disable Diagnostic mode Failed!!" );
-            break;
-        }
+                // We still need to reset the other ports on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
+            }
 
+
+            //toggle clock line
+            err = i2cToggleClockLine( i_target,
+                                      i_args );
+
+            if( err )
+            {
+                // We still need to reset the other ports on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
+            }
+
+            //manually send stop signal
+            err = i2cSendStopSignal( i_target,
+                                     i_args );
+
+            if( err )
+            {
+                // We still need to reset the other ports on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
+            }
+
+            // disable diagnostic mode in mode register
+            mode.diag_mode = 0x0;
+
+            err = i2cRegisterOp( DeviceFW::WRITE,
+                                 i_target,
+                                 &mode.value,
+                                 I2C_REG_MODE,
+                                 i_args );
+
+
+            if( err )
+            {
+                TRACFCOMP( g_trac_i2c,
+                           ERR_MRK"I2C disable Diagnostic mode Failed!!" );
+                // We still need to reset the other ports on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
+            }
+
+
+        } // end of port for loop
 
     }while(0);
 
@@ -2038,8 +2103,10 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
 
             if( err )
             {
-                //error trying to force a reset break
-                break;
+                // We still want to send the slave stop command since the
+                // initial reset completed above.
+                // So just commit the log here and let the function continue.
+                errlCommit( err, I2C_COMP_ID );
             }
         }
 
@@ -2116,13 +2183,6 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
         // Need to send slave stop to all ports with a device on the engine
         for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
         {
-            // Only do port 0 for FSI I2C
-            if ( ( i_args.switches.useFsiI2C == 1 ) &&
-                 ( port != 0 ) )
-            {
-                break;
-            }
-
             // Only send stop to a port if there are devices on it
             l_speed = speed_array[i_args.engine][port];
             if ( l_speed == 0 )
@@ -2141,7 +2201,10 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                                        i_args );
             if( err )
             {
-                break;
+                // We still need to send the slave stop to the other ports
+                // on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
             }
 
             mode.bit_rate_div = i_args.bit_rate_divisor;
@@ -2158,7 +2221,10 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if( err )
             {
-                break;
+                // We still need to send the slave stop to the other ports
+                // on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
             }
 
             cmd.value = 0x0ull;
@@ -2176,7 +2242,10 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if( err )
             {
-                break;
+                // We still need to send the slave stop to the other ports
+                // on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
             }
 
             // Now wait for cmd Complete
@@ -2185,7 +2254,10 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if( err )
             {
-                break;
+                // We still need to send the slave stop to the other ports
+                // on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
             }
 
         } // end of port for-loop

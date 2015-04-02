@@ -723,8 +723,8 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
 
 /**
  * @brief This function will reset the I2C Master engine specified
- *      by the args.  It will also then initiate a Stop cmd to the
- *      slave device.
+ *      by the args.  It will also end the sequence by initiating a Stop
+ *      cmd to all ports on the engine that have a slave device.
  *
  * @param[in] i_target - The I2C master target.
  *
