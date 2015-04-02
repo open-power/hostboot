@@ -400,7 +400,8 @@ namespace FREQVOLTSVC
                      io_procChip->getAttr<TARGETING::ATTR_HUID>());
         }
 
-        TRACDCOMP("Vdd: 0x%02x, vcs: 0x%02x", l_vdd_vid, l_vcs_vid);
+        TRACDCOMP(g_fapiTd,INFO_MRK"Vdd: 0x%02x, vcs: 0x%02x",
+                    l_vdd_vid, l_vcs_vid);
 
         // create boot voltage value
         l_boot_voltage_info |= ( ( static_cast<uint32_t>(l_vdd_vid) <<
