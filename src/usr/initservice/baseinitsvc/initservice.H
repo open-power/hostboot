@@ -80,10 +80,39 @@ namespace   INITSERVICE
 class InitService
 {
 
+
 public:
 
 
     friend  class InitServiceTest;
+
+    /**
+     * @brief Message queue structure.
+     *
+     */
+    struct regMsgQ_t
+    {
+        msg_q_t msgQ;
+        uint32_t msgType;
+        uint32_t msgPriority;
+
+        /**
+         * @brief Constructor
+         */
+        regMsgQ_t(msg_q_t i_msgQ,
+                  uint32_t i_msgType,
+                  EventPriority_t i_priority) :
+            msgQ(i_msgQ), msgType(i_msgType),
+                  msgPriority((uint32_t)i_priority) {}
+
+        // allow us to sort the queue based on priority
+        bool operator < (const regMsgQ_t &msg ) const
+        {
+            return ( msgPriority < msg.msgPriority);
+        }
+
+    };
+
 
     /**
      * @brief Get singleton instance of this class.
@@ -266,20 +295,6 @@ private:
     //Store a list of registered blocks
     std::vector<regBlock_t*> iv_regBlock;
 
-    struct regMsgQ_t
-    {
-        msg_q_t msgQ;
-        uint32_t msgType;
-        uint32_t msgPriority;
-
-        /**
-         * @brief Constructor
-         */
-        regMsgQ_t(msg_q_t i_msgQ,
-                  uint32_t i_msgType,
-                  EventPriority_t i_priority) :
-            msgQ(i_msgQ), msgType(i_msgType), msgPriority((uint32_t)i_priority) {}
-    };
 
     typedef std::vector<regMsgQ_t> EventRegistry_t;
 

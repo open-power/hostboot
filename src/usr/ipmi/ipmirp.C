@@ -478,7 +478,7 @@ void IpmiRP::lastChanceEventHandler(void)
             // register for the post memory flush callback
             INITSERVICE::registerShutdownEvent(iv_msgQ,
                             IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
-                            INITSERVICE::POST_MEM_FLUSH_START_PRIORITY);
+                            INITSERVICE::POST_MEM_FLUSH_NOTIFY_LAST);
 
             iv_graceful_shutdown_pending = true;
             lwsync();

@@ -206,6 +206,7 @@ PnorRP::PnorRP()
 iv_TOC_used(TOC_0)
 ,iv_msgQ(NULL)
 ,iv_startupRC(0)
+,iv_shutdown_pending(false)
 {
     TRACFCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
     // setup everything in a separate function
@@ -244,6 +245,10 @@ void PnorRP::initDaemon()
     {
         // create a message queue
         iv_msgQ = msg_q_create();
+
+        INITSERVICE::registerShutdownEvent( iv_msgQ,
+                PNOR::MSG_SHUTDOWN,
+                INITSERVICE::PNOR_RP_PRIORITY);
 
         // create a Block, passing in the message queue
         int rc = mm_alloc_block( iv_msgQ, (void*) BASE_VADDR, TOTAL_SIZE );
@@ -897,14 +902,21 @@ void PnorRP::waitForMessage()
         message = msg_wait( iv_msgQ );
         if( message )
         {
-            /*  data[0] = virtual address requested
-             *  data[1] = address to place contents
-             */
-            eff_addr = (uint8_t*)message->data[0];
-            user_addr = (uint8_t*)message->data[1];
+            // if its a shutdown message skip the address calculation
+            if( message->type !=  PNOR::MSG_SHUTDOWN )
+            {
+                /*  data[0] = virtual address requested
+                 *  data[1] = address to place contents
+                 */
+                eff_addr = (uint8_t*)message->data[0];
+                user_addr = (uint8_t*)message->data[1];
 
-            //figure out the real pnor offset
-            l_errhdl = computeDeviceAddr( eff_addr, dev_offset, chip_select, needs_ecc );
+                //figure out the real pnor offset
+                l_errhdl =
+                    computeDeviceAddr( eff_addr,
+                            dev_offset, chip_select, needs_ecc );
+            }
+
             if( l_errhdl )
             {
                 status_rc = -EFAULT; /* Bad address */
@@ -913,6 +925,15 @@ void PnorRP::waitForMessage()
             {
                 switch(message->type)
                 {
+                    case( PNOR::MSG_SHUTDOWN ):
+                        {
+                            // we got a message saying there is a shutdown in
+                            // progress, dont accept any new pnor writes
+                            iv_shutdown_pending = true;
+                            TRACFCOMP(g_trac_pnor,"PnorRP::Shutdown message recieved" );
+                        }
+                        break;
+
                     case( MSG_MM_RP_READ ):
                         l_errhdl = readFromDevice( dev_offset,
                                                    chip_select,
@@ -924,13 +945,25 @@ void PnorRP::waitForMessage()
                             status_rc = -EIO; /* I/O error */
                         }
                         break;
+
                     case( MSG_MM_RP_WRITE ):
-                        l_errhdl = writeToDevice( dev_offset, chip_select, needs_ecc, user_addr );
-                        if( l_errhdl )
+                        if( !iv_shutdown_pending )
                         {
-                            status_rc = -EIO; /* I/O error */
+                            l_errhdl = writeToDevice( dev_offset,
+                                                      chip_select,
+                                                      needs_ecc,
+                                                      user_addr );
+                            if( l_errhdl )
+                            {
+                                status_rc = -EIO; /* I/O error */
+                            }
+                        }
+                        else
+                        {
+                          TRACFCOMP(g_trac_pnor, "PnorRP::shutdown pending write dropped");
                         }
                         break;
+
                     default:
                         TRACFCOMP( g_trac_pnor, "PnorRP::waitForMessage> Unrecognized message type : user_addr=%p, eff_addr=%p, msgtype=%d", user_addr, eff_addr, message->type );
                         /*@

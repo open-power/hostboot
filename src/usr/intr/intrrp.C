@@ -1431,7 +1431,7 @@ void IntrRp::shutDown(uint64_t i_status)
             disableInterruptPresenter(pir);
         }
     }
-    TRACFCOMP(g_trac_intr,INFO_MRK,"INTR is shutdown");
+    TRACFCOMP(g_trac_intr,INFO_MRK"INTR is shutdown");
 }
 
 //----------------------------------------------------------------------------

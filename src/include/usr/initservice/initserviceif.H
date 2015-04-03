@@ -39,17 +39,38 @@ namespace INITSERVICE
 {
 
     /**
-     * Priority scheme, if needed
+     * Priority scheme:
+     *  The message queue will be sorted in ascending priority order, meaing a
+     *  process registering with a priority of zero will be notified first.
+     *
+     * There are two ranges of callback priorities supported.
+     *
+     *      1. Pre Memory flush callback priorities are in the range 0-127 and
+     *      will occur before the memory has been flushed to pnor.
+     *
+     *      2. Post memory flush callback priorities are in the range 127-255,
+     *      and are signaled after the memory has been flushed to pnor.
+     *
+     *      NOTE: The final call back for systems which support IPMI should be
+     *      POST_MEM_FLUSH_NOTIFY_LAST since it will trigger a power off
+     *      request to the BMC.
+     *
      */
     enum EventPriority_t
     {
-        LOWEST_PRIORITY = 0,    //!<< Notify last, LIFO order
-        CONSOLE_PRIORITY = LOWEST_PRIORITY,     //!<< Shutdown Console
-        INTR_PRIORITY   = 1,    //!<< Shutdown INTR
-        MBOX_PRIORITY   = 2,    //!<< Shutdown MBOX
-        NO_PRIORITY = 16,       //!<< No dependency / dont' care, LIFO order
-        HIGHEST_PRIORITY = 127, //!<< Notify first, LIFO order
-        POST_MEM_FLUSH_START_PRIORITY = 128, //!<< Post Mem Flush callbacks
+        NOTIFY_FIRST     = 0,
+        HIGHEST_PRIORITY = NOTIFY_FIRST,
+        NO_PRIORITY      = 16,
+        MBOX_PRIORITY    = 17,
+        INTR_PRIORITY    = 18,
+        LOWEST_PRIORITY  = 127,
+        CONSOLE_PRIORITY  = LOWEST_PRIORITY,
+        LAST_PRE_MEM_FLUSH_PRIORITY = LOWEST_PRIORITY,
+
+        HIGHEST_POST_MEM_FLUSH_PRIORITY = 128,  // 1st post mem flush callback
+        PNOR_RP_PRIORITY = HIGHEST_POST_MEM_FLUSH_PRIORITY,
+        POST_MEM_FLUSH_NOTIFY_LAST = 255
+
     };
 
 /**

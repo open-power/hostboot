@@ -721,6 +721,24 @@ void doShutdown(uint64_t i_status,
     }
 }
 
+// predicate to find a specific priority value
+class isPriority
+{
+    public:
+
+        isPriority( const uint32_t priority )
+            :iv_priority(priority)
+        {};
+
+        bool operator()( InitService::regMsgQ_t q ) const
+        {
+            return q.msgPriority  == iv_priority;
+        }
+
+    private:
+        uint32_t iv_priority;
+};
+
 void InitService::doShutdown(uint64_t i_status,
                              uint64_t i_payload_base,
                              uint64_t i_payload_entry,
@@ -758,24 +776,31 @@ void InitService::doShutdown(uint64_t i_status,
 
     TRACFCOMP(g_trac_initsvc, "doShutdown> status=%.16X",worst_status);
 
+    // sort the queue by priority before sending..
+    std::sort( iv_regMsgQ.begin(), iv_regMsgQ.end());
+
     msg_t * l_msg = msg_allocate(); // filled with zeros on creation
 
     // Call registered services and notify of shutdown
-    // except those who asked for post memory flush callbacks
-    for(EventRegistry_t::iterator i = iv_regMsgQ.begin();
-        ( (i != iv_regMsgQ.end()) &&
-          (i->msgPriority <= HIGHEST_PRIORITY));
+    // event
+    for( EventRegistry_t::iterator i = iv_regMsgQ.begin();
+            ( ( i != iv_regMsgQ.end() ) &&
+            (i->msgPriority <= LAST_PRE_MEM_FLUSH_PRIORITY));
         ++i)
     {
-        l_msg->type = i->msgType;
-        l_msg->data[0] = worst_status;
-        msg_sendrecv(i->msgQ,l_msg);
+            TRACDCOMP(g_trac_initsvc,"notify priority=0x%x, queue=0x%x", i->msgPriority, i->msgQ );
+            l_msg->type = i->msgType;
+            l_msg->data[0] = worst_status;
+            (void)msg_sendrecv(i->msgQ,l_msg);
     }
+
+    TRACFCOMP(g_trac_initsvc,"Begin virtual mem flush");
 
     std::vector<regBlock_t*>::iterator l_rb_iter = iv_regBlock.begin();
     //FLUSH each registered block in order
     while (l_rb_iter!=iv_regBlock.end())
     {
+        TRACFCOMP(g_trac_initsvc, "flushing virtual memory 0x%x",(*l_rb_iter)->vaddr );
         l_rc = mm_remove_pages(FLUSH,(*l_rb_iter)->vaddr,(*l_rb_iter)->size);
         if (l_rc)
         {
@@ -784,7 +809,7 @@ void InitService::doShutdown(uint64_t i_status,
              * @errorlog tag
              * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
              * @moduleid        BASE_INITSVC_MOD_ID
-             * @reasoncode      SHUTDOWN_FLUSH_FAILED
+             * @reasoncode      SHUTDOWN_FLUSH_FAILE D
              * @userdata1       returncode from mm_remove_pages()
              * @userdata2       0
              *
@@ -804,17 +829,19 @@ void InitService::doShutdown(uint64_t i_status,
         l_rb_iter++;
     }
 
+    TRACFCOMP(g_trac_initsvc,"Do post mem flush callbacks");
     // send message to registered services who asked for a
-    // post memory flush callback
-    for(EventRegistry_t::iterator i = iv_regMsgQ.begin();
-            i != iv_regMsgQ.end(); ++i)
+    // post memory flush callback - starting at the highest priority
+    for(EventRegistry_t::iterator i = std::find_if(iv_regMsgQ.begin(),
+                    iv_regMsgQ.end(),
+                    isPriority( (uint32_t)HIGHEST_POST_MEM_FLUSH_PRIORITY));
+                    i != iv_regMsgQ.end();
+                    ++i)
     {
-        if( i->msgPriority >= POST_MEM_FLUSH_START_PRIORITY)
-        {
+            TRACDCOMP(g_trac_initsvc,"notify priority=0x%x, queue=0x%x", i->msgPriority, i->msgQ );
             l_msg->type = i->msgType;
             l_msg->data[0] = worst_status;
-            msg_sendrecv(i->msgQ,l_msg);
-        }
+            (void)msg_sendrecv(i->msgQ,l_msg);
     }
     msg_free(l_msg);
 
@@ -835,40 +862,35 @@ void InitService::doShutdown(uint64_t i_status,
              i_masterHBInstance);
 }
 
+
+
 bool InitService::registerShutdownEvent(msg_q_t i_msgQ,
                                         uint32_t i_msgType,
                                         EventPriority_t i_priority)
 {
-    bool result = true;
-
     mutex_lock(&iv_registryMutex);
+
+    bool result = true;
 
     if (!iv_shutdownInProgress)
     {
-
-        EventRegistry_t::iterator in_pos = iv_regMsgQ.end();
-
         for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
                 r != iv_regMsgQ.end();
                 ++r)
         {
-            if(r->msgQ == i_msgQ)
+            // if we've registered this message before skip it
+            if( (r->msgQ == i_msgQ) && ( r->msgPriority == i_priority) )
             {
                 result = false;
                 break;
             }
 
-            if(r->msgPriority <= (uint32_t)i_priority)
-            {
-                in_pos = r;
-                break;
-            }
         }
 
         if(result)
         {
-            in_pos = iv_regMsgQ.insert(in_pos,
-                            regMsgQ_t(i_msgQ, i_msgType, i_priority));
+            // add it to the queue, we'll sort it before sending
+            iv_regMsgQ.push_back(regMsgQ_t(i_msgQ, i_msgType, i_priority));
         }
     }
 
@@ -890,11 +912,11 @@ bool InitService::unregisterShutdownEvent(msg_q_t i_msgQ)
                 r != iv_regMsgQ.end();
                 ++r)
         {
+            // erase all instances
             if(r->msgQ == i_msgQ)
             {
                 result = true;
                 iv_regMsgQ.erase(r);
-                break;
             }
         }
     }

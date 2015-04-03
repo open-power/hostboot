@@ -38,6 +38,16 @@
 /**
  * PNOR Resource Provider
  */
+namespace PNOR
+{
+    // used to register for the hostboot shutdown
+    // notification messages.
+    enum msg_type
+    {
+        MSG_NOT_USED = 0x00,
+        MSG_SHUTDOWN = 0x01,
+    };
+};
 class PnorRP
 {
   public:
@@ -157,6 +167,12 @@ class PnorRP
      *   something went wrong
      */
     uint64_t iv_startupRC;
+
+    /**
+     * sent when a shutdown message is sent, used to elimnate further writes
+     * to pnore during a shutdown process
+     */
+    bool iv_shutdown_pending;
 
     /**
      * Track some information related to flash wear and health
