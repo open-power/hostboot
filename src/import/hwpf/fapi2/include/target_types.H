@@ -58,8 +58,8 @@ namespace fapi2
         TARGET_TYPE_EQ            = 0x00000800, ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
         TARGET_TYPE_MCA           = 0x00001000, ///< MCA type
         TARGET_TYPE_MCBIST        = 0x00002000, ///< MCBIST type
-        TARGET_TYPE_MIA           = 0x00004000, ///< MIA type
-        TARGET_TYPE_MIS           = 0x00008000, ///< MIS type
+        TARGET_TYPE_MI            = 0x00004000, ///< MI Memory Interface (Cumulus)
+//      Can be recycled           = 0x00008000, ///<
         TARGET_TYPE_DMI           = 0x00010000, ///< DMI type
         TARGET_TYPE_OBUS          = 0x00020000, ///< OBUS type
         TARGET_TYPE_NV            = 0x00040000, ///< NV bus type
