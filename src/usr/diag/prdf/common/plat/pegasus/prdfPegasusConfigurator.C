@@ -227,38 +227,42 @@ errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
                                           PllDomainList  * io_pllDomains2)
 {
     using namespace TARGETING;
-    int32_t l_rc = SUCCESS;
     errlHndl_t l_errl = NULL ;
 
     // Get references to factory objects.
     ScanFacility      & scanFac = ScanFacility::Access();
     ResolutionFactory & resFac  = ResolutionFactory::Access();
 
-    // Get rule filename based on type.
-    const char * fileName = "";
-    switch ( i_type )
-    {
-        case TYPE_PROC:   fileName = Proc;   break;
-        case TYPE_EX:     fileName = Ex;     break;
-        case TYPE_MCS:    fileName = Mcs;    break;
-        case TYPE_MEMBUF: fileName = Membuf; break;
-        case TYPE_MBA:    fileName = Mba;    break;
+    // Get all targets of specified type and add to given domain.
+    TargetHandleList list = PlatServices::getFunctionalTargetList( i_type );
 
-        default:
-            // Print a trace statement, but do not fail the build.
-            PRDF_ERR( "[addDomainChips] Unsupported target type: %d", i_type );
-            l_rc = FAIL;
+    if ( 0 == list.size() )
+    {
+        PRDF_ERR( "[addDomainChips] getFunctionalTargetList "
+                  "returned empty list for i_type=%d", i_type );
     }
-
-    if ( SUCCESS == l_rc )
+    else
     {
-        // Get all targets of specified type and add to given domain.
-        TargetHandleList list = PlatServices::getFunctionalTargetList( i_type );
-
-        if ( 0 == list.size() )
+        // Get rule filename based on type.
+        const char * fileName = "";
+        switch ( i_type )
         {
-            PRDF_ERR( "[addDomainChips] getFunctionalTargetList "
-                      "returned empty list for i_type=%d", i_type );
+            case TYPE_PROC:   
+                // Check which Proc chip type
+                if (MODEL_NAPLES == getProcModel(list[0]))
+                    fileName = NaplesProc;
+                else
+                    fileName = MuranoVeniceProc;
+                break;
+            case TYPE_EX:     fileName = Ex;     break;
+            case TYPE_MCS:    fileName = Mcs;    break;
+            case TYPE_MEMBUF: fileName = Membuf; break;
+            case TYPE_MBA:    fileName = Mba;    break;
+
+            default:
+                // Print a trace statement, but do not fail the build.
+                PRDF_ERR( "[addDomainChips] Unsupported target type: %d",
+                          i_type );
         }
 
         for ( TargetHandleList::const_iterator itr = list.begin();

@@ -23,6 +23,14 @@
 #
 # IBM_PROLOG_END_TAG
 
+################################################################################
+#
+# Chiplet  Register Adddresses      Description
+# =======  =======================  ============================================
+#  PCIE    0x09000000 - 0x09FFFFFF  PCIE pervasive logic
+#
+################################################################################
+
     ############################################################################
     # PCIE Chiplet Registers
     ############################################################################
@@ -107,7 +115,7 @@
 
     register PCICLOCKFIR_0
     {
-        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        name        "PE0.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012000;
         capture     group default;
         capture     req funccall("phbConfigured_0");
@@ -115,7 +123,7 @@
 
     register PCICLOCKFIR_1
     {
-        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        name        "PE1.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012400;
         capture     group default;
         capture     req funccall("phbConfigured_1");
@@ -123,42 +131,63 @@
 
     register PCICLOCKFIR_2
     {
-        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        name        "PE2.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012800;
         capture     group default;
         capture     req funccall("phbConfigured_2");
     };
 
+    # This FIR only exist on Naples. So we will have a conditional capture
+    # below, which is common on all P8/P8+ chips.
+
+    register PCICLOCKFIR_3
+    {
+        name        "PE3.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        scomaddr    0x09012C00;
+        capture     group default;
+        capture     req funccall("phbConfigured_3");
+    };
+
     register PCI_ETU_RESET_0
     {
-        name        "ES.PE_WRAP_TOP.PE0.PEPBCQ.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        name        "ES.PE_WRAP_TOP.PE0.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
         scomaddr    0x0901200A;
         capture     group never;
     };
 
     register PCI_ETU_RESET_1
     {
-        name        "ES.PE_WRAP_TOP.PE1.PEPBCQ.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        name        "ES.PE_WRAP_TOP.PE1.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
         scomaddr    0x0901240A;
         capture     group never;
     };
 
     register PCI_ETU_RESET_2
     {
-        name        "ES.PE_WRAP_TOP.PE2.PEPBCQ.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        name        "ES.PE_WRAP_TOP.PE2.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
         scomaddr    0x0901280A;
         capture     group never;
     };
 
+    register PCI_ETU_RESET_3
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        scomaddr    0x09012C0A;
+        capture     group never;
+    };
 
     ############################################################################
     # PCIE Chiplet PBFFIR
     ############################################################################
 
+    # Used for FFDC only. This FIR does not exist on Naples. So we will have a
+    # conditional capture below, which is common on all P8/P8+ chips.
+
     register PBFFIR
     {
         name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_REG";
         scomaddr    0x09010800;
+        capture     req funccall("isNotNaplesProc");
         capture     group default;
     };
 
@@ -166,6 +195,7 @@
     {
         name        "ES.PBES_WRAP_TOP.PBES_TOP.IOF0.IOF.PCI_WRAP.PCI_BB.PB_IOF_ERR_STATUS";
         scomaddr    0x0901083A;
+        capture     req funccall("isNotNaplesProc");
         capture     group default;
         capture     group CerrRegs;
     };
@@ -174,6 +204,7 @@
     {
         name        "ES.PBES_WRAP_TOP.PBES_TOP.IOF1.IOF.PCI_WRAP.PCI_BB.PB_IOF_ERR_STATUS";
         scomaddr    0x0901083B;
+        capture     req funccall("isNotNaplesProc");
         capture     group default;
         capture     group CerrRegs;
     };

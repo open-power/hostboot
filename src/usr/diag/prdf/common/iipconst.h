@@ -77,6 +77,7 @@ enum DOMAIN_ID
   MBA_DOMAIN    = 0x75,
   XBUS_DOMAIN   = 0x76,
   ABUS_DOMAIN   = 0x77,
+  NV_DOMAIN     = 0x78,
 
   CLOCK_DOMAIN_FAB          = 0x90,
   CLOCK_DOMAIN_MCS          = 0x91,

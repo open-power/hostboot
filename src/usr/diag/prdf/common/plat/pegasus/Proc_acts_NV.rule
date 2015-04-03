@@ -1,0 +1,197 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_acts_NV.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+# NV Chiplet Registers
+################################################################################
+
+rule NvChipletFir
+{
+  CHECK_STOP:
+     (NV_CHIPLET_CS_FIR       & `1700000000000000`) & ~NV_CHIPLET_FIR_MASK;
+  RECOVERABLE:
+    ((NV_CHIPLET_RE_FIR >> 2) & `1700000000000000`) & ~NV_CHIPLET_FIR_MASK;
+};
+
+group gNvChipletFir filter singlebit
+{
+    /** NV_CHIPLET_FIR[3]
+     *  Attention from LFIR
+     */
+    (NvChipletFir, bit(3)) ? analyze(gNVLFir);
+
+    /** NV_CHIPLET_FIR[5]
+     *  Attention from IONVFIR_0
+     */
+    (NvChipletFir, bit(5)) ? analyze(gIoNvFir_0);
+
+    /** NV_CHIPLET_FIR[6]
+     *  Attention from NPU
+     */
+    (NvChipletFir, bit(6)) ? analyze(gNpuFir);
+
+    /** NV_CHIPLET_FIR[7]
+     *  Attention from IONVFIR_1
+     */
+    (NvChipletFir, bit(7)) ? analyze(gIoNvFir_1);
+};
+
+################################################################################
+# NV Chiplet LFIR
+################################################################################
+
+rule NVLFir
+{
+  CHECK_STOP:  NV_LFIR & ~NV_LFIR_MASK & ~NV_LFIR_ACT0 & ~NV_LFIR_ACT1;
+  RECOVERABLE: NV_LFIR & ~NV_LFIR_MASK & ~NV_LFIR_ACT0 &  NV_LFIR_ACT1;
+};
+
+group gNVLFir filter singlebit
+{
+    /** NV_LFIR[0]
+     *  CFIR internal parity error
+     */
+    (NVLFir, bit(0)) ? SelfHighThr32PerDay;
+
+    /** NV_LFIR[1]
+     *  Local errors from GPIO (PCB error)
+     */
+    (NVLFir, bit(1)) ? defaultMaskedError;
+
+    /** NV_LFIR[2]
+     *  Local errors from CC (PCB error)
+     */
+    (NVLFir, bit(2)) ? SelfHighThr32PerDay;
+
+    /** NV_LFIR[3]
+     *  Local errors from CC (OPCG, parity, scan collision, ...)
+     */
+    (NVLFir, bit(3)) ? callout2ndLvlMedThr32;
+
+    /** NV_LFIR[4]
+     *  Local errors from PSC (PCB error)
+     */
+    (NVLFir, bit(4)) ? defaultMaskedError;
+
+    /** NV_LFIR[5]
+     *  Local errors from PSC (parity error)
+     */
+    (NVLFir, bit(5)) ? defaultMaskedError;
+
+    /** NV_LFIR[6]
+     *  Local errors from Thermal (parity error)
+     */
+    (NVLFir, bit(6)) ? defaultMaskedError;
+
+    /** NV_LFIR[7]
+     *  Local errors from Thermal (PCB error)
+     */
+    (NVLFir, bit(7)) ? defaultMaskedError;
+
+    /** NV_LFIR[8|9]
+     *  Local errors from Thermal (Trip error)
+     */
+    (NVLFir, bit(8|9)) ? defaultMaskedError;
+
+    /** NV_LFIR[10|11]
+     *  Local errors from Trace Array ( error)
+     */
+    (NVLFir, bit(10|11)) ? defaultMaskedError;
+
+    /** NV_LFIR[12:20]
+     *  FIR_IN12: unused local errors
+     */
+    (NVLFir, bit(12|13|14|15|16|17|18|19|20)) ? defaultMaskedError;
+
+    /** NV_LFIR[21:30]
+     *  FIR_IN12: unused local errors
+     */
+    (NVLFir, bit(21|22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
+
+    /** NV_LFIR[31:39]
+     *  FIR_IN12: unused local errors
+     */
+    (NVLFir, bit(31|32|33|34|35|36|37|38|39)) ? defaultMaskedError;
+
+    /** NV_LFIR[40]
+     *  Malfunction alert
+     */
+    (NVLFir, bit(40)) ? defaultMaskedError;
+};
+
+################################################################################
+# NV Chiplet IONVFIR_0s
+################################################################################
+
+rule IoNvFir_0
+{
+    CHECK_STOP:
+        IONVFIR_0 & ~IONVFIR_0_MASK & ~IONVFIR_0_ACT0 & ~IONVFIR_0_ACT1;
+    RECOVERABLE:
+        IONVFIR_0 & ~IONVFIR_0_MASK & ~IONVFIR_0_ACT0 &  IONVFIR_0_ACT1;
+};
+
+group gIoNvFir_0 filter singlebit
+{
+    /** IONVFIR_0[0:63]
+     *  IONVFIR_0 errors
+     */
+    (IoNvFir_0, bit(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+};
+
+rule IoNvFir_1
+{
+    CHECK_STOP:
+        IONVFIR_1 & ~IONVFIR_1_MASK & ~IONVFIR_1_ACT0 & ~IONVFIR_1_ACT1;
+    RECOVERABLE:
+        IONVFIR_1 & ~IONVFIR_1_MASK & ~IONVFIR_1_ACT0 &  IONVFIR_1_ACT1;
+};
+
+group gIoNvFir_1 filter singlebit
+{
+    /** IONVFIR_1[0:63]
+     *  IONVFIR_1 errors
+     */
+    (IoNvFir_1, bit(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+};
+
+rule NpuFir
+{
+    CHECK_STOP:  NPUFIR & ~NPUFIR_MASK & ~NPUFIR_ACT0 & ~NPUFIR_ACT1;
+    RECOVERABLE: NPUFIR & ~NPUFIR_MASK & ~NPUFIR_ACT0 &  NPUFIR_ACT1;
+};
+
+group gNpuFir filter singlebit
+{
+    /** NPUFIR[0:63]
+     *  NPUFIR errors
+     */
+    (NpuFir, bit(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+};
+
+################################################################################
+# Actions specific to NV chiplet
+################################################################################
+

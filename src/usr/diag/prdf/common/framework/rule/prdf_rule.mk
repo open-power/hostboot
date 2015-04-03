@@ -24,7 +24,8 @@
 # IBM_PROLOG_END_TAG
 
 # Add Rule tables here:
-PRDR_RULE_TABLES += Proc.prf
+PRDR_RULE_TABLES += MuranoVeniceProc.prf
+PRDR_RULE_TABLES += NaplesProc.prf
 PRDR_RULE_TABLES += Ex.prf
 PRDR_RULE_TABLES += Mcs.prf
 PRDR_RULE_TABLES += Membuf.prf

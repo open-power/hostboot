@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_regs_ABUS.rule $
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_regs_NV.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -27,164 +27,184 @@
 #
 # Chiplet  Register Adddresses      Description
 # =======  =======================  ============================================
-#  ABUS    0x08000000 - 0x0800FFFF  ABUS pervasive logic (Murano/Venice only)
+#   NV     0x08000000 - 0x0800FFFF  NV pervasive logic (Naples only)
 #
 ################################################################################
 
     ############################################################################
-    # ABUS Chiplet Registers
+    # NV Chiplet Registers
     ############################################################################
 
-    register ABUS_CHIPLET_CS_FIR
+    register NV_CHIPLET_CS_FIR
     {
-        name        "ES.PBES_WRAP_TOP.TPC.XFIR";
+        name        "NV_WRAP_TOP.TPC.XFIR";
         scomaddr    0x08040000;
         capture     group default;
     };
 
-    register ABUS_CHIPLET_RE_FIR
+    register NV_CHIPLET_RE_FIR
     {
-        name        "ES.PBES_WRAP_TOP.TPC.RFIR";
+        name        "NV_WRAP_TOP.TPC.RFIR";
         scomaddr    0x08040001;
         capture     group default;
     };
 
-    register ABUS_CHIPLET_FIR_MASK
+    register NV_CHIPLET_FIR_MASK
     {
-        name        "ES.PBES_WRAP_TOP.TPC.FIR_MASK";
+        name        "NV_WRAP_TOP.TPC.FIR_MASK";
         scomaddr    0x08040002;
         capture     group default;
     };
 
     ############################################################################
-    # ABUS Chiplet LFIR
+    # NV Chiplet LFIR
     ############################################################################
 
-    register ABUS_LFIR
+    register NV_LFIR
     {
-        name        "ES.PBES_WRAP_TOP.TPC.LOCAL_FIR";
+        name        "NV_WRAP_TOP.TPC.LOCAL_FIR";
         scomaddr    0x0804000a;
         reset       (&, 0x0804000b);
         mask        (|, 0x0804000f);
         capture     group default;
     };
 
-    register ABUS_LFIR_MASK
+    register NV_LFIR_MASK
     {
-        name        "ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK";
+        name        "NV_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0804000d;
         capture     group default;
     };
 
-    register ABUS_LFIR_ACT0
+    register NV_LFIR_ACT0
     {
-        name        "ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION0";
+        name        "NV_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION0";
         scomaddr    0x08040010;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("ABUS_LFIR");
+        capture     req nonzero("NV_LFIR");
     };
 
-    register ABUS_LFIR_ACT1
+    register NV_LFIR_ACT1
     {
-        name        "ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1";
+        name        "NV_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1";
         scomaddr    0x08040011;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("ABUS_LFIR");
+        capture     req nonzero("NV_LFIR");
     };
 
     ############################################################################
-    # ABUS Chiplet PBESFIR
+    # NV Chiplet IONVFIR_0
     ############################################################################
 
-    register PBESFIR
+    register IONVFIR_0
     {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_REG";
-        scomaddr    0x08010800;
-        reset       (&, 0x08010801);
-        mask        (|, 0x08010805);
-        capture     group default;
-    };
-
-    register PBESFIR_MASK
-    {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_MASK_REG";
-        scomaddr    0x08010803;
-        capture     group default;
-    };
-
-    register PBESFIR_ACT0
-    {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_ACTION0_REG";
-        scomaddr    0x08010806;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PBESFIR");
-    };
-
-    register PBESFIR_ACT1
-    {
-        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_ACTION1_REG";
-        scomaddr    0x08010807;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PBESFIR");
-    };
-
-    ############################################################################
-    # ABUS Chiplet IOAFIR
-    ############################################################################
-
-    register IOAFIR
-    {
-        name        "ABUS.BUSCTL.SCOM.FIR_REG";
+        name        "NVBUS0.BUSCTL.SCOM.FIR_REG";
         scomaddr    0x08010c00;
         reset       (&, 0x08010c01);
         mask        (|, 0x08010c05);
         capture     group default;
     };
 
-    register IOAFIR_MASK
+    register IONVFIR_0_MASK
     {
-        name        "ABUS.BUSCTL.SCOM.FIR_MASK_REG";
+        name        "NVBUS0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x08010c03;
         capture     group default;
     };
 
-    register IOAFIR_ACT0
+    register IONVFIR_0_ACT0
     {
-        name        "ABUS.BUSCTL.SCOM.FIR_ACTION0_REG";
+        name        "NVBUS0.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x08010c06;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("IOAFIR");
+        capture     req nonzero("IONVFIR_0");
     };
 
-    register IOAFIR_ACT1
+    register IONVFIR_0_ACT1
     {
-        name        "ABUS.BUSCTL.SCOM.FIR_ACTION1_REG";
+        name        "NVBUS0.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x08010c07;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("IOAFIR");
+        capture     req nonzero("IONVFIR_0");
     };
 
     ############################################################################
-    # ABUS Chiplet PLL Registers
+    # NV Chiplet IONVFIR_1
     ############################################################################
 
-    register ABUS_ERROR_REG
+    register IONVFIR_1
     {
-        name        "EH.TPCHIP.NET.PCBSLAB.ERROR_REG";
-        scomaddr    0x080F001F;
-        capture     group PllFIRs;
+        name        "NVBUS1.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x08010c40;
+        reset       (&, 0x08010c41);
+        mask        (|, 0x08010c45);
+        capture     group default;
     };
 
-    register ABUS_CONFIG_REG
+    register IONVFIR_1_MASK
     {
-        name        "EH.TPCHIP.NET.PCBSLAB.SLAVE_CONFIG_REG";
-        scomaddr    0x080F001E;
-        capture     group PllFIRs;
+        name        "NVBUS1.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x08010c43;
+        capture     group default;
+    };
+
+    register IONVFIR_1_ACT0
+    {
+        name        "NVBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x08010c46;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("IONVFIR_1");
+    };
+
+    register IONVFIR_1_ACT1
+    {
+        name        "NVBUS1.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x08010c47;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("IONVFIR_1");
+    };
+
+    ############################################################################
+    # NV Chiplet NPUFIR
+    ############################################################################
+
+    register NPUFIR
+    {
+        name        "ES.NPU.NP_AT.REG.FIR_REG";
+        scomaddr    0x08013d80;
+        reset       (&, 0x08013d81);
+        mask        (|, 0x08013d85);
+        capture     group default;
+    };
+
+    register NPUFIR_MASK
+    {
+        name        "ES.NPU.NP_AT.REG.FIR_MASK_REG";
+        scomaddr    0x08013d83;
+        capture     group default;
+    };
+
+    register NPUFIR_ACT0
+    {
+        name        "ES.NPU.NP_AT.REG.FIR_ACTION0_REG";
+        scomaddr    0x08013d86;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("NPUFIR");
+    };
+
+    register NPUFIR_ACT1
+    {
+        name        "ES.NPU.NP_AT.REG.FIR_ACTION1_REG";
+        scomaddr    0x08013d87;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("NPUFIR");
     };
 

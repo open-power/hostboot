@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,7 +35,8 @@ namespace PRDF
 {
 
     // Pegasus P8 Chip
-    extern const char * Proc;
+    extern const char * MuranoVeniceProc;
+    extern const char * NaplesProc;
     extern const char * Ex;
     extern const char * Mcs;
 

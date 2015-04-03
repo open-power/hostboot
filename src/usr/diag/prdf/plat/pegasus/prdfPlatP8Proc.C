@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,8 @@ int32_t analyzeMpIPL( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, analyzeMpIPL );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, analyzeMpIPL );
 
 /**
  * @brief Handle SLW Malfunction alert
@@ -78,7 +79,8 @@ int32_t slwRecovery( ExtensibleChip * i_chip,
     CalloutUtil::defaultError( i_sc );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, slwRecovery );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, slwRecovery );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, slwRecovery );
 
 /**
  * @brief   Callout Peer PSI connected to given Proc target
@@ -96,7 +98,8 @@ int32_t calloutPeerPsiBusTgt( ExtensibleChip * i_chip,
     CalloutUtil::defaultError( i_sc );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, calloutPeerPsiBusTgt );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, calloutPeerPsiBusTgt );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, calloutPeerPsiBusTgt );
 
 /**
  * @brief Check if we're running in hostboot
@@ -108,7 +111,9 @@ int32_t inHostboot( ExtensibleChip * i_chip,
                     STEP_CODE_DATA_STRUCT & i_sc )
 {
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE( Proc, inHostboot );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, inHostboot );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, inHostboot );
 
 /**
  * @brief Collect NX debug traces
@@ -124,7 +129,9 @@ int32_t collectNxTraceArray( ExtensibleChip * i_chip,
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( Proc, collectNxTraceArray );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, collectNxTraceArray );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, collectNxTraceArray );
 
 }//namespace Proc ends
 

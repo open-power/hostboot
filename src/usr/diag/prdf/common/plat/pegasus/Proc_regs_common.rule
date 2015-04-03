@@ -1,0 +1,173 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_regs_common.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+#
+# Scope:
+#   Registers for the following chiplets:
+#
+# Chiplet  Register Adddresses      Description
+# =======  =======================  ============================================
+#   TP     0x01000000 - 0x01FFFFFF  TP pervasive logic
+#   PB     0x02000000 - 0x02FFFFFF  PB pervasive logic, note that this does
+#                                   include the SCOM addresses characterized by
+#                                   the MCS target. See Mcs.rule for those
+#                                   address ranges.
+#  XBUS    0x04000000 - 0x0400FFFF  XBUS pervasive logic
+#  PCIE    0x09000000 - 0x09FFFFFF  PCIE pervasive logic
+#
+################################################################################
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # Global Broadcast Registers
+    ############################################################################
+
+    register GLOBAL_CS_FIR
+    {
+        name        "Global Checkstop Attention FIR";
+        scomaddr    0x570F001C;
+        capture     group default;
+    };
+
+    register GLOBAL_RE_FIR
+    {
+        name        "Global Recoverable Attention FIR";
+        scomaddr    0x570F001B;
+        capture     group default;
+    };
+
+    register GLOBAL_SPA
+    {
+        name        "Global Special Attention FIR";
+        scomaddr    0x570F001A;
+        capture     group default;
+    };
+
+    register GLOBALUNITXSTPFIR
+    {
+        name        "Virtual Global Unit Checkstop FIR";
+        scomaddr    0x51040001;
+        capture     group default;
+        capture     req funccall("CoreConfiguredAndNotHostboot");
+    };
+
+    ########################################################################
+    #   Non-existent Registers for Capture
+    ########################################################################
+    register VPD_FAILED_LANES_0TO63
+    {
+        name        "Bit map 0-63 of failed lanes read from VPD";
+        scomaddr    0xFFFF0001;
+        access      no_access;
+        capture     group never;
+    };
+
+    register VPD_FAILED_LANES_64TO127
+    {
+        name        "Bit map 64-127 of failed lanes read from VPD";
+        scomaddr    0xFFFF0002;
+        access      no_access;
+        capture     group never;
+    };
+
+    register ALL_FAILED_LANES_0TO63
+    {
+        name        "Bit map 0-63 of failed lanes from io_read_erepair";
+        scomaddr    0xFFFF0003;
+        access      no_access;
+        capture     group never;
+    };
+
+    register ALL_FAILED_LANES_64TO127
+    {
+        name        "Bit map 64-127 of failed lanes from io_read_erepair";
+        scomaddr    0xFFFF0004;
+        access      no_access;
+        capture     group never;
+    };
+
+    ############################################################################
+    # Non-FIR Registers
+    ############################################################################
+
+    register TODWOF
+    {
+        name        "Time of Day / WOF Counter";
+        scomaddr    0x00040020;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PLL Registers
+    ############################################################################
+
+    register CFAM_FSI_STATUS
+    {
+        name        "TPC.FSI.FSI2PIB.STATUS";
+        scomaddr    0x00001007;
+        capture     group never;
+    };
+
+    register CFAM_FSI_GP7
+    {
+        name        "TPC.FSI.FSI_MAILBOX.FSXCOMP.FSXLOG.FSIGP7";
+        scomaddr    0x00002816;
+        capture     group never;
+    };
+
+    register PCIE_OSC_SWITCH
+    {
+        name        "TPC.FSI.FSI_MAILBOX.FSXCOMP.FSXLOG.SNS1LTH";
+        scomaddr    0x00050019;
+        capture     group PllFIRs;
+    };
+
+    register OSCERR
+    {
+        name        "EH.TPCHIP.TPC.ITR.OSCERR.OSCERR_HOLD";
+        scomaddr    0x01020019;
+        capture     group PllFIRs;
+    };
+
+    register OSCERR_MASK
+    {
+        name        "EH.TPCHIP.TPC.ITR.OSCERR.OSCERR_MASK";
+        scomaddr    0x0102001A;
+        capture     group PllFIRs;
+    };
+
+

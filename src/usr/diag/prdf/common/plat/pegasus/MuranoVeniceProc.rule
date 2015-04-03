@@ -1,0 +1,170 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/MuranoVeniceProc.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+chip Proc
+{
+    name        "Power8 Murano or Venice Chip";
+    targettype  TYPE_PROC;
+    sigoff      0x8000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+#Import signatures
+.include "prdfP8ProcExtraSig.H";
+.include "prdfP8ProcMbCommonExtraSig.H";
+
+#Import Common Proc Registers
+.include "Proc_regs_common.rule"
+
+# Import all of the chiplet registers
+.include "Proc_regs_TP.rule"
+.include "Proc_regs_PB.rule"
+.include "Proc_regs_XBUS.rule"
+.include "Proc_regs_ABUS.rule"
+.include "Proc_regs_PCIE.rule"
+
+};
+
+################################################################################
+# Global Broadcast Registers
+################################################################################
+
+rule GlobalFir
+{
+    CHECK_STOP:  GLOBAL_CS_FIR;
+    RECOVERABLE: GLOBAL_RE_FIR;
+};
+
+group gGlobalFir attntype CHECK_STOP, RECOVERABLE filter singlebit
+{
+    /** GLOBAL_FIR[1]
+     *  Attention from TP chiplet
+     */
+    (GlobalFir, bit(1)) ? analyze(gTpChipletFir);
+
+    /** GLOBAL_FIR[2]
+     *  Attention from PB chiplet
+     */
+    (GlobalFir, bit(2)) ? analyze(gPbChipletFir);
+
+    /** GLOBAL_FIR[4]
+     *  Attention from XBUS chiplet
+     */
+    (GlobalFir, bit(4)) ? analyze(gXbusChipletFir);
+
+    /** GLOBAL_FIR[8]
+     *  Attention from ABUS
+     */
+    (GlobalFir, bit(8)) ? analyze(gAbusChipletFir);
+
+    /** GLOBAL_FIR[9]
+     *  Attention from PCIE
+     */
+    (GlobalFir, bit(9)) ? analyze(gPcieChipletFir);
+
+    /** GLOBAL_FIR[17]
+     *  Attention from EX1 (Venice only)
+     */
+    (GlobalFir, bit(17)) ? analyzeEx1;
+
+    /** GLOBAL_FIR[18]
+     *  Attention from EX2 (Venice only)
+     */
+    (GlobalFir, bit(18)) ? analyzeEx2;
+
+    /** GLOBAL_FIR[19]
+     *  Attention from EX3 (Venice only)
+     */
+    (GlobalFir, bit(19)) ? analyzeEx3;
+
+    /** GLOBAL_FIR[20]
+     *  Attention from EX4
+     */
+    (GlobalFir, bit(20)) ? analyzeEx4;
+
+    /** GLOBAL_FIR[21]
+     *  Attention from EX5
+     */
+    (GlobalFir, bit(21)) ? analyzeEx5;
+
+    /** GLOBAL_FIR[22]
+     *  Attention from EX6
+     */
+    (GlobalFir, bit(22)) ? analyzeEx6;
+
+    /** GLOBAL_FIR[25]
+     *  Attention from EX9 (Venice only)
+     */
+    (GlobalFir, bit(25)) ? analyzeEx9;
+
+    /** GLOBAL_FIR[26]
+     *  Attention from EX10 (Venice only)
+     */
+    (GlobalFir, bit(26)) ? analyzeEx10;
+
+    /** GLOBAL_FIR[27]
+     *  Attention from EX11 (Venice only)
+     */
+    (GlobalFir, bit(27)) ? analyzeEx11;
+
+    /** GLOBAL_FIR[28]
+     *  Attention from EX12
+     */
+    (GlobalFir, bit(28)) ? analyzeEx12;
+
+    /** GLOBAL_FIR[29]
+     *  Attention from EX13
+     */
+    (GlobalFir, bit(29)) ? analyzeEx13;
+
+    /** GLOBAL_FIR[30]
+     *  Attention from EX14
+     */
+    (GlobalFir, bit(30)) ? analyzeEx14;
+};
+
+# Import all of the chiplet rules and actions
+# NOTE: Some of PB local FIRs are handled through the TP chiplet FIRs
+.include "Proc_acts_TP.rule"
+.include "Proc_acts_PB.rule"
+.include "Proc_acts_XBUS.rule"
+.include "Proc_acts_ABUS.rule"
+.include "Proc_acts_PCIE.rule"
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "CommonActions.rule"
+
+#import common Proc actions
+.include "Proc_acts_common.rule"

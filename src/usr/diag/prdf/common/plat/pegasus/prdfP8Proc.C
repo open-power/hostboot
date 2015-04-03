@@ -65,7 +65,8 @@ int32_t Initialize( ExtensibleChip * i_chip )
     i_chip->getDataBundle() = new P8DataBundle( i_chip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, Initialize );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, Initialize );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, Initialize );
 
 /**
  * @brief Checks the Global Broadcast register.
@@ -189,7 +190,9 @@ int32_t CheckForRecovered(ExtensibleChip * i_chip,
     }
 
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE( Proc, CheckForRecovered );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
 /**
@@ -264,7 +267,9 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( Proc, CheckForRecoveredSev );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
  *  To be called from the fabric domain to gather Checkstop information.  This
@@ -357,7 +362,9 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( Proc, GetCheckstopInfo );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, GetCheckstopInfo );
 
 int32_t CoreConfiguredAndNotHostboot(ExtensibleChip * i_chip,
                                      bool & o_isCoreConfigured)
@@ -377,7 +384,9 @@ int32_t CoreConfiguredAndNotHostboot(ExtensibleChip * i_chip,
     }
 
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE(Proc, CoreConfiguredAndNotHostboot);
+}
+PRDF_PLUGIN_DEFINE_NS(NaplesProc, Proc, CoreConfiguredAndNotHostboot);
+PRDF_PLUGIN_DEFINE_NS(MuranoVeniceProc, Proc, CoreConfiguredAndNotHostboot);
 
 //------------------------------------------------------------------------------
 // Lane Repair plugins
@@ -484,17 +493,20 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
 int32_t spareDeployed_##BUS##POS( ExtensibleChip * i_chip, \
                                   STEP_CODE_DATA_STRUCT & i_sc ) \
 { return handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, true); } \
-PRDF_PLUGIN_DEFINE( Proc, spareDeployed_##BUS##POS ); \
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, spareDeployed_##BUS##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, spareDeployed_##BUS##POS ); \
  \
 int32_t maxSparesExceeded_##BUS##POS( ExtensibleChip * i_chip, \
                                       STEP_CODE_DATA_STRUCT & i_sc ) \
 { return handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
-PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_##BUS##POS ); \
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, maxSparesExceeded_##BUS##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, maxSparesExceeded_##BUS##POS ); \
 \
 int32_t tooManyBusErrors_##BUS##POS( ExtensibleChip * i_chip, \
                                      STEP_CODE_DATA_STRUCT & i_sc ) \
 { return handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
-PRDF_PLUGIN_DEFINE( Proc, tooManyBusErrors_##BUS##POS );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, tooManyBusErrors_##BUS##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, tooManyBusErrors_##BUS##POS );
 
 PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 0 )
 PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 1 )
@@ -511,12 +523,14 @@ PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
 int32_t spareDeployed_dmiBus##POS( ExtensibleChip * i_chip, \
                                    STEP_CODE_DATA_STRUCT & i_sc ) \
 { return handleLaneRepairEvent(i_chip, TYPE_MCS, POS, i_sc, true); } \
-PRDF_PLUGIN_DEFINE( Proc, spareDeployed_dmiBus##POS ); \
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, spareDeployed_dmiBus##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, spareDeployed_dmiBus##POS ); \
  \
 int32_t maxSparesExceeded_dmiBus##POS( ExtensibleChip * i_chip, \
                                        STEP_CODE_DATA_STRUCT & i_sc ) \
 { return maxSparesExceeded_MCS(i_chip, i_sc, POS); } \
-PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_dmiBus##POS );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, maxSparesExceeded_dmiBus##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, maxSparesExceeded_dmiBus##POS );
 
 // Too Many Bus Error attentions not handled on DMI bus.
 
@@ -570,7 +584,8 @@ int32_t mcsBlockConfigured( ExtensibleChip * i_chip,
 int32_t mcsBlockConfigured_##POS( ExtensibleChip * i_chip, \
                              bool & o_isMcsBlkConfigured ) \
 { return mcsBlockConfigured( i_chip, POS, o_isMcsBlkConfigured ); } \
-PRDF_PLUGIN_DEFINE( Proc, mcsBlockConfigured_##POS );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, mcsBlockConfigured_##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, mcsBlockConfigured_##POS );
 
 PLUGIN_MCS_BLOCK_CONFIGURED( 0 )
 PLUGIN_MCS_BLOCK_CONFIGURED( 1 )
@@ -588,48 +603,45 @@ PLUGIN_MCS_BLOCK_CONFIGURED( 1 )
  * @param  o_isPhbConfigured  set to true if the PHB configured
  * @returns Success
  */
-int32_t phbConfigured(ExtensibleChip * i_chip,
-                      uint32_t i_phbPos,
-                      bool & o_isPhbConfigured)
+int32_t phbConfigured( ExtensibleChip * i_chip, uint32_t i_phbPos,
+                       bool & o_isPhbConfigured )
 {
     #define PRDF_FUNC "[Proc::phbConfigured] "
 
-    static const uint32_t MAX_PCI_NUM = 3;
-    static const char * pciEtuResetReg[MAX_PCI_NUM] =
-                                         { "PCI_ETU_RESET_0",
-                                           "PCI_ETU_RESET_1",
-                                           "PCI_ETU_RESET_2" };
-    int32_t o_rc = SUCCESS;
     o_isPhbConfigured = false;
+
+    uint32_t maxPhbs = 3; // Murano/Venice
+    if ( MODEL_NAPLES == getProcModel(i_chip->GetChipHandle()) )
+        maxPhbs = 4;
 
     do
     {
-        if( i_phbPos >= MAX_PCI_NUM )
+        if ( maxPhbs <= i_phbPos )
         {
             PRDF_ERR( PRDF_FUNC "invalid PCI number: %d", i_phbPos );
             break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * etuResetReg =
-            i_chip->getRegister( pciEtuResetReg[i_phbPos] );
+        char reg_str[64];
+        snprintf( reg_str, 64, "PCI_ETU_RESET_%d", i_phbPos );
 
-        if(NULL == etuResetReg)
+        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( reg_str );
+        if ( NULL == reg )
         {
-            PRDF_ERR( PRDF_FUNC "getRegister() Failed for register:%s",
-                         pciEtuResetReg[i_phbPos] );
+            PRDF_ERR( PRDF_FUNC"getRegister() failed for %s", reg_str );
             break;
         }
 
-        o_rc = etuResetReg->Read();
-        if ( SUCCESS != o_rc )
+        int32_t l_rc = reg->Read();
+        if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC "%s Read() failed. Target=0x%08x",
-                      pciEtuResetReg[i_phbPos], i_chip->GetId() );
+            PRDF_ERR( PRDF_FUNC"Read() failed for %s: target=0x%08x",
+                      reg_str, i_chip->GetId() );
             break;
         }
 
         // If bit 0 is cleared then the PHB is configured
-        if ( ! etuResetReg->IsBitSet(0) )
+        if ( !reg->IsBitSet(0) )
         {
             o_isPhbConfigured = true;
         }
@@ -645,11 +657,13 @@ int32_t phbConfigured(ExtensibleChip * i_chip,
 int32_t phbConfigured_##POS( ExtensibleChip * i_chip, \
                              bool & o_isPhbConfigured ) \
 { return phbConfigured( i_chip, POS, o_isPhbConfigured ); } \
-PRDF_PLUGIN_DEFINE( Proc, phbConfigured_##POS );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, phbConfigured_##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, phbConfigured_##POS );
 
 PLUGIN_PHB_CONFIGURED( 0 )
 PLUGIN_PHB_CONFIGURED( 1 )
 PLUGIN_PHB_CONFIGURED( 2 )
+PLUGIN_PHB_CONFIGURED( 3 )
 
 #undef PLUGIN_PHB_CONFIGURED
 
@@ -684,7 +698,8 @@ int32_t deadManTimerCalloutAndFFDC( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, deadManTimerCalloutAndFFDC );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, deadManTimerCalloutAndFFDC );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, deadManTimerCalloutAndFFDC );
 
 //------------------------------------------------------------------------------
 
@@ -762,7 +777,8 @@ int32_t combinedResponseCallout( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, combinedResponseCallout );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, combinedResponseCallout );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, combinedResponseCallout );
 
 //------------------------------------------------------------------------------
 
@@ -773,7 +789,8 @@ int32_t calloutInterface_##BUS##POS( ExtensibleChip * i_chip, \
     CalloutUtil::calloutBusInterface(i_chip, MRU_LOW, TYPE, POS); \
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( Proc, calloutInterface_##BUS##POS );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, calloutInterface_##BUS##POS ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, calloutInterface_##BUS##POS );
 
 PLUGIN_BUS_INTERFACE_CALLOUT( abus, TYPE_ABUS, 0 )
 PLUGIN_BUS_INTERFACE_CALLOUT( abus, TYPE_ABUS, 1 )
@@ -814,7 +831,8 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding
@@ -833,7 +851,8 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, ClearServiceCallFlag_mnfgInfo );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, ClearServiceCallFlag_mnfgInfo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, ClearServiceCallFlag_mnfgInfo );
 
 //------------------------------------------------------------------------------
 //                   PHB Plugins for IOPCIFIR_x
@@ -906,7 +925,8 @@ int32_t calloutPhbClk##CLK##_##IOPCI( ExtensibleChip * i_chip, \
 { \
     return calloutPhb( i_chip, i_sc, IOPCI, ERRA, ERRB );  \
 }\
-PRDF_PLUGIN_DEFINE( Proc, calloutPhbClk##CLK##_##IOPCI );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, calloutPhbClk##CLK##_##IOPCI ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, calloutPhbClk##CLK##_##IOPCI );
 
 PLUGIN_CALLOUT_PHB( A, 0, true, false )
 PLUGIN_CALLOUT_PHB( B, 0, false, true )
@@ -921,7 +941,8 @@ int32_t calloutPhbBothClks_##IOPCI( ExtensibleChip * i_chip, \
 { \
     return calloutPhb( i_chip, i_sc, IOPCI, true, true );  \
 }\
-PRDF_PLUGIN_DEFINE( Proc, calloutPhbBothClks_##IOPCI );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, calloutPhbBothClks_##IOPCI ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, calloutPhbBothClks_##IOPCI );
 
 PLUGIN_CALLOUT_PHB( 0 )
 PLUGIN_CALLOUT_PHB( 1 )
@@ -933,20 +954,89 @@ PLUGIN_CALLOUT_PHB( 1 )
 //------------------------------------------------------------------------------
 
 /**
-  * @brief  checks if proc is Venice chip.
-  * @param  i_chip P8 chip.
-  * @param  isVenice TRUE if chip is venice false otherwise.
-  * @return SUCCESS
-  */
-int32_t isVeniceProc( ExtensibleChip * i_chip, bool & o_isVenice )
+ * @brief  Checks if this PROC is NOT a Murano chip.
+ * @param  i_chip P8/P8+ chip.
+ * @param  o_isNotMurano TRUE if this PROC is NOT a Murano chip, FALSE
+ *                       otherwise.
+ * @return SUCCESS
+ */
+int32_t isNotMuranoProc( ExtensibleChip * i_chip, bool & o_isNotMurano )
 {
-    o_isVenice = false;
-    if( MODEL_VENICE == getProcModel( i_chip->GetChipHandle() ) )
-        o_isVenice = true;
+    o_isNotMurano = false;
+    if ( MODEL_MURANO != getProcModel( i_chip->GetChipHandle() ) )
+        o_isNotMurano = true;
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, isVeniceProc );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isNotMuranoProc );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isNotMuranoProc );
+
+/**
+ * @brief  Checks if this PROC is a Naples chip.
+ * @param  i_chip P8/P8+ chip.
+ * @param  o_isNaples TRUE if this PROC is a Naples chip, FALSE otherwise.
+ * @return SUCCESS
+ */
+int32_t isNaplesProc( ExtensibleChip * i_chip, bool & o_isNaples )
+{
+    o_isNaples = false;
+    if ( MODEL_NAPLES == getProcModel( i_chip->GetChipHandle() ) )
+        o_isNaples = true;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isNaplesProc );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isNaplesProc );
+
+/**
+ *  * @brief  Checks if this PROC is a Naples chip.
+    * @param  i_chip P8/P8+ chip.
+    * @return FAIL if not naples, SUCCESS if naples
+*/
+int32_t failIfNaples( ExtensibleChip * i_chip )
+{
+    if ( MODEL_NAPLES == getProcModel( i_chip->GetChipHandle() ) )
+        return FAIL;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, failIfNaples );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, failIfNaples );
+
+
+/**
+ * @brief  Checks if this PROC is NOT a Naples chip.
+ * @param  i_chip P8/P8+ chip.
+ * @param  o_isNotNaples TRUE if this PROC is NOT a Naples chip, FALSE
+ *                       otherwise.
+ * @return SUCCESS
+ */
+int32_t isNotNaplesProc( ExtensibleChip * i_chip, bool & o_isNotNaples )
+{
+    o_isNotNaples = false;
+    if ( MODEL_NAPLES != getProcModel( i_chip->GetChipHandle() ) )
+        o_isNotNaples = true;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isNotNaplesProc );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isNotNaplesProc );
+
+/**
+ * @brief  Checks if this PROC is a Naples chip.
+ * @param  i_chip P8/P8+ chip.
+ * @return SUCCESS if not naples, FAIL if naples
+*/
+int32_t failIfNotNaples( ExtensibleChip * i_chip )
+{
+    if ( MODEL_NAPLES != getProcModel( i_chip->GetChipHandle() ) )
+        return FAIL;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, failIfNotNaples );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, failIfNotNaples );
+
 
 /**
   * @brief  checks if proc is Murano chip and is at DD1.x level.
@@ -963,7 +1053,8 @@ int32_t isMuranoDD1( ExtensibleChip * i_chip, bool & o_isMuranoDD1 )
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, isMuranoDD1 );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isMuranoDD1 );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isMuranoDD1 );
 
 } // end namespace Proc
 

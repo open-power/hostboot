@@ -23,6 +23,17 @@
 #
 # IBM_PROLOG_END_TAG
 
+################################################################################
+#
+# Chiplet  Register Adddresses      Description
+# =======  =======================  ============================================
+#   PB     0x02000000 - 0x02FFFFFF  PB pervasive logic, note that this does
+#                                   include the SCOM addresses characterized by
+#                                   the MCS target. See Mcs.rule for those
+#                                   address ranges.
+#
+################################################################################
+
     ############################################################################
     # PB Chiplet Registers
     ############################################################################
@@ -236,10 +247,6 @@
         capture     group default;
     };
 
-    ############################################################################
-    # NXASFIR Error Report Registers
-    ############################################################################
-
     register NXASFIR_IN_ERROR_HOLD_REPORT
     {
         name        "EN.NX.AS.AS_IN_ERROR_HOLD";
@@ -274,71 +281,152 @@
     };
 
     ############################################################################
-    # PB Chiplet NXCXAFIR
+    # PB Chiplet NXCXAFIR_0
     ############################################################################
 
-    register NXCXAFIR
+    register NXCXAFIR_0
     {
-        name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.FIR_REG";
+        name        "EN.NX.CXA0.CXA_XPT.XPT_SCOMFIR.FIR_REG";
         scomaddr    0x02013000;
         reset       (&, 0x02013001);
         mask        (|, 0x02013005);
         capture     group default;
     };
 
-    register NXCXAFIR_MASK
+    register NXCXAFIR_0_MASK
     {
-        name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.FIR_MASK_REG";
+        name        "EN.NX.CXA0.CXA_XPT.XPT_SCOMFIR.FIR_MASK_REG";
         scomaddr    0x02013003;
         capture     group default;
     };
 
-    register NXCXAFIR_ACT0
+    register NXCXAFIR_0_ACT0
     {
-        name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.FIR_ACTION0_REG";
+        name        "EN.NX.CXA0.CXA_XPT.XPT_SCOMFIR.FIR_ACTION0_REG";
         scomaddr    0x02013006;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("NXCXAFIR");
+        capture     req nonzero("NXCXAFIR_0");
     };
 
-    register NXCXAFIR_ACT1
+    register NXCXAFIR_0_ACT1
     {
-        name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.FIR_ACTION1_REG";
+        name        "EN.NX.CXA0.CXA_XPT.XPT_SCOMFIR.FIR_ACTION1_REG";
         scomaddr    0x02013007;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("NXCXAFIR");
+        capture     req nonzero("NXCXAFIR_0");
     };
 
-    register NXCXAFIR_SNP_ERROR_REPORT
+    register NXCXAFIR_0_SNP_ERROR_REPORT
     {
-        name        "EN.NX.CXA.CXA_SNPFE.SNP_REGS.CXA_SNP_ERROR_REPORT_REG";
+        name        "EN.NX.CXA0.CXA_SNPFE.SNP_REGS.CXA_SNP_ERROR_REPORT_REG";
         scomaddr    0x0201300A;
         capture     group default;
         capture     group CerrRegs;
     };
 
-    register NXCXAFIR_APC1_ERROR_REPORT
+    register NXCXAFIR_0_APC1_ERROR_REPORT
     {
-        name        "EN.NX.CXA.CXA_APC1.ERRRPT";
+        name        "EN.NX.CXA0.CXA_APC1.ERRRPT";
         scomaddr    0x0201300B;
         capture     group default;
         capture     group CerrRegs;
     };
 
-    register NXCXAFIR_XPT_ERROR_REPORT
+    register NXCXAFIR_0_XPT_ERROR_REPORT
     {
-        name        "EN.NX.CXA.XPT_ERROR_REPORT";
+        name        "EN.NX.CXA0.XPT_ERROR_REPORT";
         scomaddr    0x0201300C;
         capture     group default;
         capture     group CerrRegs;
     };
 
-    register NXCXAFIR_TLBI_ERROR_REPORT
+    register NXCXAFIR_0_TLBI_ERROR_REPORT
     {
-        name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.TLBI_ERROR_REPORT";
+        name        "EN.NX.CXA0.CXA_XPT.XPT_SCOMFIR.TLBI_ERROR_REPORT";
         scomaddr    0x0201300D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    ############################################################################
+    # PB Chiplet NXCXAFIR_1
+    ############################################################################
+
+    # This FIR only exists on Naples. So we will have a conditional capture
+    # below, which is common on all P8/P8+ chips.
+
+    register NXCXAFIR_1
+    {
+        name        "EN.NX.CXA1.CXA_XPT.XPT_SCOMFIR.FIR_REG";
+        scomaddr    0x02013180;
+        reset       (&, 0x02013181);
+        mask        (|, 0x02013185);
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+    };
+
+    register NXCXAFIR_1_MASK
+    {
+        name        "EN.NX.CXA1.CXA_XPT.XPT_SCOMFIR.FIR_MASK_REG";
+        scomaddr    0x02013183;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+    };
+
+    register NXCXAFIR_1_ACT0
+    {
+        name        "EN.NX.CXA1.CXA_XPT.XPT_SCOMFIR.FIR_ACTION0_REG";
+        scomaddr    0x02013186;
+        capture     type secondary;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     req nonzero("NXCXAFIR_1");
+    };
+
+    register NXCXAFIR_1_ACT1
+    {
+        name        "EN.NX.CXA1.CXA_XPT.XPT_SCOMFIR.FIR_ACTION1_REG";
+        scomaddr    0x02013187;
+        capture     type secondary;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     req nonzero("NXCXAFIR_1");
+    };
+
+    register NXCXAFIR_1_SNP_ERROR_REPORT
+    {
+        name        "EN.NX.CXA1.CXA_SNPFE.SNP_REGS.CXA_SNP_ERROR_REPORT_REG";
+        scomaddr    0x0201318A;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCXAFIR_1_APC1_ERROR_REPORT
+    {
+        name        "EN.NX.CXA1.CXA_APC1.ERRRPT";
+        scomaddr    0x0201318B;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCXAFIR_1_XPT_ERROR_REPORT
+    {
+        name        "EN.NX.CXA1.XPT_ERROR_REPORT";
+        scomaddr    0x0201318C;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCXAFIR_1_TLBI_ERROR_REPORT
+    {
+        name        "EN.NX.CXA1.CXA_XPT.XPT_SCOMFIR.TLBI_ERROR_REPORT";
+        scomaddr    0x0201318D;
+        capture     req funccall("isNaplesProc");
         capture     group default;
         capture     group CerrRegs;
     };
@@ -938,8 +1026,85 @@
     };
 
     ############################################################################
+    # PB Chiplet PCINESTFIR_3
+    ############################################################################
+
+    # This FIR only exists on Naples. So we will have a conditional capture
+    # below, which is common on all P8/P8+ chips.
+
+    register PCINESTFIR_3
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.FIR_REG";
+        scomaddr    0x02012c00;
+        reset       (&, 0x02012c01);
+        mask        (|, 0x02012c05);
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+    };
+
+    register PCINESTFIR_3_MASK
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.FIR_MASK_REG";
+        scomaddr    0x02012c03;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+    };
+
+    register PCINESTFIR_3_ACT0
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.FIR_ACTION0_REG";
+        scomaddr    0x02012c06;
+        capture     type secondary;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     req nonzero("PCINESTFIR_3");
+    };
+
+    register PCINESTFIR_3_ACT1
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.FIR_ACTION1_REG";
+        scomaddr    0x02012c07;
+        capture     type secondary;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     req nonzero("PCINESTFIR_3");
+    };
+
+    register PCINESTFIR3_ERROR_REPORT_0
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.CERR_RPT0_REG";
+        scomaddr    0x02012c1C;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR3_ERROR_REPORT_1
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.CERR_RPT1_REG";
+        scomaddr    0x02012c1D;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR3_ERROR_REPORT_2
+    {
+        name        "ES.PE_WRAP_TOP.PE3.PEPBCQ.PBCQ.CERR_RPT2_REG";
+        scomaddr    0x02012c1E;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    ############################################################################
     # PB Chiplet IOMCFIR_0
     ############################################################################
+
+    # This FIR does not exist on Murano, however, it is possible that the
+    # entire MCS block (0-3) may be disabled on Venice and Naples based on
+    # hardware availability. So we will have a conditional capture below, which
+    # is common on all P8/P8+ chips.
 
     register IOMCFIR_0
     {
@@ -990,6 +1155,11 @@
     ############################################################################
     # PB Chiplet IOMCFIR_1
     ############################################################################
+
+    # This FIR exists on all P8/P8+ processors, however, it is possible that the
+    # entire MCS block (4-7) may be disabled based on hardware availability. So
+    # we will have a conditional capture below, which is common on all P8/P8+
+    # chips.
 
     register IOMCFIR_1
     {
@@ -1058,8 +1228,10 @@
     ############################################################################
     # PB non-existent registers for capture
     ############################################################################
+
     register NXTRACE_ARRAY
     {
         name        "Capture Data for NX Trace Array";
         capture     group never;
     };
+

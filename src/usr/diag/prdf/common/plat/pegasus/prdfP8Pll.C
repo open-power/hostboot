@@ -195,7 +195,8 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, QueryProcPll );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, QueryProcPll );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, QueryProcPll );
 
 /**
   * @brief Query the PLL chip for a PLL error on P8
@@ -257,7 +258,8 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, QueryPll );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, QueryPll );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, QueryPll );
 
 
 /**
@@ -333,7 +335,8 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, ClearPll );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, ClearPll );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, ClearPll );
 
 /**
   * @brief Mask the PLL error for P8 Plugin
@@ -404,7 +407,8 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, MaskPll );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, MaskPll );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, MaskPll );
 
 /**
  * @brief  Optional plugin function called after analysis is complete but
@@ -431,7 +435,8 @@ int32_t PllPostAnalysis( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, PllPostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, PllPostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, PllPostAnalysis );
 
 /**
  * @brief   capture additional PLL FFDC
@@ -466,7 +471,8 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, capturePllFfdc );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, capturePllFfdc );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, capturePllFfdc );
 
 /**
   * @brief   Check PCB Slave internal parity errors
@@ -784,7 +790,8 @@ int32_t AnalyzeParityErr( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, AnalyzeParityErr );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, AnalyzeParityErr );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, AnalyzeParityErr );
 
 } // end namespace Proc
 

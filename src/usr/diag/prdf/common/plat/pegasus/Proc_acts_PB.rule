@@ -30,9 +30,9 @@
 rule PbChipletFir
 {
   CHECK_STOP:
-     (PB_CHIPLET_CS_FIR        & `1FDFF80000000000`) & ~PB_CHIPLET_FIR_MASK;
+     (PB_CHIPLET_CS_FIR        & `1FDFFE0000000000`) & ~PB_CHIPLET_FIR_MASK;
   RECOVERABLE:
-    ((PB_CHIPLET_RE_FIR >> 2 ) & `1FDFF80000000000`) & ~PB_CHIPLET_FIR_MASK;
+    ((PB_CHIPLET_RE_FIR >> 2 ) & `1FDFFE0000000000`) & ~PB_CHIPLET_FIR_MASK;
 };
 
 group gPbChipletFir filter singlebit
@@ -103,9 +103,22 @@ group gPbChipletFir filter singlebit
     (PbChipletFir, bit(17|18|19)) ? analyze(gPciNestFir);
 
     /** PB_CHIPLET_FIR[20]
-     *  Attention from NXCXAFIR
+     *  Attention from NXCXAFIR_0
      */
-    (PbChipletFir, bit(20)) ? analyze(gNxCxaFir);
+    (PbChipletFir, bit(20)) ? analyze(gNxCxaFir_0);
+
+    # It would be nice to include this in the above PCINESTFIRs, however since
+    # this bit only exists on naples, an attention from bits 17-19 would cause
+    # us to also try to read PciNestFir3 which would fail on non-naples chips.
+    /** PB_CHIPLET_FIR[21]
+     *  Attention from PCINESTFIR3
+     */
+    (PbChipletFir, bit(21)) ? analyze(gPciNestFir3);
+
+    /** PB_CHIPLET_FIR[22]
+     *  Attention from NXCXAFIR_1
+     */
+    (PbChipletFir, bit(22)) ? analyze(gNxCxaFir_1);
 };
 
 rule PbChipletSpa
@@ -551,250 +564,492 @@ group gNxCqFir filter singlebit
 };
 
 ################################################################################
-# PB Chiplet NXCXAFIR
+# PB Chiplet NXCXAFIR_0
 ################################################################################
 
 # p8dd1_mss_FFDC_73_final.xls
 
-rule NxCxaFir
+rule NxCxaFir_0
 {
-    CHECK_STOP:  NXCXAFIR & ~NXCXAFIR_MASK & ~NXCXAFIR_ACT0 & ~NXCXAFIR_ACT1;
-    RECOVERABLE: NXCXAFIR & ~NXCXAFIR_MASK & ~NXCXAFIR_ACT0 &  NXCXAFIR_ACT1;
+    CHECK_STOP:
+        NXCXAFIR_0 & ~NXCXAFIR_0_MASK & ~NXCXAFIR_0_ACT0 & ~NXCXAFIR_0_ACT1;
+    RECOVERABLE:
+        NXCXAFIR_0 & ~NXCXAFIR_0_MASK & ~NXCXAFIR_0_ACT0 &  NXCXAFIR_0_ACT1;
 };
 
-group gNxCxaFir filter singlebit
+group gNxCxaFir_0 filter singlebit
 {
-    /** NXCXAFIR[0]
+    /** NXCXAFIR_0[0]
      *  BAR_PE
      */
-    (NxCxaFir, bit(0)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(0)) ? defaultMaskedError;
 
-    /** NXCXAFIR[1]
+    /** NXCXAFIR_0[1]
      *  REGISTER_PE
      */
-    (NxCxaFir, bit(1)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(1)) ? SelfMedThr1;
 
-    /** NXCXAFIR[2]
+    /** NXCXAFIR_0[2]
      *  MASTER_ARRAY_CE
      */
-    (NxCxaFir, bit(2)) ? SelfMedThr32PerDay;
+    (NxCxaFir_0, bit(2)) ? SelfMedThr32PerDay;
 
-    /** NXCXAFIR[3]
+    /** NXCXAFIR_0[3]
      *  MASTER_ARRAY_UE
      */
-    (NxCxaFir, bit(3)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(3)) ? SelfMedThr1;
 
-    /** NXCXAFIR[4]
+    /** NXCXAFIR_0[4]
      *  TIMER_EXPIRED_RECOV_ERROR
      */
-    (NxCxaFir, bit(4)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(4)) ? defaultMaskedError;
 
-    /** NXCXAFIR[5]
+    /** NXCXAFIR_0[5]
      *  TIMER_EXPIRED_XSTOP_ERROR
      */
-    (NxCxaFir, bit(5)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(5)) ? SelfMedThr1;
 
-    /** NXCXAFIR[6]
+    /** NXCXAFIR_0[6]
      *  PSL_CMD_UE
      */
-    (NxCxaFir, bit(6)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(6)) ? defaultMaskedError;
 
-    /** NXCXAFIR[7]
+    /** NXCXAFIR_0[7]
      *  PSL_CMD_SUE
      */
-    (NxCxaFir, bit(7)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(7)) ? defaultMaskedError;
 
-    /** NXCXAFIR[8]
+    /** NXCXAFIR_0[8]
      *  SNOOP_ARRAY_CE
      */
-    (NxCxaFir, bit(8)) ? callout2ndLvlMedThr32;
+    (NxCxaFir_0, bit(8)) ? callout2ndLvlMedThr32;
 
-    /** NXCXAFIR[9]
+    /** NXCXAFIR_0[9]
      *  SNOOP_ARRAY_UE
      */
-    (NxCxaFir, bit(9)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(9)) ? SelfMedThr1;
 
-    /** NXCXAFIR[10]
+    /** NXCXAFIR_0[10]
      *  RECOVERY_FAILED
      */
-    (NxCxaFir, bit(10)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(10)) ? SelfMedThr1;
 
-    /** NXCXAFIR[11]
+    /** NXCXAFIR_0[11]
      *  ILLEGAL_LPC_BAR_ACCESS
      */
-    (NxCxaFir, bit(11)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(11)) ? defaultMaskedError;
 
-    /** NXCXAFIR[12]
+    /** NXCXAFIR_0[12]
      *  XPT_RECOVERABLE_ERROR_MASK
      */
-    (NxCxaFir, bit(12)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(12)) ? defaultMaskedError;
 
-    /** NXCXAFIR[13]
+    /** NXCXAFIR_0[13]
      *  MASTER_RECOVERABLE_ERROR
      */
-    (NxCxaFir, bit(13)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(13)) ? defaultMaskedError;
 
-    /** NXCXAFIR[14]
+    /** NXCXAFIR_0[14]
      *  SNOOPER_RECOVERABLE_ERROR
      */
-    (NxCxaFir, bit(14)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(14)) ? defaultMaskedError;
 
-    /** NXCXAFIR[15]
+    /** NXCXAFIR_0[15]
      *  XPT_RECOVERABLE_ERROR
      */
-    (NxCxaFir, bit(15)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(15)) ? defaultMaskedError;
 
-    /** NXCXAFIR[16]
+    /** NXCXAFIR_0[16]
      *  MASTER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir, bit(16)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(16)) ? SelfMedThr1;
 
-    /** NXCXAFIR[17]
+    /** NXCXAFIR_0[17]
      *  SNOOPER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir, bit(17)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(17)) ? SelfMedThr1;
 
-    /** NXCXAFIR[18]
+    /** NXCXAFIR_0[18]
      *  XPT_SYS_XSTOP_ERROR
      */
-    (NxCxaFir, bit(18)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(18)) ? SelfMedThr1;
 
-    /** NXCXAFIR[19]
+    /** NXCXAFIR_0[19]
      *  MUOP_ERROR_1
      */
-    (NxCxaFir, bit(19)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(19)) ? defaultMaskedError;
 
-    /** NXCXAFIR[20]
+    /** NXCXAFIR_0[20]
      *  MUOP_ERROR_2
      */
-    (NxCxaFir, bit(20)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(20)) ? defaultMaskedError;
 
-    /** NXCXAFIR[21]
+    /** NXCXAFIR_0[21]
      *  MUOP_ERROR_3
      */
-    (NxCxaFir, bit(21)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(21)) ? defaultMaskedError;
 
-    /** NXCXAFIR[22]
+    /** NXCXAFIR_0[22]
      *  SUOP_ERROR_1
      */
-    (NxCxaFir, bit(22)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(22)) ? defaultMaskedError;
 
-    /** NXCXAFIR[23]
+    /** NXCXAFIR_0[23]
      *  SUOP_ERROR_2
      */
-    (NxCxaFir, bit(23)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(23)) ? defaultMaskedError;
 
-    /** NXCXAFIR[24]
+    /** NXCXAFIR_0[24]
      *  SUOP_ERROR_3
      */
-    (NxCxaFir, bit(24)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(24)) ? defaultMaskedError;
 
-    /** NXCXAFIR[25]
+    /** NXCXAFIR_0[25]
      *  POWERBUS_MISC_ERROR
      */
-    (NxCxaFir, bit(25)) ? SelfHighThr1;
+    (NxCxaFir_0, bit(25)) ? SelfHighThr1;
 
-    /** NXCXAFIR[26]
+    /** NXCXAFIR_0[26]
      *  POWERBUS_INTERFACE_PE
      */
-    (NxCxaFir, bit(26)) ? SelfHighThr1;
+    (NxCxaFir_0, bit(26)) ? SelfHighThr1;
 
-    /** NXCXAFIR[27]
+    /** NXCXAFIR_0[27]
      *POWERBUS_DATA_HANG_ERROR
      */
-    (NxCxaFir, bit(27)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(27)) ? defaultMaskedError;
 
-    /** NXCXAFIR[28]
+    /** NXCXAFIR_0[28]
      *  POWERBUS_HANG_ERROR
      */
-    (NxCxaFir, bit(28)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(28)) ? defaultMaskedError;
 
-    /** NXCXAFIR[29]
+    /** NXCXAFIR_0[29]
      *  LD_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(29)) ? callout2ndLvlMedThr1;
+    (NxCxaFir_0, bit(29)) ? callout2ndLvlMedThr1;
 
-    /** NXCXAFIR[30]
+    /** NXCXAFIR_0[30]
      *  ST_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(30)) ? callout2ndLvlMedThr1;
+    (NxCxaFir_0, bit(30)) ? callout2ndLvlMedThr1;
 
-    /** NXCXAFIR[31]
+    /** NXCXAFIR_0[31]
      *  PHB_LINK_DOWN
      */
-    (NxCxaFir, bit(31)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(31)) ? defaultMaskedError;
 
-    /** NXCXAFIR[32]
+    /** NXCXAFIR_0[32]
      *  LD_CLASS_CMD_FOREIGN_LINK_FAIL
      */
-    (NxCxaFir, bit(32)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(32)) ? defaultMaskedError;
 
-    /** NXCXAFIR[33]
+    /** NXCXAFIR_0[33]
      *  FOREIGN_LINK_HANG_ERROR
      */
-    (NxCxaFir, bit(33)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(33)) ? defaultMaskedError;
 
-    /** NXCXAFIR[34]
+    /** NXCXAFIR_0[34]
      *  XPT_POWERBUS_CE
      */
-    (NxCxaFir, bit(34)) ? callout2ndLvlMedThr32;
+    (NxCxaFir_0, bit(34)) ? callout2ndLvlMedThr32;
 
-    /** NXCXAFIR[35]
+    /** NXCXAFIR_0[35]
      *  XPT_POWERBUS_UE
      */
-    (NxCxaFir, bit(35)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(35)) ? defaultMaskedError;
 
-    /** NXCXAFIR[36]
+    /** NXCXAFIR_0[36]
      *  XPT_POWERBUS_SUE
      */
-    (NxCxaFir, bit(36)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(36)) ? defaultMaskedError;
 
-    /** NXCXAFIR[37]
+    /** NXCXAFIR_0[37]
      *  TLBI_TIMEOUT
      */
-    (NxCxaFir, bit(37)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(37)) ? defaultMaskedError;
 
-    /** NXCXAFIR[38]
+    /** NXCXAFIR_0[38]
      *  TLBI_SEQ_ERR
      */
-    (NxCxaFir, bit(38)) ? SelfHighThr1;
+    (NxCxaFir_0, bit(38)) ? SelfHighThr1;
 
-    /** NXCXAFIR[39]
+    /** NXCXAFIR_0[39]
      *  TLBI_BAD_OP_ERR
      */
-    (NxCxaFir, bit(39)) ? SelfHighThr1;
+    (NxCxaFir_0, bit(39)) ? SelfHighThr1;
 
-    /** NXCXAFIR[40]
+    /** NXCXAFIR_0[40]
      *  TLBI_SEQ_NUM_PARITY_ERR
      */
-    (NxCxaFir, bit(40)) ? SelfHighThr1;
+    (NxCxaFir_0, bit(40)) ? SelfHighThr1;
 
-    /** NXCXAFIR[41]
+    /** NXCXAFIR_0[41]
      *  ST_CLASS_CMD_FOREIGN_LINK_FAIL
      */
-    (NxCxaFir, bit(41)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(41)) ? defaultMaskedError;
 
-    /** NXCXAFIR[42]
+    /** NXCXAFIR_0[42]
      *  TIMEBASE_ERR
      */
-    (NxCxaFir, bit(42)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(42)) ? defaultMaskedError;
 
-    /** NXCXAFIR[43]
+    /** NXCXAFIR_0[43]
      *  XPT_INFORMATIONAL_ERR
      */
-    (NxCxaFir, bit(43)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(43)) ? defaultMaskedError;
 
-    /** NXCXAFIR[44|45|46]
+    /** NXCXAFIR_0[44|45|46]
      *  SPARE_BIT
      */
-    (NxCxaFir, bit(44|45|46)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(44|45|46)) ? defaultMaskedError;
 
-    /** NXCXAFIR[47|48]
+    /** NXCXAFIR_0[47|48]
      *  SCOM_ERR
      */
-    (NxCxaFir, bit(47|48)) ? defaultMaskedError;
+    (NxCxaFir_0, bit(47|48)) ? defaultMaskedError;
 };
 
+rule NxCxaFir_1
+{
+    CHECK_STOP:
+        NXCXAFIR_1 & ~NXCXAFIR_1_MASK & ~NXCXAFIR_1_ACT0 & ~NXCXAFIR_1_ACT1;
+    RECOVERABLE:
+        NXCXAFIR_1 & ~NXCXAFIR_1_MASK & ~NXCXAFIR_1_ACT0 &  NXCXAFIR_1_ACT1;
+};
+
+group gNxCxaFir_1 filter singlebit
+{
+    /** NXCXAFIR_1[0]
+     *  BAR_PE
+     */
+    (NxCxaFir_1, bit(0)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[1]
+     *  REGISTER_PE
+     */
+    (NxCxaFir_1, bit(1)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[2]
+     *  MASTER_ARRAY_CE
+     */
+    (NxCxaFir_1, bit(2)) ? SelfMedThr32PerDay;
+
+    /** NXCXAFIR_1[3]
+     *  MASTER_ARRAY_UE
+     */
+    (NxCxaFir_1, bit(3)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[4]
+     *  TIMER_EXPIRED_RECOV_ERROR
+     */
+    (NxCxaFir_1, bit(4)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[5]
+     *  TIMER_EXPIRED_XSTOP_ERROR
+     */
+    (NxCxaFir_1, bit(5)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[6]
+     *  PSL_CMD_UE
+     */
+    (NxCxaFir_1, bit(6)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[7]
+     *  PSL_CMD_SUE
+     */
+    (NxCxaFir_1, bit(7)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[8]
+     *  SNOOP_ARRAY_CE
+     */
+    (NxCxaFir_1, bit(8)) ? callout2ndLvlMedThr32;
+
+    /** NXCXAFIR_1[9]
+     *  SNOOP_ARRAY_UE
+     */
+    (NxCxaFir_1, bit(9)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[10]
+     *  RECOVERY_FAILED
+     */
+    (NxCxaFir_1, bit(10)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[11]
+     *  ILLEGAL_LPC_BAR_ACCESS
+     */
+    (NxCxaFir_1, bit(11)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[12]
+     *  XPT_RECOVERABLE_ERROR_MASK
+     */
+    (NxCxaFir_1, bit(12)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[13]
+     *  MASTER_RECOVERABLE_ERROR
+     */
+    (NxCxaFir_1, bit(13)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[14]
+     *  SNOOPER_RECOVERABLE_ERROR
+     */
+    (NxCxaFir_1, bit(14)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[15]
+     *  XPT_RECOVERABLE_ERROR
+     */
+    (NxCxaFir_1, bit(15)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[16]
+     *  MASTER_SYS_XSTOP_ERROR
+     */
+    (NxCxaFir_1, bit(16)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[17]
+     *  SNOOPER_SYS_XSTOP_ERROR
+     */
+    (NxCxaFir_1, bit(17)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[18]
+     *  XPT_SYS_XSTOP_ERROR
+     */
+    (NxCxaFir_1, bit(18)) ? SelfMedThr1;
+
+    /** NXCXAFIR_1[19]
+     *  MUOP_ERROR_1
+     */
+    (NxCxaFir_1, bit(19)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[20]
+     *  MUOP_ERROR_2
+     */
+    (NxCxaFir_1, bit(20)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[21]
+     *  MUOP_ERROR_3
+     */
+    (NxCxaFir_1, bit(21)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[22]
+     *  SUOP_ERROR_1
+     */
+    (NxCxaFir_1, bit(22)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[23]
+     *  SUOP_ERROR_2
+     */
+    (NxCxaFir_1, bit(23)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[24]
+     *  SUOP_ERROR_3
+     */
+    (NxCxaFir_1, bit(24)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[25]
+     *  POWERBUS_MISC_ERROR
+     */
+    (NxCxaFir_1, bit(25)) ? SelfHighThr1;
+
+    /** NXCXAFIR_1[26]
+     *  POWERBUS_INTERFACE_PE
+     */
+    (NxCxaFir_1, bit(26)) ? SelfHighThr1;
+
+    /** NXCXAFIR_1[27]
+     *POWERBUS_DATA_HANG_ERROR
+     */
+    (NxCxaFir_1, bit(27)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[28]
+     *  POWERBUS_HANG_ERROR
+     */
+    (NxCxaFir_1, bit(28)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[29]
+     *  LD_CLASS_CMD_ADDR_ERR
+     */
+    (NxCxaFir_1, bit(29)) ? callout2ndLvlMedThr1;
+
+    /** NXCXAFIR_1[30]
+     *  ST_CLASS_CMD_ADDR_ERR
+     */
+    (NxCxaFir_1, bit(30)) ? callout2ndLvlMedThr1;
+
+    /** NXCXAFIR_1[31]
+     *  PHB_LINK_DOWN
+     */
+    (NxCxaFir_1, bit(31)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[32]
+     *  LD_CLASS_CMD_FOREIGN_LINK_FAIL
+     */
+    (NxCxaFir_1, bit(32)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[33]
+     *  FOREIGN_LINK_HANG_ERROR
+     */
+    (NxCxaFir_1, bit(33)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[34]
+     *  XPT_POWERBUS_CE
+     */
+    (NxCxaFir_1, bit(34)) ? callout2ndLvlMedThr32;
+
+    /** NXCXAFIR_1[35]
+     *  XPT_POWERBUS_UE
+     */
+    (NxCxaFir_1, bit(35)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[36]
+     *  XPT_POWERBUS_SUE
+     */
+    (NxCxaFir_1, bit(36)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[37]
+     *  TLBI_TIMEOUT
+     */
+    (NxCxaFir_1, bit(37)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[38]
+     *  TLBI_SEQ_ERR
+     */
+    (NxCxaFir_1, bit(38)) ? SelfHighThr1;
+
+    /** NXCXAFIR_1[39]
+     *  TLBI_BAD_OP_ERR
+     */
+    (NxCxaFir_1, bit(39)) ? SelfHighThr1;
+
+    /** NXCXAFIR_1[40]
+     *  TLBI_SEQ_NUM_PARITY_ERR
+     */
+    (NxCxaFir_1, bit(40)) ? SelfHighThr1;
+
+    /** NXCXAFIR_1[41]
+     *  ST_CLASS_CMD_FOREIGN_LINK_FAIL
+     */
+    (NxCxaFir_1, bit(41)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[42]
+     *  TIMEBASE_ERR
+     */
+    (NxCxaFir_1, bit(42)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[43]
+     *  XPT_INFORMATIONAL_ERR
+     */
+    (NxCxaFir_1, bit(43)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[44|45|46]
+     *  SPARE_BIT
+     */
+    (NxCxaFir_1, bit(44|45|46)) ? defaultMaskedError;
+
+    /** NXCXAFIR_1[47|48]
+     *  SCOM_ERR
+     */
+    (NxCxaFir_1, bit(47|48)) ? defaultMaskedError;
+};
 ################################################################################
 # PB Chiplet MCDFIR
 ################################################################################
@@ -2590,6 +2845,175 @@ group gPciNestFir filter singlebit
 
 };
 
+rule PciNestFir_3
+{
+  CHECK_STOP:
+    PCINESTFIR_3 & ~PCINESTFIR_3_MASK & ~PCINESTFIR_3_ACT0 & ~PCINESTFIR_3_ACT1;
+  RECOVERABLE:
+    PCINESTFIR_3 & ~PCINESTFIR_3_MASK & ~PCINESTFIR_3_ACT0 &  PCINESTFIR_3_ACT1;
+};
+
+group gPciNestFir3 filter singlebit
+{
+    /** PCINESTFIR_3[0]
+     *  BAR_PE
+     */
+    (PciNestFir_3, bit(0)) ? calloutConnPci3Th1NoGard;
+
+    /** PCINESTFIR_3[1]
+     *  NONBAR_PE
+     */
+    (PciNestFir_3, bit(1)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[2]
+     *  PB_TO_PEC_CE
+     */
+    (PciNestFir_3, bit(2)) ? calloutConnPci3Th32NoGard;
+
+    /** PCINESTFIR_3[3]
+     *  PB_TO_PEC_UE
+     */
+    (PciNestFir_3, bit(3)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[4]
+     *  PB_TO_PEC_SUE
+     */
+    (PciNestFir_3, bit(4)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[5]
+     *  ARY_ECC_CE
+     */
+    (PciNestFir_3, bit(5)) ? calloutConnPci3Th32NoGard;
+
+    /** PCINESTFIR_3[6]
+     *  ARY_ECC_UE
+     */
+    (PciNestFir_3, bit(6)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[7]
+     *  ARY_ECC_SUE
+     */
+    (PciNestFir_3, bit(7)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[8]
+     *  REGISTER_ARRAY_PE
+     */
+    (PciNestFir_3, bit(8)) ? calloutConnPci3Th1NoGard;
+
+    /** PCINESTFIR_3[9]
+     *  PB_INTERFACE_PE
+     */
+    (PciNestFir_3, bit(9)) ? calloutConnPci3Th1NoGard;
+
+    /** PCINESTFIR_3[10]
+     *  PB_DATA_HANG_ERRORS
+     */
+    (PciNestFir_3, bit(10)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[11]
+     *  PB_HANG_ERRORS
+     */
+    (PciNestFir_3, bit(11)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[12]
+     *  RD_ARE_ERRORS
+     */
+    (PciNestFir_3, bit(12)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[13]
+     *  NONRD_ARE_ERRORS
+     */
+    (PciNestFir_3, bit(13)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[14]
+     *  PCI_HANG_ERROR
+     */
+    (PciNestFir_3, bit(14)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[15]
+     *  PCI_CLOCK_ERROR
+     *
+     *  These should never trigger directly themselves.
+     *  Should be handled by global PRD PLL code.
+     */
+    (PciNestFir_3, bit(15)) ? threshold32pday;
+
+    /** PCINESTFIR_3[16]
+     *  AIB_FENCE
+     */
+    (PciNestFir_3, bit(16)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[17]
+     *  HW_ERRORS
+     */
+    (PciNestFir_3, bit(17)) ? calloutConnPci3Th1NoGard;
+
+    /** PCINESTFIR_3[18]
+     *  UNSOLICITIEDPBDATA
+     */
+    (PciNestFir_3, bit(18)) ? callout2ndLvlMedThr1;
+
+    /** PCINESTFIR_3[19]
+     *  UNEXPECTEDCRESP
+     */
+    (PciNestFir_3, bit(19)) ? callout2ndLvlMedThr1;
+
+    /** PCINESTFIR_0[20]
+     *  INVALIDCRESP
+     */
+    (PciNestFir_3, bit(20)) ? calloutProcLevel2MedThr1;
+
+    /** PCINESTFIR_0[21]
+     *  PBUNSUPPORTEDSIZE
+     */
+    (PciNestFir_3, bit(21)) ? calloutProcLevel2MedThr1;
+
+    /** PCINESTFIR_0[22]
+     *  PBUNSUPPORTEDCMD
+     */
+    (PciNestFir_3, bit(22)) ? calloutProcLevel2MedThr1;
+
+    /** PCINESTFIR_0[23]
+     *  AIB_PE
+     */
+    (PciNestFir_3, bit(23)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[24]
+     *  ASB_ERROR
+     */
+    (PciNestFir_3, bit(24)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[25]
+     *  FOREIGN_LINK_FAIL
+     */
+    (PciNestFir_3, bit(25)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[26]
+     *  FOREIGN_PB_HANG
+     */
+    (PciNestFir_3, bit(26)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[27]
+     *  CAPP_ERROR
+     */
+    (PciNestFir_3, bit(27)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[28]
+     *  SYNC_SCOM_ERR
+     */
+    (PciNestFir_3, bit(28)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[29]
+     *  SCOM Engine ERROR 0
+     */
+    (PciNestFir_3, bit(29)) ? defaultMaskedError;
+
+    /** PCINESTFIR_3[30]
+     *  SCOM Engine ERROR 0
+     */
+    (PciNestFir_3, bit(30)) ? defaultMaskedError;
+};
+
 ################################################################################
 # PB Chiplet IOMCFIR_0
 ################################################################################
@@ -2958,6 +3382,12 @@ actionclass calloutConnPci2NoGard
     callout(connected(TYPE_PCI,2), MRU_MED, NO_GARD);
 };
 
+/** Callout the connected PCI 3 controller. */
+actionclass calloutConnPci3NoGard
+{
+    callout(connected(TYPE_PCI,3), MRU_MED, NO_GARD);
+};
+
 /** Callout the connected PCI 0 controller, threshold 1 , no garding */
 actionclass calloutConnPci0Th1NoGard
 {
@@ -2979,6 +3409,13 @@ actionclass calloutConnPci2Th1NoGard
     threshold1;
 };
 
+/** Callout the connected PCI 3 controller, threshold 1, no garding */
+actionclass calloutConnPci3Th1NoGard
+{
+    calloutConnPci3NoGard;
+    threshold1;
+};
+
 /** Callout the connected PCI 0 controller, threshold 32 per day, no garding */
 actionclass calloutConnPci0Th32NoGard
 {
@@ -2997,6 +3434,13 @@ actionclass calloutConnPci1Th32NoGard
 actionclass calloutConnPci2Th32NoGard
 {
     calloutConnPci2NoGard;
+    threshold32pday;
+};
+
+/** Callout the connected PCI 3 controller, threshold 32 per day , no garding */
+actionclass calloutConnPci3Th32NoGard
+{
+    calloutConnPci3NoGard;
     threshold32pday;
 };
 

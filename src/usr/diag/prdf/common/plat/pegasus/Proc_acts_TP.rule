@@ -48,22 +48,22 @@ group gTpChipletFir filter singlebit
     (TpChipletFir, bit(4)) ? analyze(gOccFir);
 
     /** TP_CHIPLET_FIR[5]
-     *  Attention from MCIFIR (MCS 00 Venice only)
+     *  Attention from MCIFIR (MCS 00 not used in Murano)
      */
     (TpChipletFir, bit(5)) ? analyzeMcs00;
 
     /** TP_CHIPLET_FIR[6]
-     *  Attention from MCIFIR (MCS 01 Venice only)
+     *  Attention from MCIFIR (MCS 01 not used in Murano)
      */
     (TpChipletFir, bit(6)) ? analyzeMcs01;
 
     /** TP_CHIPLET_FIR[7]
-     *  Attention from MCIFIR (MCS 10 Venice only)
+     *  Attention from MCIFIR (MCS 10 not used in Murano)
      */
     (TpChipletFir, bit(7)) ? analyzeMcs10;
 
     /** TP_CHIPLET_FIR[8]
-     *  Attention from MCIFIR (MCS 11 Venice only)
+     *  Attention from MCIFIR (MCS 11 not used in Murano)
      */
     (TpChipletFir, bit(8)) ? analyzeMcs11;
 
@@ -88,7 +88,7 @@ group gTpChipletFir filter singlebit
     (TpChipletFir, bit(12)) ? analyzeMcs31;
 
     /** TP_CHIPLET_FIR[13]
-     *  Attention from IOMCFIR_0 (Venice only)
+     *  Attention from IOMCFIR_0 (not used in Murano)
      */
     (TpChipletFir, bit(13)) ? analyze(gIomcFir_0);
 
@@ -126,22 +126,22 @@ group gTpChipletSpa filter singlebit
     (TpChipletSpa, bit(0)) ? analyze(gOccFir);
 
     /** TP_CHIPLET_SPA[1]
-     *  Attention from MCIFIR_00 (Venice only)
+     *  Attention from MCIFIR_00 (not used in Murano)
      */
     (TpChipletSpa, bit(1)) ? analyzeMcs00;
 
     /** TP_CHIPLET_SPA[2]
-     *  Attention from MCIFIR_01 (Venice only)
+     *  Attention from MCIFIR_01 (not used in Murano)
      */
     (TpChipletSpa, bit(2)) ? analyzeMcs01;
 
     /** TP_CHIPLET_SPA[3]
-     *  Attention from MCIFIR_10 (Venice only)
+     *  Attention from MCIFIR_10 (not used in Murano)
      */
     (TpChipletSpa, bit(3)) ? analyzeMcs10;
 
     /** TP_CHIPLET_SPA[4]
-     *  Attention from MCIFIR_11 (Venice only)
+     *  Attention from MCIFIR_11 (not used in Murano)
      */
     (TpChipletSpa, bit(4)) ? analyzeMcs11;
 

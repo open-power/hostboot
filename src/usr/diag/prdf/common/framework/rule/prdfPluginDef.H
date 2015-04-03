@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -342,6 +344,9 @@ inline Plugin_4arg<_A, _B, _C, _D, _ExtensibleObject> *
 #define __PRDF_PLUGIN_MAKENAME(X,Y,Z) __PRDF_PLUGIN_XYZ(X,Y,Z)
 
 #define PRDF_PLUGIN_DEFINE(CHIP,PLUGIN_NAME) \
+    PRDF_PLUGIN_DEFINE_NS(CHIP,CHIP,PLUGIN_NAME)
+
+#define PRDF_PLUGIN_DEFINE_NS(CHIP,NAMESPACE,PLUGIN_NAME) \
     class __PRDF_PLUGIN_MAKENAME(Plugin_Registration_,CHIP,PLUGIN_NAME) \
     { \
       private: \
@@ -350,7 +355,7 @@ inline Plugin_4arg<_A, _B, _C, _D, _ExtensibleObject> *
         char cv_plugin_space[sizeof(Plugin<ExtensibleChip>)]; \
       public: \
         __PRDF_PLUGIN_MAKENAME(Plugin_Registration_,CHIP,PLUGIN_NAME)() : \
-            cv_plugin( bind_plugin_ptr(&CHIP::PLUGIN_NAME, \
+            cv_plugin( bind_plugin_ptr(&NAMESPACE::PLUGIN_NAME, \
                                        &cv_plugin_space) ), \
             cv_registerClass(#CHIP,#PLUGIN_NAME,cv_plugin) \
         {} \

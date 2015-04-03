@@ -51,7 +51,8 @@ int32_t FUNC( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & i_sc ) \
     CalloutUtil::defaultError( i_sc ); \
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( Proc, FUNC );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, FUNC ); \
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, FUNC );
 
 PLUGIN_TOD_UNEXPECTED_ATTN( clearServiceCallFlag )
 PLUGIN_TOD_UNEXPECTED_ATTN( todNewTopologyIfBackupMDMT )
@@ -85,7 +86,8 @@ int32_t isTodDisabled( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, isTodDisabled );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isTodDisabled );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isTodDisabled );
 
 } //namespace Proc ends
 

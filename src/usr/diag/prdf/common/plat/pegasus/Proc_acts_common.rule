@@ -1,0 +1,208 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_acts_common.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Global Broadcast Registers
+################################################################################
+
+#CS and RE in MuranoVenice and Naples specific rule files
+
+rule GlobalSpa
+{
+    SPECIAL: GLOBAL_SPA;
+};
+
+group gGlobalSpa attntype SPECIAL filter singlebit
+{
+    /** GLOBAL_SPA[1]
+     *  Attention from TP chiplet
+     */
+    (GlobalSpa, bit(1)) ? analyze(gTpChipletSpa);
+
+    /** GLOBAL_SPA[2]
+     *  Attention from PB chiplet
+     */
+    (GlobalSpa, bit(2)) ? analyze(gPbChipletSpa);
+
+    /** GLOBAL_SPA[9]
+     *  Attention from PCIE
+     */
+    (GlobalSpa, bit(9)) ? analyze(gPcieChipletSpa);
+
+    /** GLOBAL_SPA[11]
+     *  Attention from EX1 (Venice only)
+     */
+    (GlobalSpa, bit(11)) ? analyzeEx1;
+
+    /** GLOBAL_SPA[12]
+     *  Attention from EX2 (Venice only)
+     */
+    (GlobalSpa, bit(12)) ? analyzeEx2;
+
+    /** GLOBAL_SPA[13]
+     *  Attention from EX3 (Venice only)
+     */
+    (GlobalSpa, bit(13)) ? analyzeEx3;
+
+    /** GLOBAL_SPA[14]
+     *  Attention from EX4
+     */
+    (GlobalSpa, bit(14)) ? analyzeEx4;
+
+    /** GLOBAL_SPA[15]
+     *  Attention from EX5
+     */
+    (GlobalSpa, bit(15)) ? analyzeEx5;
+
+    /** GLOBAL_SPA[16]
+     *  Attention from EX6
+     */
+    (GlobalSpa, bit(16)) ? analyzeEx6;
+
+    /** GLOBAL_SPA[19]
+     *  Attention from EX9 (Venice only)
+     */
+    (GlobalSpa, bit(19)) ? analyzeEx9;
+
+    /** GLOBAL_SPA[20]
+     *  Attention from EX10 (Venice only)
+     */
+    (GlobalSpa, bit(20)) ? analyzeEx10;
+
+    /** GLOBAL_SPA[21]
+     *  Attention from EX11 (Venice only)
+     */
+    (GlobalSpa, bit(21)) ? analyzeEx11;
+
+    /** GLOBAL_SPA[22]
+     *  Attention from EX12
+     */
+    (GlobalSpa, bit(22)) ? analyzeEx12;
+
+    /** GLOBAL_SPA[23]
+     *  Attention from EX13
+     */
+    (GlobalSpa, bit(23)) ? analyzeEx13;
+
+    /** GLOBAL_SPA[24]
+     *  Attention from EX14
+     */
+    (GlobalSpa, bit(24)) ? analyzeEx14;
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+
+################################################################################
+#                          Analyze Connected Parts                             #
+################################################################################
+
+/** Analyze connected EX1 */
+actionclass analyzeEx1 { analyze(connected(TYPE_EX, 1)); };
+
+/** Analyze connected EX2 */
+actionclass analyzeEx2 { analyze(connected(TYPE_EX, 2)); };
+
+/** Analyze connected EX3 */
+actionclass analyzeEx3 { analyze(connected(TYPE_EX, 3)); };
+
+/** Analyze connected EX4 */
+actionclass analyzeEx4 { analyze(connected(TYPE_EX, 4)); };
+
+/** Analyze connected EX5 */
+actionclass analyzeEx5 { analyze(connected(TYPE_EX, 5)); };
+
+/** Analyze connected EX6 */
+actionclass analyzeEx6 { analyze(connected(TYPE_EX, 6)); };
+
+/** Analyze connected EX9 */
+actionclass analyzeEx9 { analyze(connected(TYPE_EX, 9)); };
+
+/** Analyze connected EX10 */
+actionclass analyzeEx10 { analyze(connected(TYPE_EX, 10)); };
+
+/** Analyze connected EX11 */
+actionclass analyzeEx11 { analyze(connected(TYPE_EX, 11)); };
+
+/** Analyze connected EX12 */
+actionclass analyzeEx12 { analyze(connected(TYPE_EX, 12)); };
+
+/** Analyze connected EX13 */
+actionclass analyzeEx13 { analyze(connected(TYPE_EX, 13)); };
+
+/** Analyze connected EX14 */
+actionclass analyzeEx14 { analyze(connected(TYPE_EX, 14)); };
+
+actionclass calloutProcLevel2MedThr1
+{
+    calloutSelfLow;
+    callout2ndLvlMed;
+    threshold1;
+};
+
+/** callout Proc with low priority ,Sec level Med priority, Thr1
+ *  and dump type SH, garding not done */
+actionclass calloutProcLevel2MedThr1dumpShNoGard
+{
+    calloutSelfLowNoGard;
+    callout2ndLvlMedThr1;
+    dumpSH;
+};
+
+/** callout Proc with low priority ,Sec level Med priority, Thr 32per day
+ *  and dump type SH , garding not done */
+actionclass calloutProcLevel2MedThr32dumpShNoGard
+{
+    calloutSelfLow;
+    callout2ndLvlMed;
+    threshold32pday;
+    dumpSH;
+};
+
+actionclass calloutProcHighThr1SUE
+{
+    calloutSelfHigh;
+    SUEGenerationPoint;
+    threshold1;
+};

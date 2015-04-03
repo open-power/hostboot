@@ -146,7 +146,8 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, QueryPciPll );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, QueryPciPll );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, QueryPciPll );
 
 /**
   * @brief Query the PLL chip for a PLL error on P8
@@ -208,7 +209,8 @@ int32_t QueryPllIo( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, QueryPllIo );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, QueryPllIo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, QueryPllIo );
 
 
 /**
@@ -298,7 +300,8 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, ClearPllIo );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, ClearPllIo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, ClearPllIo );
 
 /**
   * @brief Mask the PLL error for P8 Plugin
@@ -375,7 +378,8 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, MaskPllIo );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, MaskPllIo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, MaskPllIo );
 
 /**
  * @brief   capture additional PLL FFDC
@@ -391,7 +395,8 @@ int32_t capturePllFfdcIo( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, capturePllFfdcIo );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, capturePllFfdcIo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, capturePllFfdcIo );
 
 /**
  * @brief   calling out active pcie osc connected to this proc
@@ -463,7 +468,8 @@ int32_t CalloutPllIo( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Proc, CalloutPllIo );
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, CalloutPllIo );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, CalloutPllIo );
 
 } // end namespace Proc
 

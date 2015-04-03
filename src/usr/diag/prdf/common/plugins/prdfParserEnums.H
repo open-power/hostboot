@@ -57,7 +57,8 @@ enum PositionBounds
 
     MAX_XBUS_PER_PROC   = 4,
     MAX_ABUS_PER_PROC   = 3,
-    MAX_PHB_PER_PROC    = 3,
+    MAX_PHB_PER_PROC    = 4,
+    MAX_NV_PER_PROC     = 1,
 
     MAX_MCS_PER_PROC    = 8,
     MAX_MEMBUF_PER_PROC = MAX_MCS_PER_PROC,

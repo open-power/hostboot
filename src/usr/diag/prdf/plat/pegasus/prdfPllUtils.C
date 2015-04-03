@@ -60,7 +60,9 @@ int32_t  queryPciOscErr( ExtensibleChip * i_procChip,
 
     return o_rc;
     #undef PRDF_FUNC
-}PRDF_PLUGIN_DEFINE( Proc, queryPciOscErr );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, queryPciOscErr );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, queryPciOscErr );
 
 //------------------------------------------------------------------------------
 
@@ -81,7 +83,9 @@ int32_t analyzePciClkFailover( ExtensibleChip * i_procChip,
     return o_rc;
 
     #undef PRDF_FUNC
-}PRDF_PLUGIN_DEFINE( Proc, analyzePciClkFailover );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, analyzePciClkFailover );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, analyzePciClkFailover );
 
 //------------------------------------------------------------------------------
 
@@ -102,7 +106,9 @@ int32_t clearPciOscFailOver( ExtensibleChip * i_procChip,
     return o_rc;
 
     #undef PRDF_FUNC
-}PRDF_PLUGIN_DEFINE( Proc, clearPciOscFailOver );
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, clearPciOscFailOver );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, clearPciOscFailOver );
 
 } // end namespace Proc
 
