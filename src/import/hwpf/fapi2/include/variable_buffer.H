@@ -249,6 +249,31 @@ namespace fapi2
         }
 
         ///
+        /// @brief Set an OT of data in buffer
+        /// @param[in] i_value sizeof(OT) bits of data
+        /// @param[in] i_offset Start OT (start word, for example) in buffer
+        ///            - defaults to 0 (will by default write the left most element)
+        /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
+        /// @note This is is only available for integral types. To set a
+        ///    variable_buffer into a variable_buffer, use insert()
+        ///
+        template< typename OT>
+        inline fapi2::ReturnCode set(OT i_value, const bits_type i_offset = 0)
+        {
+            // Do the variable_buffer specific check for overflow here. Then
+            // call the common set()
+            static const bits_type bits_in_value = parameterTraits<OT>::bit_length();
+            const bits_type bit_length = bufferTraits<bits_container>::bit_length(iv_data);
+
+            if ((i_offset + bits_in_value) >= this->iv_perceived_bit_length)
+            {
+                return FAPI2_RC_OVERFLOW;
+            }
+
+            return buffer_base::set(i_value, i_offset);
+        }
+
+        ///
         /// @brief Set a bit in the buffer
         /// @param[in] i_bit the bit number to set.
         /// @note 0 is left-most
