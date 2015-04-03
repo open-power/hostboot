@@ -177,8 +177,8 @@ namespace fapi2
         constexpr static uint32_t size(const bits_container& i_buffer)
             {
                 return (bit_length(i_buffer) +
-                        (parameterTraits<E>::bit_length - 1)) /
-                    parameterTraits<E>::bit_length;
+                        (parameterTraits<E>::bit_length() - 1)) /
+                    parameterTraits<E>::bit_length();
             }
 
         ///
