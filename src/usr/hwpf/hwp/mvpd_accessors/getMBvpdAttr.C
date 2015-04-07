@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.C,v 1.5 2015/02/24 19:22:51 whs Exp $
+// $Id: getMBvpdAttr.C,v 1.6 2015/04/07 20:21:37 whs Exp $
 /**
  *  @file getMBvpdAttr.C
  *
@@ -928,13 +928,25 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
             }
 
             uint16_t l_dataSpecial  = SPECIAL_DATA_MASK  & l_special;
+            uint8_t  l_vpdIncrement = 4; //default to 4 byte vpd field
+            if  (UINT8_DATA == l_dataSpecial)
+            {
+                l_vpdIncrement = 1;     // vpd is only 1 byte
+            }
+            else if  (UINT16_DATA == l_dataSpecial)
+            {
+                l_vpdIncrement = 2;     // vpd is 2 bytes
+            }
+
             for (uint8_t l_port=0; l_port<2;l_port++)
             {
+                uint8_t l_vpdOffset = 0;
                 for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
                 {
                     uint32_t l_value = getUint32 (l_dataSpecial, &(i_pBuffer->
-                      mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset]));
+           mb_mba[i_pos].mba_port[l_port].port_attr[l_attrOffset+l_vpdOffset]));
                     (*(UINT32_BY2_BY2_t*)o_pVal)[l_port][l_j] = l_value;
+                    l_vpdOffset += l_vpdIncrement;
                 }
             }
             break;
