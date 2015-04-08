@@ -153,12 +153,15 @@ hb_helptext()
         echo "  Topic 'rsync'"
         echo
         echo "  Usage:"
-        echo "      hb rsync"
+        echo "      hb rsync <opts>"
         echo
         echo "  Synchronizes an entire Hostboot repository with another"
         echo "  directory.  This can be useful for creating a backup of"
         echo "  the repository or for pushing it to a remote host, such"
         echo "  as a pool machine where simics is executed."
+        echo
+        echo "  Options:"
+        echo "      --force : Skip user prompt for RSYNCDIR confirmation (reserve for cronjobs)."
         echo
         echo "  Environment Variables:"
         echo "      RSYNCHOST: (optional) remote host to rsync to."
@@ -392,16 +395,69 @@ hb_startsimics()
         "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
 }
 
-hb_rsync()
+hb_rsync_call()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
-    [ -z "${RSYNCDIR}" ] && echo "Missing RSYNCDIR." && exit -1
-
     if [ -z "${RSYNCHOST}" ]; then
         rsync -av --delete ${HOSTBOOTROOT}/ ${RSYNCDIR}
     else
         rsync -zav --delete ${HOSTBOOTROOT}/ ${RSYNCHOST}:${RSYNCDIR}
     fi
+}
+
+hb_rsync_helper()
+{
+    if [ -n "${RSYNCHOST}" ]; then
+        echo -n "${RSYNCHOST}:"
+    fi
+    echo "${RSYNCDIR} does not look like a hostboot repo and is not empty"
+    read -r -p "rsync will clear out ${RSYNCDIR} then copy files into it, is this correct? [y/N] " response
+    case $response in
+        [yY][eE][sS]|[yY])
+            hb_rsync_call
+            ;;
+        *)
+            echo "hb rsync cancelled"
+            ;;
+    esac
+}
+
+hb_rsync()
+{
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${RSYNCDIR}" ] && echo "Missing RSYNCDIR." && exit -1
+
+    # Parse arguments
+    case $1 in
+        "--force")
+            hb_rsync_call
+        ;;
+        *)
+            # Check destination directory, if not empty check if looks like
+            # a hostboot repository, otherwise proceed
+            # If remote directory
+            if [ -n "${RSYNCHOST}" ]; then
+                if [ "$(ssh ${RSYNCHOST} 'if [ "$(ls -A '${RSYNCDIR}')" ]; then echo 1; fi')" ]; then
+                    # Remote check for hb and .git
+                    if [ "$(ssh ${RSYNCHOST} 'if [ -f '${RSYNCDIR}/hb' -a -d '${RSYNCDIR}/.git' ]; then echo 1; fi')" ]; then
+                        hb_rsync_call;
+                    else
+                        hb_rsync_helper;
+                    fi
+                else
+                    hb_rsync_call;
+                fi
+            # Local check for emptiness
+            elif [ "$(ls -A ${RSYNCDIR})" ]; then
+                # Local check for hb and .git
+                if [ -f ${RSYNCDIR}/hb -a -d ${RSYNCDIR}/.git ]; then
+                    hb_rsync_call;
+                else
+                    hb_rsync_helper;
+                fi
+            else
+                hb_rsync_call;
+            fi
+    esac
 }
 
 hb_objsizes()
