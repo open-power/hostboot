@@ -167,18 +167,19 @@ namespace HBOCC
         if( masterproc == i_proc )
         {
             config_data->firMaster = IS_FIR_MASTER;
+
+            // TODO: RTC 124683 The ability to write the HOMER data
+            //        is currently not available at runtime.
+#ifndef __HOSTBOOT_RUNTIME
+            l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
+                                          sizeof(config_data->firdataConfig) );
+#endif
+
         }
         else
         {
             config_data->firMaster = NOT_FIR_MASTER;
         }
-
-        // TODO: RTC 124683 The ability to write the HOMER data is currently not
-        //       available at runtime.
-        #ifndef __HOSTBOOT_RUNTIME
-        l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
-                                          sizeof(config_data->firdataConfig) );
-        #endif
 
 #else
         config_data->firMaster = 0;

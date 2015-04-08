@@ -480,7 +480,7 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data )
         PNOR::PnorInfo_t pnorInfo;
         PNOR::getPnorInfo( pnorInfo );
 
-        o_data.pnorInfo.pnorOffset      = sectionInfo.vaddr;
+        o_data.pnorInfo.pnorOffset      = sectionInfo.flashAddr;
         o_data.pnorInfo.pnorSize        = sectionInfo.size;
         o_data.pnorInfo.mmioOffset      = pnorInfo.mmioOffset;
         o_data.pnorInfo.norWorkarounds  = pnorInfo.norWorkarounds;
