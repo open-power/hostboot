@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.50 2015/02/19 20:51:29 gollub Exp $
+// $Id: mss_draminit_mc.C,v 1.51 2015/03/19 16:48:09 dcadiga Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -46,7 +46,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.50   | gollub   |12-FEB-20| Changed maint cmd delay from 100mSec to 1mSec
+//  1.51   | dcadiga  |18-MAR-15| Added function to enable address inversion on port 1
+//  1.50   | gollub   |12-FEB-15| Changed maint cmd delay from 100mSec to 1mSec
 //  1.49   | gollub   |12-FEB-15| Add check for RCD protect time on RDIMM and LRDIMM
 //  1.48   | dcadiga  |05-DEC-14| Powerdown control at initfile
 //  1.47   | dcadiga  |09-SEP-14| Removed SPARE cke disable step
@@ -132,6 +133,7 @@ ReturnCode mss_enable_control_bit_ecc(Target& i_target);
 ReturnCode mss_ccs_mode_reset(Target& i_target);
 ReturnCode mss_check_RCD_protect_time(Target& i_target);
 ReturnCode mss_spare_cke_disable(Target& i_target);
+ReturnCode mss_enable_addr_inversion(Target& i_target);
 
 
 ReturnCode mss_draminit_mc(Target& i_target)
@@ -229,7 +231,7 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
         }
 
 
-        // Check RCD protect time on RDIMM and LRDIMM
+        // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
         FAPI_INF( "+++ Check RCD protect time on RDIMM and LRDIMM +++");
         rc = mss_check_RCD_protect_time(l_mbaChiplets[i]);
         if(rc)
@@ -237,7 +239,16 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
            FAPI_ERR("---Error During Check RCD protect time rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
            return rc;
         }
-
+	
+	//Step Two.2: Enable address inversion on each MBA for ALL CARDS
+	FAPI_INF("+++ Setting up adr inversion for port 1 +++");
+	rc = mss_enable_addr_inversion(l_mbaChiplets[i]);
+        if(rc)
+        {
+           FAPI_ERR("---Error During ADR Inversion rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+           return rc;
+        }
+	
 
         // Step Three: Enable Refresh
         FAPI_INF( "+++ Enabling Refresh +++");
@@ -1233,6 +1244,34 @@ ReturnCode mss_spare_cke_disable (Target& i_target)
 
 
     FAPI_INF("+++ mss_spare_cke_disable complete +++");
+    return rc;
+}
+
+ReturnCode mss_enable_addr_inversion (Target& i_target)
+{
+
+    //Target MBA
+    //Sets address inversion on port 1 of an MBA
+    //Variables
+    ReturnCode rc;
+    uint32_t rc_num  = 0;
+    ecmdDataBufferBase MBA_FARB0_DB_64(64);
+
+    //Set bit 56 for adr inversion on port 1
+    rc = fapiGetScom(i_target, MBA01_MBA_FARB0Q_0x03010413, MBA_FARB0_DB_64);
+    if(rc) return rc;
+    rc_num = rc_num | MBA_FARB0_DB_64.setBit(56);
+    if(rc_num)
+    {
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+
+    rc = fapiPutScom(i_target, MBA01_MBA_FARB0Q_0x03010413, MBA_FARB0_DB_64);
+    if(rc) return rc;
+
+
+    FAPI_INF("+++ mss_enable_addr_inversion complete +++");
     return rc;
 }
 
