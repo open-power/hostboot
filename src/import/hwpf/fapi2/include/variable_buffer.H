@@ -33,6 +33,7 @@
 #include <buffer_parameters.H>
 #include <buffer_traits.H>
 #include <return_code_defs.H>
+#include <cassert>
 
 namespace fapi2
 {
@@ -163,9 +164,12 @@ namespace fapi2
     /// (and "odd sized.") These best represent the FAPI 1.X ecmdDataBuffer,
     /// however they are implemented using the same template techniques
     /// as the new fapi::buffer.
-    /// @note Variable buffers are implemeneted as a std::vector of uint32_t
-    /// as this keeps simple compatibility with ecmdDataBuffers. Cronus (at least)
-    /// need to interwork the two.
+    /// @note Variable buffers are not (presently) declared as std::bitset
+    /// as bitsets' size is fixed at runtime. It is not clear if this is
+    /// acceptable for variable_buffers at this time.
+    /// @note Variable buffers are implemented as a std::vecor of uint32_t
+    /// as this keeps simple compatibility with ecmdDataBuffers. Cronus (at
+    //least) need to interwork the two.
     class variable_buffer
     {
 
@@ -348,14 +352,14 @@ namespace fapi2
         {
             const bits_type index = i_bit / bits_per_unit;
 
-            if (index > iv_data.size())
+            // setting a bit outside our container?
+            if( i_bit >= this->iv_perceived_bit_length )
             {
                 return FAPI2_RC_INVALID_PARAMETER;
             }
 
             iv_data[index] |=
-                unit_type(1) << ((bits_per_unit - 1) -
-                                 (i_bit - (index * bits_per_unit)));
+                unit_type(1) << ((bits_per_unit - 1) - (i_bit - (index * bits_per_unit)));
 
             return FAPI2_RC_SUCCESS;
         }
@@ -408,14 +412,65 @@ namespace fapi2
         /// @tparam SB Start bit in buffer to test.
         /// @tparam L Number of consecutive bits from start bit to
         /// test, defaults to 1
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         /// @return true if all bits in range are set - false if any
         /// bit is clear
-        ///
-        template< bits_type SB, bits_type L = 1 >
-        inline bool isBitSet(void) const;
+        /// @note Example: fapi2::buffer<uint64_t>().isBitSet(4,3);
+        inline bool isBitSet( bits_type SB, bits_type L = 1 ) const
+        {
+            // make sure we stay within our container
+            assert( ((L > 0) && ((SB + L) <= this->iv_perceived_bit_length)));
+
+            bool is_set     = false;
+            uint32_t mask   = 0;
+
+            // last bit to check
+            bits_type EB    = SB + L - 1;
+
+            // index where first bit to check is located
+            bits_type start_index = SB/bits_per_unit;
+
+            // index where last bit is located
+            bits_type end_index   = EB/bits_per_unit;
+
+            if( start_index == end_index )
+            {
+                // normalize our SB to be within a unit
+                bits_type TempSB = SB - (start_index*bits_per_unit);
+
+                // grab a mask from SB for L number of bits.
+                mask = fast_mask32(TempSB, L);
+
+                is_set =
+                    ( (iv_data[start_index] & mask) == mask ) ? true : false;
+
+            }
+            else
+            {
+                // the bits span more than one internal unit, need to break
+                // it up to process it.
+
+                // make TempSB point to the start of the next unit, adjust the
+                // length and go again, process the bits in the previous index
+                // when we get back.
+                bits_type TempSB = (start_index + 1) * bits_per_unit;
+                bits_type TempL  = EB - TempSB + 1;
+
+                is_set = this->isBitSet( TempSB, TempL );
+
+                // now check the bits in the previous index up to the next index.
+                // normalize our SB to be within a unit
+                TempSB = SB - (start_index*bits_per_unit);
+
+                // get a mask for the new SB location to the end of this unit.
+                mask = fast_mask32(TempSB, L-TempL);
+
+                // test these bits against the others..
+                is_set &=
+                        ((iv_data[start_index] & mask) == mask ) ? true : false;
+            }
+
+            return is_set;
+        }
 
         ///
         /// @brief Test if multiple bits are clear
