@@ -2633,6 +2633,14 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     }
                 }
 
+                // PHYP wants all of the engines set regardless if hostboot
+                // believes there is a device on the bus.
+                if ( i_processOperation == I2C_OP_SETUP )
+                {
+                    skip = false;
+                    io_args.port = 0;
+                }
+
                 if ( skip == true )
                 {
                     TRACUCOMP( g_trac_i2c,INFO_MRK
@@ -2736,6 +2744,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                         case I2C_OP_SETUP:
                         {
                             mode_reg_t mode;
+                            mode.value = 0x0;
 
                             TRACFCOMP( g_trac_i2c,INFO_MRK
                               "i2cProcessActiveMasters: setup engine: %d",
