@@ -28,7 +28,8 @@ which I'm sure you can steal if needed.
 Target is defined as a template of <TargetType, Value> where
 Value is defined per platform. Smaller platforms will want an integer
 type here, say uint64_t. Larger platforms may want to change this to
-a pointer to an underlying platform specific targeting object.
+a pointer to an underlying platform specific targeting object. This change
+can be made in plat_target.H
 
 The target traversing functions will need to be implemented per-platform.
 
@@ -36,6 +37,16 @@ The target traversing functions will need to be implemented per-platform.
 
 All of the hardware access functions are assumed to need implementation
 per platform.
+
+plat_hw_access.H is used for platform definitions. Macros or other
+platform definitions related to hw access can go in here.
+
+fapi2_hw_access.H is the common hw access definitions and templates. It
+includes plat_hw_access.H and so definitions in plat_hw_access.H can
+be used in fapi2 common code.
+
+hw_access.H is for platform specializations of the templates in
+fapi2_hw_access.H.
 
 Please use template specialization for target types which need special
 treatment. The API documented here are generic, but they can be made
@@ -64,14 +75,15 @@ for XBUS and ABUS
 ### fapi2::ReturnCode and error_scope.H
 
 For smaller platforms, a fapi::ReturnCode is nothing but a uint64_t. For
-larger platforms fapi2::ReturnCode inherits from a (TBD) FFDC object.
+larger platforms fapi2::ReturnCode inherits from an FFDC object.
 
-There should be nothing to do for error_scope.H
+This difference is contained in
+return_code.H, and noted with the preprocessor macro FAPI2_NO_FFDC.
+Define FAPI2_NO_FFDC to get the simple representation of fapi2::ReturnCode,
+and undefine it to get the FFDC class included.
 
-### fapi2::FirstFailureData (FFDC (work in progress))
-
-The platform specific FFDC object will need to be implemented, but the
-tooling to generate the FFDC functions used in FAPI_ASSERT will be provided.
+error_scope.H refers to platform specific macros which can be defined
+in plat_error_scope.H.
 
 ### Attributes
 
