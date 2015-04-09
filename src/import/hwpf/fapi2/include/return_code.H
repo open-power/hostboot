@@ -32,8 +32,9 @@
 
 #include <stdint.h>
 
-// Remove this for platforms which don't support FFDC
-#include <ffdc.H>
+#ifndef FAPI2_NO_FFDC
+  #include <ffdc.H>
+#endif
 
 ///
 /// @brief Set HWP Error macro
@@ -115,9 +116,13 @@ namespace fapi2
     ///
     /// @brief Class representing a FAPI2 ReturnCode
     ///
-    /// @note Remove the inheritance relationship with FirstFailureData if
-    /// the platform doesn't support FFDC.
+    // Remove the inheritance relationship with FirstFailureData if
+    // the platform doesn't support FFDC.
+#ifdef FAPI2_NO_FFDC
+    class ReturnCode
+#else
     class ReturnCode : public FirstFailureData<ReturnCode>
+#endif
     {
     public:
 
