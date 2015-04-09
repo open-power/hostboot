@@ -35,8 +35,10 @@
 #include <algorithm>
 #include <buffer_parameters.H>
 
-// for debug printing ... can be removed for flight
+#ifdef FAPI2_DEBUG
 #include <iostream>
+#endif
+
 #include <iterator>
 
 namespace fapi2
@@ -60,7 +62,8 @@ namespace fapi2
     class bufferTraits
     {
     public:
-#ifndef DOXYGEN
+
+#if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
         ///
         /// @brief Print a container of bits
         /// @param[in] i_data the container of bits
@@ -153,7 +156,7 @@ namespace fapi2
     class bufferTraits<bits_container, uint32_t>
     {
     public:
-#ifndef DOXYGEN
+#if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
         ///
         /// @brief Print a container of bits
         /// @param[in] i_data the container of bits
