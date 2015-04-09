@@ -55,7 +55,8 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/mvpd_accessors/getControlCapableData.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
-#include <hwpf/hwp/mvpd_accessors/getISDIMMTOC4DAttrs.H>
+#include <hwpf/hwp/mvpd_accessors/getDQAttrISDIMM.H>
+#include <hwpf/hwp/mvpd_accessors/getDQSAttrISDIMM.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAttr.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>

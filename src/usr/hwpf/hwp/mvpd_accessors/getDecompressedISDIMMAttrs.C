@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,10 +35,6 @@
 #include <vector>
 #include <ecmdDataBufferBase.H>
 #include <getDecompressedISDIMMAttrs.H>
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/common/trace.H>
-using namespace TARGETING;
 
 void antiPermutation(int i_permNum, int* o_array,int i_finalSize)
 {
