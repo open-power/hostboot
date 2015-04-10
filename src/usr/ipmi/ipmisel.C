@@ -222,8 +222,6 @@ void send_esel(eselInitData * i_data,
     uint8_t esel_recordID[2] = {0,0};
     uint8_t sel_recordID[2] = {0,0};
 
-#ifndef __HOSTBOOT_RUNTIME
-// TODO RTC: 124972 take this out when runtime supports the eSEL
     do{
         const size_t l_eSELlen = i_data->dataSize;
         uint8_t reserveID[2] = {0,0};
@@ -347,7 +345,6 @@ void send_esel(eselInitData * i_data,
             storeReserveRecord(esel_recordID,data);
         } // while eSELindex
     }while(0);
-#endif
 
     // if eSEL wasn't created due to an error, we don't want to continue
     if(o_err == NULL)
