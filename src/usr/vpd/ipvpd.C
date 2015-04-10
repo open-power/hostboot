@@ -1339,7 +1339,7 @@ IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
     offset = le16toh( toc_rec->record_offset ) + 1;  // skip 'large resource'
 
     // Read the PT keyword(s) from the VTOC
-    for (uint16_t index = 0; index < 2; ++index)
+    for (uint16_t index = 0; index < 3; ++index)
     {
         pt_len = sizeof(l_buffer);
         err = retrieveKeyword( "PT",
