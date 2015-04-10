@@ -66,12 +66,13 @@
  *          - MASK (FIR address + 3)
  *          - ACT0 (FIR address + 6)
  *          - ACT1 (FIR address + 7)
- *          - WOF  (FIR address + 8)
  *      - ID FIR
  *          - ID MASK (ID FIR address + 0x300000000ll)
  *          - ID ACT0 (ID FIR address + 0x600000000ll)
  *          - ID ACT1 (ID FIR address + 0x700000000ll)
- *          - ID WOF  (ID FIR address + 0x800000000ll)
+ *  Note that not all FIRs have a corresponding WOF register. So any WOFs needed
+ *  for analysis will need to be explicitly listed in the corresponding
+ *  'Registers' lists.
  */
 
 typedef enum
@@ -81,7 +82,7 @@ typedef enum
 } HOMER_Version_t;
 
 /** PNOR information contained within the HOMER data. */
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t pnorOffset;     ///< Physical offset of FIRDATA in PNOR
     uint32_t pnorSize;       ///< Maximum size of FIRDATA (includes ECC)
@@ -92,7 +93,7 @@ typedef struct
 
 /** HOMER data header information containing hardware configurations and
  *  register counts. */
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t header; ///< Magic number to indicate valid data and version
 

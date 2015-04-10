@@ -96,6 +96,10 @@ static uint32_t proc_reg[] =
     0x570F001A, // GLOBAL_SPA (for FFDC only)
     //0x51040001, // GLOBALUNITXSTPFIR (not even accessible during IPL)
 
+    // For ATTN
+    0x01020013, // IPOLL reg
+    0x02000001, // GP1 reg
+
     // Chiplet FIRs
     0x01040000, // TP_CHIPLET_CS_FIR
     0x01040001, // TP_CHIPLET_RE_FIR
@@ -312,6 +316,9 @@ static uint32_t mcs_fir[] =
 
 static uint32_t mcs_reg[] =
 {
+    // WOF register explicitly needed for analysis
+    0x02011848, // MCIFIR_WOF
+
     // c_err_rpt and extra FFDC registers
     0x0201181E, // MCERPT0
     0x0201184E, // MCIERPT0

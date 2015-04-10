@@ -263,7 +263,7 @@ errlHndl_t Service::processCheckstop()
         ++tit;
     }
 
-    if( NULL != err )
+    if ( NULL == err )
     {
         if(!attentions.empty())
         {

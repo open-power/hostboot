@@ -49,12 +49,16 @@ errlHndl_t FileScomAccessor::Access(
     switch (operation)
     {
         case MopRegisterAccess::WRITE:
-            data = bs.GetFieldJustify(0, 64);
+            // TODO: RTC 62076 move BitString class to 64-bit
+            data = (((uint64_t)bs.GetFieldJustify( 0, 32)) << 32) |
+                    ((uint64_t)bs.GetFieldJustify(32, 32));
             firData.putScom( i_target, registerId, data);
             break;
         case MopRegisterAccess::READ:
             firData.getScom( i_target, registerId, data);
-            bs.SetFieldJustify( 0, 64, data);
+            // TODO: RTC 62076 move BitString class to 64-bit
+            bs.SetFieldJustify( 0, 32, data >> 32);
+            bs.SetFieldJustify(32, 32, data      );
             break;
         default:
             PRDF_ERR(PRDF_FUNC"Wrong Operation:%u", operation);

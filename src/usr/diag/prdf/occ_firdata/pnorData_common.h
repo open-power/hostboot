@@ -48,8 +48,8 @@
  *      - Registers with SCOM errors will not be captured, however, the number
  *        of SCOM errors detected should be stored in each PNOR_Trgt_t struct.
  *      - If the value of a FIR (or ID FIR) is zero, do not capture the
- *        associated ACT0 and ACT1 registers. Note that the associated MASK and
- *        WOF registers are still needed.
+ *        associated ACT0 and ACT1 registers. Note that the associated MASK
+ *        register is still needed for FFDC.
  *      - Each target type may have associated global registers. If none exist,
  *        simply capture all registers for that type. However, if they do exist
  *        and the values of ALL the global registers are zero, skip capturing
@@ -71,7 +71,7 @@ typedef enum
 } PNOR_Version_t;
 
 /** PNOR data header information. */
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t header; ///< Magic number to indicate valid data and version
 
@@ -103,7 +103,7 @@ typedef enum
 } PNOR_Trgt_RegLimits_t;
 
 /** Information for each target with SCOM data. */
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t type     : 3; ///< Target type. See enum TrgtType_t
     uint32_t procPos  : 3; ///< The processor position (0-7)
@@ -134,7 +134,7 @@ static inline PNOR_Trgt_t PNOR_getTrgt( uint32_t i_type, uint32_t i_procPos,
 };
 
 /** Information for a normal register. */
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t addr;  ///< 32-bit address
     uint64_t val;   ///< 64-bit value
@@ -142,7 +142,7 @@ typedef struct
 } PNOR_Reg_t;
 
 /** Information for an indirect-SCOM register. */
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint64_t addr;  ///< 64-bit address
     uint32_t val;   ///< 32-bit value
