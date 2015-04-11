@@ -22,11 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.189 2014/11/20 17:56:55 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.194 2015/03/17 18:55:38 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : p8_scom_addresses.H
 // *! DESCRIPTION : Defines for P8 scom addresses
@@ -989,12 +990,14 @@ CONST_UINT64_T( PCBMS_INTERRUPT_TYPE_REG_0x000F001A ,   ULL(0x000F001A));
 //      CAPP
 //------------------------------------------------------------------------------
 CONST_UINT64_T( CAPP_APC_MASTER_PB_CTL_0x02013018     , ULL(0x02013018) );
+CONST_UINT64_T( CAPP_CXA_SNOOP_CFG_0x0201301A         , ULL(0x0201301A) );
 CONST_UINT64_T( CAPP_CXA_SNOOP_CTL_0x0201301B         , ULL(0x0201301B) );
 CONST_UINT64_T( CAPP_APC_MASTER_LCO_TARGET_0x02013021 , ULL(0x02013021) );
 CONST_UINT64_T( CAPP_CXA_SNP_ARRAY_ADDR_0x02013028    , ULL(0x02013028) );
 CONST_UINT64_T( CAPP_CXA_SNP_ARRAY_DATA_0x02013029    , ULL(0x02013029) );
 
 CONST_UINT64_T( CAPP1_APC_MASTER_PB_CTL_0x02013198    , ULL(0x02013198) );
+CONST_UINT64_T( CAPP1_CXA_SNOOP_CFG_0x0201319A        , ULL(0x0201319A) );
 CONST_UINT64_T( CAPP1_CXA_SNOOP_CTL_0x0201319B        , ULL(0x0201319B) );
 CONST_UINT64_T( CAPP1_APC_MASTER_LCO_TARGET_0x020131A1, ULL(0x020131A1) );
 CONST_UINT64_T( CAPP1_CXA_SNP_ARRAY_ADDR_0x020131A8   , ULL(0x020131A8) );
@@ -1175,6 +1178,15 @@ CONST_UINT64_T( NX_NEAR_BAR_F1_0x0201309B             , ULL(0x0201309B) );
 CONST_UINT64_T( NX_FAR_BAR_F1_0x0201309C              , ULL(0x0201309C) );
 CONST_UINT64_T( NX_CQ_EPS_0x0201309D                  , ULL(0x0201309D) );
 CONST_UINT64_T( NX_AS_MMIO_BAR_0x0201309E             , ULL(0x0201309E) );
+
+CONST_UINT64_T( NX_CXA1_APC_NODAL_BAR0_0x020131AD     , ULL(0x020131AD) );
+CONST_UINT64_T( NX_CXA1_APC_NODAL_BAR1_0x020131AE     , ULL(0x020131AE) );
+CONST_UINT64_T( NX_CXA1_APC_GROUP_BAR0_0x020131AF     , ULL(0x020131AF) );
+CONST_UINT64_T( NX_CXA1_APC_GROUP_BAR1_0x020131B0     , ULL(0x020131B0) );
+CONST_UINT64_T( NX_CXA1_APC_NEAR_BAR_F0_0x020131B1    , ULL(0x020131B1) );
+CONST_UINT64_T( NX_CXA1_APC_FAR_BAR_F0_0x020131B2     , ULL(0x020131B2) );
+CONST_UINT64_T( NX_CXA1_APC_NEAR_BAR_F1_0x020131B3    , ULL(0x020131B3) );
+CONST_UINT64_T( NX_CXA1_APC_FAR_BAR_F1_0x020131B4     , ULL(0x020131B4) );
 
 CONST_UINT64_T( NX_CAPP_FIR_0x02013000                , ULL(0x02013000) );
 CONST_UINT64_T( NX_CAPP_FIR_AND_0x02013001            , ULL(0x02013001) );
@@ -1448,6 +1460,51 @@ CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_AND_0x08010C01     , ULL(0x08010C01) );
 CONST_UINT64_T( A_ABUS_BUSCNTL_FIR_MASK_0x08010C03    , ULL(0x08010C03) );
 
 CONST_UINT64_T( A_ABUS_SCOM_MODE_PB_0x08010C20        , ULL(0x08010C20) );
+
+//------------------------------------------------------------------------------
+//      NV/NPU
+//------------------------------------------------------------------------------
+CONST_UINT64_T( NV0_BUSCNTL_FIR_0x08010C00            , ULL(0x08010C00) );
+CONST_UINT64_T( NV1_BUSCNTL_FIR_0x08010C40            , ULL(0x08010C40) );
+
+CONST_UINT64_T( NPU0_MMIO_BAR0_0x08013C02             , ULL(0x08013C02) );
+CONST_UINT64_T( NPU0_MMIO_BAR1_0x08013C03             , ULL(0x08013C03) );
+CONST_UINT64_T( NPU0_NODAL_BAR0_0x08013C04            , ULL(0x08013C04) );
+CONST_UINT64_T( NPU0_NODAL_BAR1_0x08013C05            , ULL(0x08013C05) );
+CONST_UINT64_T( NPU0_GROUP_BAR0_0x08013C06            , ULL(0x08013C06) );
+CONST_UINT64_T( NPU0_GROUP_BAR1_0x08013C07            , ULL(0x08013C07) );
+CONST_UINT64_T( NPU0_CQ_EPS_0x08013C08                , ULL(0x08013C08) );
+
+CONST_UINT64_T( NPU1_MMIO_BAR0_0x08013C42             , ULL(0x08013C42) );
+CONST_UINT64_T( NPU1_MMIO_BAR1_0x08013C43             , ULL(0x08013C43) );
+CONST_UINT64_T( NPU1_NODAL_BAR0_0x08013C44            , ULL(0x08013C44) );
+CONST_UINT64_T( NPU1_NODAL_BAR1_0x08013C45            , ULL(0x08013C45) );
+CONST_UINT64_T( NPU1_GROUP_BAR0_0x08013C46            , ULL(0x08013C46) );
+CONST_UINT64_T( NPU1_GROUP_BAR1_0x08013C47            , ULL(0x08013C47) );
+CONST_UINT64_T( NPU1_CQ_EPS_0x08013C48                , ULL(0x08013C48) );
+
+CONST_UINT64_T( NPU2_MMIO_BAR0_0x08013D02             , ULL(0x08013D02) );
+CONST_UINT64_T( NPU2_MMIO_BAR1_0x08013D03             , ULL(0x08013D03) );
+CONST_UINT64_T( NPU2_NODAL_BAR0_0x08013D04            , ULL(0x08013D04) );
+CONST_UINT64_T( NPU2_NODAL_BAR1_0x08013D05            , ULL(0x08013D05) );
+CONST_UINT64_T( NPU2_GROUP_BAR0_0x08013D06            , ULL(0x08013D06) );
+CONST_UINT64_T( NPU2_GROUP_BAR1_0x08013D07            , ULL(0x08013D07) );
+CONST_UINT64_T( NPU2_CQ_EPS_0x08013D08                , ULL(0x08013D08) );
+
+CONST_UINT64_T( NPU3_MMIO_BAR0_0x08013D42             , ULL(0x08013D42) );
+CONST_UINT64_T( NPU3_MMIO_BAR1_0x08013D43             , ULL(0x08013D43) );
+CONST_UINT64_T( NPU3_NODAL_BAR0_0x08013D44            , ULL(0x08013D44) );
+CONST_UINT64_T( NPU3_NODAL_BAR1_0x08013D45            , ULL(0x08013D45) );
+CONST_UINT64_T( NPU3_GROUP_BAR0_0x08013D46            , ULL(0x08013D46) );
+CONST_UINT64_T( NPU3_GROUP_BAR1_0x08013D47            , ULL(0x08013D47) );
+CONST_UINT64_T( NPU3_CQ_EPS_0x08013D48                , ULL(0x08013D48) );
+
+CONST_UINT64_T( NPU_FIR_0x08013D80                    , ULL(0x08013D80) );
+CONST_UINT64_T( NPU_FIR_AND_0x08013D81                , ULL(0x08013D81) );
+CONST_UINT64_T( NPU_FIR_OR_0x08013D82                 , ULL(0x08013D82) );
+CONST_UINT64_T( NPU_FIR_MASK_0x08013D83               , ULL(0x08013D83) );
+CONST_UINT64_T( NPU_FIR_MASK_AND_0x08013D84           , ULL(0x08013D84) );
+CONST_UINT64_T( NPU_FIR_MASK_OR_0x08013D85            , ULL(0x08013D85) );
 
 //------------------------------------------------------------------------------
 //      PLL LOCK
@@ -2197,6 +2254,21 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.194  2015/03/17 18:55:38  jmcgill
+add NPU FIR register constants
+
+Revision 1.193  2015/02/02 18:57:13  jmcgill
+add 2nd CAPP unit memory BAR/NPU MMIO BAR address definitions
+
+Revision 1.192  2015/01/26 15:07:09  jmcgill
+add NPU SCOM addresses
+
+Revision 1.191  2014/12/18 20:44:35  jmcgill
+add NPU/NVlink SCOM address definitions
+
+Revision 1.190  2014/12/18 16:10:45  jmcgill
+add entry for CAPP snoop config registers
+
 Revision 1.189  2014/11/20 17:56:55  jmcgill
 add definition for I2C_SLAVE_CONFIG register
 
