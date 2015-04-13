@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_chip_cleanup.C,v 1.8 2014/03/02 23:14:49 belldi Exp $
+// $Id: proc_mpipl_chip_cleanup.C,v 1.9 2014/12/18 21:09:21 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -83,9 +83,7 @@ extern "C"
   // bit 5 (MCD_REC_ODD_REQ_PEND)
   //
   // 3) Clear PCI Nest FIR registers
-  // 02012000 (SCOM) 
-  // 02012400 (SCOM) 
-  // 02012800 (SCOM) 
+  // 02012X00 (SCOM) 
   //
   // parameters: 
   // 'i_target' is reference to chip target
@@ -116,11 +114,13 @@ extern "C"
       "Even", //Ptr to char string "Even" for even MCD
       "Odd"   //Ptr to char string "Odd" for odd MCD
     }; 
-    const int MAX_PHBS = 3;
+    uint8_t num_phb;
+    const int MAX_PHBS = 4;
     const uint64_t PCI_NEST_FIR_REG_ADDRS[MAX_PHBS] = {
       0x02012000,
       0x02012400,
-      0x02012800
+      0x02012800,
+      0x02012C00,
     };     
     
     do {
@@ -193,7 +193,14 @@ extern "C"
         break;
       }
       
-      for (int counter = 0; counter < MAX_PHBS; counter++) {
+      rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_NUM_PHB, &i_target, num_phb);
+      if (!rc.ok())
+      {
+          FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_NUM_PHB)");
+          break;
+      }
+
+      for (int counter = 0; counter < num_phb; counter++) {
         FAPI_DBG("Clearing PCI%d Nest FIR, target=%s", counter, i_target.toEcmdString());
         rc = fapiPutScom(i_target, PCI_NEST_FIR_REG_ADDRS[counter], fsi_data[0]);
         if (!rc.ok()) {
