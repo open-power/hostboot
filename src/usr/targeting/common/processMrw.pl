@@ -580,7 +580,7 @@ sub setupBars
     my $proc   = $targetObj->getAttribute($target, "FABRIC_CHIP_ID");
     $targetObj->{TOPOLOGY}->{$node}->{$proc}++;
 
-    my @bars=("FSP_BASE_ADDR","PSI_BRIDGE_BASE_ADDR",
+    my @bars=("NPU_MMIO_BAR_BASE_ADDR","FSP_BASE_ADDR","PSI_BRIDGE_BASE_ADDR",
               "INTP_BASE_ADDR","PHB_BASE_ADDRS","PCI_BASE_ADDRS_32",
               "PCI_BASE_ADDRS_64","RNG_BASE_ADDR","IBSCOM_PROC_BASE_ADDR");
 

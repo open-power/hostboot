@@ -545,6 +545,10 @@
     </attribute>
 
     <!-- From PHYP Memory Map -->
+
+    <attribute><id>NPU_MMIO_BAR_ENABLE</id></attribute>
+    <attribute><id>NPU_MMIO_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>NPU_MMIO_BAR_SIZE</id></attribute>
     <attribute><id>FSP_BASE_ADDR</id></attribute>
     <attribute><id>FSP_BAR_SIZE</id></attribute>
     <attribute><id>FSP_MMIO_MASK_SIZE</id></attribute>

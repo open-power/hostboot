@@ -2789,6 +2789,116 @@
 
 <!-- ===== Processor Chip Attributes ===== -->
 
+<enumerationType>
+    <id>NPU_MMIO_BAR_ENABLE</id>
+    <description>Enumeration indicating whether MMIO BAR is enabled or not to be
+        used with ATTR_PROC_NPU_MMIO_BAR_ENABLE</description>
+    <enumerator>
+        <name>DISABLE</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>ENABLE</name>
+        <value>1</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>NPU_MMIO_BAR_ENABLE</id>
+    <description>NPU MMIO BAR enables
+        creator: platform
+        consumer: proc_setup_bars
+        firmware notes: none
+            first dimension: unit number (0:3)
+            second dimension: BAR number (0:1)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<attribute>
+    <id>NPU_MMIO_BAR_BASE_ADDR</id>
+    <description>NPU MMIO BAR base address values
+        creator: platform
+        consumer: proc_setup_bars
+        firmware notes:
+            64-bit address representing BAR RA
+            NOTE: BAR register covers RA 14:51
+            first dimension: unit number (0:3)
+            second dimension: BAR number (0:1)
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>NPU_MMIO_BAR_SIZE</id>
+    <description>Enumeration indicating the BAR size
+        used with ATTR_PROC_NPU_MMIO_BAR_SIZE</description>
+    <enumerator>
+        <name>2_MB</name>
+        <value>0x0000000000200000</value>
+    </enumerator>
+    <enumerator>
+        <name>1_MB</name>
+        <value>0x0000000000100000</value>
+    </enumerator>
+    <enumerator>
+        <name>512_KB</name>
+        <value>0x0000000000080000</value>
+    </enumerator>
+    <enumerator>
+        <name>256_KB</name>
+        <value>0x0000000000040000</value>
+    </enumerator>
+    <enumerator>
+        <name>128_KB</name>
+        <value>0x0000000000020000</value>
+    </enumerator>
+    <enumerator>
+        <name>64_KB</name>
+        <value>0x0000000000010000</value>
+    </enumerator>
+</enumerationType>
+<attribute>
+    <id>NPU_MMIO_BAR_SIZE</id>
+    <description>NPU MMIO BAR size values
+        creator: platform
+        consumer: proc_setup_bars
+        firmware notes: none
+            first dimension: unit number (0:3)
+            second dimension: BAR number (0:1)
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NPU_MMIO_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <attribute>
     <id>FSP_BASE_ADDR</id>
     <description>Base Address of FSP IO Region</description>
