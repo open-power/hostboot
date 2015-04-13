@@ -86,15 +86,25 @@ namespace SENSOR
                 o_powerLimit = data[5];
                 o_powerLimit = ( o_powerLimit << 8 ) + data[4];
 
-                TRACFCOMP(g_trac_ipmi,"Power limit is %d watts",o_powerLimit);
+                // fetch the derating factor from the BMC, then apply it to
+                // the value returned in the getPowerLimit command
+
+                SENSOR::getSensorReadingData o_sensorData;
+
+                // derating factor is held in the system target
+                SENSOR::SensorBase(
+                        TARGETING::SENSOR_NAME_DERATING_FACTOR,
+                        NULL ).readSensorData( o_sensorData );
+
+                // derate the power limit based on the returned value of the
+                // sensor - derating factor is returned as a % value and is
+                // stored in the event_status field.
+                o_powerLimit = ( static_cast<uint64_t>(o_powerLimit) *
+                                            o_sensorData.event_status)/100;
+
+                TRACFCOMP(g_trac_ipmi,"Derating factor = %i",o_sensorData.event_status);
+                TRACFCOMP(g_trac_ipmi,"Power limit = 0x%i",o_powerLimit);
                 TRACFCOMP(g_trac_ipmi,"Power limit is %s", ((cc) ? "not active": "active"));
-
-                // $TODO RTC:124093 de-rating factor for the power limit will
-                // be stored in a sensor, which is not defined currently so
-                // hardcode it at 90% efficency per power team suggestion
-
-                // derate the power limit to 90% of the input power
-                o_powerLimit = ( static_cast<uint32_t>(o_powerLimit) * 9 )/10;
 
                 // the completion code also tells us if the limit is active
                 if(l_cc == POWER_LIMIT_ACTIVE )
