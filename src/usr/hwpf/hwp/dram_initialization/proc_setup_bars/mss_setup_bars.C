@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.43 2014/08/05 15:06:53 kahnevan Exp $
+// $Id: mss_setup_bars.C,v 1.44 2015/03/19 15:30:38 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.43   | gpaulraj | 03/19/15| fix SW296125 - modified k as k = 0
 //  1.42   | gpaulraj | 05/21/14| fixed on 1 MCS mirror BAR EN  issue -SW261358
 //  1.40   | gpaulraj | 05/06/14| fixed on mirror configuration issue
 //  1.39   | gpaulraj | 04/08/14| 5/5 FW review feedback - gerrit process - SW251227
@@ -614,7 +615,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
                     if(mcs_sz !=  sizeInfo.MCS_size[group_data[i][j]])
                     {
                           FAPI_INF(" Group %zd will not be configured as MCS %d is not valid grouped size is %d , present MCS size is %d \n",i,group_data[i][j],mcs_sz, sizeInfo.MCS_size[group_data[i][j]]);
-                          for(uint8_t k; k<32;k++) { group_data[i][k]=0; }
+                          for(uint8_t k = 0; k<32;k++) { group_data[i][k]=0; }
                      }
                }
            }
@@ -723,7 +724,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
 
                  uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
                  if( mcs_in_group > 1)
-                 { 
+                 {
                 	for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
                     	 (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group);
                     	 j++)
