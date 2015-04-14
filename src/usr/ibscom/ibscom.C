@@ -732,9 +732,11 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                                      i_addr),
                                 mbsiberr0.data);
 
+                //force a deconfig to potentially allow the IPL
+                // to continue after a channel fail
                 ib_err->addHwCallout(i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::NO_DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL);
 
                 //grab some HW regs via FSISCOM
@@ -815,6 +817,14 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                      mbsiberr0.piberr,
                                      i_addr,
                                      l_err );
+
+                //force a deconfig to potentially allow the IPL
+                // to continue after a channel fail
+                l_err->addHwCallout(i_target,
+                                    HWAS::SRCI_PRIORITY_LOW,
+                                    HWAS::DELAYED_DECONFIG,
+                                    HWAS::GARD_NULL);
+
 
                 //grab some HW regs via FSISCOM
                 ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_target);
