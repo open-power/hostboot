@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -124,6 +124,39 @@
       <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_PCI_CLOCK_ERROR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      First SCOM into PCIe chiplet from SBE failed
+      Trigger callout for PCI reference clock
+    </description>
+    <ffdc>SCOM_ADDRESS</ffdc>
+    <ffdc>PIB_ERROR_CODE</ffdc>
+    <ffdc>PIB_DATA_READ_PARITY_ERROR</ffdc>
+    <callout>
+      <hw>
+        <hwid>PCI_REF_CLOCK</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- No support for deconfig/gard yet, must be handled at PLAT layer
+    <deconfigure>
+      <hw>
+        <hwid>PCI_REF_CLOCK</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+    </deconfigure>
+    <gard>
+      <hw>
+        <hwid>PCI_REF_CLOCK</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+    </gard>
+    -->
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

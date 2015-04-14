@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 // *|
 // *! TITLE       : proc_extract_sbe_rc.C
 // *! DESCRIPTION : Create return code for PORE (SBE/SLW) error
@@ -329,6 +328,14 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
                     FAPI_INF("proc_extract_sbe_rc: Reconfig loop should be attempted");
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_ENGINE_RETRY);
                 }
+                // SW285387
+                else if (is_sbe &&
+                         (scom_address == (uint32_t) PCIE_OPCG_CNTL0_0x09030002) &&
+                         (pore_state.vital_state.getHalfWord(1) == 0x2100))
+                {
+                    FAPI_INF("proc_extract_sbe_rc: PCI OPCG SCOM failure encountered");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_PCI_CLOCK_ERROR);
+                }
                 else
                 {
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR);
@@ -457,16 +464,19 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
             FAPI_INF("proc_extract_sbe_rc: Determining OTPROM error at address 0x%X", pc_m4);
             switch (pc_m4)
             {
-                case (0x400fc): // original OTPROM version
-                case (0x40118): // updated OTPROM version
+                case (0x400fc):
+                case (0x40118):
+                case (0x40124):
                     FAPI_ERR("proc_extract_sbe_rc: Chip was not identified as Murano or Venice");
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_BAD_CHIP_TYPE);
                     break;
                 case (0x401c0):
+                case (0x401cc):
                     FAPI_ERR("proc_extract_sbe_rc: SEEPROM magic number didn't match \"XIP SEPM\"");
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_SEEPROM_MAGIC_NUMBER_MISMATCH);
                     break;
                 case (0x401ec):
+                case (0x401f8):
                     FAPI_ERR("proc_extract_sbe_rc: Branch to SEEPROM didn't happen");
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL);
                     break;

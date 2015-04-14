@@ -562,24 +562,11 @@ foreach my $argnum (1 .. $#ARGV)
                     exit(1);
                 }
 
-                # Check that those HW callouts that need reference targets have them
-                if (($callout->{hw}->{hwid} eq "TOD_CLOCK") ||
-                    ($callout->{hw}->{hwid} eq "MEM_REF_CLOCK") ||
-                    ($callout->{hw}->{hwid} eq "PROC_REF_CLOCK") ||
-                    ($callout->{hw}->{hwid} eq "PCI_REF_CLOCK") ||
-                    ($callout->{hw}->{hwid} eq "FLASH_CONTROLLER_PART") ||
-                    ($callout->{hw}->{hwid} eq "PNOR_PART") ||
-                    ($callout->{hw}->{hwid} eq "SBE_SEEPROM_PART") ||
-                    ($callout->{hw}->{hwid} eq "VPD_PART") ||
-                    ($callout->{hw}->{hwid} eq "LPC_SLAVE_PART") ||
-                    ($callout->{hw}->{hwid} eq "GPIO_EXPANDER_PART") ||
-                    ($callout->{hw}->{hwid} eq "SPIVID_SLAVE_PART"))
+                # Check that there is a reference target
+                if (! exists $callout->{hw}->{refTarget})
                 {
-                    if (! exists $callout->{hw}->{refTarget})
-                    {
-                        print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Callout missing refTarget\n");
-                        exit(1);
-                    }
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Callout missing refTarget\n");
+                    exit(1);
                 }
 
                 # Add an EI entry to eiEntryStr
@@ -744,7 +731,8 @@ foreach my $argnum (1 .. $#ARGV)
                     $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
 
                 }
-            }
+            }          
+
             if ($elementsFound == 0)
             {
                 print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Deconfigure incomplete\n");

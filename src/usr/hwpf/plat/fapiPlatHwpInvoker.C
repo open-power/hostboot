@@ -311,7 +311,21 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
             FAPI_ERR("processEIHwCallouts: Adding clock-callout"
                      " (clock:%d, pri:%d)",
                      l_clock, l_priority);
-            io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
+
+            //@fixme-RTC:127069-add native support to deconfig/gard clocks
+            //  Force PCI clocks to be deconfigured and garded
+            if( l_hw == HwCallouts::PCI_REF_CLOCK )
+            {
+                io_pError->addClockCallout(l_pRefTarget,
+                                           l_clock,
+                                           l_priority,
+                                           HWAS::DECONFIG,
+                                           HWAS::GARD_Predictive);
+            }
+            else
+            {
+                io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
+            }
         }
         else if ( (l_hw == HwCallouts::FLASH_CONTROLLER_PART) ||
                   (l_hw == HwCallouts::PNOR_PART) ||
