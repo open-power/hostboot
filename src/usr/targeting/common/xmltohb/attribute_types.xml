@@ -15444,6 +15444,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <readable/>
 </attribute>
 
+<attribute>
+    <id>BRAZOS_RX_FIFO_OVERRIDE</id>
+    <description>
+      Defines where to apply Brazos rx_fifo_final_l2u_dly override settings for SW299500.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_BRAZOS_RX_FIFO_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 <!-- === Manufacturing threshold Attributes of PRD === -->
 

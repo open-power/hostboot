@@ -258,6 +258,7 @@ push @systemAttr,
                                    $reqPol->{'mnfg_th_cen_mba_rt_rce_per_rank'},
     "MNFG_TH_CEN_L4_CACHE_CES", $reqPol->{'mnfg_th_cen_l4_cache_ces'},
     "OPT_MEMMAP_GROUP_POLICY", $reqPol->{'memmap_group_policy'},
+    "BRAZOS_RX_FIFO_OVERRIDE", $reqPol->{'rx_fifo_final_l2u_dly_override'},
 ];
 
 my %procLoadline = ();

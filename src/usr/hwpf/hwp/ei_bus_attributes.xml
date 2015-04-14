@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: ei_bus_attributes.xml,v 1.12 2013/09/06 20:04:08 dcrowell Exp $ -->
+<!-- $Id: ei_bus_attributes.xml,v 1.13 2015/04/13 16:13:24 jgrell Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
@@ -39,7 +41,7 @@
 		called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX chip where 'n' is the width of the bus. A basic description
 		of this capability is that the board designer can save layers on the board wiring by crossing the wiring between the two chips in
 		a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
-		If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or
+		If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or 
 		arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
 
         The Master Chip of two connected chips is defined as the chip with the smaller value of (100*Node + Pos).
@@ -49,12 +51,12 @@
 
 		The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Downstream bus is wired msb to lsb etc. and
 		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
-
+		
 		The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Upstream bus is wired msb to lsb etc. and
 		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
-
+		
 		It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP value for the correct target endpoints.
-
+		 
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -69,23 +71,23 @@
 		Usage:  TX_LANE_INVERT initfile setting for DMI and A buses
 		This attribute represents the polarity of a differential wire pair on the DMI and A buses. Normally differential pair
 		wires are connected between the two positive phases of the pair and the two negative phases between two chips. In the DMI
-		and Abus designs it's allowable for the board designer to wire the positive phase of a lane from one chip to the negative phase of the
+		and Abus designs it's allowable for the board designer to wire the positive phase of a lane from one chip to the negative phase of the 
 		of the other chip on that same lane and vice versa in order to simplify wiring on the board and reduce the number of board layers.
-		This attribute is set up as a 32 bit uint value interpreted as a 32 bit binary vector where the left-most bit position (msb/bit0)
-		corresponds to the polarity of lane 0 and the right-most bit position (lsb/bit31) corresponds to lane 31.
+		This attribute is set up as a 32 bit uint value interpreted as a 32 bit binary vector where the left-most bit position (msb/bit0) 
+		corresponds to the polarity of lane 0 and the right-most bit position (lsb/bit31) corresponds to lane 31. 		
 		A binary 1 in any position in the attribute means that the board designer has done a polarity swap within the differential
 		pair and the initfile must set the tx_lane_invert bit in the driving chip for that wire pair (called a lane).
-		The Downstream N/P Lane Swap Mask from the MRW represents the polarity of the bus wiring as it goes from the master chip to
-		the slave chip (master chip is defined as the chip with a lower value of (node*100 + chip position) and
+		The Downstream N/P Lane Swap Mask from the MRW represents the polarity of the bus wiring as it goes from the master chip to 
+		the slave chip (master chip is defined as the chip with a lower value of (node*100 + chip position) and 
 		Upstream N/P Lane Swap Mask represents the polarity of the bus wiring as it goes from the slave chip back to the master chip.
-		Examples:
+		Examples: 
 		- Port A2 on Chip Target n0p0 connects to Port A2 on chip target n0p2. This connection has a Downstream N/P Lane Swap Mask and
-		  an Upstream N/P Lane Swap Mask. Setting the Downstream N/P Lane Swap Mask to a value of 0x80000000 means lane 0 is polarity
+		  an Upstream N/P Lane Swap Mask. Setting the Downstream N/P Lane Swap Mask to a value of 0x80000000 means lane 0 is polarity 
 		  swapped and the initfile should set lane 0's tx_lane_invert bit on the n0p0 targeted chip (the so-called master chip).
-          If the Upstream N/P Lane Swap Mask is 0x20000000 this means lane 2 is polarity swapped and the initfile should set lane 2's
+          If the Upstream N/P Lane Swap Mask is 0x20000000 this means lane 2 is polarity swapped and the initfile should set lane 2's 
 		  tx_lane_invert bit on the n0p2 targeted chip (the so-called slave chip).
-		It is up to the platform code to set up each ATTR_EI_BUS_TX_LANE_INVERT value for the correct target endpoints,
-		ie. 0x80000000 for n0p0 and 0x20000000 for n0p2.
+		It is up to the platform code to set up each ATTR_EI_BUS_TX_LANE_INVERT value for the correct target endpoints, 
+		ie. 0x80000000 for n0p0 and 0x20000000 for n0p2. 
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -95,7 +97,7 @@
     <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
     <targetType>TARGET_TYPE_MCS_CHIPLET</targetType>
     <description>
-      Defines Murano/Venice/Naples FSI GP8 refclock enable field bit offset (0:7) associated with this MCS chip unit.
+      Defines Murano/Venice FSI GP8 refclock enable field bit offset (0:7) associated with this MCS chip unit.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -106,6 +108,16 @@
     <targetType>TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
       Defines where to apply DMI bus DFE override settings for HW244323.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_BRAZOS_RX_FIFO_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Defines where to apply Brazos rx_fifo_final_l2u_dly override settings for SW299500.
     </description>
     <valueType>uint8</valueType>
     <platInit/>

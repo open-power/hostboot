@@ -301,6 +301,7 @@
     <attribute><id>OPT_MEMMAP_GROUP_POLICY</id></attribute>
     <attribute><id>FRU_ID</id></attribute>
     <attribute><id>BMC_FRU_ID</id></attribute>
+    <attribute><id>BRAZOS_RX_FIFO_OVERRIDE</id></attribute>
 </targetType>
 
 <targetType>

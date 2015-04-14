@@ -1,8 +1,10 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.16 2015/02/25 21:00:12 jgrell Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.18 2015/04/13 16:17:02 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.18|jgrell  |04/25/15| Updated attribute to system type at Thi's request so it can be applied to Brazos only. (SW299500)
+#--     1.17|jmcgill |03/24/15| remove l2u delay settings,given filter bypass soln (SW299659)
 #--     1.15|jgrell  |02/25/15| Added rx_fifo_final_l2u_dly for Venice only (SW296793)
 #--     1.14|garyp   |02/19/14| Added rx_min_eye_width and rx_min_eye_height for manufacturing and lab thresholding
 #--     1.13|jgrell  |02/12/14| Added rx_wt_lane_disabled=1 on lane 17 (SW244284)
@@ -488,10 +490,18 @@ scom 0x8004340B08010C3F {
 	tx_prbs_tap_id, 0b011, ATTR_CHIP_EC_FEATURE_SET_ABUS_PRBS_TAP_ID==1;
 }
 
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+#-- Brazos only
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
 scom 0x800.0b(rx_fifo_mode_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
     bits,                   	  scom_data,		expr;
-    rx_fifo_final_l2u_dly,        0b0011,		ATTR_CHIP_EC_FEATURE_SET_ABUS_PRBS_TAP_ID==1;
+    rx_fifo_final_l2u_dly,        0b0011,		SYS.ATTR_BRAZOS_RX_FIFO_OVERRIDE==1;
 }
+
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------
