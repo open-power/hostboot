@@ -309,6 +309,28 @@ sub parseSymbolFile
     }
     close(FILE);
 
+    # Some of the symbols have a size of 0 even though they are obviously
+    # bigger than 0 bytes.  As an example any assembly label has a size of 0
+    # from the ELF data.  This loop finds all of those 0-sized symbols and
+    # fixes their size to be the distance between their address and the
+    # address of the next symbol.
+    my $prevSymbol = 0;
+    foreach my $sym (sort { $a <=> $b } keys %addrRangeHash)
+    {
+        if (0 != $prevSymbol)
+        {
+            my $symSize = $sym - $prevSymbol - 4;
+            $addrRangeHash{$prevSymbol}{size} = $symSize;
+            $symbolSize{$addrRangeHash{$prevSymbol}{name}} = $symSize;
+            $prevSymbol = 0;
+        }
+
+        if (0 == $addrRangeHash{$sym}{size})
+        {
+            $prevSymbol = $sym;
+        }
+    }
+
     $parsedSymbolFile = 1;
 }
 

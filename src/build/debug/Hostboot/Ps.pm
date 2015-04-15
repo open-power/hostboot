@@ -109,7 +109,7 @@ sub displayStackTrace
     $task{context_t}{stack_ptr} = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{dstack_ptr} = sprintf "0x%X", $task{context_t}{stack_ptr};
     $task{context_t}{nip} = ::read64($i_taskAddr + $off); $off+=8;
-    $task{context_t}{dnip} = sprintf "0x%X",$task{context_t}{nip};
+    $task{context_t}{dnip} = sprintf "0x%x",$task{context_t}{nip};
 
     foreach(my $gpr=0; $gpr<32; ++$gpr)
     {
@@ -132,7 +132,7 @@ sub displayStackTrace
     }
 
     $task{context_t}{lr} = ::read64($i_taskAddr + $off); $off+=8;
-    $task{context_t}{dlr} = sprintf "0x%X",$task{context_t}{lr} ;
+    $task{context_t}{dlr} = sprintf "0x%x",$task{context_t}{lr} ;
     $task{context_t}{cr}              = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{ctr}             = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{xer}             = ::read64($i_taskAddr + $off); $off+=8;
@@ -143,19 +143,37 @@ sub displayStackTrace
     $task{context_t}{state}           = ::read8( $i_taskAddr + $off); $off+=1;
 
     # At this point we cached the whole task struct, for any later application.
+
+    my $prefix = makeTabs($i_level);
+
+    # Display PC:
+    my $instAddr = $task{context_t}{nip};
+    my ($entryPointName, $symOff) =
+        ::findSymbolWithinAddrRange($instAddr);
+    ::userDisplay sprintf("%s     NIP  : %s+0x%x : 0x%08x %s\n",
+        $prefix, $entryPointName, $symOff, $instAddr,
+        # None of the state is valid if the task is in 'running' state
+        # ('R' = 0x52).
+        ($task{context_t}{state} == 0x52 ? " -- inaccurate" : ""));
+
     # Now dump the stack trace
 
     my $curFrame = $task{context_t}{"pgprs1"} ;
     my $curLinkReg = $task{context_t}{lr};
-    my ($entryPointName, $symOff) = ::findSymbolWithinAddrRange($curLinkReg);
+    $instAddr = $curLinkReg;
+    ($entryPointName, $symOff) = ::findSymbolWithinAddrRange($instAddr);
 
-    my $prefix = makeTabs($i_level);
-
-    print sprintf("%s     F[%02d]: %s : 0x%08X\n",
-        $prefix, 0, $entryPointName,$symOff);
+    ::userDisplay sprintf("%s     F[%02d]: %s+0x%x : 0x%08x\n",
+        $prefix, 0, $entryPointName,$symOff, $instAddr);
 
     for(my $i=0; $i<MAX_STACK_FRAMES; ++$i)
     {
+        if (($curFrame eq Hostboot::_DebugFrameworkVMM::NotFound) ||
+            ($curFrame eq Hostboot::_DebugFrameworkVMM::NotPresent))
+        {
+            last;
+        }
+
         my $nextFrame = ::read64($curFrame);
         my $linkReg = ::read64($curFrame + FRAME_TO_LR_OFFSET);
 
@@ -167,7 +185,8 @@ sub displayStackTrace
             last;
         }
 
-        ($entryPointName,$symOff) = ::findSymbolWithinAddrRange($linkReg);
+        $instAddr = $linkReg;
+        ($entryPointName,$symOff) = ::findSymbolWithinAddrRange($instAddr);
 
         if($i!=0)
         {
@@ -175,14 +194,22 @@ sub displayStackTrace
             {
                 last;
             }
-            print sprintf("%s     F[%02d]: %s : 0x%08X\n",
-                $prefix, $i, $entryPointName,$symOff);
+            ::userDisplay sprintf("%s     F[%02d]: %s+0x%X : 0x%08x\n",
+                $prefix, $i, $entryPointName,$symOff,$instAddr);
+        }
+        else
+        {
+            if ($entryPointName ne "UNKNOWN")
+            {
+                ::userDisplay sprintf("%s       OR : %s+0x%x : 0x%08x\n",
+                    $prefix, $entryPointName,$symOff,$instAddr);
+            }
         }
 
         $curFrame = $nextFrame;
     }
 
-    print $prefix . "\n";
+    ::userDisplay ($prefix."\n");
 }
 
 # Display a list of task objects.
@@ -275,7 +302,8 @@ sub displayTracker
     }
 
     # Display list of children tasks.
-    displayList($trackAddr + PS_TRACKER_CHILDREN_LIST_OFFSET, $level + 1);
+    displayList($trackAddr + PS_TRACKER_CHILDREN_LIST_OFFSET, $level + 1,
+                $withBacktrace);
 }
 
 sub makeTabs
