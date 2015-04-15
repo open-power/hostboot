@@ -65,9 +65,11 @@ bool PciOscSwitchDomain::Query(ATTENTION_TYPE attentionType)
 {
     #define  PRDF_FUNC  "PciOscSwitchDomain::Query "
     bool errorFound = false;
+
+    // Only check for PCI osc switchover on redundant clock systems
     // System always checks for RE's first, even if there is an XSTOP
     // So we only need to check for PLL errors on RECOVERABLE type
-    if(attentionType == RECOVERABLE)
+    if( hasRedundantClocks() && ( attentionType == RECOVERABLE ) )
     {
         // check sysdbug for attention first
         SYSTEM_DEBUG_CLASS sysdbug;

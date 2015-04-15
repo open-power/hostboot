@@ -119,6 +119,18 @@ bool isHyprRunning()
     return rc;
 }
 
+bool hasRedundantClocks()
+{
+    bool l_hasRedundantClks = false;
+    TargetHandle_t l_pTarget = getSystemTarget();
+
+    if(l_pTarget && l_pTarget->getAttr<ATTR_REDUNDANT_CLOCKS>())
+    {
+        l_hasRedundantClks = true;
+    }
+
+    return l_hasRedundantClks;
+}
 //##############################################################################
 //##
 //##                 Target Manipulation Utility Functions

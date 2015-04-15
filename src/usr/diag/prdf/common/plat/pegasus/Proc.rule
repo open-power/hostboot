@@ -51,6 +51,7 @@ chip Proc
 
 
 # Include Extra signatures
+.include "prdfP8ProcExtraSig.H";
 .include "prdfP8ProcMbCommonExtraSig.H";
 
  #############################################################################

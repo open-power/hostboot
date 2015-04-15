@@ -28,7 +28,6 @@
 
 #include <prdrSignatures.H>
 
-// PCI OSC switch over related special signature
 PRDR_ERROR_SIGNATURE( PCI_OSC0_FAILOVER,  0x00ed0001, "","PCI Osc0 Failed" );
 PRDR_ERROR_SIGNATURE( PCI_OSC1_FAILOVER,  0x00ed0002, "","PCI Osc1 Failed" );
 PRDR_ERROR_SIGNATURE( MULTI_PROC_PCI_OSC0_FAILOVER,  0x00ed0003, "",

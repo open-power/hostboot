@@ -67,6 +67,9 @@ bool isHyprConfigOpal();
 /** @return TRUE if the hypervisor is running. FALSE otherwise. */
 bool isHyprRunning();
 
+/** @return TRUE if this system has redundant clocks. FALSE otherwise.*/
+bool hasRedundantClocks();
+
 //##############################################################################
 //##
 //##                 Target Manipulation Utility Functions
