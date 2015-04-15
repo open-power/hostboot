@@ -30,48 +30,101 @@
 #ifndef __FAPI2_INTEGRAL_BUFFER__
 #define __FAPI2_INTEGRAL_BUFFER__
 
-#include <buffer_base.H>
+#include <buffer_parameters.H>
+#include <buffer_traits.H>
 #include <return_code.H>
 
 namespace fapi2
 {
     /// @brief Class representing a FAPI buffer<T>
-    /// @note Buffers support method chaining. So, rather than
-    /// this
-    /// @code
-    /// buffer<T> mask;
-    /// mask.setBit<B>();
-    /// mask.invert();
-    /// my_buffer &= mask;
-    /// @endcode
-    /// You can do
-    /// @code
-    /// my_buffer &= buffer<T>().setBit<B>.invert();
-    /// @endcode
-    template <typename T>
-    class buffer : public buffer_base<T>
+    /// @tparam T, the integral type of the buffer (uint16_t, uint64_t, etc.)
+    template <typename T, typename TT = bufferTraits<T> >
+    class buffer
     {
     public:
-        /// Shortcut typedef to map to our traits class
-        typedef typename buffer_base<T, buffer>::bits_type bits_type;
+        /// Shortcut typedef to get to our traits class
+        typedef typename TT::bits_type bits_type;
 
         ///
         /// @brief Integral buffer assignment constructor
         /// @param[in] i_value initial value of the buffer
         /// Meaningless for variable types and thus protected.
         ///
-        inline buffer(T i_value = 0)
+        inline buffer(T i_value = 0):
+            iv_data(i_value)
             {
-                // Why not an initializer list? That would force buffer_base<T>
-                // to have a ctor which took a T, and I want to avoid that in
-                // the generic case: this makes it more clear that the two
-                // ctor's (integral and container) behave very differently.
-                // variable_buffers also have a ctor which takes a single
-                // numerical value, and that represents a bit count, not an
-                // initial value.
-                this->iv_data = i_value;
             }
 
+        ~buffer(void) = default;
+
+#if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
+        /// @brief Print the contents of the buffer to stdout
+        inline void print(void) const
+        { TT::print(iv_data); }
+#endif
+
+        ///
+        /// @brief Get the contents of the buffer
+        /// @return The contents of the buffer
+        ///
+        inline operator T() const { return iv_data; }
+
+        ///
+        /// @brief Get the contents of the buffer
+        /// @return The contents of the buffer
+        ///
+        inline operator T&() { return iv_data; }
+
+        ///
+        /// @brief Get the contents of the buffer
+        /// @return The contents of the buffer
+        ///
+        inline T& operator()(void) { return iv_data; }
+
+        ///
+        /// @brief Get the contents of the buffer
+        /// @return Reference to the contents of the buffer
+        ///
+        inline const T& operator()(void) const { return iv_data; }
+
+        /// @name Buffer Manipulation Functions
+        ///@{
+
+        ///
+        /// @brief Set an OT of data in buffer
+        /// @param[in] i_value sizeof(OT) bits of data
+        /// @param[in] i_offset Start OT (start word, for example) in buffer
+        ///            - defaults to 0 (will by default write the left most element)
+        /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
+        /// @note This is is only available for integral types. To set a
+        ///    variable_buffer into a variable_buffer, use insert()
+        ///
+        template< typename OT>
+        inline fapi2::ReturnCode set(OT i_value, const bits_type i_offset = 0)
+        {
+            // Compile time check to make sure OT is integral
+            static_assert( std::is_integral<OT>::value,
+                           "Input must be an integral type" );
+
+            const uint32_t length = TT:: template size<OT>(iv_data);
+            static const bits_type bits_in_value = parameterTraits<OT>::bit_length();
+            const bits_type bit_length = TT::bit_length(iv_data);
+
+            if (i_offset + bits_in_value >= bit_length)
+            {
+                return FAPI2_RC_OVERFLOW;
+            }
+
+            // Create mask if part of this byte is not in the valid part of the buffer,
+            // Shift it left by the amount of unused bits,
+            // Clear the unused bits
+            if (((i_offset + 1) == length) && (bit_length % bits_in_value)) {
+                i_value &= parameterTraits<OT>::mask() << ((bits_in_value * length) - bit_length);
+            }
+
+            parameterTraits<OT>::template write_element<typename TT::unit_type>(TT::get_address(iv_data), i_value, i_offset);
+            return FAPI2_RC_SUCCESS;
+        }
 
         /// @name Bit/Word Manipulation Functions
         ///@{
@@ -81,7 +134,7 @@ namespace fapi2
         /// @return Length in bits
         ///
         inline constexpr uint32_t getBitLength(void) const
-            { return bufferTraits<T>::bit_length(this->iv_data); }
+            { return TT::bit_length(iv_data); }
 
         ///
         /// @brief Return the length of the buffer in OT units
@@ -94,7 +147,7 @@ namespace fapi2
         template< typename OT >
         inline constexpr uint32_t getLength(void) const
         {
-            return bufferTraits<T>::template size<OT>(this->iv_data);
+            return TT::template size<OT>(iv_data);
         }
 
         ///
@@ -104,15 +157,15 @@ namespace fapi2
         /// @note 0 is left-most
         /// @note Example: fapi2::buffer<uint64_t>().setBit<3>();
         ///
-        template <bits_type B>
+        template< bits_type B >
         inline buffer& setBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
+                          (B < TT::bits_per_unit()), "failed range check");
 
             // Force iv_data to be dependent on the template type to force
             // its look up in the second phase
-            this->iv_data |= (static_cast<T>(1)) << (bufferTraits<T>::bits_per_unit() - B - 1);
+            iv_data |= (static_cast<T>(1)) << (TT::bits_per_unit() - B - 1);
             return *this;
         }
 
@@ -128,9 +181,9 @@ namespace fapi2
         inline buffer& clearBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
+                          (B < TT::bits_per_unit()), "failed range check");
 
-            this->iv_data &= buffer<T>().setBit<B>().invert();
+            iv_data &= buffer<T>().setBit<B>().invert();
             return *this;
         }
 
@@ -146,7 +199,7 @@ namespace fapi2
         inline buffer& writeBit(const bool i_value)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
+                          (B < TT::bits_per_unit()), "failed range check");
 
             (i_value == 0) ? clearBit<B>() : setBit<B>();
             return *this;
@@ -165,9 +218,9 @@ namespace fapi2
         inline buffer& flipBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < bufferTraits<T>::bits_per_unit()), "failed range check");
+                          (B < TT::bits_per_unit()), "failed range check");
 
-            this->iv_data ^= buffer<T>().setBit<B>();
+            iv_data ^= buffer<T>().setBit<B>();
             return *this;
         }
 
@@ -179,15 +232,15 @@ namespace fapi2
         ///
         inline fapi2::ReturnCode setBit(const bits_type& i_bit)
             {
-                if (i_bit >= bufferTraits<T>::bits_per_unit())
+                if (i_bit >= TT::bits_per_unit())
                 {
                     return FAPI2_RC_INVALID_PARAMETER;
                 }
 
                 // Force iv_data to be dependent on the template type to force
                 // its look up in the second phase
-                this->iv_data |=
-                    (static_cast<T>(1)) << (bufferTraits<T>::bits_per_unit() - i_bit - 1);
+                iv_data |=
+                    (static_cast<T>(1)) << (TT::bits_per_unit() - i_bit - 1);
                 return FAPI2_RC_SUCCESS;
             }
 
@@ -199,7 +252,7 @@ namespace fapi2
         template< bits_type B >
         inline bool getBit(void) const
             {
-                return buffer<T>().setBit<B>() & this->iv_data;
+                return buffer<T>().setBit<B>() & iv_data;
             }
 
         ///
@@ -212,7 +265,7 @@ namespace fapi2
         inline buffer& flush(void)
             {
                 static_assert( (X == 1) || (X == 0), "bad argument to flush" );
-                (0 == X) ? bufferTraits<T>::clear(this->iv_data) : bufferTraits<T>::set(this->iv_data);
+                (0 == X) ? TT::clear(iv_data) : TT::set(iv_data);
                 return *this;
             }
 
@@ -221,14 +274,14 @@ namespace fapi2
         /// @return buffer_base&, Useful for method chaining
         ///
         inline buffer& invert(void)
-            { bufferTraits<T>::invert(this->iv_data); return *this; }
+            { TT::invert(iv_data); return *this; }
 
         ///
         /// @brief Bit reverse entire buffer
         /// @return buffer_base&, Useful for method chaining
         ///
         inline buffer& reverse(void)
-            { bufferTraits<T>::reverse(this->iv_data); return *this; }
+            { TT::reverse(iv_data); return *this; }
 
 
         ///@}
@@ -240,7 +293,7 @@ namespace fapi2
         /// @brief Get a pointer to the buffer bits
         /// @return Pointer to the buffer itself
         ///
-        inline T* pointer(void) { return &this->iv_data; }
+        inline T* pointer(void) { return &iv_data; }
 
         // Note: Many (all?) of these are not needed and the compiler complains
         // as the cast to T yields a better operator. There are here mainly for
@@ -250,84 +303,84 @@ namespace fapi2
         /// @brief operator>>()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator>>(bits_type i_shiftnum);
+        inline buffer<T>& operator>>(bits_type i_shiftnum);
 #endif
 
         ///
         /// @brief operator<<()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator<<(bits_type i_shiftnum);
+        inline buffer<T>& operator<<(bits_type i_shiftnum);
 #endif
 
         ///
         /// @brief operator+()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator+(const T& rhs);
+        inline buffer<T>& operator+(const T& rhs);
 #endif
 
         ///
         /// @brief operator+=()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator+=(const T& rhs);
+        inline buffer<T>& operator+=(const T& rhs);
 #endif
 
         ///
         /// @brief operator|=()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator|=(const T& rhs);
+        inline buffer<T>& operator|=(const T& rhs);
 #endif
 
         ///
         /// @brief operator&=()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator&=(const T& rhs);
+        inline buffer<T>& operator&=(const T& rhs);
 #endif
 
         ///
         /// @brief operator|()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator|(const T& rhs);
+        inline buffer<T>& operator|(const T& rhs);
 #endif
 
         ///
         /// @brief operator&()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator&(const T& rhs);
+        inline buffer<T>& operator&(const T& rhs);
 #endif
 
         ///
         /// @brief operator^=()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator^=(const T& rhs);
+        inline buffer<T>& operator^=(const T& rhs);
 #endif
 
         ///
         /// @brief operator~()
         ///
 #ifdef DOXYGEN
-        buffer<T>& operator~(const T& rhs) const;
+        inline buffer<T>& operator~(const T& rhs) const;
 #endif
 
         ///
         /// @brief operator==()
         ///
 #ifdef DOXYGEN
-        bool operator==(const T& rhs) const;
+        inline bool operator==(const T& rhs) const;
 #endif
 
         ///
         /// @brief operator!=()
         ///
 #ifdef DOXYGEN
-        bool operator!=(const T& rhs) const;
+        inline bool operator!=(const T& rhs) const;
 #endif
 
         ///
@@ -361,7 +414,7 @@ namespace fapi2
 
             // Normalize the input to 2 64 bit integers and adjust the starts accordingly
             uint64_t source = static_cast<uint64_t>(i_datain);
-            const uint64_t target = static_cast<uint64_t>(this->iv_data);
+            const uint64_t target = static_cast<uint64_t>(iv_data);
 
             const bits_type source_start = parameterTraits<uint64_t>::bit_length() - (source_length - SS);
             const bits_type target_start = parameterTraits<uint64_t>::bit_length() - (target_length - TS);
@@ -382,7 +435,7 @@ namespace fapi2
                 source >>= shift;
             }
 
-            this->iv_data = ((target & ~mask) | (source & mask));
+            iv_data = ((target & ~mask) | (source & mask));
             return *this;
         }
 
@@ -432,7 +485,7 @@ namespace fapi2
             // Extraction is just an insert into o_out
 
             buffer<OT> out(o_out);
-            out.insert<TS, L, SS>(this->iv_data);
+            out.insert<TS, L, SS>(iv_data);
             o_out = out;
             return *this;
         }
@@ -456,6 +509,10 @@ namespace fapi2
         }
 
         ///@}
+
+    private:
+        /// The contents of the buffer
+        T iv_data;
     };
 }
 
