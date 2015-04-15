@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
+#include <errl/hberrltypes.H>
 
 using namespace ERRORLOG;
 
@@ -54,7 +55,9 @@ namespace TARGETING
 
         iv_total_pages = iv_pages.size();
 
-        TRACDCOMP(g_trac_targeting, "total pages %d", iv_total_pages );
+        TARG_INF("AttributeSync::getDataSection() - total pages %d, section type 0x%x",
+                    iv_total_pages, iv_section_to_sync );
+
     }
 
     ATTR_SYNC_RC AttributeSync::updateSectionData() const
@@ -115,8 +118,7 @@ namespace TARGETING
                 memcpy( msg->extra_data,
                         iv_pages[iv_current_page].dataPtr, PAGESIZE );
 
-                TRACFCOMP(g_trac_targeting,
-                        "syncSectionToFsp()  - copy %d bytes from %p to %p",
+                TARG_INF("syncSectionToFsp()  - copy %d bytes from %p to %p",
                         PAGESIZE, iv_pages[iv_current_page].dataPtr,
                         msg->extra_data);
 
@@ -126,7 +128,7 @@ namespace TARGETING
 
                 if( l_errl )
                 {
-                    TRACFCOMP(g_trac_targeting, "failed sending sync message");
+                    TARG_ERR("failed sending sync message");
                     break;
                 }
 
@@ -139,8 +141,7 @@ namespace TARGETING
 
                 if( l_errl )
                 {
-                    TRACFCOMP(g_trac_targeting,
-                            "failed sending sync complete message");
+                    TARG_ERR("failed sending sync complete message");
                 }
             }
 
@@ -332,7 +333,7 @@ namespace TARGETING
     // send the sync complete message
     errlHndl_t AttributeSync::sendSyncCompleteMessage( )
     {
-        TRACFCOMP(g_trac_targeting, "sending sync complete message");
+        TARG_INF("sending sync complete message");
 
         errlHndl_t l_err = NULL;
 
@@ -354,24 +355,34 @@ namespace TARGETING
 
             if ( return_code )
             {
-                TRACFCOMP(g_trac_targeting, "return code: 0x%x", return_code );
+                TARG_ERR("Attribute sync failed with return code: 0x%x", return_code );
+                TARG_ERR("Failed syncing iv_total_pages: 0x%x from iv_section_to_sync: 0x%x",
+                          iv_total_pages,iv_section_to_sync );
 
                 /*@
                  *   @errortype
-                 *   @moduleid      TARG_MOD_ATTR_SYNC
-                 *   @reasoncode    TARG_RC_ATTR_SYNC_TO_FSP_FAIL
-                 *   @userdata1     return code from FSP attribute sync
-                 *   @userdata2     section ID of for section being sync'd
+                 *   @moduleid          TARG_MOD_ATTR_SYNC
+                 *   @reasoncode        TARG_RC_ATTR_SYNC_TO_FSP_FAIL
+                 *   @userdata1         return code from FSP attribute sync
+                 *   @userdata2[0:31]   page count for this section
+                 *   @userdata2[31:63]  section ID of for section being sync'd
                  *
                  *   @devdesc       The attribute synchronization code on the
                  *                  FSP side was unable to complete the sync
                  *                  operation successfully.
+                 *
+                 *   @custdesc      A problem occurred during the IPL of the
+                 *                  system: Attributes were not fully
+                 *                  syncronized between the host firmware and
+                 *                  service processor.
+                 *
                  */
                  l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                         TARG_MOD_ATTR_SYNC,
                                         TARG_RC_ATTR_SYNC_TO_FSP_FAIL,
                                         return_code,
-                                        (uint64_t)iv_section_to_sync);
+                                        TWO_UINT32_TO_UINT64(
+                                            iv_total_pages,iv_section_to_sync));
             }
         }
 
@@ -446,31 +457,28 @@ namespace TARGETING
     {
         errlHndl_t l_errl = NULL;
 
-        TRACDCOMP(g_trac_targeting, "type:  0x%04x",   i_msg->type );
-        TRACDCOMP(g_trac_targeting, "data0: 0x%016llx",i_msg->data[0] );
-        TRACDCOMP(g_trac_targeting, "data1: 0x%016llx",i_msg->data[1] );
-        TRACDCOMP(g_trac_targeting, "extra_data: %p",i_msg->extra_data );
+        TARG_DBG("type:  0x%04x",   i_msg->type );
+        TARG_DBG("data0: 0x%016llx",i_msg->data[0] );
+        TARG_DBG("data1: 0x%016llx",i_msg->data[1] );
+        TARG_DBG("extra_data: %p",i_msg->extra_data );
 
         // determine if its an async message or if we should wait
         // for a response
         if( type == ASYNCHRONOUS )
         {
-            TRACDCOMP(g_trac_targeting,
-                    "sendMboxMessage() - sending async mbox msg" );
+            TARG_DBG("sendMboxMessage() - sending async mbox msg" );
             l_errl = MBOX::send( MBOX::FSP_ATTR_SYNC_MSGQ, i_msg );
         }
         else
         {
-            TRACDCOMP(g_trac_targeting,
-                    "sendMboxMessage() - sending sync mbox msg" );
+            TARG_INF("sendMboxMessage() - sending sync mbox msg" );
             l_errl = MBOX::sendrecv( MBOX::FSP_ATTR_SYNC_MSGQ, i_msg );
 
         }
 
         if( l_errl )
         {
-            TRACFCOMP(g_trac_targeting,
-                    "sendMboxMessage() - failed sending mbox msg" );
+            TARG_ERR("sendMboxMessage() - failed sending mbox msg" );
 
             // if the send failed and the message is still valid, check
             // and free the extra data if it exists.
@@ -502,7 +510,7 @@ namespace TARGETING
 
             size_t section_count = sizeof(section_type)/sizeof(section_type[0]);
 
-            TRACFCOMP(g_trac_targeting,"section count = %d", section_count );
+            TARG_INF("section count = %d", section_count );
 
             // push down all attributes to FSP
             AttributeSync l_Sync;
@@ -515,9 +523,13 @@ namespace TARGETING
 
                 if( l_errl )
                 {
-                    TRACFCOMP(g_trac_targeting,
-                            "Error returned when syncing section type %d to FSP",
+                    TARG_ERR("Error returned when syncing section type %d to FSP",
                             section_type[i]);
+
+                    // collect some trace
+                    l_errl->collectTrace("TARG", 512);
+                    l_errl->collectTrace("MBOX", 512);
+
                     break;
                 }
             }
