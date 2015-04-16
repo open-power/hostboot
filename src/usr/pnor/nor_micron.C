@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -48,6 +48,10 @@ errlHndl_t micronCheckForWorkarounds( SfcDD* i_sfc,
     do {
         // Assume all Micron chips have this bug
         o_workarounds |= HWWK_MICRON_EXT_READ;
+
+        // HW workaround - run this command before reading out chipid
+        l_err = micronFlagStatus( i_sfc );
+        if(l_err) { delete l_err; }
 
         uint32_t outdata[4];
 
