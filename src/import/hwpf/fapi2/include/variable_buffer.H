@@ -409,8 +409,8 @@ namespace fapi2
 
         ///
         /// @brief Test if multiple bits are set
-        /// @tparam SB Start bit in buffer to test.
-        /// @tparam L Number of consecutive bits from start bit to
+        /// @param SB Start bit in buffer to test.
+        /// @param L Number of consecutive bits from start bit to
         /// test, defaults to 1
         /// @return true if all bits in range are set - false if any
         /// bit is clear
@@ -418,7 +418,7 @@ namespace fapi2
         inline bool isBitSet( bits_type SB, bits_type L = 1 ) const
         {
             // make sure we stay within our container
-            assert( ((L > 0) && ((SB + L) <= this->iv_perceived_bit_length)));
+            assert( ((L > 0) && ((SB + L) <= this->iv_perceived_bit_length)) );
 
             bool is_set     = false;
             uint32_t mask   = 0;
@@ -441,7 +441,7 @@ namespace fapi2
                 mask = fast_mask32(TempSB, L);
 
                 is_set =
-                    ( (iv_data[start_index] & mask) == mask ) ? true : false;
+                    (( iv_data[start_index] & mask) == mask ) ? true : false;
 
             }
             else
@@ -466,7 +466,8 @@ namespace fapi2
 
                 // test these bits against the others..
                 is_set &=
-                        ((iv_data[start_index] & mask) == mask ) ? true : false;
+                    (( iv_data[start_index] & mask) == mask ) ? true : false;
+
             }
 
             return is_set;
@@ -474,16 +475,17 @@ namespace fapi2
 
         ///
         /// @brief Test if multiple bits are clear
-        /// @tparam SB Start bit in buffer to test.
-        /// @tparam L Number of consecutive bits from start bit to
+        /// @param SB Start bit in buffer to test.
+        /// @param L Number of consecutive bits from start bit to
         /// test, defaults to 1
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         /// @return true if bit is clear - false if bit is set
         ///
-        template< bits_type SB, bits_type L = 1 >
-        inline bool isBitClear(void) const;
+        inline bool isBitClear( bits_type SB, bits_type L =1 ) const
+        {
+            variable_buffer l_buf = *this;
+
+            return l_buf.invert().isBitSet(SB,L);
+        }
 
         ///
         /// @brief Count number of bits set in a range
@@ -694,7 +696,7 @@ namespace fapi2
         /// @param[in] i_data the incoming data
         ///    - data is taken right aligned
         /// @param[in] i_targetStart The starting bit position in this
-        ///            - Defaultst to 0
+        ///            - Defaults to 0
         /// @param[in] i_len The length, in bits, the user wants copied.
         ///            - Defaults to all of the bits in the source which fit
         /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
