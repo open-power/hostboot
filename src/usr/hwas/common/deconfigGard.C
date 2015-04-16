@@ -1384,7 +1384,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 const Target *l_partnerMcs = findPartnerForMcs(l_parentMcs);
 
                 // If partner MCS is functional or not spec deconfigured
-                if ((l_partnerMcs)&&(isFunctional(l_partnerMcs)))
+                if (l_partnerMcs && isFunctional(l_partnerMcs))
                 {
                     // deconfigure the paired MCS
                     HWAS_INF("_deconfigureByAssoc MCS (& MEMBUF) paired: %.8X",
@@ -1469,7 +1469,7 @@ void DeconfigGard::_deconfigureByAssoc(
 
                 // If partner MCS is non-functional
                 // (findPartnerForMcs returned NULL) or speculated deconfig
-                if ((!l_partnerMcs)&&(!isFunctional(l_partnerMcs)))
+                if (!(l_partnerMcs && isFunctional(l_partnerMcs)))
                 {
                     // We're done.
                     break;
@@ -1742,7 +1742,7 @@ void DeconfigGard::_deconfigureTarget(
             }
 
             // Do any necessary Deconfigure Actions
-            _doDeconfigureActions(i_target);
+            _doDeconfigureActions(i_target); /*no effect*/ // to quiet BEAM
             // If target being deconfigured is an x/a bus endpoint
             if ((TYPE_XBUS == i_target.getAttr<ATTR_TYPE>()) ||
                 (TYPE_ABUS == i_target.getAttr<ATTR_TYPE>()))
