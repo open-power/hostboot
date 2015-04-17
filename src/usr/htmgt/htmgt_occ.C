@@ -164,7 +164,8 @@ namespace HTMGT
         if (iv_occsPresent & i_slavePresent)
         {
             // Flag error because multiple OCCs have same chip ID
-            TMGT_ERR("updateOccPreset: slave 0x%02X already exists (0x%02X)",
+            TMGT_ERR("updateOccPresentBits: slave 0x%02X already "
+                     "exists (0x%02X)",
                      i_slavePresent, iv_occsPresent);
             iv_needsReset = true;
         }
@@ -284,15 +285,14 @@ namespace HTMGT
     {
         TMGT_INF("buildOccs called");
 
-#if defined(__HOSTBOOT_RUNTIME)
-        // At runtime need to keep occ state, only build OCC objects once.
-        if(iv_occArray.size() > 0 && iv_occMaster != NULL)
+        // Only build OCC objects once.
+        if((iv_occArray.size() > 0) && (iv_occMaster != NULL))
         {
             TMGT_INF("buildOccs: Existing OCC Targets kept = %d",
                      iv_occArray.size());
             return iv_occArray.size();
         }
-#endif
+
         // Remove existing OCC objects
         _removeAllOccs();
 

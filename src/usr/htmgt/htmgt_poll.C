@@ -31,6 +31,7 @@
 #include "htmgt_occcmd.H"
 #include "htmgt_cfgdata.H"
 #include "occError.H"
+#include <console/consoleif.H>
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
@@ -195,6 +196,16 @@ namespace HTMGT
                      pollRsp->requestedCfg, pollRsp->state,
                      (pollRsp->errorId<<16) | pollRsp->errorLength,
                      pollRsp->errorAddress);
+#ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
+            TMGT_CONSOLE("OCC%d Poll change: Status:%04X Occs:%02X Cfg:%02X "
+                         "State:%02X Error:%06X/%08X",
+                         iv_instance,
+                         (pollRsp->status << 8) | pollRsp->extStatus,
+                         pollRsp->occsPresent,
+                         pollRsp->requestedCfg, pollRsp->state,
+                         (pollRsp->errorId<<16) | pollRsp->errorLength,
+                         pollRsp->errorAddress);
+#endif
         }
 
         do
@@ -295,7 +306,7 @@ namespace HTMGT
                      * @reasoncode HTMGT_RC_INVALID_DATA
                      * @moduleid  HTMGT_MOD_OCC_POLL
                      * @userdata1[0-15] OCC instance
-                     * @userdata[16-31] response OCC present
+                     * @userdata1[16-31] response OCC present
                      * @userdata2[0-15] expected OCC present
                      * @userdata2[16-31] response status byte
                      * @devdesc Invalid OCC present data in POLL response

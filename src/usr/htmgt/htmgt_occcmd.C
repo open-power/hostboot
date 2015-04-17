@@ -999,16 +999,16 @@ namespace HTMGT
         if (G_debug_trace & DEBUG_TRACE_OCCCMD)
         {
             // Trace the command
-            // TODO: RTC 124618 - Trace is having issues handling 256
-            TMGT_BIN("buildOccCmdBuffer: OCC command (up to 64 bytes)",
-                     cmdBuffer, std::min(l_send_length, (uint16_t)64));
+            TMGT_BIN("buildOccCmdBuffer: OCC command (up to 300 bytes)",
+                     cmdBuffer, std::min(l_send_length, (uint16_t)300));
         }
 
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
         // Trace full OCC command
         char header[64];
-        sprintf(header, "OCC Command: %s (%d bytes)",
-                command_string(iv_OccCmd.cmdType), l_send_length);
+        sprintf(header, "OCC%d Command: %s (0x%04X bytes)",
+                iv_Occ->iv_instance, command_string(iv_OccCmd.cmdType),
+                l_send_length);
         dumpToConsole(header, cmdBuffer,
                       std::min(l_send_length,(uint16_t)256));
 #endif
@@ -1046,7 +1046,8 @@ namespace HTMGT
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
             // Trace raw OCC response
             char header[64];
-            sprintf(header, "OCC Response: (%d bytes)", rspLen);
+            sprintf(header, "OCC%d Response: (0x%04X bytes)",
+                    iv_Occ->iv_instance, rspLen);
             dumpToConsole(header, rspBuffer, std::min(rspLen,(uint16_t)256));
 #endif
             iv_OccRsp.sequenceNumber = rspBuffer[l_index++];

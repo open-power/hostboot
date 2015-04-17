@@ -751,8 +751,9 @@ void getApssMessageData(uint8_t* o_data,
     //The APSS function below hardcodes 16 channels,
     //so everything better agree.
     CPPASSERT(sizeof(function) == 16);
-
     const uint16_t (*sensors)[16] = NULL;
+
+#ifdef CONFIG_BMC_IPMI
     errlHndl_t err = SENSOR::getAPSSChannelSensorNumbers(sensors);
     if (err)
     {
@@ -761,6 +762,7 @@ void getApssMessageData(uint8_t* o_data,
         ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
         sensors = NULL;
     }
+#endif
 
     o_data[0] = OCC_CFGDATA_APSS_CONFIG;
     o_data[1] = OCC_CFGDATA_APSS_VERSION;
