@@ -2542,7 +2542,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                                            (speed_array) ) )
             {
                 TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"i2cSendSlaveStop() - Cannot find "
+                           ERR_MRK"i2cProcessActiveMasters: - Cannot find "
                            "ATTR_I2C_BUS_SPEED_ARRAY needed for operation");
 
                 /*@
@@ -2608,15 +2608,6 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 if ( (i_processOperation & I2C_OP_RESET ) &&
                      ( engine != 0 ) &&
                      (io_args.switches.useFsiI2C == 1) )
-                {
-                    continue;
-                }
-
-                // @todo RTC 126069 - only resetting engine 0 for now
-                // -- only processors have an engine 1
-                // (separate block from above to avoid merge issues)
-                if ( ( i_processOperation & I2C_OP_RESET ) &&
-                     ( engine != 0 ) )
                 {
                     continue;
                 }
