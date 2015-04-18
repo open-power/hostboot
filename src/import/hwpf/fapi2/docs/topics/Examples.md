@@ -28,12 +28,12 @@
     fapi2::buffer<uint8_t>(0xA5).flipBit<5>().flipBit<5>() == 0xA5;
 
 ## Operations and Things
-### Is the FAPI_TRY / 'clean_up:' method, the recommended method for doing put/getscoms?
+### Is the FAPI_TRY / 'fapi_try_exit:' method, the recommended method for doing put/getscoms?
 
 Yes, FAPI_TRY is the preferred wrapper for put/get scom as well as other operations which used to do the do/while/break dance based on the fapi return code.
 A thread-local fapi return code, fapi2::current_err has been introduced to help with the housekeeping.
 
-Feel free to decompose the FAPI_TRY pattern if you have clean_up requirements which make FAPI_TRY too simplistic.
+Feel free to decompose the FAPI_TRY pattern if you have clean up requirements which make FAPI_TRY too simplistic.
 
 
 ## Targets
