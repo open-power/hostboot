@@ -59,10 +59,6 @@
 /// @param[in] ... vararg format/agruments for trace output (optional)
 /// @note This implementation does not support PIB error masks or
 /// FSP operational states.
-/// @warning The trace information is only going to be seen during
-/// debug, it's not an error or informational trace. This is because
-/// traces might not be seen in the field. If you want information
-/// you will see on a field error, use FAPI_ASSERT.
 ///
 #ifdef DOXYGEN
 #define FAPI_TRY(__operation__, ...) FAPI_TRY_IMPL
