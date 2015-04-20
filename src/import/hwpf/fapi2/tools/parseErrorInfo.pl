@@ -53,7 +53,7 @@ my $xml = new XML::Simple (KeyAttr=>[]);
 use Data::Dumper;
 use Getopt::Long;
 
-my $target_ffdc_type = "fapi2::Target<fapi2::TARGET_TYPE_ALL>";
+my $target_ffdc_type = "fapi2::Target<T>";
 my $buffer_ffdc_type = "fapi2::buffer";
 my $variable_buffer_ffdc_type = "fapi2::variable_buffer";
 my $ffdc_type = "fapi2::ffdc_t";
@@ -287,8 +287,8 @@ sub addFfdcMethod
 
     if ($type eq $ffdc_type)
     {
-        $method =      "\n    template< typename T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr >\n";
-        $method  .=      "    $class_name& set_$ffdc_uc(const T& $param)\n";
+        $method =      "\n    template< typename T >\n";
+        $method  .=      "    inline $class_name& set_$ffdc_uc(const T& $param)\n";
         $method_body  =  "    {$ffdc_uc.ptr() = &i_value; $ffdc_uc.size() = fapi2::getErrorInfoFfdcSize(i_value); return *this;}\n\n";
 
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;\n    ";
@@ -298,7 +298,7 @@ sub addFfdcMethod
     {
         # Two methods - one for integral buffers and one for variable_buffers
         $method =      "\n    template< typename T >\n";
-        $method  .=      "    $class_name& set_$ffdc_uc(const fapi2::buffer<T>& $param)\n";
+        $method  .=      "    inline $class_name& set_$ffdc_uc(const fapi2::buffer<T>& $param)\n";
         $method_body  =  "    {$ffdc_uc.ptr() = &i_value(); $ffdc_uc.size() = i_value.template getLength<uint8_t>(); return *this;}\n\n";
 
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;\n    ";
@@ -306,19 +306,26 @@ sub addFfdcMethod
 
     elsif ($type eq $variable_buffer_ffdc_type)
     {
-        $method       =  "\n    $class_name& set_$ffdc_uc(const fapi2::variable_buffer& $param)\n";
+        $method       =  "\n    inline $class_name& set_$ffdc_uc(const fapi2::variable_buffer& $param)\n";
         $method_body  =    "    {$ffdc_uc.ptr() = &i_value(); $ffdc_uc.size() = i_value.template getLength<uint8_t>(); return *this;}\n\n";
 
         # No need to add the member here, it was added with fapi2::buffer. And we can't have variable
         # buffer support with out integral buffer support (can we?)
     }
 
+    elsif ($type eq $target_ffdc_type)
+    {
+        $method =      "\n    template< TargetType T >\n";
+        $method .=       "    inline $class_name& set_$ffdc_uc(const $type& $param)\n";
+        $method_body .=  "    {$ffdc_uc.ptr() = &i_value; $ffdc_uc.size() = fapi2::getErrorInfoFfdcSize(i_value); return *this;}\n\n";
+
+        $methods->{$key}{member} = "$ffdc_type $ffdc_uc;\n    ";
+    }
+
     else
     {
-        $method =      "\n    $class_name& set_$ffdc_uc(const $type& $param)\n";
-        $method_body .=  "    {$ffdc_uc = &i_value; return *this;}\n\n";
-
-        $methods->{$key}{member} = "const $type* $ffdc_uc;\n    ";
+        print ("ffdc type $type is unknown");
+        exit(1);
     }
 
     $method .= ($arg_empty_ffdc eq undef) ? $method_body : "    {return *this;}\n\n";
@@ -405,7 +412,7 @@ print CRFILE "#include <plat_trace.H>\n\n";
 
 print CRFILE "namespace fapi2\n";
 print CRFILE "{\n";
-print CRFILE "void collectRegFfdc(const fapi2::Target<TARGET_TYPE_ALL>* i_target,\n";
+print CRFILE "void collectRegFfdc(const fapi2::ffdc_t& i_target,\n";
 print CRFILE "                        const fapi2::HwpFfdcId i_ffdcId,\n";
 print CRFILE "                        fapi2::ReturnCode & o_rc,\n";
 print CRFILE "                        const TargetType i_child,\n";
@@ -687,11 +694,13 @@ foreach my $argnum (0 .. $#ARGV)
             # Add a method to the ffdc-gathering class
             addFfdcMethod(\%methods, $ffdc, $err->{rc});
 
+            $ffdc = $mangle_names{$ffdc} if ($mangle_names{$ffdc} ne undef);
+
             # Add an EI entry to eiEntryStr
             $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_FFDC; \\\n";
             $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
             $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi2::$ffdcName; \\\n";
-            $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcSize = fapi2::getErrorInfoFfdcSize($ffdc); \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcSize = $ffdc.size(); \\\n";
             $eiEntryCount++;
         }
 
@@ -791,10 +800,6 @@ foreach my $argnum (0 .. $#ARGV)
                     print ("parseErrorInfo.pl ERROR in $err->{rc}. did not find two targets in bus callout\n");
                     exit(1);
                 }
-
-                # Check the type of the Targets
-                print EIFILE "fapi2::checkType<const $target_ffdc_type *>($targets[0]); \\\n";
-                print EIFILE "fapi2::checkType<const $target_ffdc_type *>($targets[1]); \\\n";
 
                 # Add the Targets to the objectlist if they don't already exist
                 my $objNum1 = addEntryToArray(\@eiObjects, $targets[0]);
@@ -995,9 +1000,6 @@ foreach my $argnum (0 .. $#ARGV)
         # Process the callout, deconfigures and GARDs for each Target
         foreach my $cdg (keys %cdgTargetHash)
         {
-            # Check the type
-            print EIFILE "fapi2::checkType<const $target_ffdc_type *>($cdg); \\\n";
-
             my $callout = 0;
             my $priority = 'LOW';
             my $deconf = 0;
@@ -1039,9 +1041,6 @@ foreach my $argnum (0 .. $#ARGV)
         # Process the callout, deconfigures and GARDs for Child Targets
         foreach my $parent (keys %cdgChildHash)
         {
-            # Check the type
-            print EIFILE "fapi2::checkType<const $target_ffdc_type *>($parent); \\\n";
-
             foreach my $childType (keys %{$cdgChildHash{$parent}})
             {
                 my $callout = 0;
@@ -1175,7 +1174,7 @@ foreach my $argnum (0 .. $#ARGV)
         {
             # Void expression keeps the compiler from complaining about the unused arguments.
             print ECFILE "    $class_name(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, fapi2::ReturnCode& i_rc = fapi2::current_err)\n";
-            print ECFILE "    {static_cast<void>(i_sev); static_cast<void>(i_rc);}\n";
+            print ECFILE "    {static_cast<void>(i_sev); static_cast<void>(i_rc);}\n\n";
         }
 
         # Methods
@@ -1188,10 +1187,17 @@ foreach my $argnum (0 .. $#ARGV)
         # passing in of the severity so that macros which call execute() can over-ride
         # the default severity.
         print ECFILE "    void execute(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED)\n";
-        print ECFILE "    {\n";
-        print ECFILE "        FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n" if ($arg_empty_ffdc eq undef);
-        print ECFILE "        fapi2::logError(iv_rc, (i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED) ? iv_sev : i_sev);\n" if ($arg_empty_ffdc eq undef);
-        print ECFILE "    }\n\n";
+        if ($arg_empty_ffdc eq undef)
+        {
+            print ECFILE "    {\n";
+            print ECFILE "        FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n" if ($arg_empty_ffdc eq undef);
+            print ECFILE "        fapi2::logError(iv_rc, (i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED) ? iv_sev : i_sev);\n" if ($arg_empty_ffdc eq undef);
+            print ECFILE "    }\n\n";
+        }
+        else
+        {
+            print ECFILE "    {static_cast<void>(i_sev);}\n\n";
+        }
 
         # Instance variables
         if ($arg_empty_ffdc eq undef)

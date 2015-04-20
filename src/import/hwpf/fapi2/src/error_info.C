@@ -181,26 +181,26 @@ namespace fapi2
         switch(iv_ffdcSize)
         {
 
-        case EI_FFDC_SIZE_TARGET:
-        {
-            Target<TARGET_TYPE_ALL> object =
-                *(static_cast<const Target<TARGET_TYPE_ALL>*>
-                  (i_objects[iv_ffdcObjIndex]));
+            case EI_FFDC_SIZE_TARGET:
+            {
+                Target<TARGET_TYPE_ALL> object =
+                    *(static_cast<const Target<TARGET_TYPE_ALL>*>
+                      (i_objects[iv_ffdcObjIndex]));
 
-            // Allocate an ErrorInfoFfdc but don't copy anything in to it.
-            // We can copy the target string once if we copy directly into
-            // the error info
-            ErrorInfoFfdc* e =
-                new ErrorInfoFfdc(iv_ffdcId, nullptr, MAX_ECMD_STRING_LEN);
+                // Allocate an ErrorInfoFfdc but don't copy anything in to it.
+                // We can copy the target string once if we copy directly into
+                // the error info
+                ErrorInfoFfdc* e =
+                    new ErrorInfoFfdc(iv_ffdcId, nullptr, MAX_ECMD_STRING_LEN);
 
-            toString(object, static_cast<char*>(e->getData()),
-                     MAX_ECMD_STRING_LEN);
-            i_info->iv_ffdcs.push_back(std::shared_ptr<ErrorInfoFfdc>(e));
+                toString(object, static_cast<char*>(e->getData()),
+                         MAX_ECMD_STRING_LEN);
+                i_info->iv_ffdcs.push_back(std::shared_ptr<ErrorInfoFfdc>(e));
 
-            FAPI_DBG("addErrorInfo: Adding target ffdc id: 0x%x %s",
-                     iv_ffdcId, static_cast<char*>(e->getData()));
-        }
-        break;
+                FAPI_DBG("addErrorInfo: Adding target ffdc id: 0x%x %s",
+                         iv_ffdcId, static_cast<char*>(e->getData()));
+            }
+            break;
 
         default:
             i_info->iv_ffdcs.push_back(std::shared_ptr<ErrorInfoFfdc>(

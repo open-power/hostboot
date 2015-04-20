@@ -32,7 +32,7 @@
 
 #include <buffer_parameters.H>
 #include <buffer_traits.H>
-#include <return_code.H>
+#include <return_code_defs.H>
 
 namespace fapi2
 {
@@ -76,7 +76,7 @@ namespace fapi2
     /// @param[in] i_length The length, in bits, the user wants copied.
     ///
     template<typename unit_type, typename bits_type, typename output_type>
-    inline fapi2::ReturnCode _insert(const unit_type* i_source,
+    inline fapi2::ReturnCodes _insert(const unit_type* i_source,
                                      bits_type i_source_length,
                                      output_type* i_target,
                                      bits_type i_target_length,
@@ -287,7 +287,7 @@ namespace fapi2
         ///    variable_buffer into a variable_buffer, use insert()
         ///
         template< typename OT>
-        inline fapi2::ReturnCode set(OT i_value, const bits_type i_offset = 0)
+        inline fapi2::ReturnCodes set(OT i_value, const bits_type i_offset = 0)
         {
             // Compile time check to make sure OT is integral
             static_assert( std::is_integral<OT>::value,
@@ -344,7 +344,7 @@ namespace fapi2
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode setBit(const bits_type& i_bit)
+        inline fapi2::ReturnCodes setBit(const bits_type& i_bit)
         {
             const bits_type index = i_bit / bits_per_unit;
 
@@ -371,7 +371,7 @@ namespace fapi2
         /// the case we can add a function parameter version.
         ///
         template< bits_type SB, bits_type L >
-        inline fapi2::ReturnCode clearBit(void);
+        inline fapi2::ReturnCodes clearBit(void);
 
         ///
         /// @brief Invert bit
@@ -384,7 +384,7 @@ namespace fapi2
         /// the case we can add a function parameter version.
         ///
         template< bits_type SB, bits_type L = 1 >
-        inline fapi2::ReturnCode flipBit(void);
+        inline fapi2::ReturnCodes flipBit(void);
 
         ///
         /// @brief Get the value of a bit in the buffer
@@ -618,7 +618,7 @@ namespace fapi2
         /// @return FAPI2_RC_SUCCESS on success, FAPi2_RC_OVERFLOW otherwise
         ///
         template<typename OT>
-        inline fapi2::ReturnCode insert(const OT& i_data,
+        inline fapi2::ReturnCodes insert(const OT& i_data,
                                         bits_type i_targetStart = 0,
                                         bits_type i_len = ~0,
                                         bits_type i_sourceStart = 0)
@@ -645,7 +645,7 @@ namespace fapi2
         /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
         ///
         template<typename OT>
-        inline fapi2::ReturnCode insertFromRight(const OT& i_data,
+        inline fapi2::ReturnCodes insertFromRight(const OT& i_data,
                                                  bits_type i_targetStart = 0,
                                                  bits_type i_len = ~0)
             {
@@ -663,7 +663,7 @@ namespace fapi2
         ///
         // Generic extract. Extract is an insert with the arguments reversed.
         template< typename OT >
-        inline fapi2::ReturnCode extract(OT& o_out,
+        inline fapi2::ReturnCodes extract(OT& o_out,
                                          bits_type i_start = 0,
                                          bits_type i_len = ~0) const
             {
@@ -678,7 +678,7 @@ namespace fapi2
                 // _insert likes 32-bit targets. So lets make our target 32 bits.
                 uint32_t l_data = static_cast<uint32_t>(o_out);
 
-                ReturnCode rc;
+                ReturnCodes rc;
                 if ((rc = _insert((container_unit*)&iv_data[0], getBitLength(),
                                   &l_data,
                                   parameterTraits<uint32_t>::bit_length(),
@@ -703,7 +703,7 @@ namespace fapi2
         ///
         // Extract is an insert with the arguments reversed.
         template< typename OT >
-        inline fapi2::ReturnCode extractToRight(OT& o_out,
+        inline fapi2::ReturnCodes extractToRight(OT& o_out,
                                                 bits_type i_start = 0,
                                                 bits_type i_len = ~0) const
             {
@@ -719,7 +719,7 @@ namespace fapi2
                 // _insert likes 32-bit targets. So lets make our target 32 bits.
                 uint32_t l_data = static_cast<uint32_t>(o_out);
 
-                ReturnCode rc;
+                ReturnCodes rc;
                 if ((rc = _insert(
                          reinterpret_cast<const container_unit*>(&iv_data[0]),
                          getBitLength(),
@@ -782,7 +782,7 @@ namespace fapi2
         /// @param[in] i_length The length, in bits, the user wants copied.
         ///
         template<typename OT>
-        inline fapi2::ReturnCode _insertFromRight(const OT& i_data,
+        inline fapi2::ReturnCodes _insertFromRight(const OT& i_data,
                                                   bits_type i_data_length,
                                                   bits_type i_targetStart,
                                                   bits_type i_len)
@@ -805,7 +805,7 @@ namespace fapi2
 
     // If the source is 64-bits, treat that as 2x32
     template<>
-    inline fapi2::ReturnCode variable_buffer::insert(const uint64_t& i_source,
+    inline fapi2::ReturnCodes variable_buffer::insert(const uint64_t& i_source,
                                     bits_type i_targetStart,
                                     bits_type i_len,
                                     bits_type i_sourceStart)
@@ -824,7 +824,7 @@ namespace fapi2
 
     // Insert another variable_bufer
     template<>
-    inline fapi2::ReturnCode variable_buffer::insert(
+    inline fapi2::ReturnCodes variable_buffer::insert(
         const variable_buffer& i_data,
         bits_type i_targetStart,
         bits_type i_len,
@@ -838,7 +838,7 @@ namespace fapi2
 
     // variable_buffer insert from right
     template<>
-    inline fapi2::ReturnCode variable_buffer::insertFromRight(
+    inline fapi2::ReturnCodes variable_buffer::insertFromRight(
         const variable_buffer& i_data,
         bits_type i_targetStart,
         bits_type i_len)
@@ -849,7 +849,7 @@ namespace fapi2
     }
 
     template<>
-    inline fapi2::ReturnCode variable_buffer::extract(
+    inline fapi2::ReturnCodes variable_buffer::extract(
         uint64_t& i_data,
         bits_type i_start,
         bits_type i_len) const
@@ -870,7 +870,7 @@ namespace fapi2
             {static_cast<uint32_t>((i_data & 0xFFFFFFFF00000000) >> 32),
              static_cast<uint32_t>((i_data & 0x00000000FFFFFFFF))};
 
-        ReturnCode rc;
+        ReturnCodes rc;
         if ((rc = _insert((container_unit*)&iv_data[0], getBitLength(),
                           l_data, parameterTraits<uint64_t>::bit_length(),
                           i_start, 0U, i_len)) != FAPI2_RC_SUCCESS)
@@ -886,7 +886,7 @@ namespace fapi2
 
     // Extract in to another variable_bufer
     template<>
-    inline fapi2::ReturnCode variable_buffer::extract(
+    inline fapi2::ReturnCodes variable_buffer::extract(
         variable_buffer& i_data,
         bits_type i_start,
         bits_type i_len) const
@@ -905,7 +905,7 @@ namespace fapi2
     }
 
     template<>
-    inline fapi2::ReturnCode variable_buffer::extractToRight(
+    inline fapi2::ReturnCodes variable_buffer::extractToRight(
         uint64_t& i_data,
         bits_type i_start,
         bits_type i_len) const
@@ -925,7 +925,7 @@ namespace fapi2
             {static_cast<uint32_t>((i_data & 0xFFFFFFFF00000000) >> 32),
              static_cast<uint32_t>((i_data & 0x00000000FFFFFFFF))};
 
-        ReturnCode rc;
+        ReturnCodes rc;
         if ((rc = _insert(
                  reinterpret_cast<const container_unit*>(&iv_data[0]),
                  getBitLength(),
