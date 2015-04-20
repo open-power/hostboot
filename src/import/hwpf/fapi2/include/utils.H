@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 #include <return_code.H>
-#include <error_info.H>
+#include <error_info_defs.H>
 
 namespace fapi2
 {
