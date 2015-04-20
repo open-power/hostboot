@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.18 2014/08/12 20:44:13 jmcgill Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 830.1 2015-04-20 13:55:22 dcrowell Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
