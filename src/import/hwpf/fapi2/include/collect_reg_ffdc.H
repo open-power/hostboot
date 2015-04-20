@@ -50,7 +50,7 @@ namespace fapi2
     /// @warning This should only be called by FAPI during FAPI_SET_HWP_ERROR or
     /// FAPI_ADD_INFO_TO_HWP_ERROR
     ///
-    /// @param[in]  i_target      Pointer to Target to collect FFDC from
+    /// @param[in]  i_target      Pointer to Target to collect FFDC from (ffdc_t.ptr())
     /// @param[in]  i_ffdcId      FFDC Identifier
     /// @param[out] o_rc          Reference to ReturnCode that FFDC is added to
     /// @param[in]  i_child       Specifies type of i_target's chiplet to collect
@@ -67,7 +67,7 @@ namespace fapi2
     ///                           addresses when collecting register FFDC based on
     ///                           present child chiplets.
     ///
-    void collectRegFfdc(const fapi2::Target<TARGET_TYPE_ALL>* i_target,
+    void collectRegFfdc(const fapi2::ffdc_t& i_target,
                         const fapi2::HwpFfdcId i_ffdcId,
                         fapi2::ReturnCode & o_rc,
                         const TargetType i_child = TARGET_TYPE_NONE,
