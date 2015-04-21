@@ -615,7 +615,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target,   std::vector<f
                     if(mcs_sz !=  sizeInfo.MCS_size[group_data[i][j]])
                     {
                           FAPI_INF(" Group %zd will not be configured as MCS %d is not valid grouped size is %d , present MCS size is %d \n",i,group_data[i][j],mcs_sz, sizeInfo.MCS_size[group_data[i][j]]);
-                          for(uint8_t k = 0; k<32;k++) { group_data[i][k]=0; }
+                          for(uint8_t k = 0; k<16;k++) { group_data[i][k]=0; }
                      }
                }
            }
