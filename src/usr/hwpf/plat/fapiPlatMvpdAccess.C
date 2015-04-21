@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -204,6 +204,7 @@ fapi::ReturnCode MvpdKeywordXlate(const fapi::MvpdKeyword i_fapiKeyword,
         MVPD::MK,
         MVPD::PB,
         MVPD::CH,
+        MVPD::IQ,
     };
     const uint8_t NUM_MVPD_KEYWORDS =
        sizeof(mvpdFapiKeywordToHbKeyword)/sizeof(mvpdFapiKeywordToHbKeyword[0]);
@@ -1290,9 +1291,6 @@ fapi::ReturnCode fapiGetMvpdField(const fapi::MvpdRecord i_record,
 
     do
     {
-        TARGETING::Target * l_pChipTarget =
-                   reinterpret_cast<TARGETING::Target*>(i_procTarget.get());
-
         // Translate the FAPI record to a Hostboot record
         MVPD::mvpdRecord l_hbRecord = MVPD::MVPD_INVALID_RECORD;
 
@@ -1321,11 +1319,14 @@ fapi::ReturnCode fapiGetMvpdField(const fapi::MvpdRecord i_record,
             fapi::voltageBucketData_t l_pVData;
 
             // Get #V bucket data
-            l_rc = fapiGetPoundVBucketData(l_pChipTarget,
+            l_rc = fapiGetPoundVBucketData(i_procTarget,
                                   (uint32_t) l_hbRecord,
                                              l_pVData);
             if (l_rc)
             {
+                TARGETING::Target * l_pChipTarget =
+                   reinterpret_cast<TARGETING::Target*>(i_procTarget.get());
+
                 FAPI_ERR("fapiGetMvpdField: Error getting #V bucket data "
                          "HUID: 0x%08X",
                          l_pChipTarget->getAttr<TARGETING::ATTR_HUID>());
@@ -1506,7 +1507,7 @@ fapi::ReturnCode fapiSetMvpdField(const fapi::MvpdRecord i_record,
 }
 
 fapi::ReturnCode fapiGetPoundVBucketData(
-                                      const TARGETING::Target * i_pChipTarget,
+                                      const fapi::Target &i_procTarget,
                                       const uint32_t i_record,
                                       fapi::voltageBucketData_t & o_data)
 {
@@ -1518,8 +1519,11 @@ fapi::ReturnCode fapiGetPoundVBucketData(
 
     do
     {
+        TARGETING::Target * l_pChipTarget =
+                   reinterpret_cast<TARGETING::Target*>(i_procTarget.get());
+
         // Read PR keyword size
-        l_err = deviceRead( (TARGETING::Target *)i_pChipTarget,
+        l_err = deviceRead( l_pChipTarget,
                             NULL,
                             l_vpdSize,
                             DEVICE_MVPD_ADDRESS( MVPD::VINI,
@@ -1528,7 +1532,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         {
             FAPI_ERR("Error getting PR keyword size for HUID: "
                      "0x%08X, errorlog PLID=0x%x",
-                      i_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                      l_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                       l_err->plid());
 
             // Add the error log pointer as data to the ReturnCode
@@ -1543,7 +1547,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         l_prDataPtr = new uint8_t [l_vpdSize];
 
         // Read PR keyword data
-        l_err = deviceRead( (TARGETING::Target *)i_pChipTarget,
+        l_err = deviceRead(l_pChipTarget,
                             l_prDataPtr,
                             l_vpdSize,
                             DEVICE_MVPD_ADDRESS( MVPD::VINI,
@@ -1552,7 +1556,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         {
             FAPI_ERR("Error getting PR keyword data for HUID: "
                      "0x%08X, errorlog PLID=0x%x",
-                      i_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                      l_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                       l_err->plid());
 
             // Add the error log pointer as data to the ReturnCode
@@ -1577,7 +1581,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         }
 
         l_vpdSize = 0;
-        l_err = deviceRead( (TARGETING::Target *)i_pChipTarget,
+        l_err = deviceRead( l_pChipTarget,
                             NULL,
                             l_vpdSize,
                             DEVICE_MVPD_ADDRESS( i_record,
@@ -1586,7 +1590,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         {
             FAPI_ERR("Error getting #V keyword size for HUID: "
                      "0x%08X, errorlog PLID=0x%x",
-                      i_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                      l_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                       l_err->plid());
 
             // Add the error log pointer as data to the ReturnCode
@@ -1600,7 +1604,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
 
         l_vDataPtr = new uint8_t [l_vpdSize];
 
-        l_err = deviceRead( (TARGETING::Target *)i_pChipTarget,
+        l_err = deviceRead( l_pChipTarget,
                             l_vDataPtr,
                             l_vpdSize,
                             DEVICE_MVPD_ADDRESS( i_record,
@@ -1609,7 +1613,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         {
             FAPI_ERR("Error getting #V keyword data for HUID: "
                      "0x%08X, errorlog PLID=0x%x",
-                      i_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                      l_pChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                       l_err->plid());
 
             // Add the error log pointer as data to the ReturnCode
@@ -1645,7 +1649,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
                                  l_vpdSize);
 
             // Callout HW as VPD data is incorrect
-            l_err->addHwCallout(i_pChipTarget, HWAS::SRCI_PRIORITY_HIGH,
+            l_err->addHwCallout(l_pChipTarget, HWAS::SRCI_PRIORITY_HIGH,
                                  HWAS::DECONFIG, HWAS::GARD_NULL);
 
             // Code (SW) callout in case this is downlevel VPD version
@@ -1659,7 +1663,7 @@ fapi::ReturnCode fapiGetPoundVBucketData(
         }
 
         // Parse #V Version one data to get bucket data
-        l_rc = fapiGetVerOneVoltageBucketData(i_pChipTarget,
+        l_rc = fapiGetVerOneVoltageBucketData(l_pChipTarget,
                                       l_bucketId,
                                       l_vpdSize,
                                       l_vDataPtr,

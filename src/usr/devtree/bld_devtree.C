@@ -1947,6 +1947,9 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
             /* Add the #V bucket for each functional core                  */
             /***************************************************************/
             TARGETING::TargetHandleList l_exlist;
+            fapi::Target l_pFapiProc(fapi::TARGET_TYPE_PROC_CHIP,
+                            (const_cast<TARGETING::Target*>(l_pProc) ));
+
             getChildChiplets( l_exlist, l_pProc, TYPE_CORE );
             for (size_t core = 0; core < l_exlist.size(); core++)
             {
@@ -1961,7 +1964,7 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
                 // Get #V bucket data
                 uint32_t l_record = (uint32_t) MVPD::LRP0 + l_coreNum;
                 fapi::voltageBucketData_t l_poundVdata = {0};
-                fapi::ReturnCode l_rc = fapiGetPoundVBucketData(l_pProc,
+                fapi::ReturnCode l_rc = fapiGetPoundVBucketData(l_pFapiProc,
                                                                 l_record,
                                                                 l_poundVdata);
                 if(l_rc)

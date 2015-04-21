@@ -128,6 +128,9 @@ static const uint32_t PROC_BOOT_VOLT_VCS_MASK = 0x0000ff00;
      * @param[out] o_sysVPDPowerSaveMinFreqMhz
      *     On success, holds highest powersave frequency
      *     On failure, set to zero.
+     * @param[out] o_sysVPDUltraTurboMinFreqMhz
+     *     On success, holds lowest ultra turbo frequency
+     *     On failure, set to zero.
      *
      * @return Error log handle indicating the status of the request
      *
@@ -137,7 +140,8 @@ static const uint32_t PROC_BOOT_VOLT_VCS_MASK = 0x0000ff00;
     errlHndl_t getSysFreq(
         uint32_t & o_sysVPDPowerSaveMinFreqMhz,
         TARGETING::ATTR_NOMINAL_FREQ_MHZ_type & o_sysNomFreqMhz,
-        TARGETING::ATTR_FREQ_CORE_MAX_type & o_sysVPDTurboMaxFreqMhz);
+        TARGETING::ATTR_FREQ_CORE_MAX_type & o_sysVPDTurboMaxFreqMhz,
+        TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type & o_sysVPDUltraMinFreqMhz);
 
     /**
      * @brief Verify the system boot frequency attribute

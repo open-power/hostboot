@@ -142,6 +142,7 @@ namespace MVPD
         { MK,  "MK" },
         { PB,  "PB" },
         { CH,  "CH" },
+        { IQ,  "IQ" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

@@ -684,6 +684,17 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
                                      uint8_t &o_val);
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_TDP_RDP_CURRENT_FACTOR attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[out] o_data        Reference to output data
+ */
+fapi::ReturnCode fapiPlatGetTdpRdpCurrentFactor
+                                     (const fapi::Target * i_pProcTarget,
+                                     uint32_t &o_val);
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
  *        ATTR_SPD_MODSPEC_COM_REF_RAW_CARD attribute.
  *        It should not be called directly.
  *
@@ -2866,6 +2877,14 @@ fapi::ReturnCode fapiPlatGetMemAttrData (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetPciOscswitchConfig(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACRO to support TDP RDP Current Factor
+//------------------------------------------------------------------------------
+#define ATTR_TDP_RDP_CURRENT_FACTOR_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetTdpRdpCurrentFactor(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
 //  MACRO to support Modspec raw card info

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: chip_attributes.xml,v 1.17 2014/11/20 17:58:41 jmcgill Exp $ -->
+<!-- $Id: chip_attributes.xml,v 1.18 2015/04/30 20:15:33 stillgs Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
@@ -241,4 +241,19 @@
     <writeable/>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_TDP_RDP_CURRENT_FACTOR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>  
+    <description>
+        Defines the scaling factor that converts the AC current (amperage) value from
+        the Thermal Design Point (TDP) to the Regulator Design Point (RDP) as input
+        to the Workload Optimization Frequency (WOF) OCC algorithm.
+
+        This is a percentage ratio value and has a granularity of 0.01 percent.  Data
+        is held in hexidecimal.   Example: 86.17% -> 8617 -> 0x21A9.
+    </description>
+    <valueType>uint32</valueType>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

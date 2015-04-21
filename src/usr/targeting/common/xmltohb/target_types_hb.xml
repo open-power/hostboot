@@ -77,6 +77,9 @@
     <attribute><id>IPMI_MAX_BUFFER_SIZE</id></attribute>
     <attribute><id>OCC_COMMON_AREA_PHYS_ADDR</id> </attribute>
     <attribute><id>SBE_MASTER_INTR_SERVICE_ENABLED</id></attribute>
+    <attribute><id>WOF_PROC_SORT</id></attribute>
+    <attribute><id>WOF_FREQUENCY_UPLIFT</id></attribute>
+    <attribute><id>WOF_REGULATOR_EFFICIENCIES</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -126,6 +129,9 @@
     </attribute>
     <attribute>
         <id>PART_NUMBER</id>
+    </attribute>
+    <attribute>
+        <id>WOF_FREQUENCY_UPLIFT_SELECTED</id>
     </attribute>
 </targetTypeExtension>
 

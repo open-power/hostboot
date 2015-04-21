@@ -122,6 +122,8 @@
     <attribute><id>L3_FORCE_R_T2_EPS</id></attribute>
     <attribute><id>L3_W_EPS</id></attribute>
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
+    <attribute><id>ULTRA_TURBO_FREQ_MHZ</id></attribute>
+    <attribute><id>WOF_ENABLED</id></attribute>
     <attribute><id>MNFG_FLAGS</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <attribute><id>MFG_TRACE_ENABLE</id></attribute>

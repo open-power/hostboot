@@ -131,6 +131,7 @@ enum mvpdKeyword
     MK          = 0x20,
     PB          = 0x21,
     CH          = 0x22,
+    IQ          = 0x23,
 
     // Last Keyword
     MVPD_LAST_KEYWORD,

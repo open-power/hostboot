@@ -51,6 +51,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAttr.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
+#include <hwpf/hwp/chip_accessors/getTdpRdpCurrentFactor.H>
 #include <hwpf/hwp/chip_accessors/getPciOscswitchConfig.H>
 #include <hwpf/hwp/chip_accessors/getOscswitchCtlAttr.H>
 #include <fapiPllRingAttr.H>
@@ -1583,6 +1584,16 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
 {
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc, getPciOscswitchConfig, *i_pProcTarget, o_val);
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetTdpRdpCurrentFactor
+                                     (const fapi::Target * i_pProcTarget,
+                                     uint32_t &o_val)
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getTdpRdpCurrentFactor, *i_pProcTarget, o_val);
     return l_rc;
 }
 

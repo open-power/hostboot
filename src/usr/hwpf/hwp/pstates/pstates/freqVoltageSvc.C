@@ -58,6 +58,157 @@ using namespace TARGETING;
 
 namespace FREQVOLTSVC
 {
+    //**************************************************************************
+    // FREQVOLTSVC::setWofFrequencyUpliftSelected
+    //**************************************************************************
+    void setWofFrequencyUpliftSelected()
+    {
+
+        // get mrw data
+        TARGETING::Target* l_pTopLevel = NULL;
+        (void)TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+        ATTR_WOF_FREQUENCY_UPLIFT_type l_upliftTable = {{{0}}};
+        ATTR_WOF_PROC_SORT_type l_procSortTable = {{0}};
+        ATTR_NOMINAL_FREQ_MHZ_type l_sysNomFreqMhz =
+            l_pTopLevel->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
+        ATTR_WOF_ENABLED_type l_wofEnabled = l_pTopLevel->getAttr
+                                           < TARGETING::ATTR_WOF_ENABLED > ();
+
+        // tryGetAttr used due to complex data type. Expected to always work.
+        if (!l_pTopLevel->tryGetAttr<ATTR_WOF_FREQUENCY_UPLIFT>(l_upliftTable))
+        {
+            // The zero initialized values will be used for the select array
+            TRACFCOMP(g_fapiTd, "Failed to get ATTR_WOF_FREQUENCY_UPLIFT");
+        }
+        // tryGetAttr used due to complex data type. Expected to always work.
+        if ( !l_pTopLevel->tryGetAttr<ATTR_WOF_PROC_SORT>(l_procSortTable))
+        {
+            // Not finding the sort table will result in not finding the index
+            // which will result in a log later
+            TRACFCOMP(g_fapiTd, "Failed to get ATTR_WOF_PROC_SORT");
+        }
+
+        // get the list of procs
+        TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC, true);
+
+        // for each proc, fill in Wof Frequency Uplift Selected attribute
+        for (TargetHandleList::const_iterator
+                l_proc_iter = l_procTargetList.begin();
+                l_proc_iter != l_procTargetList.end();
+                ++l_proc_iter)
+        {
+            TARGETING::Target * l_pProcTarget = *l_proc_iter;
+
+            // find number of active cores
+            TARGETING::TargetHandleList l_presCoreList;
+            getChildAffinityTargetsByState( l_presCoreList,
+                      const_cast<TARGETING::Target*>(l_pProcTarget),
+                      TARGETING::CLASS_UNIT,
+                      TARGETING::TYPE_CORE,
+                      TARGETING::UTIL_FILTER_PRESENT);
+            uint8_t l_activeCores = l_presCoreList.size();
+            TRACDCOMP(g_fapiTd, "setWofFrequencyUpliftSelected:"
+                            " number of active cores  is %d ",
+                            l_activeCores);
+
+            // find WOF index. For example:
+            // ATTR_WOF_PROC_SORT =
+            // Cores/Nom Freq/Index
+            //   8    3325     1
+            //   10   2926     2
+            //   12   2561     3
+            //   12   3093     4
+            // Use WOF index=3 for active cores=12 && nom freq=2561
+            uint8_t l_wofIndex = 0;
+            for (uint8_t i=0;i<4;i++)
+            {
+                if ( (l_activeCores   == l_procSortTable[i][0]) &&
+                     (l_sysNomFreqMhz == l_procSortTable[i][1]) )
+                {
+                   l_wofIndex = l_procSortTable[i][2];
+                   break;
+                }
+            }
+            TRACDCOMP(g_fapiTd, "setWofFrequencyUpliftSelected:"
+                            " WOF index is %d ",
+                            l_wofIndex);
+            // validate WOF index
+            ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type l_selectedTable = {{0}};
+            if ( (!l_wofIndex) || (l_wofIndex > 4))
+            {
+                if (l_wofEnabled) // log error if WOF enabled
+                {
+                    TRACFCOMP(g_fapiTd, "setWofFrequencyUpliftSelected:"
+                        " No WOF table index match found HUID:0x%08X"
+                        " active cores=%d, nom freq=%d, index=%d",
+                        l_pProcTarget->getAttr<TARGETING::ATTR_HUID>(),
+                        l_activeCores,
+                        l_sysNomFreqMhz,
+                        l_wofIndex);
+
+                    errlHndl_t l_err = NULL;
+                    /*@
+                     * @errortype
+                     * @moduleid         fapi::MOD_GET_WOF_FREQ_UPLIFT_SELECTED
+                     * @reasoncode       fapi::RC_INVALID_WOF_INDEX
+                     * @userdata1[0:31]  Proc HUID
+                     * @userdata1[32:63] WOF Freq Uplift Index
+                     * @userdata2[0:31]  Number of active cores
+                     * @userdata2[32:63] Nomimal Frequency
+                     * @devdesc          When WOF is enabled, the WOF Freq
+                     *                   Uplift index should be 1,2,3, or 4
+                     */
+                    l_err =
+                        new  ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             fapi::MOD_GET_WOF_FREQ_UPLIFT_SELECTED,
+                             fapi::RC_INVALID_WOF_INDEX,
+                             TWO_UINT32_TO_UINT64(
+                                 l_pProcTarget->getAttr<TARGETING::ATTR_HUID>(),
+                                 l_wofIndex),
+                             TWO_UINT32_TO_UINT64(
+                                 l_activeCores,
+                                 l_sysNomFreqMhz));
+
+                    // Callout HW as WOF mrw data is incorrect
+                    l_err->addHwCallout(l_pProcTarget, HWAS::SRCI_PRIORITY_MED,
+                                         HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+
+                    // Include WOF processor sort table
+                    TRACFBIN (g_fapiTd,
+                              "WOF processor sort table",
+                              l_procSortTable,
+                              sizeof(l_procSortTable));
+                    l_err->collectTrace(FAPI_TRACE_NAME);
+
+                    // log error and keep going
+                    errlCommit(l_err,HWPF_COMP_ID);
+                }
+                // make sure zeros are set in the selected table attribute
+                memset(l_selectedTable,
+                       0,
+                       sizeof(l_selectedTable));
+            }
+            else
+            {
+                // use index to set Wof Frequency Uplift selected attribute
+                // note: mrw index is 1 based
+                memcpy(l_selectedTable,
+                       &l_upliftTable[l_wofIndex-1][0][0],
+                       sizeof(l_selectedTable));
+            }
+            if (!l_pProcTarget->trySetAttr<ATTR_WOF_FREQUENCY_UPLIFT_SELECTED>
+                                             (l_selectedTable))
+            {
+                //unlikely, crash
+                TRACFCOMP(g_fapiTd,
+                            "Failed to set ATTR_WOF_FREQUENCY_UPLIFT_SELECTED");
+                assert(0);
+            }
+        }
+        return;
+    }
 
     //**************************************************************************
     // FREQVOLTSVC::setSysFreq
@@ -68,11 +219,14 @@ namespace FREQVOLTSVC
         uint32_t l_sysHighestPowerSaveFreq = 0x0;
         TARGETING::ATTR_NOMINAL_FREQ_MHZ_type l_sysNomFreq = 0x0;
         TARGETING::ATTR_FREQ_CORE_MAX_type l_sysLowestTurboFreq = 0x0;
+        TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type
+                                           l_sysLowestUltraTurboFreq = 0x0;
 
         // Get system frequency
         l_err = getSysFreq(l_sysHighestPowerSaveFreq,
                            l_sysNomFreq,
-                           l_sysLowestTurboFreq);
+                           l_sysLowestTurboFreq,
+                           l_sysLowestUltraTurboFreq);
         if (l_err != NULL)
         {
             TRACFCOMP( g_fapiTd,ERR_MRK"Error getting system frequency");
@@ -102,8 +256,15 @@ namespace FREQVOLTSVC
             (void)l_pTopLevel->setAttr<TARGETING::ATTR_MIN_FREQ_MHZ>
                                                     (l_sysHighestPowerSaveFreq);
 
+            // Set min ultra turbo freq attribute
+            (void)l_pTopLevel->setAttr<TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ>
+                                                    (l_sysLowestUltraTurboFreq);
+
             verifyBootFreq(l_pTopLevel);
         }
+
+        // set up the WOF Frequency Uplift Selected attribute
+        setWofFrequencyUpliftSelected();
 
         return l_err;
     }
@@ -128,12 +289,15 @@ namespace FREQVOLTSVC
     // FREQVOLTSVC::getSysFreq
     //**************************************************************************
     errlHndl_t getSysFreq(
-            uint32_t & o_sysVPDPowerSaveMinFreqMhz,
-            TARGETING::ATTR_NOMINAL_FREQ_MHZ_type & o_sysNomFreqMhz,
-            TARGETING::ATTR_FREQ_CORE_MAX_type & o_sysVPDTurboMaxFreqMhz)
+          uint32_t & o_sysVPDPowerSaveMinFreqMhz,
+          TARGETING::ATTR_NOMINAL_FREQ_MHZ_type & o_sysNomFreqMhz,
+          TARGETING::ATTR_FREQ_CORE_MAX_type & o_sysVPDTurboMaxFreqMhz,
+          TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type &
+                                                   o_sysVPDUltraTurboMinFreqMhz)
     {
         uint32_t   l_minsysVPDTurboMaxFreqMhz = 0;
         uint32_t   l_maxsysVPDPowerSaveMinFreqMhz = 0;
+        uint32_t   l_minsysVPDUltraTurboFreqMhz = 0;
         fapi::ReturnCode l_rc;
         errlHndl_t l_err = NULL;
 
@@ -142,6 +306,19 @@ namespace FREQVOLTSVC
             o_sysNomFreqMhz = 0;
             o_sysVPDTurboMaxFreqMhz = 0;
             o_sysVPDPowerSaveMinFreqMhz = 0;
+            o_sysVPDUltraTurboMinFreqMhz = 0;
+
+            //Get the top level (system) target  handle
+            TARGETING::Target* l_pTopLevel = NULL;
+            (void)TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+
+            // Assert on failure getting system target
+            assert( l_pTopLevel != NULL );
+
+            // Retrun Fvmin as ultra turbo freq if WOF enabled.
+            ATTR_WOF_ENABLED_type l_wofEnabled = l_pTopLevel->getAttr
+                                           < TARGETING::ATTR_WOF_ENABLED > ();
+            TRACFCOMP(g_fapiTd,"getSysFreq: WOF_ENABLED is %d ",l_wofEnabled);
 
             //Filter functional unit
             TARGETING::PredicateIsFunctional l_isFunctional;
@@ -177,6 +354,8 @@ namespace FREQVOLTSVC
                 // Get Parent Chip target
                 const TARGETING::Target * l_pChipTarget =
                                                     getParentChip(l_pTarget);
+                fapi::Target l_pFapiChipTarget(fapi::TARGET_TYPE_PROC_CHIP,
+                            (const_cast<TARGETING::Target*>(l_pChipTarget) ));
 
                 // Get core number for record number
                 TARGETING::ATTR_CHIP_UNIT_type l_coreNum =
@@ -185,7 +364,7 @@ namespace FREQVOLTSVC
                 uint32_t l_record = (uint32_t) MVPD::LRP0 + l_coreNum;
 
                 // Get #V bucket data
-                l_rc = fapiGetPoundVBucketData(l_pChipTarget,
+                l_rc = fapiGetPoundVBucketData(l_pFapiChipTarget,
                                                l_record,
                                                l_poundVdata);
                 if(l_rc)
@@ -205,10 +384,15 @@ namespace FREQVOLTSVC
                                 l_poundVdata.nomFreq;
                 TARGETING::ATTR_FREQ_CORE_MAX_type l_sysVPDTurboMaxFreqMhz =
                                 l_poundVdata.turboFreq;
+                // WOF defines the reserved Fvmin value as ultra turbo
+                TARGETING::ATTR_ULTRA_TURBO_FREQ_MHZ_type
+                             l_sysVPDUltraTurboFreqMhz = l_poundVdata.fvminFreq;
                 TRACFCOMP(g_fapiTd,INFO_MRK"Nominal freq is: [0x%08X]. Turbo "
-                          "freq is: [0x%08x]. PowerSave freq is: [0x%08X]",
+                          "freq is: [0x%08x]. PowerSave freq is: [0x%08X]."
+                          " Ultra Turbo is: [0x%08x]",
                           l_sysNomFreqMhz, l_sysVPDTurboMaxFreqMhz,
-                          l_sysVPDPowerSaveMinFreqMhz );
+                          l_sysVPDPowerSaveMinFreqMhz,
+                          l_sysVPDUltraTurboFreqMhz);
 
                 if( true == l_copyOnce)
                 {
@@ -216,6 +400,7 @@ namespace FREQVOLTSVC
                     l_minsysVPDTurboMaxFreqMhz = l_sysVPDTurboMaxFreqMhz;
                     l_maxsysVPDPowerSaveMinFreqMhz =
                                              l_sysVPDPowerSaveMinFreqMhz;
+                    l_minsysVPDUltraTurboFreqMhz = l_sysVPDUltraTurboFreqMhz;
                     l_copyOnce = false;
                 }
 
@@ -259,6 +444,39 @@ namespace FREQVOLTSVC
                                          HWAS::DECONFIG, HWAS::GARD_NULL);
 
                     break;
+                }
+
+                // If WOF is enabled, Ultra Turbo frequency should not be zero.
+                // Return 0 for ultra turbo freq
+                if( (fapi::ENUM_ATTR_WOF_ENABLED_ENABLED == l_wofEnabled)  &&
+                    (l_sysVPDUltraTurboFreqMhz == 0) )
+                {
+                    TRACFCOMP(g_fapiTd,
+                              ERR_MRK"GetSysFreq: Ultra Turbo frequency is 0");
+
+                    /*@
+                     * @errortype
+                     * @moduleid         fapi::MOD_GET_SYS_FREQ
+                     * @reasoncode       fapi::RC_INVALID_ULTRA_TURBO_FREQ
+                     * @userdata1        Proc HUID
+                     * @userdata2        Invalid ultra turbo frequency
+                     * @devdesc          When WOF is enabled, ultra turbo freq
+                     *                   should not be 0
+                     */
+                    l_err =
+                        new ERRORLOG::ErrlEntry(
+                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                     fapi::MOD_GET_SYS_FREQ,
+                                     fapi::RC_INVALID_ULTRA_TURBO_FREQ,
+                                     l_pTarget->getAttr<TARGETING::ATTR_HUID>(),
+                                     l_sysVPDUltraTurboFreqMhz);
+
+                    // Callout HW as VPD data is incorrect
+                    l_err->addHwCallout(l_pTarget, HWAS::SRCI_PRIORITY_MED,
+                                         HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+
+                    // log error and keep going
+                    errlCommit(l_err,HWPF_COMP_ID);
                 }
 
                 // Validate nominal frequency. If differs,
@@ -307,6 +525,13 @@ namespace FREQVOLTSVC
                     l_maxsysVPDPowerSaveMinFreqMhz =
                                     l_sysVPDPowerSaveMinFreqMhz;
                 }
+                // Save the min ultra turbo freq
+                // If WOF is enabled, do not expect to see a zero value. But if
+                // there is a zero value, then return zero.
+                if (l_sysVPDUltraTurboFreqMhz < l_minsysVPDUltraTurboFreqMhz)
+                {
+                    l_minsysVPDUltraTurboFreqMhz = l_sysVPDUltraTurboFreqMhz;
+                }
 
             } // end for loop
             if (l_err != NULL)
@@ -320,13 +545,18 @@ namespace FREQVOLTSVC
             // Get max powersave freq
             o_sysVPDPowerSaveMinFreqMhz = l_maxsysVPDPowerSaveMinFreqMhz;
 
+            // Get ultra turbo freq
+            o_sysVPDUltraTurboMinFreqMhz = l_minsysVPDUltraTurboFreqMhz;
+
         } while (0);
 
         TRACFCOMP(g_fapiTd,EXIT_MRK"o_sysNomFreqMhz: 0x%08X, "
                   "o_sysVPDTurboMaxFreqMhz: 0x%08X, "
-                  "o_sysVPDPowerSaveMinFreqMhz: 0x%08X",
+                  "o_sysVPDPowerSaveMinFreqMhz: 0x%08X, "
+                  "o_sysVPDUltraTurboFreqMhz: 0x%08x",
                    o_sysNomFreqMhz, o_sysVPDTurboMaxFreqMhz,
-                   o_sysVPDPowerSaveMinFreqMhz );
+                   o_sysVPDPowerSaveMinFreqMhz,
+                   o_sysVPDUltraTurboMinFreqMhz );
 
         return l_err;
     }

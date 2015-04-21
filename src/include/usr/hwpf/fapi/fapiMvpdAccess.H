@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMvpdAccess.H,v 1.8 2014/01/20 22:37:51 mklight Exp $
+// $Id: fapiMvpdAccess.H,v 1.10 2015/04/23 19:42:38 whs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiMvpdAccess.H,v $
 
 /**
@@ -125,6 +125,7 @@ namespace fapi
         MVPD_KEYWORD_MK  = 0x20,
         MVPD_KEYWORD_PB  = 0x21,
         MVPD_KEYWORD_CH  = 0x22,
+        MVPD_KEYWORD_IQ  = 0x23,
     };
 
     typedef struct voltageBucketData
@@ -227,7 +228,7 @@ fapi::ReturnCode fapiSetMvpdField(const fapi::MvpdRecord i_record,
  *
  * @return fapi::ReturnCode. FAPI_RC_SUCCESS, or failure value.
  */
-fapi::ReturnCode fapiGetPoundVBucketData(const TARGETING::Target *i_pChipTarget,
+fapi::ReturnCode fapiGetPoundVBucketData(const fapi::Target &i_procTarget,
                                          const uint32_t i_record,
                                          fapi::voltageBucketData_t & o_data);
 

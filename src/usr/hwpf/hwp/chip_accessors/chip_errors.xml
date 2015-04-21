@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!-- Contributors Listed Below - COPYRIGHT 2014,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: chip_errors.xml,v 1.3 2014/05/23 01:07:27 whs Exp $ -->
+<!-- $Id: chip_errors.xml,v 1.5 2015/08/11 08:55:24 whs Exp $ -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -97,4 +99,23 @@
     <ffdc>FFDC_PASSED_SIZE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_INSUFFICIENT_VPD_RETURNED</rc>
+    <description>
+        VPD keyword record returned is smaller than expected.
+        Probably a firmware bug, but could be bad VPD
+    </description>
+    <ffdc>KEYWORD</ffdc>
+    <ffdc>RETURNED_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

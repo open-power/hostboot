@@ -3215,6 +3215,23 @@
 </attribute>
 
 <attribute>
+    <id>ULTRA_TURBO_FREQ_MHZ</id>
+    <description>
+      The ultra turbo frequency in MHz.
+      This is the same for all cores in the system.
+      Provided by the min of the #V Fvmin field in mvpd LRPx records.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_ULTRA_TURBO_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MNFG_FLAGS</id>
     <description>
         Provides the manufacturing flags. This is a bitfield.
@@ -15762,7 +15779,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         cores.        
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
