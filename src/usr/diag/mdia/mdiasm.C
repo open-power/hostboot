@@ -808,10 +808,18 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     ecmdDataBufferBase startAddr(64), endAddr(64);
     mss_MaintCmd * cmd = NULL;
 
+    // starting a maint cmd ...  register a timeout monitor
+    TargetHandle_t sys = NULL;
+    targetService().getTopLevelTarget(sys);
+
+    HbSettings hbSettings = sys->getAttr<ATTR_HB_SETTINGS>();
+
+    uint64_t mbaTO =
+        hbSettings.traceContinuous ? MBA_TIMEOUT_LONG : MBA_TIMEOUT;
+
     mutex_lock(&iv_mutex);
 
-    // starting a maint cmd ...  register a timeout monitor
-    uint64_t monitorId = getMonitor().addMonitor(MBA_TIMEOUT);
+    uint64_t monitorId = getMonitor().addMonitor(mbaTO);
 
     i_wfp.timer = monitorId;
     i_wfp.timeoutCnt = 0; // reset for new work item
