@@ -81,6 +81,10 @@
   #include <diag/attn/attn.H>
 #endif
 
+#ifdef CONFIG_TPMDD
+  #include <secureboot/trustedbootif.H>
+#endif
+
 namespace HWAS
 {
 
@@ -205,6 +209,14 @@ void* host_discover_targets( void *io_pArgs )
 
     // send DIMM/CORE/PROC sensor status to the BMC
     SENSOR::updateBMCSensorStatus();
+#endif
+
+#ifdef CONFIG_TPMDD
+    if (NULL == errl)
+    {
+        // Initialize the master TPM
+        errl = (errlHndl_t)TRUSTEDBOOT::host_update_master_tpm(io_pArgs);
+    }
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

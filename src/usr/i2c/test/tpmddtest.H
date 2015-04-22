@@ -59,41 +59,42 @@ class TPMDDTest: public CxxTest::TestSuite
          */
         TARGETING::Target* getTestTarget( tpm_chip_types_t i_chip )
         {
-                TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target* testTarget = NULL;
-                tS.getMasterNodeTarget( testTarget );
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target* testTarget = NULL;
+            tS.getMasterNodeTarget( testTarget );
 
-                assert(testTarget != NULL);
+            assert(testTarget != NULL);
 
-                TRACFCOMP( g_trac_tpmdd,
-                           "getTestTarget node tgt=0x%X chip=%d",
-                           TARGETING::get_huid(testTarget),
-                           i_chip);
+            TRACFCOMP( g_trac_tpmdd,
+                       "getTestTarget node tgt=0x%X chip=%d",
+                       TARGETING::get_huid(testTarget),
+                       i_chip);
 
-                // Let's see if the requested chip is functional
-                tpm_info_t tpmInfo;
-                tpmInfo.chip = i_chip;
-                errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo);
-                if (NULL != err)
-                {
-                    testTarget = NULL;
-                    delete err;
-                }
-                else if (!tpmInfo.tpmEnabled)
-                {
-                    TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
-                              "Chip %d not enabled",
-                              i_chip);
-                    testTarget = NULL;
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
-                              "Chip %d enabled",
-                              i_chip);
-                }
+            // Let's see if the requested chip is functional
+            tpm_info_t tpmInfo;
+            tpmInfo.chip = i_chip;
+            errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo);
 
-                return testTarget;
+            if (NULL != err)
+            {
+                testTarget = NULL;
+                delete err;
+            }
+            else if (!tpmInfo.tpmEnabled)
+            {
+                TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
+                          "Chip %d not enabled",
+                          i_chip);
+                testTarget = NULL;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
+                          "Chip %d enabled",
+                          i_chip);
+            }
+
+            return testTarget;
         }
 
         /**
@@ -136,7 +137,8 @@ class TPMDDTest: public CxxTest::TestSuite
                     err = NULL;
                     continue;
                 }
-                else if (data != TPMDD::TPM_VENDORID)
+                else if ((data & TPMDD::TPM_VENDORID_MASK)
+                         != TPMDD::TPM_VENDORID)
                 {
                     fails++;
                     TS_FAIL( "testTPMReadVendorID - Failed to read "
@@ -514,15 +516,18 @@ class TPMDDTest: public CxxTest::TestSuite
          */
         void testTPMTransmit ( void )
         {
+
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
             uint8_t data[256];
             size_t dataSize = sizeof(data);
+#ifdef CONFIG_TPMDD_1_2
             uint32_t subCap = 0;
+#endif
+            size_t cmdSize = 0;
 
             TRACFCOMP( g_trac_tpmdd,
                        "testTPMTransmit - Start" );
-
             do
             {
 
@@ -532,65 +537,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 {
                     continue;
                 }
-
-
-                // Build our command block for a startup
-                memset(data, 0xFE, sizeof(data));
-
-#ifdef CONFIG_TPMDD_1_2
-                TRUSTEDBOOT::TPM_2ByteIn* cmd =
-                    reinterpret_cast<TRUSTEDBOOT::TPM_2ByteIn*>(data);
-                cmd->base.tag = TRUSTEDBOOT::TPM_TAG_RQU_COMMAND;
-                cmd->base.paramSize = sizeof (TRUSTEDBOOT::TPM_2ByteIn);
-                cmd->base.ordinal = TRUSTEDBOOT::TPM_ORD_Startup;
-                cmd->param = TRUSTEDBOOT::TPM_ST_CLEAR;
-#endif
-
-                num_ops++;
-                err = deviceRead(testTarget,
-                                 &data,
-                                 dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                     TPM_OP_TRANSMIT,
-                                                     cmd->base.paramSize) );
-#ifdef CONFIG_TPMDD_1_2
-                TRUSTEDBOOT::TPM_BaseOut* resp =
-                    reinterpret_cast<TRUSTEDBOOT::TPM_BaseOut*>(data);
-#endif
-
-
-                if( NULL != err )
-                {
-                    fails++;
-                    TS_FAIL( "testTPMTransmit - Error detected" );
-                    errlCommit( err,
-                                TPMDD_COMP_ID );
-                    delete err;
-                    err = NULL;
-                    continue;
-                }
-                else if (sizeof(TRUSTEDBOOT::TPM_BaseOut) != dataSize)
-                {
-                    fails++;
-                    TS_FAIL( "testTPMTransmit - TPM didn't return correct "
-                             "response size");
-                    continue;
-                }
-                else if (TRUSTEDBOOT::TPM_SUCCESS !=
-                         resp->returnCode)
-                {
-                    fails++;
-                    TS_FAIL( "testTPMTransmit - TPM return non-success : %d",
-                             resp->returnCode);
-                    continue;
-                }
-                else
-                {
-                    TRACUCOMP(g_trac_tpmdd, "testTPMTransmit - "
-                              "Transmit returned as expected. len=%d",
-                              dataSize);
-                }
-
 
 
                 // Build our command block for a get capability
@@ -609,6 +555,21 @@ class TPMDDTest: public CxxTest::TestSuite
                 capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
                 capCmd->subCapSize = sizeof (subCap);
                 memcpy(capCmd->subCap, &subCap, sizeof (subCap));
+                cmdSize = capCmd->base.paramSize;
+#elif defined (CONFIG_TPMDD_2_0)
+                TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
+                    (TRUSTEDBOOT::TPM2_GetCapabilityIn*)data;
+
+                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
+                cmd->base.commandSize =
+                    sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
+                cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
+                cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
+                cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
+                cmd->propertyCount = 1;
+
+                cmdSize = cmd->base.commandSize;
+
 #endif
 
                 num_ops++;
@@ -617,11 +578,10 @@ class TPMDDTest: public CxxTest::TestSuite
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_PRIMARY,
                                                      TPM_OP_TRANSMIT,
-                                                     capCmd->base.paramSize) );
-#ifdef CONFIG_TPMDD_1_2
-                TRUSTEDBOOT::TPM_GetCapabilityOut* capResp =
-                    reinterpret_cast<TRUSTEDBOOT::TPM_GetCapabilityOut*>(data);
-#endif
+                                                     cmdSize) );
+
+                TRUSTEDBOOT::TPM_BaseOut* resp =
+                    reinterpret_cast<TRUSTEDBOOT::TPM_BaseOut*>(data);
 
 
                 if( NULL != err )
@@ -634,19 +594,17 @@ class TPMDDTest: public CxxTest::TestSuite
                     err = NULL;
                     continue;
                 }
-                else if ((sizeof(TRUSTEDBOOT::TPM_GetCapabilityOut) +
-                          capResp->respSize) != dataSize)
+                else if (resp->paramSize != dataSize)
                 {
                     fails++;
                     TS_FAIL( "testTPMTransmit - GetCap : TPM didn't return "
                              "correct response size E:%d A:%d",
-                             sizeof(TRUSTEDBOOT::TPM_GetCapabilityOut) +
-                             capResp->respSize,
+                             resp->paramSize,
                              dataSize);
                     continue;
                 }
                 else if (TRUSTEDBOOT::TPM_SUCCESS !=
-                         capResp->base.returnCode)
+                         resp->returnCode)
                 {
                     fails++;
                     TS_FAIL( "testTPMTransmit - GetCap : "
@@ -681,7 +639,10 @@ class TPMDDTest: public CxxTest::TestSuite
             int64_t fails = 0, num_ops = 0;
             uint8_t data[256];
             size_t dataSize = sizeof(data);
+#ifdef CONFIG_TPMDD_1_2
             uint32_t subCap = 0;
+#endif
+            size_t cmdSize = 0;
 
             TRACFCOMP( g_trac_tpmdd,
                        "testTPMTransmitOverUnder - Start" );
@@ -695,7 +656,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 {
                     continue;
                 }
-
 
                 // Build our command block for a startup
                 memset(data, 0xFE, sizeof(data));
@@ -713,6 +673,20 @@ class TPMDDTest: public CxxTest::TestSuite
                 capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
                 capCmd->subCapSize = sizeof (subCap);
                 memcpy(capCmd->subCap, &subCap, sizeof (subCap));
+                cmdSize = capCmd->base.paramSize;
+#elif defined (CONFIG_TPMDD_2_0)
+                TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
+                    (TRUSTEDBOOT::TPM2_GetCapabilityIn*)data;
+
+                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
+                cmd->base.commandSize =
+                    sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
+                cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
+                cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
+                cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
+                cmd->propertyCount = 1;
+
+                cmdSize = cmd->base.commandSize;
 #endif
 
                 num_ops++;
@@ -721,7 +695,7 @@ class TPMDDTest: public CxxTest::TestSuite
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_PRIMARY,
                                           TPM_OP_TRANSMIT,
-                                          capCmd->base.paramSize - 1) );
+                                          cmdSize - 1) );
 
                 if( NULL == err ||
                     err->reasonCode() != TPM_UNDERFLOW_ERROR)
@@ -757,6 +731,18 @@ class TPMDDTest: public CxxTest::TestSuite
                 capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
                 capCmd->subCapSize = sizeof (subCap);
                 memcpy(capCmd->subCap, &subCap, sizeof (subCap));
+                cmdSize = capCmd->base.paramSize;
+#elif defined (CONFIG_TPMDD_2_0)
+
+                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
+                cmd->base.commandSize =
+                    sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
+                cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
+                cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
+                cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
+                cmd->propertyCount = 1;
+
+                cmdSize = cmd->base.commandSize;
 #endif
 
                 num_ops++;
@@ -765,7 +751,7 @@ class TPMDDTest: public CxxTest::TestSuite
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_PRIMARY,
                                          TPM_OP_TRANSMIT,
-                                         capCmd->base.paramSize + 1) );
+                                         cmdSize + 1) );
 
                 if( NULL == err ||
                     err->reasonCode() != TPM_OVERFLOW_ERROR)
@@ -800,17 +786,29 @@ class TPMDDTest: public CxxTest::TestSuite
                 capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
                 capCmd->subCapSize = sizeof (subCap);
                 memcpy(capCmd->subCap, &subCap, sizeof (subCap));
+                cmdSize = capCmd->base.paramSize;
+#elif defined (CONFIG_TPMDD_2_0)
+
+                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
+                cmd->base.commandSize =
+                    sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
+                cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
+                cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
+                cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
+                cmd->propertyCount = 1;
+
+                cmdSize = cmd->base.commandSize;
 #endif
 
                 num_ops++;
                 // Force datasize to be too small
-                dataSize = sizeof(TRUSTEDBOOT::TPM_GetCapabilityOut) - 1;
+                dataSize = sizeof(TRUSTEDBOOT::TPM_BaseOut);
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS( TPM_PRIMARY,
                                         TPM_OP_TRANSMIT,
-                                        capCmd->base.paramSize) );
+                                        cmdSize) );
 
                 if( NULL == err ||
                     err->reasonCode() != TPM_OVERFLOW_ERROR)
@@ -829,7 +827,6 @@ class TPMDDTest: public CxxTest::TestSuite
                               "DataOver Transmit returned as expected. len=%d",
                               dataSize);
                 }
-
 
             } while( 0 );
             TRACFCOMP( g_trac_tpmdd,

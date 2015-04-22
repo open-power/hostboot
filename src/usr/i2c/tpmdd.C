@@ -307,9 +307,13 @@ bool tpmPresence ( TARGETING::Target * i_target,
 {
 
     TRACDCOMP(g_trac_tpmdd, ENTER_MRK"tpmPresence()");
+    TRACUCOMP(g_trac_tpmdd, ENTER_MRK"tpmPresence() : "
+              "node tgt=0x%X chip=%d",
+              TARGETING::get_huid(i_target),
+              i_chip);
 
     errlHndl_t err = NULL;
-    bool l_present = false;
+    bool l_present = true;
 
     tpm_info_t tpmInfo;
 
@@ -327,6 +331,7 @@ bool tpmPresence ( TARGETING::Target * i_target,
             TRACFCOMP(g_trac_tpmdd,
                      ERR_MRK"Error in tpmPresence::tpmReadAttributes() "
                       "RC 0x%X", err->reasonCode());
+            l_present = false;
             delete err;
             err = NULL;
             break;
@@ -341,6 +346,7 @@ bool tpmPresence ( TARGETING::Target * i_target,
             TRACFCOMP(g_trac_tpmdd,
                       ERR_MRK"Error in tpmPresence::tpmGetI2Cmaster() "
                       "RC 0x%X", err->reasonCode());
+            l_present = false;
             delete err;
             err = NULL;
             break;
@@ -351,27 +357,140 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACUCOMP(g_trac_tpmdd,
                       INFO_MRK"tpmPresence : Device not enabled");
+            l_present = false;
             break;
         }
 
-        //Check for the target at the I2C level
-        l_present = I2C::i2cPresence(tpmInfo.i2cTarget,
-                                     tpmInfo.port,
-                                     tpmInfo.engine,
-                                     static_cast<uint64_t>(tpmInfo.devAddr)
-                                     );
 
-        if( !l_present )
+
+
+        // Verify the TPM is supported by this driver by reading and
+        //  comparing the vendorid
+        uint32_t vendorId = 0;
+        size_t   vendorIdSize = 4;
+
+
+        // Set the offset for the vendor reg
+        tpmInfo.offset = TPMDD::I2C_REG_VENDOR;
+
+
+        err = tpmRead( &vendorId,
+                       vendorIdSize,
+                       tpmInfo );
+
+        if ( NULL != err )
         {
             TRACUCOMP(g_trac_tpmdd,
-                      INFO_MRK"i2cPresence returned false! chip NOT present!");
+                     ERR_MRK"tpmPresence : ReadVendorID failed!"
+                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X RC=0x%X",
+                      TARGETING::get_huid(i_target),
+                      tpmInfo.chip,
+                      tpmInfo.port,
+                      tpmInfo.engine,
+                      static_cast<uint64_t>(tpmInfo.devAddr),
+                      err->reasonCode()
+                      );
+            l_present = false;
+            delete err;
+            err = NULL;
+            break;
+
+        }
+        else if ((TPMDD::TPM_VENDORID_MASK & vendorId)
+                   != TPMDD::TPM_VENDORID)
+        {
+            TRACUCOMP(g_trac_tpmdd,
+                     ERR_MRK"tpmPresence : ReadVendorID mismatch!"
+                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X"
+                      " found ID=0x%X exp ID=0x%X",
+                      TARGETING::get_huid(i_target),
+                      tpmInfo.chip,
+                      tpmInfo.port,
+                      tpmInfo.engine,
+                      static_cast<uint64_t>(tpmInfo.devAddr),
+                      vendorId, TPMDD::TPM_VENDORID
+                      );
+            l_present = false;
             break;
         }
+
+
+        // Verify the TPM is supported by this driver by reading and
+        //  comparing the familyid
+        uint8_t familyId = 0;
+        size_t  familyIdSize = 1;
+
+
+        // Set the offset for the vendor reg
+        tpmInfo.offset = TPMDD::I2C_REG_FAMILYID;
+
+
+        err = tpmRead( &familyId,
+                       familyIdSize,
+                       tpmInfo );
+
+        if ( NULL != err )
+        {
+            TRACUCOMP(g_trac_tpmdd,
+                     ERR_MRK"tpmPresence : ReadFamilyID failed!"
+                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X RC=0x%X",
+                      TARGETING::get_huid(i_target),
+                      tpmInfo.chip,
+                      tpmInfo.port,
+                      tpmInfo.engine,
+                      static_cast<uint64_t>(tpmInfo.devAddr),
+                      err->reasonCode()
+                      );
+            l_present = false;
+            delete err;
+            err = NULL;
+            break;
+
+        }
+        else if ((TPMDD::TPM_FAMILYID_MASK & familyId)
+                 != TPMDD::TPM_FAMILYID)
+        {
+            TRACUCOMP(g_trac_tpmdd,
+                     ERR_MRK"tpmPresence : FamilyID mismatch!"
+                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X"
+                      " found ID=0x%X exp ID=0x%X",
+                      TARGETING::get_huid(i_target),
+                      tpmInfo.chip,
+                      tpmInfo.port,
+                      tpmInfo.engine,
+                      static_cast<uint64_t>(tpmInfo.devAddr),
+                      familyId, TPMDD::TPM_FAMILYID
+                      );
+            l_present = false;
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_tpmdd,
+                      INFO_MRK"tpmPresence : TPM Detected!"
+                      " node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X"
+                      " Vendor ID=0x%X, Family ID=0x%X",
+                      TARGETING::get_huid(i_target),
+                      tpmInfo.chip,
+                      tpmInfo.port,
+                      tpmInfo.engine,
+                      static_cast<uint64_t>(tpmInfo.devAddr),
+                      vendorId, familyId
+                      );
+            l_present = true;
+        }
+
+
+
 
     } while( 0 );
 
     TRACDCOMP(g_trac_tpmdd, EXIT_MRK"tpmPresence() : presence : %d",
               l_present);
+    TRACUCOMP(g_trac_tpmdd, EXIT_MRK"tpmPresence() : "
+              "node tgt=0x%X chip=%d presence=%d",
+              TARGETING::get_huid(i_target),
+              i_chip, l_present);
     return l_present;
 }
 
@@ -392,7 +511,7 @@ errlHndl_t tpmRead ( void * o_buffer,
 
     do
     {
-        TRACSCOMP( g_trac_tpmdd,
+        TRACUCOMP( g_trac_tpmdd,
                    "TPM READ  START : Chip: %02d : Offset %.2X : Len %d",
                    i_tpmInfo.chip, i_tpmInfo.offset, i_buflen );
 
@@ -859,7 +978,8 @@ errlHndl_t tpmTransmit ( void * io_buffer,
     TRACDCOMP( g_trac_tpmdd,
                ENTER_MRK"tpmTransmit()" );
 
-    do {
+    do
+    {
 
         TRACUCOMP( g_trac_tpmdd,
                    "TPM TRANSMIT START : Chip: %02d : "
@@ -1161,7 +1281,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, %d/%d/0x%X "
-              "En=%d, aS=%d, aS=%d (%d)",
+              "En=%d, aS=%d, aO=%d",
               TARGETING::get_huid(i_target),
               io_tpmInfo.port, io_tpmInfo.engine, io_tpmInfo.devAddr,
               io_tpmInfo.tpmEnabled,
@@ -1596,21 +1716,50 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo)
 } // end tpmPollForDataAvail
 
 errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
-                              uint8_t & o_burstCount)
+                              uint16_t & o_burstCount)
 {
     errlHndl_t err = NULL;
-
     o_burstCount = 0;
+
+#ifdef CONFIG_TPMDD_1_2
+    // Nuvoton 1.2 used a one byte burst count
+    uint8_t burstLow = 0;
+
     err = tpmReadReg(i_tpmInfo,
                      TPMDD::I2C_REG_BURSTCOUNT,
                      1,
-                     reinterpret_cast<void*>(&o_burstCount));
+                     reinterpret_cast<void*>(&burstLow));
+
+    o_burstCount = burstLow;
 
     if (NULL == err &&
         o_burstCount > TPMDD::TPM_MAXBURSTSIZE)
     {
         o_burstCount = TPMDD::TPM_MAXBURSTSIZE;
     }
+
+#else
+    // Nuvoton 2.0 uses a two byte burst count
+    // Read the burst count
+    uint16_t burstCount = 0;
+    if (NULL == err)
+    {
+        err = tpmReadReg(i_tpmInfo,
+                         TPMDD::I2C_REG_BURSTCOUNT,
+                         2,
+                         reinterpret_cast<void*>(&burstCount));
+    }
+
+    if (NULL == err)
+    {
+        o_burstCount = (burstCount & 0x00FF) << 8;
+        o_burstCount |= (burstCount & 0xFF00) >> 8;
+    }
+#endif
+    TRACUCOMP( g_trac_tpmdd,
+               "tpmReadBurstCount() - BurstCount %d",
+               o_burstCount);
+
 
     return err;
 
@@ -1666,7 +1815,7 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
     size_t curByte = 0;
     uint8_t* bytePtr = (uint8_t*)i_buffer;
     uint8_t* curBytePtr = NULL;
-    uint8_t burstCount = 0;
+    uint16_t burstCount = 0;
     errlHndl_t err = NULL;
     bool expecting = false;
     // We will transfer the command except for the last byte
@@ -1892,7 +2041,7 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
     size_t curByte = 0;
     uint8_t* bytePtr = (uint8_t*)o_buffer;
     uint8_t* curBytePtr = NULL;
-    uint8_t burstCount = 0;
+    uint16_t burstCount = 0;
     errlHndl_t err = NULL;
     bool dataAvail = false;
 
@@ -1903,7 +2052,7 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
         do
         {
             err = tpmReadBurstCount(i_tpmInfo,
-                                burstCount);
+                                    burstCount);
             if (err)
             {
                 break;
@@ -1927,7 +2076,7 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
                            "clen=%d",
                            i_tpmInfo.chip, i_tpmInfo.port,
                            i_tpmInfo.engine, i_tpmInfo.devAddr,
-                           io_buflen, curByte);
+                           io_buflen, curByte + burstCount);
 
                 /*@
                  * @errortype

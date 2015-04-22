@@ -217,6 +217,7 @@ my %resident_modules = (
     "liberrldisplay.so"    => '1',
     "libipmi.so"           => '1',
     "libvpd.so"            => '1',
+    "libsecureboot_trusted.so" => '1',
 );
 
 # has with library to istep list file were the DepMod array is kept

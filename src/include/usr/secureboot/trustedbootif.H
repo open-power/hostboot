@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/secureboot/secure_reasoncodes.H $             */
+/* $Source: src/usr/secureboot/trustedboot.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,34 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SECUREBOOT_REASONCODES_H
-#define __SECUREBOOT_REASONCODES_H
+/**
+ * @file trustedbootif.H
+ *
+ * @brief Trustedboot interfaces
+ *
+ */
+#ifndef __TRUSTEDBOOTIF_H
+#define __TRUSTEDBOOTIF_H
+// -----------------------------------------------
+// Includes
+// -----------------------------------------------
 
-#include <hbotcompid.H>
-
-namespace SECUREBOOT
+namespace TRUSTEDBOOT
 {
-    enum SECUREModuleId
-    {
-        MOD_SECURE_INVALID              = 0x00,
-        MOD_SECURE_BLINDPURGE           = 0x01,
-        MOD_SECURE_ROM_INIT             = 0x02,
-        MOD_SECURE_ROM_VERIFY           = 0x03,
-        MOD_SECURE_ROM_CLEANUP          = 0x04,
-   };
 
-    enum SECUREReasonCode
-    {
-        RC_PURGEOP_PENDING              = SECURE_COMP_ID | 0x01,
-        RC_PURGEOP_FAIL_COMPLETE        = SECURE_COMP_ID | 0x02,
-        RC_DEV_MAP_FAIL                 = SECURE_COMP_ID | 0x03,
-        RC_PAGE_ALLOC_FAIL              = SECURE_COMP_ID | 0x04,
-        RC_SET_PERMISSION_FAIL_EXE      = SECURE_COMP_ID | 0x05,
-        RC_SET_PERMISSION_FAIL_WRITE    = SECURE_COMP_ID | 0x06,
-        RC_ROM_VERIFY                   = SECURE_COMP_ID | 0x07,
 
-        // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
-    };
-}
+    /**
+     * @brief Initialize trusted boot/TPM components for the master TPM
+     *
+     * @param[in] io_pArgs istep args
+     *
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    void* host_update_master_tpm( void *io_pArgs );
 
-#endif
+
+} // end TRUSTEDBOOT namespace
+
+
+#endif // __TRUSTEDBOOTIF_H

@@ -370,6 +370,21 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 #endif
 
+#ifdef CONFIG_TPMDD
+        /**
+         * @brief   Trusted boot library
+         */
+        {
+            "libsecureboot_trusted.so" ,        // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
+#endif
+
+
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!

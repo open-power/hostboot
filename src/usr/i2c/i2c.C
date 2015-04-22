@@ -936,14 +936,20 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 
 
                 TRACUCOMP( g_trac_i2c, "i2cRead() Wait Loop: status=0x%016llx "
-                   ".fifo_entry_count=%d, .data_request=%d",
-                   status.value, status.fifo_entry_count, status.data_request);
+                           ".fifo_entry_count=%d, .data_request=%d",
+                           status.value, status.fifo_entry_count,
+                           status.data_request);
 
 
                 if( 0 == timeoutCount-- )
                 {
                     TRACFCOMP( g_trac_i2c,
-                               ERR_MRK"i2cRead() - Timed out waiting for data in FIFO!" );
+                               ERR_MRK"i2cRead() - "
+                               "Timed out waiting for data in FIFO! "
+                               "status=0x%016llx "
+                               ".fifo_entry_count=%d, .data_request=%d",
+                               status.value, status.fifo_entry_count,
+                               status.data_request );
 
                     /*@
                      * @errortype
@@ -1326,7 +1332,9 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
             if( 0 == timeoutCount-- )
             {
                 TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"i2cWaitForCmdComp() - Timed out waiting for Command Complete!" );
+                           ERR_MRK"i2cWaitForCmdComp() - "
+                           "Timed out waiting for Command Complete! "
+                           "status=%016llX", status.value );
 
                 /*@
                  * @errortype

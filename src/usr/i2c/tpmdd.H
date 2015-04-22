@@ -97,13 +97,40 @@ enum nuvo_12_defs_t
 {
     I2C_REG_STS        = 0x0,
     I2C_REG_BURSTCOUNT = 0x1,
+    I2C_REG_FAMILYID   = 0x3,
     I2C_REG_WR_FIFO    = 0x20,
     I2C_REG_RD_FIFO    = 0x40,
     I2C_REG_VENDOR     = 0x60,
 
     TPM_VENDORID       = 0x5010FE00,
+    TPM_VENDORID_MASK  = 0xFFFFFF00,
     TPM_MAXBURSTSIZE   = 32,  ///< Max size to transfer in one i2c op
+    TPM_FAMILYID       = 0x00,
+    TPM_FAMILYID_MASK  = 0x0C,
 };
+
+#elif defined(CONFIG_TPMDD_2_0)
+/**
+ * @brief Nuvoton 2.0 TPM definitions
+ */
+enum nuvo_20_defs_t
+{
+    I2C_REG_STS        = 0x0,
+    I2C_REG_BURSTCOUNT = 0x1,
+    I2C_REG_BURSTCOUNT_HIGH = 0x2,
+    I2C_REG_FAMILYID   = 0x3,
+    I2C_REG_WR_FIFO    = 0x20,
+    I2C_REG_RD_FIFO    = 0x40,
+    I2C_REG_VENDOR     = 0x60,
+
+    TPM_VENDORID       = 0x5010FE00,
+    TPM_VENDORID_MASK  = 0xFFFFFF00,
+    TPM_MAXBURSTSIZE   = 0xFFFF,
+    TPM_FAMILYID       = 0x04,
+    TPM_FAMILYID_MASK  = 0x0C,
+};
+
+
 #endif
 #endif
 
@@ -126,13 +153,35 @@ union tpm_sts_reg_t
         uint8_t rsvd2          : 1; // 07 // RO
     } PACKED;
 };
+
+#elif defined(CONFIG_TPMDD_2_0)
+
+/**
+* @brief TPM STS register definition (PTP 2.0 Spec)
+*/
+union tpm_sts_reg_t
+{
+    uint8_t value;
+    struct
+    {
+        uint8_t stsValid       : 1; // 00 // RO
+        uint8_t isCommandReady : 1; // 01 // RW
+        uint8_t tpmGo          : 1; // 02 // WO
+        uint8_t dataAvail      : 1; // 03 // RO
+        uint8_t expect         : 1; // 04 // RO
+        uint8_t selfTestDone   : 1; // 05 // RO
+        uint8_t responseRetry  : 1; // 06 // WO
+        uint8_t rsvd2          : 1; // 07 // RO
+    } PACKED;
+};
+
 #endif
 
 
 
 /**
 *
-* @brief Perform an TPM access operation.
+* @brief Perform a TPM access operation.
 *
 * @param[in] i_opType Operation Type - See DeviceFW::OperationType in
 *       driververif.H
@@ -431,7 +480,7 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo);
  *      error log.
  */
 errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
-                              uint8_t & o_burstCount);
+                              uint16_t & o_burstCount);
 
 /**
  * @brief Write the command ready bit in the Tpm STS register
