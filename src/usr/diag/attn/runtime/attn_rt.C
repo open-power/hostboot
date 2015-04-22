@@ -25,6 +25,7 @@
 
 #include "runtime/attnsvc.H"
 #include "common/attntrace.H"
+#include "common/attnmem.H"
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
 #include <targeting/common/target.H>
@@ -102,6 +103,10 @@ namespace ATTN_RT
 
         int rc = 0;
         errlHndl_t err = NULL;
+        AttentionList attentions;
+        MemOps & memOps = getMemOps();
+        uint64_t l_iprScomData = 0;
+
 
         do
         {
@@ -133,18 +138,65 @@ namespace ATTN_RT
 
             if( i_ipollMask & hostMask)
             {
-                err = putScom( proc, INTR_TYPE_LCL_ERR_STATUS_AND_REG, 0 );
+                // After handling attn, check GP1 for more attns
+                // as there could be additional memory units with attns.
+                attentions.clear();
+
+                err = memOps.resolve(proc, attentions);
+
+                if(err)
+                {
+                    ATTN_ERR("RT GP1 Chk:memOps  returned error.HUID:0X%08X ",
+                              get_huid( proc ));
+                    break;
+                }
+
+
+                // Save the IPR if any attns still active on Centaurs
+                if (!attentions.empty())
+                {
+                    err = getScom(proc, INTR_TYPE_LCL_ERR_STATUS_REG,
+                                  l_iprScomData);
+
+                    if(err)
+                    {
+                        ATTN_ERR("RT SaveIPR returned error.HUID:0X%08X ",
+                                  get_huid( proc ));
+                        break;
+                    }
+
+                } // end if any attentions
+
+
+                // Clear the IPR (interrupt presentation register)
+                err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_AND_REG, 0);
 
                 if(err)
                 {
                     ATTN_ERR("ATTN_RT::handleAttns putscom failed for "
                              "RtProc: %llx address:0x%08X", i_proc,
                               INTR_TYPE_LCL_ERR_STATUS_AND_REG);
-                    //Let us commit and continue.
-                    errlCommit(err, ATTN_COMP_ID);
+                    break;
                 }
 
-            }
+
+                // Restore the IPR if any attns still active in Centaurs
+                if (!attentions.empty())
+                {
+                    err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_OR_REG,
+                                  l_iprScomData);
+
+                    if(err)
+                    {
+                        ATTN_ERR("RT RestoreIPR returned error.HUID:0X%08X ",
+                                  get_huid( proc ));
+                        break;
+                    }
+
+                } // end if any attentions
+
+            } // end if i_ipollMask & hostMask)
+
         } while(0);
 
         if(err)
@@ -156,6 +208,8 @@ namespace ATTN_RT
             }
         }
 
+
+        attentions.clear();
         ATTN_SLOW(EXIT_MRK"ATTN_RT::handleAttns rc: %d", rc);
 
         return rc;

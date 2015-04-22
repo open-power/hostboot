@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,11 +177,13 @@ bool getCheckbits(
 enum
 {
     INTR_TYPE_LCL_ERR_STATUS_AND_REG = 0x01020002,
-    INTR_TYPE_MASK_OR_REG      = 0x0102000d,
-    INTR_TYPE_MASK_AND_REG     = 0x0102000e,
-    INTR_TYPE_CONFIG_AND_REG   = 0x01020011,
-    GP2_REG                    = 0x02000002,
-    IPOLL_STATUS_REG           = 0x01020014,
+    INTR_TYPE_MASK_OR_REG            = 0x0102000d,
+    INTR_TYPE_MASK_AND_REG           = 0x0102000e,
+    INTR_TYPE_CONFIG_AND_REG         = 0x01020011,
+    GP2_REG                          = 0x02000002,
+    IPOLL_STATUS_REG                 = 0x01020014,
+    INTR_TYPE_LCL_ERR_STATUS_OR_REG  = 0x01020001,
+    INTR_TYPE_LCL_ERR_STATUS_REG     = 0x01020000
 };
 }
 #endif
