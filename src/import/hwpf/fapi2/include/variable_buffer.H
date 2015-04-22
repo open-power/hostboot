@@ -248,6 +248,7 @@ namespace fapi2
                 iv_data.insert(iv_data.end(), i_value, &i_value[i_length]);
             }
 
+
 #if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
         /// @brief Print the contents of the buffer to stdout
         inline void print(void) const
@@ -343,25 +344,71 @@ namespace fapi2
         }
 
         ///
-        /// @brief Set a bit in the buffer
-        /// @param[in] i_bit the bit number to set.
-        /// @note 0 is left-most
-        /// @return FAPI2_RC_SUCCESS if OK
-        ///
-        inline fapi2::ReturnCodes setBit(const bits_type& i_bit)
+        /// @brief  Set a bit in buffer
+        /// @tparam SB Start bit in buffer to clear.
+        /// @tparam L Number of consecutive bits from start bit to
+        /// clear
+        /// @return FAPI2_RC_SUCCESS on success
+        inline fapi2::ReturnCodes setBit( const bits_type SB, bits_type L = 1)
         {
-            const bits_type index = i_bit / bits_per_unit;
 
-            // setting a bit outside our container?
-            if( i_bit >= this->iv_perceived_bit_length )
+            ReturnCodes rc;
+           // make sure we stay within our container
+            assert((L > 0) && ((SB + L) <= this->iv_perceived_bit_length) );
+
+            uint32_t mask   = 0;
+
+            // last bit to check
+            bits_type EB    = SB + L -1;
+
+            // index where first bit to check is located
+            bits_type start_index = SB/bits_per_unit;
+
+            // index where last bit is located
+            bits_type end_index   = EB/bits_per_unit;
+
+            if( start_index == end_index )
             {
-                return FAPI2_RC_INVALID_PARAMETER;
+                // normalize our SB to be within a unit
+                bits_type TempSB = SB - (start_index*bits_per_unit);
+
+                // grab a mask from SB for L number of bits.
+                mask = fast_mask32(TempSB, L);
+
+                iv_data[start_index] |= mask;
+
+                rc = FAPI2_RC_SUCCESS;
+
+            }
+            else
+            {
+                // the bits span more than one internal unit, need to break
+                // it up to process it.
+
+                // make TempSB point to the start of the next unit, adjust the
+                // length and go again, process the bits in the previous index
+                // when we get back.
+                bits_type TempSB = (start_index + 1) * bits_per_unit;
+                bits_type TempL  = EB - TempSB + 1;
+
+                rc = this->setBit( TempSB, TempL );
+
+                if(rc == FAPI2_RC_SUCCESS)
+                {
+                    // now check the bits in the previous index up to the next index.
+                    // normalize our SB to be within a unit
+                    TempSB = SB - (start_index*bits_per_unit);
+
+                    // get a mask for the new SB location to the end of this unit.
+                    mask = fast_mask32(TempSB, L-TempL);
+
+                    // merge theses bits with the others.
+                    iv_data[start_index] |= mask;
+                }
+
             }
 
-            iv_data[index] |=
-                unit_type(1) << ((bits_per_unit - 1) - (i_bit - (index * bits_per_unit)));
-
-            return FAPI2_RC_SUCCESS;
+            return rc;
         }
 
         ///
@@ -374,8 +421,14 @@ namespace fapi2
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
-        template< bits_type SB, bits_type L >
-        inline fapi2::ReturnCodes clearBit(void);
+        inline fapi2::ReturnCodes clearBit(bits_type SB, bits_type L = 0)
+        {
+            ReturnCodes rc = invert().setBit(SB,L);
+
+            invert();
+
+            return rc;
+        }
 
         ///
         /// @brief Invert bit
