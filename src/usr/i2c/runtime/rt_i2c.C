@@ -139,44 +139,52 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     proc_engine_port |= (uint64_t)(args.engine) << HBRT_I2C_MASTER_ENGINE_SHIFT;
     proc_engine_port |= (uint64_t)(args.port) << HBRT_I2C_MASTER_PORT_SHIFT;
 
-    if(i_opType == DeviceFW::READ)
+    // Send I2C op to host interface
+    // Centaur I2C not yet supported
+    // @todo RTC:127533 -- Enable Centaur I2C at runtime
+    if( i_target->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_MEMBUF )
     {
-        if(g_hostInterfaces->i2c_read != NULL)
+        if(i_opType == DeviceFW::READ)
         {
-            rc = g_hostInterfaces->i2c_read
-                    (
-                        proc_engine_port,   // Master Chip/Engine/Port
-                        args.devAddr,       // Dev Addr
-                        args.offset_length, // Offset size
-                        offset,             // Offset
-                        io_buflen,          // Buffer length
-                        io_buffer           // Buffer
-                    );
+            if(g_hostInterfaces->i2c_read != NULL)
+            {
+                rc = g_hostInterfaces->i2c_read
+                        (
+                            proc_engine_port,   // Master Chip/Engine/Port
+                            args.devAddr,       // Dev Addr
+                            args.offset_length, // Offset size
+                            offset,             // Offset
+                            io_buflen,          // Buffer length
+                            io_buffer           // Buffer
+                        );
+            }
+            else
+            {
+                TRACFCOMP(g_trac_i2c,
+                    ERR_MRK"Hypervisor I2C read interface not linked");
+                l_host_if_enabled = false;
+            }
         }
-        else
+        else if (i_opType == DeviceFW::WRITE)
         {
-            TRACFCOMP(g_trac_i2c,ERR_MRK"Hypervisor I2C read interface not linked");
-            l_host_if_enabled = false;
-        }
-    }
-    else if (i_opType == DeviceFW::WRITE)
-    {
-        if(g_hostInterfaces->i2c_write != NULL)
-        {
-            rc = g_hostInterfaces->i2c_write
-                    (
-                        proc_engine_port,   // Master Chip/Engine/Port
-                        args.devAddr,       // Dev Addr
-                        args.offset_length, // Offset size
-                        offset,             // Offset
-                        io_buflen,          // Buffer length
-                        io_buffer           // Buffer
-                    );
-        }
-        else
-        {
-            TRACFCOMP(g_trac_i2c,ERR_MRK"Hypervisor I2C write interface not linked");
-            l_host_if_enabled = false;
+            if(g_hostInterfaces->i2c_write != NULL)
+            {
+                rc = g_hostInterfaces->i2c_write
+                        (
+                            proc_engine_port,   // Master Chip/Engine/Port
+                            args.devAddr,       // Dev Addr
+                            args.offset_length, // Offset size
+                            offset,             // Offset
+                            io_buflen,          // Buffer length
+                            io_buffer           // Buffer
+                        );
+            }
+            else
+            {
+                TRACFCOMP(g_trac_i2c,
+                    ERR_MRK"Hypervisor I2C write interface not linked");
+                l_host_if_enabled = false;
+            }
         }
     }
 
