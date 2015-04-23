@@ -681,9 +681,7 @@ void checkCriticalResources(uint32_t & io_commonPlid,
     uint8_t l_critical = 1;
     PredicateAttrVal<ATTR_RESOURCE_IS_CRITICAL> l_isCritical(l_critical);
 
-
     l_customPredicate.push(&l_isFunctional).Not().push(&l_isCritical).And();
-
 
     targetService().getAssociated( l_plist, i_pTop,
           TargetService::CHILD, TargetService::ALL, &l_customPredicate);
@@ -691,8 +689,7 @@ void checkCriticalResources(uint32_t & io_commonPlid,
     //if this list has ANYTHING then something critical has been deconfigured
     if(l_plist.size())
     {
-        HWAS_ERR("Insufficient HW to continue IPL: (critical resource"
-                 " not functional)");
+        HWAS_ERR("Insufficient HW to continue IPL: (critical resource not functional)");
         /*@
          * @errortype
          * @severity          ERRL_SEV_UNRECOVERABLE
@@ -717,17 +714,17 @@ void checkCriticalResources(uint32_t & io_commonPlid,
             case 3:
                 userdata2 = static_cast<uint64_t>(get_huid(l_plist[2]));
 
+                /*fall through*/  // keep BEAM quiet
             case 2:
                 userdata2 |=
                     static_cast<uint64_t>(get_huid(l_plist[1])) << 32;
 
+                /*fall through*/  // keep BEAM quiet
             case 1:
                 userdata1 =
                     (static_cast<uint64_t>(l_plist.size()) << 32) |
                      static_cast<uint64_t>(get_huid(l_plist[0]));
         }
-
-
 
         l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                            MOD_CHECK_MIN_HW,
