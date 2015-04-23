@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -463,6 +463,13 @@
         capture     type secondary;
         capture     group default;
         capture     req nonzero("PBCENTFIR");
+    };
+
+    register PB_CENT_MODE
+    {
+        name        "EH.PB.MISC.PB_CENT_MODE";
+        scomaddr    0x02010C4A;
+        capture     group PbCentMode;
     };
 
     ############################################################################

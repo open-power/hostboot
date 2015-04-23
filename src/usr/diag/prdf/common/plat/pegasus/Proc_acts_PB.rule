@@ -1270,7 +1270,7 @@ group gPbCentFir filter singlebit,
     /** PBCENTFIR[9]
      *  PB_CENT_HANG_RECOVERY_GTE_LEVEL1
      */
-    (PbCentFir, bit(9)) ? thresholdAndMask_self_mnfgInfo;
+    (PbCentFir, bit(9)) ? PbCentHangRecoveryGte;
 
     /** PBCENTFIR[10]
      *  PB_CENT_FORCE_MP_IPL
@@ -3223,10 +3223,9 @@ actionclass nxUnitCheckstop
  * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
  * threshold, instead just mask.
  */
-# This is very similar to the common thresholdAndMask_self except we do not want
-# a predictive callout in MNFG.
-actionclass thresholdAndMask_self_mnfgInfo
+actionclass PbCentHangRecoveryGte
 {
+    capture(PbCentMode);
     calloutSelfMed;
     threshold32pday;
     funccall("ClearServiceCallFlag_mnfgInfo");
