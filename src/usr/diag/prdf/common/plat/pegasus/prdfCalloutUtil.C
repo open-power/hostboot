@@ -229,7 +229,7 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
 //------------------------------------------------------------------------------
 
 int32_t getBusEndpoints( ExtensibleChip * i_chip,
-                         TargetHandle_t o_rxTrgt, TargetHandle_t o_txTrgt,
+                         TargetHandle_t & o_rxTrgt, TargetHandle_t & o_txTrgt,
                          TYPE i_busType, uint32_t i_busPos )
 {
     #define PRDF_FUNC "[CalloutUtil::getBusEndpoints] "

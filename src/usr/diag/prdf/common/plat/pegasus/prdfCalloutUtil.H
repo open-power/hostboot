@@ -136,8 +136,8 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
  *
  */
 int32_t getBusEndpoints( ExtensibleChip * i_chip,
-                         TARGETING::TargetHandle_t o_rxTrgt,
-                         TARGETING::TargetHandle_t o_txTrgt,
+                         TARGETING::TargetHandle_t & o_rxTrgt,
+                         TARGETING::TargetHandle_t & o_txTrgt,
                          TARGETING::TYPE i_busType = TARGETING::TYPE_NA,
                          uint32_t i_busPos = 0 );
 
