@@ -82,6 +82,7 @@ namespace fapi2
     /// @return ReturnCode. Zero on success, else platform specified error.
     ///
     ReturnCode delay(uint64_t i_nanoSeconds, uint64_t i_simCycles);
+
 };
 
 #endif // FAPI2_UTILS_H_
