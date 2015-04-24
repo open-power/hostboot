@@ -22,10 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- * @file fapi2_target.H
- * @brief common definitions for fapi2 targets
- */
+///
+/// @file fapi2_target.H
+/// @brief Common definitions for fapi2 targets
+///
 
 #ifndef __FAPI2_COMMON_TARGET__
 #define __FAPI2_COMMON_TARGET__
@@ -171,6 +171,43 @@ namespace fapi2
         ///
         template< TargetType T >
         inline Target<T> getParent(void) const;
+
+        ///
+        /// @brief Is this target a chip?
+        /// @return Return true if this target is a chip, false otherwise
+        ///
+        inline constexpr bool isChip(void) const
+        {
+           return ( (K == TARGET_TYPE_PROC_CHIP) ||
+                    (K == TARGET_TYPE_MEMBUF_CHIP) );
+        }
+
+        ///
+        /// @brief Is this target a chiplet?
+        /// @return Return true if this target is a chiplet, false otherwise
+        ///
+        inline constexpr bool isChiplet(void) const
+        {
+           return ( (K == TARGET_TYPE_EX) ||
+                    (K == TARGET_TYPE_MBA) ||
+                    (K == TARGET_TYPE_MCS) ||
+                    (K == TARGET_TYPE_XBUS) ||
+                    (K == TARGET_TYPE_ABUS) ||
+                    (K == TARGET_TYPE_L4) ||
+                    (K == TARGET_TYPE_CORE) ||
+                    (K == TARGET_TYPE_EQ) ||
+                    (K == TARGET_TYPE_MCA) ||
+                    (K == TARGET_TYPE_MCBIST) ||
+                    (K == TARGET_TYPE_MI) ||
+                    (K == TARGET_TYPE_DMI) ||
+                    (K == TARGET_TYPE_OBUS) ||
+                    (K == TARGET_TYPE_NV) ||
+                    (K == TARGET_TYPE_SBE) ||
+                    (K == TARGET_TYPE_PPE) ||
+                    (K == TARGET_TYPE_PERV) ||
+                    (K == TARGET_TYPE_PEC) ||
+                    (K == TARGET_TYPE_PHB) );
+        }
 
         ///
         /// @brief Get this target's children
