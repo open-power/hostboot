@@ -22,10 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- * @file fapi2.H
- * @brief top level header for fapi2
- */
+///
+/// @file fapi2.H
+/// @brief top level header for fapi2
+///
 
 #ifndef __FAPI2_TOP_LEVEL__
 #define __FAPI2_TOP_LEVEL__
@@ -34,7 +34,6 @@
 #include <return_code.H>
 #include <buffer.H>
 #include <hw_access.H>
-
 #include <utils.H>
 #include <plat_trace.H>
 
@@ -45,16 +44,8 @@
 // Block of headers not currently in fapi2
 #ifdef FAPI2_MISSING_HEADERS
   #include <fapi2SystemConfig.H>
-  #include <fapi2HwpExecutor.H>
-  #include <fapi2AttributeService.H>
-  #include <fapi2MvpdAccess.H>
-  #include <fapi2MBvpdAccess.H>
-#endif
-
-// Block of auto generated headers not presently in fapi2
-#ifdef FAPI2_AUTOGEN_HEADERS
-  #include <fapi2AttributeIds.H>  // Generated file
-  #include <fapi2ChipEcFeature.H> // Generated file
+  #include <mvpdAccess.H>
+  #include <mbvpdAccess.H>
 #endif
 
 #endif // __FAPI2_TOP_LEVEL__
