@@ -40,6 +40,7 @@ namespace fapi2
     /// or tables. TYPE_ALL is used to pass targets to methods which
     /// can act generally on any type of target
     ///
+
     /// Target Kind
     enum TargetType
     {
@@ -99,6 +100,7 @@ namespace fapi2
         static const uint8_t count = 0;
     };
     /// @endcond
+
 }
 
 #endif
