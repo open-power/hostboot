@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,7 +91,7 @@ close MEMORY_LOG;
 my %symbol_address = ();
 my %symbol_isfunc = ();
 
-my $gensyms = $ENV{"HOSTBOOTROOT"}."/img/hbicore_test.syms";
+my $gensyms = $ENV{"PROJECT_ROOT"}."/img/hbicore_test.syms";
 open (GENSYMS, "< $gensyms") or die "Cannot find syms file: $gensyms\n";
 while (my $line = <GENSYMS>)
 {

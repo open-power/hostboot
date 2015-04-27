@@ -29,6 +29,8 @@ use strict;
 my $issueFound = 0;
 my $errorFound = 0;
 
+my $projectName = $ENV{'PROJECT_NAME'};
+
 verifyPatchSet();       # Verify the patch contents.
 verifyCommitMsg();      # Verify the commit message.
 
@@ -179,7 +181,7 @@ sub verifyFileLine
     }
 
     # Check for "Confidential".
-    if ($line =~ m/Confidential/i)
+    if ($line =~ m/Confidential/i && $projectName =~ m/HostBoot/i)
     {
         unless (($file =~ m/verify-commit/) ||
                 ($file =~ m/addCopyright.pl/))

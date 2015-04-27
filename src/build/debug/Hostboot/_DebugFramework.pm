@@ -250,7 +250,7 @@ sub determineImagePath
         }
         else
         {
-            $imgPath = $ENV{"HOSTBOOTROOT"} . "/img/";
+            $imgPath = $ENV{"PROJECT_ROOT"} . "/img/";
         }
     }
 

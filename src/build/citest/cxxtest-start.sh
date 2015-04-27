@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,7 @@ if [ -z $HOSTBOOT_CI_ENV_SETUP ];
 then
     unset $SANDBOXBASE
     unset $SANDBOXNAME
-    source "$HOSTBOOTROOT/src/build/citest/setup-env"
+    source "$PROJECT_ROOT/src/build/citest/setup-env"
 fi
 
 HOSTBOOT_IMAGE=img/hbicore_test.bin

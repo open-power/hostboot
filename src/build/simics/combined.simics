@@ -1,9 +1,9 @@
-#If running in Hostboot Developer Environment, copies patched base 
-#and extended hostboot images onto the FSP so HWSV will load 
-#pached versions to PNOR instead of the default images 
+#If running in Hostboot Developer Environment, copies patched base
+#and extended hostboot images onto the FSP so HWSV will load
+#pached versions to PNOR instead of the default images
 #from the FSP the driver.
 try {
-    if (python "os.environ.has_key('HOSTBOOTROOT')") {
+    if (python "os.environ.has_key('PROJECT_ROOT')") {
         echo "Running Hostboot developer patch commands"
         $sbbase = (python "os.environ['sb']")
         $hbsrc_dir = "/host/" + $sbbase + "/hbfw/img/"
@@ -17,6 +17,6 @@ try {
             local $con = fsp2_minicomA.con
             $con.wait-for-string "C1001FFF"
             $con.input $hbpatch_cmd
-        }            
+        }
     }
 } except { echo "ERROR: Failed to load tools in combined.simics." }

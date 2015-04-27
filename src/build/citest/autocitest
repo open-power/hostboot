@@ -76,7 +76,7 @@ function    runtraceHB()
 {
 
     echo    "Collect traceHB info..."
-    
+
     #autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/simics/hb-simdebug.py"
     #if [ $? -ne 0 ] ; then
     #    echo "ERROR 3: Unable to run $?"
@@ -84,7 +84,7 @@ function    runtraceHB()
     #    stopserver
     #    exit 1
     #fi
-    
+
     autosim $NOWIN --simcmd   "pipe hb-trace \"cat > traceHB.log\"" \
             --timeout 300
     if [ $? -ne 0 ] ; then
@@ -112,13 +112,13 @@ DRIVER="$1"                     ##  backing tree
 export bb=$DRIVER               ##  simulate a workon
 HBICORE_TEST="$2"               ##  path to hbicore_test.img
 
-export SHELL="/bin/bash"        ##  Needed to fool workon to launch a bash 
+export SHELL="/bin/bash"        ##  Needed to fool workon to launch a bash
                                 ##  shell, which autosim expects.
 NOWIN="--nowin"                 ##  remote execution does not have a display
 
 ##  jenkins creates a new workspace for every compile.
 ##     cxxtest-start.sh will verify this and then export WORKSPACE_DIR for us.
-SBXHOME=$HOSTBOOTROOT
+SBXHOME=$PROJECT_ROOT
 
 if [ "$DRIVER" = "" ] ; then
         echo "ERROR: you must specify a driver (backing tree) to run the tests with"

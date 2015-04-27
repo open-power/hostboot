@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-export CITESTPATH=${HOSTBOOTROOT}/src/build/citest
+export CITESTPATH=${PROJECT_ROOT}/src/build/citest
 export PATH=${CITESTPATH}:${PATH}
 
 # Determine backing build.
@@ -43,7 +43,7 @@ fi
 # Setup sandbox location variables.
 if [ -z $SANDBOXROOT ];
 then
-    export SANDBOXROOT=${HOSTBOOTROOT}
+    export SANDBOXROOT=${PROJECT_ROOT}
 fi
 
 if [ -z $SANDBOXNAME ];
@@ -79,7 +79,7 @@ export -f execute_in_sandbox
 
 # Determine if sandbox is in /tmp, which requires -nre to simics.
 echo $SANDBOXROOT | grep "/tmp" > /dev/null
-if [ $? -eq 0 ]; 
+if [ $? -eq 0 ];
 then
     export SANDBOX_IN_TEMP=1
 fi

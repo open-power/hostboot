@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/gerrit-hostname $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+## Usage
+# It is imperative that there are no prints other than the die command or
+# "export GERRIT_SRV=$host" as this script is evaluated by env.bash and not
+# called directly
+
+use strict;
+
+my $homeDir = $ENV{'HOME'};
+my $sshConfigFile = $homeDir."/.ssh/config";
+# If the server changes location these will change
+my $gerritHostname = "gfw160.aus.stglabs.ibm.com";
+my $gerritPort = "29418";
+
+open(CONFIG, "< $sshConfigFile") or die " $? can't open $sshConfigFile: $!" ;
+
+my $host = "";
+my $hostname = "";
+my $port = "";
+while (my $line = <CONFIG>)
+{
+    # Whitespace after each constant is important
+    if ($line =~ m/^Host [^\s]/)
+    {
+        ($host) = $line =~ m/^Host (.*?)\s/
+    }
+    elsif ($line =~ m/Hostname [^\s]/)
+    {
+        ($hostname) = $line =~ m/^*Hostname (.*)/;
+    }
+    elsif ($line =~ m/Port [^\s]/)
+    {
+        ($port) = $line =~ m/^*Port (.*)/;
+    }
+
+    # Check if we found the gerrit host name
+    if ($host ne "" &&
+        $hostname eq $gerritHostname &&
+        $port eq $gerritPort)
+    {
+        last;
+    }
+}
+close(CONFIG);
+
+if ($host eq "")
+{
+    die "Error> Could not find gerrit host in $sshConfigFile";
+}
+else
+{
+    # Set gerrit server env variable by returning command to env.bash
+    print "export GERRIT_SRV=$host\n";
+}

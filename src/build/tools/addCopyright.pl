@@ -52,7 +52,6 @@
 #  and run the file to update all                                             #
 ###############################################################################
 
-
 use strict;
 use warnings;
 use POSIX;
@@ -60,20 +59,34 @@ use Getopt::Long;
 use File::Basename;
 use lib dirname (__FILE__);
 
-
 #------------------------------------------------------------------------------
 # Project-specific settings.
 #------------------------------------------------------------------------------
 my $ReleaseYear = `date +%Y`;
 chomp( $ReleaseYear );
-
 $ReleaseYear = $ENV{'DATE_OVERRIDE'} if defined $ENV{'DATE_OVERRIDE'};
 
 my $copyrightSymbol = "";
 # my $copyrightSymbol = "(C)";  # Uncomment if unable to use  character.
 
-my  $projectName            =   "HostBoot";
+# set by environment variable in project env.bash
+my $projectName = $ENV{'PROJECT_NAME'};
 my $copyrightStr = "Contributors Listed Below - COPYRIGHT";
+
+## note that these use single ticks so that the escape chars are NOT evaluated yet.
+my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
+my  $DELIMITER_END          =   'IBM_PROLOG_END_TAG';
+my  $DELIMITER_BEGIN        =   'IBM_PROLOG_BEGIN_TAG';
+
+my  $SOURCE_BEGIN_TAG       =   "\$Source:";
+my  $SOURCE_END_TAG         =   "\$";
+
+# Desired License, set by environment variable in project env.bash
+my $LicenseFile = $ENV{'LICENSE'};
+
+#------------------------------------------------------------------------------
+# Contributer info
+#------------------------------------------------------------------------------
 
 # Constants for company's copyright
 # When adding a new company add constant here and to %fileContributorsCompany
@@ -88,16 +101,6 @@ my %fileContributorsCompany = (
     "Google Shared Technology" => GOOGLE,
 );
 
-## note that these use single ticks so that the escape chars are NOT evaluated yet.
-my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
-my  $DELIMITER_END          =   'IBM_PROLOG_END_TAG';
-my  $DELIMITER_BEGIN        =   'IBM_PROLOG_BEGIN_TAG';
-
-my  $SOURCE_BEGIN_TAG       =   "\$Source:";
-my  $SOURCE_END_TAG         =   "\$";
-
-# End Project-specific settings
-
 #------------------------------------------------------------------------------
 #   Constants
 #------------------------------------------------------------------------------
@@ -107,7 +110,7 @@ use constant    RC_NO_COPYRIGHT_BLOCK       =>  3;
 use constant    RC_INVALID_SOURCE_LINE      =>  4;
 use constant    RC_INVALID_YEAR             =>  5;
 use constant    RC_OLD_DELIMITER_END        =>  6;
-use constant    RC_NOT_HOSTBOOT_BLOCK       =>  7;
+use constant    RC_PROJECT_DOES_NOT_MATCH   =>  7;
 use constant    RC_BAD_CONTRIBUTORS_BLOCK   =>  8;
 use constant    RC_NO_COPYRIGHT_STRING      =>  9;
 use constant    RC_INVALID_FILETYPE         =>  10;
@@ -341,9 +344,6 @@ foreach ( @Files )
     }   ##  endif update
 
 }   #   end foreach
-
-
-
 
 if ( $opt_logfile ne "" )
 {
@@ -648,11 +648,11 @@ sub checkCopyrightBlock( $$ )
         return  RC_NO_COPYRIGHT_STRING;
     }
 
-    ##  Check to see if this is a HostBoot Copyright notice
-    if  ( !( $block =~ m/OpenPOWER $projectName Project/ )  )
+    ##  Check to see if this matches the project it lives in
+    if  ( !( $block =~ m/$projectName Project/ )  )
     {
-        print   STDOUT  "WARNING:  Not a $projectName copyright block\n";
-        return  RC_NOT_HOSTBOOT_BLOCK;
+        print   STDOUT  "WARNING:  Copyright block does not reference project $projectName\n";
+        return  RC_PROJECT_DOES_NOT_MATCH;
     }
 
     ##  split into lines and check for specific things
@@ -1026,7 +1026,7 @@ sub addPrologComments($$$)
 
         # NOTE: CMVC prologs with inline comments will have a single trailing
         #       space at the end of the line. This is undesirable for most
-        #       hostboot developers so it will not be added.
+        #       developers so it will not be added.
 
         if ( $line =~ m/$DELIMITER_BEGIN/ )
         {
@@ -1083,30 +1083,20 @@ sub fillinEmptyCopyrightBlock( $$ )
         $copyright_Contributors .= "[+] ".$key."\n";
     }
 
+    ##  Get desired license
+    my $LicenseContent = "";
+    open(LICENSE, "< $LicenseFile") or die " $? can't open $LicenseFile: $!" ;
+    while (my $line = <LICENSE>)
+    {
+        my $evalLine = eval "qq($line)";
+        $LicenseContent .= $evalLine;
+    }
+    close(LICENSE);
+
     ##  define the final copyright block template here.
     my $IBMCopyrightBlock = <<EOF;
 $DELIMITER_BEGIN
-This is an automatically generated prolog.
-
-$SOURCE_BEGIN_TAG $filename $SOURCE_END_TAG
-
-OpenPOWER $projectName Project
-
-$copyrightStr $copyrightYear
-$copyright_Contributors
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the License for the specific language governing
-permissions and limitations under the License.
-
+$LicenseContent
 $DELIMITER_END
 EOF
 
@@ -1188,7 +1178,6 @@ EOF
         unlink( $savedbgfile ) or die " $? can't delete $savedbgfile: $!";
     }
 }
-
 
 #######################################
 ##  Gets file contirbutors based on git log of a file

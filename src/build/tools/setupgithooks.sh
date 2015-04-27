@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,11 +27,6 @@
 # Each developer runs this from the git_repo base dir, where it will copy the
 # needed scripts into .git/hooks/ directory and make them executable.
 
-# Setup some global variables
-HOOKSDIR=$HOSTBOOTROOT/.git/hooks
-TOOLSDIR=$HOSTBOOTROOT/src/build/tools
-HB_SRV=hostboot.gerrit
-
 if [ -d $HOOKSDIR ]
 then
 
@@ -37,11 +34,12 @@ then
     if [ ! -f $HOOKSDIR/commit-msg ]
     then
         echo "Copying Gerrit hooks..."
-        scp -p -q $HB_SRV:hooks/commit-msg $HOOKSDIR
+        scp -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
     fi
 
     # Copy custom pre/post commit hooks from tools directory.
-    if [ -f "$TOOLSDIR/pre-commit" -a -f "$TOOLSDIR/post-commit" ]
+    if [ -f "$TOOLSDIR/pre-commit" -a \
+         -f "$TOOLSDIR/post-commit" ]
     then
         echo "Copying pre/post commit hooks..."
 

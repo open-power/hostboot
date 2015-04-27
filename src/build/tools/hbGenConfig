@@ -254,9 +254,9 @@ sub evaluateExpr
 # Create the config.mk / config.h files with the enabled options.
 sub outputResults
 {
-    die if not defined $ENV{HOSTBOOTROOT};
-    open CONFIGMK, "> $ENV{HOSTBOOTROOT}/obj/genfiles/config.mk" or die;
-    open CONFIGH, "> $ENV{HOSTBOOTROOT}/obj/genfiles/config.h" or die;
+    die if not defined $ENV{PROJECT_ROOT};
+    open CONFIGMK, "> $ENV{PROJECT_ROOT}/obj/genfiles/config.mk" or die;
+    open CONFIGH, "> $ENV{PROJECT_ROOT}/obj/genfiles/config.h" or die;
 
     print CONFIGH "#ifndef __HOSTBOOT_CONFIG_H\n";
     print CONFIGH "#define __HOSTBOOT_CONFIG_H\n";

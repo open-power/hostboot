@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -317,7 +319,7 @@ sub parseGcovFuncs
 
 # The *.gcda filename found in the gcov_info struct is an absolute path to
 # the corresponding .o file (not the .C file).  This is of the form:
-# ${HOSTBOOTROOT}/src/usr/module/${ROOTPATH}/obj/${MODULE}/foo.gcda .
+# ${PROJECT_ROOT}/src/usr/module/${ROOTPATH}/obj/${MODULE}/foo.gcda .
 # Since we might not even be running this on the same machine, we need to put
 # the output into the "output_dir" but we need to strip off a lot of stuff.
 # The path is going to have an obj in it somewhere so we key off that

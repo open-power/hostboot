@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -24,8 +24,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-COPYRIGHT_CHECK=${HOSTBOOTROOT}/src/build/tools/copyright-check.sh
-COMMIT_CHECK=${HOSTBOOTROOT}/src/build/tools/verify-commit
+COPYRIGHT_CHECK=${PROJECT_ROOT}/src/build/tools/copyright-check.sh
+COMMIT_CHECK=${PROJECT_ROOT}/src/build/tools/verify-commit
 
 $COPYRIGHT_CHECK || exit -1
 $COMMIT_CHECK || exit -1

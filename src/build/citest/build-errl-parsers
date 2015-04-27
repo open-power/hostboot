@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +28,7 @@ echo "====Building error log parsers===="
 
 if [ -z $HOSTBOOT_CI_ENV_SETUP ];
 then
-    source "$HOSTBOOTROOT/src/build/citest/setup-env"
+    source "$PROJECT_ROOT/src/build/citest/setup-env"
 fi
 
 if [ ! -d "$SANDBOXBASE" ];

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -38,11 +38,17 @@ else
     export PATH=${FAKEROOT}/wrappers:${PATH}
 fi
 
-export PATH=${PATH}:`pwd`/src/build/trace
-export PATH=${PATH}:`pwd`/src/build/tools
+# Setup some global variables
+export PROJECT_NAME=HostBoot
+export PROJECT_ROOT=$PWD
+export TOOLSDIR=$PROJECT_ROOT/src/build/tools
+export HOOKSDIR=$PROJECT_ROOT/.git/hooks
+# Copyright license file for project
+export LICENSE=$PROJECT_ROOT/LICENSE_PROLOG
 
-export HOSTBOOTROOT=`pwd`
-TOOLSDIR=$HOSTBOOTROOT/src/build/tools
+# Update PATH
+export PATH=${PATH}:$PWD/src/build/trace
+export PATH=${PATH}:$TOOLSDIR
 
 if [ -n "${SANDBOXROOT}" ]; then
     if [ -n "${SANDBOXNAME}" ]; then
@@ -51,6 +57,20 @@ if [ -n "${SANDBOXROOT}" ]; then
 fi
 
 export DEFAULT_MACHINE=MURANO
+
+## Search and set gerrit host
+# Gerrit host name should be in .ssh/config file
+# Example:
+# Host gerrit-server
+#     Hostname gfw160.aus.stglabs.ibm.com
+#     Port 29418
+#     AFSTokenPassing no
+if [ -e $HOME/.ssh/config ]; then
+if [ -e $TOOLSDIR/gerrit-hostname ]; then
+    echo "Searching for Gerrit Host..."
+    eval $($TOOLSDIR/gerrit-hostname)
+fi
+fi
 
 ##  run setupgithooks.pl
 if [ -e .git/hooks ]; then

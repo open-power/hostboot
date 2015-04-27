@@ -287,7 +287,7 @@ hb_workon()
 hb_prime()
 {
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
     if [ ! -d "${SANDBOXBASE}" ]; then
         echo "Sandbox does not exist.  Create with 'hb simsetup."
@@ -297,10 +297,10 @@ hb_prime()
     # Prevent error message in cases where SANDBOXBASE is set but hb simsetup
     # is not performed. Example seen in cronjob scripts
     if [[ -f ${SANDBOXBASE}/rc_files/sb.conf ]] &&
-       [[ -f ${HOSTBOOTROOT}/src/build/citest/etc/bbuild ]]; then
+       [[ -f ${PROJECT_ROOT}/src/build/citest/etc/bbuild ]]; then
          SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
          grep "backing_build" | awk '{ print $3 }'`
-         DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+         DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
          if [ ${SBDRIVER} != ${DRIVER} ]; then
              echo "ERROR: Driver mismatch between sandbox and src/build/citest/etc/bbuild."
              echo "Sandbox at ${SBDRIVER}"
@@ -317,10 +317,10 @@ hb_fipssetup()
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
     [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
     [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
     SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
-    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
 
     if [ -d "${SANDBOXBASE}" ]; then
         echo "Removing old sandbox."
@@ -342,7 +342,7 @@ hb_fipssetup()
          -sb ${SANDBOXNAME} -m ppc
 
     echo "Running workarounds (presimsetup)."
-    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.presimsetup \
+    cp ${PROJECT_ROOT}/src/build/citest/etc/workarounds.presimsetup \
         ${SANDBOXBASE}/src
     execute_in_sandbox "export BACKING_BUILD=\$bb && \
         ./workarounds.presimsetup"  "ppc"
@@ -353,13 +353,13 @@ hb_simsetup()
 {
     hb_fipssetup
 
-    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
 
     needs_machine_variable
     execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
 
     echo "Running workarounds (postsimsetup)."
-    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
+    cp ${PROJECT_ROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
     execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.postsimsetup"  "ppc"
     rm ${SANDBOXBASE}/src/workarounds.postsimsetup
 
@@ -372,7 +372,7 @@ hb_simsetup()
 hb_startsimics()
 {
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
     if [ ! -d "${SANDBOXBASE}" ]; then
         echo "Sandbox does not exist.  Create with 'hb simsetup."
@@ -381,7 +381,7 @@ hb_startsimics()
 
     SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
               grep "backing_build" | awk '{ print $3 }'`
-    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
 
     if [ ${SBDRIVER} != ${DRIVER} ]; then
         echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
@@ -398,9 +398,9 @@ hb_startsimics()
 hb_rsync_call()
 {
     if [ -z "${RSYNCHOST}" ]; then
-        rsync -av --delete ${HOSTBOOTROOT}/ ${RSYNCDIR}
+        rsync -av --delete ${PROJECT_ROOT}/ ${RSYNCDIR}
     else
-        rsync -zav --delete ${HOSTBOOTROOT}/ ${RSYNCHOST}:${RSYNCDIR}
+        rsync -zav --delete ${PROJECT_ROOT}/ ${RSYNCHOST}:${RSYNCDIR}
     fi
 }
 
@@ -423,7 +423,7 @@ hb_rsync_helper()
 
 hb_rsync()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
     [ -z "${RSYNCDIR}" ] && echo "Missing RSYNCDIR." && exit -1
 
     # Parse arguments
@@ -462,11 +462,11 @@ hb_rsync()
 
 hb_objsizes()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
     echo "Object,Text Size,RO Data Size,Data Size"
 
-    objdump -h ${HOSTBOOTROOT}/img/*.elf ${HOSTBOOTROOT}/img/*.so | \
+    objdump -h ${PROJECT_ROOT}/img/*.elf ${PROJECT_ROOT}/img/*.so | \
     grep -e ".elf" -e ".so:" -e ".text " -e ".rodata" -e ".data " | \
     sed "s/.so:.*/.so/" | \
     sed "s/.elf:.*/.elf/" | \
@@ -488,9 +488,9 @@ hb_errlparser()
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
     [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
     [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
-    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+    DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
 
     # sanity checks
     if [ ! -f ${DRIVER}/src/makefile ]; then
@@ -498,19 +498,19 @@ hb_errlparser()
         exit -1
     fi
 
-    ${HOSTBOOTROOT}/src/build/citest/build-errl-parsers
+    ${PROJECT_ROOT}/src/build/citest/build-errl-parsers
     return $?
 }
 
 hb_cachesync()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
     rsync -av /gsa/ausgsa/projects/h/hostboot/.binary_cache/ \
-              ${HOSTBOOTROOT}/.git/hb_cache
+              ${PROJECT_ROOT}/.git/hb_cache
 
     failure=0
-    for files in ${HOSTBOOTROOT}/.git/hb_cache/data/*; do
+    for files in ${PROJECT_ROOT}/.git/hb_cache/data/*; do
         echo "`basename $files`  $files" | sha1sum --check >> /dev/null
         if [ $? -ne 0 ]; then
             echo "Failed SHA1 verification! $files"
@@ -523,7 +523,7 @@ hb_cachesync()
 
 hb_cacheadd()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${PROJECT_ROOT}" ] && echo "Missing PROJECT_ROOT." && exit -1
 
     CACHE_PATH=/gsa/ausgsa/projects/h/hostboot/.binary_cache/
     FILE=$1
@@ -531,7 +531,7 @@ hb_cacheadd()
 
     if [ $FILE == "--local" ]; then
         echo "Adding as local copy."
-        CACHE_PATH=${HOSTBOOTROOT}/.git/hb_cache/
+        CACHE_PATH=${PROJECT_ROOT}/.git/hb_cache/
 
         FILE=$1
         shift

@@ -32,5 +32,5 @@
 #echo "+++ Updating something wonderful in a simics file"
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
-#patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $HOSTBOOTROOT/src/build/citest/etc/patches/my_patch_File
+#patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
