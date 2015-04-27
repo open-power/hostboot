@@ -87,7 +87,9 @@ namespace IPMISEL
         format_ipmi_version_2_0 = 0x04,
     };
 
-    // event_type, per section 42.1 of the IPMI spec
+    // sel_event_dir_type type, per section 42.1 of the IPMI spec
+    // bit = 0 -> 0 is an assertion event
+    // bits 1:7 describe the sensor type
     enum sel_event_dir_type
     {
         event_unspecified       = 0x00,
@@ -95,8 +97,9 @@ namespace IPMISEL
         event_state             = 0x03,
         event_predictive        = 0x04,
         event_limit             = 0x05,
-        event_permformance      = 0x06,
+        event_performance       = 0x06,
         event_transition        = 0x07,
+        sensor_specific         = 0x6f,
         event_OEM               = 0x70,
     };
 
@@ -114,6 +117,7 @@ namespace IPMISEL
         event_data1_trans_to_non_recoverable    = 0x06,
         event_data1_trans_monitor               = 0x07,
         event_data1_trans_informational         = 0x08,
+        event_data1_invalid_offset              = 0xFF,
     };
 
     enum sel_generator_id

@@ -1046,7 +1046,9 @@ namespace SENSOR
         updateBMCFaultSensorStatus();
     };
 
-    // returns a sensor number based on input target type
+    // returns a sensor number for the FRU based on input target type
+    // there are currently 4 frus defined system, backplane, DIMM, PROC
+    //
     uint32_t getFaultSensorNumber( TARGETING::ConstTargetHandle_t i_pTarget )
     {
         TRACDCOMP(g_trac_ipmi,">>getFaultSensorNumber()");
@@ -1064,46 +1066,51 @@ namespace SENSOR
                     l_sensor_number = TARGETING::UTIL::getSensorNumber(
                             i_pTarget,
                             TARGETING::SENSOR_NAME_SYSTEM_EVENT );
+
+                    TRACDCOMP(g_trac_ipmi,"Sensor Number = 0x%x", l_sensor_number);
                     break;
                 }
 
             case TARGETING::TYPE_NODE:
                 {
-
-                    TRACDCOMP(g_trac_ipmi, "return backplane fault sensor\n");
+                    TRACDCOMP(g_trac_ipmi, "returning the \"BACKPLANE_FAULT\" sensor\n");
                     l_sensor_number = TARGETING::UTIL::getSensorNumber(
                             i_pTarget,
                             TARGETING::SENSOR_NAME_BACKPLANE_FAULT );
+
+                    TRACDCOMP(g_trac_ipmi,"Sensor Number = 0x%x", l_sensor_number);
                     break;
                 }
 
+            // these targets have specific status sensors
             case TARGETING::TYPE_DIMM:
             case TARGETING::TYPE_MEMBUF:
             case TARGETING::TYPE_PROC:
-            case TARGETING::TYPE_CORE:
                 {
                     l_sensor_number =
                                 StatusSensor(i_pTarget).getSensorNumber();
-                    break;
-                }
 
-            case TARGETING::TYPE_EX:
-                {
-                    // sensor number attribute is associated with the core
-                    const TARGETING::Target * targ = getCoreChiplet(i_pTarget);
-
-                    l_sensor_number = getFaultSensorNumber( targ );
-
+                    TRACDCOMP(g_trac_ipmi,"Sensor Number = 0x%x", l_sensor_number);
                     break;
                 }
 
             default:
                 {
 
-                    TARGETING::ConstTargetHandle_t targ =
-                                                getParentChip( i_pTarget);
+                    TARGETING::EntityPath l_targetPath =
+                        i_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
-                    l_sensor_number = getFaultSensorNumber( targ );
+                    // chop off the last part and go again.
+                    l_targetPath.removeLast();
+
+                    TARGETING::TargetHandle_t l_target = NULL;
+                    l_target =
+                        TARGETING::targetService().toTarget(l_targetPath);
+
+                    l_sensor_number =  getFaultSensorNumber(
+                        static_cast<TARGETING::ConstTargetHandle_t>(l_target));
+
+                    break;
                 }
         }
 
@@ -1216,4 +1223,18 @@ namespace SENSOR
         return offsets;
     }
 
+    uint8_t getBackPlaneFaultSensor()
+    {
+        TARGETING::TargetHandle_t sys = NULL;
+        TARGETING::TargetHandleList nodes;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        assert(sys != NULL);
+        getChildAffinityTargets(nodes, sys, TARGETING::CLASS_ENC,
+                                TARGETING::TYPE_NODE);
+        assert(!nodes.empty());
+
+        //Backplane sensor ID
+        return TARGETING::UTIL::getSensorNumber(nodes[0],
+                                        TARGETING::SENSOR_NAME_BACKPLANE_FAULT);
+    }
 }; // end name space

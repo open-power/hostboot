@@ -84,7 +84,7 @@ namespace IPMISEL
 void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
               uint32_t i_eid,
               uint8_t i_eventDirType, uint8_t i_eventOffset,
-              uint8_t i_sensorType, uint8_t i_sensorNumber)
+              uint8_t i_sensorType, uint8_t i_sensorNumber )
 {
     IPMI_TRAC(ENTER_MRK "sendESEL()");
 

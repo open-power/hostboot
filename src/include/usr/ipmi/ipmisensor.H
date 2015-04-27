@@ -116,6 +116,19 @@ namespace SENSOR
         SYSTEM_FIRMWARE_PROGRESS = 0x02,
     };
 
+
+    /**
+     *  @enum systemEventSensorOffsets
+     *  offSets specific to the system event sensor.
+     *
+     */
+    enum systemEventSensorOffsets
+    {
+        // offset 02h
+        UNDETERMINED_SYSTEM_HW_FAILURE = 0x02,
+    };
+
+
     /**
      *  @enum discrete09_Offsets
      *
@@ -924,6 +937,12 @@ namespace SENSOR
     uint16_t getSensorOffsets(TARGETING::SENSOR_NAME i_name,
                               sensorReadingType &o_readType );
 
+    /**
+     *   Helper function to return the backplane fault sensor
+     *
+     *  @return sensor number
+     */
+    uint8_t getBackPlaneFaultSensor();
 
 
 }; // end namespace
