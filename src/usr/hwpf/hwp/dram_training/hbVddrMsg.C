@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -271,15 +271,13 @@ void HBVddrMsg::createVddrData(
                         pMembuf,
                         io_request);
 
-                // VPP programming not supported in 820
-                // TODO via RTC: 110388
-                //(void)addMemoryVoltageDomains<
-                //    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
-                //    TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
-                //    TARGETING::ATTR_VPP_BASE,
-                //    TARGETING::ATTR_VPP_ID>(
-                //        pMembuf,
-                //        io_request);
+                (void)addMemoryVoltageDomains<
+                    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
+                    TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_VPP_BASE,
+                    TARGETING::ATTR_VPP_ID>(
+                        pMembuf,
+                        io_request);
             }
 
             (void)addMemoryVoltageDomains<
