@@ -369,10 +369,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
                 // read far enough in the section so it doesn't collide
                 // with other test cases
+                size_t l_bytes_to_read = i_sizeBytes;
                 if (l_id == PNOR::TEST)
                 {
                     //adjust the size of data if we are reading the entire sec
-                    i_sizeBytes = (i_offset == 0)? (((l_info.size -
+                    l_bytes_to_read = (i_offset == 0)? (((l_info.size -
                              PNOR::pnorTestSec_rt_readwrite_offset)*9)/8) :
                              i_sizeBytes;
                     i_offset = ((PNOR::pnorTestSec_rt_readwrite_offset*9)/8);
@@ -382,9 +383,9 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
                 TRACFCOMP(g_trac_hbrt,"rt_pnor_read: calling"
                         " deviceRead: offset:0x%X, flashAddr:0x%X, size:0x%X",
-                        i_offset, l_flashAddr, i_sizeBytes);
+                        i_offset, l_flashAddr, l_bytes_to_read);
 
-                l_err = DeviceFW::deviceRead (pnor_target, o_data, i_sizeBytes,
+                l_err = DeviceFW::deviceRead (pnor_target, o_data, l_bytes_to_read,
                                      DEVICE_PNOR_ADDRESS(i_proc, l_flashAddr));
                 if (l_err)
                 {
@@ -393,8 +394,10 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 }
             } while (0);
 
-            //commit the error
+            //by default tell the caller we read everything they asked for
             int rc = i_sizeBytes;
+
+            //commit the error
             if (l_err)
             {
                 errlCommit(l_err,CXXTEST_COMP_ID);

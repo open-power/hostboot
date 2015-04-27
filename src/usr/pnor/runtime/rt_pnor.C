@@ -379,6 +379,37 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
             else if( l_rc != static_cast<int>(l_readSize) )
             {
                 TRACFCOMP( g_trac_pnor, "RtPnor::readFromDevice: only read 0x%X bytes, expecting 0x%X", l_rc, l_readSize );
+
+                if( PNOR::TOC == i_section )
+                {
+                    // we can't know how big the TOC partition is without
+                    // reading it so we have to make a request for more
+                    // data and then handle a smaller amount getting returned
+                    TRACFCOMP( g_trac_pnor, "Ignoring mismatch for TOC" );
+                }
+                else // everything else should have a known size
+                {
+                    /*@
+                     * @errortype
+                     * @moduleid            PNOR::MOD_RTPNOR_READFROMDEVICE
+                     * @reasoncode          PNOR::RC_WRONG_SIZE_FROM_READ
+                     * @userdata1[00:31]    section ID
+                     * @userdata1[32:63]    requested size of read
+                     * @userdata2[00:31]    requested start offset into flash
+                     * @userdata2[32:63]    actual amount read
+                     * @devdesc             Amount of data read from pnor does
+                     *                      not match expected size
+                     * @custdesc          Error accessing system firmware flash
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                PNOR::MOD_RTPNOR_READFROMDEVICE,
+                                PNOR::RC_WRONG_SIZE_FROM_READ,
+                                TWO_UINT32_TO_UINT64(i_section,l_readSize),
+                                TWO_UINT32_TO_UINT64(l_offset,l_rc),
+                                true);
+                    break;
+                }
             }
         }
         else
@@ -405,10 +436,12 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
         {
             TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice: removing ECC...");
             // remove the ECC and fix the original data if it is broken
+            size_t l_eccSize = (l_rc/9)*8;
+            l_eccSize = std::min( l_eccSize, i_size );
             PNOR::ECC::eccStatus ecc_stat =
                  PNOR::ECC::removeECC(reinterpret_cast<uint8_t*>(l_dataToRead),
                                       reinterpret_cast<uint8_t*>(o_data),
-                                      l_rc); //actual size of read data
+                                      l_eccSize); //logical size of read data
 
             // create an error if we couldn't correct things
             if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
