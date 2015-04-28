@@ -1,0 +1,112 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_l2_flush_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_l2_flush procedure -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CMD_REG</ffdc>
+    <ffdc>CMD_REG_ADDR</ffdc>
+    <description>A previous L2 purge request has not finished</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_L2_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_L2_FLUSH_CMD_ERROR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CMD_REG</ffdc>
+    <ffdc>CMD_REG_ADDR</ffdc>
+    <description>
+      Procedure: p9_l2_flush
+      L2 flush operation failed, see L2 Purge Engine Command Register for error.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_L2_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_L2_FLUSH_CMD_TIMEOUT</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CMD_REG</ffdc>
+    <ffdc>CMD_REG_ADDR</ffdc>
+    <ffdc>NUMBER_OF_ATTEMPTS</ffdc>
+    <description>
+      Procedure: p9_l2_flush
+      L2 flush operation timed out waiting for purge busy indication to clear in
+      L2 Purge Engine Command Register.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_L2_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_L2_FLUSH_UNKNOWN_PLATFORM</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PLATFORM</ffdc>
+    <description>
+      Procedure: p9_l2_flush
+      Unable to determine which scom registers to use for the current platform.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
