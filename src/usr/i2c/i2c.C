@@ -2732,8 +2732,71 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                             }
                             break;
                         }
+
+
+
                         case I2C_OP_SETUP:
                         {
+                            // Check that engine is in a good state - this
+                            // function looks for errors and that all previous
+                            // commands are complete
+                            err = i2cWaitForCmdComp(tgt,
+                                                    io_args );
+
+                            if( err )
+                            {
+                                TRACFCOMP(g_trac_i2c, ERR_MRK
+                                    "i2cProcessActiveMasters: Error from "
+                                    "i2cWaitForCmdComp tgt=0x%X, engine=%d. "
+                                    "Will reset",
+                                    TARGETING::get_huid(tgt), engine);
+
+                                // Reset to recover the engine
+                                errlHndl_t err_reset = NULL;
+                                err_reset = i2cReset ( tgt, io_args,
+                                            FORCE_UNLOCK_RESET);
+
+                                if( err_reset )
+                                {
+                                    TRACFCOMP( g_trac_i2c,ERR_MRK
+                                       "i2cProcessActiveMasters: Error reseting"
+                                       " tgt=0x%X, engine=%d",
+                                       TARGETING::get_huid(tgt), engine);
+
+
+                                    // commit reset error and previous error
+                                    // with the same plid
+                                    err_reset->plid(err->plid());
+                                    TRACFCOMP(g_trac_i2c,
+                                        "i2cProcessActiveMasters: comitting err"
+                                        "(eid=0x%X) and err_reset(eid=0x%X) "
+                                        "with plid 0x%X",
+                                        err->eid(), err_reset->eid(),
+                                        err->plid());
+
+                                    errlCommit( err_reset,
+                                        I2C_COMP_ID );
+
+                                    errlCommit( err,
+                                        I2C_COMP_ID );
+
+                                    // Don't continue or break-need mutex unlock
+                                }
+                                else
+                                {
+                                    // The reset recovered the engine, so
+                                    // just delete the original error log
+                                   TRACFCOMP(g_trac_i2c,
+                                        "i2cProcessActiveMasters: Reset worked "
+                                        "so deleting previous err "
+                                        "eid=0x%X and plid=0x%X",
+                                        err->eid(), err->plid());
+                                    delete err;
+                                    err = NULL;
+                                }
+                            }
+
+                            // Set Mode Register
                             mode_reg_t mode;
                             mode.value = 0x0;
 
@@ -2752,7 +2815,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                             {
                                 TRACFCOMP( g_trac_i2c,
                                    ERR_MRK"i2cProcessActiveMasters:"
-                                          " Error reading from"
+                                          " Error setting mode for"
                                           " Processor, engine: %d",
                                           engine );
 
