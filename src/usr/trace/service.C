@@ -312,7 +312,7 @@ namespace TRACE
             }
 
             // Output full binary dump.
-            CONSOLE::displayf(i_td->iv_compName, output);
+            CONSOLE::displayf(i_td->iv_compName,"%s",output);
             free(output);
 
         }
