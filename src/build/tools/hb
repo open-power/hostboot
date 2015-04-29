@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -289,15 +291,19 @@ hb_prime()
         exit -1
     fi
 
-    SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
-              grep "backing_build" | awk '{ print $3 }'`
-    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
-
-    if [ ${SBDRIVER} != ${DRIVER} ]; then
-        echo "ERROR: Driver mismatch between sandbox and src/build/citest/etc/bbuild."
-        echo "Sandbox at ${SBDRIVER}"
-        echo "Update sandbox with 'hb simsetup'."
-        exit -1
+    # Prevent error message in cases where SANDBOXBASE is set but hb simsetup
+    # is not performed. Example seen in cronjob scripts
+    if [[ -f ${SANDBOXBASE}/rc_files/sb.conf ]] &&
+       [[ -f ${HOSTBOOTROOT}/src/build/citest/etc/bbuild ]]; then
+         SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
+         grep "backing_build" | awk '{ print $3 }'`
+         DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+         if [ ${SBDRIVER} != ${DRIVER} ]; then
+             echo "ERROR: Driver mismatch between sandbox and src/build/citest/etc/bbuild."
+             echo "Sandbox at ${SBDRIVER}"
+             echo "Update sandbox with 'hb simsetup'."
+             exit -1
+         fi
     fi
 
     hbDistribute $*
