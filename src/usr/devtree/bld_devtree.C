@@ -66,7 +66,7 @@ using   namespace   TARGETING;
 enum BuildConstants
 {
     DEVTREE_DATA_ADDR   =0xFF00000,    /* 256MB - 1MB*/
-    DEVTREE_SPACE_SIZE  =0x10000,      /*64KB*/
+    DEVTREE_SPACE_SIZE  =0x40000,      /*256KB*/
     XSCOM_NODE_SHIFT    =38,           /*Node pos is 25, so 63-25=38*/
     XSCOM_CHIP_SHIFT    =35,           /*Chip pos is 28, so 63-28=35*/
     CHIPID_NODE_SHIFT   =3,            /*CHIPID is NNNCCC, shift 3*/
