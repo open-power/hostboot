@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -53,6 +53,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_mb_interleave
 
 OBJS +=  mc_config.o
 OBJS += mss_volt.o
+OBJS += mss_volt_dimm_count.o
 OBJS += mss_freq.o
 OBJS += mss_eff_config.o
 OBJS += mss_eff_grouping.o

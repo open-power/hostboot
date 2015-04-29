@@ -76,6 +76,7 @@
 #include    "mss_volt/mss_volt_vdd_offset.H"
 #include    "mss_volt/mss_volt_vddr_offset.H"
 #include    "mss_volt/mss_volt_vpp_offset.H"
+#include    "mss_volt/mss_volt_dimm_count.H"
 
 #include <config.h>
 
@@ -454,6 +455,68 @@ errlHndl_t setMemoryVoltageDomainOffsetVoltage()
     return pError;
 }
 
+// helper function to call multiple mss_volt_hwps
+void  call_mss_volt_hwp (std::vector<TARGETING::ATTR_VMEM_ID_type>& i_VmemList,
+                         TARGETING::TargetHandleList& i_membufTargetList,
+                         IStepError& io_StepError,
+                         fapi::ReturnCode(*mss_volt_hwp)(std::vector<fapi::Target>&))
+{
+    errlHndl_t l_err;
+    //for each unique VmemId filter it out of the list of membuf targets
+    //to create a subsetlist of membufs with just that vmemid
+    std::vector<TARGETING::ATTR_VMEM_ID_type>::iterator l_vmem_iter;
+    for (l_vmem_iter = i_VmemList.begin();
+            l_vmem_iter != i_VmemList.end();
+            ++l_vmem_iter)
+    {
+        //  declare a vector of fapi targets to pass to mss_volt procedures
+        std::vector<fapi::Target> l_membufFapiTargets;
+
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = i_membufTargetList.begin();
+                l_membuf_iter != i_membufTargetList.end();
+                ++l_membuf_iter)
+        {
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target*  l_membuf_target = *l_membuf_iter;
+            if (l_membuf_target->getAttr<ATTR_VMEM_ID>()==*l_vmem_iter)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  add to fapi::Target vector vmem_id=0x%08X "
+                    "target HUID %.8X",
+                    l_membuf_target->getAttr<ATTR_VMEM_ID>(),
+                    TARGETING::get_huid(l_membuf_target));
+
+                fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
+                        (const_cast<TARGETING::Target*>(l_membuf_target)) );
+
+                l_membufFapiTargets.push_back( l_membuf_fapi_target );
+            }
+        }
+        FAPI_INVOKE_HWP(l_err, mss_volt_hwp, l_membufFapiTargets);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  mss_volt_dimm_count HWP( ) ",
+                    l_err->reasonCode());
+
+            // Create IStep error log and cross reference to error that occurred
+            io_StepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_volt_dimm_count HWP( )" );
+        }
+    }
+}
+
 //
 //  Wrapper function to call mss_volt
 //
@@ -506,64 +569,11 @@ void* call_mss_volt( void *io_pArgs )
     objItr=std::unique(l_VmemList.begin(), l_VmemList.end());
     l_VmemList.erase(objItr,l_VmemList.end());
 
-    //for each unique VmemId filter it out of the list of membuf targets
-    //to create a subsetlist of membufs with just that vmemid
-    std::vector<TARGETING::ATTR_VMEM_ID_type>::iterator l_vmem_iter;
-    for (l_vmem_iter = l_VmemList.begin();
-            l_vmem_iter != l_VmemList.end();
-            ++l_vmem_iter)
-    {
-        //  declare a vector of fapi targets to pass to mss_volt
-        std::vector<fapi::Target> l_membufFapiTargets;
+    //call mss_volt hwps
+    call_mss_volt_hwp (l_VmemList, l_membufTargetList,l_StepError, mss_volt);
+    call_mss_volt_hwp (l_VmemList, l_membufTargetList,l_StepError,
+                       mss_volt_dimm_count);
 
-        for (TargetHandleList::const_iterator
-                l_membuf_iter = l_membufTargetList.begin();
-                l_membuf_iter != l_membufTargetList.end();
-                ++l_membuf_iter)
-        {
-            //  make a local copy of the target for ease of use
-            const TARGETING::Target*  l_membuf_target = *l_membuf_iter;
-            if (l_membuf_target->getAttr<ATTR_VMEM_ID>()==*l_vmem_iter)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  add to fapi::Target vector vmem_id=0x%08X "
-                    "target HUID %.8X",
-                    l_membuf_target->getAttr<ATTR_VMEM_ID>(),
-                    TARGETING::get_huid(l_membuf_target));
-
-                fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_membuf_target)) );
-
-                l_membufFapiTargets.push_back( l_membuf_fapi_target );
-            }
-        }
-
-        //now have the a list of fapi membufs with just the one VmemId
-        //call the HWP on the list of fapi targets
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "=====  mss_volt HWP( vector )" );
-        FAPI_INVOKE_HWP(l_err, mss_volt, l_membufFapiTargets);
-
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  mss_volt HWP( )" );
-        }
-
-    }   // endfor
 
     l_err = setMemoryVoltageDomainOffsetVoltage<
         TARGETING::ATTR_MSS_CENT_VDD_OFFSET_DISABLE,
