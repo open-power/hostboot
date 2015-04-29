@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.194 2015/03/17 18:55:38 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.195 2015/05/01 17:40:55 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -990,6 +990,7 @@ CONST_UINT64_T( PCBMS_INTERRUPT_TYPE_REG_0x000F001A ,   ULL(0x000F001A));
 //      CAPP
 //------------------------------------------------------------------------------
 CONST_UINT64_T( CAPP_APC_MASTER_PB_CTL_0x02013018     , ULL(0x02013018) );
+CONST_UINT64_T( CAPP_APC_MASTER_CAPI_CTL_0x02013019   , ULL(0x02013019) );
 CONST_UINT64_T( CAPP_CXA_SNOOP_CFG_0x0201301A         , ULL(0x0201301A) );
 CONST_UINT64_T( CAPP_CXA_SNOOP_CTL_0x0201301B         , ULL(0x0201301B) );
 CONST_UINT64_T( CAPP_APC_MASTER_LCO_TARGET_0x02013021 , ULL(0x02013021) );
@@ -2254,6 +2255,10 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.195  2015/05/01 17:40:55  belldi
+
+- Added constant: CONST_UINT64_T( CAPP_APC_MASTER_CAPI_CTL_0x02013019   , ULL(0x02013019) );
+
 Revision 1.194  2015/03/17 18:55:38  jmcgill
 add NPU FIR register constants
 

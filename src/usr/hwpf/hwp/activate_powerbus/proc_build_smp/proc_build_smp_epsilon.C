@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.12 2014/11/18 17:41:03 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.13 2015/01/26 15:06:30 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -101,6 +101,7 @@ enum proc_build_smp_epsilon_unit
     PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_T2,
     PROC_BUILD_SMP_EPSILON_UNIT_MCS_R_F,
     PROC_BUILD_SMP_EPSILON_UNIT_NX_W_T2,
+    PROC_BUILD_SMP_EPSILON_UNIT_NPU_W_T2,
     PROC_BUILD_SMP_EPSILON_UNIT_HCA_W_T2,
     PROC_BUILD_SMP_EPSILON_UNIT_CAPP_R_T2,
     PROC_BUILD_SMP_EPSILON_UNIT_CAPP_W_T2,
@@ -131,6 +132,9 @@ const uint8_t  PROC_BUILD_SMP_EPSILON_MCS_JITTER = 0x1;
 
 // NX
 const uint32_t PROC_BUILD_SMP_EPSILON_NX_MAX_VALUE_W_T2 = 448;
+
+// NPU
+const uint32_t PROC_BUILD_SMP_EPSILON_NPU_MAX_VALUE_W_T2 = 448;
 
 // HCA
 const uint32_t PROC_BUILD_SMP_EPSILON_HCA_MAX_VALUE_W_T2 = 512;
@@ -166,6 +170,19 @@ const uint32_t MCEPS_FOREIGN_EPSILON_END_BIT = 39;
 // NX CQ Epsilon Scale register field/bit definitions
 const uint32_t NX_CQ_EPSILON_SCALE_EPSILON_START_BIT = 0;
 const uint32_t NX_CQ_EPSILON_SCALE_EPSILON_END_BIT = 5;
+
+// NPU CQ Epsilon Scale register field/bit definitions
+const uint8_t NPU_NUM_EPS_REGS = 4;
+const uint32_t NPU_CQ_EPSILON_REGS[NPU_NUM_EPS_REGS] =
+{
+    NPU0_CQ_EPS_0x08013C08,
+    NPU1_CQ_EPS_0x08013C48,
+    NPU2_CQ_EPS_0x08013D08,
+    NPU3_CQ_EPS_0x08013D48
+};
+
+const uint32_t NPU_CQ_EPSILON_SCALE_EPSILON_START_BIT = 0;
+const uint32_t NPU_CQ_EPSILON_SCALE_EPSILON_END_BIT = 5;
 
 // HCA Mode register field/bit definitions
 const uint32_t HCA_MODE_EPSILON_START_BIT = 21;
@@ -920,6 +937,98 @@ fapi::ReturnCode proc_build_smp_set_epsilons_nx(
 
 
 //------------------------------------------------------------------------------
+// function: set NPU unit epsilon registers
+// parameters: i_target  => chip target
+//             i_eps_cfg => system epsilon configuration structure
+// returns: ECMD_SUCCESS if all settings are programmed correctly,
+//          RC_PROC_BUILD_SMP_EPSILON_RANGE_ERR if any target value is out of
+//              range given underlying HW storage,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_set_epsilons_npu(
+    fapi::Target & i_target,
+    const proc_build_smp_eps_cfg & i_eps_cfg)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+    bool w_t2_fits = false;
+    ecmdDataBufferBase data(64), mask(64);
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_epsilons_npu: Start");
+
+    do
+    {
+        //
+        // NPU CQ Epsilon Scale register
+        //    0:5 = w_t2 (MAX = all 0s =  448, MIN = 1, HW = target_value/7)
+        //
+
+        // target write tier2 epsilon value must be representable
+        // in HW storage, error out if not
+        rc = proc_build_smp_check_epsilon(
+            i_eps_cfg.w_t2,
+            PROC_BUILD_SMP_EPSILON_NPU_MAX_VALUE_W_T2,
+            true,
+            PROC_BUILD_SMP_EPSILON_UNIT_NPU_W_T2,
+            w_t2_fits);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_npu: Error from proc_build_smp_check_epsilon (w_t2)");
+            break;
+        }
+
+        // program write epsilon register based on unit implementation
+        uint32_t hw_value = proc_build_smp_round_ceiling(i_eps_cfg.w_t2, 7);
+        if (hw_value == 64)
+        {
+            hw_value = 0;
+        }
+
+        rc_ecmd |= data.insertFromRight(
+            hw_value,
+            NPU_CQ_EPSILON_SCALE_EPSILON_START_BIT,
+            (NPU_CQ_EPSILON_SCALE_EPSILON_END_BIT-
+             NPU_CQ_EPSILON_SCALE_EPSILON_START_BIT+1));
+        rc_ecmd |= mask.setBit(
+            NPU_CQ_EPSILON_SCALE_EPSILON_START_BIT,
+            (NPU_CQ_EPSILON_SCALE_EPSILON_END_BIT-
+             NPU_CQ_EPSILON_SCALE_EPSILON_START_BIT+1));
+
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_npu: Error 0x%x setting up NPU CQ Epsilon Scale register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        for (uint8_t i = 0; i < NPU_NUM_EPS_REGS; i++)
+        {
+            // write register (use mask to avoid overriding other configuration
+            // settings in register)
+            rc = fapiPutScomUnderMask(i_target,
+                                      NPU_CQ_EPSILON_REGS[i],
+                                      data,
+                                      mask);
+            
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_epsilons_npu: fapiPutScomUnderMask error (NPU%d_CQ_EPS_0x%08X)",
+                         i, NPU_CQ_EPSILON_REGS[i]);
+                break;
+            }
+        }
+    } while(0);
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_epsilons_npu: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
 // function: set HCA unit epsilon registers
 // parameters: i_target  => chip target
 //             i_eps_cfg => system epsilon configuration structure
@@ -1582,6 +1691,18 @@ fapi::ReturnCode proc_build_smp_set_epsilons(
                     if (!rc.ok())
                     {
                         FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_capp");
+                        break;
+                    }
+                }
+
+                // set epsilons for NPU if present
+                if (p_iter->second.nv_present)
+                {
+                    // NPU
+                    rc = proc_build_smp_set_epsilons_npu(target, i_smp.eps_cfg);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_npu");
                         break;
                     }
                 }

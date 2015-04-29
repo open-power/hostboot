@@ -2816,6 +2816,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
+        <array>4,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -2839,6 +2840,7 @@
         <uint64_t>
             <default>0</default>
         </uint64_t>
+        <array>4,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -2890,6 +2892,7 @@
         <uint64_t>
             <default>0</default>
         </uint64_t>
+        <array>4,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars_defs.H,v 1.2 2014/11/18 17:43:18 jmcgill Exp $
+// $Id: proc_setup_bars_defs.H,v 1.4 2015/02/02 18:58:18 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars_defs.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -96,6 +96,10 @@ const uint8_t PROC_SETUP_BARS_NUM_MIRRORED_RANGES = 4;
 // PCIe unit contstants
 const uint8_t PROC_SETUP_BARS_PCIE_NUM_UNITS = 4;
 const uint8_t PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT = 3;
+
+// NPU unit constants
+const uint8_t PROC_SETUP_BARS_NPU_NUM_UNITS = 4;
+const uint8_t PROC_SETUP_BARS_NPU_MMIO_RANGES_PER_UNIT = 2;
 
 
 //------------------------------------------------------------------------------
@@ -242,6 +246,8 @@ struct proc_setup_bars_smp_chip
     // partial good attributes
     bool nx_enabled;
     bool pcie_enabled;
+    bool nv_present;
+    bool dual_capp_present;
     // number of valid PCIe PHBs
     uint8_t num_phb;
     // select for PCIe/DSMP mux (one per link)
@@ -257,6 +263,7 @@ struct proc_setup_bars_smp_chip
     proc_setup_bars_addr_range intp_range;
     proc_setup_bars_addr_range nx_mmio_range;
     proc_setup_bars_addr_range as_mmio_range;
+    proc_setup_bars_addr_range npu_mmio_ranges[PROC_SETUP_BARS_NPU_NUM_UNITS][PROC_SETUP_BARS_NPU_MMIO_RANGES_PER_UNIT];
     proc_setup_bars_addr_range pcie_ranges[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT];
 };
 
@@ -390,6 +397,23 @@ struct proc_setup_bars_nx_mmio_bar_size
         m[PROC_SETUP_BARS_SIZE_1_MB]  = 0x3;
         m[PROC_SETUP_BARS_SIZE_64_KB] = 0x1;
         m[PROC_SETUP_BARS_SIZE_4_KB]  = 0x0;
+        return m;
+    }
+    static const std::map<uint64_t, uint64_t> xlate_map;
+};
+
+// define set of NPU MMIO mask sizes
+struct proc_setup_bars_npu_mmio_bar_size
+{
+    static std::map<uint64_t, uint64_t> create_map()
+    {
+        std::map<uint64_t, uint64_t> m;
+        m[PROC_SETUP_BARS_SIZE_2_MB]   = 0x5;
+        m[PROC_SETUP_BARS_SIZE_1_MB]   = 0x4;
+        m[PROC_SETUP_BARS_SIZE_512_KB] = 0x3;
+        m[PROC_SETUP_BARS_SIZE_256_KB] = 0x2;
+        m[PROC_SETUP_BARS_SIZE_128_KB] = 0x1;
+        m[PROC_SETUP_BARS_SIZE_64_KB]  = 0x0;
         return m;
     }
     static const std::map<uint64_t, uint64_t> xlate_map;
@@ -543,7 +567,8 @@ enum proc_setup_bars_attr_id
     PROC_SETUP_BARS_ATTR_ID_INTP = 7,
     PROC_SETUP_BARS_ATTR_ID_NX = 8,
     PROC_SETUP_BARS_ATTR_ID_AS = 9,
-    PROC_SETUP_BARS_ATTR_ID_PCIE = 10
+    PROC_SETUP_BARS_ATTR_ID_PCIE = 10,
+    PROC_SETUP_BARS_ATTR_ID_NPU = 11
 };
 
 // encoding for RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR types
@@ -878,6 +903,89 @@ const proc_setup_bars_bar_reg_def as_mmio_bar_reg_def =
     53,
     55,
     &proc_setup_bars_as_mmio_bar_size::xlate_map,
+    0x0ULL,
+    0x0ULL
+};
+
+// NPU BAR constants
+const uint32_t PROC_SETUP_BARS_NPU_CHIP_NON_MIRRORED_BAR[PROC_SETUP_BARS_NPU_NUM_UNITS] =
+{
+    NPU0_NODAL_BAR0_0x08013C04,
+    NPU1_NODAL_BAR0_0x08013C44,
+    NPU2_NODAL_BAR0_0x08013D04,
+    NPU3_NODAL_BAR0_0x08013D44
+};
+
+const uint32_t PROC_SETUP_BARS_NPU_CHIP_MIRRORED_BAR[PROC_SETUP_BARS_NPU_NUM_UNITS] =
+{
+    NPU0_NODAL_BAR1_0x08013C05,
+    NPU1_NODAL_BAR1_0x08013C45,
+    NPU2_NODAL_BAR1_0x08013D05,
+    NPU3_NODAL_BAR1_0x08013D45
+};
+
+const uint32_t PROC_SETUP_BARS_NPU_NODE_NON_MIRRORED_BAR[PROC_SETUP_BARS_NPU_NUM_UNITS] =
+{
+    NPU0_GROUP_BAR0_0x08013C06,
+    NPU1_GROUP_BAR0_0x08013C46,
+    NPU2_GROUP_BAR0_0x08013D06,
+    NPU3_GROUP_BAR0_0x08013D46
+};
+
+const uint32_t PROC_SETUP_BARS_NPU_NODE_MIRRORED_BAR[PROC_SETUP_BARS_NPU_NUM_UNITS] =
+{
+    NPU0_GROUP_BAR1_0x08013C07,
+    NPU1_GROUP_BAR1_0x08013C47,
+    NPU2_GROUP_BAR1_0x08013D07,
+    NPU3_GROUP_BAR1_0x08013D47
+};
+
+// NPU MMIO BAR constants
+const uint32_t PROC_SETUP_BARS_NPU_MMIO_BAR[PROC_SETUP_BARS_NPU_NUM_UNITS][PROC_SETUP_BARS_NPU_MMIO_RANGES_PER_UNIT] =
+{
+    {
+        NPU0_MMIO_BAR0_0x08013C02,
+        NPU0_MMIO_BAR1_0x08013C03
+    },
+    {
+        NPU1_MMIO_BAR0_0x08013C42,
+        NPU1_MMIO_BAR1_0x08013C43
+    },
+    {
+        NPU2_MMIO_BAR0_0x08013D02,
+        NPU2_MMIO_BAR1_0x08013D03
+    },
+    {
+        NPU3_MMIO_BAR0_0x08013D42,
+        NPU3_MMIO_BAR1_0x08013D43
+    }
+};
+
+const fapi::AttributeId npu_mmio_bar_base_addr_attr = fapi::ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR;
+const fapi::AttributeId npu_mmio_bar_en_attr = fapi::ATTR_PROC_NPU_MMIO_BAR_ENABLE;
+const fapi::AttributeId npu_mmio_bar_size_attr = fapi::ATTR_PROC_NPU_MMIO_BAR_SIZE;
+
+const proc_setup_bars_bar_def npu_mmio_bar_def =
+{
+    0xFFFC000000000FFFULL,         // base: RA 14:51
+    PROC_SETUP_BARS_SIZE_64_KB,    // size (min): 64 KB
+    PROC_SETUP_BARS_SIZE_2_MB,     // size (max): 2 MB
+    true
+};
+
+const proc_setup_bars_bar_reg_def npu_mmio_bar_reg_def =
+{
+    true,                          // base: bits 14:51
+    PROC_SETUP_BARS_SHIFT_NONE,
+    0,
+    14,
+    51,
+    true,                          // enable: bit 52
+    52,
+    true,                          // size: bits 53:55
+    53,
+    55,
+    &proc_setup_bars_npu_mmio_bar_size::xlate_map,
     0x0ULL,
     0x0ULL
 };
