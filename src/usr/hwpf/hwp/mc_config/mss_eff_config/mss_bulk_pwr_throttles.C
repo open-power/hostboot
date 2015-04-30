@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.28 2014/12/01 19:07:07 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.30 2015/03/06 15:54:35 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -73,6 +73,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.30  | pardeik  |12-FEB-15| Review change to check for l_throttle_n_per_chip
+//         |          |         |   being zero (shouldn't have any impact to hwp)
+//   1.29  | pardeik  |12-FEB-15| CDIMM DDR4 throttle updates (set Nmba to Nchip)
 //   1.28  | pardeik  |01-DEC-14| Gerrit review updates
 //         |          |         |   changed MAX_UTIL to max_util
 //         |          |         |   changed MIN_UTIL const to min_util float
@@ -235,6 +238,7 @@ extern "C" {
 	uint32_t channel_pair_power;
 	uint32_t runtime_throttle_n_per_mba;
 	uint32_t runtime_throttle_n_per_chip;
+	uint8_t l_dram_gen;
 
 // get input attributes
 	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_custom_dimm);
@@ -269,6 +273,12 @@ extern "C" {
 			   &i_target_mba, runtime_throttle_n_per_chip);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,
+			   &i_target_mba, l_dram_gen);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_DRAM_GEN");
 	    return rc;
 	}
 
@@ -479,11 +489,19 @@ extern "C" {
 	}
 
 // ensure that N throttle values are not zero, if so set to lowest values possible
-	if ( (l_throttle_n_per_mba == 0) || (l_throttle_n_per_mba == 0))
+	if ( (l_throttle_n_per_mba == 0) || (l_throttle_n_per_chip == 0))
 	{
 	    l_throttle_n_per_mba = 1;
 	    l_throttle_n_per_chip = l_throttle_n_per_mba * l_num_mba_with_dimms;
 	}
+
+// for better custom dimm performance for DDR4, set the per mba throttle to the per chip throttle
+// Not planning on doing this for DDR3
+	if ( (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	     && (l_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) )
+	    {
+		l_throttle_n_per_mba = l_throttle_n_per_chip;
+	    }
 
 // adjust the throttles to the MRW thermal limit throttles (ie.  thermal/power limit less than available power)
 	if ( (l_throttle_n_per_mba > runtime_throttle_n_per_mba) ||

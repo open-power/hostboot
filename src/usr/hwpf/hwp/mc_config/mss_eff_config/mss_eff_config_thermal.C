@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.29 2014/11/06 21:05:54 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.31 2015/04/06 22:33:11 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -55,6 +55,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.31  | pardeik  | 04/06/15 | attribute name changed for adjustment enable
+//   1.30  | pardeik  |12-FEB-15| CDIMM DDR4 throttle updates (set Nmba to Nchip)
+//         |          |         | Support for vmem regulator power adjustment
 //   1.29  | pardeik  |06-NOV-14| removed strings in trace statements
 //         |          |         | changed FAPI_IMP to FAPI_INF
 //         |          |         | removed unused constants
@@ -448,7 +451,12 @@ extern "C" {
 	uint8_t ras_increment;
 	uint8_t cas_increment;
 	uint32_t l_max_dram_databus_util;
-
+	uint32_t l_dimm_reg_power_limit_per_dimm_adj;
+	uint32_t l_dimm_reg_power_limit_per_dimm;
+	uint8_t l_max_number_dimms_per_reg;
+	uint8_t l_dimm_reg_power_limit_adj_enable;
+	uint8_t l_reg_max_dimm_count;
+	uint8_t l_dram_gen;
 //------------------------------------------------------------------------------
 // Get input attributes
 //------------------------------------------------------------------------------
@@ -487,6 +495,36 @@ extern "C" {
 			   NULL, l_max_dram_databus_util);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_MRW_MAX_DRAM_DATABUS_UTIL");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM,
+			   NULL, l_dimm_reg_power_limit_per_dimm);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR,
+			   NULL, l_max_number_dimms_per_reg);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE,
+			   NULL, l_dimm_reg_power_limit_adj_enable);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT,
+			   NULL, l_reg_max_dimm_count);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,
+			   &i_target_mba, l_dram_gen);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_DRAM_GEN");
 	    return rc;
 	}
 
@@ -543,121 +581,154 @@ extern "C" {
 //   This means that the power limit for a MBA channel pair must be the total
 // CDIMM power limit minus the idle power of the other MBAs logical dimms
 //------------------------------------------------------------------------------
-	    if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+
+// adjust the regulator power limit per dimm if enabled and use this if less than the thermal limit
+	l_dimm_reg_power_limit_per_dimm_adj = l_dimm_reg_power_limit_per_dimm;
+	if (l_dimm_reg_power_limit_adj_enable == fapi::ENUM_ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE_TRUE)
+	{
+// adjust reg power limit per cdimm only if l_reg_max_dimm_count>0 and l_reg_max_dimm_count<l_max_number_dimms_per_reg
+	    if (
+		(l_reg_max_dimm_count > 0)
+		 && (l_reg_max_dimm_count < l_max_number_dimms_per_reg)
+		)
 	    {
-		channel_pair_thermal_power_limit =
-		  dimm_thermal_power_limit / num_mba_with_dimms;
+		l_dimm_reg_power_limit_per_dimm_adj =
+		  l_dimm_reg_power_limit_per_dimm
+		  * l_max_number_dimms_per_reg
+		  / l_reg_max_dimm_count;
+		FAPI_INF("VMEM Regulator Power/DIMM Limit Adjustment from %d to %d cW (DIMMs under regulator %d/%d)", l_dimm_reg_power_limit_per_dimm, l_dimm_reg_power_limit_per_dimm_adj, l_reg_max_dimm_count, l_max_number_dimms_per_reg);
 	    }
+	}
+// Use the smaller of the thermal limit and regulator power limit per dimm
+	if (l_dimm_reg_power_limit_per_dimm_adj < dimm_thermal_power_limit)
+	{
+	    dimm_thermal_power_limit = l_dimm_reg_power_limit_per_dimm_adj;
+	}
+
+// Adjust the thermal/power limit to represent the power for all dimms under an MBA
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+	{
+	    channel_pair_thermal_power_limit =
+	      dimm_thermal_power_limit / num_mba_with_dimms;
+	}
 // ISDIMMs thermal power limit from MRW is per DIMM, so multiply by number of dimms on channel to get channel power and multiply by 2 to get channel pair power
-	    else
-	    {
+	else
+	{
 		// ISDIMMs
-		channel_pair_thermal_power_limit =
-		  dimm_thermal_power_limit * num_dimms_on_port * 2;
-	    }
+	    channel_pair_thermal_power_limit =
+	      dimm_thermal_power_limit * num_dimms_on_port * 2;
+	}
 
 // Update the channel pair power limit attribute
-	    rc = FAPI_ATTR_SET(ATTR_MSS_MEM_WATT_TARGET,
-			       &i_target_mba, channel_pair_thermal_power_limit);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_MEM_WATT_TARGET");
-		return rc;
-	    }
+	rc = FAPI_ATTR_SET(ATTR_MSS_MEM_WATT_TARGET,
+			   &i_target_mba, channel_pair_thermal_power_limit);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_MEM_WATT_TARGET");
+	    return rc;
+	}
 
 // Initialize the runtime throttle attributes to an unthrottled value for mss_bulk_pwr_throttles
 // max utilization comes from MRW value in c% - convert to %
-	    float MAX_UTIL = (float) l_max_dram_databus_util / 100;
-	    runtime_throttle_n_per_mba = (int)(runtime_throttle_d * (MAX_UTIL / 100) / 4);
-	    runtime_throttle_n_per_chip = (int)(runtime_throttle_d * (MAX_UTIL / 100) / 4) *
-	      num_mba_with_dimms;
+	float MAX_UTIL = (float) l_max_dram_databus_util / 100;
+	runtime_throttle_n_per_mba = (int)(runtime_throttle_d * (MAX_UTIL / 100) / 4);
+	runtime_throttle_n_per_chip = (int)(runtime_throttle_d * (MAX_UTIL / 100) / 4) *
+	  num_mba_with_dimms;
 
-	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			       &i_target_mba, runtime_throttle_n_per_mba);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			       &i_target_mba, runtime_throttle_n_per_chip);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
-			       &i_target_mba, runtime_throttle_d);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
-		return rc;
-	    }
+// for better custom dimm performance for DDR4, set the per mba throttle to the per chip throttle
+// Not planning on doing this for DDR3
+	if ( (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	     && (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) )
+	{
+	    runtime_throttle_n_per_mba = runtime_throttle_n_per_chip;
+	}
+
+	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
+			   &i_target_mba, runtime_throttle_n_per_mba);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
+			   &i_target_mba, runtime_throttle_n_per_chip);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
+			   &i_target_mba, runtime_throttle_d);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
+	    return rc;
+	}
+
+	FAPI_INF("Min Power/Thermal Limit per MBA %d cW.  Unthrottled values [%d/%d/%d].", channel_pair_thermal_power_limit, runtime_throttle_n_per_mba, runtime_throttle_n_per_chip, runtime_throttle_d);
 
 // Call the procedure function that takes a channel pair power limit and
 // converts it to throttle values
 
-	    FAPI_EXEC_HWP(rc, mss_bulk_pwr_throttles, i_target_mba);
-	    if (rc)
-	    {
-		FAPI_ERR("Error (0x%x) calling mss_bulk_pwr_throttles", static_cast<uint32_t>(rc));
-		return rc;
-	    }
-
-	    FAPI_INF("MRW Power/Thermal Limit %d.  Throttles [%d/%d/%d].", channel_pair_thermal_power_limit, runtime_throttle_n_per_mba, runtime_throttle_n_per_chip, runtime_throttle_d);
+	FAPI_EXEC_HWP(rc, mss_bulk_pwr_throttles, i_target_mba);
+	if (rc)
+	{
+	    FAPI_ERR("Error (0x%x) calling mss_bulk_pwr_throttles", static_cast<uint32_t>(rc));
+	    return rc;
+	}
 
 // Read back in the updated throttle attribute values (these are now set to
 // values that will give dimm/channel power underneath the thermal power limit)
-	    rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			       &i_target_mba, runtime_throttle_n_per_mba);
-	    if (rc) {
-		FAPI_ERR("Error getting attribute ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			       &i_target_mba, runtime_throttle_n_per_chip);
-	    if (rc) {
-		FAPI_ERR("Error getting attribute ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_DENOMINATOR,
-			       &i_target_mba, runtime_throttle_d);
-	    if (rc) {
-		FAPI_ERR("Error getting attribute ATTR_MSS_MEM_THROTTLE_DENOMINATOR");
-		return rc;
-	    }
+	rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
+			   &i_target_mba, runtime_throttle_n_per_mba);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP,
+			   &i_target_mba, runtime_throttle_n_per_chip);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_DENOMINATOR,
+			   &i_target_mba, runtime_throttle_d);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_MEM_THROTTLE_DENOMINATOR");
+	    return rc;
+	}
 
 // Setup the RAS and CAS increments used in the throttling register
-	    ras_increment=0;
-	    cas_increment=1;
+	ras_increment=0;
+	cas_increment=1;
 
 // update output attributes
-	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			       &i_target_mba, runtime_throttle_n_per_mba);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			       &i_target_mba, runtime_throttle_n_per_chip);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
-			       &i_target_mba, runtime_throttle_d);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_SET(ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT,
-			       &i_target_mba, ras_increment);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT");
-		return rc;
-	    }
-	    rc = FAPI_ATTR_SET(ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT,
-			       &i_target_mba, cas_increment);
-	    if (rc) {
-		FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT");
-		return rc;
-	    }
+	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
+			   &i_target_mba, runtime_throttle_n_per_mba);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
+			   &i_target_mba, runtime_throttle_n_per_chip);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
+			   &i_target_mba, runtime_throttle_d);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT,
+			   &i_target_mba, ras_increment);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT,
+			   &i_target_mba, cas_increment);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT");
+	    return rc;
+	}
 
 	FAPI_INF("*** mss_eff_config_thermal_throttles COMPLETE on %s ***",
 		 i_target_mba.toEcmdString());
