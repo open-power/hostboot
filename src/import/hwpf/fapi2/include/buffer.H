@@ -170,6 +170,24 @@ namespace fapi2
         }
 
         ///
+        /// @brief Set a bit in the buffer
+        /// @param[in] i_bit the bit number to set.
+        /// @note 0 is left-most
+        /// @return FAPI2_RC_SUCCESS if OK
+        ///
+        inline fapi2::ReturnCode setBit(const bits_type& i_bit)
+        {
+            if (i_bit >= TT::bits_per_unit())
+            {
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            iv_data |=
+                (static_cast<T>(1)) << (TT::bits_per_unit() - i_bit - 1);
+            return FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Clear a bit in buffer
         /// @tparam B Bit in buffer to clear.
         /// @return buffer& Useful for method chaining
@@ -185,6 +203,31 @@ namespace fapi2
 
             iv_data &= buffer<T>().setBit<B>().invert();
             return *this;
+        }
+
+        ///
+        /// @brief Clear a bit in the buffer
+        /// @param[in] i_bit the bit number to clear.
+        /// @note 0 is left-most
+        /// @return FAPI2_RC_SUCCESS if OK
+        ///
+        inline fapi2::ReturnCode clearBit(const bits_type& i_bit)
+        {
+            if (i_bit >= TT::bits_per_unit())
+            {
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            fapi2::buffer<T> l_scratch;
+
+            if (l_scratch.setBit(i_bit) != FAPI2_RC_SUCCESS)
+            {
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            iv_data &= l_scratch.invert();
+
+            return FAPI2_RC_SUCCESS;
         }
 
         ///
@@ -223,26 +266,6 @@ namespace fapi2
             iv_data ^= buffer<T>().setBit<B>();
             return *this;
         }
-
-        ///
-        /// @brief Set a bit in the buffer
-        /// @param[in] i_bit the bit number to set.
-        /// @note 0 is left-most
-        /// @return FAPI2_RC_SUCCESS if OK
-        ///
-        inline fapi2::ReturnCode setBit(const bits_type& i_bit)
-            {
-                if (i_bit >= TT::bits_per_unit())
-                {
-                    return FAPI2_RC_INVALID_PARAMETER;
-                }
-
-                // Force iv_data to be dependent on the template type to force
-                // its look up in the second phase
-                iv_data |=
-                    (static_cast<T>(1)) << (TT::bits_per_unit() - i_bit - 1);
-                return FAPI2_RC_SUCCESS;
-            }
 
         ///
         /// @brief Get the value of a bit in the buffer
@@ -392,9 +415,6 @@ namespace fapi2
         /// @param[in] i_datain OT value to copy into DataBuffer
         ///    - data is taken left aligned
         /// @return buffer& Useful for method chaining
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         ///
         template<bits_type TS, bits_type L, bits_type SS = 0, typename OT>
         inline buffer& insert(const OT i_datain)
@@ -440,6 +460,76 @@ namespace fapi2
         }
 
         ///
+        /// @brief Copy part of a OT into the DataBuffer
+        /// @tparam OT the type of the incoming (origin) data
+        /// @param[in] i_datain OT value to copy into DataBuffer
+        ///    - data is taken left aligned
+        /// @param[in] Start bit to insert into (target start)
+        /// @param[in] Length of bits to insert
+        /// @param[in] Start bit in source - defaults to bit 0
+
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        template<typename OT>
+        fapi2::ReturnCode insert(const OT i_datain, const bits_type i_targetStart,
+                                 const bits_type i_len, const bits_type i_sourceStart = 0)
+        {
+            const bits_type target_length = parameterTraits<T>::bit_length();
+            const bits_type source_length = parameterTraits<OT>::bit_length();
+
+            // Error if input data don't make sense
+            if ((i_targetStart + i_len) > target_length)
+            {
+                FAPI_ERR("insert(): (Target Start + Len) is out of bounds");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            if ((i_sourceStart + i_len) > source_length)
+            {
+                FAPI_ERR("insert(): (Source Start + Len) is out of bounds");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            if (i_targetStart >= target_length)
+            {
+                FAPI_ERR("insert(): Target Start is out of bounds");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            if (i_sourceStart >= source_length)
+            {
+                FAPI_ERR("insert(): Source Start is out of bounds");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            // Normalize the input to 2 64 bit integers and adjust the starts accordingly
+            uint64_t source = static_cast<uint64_t>(i_datain);
+            const uint64_t target = static_cast<uint64_t>(iv_data);
+
+            const bits_type source_start = parameterTraits<uint64_t>::bit_length() - (source_length - i_sourceStart);
+            const bits_type target_start = parameterTraits<uint64_t>::bit_length() - (target_length - i_targetStart);
+
+            // Get mask value for Target buffer
+            // Note: Need "& 0UL" because bit shift left for Target buffer doesn't roll off
+            uint64_t mask = ((~0UL << (parameterTraits<uint64_t>::bit_length() - i_len)) & ~0UL) >> target_start;
+
+            // Align the source to the target. Make things signed so we know which way to shift.
+            int32_t shift = source_start - target_start;
+            if (shift > 0)
+            {
+                source <<= shift;
+            }
+            else
+            {
+                shift = target_start - source_start;
+                source >>= shift;
+            }
+
+            iv_data = ((target & ~mask) | (source & mask));
+            return FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Copy in a right aligned value
         /// @tparam SB Start bit to insert into
         /// @tparam L Length of bits to insert
@@ -448,16 +538,13 @@ namespace fapi2
         ///    - data is taken right aligned
         /// @return buffer& Useful for method chaining
         /// @note Data is assumed to be aligned on the word boundary of L
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         ///
         template<bits_type TS, bits_type L, typename OT>
         inline buffer& insertFromRight(const OT i_datain)
         {
             // Error if input data don't make sense
-            static_assert(L < parameterTraits<OT>::bit_length(),
-                          "insertFromRight(): Len >= input buffer");
+            static_assert(L <= parameterTraits<OT>::bit_length(),
+                          "insertFromRight(): Len > input buffer");
             static_assert(TS < parameterTraits<T>::bit_length(),
                           "insertFromRight(): Target Start is out of bounds");
             static_assert((TS + L) <= parameterTraits<T>::bit_length(),
@@ -468,6 +555,42 @@ namespace fapi2
         }
 
         ///
+        /// @brief Copy in a right aligned value
+        /// @tparam OT the type of the incoming (origin) data
+        /// @param[in] i_datain OT value to copy into DataBuffer
+        ///    - data is taken right aligned
+        /// @param[in] Start bit to insert into
+        /// @param[in] Length of bits to insert
+        /// @return FAPi2_RC_SUCCESS if no error
+        /// @note Data is assumed to be aligned on the word boundary of L
+        ///
+        template<typename OT>
+        fapi2::ReturnCode insertFromRight(const OT i_datain, const bits_type i_targetStart,
+                                          const bits_type i_len)
+        {
+            // Error if input data don't make sense
+            if ((i_targetStart + i_len) > parameterTraits<T>::bit_length())
+            {
+                FAPI_ERR("insertFromRight(): (Target Start + Len) is out of bounds");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            if (i_targetStart >= parameterTraits<T>::bit_length())
+            {
+                FAPI_ERR("insertFromRight(): Target Start is out of bounds");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            if (i_len > parameterTraits<OT>::bit_length())
+            {
+                FAPI_ERR("insertFromRight(): Len > input buffer");
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            return this->insert(i_datain, i_targetStart, i_len, parameterTraits<OT>::bit_length() - i_len);
+        }
+
+        ///
         /// @brief Copy data from this buffer into an OT
         /// @tparam TS Start bit to insert into (target start)
         /// @tparam L Length of bits to insert
@@ -475,9 +598,6 @@ namespace fapi2
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed left aligned
         /// @return buffer& Useful for method chaining
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         ///
         template<bits_type TS, bits_type L, bits_type SS, typename OT>
         inline buffer& extract(OT& o_out)
@@ -491,21 +611,58 @@ namespace fapi2
         }
 
         ///
+        /// @brief Copy data from this buffer into an OT
+        /// @tparam OT the type of the outgoing (target)
+        /// @param[out] o_out OT to copy into - data is placed left aligned
+        /// @param[in] Start bit to insert into (target start)
+        /// @param[in] Length of bits to insert
+        /// @param[in] Start bit in source
+        /// @return FAPI2_RC_SUCCESS if ok
+        ///
+        template<typename OT>
+        fapi2::ReturnCode extract(OT& o_out, const bits_type i_targetStart,
+                                  const bits_type i_len, const bits_type i_sourceStart)
+        {
+            // Extraction is just an insert into o_out
+
+            buffer<OT> out(o_out);
+            if (out.insert(iv_data, i_targetStart, i_len, i_sourceStart) != FAPI2_RC_SUCCESS)
+            {
+                return FAPI2_RC_INVALID_PARAMETER;
+            }
+
+            o_out = out;
+            return FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Copy data from this buffer into an OT and right justify
         /// @tparam SS Start bit to insert into (source start)
         /// @tparam L Length of bits to insert
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed right aligned
         /// @return buffer& Useful for method chaining
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         ///
         template<bits_type SS, bits_type L, typename OT>
         inline buffer& extractToRight(OT& o_out)
         {
             extract<parameterTraits<OT>::bit_length() - L, L, SS>(o_out);
             return *this;
+        }
+
+        ///
+        /// @brief Copy data from this buffer into an OT and right justify
+        /// @tparam OT the type of the outgoing (target)
+        /// @param[out] o_out OT to copy into - data is placed right aligned
+        /// @param[in] Start bit to insert into (source start)
+        /// @param[in] Length of bits to insert
+        /// @return FAPI2_RC_SUCCESS if ok
+        ///
+        template<typename OT>
+        fapi2::ReturnCode extractToRight(OT& o_out, const bits_type i_sourceStart,
+                                         const bits_type i_len)
+        {
+            return extract(o_out, parameterTraits<OT>::bit_length() - i_len, i_len, i_sourceStart);
         }
 
         ///@}
