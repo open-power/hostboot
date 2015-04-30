@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +50,7 @@ sub main
     my $listArg = " -l "; #  default action is to list
     my $displayArg = "";  #  for -d <error log id>
     my $traceArg = "";    #  for the name of the hbot string file
+    my $errlpathArg = ""; #  path to errl exe
 
     my %hashh = %{(shift)};
     my $temp;
@@ -65,6 +68,10 @@ sub main
         elsif( $temp eq "trace" )
         {
             $traceArg = " -t ".$hashh{$temp};
+        }
+        elsif( $temp eq "errl" )
+        {
+            $errlpathArg = " -e ".$hashh{$temp};
         }
         elsif( length($temp) eq 0  )
         {
@@ -128,7 +135,7 @@ sub main
 
 
     my $cmdLine;
-    $cmdLine = "$errlParser $tempFile $displayArg $traceArg $listArg";
+    $cmdLine = "$errlParser $tempFile $displayArg $traceArg $listArg $errlpathArg";
     # ::userDisplay "$cmdLine\n";
     open ERRLPARSER, "$cmdLine |";
     while (my $line = <ERRLPARSER>)
@@ -151,6 +158,8 @@ sub helpInfo
         options => {
                     "display=<id>|all" => ["<id> - Display a specific error log by id.",
                                            "all - Display all error logs in the repository."],
+                    "trace=<hbotStringFile>" => ["Path to hbotStringFile"],
+                    "errl=<errl exe>" => ["Path to errl executable"],
                    },
         notes => ["The default behavior is to list all the committed error logs unless",
                   "requested to display a specific error log or all error logs."]

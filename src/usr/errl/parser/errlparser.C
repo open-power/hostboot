@@ -73,7 +73,7 @@ using namespace ERRORLOG;
 #define USAGE "\
 Usage:\n\
 \n\
-errlparser [-i]<image> [[-s]<syms>] [-l|-d[<logid>|all]] [-t <stringfile>]\n\
+errlparser [-i]<image> [[-s]<syms>] [-l|-d[<logid>|all]] [-t <stringfile>] [-e <errl exe>]\n\
 \n\
 Arguments:\n\
   <image>  data file name\n\
@@ -83,6 +83,7 @@ Arguments:\n\
   -i name  explicitly name the image file\n\
   -s name  explicitly name the symbols file\n\
   -t name  name the hbotStringFile\n\
+  -e file  full path to errl binary\n\
   -v       verbose output to stdout\n\
 \n\
 Sample command lines:\n\
@@ -704,6 +705,16 @@ int main( int argc,  char *argv[] )
             // help
             halt( USAGE );
         }
+        else if( 0 == strcmp( "-e", argv[i] ))
+        {
+            i++;
+            if( i >= argc )
+            {
+              fprintf( stdout, "Provide -e <errl exe>\n" );
+              exit( 2 );
+            }
+            pszErrlTool = strdup( argv[i] );
+        }
         else if( 0 == strcmp( "-", argv[i] ))
         {
             // unrecognized switch
@@ -748,14 +759,18 @@ int main( int argc,  char *argv[] )
     }
 
     // There is a copy of FSP x86 errl tool in the simics dir.
-    pszErrlTool = "./errl";
+    if( (pszErrlTool == NULL)
+        || (-1 == stat( pszErrlTool, &statbuffer )) )
+    {
+        pszErrlTool = "./errl";
+    }
 
     rc = stat( pszErrlTool, &statbuffer );
     if(  -1 == rc )
     {
         // Not found, so this one should be found for most users.
         pszErrlTool =
-        "/esw/fips730/Builds/b0829a_1130.730/obj/x86.nfp/errl/nfp/tool/errl";
+        "/esw/fips830/Builds/built/obj/x86.nfp/errl/nfp/tool/errl";
 
         rc = stat( pszErrlTool, &statbuffer );
         if(  -1 == rc )
