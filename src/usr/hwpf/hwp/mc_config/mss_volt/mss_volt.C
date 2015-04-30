@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt.C,v 1.17 2014/11/19 16:29:07 jdsloat Exp $
+// $Id: mss_volt.C,v 1.21 2015/04/29 21:18:40 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -60,6 +60,10 @@
 //  1.14   | jdsloat  | 06/19/14 | Added error checking associated ATTR_MSS_VOLT_OVERRIDE
 //  1.16   | jdsloat  | 11/05/14 | Fixed a if to else if in error checking of ATTR_MSS_VOLT_OVERRIDE
 //  1.17   | jdsloat  | 11/19/14 | Fixed a variable not being set preventing use of ATTR_MSS_VOLT_OVERRIDE, fixed internal log numbering
+//  1.18   | pardeik  | 02/17/15 | initialize ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT
+//  1.19   | jdsloat  | 04/07/15 | Called out dimms configured for 1.5V unless specified in ATTR_MSS_VOLT_COMPLIANT_DIMMS
+//  1.20   | jdsloat  | 04/08/15 | Added fapi:: to Enums used with ATTR_MSS_VOLT_COMPLIANT_DIMMS
+//  1.21   | jdsloat  | 04/29/15 | Made the error return for compliant unique and added a return RC
 
 // This procedure takes a vector of Centaurs behind a voltage domain,
 // reads in supported DIMM voltages from SPD and determines optimal
@@ -98,9 +102,15 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
     uint32_t l_selected_dram_voltage=0;  //this gets written into all centaurs when done.
     uint32_t l_selected_dram_voltage_vpp=0;
     uint32_t l_tolerated_dram_voltage = MAX_TOLERATED_VOLT; //initially set to the max tolerated voltage
+    uint8_t l_dimm_count = 0;
+    uint8_t l_compliant_dimm_voltages = 0;
 
     do
     {
+	//Gather whether 1.5V only DIMMs supported
+	l_rc = FAPI_ATTR_GET(ATTR_MSS_VOLT_COMPLIANT_DIMMS,NULL,l_compliant_dimm_voltages); 
+        if (l_rc) break;
+
         // Iterate through the list of centaurs
         for (uint32_t i=0; i < i_targets_memb.size(); i++)
         {
@@ -247,7 +257,61 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             break;
         }
 
+	// If we are going to land on using 1.5V and we are not enabling that usage via attribute.
+	if ( ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) &&
+	     ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) && 
+	     ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) &&
+	     (l_compliant_dimm_voltages == fapi::ENUM_ATTR_MSS_VOLT_COMPLIANT_DIMMS_PROCEDURE_DEFINED) )
+        {	
 
+            std::vector<fapi::Target> l_dimm_targets_deconfig;
+            // Iterate through the list of centaurs
+            for (uint32_t i=0; i < i_targets_memb.size(); i++)
+            {
+                std::vector<fapi::Target> l_mbaChiplets;
+                // Get associated MBA's on this centaur
+                l_rc=fapiGetChildChiplets(i_targets_memb[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+                if (l_rc) break;
+                // Loop through the 2 MBA's
+                for (uint32_t j=0; j < l_mbaChiplets.size(); j++)
+                {
+                    std::vector<fapi::Target> l_dimm_targets; 
+                    // Get a vector of DIMM targets
+                    l_rc = fapiGetAssociatedDimms(l_mbaChiplets[j], l_dimm_targets, fapi::TARGET_STATE_PRESENT);
+                    if (l_rc) break;
+                    for (uint32_t k=0; k < l_dimm_targets.size(); k++)
+                    {
+                        l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_NOMINAL_VOLTAGE, &l_dimm_targets[k], l_spd_volts);
+                        if (l_rc) break;
+
+                        if((l_spd_volts & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5)
+                        {
+                            const fapi::Target &DIMM_CV_TARGET = l_dimm_targets[k];
+                            const uint8_t &DIMM_VOLTAGE = l_spd_volts;
+                            FAPI_ERR("One or more DIMMs operate 1.5V which is not supported.");
+                            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_DDR_TYPE_COMPLIANT_VOLTAGE);
+                            fapiLogError(l_rc);
+                        }
+
+                    }//end of dimms loop
+                    if (l_rc)
+                    {
+                        break;
+                    }
+                }//end of mba loop
+                if (l_rc)
+                {
+                    break;
+                }
+            }//end of centaur (memb) loop  
+	}
+
+        if (l_rc)
+        {
+            break;
+        }
+
+	//Picking voltages based on overrides or supported voltages.
 	if (l_volt_override != fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE)
 	{
 	    if (l_volt_override == fapi::ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_135)
@@ -281,7 +345,8 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             l_selected_dram_voltage=1200;
             l_selected_dram_voltage_vpp = DDR4_VPP_VOLT;
         }
-        else if ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5)
+        else if  ( ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) &&
+		   (l_compliant_dimm_voltages == fapi::ENUM_ATTR_MSS_VOLT_COMPLIANT_DIMMS_ALL_VOLTAGES))
         {
             l_selected_dram_voltage=1500;
 	    l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
@@ -437,6 +502,10 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             if (l_rc) break;
 
         }
+	// Initialize DIMM Count Attribute for mss_volt_dimm_count to use
+	l_rc = FAPI_ATTR_SET(ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT, NULL, l_dimm_count);
+	if (l_rc) break;
+
     }while(0);
     return l_rc;
 }

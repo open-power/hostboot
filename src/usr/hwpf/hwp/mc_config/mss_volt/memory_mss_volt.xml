@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -22,7 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
-<!-- $Id: memory_mss_volt.xml,v 1.3 2014/06/19 18:41:16 jdsloat Exp $ -->
+<!-- $Id: memory_mss_volt.xml,v 1.4 2015/04/29 21:22:33 jdsloat Exp $ -->
 <!-- For file ../../ipl/fapi/mss_volt.C -->
 <!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
 <!-- // *! BACKUP NAME : -->
@@ -66,6 +68,20 @@
     </callout>
     <deconfigure>
       <target>DIMM_UV_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_DDR_TYPE_COMPLIANT_VOLTAGE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_COMPLIANT_VOLTAGE</rc>
+    <description>One or more DIMMs do not support compliant voltage for DDR type.</description>
+    <ffdc>DIMM_VOLTAGE</ffdc>
+    <callout>
+      <target>DIMM_CV_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_CV_TARGET</target>
     </deconfigure>
   </hwpError>
 
