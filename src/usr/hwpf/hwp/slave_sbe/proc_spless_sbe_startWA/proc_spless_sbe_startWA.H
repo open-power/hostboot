@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_spless_sbe_startWA.H,v 1.1 2013/08/12 18:19:30 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_ref_clk_enable.H,v $
+// $Id: proc_spless_sbe_startWA.H,v 1.1 2015/08/04 22:04:52 baiocchi Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_spless_sbe_startWA.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -52,7 +52,8 @@
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_spless_sbe_startWA_FP_t)(const fapi::Target &);
+typedef fapi::ReturnCode (*proc_spless_sbe_startWA_FP_t)(const fapi::Target &,
+                                                         const bool );
 
 
 //------------------------------------------------------------------------------
@@ -75,10 +76,13 @@ extern "C"
  *        started by Hostboot
  *
  * @param[in] i_target            chip target
+ * @param[in] i_sbeSeepromSelect  SBE Seeprom Select Bit:
+ *                                if false then first image; otherwise 2nd image
  *
  * @return ReturnCode
  */
-  fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target);
+  fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target,
+                                           const bool  i_sbeSeepromSelect);
 
 } // extern "C"
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,10 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// -*- mode: C++; c-file-style: "linux";  -*-
-
-// $Id: proc_spless_sbe_startWA.C,v 1.2 2013/08/14 20:44:47 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_ref_clk_enable.C,v $
+// $Id: proc_spless_sbe_startWA.C,v 1.2 2015/08/05 14:19:34 baiocchi Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_spless_sbe_startWA.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -60,15 +58,20 @@ extern "C"
 // Hardware Procedure
 //------------------------------------------------------------------------------
 // parameters: i_target            => chip target (S1/P8)
+//             i_sbeSeepromSelect  => SBE Seeprom Select Bit
 // returns:    FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
+fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target,
+                                         const bool  i_sbeSeepromSelect)
 {
 
     uint32_t           rc_ecmd = 0;
     fapi::ReturnCode   rc;
     uint32_t           l_set_data;
     ecmdDataBufferBase  set_data(32);
+
+    // mark start of function
+    FAPI_INF("proc_spless_sbe_startWA: Enter: i_sbeSeepromSelect=%d", i_sbeSeepromSelect);
 
     do {
 
@@ -99,11 +102,66 @@ fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
             break;
         }
 
-        // ------------------------------------------------
-        // Now toggle Warmstart bit to circumvent HW254584
-        // write it to mbox scratch2
-        rc_ecmd |= set_data.setWord( 0, 0x30000000 );
 
+        // ------------------------------------------------
+        // Enable output to ATTN pin to monitor for checkstops (3 commands)
+        // - putcfam pu 0x081C 20000000
+        FAPI_INF(   "Enable output to ATTN pin to monitor for checkstops");
+
+        rc_ecmd |= set_data.setWord( 0, 0x20000000 );
+
+        rc = fapiPutCfamRegister( i_target,
+                                  CFAM_FSI_INTR_MASK_0x0000081C,
+                                  set_data    );
+        if (rc)
+        {
+            FAPI_ERR("ERROR: write CFAM_FSI_INTR_MASK_0x0000081C= 0x%08x",
+                     static_cast<uint32_t>(rc) );
+            break;
+        }
+
+        // - putcfam pu 0x100D 40000000
+        rc_ecmd |= set_data.setWord( 0, 0x40000000 );
+
+        rc = fapiPutCfamRegister( i_target,
+                                  CFAM_FSI_TRUE_MASK_0x0000100D,
+                                  set_data    );
+        if (rc)
+        {
+            FAPI_ERR("ERROR: write CFAM_FSI_TRUE_MASK_0x0000100D= 0x%08x",
+                     static_cast<uint32_t>(rc) );
+            break;
+        }
+
+
+        // - putcfam pu  0x100B FFFFFFFF
+        rc_ecmd |= set_data.setWord( 0, 0xFFFFFFFF );
+
+        rc = fapiPutCfamRegister( i_target,
+                                  CFAM_FSI_INTR_STATUS_0x0000100B,
+                                  set_data    );
+        if (rc)
+        {
+            FAPI_ERR("ERROR: write CFAM_FSI_INTR_STATUS_0x0000100B= 0x%08x",
+                     static_cast<uint32_t>(rc) );
+            break;
+        }
+
+
+
+        // -----------------------------------------------
+        // Now toggle Warmstart bit to circumvent HW254584
+        // -- set bit 8 to select SBE Image to boot from
+        if (i_sbeSeepromSelect == true)
+        {
+            rc_ecmd |= set_data.setWord( 0, 0x30800000 );
+        }
+        else
+        {
+            rc_ecmd |= set_data.setWord( 0, 0x30000000 );
+        }
+        FAPI_INF(   "Write 0x%08x to SBE VITAL to toggle Warmstart bit",
+                    set_data.getWord(0)   );
 
         rc = fapiPutCfamRegister( i_target,
                                   CFAM_FSI_SBE_VITAL_0x0000281C,
@@ -115,8 +173,20 @@ fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
             break;
         }
 
-        rc_ecmd |= set_data.setWord( 0, 0xB0000000 );
+        // -----------------------------------------------
+        // Now start SBE
+        // -- set bit 8 to select SBE Image to boot from
+        if (i_sbeSeepromSelect == true)
+        {
+            rc_ecmd |= set_data.setWord( 0, 0xB0800000 );
+        }
+        else
+        {
+            rc_ecmd |= set_data.setWord( 0, 0xB0000000 );
+        }
 
+        FAPI_INF(   "Write 0x%08x to SBE VITAL start SBE",
+                    set_data.getWord(0)   );
 
         rc = fapiPutCfamRegister( i_target,
                                   CFAM_FSI_SBE_VITAL_0x0000281C,

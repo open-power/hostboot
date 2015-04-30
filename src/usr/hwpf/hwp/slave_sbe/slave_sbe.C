@@ -268,85 +268,153 @@ void* call_host_sbe_start( void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
     IStepError  l_stepError;
+    bool        l_sbeSeepromSelect = false;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start entry" );
 
-    //
-    //  get the master Proc target, we want to IGNORE this one.
-    //
-    TARGETING::Target* l_pMasterProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
-
-    //
-    //  get a list of all the procs in the system
-    //
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        "host_sbe_start: %d procs in the system.",
-        l_procTargetList.size() );
-
-    // loop thru all the cpu's
-    for (TargetHandleList::const_iterator
-            l_proc_iter = l_procTargetList.begin();
-            l_proc_iter != l_procTargetList.end();
-            ++l_proc_iter)
+    do
     {
-        //  make a local copy of the Processor target
-        TARGETING::Target* l_pProcTarget = *l_proc_iter;
+        //
+        //  get the master Proc target, we want to IGNORE this one.
+        //
+        TARGETING::Target* l_pMasterProcTarget = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(
+                                                 l_pMasterProcTarget);
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X",
-                TARGETING::get_huid(l_pProcTarget));
+        //
+        //  get a list of all the procs in the system
+        //
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
 
-        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
-                                       l_pProcTarget    );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "host_sbe_start: %d procs in the system.",
+            l_procTargetList.size() );
 
 
-        if (l_pProcTarget  ==  l_pMasterProcTarget )
+        //
+        //  get the SBE Image side that master Proc booted from
+        //  if hostboot needs to start SBE on slave processors
+        //
+        if ( (l_procTargetList.size() > 0) &&
+             !INITSERVICE::spBaseServicesEnabled() )
         {
-            // we are just checking the Slave SBE's, skip the master
-            continue;
+            uint64_t scomData = 0x0;
+            size_t op_size = sizeof(scomData);
+            l_errl = deviceRead(l_pMasterProcTarget,
+                                &scomData,
+                                op_size,
+                                DEVICE_SCOM_ADDRESS(PORE_SBE_VITAL_0x0005001C));
+
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"call_host_sbe_start: Error reading SBE "
+                           "VITAL REG (0x%.8X) from Target HUID=0x%.8X",
+                           PORE_SBE_VITAL_0x0005001C,
+                           TARGETING::get_huid(l_pMasterProcTarget));
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_pMasterProcTarget).addToLog( l_errl );
+
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+
+                // Create IStep error log and cross reference error
+                // that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit error log
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+                // Don't break - attempt to continue
+            }
+
+            // Bit 8 in VITAL REG is SBE_IMAGE_SELECT bit:
+            // - if 0 then first image otherwise 2nd image
+            else if( scomData & 0x0080000000000000 )
+            {
+                l_sbeSeepromSelect = 1;
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call_host_sbe_start: Master Proc booted from "
+                           "2nd SBE Image. SBE_VITAL_REG(0x%X) data = 0x%.16X",
+                           PORE_SBE_VITAL_0x0005001C, scomData);
+            }
         }
-        else if (!INITSERVICE::spBaseServicesEnabled())
-        {
-            //Need to issue SBE start workaround on all slave chips
-            // Invoke the HWP
-            FAPI_INVOKE_HWP(l_errl,
-                            proc_spless_sbe_startWA,
-                            l_fapiProcTarget);
-        }
-        else
-        {
-            //Eventually for secureboot will need to kick off
-            //SBE here (different HWP), but for now not needed
-            //so do nothing
-        }
 
-        if (l_errl)
+        // loop thru all the cpu's
+        for (TargetHandleList::const_iterator
+                l_proc_iter = l_procTargetList.begin();
+                l_proc_iter != l_procTargetList.end();
+                ++l_proc_iter)
         {
+            //  make a local copy of the Processor target
+            TARGETING::Target* l_pProcTarget = *l_proc_iter;
+
+            fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                           l_pProcTarget    );
+
+
+            if (l_pProcTarget  ==  l_pMasterProcTarget )
+            {
+                // we are just checking the Slave SBE's, skip the master
+               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "target HUID %.8X --> skipping proc_spless_sbe_startWA",
+                        TARGETING::get_huid(l_pProcTarget));
+
+
+                continue;
+            }
+            else if (!INITSERVICE::spBaseServicesEnabled())
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "target HUID %.8X --> "
+                          "calling proc_spless_sbe_startWA",
+                          TARGETING::get_huid(l_pProcTarget));
+
+                //Need to issue SBE start workaround on all slave chips
+                // Invoke the HWP
+                FAPI_INVOKE_HWP(l_errl,
+                                proc_spless_sbe_startWA,
+                                l_fapiProcTarget,
+                                l_sbeSeepromSelect);
+            }
+            else
+            {
+                //Eventually for secureboot will need to kick off
+                //SBE here (different HWP), but for now not needed
+                //so do nothing
+            }
+
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : sbe_start (proc_spless_sbe_startWA) "
+                          "failed, returning errorlog" );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+                // Create IStep error log and cross reference error
+                // that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit error log
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS : sbe_start (proc_spless_sbe_startWA) "
+                          "completed ok");
+
+            }
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : sbe_start",
-                      "failed, returning errorlog" );
+                      "target HUID %.8X --> after proc_spless_sbe_startWA",
+                      TARGETING::get_huid(l_pProcTarget));
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+        }   // endfor
 
-            // Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails( l_errl );
-
-            // Commit error log
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS : sbe_start",
-                      "completed ok");
-
-        }
-    }   // endfor
+    }while( 0 );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start exit" );
 
@@ -498,7 +566,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         TARGETING::Target* l_pProcTarget = *l_proc_iter;
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X",
+                "target HUID %.8X --> calling proc_getecid",
                 TARGETING::get_huid(l_pProcTarget));
 
         fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
@@ -535,8 +603,11 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                       " completed ok");
 
         }
-    }   // endfor
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "target HUID %.8X --> after proc_getecid",
+                  TARGETING::get_huid(l_pProcTarget));
 
+    }   // endfor
 
     // Slave processors should now use Host I2C Access Method
     I2C::i2cSetAccessMode( I2C::I2C_SET_ACCESS_MODE_PROC_HOST );

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.197 2015/06/29 01:43:56 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.198 2015/08/04 22:06:23 baiocchi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -160,6 +160,9 @@ CONST_UINT64_T( DEVICE_ID_REG_0x000F000F            , ULL(0x000F000F) );
 //------------------------------------------------------------------------------
 //      FSI MBOX (CFAM)
 //------------------------------------------------------------------------------
+CONST_UINT32_T( CFAM_FSI_INTR_MASK_0x0000081C         , ULL(0x0000081C) );
+CONST_UINT32_T( CFAM_FSI_INTR_STATUS_0x0000100B       , ULL(0x0000100B) );
+CONST_UINT32_T( CFAM_FSI_TRUE_MASK_0x0000100D         , ULL(0x0000100D) );
 CONST_UINT32_T( CFAM_FSI_GP3_0x00002812               , ULL(0x00002812) );
 CONST_UINT32_T( CFAM_FSI_GP4_0x00002813               , ULL(0x00002813) );
 CONST_UINT32_T( CFAM_FSI_GP5_0x00002814               , ULL(0x00002814) );
@@ -2262,6 +2265,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.198  2015/08/04 22:06:23  baiocchi
+Updating Support for starting the SBEs without a FSP
+
 Revision 1.197  2015/06/29 01:43:56  jmcgill
 add definition for PCIE NEST FIR Action2 Registers (Naples only)
 

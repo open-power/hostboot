@@ -3047,7 +3047,39 @@ namespace SBE
 
         do{
 
-            // Set permissions back to "no_access" before returning
+            //release all pages in page block
+            rc = mm_remove_pages(RELEASE,
+                                 reinterpret_cast<void*>
+                                 (VMM_VADDR_SBE_UPDATE),
+                                 VMM_SBE_UPDATE_SIZE);
+            if( rc )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - "
+                           "Error from mm_remove_pages : rc=%d", rc );
+                /*@
+                 * @errortype
+                 * @moduleid     SBE_CLEANUP_TEST_SPACE
+                 * @reasoncode   SBE_REMOVE_PAGES_FAIL
+                 * @userdata1    Requested Address
+                 * @userdata2    rc from mm_remove_pages
+                 * @devdesc      updateProcessorSbeSeeproms> mm_remove_pages
+                 *               RELEASE failed
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_CLEANUP_TEST_SPACE,
+                                    SBE_REMOVE_PAGES_FAIL,
+                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
+                                    TO_UINT64(rc));
+                err->collectTrace(SBE_COMP_NAME);
+                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH );
+
+                break;
+            }
+
+            // Set permissions back to "no_access"
             rc = mm_set_permission(reinterpret_cast<void*>
                                    (VMM_VADDR_SBE_UPDATE),
                                    VMM_SBE_UPDATE_SIZE,
@@ -3076,37 +3108,6 @@ namespace SBE
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH );
                 break;
-            }
-
-            //release all pages in page block to ensure we
-            //start with clean state
-            rc = mm_remove_pages(RELEASE,
-                                 reinterpret_cast<void*>
-                                 (VMM_VADDR_SBE_UPDATE),
-                                 VMM_SBE_UPDATE_SIZE);
-            if( rc )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - "
-                           "Error from mm_remove_pages : rc=%d", rc );
-                /*@
-                 * @errortype
-                 * @moduleid     SBE_CLEANUP_TEST_SPACE
-                 * @reasoncode   SBE_REMOVE_PAGES_FAIL
-                 * @userdata1    Requested Address
-                 * @userdata2    rc from mm_remove_pages
-                 * @devdesc      updateProcessorSbeSeeproms> mm_remove_pages
-                 *               RELEASE failed
-                 * @custdesc     A problem occurred while updating processor
-                 *               boot code.
-                 */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CLEANUP_TEST_SPACE,
-                                    SBE_REMOVE_PAGES_FAIL,
-                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
-                                    TO_UINT64(rc));
-                err->collectTrace(SBE_COMP_NAME);
-                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
             }
 
         }while(0);
