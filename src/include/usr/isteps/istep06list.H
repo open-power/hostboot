@@ -68,11 +68,11 @@ namespace   INITSERVICE
  *      :   Clear deconfigured states
  *  06.8    proc_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs
- *  06.10   host_slave_sbe_config
- *  06.11   host_sbe_start
- *  06.12   proc_check_slave_sbe_seeprom_complete
+ *  06.9   host_slave_sbe_config
+ *  06.10   host_sbe_start
+ *  06.11   proc_check_slave_sbe_seeprom_complete
  *        : Check Slave SBE Complete
- *  06.9    proc_cen_ref_clk_enable
+ *  06.12    proc_cen_ref_clk_enable
  *      :   Setup centaur ref clocks
  *  06.13   proc_xmit_sbe
  *        : vSBE Init of Slave Chips
@@ -127,22 +127,22 @@ const   TaskInfo    g_istep06[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(06,10,"host_slave_sbe_config"),
+                ISTEPNAME(06,09,"host_slave_sbe_config"),
                 SLAVE_SBE::call_host_slave_sbe_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(06,11,"host_sbe_start"),
+                ISTEPNAME(06,10,"host_sbe_start"),
                 SLAVE_SBE::call_host_sbe_start,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(06,12,"proc_check_slave_sbe_seeprom_complete"),
+                ISTEPNAME(06,11,"proc_check_slave_sbe_seeprom_complete"),
                 SLAVE_SBE::call_proc_check_slave_sbe_seeprom_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,09,"proc_cen_ref_clk_enable"),
+                ISTEPNAME(06,12,"proc_cen_ref_clk_enable"),
                 SLAVE_SBE::call_proc_cen_ref_clk_enable,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },

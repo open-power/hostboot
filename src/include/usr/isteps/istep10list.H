@@ -127,7 +127,7 @@ const   TaskInfo    g_istep10[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(10,09,"cen_sbe_tp_arrayinit"),
+                ISTEPNAME(10,09,"cen_sbe_arrayinit"),
                 HWAS::host_stub,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
