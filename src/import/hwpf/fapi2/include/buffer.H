@@ -592,14 +592,14 @@ namespace fapi2
 
         ///
         /// @brief Copy data from this buffer into an OT
-        /// @tparam TS Start bit to insert into (target start)
-        /// @tparam L Length of bits to insert
         /// @tparam SS Start bit in source
+        /// @tparam L Length of bits to insert
+        /// @tparam TS Start bit to insert into (target start)
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed left aligned
         /// @return buffer& Useful for method chaining
         ///
-        template<bits_type TS, bits_type L, bits_type SS, typename OT>
+        template<bits_type SS, bits_type L, bits_type TS = 0, typename OT>
         inline buffer& extract(OT& o_out)
         {
             // Extraction is just an insert into o_out
@@ -614,14 +614,14 @@ namespace fapi2
         /// @brief Copy data from this buffer into an OT
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed left aligned
-        /// @param[in] Start bit to insert into (target start)
-        /// @param[in] Length of bits to insert
         /// @param[in] Start bit in source
+        /// @param[in] Length of bits to insert
+        /// @param[in] Start bit to insert into (target start)
         /// @return FAPI2_RC_SUCCESS if ok
         ///
         template<typename OT>
-        fapi2::ReturnCode extract(OT& o_out, const bits_type i_targetStart,
-                                  const bits_type i_len, const bits_type i_sourceStart)
+        fapi2::ReturnCode extract(OT& o_out, const bits_type i_sourceStart,
+                                  const bits_type i_len, const bits_type i_targetStart = 0)
         {
             // Extraction is just an insert into o_out
 
@@ -646,7 +646,7 @@ namespace fapi2
         template<bits_type SS, bits_type L, typename OT>
         inline buffer& extractToRight(OT& o_out)
         {
-            extract<parameterTraits<OT>::bit_length() - L, L, SS>(o_out);
+            extract<SS, L, parameterTraits<OT>::bit_length() - L>(o_out);
             return *this;
         }
 
@@ -662,7 +662,7 @@ namespace fapi2
         fapi2::ReturnCode extractToRight(OT& o_out, const bits_type i_sourceStart,
                                          const bits_type i_len)
         {
-            return extract(o_out, parameterTraits<OT>::bit_length() - i_len, i_len, i_sourceStart);
+            return extract(o_out, i_sourceStart, i_len, parameterTraits<OT>::bit_length() - i_len);
         }
 
         ///@}
