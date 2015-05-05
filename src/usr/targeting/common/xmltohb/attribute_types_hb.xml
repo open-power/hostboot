@@ -782,7 +782,7 @@
     </description>
     <simpleType>
         <string>
-            <default>tyan,palmetto</default><!-- @fixme-RTC:120092 -->
+            <default>ibm,miscopenpower</default>
             <sizeInclNull>32</sizeInclNull>
         </string>
     </simpleType>
