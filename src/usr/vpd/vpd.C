@@ -36,6 +36,8 @@
 #include "cvpd.H"
 #include "pvpd.H"
 #include "spd.H"
+#include "ipvpd.H"
+
 
 // ----------------------------------------------
 // Trace definitions
@@ -426,6 +428,231 @@ bool resolveVpdSource( TARGETING::Target * i_target,
 
 
 // ------------------------------------------------------------------
+// setPartAndSerialNumberAttributes
+// ------------------------------------------------------------------
+void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
+{
+    errlHndl_t l_err = NULL;
+    vpdKeyword l_serialNumberKeyword = 0;
+    size_t l_dataSize = 0;
+
+    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+    TRACSSCOMP(g_trac_vpd, ENTER_MRK"vpd.C::setPartAndSerialNumberAttributes");
+    do
+    {
+            IpVpdFacade * l_ipvpd = &(Singleton<MvpdFacade>::instance());
+            if(l_type == TARGETING::TYPE_MEMBUF)
+            {
+                l_ipvpd = &(Singleton<CvpdFacade>::instance());
+            }
+
+            IpVpdFacade::input_args_t l_args;
+
+            l_err = getPnAndSnRecordAndKeywords( i_target,
+                                                 l_type,
+                                                 l_args.record,
+                                                 l_args.keyword,
+                                                 l_serialNumberKeyword );
+
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_vpd, "setPartAndSerialNumberAttributes::Error getting record/keywords for PN/SN");
+                errlCommit(l_err, VPD_COMP_ID);
+                l_err = NULL;
+                break;
+            }
+
+            // Get the size of the part number
+            l_err = l_ipvpd->read( i_target,
+                                   NULL,
+                                   l_dataSize,
+                                   l_args );
+
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_vpd, " vpd.C::setPartAndSerialNumbers::read part number size");
+                errlCommit(l_err, VPD_COMP_ID);
+                l_err = NULL;
+                break;
+            }
+
+            //get the actual part number data
+            uint8_t l_partNumberData[l_dataSize];
+            l_err = l_ipvpd->read( i_target,
+                                   l_partNumberData,
+                                   l_dataSize,
+                                   l_args );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::read part number");
+                errlCommit(l_err, VPD_COMP_ID);
+                l_err = NULL;
+                break;
+            }
+
+            // Set the part number attribute
+            TARGETING::ATTR_PART_NUMBER_type l_partNumber;
+            size_t expectedPNSize = sizeof(l_partNumber);
+            if(expectedPNSize < l_dataSize)
+            {
+                TRACFCOMP(g_trac_vpd, "Part number data to large for attribute. Expected: %d Actual: %d",
+                        expectedPNSize, l_dataSize);
+            }
+            else
+            {
+                memcpy( l_partNumber, l_partNumberData, l_dataSize );
+                i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_partNumber);
+            }
+            // Get the serial number attribute data
+            l_args.keyword = l_serialNumberKeyword;
+            l_dataSize = 0;
+            l_err = l_ipvpd->read( i_target,
+                          NULL,
+                          l_dataSize,
+                          l_args );
+
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::read serial number size");
+                errlCommit( l_err, VPD_COMP_ID );
+                l_err = NULL;
+                break;
+            }
+
+            // Get the actual serial number data
+            uint8_t l_serialNumberData[l_dataSize];
+            l_err = l_ipvpd->read( i_target,
+                                   l_serialNumberData,
+                                   l_dataSize,
+                                   l_args );
+
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::serial number");
+                errlCommit( l_err, VPD_COMP_ID );
+                l_err = NULL;
+                break;
+            }
+
+            // set the serial number attribute
+            TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber;
+            size_t expectedSNSize = sizeof(l_serialNumber);
+            if(expectedSNSize < l_dataSize)
+            {
+                TRACFCOMP(g_trac_vpd, "Serial number data to large for attribute. Expected: %d Actual: %d",
+                        expectedSNSize, l_dataSize);
+            }
+            else
+            {
+                memcpy( l_serialNumber, l_serialNumberData, l_dataSize );
+                i_target->trySetAttr
+                            <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
+            }
+
+
+    }while( 0 );
+
+}
+
+
+
+// ------------------------------------------------------------------
+// getPnAndSnRecordAndKeywords
+// ------------------------------------------------------------------
+errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
+                                  TARGETING::TYPE i_type,
+                                  vpdRecord & io_record,
+                                  vpdKeyword & io_keywordPN,
+                                  vpdKeyword & io_keywordSN )
+{
+    TRACFCOMP(g_trac_vpd, ENTER_MRK"getPnAndSnRecordAndKeywords()");
+    errlHndl_t l_err = NULL;
+    do{
+
+        if( i_type == TARGETING::TYPE_PROC )
+        {
+            io_record    = MVPD::VRML;
+            io_keywordPN = MVPD::PN;
+            io_keywordSN = MVPD::SN;
+        }
+        else if( i_type == TARGETING::TYPE_MEMBUF )
+        {
+#if defined(CONFIG_CVPD_READ_FROM_HW) && defined(CONFIG_CVPD_READ_FROM_PNOR)
+            IpVpdFacade* l_ipvpd     = &(Singleton<CvpdFacade>::instance());
+            io_record    = CVPD::OPFR;
+            io_keywordPN = CVPD::VP;
+            io_keywordSN = CVPD::VS;
+
+            bool l_zeroPN;
+            l_err = l_ipvpd->cmpSeepromToZero( i_target,
+                                               io_record,
+                                               io_keywordPN,
+                                               l_zeroPN );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VP == 0");
+                break;
+            }
+
+            bool l_zeroSN;
+            l_err = l_ipvpd->cmpSeepromToZero( i_target,
+                                               io_record,
+                                               io_keywordSN,
+                                               l_zeroSN );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VS == 0");
+                break;
+            }
+
+            // If VP and VS are zero, use VINI instead
+            if( l_zeroPN && l_zeroSN )
+            {
+                TRACFCOMP(g_trac_vpd, "setting cvpd to VINI PN SN");
+                io_record    = CVPD::VINI;
+                io_keywordPN = CVPD::PN;
+                io_keywordSN = CVPD::SN;
+            }
+#else
+            io_record    = CVPD::VINI;
+            io_keywordPN = CVPD::PN;
+            io_keywordSN = CVPD::SN;
+#endif
+        }
+        else if( i_type == TARGETING::TYPE_DIMM )
+        {
+            // SPD does not have singleton instance
+            // SPD does not use records
+            io_keywordPN = SPD::MODULE_PART_NUMBER;
+            io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords() Unexpected target type, huid=0x%X",TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid     VPD_GET_PN_AND_SN
+             * @reasoncode   VPD_UNEXPECTED_TARGET_TYPE
+             * @userdata1    Target HUID
+             * @userdata2    <UNUSED>
+             * @devdesc      Unexpected target type
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    VPD_GET_PN_AND_SN,
+                                    VPD_UNEXPECTED_TARGET_TYPE,
+                                    TO_UINT64(TARGETING::get_huid(i_target)),
+                                    0x0,
+                                    true /*Add HB Software Callout*/ );
+
+        }
+    }while( 0 );
+    TRACSSCOMP(g_trac_vpd, EXIT_MRK"getPnAndSnRecordAndKeywords()");
+    return l_err;
+}
+
+// ------------------------------------------------------------------
 // ensureCacheIsInSync
 // ------------------------------------------------------------------
 errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
@@ -434,98 +661,32 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"ensureCacheIsInSync() " );
 
-    IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
-
     vpdRecord  l_record    = 0;
     vpdKeyword l_keywordPN = 0;
     vpdKeyword l_keywordSN = 0;
 
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    if( l_type == TARGETING::TYPE_PROC )
+    IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
+    // If we have a membuf, use CVPD api
+    if(l_type == TARGETING::TYPE_MEMBUF)
     {
-        l_record    = MVPD::VRML;
-        l_keywordPN = MVPD::PN;
-        l_keywordSN = MVPD::SN;
+        l_ipvpd = &(Singleton<CvpdFacade>::instance());
     }
-    else if( l_type == TARGETING::TYPE_MEMBUF )
-    {
-        l_ipvpd     = &(Singleton<CvpdFacade>::instance());
-        l_record    = CVPD::OPFR;
-        l_keywordPN = CVPD::VP;
-        l_keywordSN = CVPD::VS;
-    }
-    else if( l_type == TARGETING::TYPE_NODE )
-    {
-        l_ipvpd     = &(Singleton<PvpdFacade>::instance());
-        l_record    = PVPD::OPFR;
-        l_keywordPN = PVPD::VP;
-        l_keywordSN = PVPD::VS;
-    }
-    else if( l_type == TARGETING::TYPE_DIMM )
-    {
-        // SPD does not have a singleton instance
-        // SPD does not use records
-        l_keywordPN = SPD::MODULE_PART_NUMBER;
-        l_keywordSN = SPD::MODULE_SERIAL_NUMBER;
-    }
-    else
-    {
-        TRACFCOMP(g_trac_vpd,ERR_MRK"ensureCacheIsInSync() Unexpected target type, huid=0x%X",TARGETING::get_huid(i_target));
-        /*@
-         * @errortype
-         * @moduleid     VPD_ENSURE_CACHE_IS_IN_SYNC
-         * @reasoncode   VPD_UNEXPECTED_TARGET_TYPE
-         * @userdata1    Target HUID
-         * @userdata2    <UNUSED>
-         * @devdesc      Unexpected target type
-         */
-        l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                VPD_ENSURE_CACHE_IS_IN_SYNC,
-                                VPD_UNEXPECTED_TARGET_TYPE,
-                                TO_UINT64(TARGETING::get_huid(i_target)),
-                                0x0,
-                                true /*Add HB Software Callout*/ );
-        return l_err;
-    }
-
     do
     {
-        // Make sure we are comparing the correct pn/sn for CVPD
-        if( ( l_type == TARGETING::TYPE_MEMBUF ) ||
-            ( l_type == TARGETING::TYPE_NODE   ) )
+        // Get the correct Part and serial numbers
+        l_err = getPnAndSnRecordAndKeywords( i_target,
+                                             l_type,
+                                             l_record,
+                                             l_keywordPN,
+                                             l_keywordSN );
+        if( l_err )
         {
-            bool l_zeroPN;
-            l_err = l_ipvpd->cmpSeepromToZero( i_target,
-                                               l_record,
-                                               l_keywordPN,
-                                               l_zeroPN );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking if OPFR:VP == 0");
-                break;
-            }
-
-            bool l_zeroSN;
-            l_err = l_ipvpd->cmpSeepromToZero( i_target,
-                                               l_record,
-                                               l_keywordSN,
-                                               l_zeroSN );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking if OPFR:VS == 0");
-                break;
-            }
-
-            // If VP and VS are zero, use VINI instead
-            if( l_zeroPN && l_zeroSN )
-            {
-                l_record    = CVPD::VINI;
-                l_keywordPN = CVPD::PN;
-                l_keywordSN = CVPD::SN;
-            }
+            TRACDCOMP(g_trac_vpd, "VPD::ensureCacheIsInSync: Error getting part and serial numbers");
+            break;
         }
+
 
         // Compare the Part Numbers in PNOR/SEEPROM
         bool l_matchPN = false;
@@ -546,7 +707,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         }
         if (l_err)
         {
-            TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM PN match");
+            TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM PN match");
             break;
         }
 
@@ -568,7 +729,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         }
         if( l_err )
         {
-            TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM SN match");
+            TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM SN match");
             break;
         }
 
@@ -597,7 +758,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             }
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd,"Error loading SEEPROM VPD into PNOR");
+                TRACDCOMP(g_trac_vpd,"Error loading SEEPROM VPD into PNOR");
                 break;
             }
         }

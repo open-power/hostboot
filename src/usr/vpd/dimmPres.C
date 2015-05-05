@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/spdenums.H>
 #include <config.h>
+#include <initservice/initserviceif.H>
 
 #include "spd.H"
 
@@ -203,6 +204,18 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             }
         }
 #endif
+
+        if( present && !err )
+        {
+            //Fsp sets PN/SN so if there is none, do it here
+            if(!INITSERVICE::spBaseServicesEnabled())
+            {
+                //populate serial and part number attributes
+                SPD::setPartAndSerialNumberAttributes( i_target );
+
+            }
+        }
+
         // copy present value into output buffer so caller can read it
         memcpy( io_buffer, &present, presentSz );
         io_buflen = presentSz;

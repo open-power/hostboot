@@ -51,6 +51,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <config.h>
+#include <initservice/initserviceif.H>
 
 
 // Hostboot Image ID string
@@ -518,6 +519,7 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                         const HWAS::GARD_ErrorType i_gardErrorType)
 {
 
+
     if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
     {
         #ifdef CONFIG_ERRL_ENTRY_TRACE
@@ -638,6 +640,7 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 
         ErrlUserDetailsCallout(&ep, size1,
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+
     }
     if (i_gardErrorType != GARD_NULL)
     {
@@ -685,6 +688,74 @@ void ErrlEntry::addHbBuildId()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Called by addHwCallout to get the part and serial numbers from the current
+// target so that it can be appended to the error log
+void ErrlEntry::addPartAndSerialNumbersToErrLog
+                                            (const TARGETING::Target * i_target)
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
+
+
+    // Get the type of the target
+    const TARGETING::Target * l_target = i_target;
+    TARGETING::TYPE l_type = l_target->getAttr<TARGETING::ATTR_TYPE>();
+
+    do
+    {
+        if((l_type != TARGETING::TYPE_PROC ) &&
+           (l_type != TARGETING::TYPE_DIMM ) &&
+           (l_type != TARGETING::TYPE_MEMBUF ))
+        {
+            TARGETING::PredicatePostfixExpr l_procDimmMembuf;
+            TARGETING::TargetHandleList l_pList;
+
+            TARGETING::PredicateCTM l_procs(TARGETING::CLASS_CHIP,
+                                            TARGETING::TYPE_PROC);
+
+            TARGETING::PredicateCTM l_dimms(TARGETING::CLASS_CARD,
+                                            TARGETING::TYPE_DIMM);
+
+            TARGETING::PredicateCTM l_membufs(TARGETING::CLASS_CHIP,
+                                              TARGETING::TYPE_MEMBUF);
+
+            l_procDimmMembuf.push(&l_procs).push(&l_dimms).Or()
+                                           .push(&l_membufs).Or();
+
+            // Search for any parents with TYPE_PROC, TYPE_DIMM, or TYPE_MEMBUF
+            TARGETING::targetService().getAssociated( l_pList, l_target,
+                                              TARGETING::TargetService::PARENT,
+                                              TARGETING::TargetService::ALL,
+                                              &l_procDimmMembuf);
+            // If no parent of desired type is present, break
+            if(!l_pList.size())
+            {
+                TRACFCOMP(g_trac_errl, "Error! errlentry.C::addPartAndSerialNumbersToErrLog - No parent containing Serial/Part numbers found.");
+                break;
+            }
+            else
+            {
+                // We have found the parent
+                l_target = l_pList[0];
+            }
+
+        }
+        // We have made it here so we have found a target that contains
+        // ATTR_SERIAL_NUMBER and ATTR_PART_NUMBER
+        //Add the part number to the error log.
+        ErrlUserDetailsAttribute( l_target,
+                          TARGETING::ATTR_PART_NUMBER).addToLog(this);
+
+        //Add the serial number to the error log.
+        ErrlUserDetailsAttribute( l_target,
+                          TARGETING::ATTR_SERIAL_NUMBER).addToLog(this);
+
+    }while( 0 );
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
 void ErrlEntry::commit( compId_t  i_committerComponent )
 {
@@ -708,6 +779,38 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // Add the Hostboot Build ID to the error log
     addHbBuildId();
 
+    // If this error was a hardware callout, add the serial and part numbers
+    // to the log. FSP provides this data so if there is no FSP, get them here.
+    if(!INITSERVICE::spBaseServicesEnabled())
+    {
+        for(size_t i = 0; i < iv_SectionVector.size(); i++)
+        {
+            ErrlUD * l_udSection = iv_SectionVector[i];
+            HWAS::callout_ud_t * l_ud =
+                reinterpret_cast<HWAS::callout_ud_t*>(l_udSection->iv_pData);
+
+            if((ERRL_COMP_ID     == (l_udSection)->iv_header.iv_compId) &&
+               (1                == (l_udSection)->iv_header.iv_ver) &&
+               (ERRL_UDT_CALLOUT == (l_udSection)->iv_header.iv_sst) &&
+               (HWAS::HW_CALLOUT == l_ud->type))
+            {
+                uint8_t * l_uData = (uint8_t *)(l_ud + 1);
+                TARGETING::Target * l_target = NULL;
+
+                bool l_err = HWAS::retrieveTarget(l_uData,
+                               l_target,
+                               this);
+                if(!l_err)
+                {
+                    addPartAndSerialNumbersToErrLog( l_target );
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_errl, "ErrlEntry::commit() - Error retrieving target");
+                }
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2008,7 +2008,114 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
 
 
 // ------------------------------------------------------------------
-// cmpPnorSeeprom
+// setPartAndSerialNumberAttributes
+// ------------------------------------------------------------------
+void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
+{
+    errlHndl_t l_err = NULL;
+    VPD::vpdKeyword l_partKeyword = SPD::MODULE_PART_NUMBER;
+    VPD::vpdKeyword l_serialKeyword = SPD::MODULE_SERIAL_NUMBER;
+
+    do
+    {
+         // Read the Basic Memory Type
+        uint8_t l_memType = 0x0;
+        l_err = getMemType( l_memType,
+                          i_target,
+                          VPD::PNOR );
+        if( l_err )
+        {
+            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after getMemType");
+            errlCommit(l_err, VPD_COMP_ID );
+            l_err = NULL;
+            break;
+        }
+
+        if(( SPD_DDR3 != l_memType ) &&
+           ( SPD_DDR4 != l_memType ))
+        {
+            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Unknown memType");
+            break;
+        }
+
+        // Get the keyword sizes
+        size_t l_partDataSize = 0;
+        size_t l_serialDataSize = 0;
+        if( SPD_DDR3 == l_memType )
+        {
+            l_partDataSize = ddr3Data[l_partKeyword].length;
+            l_serialDataSize = ddr3Data[l_serialKeyword].length;
+        }
+        else
+        {
+            l_partDataSize = ddr4Data[l_partKeyword].length;
+            l_serialDataSize = ddr4Data[l_serialKeyword].length;
+        }
+
+        //read the keywords from SEEPROM since PNOR may not be loaded yet
+        uint8_t l_partNumberData[l_partDataSize];
+        l_err = spdGetValue( l_partKeyword,
+                             l_partNumberData,
+                             l_partDataSize,
+                             i_target,
+                             l_memType,
+                             VPD::PNOR );
+
+        if( l_err )
+        {
+            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> PART_NUMBER");
+            errlCommit(l_err, VPD_COMP_ID);
+            l_err = NULL;
+            break;
+        }
+
+        uint8_t l_serialNumberData[l_serialDataSize];
+        l_err = spdGetValue( l_serialKeyword,
+                             l_serialNumberData,
+                             l_serialDataSize,
+                             i_target,
+                             l_memType,
+                             VPD::PNOR );
+
+        if( l_err )
+        {
+            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> SERIAL_NUMBER");
+            errlCommit(l_err, VPD_COMP_ID);
+            l_err = NULL;
+            break;
+        }
+        // Set the attributes
+        TARGETING::ATTR_PART_NUMBER_type l_PN;
+        TARGETING::ATTR_SERIAL_NUMBER_type l_SN;
+        size_t expectedPNSize = sizeof(l_PN);
+        size_t expectedSNSize = sizeof(l_SN);
+        if(expectedPNSize < l_partDataSize)
+        {
+            TRACFCOMP(g_trac_spd, "Part data size too large for attribute. Expected: %d Actual: %d",
+                        expectedPNSize, l_partDataSize);
+        }
+        else
+        {
+            memcpy(l_PN, l_partNumberData, l_partDataSize);
+            i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN);
+        }
+        if(expectedSNSize < l_serialDataSize)
+        {
+            TRACFCOMP(g_trac_spd, "Serial data size too large for attribute. Expected: %d Actual: %d",
+                        expectedSNSize, l_serialDataSize);
+        }
+        else
+        {
+            memcpy(l_SN, l_serialNumberData, l_serialDataSize);
+            i_target->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN);
+        }
+    }while( 0 );
+
+    TRACSSCOMP(g_trac_spd, EXIT_MRK"spd.C::setPartAndSerialNumberAttributes()");
+}
+
+// ------------------------------------------------------------------
+// cmpPnorToSeeprom
 // ------------------------------------------------------------------
 errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
                               VPD::vpdKeyword i_keyword,
@@ -2019,7 +2126,6 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
     TRACSSCOMP( g_trac_spd, ENTER_MRK"cmpPnorSeeprom()" );
 
     o_match = false;
-
     do
     {
         // Read the Basic Memory Type

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <config.h>
+#include <initservice/initserviceif.H>
 
 extern trace_desc_t* g_trac_fsi;
 
@@ -197,14 +198,23 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                     FSI_COMP_ID );
     }
 
-
     bool present = fsi_present && mvpd_present;
+    if( present )
+    {
+        //Fsp sets PN/SN so if there is none, do it here
+        if(!INITSERVICE::spBaseServicesEnabled())
+        {
+            // set part and serial number attributes for current target
+            VPD::setPartAndSerialNumberAttributes( i_target );
+
+        }
+    }
+
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);
 
     return NULL;
 }
-
 /**
  * @brief Performs a presence detect operation on a Membuf Chip.
  *
@@ -270,6 +280,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     {
        cvpd_present = VPD::cvpdPresent( i_target );
     }
+
 
 #if defined(CONFIG_CVPD_READ_FROM_HW) && defined(CONFIG_CVPD_READ_FROM_PNOR)
     if( cvpd_present )
@@ -347,7 +358,18 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         errlCommit( l_errl,
                     FSI_COMP_ID );
     }
+
     bool present = fsi_present && cvpd_present;
+    if( present )
+    {
+        //Fsp sets PN/SN so if there is none, do it here
+        if(!INITSERVICE::spBaseServicesEnabled())
+        {
+            // set part and serial number attributes for current target
+            VPD::setPartAndSerialNumberAttributes( i_target );
+        }
+
+    }
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);
 

@@ -33,7 +33,7 @@ VPATH += ${ROOTPATH}/src/usr/hwas/common
 
 OBJS += rt_errlmanager.o
 OBJS += rt_vfs.o
-OBJS += $(if $(CONFIG_BMC_IPMI),hwasCallout.o)
+OBJS += hwasCallout.o
 
 SUBDIRS += test.d
 

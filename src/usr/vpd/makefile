@@ -38,8 +38,8 @@ SUBDIRS += runtime.d
 
 
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
-#Update mvpd to include LRPx records for all possible cores CCIN 54E3
-BINARY_FILES += $(IMGDIR)/procmvpd.dat:254c30077a002ccdaca3b34c50abcafbf5ae3e48
+#Updated mvpd to contain VRML so the part/serial numbers can be found for procs CCIN 54E3
+BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
 BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
 
 #Update to Centaur DD2.0 for CCIN 31E8

@@ -711,6 +711,15 @@ private:
      */
     void addHbBuildId();
 
+    /**
+     * @brief called by addHwCallout to retrieve the serial and part number
+     * from the current target. If the current target does not contain
+     * ATTR_PART_NUMBER or ATTR_SERIAL_NUMBER, find the first parent that does
+     * and adds the attribute to the error log.
+     *
+     * @param[in]       i_target        The target to get the numbers for
+     */
+    void addPartAndSerialNumbersToErrLog(const TARGETING::Target * i_target);
 
     /**
       * @brief   Disabled copy constructor and assignment operator

@@ -415,6 +415,17 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
                             TARGETING::Target * i_target );
 
 
+
+
+/**
+ * @brief This function sets the part and serial number attributes for the
+ *        given target.
+ * @param[in] i_target - the target to set the attributes for
+ *
+ */
+void setPartAndSerialNumberAttributes( TARGETING::Target * i_target );
+
+
 /**
  * @brief This function compares value of the keyword in PNOR/SEEPROM
  *        and returns the result

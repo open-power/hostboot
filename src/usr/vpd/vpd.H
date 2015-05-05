@@ -219,6 +219,22 @@ bool resolveVpdSource( TARGETING::Target * i_target,
                        vpdCmdTarget i_vpdCmdTarget,
                        vpdCmdTarget& o_vpdSource );
 
+/**
+ * @brief This function sets the correct record/keyword combinations
+ *        for the part and serial numbers.
+ * @param[in] i_target - target to get the data for
+ * @param[in/out] io_record - record for target
+ * @param[in/out] io_partKeyword - the part number keyword
+ * @param[in/out] io_serialKeyword - the serial number keyword
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *                error log.
+ */
+errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
+                                                 TARGETING::TYPE i_type,
+                                                 vpdRecord & io_record,
+                                                 vpdKeyword & io_partKeyword,
+                                                 vpdKeyword & io_serialKeyword);
 
 }; //end VPD namespace
 

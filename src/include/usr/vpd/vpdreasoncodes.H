@@ -48,6 +48,7 @@ enum vpdModuleId
     // Common VPD
     VPD_WRITE_PNOR                          = 0x10,
     VPD_ENSURE_CACHE_IS_IN_SYNC             = 0x11,
+    VPD_GET_PN_AND_SN                       = 0x12,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,

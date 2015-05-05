@@ -70,6 +70,15 @@ namespace VPD
      */
     bool cvpdPresent ( TARGETING::Target * i_target );
 
+
+    /**
+     * @brief This function sets the part and serial number attributes for
+     *        a given target
+     * @param[in] i_target - the target to set the attributes for
+     *
+     */
+    void setPartAndSerialNumberAttributes( TARGETING::Target * i_target );
+
     /**
      * @brief This function checks to see if the given pvpd target
      *      is present
