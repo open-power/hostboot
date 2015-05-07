@@ -59,6 +59,7 @@
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 #include    <fapiAttributeIds.H>
+#include    <fapiAttributeService.H>
 
 #include    "mc_config.H"
 
@@ -470,6 +471,9 @@ void* call_mss_volt( void *io_pArgs )
     //get a list of unique VmemIds
     std::vector<TARGETING::ATTR_VMEM_ID_type> l_VmemList;
 
+    //fapi Return Code
+    fapi::ReturnCode l_fapirc;
+
     for (TargetHandleList::const_iterator
             l_membuf_iter = l_membufTargetList.begin();
             l_membuf_iter != l_membufTargetList.end();
@@ -479,30 +483,22 @@ void* call_mss_volt( void *io_pArgs )
                             (*l_membuf_iter)->getAttr<ATTR_VMEM_ID>();
         l_VmemList.push_back(l_VmemID);
 
-#ifdef CONFIG_KINGSTON_1_35_VOLT
-        // TODO via RTC: 108833 and 117599
-        // This is a temporary fix to support Kingston dimms until we've
-        // provided a mechanism for MFG and/or the customer to set the
-        // appropriate override for their dimms via the above mentioned
-        // stories
+    }
 
-        TARGETING::ATTR_MSS_VOLT_OVERRIDE_type l_volt_override =
-            (*l_membuf_iter)->getAttr<TARGETING::ATTR_MSS_VOLT_OVERRIDE>();
+#ifdef CONFIG_ALLOW_NON_COMPLIANT_DIMM
+        // Set ATTR_MSS_VOLT_COMPLIANT_DIMMS to ALL
+        // Value of ALL value in attribute enum
+        uint8_t l_allowNonCompliantDimms =
+                        ENUM_ATTR_MSS_VOLT_COMPLIANT_DIMMS_ALL_VOLTAGES;
 
-        if(l_volt_override == ENUM_ATTR_MSS_VOLT_OVERRIDE_NONE)
-        {
-            l_volt_override = ENUM_ATTR_MSS_VOLT_OVERRIDE_VOLT_135;
-            (*l_membuf_iter)->setAttr<TARGETING::ATTR_MSS_VOLT_OVERRIDE>
-                (l_volt_override);
+        TARGETING::Target* l_sys = NULL;
+        targetService().getTopLevelTarget(l_sys);
+        l_sys->setAttr<TARGETING::ATTR_MSS_VOLT_COMPLIANT_DIMMS>
+                                                    (l_allowNonCompliantDimms);
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running CONFIG_KINGSTON_1_35_VOLT workaround "
-                "for target HUID 0x%.8X",
-                TARGETING::get_huid(*l_membuf_iter));
-        }
 #endif
 
-    }
+
 
     std::sort(l_VmemList.begin(), l_VmemList.end());
 
