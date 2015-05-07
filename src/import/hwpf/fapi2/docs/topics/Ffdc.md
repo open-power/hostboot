@@ -25,9 +25,8 @@ The XML input is the same format as for P8
 ## Using the Generated Classes
 
 Each error found in the XML files generates a class in hwp_ffdc_classes.H.
-The name of the class is the same as the return code itself (lower case)
-and the set methods are the same as the elements the xml described as
-needing colletion.
+The name of the class is the same as the return code itself and the set methods
+are the same as the elements the xml described as needing colletion.
 
 Take for example RC_MBVPD_INVALID_MT_DATA. Here is the XML:
 
@@ -45,27 +44,25 @@ Take for example RC_MBVPD_INVALID_MT_DATA. Here is the XML:
      </hwpError>
 
 It generates an FFDC class which looks like this (simplified):
+Note that the prefix "RC_" is stripped by the parser.
 
-    class rc_mbvpd_invalid_mt_data
+    class MBVPD_INVALID_MT_DATA
     {
       public:
-        rc_mbvpd_invalid_mt_data( ... )
+        MBVPD_INVALID_MT_DATA( ... )
         { FAPI_ERR("To get the proper MT data, we need a valid dimm rank combination."); }
 
-        rc_mbvpd_invalid_mt_data& set_rank_num(const T& i_value)
+        MBVPD_INVALID_MT_DATA& set_RANK_NUM(const T& i_value)
         { <setup ffdc> }
 
         void execute(void)
-        {
-            FAPI_SET_HWP_ERROR(..., RC_MBVPD_INVALID_MT_DATA);
-            fapi2::logError( ... );
-        }
+        { ... }
     };
 
 To use this, for example, you may do:
 
     FAPI_ASSERT( foo != bar,
-                 rc_mbvpd_invalid_mt_data().set_rank_num(l_rank),
+                 fapi2::MBVPD_INVALID_MT_DATA().set_RANK_NUM(l_rank),
                  "foo didn't equal bar" );
 
 Notice the description of the error is automatically logged.
@@ -95,17 +92,17 @@ as an argument and generate the correct FFDC.
 
 And its FFDC class:
 
-    class rc_fapi2_buffer
+    class FAPI2_BUFFER
     {
       public:
-        rc_fapi2_buffer( ... )
+        FAPI2_BUFFER( ... )
         { FAPI_ERR("fapi2 error from a buffer operation"); }
 
-        rc_fapi2_buffer& set_buffer(const fapi2::variable_buffer& i_value)
+        FAPI2_BUFFER& set_BUFFER(const fapi2::variable_buffer& i_value)
         { ... }
 
         template< typename T >
-        rc_fapi2_buffer& set_buffer(const fapi2::buffer<T>& i_value)
+        FAPI2_BUFFER& set_BUFFER(const fapi2::buffer<T>& i_value)
         { ... }
     };
 
@@ -115,11 +112,11 @@ And it can be used:
     fapi2::variable_buffer  bar;
 
     FAPI_ASSERT( rc != FAPI2_RC_SUCCESS,
-                 rc_fapi2_buffer().set_fapi2_buffer(foo),
+                 fapi2::FAPI2_BUFFER().set_FAPI2_BUFFER(foo),
                  "problem with buffer" );
 
     FAPI_ASSERT( rc != FAPI2_RC_SUCCESS,
-                 rc_fapi2_buffer().set_fapi2_buffer(bar),
+                 fapi2::FAPI2_BUFFER().set_FAPI2_BUFFER(bar),
                  "problem with buffer" );
 
 Note the indifference to integral or variable buffers.
