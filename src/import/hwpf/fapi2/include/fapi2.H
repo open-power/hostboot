@@ -17,9 +17,10 @@
 #include <error_scope.H>
 #include <set_sbe_error.H>      // Generated file
 
+#include <hwp_executor.H>
+
 // Block of headers not currently in fapi2
 #ifdef FAPI2_MISSING_HEADERS
-  #include <fapi2SystemConfig.H>
   #include <mvpdAccess.H>
   #include <mbvpdAccess.H>
 #endif

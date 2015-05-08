@@ -33,7 +33,6 @@
 #include <plat_trace.H>
 #include <error_info.H>
 #include <target.H>
-#include <assert.h>
 
 using fapi2::TARGET_TYPE_ALL;
 

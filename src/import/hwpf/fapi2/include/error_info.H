@@ -36,10 +36,12 @@
 #include <vector>
 #include <target.H>
 #include <error_info_defs.H>
-#include <assert.h>
 
 namespace fapi2
 {
+    // forward fapi2::Assert()
+    extern void Assert(bool);
+
     ///
     /// @class ErrorInfoFfdc
     ///
@@ -616,7 +618,7 @@ namespace fapi2
                           const void* const* i_object) const
             {
                 // "unhandled error info type");
-                assert(iv_type < EI_LAST_TYPE);
+                fapi2::Assert(iv_type < EI_LAST_TYPE);
 
                 switch(iv_type)
                 {
