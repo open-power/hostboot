@@ -34,7 +34,6 @@
 #include <stdint.h>
 #include <target.H>
 #include <variable_buffer.H>
-#include <assert.h>
 
 #include <iostream>
 
@@ -242,6 +241,6 @@ namespace fapi2
                         i_thing.getLength<uint8_t>());
     }
 
-}
+};
 
 #endif // FAPI2_ERRORINFO_DEFS_H_
