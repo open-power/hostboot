@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -184,6 +184,7 @@ HWP_ERROR_XML_FILES += hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_
 HWP_ERROR_XML_FILES += hwp/proc_pba_utils_registers.xml
 HWP_ERROR_XML_FILES += hwp/p8_fir_registers.xml
 HWP_ERROR_XML_FILES += hwp/cen_fir_registers.xml
+HWP_ERROR_XML_FILES += hwp/tp_dbg_data_accessors/proc_tp_dbg_data_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES += hwp/memory_attributes.xml
@@ -219,6 +220,7 @@ HWP_ATTR_XML_FILES += hwp/proc_chip_ec_feature.xml
 HWP_ATTR_XML_FILES += hwp/proc_abus_dmi_xbus_scominit_attributes.xml
 HWP_ATTR_XML_FILES += hwp/runtime_attributes/memory_occ_attributes.xml
 HWP_ATTR_XML_FILES += hwp/pstate_attributes.xml
+HWP_ATTR_XML_FILES += hwp/slave_sbe/proc_tp_collect_dbg_data/proc_tp_collect_dbg_data_attributes.xml
 
 #------------------------------------------------------------------------------
 # PLL Ring Data files
@@ -244,6 +246,16 @@ HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/s1_21_winkle_ring.attributes
 HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes
 HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/p8_20_winkle_ring.attributes
 HWP_WINKLE_RING_FILES += hwp/winkle_ring_accessors/n1_10_winkle_ring.attributes
+
+#------------------------------------------------------------------------------
+# Tp_dbg Spy data files
+#------------------------------------------------------------------------------
+HWP_TP_DBG_SPY_FILES += hwp/tp_dbg_attributes/s1_10_tp_dbg_data.attributes
+HWP_TP_DBG_SPY_FILES += hwp/tp_dbg_attributes/s1_13_tp_dbg_data.attributes
+HWP_TP_DBG_SPY_FILES += hwp/tp_dbg_attributes/s1_20_tp_dbg_data.attributes
+HWP_TP_DBG_SPY_FILES += hwp/tp_dbg_attributes/s1_21_tp_dbg_data.attributes
+HWP_TP_DBG_SPY_FILES += hwp/tp_dbg_attributes/p8_10_tp_dbg_data.attributes
+HWP_TP_DBG_SPY_FILES += hwp/tp_dbg_attributes/n1_10_tp_dbg_data.attributes
 
 #------------------------------------------------------------------------------
 # Initfiles
@@ -318,8 +330,11 @@ FAPI_ATTR_ID_TARGET = fapiAttributeIds.H
 # The FAPI PLL attribute header file generated from data files
 FAPI_PLL_TARGET = fapiPllRingAttr.H
 
-# The FAPI Winkle Ring attribute heaer file generated from data files
+# The FAPI Winkle Ring attribute header file generated from data files
 FAPI_WINKLE_RING_TARGET = fapiL3DeltaDataAttr.H
+
+# The FAPI tp_dbg spy attribute header file generated from data files
+FAPI_TP_DBG_SPY_TARGET = fapiTpDbgDataAttr.H
 
 # The FAPI files generated from Attribute XML files
 FAPI_ATTR_TARGETS += fapiChipEcFeature.C
@@ -354,6 +369,7 @@ GENFILES += ${HWP_IF_ALL_TARGETS}
 GENFILES += ${FAPI_ATTR_IF_TARGET}
 GENFILES += ${FAPI_PLL_TARGET}
 GENFILES += ${FAPI_WINKLE_RING_TARGET}
+GENFILES += ${FAPI_TP_DBG_SPY_TARGET}
 
 GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
 
@@ -443,6 +459,13 @@ $(call GENTARGET, ${FAPI_PLL_TARGET}) : \
 $(call GENTARGET, ${FAPI_WINKLE_RING_TARGET}) : \
         fapi/fapiCreateL3DeltaVals.pl ${HWP_WINKLE_RING_FILES}
 	$< $(dir $@) ${HWP_WINKLE_RING_FILES}
+
+#------------------------------------------------------------------------------
+# The tp_dbg spy attribute file
+#------------------------------------------------------------------------------
+$(call GENTARGET, ${FAPI_TP_DBG_SPY_TARGET}) : \
+	fapi/fapiCreateTpDbgAttrVals.pl ${HWP_TP_DBG_SPY_FILES}
+	$< $(dir $@) ${HWP_TP_DBG_SPY_FILES}
 
 #------------------------------------------------------------------------------
 # The binary, list and attr files generated from Initfiles

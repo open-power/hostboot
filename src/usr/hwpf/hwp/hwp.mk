@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,4 +43,4 @@ include ${ROOTPATH}/src/usr/hwpf/hwp/winkle_ring_accessors/winkle_ring.mk
 include ${ROOTPATH}/src/usr/hwpf/hwp/utility_procedures/utils.mk
 include ${ROOTPATH}/src/usr/hwpf/hwp/chip_accessors/chip.mk
 include ${ROOTPATH}/src/usr/hwpf/hwp/spd_accessors/spd.mk
-
+include ${ROOTPATH}/src/usr/hwpf/hwp/tp_dbg_data_accessors/tp_dbg.mk

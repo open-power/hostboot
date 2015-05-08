@@ -66,6 +66,7 @@
 #include <util/singleton.H>
 #include <procMemConsts.H>
 #include <fapiL3DeltaDataAttr.H>
+#include <fapiTpDbgDataAttr.H>
 #include <config.h>
 
 //******************************************************************************
@@ -757,6 +758,43 @@ fapi::ReturnCode getIsDimmToC4DQS
  */
 fapi::ReturnCode fapiPlatGetRCDCntlWord015 (const fapi::Target * i_pTarget,
                                             uint64_t & o_val);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_PROC_PERV_VITL_LENGTH attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[out] o_ringLength  length of decompressed ring
+ */
+fapi::ReturnCode fapiPlatGetPervVitlRingLengthAttr(
+                               const fapi::Target * i_pProcTarget,
+                               uint32_t (&o_ringLength));
+
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_PROC_TP_VITL_SPY_LENGTH attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[out] o_spyLength   length of the spy
+ */
+fapi::ReturnCode fapiPlatGetTpVitlSpyLengthAttr(
+                       const fapi::Target * i_pProcTarget,
+                       uint32_t (&o_spyLength));
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_PROC_TP_VITL_SPY_OFFSETS attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget  Processor Chip Target pointer
+ *  @param[out] o_offsets      Reference to output spy offsets
+ */
+fapi::ReturnCode fapiPlatGetTpVitlSpyOffsetAttr(
+                               const fapi::Target * i_pProcTarget,
+                               uint32_t (&o_data)[SPY_OFFSET_SIZE]);
 
 } // namespace platAttrSvc
 
@@ -2696,5 +2734,18 @@ fapi::ReturnCode fapiPlatGetRCDCntlWord015 (const fapi::Target * i_pTarget,
         fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetOscswitchCtl \
         (PTARGET,fapi::getOscswitchCtl::CTL2,&VAL,sizeof(VAL))
+
+//------------------------------------------------------------------------------
+//  MACROS to support VITL ring/spy data attributes
+//------------------------------------------------------------------------------
+#define ATTR_PROC_PERV_VITL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPervVitlRingLengthAttr(PTARGET, VAL)
+#define ATTR_PROC_TP_VITL_SPY_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetTpVitlSpyLengthAttr(PTARGET, VAL)
+#define ATTR_PROC_TP_VITL_SPY_OFFSETS_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetTpVitlSpyOffsetAttr(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

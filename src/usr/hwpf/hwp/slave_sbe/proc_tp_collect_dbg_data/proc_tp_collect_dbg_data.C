@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tp_collect_dbg_data.C,v 1.6 2014/08/04 16:00:49 thi Exp $
+// $Id: proc_tp_collect_dbg_data.C,v 1.7 2014/10/03 20:25:36 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_tp_collect_dbg_data.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -47,66 +47,8 @@
 //------------------------------------------------------------------------------
 
 const uint32_t PROC_TP_COLLECT_DBG_DATA_FSI_SHIFT_CTRL 	= 0x00000043;
-
 const uint32_t PERV_VITL_CHAIN_RING_ADDRESS = 0x0103800C;
-
-// Murano DD1.x
-const uint32_t PERV_VITL_CHAIN_LENGTH_MDD1 = 2310;
-const uint32_t TP_VITL_SPY_LENGTH_MDD1 = 576;
-const std::pair<uint32_t,uint32_t> TP_VITL_SPY_OFFSETS_MDD1[] =
-{
-    std::make_pair(1197, 1260),
-    std::make_pair(1342, 1392),
-    std::make_pair(1401, 1403),
-    std::make_pair(1641, 1641),
-    std::make_pair(1644, 1665),
-    std::make_pair(1667, 1679),
-    std::make_pair(1688, 1943),
-    std::make_pair(1963, 2005),
-    std::make_pair(1503, 1520),
-    std::make_pair( 849,  889),
-    std::make_pair( 744,  807)
-};
-
-// Murano DD2.x
-const uint32_t PERV_VITL_CHAIN_LENGTH_MDD2 = 2288;
-const uint32_t TP_VITL_SPY_LENGTH_MDD2 = 590;
-const std::pair<uint32_t,uint32_t> TP_VITL_SPY_OFFSETS_MDD2[] =
-{
-    std::make_pair(1176, 1239),
-    std::make_pair(1321, 1344),
-    std::make_pair(1365, 1371),
-    std::make_pair(1430, 1456),
-    std::make_pair(1465, 1467),
-    std::make_pair(1479, 1479),
-    std::make_pair(1482, 1503),
-    std::make_pair(1505, 1524),
-    std::make_pair(1533, 1788),
-    std::make_pair(1808, 1850),
-    std::make_pair(1893, 1910),
-    std::make_pair( 849,  889),
-    std::make_pair( 744,  807)
-};
-
-// Venice / Naples DD1.x
-const uint32_t PERV_VITL_CHAIN_LENGTH_VN = 2773;
-const uint32_t TP_VITL_SPY_LENGTH_VN = 590;
-const std::pair<uint32_t,uint32_t> TP_VITL_SPY_OFFSETS_VN[] =
-{
-    std::make_pair( 209,  272),
-    std::make_pair( 354,  377),
-    std::make_pair( 398,  404),
-    std::make_pair( 463,  489),
-    std::make_pair( 498,  500),
-    std::make_pair( 512,  512),
-    std::make_pair( 515,  536),
-    std::make_pair( 538,  557),
-    std::make_pair( 566,  821),
-    std::make_pair( 841,  883),
-    std::make_pair( 926,  943),
-    std::make_pair(2608, 2648),
-    std::make_pair(2503, 2566)
-};
+const uint32_t TP_VITL_SPY_MAX_SPY_RANGES = 24;
 
 
 //------------------------------------------------------------------------------
@@ -122,11 +64,11 @@ fapi::ReturnCode proc_tp_collect_dbg_data(const fapi::Target & i_target,
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
 
-    uint8_t chip_type;
-    uint8_t dd_level;
 	ecmdDataBufferBase ring_data;
     ecmdDataBufferBase spy_data;
-    std::vector<std::pair<uint32_t, uint32_t> > spy_offsets;
+    uint32_t ring_length;
+    uint32_t spy_length;
+    uint32_t spy_offsets[TP_VITL_SPY_MAX_SPY_RANGES];
 	ecmdDataBufferBase fsi_data(32);
 	ecmdDataBufferBase scom_data(64);
 
@@ -259,48 +201,30 @@ fapi::ReturnCode proc_tp_collect_dbg_data(const fapi::Target & i_target,
             break;
         }
 
-        // obtain chip type/EC
-        rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_target, chip_type);
+        // obtain ring/spy attribute data
+        rc = FAPI_ATTR_GET(ATTR_PROC_PERV_VITL_LENGTH, &i_target, ring_length);
         if (rc)
         {
-            FAPI_ERR("proc_tp_collect_dbg_data: Error from FAPI_ATTR_GET_PRIVILEGED (ATTR_NAME)");
+            FAPI_ERR("proc_tp_collect_dbg_data: Error from FAPI_ATTR_GET (ATTR_PROC_PERV_VITL_LENGTH)");
             break;
         }
 
-        rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, dd_level);
+        rc = FAPI_ATTR_GET(ATTR_PROC_TP_VITL_SPY_LENGTH, &i_target, spy_length);
         if (rc)
         {
-            FAPI_ERR("proc_tp_collect_dbg_data: Error from FAPI_ATTR_GET_PRIVILEGED (ATTR_EC)");
+            FAPI_ERR("proc_tp_collect_dbg_data: Error from FAPI_ATTR_GET (ATTR_PROC_TP_VITL_SPY_LENGTH)");
             break;
         }
-        // configure ring/spy data buffers & spy extraction offsets based on CT/EC
-        if ((chip_type == fapi::ENUM_ATTR_NAME_MURANO) && (dd_level < 0x20))
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_TP_VITL_SPY_OFFSETS, &i_target, spy_offsets);
+        if (rc)
         {
-            rc_ecmd |= ring_data.setBitLength(PERV_VITL_CHAIN_LENGTH_MDD1);
-            rc_ecmd |= spy_data.setBitLength(TP_VITL_SPY_LENGTH_MDD1);
-            spy_offsets.assign(TP_VITL_SPY_OFFSETS_MDD1, TP_VITL_SPY_OFFSETS_MDD1 + (sizeof(TP_VITL_SPY_OFFSETS_MDD1) / sizeof(TP_VITL_SPY_OFFSETS_MDD1[0])));
-        }
-        else if ((chip_type == fapi::ENUM_ATTR_NAME_MURANO) && (dd_level >= 0x20))
-        {
-            rc_ecmd |= ring_data.setBitLength(PERV_VITL_CHAIN_LENGTH_MDD2);
-            rc_ecmd |= spy_data.setBitLength(TP_VITL_SPY_LENGTH_MDD2);
-            spy_offsets.assign(TP_VITL_SPY_OFFSETS_MDD2, TP_VITL_SPY_OFFSETS_MDD2 + (sizeof(TP_VITL_SPY_OFFSETS_MDD2) / sizeof(TP_VITL_SPY_OFFSETS_MDD2[0])));
-        }
-        else if ((chip_type == fapi::ENUM_ATTR_NAME_VENICE) ||
-                 (chip_type == fapi::ENUM_ATTR_NAME_NAPLES))
-        {
-            rc_ecmd |= ring_data.setBitLength(PERV_VITL_CHAIN_LENGTH_VN);
-            rc_ecmd |= spy_data.setBitLength(TP_VITL_SPY_LENGTH_VN);
-            spy_offsets.assign(TP_VITL_SPY_OFFSETS_VN, TP_VITL_SPY_OFFSETS_VN + (sizeof(TP_VITL_SPY_OFFSETS_VN) / sizeof(TP_VITL_SPY_OFFSETS_VN[0])));
-        }
-        else
-        {
-            FAPI_ERR("proc_tp_collect_dbg_data: Unsupported CT/EC combination!");
-            const uint8_t CT = chip_type;
-            const uint8_t EC = dd_level;
-            FAPI_SET_HWP_ERROR(rc, RC_TP_COLLECT_DBG_DATA_UNSUPPORTED_CHIP);
+            FAPI_ERR("proc_tp_collect_dbg_data: Error from FAPI_ATTR_GET (ATTR_PROC_TP_VITL_SPY_OFFSETS)");
             break;
         }
+
+        rc_ecmd |= ring_data.setBitLength(ring_length);
+        rc_ecmd |= spy_data.setBitLength(spy_length);
         if (rc_ecmd)
         {
             FAPI_ERR("proc_tp_collect_dbg_data: Error 0x%x sizing FFDC data buffers",
@@ -319,15 +243,23 @@ fapi::ReturnCode proc_tp_collect_dbg_data(const fapi::Target & i_target,
 
         // extract spy data from ring image
         uint32_t spy_offset_curr = 0;
-        for (std::vector<std::pair<uint32_t, uint32_t> >::const_iterator offset = spy_offsets.begin();
-             offset != spy_offsets.end();
-             offset++)
+        for (uint32_t spy_offset_index = 0;
+             spy_offset_index < TP_VITL_SPY_MAX_SPY_RANGES;
+             spy_offset_index++)
         {
-            uint32_t chunk_size = (offset->second - offset->first + 1);
+            if (spy_offsets[spy_offset_index] == 0xFFFFFFFF)
+            {
+                break;
+            }
+
+            uint32_t first = ((spy_offsets[spy_offset_index] >> 16) & 0xFFFF);
+            uint32_t second = (spy_offsets[spy_offset_index] & 0xFFFF);
+
+            uint32_t chunk_size = (second - first + 1);
             rc_ecmd |= spy_data.insert(ring_data,
                                        spy_offset_curr,
                                        chunk_size,
-                                       offset->first);
+                                       first);
             spy_offset_curr += chunk_size;
         }
 

@@ -57,6 +57,7 @@
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <hwpf/hwp/winkle_ring_accessors/getL3DeltaDataAttr.H>
+#include <hwpf/hwp/tp_dbg_data_accessors/getTpDbgDataAttr.H>
 #include <fapiAttributeIds.H>
 #include <hwas/common/hwasCommon.H>
 
@@ -1759,6 +1760,43 @@ fapi::ReturnCode getIsDimmToC4DQS
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc,getDQSAttrISDIMM,*i_pTarget,o_val);
     return FAPI_RC_SUCCESS;
+}
+
+/**
+ * @brief Get the Perv Vitle ring length.  See doxygen in .H file
+ */
+fapi::ReturnCode fapiPlatGetPervVitlRingLengthAttr(
+                               const fapi::Target * i_pProcTarget,
+                               uint32_t (&o_ringLength))
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getPervVitlRingLengthAttr,
+                  *i_pProcTarget, o_ringLength);
+    return l_rc;
+}
+
+/**
+ * @brief Get the TP Vitle spy length.  See doxygen in .H file
+ */
+fapi::ReturnCode fapiPlatGetTpVitlSpyLengthAttr(
+                       const fapi::Target * i_pProcTarget,
+                       uint32_t (&o_spyLength))
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getTpVitlSpyLengthAttr, *i_pProcTarget, o_spyLength);
+    return l_rc;
+}
+
+/**
+ * @brief Get the TP Vitle spy offsets.  See doxygen in .H file
+ */
+fapi::ReturnCode fapiPlatGetTpVitlSpyOffsetAttr(
+                               const fapi::Target * i_pProcTarget,
+                               uint32_t (&o_data)[SPY_OFFSET_SIZE])
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getTpVitlSpyOffsetAttr, *i_pProcTarget, o_data);
+    return l_rc;
 }
 
 } // End platAttrSvc namespace

@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/slave_sbe/proc_tp_collect_dbg_data/proc_tp_collect_dbg_data.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/tp_dbg_data_accessors/proc_tp_dbg_data_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2014,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015                             -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,20 +22,40 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_tp_collect_dbg_data.xml,v 1.5 2014/10/03 20:25:09 jmcgill Exp $ -->
-<!-- Error definitions for proc_tp_collect_dbg_data procedure -->
+<!-- $Id: proc_tp_dbg_data_errors.xml,v 1.1 2015/05/07 20:11:12 thi Exp $ -->
+<!-- Error definitions for getTpDbgDataAttr procedures -->
+
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_TP_COLLECT_DBG_DATA</rc>
-    <description>
-      Procedure: proc_tp_collect_dbg_data
-    </description>
-    <ffdc>VITL_DATA</ffdc>
-    <collectTrace>FSI</collectTrace>
-    <collectTrace>SCOM</collectTrace>
-    <collectTrace>SCAN</collectTrace>
-    <collectTrace>MBOX</collectTrace>
+    <rc>RC_GET_TP_DBG_DATA_ERR</rc>
+    <description>No matching entry was found for requested chip type and EC level.</description>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_GET_TP_DBG_DATA_PARAMETER_ERR</rc>
+    <description>Invalid target type passed on invocation.</description>
+    <ffdc>TARGET_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_GET_TP_DEBUG_DATA_ERR</rc>
+    <description>No matching entry was found for requested chip type and EC level.</description>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>
