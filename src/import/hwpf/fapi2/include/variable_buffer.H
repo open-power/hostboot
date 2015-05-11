@@ -288,8 +288,6 @@ namespace fapi2
         /// @param[in] i_offset Start OT (start word, for example) in buffer
         ///            - defaults to 0 (will by default write the left most element)
         /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
-        /// @note This is is only available for integral types. To set a
-        ///    variable_buffer into a variable_buffer, use insert()
         ///
         template< typename OT>
         inline fapi2::ReturnCodes set(OT i_value, const bits_type i_offset = 0)
@@ -317,6 +315,17 @@ namespace fapi2
             parameterTraits<OT>::template write_element<unit_type>(bufferTraits<bits_container>::get_address(iv_data), i_value, i_offset);
             return FAPI2_RC_SUCCESS;
         }
+
+        ///
+        /// @brief Get an OT of data from buffer
+        /// @tparam OT the type of the data to get
+        /// @param[in] i_offset Start OT (start word, for example) in buffer
+        ///            - defaults to 0 (will by default write the left most element)
+        /// @return OT
+        /// @note uint8_t b = get<uint8_t>(N) <- gets the N'th left byte from the buffer
+        ///
+        template< typename OT>
+        inline OT get(const bits_type i_offset = 0);
 
         /// @name Bit/Word Manipulation Functions
         ///@{
@@ -1177,5 +1186,13 @@ namespace fapi2
         return rc;
     }
 
+    template< typename OT>
+    inline OT variable_buffer::get(const bits_type i_offset)
+    {
+        // Get is just an extract.
+        OT l_tmp;
+        extract(l_tmp, parameterTraits<OT>::bit_length() * i_offset, parameterTraits<OT>::bit_length());
+        return l_tmp;
+    }
 }
 #endif

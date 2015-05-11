@@ -615,7 +615,7 @@ namespace fapi2
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed left aligned
         /// @param[in] Start bit in source
-        /// @param[in] Length of bits to insert
+        /// @param[in] Length of bits to extract
         /// @param[in] Start bit to insert into (target start)
         /// @return FAPI2_RC_SUCCESS if ok
         ///
@@ -638,7 +638,7 @@ namespace fapi2
         ///
         /// @brief Copy data from this buffer into an OT and right justify
         /// @tparam SS Start bit to insert into (source start)
-        /// @tparam L Length of bits to insert
+        /// @tparam L Length of bits to extract
         /// @tparam OT the type of the outgoing (target)
         /// @param[out] o_out OT to copy into - data is placed right aligned
         /// @return buffer& Useful for method chaining
