@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -197,7 +199,7 @@ def hb_get_objects_by_class(classname):
 
 def hb_getallregs(regname):
     proc_list=[]
-    proc_list=hb_get_objects_by_class("ppc-power8-mambo-core")
+    proc_list=hb_get_objects_by_class("ppc-power9-mambo-core")
     for proc in proc_list:
         output = run_command("%s.read-reg %s"%(proc.name,regname))
         print ">> %s : " %(proc.name) + "%x" %output

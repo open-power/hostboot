@@ -249,9 +249,10 @@ void ErrlManager::errlogMsgHndlr ()
             case ERRLOG_ACCESS_PNOR_TYPE:
                 {
                     // PNOR is up and running now.
-
+// @todo-RTC:127337 Fake PNOR support
+#if (0)
                     setupPnorInfo();
-
+#endif
                     //We are done with the msg
                     msg_free(theMsg);
 

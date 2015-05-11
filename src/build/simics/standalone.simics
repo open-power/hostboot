@@ -4,63 +4,84 @@
 
 ($hb_masterproc).proc_fsi2host_mbox->responder_enable=1
 
+# @todo-RTC:127341 Standalaone VPD support
 # Preload VPD in PNOR
-foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
-    try {
-        run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-            ($pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
-            ($pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
-            ($pnor).sfc_master_mem.load-file ./syscvpd.dat.ecc 0x255000
-    } except { echo "ERROR: Failed to preload VPD into PNOR." }
-}
+#foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
+#    try {
+#        run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
+#            ($pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
+#            ($pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
+#            ($pnor).sfc_master_mem.load-file ./syscvpd.dat.ecc 0x255000
+#    } except { echo "ERROR: Failed to preload VPD into PNOR." }
+#}
 
+# Uncomment when PNOR is supported
+# @todo-RTC:130182 Enable PNOR access
 #Write the PNOR MMIO addr into Scratch 2, 0x283A
 #($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFF78000  #HB PNOR addr
-foreach $cc in (get-object-list p8_proc) {
-    ($cc).proc_lbus_map.write 0x28e8 0xFFF78000
-}
+#foreach $cc in (get-object-list p9_proc) {
+#    ($cc).proc_lbus_map.write 0x28e8 0xFFF78000
+#}
 
 # Loop through every processor chip
-foreach $cc in (get-object-list p8_proc) {
+foreach $cc in (get-object-list p9_proc) {
     echo $cc
 
     #Trigger a power on to cec-chip
-    echo "-Trigger power on"
+    #echo "-Trigger power on"
     @mp="%s.proc_chip"%simenv.cc
-    @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise(SIM_get_object(mp))
+    @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise()
 
+    # @todo-RTC:130184 Add real SBE behavior
     #Trigger the flush, load, and SBE start
-    echo "-Trigger SBE"
-    ($cc).proc_lbus_map.write 0x28E0 0x0000F3FF  #NonFunc EX (only 4,5 is good)
-    ($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush)
-    ($cc).proc_lbus_map.write 0x2870 0xB0000000  #SBE Vital 0x281C (load)
-    ($cc).proc_lbus_map.write 0x2870 0x30000000  #SBE Vital 0x281C (start)
+    #echo "-Trigger SBE"
+    #($cc).proc_lbus_map.write 0x28E0 0x0000F3FF  #NonFunc EX (only 4,5 is good)
+    #($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush)
+    #($cc).proc_lbus_map.write 0x2870 0xB0000000  #SBE Vital 0x281C (load)
+    #($cc).proc_lbus_map.write 0x2870 0x30000000  #SBE Vital 0x281C (start)
+    # workaround to trigger sbe start
+    ($cc).proc_chip.invoke parallel_store STARTSBEREGS 0 "80000000" 32
 }
 
+# Workaround to load hb image into memory
+# @todo-RTC:130182 Remove when PNOR access enabled
+system_cmp0.phys_mem.load-file $hb_script_location+"/hbicore.bin" 0x0
+
+# Workaround to set the sim_ctrl1 reg to enable the
+# old HPT SDR1 translation, not the new PTCR translation
+# SIM_CTRL1_P9_SDR1    0x0010000000000000
+# @todo-RTC:126640  Remove with P9 page table support
+system_cmp0.cpu0_0_00_0.write-reg sim_ctrl1 0x4230000000000000
+
+# Workaround to set the hrmor
+# @todo-RTC:130184 Remove with real SBE behavior
+system_cmp0.cpu0_0_00_0.write-reg hrmor 0x0000008000000
+
+# @todo-RTC:130182 Update when PNOR is supported
 ###################################
 #Configure SFC (mimmic FSP Setup)
 ###################################
-echo "Configure SFC"
+#echo "Configure SFC"
 
-foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
-    echo $pnor
-    #Direct Read window config
-    ($pnor).sfc_master->regs_OADRNB = 0xC000000
-    ($pnor).sfc_master->regs_ADRCBF = 0x0
-    ($pnor).sfc_master->regs_ADRCMF = 0xF
+#foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
+#    echo $pnor
+#    #Direct Read window config
+#    ($pnor).sfc_master->regs_OADRNB = 0xC000000
+#    ($pnor).sfc_master->regs_ADRCBF = 0x0
+#    ($pnor).sfc_master->regs_ADRCMF = 0xF
 
-    #Direct Access Cache Disable
-    ($pnor).sfc_master->regs_CONF = 0x00000002
+#    #Direct Access Cache Disable
+#    ($pnor).sfc_master->regs_CONF = 0x00000002
 
-    #Small Erase op code
-    ($pnor).sfc_master->regs_CONF4 = 0x00000020
-    #Erase Size
-    ($pnor).sfc_master->regs_CONF5 = 0x1000
+#    #Small Erase op code
+#    ($pnor).sfc_master->regs_CONF4 = 0x00000020
+#    #Erase Size
+#    ($pnor).sfc_master->regs_CONF5 = 0x1000
 
-    #Enable 4 byte address mode - must write via memory to trigger
-    #model behavior
-    ($pnor).fsi_local_lbus_map.write 0xC40 0x00006E00
-}
+#    #Enable 4 byte address mode - must write via memory to trigger
+#    #model behavior
+#    ($pnor).fsi_local_lbus_map.write 0xC40 0x00006E00
+#}
 
 ###################################
 #Enable the IPMI Responder

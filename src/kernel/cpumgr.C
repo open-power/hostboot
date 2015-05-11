@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -448,6 +448,11 @@ size_t CpuManager::getThreadCount()
         case CORE_POWER8_MURANO:
         case CORE_POWER8_NAPLES:
             threads = 8;
+            break;
+
+        case CORE_POWER9_NIMBUS:
+        case CORE_POWER9_CUMULUS:
+            threads = 4;
             break;
 
         case CORE_UNKNOWN:

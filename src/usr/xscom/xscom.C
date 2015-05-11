@@ -201,6 +201,8 @@ uint8_t getMaxChipsPerNode()
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
         case CORE_POWER8_NAPLES:
+        case CORE_POWER9_NIMBUS:
+        case CORE_POWER9_CUMULUS:
         case CORE_UNKNOWN:
         default:
             l_numOfChips = 8;
@@ -662,6 +664,8 @@ void collectXscomFFDC(TARGETING::Target* i_target,
                             uint64_t* i_virtAddr,
                             errlHndl_t& io_errl)
 {
+// @todo-RTC:128077 XSCOM support for P9
+#if (0)
     errlHndl_t l_err = NULL;
     HMER l_hmer;
     uint64_t io_buffer = 0;
@@ -728,7 +732,7 @@ void collectXscomFFDC(TARGETING::Target* i_target,
 
     // Add the register FFDC to the errorlog passed in.
     l_logReg.addToLog(io_errl);
-
+#endif
     return;
 }
 

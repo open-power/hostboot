@@ -442,6 +442,8 @@ namespace KernelMisc
             case CORE_POWER8_MURANO:
             case CORE_POWER8_VENICE:
             case CORE_POWER8_NAPLES:
+            case CORE_POWER9_NIMBUS:
+            case CORE_POWER9_CUMULUS:
                 cache_columns = 4;
                 break;
 
@@ -486,10 +488,12 @@ namespace KernelMisc
             case CORE_POWER8_MURANO:
             case CORE_POWER8_VENICE:
             case CORE_POWER8_NAPLES:
+            case CORE_POWER9_NIMBUS:
+            case CORE_POWER9_CUMULUS:
                 startAddr = reinterpret_cast<uint64_t*>
                                          ( VmmManager::INITIAL_MEM_SIZE ) ;
                 endAddr =
-                    reinterpret_cast<uint64_t*>(8 * MEGABYTE);
+                    reinterpret_cast<uint64_t*>(VMM_BASE_BLOCK_SIZE);
                 break;
 
             default:
@@ -542,6 +546,8 @@ namespace KernelMisc
           case CORE_POWER8_MURANO:
           case CORE_POWER8_VENICE:
           case CORE_POWER8_NAPLES:
+          case CORE_POWER9_NIMBUS:
+          case CORE_POWER9_CUMULUS:
           case CORE_UNKNOWN:
             l_scratch_addr = l_scratch_addr + 0x40;
             break;

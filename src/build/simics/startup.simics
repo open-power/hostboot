@@ -3,7 +3,7 @@ $hb_startup_path = (lookup-file hbfw/startup.simics)
 $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
-$hb_machine = (shell "env | grep 'GFW_P8_.*_PROC_EC' | sed 's/GFW_P8_\\(.*\\)_PROC_EC.*/\\1/'")
+$hb_machine = (shell "env | grep 'GFW_P9_.*_PROC_EC' | sed 's/GFW_P9_\\(.*\\)_PROC_EC.*/\\1/'")
 $hb_machine = (python "\""+$hb_machine+"\".lower()")
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
@@ -13,31 +13,33 @@ $hb_masterproc = ""
 @simenv.hb_masterproc = quiet_run_command("get-master-proc")[0]
 echo "Master Proc is: "+$hb_masterproc
 
-$hb_pnor = ""
-@simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
-try {
-    @SIM_get_object(simenv.hb_pnor[0])
-} except {
-    try {
-        # Attempt to use the Brazos name
-        @SIM_get_object("cecdrawer0_fpga0")
-        $hb_pnor = "cecdrawer0_fpga0"
-    } except {
-        # Default to Tuleta/Orlena name
-        $hb_pnor = "fpga0"
-    }
-}
-echo "Master PNOR is: "+$hb_pnor
+# Uncomment when PNOR is supported
+# @todo-RTC:130182 Enable PNOR access
+#$hb_pnor = ""
+#@simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
+#try {
+#    @SIM_get_object(simenv.hb_pnor[0])
+#} except {
+#    try {
+#        # Attempt to use the Brazos name
+#        @SIM_get_object("cecdrawer0_fpga0")
+#        $hb_pnor = "cecdrawer0_fpga0"
+#    } except {
+#        # Default to Tuleta/Orlena name
+#        $hb_pnor = "fpga0"
+#    }
+#}
+#echo "Master PNOR is: "+$hb_pnor
 
 # Choose a default core to start with
-$hb_cpu = "system_cmp0.cpu0_0_04_0"
+$hb_cpu = "system_cmp0.cpu0_0_00_0"
 echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 
 # Prevent SBE Updates from happening on an IPL
 echo "Altering SBE SEEPROM Versions to disable Update in IPL"
-foreach $cc in (get-object-list p8_proc) {
-    ($cc).procSBEPrimary_eeprom_image.set 0x300 0x5A5A5A5A 8 -l
-    ($cc).procSBEBackup_eeprom_image.set  0x300 0x5A5A5A5A 8 -l
+foreach $cc in (get-object-list p9_proc) {
+    ($cc).procSBE0Primary_eeprom_image.set 0x300 0x5A5A5A5A 8 -l
+    ($cc).procSBE0Backup_eeprom_image.set  0x300 0x5A5A5A5A 8 -l
 }
 
 # Load HB debug tools.
