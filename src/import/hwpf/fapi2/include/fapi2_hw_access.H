@@ -291,7 +291,7 @@ namespace fapi2
     ///
     /// @note The ID is not in quotes the fapi code will handle adding
     ///       the quotes for the cronus environment
-#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+#if defined(FAPI_SUPPORT_SPY_AS_ENUM) || defined(DOXYGEN)
 
 #define FAPI_GET_SPY(TARGET, ID, DATA) fapi2::getSpy(TARGET, FAPI_SPY_NAMES::ID.value, DATA)
 
@@ -301,7 +301,7 @@ namespace fapi2
                              variable_buffer& o_data);
 #endif
 
-#ifdef FAPI_SUPPORT_SPY_AS_STRING
+#if defined(FAPI_SUPPORT_SPY_AS_STRING) || defined(DOXYGEN)
 
 #define FAPI_GET_SPY(TARGET, ID, DATA) fapi2::getSpy(TARGET, #ID, DATA)
 
@@ -350,7 +350,7 @@ namespace fapi2
     /// @note The ID is not in quotes the fapi code will handle adding
     ///         the quotes for the cronus environment
     ///
-#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+#if defined(FAPI_SUPPORT_SPY_AS_ENUM) || defined(DOXYGEN)
 
 #define FAPI_PUT_SPY(TARGET, ID, DATA) fapi2::putSpy(TARGET, FAPI_SPY_NAMES::ID.value, DATA)
 
@@ -360,7 +360,7 @@ namespace fapi2
                              variable_buffer& i_data);
 #endif
 
-#ifdef FAPI_SUPPORT_SPY_AS_STRING
+#if defined(FAPI_SUPPORT_SPY_AS_STRING) || defined(DOXYGEN)
 
 #define FAPI_PUT_SPY(TARGET, ID, DATA) fapi2::putSpy(TARGET, #ID, DATA)
 
@@ -390,7 +390,7 @@ namespace fapi2
     ///
     ///         See fapiPutSpy for details on spy id specifics.
     ///
-#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+#if defined(FAPI_SUPPORT_SPY_AS_ENUM) || defined(DOXYGEN)
 
 #define FAPI_PUT_SPY_IMAGE(TARGET, ID, DATA1, DATA2)                    \
     fapi2::putSpyImage(TARGET, FAPI_SPY_NAMES::ID.value,                \
@@ -403,7 +403,7 @@ namespace fapi2
                                   variable_buffer& o_imageData);
 #endif
 
-#ifdef FAPI_SUPPORT_SPY_AS_STRING
+#if defined(FAPI_SUPPORT_SPY_AS_STRING) || defined(DOXYGEN)
 
 #define FAPI_PUT_SPY_IMAGE(TARGET, ID, DATA1, DATA2) \
     fapi2::putSpyImage(TARGET, #ID, DATA1,DATA2)
@@ -432,7 +432,7 @@ namespace fapi2
     ///
     ///         See fapiPutSpy for details on spy id specifics.
     ///
-#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+#if defined(FAPI_SUPPORT_SPY_AS_ENUM) || defined(DOXYGEN)
 
 #define FAPI_GET_SPY_IMAGE(TARGET, ID, DATA1, DATA2)    \
     fapi2:getSpyImage(TARGET, FAPI_SPY_NAMES::ID.value, \
@@ -445,7 +445,7 @@ namespace fapi2
                                   const variable_buffer& i_imageData);
 #endif
 
-#ifdef FAPI_SUPPORT_SPY_AS_STRING
+#if defined(FAPI_SUPPORT_SPY_AS_STRING) || defined(DOXYGEN)
 
 #define FAPI_GET_SPY_IMAGE(TARGET, ID, DATA1, DATA2) \
     fapi2::getSpyImage(TARGET, #ID, DATA1,DATA2)
