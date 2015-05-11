@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,8 +40,8 @@
 /**
  *  @brief  The (fixed) base address value for master proc
  */
-//@todo - Verify this value for HW
-#define MASTER_PROC_XSCOM_BASE_ADDR     0x0003FC0000000000
+// @todo-RTC:128077 XSCOM support for P9
+#define MASTER_PROC_XSCOM_BASE_ADDR     0x0006010000000000
 
 /**
  *  @brief  Type definition for XSCom address and Chip ID

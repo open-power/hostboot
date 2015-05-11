@@ -31,6 +31,7 @@
  */
 
 #include <limits.h>
+#include <config.h>
 
 /**
  * Segments
@@ -60,7 +61,11 @@
 #define VMM_ADDR_BASE_BLOCK 0
 
 /** Base Segment Base Block size */
+#ifdef CONFIG_P9_SYSTEM
+#define VMM_BASE_BLOCK_SIZE (10*MEGABYTE)
+#else
 #define VMM_BASE_BLOCK_SIZE (8*MEGABYTE)
+#endif
 
 /** Base Segment Extended Memory Block Base Address */
 #define VMM_ADDR_EXTEND_BLOCK (VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE)

@@ -101,6 +101,7 @@ errlHndl_t SecureROM::initialize()
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureROM::initialize()");
 
     errlHndl_t l_errl = NULL;
+#if (0)
     bool l_cleanup = false;
     uint32_t l_rc = 0;
 
@@ -279,7 +280,7 @@ errlHndl_t SecureROM::initialize()
 
     TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::initialize() - %s",
               ((NULL == l_errl) ? "No Error" : "With Error") );
-
+#endif
     return l_errl;
 
 }

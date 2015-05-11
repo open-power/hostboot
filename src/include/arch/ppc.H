@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -322,7 +322,8 @@ inline void icbi(void* _ptr)
 ALWAYS_INLINE
 inline void nap()
 {
-    asm volatile("nap");
+    // @todo-RTC:130186 Add new stop command support
+    //asm volatile("nap");
 }
 
 ALWAYS_INLINE

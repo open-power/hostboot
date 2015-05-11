@@ -280,6 +280,8 @@ void PnorRP::initDaemon()
         INITSERVICE::registerBlock(reinterpret_cast<void*>(BASE_VADDR),
                                    TOTAL_SIZE,PNOR_PRIORITY);
 
+// @todo-RTC:127337 Fake PNOR support
+#if (0)
         //Find and read the TOC in the PNOR to compute the sections and set
         //their correct permissions
         l_errhdl = findTOC();
@@ -305,7 +307,7 @@ void PnorRP::initDaemon()
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
-
+#endif
     } while(0);
 
     if( l_errhdl )

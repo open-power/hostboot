@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,6 +34,9 @@ namespace SECUREBOOT
 {
     errlHndl_t issueBlindPurge()
     {
+        errlHndl_t l_errl = NULL;
+// @todo-RTC:118832 Remove with purge update
+#if (0)
         static const uint64_t PURGE_REG = 0x1001080e;
 
             // Bits : Value
@@ -47,7 +52,6 @@ namespace SECUREBOOT
         static const size_t RETRY_COUNT = 100;
         static const size_t RETRY_WAIT_NS = ONE_CTX_SWITCH_NS;
 
-        errlHndl_t l_errl = NULL;
         do
         {
             size_t coreId = (task_getcpuid() / 8) & 0xF;
@@ -152,7 +156,7 @@ namespace SECUREBOOT
             }
 
         } while(0);
-
+#endif
         return l_errl;
     }
 

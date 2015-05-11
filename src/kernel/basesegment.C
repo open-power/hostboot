@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,6 +57,8 @@ void BaseSegment::_init()
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
         case CORE_POWER8_NAPLES:
+        case CORE_POWER9_NIMBUS:
+        case CORE_POWER9_CUMULUS:
         default:
             iv_physMemSize = VMM_BASE_BLOCK_SIZE;
             break;

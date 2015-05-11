@@ -8,3 +8,8 @@ config BMC_AST2400
     default n
     help
         Compile hostboot support for AST2400 based BMC
+
+config P9_SYSTEM
+    default n
+    help
+        Compile with P9 configurations

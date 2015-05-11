@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -86,7 +86,7 @@ static void checkProcessorTargeting(TargetService& i_targetService);
 /**
  *  @brief Entry point for initialization service to initialize the targeting
  *      code
- * 
+ *
  *  @param[in] io_pError
  *      Error log handle; returns NULL on success, !NULL otherwise
  *
@@ -174,6 +174,18 @@ static void checkProcessorTargeting(TargetService& i_targetService)
 
             case MODEL_NAPLES:
                 if(l_coreType == CORE_POWER8_NAPLES)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
+            case MODEL_NIMBUS:
+                if(l_coreType == CORE_POWER9_NIMBUS)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
+            case MODEL_CUMULUS:
+                if(l_coreType == CORE_POWER9_CUMULUS)
                 {
                     l_haveOneCorrectProcessor = true;
                 }

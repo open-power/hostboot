@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,6 +52,12 @@ namespace CpuID
 
             case 0x004D0000:
                 return CORE_POWER8_VENICE;
+
+            case 0x004E0000:
+                return CORE_POWER9_NIMBUS;
+
+            case 0x004F0000:
+                return CORE_POWER9_CUMULUS;
 
             default:
                 return CORE_UNKNOWN;
