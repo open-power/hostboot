@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_chip_cleanup.C,v 1.9 2014/12/18 21:09:21 jmcgill Exp $
+// $Id: proc_mpipl_chip_cleanup.C,v 1.11 2015/05/01 18:04:36 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -49,11 +49,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "proc_mpipl_chip_cleanup.H"
-
-//------------------------------------------------------------------------------
-//  eCMD Includes
-//------------------------------------------------------------------------------
-
+#include "p8_scom_addresses.H"
 
 extern "C"
 {
@@ -66,6 +62,7 @@ extern "C"
   //------------------------------------------------------------------------------
   // purpose: 
   // To enable MCD recovery
+  // To remove PCIe Express Controllers (PECs) from CAPP mode
   //
   // Note: PHBs are left in ETU reset state after executing proc_mpipl_nest_cleanup, which runs before this procedure.  PHYP releases PHBs from ETU reset post HostBoot IPL.
   //
@@ -84,6 +81,11 @@ extern "C"
   //
   // 3) Clear PCI Nest FIR registers
   // 02012X00 (SCOM) 
+  //
+  // 4) PB AIB CAPP Enable registers
+  // 09013CX3 (SCOM) 
+  // bit 0 (PE_CAPP_EN): Enable CAPP mode of operation 
+  //
   //
   // parameters: 
   // 'i_target' is reference to chip target
@@ -120,9 +122,17 @@ extern "C"
       0x02012000,
       0x02012400,
       0x02012800,
-      0x02012C00,
+      0x02012C00
     };     
     
+    const uint64_t PE_SECURE_CAPP_ENABLE_REG_ADDRS[MAX_PHBS] = {
+      0x09013C03,
+      0x09013C43,
+      0x09013C83,
+      0x09013CC3
+    };
+   
+
     do {
       //Set bit length for 64-bit buffers
       rc_ecmd = fsi_data[0].setBitLength(data_size);
@@ -205,6 +215,122 @@ extern "C"
         rc = fapiPutScom(i_target, PCI_NEST_FIR_REG_ADDRS[counter], fsi_data[0]);
         if (!rc.ok()) {
           FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, PCI_NEST_FIR_REG_ADDRS[counter], i_target.toEcmdString());
+          break;
+        }
+      }
+      if(!rc.ok()) {
+        break;
+      }
+      
+      //SW295661: Clear bit 0 of the Snoop CAPI Configuration register to disable snoop pipelines so Ttype aren't decoded for CAPI
+      FAPI_DBG("Reading Snoop CAPI Configuration register, addr=0x%08llX, target=%s", CAPP_CXA_SNOOP_CFG_0x0201301A, i_target.toEcmdString());
+      rc = fapiGetScom(i_target, CAPP_CXA_SNOOP_CFG_0x0201301A, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX), target=%s", procedureName, CAPP_CXA_SNOOP_CFG_0x0201301A, i_target.toEcmdString());
+        break;
+      }
+      rc_ecmd = fsi_data[0].clearBit(0);
+      if (rc_ecmd) {
+        FAPI_ERR("%s: Error (%u) Couldn't clear bit 0 in data buffer for Snoop CAPI Configuration register, target=%s", procedureName, rc_ecmd, i_target.toEcmdString());
+        rc.setEcmdError(rc_ecmd);
+        break;
+      }
+      FAPI_DBG("Snoop CAPI configuration register, addr: 0x%08llX, buffer value to write: 0x%016llX, chip: %s", CAPP_CXA_SNOOP_CFG_0x0201301A, fsi_data[0].getDoubleWord(0), i_target.toEcmdString());
+        
+      FAPI_DBG("Writing Snoop CAPI Configuration register, target=%s", i_target.toEcmdString());
+      rc = fapiPutScom(i_target, CAPP_CXA_SNOOP_CFG_0x0201301A, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, CAPP_CXA_SNOOP_CFG_0x0201301A, i_target.toEcmdString());
+        break;
+      }
+      
+      //SW295661: Clear bit 3 of the APC Master PowerBus Control register to turn off examing cresps when PHBs taken out of CAPP mode
+      FAPI_DBG("Reading APC Master PowerBus Control register, addr=0x%08llX, target=%s", CAPP_APC_MASTER_PB_CTL_0x02013018, i_target.toEcmdString());
+      rc = fapiGetScom(i_target, CAPP_APC_MASTER_PB_CTL_0x02013018, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX), target=%s", procedureName, CAPP_APC_MASTER_PB_CTL_0x02013018, i_target.toEcmdString());
+        break;
+      }
+      rc_ecmd = fsi_data[0].clearBit(3);
+      if (rc_ecmd) {
+        FAPI_ERR("%s: Error (%u) Couldn't clear bit 3 in data buffer for APC Master PowerBus Control register (addr: 0x%08llX), target=%s", procedureName, rc_ecmd, CAPP_APC_MASTER_PB_CTL_0x02013018, i_target.toEcmdString());
+        rc.setEcmdError(rc_ecmd);
+        break;
+      }
+      FAPI_DBG("APC Master PowerBus Control register, addr: 0x%08llX, buffer value to write: 0x%016llX, chip: %s", CAPP_APC_MASTER_PB_CTL_0x02013018, fsi_data[0].getDoubleWord(0), i_target.toEcmdString());
+        
+      FAPI_DBG("Writing APC Master PowerBus Control register (addr: 0x%08llX), target=%s", CAPP_APC_MASTER_PB_CTL_0x02013018, i_target.toEcmdString());
+      rc = fapiPutScom(i_target, CAPP_APC_MASTER_PB_CTL_0x02013018, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, CAPP_APC_MASTER_PB_CTL_0x02013018, i_target.toEcmdString());
+        break;
+      }
+      
+      //SW295661: Clear bits 1-3 of the APC Master CAPI Control register to disable PHBs in ES chiplet attached to CAPP PHB port 0 and port 1 interfaces (will get reset to correct vals when code walks PCI buses and configures CAPI)
+      FAPI_DBG("Reading APC Master CAPI Control register, addr=0x%08llX, target=%s", CAPP_APC_MASTER_CAPI_CTL_0x02013019, i_target.toEcmdString());
+      rc = fapiGetScom(i_target, CAPP_APC_MASTER_CAPI_CTL_0x02013019, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX), target=%s", procedureName, CAPP_APC_MASTER_CAPI_CTL_0x02013019, i_target.toEcmdString());
+        break;
+      }
+      rc_ecmd = fsi_data[0].clearBit(1,3);
+      if (rc_ecmd) {
+        FAPI_ERR("%s: Error (%u) Couldn't clear bits 1-3 in data buffer for APC Master CAPI Control register (addr: 0x%08llX) , target=%s", procedureName, rc_ecmd, CAPP_APC_MASTER_CAPI_CTL_0x02013019, i_target.toEcmdString());
+        rc.setEcmdError(rc_ecmd);
+        break;
+      }
+      FAPI_DBG("APC Master CAPI Control register, addr: 0x%08llX, buffer value to write: 0x%016llX, chip: %s", CAPP_APC_MASTER_CAPI_CTL_0x02013019, fsi_data[0].getDoubleWord(0), i_target.toEcmdString());
+        
+      FAPI_DBG("Writing APC Master CAPI Control register (addr: 0x%08llX), target=%s", CAPP_APC_MASTER_CAPI_CTL_0x02013019, i_target.toEcmdString());
+      rc = fapiPutScom(i_target, CAPP_APC_MASTER_CAPI_CTL_0x02013019, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, CAPP_APC_MASTER_CAPI_CTL_0x02013019, i_target.toEcmdString());
+        break;
+      }
+
+      //SW295661: Clear bits 0 and 1 of CAPP Error Status and Control reg (scom addr: 0x0201300E).
+      FAPI_DBG("Reading CAPP Error Status and Control register, addr=0x%08llX, target=%s", NX_CAPP_ERR_STAT_CTRL_0x0201300E, i_target.toEcmdString());
+      rc = fapiGetScom(i_target, NX_CAPP_ERR_STAT_CTRL_0x0201300E, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX), target=%s", procedureName, NX_CAPP_ERR_STAT_CTRL_0x0201300E, i_target.toEcmdString());
+        break;
+      }
+      rc_ecmd |= fsi_data[0].clearBit(0); //Clear bit 0 (Error Recovery Initiated)
+      rc_ecmd |= fsi_data[0].clearBit(1); //Clear bit 1 (Error Recovery Complete)
+      if (rc_ecmd) {
+        FAPI_ERR("%s: Error (%u) Couldn't clear bit(s) in data buffer for CAPP Error Status and Control register, target=%s", procedureName, rc_ecmd, i_target.toEcmdString());
+        rc.setEcmdError(rc_ecmd);
+        break;
+      }
+      FAPI_DBG("CAPP Error Status and Control register, addr: 0x%08llX, buffer value to write: 0x%016llX, chip: %s", NX_CAPP_ERR_STAT_CTRL_0x0201300E, fsi_data[0].getDoubleWord(0), i_target.toEcmdString());
+        
+      FAPI_DBG("Writing CAPP Error Status and Control register, target=%s", i_target.toEcmdString());
+      rc = fapiPutScom(i_target, NX_CAPP_ERR_STAT_CTRL_0x0201300E, fsi_data[0]);
+      if (!rc.ok()) {
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, NX_CAPP_ERR_STAT_CTRL_0x0201300E, i_target.toEcmdString());
+        break;
+      }
+
+      //SW295661: Disable CAPP mode of operation by clearing bit 0 of PE Secure CAPP Enable register
+      for (int counter = 0; counter < num_phb; counter++) {
+        FAPI_DBG("Reading PE%d Secure CAPP Enable register (addr: 0x%08llX), target=%s", counter, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], i_target.toEcmdString());
+        rc = fapiGetScom(i_target, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], fsi_data[0]);
+        if (!rc.ok()) {
+          FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX), target=%s", procedureName, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], i_target.toEcmdString());
+          break;
+        }
+
+        rc_ecmd = fsi_data[0].clearBit(0);
+        if (rc_ecmd) {
+          FAPI_ERR("%s: Error (%u) Couldn't clear bit 0 in data buffer for PE%d Secure CAPP Enable register (addr: 0x%08llX), target=%s", procedureName, rc_ecmd, counter, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], i_target.toEcmdString());
+          rc.setEcmdError(rc_ecmd);
+          break;
+        }
+
+        FAPI_DBG("Writing PE%d Secure CAPP Enable register (addr: 0x%08llX), target=%s", counter, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], i_target.toEcmdString());
+        rc = fapiPutScom(i_target, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], fsi_data[0]);
+        if (!rc.ok()) {
+          FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX), target=%s", procedureName, PE_SECURE_CAPP_ENABLE_REG_ADDRS[counter], i_target.toEcmdString());
           break;
         }
       }
