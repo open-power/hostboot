@@ -415,6 +415,63 @@ static void rejectPnorRequest(void)
         errlCommit(err, IPMI_COMP_ID);
     }
 }
+
+/**
+ * @brief Handle various IPMI Power Messages
+ */
+void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
+{
+
+    do {
+        // if the event type is "soft off" then update the modifier to send
+        // a power off to the BMC
+        if( i_event->iv_cmd[1] == IPMI::CHASSIS_POWER_OFF )
+        {
+            iv_chassis_power_mod = IPMI::CHASSIS_POWER_OFF;
+
+            // handle the graceful shutdown message
+            IPMI_TRAC("Graceful shutdown request received");
+
+#ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(NULL, "IPMI: shutdown requested");
+            CONSOLE::flush();
+#endif
+
+        }
+        // If the event type is a power soft reset aka power cycle
+        // update the modifier to send to the BMC
+        else if( i_event->iv_cmd[1] == IPMI::CHASSIS_POWER_SOFT_RESET )
+        {
+            // handle the message as a power cycle request
+            IPMI_TRAC("IPMI power cycle request received");
+            iv_chassis_power_mod = IPMI::CHASSIS_POWER_CYCLE;
+#ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(NULL, "IPMI: power cycle requested");
+            CONSOLE::flush();
+#endif
+        }
+        else
+        {
+            //Ignore this message - It is an undefined/unsupported command
+            IPMI_TRAC("Ignoring command with unknown Power Control Action: %x",
+                         i_event->iv_cmd[1]);
+            break;
+        }
+
+        // register for the post memory flush callback
+        INITSERVICE::registerShutdownEvent(iv_msgQ,
+                        IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
+                        INITSERVICE::POST_MEM_FLUSH_NOTIFY_LAST);
+
+        iv_graceful_shutdown_pending = true;
+        lwsync();
+
+        // initiate the shutdown processing in the background
+        INITSERVICE::doShutdown(SHUTDOWN_STATUS_GOOD,true);
+
+    } while (0);
+
+}
 /**
  * @brief Wait for events and read them
  */
@@ -448,44 +505,7 @@ void IpmiRP::lastChanceEventHandler(void)
         }
         else if ( event->iv_cmd[0] == IPMI::power_off().second )
         {
-            // if the event type is "soft off" then update the modifier to send
-            // a power off to the BMC, otherwise all other requests will be
-            // handled as a power cycle
-            if( event->iv_cmd[1] == IPMI::CHASSIS_POWER_OFF )
-             {
-                 iv_chassis_power_mod = IPMI::CHASSIS_POWER_OFF;
-
-                 // handle the graceful shutdown message
-                 IPMI_TRAC("Graceful shutdown request received");
-
-#ifdef CONFIG_CONSOLE
-                 CONSOLE::displayf(NULL, "IPMI: shutdown requested");
-                 CONSOLE::flush();
-#endif
-
-             }
-            else
-            {
-                // handle the message as a power cycle request
-                IPMI_TRAC("IPMI power cycle request received");
-                iv_chassis_power_mod = IPMI::CHASSIS_POWER_CYCLE;
-#ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(NULL, "IPMI: power cycle requested");
-                CONSOLE::flush();
-#endif
-            }
-
-            // register for the post memory flush callback
-            INITSERVICE::registerShutdownEvent(iv_msgQ,
-                            IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
-                            INITSERVICE::POST_MEM_FLUSH_NOTIFY_LAST);
-
-            iv_graceful_shutdown_pending = true;
-            lwsync();
-
-            // initiate the shutdown processing in the background
-            INITSERVICE::doShutdown(SHUTDOWN_STATUS_GOOD,true);
-
+            handlePowerMessage(event);
         }
         else {
             // TODO: RTC: 120128

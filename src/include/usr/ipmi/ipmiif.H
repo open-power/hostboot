@@ -60,6 +60,7 @@ namespace IPMI
     enum power_request_type
     {
         CHASSIS_POWER_OFF = 0x00,
+        CHASSIS_POWER_SOFT_RESET = 0x01,
         CHASSIS_POWER_CYCLE = 0x02,
     };
 

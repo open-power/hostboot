@@ -132,6 +132,12 @@ class IpmiRP
      */
     void postEvent(IPMI::oemSEL* i_event);
 
+    /**
+     * @brief Give the resource provider a message to put in the eventq
+     * @param[in] i_event, pointer to the power event data to handle (OEM SEL)
+     */
+    void handlePowerMessage(IPMI::oemSEL* i_event);
+
   private:
 
     /**
