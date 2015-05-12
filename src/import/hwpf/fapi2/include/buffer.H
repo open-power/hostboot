@@ -153,74 +153,79 @@ namespace fapi2
         ///
         /// @brief Templated setBit for integral types
         /// @tparam B the bit number to set.
+        /// @tparam C the count of bits to set, defaults to 1
         /// @return buffer& Useful for method chaining
         /// @note 0 is left-most
         /// @note Example: fapi2::buffer<uint64_t>().setBit<3>();
         ///
-        template< bits_type B >
+        template< bits_type B, bits_type C = 1 >
         inline buffer& setBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < TT::bits_per_unit()), "failed range check");
+                          ((B + C - 1) < TT::bits_per_unit()), "failed range check");
 
-            // Force iv_data to be dependent on the template type to force
-            // its look up in the second phase
-            iv_data |= (static_cast<T>(1)) << (TT::bits_per_unit() - B - 1);
+            // This would be a candidate for a fast_mask (see variable_buffer) but
+            // we'd need tables for all the integral types which maybe we need to
+            // do ...
+            iv_data |= (T(~0) >> (TT::bits_per_unit() - C)) << (TT::bits_per_unit() - B - C);
             return *this;
         }
 
         ///
         /// @brief Set a bit in the buffer
         /// @param[in] i_bit the bit number to set.
+        /// @param[in] i_count the count of bits to set, defaults to 1
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode setBit(const bits_type& i_bit)
+        inline fapi2::ReturnCode setBit(const bits_type& i_bit, const bits_type& i_count = 1)
         {
-            if (i_bit >= TT::bits_per_unit())
+            if ((i_count + i_bit - 1) >= TT::bits_per_unit())
             {
                 return FAPI2_RC_INVALID_PARAMETER;
             }
 
-            iv_data |=
-                (static_cast<T>(1)) << (TT::bits_per_unit() - i_bit - 1);
+            iv_data |= (T(~0) >> (TT::bits_per_unit() - i_count)) << (TT::bits_per_unit() - i_bit - i_count);
+
             return FAPI2_RC_SUCCESS;
         }
 
         ///
         /// @brief Clear a bit in buffer
         /// @tparam B Bit in buffer to clear.
+        /// @tparam C the count of bits to clear, defaults to 1
         /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
-        template< bits_type B >
+        template< bits_type B, bits_type C = 1>
         inline buffer& clearBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < TT::bits_per_unit()), "failed range check");
+                          ((B + C - 1)< TT::bits_per_unit()), "failed range check");
 
-            iv_data &= buffer<T>().setBit<B>().invert();
+            iv_data &= buffer<T>().setBit<B, C>().invert();
             return *this;
         }
 
         ///
         /// @brief Clear a bit in the buffer
         /// @param[in] i_bit the bit number to clear.
+        /// @param[in] i_count the count of bits to clear, defaults to 1
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode clearBit(const bits_type& i_bit)
+        inline fapi2::ReturnCode clearBit(const bits_type& i_bit, const bits_type& i_count = 1)
         {
-            if (i_bit >= TT::bits_per_unit())
+            if ((i_count + i_bit - 1) >= TT::bits_per_unit())
             {
                 return FAPI2_RC_INVALID_PARAMETER;
             }
 
             fapi2::buffer<T> l_scratch;
 
-            if (l_scratch.setBit(i_bit) != FAPI2_RC_SUCCESS)
+            if (l_scratch.setBit(i_bit, i_count) != FAPI2_RC_SUCCESS)
             {
                 return FAPI2_RC_INVALID_PARAMETER;
             }
@@ -233,18 +238,19 @@ namespace fapi2
         ///
         /// @brief Write a bit in buffer to a given value
         /// @tparam B Bit in buffer to write
+        /// @tparam C the count of bits to write, defaults to 1
         /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
-        template< bits_type B >
+        template< bits_type B, bits_type C = 1 >
         inline buffer& writeBit(const bool i_value)
         {
             static_assert((B >= 0) &&
-                          (B < TT::bits_per_unit()), "failed range check");
+                          ((B + C - 1)< TT::bits_per_unit()), "failed range check");
 
-            (i_value == 0) ? clearBit<B>() : setBit<B>();
+            (i_value == 0) ? clearBit<B, C>() : setBit<B, C>();
             return *this;
         }
 
@@ -252,30 +258,32 @@ namespace fapi2
         ///
         /// @brief Invert bit
         /// @tparam B Bit in buffer to invert.
+        /// @tparam C the count of bits to flip, defaults to 1
         /// @return buffer& Useful for method chaining
         /// @note Asserting that all the parameters are known at
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
-        template< bits_type B >
+        template< bits_type B, bits_type C = 1 >
         inline buffer& flipBit(void)
         {
             static_assert((B >= 0) &&
-                          (B < TT::bits_per_unit()), "failed range check");
+                          ((B + C - 1) < TT::bits_per_unit()), "failed range check");
 
-            iv_data ^= buffer<T>().setBit<B>();
+            iv_data ^= buffer<T>().setBit<B, C>();
             return *this;
         }
 
         ///
         /// @brief Get the value of a bit in the buffer
         /// @tparam B Bit in buffer to get.
-        /// @return true if bit is on, false if bit is off
+        /// @tparam C the count of bits to get, defaults to 1
+        /// @return true if *any* bit is on, false if *every* bit is off
         ///
-        template< bits_type B >
+        template< bits_type B, bits_type C = 1>
         inline bool getBit(void) const
             {
-                return buffer<T>().setBit<B>() & iv_data;
+                return buffer<T>().setBit<B, C>() & iv_data;
             }
 
         ///
