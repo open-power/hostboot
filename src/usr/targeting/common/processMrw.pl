@@ -822,8 +822,8 @@ sub processPcie
     $iop_swap{0}{1}{'11'}=$t[7];
 
     $iop_swap{1}{0}{'00'}=$t[8];
-    $iop_swap{1}{0}{'01'}=$t[9];
-    $iop_swap{1}{0}{'10'}=$t[10];
+    $iop_swap{1}{0}{'10'}=$t[9];
+    $iop_swap{1}{0}{'01'}=$t[10];
     $iop_swap{1}{0}{'11'}=$t[11];
     $iop_swap{1}{1}{'00'}=$t[12];
     $iop_swap{1}{1}{'10'}=$t[13];
@@ -923,25 +923,22 @@ sub processPcie
           die "PCIE config for $iop,$iop_lane_swap[$iop],$lane_rev not found\n";
         }
     }
-    my $lane_swap_attr0 = sprintf("%s,%s",$iop_lane_swap[0],
-                          $iop_lane_swap[1]);
-    my $lane_swap_attr1 = sprintf("%s,0,%s,0",$iop_lane_swap[0],
-                          $iop_lane_swap[1]);
 
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP",
-        $lane_swap_attr0);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_NON_BIFURCATED",
-        $lane_swap_attr1);
-    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_BIFURCATED",
-        "0,0,0,0");
-
-    my $lane_rev_attr = sprintf("%s,0,%s,0",
+    my $lane_rev_attr0 = sprintf("%s,%s",
+                         oct($iop_swap_lu[0]),oct($iop_swap_lu[1]));
+    my $lane_rev_attr1 = sprintf("%s,0,%s,0",
                          oct($iop_swap_lu[0]),oct($iop_swap_lu[1]));
 
+    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP",
+        $lane_rev_attr0);
+    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_NON_BIFURCATED",
+        $lane_rev_attr1);
+    $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_BIFURCATED",
+        "0,0,0,0");
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL",
-        $lane_rev_attr);
+        "0,0,0,0");
     $targetObj->setAttribute($parentTarget,
-        "PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED",$lane_rev_attr);
+        "PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED","0,0,0,0");
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL_BIFURCATED",
         "0,0,0,0");
 
